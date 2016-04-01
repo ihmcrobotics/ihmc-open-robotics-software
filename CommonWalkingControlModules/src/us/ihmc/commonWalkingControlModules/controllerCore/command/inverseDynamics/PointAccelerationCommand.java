@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 
 import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.HARD_CONSTRAINT;
 
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -9,9 +11,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-
-import javax.vecmath.Vector3d;
 
 public class PointAccelerationCommand implements InverseDynamicsCommand<PointAccelerationCommand>
 {
@@ -106,10 +105,13 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
 
    public void setWeights(DenseMatrix64F weight)
    {
+      hasWeight = true;
+
       for (int i = 0; i < 3; i++)
       {
          weightVector.set(i, 0, weight.get(i, 0));
-         hasWeight = weight.get(i, 0) != HARD_CONSTRAINT && hasWeight;
+         if (weight.get(i, 0) == HARD_CONSTRAINT)
+            hasWeight = false;
       }
    }
 
