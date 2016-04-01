@@ -121,9 +121,17 @@ public class LogSessionDisplay extends JFrame
       }
    }
 
+
    public AnnounceRequest getAnnounceRequestByIP(String IPAdress)
    {
+
+      return getAnnounceRequestByIP(IPAdress, 100000000);
+   }
+
+   public AnnounceRequest getAnnounceRequestByIP(String IPAdress, int timeOut)
+   {
       Boolean announceRequestFound = false;
+      int timeOutCounter = 0;
       final LinkedBlockingQueue<AnnounceRequest> request = new LinkedBlockingQueue<>();
       SwingUtilities.invokeLater(new Runnable()
       {
@@ -137,7 +145,7 @@ public class LogSessionDisplay extends JFrame
       });
 
       PrintTools.info("Looking for: " + IPAdress + " to come online");
-      while (!announceRequestFound)
+      while ((!announceRequestFound) && (timeOutCounter < timeOut))
       {
          for (int i = 1; i <= model.getRowCount(); i++)
          {
@@ -164,6 +172,7 @@ public class LogSessionDisplay extends JFrame
                }
             }
          }
+         timeOutCounter++;
       }
 
       return null;

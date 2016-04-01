@@ -1,5 +1,8 @@
 package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 
+import java.awt.Color;
+
+import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -12,8 +15,11 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.Transform3d;
+import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 
 public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic
 {
@@ -131,6 +137,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic
    private Vector3d z_rot = new Vector3d(), y_rot = new Vector3d(), x_rot = new Vector3d();
    private Matrix3d rotMatrix = new Matrix3d();
 
+   @Override
    protected void computeRotationTranslation(Transform3d transform3D)
    {
       transform3D.setIdentity();
@@ -195,9 +202,11 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic
       this.z.set(z);
    }
 
+   @Override
    public Artifact createArtifact()
    {
-      throw new RuntimeException("Implement Me!");
+      Color3f color3f = appearance.getColor();
+      return new YoArtifactLineSegment2d(getName(), new YoFrameLineSegment2d(baseX, baseY, x, y, ReferenceFrame.getWorldFrame()), new Color(color3f.x, color3f.y, color3f.z));
    }
 
    @Override
@@ -220,16 +229,19 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic
       return false;
    }
 
+   @Override
    public RemoteGraphicType getRemoteGraphicType()
    {
       return RemoteGraphicType.VECTOR_DGO;
    }
 
+   @Override
    public DoubleYoVariable[] getVariables()
    {
       return new DoubleYoVariable[] { baseX, baseY, baseZ, x, y, z };
    }
 
+   @Override
    public double[] getConstants()
    {
       return new double[] { scaleFactor };
@@ -240,6 +252,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic
       return drawArrowhead;
    }
 
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -258,6 +271,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic
       return linkGraphics;
    }
 
+   @Override
    public AppearanceDefinition getAppearance()
    {
       return appearance;

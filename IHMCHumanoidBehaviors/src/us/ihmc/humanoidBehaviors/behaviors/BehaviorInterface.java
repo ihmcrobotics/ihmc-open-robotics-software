@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.ControllerGlobalObjectConsumer;
 import us.ihmc.humanoidBehaviors.communication.NetworkProcessorGlobalObjectConsumer;
@@ -67,6 +68,11 @@ public abstract class BehaviorInterface implements RobotController
       isPaused = new BooleanYoVariable("isPaused" + behaviorName, registry);
       isStopped = new BooleanYoVariable("isStopped" + behaviorName, registry);
       percentCompleted = new DoubleYoVariable("percentCompleted", registry);
+   }
+
+   public CoactiveElement getCoactiveElement()
+   {
+      return null;
    }
 
    public void sendPacketToController(Packet<?> obj)
