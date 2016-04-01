@@ -21,6 +21,8 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class KickBallBehavior extends BehaviorInterface
 {
+   private static final boolean CREATE_COACTIVE_ELEMENT = false;
+   
    private enum KickState
    {
       SEARCH, APPROACH, VERIFY_LOCATION, FINAL_APPROACH, VERIFY_KICK_LOCATION, KICK_BALL
@@ -45,7 +47,7 @@ public class KickBallBehavior extends BehaviorInterface
    private final double standingDistance = 0.4;
    private boolean pipelineSetUp = false;
 
-   private final KickBallBehaviorCoactiveElement coactiveElement = new KickBallBehaviorCoactiveElement();
+   private final KickBallBehaviorCoactiveElement coactiveElement;
    
    public KickBallBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
@@ -71,8 +73,17 @@ public class KickBallBehavior extends BehaviorInterface
          registry.addChild(behavior.getYoVariableRegistry());
       }
 
-      registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
-      registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
+      if (CREATE_COACTIVE_ELEMENT)
+      {
+         coactiveElement = new KickBallBehaviorCoactiveElement();
+         coactiveElement.setKickBallBehavior(this);
+         registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
+         registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());    
+      }
+      else
+      {
+         coactiveElement = null;
+      }
    }
    
    @Override
@@ -239,6 +250,7 @@ public class KickBallBehavior extends BehaviorInterface
 
    public void abort()
    {
+      this.stop();
       this.pipeLine.clearAll();
    }
 }
