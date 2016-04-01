@@ -92,7 +92,7 @@ public class MotionQPInputCalculator
       numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
       allTaskJacobian = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       secondaryTaskJointsWeight.set(1.0); // TODO Needs to be rethought, it doesn't seem to be that useful.
-      nullspaceProjectionAlpha.set(0.01);
+      nullspaceProjectionAlpha.set(0.005);
       nullspaceCalculator = new DampedLeastSquaresNullspaceCalculator(numberOfDoFs, nullspaceProjectionAlpha.getDoubleValue());
 
       parentRegistry.addChild(registry);
