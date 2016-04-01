@@ -2,12 +2,12 @@ package us.ihmc.humanoidBehaviors.behaviors.midLevel;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.PelvisHeightTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GraspCylinderTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.OrientPalmToGraspCylinderTask;
@@ -27,7 +27,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
-   private final ComHeightBehavior comHeightBehavior;
+   private final PelvisHeightTrajectoryBehavior comHeightBehavior;
    private final HandPoseBehavior handPoseBehavior;
    private final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
 
@@ -46,7 +46,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
       this.yoTime = yoTime;
       this.fullRobotModel = fullRobotModel;
 
-      comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
+      comHeightBehavior = new PelvisHeightTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
 
@@ -71,7 +71,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
 
       graspPoint.changeFrame(worldFrame);
 
-      CoMHeightTask comHeightTask = new CoMHeightTask(graspPoint.getZ() - 0.9, yoTime, comHeightBehavior, 1.0);
+      PelvisHeightTrajectoryTask comHeightTask = new PelvisHeightTrajectoryTask(graspPoint.getZ() - 0.9, yoTime, comHeightBehavior, 1.0);
       HandDesiredConfigurationTask openHandTask = new HandDesiredConfigurationTask(robotSide, HandConfiguration.OPEN, handDesiredConfigurationBehavior, yoTime);
 
       OrientPalmToGraspCylinderTask orientPalmForGraspingTask = new OrientPalmToGraspCylinderTask(robotSide, graspPoint, graspedCylinderLongAxis,

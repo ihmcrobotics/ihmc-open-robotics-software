@@ -3,22 +3,22 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class ComHeightBehavior extends BehaviorInterface
+public class PelvisHeightTrajectoryBehavior extends BehaviorInterface
 {
    private final BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet" + behaviorName, registry);
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private final BooleanYoVariable trajectoryTimeElapsed = new BooleanYoVariable(getName() + "TrajectoryTimeElapsed", registry);
-   private ComHeightPacket outgoingComHeightPacket;
+   private PelvisHeightTrajectoryMessage outgoingPelvisHeightTrajectoryMessage;
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
 
-   public ComHeightBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public PelvisHeightTrajectoryBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       startTime = new DoubleYoVariable(getName() + "StartTime", registry);
@@ -28,22 +28,10 @@ public class ComHeightBehavior extends BehaviorInterface
       this.yoTime = yoTime;
    }
 
-   public void setInput(ComHeightPacket comHeightPacket)
+   public void setInput(PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage)
    {
-      this.outgoingComHeightPacket = comHeightPacket;
+      this.outgoingPelvisHeightTrajectoryMessage = pelvisHeightTrajectoryMessage;
       hasInputBeenSet.set(true);
-   }
-
-   public void kneelDown()
-   {
-      ComHeightPacket packet = new ComHeightPacket(ComHeightPacket.MIN_COM_HEIGHT + 0.08);  // ComHeightPacket.MIN_COM_HEIGHT + 0.15
-      setInput(packet);
-   }
-
-   public void goToHomeHeight()
-   {
-      ComHeightPacket packet = new ComHeightPacket(0.0);
-      setInput(packet);
    }
 
    @Override
@@ -51,20 +39,20 @@ public class ComHeightBehavior extends BehaviorInterface
    {
       if (!packetHasBeenSent.getBooleanValue() &&  hasInputBeenSet())
       {
-         sendComHeightToController();
+         sendMessageToController();
       }
    }
 
-   private void sendComHeightToController()
+   private void sendMessageToController()
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {      
-         outgoingComHeightPacket.setDestination(PacketDestination.UI);  
-         sendPacketToController(outgoingComHeightPacket);
-         sendPacketToNetworkProcessor(outgoingComHeightPacket);
+         outgoingPelvisHeightTrajectoryMessage.setDestination(PacketDestination.UI);  
+         sendPacketToController(outgoingPelvisHeightTrajectoryMessage);
+         sendPacketToNetworkProcessor(outgoingPelvisHeightTrajectoryMessage);
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
-         trajectoryTime.set(outgoingComHeightPacket.getTrajectoryTime());
+         trajectoryTime.set(outgoingPelvisHeightTrajectoryMessage.getTrajectoryTime());
       }
    }
 
@@ -88,7 +76,7 @@ public class ComHeightBehavior extends BehaviorInterface
       packetHasBeenSent.set(false);
       hasInputBeenSet.set(false);
       trajectoryTimeElapsed.set(false);
-      outgoingComHeightPacket = null;
+      outgoingPelvisHeightTrajectoryMessage = null;
 
       startTime.set(Double.NaN);
       trajectoryTime.set(Double.NaN);

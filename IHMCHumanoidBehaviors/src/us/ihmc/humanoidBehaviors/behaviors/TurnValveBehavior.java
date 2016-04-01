@@ -7,12 +7,12 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior.WalkingOrientation;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior.ValveGraspMethod;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.PelvisHeightTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GraspTurnAndUnGraspValveTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ScriptTask;
@@ -72,7 +72,7 @@ public class TurnValveBehavior extends BehaviorInterface
    private final WalkToLocationBehavior walkToLocationBehavior;
    private WalkToLocationTask walkToValveTask;
    private final GraspTurnAndUnGraspValveBehavior graspValveTurnAndUnGraspBehavior;
-   private final ComHeightBehavior comHeightBehavior;
+   private final PelvisHeightTrajectoryBehavior comHeightBehavior;
    private final ScriptBehavior scriptBehavior;
 
    private final ConcurrentListeningQueue<ScriptBehaviorInputPacket> scriptBehaviorInputPacketListener;
@@ -105,7 +105,7 @@ public class TurnValveBehavior extends BehaviorInterface
       graspValveTurnAndUnGraspBehavior = new GraspTurnAndUnGraspValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime,
             wholeBodyControllerParameters, tippingDetectedBoolean, USE_WHOLE_BODY_INVERSE_KINEMATICS);
       childBehaviors.add(graspValveTurnAndUnGraspBehavior);
-      comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
+      comHeightBehavior = new PelvisHeightTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
       childBehaviors.add(comHeightBehavior);
       scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport, walkingControllerParameters);
       childBehaviors.add(scriptBehavior);
@@ -199,7 +199,7 @@ public class TurnValveBehavior extends BehaviorInterface
          totalAngleToRotateValveRemaining -= angleToRotateOnThisGraspUngraspCycle;
       }
 
-      CoMHeightTask goToDefaultCoMHeightTask = new CoMHeightTask(0.0, yoTime, comHeightBehavior, 1.0);
+      PelvisHeightTrajectoryTask goToDefaultCoMHeightTask = new PelvisHeightTrajectoryTask(0.0, yoTime, comHeightBehavior, 1.0);
       
 //      pipeLine.submitSingleTaskStage(moveHandToHomeTask);  //FIXME: Go To Home HandPosePacket doesn't work at the moment...
       if (walkToValveTask != null)
