@@ -31,9 +31,9 @@ public class FourBarKinematicLoopJacobianSolver
       return jacobian;
    }
 
-   public DenseMatrix64F solveLinearVelFromAngularVel(DenseMatrix64F jacobian, DenseMatrix64F fourBarInputJoint_qd, DenseMatrix64F resultToPack)
+   public void solveLinearVelFromAngularVel(DenseMatrix64F jacobian, DenseMatrix64F fourBarInputJoint_qd, DenseMatrix64F resultToPack)
    {
       CommonOps.mult(jacobian, fourBarInputJoint_qd, resultToPack); 
-      return resultToPack;
+      System.out.println(resultToPack);
    }
 }
