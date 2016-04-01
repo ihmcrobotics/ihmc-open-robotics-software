@@ -451,6 +451,11 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    {
       setButton(channel, holder.getVariable(name));
    }
+   
+   public void setButtonEnum(int channel, String name, YoVariableHolder holder, Enum<?> enumValue)
+   {
+      setButtonEnum(channel, (EnumYoVariable<?>) holder.getVariable(name), enumValue);
+   }
 
    public void setButton(int channel, YoVariable<?> var)
    {
@@ -460,6 +465,17 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       else
          offset = -16;
       setControl(channel + offset, var, 0, 1, 1, SliderType.BOOLEAN, ControlType.BUTTON);
+   }
+   
+   public void setButtonEnum(int channel, EnumYoVariable<?> enumYoVariable, Enum<?> enumValue)
+   {
+      int offset;
+      if ((channel >= 17) && (channel <= 20))
+         offset = -8;
+      else
+         offset = -16;
+      
+      setControl(channel + offset, enumYoVariable, 0.0, enumValue.ordinal(), 1.0, SliderType.ENUM, ControlType.BUTTON);
    }
 
    public void setKnobButton(int channel, String name, YoVariableHolder holder)
