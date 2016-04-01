@@ -14,7 +14,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 ({
    us.ihmc.atlas.behaviorTests.AtlasHandPoseListBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasPelvisPoseBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasScriptBehaviorTest.class
 })
 

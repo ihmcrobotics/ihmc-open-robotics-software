@@ -112,6 +112,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCScriptBehaviorTest.class + " after class.");
    }
 
+   public static final double COM_POSITION_THRESHOLD = 0.05;
    private final double POSITION_THRESHOLD = 0.007;
    private final double ORIENTATION_THRESHOLD = 0.007;
    private static final boolean DEBUG = true;
@@ -774,7 +775,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
          PrintTools.debug(this, "actualHeightOffset: " + actualHeightOffset);
       }
 
-      assertEquals("Actual CoM Height Offset :" + actualHeightOffset + " does not match desired offset: " + desiredHeightOffset + " within threshold of " + DRCComHeightBehaviorTest.POSITION_THRESHOLD, desiredHeightOffset, actualHeightOffset, DRCComHeightBehaviorTest.POSITION_THRESHOLD);
+      assertEquals("Actual CoM Height Offset :" + actualHeightOffset + " does not match desired offset: " + desiredHeightOffset + " within threshold of " + COM_POSITION_THRESHOLD, desiredHeightOffset, actualHeightOffset, COM_POSITION_THRESHOLD);
    }
 
    private void assertOrientationsAreWithinThresholds(Quat4d desiredQuat, ReferenceFrame frameToCheck)

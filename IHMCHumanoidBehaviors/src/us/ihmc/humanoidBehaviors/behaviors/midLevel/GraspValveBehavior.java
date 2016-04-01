@@ -8,12 +8,12 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveGraspLocation;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveTurnDirection;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.PelvisHeightTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyInverseKinematicTask;
@@ -44,7 +44,7 @@ public class GraspValveBehavior extends BehaviorInterface
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
-   private final ComHeightBehavior comHeightBehavior;
+   private final PelvisHeightTrajectoryBehavior comHeightBehavior;
    private final HandPoseBehavior handPoseBehavior;
    private final WholeBodyInverseKinematicBehavior wholeBodyInverseKinematicBehavior;
    private final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
@@ -69,7 +69,7 @@ public class GraspValveBehavior extends BehaviorInterface
 
       this.yoTime = yoTime;
       
-      this.comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
+      this.comHeightBehavior = new PelvisHeightTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
       this.handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       this.wholeBodyInverseKinematicBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters,
             fullRobotModel, yoTime);
@@ -109,7 +109,7 @@ public class GraspValveBehavior extends BehaviorInterface
       FramePose finalGraspHandFramePose = graspPoses.get(1);
       
       double comHeightDesiredOffset = finalGraspHandFramePose.getZ() - 1.27;
-      CoMHeightTask comHeightTask = new CoMHeightTask(comHeightDesiredOffset, yoTime, comHeightBehavior, 1.0);
+      PelvisHeightTrajectoryTask comHeightTask = new PelvisHeightTrajectoryTask(comHeightDesiredOffset, yoTime, comHeightBehavior, 1.0);
       HandDesiredConfigurationTask openHandTask = new HandDesiredConfigurationTask(robotSideOfGraspingHand, HandConfiguration.OPEN, handDesiredConfigurationBehavior, yoTime);
       HandPoseTask moveHandToFavorableGraspApproachLocation = new HandPoseTask(robotSideOfGraspingHand, 1.0, preGraspHandFramePose, Frame.WORLD,
             handPoseBehavior, yoTime);
@@ -224,7 +224,7 @@ public class GraspValveBehavior extends BehaviorInterface
 
 	      
 	      double comHeightDesiredOffset = graspPoses.get(1).getZ() - 1.27;
-	      CoMHeightTask comHeightTask = new CoMHeightTask(comHeightDesiredOffset, yoTime, comHeightBehavior, 1.0);
+	      PelvisHeightTrajectoryTask comHeightTask = new PelvisHeightTrajectoryTask(comHeightDesiredOffset, yoTime, comHeightBehavior, 1.0);
 	      
 
 	      HandDesiredConfigurationTask openHandTask = new HandDesiredConfigurationTask(robotSideOfGraspingHand, HandConfiguration.OPEN, handDesiredConfigurationBehavior, yoTime);

@@ -5,13 +5,13 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class PelvisPoseBehavior extends BehaviorInterface
+public class PelvisOrientationTrajectoryBehavior extends BehaviorInterface
 {
-   private PelvisPosePacket outgoingPelvisPosePacket;
+   private PelvisOrientationTrajectoryMessage outgoingPelvisOrientationTrajectoryMessage;
 
    private final BooleanYoVariable hasPacketBeenSent;
    private final DoubleYoVariable yoTime;
@@ -19,7 +19,7 @@ public class PelvisPoseBehavior extends BehaviorInterface
    private final DoubleYoVariable trajectoryTime;
    private final BooleanYoVariable trajectoryTimeElapsed;
 
-   public PelvisPoseBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public PelvisOrientationTrajectoryBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
 
@@ -33,15 +33,15 @@ public class PelvisPoseBehavior extends BehaviorInterface
       trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
    }
 
-   public void setInput(PelvisPosePacket pelvisPosePacket)
+   public void setInput(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage)
    {
-      this.outgoingPelvisPosePacket = pelvisPosePacket;
+      this.outgoingPelvisOrientationTrajectoryMessage = pelvisOrientationTrajectoryMessage;
    }
 
    @Override
    public void doControl()
    {
-      if (!hasPacketBeenSent.getBooleanValue() && (outgoingPelvisPosePacket != null))
+      if (!hasPacketBeenSent.getBooleanValue() && (outgoingPelvisOrientationTrajectoryMessage != null))
       {
          sendPelvisPosePacketToController();
       }
@@ -51,12 +51,12 @@ public class PelvisPoseBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
-         outgoingPelvisPosePacket.setDestination(PacketDestination.UI);
-         sendPacketToNetworkProcessor(outgoingPelvisPosePacket);
-         sendPacketToController(outgoingPelvisPosePacket);
+         outgoingPelvisOrientationTrajectoryMessage.setDestination(PacketDestination.UI);
+         sendPacketToNetworkProcessor(outgoingPelvisOrientationTrajectoryMessage);
+         sendPacketToController(outgoingPelvisOrientationTrajectoryMessage);
          hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
-         trajectoryTime.set(outgoingPelvisPosePacket.getTrajectoryTime());
+         trajectoryTime.set(outgoingPelvisOrientationTrajectoryMessage.getTrajectoryTime());
       }
    }
 
@@ -75,7 +75,7 @@ public class PelvisPoseBehavior extends BehaviorInterface
    public void doPostBehaviorCleanup()
    {
       hasPacketBeenSent.set(false);
-      outgoingPelvisPosePacket = null;
+      outgoingPelvisOrientationTrajectoryMessage = null;
 
       isPaused.set(false);
       isStopped.set(false);
@@ -132,6 +132,6 @@ public class PelvisPoseBehavior extends BehaviorInterface
    @Override
    public boolean hasInputBeenSet()
    {
-      return outgoingPelvisPosePacket != null;
+      return outgoingPelvisOrientationTrajectoryMessage != null;
    }
 }

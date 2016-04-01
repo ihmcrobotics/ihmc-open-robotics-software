@@ -30,10 +30,10 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisOrientationTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
+import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
@@ -42,7 +42,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlM
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -234,8 +234,8 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      PelvisPoseBehavior pelvisPoseBehavior = new PelvisPoseBehavior(communicationBridge, yoTime);
-      behaviorDispatcher.addBehavior(HumanoidBehaviorType.TEST, pelvisPoseBehavior);
+      PelvisOrientationTrajectoryBehavior pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(communicationBridge, yoTime);
+      behaviorDispatcher.addBehavior(HumanoidBehaviorType.TEST, pelvisOrientationTrajectoryBehavior);
 
       behaviorDispatcher.start();
 
@@ -246,23 +246,23 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      PelvisPosePacket pelvisPosePacket = createRotationOnlyPelvisPosePacket(new Vector3d(0.0, 1.0, 0.0), Math.toRadians(5.0));
+      PelvisOrientationTrajectoryMessage pelvisPosePacket = createPelvisOrientationTrajectoryMessage(new Vector3d(0.0, 1.0, 0.0), Math.toRadians(5.0));
       FramePose desiredPelvisPose = new FramePose();
-      desiredPelvisPose.setOrientation(pelvisPosePacket.orientation);
+      desiredPelvisPose.setOrientation(pelvisPosePacket.getLastTrajectoryPoint().orientation);
 
-      pelvisPoseBehavior.initialize();
-      pelvisPoseBehavior.setInput(pelvisPosePacket);
-      assertTrue(pelvisPoseBehavior.hasInputBeenSet());
+      pelvisOrientationTrajectoryBehavior.initialize();
+      pelvisOrientationTrajectoryBehavior.setInput(pelvisPosePacket);
+      assertTrue(pelvisOrientationTrajectoryBehavior.hasInputBeenSet());
       PrintTools.debug(this, "Setting PelvisPoseBehavior Input");
 
       PrintTools.debug(this, "Starting to Excecute Behavior");
-      while (!pelvisPoseBehavior.isDone() && yoTime.getDoubleValue() < 20.0)
+      while (!pelvisOrientationTrajectoryBehavior.isDone() && yoTime.getDoubleValue() < 20.0)
       {
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
          assertTrue(success);
       }
 
-      assertTrue(pelvisPoseBehavior.isDone());
+      assertTrue(pelvisOrientationTrajectoryBehavior.isDone());
       assertOrientationsAreWithinThresholds(desiredPelvisPose, getCurrentPelvisPose());
 
       BambooTools.reportTestFinishedMessage();
@@ -477,14 +477,14 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private PelvisPosePacket createRotationOnlyPelvisPosePacket(Vector3d rotationAxis, double rotationAngle)
+   private PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(Vector3d rotationAxis, double rotationAngle)
    {
       AxisAngle4d desiredPelvisAxisAngle = new AxisAngle4d(rotationAxis, rotationAngle);
       Quat4d desiredPelvisQuat = new Quat4d();
       desiredPelvisQuat.set(desiredPelvisAxisAngle);
 
-      PelvisPosePacket pelvisPosePacket = new PelvisPosePacket(desiredPelvisQuat);
-      return pelvisPosePacket;
+      PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage = new PelvisOrientationTrajectoryMessage(3.0, desiredPelvisQuat);
+      return pelvisOrientationTrajectoryMessage;
    }
 
    private FramePose getCurrentPelvisPose()
