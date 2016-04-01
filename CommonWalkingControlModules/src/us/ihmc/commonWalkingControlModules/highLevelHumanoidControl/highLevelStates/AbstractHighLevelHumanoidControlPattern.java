@@ -13,7 +13,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -70,11 +70,11 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    protected final SideDependentList<? extends ContactablePlaneBody> feet, handPalms;
 
-   protected final VariousWalkingManagers variousWalkingManagers;
+   protected final HighLevelControlManagerFactory variousWalkingManagers;
 
    protected final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   public AbstractHighLevelHumanoidControlPattern(VariousWalkingManagers variousWalkingManagers, MomentumBasedController momentumBasedController,
+   public AbstractHighLevelHumanoidControlPattern(HighLevelControlManagerFactory variousWalkingManagers, MomentumBasedController momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, HighLevelState controllerState)
    {
       super(controllerState);
