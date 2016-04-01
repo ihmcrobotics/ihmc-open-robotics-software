@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.DoneWithStateCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.DoubleSupportToSingleSupportConditionForDisturbanceRecovery;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.SingleSupportToTransferToCondition;
@@ -139,7 +139,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-         VariousWalkingManagers variousWalkingManagers, WalkingControllerParameters walkingControllerParameters,
+         HighLevelControlManagerFactory variousWalkingManagers, WalkingControllerParameters walkingControllerParameters,
          MomentumBasedController momentumBasedController)
    {
       super(variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);

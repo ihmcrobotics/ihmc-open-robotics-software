@@ -85,7 +85,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    private HighLevelHumanoidControllerManager highLevelHumanoidControllerManager = null;
    private final ArrayList<HighLevelBehavior> highLevelBehaviors = new ArrayList<>();
 
-   private VariousWalkingManagers variousWalkingManagers;
+   private HighLevelControlManagerFactory variousWalkingManagers;
 
    private ArrayList<HighLevelBehaviorFactory> highLevelBehaviorFactories = new ArrayList<>();
 
@@ -253,7 +253,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       if (createUserDesiredControllerCommandGenerator)
          createUserDesiredControllerCommandGenerator();
 
-      variousWalkingManagers = new VariousWalkingManagers(statusOutputManager, momentumBasedController, walkingControllerParameters,
+      variousWalkingManagers = new HighLevelControlManagerFactory(statusOutputManager, momentumBasedController, walkingControllerParameters,
             capturePointPlannerParameters, armControllerParameters, registry);
 
       /////////////////////////////////////////////////////////////////////////////////////////////

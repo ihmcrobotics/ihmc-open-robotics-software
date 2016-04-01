@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 
 public interface HighLevelBehaviorFactory
 {
-   public abstract HighLevelBehavior createHighLevelBehavior(VariousWalkingManagers variousWalkingManagers, MomentumBasedController momentumBasedController);
+   public abstract HighLevelBehavior createHighLevelBehavior(HighLevelControlManagerFactory variousWalkingManagers, MomentumBasedController momentumBasedController);
 
    public abstract boolean isTransitionToBehaviorRequested();
 }

@@ -21,7 +21,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.vecmath.Vector3d;
 
-public class VariousWalkingManagers
+public class HighLevelControlManagerFactory
 {
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager centerOfMassHeightManager;
@@ -31,7 +31,7 @@ public class VariousWalkingManagers
    private final FeetManager feetManager;
    private final PelvisOrientationManager pelvisOrientationManager;
 
-   public VariousWalkingManagers(StatusMessageOutputManager statusOutputManager, MomentumBasedController momentumBasedController,
+   public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, MomentumBasedController momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
          ArmControllerParameters armControlParameters, YoVariableRegistry registry)
    {
