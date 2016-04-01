@@ -41,6 +41,15 @@ public class MathToolsTest
    {
    }
 
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testAngleFromZeroToTwoPi()
+   {
+      assertEquals("not equal", 0.0, MathTools.angleFromZeroToTwoPi(0.0, 0.0), 1e-7);
+      assertEquals("not equal", Math.PI / 4.0, MathTools.angleFromZeroToTwoPi(1.0, 1.0), 1e-7);
+      assertEquals("not equal", 7.0 * Math.PI / 4.0, MathTools.angleFromZeroToTwoPi(1.0, -1.0), 1e-7);
+   }
+   
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor()
