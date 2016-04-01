@@ -1,5 +1,6 @@
 package us.ihmc.graphics3DAdapter.graphics.appearances;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +39,15 @@ public class SDFAppearance extends YoAppearanceTransparency
       return resourceDirectories;
    }
 
+   @Override
    public Color3f getColor()
    {
      throw new NotImplementedException("getColor() is not implemented");
+   }
+
+   @Override
+   public Color getAwtColor()
+   {
+     throw new NotImplementedException("getAwtColor() is not implemented");
    }
 }

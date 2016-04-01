@@ -1,5 +1,6 @@
 package us.ihmc.graphics3DAdapter.graphics.appearances;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import javax.vecmath.Color3f;
@@ -35,9 +36,15 @@ public class YoAppearanceTexture extends YoAppearanceTransparency
       return bufferedImage;
    }
 
+   @Override
    public Color3f getColor()
    {
       throw new NotImplementedException("getColor() is not implemented");
    }
 
+   @Override
+   public Color getAwtColor()
+   {
+      throw new NotImplementedException("getAwtColor() is not implemented");
+   }
 }
