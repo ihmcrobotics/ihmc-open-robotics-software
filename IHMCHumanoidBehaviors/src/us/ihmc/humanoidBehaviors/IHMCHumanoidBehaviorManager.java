@@ -11,7 +11,6 @@ import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizeDrillBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.ReceiveImageBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TalkAndMoveHandsBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.ForceControlledWallTaskBehavior;
@@ -168,7 +167,6 @@ public class IHMCHumanoidBehaviorManager
          OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry,
          CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
-      BooleanYoVariable tippingDetectedBoolean = capturePointUpdatable.getTippingDetectedBoolean();
       BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
       EnumYoVariable<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
       YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
@@ -186,10 +184,6 @@ public class IHMCHumanoidBehaviorManager
       LocalizationBehavior localizationBehavior = new LocalizationBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport,
             wholeBodyControllerParameters.getWalkingControllerParameters());
       dispatcher.addBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
-
-      TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime,
-            tippingDetectedBoolean, yoDoubleSupport, wholeBodyControllerParameters);
-      dispatcher.addBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
 
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, wholeBodyControllerParameters
             .getWalkingControllerParameters().getAnkleHeight());
