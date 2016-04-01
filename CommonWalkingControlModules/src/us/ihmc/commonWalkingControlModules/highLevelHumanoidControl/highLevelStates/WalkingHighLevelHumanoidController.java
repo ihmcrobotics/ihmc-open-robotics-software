@@ -337,9 +337,9 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       {
          WalkingSingleSupportState walkingSingleSupportState = walkingSingleSupportStates.get(robotSide);
          WalkingStateEnum walkingSingleSupportStateEnum = walkingSingleSupportState.getStateEnum();
-         RobotSide supportSide = walkingSingleSupportState.getSupportSide();
+         RobotSide swingSide = walkingSingleSupportState.getSwingSide();
 
-         DoubleSupportToSingleSupportConditionForDisturbanceRecovery isFallingFromDoubleSupportCondition = new DoubleSupportToSingleSupportConditionForDisturbanceRecovery(supportSide, balanceManager);
+         DoubleSupportToSingleSupportConditionForDisturbanceRecovery isFallingFromDoubleSupportCondition = new DoubleSupportToSingleSupportConditionForDisturbanceRecovery(swingSide, balanceManager);
          StateTransition<WalkingStateEnum> fromFallingToSingleSupport = new StateTransition<WalkingStateEnum>(walkingSingleSupportStateEnum, isFallingFromDoubleSupportCondition);
          fromFallingToSingleSupportsTransitions.put(robotSide, fromFallingToSingleSupport);
       }

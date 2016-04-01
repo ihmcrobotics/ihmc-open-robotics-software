@@ -6,12 +6,12 @@ import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 
 public class DoubleSupportToSingleSupportConditionForDisturbanceRecovery implements StateTransitionCondition
 {
-   private final RobotSide transferToSide;
+   private final RobotSide swingSide;
    private final BalanceManager balanceManager;
 
-   public DoubleSupportToSingleSupportConditionForDisturbanceRecovery(RobotSide singleSupportStateSupportSide, BalanceManager balanceManager)
+   public DoubleSupportToSingleSupportConditionForDisturbanceRecovery(RobotSide singleSupportStateSwingSide, BalanceManager balanceManager)
    {
-      transferToSide = singleSupportStateSupportSide;
+      swingSide = singleSupportStateSwingSide;
       this.balanceManager = balanceManager;
    }
 
@@ -27,7 +27,7 @@ public class DoubleSupportToSingleSupportConditionForDisturbanceRecovery impleme
       if (!isRobotFalling)
          return false;
 
-      boolean switchToSingleSupport = transferToSide != suggestedSwingSide;
+      boolean switchToSingleSupport = swingSide.getOppositeSide() != suggestedSwingSide;
 
       if (switchToSingleSupport)
          balanceManager.prepareForDoubleSupportPushRecovery();
