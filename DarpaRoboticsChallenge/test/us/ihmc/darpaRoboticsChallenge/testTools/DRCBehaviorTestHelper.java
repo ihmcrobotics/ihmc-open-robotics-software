@@ -85,17 +85,17 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final PacketCommunicator behaviorCommunicatorClient;
    private final PacketCommunicator mockUIPacketCommunicatorClient;
 
-   public DRCBehaviorTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation,
+   public DRCBehaviorTestHelper(String name, DRCStartingLocation selectedLocation,
          SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
    {
-      this(new DRCDemo01NavigationEnvironment(), name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel);
+      this(new DRCDemo01NavigationEnvironment(), name, selectedLocation, simulationTestingParameters, robotModel);
    }
 
    public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface,
-         String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
+         String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
          DRCRobotModel robotModel)
    {
-      super(commonAvatarEnvironmentInterface, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel);
+      super(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel);
 
       yoTimeRobot = getRobot().getYoTime();
       yoTimeBehaviorDispatcher = new DoubleYoVariable("yoTimeBehaviorDispatcher", registry);

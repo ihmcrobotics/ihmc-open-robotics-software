@@ -80,7 +80,7 @@ public class AtlasFinalsWorldStairsTest
       AtlasRobotModel robotModel = AtlasRobotModelFactory.createDefaultRobotModel();
       robotModel.addMoreFootContactPointsSimOnly();
       DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", "", selectedLocation, simulationTestingParameters,
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,
               robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -127,7 +127,7 @@ public class AtlasFinalsWorldStairsTest
       AtlasRobotModel robotModel = AtlasRobotModelFactory.createDefaultRobotModel();
       robotModel.addMoreFootContactPointsSimOnly();
       DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", "", selectedLocation, simulationTestingParameters,
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,
             robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();

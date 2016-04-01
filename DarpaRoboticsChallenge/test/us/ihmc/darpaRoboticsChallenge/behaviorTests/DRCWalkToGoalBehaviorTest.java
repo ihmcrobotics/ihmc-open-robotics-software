@@ -133,7 +133,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       {
          throw new RuntimeException(e);
       }
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, getSimpleRobotName(), null,
+      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, getSimpleRobotName(),
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
 
       Robot robotToTest = drcSimulationTestHelper.getRobot();

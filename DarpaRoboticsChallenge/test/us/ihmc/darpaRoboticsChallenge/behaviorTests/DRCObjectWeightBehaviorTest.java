@@ -36,7 +36,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestStartedMessage();
      
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null,
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(),
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 

@@ -164,7 +164,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       
       this.communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer, registry);
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper(new DRCDemo01NavigationEnvironment(), getSimpleRobotName(), null,
+      drcSimulationTestHelper = new DRCSimulationTestHelper(new DRCDemo01NavigationEnvironment(), getSimpleRobotName(),
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
 
       networkProcessor.attachPacketCommunicator(PacketDestination.CONTROLLER, drcSimulationTestHelper.getControllerCommunicator());

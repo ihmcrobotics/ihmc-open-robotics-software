@@ -80,7 +80,7 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
    public void setUp()
    {
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null,
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(),
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
