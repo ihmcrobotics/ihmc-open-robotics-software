@@ -1,10 +1,12 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveBehaviorTools;
+import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.robotics.stateMachines.State;
 
 public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
-{
+{   
    private final BehaviorInterface behavior;
    private final Boolean initializeOnTransitionIntoAction;
 
@@ -19,6 +21,13 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
 
       this.behavior = behavior;
       this.initializeOnTransitionIntoAction = initializeOnTransitionIntoAction;
+
+      CoactiveElement coactiveElement = behavior.getCoactiveElement();
+      if (coactiveElement != null)
+      {
+         CoactiveBehaviorTools.synchronizeCoactiveElementMachineSideUsingTCPYoWhiteBoard(coactiveElement);
+      }
+      
    }
 
    @Override
@@ -26,7 +35,13 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
    {
       if (initializeOnTransitionIntoAction)
       {
-         behavior.initialize();       
+         behavior.initialize();
+
+         CoactiveElement coactiveElement = behavior.getCoactiveElement();
+         if (coactiveElement != null)
+         {
+            coactiveElement.initializeMachineSide();
+         }
       }
    }
    
@@ -34,6 +49,12 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
    public void doAction()
    {
       behavior.doControl();
+
+      CoactiveElement coactiveElement = behavior.getCoactiveElement();
+      if (coactiveElement != null)
+      {
+         coactiveElement.updateMachineSide();
+      }
    }
 
    @Override
