@@ -33,7 +33,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
-public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestInterface
+public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
@@ -68,7 +68,7 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
    @AfterClass
    public static void printMemoryUsageAfterClass()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCHeadOrientationBehaviorTest.class + " after class.");
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCHeadTrajectoryBehaviorTest.class + " after class.");
    }
 
    private static final boolean DEBUG = false;

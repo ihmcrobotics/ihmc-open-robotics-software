@@ -9,11 +9,11 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = {TestPlanTarget.Flaky, TestPlanTarget.VideoA})
-public class AtlasChestOrientationBehaviorTest extends DRCChestTrajectoryBehaviorTest
+public class AtlasChestTrajectoryBehaviorTest extends DRCChestTrajectoryBehaviorTest
 {
    private final AtlasRobotModel robotModel;
    
-   public AtlasChestOrientationBehaviorTest()
+   public AtlasChestTrajectoryBehaviorTest()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
    }
