@@ -1,23 +1,23 @@
 package us.ihmc.graphics3DAdapter.graphics.appearances;
 
+import java.awt.Color;
+
 import javax.vecmath.Color3f;
+
+import org.apache.commons.lang3.NotImplementedException;
 
 public class YoAppearanceMaterial extends YoAppearanceTransparency
 {
-   
-   
    private final Color3f diffuseColor = new Color3f();
    private final Color3f specularColor = new Color3f();
    private float shininess;
    private final Color3f ambientColor = new Color3f();
-   
 
    public void setDiffuseColor(float f, float g, float h)
    {
       diffuseColor.x = f;
       diffuseColor.y = g;
       diffuseColor.z = h;
-      
    }
 
    public void setSpecularColor(float f, float g, float h)
@@ -72,13 +72,17 @@ public class YoAppearanceMaterial extends YoAppearanceTransparency
    public void setSpecularColor(Color3f color3f)
    {
       specularColor.set(color3f);
-      
    }
 
+   @Override
    public Color3f getColor()
    {
       return diffuseColor;
    }
 
-   
+   @Override
+   public Color getAwtColor()
+   {
+      throw new NotImplementedException("getAwtColor() is not implemented");
+   }
 }

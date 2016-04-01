@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
@@ -20,7 +21,8 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class KickBallBehavior extends BehaviorInterface
 {
-
+   private static final boolean CREATE_COACTIVE_ELEMENT = false;
+   
    private enum KickState
    {
       SEARCH, APPROACH, VERIFY_LOCATION, FINAL_APPROACH, VERIFY_KICK_LOCATION, KICK_BALL
@@ -45,6 +47,8 @@ public class KickBallBehavior extends BehaviorInterface
    private final double standingDistance = 0.4;
    private boolean pipelineSetUp = false;
 
+   private final KickBallBehaviorCoactiveElement coactiveElement;
+   
    public KickBallBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
@@ -69,6 +73,23 @@ public class KickBallBehavior extends BehaviorInterface
          registry.addChild(behavior.getYoVariableRegistry());
       }
 
+      if (CREATE_COACTIVE_ELEMENT)
+      {
+         coactiveElement = new KickBallBehaviorCoactiveElement();
+         coactiveElement.setKickBallBehavior(this);
+         registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
+         registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());    
+      }
+      else
+      {
+         coactiveElement = null;
+      }
+   }
+   
+   @Override
+   public CoactiveElement getCoactiveElement()
+   {
+      return coactiveElement;
    }
 
    boolean locationSet = false;
@@ -225,5 +246,11 @@ public class KickBallBehavior extends BehaviorInterface
    public boolean hasInputBeenSet()
    {
       return true;
+   }
+
+   public void abort()
+   {
+      this.stop();
+      this.pipeLine.clearAll();
    }
 }
