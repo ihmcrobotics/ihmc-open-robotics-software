@@ -244,9 +244,9 @@ public class MotionQPInputCalculator
       {
          // Compute the weight: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
-         tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+         tempTaskWeight.reshape(3, 3);
          commandToConvert.getWeightMatrix(tempTaskWeight);
-         tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
+         tempTaskWeightSubspace.reshape(taskSize, 3);
          CommonOps.mult(selectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
          CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, motionQPInputToPack.taskWeightMatrix);
       }
