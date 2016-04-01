@@ -19,8 +19,8 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadOrientationBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadTrajectoryBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -102,8 +102,8 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       Vector3d axis = new Vector3d(0, 1, 0);
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
 
-      HeadOrientationPacket headOrientationPacket = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
-      testHeadOrientationBehavior(headOrientationPacket, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
+      testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -116,8 +116,8 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       Vector3d axis = new Vector3d(1, 0, 0);
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
 
-      HeadOrientationPacket headOrientationPacket = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
-      testHeadOrientationBehavior(headOrientationPacket, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
+      testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -130,8 +130,8 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       Vector3d axis = new Vector3d(0, 0, 1);
       double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
 
-      HeadOrientationPacket headOrientationPacket = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
-      testHeadOrientationBehavior(headOrientationPacket, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
+      testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -142,37 +142,36 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
 
       double trajectoryTime = 4.0;
       Quat4d desiredHeadQuat = new Quat4d(RandomTools.generateRandomQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
-      HeadOrientationPacket headOrientationPacket = new HeadOrientationPacket(desiredHeadQuat, trajectoryTime);
-
-      testHeadOrientationBehavior(headOrientationPacket, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      HeadTrajectoryMessage message = new HeadTrajectoryMessage(trajectoryTime, desiredHeadQuat);
+      testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       BambooTools.reportTestFinishedMessage();
    }
 
-   private HeadOrientationPacket createHeadOrientationPacket(Vector3d axis, double rotationAngle, double trajectoryTime)
+   private HeadTrajectoryMessage createHeadOrientationPacket(Vector3d axis, double rotationAngle, double trajectoryTime)
    {
       AxisAngle4d desiredAxisAngle = new AxisAngle4d();
       desiredAxisAngle.set(axis, rotationAngle);
       Quat4d desiredHeadQuat = new Quat4d();
       desiredHeadQuat.set(desiredAxisAngle);
 
-      HeadOrientationPacket headOrientationPacket = new HeadOrientationPacket(desiredHeadQuat, trajectoryTime);
-      return headOrientationPacket;
+      HeadTrajectoryMessage message = new HeadTrajectoryMessage(trajectoryTime, desiredHeadQuat);
+      return message;
    }
 
-   private void testHeadOrientationBehavior(HeadOrientationPacket headOrientationPacket, double trajectoryTime) throws SimulationExceededMaximumTimeException
+   private void testHeadOrientationBehavior(HeadTrajectoryMessage headTrajectoryMessage, double trajectoryTime) throws SimulationExceededMaximumTimeException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      final HeadOrientationBehavior headOrientBehavior = new HeadOrientationBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+      final HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
             drcBehaviorTestHelper.getYoTime());
 
-      headOrientBehavior.initialize();
-      headOrientBehavior.setInput(headOrientationPacket);
-      assertTrue(headOrientBehavior.hasInputBeenSet());
+      headTrajectoryBehavior.initialize();
+      headTrajectoryBehavior.setInput(headTrajectoryMessage);
+      assertTrue(headTrajectoryBehavior.hasInputBeenSet());
 
       FramePose initialHeadPose = getCurrentHeadPose(drcBehaviorTestHelper.getSDFFullRobotModel());
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(headOrientBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(headTrajectoryBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       assertTrue(success);
       FramePose finalHeadPose = getCurrentHeadPose(drcBehaviorTestHelper.getSDFFullRobotModel());
 
@@ -182,9 +181,9 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       }
 
       FramePose desiredHeadPose = new FramePose();
-      desiredHeadPose.setPose(initialHeadPose.getFramePointCopy().getPoint(), headOrientationPacket.orientation);
+      desiredHeadPose.setPose(initialHeadPose.getFramePointCopy().getPoint(), headTrajectoryMessage.getLastTrajectoryPoint().orientation);
       assertPosesAreWithinThresholds(desiredHeadPose, finalHeadPose);
-      assertTrue(headOrientBehavior.isDone());
+      assertTrue(headTrajectoryBehavior.isDone());
    }
 
    private FramePose getCurrentHeadPose(FullRobotModel fullRobotModel)

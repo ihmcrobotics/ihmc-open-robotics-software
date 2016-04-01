@@ -5,25 +5,25 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class HeadOrientationBehavior extends BehaviorInterface
+public class HeadTrajectoryBehavior extends BehaviorInterface
 {
    private final BooleanYoVariable packetHasBeenSent;
-   private HeadOrientationPacket outgoingHeadOrientationPacket;
+   private HeadTrajectoryMessage outgoingHeadTrajectoryMessage;
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
 
-   public HeadOrientationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public HeadTrajectoryBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       this(null, outgoingCommunicationBridge, yoTime);
    }
    
-   public HeadOrientationBehavior(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public HeadTrajectoryBehavior(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(namePrefix, outgoingCommunicationBridge);
       
@@ -36,15 +36,15 @@ public class HeadOrientationBehavior extends BehaviorInterface
       trajectoryTime.set(Double.NaN);
    }
 
-   public void setInput(HeadOrientationPacket headOrientationPacket)
+   public void setInput(HeadTrajectoryMessage headTrajectoryMessage)
    {
-      this.outgoingHeadOrientationPacket = headOrientationPacket;
+      this.outgoingHeadTrajectoryMessage = headTrajectoryMessage;
    }
 
    @Override
    public void doControl()
    {
-      if (!packetHasBeenSent.getBooleanValue() && (outgoingHeadOrientationPacket != null))
+      if (!packetHasBeenSent.getBooleanValue() && (outgoingHeadTrajectoryMessage != null))
       {
          sendHeadOrientationPacketToController();
       }
@@ -54,13 +54,13 @@ public class HeadOrientationBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
-         outgoingHeadOrientationPacket.setDestination(PacketDestination.UI);
-         sendPacketToNetworkProcessor(outgoingHeadOrientationPacket);
-         sendPacketToController(outgoingHeadOrientationPacket);
+         outgoingHeadTrajectoryMessage.setDestination(PacketDestination.UI);
+         sendPacketToNetworkProcessor(outgoingHeadTrajectoryMessage);
+         sendPacketToController(outgoingHeadTrajectoryMessage);
          
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
-         trajectoryTime.set(outgoingHeadOrientationPacket.getTrajectoryTime());
+         trajectoryTime.set(outgoingHeadTrajectoryMessage.getTrajectoryTime());
       }
    }
 
@@ -79,7 +79,7 @@ public class HeadOrientationBehavior extends BehaviorInterface
    public void doPostBehaviorCleanup()
    {
       packetHasBeenSent.set(false);
-      outgoingHeadOrientationPacket = null;
+      outgoingHeadTrajectoryMessage = null;
 
       isPaused.set(false);
       isStopped.set(false);
@@ -129,7 +129,7 @@ public class HeadOrientationBehavior extends BehaviorInterface
    }
    
    public boolean hasInputBeenSet() {
-	   if (outgoingHeadOrientationPacket != null)
+	   if (outgoingHeadTrajectoryMessage != null)
 		   return true;
 	   else
 		   return false;
