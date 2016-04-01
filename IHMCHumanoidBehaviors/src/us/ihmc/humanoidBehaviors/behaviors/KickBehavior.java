@@ -6,13 +6,12 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.FootPoseTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -32,7 +31,7 @@ public class KickBehavior extends BehaviorInterface {
 	private final DoubleYoVariable yoTime;
 	private final ReferenceFrame midZupFrame;
 	private BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
-	private final FootPoseBehavior footPoseBehavior;
+	private final FootTrajectoryBehavior footTrajectoryBehavior;
 
 	private FramePoint2d objectToKickPose;
 
@@ -52,8 +51,8 @@ public class KickBehavior extends BehaviorInterface {
 		trajectoryTime.set(0.5);
 		ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 
-		footPoseBehavior = new FootPoseBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport);
-		registry.addChild(footPoseBehavior.getYoVariableRegistry());
+		footTrajectoryBehavior = new FootTrajectoryBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport);
+		registry.addChild(footTrajectoryBehavior.getYoVariableRegistry());
 
 	}
 
@@ -139,9 +138,8 @@ public class KickBehavior extends BehaviorInterface {
 		Point3d desiredFootPosition = new Point3d();
 		Quat4d desiredFootOrientation = new Quat4d();
 		desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
-		FootPoseTask footPoseTask = new FootPoseTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime,
-				footPoseBehavior, trajectoryTime.getDoubleValue(), 0.0);
-		pipeLine.submitSingleTaskStage(footPoseTask);
+		FootTrajectoryTask task = new FootTrajectoryTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footTrajectoryBehavior, trajectoryTime.getDoubleValue());
+		pipeLine.submitSingleTaskStage(task);
 	}
 
 	@Override

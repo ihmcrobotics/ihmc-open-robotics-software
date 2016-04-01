@@ -13,7 +13,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.atlas.behaviorTests.AtlasChestOrientationBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasFootPoseBehaviorTest.class
 })
 
 public class AtlasCFlakyTestSuite
