@@ -7,18 +7,16 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FootStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandLoadBearingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HighLevelStateBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PrimitiveBehaviorType;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ThighStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngine;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -36,6 +34,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacke
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootStatePacket;
@@ -78,14 +77,12 @@ public class ScriptBehavior extends BehaviorInterface
 
    private final FootstepListBehavior footstepListBehavior;
    private final HandPoseBehavior handPoseBehavior;
-   private final FootStateBehavior footStateBehavior;
+   private final EndEffectorLoadBearingBehavior endEffectorLoadBearingBehavior;
    private final HeadOrientationBehavior headOrientationBehavior;
    private final PelvisHeightTrajectoryBehavior comHeightBehavior;
    private final FootPoseBehavior footPoseBehavior;
    private final PelvisTrajectoryBehavior pelvisTrajectoryBehavior;
    private final ChestTrajectoryBehavior chestTrajectoryBehavior;
-   private final HandLoadBearingBehavior handLoadBearingBehavior;
-   private final ThighStateBehavior thighStateBehavior;
    private final HighLevelStateBehavior highLevelStateBehavior;
    public final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
 
@@ -112,7 +109,7 @@ public class ScriptBehavior extends BehaviorInterface
          footstepListBehavior = null;
       }
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
-      footStateBehavior = new FootStateBehavior(outgoingCommunicationBridge);
+      endEffectorLoadBearingBehavior = new EndEffectorLoadBearingBehavior(outgoingCommunicationBridge);
       headOrientationBehavior = new HeadOrientationBehavior(outgoingCommunicationBridge, yoTime);
       comHeightBehavior = new PelvisHeightTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
       if (doubleSupport != null)
@@ -126,8 +123,6 @@ public class ScriptBehavior extends BehaviorInterface
       }
       pelvisTrajectoryBehavior = new PelvisTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
       chestTrajectoryBehavior = new ChestTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
-      handLoadBearingBehavior = new HandLoadBearingBehavior(outgoingCommunicationBridge);
-      thighStateBehavior = new ThighStateBehavior(outgoingCommunicationBridge);
       highLevelStateBehavior = new HighLevelStateBehavior(outgoingCommunicationBridge);
       handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
       scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
@@ -155,14 +150,12 @@ public class ScriptBehavior extends BehaviorInterface
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.IDLE, new SimpleDoNothingBehavior(outgoingCommunicationBridge));
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.FOOTSTEP_LIST, footstepListBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HAND_TRAJECTORY, handPoseBehavior);
-      wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.FOOT_STATE, footStateBehavior);
+      wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.END_EFFECTOR_LOAD_BEARING, endEffectorLoadBearingBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HEAD_ORIENTATION, headOrientationBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.COM_HEIGHT, comHeightBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.FOOT_POSE, footPoseBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.PELVIS_POSE, pelvisTrajectoryBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.CHEST_TRAJECTORY, chestTrajectoryBehavior);
-      wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HAND_LOAD, handLoadBearingBehavior);
-      wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.THIGH_STATE, thighStateBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HIGH_LEVEL_STATE, highLevelStateBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.FINGER_STATE, handDesiredConfigurationBehavior);
 
@@ -398,7 +391,7 @@ public class ScriptBehavior extends BehaviorInterface
       }
       else if (scriptObject instanceof FootStatePacket)
       {
-         ret = PrimitiveBehaviorType.FOOT_STATE;
+         ret = PrimitiveBehaviorType.END_EFFECTOR_LOAD_BEARING;
       }
       else if (scriptObject instanceof HeadOrientationPacket)
       {
@@ -457,10 +450,10 @@ public class ScriptBehavior extends BehaviorInterface
          handPoseBehavior.initialize();
          handPoseBehavior.setInput((HandPosePacket) inputPacket.getScriptObject());
       }
-      else if (behaviorType.equals(PrimitiveBehaviorType.FOOT_STATE))
+      else if (behaviorType.equals(PrimitiveBehaviorType.END_EFFECTOR_LOAD_BEARING))
       {
-         footStateBehavior.initialize();
-         footStateBehavior.setInput((FootStatePacket) inputPacket.getScriptObject());
+         endEffectorLoadBearingBehavior.initialize();
+         endEffectorLoadBearingBehavior.setInput((EndEffectorLoadBearingMessage) inputPacket.getScriptObject());
       }
       else if (behaviorType.equals(PrimitiveBehaviorType.HEAD_ORIENTATION))
       {
@@ -486,16 +479,6 @@ public class ScriptBehavior extends BehaviorInterface
       {
          chestTrajectoryBehavior.initialize();
          chestTrajectoryBehavior.setInput((ChestTrajectoryMessage) inputPacket.getScriptObject());
-      }
-      else if (behaviorType.equals(PrimitiveBehaviorType.HAND_LOAD))
-      {
-         handLoadBearingBehavior.initialize();
-         handLoadBearingBehavior.setInput((HandLoadBearingPacket) inputPacket.getScriptObject());
-      }
-      else if (behaviorType.equals(PrimitiveBehaviorType.THIGH_STATE))
-      {
-         thighStateBehavior.initialize();
-         thighStateBehavior.setInput((ThighStatePacket) inputPacket.getScriptObject());
       }
       else if (behaviorType.equals(PrimitiveBehaviorType.HIGH_LEVEL_STATE))
       {
@@ -579,14 +562,12 @@ public class ScriptBehavior extends BehaviorInterface
    {
       footstepListBehavior.consumeObjectFromNetworkProcessor(object);
       handPoseBehavior.consumeObjectFromNetworkProcessor(object);
-      footStateBehavior.consumeObjectFromNetworkProcessor(object);
+      endEffectorLoadBearingBehavior.consumeObjectFromNetworkProcessor(object);
       headOrientationBehavior.consumeObjectFromNetworkProcessor(object);
       comHeightBehavior.consumeObjectFromNetworkProcessor(object);
       footPoseBehavior.consumeObjectFromNetworkProcessor(object);
       pelvisTrajectoryBehavior.consumeObjectFromNetworkProcessor(object);
       chestTrajectoryBehavior.consumeObjectFromNetworkProcessor(object);
-      handLoadBearingBehavior.consumeObjectFromNetworkProcessor(object);
-      thighStateBehavior.consumeObjectFromNetworkProcessor(object);
       highLevelStateBehavior.consumeObjectFromNetworkProcessor(object);
       handDesiredConfigurationBehavior.consumeObjectFromNetworkProcessor(object);
    }
@@ -596,14 +577,12 @@ public class ScriptBehavior extends BehaviorInterface
    {
       footstepListBehavior.consumeObjectFromController(object);
       handPoseBehavior.consumeObjectFromController(object);
-      footStateBehavior.consumeObjectFromController(object);
+      endEffectorLoadBearingBehavior.consumeObjectFromController(object);
       headOrientationBehavior.consumeObjectFromController(object);
       comHeightBehavior.consumeObjectFromController(object);
       footPoseBehavior.consumeObjectFromController(object);
       pelvisTrajectoryBehavior.consumeObjectFromController(object);
       chestTrajectoryBehavior.consumeObjectFromController(object);
-      handLoadBearingBehavior.consumeObjectFromController(object);
-      thighStateBehavior.consumeObjectFromController(object);
       highLevelStateBehavior.consumeObjectFromController(object);
       handDesiredConfigurationBehavior.consumeObjectFromController(object);
    }

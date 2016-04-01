@@ -5,7 +5,7 @@ public enum PrimitiveBehaviorType
    IDLE,
    FOOTSTEP_LIST,
    HAND_TRAJECTORY,
-   FOOT_STATE,
+   END_EFFECTOR_LOAD_BEARING,
    HEAD_ORIENTATION,
    COM_HEIGHT,
    FOOT_POSE,

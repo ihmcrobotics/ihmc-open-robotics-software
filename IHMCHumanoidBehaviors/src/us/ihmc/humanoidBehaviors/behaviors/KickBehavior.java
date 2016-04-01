@@ -7,11 +7,14 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FootStateBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootPoseTask;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -112,12 +115,14 @@ public class KickBehavior extends BehaviorInterface {
 		submitFootPosition(kickFoot, new FramePoint(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0,
 				kickFoot.negateIfRightSide(0.25), 0));
 
-		final FootStateBehavior footStateBehavior = new FootStateBehavior(outgoingCommunicationBridge);
+		final EndEffectorLoadBearingBehavior footStateBehavior = new EndEffectorLoadBearingBehavior(outgoingCommunicationBridge);
 		pipeLine.submitSingleTaskStage(new BehaviorTask(footStateBehavior, yoTime) {
 
 			@Override
-			protected void setBehaviorInput() {
-				footStateBehavior.setInput(new FootStatePacket(kickFoot, true));
+			protected void setBehaviorInput()
+			{
+			   EndEffectorLoadBearingMessage message = new EndEffectorLoadBearingMessage(kickFoot, EndEffector.FOOT, LoadBearingRequest.LOAD);
+				footStateBehavior.setInput(message);
 
 			}
 		});
