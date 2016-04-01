@@ -83,7 +83,7 @@ public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRob
    @AfterClass
    public static void printMemoryUsageAfterClass()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCChestOrientationBehaviorTest.class + " after class.");
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCChestTrajectoryBehaviorTest.class + " after class.");
    }
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;

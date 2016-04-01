@@ -71,7 +71,7 @@ public abstract class DRCPushButtonBehaviorTest implements MultiRobotTestInterfa
    @AfterClass
    public static void printMemoryUsageAfterClass()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCChestOrientationBehaviorTest.class + " after class.");
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCChestTrajectoryBehaviorTest.class + " after class.");
    }
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
