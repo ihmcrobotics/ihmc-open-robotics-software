@@ -3,50 +3,24 @@ package us.ihmc.humanoidBehaviors.behaviors;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ObjectWeightBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PrimitiveBehaviorType;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyIKTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
-import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
 import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.ObjectWeightTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyIKTrajectoryTask;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.DrillPacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.robotics.stateMachines.StateChangedListener;
-import us.ihmc.robotics.stateMachines.StateTransition;
-import us.ihmc.robotics.stateMachines.StateTransitionAction;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 
 public class KickBallBehavior extends BehaviorInterface
 {
-
    private enum KickState
    {
       SEARCH, APPROACH, VERIFY_LOCATION, FINAL_APPROACH, VERIFY_KICK_LOCATION, KICK_BALL
@@ -71,6 +45,8 @@ public class KickBallBehavior extends BehaviorInterface
    private final double standingDistance = 0.4;
    private boolean pipelineSetUp = false;
 
+   private final KickBallBehaviorCoactiveElement coactiveElement = new KickBallBehaviorCoactiveElement();
+   
    public KickBallBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
@@ -95,6 +71,14 @@ public class KickBallBehavior extends BehaviorInterface
          registry.addChild(behavior.getYoVariableRegistry());
       }
 
+      registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
+      registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
+   }
+   
+   @Override
+   public CoactiveElement getCoactiveElement()
+   {
+      return coactiveElement;
    }
 
    boolean locationSet = false;
@@ -251,5 +235,10 @@ public class KickBallBehavior extends BehaviorInterface
    public boolean hasInputBeenSet()
    {
       return true;
+   }
+
+   public void abort()
+   {
+      this.pipeLine.clearAll();
    }
 }
