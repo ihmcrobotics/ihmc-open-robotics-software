@@ -1,7 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.FOOT_SWING_WEIGHT;
+
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
@@ -13,8 +16,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.FormattingTools;
-
-import javax.vecmath.Vector3d;
 
 /**
  * The unconstrained state is used if the foot is moved free in space without constrains. Depending on the type of trajectory
@@ -38,6 +39,9 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final BooleanYoVariable yoSetDesiredAccelerationToZero;
    private final BooleanYoVariable yoSetDesiredVelocityToZero;
 
+   private final YoFrameVector angularWeight;
+   private final YoFrameVector linearWeight;
+
    public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains,
          YoVariableRegistry registry)
    {
@@ -54,12 +58,17 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
       yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
 
+      angularWeight = new YoFrameVector(namePrefix + "AngularWeight", null, registry);
+      linearWeight = new YoFrameVector(namePrefix + "LinearWeight", null, registry);
+
+      angularWeight.set(FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT);
+      linearWeight.set(FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT);
+
       if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
          legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController, robotSide);
       else
          legJointLimitAvoidanceControlModule = null;
 
-      spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.FOOT_SWING_WEIGHT);
       spatialFeedbackControlCommand.set(rootBody, foot);
       spatialFeedbackControlCommand.setPrimaryBase(footControlHelper.getMomentumBasedController().getFullRobotModel().getPelvis());
       spatialFeedbackControlCommand.setGains(gains);
@@ -70,12 +79,16 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
    public void setWeight(double weight)
    {
-      spatialFeedbackControlCommand.setWeightForSolver(weight);
+      angularWeight.set(1.0, 1.0, 1.0);
+      angularWeight.scale(weight);
+      linearWeight.set(1.0, 1.0, 1.0);
+      linearWeight.scale(weight);
    }
 
    public void setWeights(Vector3d angularWeight, Vector3d linearWeight)
    {
-      spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
+      this.angularWeight.set(angularWeight);
+      this.linearWeight.set(linearWeight);
    }
 
    /**
@@ -98,6 +111,9 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       initializeTrajectory();
    }
+
+   private final Vector3d tempAngularWeightVector = new Vector3d();
+   private final Vector3d tempLinearWeightVector = new Vector3d();
 
    @Override
    public void doSpecificAction()
@@ -124,6 +140,9 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      angularWeight.get(tempAngularWeightVector);
+      linearWeight.get(tempLinearWeightVector);
+      spatialFeedbackControlCommand.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
 
       yoDesiredPosition.setAndMatchFrame(desiredPosition);
       yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
