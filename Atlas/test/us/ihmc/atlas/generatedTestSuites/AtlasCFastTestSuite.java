@@ -14,7 +14,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 ({
    us.ihmc.atlas.AtlasPushRecoveryMultiStepTest.class,
    us.ihmc.atlas.behaviorTests.AtlasFootstepListBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasHandLoadBearingBehaviorTest.class
 })
 
 public class AtlasCFastTestSuite

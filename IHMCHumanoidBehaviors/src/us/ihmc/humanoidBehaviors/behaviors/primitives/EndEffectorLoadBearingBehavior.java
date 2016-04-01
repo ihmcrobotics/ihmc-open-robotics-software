@@ -2,28 +2,28 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
-public class FootStateBehavior extends BehaviorInterface
+public class EndEffectorLoadBearingBehavior extends BehaviorInterface
 {
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
-   private FootStatePacket outgoingFootStatePacket;
+   private EndEffectorLoadBearingMessage outgoingEndEffectorLoadBearingMessage;
 
-   public FootStateBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public EndEffectorLoadBearingBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
    }
 
-   public void setInput(FootStatePacket footStatePacket)
+   public void setInput(EndEffectorLoadBearingMessage endEffectorLoadBearingMessage)
    {
-      this.outgoingFootStatePacket = footStatePacket;
+      this.outgoingEndEffectorLoadBearingMessage = endEffectorLoadBearingMessage;
    }
 
    @Override
    public void doControl()
    {
-      if (!packetHasBeenSent.getBooleanValue() && (outgoingFootStatePacket != null))
+      if (!packetHasBeenSent.getBooleanValue() && (outgoingEndEffectorLoadBearingMessage != null))
       {
          sendFootStateToController();
       }
@@ -33,7 +33,7 @@ public class FootStateBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
       {
-         sendPacketToController(outgoingFootStatePacket);
+         sendPacketToController(outgoingEndEffectorLoadBearingMessage);
          packetHasBeenSent.set(true);
       }
    }
@@ -47,7 +47,7 @@ public class FootStateBehavior extends BehaviorInterface
    public void doPostBehaviorCleanup()
    {
       packetHasBeenSent.set(false);
-      outgoingFootStatePacket = null;
+      outgoingEndEffectorLoadBearingMessage = null;
 
       isPaused.set(false);
       isStopped.set(false);
@@ -93,7 +93,7 @@ public class FootStateBehavior extends BehaviorInterface
    }
    
    public boolean hasInputBeenSet() {
-	   if (outgoingFootStatePacket != null)
+	   if (outgoingEndEffectorLoadBearingMessage != null)
 		   return true;
 	   else
 		   return false;

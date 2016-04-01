@@ -12,8 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.humanoidBehaviors.behaviors.primitives.FootStateBehaviorTest.class,
-   us.ihmc.humanoidBehaviors.behaviors.primitives.ThighStateBehaviorTest.class
+   us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehaviorTest.class,
 })
 
 public class IHMCHumanoidBehaviorsAFastTestSuite
