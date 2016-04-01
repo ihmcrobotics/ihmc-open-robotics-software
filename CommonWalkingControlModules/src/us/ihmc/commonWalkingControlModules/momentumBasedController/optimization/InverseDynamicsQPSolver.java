@@ -44,6 +44,8 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F solverOutput_rhos;
 
    private final IntegerYoVariable numberOfIterations = new IntegerYoVariable("numberOfIterations", registry);
+   private final IntegerYoVariable numberOfEqualityConstraints = new IntegerYoVariable("numberOfEqualityConstraints", registry);
+   private final IntegerYoVariable numberOfInequalityConstraints = new IntegerYoVariable("numberOfInequalityConstraints", registry);
    private final IntegerYoVariable numberOfConstraints = new IntegerYoVariable("numberOfConstraints", registry);
    private final DoubleYoVariable jointAccelerationRegularization = new DoubleYoVariable("jointAccelerationRegularization", registry);
    private final DoubleYoVariable jointJerkRegularization = new DoubleYoVariable("jointJerkRegularization", registry);
@@ -312,6 +314,8 @@ public class InverseDynamicsQPSolver
       if (!hasWrenchesEquilibriumConstraintBeenSetup)
          throw new RuntimeException("The wrench equilibrium constraint has to be setup before calling solve().");
 
+      numberOfEqualityConstraints.set(solverInput_Aeq.getNumRows());
+      numberOfInequalityConstraints.set(solverInput_Ain.getNumRows());
       numberOfConstraints.set(solverInput_Aeq.getNumRows() + solverInput_Ain.getNumRows());
 
       qpSolverTimer.startMeasurement();
