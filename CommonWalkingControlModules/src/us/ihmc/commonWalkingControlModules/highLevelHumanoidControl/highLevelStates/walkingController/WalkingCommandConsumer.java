@@ -122,6 +122,7 @@ public class WalkingCommandConsumer
       manipulationControlModule.handleGoHomeCommand(command);
       pelvisOrientationManager.handleGoHomeCommand(command);
       balanceManager.handleGoHomeCommand(command);
+      comHeightManager.handleGoHomeCommand(command);
       chestOrientationManager.handleGoHomeCommand(command);
    }
 

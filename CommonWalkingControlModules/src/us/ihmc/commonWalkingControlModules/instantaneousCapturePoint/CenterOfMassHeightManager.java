@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -143,6 +144,11 @@ public class CenterOfMassHeightManager
    public void handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
       centerOfMassTrajectoryGenerator.handlePelvisHeightTrajectoryCommand(command);
+   }
+
+   public void handleGoHomeCommand(GoHomeCommand command)
+   {
+      centerOfMassTrajectoryGenerator.handleGoHomeCommand(command);
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
