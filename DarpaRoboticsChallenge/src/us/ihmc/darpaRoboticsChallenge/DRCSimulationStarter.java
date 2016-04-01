@@ -67,7 +67,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    private DRCSimulationFactory drcSimulationFactory;
    private SimulationConstructionSet simulationConstructionSet;
 
-   private String scriptFileName; // TODO Reimplement the script based message generator.
    private ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator;
    private boolean createSCSSimulatedSensors;
 
@@ -166,17 +165,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
          this.controllerFailureListeners.add(listener);
       else
          controllerFactory.attachControllerFailureListener(listener);
-   }
-
-   /**
-    * Mostly used for unit tests.
-    * Set the file name of a script to be loaded and executed by the controller.
-    * @param scriptFileName
-    */
-   @Override
-   public void setScriptFile(String scriptFileName)
-   {
-      this.scriptFileName = scriptFileName;
    }
 
    /**

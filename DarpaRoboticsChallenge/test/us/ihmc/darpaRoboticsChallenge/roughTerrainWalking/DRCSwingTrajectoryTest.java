@@ -147,7 +147,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
          simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
          simulationTestingParameters.setRunMultiThreaded(false);
-         drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation, simulationTestingParameters,
+         drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
                  getRobotModel());
          FullHumanoidRobotModel estimatorRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
          TestController testController = new TestController(estimatorRobotModel);
@@ -195,7 +195,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       simulationTestingParameters.setRunMultiThreaded(false);
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation, simulationTestingParameters,
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
               getRobotModel());
 
       ThreadTools.sleep(1000);
@@ -225,7 +225,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       simulationTestingParameters.setRunMultiThreaded(false);
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation, simulationTestingParameters,
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
             getRobotModel());
 
       ThreadTools.sleep(1000);

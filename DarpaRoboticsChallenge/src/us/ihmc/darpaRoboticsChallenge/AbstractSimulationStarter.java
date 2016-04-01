@@ -41,13 +41,6 @@ public interface AbstractSimulationStarter
    public abstract void attachControllerFailureListener(ControllerFailureListener listener);
 
    /**
-    * Mostly used for unit tests.
-    * Set the file name of a script to be loaded and executed by the controller.
-    * @param scriptFileName
-    */
-   public abstract void setScriptFile(String scriptFileName);
-
-   /**
     * Sets whether the estimator and the controller are running on the same thread or multiThreaded. Defaults to multiThreaded.
     * Need to set to false if you want the simulation to be rewindable.
     * @param runMultiThreaded

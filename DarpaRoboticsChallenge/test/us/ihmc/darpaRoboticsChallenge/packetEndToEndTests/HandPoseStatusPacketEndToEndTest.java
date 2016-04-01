@@ -115,7 +115,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       Random random = new Random(1778L);
     
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), null, startingLocation, simulationTestingParameters, getRobotModel());
+      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), startingLocation, simulationTestingParameters, getRobotModel());
       
 
       statusStartedCounter = 0;
@@ -158,7 +158,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       Random random = new Random(1234L);
 
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, getRobotModel());
+      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), startingLocation , simulationTestingParameters, getRobotModel());
 
       statusStartedCounter = 0;
       statusCompletedCounter = 0;
@@ -236,7 +236,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       Random random = new Random(1567L);
 
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, getRobotModel());
+      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), startingLocation , simulationTestingParameters, getRobotModel());
 
       statusStartedCounter = 0;
       statusCompletedCounter = 0;
@@ -293,7 +293,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       Random random = new Random(1234L);
 
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, getRobotModel());
+      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), startingLocation , simulationTestingParameters, getRobotModel());
 
       leftStatusStartedCounter = 0;
       leftStatusCompletedCounter = 0;

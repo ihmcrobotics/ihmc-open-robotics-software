@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.stateEstimationEndToEndTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Random;
@@ -14,6 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
@@ -845,15 +847,18 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       useExternalPelvisCorrector.set(activate);
    }
    
-   private void setupSim(DRCObstacleCourseStartingLocation startingLocation, boolean useScript)
+   private void setupSim(DRCObstacleCourseStartingLocation startingLocation, boolean useScript) throws SimulationExceededMaximumTimeException
    {
-      String script = "";
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "PelvisCorrectionTest",
+            startingLocation, simulationTestingParameters, getRobotModel());
       if (useScript)
       {
-         script = simpleFlatGroundScriptName;
+         String scriptName = simpleFlatGroundScriptName;
+         SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+         drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
+         InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
+         drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
       }
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "PelvisCorrectionTest", script,
-            startingLocation, simulationTestingParameters, getRobotModel());
       simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       robot = drcSimulationTestHelper.getRobot();
       registry = robot.getRobotsYoVariableRegistry();
@@ -889,7 +894,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       return drcFlatGroundWalkingTrack;
    }
 
-   private Runnable setupSimulationWithFeetPertuberAndCreateExternalPelvisThread()
+   private Runnable setupSimulationWithFeetPertuberAndCreateExternalPelvisThread() throws SimulationExceededMaximumTimeException
    {
       setupSim(DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y_ROTATED_PI, true);
       int ticksPerPerturbation = 10;
@@ -900,7 +905,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       return pelvisCorrectorSource;
    }
 
-   private void setupSimulationWithStandingControllerAndCreateExternalPelvisThread()
+   private void setupSimulationWithStandingControllerAndCreateExternalPelvisThread() throws SimulationExceededMaximumTimeException
    {
       setupSim(DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y_ROTATED_PI, false);
       StandStillDoNothingPelvisPoseHistoryCorrectorController robotController = new StandStillDoNothingPelvisPoseHistoryCorrectorController();
