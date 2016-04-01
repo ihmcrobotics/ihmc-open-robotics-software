@@ -28,8 +28,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -91,8 +93,18 @@ public class BalanceManager
    private final FramePoint2d desiredCMP = new FramePoint2d();
    private final FramePoint2d achievedCMP = new FramePoint2d();
 
+   private final FrameVector2d icpError2d = new FrameVector2d();
+
    private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
+
+   private final DoubleYoVariable safeDistanceFromSupportEdgesToStopCancelICPPlan = new DoubleYoVariable("safeDistanceFromSupportEdgesToStopCancelICPPlan", registry);
+   private final DoubleYoVariable distanceToShrinkSupportPolygonWhenHoldingCurrent = new DoubleYoVariable("distanceToShrinkSupportPolygonWhenHoldingCurrent", registry);
+
+   private final BooleanYoVariable holdICPToCurrentCoMLocationInNextDoubleSupport = new BooleanYoVariable("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
+
+   private final DoubleYoVariable maxICPErrorBeforeSingleSupportX = new DoubleYoVariable("maxICPErrorBeforeSingleSupportX", registry);
+   private final DoubleYoVariable maxICPErrorBeforeSingleSupportY = new DoubleYoVariable("maxICPErrorBeforeSingleSupportY", registry);
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
@@ -133,6 +145,13 @@ public class BalanceManager
       icpPlanner.setOmega0(omega0);
       icpPlanner.setSingleSupportTime(walkingControllerParameters.getDefaultSwingTime());
       icpPlanner.setDoubleSupportTime(walkingControllerParameters.getDefaultTransferTime());
+
+      safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
+      distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
+
+      maxICPErrorBeforeSingleSupportX.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportX());
+      maxICPErrorBeforeSingleSupportY.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportY());
+
       YoPDGains pelvisXYControlGains = walkingControllerParameters.createPelvisICPBasedXYControlGains(registry);
       pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, bipedSupportPolygons, pelvisXYControlGains, registry);
 
@@ -337,14 +356,42 @@ public class BalanceManager
 
    public void initializeICPPlanForStanding()
    {
+      if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
+      {
+         requestICPPlannerToHoldCurrentCoM();
+         holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
+      }
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
    public void initializeICPPlanForTransfer(RobotSide transferToSide)
    {
+      if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
+      {
+         requestICPPlannerToHoldCurrentCoM();
+         holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
+      }
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue(), transferToSide);
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
+   }
+
+   public boolean isTransitionToSingleSupportSafe(RobotSide transferToSide)
+   {
+      getICPError(icpError2d);
+      ReferenceFrame leadingAnkleZUpFrame = bipedSupportPolygons.getAnkleZUpFrames().get(transferToSide);
+      icpError2d.changeFrame(leadingAnkleZUpFrame);
+      double ellipticErrorSquared = MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX.getDoubleValue())
+            + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY.getDoubleValue());
+      boolean closeEnough = ellipticErrorSquared < 1.0;
+      return closeEnough;
+   }
+
+   public boolean isTransitionToStandingSafe()
+   {
+      FrameConvexPolygon2d supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+      yoCapturePoint.getFrameTuple2d(capturePoint2d);
+      return supportPolygonInWorld.getDistanceInside(capturePoint2d) > safeDistanceFromSupportEdgesToStopCancelICPPlan.getDoubleValue();
    }
 
    public double getICPErrorMagnitude()
@@ -405,12 +452,17 @@ public class BalanceManager
       pushRecoveryControlModule.reset();
    }
 
-   public void requestICPPlannerToHoldCurrentCoM(double distancceFromSupportPolygonEdges)
+   public void requestICPPlannerToHoldCurrentCoMInNextDoubleSupport()
+   {
+      holdICPToCurrentCoMLocationInNextDoubleSupport.set(true);
+   }
+
+   public void requestICPPlannerToHoldCurrentCoM()
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
 
       FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
-      convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygonInMidFeetZUp, distancceFromSupportPolygonEdges, shrunkSupportPolygon);
+      convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygonInMidFeetZUp, distanceToShrinkSupportPolygonWhenHoldingCurrent.getDoubleValue(), shrunkSupportPolygon);
 
       centerOfMassPosition.changeFrame(shrunkSupportPolygon.getReferenceFrame());
       centerOfMassPosition2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassPosition);

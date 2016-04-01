@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController.SingleSupportState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.SingleSupportState;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 
 public class StopWalkingFromSingleSupportCondition implements StateTransitionCondition

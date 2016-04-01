@@ -41,6 +41,7 @@ public class WalkingMessageHandler
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
+   private final SideDependentList<Footstep> lastDesiredFootsteps = new SideDependentList<>();
 
    private final SideDependentList<CommandArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
 
@@ -244,6 +245,16 @@ public class WalkingMessageHandler
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
    }
 
+   public void registerCompletedDesiredFootstep(Footstep completedFesiredFootstep)
+   {
+      lastDesiredFootsteps.put(completedFesiredFootstep.getRobotSide(), completedFesiredFootstep);
+   }
+
+   public Footstep getLastDesiredFootstep(RobotSide footstepSide)
+   {
+      return lastDesiredFootsteps.get(footstepSide);
+   }
+
    private final FramePose tempPose = new FramePose();
 
    public Footstep getFootstepAtCurrentLocation(RobotSide robotSide)
@@ -284,6 +295,39 @@ public class WalkingMessageHandler
       }
 
       footstepListVisualizer.update(upcomingFootsteps);
+   }
+
+   public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
+   {
+      Footstep transferFromFootstep = getFootstepAtCurrentLocation(transferToSide.getOppositeSide());
+      Footstep transferToFootstep = getFootstepAtCurrentLocation(transferToSide);
+
+      Footstep nextFootstep;
+
+      nextFootstep = peek(0);
+
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
+      transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
+      transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
+      transferToAndNextFootstepsData.setTransferToSide(transferToSide);
+      transferToAndNextFootstepsData.setNextFootstep(nextFootstep);
+
+      return transferToAndNextFootstepsData;
+   }
+
+   public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForSingleSupport(Footstep transferToFootstep, RobotSide swingSide)
+   {
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
+
+      Footstep transferFromFootstep = getFootstepAtCurrentLocation(swingSide.getOppositeSide());
+
+      transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
+      transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
+
+      transferToAndNextFootstepsData.setTransferToSide(swingSide);
+      transferToAndNextFootstepsData.setNextFootstep(peek(0));
+
+      return transferToAndNextFootstepsData;
    }
 
    private Footstep createFootstep(FootstepDataControllerCommand footstepData)
