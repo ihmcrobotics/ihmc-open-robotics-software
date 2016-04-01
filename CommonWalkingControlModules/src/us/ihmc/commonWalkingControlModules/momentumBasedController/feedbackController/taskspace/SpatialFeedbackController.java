@@ -188,7 +188,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private void updatePositionVisualization()
    {
-      desiredSpatialAcceleration.getAngularPart(desiredLinearAcceleration);
+      desiredSpatialAcceleration.getLinearPart(desiredLinearAcceleration);
       yoDesiredLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
 
       tempPosition.setToZero(accelerationControlModule.getTrackingFrame());
