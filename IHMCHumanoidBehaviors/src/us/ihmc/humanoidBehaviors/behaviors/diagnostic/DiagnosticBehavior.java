@@ -14,12 +14,9 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.TurnInPlaceBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspCylinderBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.midLevel.RotateHandAboutAxisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
@@ -32,7 +29,6 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootstepListTask;
@@ -41,11 +37,9 @@ import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisHeightTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisOrientationTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisTrajectoryTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.RotateHandAboutAxisTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.GraspCylinderPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
@@ -57,7 +51,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationT
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -65,7 +58,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -82,8 +74,6 @@ import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DCalculator;
 import us.ihmc.robotics.random.RandomTools;
@@ -98,10 +88,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.taskExecutor.NullTask;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -139,8 +126,6 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final PelvisHeightTrajectoryBehavior pelvisHeightTrajectoryBehavior;
    private final TurnInPlaceBehavior turnInPlaceBehavior;
-   private final GraspCylinderBehavior graspCylinderBehavior;
-   private final RotateHandAboutAxisBehavior rotateHandAboutAxisBehavior;
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable trajectoryTime, flyingTrajectoryTime;
@@ -206,7 +191,6 @@ public class DiagnosticBehavior extends BehaviorInterface
       TURN_IN_PLACE_SEQUENCE,
       TURN_IN_PLACE_ANGLE,
       FEET_SQUARE_UP,
-      TURN_WHEEL,
       CUTE_WAVE,
       HAND_SHAKE_PREP,
       HAND_SHAKE_SHAKE,
@@ -253,26 +237,6 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private final DoubleYoVariable pelvisOrientationScaleFactor = new DoubleYoVariable("diagnosticBehaviorPelvisOrientationScaleFactor", registry);
    private final DoubleYoVariable bootyShakeTime = new DoubleYoVariable("diagnosticBehaviorButtyShakeTime", registry);
-
-   private final YoFramePoint steeringWheelCenter;
-   private final YoFramePose steeringWheelPose;
-   private final YoFrameOrientation steeringWheelOrientation;
-   private final BooleanYoVariable steeringWheelResetPose;
-   /**
-    * The axis of rotation of the steering wheel is defined as (0.0, 0.0, 1.0) in its frame.
-    * This frame is updated automatically based {@link #steeringWheelCenter} and {@link #steeringWheelOrientation}.
-    */
-   private final ReferenceFrame steeringWheelFrame;
-   private final DoubleYoVariable steeringWheelRadius;
-   private final int numberOfBalls = 50;
-   private final BagOfBalls steeringWheelVisualization;
-   private final BooleanYoVariable showSteeringWheel;
-   private final DoubleYoVariable steeringWheelInitialAngle;
-   private final DoubleYoVariable steeringWheelFinalAngle;
-   private final YoFramePoint steeringWheelInitialPosition;
-   private final YoFramePoint steeringWheelFinalPosition;
-   private final BooleanYoVariable steeringWheelControlRotationAxis;
-   private final BooleanYoVariable steeringWheelExecuteGraspingFirst;
 
    public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
          DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
@@ -398,12 +362,6 @@ public class DiagnosticBehavior extends BehaviorInterface
          armGoHomeBehaviors.put(robotSide, armGoHomeBehavior);
       }
 
-      graspCylinderBehavior = new GraspCylinderBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
-      registry.addChild(graspCylinderBehavior.getYoVariableRegistry());
-
-      rotateHandAboutAxisBehavior = new RotateHandAboutAxisBehavior("diagnostic_", outgoingCommunicationBridge, fullRobotModel, yoTime);
-      registry.addChild(rotateHandAboutAxisBehavior.getYoVariableRegistry());
-
       requestedDiagnostic = new EnumYoVariable<>("requestedDiagnostic", registry, DiagnosticTask.class, true);
       requestedDiagnostic.set(null);
 
@@ -449,46 +407,6 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       this.attachControllerListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
 
-      steeringWheelCenter = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelCenter", worldFrame, registry);
-      steeringWheelOrientation = new YoFrameOrientation(behaviorNameFirstLowerCase + "SteeringWheelOrientation", worldFrame, registry);
-      steeringWheelPose = new YoFramePose(steeringWheelCenter, steeringWheelOrientation);
-      steeringWheelRadius = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelRadius", registry);
-      steeringWheelResetPose = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelResetPose", registry);
-      steeringWheelControlRotationAxis = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelControlRotationAxis", registry);
-      steeringWheelExecuteGraspingFirst = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelExecuteGraspingFirst", registry);
-      steeringWheelExecuteGraspingFirst.set(true);
-
-      steeringWheelFrame = new ReferenceFrame("steeringWheelFrame", worldFrame)
-      {
-         private static final long serialVersionUID = 4561076900680410565L;
-         private final Vector3d localTranslation = new Vector3d();
-         private final Quat4d localQuaternion = new Quat4d();
-
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            steeringWheelCenter.get(localTranslation);
-            steeringWheelOrientation.getQuaternion(localQuaternion);
-            transformToParent.set(localQuaternion, localTranslation);
-         }
-      };
-
-      steeringWheelInitialAngle = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelInitialAngle", registry);
-      steeringWheelFinalAngle = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelFinalAngle", registry);
-
-      showSteeringWheel = new BooleanYoVariable(behaviorNameFirstLowerCase + "ShowSteeringWheel", registry);
-      steeringWheelInitialPosition = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelInitialPosition", worldFrame, registry);
-      steeringWheelFinalPosition = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelFinalPosition", worldFrame, registry);
-      steeringWheelVisualization = new BagOfBalls(numberOfBalls, 0.03, behaviorNameFirstLowerCase + "SteeringWheelVizualization", YoAppearance.Black(),
-            registry, yoGraphicsListRegistry);
-      steeringWheelVisualization.hideAll();
-      yoGraphicsListRegistry.registerYoGraphic("Steering Wheel",
-            new YoGraphicPosition(behaviorNameFirstLowerCase + "SteeringWheelInitialPosition", steeringWheelInitialPosition, 0.035, YoAppearance.BlueViolet()));
-      yoGraphicsListRegistry.registerYoGraphic("Steering Wheel",
-            new YoGraphicPosition(behaviorNameFirstLowerCase + "SteeringWheelFinalPosition", steeringWheelFinalPosition, 0.035, YoAppearance.Red()));
-
-      updateSteeringWheelParameters();
-      
       requestedDiagnostic.set(DiagnosticTask.KARATE_KID);
    }
 
@@ -571,58 +489,6 @@ public class DiagnosticBehavior extends BehaviorInterface
                tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
          inverseKinematicsForLowerArm.setSelectionMatrix(angularSelectionMatrix);
          inverseKinematicsForLowerArms.put(robotSide, inverseKinematicsForLowerArm);
-      }
-   }
-
-   private void resetSteeringWheelToDefault()
-   {
-      fullRobotModel.updateFrames();
-      FramePose defaultSteeringWheelPose = new FramePose(fullRobotModel.getChest().getBodyFixedFrame());
-      defaultSteeringWheelPose.setPosition(0.6, 0.0, -0.4);
-      defaultSteeringWheelPose.setYawPitchRoll(0.0, Math.toRadians(-33.0), 0.0);
-      defaultSteeringWheelPose.changeFrame(worldFrame);
-      steeringWheelPose.set(defaultSteeringWheelPose);
-
-      steeringWheelInitialAngle.set(-Math.toRadians(45.0));
-      steeringWheelFinalAngle.set(Math.toRadians(45.0));
-      steeringWheelRadius.set(0.175);
-   }
-
-   private void updateSteeringWheelParameters()
-   {
-      if (steeringWheelResetPose.getBooleanValue())
-      {
-         resetSteeringWheelToDefault();
-         steeringWheelResetPose.set(false);
-      }
-
-      steeringWheelFrame.update();
-
-      FramePoint localPosition = new FramePoint();
-
-      if (showSteeringWheel.getBooleanValue())
-      {
-         CylindricalCoordinatesCalculator.getPosition(localPosition, steeringWheelFrame, steeringWheelInitialAngle.getDoubleValue(),
-               steeringWheelRadius.getDoubleValue(), 0.0);
-         steeringWheelInitialPosition.setAndMatchFrame(localPosition);
-         CylindricalCoordinatesCalculator.getPosition(localPosition, steeringWheelFrame, steeringWheelFinalAngle.getDoubleValue(),
-               steeringWheelRadius.getDoubleValue(), 0.0);
-         steeringWheelFinalPosition.setAndMatchFrame(localPosition);
-
-         double deltaAngle = 2.0 * Math.PI / (numberOfBalls - 1);
-         for (int ballIndex = 0; ballIndex < numberOfBalls; ballIndex++)
-         {
-            double angle = ballIndex * deltaAngle;
-            CylindricalCoordinatesCalculator.getPosition(localPosition, steeringWheelFrame, angle, steeringWheelRadius.getDoubleValue(), 0.0);
-            localPosition.changeFrame(worldFrame);
-            steeringWheelVisualization.setBall(localPosition, ballIndex);
-         }
-      }
-      else
-      {
-         steeringWheelVisualization.hideAll();
-         steeringWheelInitialPosition.setToNaN();
-         steeringWheelFinalPosition.setToNaN();
       }
    }
 
@@ -2400,7 +2266,6 @@ public class DiagnosticBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
-      resetSteeringWheelToDefault();
    }
 
    private final FrameOrientation tempFrameOrientation = new FrameOrientation();
@@ -2408,7 +2273,6 @@ public class DiagnosticBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      updateSteeringWheelParameters();
       diagnosticBehaviorEnabled.set(isControllerReady());
 
       handleAutomaticDiagnosticRoutine();
@@ -2586,10 +2450,6 @@ public class DiagnosticBehavior extends BehaviorInterface
                handleRequestedDiagnostic();
             }
             break;
-         case TURN_WHEEL:
-            lastDiagnosticTask.set(DiagnosticTask.TURN_WHEEL);
-            sequenceTurnWheel();
-            break;
          case CUTE_WAVE:
             lastDiagnosticTask.set(DiagnosticTask.CUTE_WAVE);
             sequenceCuteWave();
@@ -2621,56 +2481,6 @@ public class DiagnosticBehavior extends BehaviorInterface
          }
          requestedDiagnostic.set(null);
       }
-   }
-
-   private void sequenceTurnWheel()
-   {
-      if (activeSideForHandControl.getEnumValue() == null)
-      {
-         PrintTools.info("Select hand to perform diagnostic.");
-         return;
-      }
-      if (!showSteeringWheel.getBooleanValue())
-      {
-         showSteeringWheel.set(true);
-         updateSteeringWheelParameters();
-      }
-
-      if (steeringWheelExecuteGraspingFirst.getBooleanValue())
-      {
-         FramePoint graspPoint = new FramePoint();
-         steeringWheelInitialPosition.getFrameTupleIncludingFrame(graspPoint);
-         FrameVector steeringWheelAxis = new FrameVector(steeringWheelFrame, 0.0, 0.0, 1.0);
-
-         graspPoint.changeFrame(worldFrame);
-         steeringWheelAxis.changeFrame(worldFrame);
-
-         final GraspCylinderPacket graspCylinderPacket = new GraspCylinderPacket(activeSideForHandControl.getEnumValue(), graspPoint.getPointCopy(),
-               steeringWheelAxis.getVectorCopy());
-         pipeLine.submitSingleTaskStage(new BehaviorTask(graspCylinderBehavior, yoTime)
-         {
-            @Override
-            protected void setBehaviorInput()
-            {
-               graspCylinderBehavior.setInput(graspCylinderPacket);
-            }
-         });
-      }
-      else
-      {
-         FramePoint currentHandPosition = new FramePoint(fullRobotModel.getHandControlFrame(activeSideForHandControl.getEnumValue()));
-         currentHandPosition.changeFrame(steeringWheelFrame);
-         double initialAngle = CylindricalCoordinatesCalculator.getAngle(currentHandPosition);
-         steeringWheelInitialAngle.set(initialAngle);
-         updateSteeringWheelParameters();
-      }
-
-      boolean controlHandOrientationAboutAxis = steeringWheelControlRotationAxis.getBooleanValue();
-      double turnAngle = steeringWheelFinalAngle.getDoubleValue() - steeringWheelInitialAngle.getDoubleValue();
-      double rotationRateRadPerSec = turnAngle / trajectoryTime.getDoubleValue();
-      final RigidBodyTransform wheelTransformToWorld = steeringWheelFrame.getTransformToDesiredFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new RotateHandAboutAxisTask(activeSideForHandControl.getEnumValue(), yoTime, rotateHandAboutAxisBehavior,
-            wheelTransformToWorld, Axis.Z, controlHandOrientationAboutAxis, turnAngle, rotationRateRadPerSec, false));
    }
 
    private void sequenceTurnInPlace()
@@ -2861,8 +2671,6 @@ public class DiagnosticBehavior extends BehaviorInterface
          footstepListBehavior.consumeObjectFromNetworkProcessor(object);
          walkToLocationBehavior.consumeObjectFromNetworkProcessor(object);
          turnInPlaceBehavior.consumeObjectFromNetworkProcessor(object);
-         graspCylinderBehavior.consumeObjectFromNetworkProcessor(object);
-         rotateHandAboutAxisBehavior.consumeObjectFromNetworkProcessor(object);
       }
    }
 
@@ -2876,8 +2684,6 @@ public class DiagnosticBehavior extends BehaviorInterface
          footstepListBehavior.consumeObjectFromController(object);
          walkToLocationBehavior.consumeObjectFromController(object);
          turnInPlaceBehavior.consumeObjectFromController(object);
-         graspCylinderBehavior.consumeObjectFromController(object);
-         rotateHandAboutAxisBehavior.consumeObjectFromController(object);
       }
    }
 
