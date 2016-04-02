@@ -54,7 +54,6 @@ import us.ihmc.steppr.hardware.controllers.StepprOutputProcessor;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
@@ -76,12 +75,6 @@ public class BonoRobotModel implements DRCRobotModel
    private final BonoWalkingControllerParameters multiContactControllerParameters;
    
    private boolean enableJointDamping = true;
-
-   @Override
-   public WholeBodyIkSolver createWholeBodyIkSolver()  
-   {
-      return null;
-   }
 
    public BonoRobotModel(boolean runningOnRealRobot, boolean headless)
    {

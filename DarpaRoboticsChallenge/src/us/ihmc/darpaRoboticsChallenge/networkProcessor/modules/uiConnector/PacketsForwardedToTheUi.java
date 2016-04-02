@@ -3,15 +3,13 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector;
 import java.util.HashMap;
 
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
@@ -57,7 +55,7 @@ public class PacketsForwardedToTheUi
       ChestOrientationPacket.class,                  
       SnapFootstepPacket.class,
       VideoPacket.class,
-      HandPosePacket.class,
+//      HandPosePacket.class,
       HandRotateAboutAxisPacket.class,
       DepthDataClearCommand.class,
       PointCloudWorldPacket.class,
@@ -69,7 +67,7 @@ public class PacketsForwardedToTheUi
       DetectedObjectPacket.class,
       MultisenseMocapExperimentPacket.class,
       FisheyePacket.class,
-      HandPoseStatus.class,
+//      HandPoseStatus.class,
       LocalizationPointMapPacket.class,
       BlackFlyParameterPacket.class,
       DrillDetectionPacket.class,

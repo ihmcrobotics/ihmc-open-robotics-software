@@ -29,7 +29,5 @@ public interface WholeBodyControllerParameters extends SDFFullHumanoidRobotModel
 	
 	public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel);
 	
-	public abstract WholeBodyIkSolver createWholeBodyIkSolver();
-	
 	public DefaultArmConfigurations getDefaultArmConfigurations();
 }

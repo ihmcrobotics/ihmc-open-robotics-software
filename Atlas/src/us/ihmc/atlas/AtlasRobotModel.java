@@ -78,7 +78,6 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
@@ -112,26 +111,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasFootstepSnappingParameters snappingParameters;
 
    private boolean enableJointDamping = true;
-
-   @Override
-   public WholeBodyIkSolver createWholeBodyIkSolver()
-   {
-      if(USE_WHOLE_BODY_IK)
-      {
-         try
-         {
-            return new AtlasWholeBodyIK(this);
-         }
-         catch(UnsatisfiedLinkError e)
-         {
-            System.err.println("There was an error linking to the Whole Body IK C library, "
-                  + "please check that it has been compiles and is located in the correct place, "
-                  + "no wholebody components will function");
-            System.err.println(e.getMessage());
-         }
-      }
-      return null;
-   }
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless)
    {
