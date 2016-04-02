@@ -10,20 +10,18 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGenerator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = {TestPlanTarget.Fast})
 public class VelocityConstrainedPoseTrajectoryGeneratorTest
@@ -36,7 +34,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
 
    private static final double EPSILON = 1e-10;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRuntimeExceptions()
    {
@@ -84,8 +82,8 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
          // Good
       }
    }
-   
-	@DeployableTestMethod(estimatedDuration = 0.0)
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCompareWithStraightLinePoseTrajectoryGeneratorPositionOnly()
    {
@@ -109,7 +107,6 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       trajToCompare.setFinalPose(finalPosition, finalOrientation);
       trajToCompare.setTrajectoryTime(time);
       trajToCompare.initialize();
-
 
       double dt = 1.0e-3;
       FramePoint position1 = new FramePoint();
@@ -141,12 +138,12 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
          assertTrue(acceleration1.epsilonEquals(acceleration2, EPSILON));
          assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
          // numerical errors in due to finite differences used in VelocityConstrainedPoseTrajectoryGenerator in algorithm
-//         assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
-//         assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
+         //         assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
+         //         assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
       }
    }
-   
-	@DeployableTestMethod(estimatedDuration = 0.0)
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPositionAndVelocityConsistencyWithInitialVelocity()
    {
@@ -154,7 +151,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       double time = 1.0;
       VelocityConstrainedPoseTrajectoryGenerator trajToTest = new VelocityConstrainedPoseTrajectoryGenerator("Traj1", worldFrame, registry);
 
-      FramePoint initialPosition =  FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
+      FramePoint initialPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
       FrameVector initialVelocity = FrameVector.generateRandomFrameVector(random, worldFrame);
       FramePoint finalPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
 
@@ -192,7 +189,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       FrameVector acceleration3 = new FrameVector();
       FrameOrientation orientation3 = new FrameOrientation();
       FrameVector angularVelocity3 = new FrameVector();
-      FrameVector angularAcceleration3= new FrameVector();
+      FrameVector angularAcceleration3 = new FrameVector();
 
       Quat4d quat1 = new Quat4d();
       Quat4d quat3 = new Quat4d();
@@ -230,13 +227,13 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
          quat1.inverse();
          quatDelta.mul(quat3, quat1);
          quatDelta.normalize();
-         
+
          angle = Math.acos(quatDelta.getW()) * 2.0;
          omega = angle / (2.0 * FDdt);
 
          vectorDelta.set(quatDelta.x, quatDelta.y, quatDelta.z);
-         
-         if(vectorDelta.length() > 0.0)
+
+         if (vectorDelta.length() > 0.0)
          {
             vectorDelta.normalize();
          }
@@ -248,12 +245,13 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
          assertTrue(finiteDiffAcc.epsilonEquals(acceleration2, 1e-2));
       }
    }
-/**
- * TODO: Get that working with final angular velocity.
- * 
- **/ 
-   
-	@DeployableTestMethod(estimatedDuration = 0.0)
+
+   /**
+    * TODO: Get that working with final angular velocity.
+    * 
+    **/
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPositionAndVelocityConsistencyWithInitialAndFinalVelocity()
    {
@@ -261,7 +259,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       double time = 1.0;
       VelocityConstrainedPoseTrajectoryGenerator trajToTest = new VelocityConstrainedPoseTrajectoryGenerator("Traj1", worldFrame, registry);
 
-      FramePoint initialPosition =  FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
+      FramePoint initialPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
       FrameVector initialVelocity = FrameVector.generateRandomFrameVector(random, worldFrame);
       FramePoint finalPosition = FramePoint.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
       FrameVector finalVelocity = FrameVector.generateRandomFrameVector(random, worldFrame);
@@ -272,7 +270,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       FrameVector finalAngularVelocity = new FrameVector(worldFrame, 1.0, 0.0, 0.0);//.generateRandomFrameVector(random, worldFrame);
 
       trajToTest.setInitialPoseWithInitialVelocity(initialPosition, initialVelocity, initialOrientation, initialAngularVelocity);
-//      trajToTest.setFinalPoseWithFinalVelocity(new FramePose(finalPosition, finalOrientation), finalVelocity, finalAngularVelocity);
+      //      trajToTest.setFinalPoseWithFinalVelocity(new FramePose(finalPosition, finalOrientation), finalVelocity, finalAngularVelocity);
       trajToTest.setFinalPoseWithoutFinalVelocity(new FramePose(finalPosition, finalOrientation));
       trajToTest.setTrajectoryTime(time);
       trajToTest.initialize();
@@ -302,7 +300,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       FrameVector acceleration3 = new FrameVector();
       FrameOrientation orientation3 = new FrameOrientation();
       FrameVector angularVelocity3 = new FrameVector();
-      FrameVector angularAcceleration3= new FrameVector();
+      FrameVector angularAcceleration3 = new FrameVector();
 
       Quat4d quat1 = new Quat4d();
       Quat4d quat3 = new Quat4d();
@@ -340,45 +338,45 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
          quat1.inverse();
          quatDelta.mul(quat3, quat1);
          quatDelta.normalize();
-         
+
          angle = Math.acos(quatDelta.getW()) * 2.0;
          omega = angle / (2.0 * FDdt);
 
          vectorDelta.set(quatDelta.x, quatDelta.y, quatDelta.z);
-         
-         if(vectorDelta.length() > 0.0)
+
+         if (vectorDelta.length() > 0.0)
          {
             vectorDelta.normalize();
          }
          vectorDelta.scale(omega);
          discreteAngularVelocity.set(vectorDelta);
-         System.out.println("Angular Velocity calculated by unitTest: " + discreteAngularVelocity + " Angular Velocity from generator: " +angularVelocity2);
-         
-         assertTrue(discreteAngularVelocity.epsilonEquals(angularVelocity2, 6e-1));  // bad accuracy!!! Fix algorithm
+         System.out.println("Angular Velocity calculated by unitTest: " + discreteAngularVelocity + " Angular Velocity from generator: " + angularVelocity2);
+
+         assertTrue(discreteAngularVelocity.epsilonEquals(angularVelocity2, 6e-1)); // bad accuracy!!! Fix algorithm
          assertTrue(finiteDiffVel.epsilonEquals(velocity2, 1e-6));
          assertTrue(finiteDiffAcc.epsilonEquals(acceleration2, 1e-2));
       }
    }
-   
+
    FrameVector calculateFiniteDdt(FramePoint a, FramePoint c, double dt)
    {
       FrameVector ret = new FrameVector();
-      ret.sub(c,a);
+      ret.sub(c, a);
       ret.scale(1.0 / (2.0 * dt));
       return ret;
-   } 
+   }
 
    FrameVector calulateFiniteDDdt(FramePoint a, FramePoint b, FramePoint c, double dt)
    {
       FrameVector ret = new FrameVector();
-      ret.add(a,c);
+      ret.add(a, c);
       ret.sub(b);
       ret.sub(b);
       ret.scale(1 / (dt * dt));
       return ret;
    }
-   
-	@DeployableTestMethod(estimatedDuration = 0.0)
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTooBigTime()
    {

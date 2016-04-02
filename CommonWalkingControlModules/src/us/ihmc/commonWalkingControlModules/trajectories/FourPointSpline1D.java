@@ -5,7 +5,6 @@ import javax.vecmath.Point2d;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
-
 public class FourPointSpline1D
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -17,7 +16,7 @@ public class FourPointSpline1D
    private YoPolynomial spline = new YoPolynomial("heightSpline", numberOfCoefficients, registry);
 
    public FourPointSpline1D(YoVariableRegistry parentRegistry)
-   {      
+   {
       for (int i = 0; i < points.length; i++)
       {
          points[i] = new Point2d();
@@ -32,25 +31,25 @@ public class FourPointSpline1D
       double previousX = Double.NEGATIVE_INFINITY;
       for (int i = 0; i < points.length; i++)
       {
-         if (points[i].getX() < previousX) throw new RuntimeException("x values must be in increasing order!");
+         if (points[i].getX() < previousX)
+            throw new RuntimeException("x values must be in increasing order!");
          this.points[i].set(points[i]);
          previousX = points[i].getX();
       }
-      
-      for (int i=0; i < endpointSlopes.length; i++)
+
+      for (int i = 0; i < endpointSlopes.length; i++)
       {
          this.endpointSlopes[i] = endpointSlopes[i];
          this.intermediateSlopes[i] = intermediateSlopes[i];
       }
 
-      spline.setCubicUsingIntermediatePoints(points[0].x, points[1].x, points[2].x, points[3].x,  
-            points[0].y, points[1].y, points[2].y, points[3].y);
+      spline.setCubicUsingIntermediatePoints(points[0].x, points[1].x, points[2].x, points[3].x, points[0].y, points[1].y, points[2].y, points[3].y);
 
-//    spline.setNonic(points[0].x, points[1].x, points[2].x, points[3].x, points[0].y, endpointSlopes[0],
-//    points[1].y, intermediateSlopes[0], points[2].y, intermediateSlopes[1], points[3].y, endpointSlopes[1]);
+      //    spline.setNonic(points[0].x, points[1].x, points[2].x, points[3].x, points[0].y, endpointSlopes[0],
+      //    points[1].y, intermediateSlopes[0], points[2].y, intermediateSlopes[1], points[3].y, endpointSlopes[1]);
 
-//      spline.setSeptic(points[0].x, points[1].x, points[2].x, points[3].x, points[0].y, endpointSlopes[0],
-//            points[1].y, intermediateSlopes[0], points[2].y, intermediateSlopes[1], points[3].y, endpointSlopes[1]);
+      //      spline.setSeptic(points[0].x, points[1].x, points[2].x, points[3].x, points[0].y, endpointSlopes[0],
+      //            points[1].y, intermediateSlopes[0], points[2].y, intermediateSlopes[1], points[3].y, endpointSlopes[1]);
    }
 
    public void getZSlopeAndSecondDerivative(double queryPoint, double[] resultToPack)
@@ -60,13 +59,13 @@ public class FourPointSpline1D
       double slope = spline.getVelocity();
       double secondDerivative = spline.getAcceleration();
 
-      if (queryPoint < points[0].getX() + 1e-3) 
+      if (queryPoint < points[0].getX() + 1e-3)
       {
          slope = 0.0;
          secondDerivative = 0.0;
       }
-      
-      else if (queryPoint > points[points.length-1].getX() - 1e-3) 
+
+      else if (queryPoint > points[points.length - 1].getX() - 1e-3)
       {
          slope = 0.0;
          secondDerivative = 0.0;

@@ -15,8 +15,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseSteppingStonesTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseTrialsWalkingTaskTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasPelvisLowGainsTest.class,
-   us.ihmc.atlas.packets.AtlasRobotConfigurationDataTest.class,
-   us.ihmc.atlas.packets.wholebody.AtlasArmJointTrajectoryPacketTest.class
+   us.ihmc.atlas.packets.AtlasRobotConfigurationDataTest.class
 })
 
 public class AtlasIFastTestSuite

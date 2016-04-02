@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.doIHMCControlRatio</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -83,7 +83,7 @@
 
 <Graph Array Window Size>2</Graph Array Window Size>
 <Graph Array Window1>
-<ScreenID>3</ScreenID>
+<ScreenID>2</ScreenID>
 <WindowLocation>3840.0, 0.0</WindowLocation>
 <WindowSize>960.0, 1200.0</WindowSize>
 <GraphGroup>
@@ -378,7 +378,7 @@
 	</Graph>
 </GraphGroup>
 </Graph Array Window1><Graph Array Window2>
-<ScreenID>3</ScreenID>
+<ScreenID>2</ScreenID>
 <WindowLocation>4800.0, 0.0</WindowLocation>
 <WindowSize>960.0, 1200.0</WindowSize>
 <GraphGroup>
@@ -676,14 +676,14 @@
 
 <Extra Panels>
 <Main Viewport>
-
+Plotter,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
+ <Camera X>3.2161741801585464</Camera X>
+ <Camera Y>-0.7298105383963283</Camera Y>
+ <Camera Z>0.6504578891061402</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

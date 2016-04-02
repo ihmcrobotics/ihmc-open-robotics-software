@@ -34,7 +34,6 @@ public class AtlasReachabilitySphereMapSimulation
       ReachabilitySphereMapCalculator reachabilitySphereMapCalculator = new ReachabilitySphereMapCalculator(armJoints, scs);
 //      reachabilitySphereMapCalculator.setControlFrameFixedInEndEffector(fullRobotModel.getHandControlFrame(RobotSide.LEFT));
       FramePose palmCenter = new FramePose(fullRobotModel.getHandControlFrame(RobotSide.LEFT));
-      palmCenter.setX(robotModel.getArmControllerParameters().getWristHandCenterOffset() - 0.02);
       palmCenter.changeFrame(fullRobotModel.getEndEffector(RobotSide.LEFT, LimbName.ARM).getBodyFixedFrame());
       RigidBodyTransform transformFromPalmCenterToHandBodyFixedFrame = new RigidBodyTransform();
       palmCenter.getPose(transformFromPalmCenterToHandBodyFixedFrame);

@@ -1,13 +1,14 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.*;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -31,9 +32,7 @@ public class WalkingFailureDetectionControlModule
    private final BooleanYoVariable isRobotFalling;
    private final FrameVector2d fallingDirection = new FrameVector2d();
 
-   private final FramePoint2d capturePoint = new FramePoint2d();
-
-   public WalkingFailureDetectionControlModule(SideDependentList<ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry)
+   public WalkingFailureDetectionControlModule(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry)
    {
 
       for (RobotSide robotSide : RobotSide.values)
@@ -94,23 +93,24 @@ public class WalkingFailureDetectionControlModule
    }
 
    private final FrameVector2d tempFallingDirection = new FrameVector2d();
-   public void checkIfRobotIsFalling(YoFramePoint currentCapturePoint, YoFramePoint2d desiredCapturePoint)
+
+   public void checkIfRobotIsFalling(FramePoint2d capturePoint2d, FramePoint2d desiredCapturePoint2d)
    {
       updateCombinedPolygon();
 
-      currentCapturePoint.getFrameTuple2dIncludingFrame(capturePoint);
       if (isUsingNextFootstep.getBooleanValue())
-         icpDistanceFromFootPolygon.set(combinedFootPolygonWithNextFootstep.distance(capturePoint));
+         icpDistanceFromFootPolygon.set(combinedFootPolygonWithNextFootstep.distance(capturePoint2d));
       else
-         icpDistanceFromFootPolygon.set(combinedFootPolygon.distance(capturePoint));
+         icpDistanceFromFootPolygon.set(combinedFootPolygon.distance(capturePoint2d));
       // TODO need to investigate this method, seems to be buggy
       //      boolean isCapturePointCloseToFootPolygon = combinedFootPolygon.isPointInside(capturePoint, icpDistanceFromFootPolygonThreshold.getDoubleValue());
       boolean isCapturePointCloseToFootPolygon = icpDistanceFromFootPolygon.getDoubleValue() < icpDistanceFromFootPolygonThreshold.getDoubleValue();
-      boolean isCapturePointCloseToDesiredCapturePoint = desiredCapturePoint.distance(capturePoint) < icpDistanceFromFootPolygonThreshold.getDoubleValue();
+      boolean isCapturePointCloseToDesiredCapturePoint = desiredCapturePoint2d.distance(capturePoint2d) < icpDistanceFromFootPolygonThreshold.getDoubleValue();
       isRobotFalling.set(!isCapturePointCloseToFootPolygon && !isCapturePointCloseToDesiredCapturePoint);
 
-      if (isRobotFalling.getBooleanValue()){
-         tempFallingDirection.set(capturePoint);
+      if (isRobotFalling.getBooleanValue())
+      {
+         tempFallingDirection.set(capturePoint2d);
          FramePoint2d footCenter = combinedFootPolygon.getCentroid();
          tempFallingDirection.changeFrame(ReferenceFrame.getWorldFrame());
          footCenter.changeFrame(ReferenceFrame.getWorldFrame());
@@ -127,7 +127,8 @@ public class WalkingFailureDetectionControlModule
       return isRobotFalling.getBooleanValue();
    }
 
-   public FrameVector2d getFallingDirection(){
+   public FrameVector2d getFallingDirection()
+   {
       return fallingDirection;
    }
 

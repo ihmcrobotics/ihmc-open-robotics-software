@@ -10,7 +10,7 @@ import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -46,9 +46,9 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
    private double swingTime, transferTime;
 
-   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList();
+   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
 
-   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList();
+   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
 
    private DRCPushRobotController pushRobotController;
 
@@ -113,7 +113,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
       if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(robotModel.getSimpleRobotName(), drcFlatGroundWalkingTrack.getSimulationConstructionSet(), 1);
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(robotModel.getSimpleRobotName(),
+               drcFlatGroundWalkingTrack.getSimulationConstructionSet(), 1);
       }
       BambooTools.reportTestFinishedMessage();
    }
@@ -327,15 +328,18 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
       // get YoVariables
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
       for (RobotSide robotSide : RobotSide.values)
       {
-         String prefix = fullRobotModel.getFoot(robotSide).getName();
-         @SuppressWarnings("unchecked") final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(prefix
-                                                                                                     + "FootControlModule", prefix + "State");
-         @SuppressWarnings("unchecked") final EnumYoVariable<WalkingState> walkingState =
-            (EnumYoVariable<WalkingState>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+         String footPrefix = sidePrefix + "Foot";
+         @SuppressWarnings("unchecked")
+         final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
+               footPrefix + "State");
+         @SuppressWarnings("unchecked")
+         final EnumYoVariable<WalkingStateEnum> walkingState = (EnumYoVariable<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
+               "walkingState");
          swingStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          swingFinishConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
@@ -361,8 +365,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    }
 
    private void testPush(Vector3d forceDirection, double magnitude, double duration, double percentInState, RobotSide side,
-                         SideDependentList<StateTransitionCondition> condition, double stateTime)
-           throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+         SideDependentList<StateTransitionCondition> condition, double stateTime)
+               throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       double delay = stateTime * percentInState;
       pushRobotController.applyForceDelayed(condition.get(side), delay, forceDirection, magnitude, duration);
@@ -385,14 +389,13 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       }
    }
 
-
    private class DoubleSupportStartCondition implements StateTransitionCondition
    {
-      private final EnumYoVariable<WalkingState> walkingState;
+      private final EnumYoVariable<WalkingStateEnum> walkingState;
 
       private final RobotSide side;
 
-      public DoubleSupportStartCondition(EnumYoVariable<WalkingState> walkingState, RobotSide side)
+      public DoubleSupportStartCondition(EnumYoVariable<WalkingStateEnum> walkingState, RobotSide side)
       {
          this.walkingState = walkingState;
          this.side = side;
@@ -403,11 +406,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       {
          if (side == RobotSide.LEFT)
          {
-            return (walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT) || (walkingState.getEnumValue() == WalkingState.TRANSFER_TO_LEFT_SUPPORT);
+            return (walkingState.getEnumValue() == WalkingStateEnum.TO_STANDING) || (walkingState.getEnumValue() == WalkingStateEnum.TO_WALKING_LEFT_SUPPORT);
          }
          else
          {
-            return (walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT) || (walkingState.getEnumValue() == WalkingState.TRANSFER_TO_RIGHT_SUPPORT);
+            return (walkingState.getEnumValue() == WalkingStateEnum.TO_STANDING) || (walkingState.getEnumValue() == WalkingStateEnum.TO_WALKING_RIGHT_SUPPORT);
          }
       }
    }

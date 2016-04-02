@@ -19,8 +19,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -28,6 +26,8 @@ import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicCoordinateSystem;
@@ -68,7 +68,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final FramePoint initialPosition = new FramePoint();
    private final FramePoint currentPosition = new FramePoint();
    private final FramePoint finalPosition = new FramePoint();
-   
+
    private final FrameOrientation initialOrientation = new FrameOrientation();
    private final FrameOrientation finalOrientation = new FrameOrientation();
    private final FrameOrientation currentOrientation = new FrameOrientation();
@@ -81,7 +81,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    private final YoFramePoint yoInitialPosition;
    private final YoFramePoint yoFinalPosition;
-   
+
    private final YoFramePoint yoCurrentPosition;
    private final YoFrameVector yoCurrentVelocity;
    private final YoFrameVector yoCurrentAcceleration;
@@ -97,9 +97,9 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final YoFramePoint yoFinalPositionWorld;
    private final YoFramePoint yoCurrentPositionWorld;
    private final YoFramePoint yoCurrentAdjustedPositionWorld;
-   
+
    private boolean rotateHandAngleAboutAxis = false;
-   
+
    private boolean visualize = true;
    private final BagOfBalls bagOfBalls;
    private final FramePoint ballPosition = new FramePoint();
@@ -123,10 +123,10 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.desiredTrajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
       this.currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
-      
-//      this.anglePolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 2, registry);
+
+      //      this.anglePolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 2, registry);
       this.anglePolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 4, registry);
-//      this.anglePolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 6, registry);
+      //      this.anglePolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 6, registry);
 
       this.desiredTrajectoryTimeProvider = trajectoryTimeProvider;
 
@@ -146,7 +146,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
       desiredRotationAngle = new DoubleYoVariable(namePrefix + "DesiredRotationAngle", registry);
       currentRelativeAngle = new DoubleYoVariable(namePrefix + "CurrentRelativeAngle", registry);
-      
+
       yoInitialPosition = new YoFramePoint(namePrefix + "InitialPosition", trajectoryFrame, registry);
       yoFinalPosition = new YoFramePoint(namePrefix + "FinalPosition", trajectoryFrame, registry);
 
@@ -194,11 +194,14 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       if (this.visualize && yoGraphicsListRegistry != null)
       {
          final YoGraphicPosition currentPositionViz = new YoGraphicPosition(namePrefix + "CurrentPosition", yoCurrentPositionWorld, 0.025, YoAppearance.Blue());
-         final YoGraphicPosition currentAdjustedPositionViz = new YoGraphicPosition(namePrefix + "CurrentAdjustedPosition", yoCurrentAdjustedPositionWorld, 0.023, YoAppearance.Gold());
-         final YoGraphicPosition initialPositionViz = new YoGraphicPosition(namePrefix + "InitialPosition", yoInitialPositionWorld, 0.02, YoAppearance.BlueViolet());
+         final YoGraphicPosition currentAdjustedPositionViz = new YoGraphicPosition(namePrefix + "CurrentAdjustedPosition", yoCurrentAdjustedPositionWorld,
+               0.023, YoAppearance.Gold());
+         final YoGraphicPosition initialPositionViz = new YoGraphicPosition(namePrefix + "InitialPosition", yoInitialPositionWorld, 0.02,
+               YoAppearance.BlueViolet());
          final YoGraphicPosition finalPositionViz = new YoGraphicPosition(namePrefix + "FinalPosition", yoFinalPositionWorld, 0.02, YoAppearance.Red());
-         final YoGraphicCoordinateSystem tangentialFrameViz = new YoGraphicCoordinateSystem(namePrefix + "TangentialFrame", yoTangentialCircleFramePose, 0.2, YoAppearance.Pink());
-         
+         final YoGraphicCoordinateSystem tangentialFrameViz = new YoGraphicCoordinateSystem(namePrefix + "TangentialFrame", yoTangentialCircleFramePose, 0.2,
+               YoAppearance.Pink());
+
          YoGraphicsList yoGraphicsList = new YoGraphicsList(namePrefix + "CircleTraj");
          yoGraphicsList.add(currentPositionViz);
          yoGraphicsList.add(currentAdjustedPositionViz);
@@ -289,7 +292,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       yoInitialPosition.set(initialPosition);
       yoInitialOrientation.set(initialOrientation);
    }
-   
+
    public void setControlHandAngleAboutAxis(boolean controlIfTrue)
    {
       rotateHandAngleAboutAxis = controlIfTrue;
@@ -318,9 +321,9 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       initialAngle.set(Math.atan2(y, x));
       finalAngle.set(initialAngle.getDoubleValue() + desiredRotationAngle.getDoubleValue());
 
-//      anglePolynomial.setLinear(0.0, desiredTrajectoryTime.getDoubleValue(), initialAngle.getDoubleValue(), finalAngle.getDoubleValue());
+      //      anglePolynomial.setLinear(0.0, desiredTrajectoryTime.getDoubleValue(), initialAngle.getDoubleValue(), finalAngle.getDoubleValue());
       anglePolynomial.setCubic(0.0, desiredTrajectoryTime.getDoubleValue(), initialAngle.getDoubleValue(), 0.0, finalAngle.getDoubleValue(), 0.0);
-//      anglePolynomial.setQuintic(0.0, desiredTrajectoryTime.getDoubleValue(), initialAngle.getDoubleValue(), 0.0, 0.0, finalAngle.getDoubleValue(), 0.0, 0.0);
+      //      anglePolynomial.setQuintic(0.0, desiredTrajectoryTime.getDoubleValue(), initialAngle.getDoubleValue(), 0.0, 0.0, finalAngle.getDoubleValue(), 0.0, 0.0);
 
       double xFinal = initialRadius.getDoubleValue() * Math.cos(finalAngle.getDoubleValue());
       double yFinal = initialRadius.getDoubleValue() * Math.sin(finalAngle.getDoubleValue());
@@ -518,7 +521,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    {
       compute(0.0);
    }
-   
+
    public double getCurrentAngularDisplacement()
    {
       return currentRelativeAngle.getDoubleValue();
@@ -558,7 +561,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    {
       yoCurrentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
-   
+
    public void getAngularVelocity(FrameVector angularVelocityToPack)
    {
       yoCurrentAngularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);

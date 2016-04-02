@@ -1,10 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
-
-public class YoFootSE3Gains implements YoSE3PIDGains
+public class YoFootSE3Gains implements YoSE3PIDGainsInterface
 {
    private final YoFootPositionGains positionGains;
    private final YoFootOrientationGains orientationGains;
@@ -21,11 +23,13 @@ public class YoFootSE3Gains implements YoSE3PIDGains
       orientationGains.reset();
    }
 
+   @Override
    public YoFootPositionGains getPositionGains()
    {
       return positionGains;
    }
 
+   @Override
    public YoFootOrientationGains getOrientationGains()
    {
       return orientationGains;
@@ -34,6 +38,11 @@ public class YoFootSE3Gains implements YoSE3PIDGains
    public void setPositionProportionalGains(double proportionalGainXY, double proportionalGainZ)
    {
       positionGains.setProportionalGains(proportionalGainXY, proportionalGainZ);
+   }
+
+   public void setPositionProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
+   {
+      positionGains.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
    }
 
    public void setPositionDerivativeGains(double derivativeGainXY, double derivativeGainZ)
@@ -49,6 +58,11 @@ public class YoFootSE3Gains implements YoSE3PIDGains
    public void setPositionMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       positionGains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+   }
+
+   public void setOrientationProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
+   {
+      orientationGains.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
    }
 
    public void setOrientationProportionalGains(double proportionalGainXY, double proportionalGainZ)
@@ -74,6 +88,25 @@ public class YoFootSE3Gains implements YoSE3PIDGains
    public void setOrientationMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       orientationGains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+   }
+
+   @Override
+   public void set(SE3PIDGainsInterface gains)
+   {
+      set(gains.getPositionGains());
+      set(gains.getOrientationGains());
+   }
+
+   @Override
+   public void set(PositionPIDGainsInterface positionGains)
+   {
+      this.positionGains.set(positionGains);
+   }
+
+   @Override
+   public void set(OrientationPIDGainsInterface orientationGains)
+   {
+      this.orientationGains.set(orientationGains);
    }
 
    public void createDerivativeGainUpdater(boolean updateNow)

@@ -14,9 +14,9 @@ import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
 
 public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajectoryGenerator
@@ -76,7 +76,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    private final FramePoint desiredICPInitialFrame = new FramePoint();
    private final FrameVector desiredICPVelocityInitialFrame = new FrameVector();
-   
+
    private final FramePoint desiredICPFinalFrame = new FramePoint();
    private final FrameVector desiredICPVelocityFinalFrame = new FrameVector();
 
@@ -85,7 +85,8 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    private final VelocityConstrainedPositionTrajectoryGenerator spline;
 
-   public ICPPlannerSegmentedTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, DoubleYoVariable omega0, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public ICPPlannerSegmentedTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, DoubleYoVariable omega0,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.trajectoryFrame = trajectoryFrame;
       initialFrame = trajectoryFrame;
@@ -118,11 +119,13 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    public void createVisualizers(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
    {
-      YoGraphicPosition startOfSplineICPViz = new YoGraphicPosition("singleSupportInitialSplineICP", yoStartOfSplineICP, 0.004, YoAppearance.Black(), GraphicType.SOLID_BALL);
+      YoGraphicPosition startOfSplineICPViz = new YoGraphicPosition("singleSupportInitialSplineICP", yoStartOfSplineICP, 0.004, YoAppearance.Black(),
+            GraphicType.SOLID_BALL);
       yoGraphicsList.add(startOfSplineICPViz);
       artifactList.add(startOfSplineICPViz.createArtifact());
 
-      YoGraphicPosition endOfSplineICPViz = new YoGraphicPosition("singleSupportFinalSplineICP", yoEndOfSplineICP, 0.004, YoAppearance.Black(), GraphicType.BALL);
+      YoGraphicPosition endOfSplineICPViz = new YoGraphicPosition("singleSupportFinalSplineICP", yoEndOfSplineICP, 0.004, YoAppearance.Black(),
+            GraphicType.BALL);
       yoGraphicsList.add(endOfSplineICPViz);
       artifactList.add(endOfSplineICPViz.createArtifact());
 
@@ -215,15 +218,23 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
       spline.setTrajectoryTime(endOfSplineTime - startOfSplineTime);
 
-      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), startOfSplineTime, initialICPInitialFrame, initialCMPInitialFrame, startOfSplineICPInitialFrame);
-      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), startOfSplineTime, initialICPInitialFrame, initialCMPInitialFrame, startOfSplineICPVelocityInitialFrame);
-      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), endOfSplineTime - timeSpentOnInitialCMP.getDoubleValue(), finalCornerPointInitialFrame, finalCMPInitialFrame, endOfSplineICPInitialFrame);
-      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), endOfSplineTime - timeSpentOnInitialCMP.getDoubleValue(), finalCornerPointInitialFrame, finalCMPInitialFrame, endOfSplineICPVelocityInitialFrame);
+      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), startOfSplineTime, initialICPInitialFrame, initialCMPInitialFrame,
+            startOfSplineICPInitialFrame);
+      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), startOfSplineTime, initialICPInitialFrame, initialCMPInitialFrame,
+            startOfSplineICPVelocityInitialFrame);
+      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), endOfSplineTime - timeSpentOnInitialCMP.getDoubleValue(),
+            finalCornerPointInitialFrame, finalCMPInitialFrame, endOfSplineICPInitialFrame);
+      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), endOfSplineTime - timeSpentOnInitialCMP.getDoubleValue(),
+            finalCornerPointInitialFrame, finalCMPInitialFrame, endOfSplineICPVelocityInitialFrame);
 
-      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), startOfSplineTime, initialICPFinalFrame, initialCMPFinalFrame, startOfSplineICPFinalFrame);
-      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), startOfSplineTime, initialICPFinalFrame, initialCMPFinalFrame, startOfSplineICPVelocityFinalFrame);
-      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), endOfSplineTime - timeSpentOnInitialCMP.getDoubleValue(), finalCornerPointFinalFrame, finalCMPFinalFrame, endOfSplineICPFinalFrame);
-      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), endOfSplineTime - timeSpentOnInitialCMP.getDoubleValue(), finalCornerPointFinalFrame, finalCMPFinalFrame, endOfSplineICPVelocityFinalFrame);
+      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), startOfSplineTime, initialICPFinalFrame, initialCMPFinalFrame,
+            startOfSplineICPFinalFrame);
+      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), startOfSplineTime, initialICPFinalFrame, initialCMPFinalFrame,
+            startOfSplineICPVelocityFinalFrame);
+      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), endOfSplineTime - timeSpentOnInitialCMP.getDoubleValue(),
+            finalCornerPointFinalFrame, finalCMPFinalFrame, endOfSplineICPFinalFrame);
+      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), endOfSplineTime - timeSpentOnInitialCMP.getDoubleValue(),
+            finalCornerPointFinalFrame, finalCMPFinalFrame, endOfSplineICPVelocityFinalFrame);
    }
 
    @Override
@@ -233,7 +244,6 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       progressionInPercent.set(time / totalTrajectoryTime.getDoubleValue());
 
       updateSplineBoundaries();
-
 
       if (time <= startOfSplineTime.getDoubleValue())
       {
@@ -254,14 +264,19 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    private void computeFirstSegment(double timeInFirstSegment)
    {
-      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeInFirstSegment, initialICPInitialFrame, initialCMPInitialFrame, desiredICPInitialFrame);
-      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeInFirstSegment, initialICPFinalFrame, initialCMPFinalFrame, desiredICPFinalFrame);
+      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeInFirstSegment, initialICPInitialFrame, initialCMPInitialFrame,
+            desiredICPInitialFrame);
+      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeInFirstSegment, initialICPFinalFrame, initialCMPFinalFrame,
+            desiredICPFinalFrame);
 
-      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInFirstSegment, initialICPInitialFrame, initialCMPInitialFrame, desiredICPVelocityInitialFrame);
-      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInFirstSegment, initialICPFinalFrame, initialCMPFinalFrame, desiredICPVelocityFinalFrame);
+      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInFirstSegment, initialICPInitialFrame, initialCMPInitialFrame,
+            desiredICPVelocityInitialFrame);
+      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInFirstSegment, initialICPFinalFrame, initialCMPFinalFrame,
+            desiredICPVelocityFinalFrame);
 
       interpolatePointFromInitialToFinalFrame(desiredICPOutput, desiredICPInitialFrame, desiredICPFinalFrame, progressionInPercent.getDoubleValue());
-      interpolateVectorFromInitialToFinalFrame(desiredICPVelocityOutput, desiredICPVelocityInitialFrame, desiredICPVelocityFinalFrame, progressionInPercent.getDoubleValue());
+      interpolateVectorFromInitialToFinalFrame(desiredICPVelocityOutput, desiredICPVelocityInitialFrame, desiredICPVelocityFinalFrame,
+            progressionInPercent.getDoubleValue());
    }
 
    private void computeSecondSegment(double timeInSecondSegment)
@@ -277,25 +292,32 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    private void computeThirdSegment(double timeInThirdSegment)
    {
-      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeInThirdSegment, endOfSplineICPInitialFrame, finalCMPInitialFrame, desiredICPInitialFrame);
-      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeInThirdSegment, endOfSplineICPFinalFrame, finalCMPFinalFrame, desiredICPFinalFrame);
+      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeInThirdSegment, endOfSplineICPInitialFrame, finalCMPInitialFrame,
+            desiredICPInitialFrame);
+      CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeInThirdSegment, endOfSplineICPFinalFrame, finalCMPFinalFrame,
+            desiredICPFinalFrame);
 
-      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInThirdSegment, endOfSplineICPInitialFrame, finalCMPInitialFrame, desiredICPVelocityInitialFrame);
-      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInThirdSegment, endOfSplineICPFinalFrame, finalCMPFinalFrame, desiredICPVelocityFinalFrame);
+      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInThirdSegment, endOfSplineICPInitialFrame, finalCMPInitialFrame,
+            desiredICPVelocityInitialFrame);
+      CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInThirdSegment, endOfSplineICPFinalFrame, finalCMPFinalFrame,
+            desiredICPVelocityFinalFrame);
 
       interpolatePointFromInitialToFinalFrame(desiredICPOutput, desiredICPInitialFrame, desiredICPFinalFrame, progressionInPercent.getDoubleValue());
-      interpolateVectorFromInitialToFinalFrame(desiredICPVelocityOutput, desiredICPVelocityInitialFrame, desiredICPVelocityFinalFrame, progressionInPercent.getDoubleValue());
+      interpolateVectorFromInitialToFinalFrame(desiredICPVelocityOutput, desiredICPVelocityInitialFrame, desiredICPVelocityFinalFrame,
+            progressionInPercent.getDoubleValue());
    }
 
    private void updateSplineBoundaries()
    {
       double progressionInPercent = startOfSplineTime.getDoubleValue() / totalTrajectoryTime.getDoubleValue();
       interpolatePointFromInitialToFinalFrame(startOfSplineICP, startOfSplineICPInitialFrame, startOfSplineICPFinalFrame, progressionInPercent);
-      interpolateVectorFromInitialToFinalFrame(startOfSplineICPVelocity, startOfSplineICPVelocityInitialFrame, startOfSplineICPVelocityFinalFrame, progressionInPercent);
+      interpolateVectorFromInitialToFinalFrame(startOfSplineICPVelocity, startOfSplineICPVelocityInitialFrame, startOfSplineICPVelocityFinalFrame,
+            progressionInPercent);
 
       progressionInPercent = endOfSplineTime.getDoubleValue() / totalTrajectoryTime.getDoubleValue();
       interpolatePointFromInitialToFinalFrame(endOfSplineICP, endOfSplineICPInitialFrame, endOfSplineICPFinalFrame, progressionInPercent);
-      interpolateVectorFromInitialToFinalFrame(endOfSplineICPVelocity, endOfSplineICPVelocityInitialFrame, endOfSplineICPVelocityFinalFrame, progressionInPercent);
+      interpolateVectorFromInitialToFinalFrame(endOfSplineICPVelocity, endOfSplineICPVelocityInitialFrame, endOfSplineICPVelocityFinalFrame,
+            progressionInPercent);
 
       yoStartOfSplineICP.set(startOfSplineICP);
       yoEndOfSplineICP.set(endOfSplineICP);
@@ -304,7 +326,8 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    private final FramePoint pointA = new FramePoint();
    private final FramePoint pointB = new FramePoint();
 
-   private void interpolatePointFromInitialToFinalFrame(FramePoint pointTrajectoryFrameToPack, FramePoint pointInitialFrame, FramePoint pointFinalFrame, double percentOfFinal)
+   private void interpolatePointFromInitialToFinalFrame(FramePoint pointTrajectoryFrameToPack, FramePoint pointInitialFrame, FramePoint pointFinalFrame,
+         double percentOfFinal)
    {
       pointA.setIncludingFrame(pointInitialFrame);
       pointB.setIncludingFrame(pointFinalFrame);
@@ -317,7 +340,8 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    private final FrameVector vectorA = new FrameVector();
    private final FrameVector vectorB = new FrameVector();
 
-   private void interpolateVectorFromInitialToFinalFrame(FrameVector vectorTrajectoryFrameToPack, FrameVector vectorInitialFrame, FrameVector vectorFinalFrame, double percentOfFinal)
+   private void interpolateVectorFromInitialToFinalFrame(FrameVector vectorTrajectoryFrameToPack, FrameVector vectorInitialFrame, FrameVector vectorFinalFrame,
+         double percentOfFinal)
    {
       vectorA.setIncludingFrame(vectorInitialFrame);
       vectorB.setIncludingFrame(vectorFinalFrame);

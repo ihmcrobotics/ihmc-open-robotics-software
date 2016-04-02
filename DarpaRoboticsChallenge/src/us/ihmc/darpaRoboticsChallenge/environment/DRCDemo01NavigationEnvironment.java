@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -15,9 +16,12 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceMaterial;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.shapes.Sphere3d;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
@@ -473,7 +477,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       // 45deg zig zag pattern, two high. 8 on bottom, 4 directly on top or 7
       // overlapped.
       startDistance += sectionLength + sectionLength / 4;
-      setUpStraightHurdles(combinedTerrainObject, courseAngleDeg, startDistance, new int[] {6, 5});
+      ;
 
       startDistance += sectionLength / 2;
       combinedTerrainObject.addTerrainObject(setUpZigZagHurdles("zigZagHurdles", courseAngleDeg, startDistance, new int[] {8, 7}, 45.0));
@@ -494,7 +498,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    }
 
-   private static CombinedTerrainObject3D setUpPath4DRCTrialsTrainingWalkingCourse(String name)
+   public static CombinedTerrainObject3D setUpPath4DRCTrialsTrainingWalkingCourse(String name)
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
@@ -676,7 +680,12 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(truss);
    }
 
-   private static CombinedTerrainObject3D setUpCinderBlockFieldActual(String name, double courseAngle, double startDistance)
+   public static CombinedTerrainObject3D setUpCinderBlockFieldActual(String name, double courseAngle, double startDistance)
+   {
+      return setUpCinderBlockFieldActual(name, courseAngle, startDistance, null);
+   }
+
+   public static CombinedTerrainObject3D setUpCinderBlockFieldActual(String name, double courseAngle, double startDistance, List<List<FramePose>> cinderBlockPoseToPack)
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
@@ -696,10 +705,30 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
          }
       }
 
-      blockHeight = new int[][] {{-1, -1, -1, -1, -1, 0}, {-1, -1, -1, -1, 0, 1}, {-1, -1, -1, 0, 1, 2}, {-1, -1, 0, 1, 2, 3}, {-1, 0, 1, 2, 3, 2},
-            {0, 1, 2, 3, 2, 1}, {1, 2, 3, 2, 1, 0}, {2, 3, 2, 1, 0, -1}, {3, 2, 1, 0, -1, 0}, {2, 1, -1, -1, -1, 0}, {1, 0, -1, 0, 0, 1}, {0, -1, 0, 0, 1, 2},
-            {-1, 0, 0, 1, 2, 3}, {0, 0, 1, 2, 3, 2}, {0, 1, 2, 3, 2, 1}, {1, 2, 3, 2, 1, 0}, {2, 3, 2, 1, 0, -1}, {3, 2, 1, 0, -1, -1}, {2, 1, 0, -1, -1, -1},
-            {1, 0, -1, -1, -1, -1}, {0, -1, -1, -1, -1, -1}};
+      blockHeight = new int[][]
+      {
+         {-1, -1, -1, -1, -1, 0},
+         {-1, -1, -1, -1, 0, 1},
+         {-1, -1, -1, 0, 1, 2},
+         {-1, -1, 0, 1, 2, 3},
+         {-1, 0, 1, 2, 3, 2},
+         {0, 1, 2, 3, 2, 1},
+         {1, 2, 3, 2, 1, 0},
+         {2, 3, 2, 1, 0, -1},
+         {3, 2, 1, 0, -1, 0},
+         {2, 1, -1, -1, -1, 0},
+         {1, 0, -1, 0, 0, 1},
+         {0, -1, 0, 0, 1, 2},
+         {-1, 0, 0, 1, 2, 3},
+         {0, 0, 1, 2, 3, 2},
+         {0, 1, 2, 3, 2, 1},
+         {1, 2, 3, 2, 1, 0},
+         {2, 3, 2, 1, 0, -1},
+         {3, 2, 1, 0, -1, -1},
+         {2, 1, 0, -1, -1, -1},
+         {1, 0, -1, -1, -1, -1},
+         {0, -1, -1, -1, -1, -1}
+      };
 
       final int NORTH = -90;
       final int SOUTH = 90;
@@ -733,14 +762,26 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       startDistance += cinderBlockLength / 2;
 
+      if (cinderBlockPoseToPack != null)
+         cinderBlockPoseToPack.clear();
+
       for (int i = 0; i < nBlocksLong; i++)
       {
+         ArrayList<FramePose> rowCinderBlockLocations = null;
+
+         if (cinderBlockPoseToPack != null)
+         {
+            rowCinderBlockLocations = new ArrayList<>();
+            cinderBlockPoseToPack.add(rowCinderBlockLocations);
+         }
+
          for (int j = 0; j < nBlocksWide; j++)
          {
             double xCenter = startDistance + i * cinderBlockLength;
             double yCenter = (nBlocksWide * cinderBlockLength) / 2 - j * cinderBlockLength - cinderBlockLength / 2;
             double[] point = {xCenter, yCenter};
             double[] rotatedPoint = rotateAroundOrigin(point, courseAngle);
+
             int h = blockHeight[i][j];
             double deg = blockAngle[i][j] + courseAngle;
             switch (blockType[i][j])
@@ -764,6 +805,32 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
                setUpRampBlock(combinedTerrainObject, rotatedPoint, h, deg);
 
                break;
+            }
+
+            if (rowCinderBlockLocations != null)
+            {
+               Vector3d cinderBlockNormal = new Vector3d();
+               double z = combinedTerrainObject.heightAt(rotatedPoint[0] + 0.0005, rotatedPoint[1] + 0.0005, 20.0);
+               combinedTerrainObject.heightAndNormalAt(rotatedPoint[0] + 0.0005, rotatedPoint[1] + 0.0005, z, cinderBlockNormal);
+
+               if (z == Double.NEGATIVE_INFINITY)
+               {
+                  z = 0.0;
+                  cinderBlockNormal.set(0.0, 0.0, 1.0);
+               }
+               
+               Matrix3d pitchRollMatrix = new Matrix3d();
+               Matrix3d cinderBlockOrientation = new Matrix3d();
+
+               pitchRollMatrix.set(GeometryTools.getRotationBasedOnNormal(cinderBlockNormal));
+               cinderBlockOrientation.rotZ(Math.toRadians(courseAngle));
+               cinderBlockOrientation.mul(pitchRollMatrix);
+
+               FramePose cinderBlockPose = new FramePose(ReferenceFrame.getWorldFrame());
+               cinderBlockPose.setPosition(rotatedPoint[0], rotatedPoint[1], z);
+               cinderBlockPose.setOrientation(cinderBlockOrientation);
+
+               rowCinderBlockLocations.add(cinderBlockPose);
             }
          }
       }

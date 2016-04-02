@@ -12,7 +12,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.robotics.trajectories.TrajectoryNDTest.class
 })
 
 public class IHMCRoboticsToolkitAInDevelopmentTestSuite

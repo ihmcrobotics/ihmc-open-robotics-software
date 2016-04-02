@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2016-Feb-25 17:50" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20151019-2113">
+        <filterScript>
+
+// no filter script yet defined for this class diagram
+// use CTRL+SPACE for completion suggestions
+hide all fields
+hide all methods
+
+</filterScript>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommand" project="CommonWalkingControlModules" xLocation="37" yLocation="1118"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommand" project="CommonWalkingControlModules" xLocation="-1172" yLocation="1110"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolderInterface" project="CommonWalkingControlModules" xLocation="1560" yLocation="955"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.YoLowLevelOneDoFJointDesiredDataHolder" project="CommonWalkingControlModules" xLocation="1713" yLocation="769"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.JointspaceAccelerationCommand" project="CommonWalkingControlModules" xLocation="483" yLocation="763"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.SpatialAccelerationCommand" project="CommonWalkingControlModules" xLocation="562" yLocation="922"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.lowLevelControl.LowLevelOneDoFJointDesiredDataHolder" project="CommonWalkingControlModules" xLocation="1296" yLocation="761"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyFeedbackController" project="CommonWalkingControlModules" xLocation="-1088" yLocation="505"/>
+        <class className="us.ihmc.wholeBodyController.concurrent.controllerCoreCommands.InverseDynamicsCommandDataCopier" project="IHMCWholeBodyController" xLocation="-1021" yLocation="60"/>
+        <class className="us.ihmc.wholeBodyController.concurrent.controllerCoreCommands.FeedbackControlCommandDataCopier" project="IHMCWholeBodyController" xLocation="-552" yLocation="80"/>
+        <class className="us.ihmc.wholeBodyController.concurrent.controllerCoreCommands.ControllerCoreCommandDataCopier" project="IHMCWholeBodyController" xLocation="-839" yLocation="-107"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings" project="CommonWalkingControlModules" xLocation="972" yLocation="551"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.OrientationFeedbackControlCommand" project="CommonWalkingControlModules" xLocation="-1087" yLocation="896"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.JointspaceFeedbackControlCommand" project="CommonWalkingControlModules" xLocation="-588" yLocation="765"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommandPool" project="CommonWalkingControlModules" xLocation="189" yLocation="916"/>
+        <class className="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager" project="CommonWalkingControlModules" xLocation="763" yLocation="-213"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommandInterface" project="CommonWalkingControlModules" xLocation="379" yLocation="202"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.WholeBodyControlCoreToolbox" project="CommonWalkingControlModules" xLocation="953" yLocation="426"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.WholeBodyInverseDynamicsSolver" project="CommonWalkingControlModules" xLocation="405" yLocation="507"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.ExternalWrenchCommand" project="CommonWalkingControlModules" xLocation="154" yLocation="772"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PointAccelerationCommand" project="CommonWalkingControlModules" xLocation="944" yLocation="910"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.SpatialFeedbackControlCommand" project="CommonWalkingControlModules" xLocation="-728" yLocation="901"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.PointFeedbackControlCommand" project="CommonWalkingControlModules" xLocation="-903" yLocation="759"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.InverseDynamicsCommandList" project="CommonWalkingControlModules" xLocation="-162" yLocation="774"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.feedbackController.FeedbackControlCommandList" project="CommonWalkingControlModules" xLocation="-1211" yLocation="752"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.PlaneContactStateCommand" project="CommonWalkingControlModules" xLocation="-125" yLocation="931"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.solver.MomentumRateCommand" project="CommonWalkingControlModules" xLocation="872" yLocation="760"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreCommand" project="CommonWalkingControlModules" xLocation="379" yLocation="55"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerCore" project="CommonWalkingControlModules" xLocation="805" yLocation="-24"/>
+        <class className="us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.ControllerCoreOuput" project="CommonWalkingControlModules" xLocation="1482" yLocation="-15"/>
+    </diagram>
+</ajsv>

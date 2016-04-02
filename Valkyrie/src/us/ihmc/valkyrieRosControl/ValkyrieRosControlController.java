@@ -4,7 +4,6 @@ import us.ihmc.affinity.Affinity;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
@@ -102,7 +101,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    private DiagnosticsWhenHangingControllerFactory diagnosticControllerFactory = null;
 
    private MomentumBasedControllerFactory createDRCControllerFactory(ValkyrieRobotModel robotModel,
-         HumanoidGlobalDataProducer dataProducer, DRCRobotSensorInformation sensorInformation)
+         PacketCommunicator packetCommunicator, DRCRobotSensorInformation sensorInformation)
    {
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
 
@@ -110,8 +109,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       WalkingControllerParameters walkingControllerParamaters = robotModel.getWalkingControllerParameters();
       ArmControllerParameters armControllerParamaters = robotModel.getArmControllerParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
-
-      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForSlowWalkingOnRobot(walkingControllerParamaters);
 
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -130,24 +127,11 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       diagnosticControllerFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, true, true, valkyrieTorqueOffsetPrinter);
       diagnosticControllerFactory.setTransitionRequested(true);
       controllerFactory.addHighLevelBehaviorFactory(diagnosticControllerFactory);
+      controllerFactory.createControllerNetworkSubscriber(new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY), packetCommunicator);
 
-      VariousWalkingProviderFactory variousWalkingProviderFactory;
-      switch(walkingProvider)
-      {
-      case YOVARIABLE:
-         variousWalkingProviderFactory = new YoVariableVariousWalkingProviderFactory();
-         break;
-      case DATA_PRODUCER:
-         variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters, new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY));
-         break;
-      case VELOCITY_HEADING_COMPONENT:
-         variousWalkingProviderFactory = new ComponentBasedVariousWalkingProviderFactory(false, null, robotModel.getControllerDT());
-         break;
-      default:
-         throw new RuntimeException("Invalid walking provider.");
-      }
+      if (walkingProvider == WalkingProvider.VELOCITY_HEADING_COMPONENT)
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator();
 
-      controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
       return controllerFactory;
    }
 
@@ -209,10 +193,10 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       /*
        * Create network servers/clients
        */
-      PacketCommunicator drcNetworkProcessorServer = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator controllerPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.LOGGER_PRIORITY), robotModel.getLogModelProvider(), robotModel.getLogSettings(
             ValkyrieConfigurationRoot.USE_CAMERAS_FOR_LOGGING), robotModel.getEstimatorDT());
-      HumanoidGlobalDataProducer dataProducer = new HumanoidGlobalDataProducer(drcNetworkProcessorServer);
+      HumanoidGlobalDataProducer dataProducer = new HumanoidGlobalDataProducer(controllerPacketCommunicator);
       
       /*
        * Create sensors
@@ -225,7 +209,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       /*
        * Create controllers
        */
-      MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, dataProducer, sensorInformation);
+      MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, controllerPacketCommunicator, sensorInformation);
       
       /*
        * Create output writer
@@ -261,7 +245,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
        */
       try
       {
-         drcNetworkProcessorServer.connect();
+         controllerPacketCommunicator.connect();
       }
       catch (IOException e)
       {

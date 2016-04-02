@@ -2,12 +2,12 @@ package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.MathTools;
 
 @ClassDocumentation("This message contains a desired joint angle for a single joint.")
-public class SingleJointAnglePacket extends IHMCRosApiPacket<SingleJointAnglePacket> implements VisualizablePacket
+public class SingleJointAnglePacket extends Packet<SingleJointAnglePacket> implements VisualizablePacket
 {   
    public String jointName;
    public double angle;

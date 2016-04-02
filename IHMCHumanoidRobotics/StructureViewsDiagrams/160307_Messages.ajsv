@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2016-Mar-07 11:08" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20151019-2113">
+        <filterScript>
+
+// no filter script yet defined for this class diagram
+// use CTRL+SPACE for completion suggestions
+hide all constructors
+hide all methods
+hide all fields
+
+</filterScript>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage" project="IHMCHumanoidRobotics" xLocation="-111" yLocation="1239"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage" project="IHMCHumanoidRobotics" xLocation="1181" yLocation="-142"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage" project="IHMCHumanoidRobotics" xLocation="1165" yLocation="514"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage" project="IHMCHumanoidRobotics" xLocation="-85" yLocation="1609"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.Abstract1DTrajectoryMessage" project="IHMCHumanoidRobotics" xLocation="1148" yLocation="-513"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage" project="IHMCHumanoidRobotics" xLocation="-89" yLocation="196"/>
+        <class className="us.ihmc.communication.packets.IHMCRosApiMessage" project="IHMCCommunication" xLocation="3088" yLocation="720"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage" project="IHMCHumanoidRobotics" xLocation="1574" yLocation="1814"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage" project="IHMCHumanoidRobotics" xLocation="2469" yLocation="1899"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage" project="IHMCHumanoidRobotics" xLocation="2355" yLocation="121"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmOneJointTrajectoryMessage" project="IHMCHumanoidRobotics" xLocation="387" yLocation="-136"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage" project="IHMCHumanoidRobotics" xLocation="377" yLocation="595"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage" project="IHMCHumanoidRobotics" xLocation="-738" yLocation="624"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage" project="IHMCHumanoidRobotics" xLocation="2966" yLocation="1713"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage" project="IHMCHumanoidRobotics" xLocation="2264" yLocation="-508"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage" project="IHMCHumanoidRobotics" xLocation="-106" yLocation="607"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage" project="IHMCHumanoidRobotics" xLocation="-95" yLocation="-336"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage" project="IHMCHumanoidRobotics" xLocation="-89" yLocation="-551"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage" project="IHMCHumanoidRobotics" xLocation="1579" yLocation="2238"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage" project="IHMCHumanoidRobotics" xLocation="2332" yLocation="-150"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage" project="IHMCHumanoidRobotics" xLocation="2394" yLocation="368"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage" project="IHMCHumanoidRobotics" xLocation="-88" yLocation="860"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage" project="IHMCHumanoidRobotics" xLocation="-91" yLocation="-121"/>
+        <class className="us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage" project="IHMCHumanoidRobotics" xLocation="1259" yLocation="1620"/>
+    </diagram>
+</ajsv>

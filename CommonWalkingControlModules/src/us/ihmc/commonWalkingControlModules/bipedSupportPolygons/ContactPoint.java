@@ -29,7 +29,7 @@ public class ContactPoint implements ContactPointInterface
    {
       this.inContact = inContact;
    }
-   
+
    @Override
    public void setPosition(FramePoint position)
    {

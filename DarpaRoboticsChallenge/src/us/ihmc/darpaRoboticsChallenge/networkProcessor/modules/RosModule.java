@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 
+import org.ros.exception.RosMessageRuntimeException;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
@@ -28,6 +29,7 @@ import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -157,13 +159,19 @@ public class RosModule
 
       for (Map.Entry<String, Class> e : outputPacketList.entrySet())
       {
-         Message message = messageFactory.newFromType(e.getKey());
-
-         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false,
-               uiPacketCommunicator, e.getValue());
-         String topic = IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue());
-         topic = topic.replaceFirst("control", "output");
-         rosMainNode.attachPublisher(namespace + topic, publisher);
+         try
+         {
+            Message message = messageFactory.newFromType(e.getKey());
+            IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false,
+                  uiPacketCommunicator, e.getValue());
+            String topic = IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue());
+            topic = topic.replaceFirst("control", "output");
+            rosMainNode.attachPublisher(namespace + topic, publisher);
+         }
+         catch (Exception exception)
+         {
+            PrintTools.error(this, "Problem setting up: " + e.getValue().getSimpleName());
+         }
       }
 
       

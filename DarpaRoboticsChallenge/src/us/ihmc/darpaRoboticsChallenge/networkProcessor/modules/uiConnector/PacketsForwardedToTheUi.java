@@ -3,16 +3,16 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector;
 import java.util.HashMap;
 
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
@@ -25,16 +25,18 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPac
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class PacketsForwardedToTheUi
@@ -50,26 +52,29 @@ public class PacketsForwardedToTheUi
       BehaviorControlModeResponsePacket.class,
       BDIBehaviorStatusPacket.class,                 
       ControlStatusPacket.class,                     
-      FootstepDataList.class,                        
-      ComHeightPacket.class,                         
-      HeadOrientationPacket.class,                   
-      PelvisPosePacket.class,                        
-      ChestOrientationPacket.class,                  
+      FootstepDataListMessage.class,                        
+      PelvisHeightTrajectoryMessage.class,                         
+      HeadTrajectoryMessage.class,                   
+      NeckTrajectoryMessage.class,                   
+      PelvisTrajectoryMessage.class,
+      PelvisOrientationTrajectoryMessage.class,
+      ChestTrajectoryMessage.class,                  
       SnapFootstepPacket.class,
       VideoPacket.class,
-      HandPosePacket.class,
+      HandTrajectoryMessage.class,
+      ArmTrajectoryMessage.class,
       HandRotateAboutAxisPacket.class,
       DepthDataClearCommand.class,
       PointCloudWorldPacket.class,
       HandJointAnglePacket.class,
-      WholeBodyTrajectoryPacket.class,
+      WholeBodyTrajectoryMessage.class,
       JointAnglesPacket.class,
       ControllerCrashNotificationPacket.class,
       InvalidPacketNotificationPacket.class,
       DetectedObjectPacket.class,
       MultisenseMocapExperimentPacket.class,
       FisheyePacket.class,
-      HandPoseStatus.class,
+//      HandPoseStatus.class,
       LocalizationPointMapPacket.class,
       BlackFlyParameterPacket.class,
       DrillDetectionPacket.class,

@@ -6,13 +6,15 @@ import java.util.Comparator;
 import java.util.List;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class DesiredFootstepCalculatorTools
 {
@@ -26,6 +28,25 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
+         tempVector.set(tempFramePoint.getPoint());
+         footToWorldRotation.transform(tempVector);
+         if (tempVector.getZ() < minZ)
+            minZ = tempVector.getZ();
+      }
+
+      return minZ;
+   }
+
+   public static double computeMinZPointWithRespectToSoleInWorldFrame(Matrix3d footToWorldRotation, ContactablePlaneBody contactableBody)
+   {
+      List<FramePoint> footPoints = contactableBody.getContactPointsCopy();
+      double minZ = Double.POSITIVE_INFINITY;
+      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      Vector3d tempVector = new Vector3d();
+      for (FramePoint footPoint : footPoints)
+      {
+         tempFramePoint.setIncludingFrame(footPoint);
+         tempFramePoint.changeFrame(contactableBody.getSoleFrame());
          tempVector.set(tempFramePoint.getPoint());
          footToWorldRotation.transform(tempVector);
          if (tempVector.getZ() < minZ)
@@ -70,9 +91,9 @@ public class DesiredFootstepCalculatorTools
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
-         tempVector.set(tempFramePoint.getPoint());    // foot point w.r.t. ankle in foot frame
-         footToWorldRotation.transform(tempVector);    // foot point w.r.t. ankle in world frame
-         worldToDesiredHeadingFrame.transform(tempVector);    // foot point w.r.t. ankle in desired heading frame
+         tempVector.set(tempFramePoint.getPoint()); // foot point w.r.t. ankle in foot frame
+         footToWorldRotation.transform(tempVector); // foot point w.r.t. ankle in world frame
+         worldToDesiredHeadingFrame.transform(tempVector); // foot point w.r.t. ankle in desired heading frame
          if (tempVector.getX() > maxX)
             maxX = tempVector.getX();
       }
@@ -90,7 +111,7 @@ public class DesiredFootstepCalculatorTools
    }
 
    public static FramePoint computeMinZPointInFrame(RigidBodyTransform footToWorldTransform, List<FramePoint> footPoints, ReferenceFrame bodyFrame,
-           ReferenceFrame frame)
+         ReferenceFrame frame)
    {
       FramePoint minFramePoint = new FramePoint(frame);
       minFramePoint.setZ(Double.POSITIVE_INFINITY);
@@ -159,12 +180,27 @@ public class DesiredFootstepCalculatorTools
       return ret;
    }
 
+   public static List<Point2d> computeMaximumPointsInDirection(List<Point2d> framePoints, Vector2d searchDirection, int nPoints)
+   {
+      if (framePoints.size() < nPoints)
+         throw new RuntimeException("Not enough points");
+      List<Point2d> ret = new ArrayList<Point2d>(framePoints);
+      Collections.sort(ret, new SearchDirectionPoint2dComparator(searchDirection));
+
+      while (ret.size() > nPoints)
+      {
+         ret.remove(0);
+      }
+
+      return ret;
+   }
+
    public static int[] findMaximumPointIndexesInDirection(List<FramePoint> framePoints, FrameVector searchDirection, int nPoints)
    {
       List<FramePoint> maximumPoints = computeMaximumPointsInDirection(framePoints, searchDirection, nPoints);
-      
+
       int[] indexes = new int[nPoints];
-      
+
       for (int i = 0; i < nPoints; i++)
       {
          indexes[i] = framePoints.indexOf(maximumPoints.get(i));
@@ -186,6 +222,26 @@ public class DesiredFootstepCalculatorTools
       public int compare(FramePoint o1, FramePoint o2)
       {
          differenceVector.setIncludingFrame(o1);
+         differenceVector.sub(o2);
+         double dotProduct = searchDirection.dot(differenceVector);
+
+         return Double.compare(dotProduct, 0.0);
+      }
+   }
+
+   private static class SearchDirectionPoint2dComparator implements Comparator<Point2d>
+   {
+      private final Vector2d searchDirection;
+      private final Vector2d differenceVector = new Vector2d();
+
+      public SearchDirectionPoint2dComparator(Vector2d searchDirection)
+      {
+         this.searchDirection = searchDirection;
+      }
+
+      public int compare(Point2d o1, Point2d o2)
+      {
+         differenceVector.set(o1);
          differenceVector.sub(o2);
          double dotProduct = searchDirection.dot(differenceVector);
 

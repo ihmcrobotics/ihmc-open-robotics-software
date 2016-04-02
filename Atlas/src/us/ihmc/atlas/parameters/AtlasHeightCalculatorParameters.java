@@ -1,6 +1,6 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.commonWalkingControlModules.trajectories.HeightCalculatorParameters;
+import us.ihmc.darpaRoboticsChallenge.footstepGenerator.HeightCalculatorParameters;
 
 /**
  * Created by agrabertilton on 3/10/15.

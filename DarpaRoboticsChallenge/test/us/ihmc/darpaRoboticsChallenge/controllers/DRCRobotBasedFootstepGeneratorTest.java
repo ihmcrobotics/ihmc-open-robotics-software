@@ -49,7 +49,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    private List<Footstep> footSteps = new ArrayList<Footstep>();
    private FullHumanoidRobotModel fullRobotModel;
    private HumanoidReferenceFrames referenceFrames;
-   private SideDependentList<ContactablePlaneBody> contactableFeet;
+   private SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private SideDependentList<RigidBody> feet;
    private SideDependentList<ReferenceFrame> soleFrames;
    private WalkingControllerParameters walkingParamaters;

@@ -6,12 +6,12 @@ import java.util.List;
 import javax.vecmath.Point2d;
 import javax.vecmath.Tuple2d;
 
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
 {
@@ -24,25 +24,28 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    {
       this.rigidBody = rigidBody;
       this.soleFrame = soleFrame;
-      
-      for(Point2d contactPoint : contactPointsInSoleFrame)
+
+      for (Point2d contactPoint : contactPointsInSoleFrame)
       {
          this.contactPoints.add(new Point2d(contactPoint));
       }
-      
+
       totalNumberOfContactPoints = contactPoints.size();
    }
 
+   @Override
    public RigidBody getRigidBody()
    {
       return rigidBody;
    }
-   
+
+   @Override
    public String getName()
    {
       return rigidBody.getName();
    }
 
+   @Override
    public List<FramePoint> getContactPointsCopy()
    {
       List<FramePoint> ret = new ArrayList<FramePoint>(contactPoints.size());
@@ -51,10 +54,11 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
          Tuple2d point = contactPoints.get(i);
          ret.add(new FramePoint(soleFrame, point.getX(), point.getY(), 0.0));
       }
-   
+
       return ret;
    }
 
+   @Override
    public ReferenceFrame getFrameAfterParentJoint()
    {
       return rigidBody.getParentJoint().getFrameAfterJoint();
@@ -65,11 +69,13 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
       return new FrameConvexPolygon2d(soleFrame, contactPoints);
    }
 
+   @Override
    public ReferenceFrame getSoleFrame()
    {
       return soleFrame;
    }
 
+   @Override
    public List<FramePoint2d> getContactPoints2d()
    {
       List<FramePoint2d> ret = new ArrayList<FramePoint2d>(contactPoints.size());
@@ -78,15 +84,11 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
          Tuple2d point = contactPoints.get(i);
          ret.add(new FramePoint2d(soleFrame, point));
       }
-   
+
       return ret;
    }
 
-   public boolean inContact()
-   {
-      throw new RuntimeException();
-   }
-
+   @Override
    public int getTotalNumberOfContactPoints()
    {
       return totalNumberOfContactPoints;

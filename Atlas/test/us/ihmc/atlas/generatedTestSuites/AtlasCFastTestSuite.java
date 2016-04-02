@@ -12,9 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.AtlasPushRecoveryMultiStepTest.class,
+   us.ihmc.atlas.pushRecovery.AtlasPushRecoveryMultiStepTest.class,
    us.ihmc.atlas.behaviorTests.AtlasFootstepListBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasHandLoadBearingBehaviorTest.class
 })
 
 public class AtlasCFastTestSuite

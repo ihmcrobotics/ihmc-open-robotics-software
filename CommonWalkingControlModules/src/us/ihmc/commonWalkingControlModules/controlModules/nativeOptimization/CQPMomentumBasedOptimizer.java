@@ -6,7 +6,6 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.convexOptimization.quadraticProgram.BlockDiagSquareMatrix;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
-
 /**
  * see super class for variable explanation
  * @author tingfan
@@ -17,17 +16,18 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
    private final ConstrainedQPSolver CQPsolver;
    private boolean firstCall;
    final boolean useBoxContraints;
-   final boolean useBlockDiagMatrixclass=true;
+   final boolean useBlockDiagMatrixclass = true;
 
    DenseMatrix64F AtC, JstWs, Q, QBlk1, QBlk2, f, fBlk1, fBlk2, Aeq, negA, beq, Ain, bin, x0, IdentityMatrix;
    DenseMatrix64F lb, ub;
+
    public CQPMomentumBasedOptimizer(int nDoF, ConstrainedQPSolver CQPsolver)
    {
       super(nDoF);
 
       // pre-allocation matrices to avoid gc()
       AtC = new DenseMatrix64F(nDoF, nWrench);
-      if(useBlockDiagMatrixclass)
+      if (useBlockDiagMatrixclass)
       {
          Q = new BlockDiagSquareMatrix(nDoF, nRho);
       }
@@ -69,7 +69,6 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       this.CQPsolver = CQPsolver;
    }
 
-
    @Override
    public int solve() throws NoConvergenceException
    {
@@ -79,8 +78,8 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       CommonOps.multTransA(Js, Ws, JstWs);
 
       /*
-       * Q = [A'CA + Js'Ws Js + Lambda     0                                 ]
-       *     [0                            Wp+Wpsm+Wpcop + QfeetCoP'QfeetCoP ]
+       * Q = [A'CA + Js'Ws Js + Lambda 0 ]
+       *     [0 Wp+Wpsm+Wpcop + QfeetCoP'QfeetCoP]
        */
 
       CommonOps.mult(AtC, A, QBlk1);
@@ -89,26 +88,23 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
 
       CommonOps.add(WRho, WRhoSmoother, QBlk2);
       CommonOps.addEquals(QBlk2, WRhoCoPPenalty);
-      CommonOps.multAddTransA(QfeetCop, QfeetCop, QBlk2);
 
-      
-      if(useBlockDiagMatrixclass)
+      if (useBlockDiagMatrixclass)
       {
-         ((BlockDiagSquareMatrix)Q).setBlock(QBlk1, 0);
-         ((BlockDiagSquareMatrix)Q).setBlock(QBlk2, 1);
+         ((BlockDiagSquareMatrix) Q).setBlock(QBlk1, 0);
+         ((BlockDiagSquareMatrix) Q).setBlock(QBlk2, 1);
       }
       else
       {
-              CommonOps.insert(QBlk1, Q, 0, 0);
-              CommonOps.insert(QBlk2, Q, nDoF, nDoF);
+         CommonOps.insert(QBlk1, Q, 0, 0);
+         CommonOps.insert(QBlk2, Q, nDoF, nDoF);
       }
-      
-      CommonOps.add(1e-8, IdentityMatrix, Q, Q);    // regularization
 
+      CommonOps.add(1e-8, IdentityMatrix, Q, Q); // regularization
 
       /*
-       * f = -[A'C b   +  Js' Ws ps        ]
-       *      [Wpsm Pprev   +   Wpcop Ppavg]
+       * f = -[A'C b + Js' Ws ps ]
+       *      [Wpsm Pprev + Wpcop Ppavg]
        */
 
       // blk1
@@ -127,13 +123,11 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       CommonOps.changeSign(f);
 
       /*
-       *        nDoF|nRho
-       * Aeq = [-A   QRho] nWrench
-       *       [Jp   Zero] nDoF
-       *
-       * beq = [c    pp  ]
+       * nDoF|nRho Aeq = [-A QRho]
+       *         nWrench [Jp Zero]
+       *  nDoF beq = [c pp ]
        */
-      boolean isPrimaryConstraintUsed = (Jp.numRows > 0) &&!Double.isNaN(Jp.get(0, 0));
+      boolean isPrimaryConstraintUsed = (Jp.numRows > 0) && !Double.isNaN(Jp.get(0, 0));
       if (isPrimaryConstraintUsed)
       {
          Aeq.reshape(nWrench + Jp.numRows, nDoF + nRho);
@@ -152,7 +146,6 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       CommonOps.insert(negA, Aeq, 0, 0);
       CommonOps.insert(QRho, Aeq, 0, nDoF);
       CommonOps.insert(c, beq, 0, 0);
-
 
       /*
        * Equality Constraint Ain - nDoF nRho ---------------- | Zero| -I | nRho
@@ -183,13 +176,13 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       int iter;
       if (useBoxContraints)
       {
-         iter=CQPsolver.solve(Q, f, Aeq, beq, Ain, bin, lb, ub, x0, firstCall);
+         iter = CQPsolver.solve(Q, f, Aeq, beq, Ain, bin, lb, ub, x0, firstCall);
       }
       else
       {
          try
          {
-            iter=CQPsolver.solve(Q, f, Aeq, beq, Ain, bin, x0, firstCall);
+            iter = CQPsolver.solve(Q, f, Aeq, beq, Ain, bin, x0, firstCall);
          }
          catch (Exception e)
          {
@@ -204,7 +197,7 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       CommonOps.extract(x0, 0, nDoF, 0, 1, vd, 0, 0);
       CommonOps.extract(x0, nDoF, nDoF + nRho, 0, 1, rho, 0, 0);
 
-      return iter; 
+      return iter;
    }
 
 }

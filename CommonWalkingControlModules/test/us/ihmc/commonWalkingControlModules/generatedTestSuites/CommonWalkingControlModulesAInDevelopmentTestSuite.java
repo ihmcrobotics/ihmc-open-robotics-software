@@ -12,10 +12,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.commonWalkingControlModules.controlModules.GeometricVirtualToePointCalculatorLogisticParametersTest.class,
-   us.ihmc.commonWalkingControlModules.controlModules.GeometricVirtualToePointCalculatorTest.class,
-   us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumSolverTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.ThreePointDoubleSplines2DTest.class
 })
 
 public class CommonWalkingControlModulesAInDevelopmentTestSuite

@@ -19,7 +19,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 {
-   private static boolean DEBUG = false;
+   private static boolean DEBUG = true;
 
    @DeployableTestMethod(estimatedDuration = 2.0)
    @Test(timeout = 10000)

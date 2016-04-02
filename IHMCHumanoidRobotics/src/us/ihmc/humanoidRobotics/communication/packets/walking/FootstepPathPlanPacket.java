@@ -8,9 +8,9 @@ import us.ihmc.communication.packets.Packet;
 public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket> {
 	
 	public boolean goalsValid;
-	public FootstepData start;
-	public ArrayList<FootstepData> originalGoals = new ArrayList<FootstepData>();
-	public ArrayList<FootstepData> pathPlan = new ArrayList<FootstepData>();
+	public FootstepDataMessage start;
+	public ArrayList<FootstepDataMessage> originalGoals = new ArrayList<FootstepDataMessage>();
+	public ArrayList<FootstepDataMessage> pathPlan = new ArrayList<FootstepDataMessage>();
 	public ArrayList<Boolean> footstepUnknown = new ArrayList<Boolean>();
 	public double subOptimality;
 	public double pathCost = Double.POSITIVE_INFINITY;
@@ -18,17 +18,17 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket> {
 	public FootstepPathPlanPacket(Random random)
 	{
 	   goalsValid = random.nextBoolean();
-	   start = new FootstepData(random);
+	   start = new FootstepDataMessage(random);
 	   int size = Math.abs(random.nextInt(1000));
 	   for (int i = 0; i < size; i++)
       {
-         originalGoals.add(new FootstepData(random));
+         originalGoals.add(new FootstepDataMessage(random));
       }
 	   
 	   size = Math.abs(random.nextInt(1000));
 	   for (int i = 0; i < size; i++)
 	   {
-	      pathPlan.add(new FootstepData(random));
+	      pathPlan.add(new FootstepDataMessage(random));
 	   }
 	   
 	   size = Math.abs(random.nextInt(1000));
@@ -47,7 +47,7 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket> {
 		// empty constructor for serialization
 	}
 	
-	public FootstepPathPlanPacket(boolean goalsValid, FootstepData start, ArrayList<FootstepData> originalGoals, ArrayList<FootstepData> ADStarPathPlan,
+	public FootstepPathPlanPacket(boolean goalsValid, FootstepDataMessage start, ArrayList<FootstepDataMessage> originalGoals, ArrayList<FootstepDataMessage> ADStarPathPlan,
 			ArrayList<Boolean> footstepUnknown, double subOptimality, double cost)
 	{
 		this.goalsValid = goalsValid;
