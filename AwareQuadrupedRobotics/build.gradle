@@ -1,9 +1,17 @@
-plugins {
-   id 'us.ihmc.gradle.ihmc-build' version '0.0.14'
+buildscript {
+   repositories {
+      jcenter()
+      mavenCentral()
+      maven {
+         url "https://plugins.gradle.org/m2/"
+      }
+   }
+   dependencies {
+      classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.15"
+   }
 }
 
-
-
+apply plugin: "us.ihmc.gradle.ihmc-build"
 
 sourceCompatibility = 1.7
 version = '1.0'
@@ -24,7 +32,7 @@ repositories {
 }
 
 
-evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCQuadrupedRobotics"))
+
 
 dependencies 
 {
@@ -37,8 +45,8 @@ dependencies
   compile ihmc.getProjectDependency(":RobotDataCommunication")
   compile ihmc.getProjectDependency(":SensorProcessing")
   compile ihmc.getProjectDependency(":IHMCJavaToolkit")
-  testCompile ihmc.getProjectDependency(":IHMCRoboticsToolkit").sourceSets.test.output
-  testCompile ihmc.getProjectDependency(":IHMCQuadrupedRobotics").sourceSets.test.output
+  testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+  testCompile ihmc.getProjectTestDependency(":IHMCQuadrupedRobotics")
   compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
   compile ihmc.getProjectDependency(":EtherlabWrapper")

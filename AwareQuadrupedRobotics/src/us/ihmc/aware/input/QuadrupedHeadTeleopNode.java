@@ -26,6 +26,7 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
     */
    private static final double DT = 0.01;
 
+   private boolean teleopEnabled = true;
    private static final String PARAM_PROXIMAL_NECK_YAW_SCALE = "proximalNeckYawRateScale";
    private static final String PARAM_PROXIMAL_NECK_PITCH_SCALE = "proximalNeckPitchRateScale";
    private static final String PARAM_PROXIMAL_NECK_ROLL_SCALE = "proximalNeckRollRateScale";
@@ -49,9 +50,9 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
       params.setDefault(PARAM_PROXIMAL_NECK_YAW_SCALE, 0.9);
       params.setDefault(PARAM_PROXIMAL_NECK_PITCH_SCALE, 0.9);
       params.setDefault(PARAM_PROXIMAL_NECK_ROLL_SCALE, 0.5);
-      params.setDefault(PARAM_DISTAL_NECK_YAW_SCALE, 0.9);
-      params.setDefault(PARAM_DISTAL_NECK_PITCH_SCALE, 0.9);
-      params.setDefault(PARAM_DISTAL_NECK_ROLL_SCALE, 0.4);
+      params.setDefault(PARAM_DISTAL_NECK_YAW_SCALE, 0.8);
+      params.setDefault(PARAM_DISTAL_NECK_PITCH_SCALE, 0.8);
+      params.setDefault(PARAM_DISTAL_NECK_ROLL_SCALE, 0.5);
 
       // TODO: Don't hardcode localhost
       this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, NetworkPorts.CONTROLLER_PORT, netClassList);
@@ -101,8 +102,11 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
          neckJointPositionSetpoints.put(QuadrupedJointName.PROXIMAL_NECK_PITCH, proximalNeckPitch);
          neckJointPositionSetpoints.put(QuadrupedJointName.PROXIMAL_NECK_ROLL, proximalNeckRoll);
 
-         QuadrupedNeckJointPositionPacket neckJointPositionPacket = new QuadrupedNeckJointPositionPacket(neckJointPositionSetpoints);
-         packetCommunicator.send(neckJointPositionPacket);
+         if (teleopEnabled)
+         {
+            QuadrupedNeckJointPositionPacket neckJointPositionPacket = new QuadrupedNeckJointPositionPacket(neckJointPositionSetpoints);
+            packetCommunicator.send(neckJointPositionPacket);
+         }
 
       } catch (Exception e)
       {
@@ -122,21 +126,25 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
       case BUTTON_A:
          if (get(InputChannel.BUTTON_A) > 0.5)
          {
+            teleopEnabled = true;
          }
          break;
       case BUTTON_X:
          if (get(InputChannel.BUTTON_X) > 0.5)
          {
+            teleopEnabled = false;
          }
          break;
       case BUTTON_Y:
          if (get(InputChannel.BUTTON_Y) > 0.5)
          {
+            teleopEnabled = false;
          }
          break;
       case BUTTON_B:
          if (get(InputChannel.BUTTON_B) > 0.5)
          {
+            teleopEnabled = false;
          }
          break;
       }
