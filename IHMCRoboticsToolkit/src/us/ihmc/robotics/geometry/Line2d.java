@@ -407,6 +407,28 @@ public class Line2d implements Geometry2d<Line2d>
 
       return true;
    }
+   
+   public void intersectionWith(Line2d line, Point3d intersectionToPack)
+   {
+      intersectionWith(line.getPoint().getX(), line.getPoint().getY(), line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
+      intersectionToPack.set(tempPoint2d.getX(), tempPoint2d.getY(), intersectionToPack.getZ());
+   }
+   
+   public void intersectionWith(Line2d line, Point2d intersectionToPack)
+   {
+      intersectionWith(line.getPoint().getX(), line.getPoint().getY(), line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
+      intersectionToPack.set(tempPoint2d);
+   }
+   
+   private Point2d intersectionWith(double x1, double y1, double vx1, double vy1)
+   {
+      GeometryTools.intersection(point.x, point.y, normalizedVector.x, normalizedVector.y, x1, y1, vx1, vy1, tempAlphaBeta);
+      if (Double.isNaN(tempAlphaBeta[0]))
+         throw new RuntimeException("Lines are parallel");
+
+      tempPoint2d.set(point.x + normalizedVector.x * tempAlphaBeta[0], point.y + normalizedVector.y * tempAlphaBeta[0]);
+      return tempPoint2d;
+   }
 
    @Override
    public Point2d[] intersectionWith(ConvexPolygon2d convexPolygon)
@@ -507,23 +529,45 @@ public class Line2d implements Geometry2d<Line2d>
 
    public boolean isPointOnLeftSideOfLine(Point2d point)
    {
-      return isPointOnSideOfLine(point, RobotSide.LEFT);
+      return isPointOnSideOfLine(point.x, point.y, RobotSide.LEFT);
    }
 
    public boolean isPointOnRightSideOfLine(Point2d point)
    {
-      return isPointOnSideOfLine(point, RobotSide.RIGHT);
+      return isPointOnSideOfLine(point.x, point.y, RobotSide.RIGHT);
    }
 
    public boolean isPointOnSideOfLine(Point2d point, RobotSide side)
    {
+      return isPointOnSideOfLine(point.x, point.y, side);
+   }
+   
+   private boolean isPointOnSideOfLine(double x, double y, RobotSide side)
+   {
       double vectorX = normalizedVector.x;
       double vectorY = normalizedVector.y;
-      double pointToPointX = point.x - this.point.x;
-      double pointToPointY = point.y - this.point.y;
+      double pointToPointX = x - point.x;
+      double pointToPointY = y - point.y;
 
       double crossProduct = vectorX * pointToPointY - pointToPointX * vectorY;
       return side.negateIfRightSide(crossProduct) > 0.0;
+   }
+   
+   public boolean isPointInFrontOfLine(Vector2d frontDirection, Point2d point)
+   {
+      return isPointInFrontOfLine(point.getX(), point.getY(), frontDirection.getX(), frontDirection.getY());
+   }
+   
+   private boolean isPointInFrontOfLine(double x, double y, double vFrontX, double vFrontY)
+   {
+      if (isPointOnSideOfLine(x, y, RobotSide.RIGHT) == isPointOnSideOfLine(vFrontX, vFrontY, RobotSide.RIGHT))
+      {
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    /**
@@ -535,10 +579,15 @@ public class Line2d implements Geometry2d<Line2d>
     */
    public boolean isPointInFrontOfLine(Point2d point)
    {
+      return isPointInFrontOfLine(point.x, point.y);
+   }
+   
+   private boolean isPointInFrontOfLine(double x, double y)
+   {
       if (normalizedVector.y > 0.0)
-         return isPointOnRightSideOfLine(point);
+         return isPointOnSideOfLine(x, y, RobotSide.RIGHT);
       else if (normalizedVector.y < 0.0)
-         return isPointOnLeftSideOfLine(point);
+         return isPointOnSideOfLine(x, y, RobotSide.LEFT);
       else
          throw new RuntimeException("Not defined when line is pointing exactly along the x-axis");
    }

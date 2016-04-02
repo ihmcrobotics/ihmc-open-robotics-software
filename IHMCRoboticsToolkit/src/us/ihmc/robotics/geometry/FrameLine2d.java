@@ -9,16 +9,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
  * @author Twan Koolen
- * @version 1.0
  */
 public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
 {
@@ -138,12 +129,36 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
    {
       this.line.rotate(radians);
    }
-
-   public void setFramePoint2d(FramePoint2d framePoint2d)
+   
+   public void setOrigin(FramePoint2d framePoint2d)
    {
-      this.line.setPoint2d(framePoint2d.getPoint());
+      checkReferenceFrameMatch(framePoint2d);
+      
+      line.getPoint().set(framePoint2d.getPoint());
+   }
+   
+   public void setDirection(FrameVector2d frameVector2d)
+   {
+      checkReferenceFrameMatch(frameVector2d);
+      
+      line.getNormalizedVector().set(frameVector2d.getVector());
    }
 
+   @Deprecated
+   public void setFramePoint2d(FramePoint2d framePoint2d)
+   {
+      setOrigin(framePoint2d);
+   }
+
+   public void setByProjectionOntoXYPlane(FramePoint startPoint, FramePoint endPoint)
+   {
+      checkReferenceFrameMatch(startPoint);
+      checkReferenceFrameMatch(endPoint);
+      
+      line.getPoint().set(startPoint.getX(), startPoint.getY());
+      line.getNormalizedVector().set(endPoint.getX() - startPoint.getX(), endPoint.getY() - startPoint.getY());
+   }
+   
    public void set(FramePoint2d endpoint0, FramePoint2d endpoint1)
    {
       checkReferenceFrameMatch(endpoint0);
@@ -321,6 +336,14 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
 
       return new FramePoint2d(point.getReferenceFrame(), projected);
    }
+   
+   public void getIntersectionWithLine(FrameLine2d line, FramePoint2d intersectionToPack)
+   {
+      checkReferenceFrameMatch(line);
+      checkReferenceFrameMatch(intersectionToPack);
+      
+      this.line.intersectionWith(line.getLine2d(), intersectionToPack.getPoint());
+   }
 
    @Override
    public FramePoint2d intersectionWith(FrameLine2d secondLine)
@@ -420,6 +443,11 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       checkReferenceFrameMatch(point);
 
       return line.isPointOnSideOfLine(point.tuple, side);
+   }
+   
+   public boolean isPointInFrontOfLine(FrameVector2d frontDirection, FramePoint2d framePoint)
+   {
+      return line.isPointInFrontOfLine(frontDirection.getVector(), framePoint.getPoint());
    }
 
    /**
