@@ -105,7 +105,7 @@ public class QueuedControllerCommandGenerator implements Updatable
       
       else
       {
-         System.err.println("QueuedControllerCommandGenerator: No plan for how to deal with commands of type " + controllerCommand.getClass());
+         System.err.println("QueuedControllerCommandGenerator: No plan for how to deal with commands of type " + controllerCommand.getClass().getSimpleName());
       }
 
    }
