@@ -73,7 +73,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
       SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
 
@@ -112,7 +112,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
       SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
 

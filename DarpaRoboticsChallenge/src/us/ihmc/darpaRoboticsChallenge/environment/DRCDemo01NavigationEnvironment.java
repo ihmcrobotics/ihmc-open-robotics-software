@@ -498,7 +498,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    }
 
-   private static CombinedTerrainObject3D setUpPath4DRCTrialsTrainingWalkingCourse(String name)
+   public static CombinedTerrainObject3D setUpPath4DRCTrialsTrainingWalkingCourse(String name)
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
