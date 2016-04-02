@@ -6,9 +6,7 @@ import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConve
 import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertQuat4dToQuaternion;
 import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertQuaternionToQuat4d;
 import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertVector3ToPoint3d;
-import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertVector3ToVector3d;
 import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertVector3ToVector3f;
-import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertVector3dToVector3;
 import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertVector3fToVector3;
 
 import java.util.ArrayList;
@@ -21,8 +19,6 @@ import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
-import geometry_msgs.Quaternion;
-import geometry_msgs.Vector3;
 import ihmc_msgs.ArmJointTrajectoryPacketMessage;
 import ihmc_msgs.AtlasDesiredPumpPSIPacketMessage;
 import ihmc_msgs.AtlasElectricMotorEnablePacketMessage;
@@ -539,19 +535,15 @@ public class DRCROSMessageConverter
    {
       FootstepStatusMessage ret = messageFactory.newFromType("ihmc_msgs/FootstepStatusMessage");
       ret.setUniqueId(packet.getUniqueId());
-      ret.setIsDoneWalking(packet.isDoneWalking());
 
-      if (!packet.isDoneWalking())
-      {
-         ret.setStatus(convertEnumToByte(packet.getStatus()));
-         ret.setFootstepIndex(packet.getFootstepIndex());
-         if (packet.getActualFootPositionInWorld() != null)
-            ret.setActualFootPositionInWorld(convertPoint3dToVector3(packet.getActualFootPositionInWorld()));
-         if (packet.getActualFootOrientationInWorld() != null)
-            ret.setActualFootOrientationInWorld(convertQuat4dToQuaternion(packet.getActualFootOrientationInWorld()));
-         if (packet.getRobotSide() != null)
-            ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
-      }
+      ret.setStatus(convertEnumToByte(packet.getStatus()));
+      ret.setFootstepIndex(packet.getFootstepIndex());
+      if (packet.getActualFootPositionInWorld() != null)
+         ret.setActualFootPositionInWorld(convertPoint3dToVector3(packet.getActualFootPositionInWorld()));
+      if (packet.getActualFootOrientationInWorld() != null)
+         ret.setActualFootOrientationInWorld(convertQuat4dToQuaternion(packet.getActualFootOrientationInWorld()));
+      if (packet.getRobotSide() != null)
+         ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
 
       return ret;
    }
