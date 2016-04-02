@@ -78,7 +78,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-      drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
+      drcSimulationTestHelper.loadScriptFile(scriptInputStream, ReferenceFrame.getWorldFrame());
       
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
@@ -91,7 +91,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
 
       assertTrue(success);
 
-      Point3d center = new Point3d(0.6812851906440737, 0.09417744438175872, 0.8465619287124818);
+      Point3d center = new Point3d(1.121, -0.092, 0.7102);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
