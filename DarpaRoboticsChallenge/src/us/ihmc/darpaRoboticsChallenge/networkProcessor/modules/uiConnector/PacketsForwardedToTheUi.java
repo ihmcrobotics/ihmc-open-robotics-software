@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPac
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -58,7 +58,7 @@ public class PacketsForwardedToTheUi
       NeckTrajectoryMessage.class,                   
       PelvisTrajectoryMessage.class,
       PelvisOrientationTrajectoryMessage.class,
-      ChestOrientationPacket.class,                  
+      ChestTrajectoryMessage.class,                  
       SnapFootstepPacket.class,
       VideoPacket.class,
       HandTrajectoryMessage.class,

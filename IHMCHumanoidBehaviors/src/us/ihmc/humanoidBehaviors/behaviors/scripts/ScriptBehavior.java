@@ -30,7 +30,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBeh
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
@@ -407,7 +406,7 @@ public class ScriptBehavior extends BehaviorInterface
       {
          ret = PrimitiveBehaviorType.PELVIS_POSE;
       }
-      else if (scriptObject instanceof ChestOrientationPacket)
+      else if (scriptObject instanceof ChestTrajectoryMessage)
       {
          ret = PrimitiveBehaviorType.CHEST_TRAJECTORY;
       }

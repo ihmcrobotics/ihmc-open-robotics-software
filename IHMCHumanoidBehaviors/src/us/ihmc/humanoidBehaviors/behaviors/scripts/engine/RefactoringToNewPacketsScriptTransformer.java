@@ -8,8 +8,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
@@ -97,15 +95,15 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
 
          return footstepDataListMessage;
       }
-      else if (object instanceof ChestOrientationPacket)
-      {
-         ChestOrientationPacket chestOrientationPacket = (ChestOrientationPacket) object;
-
-         double trajectoryTime = chestOrientationPacket.trajectoryTime;
-         Quat4d desiredOrientation = chestOrientationPacket.orientation;
-         ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation);
-         return chestTrajectoryMessage;
-      }
+//      else if (object instanceof ChestOrientationPacket)
+//      {
+//         ChestOrientationPacket chestOrientationPacket = (ChestOrientationPacket) object;
+//
+//         double trajectoryTime = chestOrientationPacket.trajectoryTime;
+//         Quat4d desiredOrientation = chestOrientationPacket.orientation;
+//         ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation);
+//         return chestTrajectoryMessage;
+//      }
 //      else if (object instanceof HeadOrientationPacket)
 //      {
 //         HeadOrientationPacket headOrientationPacket = (HeadOrientationPacket) object;
