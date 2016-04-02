@@ -481,7 +481,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    {
       momentumBasedController.update();
 
-      headOrientationManager.submitNewNeckJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
+      if (headOrientationManager != null)
+         headOrientationManager.submitNewNeckJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
 
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
@@ -500,6 +501,32 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       commandConsumer.consumeManipulationCommands(currentState);
       commandConsumer.handleAutomaticManipulationAbortOnICPError(currentState);
 
+      updateFailureDetection();
+
+      balanceManager.update();
+
+      stateMachine.checkTransitionConditions();
+      stateMachine.doAction();
+
+      currentState = stateMachine.getCurrentState();
+
+      updateManagers(currentState);      
+
+      submitControllerCoreCommands();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         controllerCoreOutput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
+         momentumBasedController.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
+      }
+
+      momentumBasedController.doProportionalControlOnCoP(footDesiredCoPs);
+
+      statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
+   }
+
+   public void updateFailureDetection()
+   {
       balanceManager.getCapturePoint(capturePoint2d);
       balanceManager.getDesiredICP(desiredCapturePoint2d);
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, desiredCapturePoint2d);
@@ -520,14 +547,10 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          if (balanceManager.isPushRecoveryEnabled() && balanceManager.isRobotBackToSafeState())
             balanceManager.disablePushRecovery();
       }
+   }
 
-      balanceManager.update();
-
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
-
-      currentState = stateMachine.getCurrentState();
-
+   public void updateManagers(WalkingState currentState)
+   {
       balanceManager.getDesiredICPVelocity(desiredICPVelocityAsFrameVector);
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
       double omega0 = balanceManager.getOmega0();
@@ -549,19 +572,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       if (manipulationControlModule != null && manipulationControlModule.isAtLeastOneHandLoadBearing())
          keepCMPInsideSupportPolygon = false;
 
-      balanceManager.compute(currentState.getSupportSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon);      
-
-      submitControllerCoreCommands();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         controllerCoreOutput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
-         momentumBasedController.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
-      }
-
-      momentumBasedController.doProportionalControlOnCoP(footDesiredCoPs);
-
-      statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
+      balanceManager.compute(currentState.getSupportSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon);
    }
 
    private void submitControllerCoreCommands()
@@ -569,7 +580,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       planeContactStateCommandPool.clear();
 
       controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
-      
 
       boolean isHighCoPDampingNeeded = momentumBasedController.estimateIfHighCoPDampingNeeded(footDesiredCoPs);
 
@@ -578,10 +588,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotSide));
          controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
 
-         controllerCoreCommand.addFeedbackControlCommand(manipulationControlModule.getFeedbackControlCommand(robotSide));
-         controllerCoreCommand.addInverseDynamicsCommand(manipulationControlModule.getInverseDynamicsCommand(robotSide));
-         controllerCoreCommand.completeLowLevelJointData(manipulationControlModule.getLowLevelJointDesiredData(robotSide));
-
          YoPlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
@@ -589,12 +595,26 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
       }
 
-      controllerCoreCommand.addFeedbackControlCommand(headOrientationManager.getFeedbackControlCommand());
-      controllerCoreCommand.addInverseDynamicsCommand(headOrientationManager.getInverseDynamicsCommand());
-      controllerCoreCommand.completeLowLevelJointData(headOrientationManager.getLowLevelJointDesiredData());
-      
-      controllerCoreCommand.addFeedbackControlCommand(chestOrientationManager.getFeedbackControlCommand());
-      
+      if (manipulationControlModule != null)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            controllerCoreCommand.addFeedbackControlCommand(manipulationControlModule.getFeedbackControlCommand(robotSide));
+            controllerCoreCommand.addInverseDynamicsCommand(manipulationControlModule.getInverseDynamicsCommand(robotSide));
+            controllerCoreCommand.completeLowLevelJointData(manipulationControlModule.getLowLevelJointDesiredData(robotSide));
+         }
+      }
+
+      if (headOrientationManager != null)
+      {
+         controllerCoreCommand.addFeedbackControlCommand(headOrientationManager.getFeedbackControlCommand());
+         controllerCoreCommand.addInverseDynamicsCommand(headOrientationManager.getInverseDynamicsCommand());
+         controllerCoreCommand.completeLowLevelJointData(headOrientationManager.getLowLevelJointDesiredData());
+      }
+
+      if (chestOrientationManager != null)
+         controllerCoreCommand.addFeedbackControlCommand(chestOrientationManager.getFeedbackControlCommand());
+
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
