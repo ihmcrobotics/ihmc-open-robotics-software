@@ -27,7 +27,7 @@ public class DoubleSupportToSingleSupportConditionForDisturbanceRecovery impleme
       if (!isRobotFalling)
          return false;
 
-      boolean switchToSingleSupport = swingSide.getOppositeSide() != suggestedSwingSide;
+      boolean switchToSingleSupport = swingSide == suggestedSwingSide;
 
       if (switchToSingleSupport)
          balanceManager.prepareForDoubleSupportPushRecovery();

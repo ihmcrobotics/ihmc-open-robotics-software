@@ -46,9 +46,9 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
    private double swingTime, transferTime;
 
-   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList();
+   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
 
-   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList();
+   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
 
    private DRCPushRobotController pushRobotController;
 
@@ -113,7 +113,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
       if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(robotModel.getSimpleRobotName(), drcFlatGroundWalkingTrack.getSimulationConstructionSet(), 1);
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(robotModel.getSimpleRobotName(),
+               drcFlatGroundWalkingTrack.getSimulationConstructionSet(), 1);
       }
       BambooTools.reportTestFinishedMessage();
    }
@@ -327,15 +328,18 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
       // get YoVariables
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
       for (RobotSide robotSide : RobotSide.values)
       {
-         String prefix = fullRobotModel.getFoot(robotSide).getName();
-         @SuppressWarnings("unchecked") final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(prefix
-                                                                                                     + "FootControlModule", prefix + "State");
-         @SuppressWarnings("unchecked") final EnumYoVariable<WalkingStateEnum> walkingState =
-            (EnumYoVariable<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+         String footPrefix = sidePrefix + "Foot";
+         @SuppressWarnings("unchecked")
+         final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
+               footPrefix + "State");
+         @SuppressWarnings("unchecked")
+         final EnumYoVariable<WalkingStateEnum> walkingState = (EnumYoVariable<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
+               "walkingState");
          swingStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          swingFinishConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
@@ -361,8 +365,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    }
 
    private void testPush(Vector3d forceDirection, double magnitude, double duration, double percentInState, RobotSide side,
-                         SideDependentList<StateTransitionCondition> condition, double stateTime)
-           throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+         SideDependentList<StateTransitionCondition> condition, double stateTime)
+               throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       double delay = stateTime * percentInState;
       pushRobotController.applyForceDelayed(condition.get(side), delay, forceDirection, magnitude, duration);
@@ -384,7 +388,6 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          return footConstraintType.getEnumValue() == ConstraintType.SWING;
       }
    }
-
 
    private class DoubleSupportStartCondition implements StateTransitionCondition
    {
