@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
@@ -68,6 +69,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       assertTrue(behavior.hasInputBeenSet());
    }
    
+   @Ignore("Needs to be reimplemented")
    @DeployableTestMethod(estimatedDuration = 19.6)
    @Test(timeout = 98000)
    public void testSettingWeight() throws SimulationExceededMaximumTimeException
