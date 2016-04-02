@@ -23,7 +23,6 @@ import ihmc_msgs.ArmJointTrajectoryPacketMessage;
 import ihmc_msgs.AtlasDesiredPumpPSIPacketMessage;
 import ihmc_msgs.AtlasElectricMotorEnablePacketMessage;
 import ihmc_msgs.AtlasWristSensorCalibrationRequestPacketMessage;
-import ihmc_msgs.ChestOrientationPacketMessage;
 import ihmc_msgs.ComHeightPacketMessage;
 import ihmc_msgs.FingerStatePacketMessage;
 import ihmc_msgs.FootPosePacketMessage;
@@ -58,7 +57,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSen
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -90,8 +88,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage) packet);
       else if (packet instanceof FootstepStatus)
          return convertToRosMessage((FootstepStatus) packet);
-      else if (packet instanceof ChestOrientationPacket)
-         return convertToRosMessage((ChestOrientationPacket) packet);
+//      else if (packet instanceof ChestOrientationPacket)
+//         return convertToRosMessage((ChestOrientationPacket) packet);
 //      else if (packet instanceof HeadOrientationPacket)
 //         return convertToRosMessage((HeadOrientationPacket) packet);
       else if (packet instanceof PauseWalkingMessage)
@@ -140,8 +138,8 @@ public class DRCROSMessageConverter
          return convertToPacket((FootstepDataListMessage) message);
       else if (message instanceof FootstepStatusMessage)
          return convertToPacket((FootstepStatusMessage) message);
-      else if (message instanceof ChestOrientationPacketMessage)
-         return convertToPacket((ChestOrientationPacketMessage) message);
+//      else if (message instanceof ChestOrientationPacketMessage)
+//         return convertToPacket((ChestOrientationPacketMessage) message);
 //      else if (message instanceof HeadOrientationPacketMessage)
 //         return convertToPacket((HeadOrientationPacketMessage) message);
       else if (message instanceof PauseCommandMessage)
@@ -555,24 +553,24 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static ChestOrientationPacketMessage convertToRosMessage(ChestOrientationPacket packet)
-   {
-      ChestOrientationPacketMessage ret = messageFactory.newFromType("ihmc_msgs/ChestOrientationPacketMessage");
-      ret.setUniqueId(packet.getUniqueId());
-      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
-      ret.setToHomeOrientation(packet.isToHomeOrientation());
-      ret.setTrajectoryTime(packet.getTrajectoryTime());
-
-      return ret;
-   }
-
-   public static ChestOrientationPacket convertToPacket(ChestOrientationPacketMessage message)
-   {
-      ChestOrientationPacket ret = new ChestOrientationPacket(convertQuaternionToQuat4d(message.getOrientation()), message.getToHomeOrientation(),
-            message.getTrajectoryTime());
-      ret.setUniqueId(message.getUniqueId());
-      return ret;
-   }
+//   public static ChestOrientationPacketMessage convertToRosMessage(ChestOrientationPacket packet)
+//   {
+//      ChestOrientationPacketMessage ret = messageFactory.newFromType("ihmc_msgs/ChestOrientationPacketMessage");
+//      ret.setUniqueId(packet.getUniqueId());
+//      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
+//      ret.setToHomeOrientation(packet.isToHomeOrientation());
+//      ret.setTrajectoryTime(packet.getTrajectoryTime());
+//
+//      return ret;
+//   }
+//
+//   public static ChestOrientationPacket convertToPacket(ChestOrientationPacketMessage message)
+//   {
+//      ChestOrientationPacket ret = new ChestOrientationPacket(convertQuaternionToQuat4d(message.getOrientation()), message.getToHomeOrientation(),
+//            message.getTrajectoryTime());
+//      ret.setUniqueId(message.getUniqueId());
+//      return ret;
+//   }
 
 //   public static HeadOrientationPacketMessage convertToRosMessage(HeadOrientationPacket packet)
 //   {

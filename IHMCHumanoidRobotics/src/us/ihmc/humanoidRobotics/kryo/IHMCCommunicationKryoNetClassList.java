@@ -120,7 +120,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
@@ -274,9 +273,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Spigot pose
       registerPacketClass(SpigotPosePacket.class);
-
-      //Chest Orientation
-      registerPacketClass(ChestOrientationPacket.class);
 
       // Joint data
       registerPacketClass(RobotConfigurationData.class);

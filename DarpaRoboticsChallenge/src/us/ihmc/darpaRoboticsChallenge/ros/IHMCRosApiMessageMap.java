@@ -14,7 +14,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSen
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -38,7 +37,7 @@ public class IHMCRosApiMessageMap
 	   FootstepDataMessage.class,
 	   FootstepDataListMessage.class,
 	   FootstepStatus.class,
-	   ChestOrientationPacket.class,
+//	   ChestOrientationPacket.class,
 //	   HeadOrientationPacket.class,
 	   PauseWalkingMessage.class,
 	   HighLevelStateMessage.class,
@@ -61,7 +60,7 @@ public class IHMCRosApiMessageMap
       ComHeightPacket.class,
       FootPosePacket.class,
       FootstepDataListMessage.class,
-      ChestOrientationPacket.class,
+//      ChestOrientationPacket.class,
 //      HeadOrientationPacket.class,
       PauseWalkingMessage.class,
       HighLevelStateMessage.class,
@@ -103,7 +102,7 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(ComHeightPacket.class, "/control/com_height");
       PACKET_TO_TOPIC_MAP.put(FootPosePacket.class, "/control/foot_pose");
       PACKET_TO_TOPIC_MAP.put(FootstepDataListMessage.class, "/control/footstep_list");
-      PACKET_TO_TOPIC_MAP.put(ChestOrientationPacket.class, "/control/chest_orientation");
+//      PACKET_TO_TOPIC_MAP.put(ChestOrientationPacket.class, "/control/chest_orientation");
 //      PACKET_TO_TOPIC_MAP.put(HeadOrientationPacket.class, "/control/head_orientation");
       PACKET_TO_TOPIC_MAP.put(PauseWalkingMessage.class, "/control/pause_footstep_exec");
       PACKET_TO_TOPIC_MAP.put(HighLevelStateMessage.class, "/control/high_level_state");
