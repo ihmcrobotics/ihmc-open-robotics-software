@@ -93,6 +93,7 @@ public class PushRecoveryControlModule
       icpErrorThreshold.set(0.05);
       closestFootToICP = new EnumYoVariable<>("ClosestFootToICP", registry, RobotSide.class, true);
       swingSideForDoubleSupportRecovery = new EnumYoVariable<>("swingSideForDoubleSupportRecovery", registry, RobotSide.class, true);
+      swingSideForDoubleSupportRecovery.set(null);
 
       isRobotBackToSafeState = new GlitchFilteredBooleanYoVariable("isRobotBackToSafeState", registry, 100);
       isCaptureRegionEmpty = new BooleanYoVariable("isCaptureRegionEmpty", registry);
@@ -117,9 +118,6 @@ public class PushRecoveryControlModule
     */
    public RobotSide isRobotFallingFromDoubleSupport()
    {
-      if (!isICPOutside.getBooleanValue())
-         return null;
-
       return swingSideForDoubleSupportRecovery.getEnumValue();
    }
 
@@ -140,6 +138,7 @@ public class PushRecoveryControlModule
 
       // Initialize variables
       closestFootToICP.set(null);
+      swingSideForDoubleSupportRecovery.set(null);
 
       for (RobotSide robotSide : RobotSide.values)
          distanceICPToFeet.get(robotSide).set(Double.NaN);
