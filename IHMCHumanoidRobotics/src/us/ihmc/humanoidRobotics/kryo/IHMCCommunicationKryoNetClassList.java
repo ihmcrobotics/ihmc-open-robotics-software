@@ -103,7 +103,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationStatusPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.LookAtPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseMocapExperimentPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseTest;
@@ -311,7 +310,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       
       // Head orientation
       registerPacketClass(HeadOrientationPacket.class);
-      registerPacketClass(LookAtPacket.class);
       registerPacketClass(PelvisPosePacket.class);
 
       // Com Height
