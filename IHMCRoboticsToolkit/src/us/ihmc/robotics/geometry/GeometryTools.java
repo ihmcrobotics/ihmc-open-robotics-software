@@ -1172,6 +1172,16 @@ public class GeometryTools
    }
    
    /**
+    * Calculates distance between two points.
+    */
+   public static double distanceBetweenPoints(double x0, double y0, double x1, double y1)
+   {
+      double deltaX = x1 - x0;
+      double deltaY = y1 - y0;
+      return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+   }
+   
+   /**
     * Calculates distance between two Point2ds, a and b.
     *
     * @param a Point2d
