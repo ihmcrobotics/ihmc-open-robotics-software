@@ -477,8 +477,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertTrue(expectedResultPoint.epsilonEquals(resultPoint, epsilon));
    }
 
-   // Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testConstructors()
    {
@@ -486,16 +485,8 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       double[] xyz = RandomTools.generateRandomDoubleArray(random, 3, Double.MAX_VALUE);
       FramePoint pointToBeTested;
       ReferenceFrame referenceFrame = null;
+      pointToBeTested = new FramePoint(referenceFrame, xyz);
 
-      try
-      {
-         pointToBeTested = new FramePoint(referenceFrame, xyz);
-         fail("Should have thrown an exception");
-      }
-      catch (RuntimeException e)
-      {
-         //Good
-      }
 
       pointToBeTested = new FramePoint(aFrame, xyz);
       Point3d point3dExpected = new Point3d(xyz);
@@ -504,31 +495,14 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
 
       double max = Double.MAX_VALUE / 2.0;
       point3dExpected = RandomTools.generateRandomPoint(random, max, max, max);
-      pointToBeTested = null;
-      try
-      {
-         pointToBeTested = new FramePoint(referenceFrame, point3dExpected, "");
-         fail("Should have thrown an exception");
-      }
-      catch (RuntimeException e)
-      {
-         //Good
-      }
+      pointToBeTested = new FramePoint(referenceFrame, point3dExpected, "");
+       
       pointToBeTested = new FramePoint(aFrame, point3dExpected, "");
       assertTrue(aFrame == pointToBeTested.getReferenceFrame());
       assertTrue("Expected: " + point3dExpected + ", actual: " + pointToBeTested.getPoint(), point3dExpected.epsilonEquals(pointToBeTested.getPoint(), epsilon));
 
       xyz = RandomTools.generateRandomDoubleArray(random, 3, Double.MAX_VALUE);
-
-      try
-      {
-         pointToBeTested = new FramePoint(referenceFrame, xyz, "");
-         fail("Should have thrown an exception");
-      }
-      catch (RuntimeException e)
-      {
-         //Good
-      }
+      pointToBeTested = new FramePoint(referenceFrame, xyz, "");
 
       pointToBeTested = new FramePoint(aFrame, xyz, "");
       point3dExpected = new Point3d(xyz);
