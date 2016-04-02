@@ -15,7 +15,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.valkyrie.kinematics.transmissions.ComparePushRodTransmissionsTest.class,
    us.ihmc.valkyrie.kinematics.util.ClosedFormJacobianTest.class,
    us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseFlatTest.class,
-   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseTrialsTerrainTest.class
+   us.ihmc.valkyrie.pushRecovery.ValkyriePushRecoveryTest.class
 })
 
 public class ValkyrieAInDevelopmentTestSuite

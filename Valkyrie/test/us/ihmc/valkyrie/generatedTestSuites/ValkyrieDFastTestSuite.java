@@ -9,13 +9,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.InDevelopment)
+@TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.pushRecovery.ValkyriePushRecoveryTest.class
+   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndEndEffectorLoadBearingMessageTest.class
 })
 
-public class ValkyrieBInDevelopmentTestSuite
+public class ValkyrieDFastTestSuite
 {
    public static void main(String[] args)
    {

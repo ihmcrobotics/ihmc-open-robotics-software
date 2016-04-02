@@ -12,8 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.VideoA)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasFinalsWorldStairsTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseDoNothingTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCoursePlatformTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampFootstepSnapperTest.class
 })
 
 public class AtlasFVideoATestSuite
