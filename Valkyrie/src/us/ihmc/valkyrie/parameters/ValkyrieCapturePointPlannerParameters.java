@@ -90,4 +90,11 @@ public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerPa
    {
       return -0.04;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getVelocityDecayDurationWhenDone()
+   {
+      return 0.5;
+   }
 }
