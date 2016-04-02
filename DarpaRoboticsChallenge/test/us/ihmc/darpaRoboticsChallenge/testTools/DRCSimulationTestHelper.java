@@ -46,7 +46,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.robotics.time.GlobalTimer;
-import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -335,9 +334,13 @@ public class DRCSimulationTestHelper
 
    public void assertRobotsRootJointIsInBoundingBox(BoundingBox3d boundingBox)
    {
-      FloatingJoint rootJoint = getRobot().getRootJoint();
+      assertRobotsRootJointIsInBoundingBox(boundingBox, getRobot());
+   }
+
+   public static void assertRobotsRootJointIsInBoundingBox(BoundingBox3d boundingBox, SDFHumanoidRobot robot)
+   {
       Point3d position = new Point3d();
-      rootJoint.getPosition(position);
+      robot.getRootJoint().getPosition(position);
       boolean inside = boundingBox.isInside(position);
       if (!inside)
       {

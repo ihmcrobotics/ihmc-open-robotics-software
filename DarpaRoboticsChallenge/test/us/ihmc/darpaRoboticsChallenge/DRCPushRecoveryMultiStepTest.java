@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
@@ -12,9 +13,11 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
@@ -47,7 +50,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
 
    protected double forceDuration;
 
-   protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList();
+   protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
 
    StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.LEFT);
 
@@ -94,7 +97,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       setForwardPushParameters();
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -109,6 +112,12 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       // re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
+
+      Point3d center = new Point3d(0.0, 0.0, 0.8882009563211146);
+      Vector3d plusMinusVector = new Vector3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      DRCSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox, drcFlatGroundWalkingTrack.getDrcSimulation().getRobot());
+
       createVideo(scs);
       BambooTools.reportTestFinishedMessage();
    }
@@ -123,7 +132,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       setBackwardPushParameters();
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -138,6 +147,12 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       // re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
+
+      Point3d center = new Point3d(0.0, 0.0, 0.8882009563211146);
+      Vector3d plusMinusVector = new Vector3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      DRCSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox, drcFlatGroundWalkingTrack.getDrcSimulation().getRobot());
+
       createVideo(scs);
       BambooTools.reportTestFinishedMessage();
    }
