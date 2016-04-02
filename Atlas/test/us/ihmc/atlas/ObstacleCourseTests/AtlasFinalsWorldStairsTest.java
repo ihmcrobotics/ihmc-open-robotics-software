@@ -11,6 +11,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -121,6 +122,7 @@ public class AtlasFinalsWorldStairsTest
       BambooTools.reportTestFinishedMessage();
    }
 
+	@Ignore("Improve the feet stability.")
    @DeployableTestMethod(estimatedDuration = 120.0)
    @Test(timeout = 151825)
    public void testFastWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
