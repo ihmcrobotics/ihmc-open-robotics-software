@@ -401,15 +401,14 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    {
       BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behavior);
 
-      boolean ret = true;
-      while (!behavior.isDone())
+      boolean simulationSuccess = true;
+      while (!behavior.isDone() && (simulationSuccess))
       {
-         ret = simulateAndBlockAndCatchExceptions(1.0);
+         simulationSuccess = simulateAndBlockAndCatchExceptions(1.0);
       }
 
       behaviorRunner.closeAndDispose();
-
-      return ret;
+      return simulationSuccess;
    }
    
    public boolean executeBehaviorUntilDoneUsingBehaviorDispatcher(final BehaviorInterface behavior) throws SimulationExceededMaximumTimeException
