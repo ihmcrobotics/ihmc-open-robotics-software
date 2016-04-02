@@ -179,6 +179,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       {
          String prefix = fullRobotModel.getFoot(robotSide).getName();
          scs.getVariable(prefix + "FootControlModule", prefix + "State");
+         @SuppressWarnings("unchecked")
          final EnumYoVariable<WalkingStateEnum> walkingState = (EnumYoVariable<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
