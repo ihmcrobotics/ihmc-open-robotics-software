@@ -19,8 +19,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
@@ -108,15 +106,15 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
          ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation);
          return chestTrajectoryMessage;
       }
-      else if (object instanceof HeadOrientationPacket)
-      {
-         HeadOrientationPacket headOrientationPacket = (HeadOrientationPacket) object;
-
-         double trajectoryTime = headOrientationPacket.trajectoryTime;
-         Quat4d desiredOrientation = headOrientationPacket.orientation;
-         HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation);
-         return headTrajectoryMessage;
-      }
+//      else if (object instanceof HeadOrientationPacket)
+//      {
+//         HeadOrientationPacket headOrientationPacket = (HeadOrientationPacket) object;
+//
+//         double trajectoryTime = headOrientationPacket.trajectoryTime;
+//         Quat4d desiredOrientation = headOrientationPacket.orientation;
+//         HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation);
+//         return headTrajectoryMessage;
+//      }
 //      else if (object instanceof FingerStatePacket)
 //      {
 //         FingerStatePacket fingerStatePacket = (FingerStatePacket) object;

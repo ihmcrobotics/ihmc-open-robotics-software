@@ -29,8 +29,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPa
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
@@ -53,7 +54,8 @@ public class PacketsForwardedToTheUi
       ControlStatusPacket.class,                     
       FootstepDataListMessage.class,                        
       ComHeightPacket.class,                         
-      HeadOrientationPacket.class,                   
+      HeadTrajectoryMessage.class,                   
+      NeckTrajectoryMessage.class,                   
       PelvisTrajectoryMessage.class,
       PelvisOrientationTrajectoryMessage.class,
       ChestOrientationPacket.class,                  
