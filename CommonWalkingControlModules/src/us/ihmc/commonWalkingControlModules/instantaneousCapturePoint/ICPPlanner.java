@@ -384,6 +384,7 @@ public class ICPPlanner
       this.supportSide.set(supportSide);
       isHoldingPosition.set(false);
 
+      isStanding.set(false);
       isInitialTransfer.set(false);
       isDoubleSupport.set(false);
       this.initialTime.set(initialTime);
