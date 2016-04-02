@@ -37,7 +37,6 @@ import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -493,8 +492,8 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    private boolean yawBigInSingleSupport(ExternalPelvisPoseCreator externalPelvisPoseCreator) throws SimulationExceededMaximumTimeException
    {
-      FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3d(1, 1, 0.3), new Quat4d(), 0.6);
-      drcSimulationTestHelper.send(packet);
+//      FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3d(1, 1, 0.3), new Quat4d(), 0.6);
+//      drcSimulationTestHelper.send(packet);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2);
       long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
       RigidBodyTransform yawTransform = TransformTools.createTransformFromTranslationAndEulerAngles(1, 1, 0.8, 0, 0, Math.PI);
@@ -507,8 +506,8 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    private boolean localizeOutsideOfFootInSingleSupport(ExternalPelvisPoseCreator externalPelvisPoseCreator) throws SimulationExceededMaximumTimeException
    {
-      FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3d(1.0, 1.0, 0.3), new Quat4d(), 0.6);
-      drcSimulationTestHelper.send(packet);
+//      FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3d(1.0, 1.0, 0.3), new Quat4d(), 0.6);
+//      drcSimulationTestHelper.send(packet);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
       RigidBodyTransform outsideOfFootTransform = TransformTools.createTransformFromTranslationAndEulerAngles(1.5, 1.0, 0.8, 0.0, 0.0, 0.0);

@@ -4,11 +4,6 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
 public class ChangingHandFrameScriptTransformer extends ScriptTransformer
 {
 
@@ -20,19 +15,19 @@ public class ChangingHandFrameScriptTransformer extends ScriptTransformer
    @Override
    public Object transformScriptObject(Object object)
    {
-      if (object instanceof HandPosePacket)
-      {
-         HandPosePacket packetToTransform = (HandPosePacket) object;
-         if (packetToTransform.orientation == null || packetToTransform.position == null)
-            return object;
-         RigidBodyTransform handpose = new RigidBodyTransform();
-         handpose.setRotation(packetToTransform.getOrientation());
-         handpose.setTranslation(new Vector3d(packetToTransform.position));
-         RigidBodyTransform xOffsetInHandFrame = new RigidBodyTransform();
-         xOffsetInHandFrame.setTranslation(0.16, 0.0, 0.0);
-         handpose.multiply(handpose, xOffsetInHandFrame);
-         handpose.getTranslation(packetToTransform.position);
-      }
+//      if (object instanceof HandPosePacket)
+//      {
+//         HandPosePacket packetToTransform = (HandPosePacket) object;
+//         if (packetToTransform.orientation == null || packetToTransform.position == null)
+//            return object;
+//         RigidBodyTransform handpose = new RigidBodyTransform();
+//         handpose.setRotation(packetToTransform.getOrientation());
+//         handpose.setTranslation(new Vector3d(packetToTransform.position));
+//         RigidBodyTransform xOffsetInHandFrame = new RigidBodyTransform();
+//         xOffsetInHandFrame.setTranslation(0.16, 0.0, 0.0);
+//         handpose.multiply(handpose, xOffsetInHandFrame);
+//         handpose.getTranslation(packetToTransform.position);
+//      }
       
       return object;
    }

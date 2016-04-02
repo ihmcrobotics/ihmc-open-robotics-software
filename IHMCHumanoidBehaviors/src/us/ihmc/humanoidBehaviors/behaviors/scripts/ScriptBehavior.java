@@ -29,24 +29,15 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBeh
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ThighStatePacket;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -155,7 +146,7 @@ public class ScriptBehavior extends BehaviorInterface
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HAND_TRAJECTORY, handTrajectoryBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.END_EFFECTOR_LOAD_BEARING, endEffectorLoadBearingBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HEAD_ORIENTATION, headTrajectoryBehavior);
-      wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.COM_HEIGHT, pelvisHeightTrajectoryBehavior);
+      wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.PELVIS_HEIGHT, pelvisHeightTrajectoryBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.FOOT_POSE, footTrajectoryBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.PELVIS_POSE, pelvisTrajectoryBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.CHEST_TRAJECTORY, chestTrajectoryBehavior);
@@ -388,42 +379,34 @@ public class ScriptBehavior extends BehaviorInterface
       {
          ret = PrimitiveBehaviorType.FOOTSTEP_LIST;
       }
-      else if (scriptObject instanceof HandPosePacket)
+      else if (scriptObject instanceof HandTrajectoryMessage)
       {
          ret = PrimitiveBehaviorType.HAND_TRAJECTORY;
       }
-      else if (scriptObject instanceof FootStatePacket)
+      else if (scriptObject instanceof EndEffectorLoadBearingMessage)
       {
          ret = PrimitiveBehaviorType.END_EFFECTOR_LOAD_BEARING;
       }
-      else if (scriptObject instanceof HeadOrientationPacket)
+      else if (scriptObject instanceof HeadTrajectoryMessage)
       {
          ret = PrimitiveBehaviorType.HEAD_ORIENTATION;
       }
-      else if (scriptObject instanceof ComHeightPacket)
+      else if (scriptObject instanceof PelvisHeightTrajectoryMessage)
       {
-         ret = PrimitiveBehaviorType.COM_HEIGHT;
+         ret = PrimitiveBehaviorType.PELVIS_HEIGHT;
       }
-      else if (scriptObject instanceof FootPosePacket)
+      else if (scriptObject instanceof FootTrajectoryMessage)
       {
          ret = PrimitiveBehaviorType.FOOT_POSE;
          //         scriptIndex--; //TODO:  <-- Why is this here?  Also, shouldn't scriptStatus != ScriptBehaviorStatusEnum.INDEX_CHANGED?
       }
-      else if (scriptObject instanceof PelvisPosePacket)
+      else if (scriptObject instanceof PelvisTrajectoryMessage)
       {
          ret = PrimitiveBehaviorType.PELVIS_POSE;
       }
-      else if (scriptObject instanceof ChestOrientationPacket)
+      else if (scriptObject instanceof ChestTrajectoryMessage)
       {
          ret = PrimitiveBehaviorType.CHEST_TRAJECTORY;
-      }
-      else if (scriptObject instanceof HandLoadBearingPacket)
-      {
-         ret = PrimitiveBehaviorType.HAND_LOAD;
-      }
-      else if (scriptObject instanceof ThighStatePacket)
-      {
-         ret = PrimitiveBehaviorType.THIGH_STATE;
       }
       else if (scriptObject instanceof HighLevelStateMessage)
       {
@@ -463,7 +446,7 @@ public class ScriptBehavior extends BehaviorInterface
          headTrajectoryBehavior.initialize();
          headTrajectoryBehavior.setInput((HeadTrajectoryMessage) inputPacket.getScriptObject());
       }
-      else if (behaviorType.equals(PrimitiveBehaviorType.COM_HEIGHT))
+      else if (behaviorType.equals(PrimitiveBehaviorType.PELVIS_HEIGHT))
       {
          pelvisHeightTrajectoryBehavior.initialize();
          pelvisHeightTrajectoryBehavior.setInput((PelvisHeightTrajectoryMessage) inputPacket.getScriptObject());

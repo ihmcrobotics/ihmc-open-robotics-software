@@ -70,7 +70,6 @@ import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
@@ -90,11 +89,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
    private final Map<String, Double> standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load("standPrep", "setpoints.yaml");
    private final DRCRobotModel.RobotTarget target;
-
-   public WholeBodyIkSolver createWholeBodyIkSolver()  
-   {
-      return null;
-   }
 
    private final String[] resourceDirectories;
    {

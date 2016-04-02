@@ -4,26 +4,14 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 
 public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
 {
@@ -36,31 +24,31 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
    @Override
    public Object transformScriptObject(Object object)
    {
-      if (object instanceof ComHeightPacket)
-      {
-         ComHeightPacket comHeightPacket = (ComHeightPacket) object;
-
-         PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(1);
-         double position = comHeightPacket.heightOffset + 0.65;
-         double velocity = 0.0;
-         pelvisHeightTrajectoryMessage.setTrajectoryPoint(0, comHeightPacket.trajectoryTime, position, velocity);
-         
-         return pelvisHeightTrajectoryMessage;
-      }
-      else if (object instanceof FootPosePacket)
-      {
-         FootPosePacket footPosePacket = (FootPosePacket) object;
-
-         FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(footPosePacket.getRobotSide(), 1);
-         
-         Point3d position = footPosePacket.position;
-         Quat4d orientation = footPosePacket.orientation;
-         Vector3d linearVelocity = new Vector3d();
-         Vector3d angularVelocity = new Vector3d();
-         footTrajectoryMessage.setTrajectoryPoint(0, 1.0, position, orientation, linearVelocity, angularVelocity);
-         
-         return footTrajectoryMessage;
-      }
+//      if (object instanceof ComHeightPacket)
+//      {
+//         ComHeightPacket comHeightPacket = (ComHeightPacket) object;
+//
+//         PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(1);
+//         double position = comHeightPacket.heightOffset + 0.65;
+//         double velocity = 0.0;
+//         pelvisHeightTrajectoryMessage.setTrajectoryPoint(0, comHeightPacket.trajectoryTime, position, velocity);
+//         
+//         return pelvisHeightTrajectoryMessage;
+//      }
+//      else if (object instanceof FootPosePacket)
+//      {
+//         FootPosePacket footPosePacket = (FootPosePacket) object;
+//
+//         FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(footPosePacket.getRobotSide(), 1);
+//         
+//         Point3d position = footPosePacket.position;
+//         Quat4d orientation = footPosePacket.orientation;
+//         Vector3d linearVelocity = new Vector3d();
+//         Vector3d angularVelocity = new Vector3d();
+//         footTrajectoryMessage.setTrajectoryPoint(0, 1.0, position, orientation, linearVelocity, angularVelocity);
+//         
+//         return footTrajectoryMessage;
+//      }
 //      else if (object instanceof HandPosePacket)
 //      {
 //         HandPosePacket handPosePacket = (HandPosePacket) object;
@@ -81,7 +69,7 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
 //
 //         return handTrajectoryMessage;
 //      }
-      else if (object instanceof FootstepDataList)
+      if (object instanceof FootstepDataList)
       {
          FootstepDataList footstepDataList = (FootstepDataList) object;
 
@@ -99,24 +87,24 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
 
          return footstepDataListMessage;
       }
-      else if (object instanceof ChestOrientationPacket)
-      {
-         ChestOrientationPacket chestOrientationPacket = (ChestOrientationPacket) object;
-
-         double trajectoryTime = chestOrientationPacket.trajectoryTime;
-         Quat4d desiredOrientation = chestOrientationPacket.orientation;
-         ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation);
-         return chestTrajectoryMessage;
-      }
-      else if (object instanceof HeadOrientationPacket)
-      {
-         HeadOrientationPacket headOrientationPacket = (HeadOrientationPacket) object;
-
-         double trajectoryTime = headOrientationPacket.trajectoryTime;
-         Quat4d desiredOrientation = headOrientationPacket.orientation;
-         HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation);
-         return headTrajectoryMessage;
-      }
+//      else if (object instanceof ChestOrientationPacket)
+//      {
+//         ChestOrientationPacket chestOrientationPacket = (ChestOrientationPacket) object;
+//
+//         double trajectoryTime = chestOrientationPacket.trajectoryTime;
+//         Quat4d desiredOrientation = chestOrientationPacket.orientation;
+//         ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredOrientation);
+//         return chestTrajectoryMessage;
+//      }
+//      else if (object instanceof HeadOrientationPacket)
+//      {
+//         HeadOrientationPacket headOrientationPacket = (HeadOrientationPacket) object;
+//
+//         double trajectoryTime = headOrientationPacket.trajectoryTime;
+//         Quat4d desiredOrientation = headOrientationPacket.orientation;
+//         HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation);
+//         return headTrajectoryMessage;
+//      }
 //      else if (object instanceof FingerStatePacket)
 //      {
 //         FingerStatePacket fingerStatePacket = (FingerStatePacket) object;

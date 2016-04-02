@@ -30,7 +30,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTraject
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -917,7 +916,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       // FootstepDataList footstepDataList = createFootstepsForTwoLongFlatSteps(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
-      drcSimulationTestHelper.send(new ComHeightPacket(0.08, 1.0));
+//      drcSimulationTestHelper.send(new ComHeightPacket(0.08, 1.0));
 
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
