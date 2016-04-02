@@ -785,20 +785,21 @@ public class FootstepGeneratorsTest
 	@Test(timeout=300000)
    public void TwoSegment_RandomTransitionTest()
    {
-      // Visualization vis = Visualization.VISUALIZE;
+//       Visualization vis = Visualization.VISUALIZE;
       Visualization vis = Visualization.NO_VISUALIZATION;
 
+      Random random = new Random(1234L);
       /////////////////////////////////////////////
       // Setup desired start and end configurations/poses
       for (int randTest = 0; randTest < 25; randTest++)
       {
-         double startX = Math.random();
-         double startY = Math.random();
-         double startYaw = Math.random() * 2 * Math.PI;
-         double midX = Math.random();
-         double midY = Math.random();
-         double endX = Math.random();
-         double endY = Math.random();
+         double startX = random.nextDouble();
+         double startY = random.nextDouble();
+         double startYaw = random.nextDouble() * 2 * Math.PI;
+         double midX = random.nextDouble();
+         double midY = random.nextDouble();
+         double endX = random.nextDouble();
+         double endY = random.nextDouble();
 
          for (PathOrientation pathOrientation1 : PathOrientation.values())
          {
@@ -1417,12 +1418,14 @@ public class FootstepGeneratorsTest
       // Visualization vis = Visualization.VISUALIZE;
       Visualization vis = Visualization.NO_VISUALIZATION;
 
-      double startX = 2 * Math.random() - 1;
-      double startY = 2 * Math.random() - 1;
-      double startYaw = 2 * Math.PI * Math.random();
+      Random random = new Random(1984L);
+      
+      double startX = 2 * random.nextDouble() - 1;
+      double startY = 2 * random.nextDouble() - 1;
+      double startYaw = 2 * Math.PI * random.nextDouble();
 
-      double r = 2 * Math.random() - 1;
-      double theta = 2 * Math.PI * Math.random();
+      double r = 2.0 * random.nextDouble() - 1.0;
+      double theta = 2 * Math.PI * random.nextDouble();
 
       String testDescription = String.format("Translation (%.2f,%.2f)->(r%.2f,theta%.2f) initialtheta = %.2f", startX, startY, r, theta, startYaw);
       translationAtAngleTest(String.format(testDescription, Math.toDegrees(theta), r), vis, startX, startY, startYaw, r, theta, Double.POSITIVE_INFINITY);
