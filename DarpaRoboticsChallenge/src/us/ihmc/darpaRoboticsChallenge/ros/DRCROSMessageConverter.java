@@ -25,7 +25,6 @@ import ihmc_msgs.AtlasElectricMotorEnablePacketMessage;
 import ihmc_msgs.AtlasWristSensorCalibrationRequestPacketMessage;
 import ihmc_msgs.ComHeightPacketMessage;
 import ihmc_msgs.FingerStatePacketMessage;
-import ihmc_msgs.FootPosePacketMessage;
 import ihmc_msgs.FootstepDataListMessage;
 import ihmc_msgs.FootstepDataMessage;
 import ihmc_msgs.FootstepStatusMessage;
@@ -58,7 +57,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianc
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus.Status;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
@@ -80,8 +78,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((HandPosePacket) packet);
       else*/ if (packet instanceof ComHeightPacket)
          return convertToRosMessage((ComHeightPacket) packet);
-      else if (packet instanceof FootPosePacket)
-         return convertToRosMessage((FootPosePacket) packet);
+//      else if (packet instanceof FootPosePacket)
+//         return convertToRosMessage((FootPosePacket) packet);
       else if (packet instanceof us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage)
          return convertToRosMessage((us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage) packet);
       else if (packet instanceof us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage)
@@ -130,8 +128,8 @@ public class DRCROSMessageConverter
          return convertToPacket((HandPosePacketMessage) message);
       else if (message instanceof ComHeightPacketMessage)
          return convertToPacket((ComHeightPacketMessage) message);
-      else if (message instanceof FootPosePacketMessage)
-         return convertToPacket((FootPosePacketMessage) message);
+//      else if (message instanceof FootPosePacketMessage)
+//         return convertToPacket((FootPosePacketMessage) message);
       else if (message instanceof FootstepDataMessage)
          return convertToPacket((FootstepDataMessage) message);
       else if (message instanceof FootstepDataListMessage)
@@ -422,25 +420,25 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static FootPosePacketMessage convertToRosMessage(FootPosePacket packet)
-   {
-      FootPosePacketMessage ret = messageFactory.newFromType("ihmc_msgs/FootPosePacketMessage");
-      ret.setUniqueId(packet.getUniqueId());
-      ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
-      ret.setPosition(convertPoint3dToVector3(packet.getPosition()));
-      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
-      ret.setTrajectoryTime(packet.getTrajectoryTime());
-
-      return ret;
-   }
-
-   public static FootPosePacket convertToPacket(FootPosePacketMessage message)
-   {
-      FootPosePacket ret = new FootPosePacket(convertByteToEnum(RobotSide.class, message.getRobotSide()), convertVector3ToPoint3d(message.getPosition()),
-            convertQuaternionToQuat4d(message.getOrientation()), message.getTrajectoryTime());
-      ret.setUniqueId(message.getUniqueId());
-      return ret;
-   }
+//   public static FootPosePacketMessage convertToRosMessage(FootPosePacket packet)
+//   {
+//      FootPosePacketMessage ret = messageFactory.newFromType("ihmc_msgs/FootPosePacketMessage");
+//      ret.setUniqueId(packet.getUniqueId());
+//      ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
+//      ret.setPosition(convertPoint3dToVector3(packet.getPosition()));
+//      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
+//      ret.setTrajectoryTime(packet.getTrajectoryTime());
+//
+//      return ret;
+//   }
+//
+//   public static FootPosePacket convertToPacket(FootPosePacketMessage message)
+//   {
+//      FootPosePacket ret = new FootPosePacket(convertByteToEnum(RobotSide.class, message.getRobotSide()), convertVector3ToPoint3d(message.getPosition()),
+//            convertQuaternionToQuat4d(message.getOrientation()), message.getTrajectoryTime());
+//      ret.setUniqueId(message.getUniqueId());
+//      return ret;
+//   }
 
    public static FootstepDataMessage convertToRosMessage(us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage packet)
    {

@@ -15,7 +15,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianc
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -33,7 +32,7 @@ public class IHMCRosApiMessageMap
    {
 //	   HandPosePacket.class,
 	   ComHeightPacket.class,
-	   FootPosePacket.class,
+//	   FootPosePacket.class,
 	   FootstepDataMessage.class,
 	   FootstepDataListMessage.class,
 	   FootstepStatus.class,
@@ -58,7 +57,7 @@ public class IHMCRosApiMessageMap
    {
 //      HandPosePacket.class,
       ComHeightPacket.class,
-      FootPosePacket.class,
+//      FootPosePacket.class,
       FootstepDataListMessage.class,
 //      ChestOrientationPacket.class,
 //      HeadOrientationPacket.class,
@@ -100,7 +99,7 @@ public class IHMCRosApiMessageMap
       //inputs
 //      PACKET_TO_TOPIC_MAP.put(HandPosePacket.class, "/control/hand_pose");
       PACKET_TO_TOPIC_MAP.put(ComHeightPacket.class, "/control/com_height");
-      PACKET_TO_TOPIC_MAP.put(FootPosePacket.class, "/control/foot_pose");
+//      PACKET_TO_TOPIC_MAP.put(FootPosePacket.class, "/control/foot_pose");
       PACKET_TO_TOPIC_MAP.put(FootstepDataListMessage.class, "/control/footstep_list");
 //      PACKET_TO_TOPIC_MAP.put(ChestOrientationPacket.class, "/control/chest_orientation");
 //      PACKET_TO_TOPIC_MAP.put(HeadOrientationPacket.class, "/control/head_orientation");
