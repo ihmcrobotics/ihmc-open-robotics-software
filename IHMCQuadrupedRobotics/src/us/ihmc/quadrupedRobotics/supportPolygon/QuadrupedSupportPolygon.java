@@ -23,6 +23,7 @@ import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
@@ -481,17 +482,34 @@ public class QuadrupedSupportPolygon implements Serializable
       return closestQuadrant;
    }
    
+   public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint2d pointToSnap)
+   {
+      FramePoint2d snapped = snapPointToClosestEdgeOfPolygonIfOutside2d(pointToSnap.getX(), pointToSnap.getY());
+      pointToSnap.set(snapped.getX(), snapped.getY());
+   }
+   
    public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint pointToSnap)
    {
-      if (size() > 0 && !isInside(pointToSnap.getFrameTuple()))
+      FramePoint2d snapped = snapPointToClosestEdgeOfPolygonIfOutside2d(pointToSnap.getX(), pointToSnap.getY());
+      pointToSnap.set(snapped.getX(), snapped.getY(), 0.0);
+   }
+   
+   private FramePoint2d snapPointToClosestEdgeOfPolygonIfOutside2d(double x, double y)
+   {
+      if (size() > 0 && !isInside(x, y))
       {
          updateTempFrameConvexPolygon();
 
-         tempFramePoint2dOne.set(pointToSnap.getX(), pointToSnap.getY());
+         tempFramePoint2dOne.set(x, y);
          tempFrameConvexPolygon2d.getClosestEdge(tempLineSegment2d, tempFramePoint2dOne);
          tempLineSegment2d.getClosestPointOnLineSegment(tempFramePoint2dTwo, tempFramePoint2dOne);
          
-         pointToSnap.set(tempFramePoint2dTwo.getX(), tempFramePoint2dTwo.getY(), 0.0);
+         return tempFramePoint2dTwo;
+      }
+      else
+      {
+         tempFramePoint2dTwo.set(x, y);
+         return tempFramePoint2dTwo;
       }
    }
    
@@ -725,12 +743,7 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public boolean isInside(FramePoint point)
    {
-      if (getDistanceInside2d(point) > 0.0)
-      {
-         return true;
-      }
-
-      return false;
+      return isInside(point.getX(), point.getY());
    }
    
    /**
@@ -743,13 +756,22 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public boolean isInside(FramePoint2d point)
    {
-      temporaryFramePoint.setXY(point);
-      if (getDistanceInside2d(temporaryFramePoint) > 0.0)
+      return isInside(point.getX(), point.getY());
+   }
+   
+   private boolean isInside(double x, double y)
+   {
+      if (getDistanceInside2d(x, y) > 0.0)
       {
          return true;
       }
 
       return false;
+   }
+   
+   public double getDistanceInside2d(FramePoint2d point)
+   {
+      return getDistanceInside2d(point.getX(), point.getY());
    }
 
    /**
@@ -764,15 +786,21 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getDistanceInside2d(FramePoint point)
    {
+      return getDistanceInside2d(point.getX(), point.getY());
+   }
+   
+   private double getDistanceInside2d(double x, double y)
+   {
       if (size() == 1)
       {
-         return -point.distance(getFootstep(getFirstSupportingQuadrant()));
+         FramePoint footstep = getFootstep(getFirstSupportingQuadrant());
+         return -GeometryTools.distanceBetweenPoints(x, y, footstep.getX(), footstep.getY());
       }
       else if (size() == 2)
       {
          FramePoint pointOne = getFootstep(getFirstSupportingQuadrant());
          FramePoint pointTwo = getFootstep(getLastSupportingQuadrant());
-         return -Math.abs(GeometryTools.distanceFromPointToLine2d(point, pointOne, pointTwo));
+         return -Math.abs(GeometryTools.distanceFromPointToLine(x, y, pointOne.getX(), pointOne.getY(), pointTwo.getX(), pointTwo.getY()));
       }
       else
       {
@@ -783,7 +811,7 @@ public class QuadrupedSupportPolygon implements Serializable
             FramePoint pointOne = getFootstep(robotQuadrant);
             FramePoint pointTwo = getFootstep(getNextClockwiseSupportingQuadrant(robotQuadrant));
             
-            double distance = getDistanceToSideOfSegment(point, pointOne, pointTwo);
+            double distance = getDistanceToSideOfSegment(x, y, pointOne, pointTwo);
             if (distance < closestDistance)
             {
                closestDistance = distance;
@@ -794,18 +822,15 @@ public class QuadrupedSupportPolygon implements Serializable
       }
    }
    
-   private double getDistanceToSideOfSegment(FramePoint point, FramePoint pointOne, FramePoint pointTwo)
+   private double getDistanceToSideOfSegment(double x, double y, FramePoint pointOne, FramePoint pointTwo)
    {
-      double x0 = point.getX();
-      double y0 = point.getY();
-      
       double x1 = pointOne.getX();
       double y1 = pointOne.getY();
       
       double x2 = pointTwo.getX();
       double y2 = pointTwo.getY();
       
-      double numerator = (y2 - y1) * x0 - (x2 - x1) * y0 + x2*y1 - y2*x1;
+      double numerator = (y2 - y1) * x - (x2 - x1) * y + x2*y1 - y2*x1;
       double denominator = Math.sqrt((y2-y1) * (y2-y1) + (x2-x1) * (x2-x1));
       
       return numerator/denominator;
@@ -1054,25 +1079,7 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public void getFrontMidpoint(FramePoint framePointToPack)
    {
-      if (containsFootstep(RobotQuadrant.FRONT_LEFT) && containsFootstep(RobotQuadrant.FRONT_RIGHT))
-      {
-         framePointToPack.setToZero();
-         framePointToPack.add(getFootstep(RobotQuadrant.FRONT_LEFT));
-         framePointToPack.add(getFootstep(RobotQuadrant.FRONT_RIGHT));
-         framePointToPack.scale(0.5);
-      }
-      else if (containsFootstep(RobotQuadrant.FRONT_LEFT))
-      {
-         framePointToPack.set(getFootstep(RobotQuadrant.FRONT_LEFT));
-      }
-      else if (containsFootstep(RobotQuadrant.FRONT_RIGHT))
-      {
-         framePointToPack.set(getFootstep(RobotQuadrant.FRONT_RIGHT));
-      }
-      else
-      {
-         throw new UndefinedOperationException("Polygon must contain a front footstep");
-      }
+      getMidpoint(RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, framePointToPack);
    }
 
    /**
@@ -1084,24 +1091,53 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public void getHindMidpoint(FramePoint framePointToPack)
    {
-      if (containsFootstep(RobotQuadrant.HIND_LEFT) && containsFootstep(RobotQuadrant.HIND_RIGHT))
+      getMidpoint(RobotQuadrant.HIND_LEFT, RobotQuadrant.HIND_RIGHT, framePointToPack);
+   }
+   
+   /**
+    * Returns the average position of the vertices in the polygon
+    * corresponding to left foot locations. NaN is hind feet aren't
+    * supporting.
+    *
+    * @params framePointToPack
+    */
+   public void getLeftMidpoint(FramePoint framePointToPack)
+   {
+      getMidpoint(RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT, framePointToPack);
+   }
+   
+   /**
+    * Returns the average position of the vertices in the polygon
+    * corresponding to right foot locations. NaN is hind feet aren't
+    * supporting.
+    *
+    * @params framePointToPack
+    */
+   public void getRightMidpoint(FramePoint framePointToPack)
+   {
+      getMidpoint(RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_RIGHT, framePointToPack);
+   }
+   
+   private void getMidpoint(RobotQuadrant quadrant1, RobotQuadrant quadrant2, FramePoint framePointToPack)
+   {
+      if (containsFootstep(quadrant1) && containsFootstep(quadrant2))
       {
          framePointToPack.setToZero();
-         framePointToPack.add(getFootstep(RobotQuadrant.HIND_LEFT));
-         framePointToPack.add(getFootstep(RobotQuadrant.HIND_RIGHT));
+         framePointToPack.add(getFootstep(quadrant1));
+         framePointToPack.add(getFootstep(quadrant2));
          framePointToPack.scale(0.5);
       }
-      else if (containsFootstep(RobotQuadrant.HIND_LEFT))
+      else if (containsFootstep(quadrant1))
       {
-         framePointToPack.set(getFootstep(RobotQuadrant.HIND_LEFT));
+         framePointToPack.set(getFootstep(quadrant1));
       }
-      else if (containsFootstep(RobotQuadrant.HIND_RIGHT))
+      else if (containsFootstep(quadrant2))
       {
-         framePointToPack.set(getFootstep(RobotQuadrant.HIND_RIGHT));
+         framePointToPack.set(getFootstep(quadrant2));
       }
       else
       {
-         throw new UndefinedOperationException("Polygon must contain a hind footstep");
+         throw new UndefinedOperationException("Polygon must contain a footstep at " + quadrant1 + " or " + quadrant2);
       }
    }
 
