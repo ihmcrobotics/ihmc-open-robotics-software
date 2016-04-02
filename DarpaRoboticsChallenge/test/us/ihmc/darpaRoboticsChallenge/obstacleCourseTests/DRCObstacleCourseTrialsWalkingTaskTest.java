@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
@@ -12,12 +13,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -74,6 +79,10 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
       SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
+      FramePoint pelvisHeight = new FramePoint(fullRobotModel.getRootJoint().getFrameAfterJoint());
+      pelvisHeight.changeFrame(ReferenceFrame.getWorldFrame());
+      PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.05);
+      drcSimulationTestHelper.send(message);
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
 
@@ -113,6 +122,10 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
       SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
+      FramePoint pelvisHeight = new FramePoint(fullRobotModel.getRootJoint().getFrameAfterJoint());
+      pelvisHeight.changeFrame(ReferenceFrame.getWorldFrame());
+      PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.05);
+      drcSimulationTestHelper.send(message);
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
 
