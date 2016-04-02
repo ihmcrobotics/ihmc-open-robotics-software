@@ -4,7 +4,6 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
@@ -13,7 +12,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 
 public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
 {
@@ -26,17 +24,17 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
    @Override
    public Object transformScriptObject(Object object)
    {
-      if (object instanceof ComHeightPacket)
-      {
-         ComHeightPacket comHeightPacket = (ComHeightPacket) object;
-
-         PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(1);
-         double position = comHeightPacket.heightOffset + 0.65;
-         double velocity = 0.0;
-         pelvisHeightTrajectoryMessage.setTrajectoryPoint(0, comHeightPacket.trajectoryTime, position, velocity);
-         
-         return pelvisHeightTrajectoryMessage;
-      }
+//      if (object instanceof ComHeightPacket)
+//      {
+//         ComHeightPacket comHeightPacket = (ComHeightPacket) object;
+//
+//         PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(1);
+//         double position = comHeightPacket.heightOffset + 0.65;
+//         double velocity = 0.0;
+//         pelvisHeightTrajectoryMessage.setTrajectoryPoint(0, comHeightPacket.trajectoryTime, position, velocity);
+//         
+//         return pelvisHeightTrajectoryMessage;
+//      }
 //      else if (object instanceof FootPosePacket)
 //      {
 //         FootPosePacket footPosePacket = (FootPosePacket) object;
@@ -71,7 +69,7 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
 //
 //         return handTrajectoryMessage;
 //      }
-      else if (object instanceof FootstepDataList)
+      if (object instanceof FootstepDataList)
       {
          FootstepDataList footstepDataList = (FootstepDataList) object;
 

@@ -31,7 +31,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBeh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
@@ -147,7 +146,7 @@ public class ScriptBehavior extends BehaviorInterface
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HAND_TRAJECTORY, handTrajectoryBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.END_EFFECTOR_LOAD_BEARING, endEffectorLoadBearingBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.HEAD_ORIENTATION, headTrajectoryBehavior);
-      wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.COM_HEIGHT, pelvisHeightTrajectoryBehavior);
+      wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.PELVIS_HEIGHT, pelvisHeightTrajectoryBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.FOOT_POSE, footTrajectoryBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.PELVIS_POSE, pelvisTrajectoryBehavior);
       wrapBehaviorAndSetupTransitions(stateMachine, PrimitiveBehaviorType.CHEST_TRAJECTORY, chestTrajectoryBehavior);
@@ -392,9 +391,9 @@ public class ScriptBehavior extends BehaviorInterface
       {
          ret = PrimitiveBehaviorType.HEAD_ORIENTATION;
       }
-      else if (scriptObject instanceof ComHeightPacket)
+      else if (scriptObject instanceof PelvisHeightTrajectoryMessage)
       {
-         ret = PrimitiveBehaviorType.COM_HEIGHT;
+         ret = PrimitiveBehaviorType.PELVIS_HEIGHT;
       }
       else if (scriptObject instanceof FootTrajectoryMessage)
       {
@@ -447,7 +446,7 @@ public class ScriptBehavior extends BehaviorInterface
          headTrajectoryBehavior.initialize();
          headTrajectoryBehavior.setInput((HeadTrajectoryMessage) inputPacket.getScriptObject());
       }
-      else if (behaviorType.equals(PrimitiveBehaviorType.COM_HEIGHT))
+      else if (behaviorType.equals(PrimitiveBehaviorType.PELVIS_HEIGHT))
       {
          pelvisHeightTrajectoryBehavior.initialize();
          pelvisHeightTrajectoryBehavior.setInput((PelvisHeightTrajectoryMessage) inputPacket.getScriptObject());
