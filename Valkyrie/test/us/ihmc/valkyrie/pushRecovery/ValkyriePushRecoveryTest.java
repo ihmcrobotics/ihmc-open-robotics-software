@@ -5,10 +5,12 @@ import org.junit.Test;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.pushRecovery.DRCPushRecoveryTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.tools.testing.TestPlanTarget;
 
+@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
 public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()
