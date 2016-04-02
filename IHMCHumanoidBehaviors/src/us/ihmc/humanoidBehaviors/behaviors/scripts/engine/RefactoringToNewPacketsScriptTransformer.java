@@ -4,14 +4,8 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -43,20 +37,20 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
          
          return pelvisHeightTrajectoryMessage;
       }
-      else if (object instanceof FootPosePacket)
-      {
-         FootPosePacket footPosePacket = (FootPosePacket) object;
-
-         FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(footPosePacket.getRobotSide(), 1);
-         
-         Point3d position = footPosePacket.position;
-         Quat4d orientation = footPosePacket.orientation;
-         Vector3d linearVelocity = new Vector3d();
-         Vector3d angularVelocity = new Vector3d();
-         footTrajectoryMessage.setTrajectoryPoint(0, 1.0, position, orientation, linearVelocity, angularVelocity);
-         
-         return footTrajectoryMessage;
-      }
+//      else if (object instanceof FootPosePacket)
+//      {
+//         FootPosePacket footPosePacket = (FootPosePacket) object;
+//
+//         FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(footPosePacket.getRobotSide(), 1);
+//         
+//         Point3d position = footPosePacket.position;
+//         Quat4d orientation = footPosePacket.orientation;
+//         Vector3d linearVelocity = new Vector3d();
+//         Vector3d angularVelocity = new Vector3d();
+//         footTrajectoryMessage.setTrajectoryPoint(0, 1.0, position, orientation, linearVelocity, angularVelocity);
+//         
+//         return footTrajectoryMessage;
+//      }
 //      else if (object instanceof HandPosePacket)
 //      {
 //         HandPosePacket handPosePacket = (HandPosePacket) object;
