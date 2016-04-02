@@ -213,7 +213,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
          assertNumberOfWaypoints(robotSide, numberOfTrajectoryPoints + 1, scs);
@@ -343,7 +343,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(firstTrajectoryPointTime + 2.0 * getRobotModel().getControllerDT());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(firstTrajectoryPointTime + 4.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
          int expectedTrajectoryPointIndex = 0;
