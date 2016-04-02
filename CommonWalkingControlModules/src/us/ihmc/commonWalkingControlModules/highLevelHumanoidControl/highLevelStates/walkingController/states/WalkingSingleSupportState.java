@@ -75,14 +75,13 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (balanceManager.isPushRecoveryEnabled())
       {
-         double estimatedTimeRemaining = balanceManager.getTimeRemainingInCurrentState();
          boolean footstepHasBeenAdjusted = balanceManager.checkAndUpdateFootstep(nextFootstep);
          if (footstepHasBeenAdjusted)
          {
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.replanSwingTrajectory(swingSide, nextFootstep, estimatedTimeRemaining);
+            feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getSwingTime());
 
             walkingMessageHandler.reportWalkingAbortRequested();
             walkingMessageHandler.clearFootsteps();
@@ -90,7 +89,6 @@ public class WalkingSingleSupportState extends SingleSupportState
             balanceManager.clearICPPlan();
             balanceManager.addFootstepToPlan(nextFootstep);
             balanceManager.updateICPPlanForSingleSupportDisturbances();
-            balanceManager.requestICPPlannerToHoldCurrentCoM();
          }
       }
 
