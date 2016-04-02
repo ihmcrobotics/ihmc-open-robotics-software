@@ -9,6 +9,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -82,6 +83,12 @@ public class YoQuadrupedSupportPolygon
       quadrupedSupportPolygon.getCommonTriangle2d(polygonToCompare, commonPolygonToPack, quadrantToAssignToIntersection);
    }
    
+   public double getDistanceInside2d(FramePoint2d point)
+   {
+      putYoValuesIntoSupportPolygon();
+      return quadrupedSupportPolygon.getDistanceInside2d(point);
+   }
+   
    public double getDistanceInside2d(FramePoint point)
    {
       putYoValuesIntoSupportPolygon();
@@ -118,16 +125,28 @@ public class YoQuadrupedSupportPolygon
       quadrupedSupportPolygon.getFrontMidpoint(framePointToPack);
    }
    
-   public RobotQuadrant getHighestFootstep()
+   public void getLeftMidpoint(FramePoint framePointToPack)
    {
       putYoValuesIntoSupportPolygon();
-      return quadrupedSupportPolygon.getHighestFootstep();
+      quadrupedSupportPolygon.getLeftMidpoint(framePointToPack);
+   }
+   
+   public void getRightMidpoint(FramePoint framePointToPack)
+   {
+      putYoValuesIntoSupportPolygon();
+      quadrupedSupportPolygon.getRightMidpoint(framePointToPack);
    }
    
    public void getHindMidpoint(FramePoint framePointToPack)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getHindMidpoint(framePointToPack);
+   }
+
+   public RobotQuadrant getHighestFootstep()
+   {
+      putYoValuesIntoSupportPolygon();
+      return quadrupedSupportPolygon.getHighestFootstep();
    }
    
    public double getInCircle2d(FramePoint inCircleCenterToPack)
@@ -380,6 +399,12 @@ public class YoQuadrupedSupportPolygon
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getCentroid(centroidToPack);
+   }
+
+   public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint2d pointToSnap)
+   {
+      putYoValuesIntoSupportPolygon();
+      quadrupedSupportPolygon.snapPointToClosestEdgeOfPolygonIfOutside2d(pointToSnap);
    }
 
    public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint pointToSnap)
