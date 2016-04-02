@@ -17,7 +17,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmissionTest.class,
    us.ihmc.valkyrie.kinematics.util.ClosedFormJacobianTest.class,
    us.ihmc.valkyrie.simulation.ValkyrieFlatGroundWalkingWithIMUDriftTest.class,
-   us.ihmc.valkyrie.simulation.ValkyrieObstacleCourseRampFootstepSnapperTest.class,
+   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseRampFootstepSnapperTest.class,
 })
 
 public class ValkyrieAFastTestSuite

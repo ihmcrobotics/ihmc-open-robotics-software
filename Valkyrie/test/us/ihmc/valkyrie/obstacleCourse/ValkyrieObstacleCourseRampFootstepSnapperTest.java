@@ -1,13 +1,14 @@
-package us.ihmc.valkyrie;
+package us.ihmc.valkyrie.obstacleCourse;
 
-import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryWalkingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseRampFootstepSnapperTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.VideoB})
-public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
+@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.VideoB})
+public class ValkyrieObstacleCourseRampFootstepSnapperTest extends DRCObstacleCourseRampFootstepSnapperTest
 {
    @Override
    public DRCRobotModel getRobotModel()

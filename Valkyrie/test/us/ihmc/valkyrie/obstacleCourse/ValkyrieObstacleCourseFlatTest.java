@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie;
+package us.ihmc.valkyrie.obstacleCourse;
 
 import javax.vecmath.Vector3d;
 
@@ -13,6 +13,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.VideoB})
@@ -41,9 +42,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Override
    protected DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
-      return (DoubleYoVariable) scs.getVariable(
-          "MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.v1PelvisAxisAngleOrientationController",
-          "v1PelvisOrientationErrorMagnitude");
+      return (DoubleYoVariable) scs.getVariable("pelvisAxisAngleOrientationController",
+            "pelvisRotationErrorInBodyZ");
    }
 
    @Override

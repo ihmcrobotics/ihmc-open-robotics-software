@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Slow)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.ValkyriePushRecoveryWalkingTest.class
+   us.ihmc.valkyrie.pushRecovery.ValkyriePushRecoveryWalkingTest.class
 })
 
 public class ValkyrieESlowTestSuite

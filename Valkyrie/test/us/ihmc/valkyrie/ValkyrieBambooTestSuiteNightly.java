@@ -9,14 +9,14 @@ import org.junit.runners.Suite;
 //   us.ihmc.valkyrie.codeGenerators.APIBuilderTest.class,
 //   us.ihmc.valkyrie.networkProcessor.depthData.ValkyrieDepthDataProcessorTest.class,
 //   us.ihmc.valkyrie.simulation.ValkyrieFlatGroundWalkingWithIMUDriftTest.class,
-   us.ihmc.valkyrie.ValkyrieFlatGroundWalkingTest.class,
-   us.ihmc.valkyrie.ValkyrieObstacleCourseEveryBuildTest.class,
-   us.ihmc.valkyrie.ValkyrieObstacleCourseFlatTest.class,
-   us.ihmc.valkyrie.ValkyrieObstacleCourseRampsTest.class,
-   us.ihmc.valkyrie.ValkyrieObstacleCourseTrialsTerrainTest.class,
-   us.ihmc.valkyrie.ValkyriePushRecoveryMultiStepTest.class,
-   us.ihmc.valkyrie.ValkyriePushRecoveryStandingTest.class,
-   us.ihmc.valkyrie.ValkyriePushRecoveryTest.class,
+   us.ihmc.valkyrie.simulation.ValkyrieFlatGroundWalkingTest.class,
+   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseEveryBuildTest.class,
+   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseFlatTest.class,
+   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseRampsTest.class,
+   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseTrialsTerrainTest.class,
+   us.ihmc.valkyrie.pushRecovery.ValkyriePushRecoveryMultiStepTest.class,
+   us.ihmc.valkyrie.pushRecovery.ValkyriePushRecoveryStandingTest.class,
+   us.ihmc.valkyrie.pushRecovery.ValkyriePushRecoveryTest.class,
 //   us.ihmc.valkyrie.ValkyriePushRecoveryWalkingTest.class
 })
 

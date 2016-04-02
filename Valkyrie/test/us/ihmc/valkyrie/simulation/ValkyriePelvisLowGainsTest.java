@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie;
+package us.ihmc.valkyrie.simulation;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -9,6 +9,7 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 

@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie;
+package us.ihmc.valkyrie.simulation;
 
 import org.junit.Test;
 
@@ -9,6 +9,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 //This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
