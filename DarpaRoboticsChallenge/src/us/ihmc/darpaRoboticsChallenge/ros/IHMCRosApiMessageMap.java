@@ -20,7 +20,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
@@ -40,7 +39,7 @@ public class IHMCRosApiMessageMap
 	   FootstepDataListMessage.class,
 	   FootstepStatus.class,
 	   ChestOrientationPacket.class,
-	   HeadOrientationPacket.class,
+//	   HeadOrientationPacket.class,
 	   PauseWalkingMessage.class,
 	   HighLevelStateMessage.class,
 	   ArmTrajectoryMessage.class,
@@ -63,7 +62,7 @@ public class IHMCRosApiMessageMap
       FootPosePacket.class,
       FootstepDataListMessage.class,
       ChestOrientationPacket.class,
-      HeadOrientationPacket.class,
+//      HeadOrientationPacket.class,
       PauseWalkingMessage.class,
       HighLevelStateMessage.class,
       ArmTrajectoryMessage.class,
@@ -105,7 +104,7 @@ public class IHMCRosApiMessageMap
       PACKET_TO_TOPIC_MAP.put(FootPosePacket.class, "/control/foot_pose");
       PACKET_TO_TOPIC_MAP.put(FootstepDataListMessage.class, "/control/footstep_list");
       PACKET_TO_TOPIC_MAP.put(ChestOrientationPacket.class, "/control/chest_orientation");
-      PACKET_TO_TOPIC_MAP.put(HeadOrientationPacket.class, "/control/head_orientation");
+//      PACKET_TO_TOPIC_MAP.put(HeadOrientationPacket.class, "/control/head_orientation");
       PACKET_TO_TOPIC_MAP.put(PauseWalkingMessage.class, "/control/pause_footstep_exec");
       PACKET_TO_TOPIC_MAP.put(HighLevelStateMessage.class, "/control/high_level_state");
       PACKET_TO_TOPIC_MAP.put(ArmTrajectoryMessage.class, "/control/arm_joint_trajectory");

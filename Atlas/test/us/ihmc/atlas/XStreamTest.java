@@ -13,11 +13,10 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 
 public class XStreamTest
 {
@@ -108,7 +107,7 @@ public class XStreamTest
 //      packets[1] = new HandTrajectoryMessage(random);
       packets[2] = new FootPosePacket(random);
       packets[3] = new EndEffectorLoadBearingMessage();
-      packets[4] = new HeadOrientationPacket(random);
+//      packets[4] = new HeadTrajectoryMessage(random);
       
       
       ArrayList<Object> serializedObjects = new ArrayList<Object>();

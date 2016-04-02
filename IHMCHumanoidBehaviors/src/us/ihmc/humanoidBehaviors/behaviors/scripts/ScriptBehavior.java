@@ -38,7 +38,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
@@ -391,7 +390,7 @@ public class ScriptBehavior extends BehaviorInterface
       {
          ret = PrimitiveBehaviorType.END_EFFECTOR_LOAD_BEARING;
       }
-      else if (scriptObject instanceof HeadOrientationPacket)
+      else if (scriptObject instanceof HeadTrajectoryMessage)
       {
          ret = PrimitiveBehaviorType.HEAD_ORIENTATION;
       }

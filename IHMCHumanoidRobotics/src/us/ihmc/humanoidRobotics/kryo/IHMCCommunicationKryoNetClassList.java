@@ -137,7 +137,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanReques
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
@@ -307,9 +306,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(WalkingStatusMessage.Status.class);
       registerPacketClass(AbortWalkingMessage.class);
       
-      // Head orientation
-      registerPacketClass(HeadOrientationPacket.class);
-
       // Com Height
       registerPacketClass(ComHeightPacket.class);
 

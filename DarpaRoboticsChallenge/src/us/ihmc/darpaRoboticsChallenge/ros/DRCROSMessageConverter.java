@@ -32,7 +32,6 @@ import ihmc_msgs.FootstepDataMessage;
 import ihmc_msgs.FootstepStatusMessage;
 import ihmc_msgs.HandComplianceControlParametersPacketMessage;
 import ihmc_msgs.HandPosePacketMessage;
-import ihmc_msgs.HeadOrientationPacketMessage;
 import ihmc_msgs.HighLevelStateChangePacketMessage;
 import ihmc_msgs.HighLevelStatePacketMessage;
 import ihmc_msgs.JointAnglesPacketMessage;
@@ -64,7 +63,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus.Status;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
@@ -94,8 +92,8 @@ public class DRCROSMessageConverter
          return convertToRosMessage((FootstepStatus) packet);
       else if (packet instanceof ChestOrientationPacket)
          return convertToRosMessage((ChestOrientationPacket) packet);
-      else if (packet instanceof HeadOrientationPacket)
-         return convertToRosMessage((HeadOrientationPacket) packet);
+//      else if (packet instanceof HeadOrientationPacket)
+//         return convertToRosMessage((HeadOrientationPacket) packet);
       else if (packet instanceof PauseWalkingMessage)
          return convertToRosMessage((PauseWalkingMessage) packet);
       else if (packet instanceof HighLevelStateMessage)
@@ -144,8 +142,8 @@ public class DRCROSMessageConverter
          return convertToPacket((FootstepStatusMessage) message);
       else if (message instanceof ChestOrientationPacketMessage)
          return convertToPacket((ChestOrientationPacketMessage) message);
-      else if (message instanceof HeadOrientationPacketMessage)
-         return convertToPacket((HeadOrientationPacketMessage) message);
+//      else if (message instanceof HeadOrientationPacketMessage)
+//         return convertToPacket((HeadOrientationPacketMessage) message);
       else if (message instanceof PauseCommandMessage)
          return convertToPacket((PauseCommandMessage) message);
       else if (message instanceof HighLevelStatePacketMessage)
@@ -576,23 +574,23 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HeadOrientationPacketMessage convertToRosMessage(HeadOrientationPacket packet)
-   {
-      HeadOrientationPacketMessage ret = messageFactory.newFromType("ihmc_msgs/HeadOrientationPacketMessage");
-      ret.setUniqueId(packet.getUniqueId());
-      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
-      ret.setTrajectoryTime(packet.getTrajectoryTime());
-
-      return ret;
-   }
-
-   public static HeadOrientationPacket convertToPacket(HeadOrientationPacketMessage message)
-   {
-      HeadOrientationPacket ret = new HeadOrientationPacket(convertQuaternionToQuat4d(message.getOrientation()), message.getTrajectoryTime());ret.setUniqueId(
-         message.getUniqueId());
-
-      return ret;
-   }
+//   public static HeadOrientationPacketMessage convertToRosMessage(HeadOrientationPacket packet)
+//   {
+//      HeadOrientationPacketMessage ret = messageFactory.newFromType("ihmc_msgs/HeadOrientationPacketMessage");
+//      ret.setUniqueId(packet.getUniqueId());
+//      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
+//      ret.setTrajectoryTime(packet.getTrajectoryTime());
+//
+//      return ret;
+//   }
+//
+//   public static HeadOrientationPacket convertToPacket(HeadOrientationPacketMessage message)
+//   {
+//      HeadOrientationPacket ret = new HeadOrientationPacket(convertQuaternionToQuat4d(message.getOrientation()), message.getTrajectoryTime());ret.setUniqueId(
+//         message.getUniqueId());
+//
+//      return ret;
+//   }
 
    public static PauseCommandMessage convertToRosMessage(PauseWalkingMessage packet)
    {
