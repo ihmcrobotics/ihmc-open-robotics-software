@@ -18,6 +18,13 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
+/**
+ * This multi waypoint trajectory generator helper will generate velocities at intermediate way points of a trajectory which will result in a smooth path trough
+ * those way points.It is based on the paper "Curvature-continuous 3D Path-planning Using QPMI Method" which can be found at
+ * http://cdn.intechopen.com/pdfs-wm/48591.pdf
+ *
+ * The minimal number of way points is 3.
+ */
 public class EuclideanTrajectoryPointCalculator
 {
    private static final boolean DEBUG = false;
