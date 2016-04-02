@@ -4,10 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus.Status;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -19,10 +16,7 @@ public class HandTrajectoryBehavior extends BehaviorInterface
 {
    private static final boolean DEBUG = false;
 
-   private final ConcurrentListeningQueue<HandPoseStatus> inputListeningQueue = new ConcurrentListeningQueue<HandPoseStatus>();
-
    protected RobotSide robotSide;
-   protected Status status;
 
    protected HandTrajectoryMessage outgoingMessage;
 
@@ -58,7 +52,6 @@ public class HandTrajectoryBehavior extends BehaviorInterface
       hasInputBeenSet = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);
       hasStatusBeenReceived = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
       isDone = new BooleanYoVariable(behaviorNameFirstLowerCase + "IsDone", registry);
-      this.attachControllerListeningQueue(inputListeningQueue, HandPoseStatus.class);
    }
 
    public void setInput(HandTrajectoryMessage armTrajectoryMessage)
@@ -77,12 +70,7 @@ public class HandTrajectoryBehavior extends BehaviorInterface
    {
       trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue());
 
-      if (inputListeningQueue.isNewPacketAvailable())
-      {
-         consumeHandPoseStatus(inputListeningQueue.getNewestPacket());
-      }
-
-      if (!isDone.getBooleanValue() && status == Status.COMPLETED && hasInputBeenSet() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue()
+      if (!isDone.getBooleanValue() && hasInputBeenSet() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue()
             && trajectoryTimeElapsed.getDoubleValue() > trajectoryTime.getDoubleValue())
       {
          if (DEBUG)
@@ -94,11 +82,6 @@ public class HandTrajectoryBehavior extends BehaviorInterface
       {
          sendOutgoingPacketToControllerAndNetworkProcessor();
       }
-   }
-
-   public Status getStatus()
-   {
-      return status;
    }
 
    private void sendOutgoingPacketToControllerAndNetworkProcessor()
@@ -130,8 +113,6 @@ public class HandTrajectoryBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
-      inputListeningQueue.clear();
-      status = null;
       hasInputBeenSet.set(false);
       hasPacketBeenSent.set(false);
       outgoingMessage = null;
@@ -162,7 +143,6 @@ public class HandTrajectoryBehavior extends BehaviorInterface
       startTime.set(Double.NaN);
       trajectoryTimeElapsed.set(Double.NaN);
 
-      status = null;
       isDone.set(false);
    }
 
@@ -183,7 +163,6 @@ public class HandTrajectoryBehavior extends BehaviorInterface
       else
       {
          stopArmMotion();
-         status = null;
          isPaused.set(true);
       }
    }
@@ -197,7 +176,6 @@ public class HandTrajectoryBehavior extends BehaviorInterface
       }
       else
       {
-         status = null;
          isPaused.set(false);
 
          if (hasInputBeenSet())
@@ -211,20 +189,6 @@ public class HandTrajectoryBehavior extends BehaviorInterface
    public boolean isDone()
    {
       return isDone.getBooleanValue();
-   }
-
-   private void consumeHandPoseStatus(HandPoseStatus handPoseStatus)
-   {
-      RobotSide statusRobotSide = handPoseStatus.getRobotSide();
-
-      if (statusRobotSide == robotSide)
-      {
-         status = handPoseStatus.getStatus();
-         hasStatusBeenReceived.set(true);
-         if (DEBUG)
-            PrintTools.debug(this,
-                  "Received a hand pose status: " + handPoseStatus.getStatus() + ", " + handPoseStatus.getRobotSide() + " at t = " + yoTime.getDoubleValue());
-      }
    }
 
    @Override

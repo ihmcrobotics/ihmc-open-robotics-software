@@ -9,7 +9,6 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandTrajectoryTask;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;

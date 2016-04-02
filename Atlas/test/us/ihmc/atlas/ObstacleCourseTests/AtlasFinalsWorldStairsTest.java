@@ -21,10 +21,9 @@ import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCFinalsEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -94,8 +93,11 @@ public class AtlasFinalsWorldStairsTest
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
-      ComHeightPacket heightPacket = new ComHeightPacket(0.1);
-      drcSimulationTestHelper.send(heightPacket);
+      SixDoFJointReferenceFrame rootFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
+      FramePoint pelvisPosition = new FramePoint(rootFrame);
+      pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.15);
+      drcSimulationTestHelper.send(message);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 

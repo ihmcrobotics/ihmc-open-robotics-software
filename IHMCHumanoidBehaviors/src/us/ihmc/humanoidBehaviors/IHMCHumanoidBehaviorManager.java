@@ -13,7 +13,6 @@ import us.ihmc.humanoidBehaviors.behaviors.ReceiveImageBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TalkAndMoveHandsBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.midLevel.ForceControlledWallTaskBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
@@ -199,9 +198,6 @@ public class IHMCHumanoidBehaviorManager
       // TODO: Fix or remove this behavior
 //      PushButtonBehavior pushButtonBehavior = new PushButtonBehavior(outgoingCommunicationBridge, referenceFrames, yoTime, wristSensors);
 //      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.PUSH_BUTTON, pushButtonBehavior);
-
-      ForceControlledWallTaskBehavior forcecontrolledWallTaskBehavior = new ForceControlledWallTaskBehavior(outgoingCommunicationBridge, referenceFrames, fullRobotModel, yoTime, yoGraphicsListRegistry);
-      dispatcher.addBehavior(HumanoidBehaviorType.FORCECONTROL_WALL_TASK, forcecontrolledWallTaskBehavior);
    }
 
    private void createAndRegisterAutomaticDiagnostic(BehaviorDispatcher<HumanoidBehaviorType> dispatcher, SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,

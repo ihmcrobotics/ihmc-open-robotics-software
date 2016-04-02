@@ -21,10 +21,8 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.util.PacketControllerTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -106,11 +104,11 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       }
 
-      HandPosePacket releaseLeftHandToHome = PacketControllerTools.createGoToHomeHandPosePacket(RobotSide.LEFT, 1.0);
-      drcSimulationTestHelper.send(releaseLeftHandToHome);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      HandPosePacket releaseRightHandToHome = PacketControllerTools.createGoToHomeHandPosePacket(RobotSide.RIGHT, 1.0);
-      drcSimulationTestHelper.send(releaseRightHandToHome);
+//      HandPosePacket releaseLeftHandToHome = PacketControllerTools.createGoToHomeHandPosePacket(RobotSide.LEFT, 1.0);
+//      drcSimulationTestHelper.send(releaseLeftHandToHome);
+//      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+//      HandPosePacket releaseRightHandToHome = PacketControllerTools.createGoToHomeHandPosePacket(RobotSide.RIGHT, 1.0);
+//      drcSimulationTestHelper.send(releaseRightHandToHome);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       for (int i = 0; i < 3; i++)

@@ -22,7 +22,6 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -83,7 +82,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
    }
 
    // The default height seems to be a bit too low for the ramp
-   private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05, 1.0);
+//   private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05, 1.0);
    private final Random random = new Random(165163L);
 
 	@DeployableTestMethod(estimatedDuration = 71.2)
@@ -110,7 +109,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
-      drcSimulationTestHelper.send(comHeightPacket);
+//      drcSimulationTestHelper.send(comHeightPacket);
 
       setupCameraForWalkingOverRamp(scs);
       ThreadTools.sleep(1000);

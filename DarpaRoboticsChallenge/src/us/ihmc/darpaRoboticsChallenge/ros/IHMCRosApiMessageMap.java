@@ -11,17 +11,12 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
@@ -34,14 +29,14 @@ public class IHMCRosApiMessageMap
 {
    public static final Class[] PACKET_LIST =
    {
-	   HandPosePacket.class,
-	   ComHeightPacket.class,
-	   FootPosePacket.class,
+//	   HandPosePacket.class,
+//	   ComHeightPacket.class,
+//	   FootPosePacket.class,
 	   FootstepDataMessage.class,
 	   FootstepDataListMessage.class,
 	   FootstepStatus.class,
-	   ChestOrientationPacket.class,
-	   HeadOrientationPacket.class,
+//	   ChestOrientationPacket.class,
+//	   HeadOrientationPacket.class,
 	   PauseWalkingMessage.class,
 	   HighLevelStateMessage.class,
 	   ArmTrajectoryMessage.class,
@@ -59,12 +54,12 @@ public class IHMCRosApiMessageMap
 
    public static final Class[] INPUT_PACKET_LIST =
    {
-      HandPosePacket.class,
-      ComHeightPacket.class,
-      FootPosePacket.class,
+//      HandPosePacket.class,
+//      ComHeightPacket.class,
+//      FootPosePacket.class,
       FootstepDataListMessage.class,
-      ChestOrientationPacket.class,
-      HeadOrientationPacket.class,
+//      ChestOrientationPacket.class,
+//      HeadOrientationPacket.class,
       PauseWalkingMessage.class,
       HighLevelStateMessage.class,
       ArmTrajectoryMessage.class,
@@ -101,12 +96,12 @@ public class IHMCRosApiMessageMap
       MESSAGE_NAME_PACKET_MAP = invertMap(PACKET_MESSAGE_NAME_MAP);
 
       //inputs
-      PACKET_TO_TOPIC_MAP.put(HandPosePacket.class, "/control/hand_pose");
-      PACKET_TO_TOPIC_MAP.put(ComHeightPacket.class, "/control/com_height");
-      PACKET_TO_TOPIC_MAP.put(FootPosePacket.class, "/control/foot_pose");
+//      PACKET_TO_TOPIC_MAP.put(HandPosePacket.class, "/control/hand_pose");
+//      PACKET_TO_TOPIC_MAP.put(ComHeightPacket.class, "/control/com_height");
+//      PACKET_TO_TOPIC_MAP.put(FootPosePacket.class, "/control/foot_pose");
       PACKET_TO_TOPIC_MAP.put(FootstepDataListMessage.class, "/control/footstep_list");
-      PACKET_TO_TOPIC_MAP.put(ChestOrientationPacket.class, "/control/chest_orientation");
-      PACKET_TO_TOPIC_MAP.put(HeadOrientationPacket.class, "/control/head_orientation");
+//      PACKET_TO_TOPIC_MAP.put(ChestOrientationPacket.class, "/control/chest_orientation");
+//      PACKET_TO_TOPIC_MAP.put(HeadOrientationPacket.class, "/control/head_orientation");
       PACKET_TO_TOPIC_MAP.put(PauseWalkingMessage.class, "/control/pause_footstep_exec");
       PACKET_TO_TOPIC_MAP.put(HighLevelStateMessage.class, "/control/high_level_state");
       PACKET_TO_TOPIC_MAP.put(ArmTrajectoryMessage.class, "/control/arm_joint_trajectory");
