@@ -13,6 +13,9 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.atlas.behaviorTests.AtlasChestTrajectoryBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class,
+   us.ihmc.atlas.communication.producers.AtlasRobotConfigurationDataBufferTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCoursePlatformTest.class
 })
 
 public class AtlasCFlakyTestSuite

@@ -15,6 +15,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.darpaRoboticsChallenge.DRCConfigParametersTest.class,
    us.ihmc.darpaRoboticsChallenge.footstepGenerator.BasicFootstepValidityMetricTest.class,
    us.ihmc.darpaRoboticsChallenge.footstepGenerator.PathToFootstepGeneratorTest.class,
+   us.ihmc.darpaRoboticsChallenge.footstepGenerator.SwingHeightTrajectoryCalculatorTest.class,
    us.ihmc.darpaRoboticsChallenge.frictionCompensation.JointFrictionModelsHolderTest.class,
    us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.WheelRotationEstimatorTest.class,
    us.ihmc.darpaRoboticsChallenge.odometry.IcpCloud3DTest.class,

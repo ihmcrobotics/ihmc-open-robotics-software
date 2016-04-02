@@ -9,15 +9,18 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.VideoA)
+@TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseSteppingStonesTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseTrialsWalkingTaskTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseWobblyFootTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasPelvisLowGainsTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasPelvisLowGainsTest.class,
+   us.ihmc.atlas.packets.AtlasRobotConfigurationDataTest.class,
+   us.ihmc.atlas.posePlayback.AtlasPlaybackPoseSequenceTest.class,
+   us.ihmc.atlas.pushRecovery.AtlasPushRecoveryMultiStepTest.class
 })
 
-public class AtlasLVideoATestSuite
+public class AtlasNFastTestSuite
 {
    public static void main(String[] args)
    {

@@ -1,4 +1,4 @@
-package us.ihmc.atlas.generatedTestSuites;
+package us.ihmc.valkyrie.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
@@ -9,12 +9,14 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Slow)
+@TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
+   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseRampsTest.class,
+   us.ihmc.valkyrie.pushRecovery.ValkyriePushRecoveryTest.class
 })
 
-public class AtlasISlowTestSuite
+public class ValkyrieIFastTestSuite
 {
    public static void main(String[] args)
    {
