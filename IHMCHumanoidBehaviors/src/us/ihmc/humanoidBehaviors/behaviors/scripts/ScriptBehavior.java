@@ -37,7 +37,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
@@ -391,7 +390,7 @@ public class ScriptBehavior extends BehaviorInterface
       {
          ret = PrimitiveBehaviorType.HAND_TRAJECTORY;
       }
-      else if (scriptObject instanceof FootStatePacket)
+      else if (scriptObject instanceof EndEffectorLoadBearingMessage)
       {
          ret = PrimitiveBehaviorType.END_EFFECTOR_LOAD_BEARING;
       }
