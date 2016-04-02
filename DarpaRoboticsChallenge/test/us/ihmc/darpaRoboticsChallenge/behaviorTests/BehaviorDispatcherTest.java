@@ -98,6 +98,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       // Do this here in case a test fails. That way the memory will be recycled.
       if (drcSimulationTestHelper != null)
       {
+         behaviorDispatcher.closeAndDispose();
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
          communicationBridge = null;
