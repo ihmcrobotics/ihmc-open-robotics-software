@@ -18,7 +18,6 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.BoundingBox3d;
@@ -409,8 +408,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       double heightOffset = 0.12;
       double heightTrajectoryTime = 0.5;
-      ComHeightPacket comHeightPacket = new ComHeightPacket(heightOffset, heightTrajectoryTime);
-      drcSimulationTestHelper.send(comHeightPacket);
+//      ComHeightPacket comHeightPacket = new ComHeightPacket(heightOffset, heightTrajectoryTime);
+//      drcSimulationTestHelper.send(comHeightPacket);
 
 	   success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 

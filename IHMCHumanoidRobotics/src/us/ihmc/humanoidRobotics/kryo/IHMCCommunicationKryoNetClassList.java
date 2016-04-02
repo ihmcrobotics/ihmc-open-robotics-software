@@ -121,7 +121,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulat
 import us.ihmc.humanoidRobotics.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
@@ -302,9 +301,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(WalkingStatusMessage.Status.class);
       registerPacketClass(AbortWalkingMessage.class);
       
-      // Com Height
-      registerPacketClass(ComHeightPacket.class);
-
       //SCS
       registerPacketClass(SCSListenerPacket.class);
       

@@ -23,7 +23,6 @@ import ihmc_msgs.ArmJointTrajectoryPacketMessage;
 import ihmc_msgs.AtlasDesiredPumpPSIPacketMessage;
 import ihmc_msgs.AtlasElectricMotorEnablePacketMessage;
 import ihmc_msgs.AtlasWristSensorCalibrationRequestPacketMessage;
-import ihmc_msgs.ComHeightPacketMessage;
 import ihmc_msgs.FingerStatePacketMessage;
 import ihmc_msgs.FootstepDataListMessage;
 import ihmc_msgs.FootstepDataMessage;
@@ -56,7 +55,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSen
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus.Status;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
@@ -76,11 +74,11 @@ public class DRCROSMessageConverter
       /*
       if (packet instanceof HandPosePacket)
          return convertToRosMessage((HandPosePacket) packet);
-      else*/ if (packet instanceof ComHeightPacket)
+      else if (packet instanceof ComHeightPacket)
          return convertToRosMessage((ComHeightPacket) packet);
 //      else if (packet instanceof FootPosePacket)
 //         return convertToRosMessage((FootPosePacket) packet);
-      else if (packet instanceof us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage)
+      else*/ if (packet instanceof us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage)
          return convertToRosMessage((us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage) packet);
       else if (packet instanceof us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage)
          return convertToRosMessage((us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage) packet);
@@ -126,8 +124,8 @@ public class DRCROSMessageConverter
    {
       if (message instanceof HandPosePacketMessage)
          return convertToPacket((HandPosePacketMessage) message);
-      else if (message instanceof ComHeightPacketMessage)
-         return convertToPacket((ComHeightPacketMessage) message);
+//      else if (message instanceof ComHeightPacketMessage)
+//         return convertToPacket((ComHeightPacketMessage) message);
 //      else if (message instanceof FootPosePacketMessage)
 //         return convertToPacket((FootPosePacketMessage) message);
       else if (message instanceof FootstepDataMessage)
@@ -403,22 +401,22 @@ public class DRCROSMessageConverter
 //      return ret;
 //   }
 
-   public static ComHeightPacketMessage convertToRosMessage(ComHeightPacket packet)
-   {
-      ComHeightPacketMessage ret = messageFactory.newFromType("ihmc_msgs/ComHeightPacketMessage");
-      ret.setUniqueId(packet.getUniqueId());
-      ret.setHeightOffset(packet.getHeightOffset());
-      ret.setTrajectoryTime(packet.getTrajectoryTime());
-
-      return ret;
-   }
-
-   public static ComHeightPacket convertToPacket(ComHeightPacketMessage message)
-   {
-      ComHeightPacket ret = new ComHeightPacket(message.getHeightOffset(), message.getTrajectoryTime());ret.setUniqueId(message.getUniqueId());
-
-      return ret;
-   }
+//   public static ComHeightPacketMessage convertToRosMessage(ComHeightPacket packet)
+//   {
+//      ComHeightPacketMessage ret = messageFactory.newFromType("ihmc_msgs/ComHeightPacketMessage");
+//      ret.setUniqueId(packet.getUniqueId());
+//      ret.setHeightOffset(packet.getHeightOffset());
+//      ret.setTrajectoryTime(packet.getTrajectoryTime());
+//
+//      return ret;
+//   }
+//
+//   public static ComHeightPacket convertToPacket(ComHeightPacketMessage message)
+//   {
+//      ComHeightPacket ret = new ComHeightPacket(message.getHeightOffset(), message.getTrajectoryTime());ret.setUniqueId(message.getUniqueId());
+//
+//      return ret;
+//   }
 
 //   public static FootPosePacketMessage convertToRosMessage(FootPosePacket packet)
 //   {
