@@ -9,6 +9,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
@@ -243,6 +244,11 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    public void get(YoFramePoint positionToPack)
    {
       positionToPack.set(currentPosition);
+   }
+   
+   public void getProjectedOntoXYPlane(YoFramePoint2d positionToPack)
+   {
+      positionToPack.set(currentPosition.getX(), currentPosition.getY());
    }
 
    public void get(Point3d positionToPack)
