@@ -857,13 +857,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getDesiredTouchdownAcceleration()
    {
-      if(target == DRCRobotModel.RobotTarget.GAZEBO)
+      switch(target)
       {
+      case REAL_ROBOT:
+      case GAZEBO:
          return -1.0;
-      }
-      else
-      {
-         return 0.0;
+      default:
+         return -2.0;
       }
    }
 
