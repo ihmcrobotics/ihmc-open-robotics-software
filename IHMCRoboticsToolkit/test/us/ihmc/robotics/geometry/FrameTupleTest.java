@@ -865,9 +865,8 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePoint.interpolate(point1, point2, weightedAverage);
    }
 
-   // Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
-	@Test(timeout=300000,expected = RuntimeException.class)
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout=300000)
    public final void testFramePoint()
    {
       createFrameTuple(theFrame);
@@ -876,8 +875,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       createFrameTuple(referenceFrame);
    }
 
-   // Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public final void testFramePoint1()
    {
@@ -888,9 +886,8 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       createFrameTuple(referenceFrame, point);
    }
 
-   // Doesn't throw exception since FrameTuple has been created. Not sure if it should throw an exception yet. Sylvain
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
-	@Test(timeout=300000,expected = RuntimeException.class)
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout=300000)
    public final void testFramePoint2()
    {
       createFrameTuple(theFrame);
