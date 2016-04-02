@@ -11,6 +11,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
@@ -63,6 +64,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @Ignore("Needs to be reimplemented")
    @DeployableTestMethod(estimatedDuration = 192.2)
    @Test(timeout = 960000)
    public void testVariousHandstepsOnWalls() throws SimulationExceededMaximumTimeException
