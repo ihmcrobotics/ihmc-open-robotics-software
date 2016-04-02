@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
-import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -13,6 +11,8 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
  * Provides the function adjustFootstep which takes a footstep and a capture region
@@ -36,7 +36,8 @@ public class FootstepAdjustor
    private FootstepAdjusterVisualizer footstepAdjusterVisualizer = null;
    private SteppingStones steppingStones = null;
 
-   public FootstepAdjustor(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FootstepAdjustor(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       parentRegistry.addChild(registry);
       if (yoGraphicsListRegistry != null && VISUALIZE)
@@ -117,18 +118,18 @@ public class FootstepAdjustor
       // move the position of the footstep to the capture region centroid
       nextStep2d.setIncludingFrame(captureRegion.getCentroid());
       nextStep2d.changeFrame(footstep.getParentFrame());
-      
+
       // move the position as far away from the projectionPoint as possible
       direction.setIncludingFrame(nextStep2d);
       direction.sub(projection);
       direction.normalize();
       direction.scale(10.0);
       nextStep2d.add(direction);
-      
+
       nextStep2d.changeFrame(captureRegion.getReferenceFrame());
       captureRegion.orthogonalProjection(nextStep2d);
       nextStep2d.changeFrame(footstep.getParentFrame());
-      
+
       footstep.setPositionChangeOnlyXY(nextStep2d);
 
       calculateTouchdownFootPolygon(footstep, captureRegion.getReferenceFrame(), touchdownFootPolygon);

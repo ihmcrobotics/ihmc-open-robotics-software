@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Slow)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.ValkyrieObstacleCourseTrialsTerrainTest.class
+   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseTrialsTerrainTest.class
 })
 
 public class ValkyrieBSlowTestSuite

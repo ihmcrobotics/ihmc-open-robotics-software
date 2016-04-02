@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
-import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
@@ -46,11 +44,6 @@ public class DRCSCSInitialSetup
    {      
       this.groundProfile3D = groundProfile;
       this.simulateDT = simulateDT;
-   }
-
-   public DRCSCSInitialSetup(TerrainType terrainType, double simulateDT)
-   {
-      this(CommonTerrain.setUpTerrain(terrainType), simulateDT);
    }
 
    public DRCSCSInitialSetup(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, double simulateDT)

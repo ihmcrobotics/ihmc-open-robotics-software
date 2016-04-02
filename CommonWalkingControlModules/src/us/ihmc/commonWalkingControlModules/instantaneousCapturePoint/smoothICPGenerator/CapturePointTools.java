@@ -10,7 +10,9 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector2d;
 
 /**
  * Note: CMP stands for Centroidal Momentum Pivot
@@ -30,7 +32,8 @@ public class CapturePointTools
     * @param startStanding If true, the first constant CMP will be between the 2 first footsteps, else it will at the first footstep. 
     * @param endStanding If true, the last constant CMP will be between the 2 last footsteps, else it will at the last footstep. 
     */
-   public static void computeConstantCMPs(ArrayList<YoFramePoint> constantCMPsToPack, RecyclingArrayList<FramePoint> footstepList, int firstFootstepIndex, int lastFootstepIndex, boolean startStanding, boolean endStanding)
+   public static void computeConstantCMPs(ArrayList<YoFramePoint> constantCMPsToPack, RecyclingArrayList<FramePoint> footstepList, int firstFootstepIndex,
+         int lastFootstepIndex, boolean startStanding, boolean endStanding)
    {
       if (startStanding)
       {
@@ -63,7 +66,8 @@ public class CapturePointTools
     * @param firstFootstepIndex Integer describing the index of the first footstep to consider when laying out the CMP's
     * @param lastFootstepIndex Integer describing the index of the last footstep to consider when laying out the CMP's
     */
-   public static void computeConstantCMPsOnFeet(ArrayList<YoFramePoint> constantCMPsToPack, RecyclingArrayList<FramePoint> footstepList, int firstFootstepIndex, int lastFootstepIndex)
+   public static void computeConstantCMPsOnFeet(ArrayList<YoFramePoint> constantCMPsToPack, RecyclingArrayList<FramePoint> footstepList, int firstFootstepIndex,
+         int lastFootstepIndex)
    {
       for (int i = firstFootstepIndex; i <= lastFootstepIndex; i++)
       {
@@ -94,11 +98,12 @@ public class CapturePointTools
     * @param stepTime equals to the single plus double support durations
     * @param omega0
     */
-   public static void computeDesiredCornerPoints(ArrayList<? extends YoFramePoint> cornerPointsToPack, ArrayList<YoFramePoint> constantCMPs, boolean skipFirstCornerPoint, double stepTime, double omega0)
+   public static void computeDesiredCornerPoints(ArrayList<? extends YoFramePoint> cornerPointsToPack, ArrayList<YoFramePoint> constantCMPs,
+         boolean skipFirstCornerPoint, double stepTime, double omega0)
    {
-      double exponentialTerm = Math.exp(- omega0 * stepTime);
+      double exponentialTerm = Math.exp(-omega0 * stepTime);
       YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
-      
+
       int firstCornerPointIndex = skipFirstCornerPoint ? 1 : 0;
       for (int i = cornerPointsToPack.size() - 1; i >= firstCornerPointIndex; i--)
       {
@@ -106,7 +111,7 @@ public class CapturePointTools
          YoFramePoint initialCMP = constantCMPs.get(i);
 
          cornerPoint.interpolate(initialCMP, nextCornerPoint, exponentialTerm);
-         
+
          nextCornerPoint = cornerPoint;
       }
    }
@@ -122,16 +127,17 @@ public class CapturePointTools
     * @param timeInPercentSpentOnExitCMPs
     * @param omega0
     */
-   public static void computeDesiredCornerPoints(ArrayList<? extends YoFramePoint> entryCornerPointsToPack, ArrayList<? extends YoFramePoint> exitCornerPointsToPack,
-         ArrayList<YoFramePoint> entryCMPs, ArrayList<YoFramePoint> exitCMPs, double stepTime, double timeInPercentSpentOnExitCMPs, double omega0)
+   public static void computeDesiredCornerPoints(ArrayList<? extends YoFramePoint> entryCornerPointsToPack,
+         ArrayList<? extends YoFramePoint> exitCornerPointsToPack, ArrayList<YoFramePoint> entryCMPs, ArrayList<YoFramePoint> exitCMPs, double stepTime,
+         double timeInPercentSpentOnExitCMPs, double omega0)
    {
       double timeSpentOnExitCMP = stepTime * timeInPercentSpentOnExitCMPs;
       double timeSpentOnEntryCMP = stepTime * (1.0 - timeInPercentSpentOnExitCMPs);
-      double entryExponentialTerm = Math.exp(- omega0 * timeSpentOnEntryCMP);
-      double exitExponentialTerm = Math.exp(- omega0 * timeSpentOnExitCMP);
+      double entryExponentialTerm = Math.exp(-omega0 * timeSpentOnEntryCMP);
+      double exitExponentialTerm = Math.exp(-omega0 * timeSpentOnExitCMP);
 
       YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
-      
+
       for (int i = exitCornerPointsToPack.size() - 1; i >= 0; i--)
       {
          YoFramePoint exitCornerPoint = exitCornerPointsToPack.get(i);
@@ -141,7 +147,7 @@ public class CapturePointTools
 
          exitCornerPoint.interpolate(exitCMP, nextEntryCornerPoint, exitExponentialTerm);
          entryCornerPoint.interpolate(entryCMP, exitCornerPoint, entryExponentialTerm);
-         
+
          nextEntryCornerPoint = entryCornerPoint;
       }
    }
@@ -156,10 +162,10 @@ public class CapturePointTools
     * @param omega0
     * @param stepTime
     */
-   public static void computeConstantCMPFromInitialAndFinalCapturePointLocations(YoFramePoint cmpToPack,
-         YoFramePoint finalDesiredCapturePoint, YoFramePoint initialCapturePoint, double omega0, double stepTime)
+   public static void computeConstantCMPFromInitialAndFinalCapturePointLocations(YoFramePoint cmpToPack, YoFramePoint finalDesiredCapturePoint,
+         YoFramePoint initialCapturePoint, double omega0, double stepTime)
    {
-      double exponentialTerm = Math.exp(- omega0 * stepTime);
+      double exponentialTerm = Math.exp(-omega0 * stepTime);
       cmpToPack.scaleSub(exponentialTerm, finalDesiredCapturePoint, initialCapturePoint);
       cmpToPack.scale(1.0 / (exponentialTerm - 1.0));
    }
@@ -174,7 +180,8 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointToPack
     */
-   public static void computeDesiredCapturePointPosition(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP, YoFramePoint desiredCapturePointToPack)
+   public static void computeDesiredCapturePointPosition(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP,
+         YoFramePoint desiredCapturePointToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
          desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
@@ -192,7 +199,8 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointToPack
     */
-   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, FramePoint desiredCapturePointToPack)
+   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP,
+         FramePoint desiredCapturePointToPack)
    {
       desiredCapturePointToPack.setToZero(initialCapturePoint.getReferenceFrame());
 
@@ -212,7 +220,8 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointToPack
     */
-   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, YoFramePoint desiredCapturePointToPack)
+   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP,
+         YoFramePoint desiredCapturePointToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
          desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
@@ -230,7 +239,8 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointVelocityToPack
     */
-   public static void computeDesiredCapturePointVelocity(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP, YoFrameVector desiredCapturePointVelocityToPack)
+   public static void computeDesiredCapturePointVelocity(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP,
+         YoFrameVector desiredCapturePointVelocityToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
          desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
@@ -248,7 +258,8 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointVelocityToPack
     */
-   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, FrameVector desiredCapturePointVelocityToPack)
+   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP,
+         FrameVector desiredCapturePointVelocityToPack)
    {
       desiredCapturePointVelocityToPack.setToZero(initialCapturePoint.getReferenceFrame());
 
@@ -268,7 +279,8 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointVelocityToPack
     */
-   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, YoFrameVector desiredCapturePointVelocityToPack)
+   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP,
+         YoFrameVector desiredCapturePointVelocityToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
          desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
@@ -284,7 +296,8 @@ public class CapturePointTools
     * @param desiredCapturePointVelocity
     * @param desiredCapturePointAccelerationToPack
     */
-   public static void computeDesiredCapturePointAcceleration(double omega0, YoFrameVector desiredCapturePointVelocity, YoFrameVector desiredCapturePointAccelerationToPack)
+   public static void computeDesiredCapturePointAcceleration(double omega0, YoFrameVector desiredCapturePointVelocity,
+         YoFrameVector desiredCapturePointAccelerationToPack)
    {
       desiredCapturePointAccelerationToPack.setAndMatchFrame(desiredCapturePointVelocity.getFrameTuple());
       desiredCapturePointAccelerationToPack.scale(omega0);
@@ -300,7 +313,8 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointAccelerationToPack
     */
-   public static void computeDesiredCapturePointAcceleration(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP, YoFrameVector desiredCapturePointAccelerationToPack)
+   public static void computeDesiredCapturePointAcceleration(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP,
+         YoFrameVector desiredCapturePointAccelerationToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
          desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
@@ -318,7 +332,8 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointAccelerationToPack
     */
-   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, FrameVector desiredCapturePointAccelerationToPack)
+   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP,
+         FrameVector desiredCapturePointAccelerationToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
          desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
@@ -336,7 +351,8 @@ public class CapturePointTools
     * @param initialCMP
     * @param desiredCapturePointAccelerationToPack
     */
-   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, YoFrameVector desiredCapturePointAccelerationToPack)
+   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP,
+         YoFrameVector desiredCapturePointAccelerationToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
          desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
@@ -353,9 +369,10 @@ public class CapturePointTools
     * @param omega0
     * @param desiredCMPToPack
     */
-   public static void computeDesiredCentroidalMomentumPivot(YoFramePoint desiredCapturePointPosition, YoFrameVector desiredCapturePointVelocity, double omega0, YoFramePoint desiredCMPToPack)
+   public static void computeDesiredCentroidalMomentumPivot(YoFramePoint desiredCapturePointPosition, YoFrameVector desiredCapturePointVelocity, double omega0,
+         YoFramePoint desiredCMPToPack)
    {
-      desiredCMPToPack.scaleAdd(- 1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
+      desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
    }
 
    /**
@@ -367,9 +384,10 @@ public class CapturePointTools
     * @param omega0
     * @param desiredCMPToPack
     */
-   public static void computeDesiredCentroidalMomentumPivot(FramePoint desiredCapturePointPosition, FrameVector desiredCapturePointVelocity, double omega0, YoFramePoint desiredCMPToPack)
+   public static void computeDesiredCentroidalMomentumPivot(YoFramePoint2d desiredCapturePointPosition, YoFrameVector2d desiredCapturePointVelocity, double omega0,
+         YoFramePoint2d desiredCMPToPack)
    {
-      desiredCMPToPack.scaleAdd(- 1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
+      desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
    }
 
    /**
@@ -381,9 +399,25 @@ public class CapturePointTools
     * @param omega0
     * @param desiredCMPToPack
     */
-   public static void computeDesiredCentroidalMomentumPivot(FramePoint2d desiredCapturePointPosition, FrameVector2d desiredCapturePointVelocity, double omega0, FramePoint2d desiredCMPToPack)
+   public static void computeDesiredCentroidalMomentumPivot(FramePoint desiredCapturePointPosition, FrameVector desiredCapturePointVelocity, double omega0,
+         YoFramePoint desiredCMPToPack)
    {
-      desiredCMPToPack.scaleAdd(- 1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
+      desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
+   }
+
+   /**
+    * Computes the desired centroidal momentum pivot by,
+    * CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
+    * 
+    * @param desiredCapturePointPosition
+    * @param desiredCapturePointVelocity
+    * @param omega0
+    * @param desiredCMPToPack
+    */
+   public static void computeDesiredCentroidalMomentumPivot(FramePoint2d desiredCapturePointPosition, FrameVector2d desiredCapturePointVelocity, double omega0,
+         FramePoint2d desiredCMPToPack)
+   {
+      desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
    }
 
    /**
@@ -395,12 +429,48 @@ public class CapturePointTools
     * @param desiredCapturePointVelocity
     * @return
     */
-   public static double computeDistanceToCapturePointFreezeLineIn2d(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition, FrameVector desiredCapturePointVelocity)
+   public static double computeDistanceToCapturePointFreezeLineIn2d(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition,
+         FrameVector desiredCapturePointVelocity)
    {
       currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition);
       desiredCapturePointVelocity.checkReferenceFrameMatch(desiredCapturePointPosition);
 
-      double desiredCapturePointVelocityMagnitude = Math.sqrt(MathTools.square(desiredCapturePointVelocity.getX()) + MathTools.square(desiredCapturePointVelocity.getY()));
+      double desiredCapturePointVelocityMagnitude = Math
+            .sqrt(MathTools.square(desiredCapturePointVelocity.getX()) + MathTools.square(desiredCapturePointVelocity.getY()));
+
+      if (desiredCapturePointVelocityMagnitude == 0.0)
+      {
+         return Double.NaN;
+      }
+      else
+      {
+         double normalizedCapturePointVelocityX = desiredCapturePointVelocity.getX() / desiredCapturePointVelocityMagnitude;
+         double normalizedCapturePointVelocityY = desiredCapturePointVelocity.getY() / desiredCapturePointVelocityMagnitude;
+
+         double capturePointErrorX = currentCapturePointPosition.getX() - desiredCapturePointPosition.getX();
+         double capturePointErrorY = currentCapturePointPosition.getY() - desiredCapturePointPosition.getY();
+
+         return -(normalizedCapturePointVelocityX * capturePointErrorX + normalizedCapturePointVelocityY * capturePointErrorY);
+      }
+   }
+
+   /**
+    * Compute the distance along the capture point guide line from the 
+    * current capture point position to the desired capture point position.
+    * 
+    * @param currentCapturePointPosition
+    * @param desiredCapturePointPosition
+    * @param desiredCapturePointVelocity
+    * @return
+    */
+   public static double computeDistanceToCapturePointFreezeLineIn2d(FramePoint2d currentCapturePointPosition, FramePoint2d desiredCapturePointPosition,
+         FrameVector2d desiredCapturePointVelocity)
+   {
+      currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition);
+      desiredCapturePointVelocity.checkReferenceFrameMatch(desiredCapturePointPosition);
+
+      double desiredCapturePointVelocityMagnitude = Math
+            .sqrt(MathTools.square(desiredCapturePointVelocity.getX()) + MathTools.square(desiredCapturePointVelocity.getY()));
 
       if (desiredCapturePointVelocityMagnitude == 0.0)
       {
@@ -432,5 +502,26 @@ public class CapturePointTools
    {
       projectedCapturePoint.set(actualICP.getX(), actualICP.getY());
       capturePointTrajectoryLine.orthogonalProjection(projectedCapturePoint);
+   }
+
+   /**
+    * Compute the capture point position at a given time.
+    * x<sup>ICP<sub>des</sub></sup> = (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0 t</sup>)x<sup>CMP<sub>0</sub></sup>
+    * 
+    * @param omega0
+    * @param time
+    * @param initialCapturePoint
+    * @param initialCMP
+    * @param desiredCapturePointToPack
+    */
+   public static void computeCapturePointPosition(double omega0, double time, FramePoint2d initialCapturePoint, FramePoint2d initialCMP,
+         FramePoint2d desiredCapturePointToPack)
+   {
+      desiredCapturePointToPack.setToZero(initialCapturePoint.getReferenceFrame());
+
+      if (initialCapturePoint.distance(initialCMP) > EPSILON)
+         desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
+      else
+         desiredCapturePointToPack.set(initialCapturePoint);
    }
 }

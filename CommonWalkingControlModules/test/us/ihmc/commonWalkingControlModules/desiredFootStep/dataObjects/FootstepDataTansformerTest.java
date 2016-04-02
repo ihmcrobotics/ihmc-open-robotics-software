@@ -14,14 +14,14 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,13 +34,13 @@ public class FootstepDataTansformerTest
 {
    private static Random random = new Random(100L);
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void test()
    {
       RigidBodyTransform transform3D;
-      FootstepData originalFootstepData;
-      FootstepData transformedFootstepData;
+      FootstepDataMessage originalFootstepData;
+      FootstepDataMessage transformedFootstepData;
 
       int numberOfTests = 1;
 
@@ -49,16 +49,16 @@ public class FootstepDataTansformerTest
          originalFootstepData = getTestFootstepData();
          transform3D = new RigidBodyTransform();
          transform3D = RigidBodyTransform.generateRandomTransform(random);
-         
+
          transformedFootstepData = originalFootstepData.transform(transform3D);
 
          performEqualsTestsWithTransform(originalFootstepData, transform3D, transformedFootstepData);
       }
    }
 
-   private static FootstepData getTestFootstepData()
+   private static FootstepDataMessage getTestFootstepData()
    {
-      FootstepData ret = new FootstepData();
+      FootstepDataMessage ret = new FootstepDataMessage();
       ret.robotSide = RobotSide.LEFT;
       ret.location = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
       AxisAngle4d axisAngle = RandomTools.generateRandomRotation(random);
@@ -72,11 +72,12 @@ public class FootstepDataTansformerTest
             listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
          }
       }
-      
+
       return ret;
    }
 
-   private static void performEqualsTestsWithTransform(FootstepData footstepData, RigidBodyTransform transform3D, FootstepData transformedFootstepData)
+   private static void performEqualsTestsWithTransform(FootstepDataMessage footstepData, RigidBodyTransform transform3D,
+         FootstepDataMessage transformedFootstepData)
    {
       double distance;
 
@@ -93,8 +94,8 @@ public class FootstepDataTansformerTest
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testDistance()
    {
       Point3d startPoint = new Point3d(2.0, 6.0, 5.0);

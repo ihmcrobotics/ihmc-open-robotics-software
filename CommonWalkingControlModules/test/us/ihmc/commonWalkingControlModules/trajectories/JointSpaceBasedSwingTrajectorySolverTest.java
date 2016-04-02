@@ -22,14 +22,14 @@ import us.ihmc.robotics.trajectories.ParametricSplineTrajectorySolver;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraph;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraphGroup;
 import us.ihmc.simulationconstructionset.util.graphs.JFreePlot;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 /**
  * Created by agrabertilton on 2/5/15.
  */
-@DeployableTestClass(targets={TestPlanTarget.Exclude})
+@DeployableTestClass(targets = {TestPlanTarget.Exclude})
 public class JointSpaceBasedSwingTrajectorySolverTest
 {
    @DeployableTestMethod(estimatedDuration = 0.1)
@@ -52,12 +52,12 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       double[] endVelocity = {0.0};
       double[] endAcceleration = {0.0};
 
-      double middleTime =  startTime + (0.5) * (endTime - startTime);
+      double middleTime = startTime + (0.5) * (endTime - startTime);
       double highKneeTime = startTime + (0.75) * (endTime - startTime);
       double[] highKneePosition = {1.0};
 
       int numberOfConstraint = 8;
-      ParametricSplineTrajectorySolver solver = new ParametricSplineTrajectorySolver(3,3, numberOfConstraint, numberOfJoints);
+      ParametricSplineTrajectorySolver solver = new ParametricSplineTrajectorySolver(3, 3, numberOfConstraint, numberOfJoints);
       solver.setPositionConstraint(startTime, startPosition);
       solver.setVelocityConstraint(startTime, startVelocity);
       solver.setAccelerationConstraint(startTime, startAcceleration);
@@ -77,12 +77,14 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       assertArrayEquals(endVelocity, trajectory.getVelocities(endTime), tolerance);
       assertArrayEquals(endAcceleration, trajectory.getAccelerations(endTime), tolerance);
 
-      if (VISUALIZE){
+      if (VISUALIZE)
+      {
          List<Point2d> positionValues = new ArrayList<Point2d>();
          int discretization = 100;
          double time;
          double position;
-         for (int i = 0; i <= discretization; i++){
+         for (int i = 0; i <= discretization; i++)
+         {
             time = startTime + (endTime - startTime) * (i * 1.0 / discretization);
             position = (trajectory.getPositions(time))[0];
             positionValues.add(new Point2d(time, position));
@@ -118,24 +120,24 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       double startPelvis = 0;
       double endPelvis = 0;
 
-
-      double[] startPosition = {Math.PI/8, 0.0};
+      double[] startPosition = {Math.PI / 8, 0.0};
       double[] startVelocity = {0.0, 0.0};
       double[] startAcceleration = {0.0, 0.0};
 
-      double[] endPosition = {-Math.PI/8, 0.0}; //Math.PI/4};
+      double[] endPosition = {-Math.PI / 8, 0.0}; //Math.PI/4};
       double[] endVelocity = {0.0, 0.0};
       double[] endAcceleration = {0.0, 0.0};
 
-      double middleTime  = (startTime+ endTime)/2.0;
-      double[] middlePosition = {-Math.PI/8, Math.PI/2};
-      double highKneeBend = Math.PI/2;
-      double[] highKneePosition = {-highKneeBend/2.0 + endPosition[0]/2, highKneeBend};
+      double middleTime = (startTime + endTime) / 2.0;
+      double[] middlePosition = {-Math.PI / 8, Math.PI / 2};
+      double highKneeBend = Math.PI / 2;
+      double[] highKneePosition = {-highKneeBend / 2.0 + endPosition[0] / 2, highKneeBend};
 
-      ParametricSplineTrajectorySolver solver = new ParametricSplineTrajectorySolver(3,3,7, numberOfJoints);
+      ParametricSplineTrajectorySolver solver = new ParametricSplineTrajectorySolver(3, 3, 7, numberOfJoints);
       int numberOfPoints = solver.getNumberOfSplines() + 1;
       double[] times = new double[numberOfPoints];
-      for (int i = 0; i < times.length; i++){
+      for (int i = 0; i < times.length; i++)
+      {
          times[i] = Double.NaN;
       }
       times[0] = startTime;
@@ -151,7 +153,6 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       solver.setAccelerationConstraint(endTime, endAcceleration);
       solver.setPositionConstraint(middleTime, middlePosition);
 
-
       ParametricSplineTrajectory trajectory = solver.computeTrajectory();
 
       assertArrayEquals(startPosition, trajectory.getPositions(startTime), tolerance);
@@ -162,7 +163,8 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       assertArrayEquals(endVelocity, trajectory.getVelocities(endTime), tolerance);
       assertArrayEquals(endAcceleration, trajectory.getAccelerations(endTime), tolerance);
 
-      if (VISUALIZE){
+      if (VISUALIZE)
+      {
          List<double[]> positionValues = new ArrayList<double[]>();
          ArrayList<Point2d> pelvisPositions = new ArrayList<Point2d>();
 
@@ -172,17 +174,18 @@ public class JointSpaceBasedSwingTrajectorySolverTest
          double[] currentPositions;
          double[] currentVelocities;
          double[] currentAcceleratinos;
-         double[] timeValues = new double[discretization+1];
-         double[] hipAngles = new double[discretization+1];
-         double[] kneeAngles = new double[discretization+1];
-         double[] hipVelocities = new double[discretization+1];
-         double[] kneeVelocities = new double[discretization+1];
-         double[] hipAccelerations = new double[discretization+1];
-         double[] kneeAccelerations = new double[discretization+1];
+         double[] timeValues = new double[discretization + 1];
+         double[] hipAngles = new double[discretization + 1];
+         double[] kneeAngles = new double[discretization + 1];
+         double[] hipVelocities = new double[discretization + 1];
+         double[] kneeVelocities = new double[discretization + 1];
+         double[] hipAccelerations = new double[discretization + 1];
+         double[] kneeAccelerations = new double[discretization + 1];
 
-         for (int i = 0; i <= discretization; i++){
+         for (int i = 0; i <= discretization; i++)
+         {
             time = startTime + (endTime - startTime) * (i * 1.0 / discretization);
-            pelvisPositions.add(new Point2d(startPelvis + (endPelvis - startPelvis) * (i* 1.0/discretization), 0));
+            pelvisPositions.add(new Point2d(startPelvis + (endPelvis - startPelvis) * (i * 1.0 / discretization), 0));
             currentPositions = trajectory.getPositions(time);
             currentVelocities = trajectory.getVelocities(time);
             currentAcceleratinos = trajectory.getAccelerations(time);
@@ -218,7 +221,6 @@ public class JointSpaceBasedSwingTrajectorySolverTest
          kneeVelocityPlot.setColor(Color.GREEN);
          kneeAccelerationPlot.setColor(Color.GREEN);
 
-
          jointPositionGraph.addPlot(hipAnglePlot);
          jointPositionGraph.addPlot(kneeAnglePlot);
          jointVelocityGraph.addPlot(hipVelocityPlot);
@@ -248,7 +250,8 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       }
    }
 
-   private void visualizeInvertedPendulum(double length1, double length2, ArrayList<Point2d> hipPositions, List<double[]> jointAngles){
+   private void visualizeInvertedPendulum(double length1, double length2, ArrayList<Point2d> hipPositions, List<double[]> jointAngles)
+   {
       assertTrue(hipPositions.size() == jointAngles.size());
       Plotter p = new Plotter();
       Point2d hipPosition = new Point2d();
@@ -256,10 +259,11 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       Point2d anklePosition = new Point2d();
 
       int index = 0;
-      for (double[] jointAngleSet : jointAngles){
+      for (double[] jointAngleSet : jointAngles)
+      {
          hipPosition = hipPositions.get(index);
-         kneePosition.setX(hipPosition.x -length1 * Math.sin(jointAngleSet[0]));
-         kneePosition.setY(hipPosition.y -length1 * Math.cos(jointAngleSet[0]));
+         kneePosition.setX(hipPosition.x - length1 * Math.sin(jointAngleSet[0]));
+         kneePosition.setY(hipPosition.y - length1 * Math.cos(jointAngleSet[0]));
          anklePosition.setX(kneePosition.x - length2 * Math.sin(jointAngleSet[0] + jointAngleSet[1]));
          anklePosition.setY(kneePosition.y - length2 * Math.cos(jointAngleSet[0] + jointAngleSet[1]));
 
@@ -284,15 +288,17 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       f.setVisible(true);
    }
 
-
-   private void plotValues(List<Point2d> points){
+   private void plotValues(List<Point2d> points)
+   {
       plotValues(points, Color.blue);
    }
 
-   private void plotValues(List<Point2d> points, Color color){
+   private void plotValues(List<Point2d> points, Color color)
+   {
       Plotter p = new Plotter();
       int index = 0;
-      for (Point2d point: points){
+      for (Point2d point : points)
+      {
          p.createAndAddPointArtifact("Point" + (index++), point, color);
       }
 

@@ -17,7 +17,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior.WalkingOrientation;
@@ -87,9 +87,9 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
    @Before
    public void setUp()
    {
-      DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null, DRCObstacleCourseStartingLocation.DEFAULT,
-              simulationTestingParameters, getRobotModel());
+      FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
+            simulationTestingParameters, getRobotModel());
    }
 
    @DeployableTestMethod(estimatedDuration = 98.7)
@@ -197,7 +197,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       {
          footstep.getPose2d(currentFootstepPose);
          assertEquals("Current footstep orientation does not match start orientation.", 0.0, currentFootstepPose.getOrientationDistance(startMidFeetPose2d),
-                      ORIENTATION_THRESHOLD);
+               ORIENTATION_THRESHOLD);
       }
 
       PrintTools.debug(this, "Starting to Execute Behavior");
@@ -233,7 +233,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       {
          footsteps.get(numberOfFootsteps - numberOfStepsFromTarget - 1).getPose2d(currentFootstepPose);
          assertEquals("Current footstep orientation does not match end orientation.", 0.0, currentFootstepPose.getOrientationDistance(targetMidFeetPose2d),
-                      ORIENTATION_THRESHOLD);
+               ORIENTATION_THRESHOLD);
       }
 
       PrintTools.debug(this, "Starting to Execute Behavior");
@@ -276,11 +276,10 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
             numberOfStepsAlignedWithMeanOrientation++;
       }
 
-      PrintTools.info(this,
-                      "Total number of footsteps: " + numberOfFootsteps + ", number Of Footsteps aligned with mean orientation: "
-                      + numberOfStepsAlignedWithMeanOrientation);
+      PrintTools.info(this, "Total number of footsteps: " + numberOfFootsteps + ", number Of Footsteps aligned with mean orientation: "
+            + numberOfStepsAlignedWithMeanOrientation);
       assertTrue("Number Of Footsteps aligned with mean orientation !> total number of footsteps",
-                 numberOfStepsAlignedWithMeanOrientation > 0.5 * numberOfFootsteps);
+            numberOfStepsAlignedWithMeanOrientation > 0.5 * numberOfFootsteps);
       PrintTools.debug(this, "Starting to Execute Behavior");
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(walkToLocationBehavior);
       assertTrue(success);
@@ -355,8 +354,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       double stopPercent = 20.0;
       ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getReferenceFrames().getMidFeetZUpFrame();
       TrajectoryBasedStopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(drcBehaviorTestHelper.getRobotDataReceiver(),
-                                                                  walkToLocationBehavior, pausePercent, pauseDuration, stopPercent, desiredMidFeetPose2d,
-                                                                  frameToKeepTrackOf);
+            walkToLocationBehavior, pausePercent, pauseDuration, stopPercent, desiredMidFeetPose2d, frameToKeepTrackOf);
       success = drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(walkToLocationBehavior, stopThreadUpdatable);
       assertTrue(success);
       PrintTools.debug(this, "Stop Simulating Behavior");
@@ -391,8 +389,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       double stopPercent = Double.POSITIVE_INFINITY;
       ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getReferenceFrames().getMidFeetZUpFrame();
       TrajectoryBasedStopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(drcBehaviorTestHelper.getRobotDataReceiver(),
-                                                                  walkToLocationBehavior, pausePercent, pauseDuration, stopPercent, desiredMidFeetPose2d,
-                                                                  frameToKeepTrackOf);
+            walkToLocationBehavior, pausePercent, pauseDuration, stopPercent, desiredMidFeetPose2d, frameToKeepTrackOf);
       success = drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(walkToLocationBehavior, stopThreadUpdatable);
       assertTrue(success);
       PrintTools.debug(this, "Stop Simulating Behavior");
@@ -432,8 +429,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       double stopPercent = Double.POSITIVE_INFINITY;
       ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getReferenceFrames().getMidFeetZUpFrame();
       TrajectoryBasedStopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(drcBehaviorTestHelper.getRobotDataReceiver(),
-                                                                  walkToLocationBehavior, pausePercent, pauseDuration, stopPercent, desiredMidFeetPose2d,
-                                                                  frameToKeepTrackOf);
+            walkToLocationBehavior, pausePercent, pauseDuration, stopPercent, desiredMidFeetPose2d, frameToKeepTrackOf);
       success = drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(walkToLocationBehavior, stopThreadUpdatable);
       assertTrue(success);
       PrintTools.debug(this, "Stop Simulating Behavior");
@@ -469,8 +465,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       double stopPercent = 20.0;
       ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getReferenceFrames().getMidFeetZUpFrame();
       TrajectoryBasedStopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(drcBehaviorTestHelper.getRobotDataReceiver(),
-                                                                  walkToLocationBehavior, pausePercent, pauseDuration, stopPercent, desiredMidFeetPose2d,
-                                                                  frameToKeepTrackOf);
+            walkToLocationBehavior, pausePercent, pauseDuration, stopPercent, desiredMidFeetPose2d, frameToKeepTrackOf);
       PrintTools.debug(this, "Starting to Execute Behavior");
       success = drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(walkToLocationBehavior, stopThreadUpdatable);
       assertTrue(success);
@@ -545,7 +540,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       HumanoidReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();
       final WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,
-                                                               walkingControllerParams);
+            walkingControllerParams);
 
       return walkToLocationBehavior;
    }
@@ -593,6 +588,6 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);
       assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance,
-                   orientationThreshold);
+            orientationThreshold);
    }
 }

@@ -93,6 +93,7 @@ public class PushRecoveryControlModule
       icpErrorThreshold.set(0.05);
       closestFootToICP = new EnumYoVariable<>("ClosestFootToICP", registry, RobotSide.class, true);
       swingSideForDoubleSupportRecovery = new EnumYoVariable<>("swingSideForDoubleSupportRecovery", registry, RobotSide.class, true);
+      swingSideForDoubleSupportRecovery.set(null);
 
       isRobotBackToSafeState = new GlitchFilteredBooleanYoVariable("isRobotBackToSafeState", registry, 100);
       isCaptureRegionEmpty = new BooleanYoVariable("isCaptureRegionEmpty", registry);
@@ -114,16 +115,12 @@ public class PushRecoveryControlModule
    /**
     * Return null if the robot is not falling.
     * If the robot is falling, it returns the suggested swingSide to recover. 
-    * @param timeInState
     */
-   public RobotSide isRobotFallingFromDoubleSupport(double timeInState)
+   public RobotSide isRobotFallingFromDoubleSupport()
    {
-      if (!isICPOutside.getBooleanValue())
-         return null;
-      
       return swingSideForDoubleSupportRecovery.getEnumValue();
    }
-   
+
    public void initializeParametersForDoubleSupportPushRecovery()
    {
       recoveringFromDoubleSupportFall.set(true);
@@ -131,6 +128,9 @@ public class PushRecoveryControlModule
 
    public void updateForDoubleSupport(FramePoint2d desiredCapturePoint2d, FramePoint2d capturePoint2d, double omega0)
    {
+      if (!isEnabled())
+         return;
+
       this.omega0 = omega0;
       this.capturePoint2d.setIncludingFrame(capturePoint2d);
       this.desiredCapturePoint2d.setIncludingFrame(desiredCapturePoint2d);
@@ -138,6 +138,7 @@ public class PushRecoveryControlModule
 
       // Initialize variables
       closestFootToICP.set(null);
+      swingSideForDoubleSupportRecovery.set(null);
 
       for (RobotSide robotSide : RobotSide.values)
          distanceICPToFeet.get(robotSide).set(Double.NaN);
@@ -175,6 +176,9 @@ public class PushRecoveryControlModule
 
    public void updateForSingleSupport(FramePoint2d desiredCapturePoint2d, FramePoint2d capturePoint2d, double omega0)
    {
+      if (!isEnabled())
+         return;
+
       this.omega0 = omega0;
       this.capturePoint2d.setIncludingFrame(capturePoint2d);
       this.desiredCapturePoint2d.setIncludingFrame(desiredCapturePoint2d);
@@ -253,7 +257,7 @@ public class PushRecoveryControlModule
    {
       if (!enablePushRecovery.getBooleanValue())
          return null;
-      
+
       Footstep footstepForPushRecovery = createFootstepAtCurrentLocation(swingSide);
       checkAndUpdateFootstep(swingTimeRemaining, footstepForPushRecovery);
       return footstepForPushRecovery;
@@ -300,7 +304,7 @@ public class PushRecoveryControlModule
 
    public boolean isRecovering()
    {
-      return recovering.getBooleanValue();
+      return isEnabled() && recovering.getBooleanValue();
    }
 
    public boolean isRobotBackToSafeState()

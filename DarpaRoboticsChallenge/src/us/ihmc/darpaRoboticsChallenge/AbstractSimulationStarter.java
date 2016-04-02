@@ -1,8 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CarIngressEgressController;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -10,12 +11,9 @@ import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterfa
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
-
-import javax.vecmath.Vector3d;
 
 public interface AbstractSimulationStarter
 {
@@ -41,13 +39,6 @@ public interface AbstractSimulationStarter
    public abstract void disableSCSSimulatedSensors();
 
    public abstract void attachControllerFailureListener(ControllerFailureListener listener);
-
-   /**
-    * Mostly used for unit tests.
-    * Set the file name of a script to be loaded and executed by the controller.
-    * @param scriptFileName
-    */
-   public abstract void setScriptFile(String scriptFileName);
 
    /**
     * Sets whether the estimator and the controller are running on the same thread or multiThreaded. Defaults to multiThreaded.

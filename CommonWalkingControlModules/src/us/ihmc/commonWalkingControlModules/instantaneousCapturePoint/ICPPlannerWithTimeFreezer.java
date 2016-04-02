@@ -7,8 +7,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -29,9 +29,9 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    private final DoubleYoVariable maxCapturePointErrorAllowedToBeginSwingPhase;
    private final DoubleYoVariable maxAllowedCapturePointErrorWithoutPartialTimeFreeze;
 
-   private final FramePoint tmpCapturePointPosition;
-   private final FrameVector tmpCapturePointVelocity;
-   
+   private final FramePoint2d tmpCapturePointPosition;
+   private final FrameVector2d tmpCapturePointVelocity;
+
    public ICPPlannerWithTimeFreezer(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -46,9 +46,9 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
       this.previousTime = new DoubleYoVariable(namePrefix + "PreviousTime", registry);
       this.doTimeFreezing = new BooleanYoVariable(namePrefix + "DoTimeFreezing", registry);
       this.isTimeBeingFrozen = new BooleanYoVariable(namePrefix + "IsTimeBeingFrozen", registry);
-      this.tmpCapturePointPosition = new FramePoint(worldFrame);
-      this.tmpCapturePointVelocity = new FrameVector(worldFrame);
-      
+      this.tmpCapturePointPosition = new FramePoint2d(worldFrame);
+      this.tmpCapturePointVelocity = new FrameVector2d(worldFrame);
+
       this.isTimeBeingFrozen.set(false);
       this.timeDelay.set(0.0);
       this.capturePointPositionError.set(0.0);
@@ -60,8 +60,8 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
       this.freezeTimeFactor.set(capturePointPlannerParameters.getFreezeTimeFactor());
    }
 
-   public void getDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack, FramePoint currentCapturePointPosition,
-         double time)
+   public void getDesiredCapturePointPositionAndVelocity(FramePoint2d desiredCapturePointPositionToPack, FrameVector2d desiredCapturePointVelocityToPack,
+         FramePoint2d currentCapturePointPosition, double time)
    {
       super.getDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, getTimeWithDelay(time));
 
@@ -76,22 +76,22 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    }
 
    @Override
-   public void initializeDoubleSupport(double initialTime, RobotSide transferToSide)
+   public void initializeForTransfer(double initialTime, RobotSide transferToSide)
    {
       timeDelay.set(0.0);
       previousTime.set(initialTime);
-      super.initializeDoubleSupport(initialTime, transferToSide);
+      super.initializeForTransfer(initialTime, transferToSide);
    }
 
    @Override
-   public void initializeSingleSupport(double initialTime, RobotSide supportSide)
+   public void initializeForSingleSupport(double initialTime, RobotSide supportSide)
    {
       timeDelay.set(0.0);
       previousTime.set(initialTime);
-      super.initializeSingleSupport(initialTime, supportSide);
+      super.initializeForSingleSupport(initialTime, supportSide);
    }
 
-   private void doTimeFreezeIfNeeded(FramePoint currentCapturePointPosition, double time)
+   private void doTimeFreezeIfNeeded(FramePoint2d currentCapturePointPosition, double time)
    {
       computeCapturePointDistantToFreezeLine(currentCapturePointPosition, tmpCapturePointPosition, tmpCapturePointVelocity);
 
@@ -127,15 +127,15 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
       timeDelay.add(time - previousTime.getDoubleValue());
    }
 
-   private void computeCapturePointDistantToFreezeLine(FramePoint currentCapturePointPosition, FramePoint desiredCapturePointPosition,
-         FrameVector desiredCapturePointVelocity)
+   private void computeCapturePointDistantToFreezeLine(FramePoint2d currentCapturePointPosition, FramePoint2d desiredCapturePointPosition,
+         FrameVector2d desiredCapturePointVelocity)
    {
       distanceToFreezeLine.set(CapturePointTools.computeDistanceToCapturePointFreezeLineIn2d(currentCapturePointPosition, desiredCapturePointPosition,
             desiredCapturePointVelocity));
    }
 
    @Override
-   public void updatePlanForSingleSupportDisturbances(double time, FramePoint actualCapturePointPosition)
+   public void updatePlanForSingleSupportDisturbances(double time, FramePoint2d actualCapturePointPosition)
    {
       timeDelay.set(0.0);
       previousTime.set(time);
@@ -159,10 +159,10 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    }
 
    @Override
-   public void reset(double time)
+   public void initializeForStanding(double time)
    {
       timeDelay.set(0.0);
       previousTime.set(time);
-      super.reset(time);
+      super.initializeForStanding(time);
    }
 }

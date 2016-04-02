@@ -85,7 +85,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       
       // Disable joint damping to make sure that damping isn't causing the problem.
       robotModel.setEnableJointDamping(false);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCPelvisFlippingOutBugTest", "", selectedLocation, simulationTestingParameters,
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCPelvisFlippingOutBugTest", selectedLocation, simulationTestingParameters,
               robotModel);
       
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();

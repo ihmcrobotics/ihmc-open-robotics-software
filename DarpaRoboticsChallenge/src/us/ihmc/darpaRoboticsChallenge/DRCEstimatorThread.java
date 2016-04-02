@@ -308,7 +308,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       HumanoidReferenceFrames estimatorReferenceFrames = new HumanoidReferenceFrames(estimatorFullRobotModel);
       ContactableBodiesFactory contactableBodiesFactory = contactPointParamaters.getContactableBodiesFactory();
-      SideDependentList<ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel,
+      SideDependentList<? extends ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel,
             estimatorReferenceFrames);
 
       double gravityMagnitude = Math.abs(gravity);

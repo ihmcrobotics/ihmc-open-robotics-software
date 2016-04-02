@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-
 /**
  * Created by agrabertilton on 2/20/15.
  */
@@ -19,7 +17,6 @@ public class DummySteppingParameters implements SteppingParameters
    public DummySteppingParameters()
    {
    }
-
 
    @Override
    public double getFootForwardOffset()
@@ -113,7 +110,7 @@ public class DummySteppingParameters implements SteppingParameters
    @Override
    public double getMaxAngleTurnOutwards()
    {
-      return Math.PI/4.0;
+      return Math.PI / 4.0;
    }
 
    @Override

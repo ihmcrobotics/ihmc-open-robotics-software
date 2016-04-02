@@ -38,4 +38,8 @@ public interface CommonHumanoidReferenceFrames extends ReferenceFrames
    public abstract ReferenceFrame getPelvisZUpFrame();
 
    public abstract ReferenceFrame getSoleFrame(RobotSide robotSide);
+
+   public abstract ReferenceFrame getSoleZUpFrame(RobotSide robotSide);
+
+   public abstract SideDependentList<ReferenceFrame> getSoleZUpFrames();
 }

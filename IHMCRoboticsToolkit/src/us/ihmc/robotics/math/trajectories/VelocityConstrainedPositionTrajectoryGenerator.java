@@ -13,6 +13,8 @@ import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
@@ -38,20 +40,17 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       this(name, false, referenceFrame, parentRegistry);
    }
 
-   public VelocityConstrainedPositionTrajectoryGenerator(String name, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry)
+   public VelocityConstrainedPositionTrajectoryGenerator(String name, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       this(name, allowMultipleFrames, 4, referenceFrame, parentRegistry);
    }
 
-   public VelocityConstrainedPositionTrajectoryGenerator(String name, int numberOfCoefficients, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry)
+   public VelocityConstrainedPositionTrajectoryGenerator(String name, int numberOfCoefficients, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       this(name, false, numberOfCoefficients, referenceFrame, parentRegistry);
    }
 
-   public VelocityConstrainedPositionTrajectoryGenerator(String name, boolean allowMultipleFrames, int numberOfCoefficients, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry)
+   public VelocityConstrainedPositionTrajectoryGenerator(String name, boolean allowMultipleFrames, int numberOfCoefficients, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       super(allowMultipleFrames, referenceFrame);
       registry = new YoVariableRegistry(name);
@@ -68,14 +67,14 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       {
          YoFramePointInMultipleFrames initialPosition = new YoFramePointInMultipleFrames(initialPositionName, registry, referenceFrame);
          YoFrameVectorInMultipleFrames initialVelocity = new YoFrameVectorInMultipleFrames(initialVelocityName, registry, referenceFrame);
-         
+
          YoFramePointInMultipleFrames finalPosition = new YoFramePointInMultipleFrames(finalPositionName, registry, referenceFrame);
          YoFrameVectorInMultipleFrames finalVelocity = new YoFrameVectorInMultipleFrames(finalVelocityName, registry, referenceFrame);
-         
+
          YoFramePointInMultipleFrames currentPosition = new YoFramePointInMultipleFrames(currentPositionName, registry, referenceFrame);
          YoFrameVectorInMultipleFrames currentVelocity = new YoFrameVectorInMultipleFrames(currentVelocityName, registry, referenceFrame);
          YoFrameVectorInMultipleFrames currentAcceleration = new YoFrameVectorInMultipleFrames(currentAccelerationName, registry, referenceFrame);
-         
+
          registerMultipleFramesHolders(initialPosition, initialVelocity, finalPosition, finalVelocity, currentPosition, currentVelocity, currentAcceleration);
 
          this.initialPosition = initialPosition;
@@ -150,8 +149,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       this.finalVelocity.setAndMatchFrame(finalVelocity);
    }
 
-   public void setTrajectoryParameters(double duration, FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalPosition,
-         FrameVector finalVelocity)
+   public void setTrajectoryParameters(double duration, FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalPosition, FrameVector finalVelocity)
    {
       trajectoryTime.set(duration);
 
@@ -171,6 +169,35 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
       this.finalPosition.set(finalPosition);
       this.finalVelocity.set(finalVelocity);
+   }
+
+   private final FramePoint tempPosition = new FramePoint();
+   private final FrameVector tempLinearVelocity = new FrameVector();
+   
+   public void setTrajectoryParameters(FrameEuclideanTrajectoryPoint initialFrameEuclideanWaypoint, FrameEuclideanTrajectoryPoint finalFrameEuclideanWaypoint)
+   {
+      setTrajectoryTime(finalFrameEuclideanWaypoint.getTime() - initialFrameEuclideanWaypoint.getTime());
+
+      initialFrameEuclideanWaypoint.getPositionIncludingFrame(tempPosition);
+      initialFrameEuclideanWaypoint.getLinearVelocityIncludingFrame(tempLinearVelocity);
+      initialPosition.set(tempPosition);
+      initialVelocity.set(tempLinearVelocity);
+
+      finalFrameEuclideanWaypoint.getPositionIncludingFrame(tempPosition);
+      finalFrameEuclideanWaypoint.getLinearVelocityIncludingFrame(tempLinearVelocity);
+      finalPosition.set(tempPosition);
+      finalVelocity.set(tempLinearVelocity);
+   }
+
+   public void setTrajectoryParameters(YoFrameEuclideanTrajectoryPoint initialYoFrameEuclideanWaypoint, YoFrameEuclideanTrajectoryPoint finalYoFrameEuclideanWaypoint)
+   {
+      setTrajectoryTime(finalYoFrameEuclideanWaypoint.getTime() - initialYoFrameEuclideanWaypoint.getTime());
+
+      initialPosition.set(initialYoFrameEuclideanWaypoint.getPosition());
+      initialVelocity.set(initialYoFrameEuclideanWaypoint.getLinearVelocity());
+
+      finalPosition.set(finalYoFrameEuclideanWaypoint.getPosition());
+      finalVelocity.set(finalYoFrameEuclideanWaypoint.getLinearVelocity());
    }
 
    public void initialize()
@@ -297,7 +324,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       velocityToPack.set(currentVelocity);
       accelerationToPack.set(currentAcceleration);
    }
-   
+
    public void getFinalPosition(FramePoint finalPosition)
    {
       this.finalPosition.getFrameTuple(finalPosition);

@@ -52,7 +52,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    protected HeightMapWithPoints heightMap;
-   protected SideDependentList<ContactablePlaneBody> contactableFeet;
+   protected SideDependentList<? extends ContactablePlaneBody> contactableFeet;
 //   protected final FootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
    
    //TODO: Fix so not specific to Atlas...
@@ -250,7 +250,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    protected abstract OverheadPath getPath();
 
    @Override
-   public void setHeightMap(HeightMapWithPoints heightMap, SideDependentList<ContactablePlaneBody> contactableFeet)
+   public void setHeightMap(HeightMapWithPoints heightMap, SideDependentList<? extends ContactablePlaneBody> contactableFeet)
    {
       this.heightMap = heightMap;
       this.contactableFeet = contactableFeet;

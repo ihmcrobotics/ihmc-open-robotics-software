@@ -6,12 +6,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
+import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -49,7 +49,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
 
    private final ThreadDataSynchronizerInterface threadDataSynchronizer;
 
-   private final SideDependentList<FingerStateProvider> fingerStateProviders = new SideDependentList<>();
+   private final SideDependentList<HandDesiredConfigurationMessageSubscriber> handDesiredConfigurationMessageSubscribers = new SideDependentList<>();
 
    private final SideDependentList<List<OneDegreeOfFreedomJoint>> allFingerJoints = new SideDependentList<>();
 
@@ -101,10 +101,10 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
 
          if (hasRobotiqHand.get(robotSide))
          {
-            FingerStateProvider fingerStateProvider = new FingerStateProvider(robotSide);
-            fingerStateProviders.put(robotSide, fingerStateProvider);
+            HandDesiredConfigurationMessageSubscriber handDesiredConfigurationSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
+            handDesiredConfigurationMessageSubscribers.put(robotSide, handDesiredConfigurationSubscriber);
             if (globalDataProducer != null)
-               globalDataProducer.attachListener(FingerStatePacket.class, fingerStateProvider);
+               globalDataProducer.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationSubscriber);
 
             IndividualRobotiqHandController individualHandController = new IndividualRobotiqHandController(robotSide, handControllerTime, fingerTrajectoryTime,
                   simulatedRobot, registry);
@@ -193,7 +193,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    @Override
    public void run()
    {
-      checkForNewFingerStateRequested();
+      checkForNewHandDesiredConfigurationRequested();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -202,23 +202,23 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
       }
    }
 
-   private void checkForNewFingerStateRequested()
+   private void checkForNewHandDesiredConfigurationRequested()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
          if (!hasRobotiqHand.get(robotSide))
             continue;
 
-         FingerStateProvider fingerStateProvider = fingerStateProviders.get(robotSide);
-         if (fingerStateProvider.isNewFingerStateAvailable())
+         HandDesiredConfigurationMessageSubscriber handDesiredConfigurationSubscriber = handDesiredConfigurationMessageSubscribers.get(robotSide);
+         if (handDesiredConfigurationSubscriber.isNewDesiredConfigurationAvailable())
          {
             IndividualRobotiqHandController individualRobotiqHandController = individualHandControllers.get(robotSide);
 
-            FingerState fingerState = fingerStateProvider.pullPacket().getFingerState();
+            HandConfiguration handDesiredConfiguration = handDesiredConfigurationSubscriber.pollMessage().getHandDesiredConfiguration();
             
             if (DEBUG)
-               PrintTools.debug(this, "Recieved new FingerState Packet: " + fingerState);
-            switch (fingerState)
+               PrintTools.debug(this, "Recieved new HandDesiredConfiguration: " + handDesiredConfiguration);
+            switch (handDesiredConfiguration)
             {
                case OPEN:
                   individualRobotiqHandController.open();

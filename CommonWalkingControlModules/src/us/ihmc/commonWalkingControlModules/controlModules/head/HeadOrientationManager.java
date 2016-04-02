@@ -1,148 +1,318 @@
 package us.ihmc.commonWalkingControlModules.controlModules.head;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointDataReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.providers.YoQuaternionProvider;
-import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.stateMachines.GenericStateMachine;
+import us.ihmc.robotics.stateMachines.StateMachineTools;
 
 public class HeadOrientationManager
 {
-   private final YoVariableRegistry registry;
-   private final HeadOrientationControlModule headOrientationControlModule;
-   private final MomentumBasedController momentumBasedController;
-   private final HeadOrientationProvider desiredHeadOrientationProvider;
+   private static final double defaultTrajectoryTime = 1.0;
+
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final GenericStateMachine<HeadControlMode, HeadControlState> stateMachine;
+   private final EnumYoVariable<HeadControlMode> requestedState = new EnumYoVariable<>("headRequestedControlMode", registry, HeadControlMode.class, true);
+
+   private final TaskspaceHeadControlState taskspaceHeadControlState;
+   private final JointspaceHeadControlState jointspaceHeadControlState;
+   private final HeadUserControlModeState headUserControlModeState;
+
    private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable receivedNewHeadOrientationTime;
-   private final DoubleYoVariable headOrientationTrajectoryTime;
-   private final OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;
 
-   private final BooleanYoVariable isTrackingOrientation;
+   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasHeadOrientationManagerBeenInitialized", registry);
 
-   private final ReferenceFrame headOrientationExpressedInFrame;
-   private final YoQuaternionProvider initialOrientationProvider;
-   private final YoQuaternionProvider finalOrientationProvider;
+   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
+   private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
 
-   private final BooleanYoVariable hasBeenInitialized;
+   private final OneDoFJoint[] jointsOriginal;
+   /**
+    * These joints are cloned from {@link #jointsOriginal}.
+    * Their positions and velocities are set to match the current desireds.
+    * They are used as an easy way to figure out what would be the desired hand pose when the arm is controlled in jointspace.
+    * They are updated by calling {@link #updateJointsAtDesiredPosition()}.
+    */
+   private final OneDoFJoint[] jointsAtDesiredPosition;
+   private LowLevelOneDoFJointDesiredDataHolderReadOnly newJointDesiredData = null;
 
-   public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControlModule headOrientationControlModule,
-         HeadOrientationProvider desiredHeadOrientationProvider, double trajectoryTime, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
+   private final ReferenceFrame headFrame;
+
+   private final FrameOrientation initialOrientation = new FrameOrientation();
+   private final double[] initialJointPositions;
+
+   public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
+         YoVariableRegistry parentRegistry)
    {
-      this.momentumBasedController = momentumBasedController;
-      this.yoTime = momentumBasedController.getYoTime();
-      this.headOrientationControlModule = headOrientationControlModule;
-      this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
-      registry = new YoVariableRegistry(getClass().getSimpleName());
+      yoTime = momentumBasedController.getYoTime();
+      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+
+      stateMachine = new GenericStateMachine<>("headControlState", "headControlState" + "SwitchTime", HeadControlMode.class, yoTime, registry);
+
+      RigidBody head = fullRobotModel.getHead();
+      RigidBody chest = fullRobotModel.getChest();
+      double[] homeYawPitchRoll = headOrientationControllerParameters.getInitialHeadYawPitchRoll();
+      headFrame = head.getBodyFixedFrame();
+
+      YoOrientationPIDGainsInterface taskspaceGains = headOrientationControllerParameters.createHeadOrientationControlGains(registry);
+      YoPIDGains jointspaceGains = headOrientationControllerParameters.createHeadJointspaceControlGains(registry);
+      jointsOriginal = ScrewTools.createOneDoFJointPath(chest, head);
+      jointsAtDesiredPosition = ScrewTools.cloneOneDoFJointPath(chest, head);
+      initialJointPositions = new double[jointsOriginal.length];
+
+      List<HeadControlState> states = new ArrayList<>();
+      taskspaceHeadControlState = new TaskspaceHeadControlState(chest, head, homeYawPitchRoll, taskspaceGains, registry);
+      states.add(taskspaceHeadControlState);
+      jointspaceHeadControlState = new JointspaceHeadControlState(jointsOriginal, jointspaceGains, registry);
+      states.add(jointspaceHeadControlState);
+      headUserControlModeState = new HeadUserControlModeState(jointsOriginal, yoTime, registry);
+      states.add(headUserControlModeState);
+
+      for (HeadControlState fromState : states)
+      {
+         for (HeadControlState toState : states)
+         {
+            StateMachineTools.addRequestedStateTransition(requestedState, false, fromState, toState);
+         }
+         stateMachine.addState(fromState);
+      }
+
       parentRegistry.addChild(registry);
 
-      if (desiredHeadOrientationProvider != null)
+      hasBeenInitialized.set(false);
+
+      boolean neckPositionControlled = headOrientationControllerParameters.isNeckPositionControlled();
+
+      if (neckPositionControlled)
       {
-         headOrientationExpressedInFrame = desiredHeadOrientationProvider.getHeadOrientationExpressedInFrame();
+         jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
+         lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-         receivedNewHeadOrientationTime = new DoubleYoVariable("receivedNewHeadOrientationTime", registry);
-         isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
-         headOrientationTrajectoryTime = new DoubleYoVariable("headOrientationTrajectoryTime", registry);
+         lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointsOriginal);
+         lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(jointsOriginal, LowLevelJointControlMode.POSITION_CONTROL);
 
-         hasBeenInitialized = new BooleanYoVariable("hasHeadOrientationManagerBeenInitialized", registry);
-         hasBeenInitialized.set(false);
-
-         headOrientationTrajectoryTime.set(trajectoryTime);
-         DoubleProvider trajectoryTimeProvider = new YoVariableDoubleProvider(headOrientationTrajectoryTime);
-         //         initialOrientationProvider = new CurrentOrientationProvider(headOrientationExpressedInFrame, headOrientationControlModule.getHead().getBodyFixedFrame());
-         initialOrientationProvider = new YoQuaternionProvider("headInitialOrientation", headOrientationExpressedInFrame, registry);
-         finalOrientationProvider = new YoQuaternionProvider("headFinalOrientation", headOrientationExpressedInFrame, registry);
-         desiredOrientation.setIncludingFrame(headOrientationExpressedInFrame, initialDesiredHeadYawPitchRoll);
-         finalOrientationProvider.setOrientation(desiredOrientation);
-         orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("headOrientation", headOrientationExpressedInFrame,
-               trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
-         orientationTrajectoryGenerator.setContinuouslyUpdateFinalOrientation(true);
+         for (OneDoFJoint neckJoint : jointsOriginal)
+            jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(neckJoint);
       }
       else
       {
-         headOrientationExpressedInFrame = null;
-         receivedNewHeadOrientationTime = null;
-         headOrientationTrajectoryTime = null;
-         isTrackingOrientation = null;
-         hasBeenInitialized = null;
-         initialOrientationProvider = null;
-         finalOrientationProvider = null;
-         orientationTrajectoryGenerator = null;
+         jointAccelerationIntegrationCommand = null;
+         lowLevelOneDoFJointDesiredDataHolder = null;
       }
    }
-   
-   private void initialize()
+
+   public void setWeights(double jointspace, double taskspace, double userMode)
    {
-      if (hasBeenInitialized == null || hasBeenInitialized.getBooleanValue())
+      jointspaceHeadControlState.setWeight(jointspace);
+      taskspaceHeadControlState.setWeight(taskspace);
+      headUserControlModeState.setWeight(userMode);
+   }
+
+   public void initialize()
+   {
+      if (hasBeenInitialized.getBooleanValue())
          return;
 
       hasBeenInitialized.set(true);
 
-      ReferenceFrame headFrame = momentumBasedController.getFullRobotModel().getHead().getBodyFixedFrame();
-      desiredOrientation.setToZero(headFrame);
-      desiredOrientation.changeFrame(headOrientationExpressedInFrame);
-      initialOrientationProvider.setOrientation(desiredOrientation);
-      receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
-      orientationTrajectoryGenerator.initialize();
-      isTrackingOrientation.set(true);
+      initialOrientation.setToZero(headFrame);
+      taskspaceHeadControlState.handleGoHome(defaultTrajectoryTime, initialOrientation);
+      requestedState.set(taskspaceHeadControlState.getStateEnum());
    }
-
-   private final FrameOrientation desiredOrientation = new FrameOrientation();
 
    public void compute()
    {
       initialize();
 
-      checkForNewDesiredOrientationInformation();
-      
-      if (desiredHeadOrientationProvider != null)
-      {
-         if (isTrackingOrientation.getBooleanValue())
-         {
-            double deltaTime = yoTime.getDoubleValue() - receivedNewHeadOrientationTime.getDoubleValue();
-            orientationTrajectoryGenerator.compute(deltaTime);
-            isTrackingOrientation.set(!orientationTrajectoryGenerator.isDone());
-         }
-         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
-         headOrientationControlModule.setOrientationToTrack(desiredOrientation);
-      }
+      if (stateMachine.getCurrentStateEnum() == HeadControlMode.USER_CONTROL_MODE && headUserControlModeState.isAbortUserControlModeRequested())
+         holdCurrentOrientation();
 
-      headOrientationControlModule.compute();
+      stateMachine.checkTransitionConditions();
+      stateMachine.doAction();
+
+      updateInverseDynamicsCommandList();
    }
 
-   private void checkForNewDesiredOrientationInformation()
+   public void holdCurrentOrientation()
    {
-      if (desiredHeadOrientationProvider == null)
-         return;
+      taskspaceHeadControlState.holdCurrentOrientation();
+      requestedState.set(taskspaceHeadControlState.getStateEnum());
+   }
 
-      if (desiredHeadOrientationProvider.isNewHeadOrientationInformationAvailable())
+   public void handleHeadTrajectoryCommand(HeadTrajectoryCommand command)
+   {
+      computeDesiredOrientation(initialOrientation);
+      taskspaceHeadControlState.handleHeadTrajectoryCommand(command, initialOrientation);
+      requestedState.set(taskspaceHeadControlState.getStateEnum());
+   }
+
+   public void handleNeckTrajectoryCommand(NeckTrajectoryCommand command)
+   {
+      computeDesiredJointPositions(initialJointPositions);
+      jointspaceHeadControlState.handleNeckTrajectoryCommand(command, initialJointPositions);
+      requestedState.set(jointspaceHeadControlState.getStateEnum());
+   }
+
+   public void handleNeckDesiredAccelerationsCommand(NeckDesiredAccelerationsCommand command)
+   {
+      headUserControlModeState.handleNeckDesiredAccelerationsMessage(command);
+      requestedState.set(headUserControlModeState.getStateEnum());
+   }
+
+   private void updateInverseDynamicsCommandList()
+   {
+      inverseDynamicsCommandList.clear();
+      inverseDynamicsCommandList.addCommand(jointAccelerationIntegrationCommand);
+      inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
+   }
+
+   private void computeDesiredOrientation(FrameOrientation desiredOrientationToPack)
+   {
+      if (stateMachine.getCurrentStateEnum() == HeadControlMode.TASKSPACE)
       {
-         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
-         initialOrientationProvider.setOrientation(desiredOrientation);
-         finalOrientationProvider.setOrientation(desiredHeadOrientationProvider.getDesiredHeadOrientation());
-         headOrientationTrajectoryTime.set(desiredHeadOrientationProvider.getTrajectoryTime());
-         receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
-         orientationTrajectoryGenerator.initialize();
-         isTrackingOrientation.set(true);
+         taskspaceHeadControlState.getDesiredOrientation(initialOrientation);
       }
-      else if (desiredHeadOrientationProvider.isNewLookAtInformationAvailable())
+      else
       {
-         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
-         initialOrientationProvider.setOrientation(desiredOrientation);
-         headOrientationControlModule.setPointToTrack(desiredHeadOrientationProvider.getLookAtPoint());
-         headOrientationControlModule.getDesiredFrameOrientation(desiredOrientation);
-         desiredOrientation.changeFrame(headOrientationExpressedInFrame);
-         finalOrientationProvider.setOrientation(desiredOrientation);
-         headOrientationTrajectoryTime.set(desiredHeadOrientationProvider.getTrajectoryTime());
-         receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
-         orientationTrajectoryGenerator.initialize();
-         isTrackingOrientation.set(true);
+         updateJointsAtDesiredPosition();
+         ReferenceFrame desiredEndEffectorFrame = jointsAtDesiredPosition[jointsAtDesiredPosition.length - 1].getSuccessor().getBodyFixedFrame();
+         desiredOrientationToPack.setToZero(desiredEndEffectorFrame);
       }
+   }
+
+   private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
+   {
+      if (stateMachine.getCurrentStateEnum() == HeadControlMode.JOINTSPACE)
+      {
+         for (int i = 0; i < jointsOriginal.length; i++)
+         {
+            desiredJointPositionsToPack[i] = jointspaceHeadControlState.getJointDesiredPosition(jointsOriginal[i]);
+         }
+      }
+      else
+      {
+         updateJointsAtDesiredPosition();
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+         {
+            desiredJointPositionsToPack[i] = jointsAtDesiredPosition[i].getQ();
+         }
+      }
+   }
+
+   private void updateJointsAtDesiredPosition()
+   {
+      if (newJointDesiredData != null)
+      {
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+         {
+            OneDoFJoint jointAtDesiredPosition = jointsAtDesiredPosition[i];
+            double q = jointsOriginal[i].getQ();
+            double qd = jointsOriginal[i].getQd();
+
+            if (newJointDesiredData.hasDataForJoint(jointsOriginal[i]))
+            {
+               LowLevelJointDataReadOnly jointDesiredData = newJointDesiredData.getLowLevelJointData(jointsOriginal[i]);
+
+               double qDesired = jointDesiredData.hasDesiredPosition() ? jointDesiredData.getDesiredPosition() : q;
+               jointAtDesiredPosition.setQ(qDesired);
+
+               double qdDesired = jointDesiredData.hasDesiredVelocity() ? jointDesiredData.getDesiredVelocity() : qd;
+               jointAtDesiredPosition.setQd(qdDesired);
+            }
+            else
+            {
+               jointAtDesiredPosition.setQ(q);
+               jointAtDesiredPosition.setQd(qd);
+            }
+         }
+
+         newJointDesiredData = null;
+      }
+      else if (stateMachine.getCurrentStateEnum() == HeadControlMode.JOINTSPACE)
+      {
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+         {
+            jointsAtDesiredPosition[i].setQ(jointspaceHeadControlState.getJointDesiredPosition(jointsOriginal[i]));
+            jointsAtDesiredPosition[i].setQd(jointspaceHeadControlState.getJointDesiredVelocity(jointsOriginal[i]));
+         }
+      }
+      else
+      {
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+         {
+            jointsAtDesiredPosition[i].setQ(jointsOriginal[i].getQ());
+            jointsAtDesiredPosition[i].setQd(jointsOriginal[i].getQd());
+         }
+      }
+
+      jointsAtDesiredPosition[0].updateFramesRecursively();
+   }
+
+   /**
+    * In a best effort of having continuity in desireds between states, the low-level data can be used to update the {@link HandControlModule} with 
+    * the most recent desired joint positions and velocities.
+    * @param lowLevelOneDoFJointDesiredDataHolder Data that will be used to update the arm desired configuration. Only a read-only access is needed.
+    */
+   public void submitNewNeckJointDesiredConfiguration(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
+   {
+      newJointDesiredData = lowLevelOneDoFJointDesiredDataHolder;
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      if (inverseDynamicsCommandList.isEmpty())
+         return null;
+      else
+         return inverseDynamicsCommandList;
+   }
+
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return stateMachine.getCurrentState().getFeedbackControlCommand();
+   }
+
+   public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
+   {
+      return lowLevelOneDoFJointDesiredDataHolder;
+   }
+
+   public FeedbackControlCommandList createFeedbackControlTemplate()
+   {
+      FeedbackControlCommandList ret = new FeedbackControlCommandList();
+      for (HeadControlMode mode : HeadControlMode.values())
+      {
+         HeadControlState state = stateMachine.getState(mode);
+         if (state != null && state.getFeedbackControlCommand() != null)
+            ret.addCommand(state.getFeedbackControlCommand());
+      }
+      return ret;
    }
 }

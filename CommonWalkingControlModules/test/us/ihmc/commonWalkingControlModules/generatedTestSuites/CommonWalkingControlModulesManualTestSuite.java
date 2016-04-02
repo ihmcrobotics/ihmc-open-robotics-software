@@ -12,7 +12,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Manual)
 @SuiteClasses
 ({
-   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPProjectorTest.class
 })
 
 public class CommonWalkingControlModulesManualTestSuite

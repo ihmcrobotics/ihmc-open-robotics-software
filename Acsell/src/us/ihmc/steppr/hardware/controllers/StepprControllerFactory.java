@@ -13,14 +13,9 @@ import us.ihmc.acsell.hardware.AcsellSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ComponentBasedVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DataProducerVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.YoVariableVariousWalkingProviderFactory;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
@@ -74,15 +69,15 @@ public class StepprControllerFactory
       /*
        * Create network servers/clients
        */
-      PacketCommunicator drcNetworkProcessorServer = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator controllerPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicRealtimeThreadScheduler(loggerPriority), robotModel.getLogModelProvider(), robotModel.getLogSettings(),
             robotModel.getEstimatorDT());
-      HumanoidGlobalDataProducer dataProducer = new HumanoidGlobalDataProducer(drcNetworkProcessorServer);
+      HumanoidGlobalDataProducer dataProducer = new HumanoidGlobalDataProducer(controllerPacketCommunicator);
 
       /*
        * Create controllers
        */
-      MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, dataProducer, sensorInformation);
+      MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, controllerPacketCommunicator, sensorInformation);
 
       /*
        * Create sensors
@@ -142,7 +137,7 @@ public class StepprControllerFactory
        */
       try
       {
-         drcNetworkProcessorServer.connect();
+         controllerPacketCommunicator.connect();
       }
       catch (IOException e)
       {
@@ -168,7 +163,7 @@ public class StepprControllerFactory
       System.exit(0);
    }
 
-   private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel, HumanoidGlobalDataProducer dataProducer,
+   private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel, PacketCommunicator packetCommunicator,
          DRCRobotSensorInformation sensorInformation)
    {
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
@@ -177,8 +172,6 @@ public class StepprControllerFactory
       WalkingControllerParameters walkingControllerParamaters = robotModel.getWalkingControllerParameters();
       ArmControllerParameters armControllerParamaters = robotModel.getArmControllerParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
-
-      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForSlowWalkingOnRobot(walkingControllerParamaters);
 
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -197,23 +190,11 @@ public class StepprControllerFactory
       // Configure the MomentumBasedControllerFactory so we start with the diagnostic controller
       diagnosticsWhenHangingHighLevelBehaviorFactory.setTransitionRequested(true);
       controllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingHighLevelBehaviorFactory);
+      controllerFactory.createControllerNetworkSubscriber(new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority), packetCommunicator);
       
-      VariousWalkingProviderFactory variousWalkingProviderFactory;
-      switch(walkingProvider)
-      {
-         case YOVARIABLE:
-            variousWalkingProviderFactory = new YoVariableVariousWalkingProviderFactory();
-            break;
-         case DATA_PRODUCER:
-            variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters, new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority));
-            break;
-         case VELOCITY_HEADING_COMPONENT:
-            variousWalkingProviderFactory = new ComponentBasedVariousWalkingProviderFactory(false, null, robotModel.getControllerDT());
-            break;
-         default:
-               throw new RuntimeException("no such walkingProvider");
-      }
-      controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
+      if (walkingProvider == WalkingProvider.VELOCITY_HEADING_COMPONENT)
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator();
+
       return controllerFactory;
    }
 

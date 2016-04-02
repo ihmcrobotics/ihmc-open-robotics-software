@@ -100,22 +100,21 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       swingTime.set(swingTimeProvider.getValue());
       timeIntoStep.set(swingTime.getDoubleValue() - swingTimeRemainingProvider.getValue());
 
-      
       positionSources[0].getPosition(tempPosition);
       tempPosition.changeFrame(desiredPosition.getReferenceFrame());
       double x0 = tempPosition.getX();
       double y0 = tempPosition.getY();
-      
+
       velocitySources[0].get(tempVector);
       tempVector.changeFrame(desiredPosition.getReferenceFrame());
       double xd0 = tempVector.getX();
       double yd0 = tempVector.getY();
-      
+
       positionSources[1].getPosition(tempPosition);
       tempPosition.changeFrame(desiredPosition.getReferenceFrame());
       double xFinal = tempPosition.getX();
       double yFinal = tempPosition.getY();
-      
+
       xPolynomial.setQuarticUsingFinalAcceleration(timeIntoStep.getDoubleValue(), swingTime.getDoubleValue(), x0, xd0, xFinal, 0.0, 0.0);
       yPolynomial.setQuarticUsingFinalAcceleration(timeIntoStep.getDoubleValue(), swingTime.getDoubleValue(), y0, yd0, yFinal, 0.0, 0.0);
 

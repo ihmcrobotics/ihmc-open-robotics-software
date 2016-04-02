@@ -27,7 +27,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    private final ContactablePlaneBody foot;
    private final ContactablePlaneBody[] otherFeet;
 
-   public KinematicsBasedFootSwitch(String footName, SideDependentList<ContactablePlaneBody> bipedFeet, double switchZThreshold, double totalRobotWeight, RobotSide side, YoVariableRegistry parentRegistry)
+   public KinematicsBasedFootSwitch(String footName, SideDependentList<? extends ContactablePlaneBody> bipedFeet, double switchZThreshold, double totalRobotWeight, RobotSide side, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(footName + getClass().getSimpleName());
       foot = bipedFeet.get(side);
@@ -52,7 +52,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
     * @param quadrant the foot in question
     * @param parentRegistry
     */
-   public KinematicsBasedFootSwitch(String footName, QuadrantDependentList<ContactablePlaneBody> quadrupedFeet, double switchZThreshold, double totalRobotWeight, RobotQuadrant quadrant, YoVariableRegistry parentRegistry)
+   public KinematicsBasedFootSwitch(String footName, QuadrantDependentList<? extends ContactablePlaneBody> quadrupedFeet, double switchZThreshold, double totalRobotWeight, RobotQuadrant quadrant, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(footName + getClass().getSimpleName());
       foot = quadrupedFeet.get(quadrant);

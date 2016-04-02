@@ -13,6 +13,11 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
@@ -104,13 +109,16 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    private final BipedSupportPolygons bipedSupportPolygons;
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
 
-   public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, BipedSupportPolygons bipedSupportPolygons, boolean useArms, boolean robotIsHanging,
+   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
+
+   public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging,
          MomentumBasedController momentumBasedController, TorqueOffsetPrinter torqueOffsetPrinter)
    {
       super(HighLevelState.DIAGNOSTICS);
 
       this.humanoidJointPoseList = humanoidJointPoseList;
-      this.bipedSupportPolygons = bipedSupportPolygons;
+      this.bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
@@ -138,6 +146,11 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       this.yoTime = momentumBasedController.getYoTime();
       this.fullRobotModel = momentumBasedController.getFullRobotModel();
       fullRobotModel.getOneDoFJoints(oneDoFJoints);
+
+      lowLevelOneDoFJointDesiredDataHolder = controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder();
+      OneDoFJoint[] jointArray = fullRobotModel.getOneDoFJoints();
+      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
+      lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(jointArray, LowLevelJointControlMode.FORCE_CONTROL);
 
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
@@ -302,6 +315,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          printForceSensorsOffsets.set(false);
          printFootSensorsOffset();
       }
+
+      OneDoFJoint[] jointArray = fullRobotModel.getOneDoFJoints();
+      lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(jointArray);
    }
 
    private void callUpdatables()
@@ -313,7 +329,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       }
 
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
-      momentumBasedController.callUpdatables();
+      momentumBasedController.update();
    }
 
    public void updateDiagnosticsWhenHangingHelpers()
@@ -939,6 +955,18 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       {
          diagnosticsWhenHangingHelper.setAppliedTorque(appliedTorque);
       }
+   }
+
+   @Override
+   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
+   {
+      
+   }
+
+   @Override
+   public ControllerCoreCommand getControllerCoreCommand()
+   {
+      return controllerCoreCommand;
    }
 
    // private void tareFootSensors()

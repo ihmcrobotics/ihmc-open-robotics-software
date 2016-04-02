@@ -13,7 +13,6 @@ import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-
 public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
@@ -31,26 +30,26 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       this(namePrefix, false, referenceFrame, parentRegistry, false, null);
    }
 
-   public LeadInOutPoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry,
-         boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public LeadInOutPoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry, boolean visualize,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(namePrefix, false, referenceFrame, parentRegistry, visualize, yoGraphicsListRegistry);
    }
 
-   public LeadInOutPoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry)
+   public LeadInOutPoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       this(namePrefix, allowMultipleFrames, referenceFrame, parentRegistry, false, null);
    }
 
-   public LeadInOutPoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry, boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public LeadInOutPoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry,
+         boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
-      positionTrajectoryGenerator = new LeadInOutPositionTrajectoryGenerator(namePrefix, allowMultipleFrames, referenceFrame, registry, visualize, yoGraphicsListRegistry);
+      positionTrajectoryGenerator = new LeadInOutPositionTrajectoryGenerator(namePrefix, allowMultipleFrames, referenceFrame, registry, visualize,
+            yoGraphicsListRegistry);
       orientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator(namePrefix, allowMultipleFrames, referenceFrame, registry);
-      
+
       leaveTime = positionTrajectoryGenerator.getYoLeaveTime();
    }
 
@@ -183,7 +182,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       orientationTrajectoryGenerator.getOrientation(tempOrientation);
       framePoseToPack.setOrientation(tempOrientation);
    }
-   
+
    public boolean isDone()
    {
       return positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();

@@ -119,6 +119,16 @@ public class Twist extends SpatialMotionVector
    }
 
    /**
+    * Packs the angular velocity of the body frame with respect to the base frame, expressed in the base frame.
+    * The vector is computed by simply rotating the angular velocity part of this twist to base frame.
+    */
+   public void getAngularVelocityInBaseFrame(FrameVector vectorToPack)
+   {
+      vectorToPack.setToZero(baseFrame);
+      getAngularVelocityInBaseFrame(vectorToPack.getVector());
+   }
+
+   /**
     * Packs a version of the linear velocity, rotated to the base frame.
     */
    public void getBodyOriginLinearPartInBaseFrame(Vector3d linearVelocityAtBodyOriginToPack)

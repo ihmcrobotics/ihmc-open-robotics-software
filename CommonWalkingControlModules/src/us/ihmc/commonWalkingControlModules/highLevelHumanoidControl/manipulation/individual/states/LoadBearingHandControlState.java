@@ -1,62 +1,67 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.Twist;
-
+import us.ihmc.tools.FormattingTools;
 
 /**
  * @author twan
  *         Date: 5/30/13
  */
-public class LoadBearingHandControlState extends TaskspaceHandControlState
+public class LoadBearingHandControlState extends HandControlState
 {
-   protected final DoubleYoVariable coefficientOfFriction;
-   protected final SpatialAccelerationVector handAcceleration;
+   private final String name;
+   private final YoVariableRegistry registry;
+
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
+   private final MomentumBasedController momentumBasedController;
+
+   private final DoubleYoVariable coefficientOfFriction;
+   private final SpatialAccelerationVector handAcceleration;
 
    private final FrameVector contactNormal;
 
    private final ContactablePlaneBody handPalm;
-   private final ReferenceFrame handControlFrame;
    private final ReferenceFrame handFrame;
    private final ReferenceFrame elevatorFrame;
 
-   private final FramePose desiredPose = new FramePose();
-   private final Twist desiredTwist = new Twist();
-   private final SpatialAccelerationVector desiredAcceleration = new SpatialAccelerationVector();
 
-   private RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule;
-
-   public LoadBearingHandControlState(String namePrefix, HandControlState stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
-         RigidBody elevator, RigidBody endEffector, int jacobianId, YoVariableRegistry parentRegistry)
+   public LoadBearingHandControlState(String namePrefix, HandControlMode stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
+         RigidBody elevator, RigidBody endEffector, YoVariableRegistry parentRegistry)
    {
-      super(namePrefix, stateEnum, momentumBasedController, jacobianId, elevator, endEffector, parentRegistry);
-      
+      super(stateEnum);
+
+      name = namePrefix + FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";
+      registry = new YoVariableRegistry(name);
+
+      spatialAccelerationCommand.set(elevator, endEffector);
+      spatialAccelerationCommand.setSelectionMatrixToIdentity();
+
+      this.momentumBasedController = momentumBasedController;
+
+      parentRegistry.addChild(registry);
+
       coefficientOfFriction = new DoubleYoVariable(name + "CoefficientOfFriction", registry);
       handAcceleration = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(), elevator.getBodyFixedFrame(), endEffector.getBodyFixedFrame());
 
-      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
-      elevatorFrame = fullRobotModel.getElevatorFrame();
-      handFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame();
-      
+      elevatorFrame = elevator.getBodyFixedFrame();
+      handFrame = endEffector.getBodyFixedFrame();
+
       SideDependentList<ContactablePlaneBody> contactableHands = momentumBasedController.getContactableHands();
       if (contactableHands != null)
       {
          handPalm = contactableHands.get(robotSide);
-         handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
          contactNormal = new FrameVector();
          contactNormal.setToNaN();
          momentumBasedController.setPlaneContactStateFree(handPalm);
@@ -64,20 +69,8 @@ public class LoadBearingHandControlState extends TaskspaceHandControlState
       else
       {
          handPalm = null;
-         handControlFrame = null;
          contactNormal = null;
       }
-   }
-
-   @Override
-   public void setControlModuleForForceControl(RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule)
-   {
-      this.handRigidBodySpatialAccelerationControlModule = handRigidBodySpatialAccelerationControlModule;
-   }
-
-   @Override
-   public void setControlModuleForPositionControl(TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator)
-   {
    }
 
    public void setCoefficientOfFriction(double coefficientOfFriction)
@@ -106,14 +99,8 @@ public class LoadBearingHandControlState extends TaskspaceHandControlState
    @Override
    public void doAction()
    {
-      desiredTwist.setToZero(handControlFrame, elevatorFrame, handControlFrame);
-      desiredAcceleration.setToZero(handControlFrame, elevatorFrame, handControlFrame);
-      handRigidBodySpatialAccelerationControlModule.doPositionControl(desiredPose, desiredTwist, desiredAcceleration, getBase());
-      handRigidBodySpatialAccelerationControlModule.getAcceleration(handAcceleration);
-      handAcceleration.changeBodyFrameNoRelativeAcceleration(handFrame);
-      handAcceleration.changeFrameNoRelativeMotion(handFrame);
-
-      submitDesiredAcceleration(handAcceleration);
+      handAcceleration.setToZero(handFrame, elevatorFrame, handFrame);
+      spatialAccelerationCommand.setSpatialAcceleration(handAcceleration);
    }
 
    @Override
@@ -131,8 +118,6 @@ public class LoadBearingHandControlState extends TaskspaceHandControlState
 
       contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
       momentumBasedController.setPlaneContactStateFullyConstrained(handPalm, coefficientOfFriction.getDoubleValue(), contactNormal);
-      desiredPose.setToZero(handControlFrame);
-      desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    @Override
@@ -149,5 +134,17 @@ public class LoadBearingHandControlState extends TaskspaceHandControlState
    public boolean isDone()
    {
       return true;
+   }
+
+   @Override
+   public SpatialAccelerationCommand getInverseDynamicsCommand()
+   {
+      return spatialAccelerationCommand;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return null;
    }
 }

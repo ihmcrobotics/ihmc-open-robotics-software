@@ -12,7 +12,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.packets.wholebody.AtlasWholeBodyTrajectoryPacketTest.class,
    us.ihmc.atlas.posePlayback.AtlasPlaybackPoseSequenceTest.class,
    us.ihmc.atlas.roughTerrainWalking.AtlasFootstepSnapperTest.class,
    us.ihmc.atlas.roughTerrainWalking.AtlasSwingTrajectoryTest.class,

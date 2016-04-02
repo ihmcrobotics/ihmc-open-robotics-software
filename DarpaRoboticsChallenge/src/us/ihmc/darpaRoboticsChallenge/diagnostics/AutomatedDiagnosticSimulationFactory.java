@@ -159,7 +159,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
-      SideDependentList<ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, humanoidReferenceFrames);
+      SideDependentList<? extends ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, humanoidReferenceFrames);
 
       Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
       Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();

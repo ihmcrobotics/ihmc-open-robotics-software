@@ -2,20 +2,20 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
 public class HighLevelStateBehavior extends BehaviorInterface
 {
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
-   private HighLevelStatePacket outgoingHighLevelStatePacket;
+   private HighLevelStateMessage outgoingHighLevelStatePacket;
 
    public HighLevelStateBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
    }
 
-   public void setInput(HighLevelStatePacket thighStatePacket)
+   public void setInput(HighLevelStateMessage thighStatePacket)
    {
       this.outgoingHighLevelStatePacket = thighStatePacket;
    }

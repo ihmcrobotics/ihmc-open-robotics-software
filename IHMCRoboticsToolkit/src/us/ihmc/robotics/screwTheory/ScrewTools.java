@@ -1,16 +1,5 @@
 package us.ihmc.robotics.screwTheory;
 
-import gnu.trove.list.array.TIntArrayList;
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +7,20 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
+import org.ejml.data.DenseMatrix64F;
+
+import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ScrewTools
 {
@@ -665,6 +668,16 @@ public class ScrewTools
       return ret;
    }
 
+   public static int computeDegreesOfFreedom(List<? extends InverseDynamicsJoint> jointList)
+   {
+      int ret = 0;
+      for (int i = 0; i < jointList.size(); i++)
+      {
+         ret += jointList.get(i).getDegreesOfFreedom();
+      }
+      return ret;
+   }
+
    public static SpatialAccelerationVector createGravitationalSpatialAcceleration(RigidBody rootBody, double gravity)
    {
       Vector3d gravitationalAcceleration = new Vector3d(0.0, 0.0, gravity);
@@ -906,5 +919,23 @@ public class ScrewTools
             externalWrench.add(externalWrenchToCompensateFor);
          }
       }
+   }
+
+   public static long computeGeometricJacobianNameBasedHashCode(InverseDynamicsJoint joints[], ReferenceFrame jacobianFrame, boolean allowChangeFrame)
+   {
+      long jointsHashCode = NameBasedHashCodeTools.computeArrayHashCode(joints);
+      if (!allowChangeFrame)
+         return NameBasedHashCodeTools.combineHashCodes(jointsHashCode, jacobianFrame);
+      else
+         return jointsHashCode;
+   }
+
+   public static long computeGeometricJacobianNameBasedHashCode(InverseDynamicsJoint joints[], int firstIndex, int lastIndex, ReferenceFrame jacobianFrame, boolean allowChangeFrame)
+   {
+      long jointsHashCode = NameBasedHashCodeTools.computeSubArrayHashCode(joints, firstIndex, lastIndex);
+      if (!allowChangeFrame)
+         return NameBasedHashCodeTools.combineHashCodes(jointsHashCode, jacobianFrame);
+      else
+         return jointsHashCode;
    }
 }

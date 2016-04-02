@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.VideoA)
 @SuiteClasses
 ({
-   us.ihmc.atlas.AtlasPushRecoveryMultiStepTest.class
+   us.ihmc.atlas.pushRecovery.AtlasPushRecoveryMultiStepTest.class
 })
 
 public class AtlasCVideoATestSuite

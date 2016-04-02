@@ -1,296 +1,314 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
+import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultipleFrames;
-import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.WaypointOrientationTrajectoryData;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.tools.io.printing.PrintTools;
 
+import javax.vecmath.Vector3d;
 
 public class ChestOrientationManager
 {
-   private final YoVariableRegistry registry;
-   private final ChestOrientationControlModule chestOrientationControlModule;
-   private final MomentumBasedController momentumBasedController;
-   private int jacobianId = -1;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final ChestOrientationProvider chestOrientationProvider;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
+
    private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable receivedNewChestOrientationTime;
-   private final ReferenceFrame chestOrientationExpressedInFrame;
+   private final DoubleYoVariable receivedNewChestOrientationTime = new DoubleYoVariable("receivedNewChestOrientationTime", registry);
 
-   private final BooleanYoVariable isTrackingOrientation;
-   private final BooleanYoVariable isUsingWaypointTrajectory;
-   private final YoFrameVector yoControlledAngularAcceleration;
+   private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isChestOrientationTrajectoryStopped", registry);
+   private final BooleanYoVariable isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
 
-   private OrientationTrajectoryGeneratorInMultipleFrames activeTrajectoryGenerator;
-   private final SimpleOrientationTrajectoryGenerator simpleOrientationTrajectoryGenerator;
-   private final MultipleWaypointsOrientationTrajectoryGenerator waypointOrientationTrajectoryGenerator;
+   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasChestOrientationManagerBeenInitialized", registry);
+
+   private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
    private final ReferenceFrame pelvisZUpFrame;
    private final ReferenceFrame chestFrame;
 
-   private final BooleanYoVariable initializeToCurrent;
-   
-   public ChestOrientationManager(MomentumBasedController momentumBasedController, ChestOrientationControlModule chestOrientationControlModule,
-         ChestOrientationProvider chestOrientationProvider, double trajectoryTime, YoVariableRegistry parentRegistry)
+   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameVector desiredAngularVelocity = new FrameVector();
+   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
+   private final FrameSO3TrajectoryPoint initialTrajectoryPoint = new FrameSO3TrajectoryPoint();
+
+   private final YoFrameVector yoChestAngularWeight = new YoFrameVector("chestWeight", null, registry);
+   private final Vector3d chestAngularWeight = new Vector3d();
+
+   private final YoOrientationPIDGainsInterface gains;
+
+   private final LongYoVariable lastCommandId;
+
+   private final BooleanYoVariable isReadyToHandleQueuedCommands;
+   private final LongYoVariable numberOfQueuedCommands;
+   private final CommandArrayDeque<ChestTrajectoryCommand> commandQueue = new CommandArrayDeque<>(ChestTrajectoryCommand.class);
+
+   public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface gains, Vector3d angularWeight,
+         double trajectoryTime, YoVariableRegistry parentRegistry)
    {
-      this.momentumBasedController = momentumBasedController;
-      this.yoTime = momentumBasedController.getYoTime();
-      this.chestOrientationControlModule = chestOrientationControlModule;
-      this.chestOrientationProvider = chestOrientationProvider;
-      this.pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
+      this.gains = gains;
+      yoTime = momentumBasedController.getYoTime();
+      pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
 
-      registry = new YoVariableRegistry(getClass().getSimpleName());
-      chestFrame = chestOrientationControlModule.getChest().getBodyFixedFrame();
-      yoControlledAngularAcceleration = new YoFrameVector("controlledChestAngularAcceleration", chestFrame, registry);
-      
-      if (chestOrientationProvider != null)
-      {
-         chestOrientationExpressedInFrame = chestOrientationProvider.getChestOrientationExpressedInFrame();
+      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      RigidBody chest = fullRobotModel.getChest();
+      RigidBody elevator = fullRobotModel.getElevator();
+      chestFrame = chest.getBodyFixedFrame();
 
-         isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
-         receivedNewChestOrientationTime = new DoubleYoVariable("receivedNewChestOrientationTime", registry);
+      yoChestAngularWeight.set(angularWeight);
+      yoChestAngularWeight.get(chestAngularWeight);
+      orientationFeedbackControlCommand.setWeightsForSolver(chestAngularWeight);
+      orientationFeedbackControlCommand.set(elevator, chest);
+      orientationFeedbackControlCommand.setGains(gains);
 
-         isUsingWaypointTrajectory = new BooleanYoVariable(getClass().getSimpleName() + "IsUsingWaypointTrajectory", registry);
-         isUsingWaypointTrajectory.set(false);
+      boolean allowMultipleFrames = true;
+      String namePrefix = "chest";
+      orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix, allowMultipleFrames, pelvisZUpFrame, registry);
+      orientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
 
-         boolean allowMultipleFrames = true;
-         simpleOrientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("chest", allowMultipleFrames, chestOrientationExpressedInFrame, parentRegistry);
-         simpleOrientationTrajectoryGenerator.setTrajectoryTime(trajectoryTime);
-         simpleOrientationTrajectoryGenerator.registerAndSwitchFrame(pelvisZUpFrame);
-         simpleOrientationTrajectoryGenerator.initialize();
-         activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
+      lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
+      lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-         boolean doVelocityAtWaypoints = false;
-         waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chestWaypoint", 15, doVelocityAtWaypoints, allowMultipleFrames, chestOrientationExpressedInFrame, registry);
-         waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(pelvisZUpFrame);
+      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedArmTrajectoryCommands", registry);
+      numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
 
-         initializeToCurrent = new BooleanYoVariable("initializeChestOrientationToCurrent", registry);
-      }
-      else
-      {
-         chestOrientationExpressedInFrame = null;
-         isTrackingOrientation = null;
-         receivedNewChestOrientationTime = null;
-         isUsingWaypointTrajectory = null;
-         simpleOrientationTrajectoryGenerator = null;
-         waypointOrientationTrajectoryGenerator = null;
-
-         initializeToCurrent = null;
-      }
-      
       parentRegistry.addChild(registry);
    }
 
-   private final FrameOrientation desiredOrientation = new FrameOrientation();
-   private final FrameVector desiredAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
+   public void initialize()
+   {
+      if (hasBeenInitialized.getBooleanValue())
+         return;
 
-   private final FrameVector controlledAngularAcceleration = new FrameVector();
-   
+      hasBeenInitialized.set(true);
+
+      holdCurrentOrientation();
+   }
+
    public void compute()
    {
-      if (isUsingWaypointTrajectory != null)
+      if (isTrackingOrientation.getBooleanValue())
       {
-         if (isUsingWaypointTrajectory.getBooleanValue())
-            activeTrajectoryGenerator = waypointOrientationTrajectoryGenerator;
-         else
-            activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
-      }
+         if (!isTrajectoryStopped.getBooleanValue())
+         {
+            double deltaTime = yoTime.getDoubleValue() - receivedNewChestOrientationTime.getDoubleValue();
+            orientationTrajectoryGenerator.compute(deltaTime);
 
-      checkForNewDesiredOrientationInformation();
+            if (orientationTrajectoryGenerator.isDone() && !commandQueue.isEmpty())
+            {
+               double firstTrajectoryPointTime = orientationTrajectoryGenerator.getLastWaypointTime();
+               ChestTrajectoryCommand command = commandQueue.poll();
+               numberOfQueuedCommands.decrement();
+               initializeTrajectoryGenerator(command, firstTrajectoryPointTime);
+               orientationTrajectoryGenerator.compute(deltaTime);
+            }
+         }
+         boolean isTrajectoryDone = orientationTrajectoryGenerator.isDone();
 
-      if (chestOrientationProvider != null && isTrackingOrientation.getBooleanValue())
-      {
-         double deltaTime = yoTime.getDoubleValue() - receivedNewChestOrientationTime.getDoubleValue();
-         activeTrajectoryGenerator.compute(deltaTime);
-         boolean isTrajectoryDone = activeTrajectoryGenerator.isDone();
-         
          if (isTrajectoryDone)
-            activeTrajectoryGenerator.changeFrame(pelvisZUpFrame);
-         
-         activeTrajectoryGenerator.getOrientation(desiredOrientation);
-         chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+            orientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
+
          isTrackingOrientation.set(!isTrajectoryDone);
       }
 
-      if (jacobianId >= 0)
-      {
-         chestOrientationControlModule.compute();
-         TaskspaceConstraintData taskspaceConstraintData = chestOrientationControlModule.getTaskspaceConstraintData();
-         
-         if (yoControlledAngularAcceleration != null)
-         {
-            SpatialAccelerationVector spatialAcceleration = taskspaceConstraintData.getSpatialAcceleration();
-            if (spatialAcceleration.getExpressedInFrame() != null) // That happens when there is no joint to control.
-            {
-               spatialAcceleration.getAngularPart(controlledAngularAcceleration);
-               yoControlledAngularAcceleration.set(controlledAngularAcceleration);
-            }
-         }
-
-         momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
-      }
+      orientationTrajectoryGenerator.getOrientation(desiredOrientation);
+      desiredAngularVelocity.setToZero(worldFrame);
+      feedForwardAngularAcceleration.setToZero(worldFrame);
+      orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      orientationFeedbackControlCommand.setGains(gains);
+      yoChestAngularWeight.get(chestAngularWeight);
+      orientationFeedbackControlCommand.setWeightsForSolver(chestAngularWeight);
    }
 
    public void holdCurrentOrientation()
    {
-      if (initializeToCurrent != null)
-         initializeToCurrent.set(true);
+      receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
+      initialTrajectoryPoint.setToZero(chestFrame);
+      initialTrajectoryPoint.changeFrame(pelvisZUpFrame);
+
+      orientationTrajectoryGenerator.clear(pelvisZUpFrame);
+      orientationTrajectoryGenerator.appendWaypoint(initialTrajectoryPoint);
+      orientationTrajectoryGenerator.initialize();
+      isTrackingOrientation.set(true);
+      isTrajectoryStopped.set(false);
    }
 
-   private void checkForNewDesiredOrientationInformation()
+   public void handleChestTrajectoryCommand(ChestTrajectoryCommand command)
    {
-      if (chestOrientationProvider == null)
+      switch (command.getExecutionMode())
+      {
+      case OVERRIDE:
+         isReadyToHandleQueuedCommands.set(true);
+         clearCommandQueue(command.getCommandId());
+         receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
+         initializeTrajectoryGenerator(command, 0.0);
          return;
-
-      if (initializeToCurrent.getBooleanValue())
-      {
-         initializeToCurrent.set(false);
-
-         receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
-
-         simpleOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
-         desiredOrientation.setToZero(chestFrame);
-         desiredOrientation.changeFrame(pelvisZUpFrame);
-         simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
-         simpleOrientationTrajectoryGenerator.setFinalOrientation(desiredOrientation);
-         simpleOrientationTrajectoryGenerator.setTrajectoryTime(0.0);
-         simpleOrientationTrajectoryGenerator.initialize();
-         isUsingWaypointTrajectory.set(false);
-         activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
-         isTrackingOrientation.set(true);
+      case QUEUE:
+         boolean success = queueHandTrajectoryCommand(command);
+         if (!success)
+         {
+            isReadyToHandleQueuedCommands.set(false);
+            clearCommandQueue(INVALID_MESSAGE_ID);
+            holdCurrentOrientation();
+         }
+         return;
+      default:
+         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
+         return;
       }
-      else if (chestOrientationProvider.checkForHomeOrientation())
+   }
+
+   public boolean queueHandTrajectoryCommand(ChestTrajectoryCommand command)
+   {
+      if (!isReadyToHandleQueuedCommands.getBooleanValue())
       {
-         receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
-
-         simpleOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
-         activeTrajectoryGenerator.changeFrame(pelvisZUpFrame);
-         activeTrajectoryGenerator.getOrientation(desiredOrientation);
-         simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
-         desiredOrientation.setToZero(pelvisZUpFrame);
-         simpleOrientationTrajectoryGenerator.setFinalOrientation(desiredOrientation);
-         simpleOrientationTrajectoryGenerator.setTrajectoryTime(chestOrientationProvider.getTrajectoryTime());
-         simpleOrientationTrajectoryGenerator.initialize();
-         isUsingWaypointTrajectory.set(false);
-         activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
-         isTrackingOrientation.set(true);
+         PrintTools.warn(this, "The very first " + command.getClass().getSimpleName() + " of a series must be " + ExecutionMode.OVERRIDE + ". Aborting motion.");
+         return false;
       }
-      else if (chestOrientationProvider.checkForNewChestOrientation())
+
+      long previousCommandId = command.getPreviousCommandId();
+
+      if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
-         receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
-
-         simpleOrientationTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
-         activeTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
-         activeTrajectoryGenerator.getOrientation(desiredOrientation);
-         simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
-         simpleOrientationTrajectoryGenerator.setFinalOrientation(chestOrientationProvider.getDesiredChestOrientation());
-         simpleOrientationTrajectoryGenerator.setTrajectoryTime(chestOrientationProvider.getTrajectoryTime());
-         simpleOrientationTrajectoryGenerator.initialize();
-         isUsingWaypointTrajectory.set(false);
-         activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
-         isTrackingOrientation.set(true);
+         PrintTools.warn(this, "Previous command ID mismatch: previous ID from command = " + previousCommandId
+               + ", last message ID received by the controller = " + lastCommandId.getLongValue() + ". Aborting motion.");
+         return false;
       }
-      else if (chestOrientationProvider.checkForNewChestOrientationWithWaypoints())
+
+      if (command.getTrajectoryPoint(0).getTime() < 1.0e-5)
       {
-         receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
-
-         simpleOrientationTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
-         activeTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
-         activeTrajectoryGenerator.getOrientation(desiredOrientation);
-         simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
-         
-         WaypointOrientationTrajectoryData trajectoryData = chestOrientationProvider.getDesiredChestOrientationWithWaypoints();
-
-         int lastIndex = trajectoryData.getTimeAtWaypoints().length - 1;      
-
-         double totalTime = trajectoryData.getTimeAtWaypoints()[ lastIndex ];     
-
-         FrameOrientation lastChestOrientation = new FrameOrientation( ReferenceFrame.getWorldFrame(), trajectoryData.getOrientations()[lastIndex] );
-         
-         simpleOrientationTrajectoryGenerator.setFinalOrientation( lastChestOrientation );  
-         simpleOrientationTrajectoryGenerator.setTrajectoryTime( totalTime );
-         
-         simpleOrientationTrajectoryGenerator.initialize();
-         isUsingWaypointTrajectory.set(false);
-         activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
-         
-         /*waypointOrientationTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
-         activeTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
-         activeTrajectoryGenerator.get(desiredOrientation);
-         waypointOrientationTrajectoryGenerator.clear();
-         waypointOrientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation);
-         WaypointOrientationTrajectoryData trajectoryData = chestOrientationProvider.getDesiredChestOrientationWithWaypoints();
-         trajectoryData.changeFrame(chestOrientationExpressedInFrame);
-         waypointOrientationTrajectoryGenerator.appendWaypoints(trajectoryData);
-         waypointOrientationTrajectoryGenerator.initialize();
-         isUsingWaypointTrajectory.set(true);
-         activeTrajectoryGenerator = waypointOrientationTrajectoryGenerator;*/
-         isTrackingOrientation.set(true);
+         PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
+         return false;
       }
-   }  
 
-   public void setDesireds(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector desiredAngularAcceleration)
-   {
-      chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      commandQueue.add(command);
+      numberOfQueuedCommands.increment();
+      lastCommandId.set(command.getCommandId());
+
+      return true;
    }
 
-   public int createJacobian(FullRobotModel fullRobotModel, String[] chestOrientationControlJointNames)
+   private void initializeTrajectoryGenerator(ChestTrajectoryCommand command, double firstTrajectoryPointTime)
    {
-      RigidBody rootBody = fullRobotModel.getRootJoint().getSuccessor();
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(rootBody);
-      InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
+      command.addTimeOffset(firstTrajectoryPointTime);
 
-      ReferenceFrame chestFrame = chestOrientationControlModule.getChest().getBodyFixedFrame();
-      int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(chestOrientationControlJoints, chestFrame);
-      return jacobianId;
+      if (command.getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
+      {
+         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
+         desiredOrientation.changeFrame(worldFrame);
+         desiredAngularVelocity.setToZero(worldFrame);
+
+         orientationTrajectoryGenerator.clear(worldFrame);
+         orientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, desiredAngularVelocity);
+      }
+      else
+      {
+         orientationTrajectoryGenerator.clear(worldFrame);
+      }
+
+      int numberOfTrajectoryPoints = queueExcedingTrajectoryPointsIfNeeded(command);
+
+      for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+      {
+         orientationTrajectoryGenerator.appendWaypoint(command.getTrajectoryPoint(trajectoryPointIndex));
+      }
+
+      orientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
+      orientationTrajectoryGenerator.initialize();
+      isTrackingOrientation.set(true);
+      isTrajectoryStopped.set(false);
    }
 
-   public void setUp(RigidBody base, int jacobianId)
+   private int queueExcedingTrajectoryPointsIfNeeded(ChestTrajectoryCommand command)
    {
-      this.jacobianId = jacobianId;
-      chestOrientationControlModule.setBase(base);
-      chestOrientationControlModule.setJacobian(momentumBasedController.getJacobian(jacobianId));
+      int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
+
+      int maximumNumberOfWaypoints = orientationTrajectoryGenerator.getMaximumNumberOfWaypoints() - orientationTrajectoryGenerator.getCurrentNumberOfWaypoints();
+
+      if (numberOfTrajectoryPoints <= maximumNumberOfWaypoints)
+         return numberOfTrajectoryPoints;
+
+      ChestTrajectoryCommand commandForExcedent = commandQueue.addFirst();
+      numberOfQueuedCommands.increment();
+      commandForExcedent.clear();
+      commandForExcedent.setPropertiesOnly(command);
+
+      for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+      {
+         commandForExcedent.addTrajectoryPoint(command.getTrajectoryPoint(trajectoryPointIndex));
+      }
+
+      double timeOffsetToSubtract = command.getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
+      commandForExcedent.subtractTimeOffset(timeOffsetToSubtract);
+
+      return maximumNumberOfWaypoints;
    }
 
-   public void setUp(RigidBody base, int jacobianId, double proportionalGainX, double proportionalGainY, double proportionalGainZ, double derivativeGainX,
-         double derivativeGainY, double derivativeGainZ)
+   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      this.jacobianId = jacobianId;
-      chestOrientationControlModule.setBase(base);
-      chestOrientationControlModule.setJacobian(momentumBasedController.getJacobian(jacobianId));
-      chestOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
-      chestOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
+      isTrajectoryStopped.set(command.isStopAllTrajectory());
    }
 
-   public void setControlGains(double proportionalGain, double derivativeGain)
+   public void handleGoHomeCommand(GoHomeCommand command)
    {
-      chestOrientationControlModule.setProportionalGains(proportionalGain, proportionalGain, proportionalGain);
-      chestOrientationControlModule.setDerivativeGains(derivativeGain, derivativeGain, derivativeGain);
+      if (command.getRequest(BodyPart.CHEST))
+         goToHomeFromCurrentDesired(command.getTrajectoryTime());
    }
 
-   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void goToHomeFromCurrentDesired(double trajectoryTime)
    {
-      chestOrientationControlModule.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
+
+      orientationTrajectoryGenerator.getOrientation(desiredOrientation);
+
+      desiredOrientation.changeFrame(pelvisZUpFrame);
+      orientationTrajectoryGenerator.clear(pelvisZUpFrame);
+      orientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, desiredAngularVelocity);
+
+      desiredOrientation.setToZero(pelvisZUpFrame);
+      orientationTrajectoryGenerator.appendWaypoint(trajectoryTime, desiredOrientation, desiredAngularVelocity);
+      orientationTrajectoryGenerator.initialize();
+
+      isTrackingOrientation.set(true);
+      isTrajectoryStopped.set(false);
    }
 
-   public void turnOff()
+   private void clearCommandQueue(long lastCommandId)
    {
-      setUp(null, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      commandQueue.clear();
+      numberOfQueuedCommands.set(0);
+      this.lastCommandId.set(lastCommandId);
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return null;
+   }
+
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return orientationFeedbackControlCommand;
    }
 }

@@ -16,13 +16,11 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTools;
-import us.ihmc.commonWalkingControlModules.trajectories.HeightCalculatorParameters;
-import us.ihmc.commonWalkingControlModules.trajectories.SwingTrajectoryHeightCalculator;
 import us.ihmc.darpaRoboticsChallenge.footstepGenerator.BasicFootstepValidityMetric;
 import us.ihmc.darpaRoboticsChallenge.footstepGenerator.PathToFootstepGenerator;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepVisualizer;
@@ -80,15 +78,15 @@ public class PathToFootstepGeneratorTest
       PathToFootstepGenerator generator = new PathToFootstepGenerator(heightCalculator, footstepSnapper, validityMetric, null);
 
       FootstepOverheadPath overheadPath = new InterpolatedFootstepOverheadPath(startPose, endPose);
-      SideDependentList<FootstepData> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
+      SideDependentList<FootstepDataMessage> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
       generator.initialize(originalFeet, overheadPath);
 
-      List<FootstepData> generatedFootsteps = generator.getStepsAlongPath(startSide);
+      List<FootstepDataMessage> generatedFootsteps = generator.getStepsAlongPath(startSide);
 
-      SideDependentList<FootstepData> previousFeet = new SideDependentList<>(originalFeet);
-      FootstepData initialSwingFootstep;
-      FootstepData stanceFootstep;
-      for (FootstepData footstepData : generatedFootsteps){
+      SideDependentList<FootstepDataMessage> previousFeet = new SideDependentList<>(originalFeet);
+      FootstepDataMessage initialSwingFootstep;
+      FootstepDataMessage stanceFootstep;
+      for (FootstepDataMessage footstepData : generatedFootsteps){
          initialSwingFootstep = previousFeet.get(footstepData.getRobotSide());
          stanceFootstep = previousFeet.get(footstepData.getRobotSide().getOppositeSide());
          assertTrue(validityMetric.footstepValid(stanceFootstep, footstepData));
@@ -96,7 +94,7 @@ public class PathToFootstepGeneratorTest
          previousFeet.put(footstepData.getRobotSide(), footstepData);
       }
 
-      for (FootstepData lastFootstep : previousFeet){
+      for (FootstepDataMessage lastFootstep : previousFeet){
          testLastFootstep(endPose, lastFootstep, horizontalOffset);
       }
 
@@ -127,15 +125,15 @@ public class PathToFootstepGeneratorTest
       PathToFootstepGenerator generator = new PathToFootstepGenerator(heightCalculator, footstepSnapper, validityMetric, heightMap);
 
       FootstepOverheadPath overheadPath = new InterpolatedFootstepOverheadPath(startPose, endPose);
-      SideDependentList<FootstepData> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
+      SideDependentList<FootstepDataMessage> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
       generator.initialize(originalFeet, overheadPath);
 
-      List<FootstepData> generatedFootsteps = generator.getStepsAlongPath(startSide);
+      List<FootstepDataMessage> generatedFootsteps = generator.getStepsAlongPath(startSide);
 
-      SideDependentList<FootstepData> previousFeet = new SideDependentList<>(originalFeet);
-      FootstepData initialSwingFootstep;
-      FootstepData stanceFootstep;
-      for (FootstepData footstepData : generatedFootsteps){
+      SideDependentList<FootstepDataMessage> previousFeet = new SideDependentList<>(originalFeet);
+      FootstepDataMessage initialSwingFootstep;
+      FootstepDataMessage stanceFootstep;
+      for (FootstepDataMessage footstepData : generatedFootsteps){
          initialSwingFootstep = previousFeet.get(footstepData.getRobotSide());
          stanceFootstep = previousFeet.get(footstepData.getRobotSide().getOppositeSide());
          assertTrue(validityMetric.footstepValid(stanceFootstep, footstepData));
@@ -143,7 +141,7 @@ public class PathToFootstepGeneratorTest
          previousFeet.put(footstepData.getRobotSide(), footstepData);
       }
 
-      for (FootstepData lastFootstep : previousFeet){
+      for (FootstepDataMessage lastFootstep : previousFeet){
          testLastFootstep(endPose, lastFootstep, horizontalOffset);
       }
 
@@ -175,15 +173,15 @@ public class PathToFootstepGeneratorTest
       PathToFootstepGenerator generator = new PathToFootstepGenerator(heightCalculator, footstepSnapper, validityMetric, heightMap);
 
       FootstepOverheadPath overheadPath = new InterpolatedFootstepOverheadPath(startPose, endPose);
-      SideDependentList<FootstepData> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
+      SideDependentList<FootstepDataMessage> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
       generator.initialize(originalFeet, overheadPath);
 
-      List<FootstepData> generatedFootsteps = generator.getStepsAlongPath(startSide);
+      List<FootstepDataMessage> generatedFootsteps = generator.getStepsAlongPath(startSide);
 
-      SideDependentList<FootstepData> previousFeet = new SideDependentList<>(originalFeet);
-      FootstepData initialSwingFootstep;
-      FootstepData stanceFootstep;
-      for (FootstepData footstepData : generatedFootsteps){
+      SideDependentList<FootstepDataMessage> previousFeet = new SideDependentList<>(originalFeet);
+      FootstepDataMessage initialSwingFootstep;
+      FootstepDataMessage stanceFootstep;
+      for (FootstepDataMessage footstepData : generatedFootsteps){
          initialSwingFootstep = previousFeet.get(footstepData.getRobotSide());
          stanceFootstep = previousFeet.get(footstepData.getRobotSide().getOppositeSide());
          assertTrue(validityMetric.footstepValid(stanceFootstep, footstepData));
@@ -191,7 +189,7 @@ public class PathToFootstepGeneratorTest
          previousFeet.put(footstepData.getRobotSide(), footstepData);
       }
 
-      for (FootstepData lastFootstep : previousFeet){
+      for (FootstepDataMessage lastFootstep : previousFeet){
          testLastFootstep(endPose, lastFootstep, horizontalOffset);
       }
 
@@ -223,15 +221,15 @@ public class PathToFootstepGeneratorTest
       PathToFootstepGenerator generator = new PathToFootstepGenerator(heightCalculator, footstepSnapper, validityMetric, heightMap);
 
       FootstepOverheadPath overheadPath = new TurnStraightTurnFootstepOverheadPath(startPose, endPose);
-      SideDependentList<FootstepData> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
+      SideDependentList<FootstepDataMessage> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
       generator.initialize(originalFeet, overheadPath);
 
-      List<FootstepData> generatedFootsteps = generator.getStepsAlongPath(startSide);
+      List<FootstepDataMessage> generatedFootsteps = generator.getStepsAlongPath(startSide);
 
-      SideDependentList<FootstepData> previousFeet = new SideDependentList<>(originalFeet);
-      FootstepData initialSwingFootstep;
-      FootstepData stanceFootstep;
-      for (FootstepData footstepData : generatedFootsteps){
+      SideDependentList<FootstepDataMessage> previousFeet = new SideDependentList<>(originalFeet);
+      FootstepDataMessage initialSwingFootstep;
+      FootstepDataMessage stanceFootstep;
+      for (FootstepDataMessage footstepData : generatedFootsteps){
          initialSwingFootstep = previousFeet.get(footstepData.getRobotSide());
          stanceFootstep = previousFeet.get(footstepData.getRobotSide().getOppositeSide());
          assertTrue(validityMetric.footstepValid(stanceFootstep, footstepData));
@@ -239,7 +237,7 @@ public class PathToFootstepGeneratorTest
          previousFeet.put(footstepData.getRobotSide(), footstepData);
       }
 
-      for (FootstepData lastFootstep : previousFeet){
+      for (FootstepDataMessage lastFootstep : previousFeet){
          testLastFootstep(endPose, lastFootstep, horizontalOffset);
       }
 
@@ -271,15 +269,15 @@ public class PathToFootstepGeneratorTest
       PathToFootstepGenerator generator = new PathToFootstepGenerator(heightCalculator, footstepSnapper, validityMetric, heightMap);
 
 
-      SideDependentList<FootstepData> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
+      SideDependentList<FootstepDataMessage> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
       generator.initialize(originalFeet, overheadPath);
 
-      List<FootstepData> generatedFootsteps = generator.getStepsAlongPath(startSide);
+      List<FootstepDataMessage> generatedFootsteps = generator.getStepsAlongPath(startSide);
 
-      SideDependentList<FootstepData> previousFeet = new SideDependentList<>(originalFeet);
-      FootstepData initialSwingFootstep;
-      FootstepData stanceFootstep;
-      for (FootstepData footstepData : generatedFootsteps){
+      SideDependentList<FootstepDataMessage> previousFeet = new SideDependentList<>(originalFeet);
+      FootstepDataMessage initialSwingFootstep;
+      FootstepDataMessage stanceFootstep;
+      for (FootstepDataMessage footstepData : generatedFootsteps){
          initialSwingFootstep = previousFeet.get(footstepData.getRobotSide());
          stanceFootstep = previousFeet.get(footstepData.getRobotSide().getOppositeSide());
          assertTrue(validityMetric.footstepValid(stanceFootstep, footstepData));
@@ -287,7 +285,7 @@ public class PathToFootstepGeneratorTest
          previousFeet.put(footstepData.getRobotSide(), footstepData);
       }
 
-      for (FootstepData lastFootstep : previousFeet){
+      for (FootstepDataMessage lastFootstep : previousFeet){
          testLastFootstep(endPose, lastFootstep, horizontalOffset);
       }
 
@@ -325,15 +323,15 @@ public class PathToFootstepGeneratorTest
       PathToFootstepGenerator generator = new PathToFootstepGenerator(heightCalculator, footstepSnapper, validityMetric, heightMap);
 
 
-      SideDependentList<FootstepData> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
+      SideDependentList<FootstepDataMessage> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
       generator.initialize(originalFeet, overheadPath);
 
-      List<FootstepData> generatedFootsteps = generator.getStepsAlongPath(startSide);
+      List<FootstepDataMessage> generatedFootsteps = generator.getStepsAlongPath(startSide);
 
-      SideDependentList<FootstepData> previousFeet = new SideDependentList<>(originalFeet);
-      FootstepData initialSwingFootstep;
-      FootstepData stanceFootstep;
-      for (FootstepData footstepData : generatedFootsteps){
+      SideDependentList<FootstepDataMessage> previousFeet = new SideDependentList<>(originalFeet);
+      FootstepDataMessage initialSwingFootstep;
+      FootstepDataMessage stanceFootstep;
+      for (FootstepDataMessage footstepData : generatedFootsteps){
          initialSwingFootstep = previousFeet.get(footstepData.getRobotSide());
          stanceFootstep = previousFeet.get(footstepData.getRobotSide().getOppositeSide());
          assertTrue(validityMetric.footstepValid(stanceFootstep, footstepData));
@@ -341,7 +339,7 @@ public class PathToFootstepGeneratorTest
          previousFeet.put(footstepData.getRobotSide(), footstepData);
       }
 
-      for (FootstepData lastFootstep : previousFeet){
+      for (FootstepDataMessage lastFootstep : previousFeet){
          testLastFootstep(endPose, lastFootstep, horizontalOffset);
       }
 
@@ -374,15 +372,15 @@ public class PathToFootstepGeneratorTest
       PathToFootstepGenerator generator = new PathToFootstepGenerator(heightCalculator, footstepSnapper, validityMetric, heightMap);
 
 
-      SideDependentList<FootstepData> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
+      SideDependentList<FootstepDataMessage> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
       generator.initialize(originalFeet, overheadPath);
 
-      List<FootstepData> generatedFootsteps = generator.getStepsAlongPath(startSide);
+      List<FootstepDataMessage> generatedFootsteps = generator.getStepsAlongPath(startSide);
 
-      SideDependentList<FootstepData> previousFeet = new SideDependentList<>(originalFeet);
-      FootstepData initialSwingFootstep;
-      FootstepData stanceFootstep;
-      for (FootstepData footstepData : generatedFootsteps){
+      SideDependentList<FootstepDataMessage> previousFeet = new SideDependentList<>(originalFeet);
+      FootstepDataMessage initialSwingFootstep;
+      FootstepDataMessage stanceFootstep;
+      for (FootstepDataMessage footstepData : generatedFootsteps){
          initialSwingFootstep = previousFeet.get(footstepData.getRobotSide());
          stanceFootstep = previousFeet.get(footstepData.getRobotSide().getOppositeSide());
          assertTrue(validityMetric.footstepValid(stanceFootstep, footstepData));
@@ -390,7 +388,7 @@ public class PathToFootstepGeneratorTest
          previousFeet.put(footstepData.getRobotSide(), footstepData);
       }
 
-      for (FootstepData lastFootstep : previousFeet){
+      for (FootstepDataMessage lastFootstep : previousFeet){
          testLastFootstep(endPose, lastFootstep, horizontalOffset);
       }
 
@@ -423,15 +421,15 @@ public class PathToFootstepGeneratorTest
       PathToFootstepGenerator generator = new PathToFootstepGenerator(heightCalculator, footstepSnapper, validityMetric, heightMap);
 
 
-      SideDependentList<FootstepData> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
+      SideDependentList<FootstepDataMessage> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
       generator.initialize(originalFeet, overheadPath);
 
-      List<FootstepData> generatedFootsteps = generator.getStepsAlongPath(startSide);
+      List<FootstepDataMessage> generatedFootsteps = generator.getStepsAlongPath(startSide);
 
-      SideDependentList<FootstepData> previousFeet = new SideDependentList<>(originalFeet);
-      FootstepData initialSwingFootstep;
-      FootstepData stanceFootstep;
-      for (FootstepData footstepData : generatedFootsteps){
+      SideDependentList<FootstepDataMessage> previousFeet = new SideDependentList<>(originalFeet);
+      FootstepDataMessage initialSwingFootstep;
+      FootstepDataMessage stanceFootstep;
+      for (FootstepDataMessage footstepData : generatedFootsteps){
          initialSwingFootstep = previousFeet.get(footstepData.getRobotSide());
          stanceFootstep = previousFeet.get(footstepData.getRobotSide().getOppositeSide());
          assertTrue(validityMetric.footstepValid(stanceFootstep, footstepData));
@@ -439,7 +437,7 @@ public class PathToFootstepGeneratorTest
          previousFeet.put(footstepData.getRobotSide(), footstepData);
       }
 
-      for (FootstepData lastFootstep : previousFeet){
+      for (FootstepDataMessage lastFootstep : previousFeet){
          testLastFootstep(endPose, lastFootstep, horizontalOffset);
       }
 
@@ -472,15 +470,15 @@ public class PathToFootstepGeneratorTest
       PathToFootstepGenerator generator = new PathToFootstepGenerator(heightCalculator, footstepSnapper, validityMetric, heightMap);
 
 
-      SideDependentList<FootstepData> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
+      SideDependentList<FootstepDataMessage> originalFeet = createStartFeet(startPose, horizontalOffset, footstepSnapper, heightMap);
       generator.initialize(originalFeet, overheadPath);
 
-      List<FootstepData> generatedFootsteps = generator.getStepsAlongPath(startSide);
+      List<FootstepDataMessage> generatedFootsteps = generator.getStepsAlongPath(startSide);
 
-      SideDependentList<FootstepData> previousFeet = new SideDependentList<>(originalFeet);
-      FootstepData initialSwingFootstep;
-      FootstepData stanceFootstep;
-      for (FootstepData footstepData : generatedFootsteps){
+      SideDependentList<FootstepDataMessage> previousFeet = new SideDependentList<>(originalFeet);
+      FootstepDataMessage initialSwingFootstep;
+      FootstepDataMessage stanceFootstep;
+      for (FootstepDataMessage footstepData : generatedFootsteps){
          initialSwingFootstep = previousFeet.get(footstepData.getRobotSide());
          stanceFootstep = previousFeet.get(footstepData.getRobotSide().getOppositeSide());
          assertTrue(validityMetric.footstepValid(stanceFootstep, footstepData));
@@ -488,7 +486,7 @@ public class PathToFootstepGeneratorTest
          previousFeet.put(footstepData.getRobotSide(), footstepData);
       }
 
-      for (FootstepData lastFootstep : previousFeet){
+      for (FootstepDataMessage lastFootstep : previousFeet){
          testLastFootstep(endPose, lastFootstep, horizontalOffset);
       }
 
@@ -500,7 +498,7 @@ public class PathToFootstepGeneratorTest
 
 
 
-   private void visualizeFootsteps(CombinedTerrainObject3D groundProfile, SideDependentList<FootstepData> originalFeet, List<FootstepData> generatedFootsteps,  SteppingParameters steppingParameters){
+   private void visualizeFootsteps(CombinedTerrainObject3D groundProfile, SideDependentList<FootstepDataMessage> originalFeet, List<FootstepDataMessage> generatedFootsteps,  SteppingParameters steppingParameters){
       int maxNumberOfFootstepsPerSide = 50;
       int maxContactPointsPerFoot = 4;
       String description = "Basic Test";
@@ -510,14 +508,14 @@ public class PathToFootstepGeneratorTest
 
       SimulationConstructionSet scs = footstepVisualizer.getSimulationConstructionSet();    // new SimulationConstructionSet(robot);
       for (RobotSide side : RobotSide.values()){
-         FootstepData footstepData = originalFeet.get(side);
+         FootstepDataMessage footstepData = originalFeet.get(side);
          Footstep footstep = FootstepTools.generateFootstepFromFootstepData(footstepData, footSpoof);
          FramePose footSolePose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
          footstep.setSolePose(footSolePose);
          footstepVisualizer.visualizeFootstep(footSpoof, footstep);
       }
 
-      for (FootstepData footstepData : generatedFootsteps)
+      for (FootstepDataMessage footstepData : generatedFootsteps)
       {
          Footstep footstep = FootstepTools.generateFootstepFromFootstepData(footstepData, footSpoof);
          FramePose footSolePose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
@@ -527,8 +525,8 @@ public class PathToFootstepGeneratorTest
       ThreadTools.sleepForever();
    }
 
-   private SideDependentList<FootstepData> createStartFeet(FramePose2d centerPoint, double horizontalDistance, FootstepSnapper snapper, HeightMapWithPoints heightMap){
-      SideDependentList<FootstepData> originalFeet = new SideDependentList<>();
+   private SideDependentList<FootstepDataMessage> createStartFeet(FramePose2d centerPoint, double horizontalDistance, FootstepSnapper snapper, HeightMapWithPoints heightMap){
+      SideDependentList<FootstepDataMessage> originalFeet = new SideDependentList<>();
       double yaw = centerPoint.getYaw();
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
 
@@ -541,14 +539,14 @@ public class PathToFootstepGeneratorTest
          position.x = centerPoint.getX() + -1.0 * Math.sin(yaw) * sign * horizontalDistance;
          position.y = centerPoint.getY() + 1.0 * Math.cos(yaw) * sign * horizontalDistance;
          RotationTools.computeQuaternionFromYawAndZNormal(yaw, verticalVector, orientation);
-         FootstepData footstep = new FootstepData(side, position, orientation);
+         FootstepDataMessage footstep = new FootstepDataMessage(side, position, orientation);
          snapper.snapFootstep(footstep, heightMap);
          originalFeet.put(side, footstep);
       }
       return originalFeet;
    }
 
-   private void testLastFootstep(FramePose2d endPoint, FootstepData endFootstep, double horizontalDistance){
+   private void testLastFootstep(FramePose2d endPoint, FootstepDataMessage endFootstep, double horizontalDistance){
       double yaw = endPoint.getYaw();
       double sign = (endFootstep.getRobotSide() == RobotSide.LEFT) ? 1 : -1;
       //sign * horizontalDistance
