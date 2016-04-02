@@ -193,7 +193,7 @@ public class StepprControllerFactory
       controllerFactory.createControllerNetworkSubscriber(new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority), packetCommunicator);
       
       if (walkingProvider == WalkingProvider.VELOCITY_HEADING_COMPONENT)
-         controllerFactory.createComponentBasedFootstepDataMessageGenerator(false);
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator();
 
       return controllerFactory;
    }

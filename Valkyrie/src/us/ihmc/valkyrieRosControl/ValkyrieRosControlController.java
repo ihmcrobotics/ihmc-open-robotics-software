@@ -130,7 +130,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       controllerFactory.createControllerNetworkSubscriber(new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY), packetCommunicator);
 
       if (walkingProvider == WalkingProvider.VELOCITY_HEADING_COMPONENT)
-         controllerFactory.createComponentBasedFootstepDataMessageGenerator(false);
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator();
 
       return controllerFactory;
    }

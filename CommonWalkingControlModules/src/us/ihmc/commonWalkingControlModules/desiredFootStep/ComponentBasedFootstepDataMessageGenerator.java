@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesir
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
+import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
@@ -49,12 +50,17 @@ public class ComponentBasedFootstepDataMessageGenerator
 
    public ComponentBasedFootstepDataMessageGenerator(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
-         SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, boolean useHeadingAndVelocityScript, YoVariableRegistry parentRegistry)
+         SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, boolean useHeadingAndVelocityScript, HeightMap heightMapForFootZ, YoVariableRegistry parentRegistry)
    {
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
       componentBasedDesiredFootstepCalculator = createComponentBasedDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, bipedFeet,
             controlDT, useHeadingAndVelocityScript);
+
+      if (heightMapForFootZ != null)
+      {
+         componentBasedDesiredFootstepCalculator.setGroundProfile(heightMapForFootZ);
+      }
 
       walk.addVariableChangedListener(createVariableChangedListener());
       swingTime.set(walkingControllerParameters.getDefaultSwingTime());

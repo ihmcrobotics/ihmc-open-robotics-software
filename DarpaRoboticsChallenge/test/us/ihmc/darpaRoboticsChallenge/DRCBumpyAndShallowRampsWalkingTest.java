@@ -334,10 +334,10 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       while (scs.getTime() - standingTimeDuration < walkingTimeDuration)
       {
          blockingSimulationRunner.simulateAndBlock(timeIncrement);
-
-         if (Math.abs(comError.getDoubleValue()) > 0.3)
+         
+         if (Math.abs(comError.getDoubleValue()) > 0.09)
          {
-            fail("Math.abs(comError.getDoubleValue()) > 0.3: " + comError.getDoubleValue() + " at t = " + scs.getTime());
+            fail("Math.abs(comError.getDoubleValue()) > 0.09: " + comError.getDoubleValue() + " at t = " + scs.getTime());
          }
       }
 
