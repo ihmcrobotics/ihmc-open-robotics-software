@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.communication.net.PacketConsumer;
@@ -106,6 +107,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       return handPosePacket;
    }
 
+   @Ignore("Needs to be reimplemented")
 	@DeployableTestMethod(estimatedDuration = 11.8)
 	@Test(timeout = 35449)
    public void testStartedAndCompletedStatusAreSentAndReceivedForOneHandPose() throws SimulationExceededMaximumTimeException
@@ -149,6 +151,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       
    }
 
+   @Ignore("Needs to be reimplemented")
 	@DeployableTestMethod(estimatedDuration = 21.5)
 	@Test(timeout = 64372)
    public void testPauseDuringSingleSendAndReceivedForOneHandPose() throws SimulationExceededMaximumTimeException
@@ -227,6 +230,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       
    }
 
+   @Ignore("Needs to be reimplemented")
 	@DeployableTestMethod(estimatedDuration = 11.4)
 	@Test(timeout = 34250)
    public void testWhenTwoHandPosesAreSentInARow() throws SimulationExceededMaximumTimeException
@@ -284,6 +288,7 @@ public abstract class HandPoseStatusPacketEndToEndTest implements MultiRobotTest
       
    }
 
+   @Ignore("Needs to be reimplemented")
 	@DeployableTestMethod(estimatedDuration = 11.7)
 	@Test(timeout = 35190)
    public void testEachArmReceiveOneHandPoseAtTheSameTime() throws SimulationExceededMaximumTimeException
