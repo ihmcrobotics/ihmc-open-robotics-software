@@ -11,8 +11,6 @@ public enum PrimitiveBehaviorType
    FOOT_POSE,
    PELVIS_POSE,
    CHEST_TRAJECTORY,
-   HAND_LOAD,
-   THIGH_STATE,
    HIGH_LEVEL_STATE,
    FINGER_STATE,
    LOOK_AT_BEHAVIOR;
