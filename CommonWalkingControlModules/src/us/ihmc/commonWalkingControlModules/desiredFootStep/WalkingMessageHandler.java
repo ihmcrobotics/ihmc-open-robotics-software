@@ -231,6 +231,13 @@ public class WalkingMessageHandler
             actualFootPositionInWorld, actualFootOrientationInWorld, robotSide));
    }
 
+   public void reportWalkingStarted()
+   {
+      WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
+      walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.STARTED);
+      statusOutputManager.reportStatusMessage(walkingStatusMessage);
+   }
+
    public void reportWalkingComplete()
    {
       WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();

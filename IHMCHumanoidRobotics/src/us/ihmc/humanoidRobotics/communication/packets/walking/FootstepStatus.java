@@ -58,9 +58,6 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
    @FieldDocumentation("actualFootOrientationInWorld gives the orientation the foot is actually in as opposed to"
                                      + "the desired orientation sent to the controller\n")
    public Quat4d actualFootOrientationInWorld;
-   @FieldDocumentation("isDoneWalking will be set to true when in double-support and there are no footsteps queued. If\n"
-                                     + "isDoneWalking is set to true, the rest of the fields in this packet should be ignored")
-   public boolean isDoneWalking;
 
    public FootstepStatus()
    {
@@ -70,7 +67,6 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
-      this.isDoneWalking = false;
       this.actualFootPositionInWorld = null;
       this.actualFootOrientationInWorld = null;
       this.robotSide = null;
@@ -80,7 +76,6 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
-      this.isDoneWalking = false;
       this.actualFootPositionInWorld = actualFootPositionInWorld;
       this.actualFootOrientationInWorld = actualFootOrientationInWorld;
       
@@ -91,23 +86,9 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
-      this.isDoneWalking = false;
       this.actualFootPositionInWorld = actualFootPositionInWorld;
       this.actualFootOrientationInWorld = actualFootOrientationInWorld;
       this.robotSide = robotSide;
-   }
-
-   public static FootstepStatus createWalkingIsDonePacket()
-   {
-      FootstepStatus footstepStatus = new FootstepStatus();
-      footstepStatus.isDoneWalking = true;
-      footstepStatus.footstepIndex = 0;
-      footstepStatus.status = null;
-      footstepStatus.actualFootPositionInWorld = null;
-      footstepStatus.actualFootOrientationInWorld = null;
-      footstepStatus.robotSide = null;
-      
-      return footstepStatus;
    }
 
    @Override
@@ -131,13 +112,6 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
          actualFootOrientationInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
       else
          actualFootOrientationInWorld.set(other.actualFootOrientationInWorld);
-
-      isDoneWalking = other.isDoneWalking;
-   }
-
-   public boolean isDoneWalking()
-   {
-      return isDoneWalking;
    }
 
    public Status getStatus()

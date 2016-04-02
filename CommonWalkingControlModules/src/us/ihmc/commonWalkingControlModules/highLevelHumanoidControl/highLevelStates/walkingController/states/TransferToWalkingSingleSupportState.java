@@ -22,8 +22,13 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       super.doTransitionIntoAction();
 
-      if (walkingMessageHandler.hasUpcomingFootsteps() && isInitialTransfer())
+      boolean initialTransfer = isInitialTransfer();
+
+      if (initialTransfer)
+      {
+         walkingMessageHandler.reportWalkingStarted();
          pelvisOrientationManager.moveToAverageInSupportFoot(transferToSide);
+      }
       // In middle of walking or leaving foot pose, pelvis is good leave it like that.
       else
          pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
