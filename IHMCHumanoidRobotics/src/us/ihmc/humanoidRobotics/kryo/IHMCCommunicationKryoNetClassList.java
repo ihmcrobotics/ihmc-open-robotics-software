@@ -77,9 +77,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandCollision
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseListPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPowerCyclePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -202,14 +199,11 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(PacketDestination.class);
       
       // Hand pose
-      registerPacketClass(HandPosePacket.class);
       registerPacketClass(AutomaticManipulationAbortMessage.class);
       registerPacketClass(ManipulationAbortedStatus.class);
       registerPacketClass(HandDesiredConfigurationMessage.class);
       registerPacketField(HandConfiguration.class);
       registerPacketFields(RobotSide.class);
-      registerPacketFields(HandPosePacket.Frame.class);
-      registerPacketFields(HandPosePacket.DataType.class);
       registerPacketClass(ObjectWeightPacket.class);
       registerPacketClass(HandRotateAboutAxisPacket.class);
       registerPacketField(HandRotateAboutAxisPacket.DataType.class);
@@ -271,10 +265,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(SE3TrajectoryPointMessage[].class);
       registerPacketField(BodyPart.class);
       
-
-      // Hand pose list
-      registerPacketClass(HandPoseListPacket.class);
-      registerPacketField(double[][].class);
 
       // Handstep
       registerPacketClass(HandstepPacket.class);
@@ -439,8 +429,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(PelvisPoseErrorPacket.class);
       registerPacketClass(LocalizationPointMapPacket.class);
       
-      registerPacketClass(HandPoseStatus.class);
-//      registerPacketField(HandPoseStatus.Status.class);
       registerPacketClass(RawIMUPacket.class);
       registerPacketClass(HeadPosePacket.class);
       registerPacketClass(HeadPosePacket.MeasurementStatus.class);

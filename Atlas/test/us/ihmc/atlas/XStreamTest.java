@@ -13,7 +13,7 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
@@ -105,7 +105,7 @@ public class XStreamTest
       Packet<?>[] packets = new Packet<?>[10];
       
       packets[0] = new FootstepPlanRequestPacket(random);
-      packets[1] = new HandPosePacket(random);
+//      packets[1] = new HandTrajectoryMessage(random);
       packets[2] = new FootPosePacket(random);
       packets[3] = new EndEffectorLoadBearingMessage();
       packets[4] = new HeadOrientationPacket(random);

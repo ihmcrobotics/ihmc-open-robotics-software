@@ -17,7 +17,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolverTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootPosePacketTransformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataTansformerTest.class,
-   us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.HandPosePacketTransformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PelvisPosePacketTransformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.TorusPosePacketTransformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorToolsTest.class,

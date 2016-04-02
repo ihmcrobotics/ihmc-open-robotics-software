@@ -58,7 +58,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectric
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
@@ -80,9 +79,10 @@ public class DRCROSMessageConverter
 
    public static Message convertToRosMessage(Packet<?> packet)
    {
+      /*
       if (packet instanceof HandPosePacket)
          return convertToRosMessage((HandPosePacket) packet);
-      else if (packet instanceof ComHeightPacket)
+      else*/ if (packet instanceof ComHeightPacket)
          return convertToRosMessage((ComHeightPacket) packet);
       else if (packet instanceof FootPosePacket)
          return convertToRosMessage((FootPosePacket) packet);
@@ -353,23 +353,23 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HandPosePacketMessage convertToRosMessage(HandPosePacket packet)
-   {
-      HandPosePacketMessage ret = messageFactory.newFromType("ihmc_msgs/HandPosePacketMessage");
-      ret.setUniqueId(packet.getUniqueId());
-
-      ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
-      ret.setDataType(convertEnumToByte(packet.getDataType()));
-      ret.setReferenceFrame(convertEnumToByte(packet.getReferenceFrame()));
-      ret.setToHomePosition(packet.isToHomePosition());
-      ret.setPosition(convertPoint3dToVector3(packet.getPosition()));
-      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
-      ret.setTrajectoryTime(packet.getTrajectoryTime());
-      ret.setJointAngles(packet.getJointAngles());
-      ret.setControlOrientation(packet.getControlOrientation());
-
-      return ret;
-   }
+//   public static HandPosePacketMessage convertToRosMessage(HandPosePacket packet)
+//   {
+//      HandPosePacketMessage ret = messageFactory.newFromType("ihmc_msgs/HandPosePacketMessage");
+//      ret.setUniqueId(packet.getUniqueId());
+//
+//      ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
+//      ret.setDataType(convertEnumToByte(packet.getDataType()));
+//      ret.setReferenceFrame(convertEnumToByte(packet.getReferenceFrame()));
+//      ret.setToHomePosition(packet.isToHomePosition());
+//      ret.setPosition(convertPoint3dToVector3(packet.getPosition()));
+//      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
+//      ret.setTrajectoryTime(packet.getTrajectoryTime());
+//      ret.setJointAngles(packet.getJointAngles());
+//      ret.setControlOrientation(packet.getControlOrientation());
+//
+//      return ret;
+//   }
 
    public static AtlasElectricMotorEnablePacket convertToPacket(AtlasElectricMotorEnablePacketMessage message)
    {
@@ -399,15 +399,15 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HandPosePacket convertToPacket(HandPosePacketMessage message)
-   {
-      HandPosePacket ret = new HandPosePacket(convertByteToEnum(RobotSide.class, message.getRobotSide()),
-            convertByteToEnum(HandPosePacket.Frame.class, message.getReferenceFrame()), convertByteToEnum(HandPosePacket.DataType.class, message.getDataType()),
-            convertVector3ToPoint3d(message.getPosition()), convertQuaternionToQuat4d(message.getOrientation()), message.getToHomePosition(),
-            message.getTrajectoryTime(), message.getJointAngles());
-      ret.setControlledOrientationAxes(message.getControlOrientation(), message.getControlOrientation(), message.getControlOrientation());
-      return ret;
-   }
+//   public static HandPosePacket convertToPacket(HandPosePacketMessage message)
+//   {
+//      HandPosePacket ret = new HandPosePacket(convertByteToEnum(RobotSide.class, message.getRobotSide()),
+//            convertByteToEnum(HandPosePacket.Frame.class, message.getReferenceFrame()), convertByteToEnum(HandPosePacket.DataType.class, message.getDataType()),
+//            convertVector3ToPoint3d(message.getPosition()), convertQuaternionToQuat4d(message.getOrientation()), message.getToHomePosition(),
+//            message.getTrajectoryTime(), message.getJointAngles());
+//      ret.setControlledOrientationAxes(message.getControlOrientation(), message.getControlOrientation(), message.getControlOrientation());
+//      return ret;
+//   }
 
    public static ComHeightPacketMessage convertToRosMessage(ComHeightPacket packet)
    {

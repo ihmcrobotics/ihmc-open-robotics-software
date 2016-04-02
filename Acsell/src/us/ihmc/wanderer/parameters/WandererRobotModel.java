@@ -54,7 +54,6 @@ import us.ihmc.wanderer.hardware.controllers.WandererOutputProcessor;
 import us.ihmc.wanderer.initialSetup.WandererInitialSetup;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
@@ -76,12 +75,6 @@ public class WandererRobotModel implements DRCRobotModel
    private final WandererWalkingControllerParameters multiContactControllerParameters;
    
    private boolean enableJointDamping = true;
-
-   @Override
-   public WholeBodyIkSolver createWholeBodyIkSolver()  
-   {
-      return null;
-   }
 
    public WandererRobotModel(boolean runningOnRealRobot, boolean headless)
    {
