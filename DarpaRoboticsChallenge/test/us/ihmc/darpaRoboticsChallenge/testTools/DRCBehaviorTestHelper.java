@@ -375,9 +375,9 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       behaviorThread.start();
 
       boolean success = true;
-      while (!stopThreadUpdatable.shouldBehaviorRunnerBeStopped())
+      while (!stopThreadUpdatable.shouldBehaviorRunnerBeStopped() && success)
       {
-         success &= simulateAndBlockAndCatchExceptions(1.0);
+         success = simulateAndBlockAndCatchExceptions(1.0);
       }
       behaviorRunner.closeAndDispose();
 
@@ -401,15 +401,15 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    {
       BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behavior);
 
-      boolean ret = true;
-      while (!behavior.isDone())
+      boolean success = true;
+      while (!behavior.isDone() && success)
       {
-         ret = simulateAndBlockAndCatchExceptions(1.0);
+         success = simulateAndBlockAndCatchExceptions(1.0);
       }
 
       behaviorRunner.closeAndDispose();
 
-      return ret;
+      return success;
    }
    
    public boolean executeBehaviorUntilDoneUsingBehaviorDispatcher(final BehaviorInterface behavior) throws SimulationExceededMaximumTimeException
@@ -417,16 +417,16 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       behaviorDispatcher.start();
 
       
-      boolean ret = true;
-      ret = simulateAndBlockAndCatchExceptions(0.1);
+      boolean success = true;
+      success = simulateAndBlockAndCatchExceptions(0.1);
       sendBehaviorToDispatcher(behavior);
       
-      while (!behavior.isDone())
+      while (!behavior.isDone() && success)
       {
-         ret = simulateAndBlockAndCatchExceptions(1.0);
+         success = simulateAndBlockAndCatchExceptions(1.0);
       }
       
-      return ret;
+      return success;
    }
    
    
