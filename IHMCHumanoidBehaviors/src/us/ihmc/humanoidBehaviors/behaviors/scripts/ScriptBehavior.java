@@ -41,7 +41,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -405,7 +404,7 @@ public class ScriptBehavior extends BehaviorInterface
          ret = PrimitiveBehaviorType.FOOT_POSE;
          //         scriptIndex--; //TODO:  <-- Why is this here?  Also, shouldn't scriptStatus != ScriptBehaviorStatusEnum.INDEX_CHANGED?
       }
-      else if (scriptObject instanceof PelvisPosePacket)
+      else if (scriptObject instanceof PelvisTrajectoryMessage)
       {
          ret = PrimitiveBehaviorType.PELVIS_POSE;
       }
