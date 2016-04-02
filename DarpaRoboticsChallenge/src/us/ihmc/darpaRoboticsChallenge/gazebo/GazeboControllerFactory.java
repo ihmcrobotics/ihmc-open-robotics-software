@@ -174,7 +174,7 @@ public class GazeboControllerFactory
 //      controllerFactory.addHighLevelBehaviorFactory(new JointPositionControllerFactory(true));
 
       if (!USE_GUI)
-         controllerFactory.createComponentBasedFootstepDataMessageGenerator(true);
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator(true, null);
 
       return controllerFactory;
    }

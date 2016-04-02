@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.GlobalTimer;
@@ -55,7 +56,14 @@ public class DRCFlatGroundWalkingTrack
             feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
             HighLevelState.WALKING);
 
-      controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript);
+      
+      HeightMap heightMapForFootstepZ = null;
+      if (cheatWithGroundHeightAtForFootstep)
+      {
+         heightMapForFootstepZ = scsInitialSetup.getHeightMap();
+      }
+      
+      controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, heightMapForFootstepZ);
 
       drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
 

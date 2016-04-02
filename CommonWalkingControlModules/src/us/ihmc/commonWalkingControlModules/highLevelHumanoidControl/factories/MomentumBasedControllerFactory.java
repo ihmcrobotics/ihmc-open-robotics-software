@@ -32,6 +32,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
@@ -68,6 +69,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    private final StatusMessageOutputManager statusOutputManager;
    private boolean createComponentBasedFootstepDataMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = true;
+   private HeightMap heightMapForFootstepZ = null;
    private boolean createQueuedControllerCommandGenerator = false;
    private boolean createUserDesiredControllerCommandGenerator = true;
 
@@ -141,7 +143,17 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    private ComponentBasedFootstepDataMessageGenerator footstepGenerator;
 
+   public void createComponentBasedFootstepDataMessageGenerator()
+   {
+      createComponentBasedFootstepDataMessageGenerator(false, null);
+   }
+
    public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript)
+   {
+      createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, null);
+   }
+
+   public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript, HeightMap heightMapForFootstepZ)
    {
       if (footstepGenerator != null)
          return;
@@ -152,13 +164,14 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
          CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
          double controlDT = momentumBasedController.getControlDT();
          ComponentBasedFootstepDataMessageGenerator footstepGenerator = new ComponentBasedFootstepDataMessageGenerator(commandInputManager, statusOutputManager,
-               walkingControllerParameters, referenceFrames, contactableFeet, controlDT, useHeadingAndVelocityScript, registry);
+               walkingControllerParameters, referenceFrames, contactableFeet, controlDT, useHeadingAndVelocityScript, heightMapForFootstepZ, registry);
          momentumBasedController.addUpdatables(footstepGenerator.getModulesToUpdate());
       }
       else
       {
          createComponentBasedFootstepDataMessageGenerator = true;
          this.useHeadingAndVelocityScript = useHeadingAndVelocityScript;
+         this.heightMapForFootstepZ = heightMapForFootstepZ;
       }
    }
 
@@ -247,7 +260,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)
-         createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript);
+         createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, heightMapForFootstepZ);
       if (createUserDesiredControllerCommandGenerator)
          if (createQueuedControllerCommandGenerator)
             createQueuedControllerCommandGenerator(controllerCommands);
