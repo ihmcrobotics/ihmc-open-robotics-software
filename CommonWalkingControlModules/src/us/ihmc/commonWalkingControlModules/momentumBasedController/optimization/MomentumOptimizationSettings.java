@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 
 public class MomentumOptimizationSettings
 {
-   private final Vector3d linearMomentumWeight = new Vector3d(0.05, 0.05, 0.005);
+   private final Vector3d linearMomentumWeight = new Vector3d(0.05, 0.05, 0.01);
    private final Vector3d angularMomentumWeight = new Vector3d(0.0, 0.0, 0.0);
 
    private Vector3d defaultAngularFootWeight = new Vector3d(0.5, 0.5, 0.5);
