@@ -200,6 +200,7 @@ public class FootstepListBehavior extends BehaviorInterface
    public void stop()
    {
       sendPacketToController(new PauseWalkingMessage(true));
+      isPaused.set(true);
       isStopped.set(true);
    }
 
