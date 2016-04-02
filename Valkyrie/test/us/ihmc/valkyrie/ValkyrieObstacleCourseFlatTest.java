@@ -153,14 +153,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 250000)
-   public void testChestControlWithPackets() throws SimulationExceededMaximumTimeException
-   {
-      super.testChestControlWithPackets();
-   }
-
-   @Override
    @DeployableTestMethod(estimatedDuration = 43.7)
    @Test(timeout = 220000)
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
