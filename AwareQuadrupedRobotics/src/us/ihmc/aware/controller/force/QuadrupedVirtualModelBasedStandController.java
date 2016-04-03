@@ -2,6 +2,7 @@ package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
+import us.ihmc.aware.controller.common.GroundPlaneEstimator;
 import us.ihmc.aware.controller.force.taskSpaceController.*;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
@@ -15,9 +16,13 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+
+import javax.vecmath.Quat4d;
 
 public class QuadrupedVirtualModelBasedStandController implements QuadrupedForceController
 {
@@ -62,6 +67,9 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final QuadrupedTaskSpaceController taskSpaceController;
    private final QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings;
 
+   // planning
+   private final GroundPlaneEstimator groundPlaneEstimator;
+
    public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProviderInterface inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator, QuadrupedTaskSpaceController taskSpaceController)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
@@ -105,6 +113,9 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
 
+      // planning
+      groundPlaneEstimator = new GroundPlaneEstimator();
+
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
 
@@ -125,6 +136,9 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       dcmPositionEstimate.set(taskSpaceEstimates.getComVelocity());
       dcmPositionEstimate.scale(1.0 / dcmPositionController.getNaturalFrequency());
       dcmPositionEstimate.add(taskSpaceEstimates.getComPosition());
+
+      // update ground plane estimate
+      groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
    }
 
    private void updateSetpoints()
@@ -148,7 +162,11 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       // update desired body orientation and angular rate
       taskSpaceSetpoints.getBodyOrientation().changeFrame(supportFrame);
       taskSpaceSetpoints.getBodyOrientation().set(inputProvider.getBodyOrientationInput());
-      taskSpaceSetpoints.getBodyAngularVelocity().changeFrame(supportFrame);
+      taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
+      double bodyYaw = taskSpaceSetpoints.getBodyOrientation().getYaw();
+      double bodyPitch = taskSpaceSetpoints.getBodyOrientation().getPitch() + groundPlaneEstimator.getPitch(bodyYaw);
+      double bodyRoll = taskSpaceSetpoints.getBodyOrientation().getRoll();
+      taskSpaceSetpoints.getBodyOrientation().setYawPitchRoll(bodyYaw, bodyPitch, bodyRoll);
       taskSpaceSetpoints.getBodyAngularVelocity().set(inputProvider.getBodyAngularRateInput());
 
       // update joint setpoints

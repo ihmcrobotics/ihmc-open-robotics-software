@@ -359,7 +359,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          cmpPositionAtSoSNominal = new FramePoint(worldFrame);
          cmpPositionAtEoSNominal = new FramePoint(worldFrame);
          dcmPositionAtSoSNominal = new FramePoint(worldFrame);
-         groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
       }
 
       @Override public void onEntry()
@@ -380,6 +379,9 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
             taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
             taskSpaceControllerSettings.setPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
          }
+
+         // compute ground plane estimate
+         groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
       }
 
       @Override public TrotEvent process()
@@ -428,7 +430,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          cmpPositionAtEoS = new FramePoint(worldFrame);
          dcmPositionAtEoS = new FramePoint(worldFrame);
          footholdPosition = new FramePoint(worldFrame);
-         groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
       }
 
       @Override public void onEntry()
@@ -487,6 +488,9 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
             taskSpaceControllerSettings.setPressureUpperLimit(swingQuadrant, params.get(NO_CONTACT_PRESSURE_LIMIT));
             taskSpaceControllerSettings.setPressureUpperLimit(supportQuadrant, Double.MAX_VALUE);
          }
+
+         // compute ground plane estimate
+         groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
       }
 
       @Override public TrotEvent process()
