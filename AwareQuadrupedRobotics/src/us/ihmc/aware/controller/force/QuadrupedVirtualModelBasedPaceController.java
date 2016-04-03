@@ -350,7 +350,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       footholdPosition.setIncludingFrame(cmpPosition);
       footholdPosition.changeFrame(worldFrame);
       footholdPosition.add(xOffset, yOffset, 0.0);
-      groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
+      groundPlaneEstimator.projectZ(footholdPosition);
    }
 
    private class QuadSupportState implements StateMachineState<TrotEvent>
@@ -394,6 +394,9 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
             taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
             taskSpaceControllerSettings.setPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
          }
+
+         // compute ground plane estimate
+         groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
       }
 
       @Override public TrotEvent process()
@@ -506,6 +509,9 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
             taskSpaceControllerSettings.setPressureUpperLimit(swingQuadrant, params.get(NO_CONTACT_PRESSURE_LIMIT));
             taskSpaceControllerSettings.setPressureUpperLimit(supportQuadrant, Double.MAX_VALUE);
          }
+
+         // compute ground plane estimate
+         groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
       }
 
       @Override public TrotEvent process()
