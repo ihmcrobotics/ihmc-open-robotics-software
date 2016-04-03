@@ -46,7 +46,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.math.trajectories.IntermediateWaypointVelocityGeneratorTest.class,
    us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGeneratorTest.class,
    us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGeneratorTest.class,
-   us.ihmc.robotics.math.trajectories.PositionPathPlanningTrajectoryGeneratorTest.class,
    us.ihmc.robotics.math.trajectories.PositionTrajectorySmootherTest.class,
    us.ihmc.robotics.math.trajectories.ProviderBasedConstantOrientationTrajectoryGeneratorTest.class,
    us.ihmc.robotics.math.trajectories.providers.YoOrientationProviderTest.class,

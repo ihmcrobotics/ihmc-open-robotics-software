@@ -448,7 +448,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kpOrthogonal = runningOnRealRobot ? 1.9 : 1.5;
-      double kpParallel = runningOnRealRobot ? 2.0 : 1.5;
+      double kpParallel = runningOnRealRobot ? 2.0 : 2.5;
       double ki = runningOnRealRobot ? 0.0 : 0.0;
       double kiBleedOff = 0.9;
 

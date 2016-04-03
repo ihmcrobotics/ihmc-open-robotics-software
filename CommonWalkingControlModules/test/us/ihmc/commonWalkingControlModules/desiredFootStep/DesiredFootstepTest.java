@@ -295,6 +295,7 @@ public class DesiredFootstepTest
       netClassList.registerPacketField(ArrayList.class);
       netClassList.registerPacketField(Point3d.class);
       netClassList.registerPacketField(Quat4d.class);
+      netClassList.registerPacketField(FootstepDataMessage.FootstepOrigin.class);
       netClassList.registerPacketField(PacketDestination.class);
       netClassList.registerPacketField(FootstepStatus.Status.class);
       netClassList.registerPacketField(TrajectoryType.class);

@@ -5,13 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 
 public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
 {
@@ -69,24 +62,24 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
 //
 //         return handTrajectoryMessage;
 //      }
-      if (object instanceof FootstepDataList)
-      {
-         FootstepDataList footstepDataList = (FootstepDataList) object;
-
-         FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage(footstepDataList.swingTime, footstepDataList.transferTime);
-         
-         ArrayList<FootstepData> oldFootstepDataList = footstepDataList.footstepDataList;
-         
-         for (FootstepData footstepData : oldFootstepDataList)
-         {
-            FootstepDataMessage footstepDataMessage = new FootstepDataMessage(footstepData.robotSide, footstepData.location, footstepData.orientation);
-            footstepDataMessage.setOrigin(FootstepOrigin.AT_ANKLE_FRAME);
-            footstepDataMessage.setSwingHeight(footstepData.swingHeight);
-            footstepDataListMessage.add(footstepDataMessage);
-         }
-
-         return footstepDataListMessage;
-      }
+//      if (object instanceof FootstepDataList)
+//      {
+//         FootstepDataList footstepDataList = (FootstepDataList) object;
+//
+//         FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage(footstepDataList.swingTime, footstepDataList.transferTime);
+//         
+//         ArrayList<FootstepData> oldFootstepDataList = footstepDataList.footstepDataList;
+//         
+//         for (FootstepData footstepData : oldFootstepDataList)
+//         {
+//            FootstepDataMessage footstepDataMessage = new FootstepDataMessage(footstepData.robotSide, footstepData.location, footstepData.orientation);
+//            footstepDataMessage.setOrigin(FootstepOrigin.AT_ANKLE_FRAME);
+//            footstepDataMessage.setSwingHeight(footstepData.swingHeight);
+//            footstepDataListMessage.add(footstepDataMessage);
+//         }
+//
+//         return footstepDataListMessage;
+//      }
 //      else if (object instanceof ChestOrientationPacket)
 //      {
 //         ChestOrientationPacket chestOrientationPacket = (ChestOrientationPacket) object;
@@ -113,12 +106,12 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
 //         HandConfiguration handDesiredConfiguration = HandConfiguration.valueOf(fingerStatePacket.fingerState.toString());
 //         return new HandDesiredConfigurationMessage(robotSide, handDesiredConfiguration);
 //      }
-      else if (object instanceof PauseCommand)
-      {
-         PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
-         return pauseWalkingMessage;
-      }
-      else if (object instanceof EndOfScriptCommand)
+//      else if (object instanceof PauseCommand)
+//      {
+//         PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
+//         return pauseWalkingMessage;
+//      }
+       if (object instanceof EndOfScriptCommand)
       {
          return object;
       }
