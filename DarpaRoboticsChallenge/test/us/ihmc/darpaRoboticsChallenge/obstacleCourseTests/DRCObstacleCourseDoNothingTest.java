@@ -97,7 +97,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       setupCameraForWalkingOverSmallPlatform(simulationConstructionSet);
 
       ThreadTools.sleep(100);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
       drcSimulationTestHelper.checkNothingChanged();
