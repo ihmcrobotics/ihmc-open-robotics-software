@@ -16,7 +16,6 @@ import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineState;
 import us.ihmc.aware.util.ContactState;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -98,8 +97,9 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    }
    private final StateMachine<TrotState, TrotEvent> trotStateMachine;
 
-   public QuadrupedVirtualModelBasedPaceController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters,
-         ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProviderInterface inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator, QuadrupedTaskSpaceController taskSpaceController)
+   public QuadrupedVirtualModelBasedPaceController(QuadrupedRuntimeEnvironment runtimeEnvironment, ParameterMapRepository parameterMapRepository,
+         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator,
+         QuadrupedTaskSpaceController taskSpaceController)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -129,9 +129,9 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 500, 500, 500);
       params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.1);
+      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.10);
       params.setDefault(QUAD_SUPPORT_DURATION, 1.00);
-      params.setDefault(DOUBLE_SUPPORT_DURATION, 0.4);
+      params.setDefault(DOUBLE_SUPPORT_DURATION, 0.33);
       params.setDefault(STANCE_WIDTH_NOMINAL, 0.25);
       params.setDefault(STANCE_LENGTH_NOMINAL, 1.1);
       params.setDefault(NO_CONTACT_PRESSURE_LIMIT, 75);
@@ -228,7 +228,6 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
 
    @Override public QuadrupedForceControllerEvent process()
    {
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       updateEstimates();
       updateSetpoints();
       return null;
@@ -237,6 +236,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    @Override public void onEntry()
    {
       // initialize dcm controller
+      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       dcmPositionController.setGains(
             params.getVolatileArray(DCM_POSITION_PROPORTIONAL_GAINS),
             params.getVolatileArray(DCM_POSITION_DERIVATIVE_GAINS),
@@ -248,6 +248,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       taskSpaceEstimator.compute(taskSpaceEstimates);
       taskSpaceSetpoints.initialize(taskSpaceEstimates);
       taskSpaceControllerSettings.initialize();
+      taskSpaceControllerSettings.setJointDamping(params.get(JOINT_DAMPING));
       taskSpaceControllerSettings.setComForceCommandWeights(1.0, 1.0, 1.0);
       taskSpaceControllerSettings.setComTorqueCommandWeights(1.0, 1.0, 1.0);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -378,6 +379,9 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       {
          initialTime = robotTimestamp.getDoubleValue();
 
+         // initialize dcm controller height
+         dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
+
          // compute desired dcm position at start of step
          timeAtSoS[0] = 0.0;
          timeAtSoS[1] = params.get(DOUBLE_SUPPORT_DURATION);
@@ -454,6 +458,9 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       @Override public void onEntry()
       {
          initialTime = robotTimestamp.getDoubleValue();
+
+         // initialize dcm controller height
+         dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
 
          // compute desired dcm position at end of step
          timeAtSoS[0] = 0.0;
