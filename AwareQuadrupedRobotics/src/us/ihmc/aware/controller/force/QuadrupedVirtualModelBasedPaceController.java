@@ -100,8 +100,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    private final StateMachine<TrotState, TrotEvent> trotStateMachine;
 
    public QuadrupedVirtualModelBasedPaceController(QuadrupedRuntimeEnvironment runtimeEnvironment, ParameterMapRepository parameterMapRepository,
-         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator,
-         QuadrupedTaskSpaceController taskSpaceController)
+         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedForceControllerContext controllerContext)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -109,8 +108,6 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       this.gravity = 9.81;
       this.mass = fullRobotModel.getTotalMass();
       this.inputProvider = inputProvider;
-      this.taskSpaceEstimator = taskSpaceEstimator;
-      this.taskSpaceController = taskSpaceController;
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedPaceController.class);
@@ -134,12 +131,12 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.10);
       params.setDefault(QUAD_SUPPORT_DURATION, 1.00);
       params.setDefault(DOUBLE_SUPPORT_DURATION, 0.33);
-      params.setDefault(STANCE_WIDTH_NOMINAL, 0.3);
+      params.setDefault(STANCE_WIDTH_NOMINAL, 0.25);
       params.setDefault(STANCE_LENGTH_NOMINAL, 1.1);
       params.setDefault(NO_CONTACT_PRESSURE_LIMIT, 75);
 
       // frames
-      ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
+      QuadrupedReferenceFrames referenceFrames = controllerContext.getReferenceFrames();
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -147,13 +144,15 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       dcmPositionEstimate = new FramePoint();
       dcmPositionSetpoint = new FramePoint();
       dcmVelocitySetpoint = new FrameVector();
-      dcmPositionController = new DivergentComponentOfMotionController("dcmPosition", comFrame, controlDT, mass, gravity, inputProvider.getComPositionInput().getZ(), registry);
+      dcmPositionController = controllerContext.getDcmPositionController();
 
       // task space controllers
       taskSpaceCommands = new QuadrupedTaskSpaceCommands();
       taskSpaceSetpoints = new QuadrupedTaskSpaceSetpoints();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
+      taskSpaceEstimator = controllerContext.getTaskSpaceEstimator();
+      taskSpaceController = controllerContext.getTaskSpaceController();
 
       // planning
       groundPlaneEstimator = new GroundPlaneEstimator();

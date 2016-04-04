@@ -64,7 +64,8 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    // planning
    private final GroundPlaneEstimator groundPlaneEstimator;
 
-   public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProviderInterface inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator, QuadrupedTaskSpaceController taskSpaceController)
+   public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, ParameterMapRepository parameterMapRepository,
+         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedForceControllerContext controllerContext)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -90,7 +91,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       params.setDefault(DCM_POSITION_MAX_INTEGRAL_ERROR, 0);
 
       // frames
-      ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
+      QuadrupedReferenceFrames referenceFrames = controllerContext.getReferenceFrames();
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -98,15 +99,15 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       dcmPositionEstimate = new FramePoint();
       dcmPositionSetpoint = new FramePoint();
       dcmVelocitySetpoint = new FrameVector();
-      dcmPositionController = new DivergentComponentOfMotionController("dcmPosition", comFrame, controlDT, mass, gravity, inputProvider.getComPositionInput().getZ(), registry);
+      dcmPositionController = controllerContext.getDcmPositionController();
 
       // task space controllers
-      this.taskSpaceEstimator = taskSpaceEstimator;
-      this.taskSpaceController = taskSpaceController;
       taskSpaceCommands = new QuadrupedTaskSpaceCommands();
       taskSpaceSetpoints = new QuadrupedTaskSpaceSetpoints();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
+      taskSpaceEstimator = controllerContext.getTaskSpaceEstimator();
+      taskSpaceController = controllerContext.getTaskSpaceController();
 
       // planning
       groundPlaneEstimator = new GroundPlaneEstimator();
