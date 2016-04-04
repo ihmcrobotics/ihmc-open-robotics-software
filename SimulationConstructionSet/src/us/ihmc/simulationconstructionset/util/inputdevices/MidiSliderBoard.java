@@ -19,6 +19,7 @@ import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.ControlType;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.SliderType;
+import us.ihmc.simulationconstructionset.util.inputdevices.sliderboardVisualizer.MidiSliderBoardConfigurationVisualizer;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
@@ -146,6 +147,9 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
                            double value = 0.0;
                            value = (tmpControl).var.getValueAsDouble();
                            yoVariableChanged((tmpControl).mapping, value);
+
+                           if (visualizer != null)
+                              visualizer.updateValue(tmpControl, value);
                         }
                      }
                   }
@@ -182,6 +186,8 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
                if (DEBUG)
                   System.out.println("EVL::valueChanged [" + midiControl.mapping + "] value to : " + midiControl.var.getValueAsDouble() + " YoVal:"
                                      + midiControl.var.getValueAsDouble());
+               if (visualizer != null)
+                  visualizer.updateValue(midiControl);
             }
          });
       }
@@ -867,6 +873,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       {
          transmitter.moveControl(midiControl, sliderValue);
       }
+
    }
 
    public void setToInitialPosition(MidiControl midiControl)
