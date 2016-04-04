@@ -16,7 +16,7 @@ public class MidiControl
 
    public enum SliderType
    {
-      BOOLEAN, ENUM, NUMBER
+      BOOLEAN, ENUM, NUMBER, INT
    };
 
    public SliderType sliderType;
@@ -56,5 +56,4 @@ public class MidiControl
       this.hires = hires;
       this.name = name;
    }
-
 }
