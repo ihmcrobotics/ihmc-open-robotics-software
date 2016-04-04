@@ -60,7 +60,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       params.setDefault(PARAM_VX_SCALE, 0.1);
       params.setDefault(PARAM_VY_SCALE, 0.5);
       params.setDefault(PARAM_VZ_SCALE, 0.25);
-      params.setDefault(PARAM_WZ_SCALE, 0.25);
+      params.setDefault(PARAM_WZ_SCALE, 1.0);
       params.setDefault(PARAM_DEFAULT_COM_HEIGHT, 0.55);
 
       // TODO: Don't hardcode localhost
@@ -153,7 +153,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       case BUTTON_X:
          if (get(InputChannel.BUTTON_X) > 0.5)
          {
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent.REQUEST_PACE);
+            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent.REQUEST_TROT);
             packetCommunicator.send(eventPacket);
             mode = QuadrupedTeleopMode.VELOCITY;
          }
@@ -169,7 +169,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       case BUTTON_B:
          if (get(InputChannel.BUTTON_B) > 0.5)
          {
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent.REQUEST_TROT);
+            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent.REQUEST_PACE);
             packetCommunicator.send(eventPacket);
             mode = QuadrupedTeleopMode.VELOCITY;
          }
