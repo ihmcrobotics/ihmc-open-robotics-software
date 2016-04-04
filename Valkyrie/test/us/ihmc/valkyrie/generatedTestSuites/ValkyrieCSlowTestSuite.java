@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Slow)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.pushRecovery.ValkyriePushRecoveryMultiStepTest.class
+   us.ihmc.valkyrie.pushRecovery.ValkyriePushRecoveryTest.class
 })
 
 public class ValkyrieCSlowTestSuite

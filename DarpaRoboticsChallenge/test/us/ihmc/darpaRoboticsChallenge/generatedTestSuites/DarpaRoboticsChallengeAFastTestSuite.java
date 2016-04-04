@@ -20,7 +20,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.WheelRotationEstimatorTest.class,
    us.ihmc.darpaRoboticsChallenge.odometry.IcpCloud3DTest.class,
    us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMapTest.class,
-   us.ihmc.darpaRoboticsChallenge.ros.ROSMessageConverterTest.class,
    us.ihmc.darpaRoboticsChallenge.ros.ROSMessageGenerationTest.class,
    us.ihmc.darpaRoboticsChallenge.stateEstimationEndToEndTests.PelvisPoseHistoryCorrectionUsingSimpleRobotTest.class
 })
