@@ -15,7 +15,6 @@ import us.ihmc.aware.util.PreallocatedQueue;
 import us.ihmc.aware.util.QuadrupedTimedStep;
 import us.ihmc.aware.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -98,7 +97,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    }
    private final QuadrantDependentList<StateMachine<FootState, FootEvent>> footStateMachine;
 
-   public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProviderInterface inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator, QuadrupedTaskSpaceController taskSpaceController)
+   public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, ParameterMapRepository parameterMapRepository,
+         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedForceControllerContext controllerContext)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -107,8 +107,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       this.gravity = 9.81;
       this.mass = fullRobotModel.getTotalMass();
       this.inputProvider = inputProvider;
-      this.taskSpaceEstimator = taskSpaceEstimator;
-      this.taskSpaceController = taskSpaceController;
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedStepController.class);
@@ -133,7 +131,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       params.setDefault(NO_CONTACT_PRESSURE_LIMIT, 75);
 
       // utilities
-      ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
+      QuadrupedReferenceFrames referenceFrames = controllerContext.getReferenceFrames();
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -141,13 +139,15 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       dcmPositionEstimate = new FramePoint();
       dcmPositionSetpoint = new FramePoint();
       dcmVelocitySetpoint = new FrameVector();
-      dcmPositionController = new DivergentComponentOfMotionController("dcmPosition", comFrame, controlDT, mass, gravity, inputProvider.getComPositionInput().getZ(), registry);
+      dcmPositionController = controllerContext.getDcmPositionController();
 
       // task space controller
       taskSpaceCommands = new QuadrupedTaskSpaceCommands();
       taskSpaceSetpoints = new QuadrupedTaskSpaceSetpoints();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
+      taskSpaceEstimator = controllerContext.getTaskSpaceEstimator();
+      taskSpaceController = controllerContext.getTaskSpaceController();
 
       // planning
       copPlanner = new PiecewiseCopPlanner(2 * STEP_QUEUE_CAPACITY);
@@ -354,6 +354,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       taskSpaceEstimator.compute(taskSpaceEstimates);
       taskSpaceSetpoints.initialize(taskSpaceEstimates);
       taskSpaceControllerSettings.initialize();
+      taskSpaceControllerSettings.setJointDamping(params.get(JOINT_DAMPING));
       taskSpaceControllerSettings.setComForceCommandWeights(1.0, 1.0, 1.0);
       taskSpaceControllerSettings.setComTorqueCommandWeights(1.0, 1.0, 1.0);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)

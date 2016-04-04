@@ -9,6 +9,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class GroundPlaneEstimator
 {
    private final static int MAX_GROUND_PLANE_POINTS = 100;
    private final Plane3d groundPlane = new Plane3d();
+   private final Vector3d groundNormal = new Vector3d();
    private final ArrayList<Point3d> groundPlanePoints = new ArrayList<>(MAX_GROUND_PLANE_POINTS);
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
 
@@ -46,8 +48,8 @@ public class GroundPlaneEstimator
     */
    public double getPitch(double yaw)
    {
-      double deltaZ = groundPlane.getZOnPlane(Math.cos(yaw),-Math.sin(yaw)) - groundPlane.getZOnPlane(0, 0);
-      return -Math.atan2(deltaZ, 0);
+      groundPlane.getNormal(groundNormal);
+      return Math.atan2(Math.cos(yaw) * groundNormal.getX() - Math.sin(yaw) * groundNormal.getY(), groundNormal.getZ());
    }
 
    /**
@@ -56,8 +58,8 @@ public class GroundPlaneEstimator
     */
    public double getRoll(double yaw)
    {
-      double deltaZ = groundPlane.getZOnPlane(Math.sin(yaw), Math.cos(yaw)) - groundPlane.getZOnPlane(0, 0);
-      return Math.atan2(deltaZ, 0);
+      groundPlane.getNormal(groundNormal);
+      return Math.atan2(Math.sin(yaw) * groundNormal.getX() + Math.cos(yaw) * groundNormal.getY(), groundNormal.getZ());
    }
 
    /**

@@ -8,7 +8,6 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -26,11 +25,10 @@ public class QuadrupedForceJointInitializationController implements QuadrupedFor
     */
    private final boolean initialized[];
 
-   public QuadrupedForceJointInitializationController(QuadrupedRuntimeEnvironment environment,
-         QuadrupedRobotParameters parameters)
+   public QuadrupedForceJointInitializationController(QuadrupedRuntimeEnvironment environment, QuadrupedJointNameMap jointMap)
    {
       this.fullRobotModel = environment.getFullRobotModel();
-      this.jointMap = parameters.getJointMap();
+      this.jointMap = jointMap;
       this.initialized = new boolean[fullRobotModel.getOneDoFJoints().length];
    }
 
