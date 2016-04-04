@@ -558,7 +558,13 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          PrintTools.warn("Trying to add yovariable to slider, but it does not exist, or more than 1 exists: " + name);
       }
 
-      setSlider(channel, holder.getVariable(name), min, max, exponent);
+      YoVariable<?> variable = holder.getVariable(name);
+      if(variable == null)
+      {
+         PrintTools.error("Ahhhhhhhhh, yoVariable name " + name + " was not found in the registry. It's not getting added to the sliderboard");
+         return;
+      }
+      setSlider(channel, variable, min, max, exponent);
    }
 
    public void setSlider(int channel, String varName, String sliderName, YoVariableHolder holder, double min, double max, double exponent)
@@ -566,6 +572,13 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       if (!holder.hasUniqueVariable(varName))
       {
          PrintTools.warn("Trying to add yovariable to slider, but it does not exist, or more than 1 exists: " + varName);
+      }
+      
+      YoVariable<?> variable = holder.getVariable(varName);
+      if(variable == null)
+      {
+         PrintTools.error("Ahhhhhhhhh, yoVariable name " + varName + " was not found in the registry. It's not getting added to the sliderboard");
+         return;
       }
 
       setSlider(channel, holder.getVariable(varName), sliderName, min, max, exponent);
@@ -763,6 +776,12 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    private void setControl(int channel, YoVariable<?> var, double min, double max, double exponent, SliderType sliderType, ControlType controlType)
    {
+      
+      if(var == null)
+      {
+         PrintTools.error("YoVariable was null. It's not getting added to the sliderboard");
+         return;
+      }
       setControl(channel, var, var.getName(), min, max, exponent, (min + max) / 2.0, sliderType, controlType);
    }
 
