@@ -9,6 +9,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedComPositionFeedbackController implements QuadrupedTaskSpaceFeedbackController
 {
@@ -51,7 +52,8 @@ public class QuadrupedComPositionFeedbackController implements QuadrupedTaskSpac
       comPositionController.compute(comForceCommand, comPositionSetpoint, comVelocitySetpoint, comVelocityEstimate, comForceFeedforwardSetpoint);
    }
 
-   @Override public void enableVisualization(boolean enable)
+   @Override public void registerGraphics(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+
    }
 }

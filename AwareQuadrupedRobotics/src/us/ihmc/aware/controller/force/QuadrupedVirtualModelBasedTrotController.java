@@ -98,8 +98,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final StateMachine<TrotState, TrotEvent> trotStateMachine;
 
    public QuadrupedVirtualModelBasedTrotController(QuadrupedRuntimeEnvironment runtimeEnvironment, ParameterMapRepository parameterMapRepository,
-         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator,
-         QuadrupedTaskSpaceController taskSpaceController)
+         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedForceControllerContext controllerContext)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -107,8 +106,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       this.gravity = 9.81;
       this.mass = fullRobotModel.getTotalMass();
       this.inputProvider = inputProvider;
-      this.taskSpaceEstimator = taskSpaceEstimator;
-      this.taskSpaceController = taskSpaceController;
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedTrotController.class);
@@ -137,7 +134,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       params.setDefault(NO_CONTACT_PRESSURE_LIMIT, 75);
 
       // frames
-      ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
+      QuadrupedReferenceFrames referenceFrames = controllerContext.getReferenceFrames();
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -145,13 +142,15 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       dcmPositionEstimate = new FramePoint();
       dcmPositionSetpoint = new FramePoint();
       dcmVelocitySetpoint = new FrameVector();
-      dcmPositionController = new DivergentComponentOfMotionController("dcmPosition", comFrame, controlDT, mass, gravity, inputProvider.getComPositionInput().getZ(), registry);
+      dcmPositionController = controllerContext.getDcmPositionController();
 
       // task space controller
       taskSpaceCommands = new QuadrupedTaskSpaceCommands();
       taskSpaceSetpoints = new QuadrupedTaskSpaceSetpoints();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
+      taskSpaceEstimator = controllerContext.getTaskSpaceEstimator();
+      taskSpaceController = controllerContext.getTaskSpaceController();
 
       // planning
       groundPlaneEstimator = new GroundPlaneEstimator();

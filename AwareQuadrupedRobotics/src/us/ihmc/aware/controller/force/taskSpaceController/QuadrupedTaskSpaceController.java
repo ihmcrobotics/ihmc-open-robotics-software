@@ -36,12 +36,12 @@ public class QuadrupedTaskSpaceController
 
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceController");
 
-   public QuadrupedTaskSpaceController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, QuadrupedJointLimits jointLimits, double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public QuadrupedTaskSpaceController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, QuadrupedJointLimits jointLimits, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.jointLimits = jointLimits;
 
       // virtual model controller
-      virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap, registry, graphicsListRegistry);
+      virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap, registry);
       virtualModelControllerSettings = new QuadrupedVirtualModelControllerSettings();
       contactForceLimits = new QuadrupedContactForceLimits();
       contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames, registry);
@@ -75,6 +75,15 @@ public class QuadrupedTaskSpaceController
       for (int i = 0; i < feedbackControllers.size(); i++)
       {
          feedbackControllers.get(i).reset();
+      }
+   }
+
+   public void registerGraphics(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      virtualModelController.registerGraphics(yoGraphicsListRegistry);
+      for (int i = 0; i < feedbackControllers.size(); i++)
+      {
+         feedbackControllers.get(i).registerGraphics(yoGraphicsListRegistry);
       }
    }
 
