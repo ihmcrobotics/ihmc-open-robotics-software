@@ -136,7 +136,7 @@ public class SO3TrajectoryPointMessage extends IHMCRosApiMessage<SO3TrajectoryPo
    }
 
    @IgnoreField
-   private Quat4d tempQuaternionForTransform;
+   public Quat4d tempQuaternionForTransform;
 
    @Override
    public void applyTransform(RigidBodyTransform transform)
