@@ -3,18 +3,17 @@ package us.ihmc.aware.config;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class DynamicProperty
+public abstract class Property
 {
    private final String path;
-   private final List<DynamicPropertyChangedListener> changedListeners = new ArrayList<>();
+   private final List<PropertyChangedListener> changedListeners = new ArrayList<>();
 
-   public DynamicProperty(DynamicPropertyRegistry registry, String path)
+   public Property(String path)
    {
       this.path = path;
-      registry.register(this);
    }
 
-   public void addChangedListener(DynamicPropertyChangedListener listener)
+   public void addChangedListener(PropertyChangedListener listener)
    {
       if (listener != null)
       {
@@ -24,7 +23,7 @@ public abstract class DynamicProperty
 
    protected void notifyChangedListeners()
    {
-      for (DynamicPropertyChangedListener changedListener : changedListeners)
+      for (PropertyChangedListener changedListener : changedListeners)
       {
          changedListener.onPropertyChanged(this);
       }

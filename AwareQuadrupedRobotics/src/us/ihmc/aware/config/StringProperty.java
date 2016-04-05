@@ -1,12 +1,12 @@
 package us.ihmc.aware.config;
 
-public class DynamicStringProperty extends DynamicProperty
+public class StringProperty extends Property
 {
    private String value;
 
-   public DynamicStringProperty(DynamicPropertyRegistry registry, String path, String defaultValue)
+   protected StringProperty(String path, String defaultValue)
    {
-      super(registry, path);
+      super(path);
       this.value = defaultValue;
    }
 

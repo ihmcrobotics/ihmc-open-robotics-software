@@ -138,7 +138,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             paramMapRepository);
       QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(runtimeEnvironment, parameters, paramMapRepository, inputProvider, referenceFrames, taskSpaceEstimator, taskSpaceController);
       QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, parameters, paramMapRepository, inputProvider);
-      QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, parameters, paramMapRepository, inputProvider, referenceFrames, taskSpaceEstimator, taskSpaceController);
+      QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, parameters, inputProvider, referenceFrames, taskSpaceEstimator, taskSpaceController);
       QuadrupedForceController paceController = new QuadrupedVirtualModelBasedPaceController(runtimeEnvironment, parameters, paramMapRepository, inputProvider, referenceFrames, taskSpaceEstimator, taskSpaceController);
 
       StateMachineBuilder<QuadrupedForceControllerState, QuadrupedForceControllerEvent> builder = new StateMachineBuilder<>(QuadrupedForceControllerState.class,
