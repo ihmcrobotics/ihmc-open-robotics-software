@@ -1,5 +1,6 @@
 package us.ihmc.aware.planning;
 
+import us.ihmc.aware.controller.common.GroundPlaneEstimator;
 import us.ihmc.aware.util.PreallocatedQueue;
 import us.ihmc.aware.util.QuadrupedTimedStep;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
@@ -34,17 +35,17 @@ public class XGaitStepPlanner
    /**
     * The time a foot should spend in the air during its swing state in s.
     */
-   private double swingDuration = 0.5;
+   private double swingDuration = 0.4;
 
    /**
     * The time during which both feet of a front or back pair are in support in s.
     */
-   private double endPairSupportDuration = 0.5;
+   private double endPairSupportDuration = 0.8;
 
    /**
     * The phase offset of the front and back feet pairs in deg.
     */
-   private double phaseShift = 90.0;
+   private double phaseShift = 120.0;
 
    /**
     * The distance between same-side legs during stance.
@@ -59,7 +60,7 @@ public class XGaitStepPlanner
    /**
     * The forward distance at which a footstep is placed from the previous step.
     */
-   private double strideLength = 0.3;
+   private double strideLength = 0.2;
 
    /**
     * The sideways distance at which a footstep is placed from the previous step.
@@ -84,6 +85,13 @@ public class XGaitStepPlanner
     */
    private final QuadrantDependentList<PreallocatedQueue<QuadrupedTimedStep>> queues = new QuadrantDependentList<>();
 
+   /**
+    * Used to estimate the ground plane at the beginning of each plan to compute the foothold heights.
+    */
+   private static final GroundPlaneEstimator groundPlaneEstimator = new GroundPlaneEstimator();
+
+   private static final QuadrantDependentList<FramePoint> initialFootholds = new QuadrantDependentList();
+
    private final HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
    public XGaitStepPlanner(YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry,
@@ -98,6 +106,11 @@ public class XGaitStepPlanner
 
       this.footstepVisualization = BagOfBalls
             .createRainbowBag(FOOTSTEP_QUEUE_SIZE * 4, 0.03, "footsteps", registry, graphicsListRegistry);
+
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         initialFootholds.set(quadrant, new FramePoint());
+      }
    }
 
    /**
@@ -115,6 +128,13 @@ public class XGaitStepPlanner
       pool.evict();
 
       footstepVisualization.reset();
+
+      // Estimate the ground plane.
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         initialFootholds.get(quadrant).setToZero(referenceFrames.getFootFrame(quadrant));
+      }
+      groundPlaneEstimator.compute(initialFootholds);
 
       // Add the initialization steps.
       double initializationPeriod = needInitialization ? addInitializationSteps(startTime) : 0.0;
@@ -172,8 +192,7 @@ public class XGaitStepPlanner
          stepGoalPosition.set(initialX, initialY, 0.0);
 
          // Project onto the ground.
-         stepGoalPosition.changeFrame(referenceFrames.getWorldFrame());
-         stepGoalPosition.setZ(0.0);
+         groundPlaneEstimator.projectZ(stepGoalPosition);
 
          // Shift right feet forward half a stride.
          if (quadrant.isQuadrantOnRightSide())
@@ -220,7 +239,7 @@ public class XGaitStepPlanner
       FramePoint stepGoalPosition = step.getGoalPosition();
       stepGoalPosition.setIncludingFrame(previousStepGoalPosition);
       stepGoalPosition.changeFrame(referenceFrames.getWorldFrame());
-      stepGoalPosition.setZ(0.0);
+      groundPlaneEstimator.projectZ(stepGoalPosition);
 
       // Compute the support polygon for the previous group of four footsteps.
       QuadrupedSupportPolygon polygon = new QuadrupedSupportPolygon();
@@ -244,12 +263,13 @@ public class XGaitStepPlanner
       FrameVector stride = pool.lease(FrameVector.class);
       stride.setToZero(referenceFrames.getWorldFrame());
       stride.add(quadrant.getEnd().negateIfHindEnd(stanceLength) / 2.0, quadrant.getSide().negateIfRightSide(stanceWidth) / 2.0, 0.0);
-//      stride.add(strideLength, strideWidth, 0.0);
-//      stride.applyTransform(tf);
+      stride.add(strideLength, strideWidth, 0.0);
+      stride.applyTransform(tf);
       stride.add(centroid);
 
-//      step.setGoalPosition(polygon.getFootstep(quadrant));
+//    step.setGoalPosition(polygon.getFootstep(quadrant));
       step.getGoalPosition().set(stride);
+      groundPlaneEstimator.projectZ(step.getGoalPosition());
 
       return step;
    }

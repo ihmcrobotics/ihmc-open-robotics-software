@@ -59,7 +59,7 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<BooleanYoVariable> yoSoleContactForceGraphicVisible;
 
    public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         YoVariableRegistry parentRegistry)
    {
       this.jointNameMap = jointNameMap;
       registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -131,7 +131,6 @@ public class QuadrupedVirtualModelController
          yoGraphicsList.add(yoSoleVirtualForceGraphic.get(robotQuadrant));
          yoGraphicsList.add(yoSoleContactForceGraphic.get(robotQuadrant));
       }
-      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
 
       parentRegistry.addChild(registry);
       this.reset();
@@ -145,6 +144,12 @@ public class QuadrupedVirtualModelController
          soleContactForce.get(robotQuadrant).setToZero();
       }
    }
+
+   public void registerGraphics(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+   }
+
 
    public void setSoleVirtualForce(RobotQuadrant robotQuadrant, FrameVector virtualForce)
    {

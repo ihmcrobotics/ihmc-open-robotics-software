@@ -1,7 +1,10 @@
 package us.ihmc.aware.controller.force.taskSpaceController;
 
 import us.ihmc.aware.util.ContactState;
+import us.ihmc.aware.vmc.QuadrupedContactForceLimits;
 import us.ihmc.aware.vmc.QuadrupedContactForceOptimizationSettings;
+import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
+import us.ihmc.aware.vmc.QuadrupedVirtualModelControllerSettings;
 import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -27,6 +30,7 @@ public class QuadrupedTaskSpaceControllerSettings
    // contact state
    private final QuadrantDependentList<ContactState> contactState;
    private final QuadrantDependentList<DoubleWrapper> pressureUpperLimit;
+   private double jointDamping = 0.0;
 
    // command weights
    private final double[] comTorqueCommandWeights;
@@ -98,6 +102,7 @@ public class QuadrupedTaskSpaceControllerSettings
          setContactState(robotQuadrant, ContactState.NO_CONTACT);
          setPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
       }
+      setJointDamping(0.0);
       setComForceCommandWeights(1.0, 1.0, 1.0);
       setComTorqueCommandWeights(1.0, 1.0, 1.0);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -120,6 +125,11 @@ public class QuadrupedTaskSpaceControllerSettings
    public void setPressureUpperLimit(RobotQuadrant robotQuadrant, double pressureUpperLimit)
    {
       this.pressureUpperLimit.get(robotQuadrant).setValue(pressureUpperLimit);
+   }
+
+   public void setJointDamping(double jointDamping)
+   {
+      this.jointDamping = jointDamping;
    }
 
    public void setComTorqueCommandWeights(double[] weights)
@@ -265,10 +275,19 @@ public class QuadrupedTaskSpaceControllerSettings
       return contactState.get(robotQuadrant);
    }
 
-   public double getPressureUpperLimit(RobotQuadrant robotQuadrant)
+   public QuadrantDependentList<ContactState> getContactState()
    {
-      return pressureUpperLimit.get(robotQuadrant).getValue();
+      return contactState;
    }
+
+   public void getContactForceLimits(QuadrupedContactForceLimits contactForceLimits)
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         contactForceLimits.setPressureUpperLimit(robotQuadrant, pressureUpperLimit.get(robotQuadrant).getValue());
+      }
+   }
+
    public void getContactForceOptimizationSettings(QuadrupedContactForceOptimizationSettings contactForceOptimizationSettings)
    {
       contactForceOptimizationSettings.setComForceCommandWeights(comForceCommandWeights);
@@ -277,6 +296,11 @@ public class QuadrupedTaskSpaceControllerSettings
       {
          contactForceOptimizationSettings.setContactForceCommandWeights(robotQuadrant, soleForceCommandWeights.get(robotQuadrant));
       }
+   }
+
+   public void getVirtualModelControllerSettings(QuadrupedVirtualModelControllerSettings virtualModelControllerSettings)
+   {
+      virtualModelControllerSettings.setJointDamping(jointDamping);
    }
 
    public void getBodyOrientationFeedbackGains(YoAxisAngleOrientationGains bodyOrientationFeedbackGains)

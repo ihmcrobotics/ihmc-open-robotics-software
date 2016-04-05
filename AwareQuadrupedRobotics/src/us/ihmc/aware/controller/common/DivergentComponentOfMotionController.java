@@ -1,10 +1,18 @@
 package us.ihmc.aware.controller.common;
 
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
 
 public class DivergentComponentOfMotionController
 {
@@ -14,6 +22,22 @@ public class DivergentComponentOfMotionController
    private double comHeight;
    private final ReferenceFrame comFrame;
    private final PIDController[] pidController;
+   private final FramePoint vrpPositionSetpoint;
+   private final FramePoint cmpPositionSetpoint;
+
+   YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
+   ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
+
+   YoFramePoint yoDcmPositionEstimate = new YoFramePoint("dcmPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
+   YoFramePoint yoDcmPositionSetpoint = new YoFramePoint("dcmPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
+   YoFrameVector yoDcmVelocitySetpoint = new YoFrameVector("dcmVelocitySetpoint", ReferenceFrame.getWorldFrame(), registry);
+   YoFramePoint yoIcpPositionEstimate = new YoFramePoint("icpPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
+   YoFramePoint yoIcpPositionSetpoint = new YoFramePoint("icpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
+   YoFrameVector yoIcpVelocitySetpoint = new YoFrameVector("icpVelocitySetpoint", ReferenceFrame.getWorldFrame(), registry);
+   YoFramePoint yoVrpPositionSetpoint = new YoFramePoint("vrpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
+   YoFramePoint yoCmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
+   DoubleYoVariable yoLipNaturalFrequency = new DoubleYoVariable("lipNaturalFrequency", registry);
 
    public DivergentComponentOfMotionController(String suffix, ReferenceFrame comFrame, double dt, double mass, double gravity, double comHeight, YoVariableRegistry parentRegistry)
    {
@@ -27,9 +51,28 @@ public class DivergentComponentOfMotionController
       pidController[0] = new PIDController(suffix + "X", parentRegistry);
       pidController[1] = new PIDController(suffix + "Y", parentRegistry);
       pidController[2] = new PIDController(suffix + "Z", parentRegistry);
+      vrpPositionSetpoint = new FramePoint();
+      cmpPositionSetpoint = new FramePoint();
+
+      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition("icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Magenta());
+      YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition("icpPositionSetpoint", yoIcpPositionSetpoint, 0.025, YoAppearance.Blue());
+      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition("cmpPositionSetpoint", yoCmpPositionSetpoint, 0.025, YoAppearance.Chartreuse());
+      yoGraphicsList.add(yoIcpPositionEstimateViz);
+      yoGraphicsList.add(yoIcpPositionSetpointViz);
+      yoGraphicsList.add(yoCmpPositionSetpointViz);
+      artifactList.add(yoIcpPositionEstimateViz.createArtifact());
+      artifactList.add(yoIcpPositionSetpointViz.createArtifact());
+      artifactList.add(yoCmpPositionSetpointViz.createArtifact());
+      parentRegistry.addChild(registry);
    }
 
-   public void setComHeight(double naturalFrequency)
+   public void registerGraphics(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
+   }
+
+   public void setComHeight(double comHeight)
    {
       this.comHeight = Math.max(comHeight, 0.001);
    }
@@ -124,6 +167,8 @@ public class DivergentComponentOfMotionController
       dcmPositionSetpoint.changeFrame(comFrame);
       dcmVelocitySetpoint.changeFrame(comFrame);
       dcmPositionEstimate.changeFrame(comFrame);
+      vrpPositionSetpoint.changeFrame(comFrame);
+      cmpPositionSetpoint.changeFrame(comFrame);
 
       double omega = getNaturalFrequency();
       double vrpX = dcmPositionEstimate.getX() - 1 / omega * (dcmVelocitySetpoint.getX() + pidController[0].compute(dcmPositionEstimate.getX(), dcmPositionSetpoint.getX(), 0, 0, dt));
@@ -136,6 +181,20 @@ public class DivergentComponentOfMotionController
       double fY = mass * Math.pow(omega, 2) * -cmpY;
       double fZ = mass * Math.pow(omega, 2) * -cmpZ;
       comForceCommand.set(fX, fY, fZ);
+      vrpPositionSetpoint.set(vrpX, vrpY, vrpZ);
+      cmpPositionSetpoint.set(cmpX, cmpY, cmpZ);
+
+      yoDcmPositionEstimate.setAndMatchFrame(dcmPositionEstimate);
+      yoDcmPositionSetpoint.setAndMatchFrame(dcmPositionSetpoint);
+      yoDcmVelocitySetpoint.setAndMatchFrame(dcmVelocitySetpoint);
+      yoIcpPositionEstimate.set(yoDcmPositionEstimate);
+      yoIcpPositionEstimate.add(0, 0, -getComHeight());
+      yoIcpPositionSetpoint.set(yoDcmPositionSetpoint);
+      yoIcpPositionSetpoint.add(0, 0, -getComHeight());
+      yoIcpVelocitySetpoint.set(yoDcmVelocitySetpoint);
+      yoVrpPositionSetpoint.setAndMatchFrame(vrpPositionSetpoint);
+      yoCmpPositionSetpoint.setAndMatchFrame(cmpPositionSetpoint);
+      yoLipNaturalFrequency.set(getNaturalFrequency());
 
       comForceCommand.changeFrame(comForceCommandFrame);
       dcmPositionSetpoint.changeFrame(dcmPositionSetpointFrame);

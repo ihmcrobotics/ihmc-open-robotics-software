@@ -1,42 +1,35 @@
 package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
+import us.ihmc.aware.controller.common.GroundPlaneEstimator;
 import us.ihmc.aware.controller.force.taskSpaceController.*;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.util.ContactState;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
-import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.*;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedVirtualModelBasedStandController implements QuadrupedForceController
 {
    private final SDFFullRobotModel fullRobotModel;
    private final DoubleYoVariable robotTimestamp;
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
-   private final QuadrupedJointNameMap jointNameMap;
    private final double controlDT;
    private final double gravity;
    private final double mass;
    private final QuadrupedControllerInputProviderInterface inputProvider;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    // parameters
    private final ParameterMap params;
+   private final static String JOINT_DAMPING = "jointDamping";
    private final static String BODY_ORIENTATION_PROPORTIONAL_GAINS = "bodyOrientationProportionalGains";
    private final static String BODY_ORIENTATION_DERIVATIVE_GAINS = "bodyOrientationDerivativeGains";
    private final static String BODY_ORIENTATION_INTEGRAL_GAINS = "bodyOrientationIntegralGains";
@@ -51,13 +44,8 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final static String DCM_POSITION_MAX_INTEGRAL_ERROR = "dcmPositionMaxIntegralError";
 
    // frames
-   private final PoseReferenceFrame supportFrame;
+   private final ReferenceFrame supportFrame;
    private final ReferenceFrame worldFrame;
-
-   // support utils
-   QuadrupedSupportPolygon supportPolygon;
-   FramePoint supportCentroid;
-   FrameOrientation supportOrientation;
 
    // dcm controller
    private final FramePoint dcmPositionEstimate;
@@ -73,14 +61,14 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final QuadrupedTaskSpaceController taskSpaceController;
    private final QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   // planning
+   private final GroundPlaneEstimator groundPlaneEstimator;
 
-   public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProviderInterface inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator, QuadrupedTaskSpaceController taskSpaceController)
+   public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, ParameterMapRepository parameterMapRepository,
+         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedForceControllerContext controllerContext)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
-      this.yoGraphicsListRegistry = runtimeEnvironment.getGraphicsListRegistry();
-      this.jointNameMap = robotParameters.getJointMap();
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
       this.mass = fullRobotModel.getTotalMass();
@@ -88,6 +76,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedStandController.class);
+      params.setDefault(JOINT_DAMPING, 2);
       params.setDefault(BODY_ORIENTATION_PROPORTIONAL_GAINS, 5000, 5000, 2500);
       params.setDefault(BODY_ORIENTATION_DERIVATIVE_GAINS, 750, 750, 500);
       params.setDefault(BODY_ORIENTATION_INTEGRAL_GAINS, 0, 0, 0);
@@ -102,32 +91,26 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       params.setDefault(DCM_POSITION_MAX_INTEGRAL_ERROR, 0);
 
       // frames
-      ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
-      supportFrame = new PoseReferenceFrame("SupportFrame", ReferenceFrame.getWorldFrame());
+      QuadrupedReferenceFrames referenceFrames = controllerContext.getReferenceFrames();
+      supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       worldFrame = ReferenceFrame.getWorldFrame();
-
-      // support
-      supportPolygon = new QuadrupedSupportPolygon();
-      supportCentroid = new FramePoint();
-      supportOrientation = new FrameOrientation();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         supportPolygon.setFootstep(robotQuadrant, new FramePoint());
-      }
 
       // dcm controller
       dcmPositionEstimate = new FramePoint();
       dcmPositionSetpoint = new FramePoint();
       dcmVelocitySetpoint = new FrameVector();
-      dcmPositionController = new DivergentComponentOfMotionController("dcmPosition", comFrame, controlDT, mass, gravity, inputProvider.getComPositionInput().getZ(), registry);
+      dcmPositionController = controllerContext.getDcmPositionController();
 
       // task space controllers
-      this.taskSpaceEstimator = taskSpaceEstimator;
-      this.taskSpaceController = taskSpaceController;
       taskSpaceCommands = new QuadrupedTaskSpaceCommands();
       taskSpaceSetpoints = new QuadrupedTaskSpaceSetpoints();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
+      taskSpaceEstimator = controllerContext.getTaskSpaceEstimator();
+      taskSpaceController = controllerContext.getTaskSpaceController();
+
+      // planning
+      groundPlaneEstimator = new GroundPlaneEstimator();
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
@@ -150,24 +133,8 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       dcmPositionEstimate.scale(1.0 / dcmPositionController.getNaturalFrequency());
       dcmPositionEstimate.add(taskSpaceEstimates.getComPosition());
 
-      // compute support frame
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         taskSpaceEstimates.getSolePosition().get(robotQuadrant).changeFrame(supportPolygon.getReferenceFrame());
-         supportPolygon.setFootstep(robotQuadrant, taskSpaceEstimates.getSolePosition().get(robotQuadrant));
-         taskSpaceEstimates.getSolePosition().get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-      }
-      double minFrontFootHeight = Math.min(taskSpaceEstimates.getSolePosition().get(RobotQuadrant.FRONT_LEFT).getZ(), taskSpaceEstimates.getSolePosition().get(RobotQuadrant.FRONT_RIGHT).getZ());
-      double minHindFootHeight = Math.min(taskSpaceEstimates.getSolePosition().get(RobotQuadrant.HIND_LEFT).getZ(), taskSpaceEstimates.getSolePosition().get(RobotQuadrant.HIND_RIGHT).getZ());
-
-      // compute support frame (centroid and nominal orientation)
-      supportCentroid.changeFrame(supportPolygon.getReferenceFrame());
-      supportPolygon.getCentroid(supportCentroid);
-      supportCentroid.changeFrame(ReferenceFrame.getWorldFrame());
-      supportCentroid.setZ((minFrontFootHeight + minHindFootHeight) / 2.0);
-      supportOrientation.changeFrame(supportPolygon.getReferenceFrame());
-      supportOrientation.setYawPitchRoll(supportPolygon.getNominalYaw(), 0.0, 0.0);
-      supportFrame.setPoseAndUpdate(supportCentroid, supportOrientation);
+      // update ground plane estimate
+      groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
    }
 
    private void updateSetpoints()
@@ -191,7 +158,11 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       // update desired body orientation and angular rate
       taskSpaceSetpoints.getBodyOrientation().changeFrame(supportFrame);
       taskSpaceSetpoints.getBodyOrientation().set(inputProvider.getBodyOrientationInput());
-      taskSpaceSetpoints.getBodyAngularVelocity().changeFrame(supportFrame);
+      taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
+      double bodyYaw = taskSpaceSetpoints.getBodyOrientation().getYaw();
+      double bodyPitch = taskSpaceSetpoints.getBodyOrientation().getPitch() + groundPlaneEstimator.getPitch(bodyYaw);
+      double bodyRoll = taskSpaceSetpoints.getBodyOrientation().getRoll();
+      taskSpaceSetpoints.getBodyOrientation().setYawPitchRoll(bodyYaw, bodyPitch, bodyRoll);
       taskSpaceSetpoints.getBodyAngularVelocity().set(inputProvider.getBodyAngularRateInput());
 
       // update joint setpoints
@@ -220,6 +191,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       taskSpaceEstimator.compute(taskSpaceEstimates);
       taskSpaceSetpoints.initialize(taskSpaceEstimates);
       taskSpaceControllerSettings.initialize();
+      taskSpaceControllerSettings.setJointDamping(params.get(JOINT_DAMPING));
       taskSpaceControllerSettings.setComForceCommandWeights(1.0, 1.0, 1.0);
       taskSpaceControllerSettings.setComTorqueCommandWeights(1.0, 1.0, 1.0);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
