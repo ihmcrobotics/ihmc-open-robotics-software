@@ -10,13 +10,15 @@ import java.util.concurrent.TimeUnit;
 
 import us.ihmc.aware.controller.force.QuadrupedForceControllerEvent;
 import us.ihmc.aware.input.value.InputValueIntegrator;
-import us.ihmc.aware.packets.*;
-import us.ihmc.aware.params.ParameterMap;
-import us.ihmc.aware.params.ParameterMapRepository;
+import us.ihmc.aware.packets.BodyOrientationPacket;
+import us.ihmc.aware.packets.ComPositionPacket;
+import us.ihmc.aware.packets.PlanarVelocityPacket;
+import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
+import us.ihmc.aware.params.DoubleParameter;
+import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class QuadrupedBodyTeleopNode implements InputEventCallback
 {
@@ -25,22 +27,22 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
     */
    private static final double DT = 0.01;
 
-   private enum QuadrupedTeleopMode {POSITION, VELOCITY}
+   private enum QuadrupedTeleopMode
+   {
+      POSITION, VELOCITY
+   }
 
-   private static final String PARAM_ROLL_SCALE = "rollScale";
-   private static final String PARAM_PITCH_SCALE = "pitchScale";
-   private static final String PARAM_YAW_SCALE = "yawScale";
-   private static final String PARAM_X_SCALE = "xScale";
-   private static final String PARAM_Y_SCALE = "yScale";
-   private static final String PARAM_VX_SCALE = "vxScale";
-   private static final String PARAM_VY_SCALE = "vyScale";
-   private static final String PARAM_VZ_SCALE = "vzScale";
-   private static final String PARAM_WZ_SCALE = "wzScale";
-   private static final String PARAM_DEFAULT_COM_HEIGHT = "defaultComHeight";
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedBodyTeleopNode.class.getSimpleName());
-   private final ParameterMapRepository repository = new ParameterMapRepository(registry);
-   private final ParameterMap params = repository.get(QuadrupedBodyTeleopNode.class);
+   private final ParameterFactory parameterFactory = new ParameterFactory(QuadrupedBodyTeleopNode.class.getName());
+   private final DoubleParameter rollScaleParameter = parameterFactory.createDouble("paramRollScale", 0.15);
+   private final DoubleParameter pitchScaleParameter = parameterFactory.createDouble("paramPitchScale", 0.15);
+   private final DoubleParameter yawScaleParameter = parameterFactory.createDouble("paramYawScale", 0.15);
+   private final DoubleParameter xScaleParameter = parameterFactory.createDouble("paramXScale", 0.20);
+   private final DoubleParameter yScaleParameter = parameterFactory.createDouble("paramYScale", 0.10);
+   private final DoubleParameter vxScaleParameter = parameterFactory.createDouble("paramVxScale", 0.1);
+   private final DoubleParameter vyScaleParameter = parameterFactory.createDouble("paramVyScale", 0.5);
+   private final DoubleParameter vzScaleParameter = parameterFactory.createDouble("paramVzScale", 0.25);
+   private final DoubleParameter wzScaleParameter = parameterFactory.createDouble("paramWzScale", 1.0);
+   private final DoubleParameter defaultComHeightParameter = parameterFactory.createDouble("paramDefaultComHeight", 0.55);
 
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
    private final PacketCommunicator packetCommunicator;
@@ -52,21 +54,10 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
 
    public QuadrupedBodyTeleopNode(String host, NetClassList netClassList, PollingInputDevice device) throws IOException
    {
-      params.setDefault(PARAM_ROLL_SCALE, 0.15);
-      params.setDefault(PARAM_PITCH_SCALE, 0.15);
-      params.setDefault(PARAM_YAW_SCALE, 0.15);
-      params.setDefault(PARAM_X_SCALE, 0.20);
-      params.setDefault(PARAM_Y_SCALE, 0.10);
-      params.setDefault(PARAM_VX_SCALE, 0.1);
-      params.setDefault(PARAM_VY_SCALE, 0.5);
-      params.setDefault(PARAM_VZ_SCALE, 0.25);
-      params.setDefault(PARAM_WZ_SCALE, 1.0);
-      params.setDefault(PARAM_DEFAULT_COM_HEIGHT, 0.55);
-
       // TODO: Don't hardcode localhost
       this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, NetworkPorts.CONTROLLER_PORT, netClassList);
       this.device = device;
-      this.comZ = new InputValueIntegrator(DT, params.get(PARAM_DEFAULT_COM_HEIGHT));
+      this.comZ = new InputValueIntegrator(DT, defaultComHeightParameter.get());
 
       // Initialize all channels to zero.
       for (InputChannel channel : InputChannel.values())
@@ -101,11 +92,11 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
    {
       double bodyYaw = 0.0;
       double bodyRoll = 0.0;
-      double bodyPitch = get(InputChannel.RIGHT_STICK_Y) * params.get(PARAM_PITCH_SCALE);
+      double bodyPitch = get(InputChannel.RIGHT_STICK_Y) * pitchScaleParameter.get();
       if (mode == QuadrupedTeleopMode.POSITION)
       {
-         bodyYaw = get(InputChannel.RIGHT_STICK_X) * params.get(PARAM_YAW_SCALE);
-         bodyRoll = -get(InputChannel.LEFT_STICK_X) * params.get(PARAM_ROLL_SCALE);
+         bodyYaw = get(InputChannel.RIGHT_STICK_X) * yawScaleParameter.get();
+         bodyRoll = -get(InputChannel.LEFT_STICK_X) * rollScaleParameter.get();
       }
       BodyOrientationPacket orientationPacket = new BodyOrientationPacket(bodyYaw, bodyPitch, bodyRoll);
       packetCommunicator.send(orientationPacket);
@@ -115,19 +106,19 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       double yawRate = 0.0;
       if (mode == QuadrupedTeleopMode.VELOCITY)
       {
-         xVelocity = get(InputChannel.LEFT_STICK_Y) * params.get(PARAM_VX_SCALE);
-         yVelocity = get(InputChannel.LEFT_STICK_X) * params.get(PARAM_VY_SCALE);
-         yawRate = get(InputChannel.RIGHT_STICK_X) * params.get(PARAM_WZ_SCALE);
+         xVelocity = get(InputChannel.LEFT_STICK_Y) * vxScaleParameter.get();
+         yVelocity = get(InputChannel.LEFT_STICK_X) * vyScaleParameter.get();
+         yawRate = get(InputChannel.RIGHT_STICK_X) * wzScaleParameter.get();
       }
       PlanarVelocityPacket velocityPacket = new PlanarVelocityPacket(xVelocity, yVelocity, yawRate);
       packetCommunicator.send(velocityPacket);
 
       double comX = 0.0;
       double comY = 0.0;
-      double comZdot = (get(InputChannel.RIGHT_BUTTON) - get(InputChannel.LEFT_BUTTON)) * params.get(PARAM_VZ_SCALE);
+      double comZdot = (get(InputChannel.RIGHT_BUTTON) - get(InputChannel.LEFT_BUTTON)) * vzScaleParameter.get();
       if (mode == QuadrupedTeleopMode.POSITION)
       {
-         comX = get(InputChannel.LEFT_STICK_Y) * params.get(PARAM_X_SCALE);
+         comX = get(InputChannel.LEFT_STICK_Y) * xScaleParameter.get();
       }
       ComPositionPacket comPositionPacket = new ComPositionPacket(comX, comY, comZ.update(comZdot));
       packetCommunicator.send(comPositionPacket);
