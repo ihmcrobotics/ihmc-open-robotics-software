@@ -1,7 +1,6 @@
 package us.ihmc.aware.parameters;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.aware.config.PropertyRegistry;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -18,8 +17,6 @@ public class QuadrupedRuntimeEnvironment
 
    private final SDFFullRobotModel fullRobotModel;
 
-   private final PropertyRegistry propertyRegistry;
-
    private final YoVariableRegistry parentRegistry;
    private final YoGraphicsListRegistry graphicsListRegistry;
    private final YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead;
@@ -31,14 +28,13 @@ public class QuadrupedRuntimeEnvironment
 
    private final NetClassList netClassList;
 
-   public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp, SDFFullRobotModel fullRobotModel, PropertyRegistry propertyRegistry,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead,
-         GlobalDataProducer globalDataProducer, QuadrupedLegInverseKinematicsCalculator legIkCalculator, QuadrantDependentList<FootSwitchInterface> footSwitches, NetClassList netClassList)
+   public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp, SDFFullRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry graphicsListRegistry, YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead, GlobalDataProducer globalDataProducer,
+         QuadrupedLegInverseKinematicsCalculator legIkCalculator, QuadrantDependentList<FootSwitchInterface> footSwitches, NetClassList netClassList)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
       this.fullRobotModel = fullRobotModel;
-      this.propertyRegistry = propertyRegistry;
       this.parentRegistry = parentRegistry;
       this.graphicsListRegistry = graphicsListRegistry;
       this.graphicsListRegistryForDetachedOverhead = graphicsListRegistryForDetachedOverhead;
@@ -61,11 +57,6 @@ public class QuadrupedRuntimeEnvironment
    public SDFFullRobotModel getFullRobotModel()
    {
       return fullRobotModel;
-   }
-
-   public PropertyRegistry getPropertyRegistry()
-   {
-      return propertyRegistry;
    }
 
    public YoVariableRegistry getParentRegistry()

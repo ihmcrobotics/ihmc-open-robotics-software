@@ -1,10 +1,10 @@
 package us.ihmc.aware.config;
 
-public class StringProperty extends Property
+public class StringParameter extends Parameter
 {
    private String value;
 
-   protected StringProperty(String path, String defaultValue)
+   StringParameter(String path, String defaultValue)
    {
       super(path);
       this.value = defaultValue;
@@ -22,9 +22,16 @@ public class StringProperty extends Property
    }
 
    @Override
-   public String dump()
+   public boolean tryLoadValue(String value)
    {
-      return getPath() + "=" + value;
+      this.value = value;
+      return true;
+   }
+
+   @Override
+   protected String dumpValue()
+   {
+      return value;
    }
 }
 
