@@ -22,7 +22,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -55,26 +54,29 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 
 public class QuadrupedTrotWalkController extends QuadrupedController
 {
+   // Constants
    private static final double GRAVITY = 9.81;
    private static final double INITIAL_STANCE_HEIGHT = 0.625;
    private static final double SIMULATION_TO_ROBOT_MODEL_Z_DIFFERNCE = 0.08;
    private static final double ESTIMATED_MASS = 63.9; // TODO PDControl this when z-vel=0
    private static final double ESTIMATED_ROTATIONAL_INERTIA = 5.0; // TODO PDControl this when z-vel=0
    private static final double COEFFICIENT_OF_FRICTION = 0.7;
+   
+   // Controller Options
    public static final boolean USE_COPX_AND_COPY = true;
+   public static final boolean CREATE_VISUALIZATIONS = true;
+   
+   // Inherited Variables
    private final double dt;
    private final DoubleYoVariable yoTime;
    private final YoVariableRegistry registry = new YoVariableRegistry("TrotWalkController");
    private final QuadrupedReferenceFrames referenceFrames;
    private final SDFFullRobotModel fullRobotModel;
+   private final QuadrantDependentList<ArrayList<OneDoFJoint>> oneDofJoints = new QuadrantDependentList<>();
    private boolean hasInitializedInheritedYoVariables = false;
    private DoubleYoVariable q_z;
-   
-   private final QuadrantDependentList<FootSwitchInterface> footSwitches;
-   private final QuadrantDependentList<YoFramePoint> footPositions = new QuadrantDependentList<YoFramePoint>();
-   private final QuadrantDependentList<YoFrameVector> footVelocities = new QuadrantDependentList<YoFrameVector>();
-   private final CenterOfMassJacobian centerOfMassJacobian;
 
+   // PD Controllers
    private final DoubleYoVariable kp_x = new DoubleYoVariable("kp_x", registry);
    private final DoubleYoVariable kp_y = new DoubleYoVariable("kp_y", registry);
    private final DoubleYoVariable kp_z = new DoubleYoVariable("kp_z", registry);
@@ -90,25 +92,19 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final DoubleYoVariable kd_yaw = new DoubleYoVariable("kd_yaw", registry);
    private final DoubleYoVariable kd_icp = new DoubleYoVariable("kd_icp", registry);
 
-   private final QuadrantDependentList<ArrayList<OneDoFJoint>> oneDofJoints = new QuadrantDependentList<>();
-
-   private final IntegerYoVariable numberOfFeetInContact = new IntegerYoVariable("numberOfFeetInContact", registry);
-   
+   private final QuadrantDependentList<YoFramePoint> footPositions = new QuadrantDependentList<YoFramePoint>();
+   private final QuadrantDependentList<YoFrameVector> footVelocities = new QuadrantDependentList<YoFrameVector>();
+   private final CenterOfMassJacobian centerOfMassJacobian;
    private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector centerOfMassVelocity = new YoFrameVector("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint centerOfMassXYProjection = new YoFramePoint("centerOfMassXYProjection", ReferenceFrame.getWorldFrame(), registry);
-   private final YoGraphicPosition centerOfMassVis = new YoGraphicPosition("centerOfMassVis", centerOfMassXYProjection, 0.02, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
    
    // Balancing
    private final YoFramePoint2d icp = new YoFramePoint2d("icp", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint2d desiredICP = new YoFramePoint2d("desiredICP", ReferenceFrame.getWorldFrame(), registry);
-   private final YoGraphicPosition desiredICPVis = new YoGraphicPosition("desiredICPVis", desiredICP, 0.01, YoAppearance.Green(), GraphicType.SQUARE);
    private final YoFramePoint centerOfPressure = new YoFramePoint("centerOfPressure", ReferenceFrame.getWorldFrame(), registry);
-   private final YoGraphicPosition centerOfPressureVis = new YoGraphicPosition("centerOfPressureVis", centerOfPressure, 0.01, YoAppearance.Lime(), GraphicType.BALL_WITH_ROTATED_CROSS);
    private final YoFramePoint2d desiredCenterOfPressure = new YoFramePoint2d("desiredCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
-   private final YoGraphicPosition desiredCenterOfPressureVis = new YoGraphicPosition("desiredCenterOfPressureVis", desiredCenterOfPressure, 0.01, YoAppearance.DarkSlateBlue(), GraphicType.BALL_WITH_ROTATED_CROSS);
    private final YoFramePoint2d snappedDesiredCenterOfPressure = new YoFramePoint2d("snappedDesiredCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
-   private final YoGraphicPosition snappedDesiredCenterOfPressureVis = new YoGraphicPosition("snappedDesiredCenterOfPressureVis", snappedDesiredCenterOfPressure, 0.02, YoAppearance.Red(), GraphicType.BALL_WITH_ROTATED_CROSS);
    private final QuadrantDependentList<YoFrameVector[]> basisForceVectors = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFrameVector[]> basisTorqueVectors = new QuadrantDependentList<>();
    private final QuadrantDependentList<double[]> rhoScalars = new QuadrantDependentList<>();
@@ -129,8 +125,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final YoFrameVector bodyAngularAcceleration = new YoFrameVector("bodyAngularAcceleration", ReferenceFrame.getWorldFrame(), registry);
    private final YoWrench desiredBodyWrench;
    private final YoTwist desiredBodyTwist;
-   private final QuadrantDependentList<YoGraphicVector> forceDistributionYoGraphicVectors = new QuadrantDependentList<>();
-   private final QuadrantDependentList<YoGraphicVector[]> basisForceYoGraphicVectors = new QuadrantDependentList<>();
    
    // Jacobian
    private final FramePoint jointPosition = new FramePoint();
@@ -157,7 +151,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final BooleanYoVariable gaitCompleted = new BooleanYoVariable("gaitCompleted", registry);
    private final DoubleYoVariable impactVelocityZ = new DoubleYoVariable("impactVelocityZ", registry);
    private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
-   private final YoGraphicPosition centroidVis = new YoGraphicPosition("centroidVis", centroid, 0.01, YoAppearance.Black(), GraphicType.CROSS);
    private final YoQuadrupedSupportPolygon previousSupportPolygon = new YoQuadrupedSupportPolygon("previousSupportPolygon", registry);
    private final YoQuadrupedSupportPolygon currentSupportPolygon = new YoQuadrupedSupportPolygon("currentSupportPolygon", registry);
    private final YoQuadrupedSupportPolygon nextSupportPolygon = new YoQuadrupedSupportPolygon("nextSupportPolygon", registry);
@@ -188,10 +181,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    private final FrameVector2d awayFromCentroidToClosestIntersection = new FrameVector2d();
    private final YoFramePoint2d outerCenterOfPressure = new YoFramePoint2d("outerCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
    private double ratioFromMidToClosest;
-   private final YoGraphicPosition closestIntersectionVis = new YoGraphicPosition("closestIntersectionVis", closestIntersection, 0.003, YoAppearance.DarkRed(), GraphicType.BALL_WITH_ROTATED_CROSS);
-   private final YoGraphicPosition secondClosestIntersectionVis = new YoGraphicPosition("secondClosestIntersectionVis", secondClosestIntersection, 0.003, YoAppearance.DarkSlateBlue(), GraphicType.BALL_WITH_ROTATED_CROSS);
-   private final YoGraphicPosition innerCenterOfPressureVis = new YoGraphicPosition("innerCenterOfPressureVis", innerCenterOfPressure, 0.003, YoAppearance.DarkMagenta(), GraphicType.BALL_WITH_ROTATED_CROSS);
-   private final YoGraphicPosition outerCenterOfPressureVis = new YoGraphicPosition("outerCenterOfPressureVis", outerCenterOfPressure, 0.003, YoAppearance.DarkBlue(), GraphicType.BALL_WITH_ROTATED_CROSS);
    
    // Swing PD Controllers
    private final YoFrameVector kp_swing = new YoFrameVector("kp_swing_", ReferenceFrame.getWorldFrame(), registry);
@@ -211,7 +200,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    {
       super(QuadrupedControllerState.TROT_WALK);
       this.fullRobotModel = fullRobotModel;
-      this.footSwitches = footSwitches;
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
       this.dt = DT;
       this.yoTime = yoTime;
@@ -239,8 +227,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          YoFramePoint footPosition = new YoFramePoint("footPosition" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry);
-         YoGraphicPosition footPositionVis = new YoGraphicPosition("footPosition" + robotQuadrant.getPascalCaseName() + "Vis", footPosition, 0.02, YoAppearance.Color(robotQuadrant.getColor()), GraphicType.BALL_WITH_CROSS);
-         yoGraphicsListRegistry.registerArtifact("footPositions", footPositionVis.createArtifact());
          footPositions.set(robotQuadrant, footPosition);
          footVelocities.set(robotQuadrant, new YoFrameVector("footVelocity" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
       }
@@ -263,46 +249,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       desiredBodyTwist = new YoTwist("desiredBodyTwist", referenceFrames.getBodyFrame(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), registry);
       bodyTwist = new YoTwist("bodyTwist", referenceFrames.getBodyFrame(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), registry);
       
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
-      {
-         forceDistributionYoGraphicVectors.set(robotQuadrant, new YoGraphicVector("vmcFootForce" + robotQuadrant.getPascalCaseName(), footPositions.get(robotQuadrant),
-                                                                                  vmcFootForces.get(robotQuadrant), 0.007, YoAppearance.Yellow(), true, 0.01));
-         yoGraphicsListRegistry.registerYoGraphic("trotWalk", forceDistributionYoGraphicVectors.get(robotQuadrant));
-      }
-      
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         basisForceYoGraphicVectors.set(robotQuadrant, new YoGraphicVector[4]);
-         
-         for (int i = 0; i < 4; i++)
-         {
-            basisForceYoGraphicVectors.get(robotQuadrant)[i] = new YoGraphicVector("basisForceYoGraphicVectors" + robotQuadrant.getPascalCaseName() + i,
-                                                                                    footPositions.get(robotQuadrant),
-                                                                                    basisForceVectors.get(robotQuadrant)[i], 0.007, YoAppearance.Red(), true, 0.01);
-            yoGraphicsListRegistry.registerYoGraphic("trotWalk", basisForceYoGraphicVectors.get(robotQuadrant)[i]);
-         }
-      }
-      
-      yoGraphicsListRegistry.registerArtifact("icpVis", new YoArtifactPosition("icpVis", icp.getYoX(), icp.getYoY(), GraphicType.SQUARE, YoAppearance.DarkSlateBlue().getAwtColor(), 0.01));
-      yoGraphicsListRegistry.registerArtifact("desiredICPVis", desiredICPVis.createArtifact());
-      yoGraphicsListRegistry.registerArtifact("centerOfMassVis", centerOfMassVis.createArtifact());
-      yoGraphicsListRegistry.registerArtifact("centroidVis", centroidVis.createArtifact());
-      yoGraphicsListRegistry.registerArtifact("centerOfPressureVis", centerOfPressureVis.createArtifact());
-      yoGraphicsListRegistry.registerArtifact("desiredCenterOfPressureVis", desiredCenterOfPressureVis.createArtifact());
-      yoGraphicsListRegistry.registerArtifact("snappedDesiredCenterOfPressureVis", snappedDesiredCenterOfPressureVis.createArtifact());
-      yoGraphicsListRegistry.registerArtifact("icpTrajectory", new YoArtifactLine("icpTrajectory", icpTrajectory.getInitialPosition(), icpTrajectory.getFinalPosition(), Color.BLUE));
-      yoGraphicsListRegistry.registerArtifact("trotWalkPolygons", new YoArtifactPolygon("previousYoArtifactPolygon", previousYoFrameConvexPolygon2d, Color.GRAY, false, 3));
-      yoGraphicsListRegistry.registerArtifact("trotWalkPolygons", new YoArtifactPolygon("currentYoArtifactPolygon", currentYoFrameConvexPolygon2d, Color.BLUE, false, 2));
-      yoGraphicsListRegistry.registerArtifact("trotWalkPolygons", new YoArtifactPolygon("nextYoArtifactPolygon", nextYoFrameConvexPolygon2d, new Color(0, 100, 0), false, 1));
-      yoGraphicsListRegistry.registerArtifact("trotGeometry", new YoArtifactLineSegment2d("midPointOfIntersectionsToClosestIntersection", midPointOfIntersections, closestIntersection, Color.GREEN));
-      yoGraphicsListRegistry.registerArtifact("trotGeometry", closestIntersectionVis.createArtifact());
-      yoGraphicsListRegistry.registerArtifact("trotGeometry", secondClosestIntersectionVis.createArtifact());
-      yoGraphicsListRegistry.registerArtifact("trotGeometry", innerCenterOfPressureVis.createArtifact());
-      yoGraphicsListRegistry.registerArtifact("trotGeometry", outerCenterOfPressureVis.createArtifact());
-      yoGraphicsListRegistry.registerArtifact("trotGeometry", new YoArtifactLineSegment2d("innerToOuterCenterOfPressure", innerCenterOfPressure, outerCenterOfPressure, Color.BLUE));
-      yoGraphicsListRegistry.registerYoGraphic("bodyPose", new YoGraphicPosition("stancePoseHigherForVis", stancePoseHigherForVis, 0.03, YoAppearance.Blue()));
-      yoGraphicsListRegistry.registerYoGraphic("bodyPose", new YoGraphicPosition("desiredStancePoseHigherForVis", desiredStancePoseHigherForVis, 0.03, YoAppearance.Green()));
-      
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          swingZTrajectories.set(robotQuadrant, new YoPolynomial("swingZTrajectory" + robotQuadrant.getPascalCaseName(), 4, registry));
@@ -311,6 +257,39 @@ public class QuadrupedTrotWalkController extends QuadrupedController
          swingDurations.set(robotQuadrant, new DoubleYoVariable("swingDurations" + robotQuadrant.getPascalCaseName(), registry));
          desiredFootPositions.set(robotQuadrant, new YoFramePoint("desiredFootPosition" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
          desiredFootVelocities.set(robotQuadrant, new YoFrameVector("desiredFootVelocity" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
+      }
+      
+      if (CREATE_VISUALIZATIONS)
+      {
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            yoGraphicsListRegistry.registerYoGraphic(getName() + "FootForces", new YoGraphicVector("vmcFootForce" + robotQuadrant.getPascalCaseName(), footPositions.get(robotQuadrant), vmcFootForces.get(robotQuadrant), 0.007, YoAppearance.Yellow(), true, 0.01));
+            yoGraphicsListRegistry.registerArtifact(getName() + "FootPositions", new YoArtifactPosition("footPosition" + robotQuadrant.getPascalCaseName() + "Vis", footPositions.get(robotQuadrant).getYoX(), footPositions.get(robotQuadrant).getYoY(), GraphicType.BALL_WITH_CROSS, YoAppearance.Color(robotQuadrant.getColor()).getAwtColor(), 0.02));
+            
+            for (int i = 0; i < 4; i++)
+            {
+               yoGraphicsListRegistry.registerYoGraphic(getName() + "BasisVectors", new YoGraphicVector("basisForceYoGraphicVectors" + robotQuadrant.getPascalCaseName() + i, footPositions.get(robotQuadrant), basisForceVectors.get(robotQuadrant)[i], 0.007, YoAppearance.Red(), true, 0.01));
+            }
+         }
+         yoGraphicsListRegistry.registerArtifact(getName() + "IcpVis", new YoArtifactPosition("icpVis", icp.getYoX(), icp.getYoY(), GraphicType.SQUARE, YoAppearance.DarkSlateBlue().getAwtColor(), 0.01));
+         yoGraphicsListRegistry.registerArtifact(getName() + "DesiredICPVis", new YoArtifactPosition("desiredICPVis", desiredICP.getYoX(), desiredICP.getYoY(), GraphicType.SQUARE, YoAppearance.Green().getAwtColor(), 0.01));
+         yoGraphicsListRegistry.registerArtifact(getName() + "CenterOfMassVis", new YoArtifactPosition("centerOfMassVis", centerOfMass.getYoX(), centerOfMass.getYoY(), GraphicType.BALL_WITH_CROSS, YoAppearance.Black().getAwtColor(), 0.02));
+         yoGraphicsListRegistry.registerArtifact(getName() + "CentroidVis", new YoArtifactPosition("centroidVis", centroid.getYoX(), centroid.getYoY(), GraphicType.CROSS, YoAppearance.Black().getAwtColor(), 0.01));
+         yoGraphicsListRegistry.registerArtifact(getName() + "CenterOfPressureVis", new YoArtifactPosition("centerOfPressureVis", centerOfPressure.getYoX(), centerOfPressure.getYoY(), GraphicType.BALL_WITH_ROTATED_CROSS, YoAppearance.Lime().getAwtColor(), 0.01));
+         yoGraphicsListRegistry.registerArtifact(getName() + "DesiredCenterOfPressureVis", new YoArtifactPosition("desiredCenterOfPressureVis", desiredCenterOfPressure.getYoX(), desiredCenterOfPressure.getYoY(), GraphicType.BALL_WITH_ROTATED_CROSS, YoAppearance.DarkSlateBlue().getAwtColor(), 0.01));
+         yoGraphicsListRegistry.registerArtifact(getName() + "SnappedDesiredCenterOfPressureVis", new YoArtifactPosition("snappedDesiredCenterOfPressureVis", snappedDesiredCenterOfPressure.getYoX(), snappedDesiredCenterOfPressure.getYoY(), GraphicType.BALL_WITH_ROTATED_CROSS, YoAppearance.Red().getAwtColor(), 0.02));
+         yoGraphicsListRegistry.registerArtifact(getName() + "IcpTrajectory", new YoArtifactLine("icpTrajectory", icpTrajectory.getInitialPosition(), icpTrajectory.getFinalPosition(), Color.BLUE));
+         yoGraphicsListRegistry.registerArtifact(getName() + "TrotWalkPolygons", new YoArtifactPolygon("previousYoArtifactPolygon", previousYoFrameConvexPolygon2d, Color.GRAY, false, 3));
+         yoGraphicsListRegistry.registerArtifact(getName() + "TrotWalkPolygons", new YoArtifactPolygon("currentYoArtifactPolygon", currentYoFrameConvexPolygon2d, Color.BLUE, false, 2));
+         yoGraphicsListRegistry.registerArtifact(getName() + "TrotWalkPolygons", new YoArtifactPolygon("nextYoArtifactPolygon", nextYoFrameConvexPolygon2d, new Color(0, 100, 0), false, 1));
+         yoGraphicsListRegistry.registerArtifact(getName() + "TrotGeometry", new YoArtifactLineSegment2d("midPointOfIntersectionsToClosestIntersection", midPointOfIntersections, closestIntersection, Color.GREEN));
+         yoGraphicsListRegistry.registerArtifact(getName() + "TrotGeometry", new YoArtifactPosition("closestIntersectionVis", closestIntersection.getYoX(), closestIntersection.getYoY(), GraphicType.BALL_WITH_ROTATED_CROSS, YoAppearance.DarkRed().getAwtColor(), 0.003));
+         yoGraphicsListRegistry.registerArtifact(getName() + "TrotGeometry", new YoArtifactPosition("secondClosestIntersectionVis", secondClosestIntersection.getYoX(), secondClosestIntersection.getYoY(), GraphicType.BALL_WITH_ROTATED_CROSS, YoAppearance.DarkSlateBlue().getAwtColor(), 0.003));
+         yoGraphicsListRegistry.registerArtifact(getName() + "TrotGeometry", new YoArtifactPosition("innerCenterOfPressureVis", innerCenterOfPressure.getYoX(), innerCenterOfPressure.getYoY(), GraphicType.BALL_WITH_ROTATED_CROSS, YoAppearance.DarkMagenta().getAwtColor(), 0.003));
+         yoGraphicsListRegistry.registerArtifact(getName() + "TrotGeometry", new YoArtifactPosition("outerCenterOfPressureVis", outerCenterOfPressure.getYoX(), outerCenterOfPressure.getYoY(), GraphicType.BALL_WITH_ROTATED_CROSS, YoAppearance.DarkBlue().getAwtColor(), 0.003));
+         yoGraphicsListRegistry.registerArtifact(getName() + "TrotGeometry", new YoArtifactLineSegment2d("innerToOuterCenterOfPressure", innerCenterOfPressure, outerCenterOfPressure, Color.BLUE));
+         yoGraphicsListRegistry.registerYoGraphic(getName() + "BodyPose", new YoGraphicPosition("stancePoseHigherForVis", stancePoseHigherForVis, 0.03, YoAppearance.Blue()));
+         yoGraphicsListRegistry.registerYoGraphic(getName() + "BodyPose", new YoGraphicPosition("desiredStancePoseHigherForVis", desiredStancePoseHigherForVis, 0.03, YoAppearance.Green()));
       }
       
       parentRegistry.addChild(registry);
@@ -401,8 +380,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    {
       initializeInheritedVariables();
       updateEstimates();
-
-      computeFeetContactState();
       
       checkGaitTransitionConditions();
       
@@ -531,21 +508,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       {
          gaitCompleted.set(true);
          currentGaitCompletion.set(currentGaitCompletion.getDoubleValue() % 1.0);
-      }
-   }
-
-   private void computeFeetContactState()
-   {
-      if (footSwitches != null)
-      {
-         numberOfFeetInContact.set(0);
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         {
-            if (footSwitches.get(robotQuadrant).hasFootHitGround())
-            {
-               numberOfFeetInContact.increment();
-            }
-         }
       }
    }
    
