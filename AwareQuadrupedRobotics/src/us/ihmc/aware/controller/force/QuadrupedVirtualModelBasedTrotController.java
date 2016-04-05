@@ -1,7 +1,9 @@
 package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.aware.config.DynamicDoubleArrayProperty;
+import us.ihmc.aware.config.DynamicDoubleProperty;
+import us.ihmc.aware.config.DynamicPropertyRegistry;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
 import us.ihmc.aware.controller.force.taskSpaceController.*;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
@@ -30,7 +32,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceController
@@ -47,28 +48,51 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    // parameters
    private final ParameterMap params;
    private final static String JOINT_DAMPING = "jointDamping";
+   private final DynamicDoubleProperty jointDampingProperty;
    private final static String BODY_ORIENTATION_PROPORTIONAL_GAINS = "bodyOrientationProportionalGains";
+   private final DynamicDoubleArrayProperty bodyOrientationProportionalGainsProperty;
    private final static String BODY_ORIENTATION_DERIVATIVE_GAINS = "bodyOrientationDerivativeGains";
+   private final DynamicDoubleArrayProperty bodyOrientationDerivativeGainsProperty;
    private final static String BODY_ORIENTATION_INTEGRAL_GAINS = "bodyOrientationIntegralGains";
+   private final DynamicDoubleArrayProperty bodyOrientationIntegralGainsProperty;
    private final static String BODY_ORIENTATION_MAX_INTEGRAL_ERROR = "bodyOrientationMaxIntegralError";
+   private final DynamicDoubleProperty bodyOrientationMaxIntegralErrorProperty;
    private final static String DCM_POSITION_PROPORTIONAL_GAINS = "dcmPositionProportionalGains";
+   private final DynamicDoubleArrayProperty dcmPositionProportionalGainsProperty;
    private final static String DCM_POSITION_DERIVATIVE_GAINS = "dcmPositionDerivativeGains";
+   private final DynamicDoubleArrayProperty dcmPositionDerivativeGainsProperty;
    private final static String DCM_POSITION_INTEGRAL_GAINS = "dcmPositionIntegralGains";
+   private final DynamicDoubleArrayProperty dcmPositionIntegralGainsProperty;
    private final static String DCM_POSITION_MAX_INTEGRAL_ERROR = "dcmPositionMaxIntegralError";
+   private final DynamicDoubleProperty dcmPositionMaxIntegralErrorProperty;
    private final static String COM_POSITION_PROPORTIONAL_GAINS = "comPositionProportionalGains";
+   private final DynamicDoubleArrayProperty comPositionProportionalGainsProperty;
    private final static String COM_POSITION_DERIVATIVE_GAINS = "comPositionDerivativeGains";
+   private final DynamicDoubleArrayProperty comPositionDerivativeGainsProperty;
    private final static String COM_POSITION_INTEGRAL_GAINS = "comPositionIntegralGains";
+   private final DynamicDoubleArrayProperty comPositionIntegralGainsProperty;
    private final static String COM_POSITION_MAX_INTEGRAL_ERROR = "comPositionMaxIntegralError";
+   private final DynamicDoubleProperty comPositionMaxIntegralErrorProperty;
    private final static String SWING_POSITION_PROPORTIONAL_GAINS = "swingPositionProportionalGains";
+   private final DynamicDoubleArrayProperty swingPositionProportionalGainsProperty;
    private final static String SWING_POSITION_DERIVATIVE_GAINS = "swingPositionDerivativeGains";
+   private final DynamicDoubleArrayProperty swingPositionDerivativeGainsProperty;
    private final static String SWING_POSITION_INTEGRAL_GAINS = "swingPositionIntegralGains";
+   private final DynamicDoubleArrayProperty swingPositionIntegralGainsProperty;
    private final static String SWING_POSITION_MAX_INTEGRAL_ERROR = "swingPositionMaxIntegralError";
+   private final DynamicDoubleProperty swingPositionMaxIntegralErrorProperty;
    private final static String SWING_TRAJECTORY_GROUND_CLEARANCE = "swingTrajectoryGroundClearance";
+   private final DynamicDoubleProperty swingTrajectoryGroundClearanceProperty;
    private final static String QUAD_SUPPORT_DURATION = "quadSupportDuration";
+   private final DynamicDoubleProperty quadSupportDurationProperty;
    private final static String DOUBLE_SUPPORT_DURATION = "doubleSupportDuration";
+   private final DynamicDoubleProperty doubleSupportDurationProperty;
    private final static String STANCE_WIDTH_NOMINAL = "stanceWidthNominal";
+   private final DynamicDoubleProperty stanceWidthNominalProperty;
    private final static String STANCE_LENGTH_NOMINAL = "stanceLengthNominal";
+   private final DynamicDoubleProperty stanceLengthNominalProperty;
    private final static String NO_CONTACT_PRESSURE_LIMIT = "noContactPressureLimit";
+   private final DynamicDoubleProperty noContactPressureLimitProperty;
 
    // frames
    private final PoseReferenceFrame supportFrame;
@@ -124,6 +148,32 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       this.inputProvider = inputProvider;
       this.taskSpaceEstimator = taskSpaceEstimator;
       this.taskSpaceController = taskSpaceController;
+
+      DynamicPropertyRegistry propertyRegistry = new DynamicPropertyRegistry();
+      this.jointDampingProperty = new DynamicDoubleProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.jointDamping", 0);
+      this.bodyOrientationProportionalGainsProperty = new DynamicDoubleArrayProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.bodyOrientationProportionalGainsProperty", 0, 0, 0);
+      this.bodyOrientationDerivativeGainsProperty = new DynamicDoubleArrayProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.bodyOrientationDerivativeGainsProperty", 0, 0, 0);
+      this.bodyOrientationIntegralGainsProperty = new DynamicDoubleArrayProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.bodyOrientationIntegralGainsProperty", 0, 0, 0);
+      this.bodyOrientationMaxIntegralErrorProperty = new DynamicDoubleProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.bodyOrientationMaxIntegralErrorProperty", 0);
+      this.dcmPositionProportionalGainsProperty = new DynamicDoubleArrayProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.dcmPositionProportionalGainsProperty", 0);
+      this.dcmPositionDerivativeGainsProperty = new DynamicDoubleArrayProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.dcmPositionDerivativeGainsProperty", 0, 0, 0);
+      this.dcmPositionIntegralGainsProperty = new DynamicDoubleArrayProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.dcmPositionIntegralGainsProperty", 0, 0, 0);
+      this.dcmPositionMaxIntegralErrorProperty = new DynamicDoubleProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.dcmPositionMaxIntegralErrorProperty", 0);
+      this.comPositionProportionalGainsProperty = new DynamicDoubleArrayProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.comPositionProportionalGainsProperty", 0, 0, 0);
+      this.comPositionDerivativeGainsProperty = new DynamicDoubleArrayProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.comPositionDerivativeGainsProperty", 0, 0, 0);
+      this.comPositionIntegralGainsProperty = new DynamicDoubleArrayProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.comPositionIntegralGainsProperty", 0, 0, 0);
+      this.comPositionMaxIntegralErrorProperty = new DynamicDoubleProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.comPositionMaxIntegralError", 0);
+      this.swingPositionProportionalGainsProperty = new DynamicDoubleArrayProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.swingPositionProportionalGains", 0, 0, 0);
+      this.swingPositionDerivativeGainsProperty = new DynamicDoubleArrayProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.swingPositionDerivativeGains", 0, 0, 0);
+      this.swingPositionIntegralGainsProperty = new DynamicDoubleArrayProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.swingPositionIntegralGains", 0, 0, 0);
+      this.swingPositionMaxIntegralErrorProperty = new DynamicDoubleProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.swingPositionMaxIntegralError", 0);
+      this.swingTrajectoryGroundClearanceProperty = new DynamicDoubleProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.swingTrajectoryGroundClearance", 0);
+      this.quadSupportDurationProperty = new DynamicDoubleProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.quadSupportDuration", 0);
+      this.doubleSupportDurationProperty = new DynamicDoubleProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.doubleSupportDuration", 0);
+      this.stanceWidthNominalProperty = new DynamicDoubleProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.stanceWidthNominal", 0);
+      this.stanceLengthNominalProperty = new DynamicDoubleProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.stanceLengthNominal", 0);
+      this.noContactPressureLimitProperty = new DynamicDoubleProperty(propertyRegistry, "QuadrupedVirtualModelBasedTrotController.noContactPressureLimit", 0);
+      propertyRegistry.save();
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedTrotController.class);
