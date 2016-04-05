@@ -1,4 +1,4 @@
-package us.ihmc.aware.config;
+package us.ihmc.aware.params;
 
 import java.util.ArrayList;
 import java.util.List;

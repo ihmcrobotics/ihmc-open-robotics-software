@@ -1,4 +1,4 @@
-package us.ihmc.aware.config;
+package us.ihmc.aware.params;
 
 public class DoubleParameter extends Parameter
 {

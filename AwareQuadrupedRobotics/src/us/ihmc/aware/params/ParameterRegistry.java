@@ -1,4 +1,4 @@
-package us.ihmc.aware.config;
+package us.ihmc.aware.params;
 
 import java.io.BufferedReader;
 import java.io.IOException;

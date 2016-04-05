@@ -1,4 +1,4 @@
-package us.ihmc.aware.config;
+package us.ihmc.aware.params;
 
 import com.google.common.primitives.Doubles;
 import org.apache.commons.lang3.StringUtils;

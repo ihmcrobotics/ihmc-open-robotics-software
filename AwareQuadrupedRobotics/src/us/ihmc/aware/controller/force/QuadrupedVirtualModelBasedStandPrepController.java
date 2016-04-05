@@ -1,12 +1,10 @@
 package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.aware.config.DoubleArrayParameter;
-import us.ihmc.aware.config.DoubleParameter;
-import us.ihmc.aware.config.ParameterFactory;
+import us.ihmc.aware.params.DoubleArrayParameter;
+import us.ihmc.aware.params.DoubleParameter;
+import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
-import us.ihmc.aware.params.ParameterMap;
-import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.planning.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelControllerSettings;

@@ -1,9 +1,9 @@
 package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.aware.config.DoubleArrayParameter;
-import us.ihmc.aware.config.DoubleParameter;
-import us.ihmc.aware.config.ParameterFactory;
+import us.ihmc.aware.params.DoubleArrayParameter;
+import us.ihmc.aware.params.DoubleParameter;
+import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
 import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceCommands;
 import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceController;
@@ -12,7 +12,6 @@ import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceEsti
 import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceEstimator;
 import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceSetpoints;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
-import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.planning.PiecewiseCopPlanner;
 import us.ihmc.aware.planning.PiecewiseReverseDcmTrajectory;
 import us.ihmc.aware.planning.ThreeDoFSwingFootTrajectory;

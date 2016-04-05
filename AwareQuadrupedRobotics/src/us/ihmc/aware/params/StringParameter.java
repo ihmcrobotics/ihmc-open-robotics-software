@@ -1,21 +1,21 @@
-package us.ihmc.aware.config;
+package us.ihmc.aware.params;
 
-public class BooleanParameter extends Parameter
+public class StringParameter extends Parameter
 {
-   private boolean value;
+   private String value;
 
-   BooleanParameter(String path, boolean defaultValue)
+   StringParameter(String path, String defaultValue)
    {
       super(path);
       this.value = defaultValue;
    }
 
-   public boolean get()
+   public String get()
    {
       return value;
    }
 
-   public void set(boolean value)
+   public void set(String value)
    {
       this.value = value;
       notifyChangedListeners();
@@ -24,14 +24,14 @@ public class BooleanParameter extends Parameter
    @Override
    public boolean tryLoadValue(String value)
    {
-      this.value = Boolean.parseBoolean(value);
+      this.value = value;
       return true;
    }
 
    @Override
    protected String dumpValue()
    {
-      return Boolean.toString(value);
+      return value;
    }
 }
 
