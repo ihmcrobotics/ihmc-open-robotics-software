@@ -4,7 +4,7 @@ public class DynamicDoubleArrayProperty extends DynamicProperty
 {
    private double[] value;
 
-   public DynamicDoubleArrayProperty(DynamicPropertyRegistry registry, String path, double[] defaultValue)
+   public DynamicDoubleArrayProperty(DynamicPropertyRegistry registry, String path, double... defaultValue)
    {
       super(registry, path);
       this.value = defaultValue;
