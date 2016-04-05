@@ -15,6 +15,7 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
+import org.pitest.mutationtest.commandline.MutationCoverageReport;
 
 import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
 import us.ihmc.robotics.random.RandomTools;
@@ -688,5 +689,10 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
    {
       expected.checkReferenceFrameMatch(actual);
       JUnitTools.assertTuple3dEquals(expected.getPoint(), actual.getPoint(), delta);
+   }
+   
+   public static void main(String[] args)
+   {
+      MutationCoverageReport.main(new String[] {"--reportDir", "pitest", "--targetClasses", "us.ihmc.robotics.geometry.FramePoint", "--targetTests", "us.ihmc.robotics.geometry.FramePointTest", "--sourceDirs", "src,test"});
    }
 }
