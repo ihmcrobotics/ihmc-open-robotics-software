@@ -263,7 +263,7 @@ public class FourBarCalculatorWithDerivativesTest
 	@Test(timeout = 300000)
    public void testAccelerationsWithRandomQuadrilateral()
    {
-      double eps = 1.0e-6;
+      double eps = 1.0e-5;
       Random random = new Random(1984L);
       double AD, BA, CB, DC;
       FourBarCalculatorWithDerivatives fourBar;
