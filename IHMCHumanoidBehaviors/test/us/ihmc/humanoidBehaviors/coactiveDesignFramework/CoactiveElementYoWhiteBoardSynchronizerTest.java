@@ -52,6 +52,16 @@ public class CoactiveElementYoWhiteBoardSynchronizerTest
 
       userInterfaceSideWhiteBoard.connect();
       machineSideWhiteBoard.connect();
+      
+      while(!userInterfaceSideWhiteBoard.isConnected())
+      {
+         Thread.yield();
+      }
+      
+      while(!machineSideWhiteBoard.isConnected())
+      {
+         Thread.yield();
+      }
 
       boolean buttonWasClickedAtLeastOnce = false;
       int numberOfTicksToTest = 100;
