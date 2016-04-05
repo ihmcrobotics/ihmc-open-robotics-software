@@ -1,8 +1,8 @@
 package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
+import us.ihmc.aware.controller.common.GroundPlaneEstimator;
 import us.ihmc.aware.controller.force.taskSpaceController.*;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMap;
@@ -16,33 +16,26 @@ import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineState;
 import us.ihmc.aware.util.ContactState;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceController
 {
    private final SDFFullRobotModel fullRobotModel;
    private final DoubleYoVariable robotTimestamp;
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
-   private final QuadrupedJointNameMap jointNameMap;
    private final double controlDT;
    private final double gravity;
    private final double mass;
    private final QuadrupedControllerInputProviderInterface inputProvider;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    // parameters
    private final ParameterMap params;
@@ -71,13 +64,8 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    private final static String NO_CONTACT_PRESSURE_LIMIT = "noContactPressureLimit";
 
    // frames
-   private final PoseReferenceFrame supportFrame;
+   private final ReferenceFrame supportFrame;
    private final ReferenceFrame worldFrame;
-
-   // support
-   QuadrupedSupportPolygon supportPolygon;
-   FramePoint supportCentroid;
-   FrameOrientation supportOrientation;
 
    // dcm controller
    private final FramePoint dcmPositionEstimate;
@@ -93,10 +81,12 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    private final QuadrupedTaskSpaceController taskSpaceController;
    private final QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings;
 
-   // trajectories
+   // planning
    private double bodyYawSetpoint;
+   private final GroundPlaneEstimator groundPlaneEstimator;
    private final PiecewisePeriodicDcmTrajectory nominalPeriodicDcmTrajectory;
    private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
+   private final double[] timeAtSoS;
 
    // state machine
    public enum TrotState
@@ -109,21 +99,15 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    }
    private final StateMachine<TrotState, TrotEvent> trotStateMachine;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   public QuadrupedVirtualModelBasedPaceController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters robotParameters,
-         ParameterMapRepository parameterMapRepository, QuadrupedControllerInputProviderInterface inputProvider, QuadrupedReferenceFrames referenceFrames, QuadrupedTaskSpaceEstimator taskSpaceEstimator, QuadrupedTaskSpaceController taskSpaceController)
+   public QuadrupedVirtualModelBasedPaceController(QuadrupedRuntimeEnvironment runtimeEnvironment, ParameterMapRepository parameterMapRepository,
+         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedForceControllerContext controllerContext)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
-      this.yoGraphicsListRegistry = runtimeEnvironment.getGraphicsListRegistry();
-      this.jointNameMap = robotParameters.getJointMap();
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
       this.mass = fullRobotModel.getTotalMass();
       this.inputProvider = inputProvider;
-      this.taskSpaceEstimator = taskSpaceEstimator;
-      this.taskSpaceController = taskSpaceController;
 
       // parameters
       this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedPaceController.class);
@@ -144,46 +128,41 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 500, 500, 500);
       params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
       params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.1);
+      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.10);
       params.setDefault(QUAD_SUPPORT_DURATION, 1.00);
-      params.setDefault(DOUBLE_SUPPORT_DURATION, 0.4);
+      params.setDefault(DOUBLE_SUPPORT_DURATION, 0.33);
       params.setDefault(STANCE_WIDTH_NOMINAL, 0.25);
       params.setDefault(STANCE_LENGTH_NOMINAL, 1.1);
       params.setDefault(NO_CONTACT_PRESSURE_LIMIT, 75);
 
       // frames
-      ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
-      supportFrame = new PoseReferenceFrame("SupportFrame", ReferenceFrame.getWorldFrame());
+      QuadrupedReferenceFrames referenceFrames = controllerContext.getReferenceFrames();
+      supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       worldFrame = ReferenceFrame.getWorldFrame();
-
-      // support
-      supportPolygon = new QuadrupedSupportPolygon();
-      supportCentroid = new FramePoint();
-      supportOrientation = new FrameOrientation();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         supportPolygon.setFootstep(robotQuadrant, new FramePoint());
-      }
 
       // dcm controller
       dcmPositionEstimate = new FramePoint();
       dcmPositionSetpoint = new FramePoint();
       dcmVelocitySetpoint = new FrameVector();
-      dcmPositionController = new DivergentComponentOfMotionController("dcmPosition", comFrame, controlDT, mass, gravity, inputProvider.getComPositionInput().getZ(), registry);
+      dcmPositionController = controllerContext.getDcmPositionController();
 
       // task space controllers
       taskSpaceCommands = new QuadrupedTaskSpaceCommands();
       taskSpaceSetpoints = new QuadrupedTaskSpaceSetpoints();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
+      taskSpaceEstimator = controllerContext.getTaskSpaceEstimator();
+      taskSpaceController = controllerContext.getTaskSpaceController();
 
-      // trajectories
+      // planning
+      groundPlaneEstimator = new GroundPlaneEstimator();
       swingFootTrajectory = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          swingFootTrajectory.set(robotQuadrant, new ThreeDoFSwingFootTrajectory());
       }
       nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(2, gravity, inputProvider.getComPositionInput().getZ(), null);
+      timeAtSoS = new double[2];
 
       // state machine
       StateMachineBuilder<TrotState, TrotEvent> stateMachineBuilder = new StateMachineBuilder<>(TrotState.class, "TrotState", registry);
@@ -215,25 +194,6 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       dcmPositionEstimate.set(taskSpaceEstimates.getComVelocity());
       dcmPositionEstimate.scale(1.0 / dcmPositionController.getNaturalFrequency());
       dcmPositionEstimate.add(taskSpaceEstimates.getComPosition());
-
-      // compute support frame
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         taskSpaceEstimates.getSolePosition().get(robotQuadrant).changeFrame(supportPolygon.getReferenceFrame());
-         supportPolygon.setFootstep(robotQuadrant, taskSpaceEstimates.getSolePosition().get(robotQuadrant));
-         taskSpaceEstimates.getSolePosition().get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-      }
-      double minFrontFootHeight = Math.min(taskSpaceEstimates.getSolePosition().get(RobotQuadrant.FRONT_LEFT).getZ(), taskSpaceEstimates.getSolePosition().get(RobotQuadrant.FRONT_RIGHT).getZ());
-      double minHindFootHeight = Math.min(taskSpaceEstimates.getSolePosition().get(RobotQuadrant.HIND_LEFT).getZ(), taskSpaceEstimates.getSolePosition().get(RobotQuadrant.HIND_RIGHT).getZ());
-
-      // compute support frame (centroid and nominal orientation)
-      supportCentroid.changeFrame(supportPolygon.getReferenceFrame());
-      supportPolygon.getCentroid(supportCentroid);
-      supportCentroid.changeFrame(ReferenceFrame.getWorldFrame());
-      supportCentroid.setZ((minFrontFootHeight + minHindFootHeight) / 2.0);
-      supportOrientation.changeFrame(supportPolygon.getReferenceFrame());
-      supportOrientation.setYawPitchRoll(supportPolygon.getNominalYaw(), 0.0, 0.0);
-      supportFrame.setPoseAndUpdate(supportCentroid, supportOrientation);
    }
 
    private void updateSetpoints()
@@ -258,7 +218,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       }
       taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
       taskSpaceSetpoints.getBodyOrientation().setYawPitchRoll(bodyYawSetpoint,
-            RotationTools.computePitch(inputProvider.getBodyOrientationInput()) + supportPolygon.getNominalPitch(),
+            RotationTools.computePitch(inputProvider.getBodyOrientationInput()) + groundPlaneEstimator.getPitch(bodyYawSetpoint),
                   RotationTools.computeRoll(inputProvider.getBodyOrientationInput()));
       taskSpaceSetpoints.getBodyAngularVelocity().setToZero();
       taskSpaceSetpoints.getComTorqueFeedforward().setToZero();
@@ -270,7 +230,6 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
 
    @Override public QuadrupedForceControllerEvent process()
    {
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       updateEstimates();
       updateSetpoints();
       return null;
@@ -279,6 +238,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    @Override public void onEntry()
    {
       // initialize dcm controller
+      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       dcmPositionController.setGains(
             params.getVolatileArray(DCM_POSITION_PROPORTIONAL_GAINS),
             params.getVolatileArray(DCM_POSITION_DERIVATIVE_GAINS),
@@ -290,6 +250,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       taskSpaceEstimator.compute(taskSpaceEstimates);
       taskSpaceSetpoints.initialize(taskSpaceEstimates);
       taskSpaceControllerSettings.initialize();
+      taskSpaceControllerSettings.setJointDamping(params.get(JOINT_DAMPING));
       taskSpaceControllerSettings.setComForceCommandWeights(1.0, 1.0, 1.0);
       taskSpaceControllerSettings.setComTorqueCommandWeights(1.0, 1.0, 1.0);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -324,33 +285,33 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    {
    }
 
-   private void computeNominalCmpPositions(RobotQuadrant hindSupportQuadrant, RobotQuadrant frontSupportQuadrant, FramePoint[] nominalCmpPositionAtSoS, FramePoint nominalCmpPositionAtEoS)
+   private void computeNominalCmpPositions(RobotQuadrant hindQuadrant, RobotQuadrant frontQuadrant, FramePoint[] nominalCmpPositionAtSoS, FramePoint nominalCmpPositionAtEoS)
    {
-      double bodyYaw, yStance, xStride, yStride, xOffset, yOffset;
+      double xStride = inputProvider.getPlanarVelocityInput().getX() * params.get(DOUBLE_SUPPORT_DURATION);
+      double yStride = inputProvider.getPlanarVelocityInput().getY() * params.get(DOUBLE_SUPPORT_DURATION) * 2;
+      double bodyYaw, yStance, xOffset, yOffset;
 
-      taskSpaceEstimates.getSolePosition(hindSupportQuadrant).changeFrame(worldFrame);
-      taskSpaceEstimates.getSolePosition(frontSupportQuadrant).changeFrame(worldFrame);
+      // cmp position
+      bodyYaw = bodyYawSetpoint;
+      taskSpaceEstimates.getSolePosition(hindQuadrant).changeFrame(worldFrame);
+      taskSpaceEstimates.getSolePosition(frontQuadrant).changeFrame(worldFrame);
       nominalCmpPositionAtSoS[0].setToZero(worldFrame);
-      nominalCmpPositionAtSoS[0].add(taskSpaceEstimates.getSolePosition(hindSupportQuadrant));
-      nominalCmpPositionAtSoS[0].add(taskSpaceEstimates.getSolePosition(frontSupportQuadrant));
+      nominalCmpPositionAtSoS[0].add(taskSpaceEstimates.getSolePosition(hindQuadrant));
+      nominalCmpPositionAtSoS[0].add(taskSpaceEstimates.getSolePosition(frontQuadrant));
       nominalCmpPositionAtSoS[0].scale(0.5);
 
-      taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
-      bodyYaw = taskSpaceSetpoints.getBodyOrientation().getYaw() + inputProvider.getPlanarVelocityInput().getZ() * params.get(DOUBLE_SUPPORT_DURATION);
-      yStance = hindSupportQuadrant.getSide().negateIfLeftSide(params.get(STANCE_WIDTH_NOMINAL));
-      xStride = inputProvider.getPlanarVelocityInput().getX() * params.get(DOUBLE_SUPPORT_DURATION);
-      yStride = inputProvider.getPlanarVelocityInput().getY() * params.get(DOUBLE_SUPPORT_DURATION) * 2;
+      // cmp position after 1 step
+      bodyYaw = bodyYaw + inputProvider.getPlanarVelocityInput().getZ() * params.get(DOUBLE_SUPPORT_DURATION);
+      yStance = hindQuadrant.getSide().negateIfLeftSide(params.get(STANCE_WIDTH_NOMINAL));
       xOffset =-Math.sin(bodyYaw) * yStance + Math.cos(bodyYaw) * xStride - Math.sin(bodyYaw) * yStride;
       yOffset = Math.cos(bodyYaw) * yStance + Math.sin(bodyYaw) * xStride + Math.cos(bodyYaw) * yStride;
       nominalCmpPositionAtSoS[1].setIncludingFrame(nominalCmpPositionAtSoS[0]);
       nominalCmpPositionAtSoS[1].changeFrame(worldFrame);
       nominalCmpPositionAtSoS[1].add(xOffset, yOffset, 0.0);
 
-      taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
-      bodyYaw = taskSpaceSetpoints.getBodyOrientation().getYaw() + inputProvider.getPlanarVelocityInput().getZ() * 2 * params.get(DOUBLE_SUPPORT_DURATION);
-      yStance = hindSupportQuadrant.getSide().negateIfRightSide(params.get(STANCE_WIDTH_NOMINAL));
-      xStride = inputProvider.getPlanarVelocityInput().getX() * params.get(DOUBLE_SUPPORT_DURATION);
-      yStride = inputProvider.getPlanarVelocityInput().getY() * params.get(DOUBLE_SUPPORT_DURATION) * 2;
+      // cmp position after 2 steps
+      bodyYaw = bodyYaw + inputProvider.getPlanarVelocityInput().getZ() * params.get(DOUBLE_SUPPORT_DURATION);
+      yStance = hindQuadrant.getSide().negateIfRightSide(params.get(STANCE_WIDTH_NOMINAL));
       xOffset =-Math.sin(bodyYaw) * yStance + Math.cos(bodyYaw) * xStride - Math.sin(bodyYaw) * yStride;
       yOffset = Math.cos(bodyYaw) * yStance + Math.sin(bodyYaw) * xStride + Math.cos(bodyYaw) * yStride;
       nominalCmpPositionAtEoS.setIncludingFrame(nominalCmpPositionAtSoS[1]);
@@ -358,86 +319,69 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       nominalCmpPositionAtEoS.add(xOffset, yOffset, 0.0);
    }
 
-   private void computeNominalPeriodicDcmTrajectory(FramePoint[] nominalCmpPositionAtSoS, double[] timeAtSoS, FramePoint nominalCmpPositionAtEoS, double timeAtEoS)
+   private void computeNominalDcmPositions(FramePoint[] nominalCmpPositionAtSoS, FramePoint nominalCmpPositionAtEoS, FramePoint[] nominalDcmPositionAtSoS, FramePoint nominalDcmPositionAtEoS)
    {
-      double relativeYawAtEoS = inputProvider.getPlanarVelocityInput().getZ() * timeAtEoS - timeAtSoS[0];
+      timeAtSoS[0] = 0;
+      timeAtSoS[1] = params.get(DOUBLE_SUPPORT_DURATION);
+      double timeAtEoS = params.get(DOUBLE_SUPPORT_DURATION) * 2;
+      double relativeYawAtEoS = 2 * inputProvider.getPlanarVelocityInput().getZ() * params.get(DOUBLE_SUPPORT_DURATION);
       nominalPeriodicDcmTrajectory.setComHeight(inputProvider.getComPositionInput().getZ());
       nominalPeriodicDcmTrajectory.initializeTrajectory(2, timeAtSoS, nominalCmpPositionAtSoS, timeAtEoS, nominalCmpPositionAtEoS, relativeYawAtEoS);
-   }
-
-   private void computeNominalDcmPositionAtSoS(int step, FramePoint[] nominalCmpPositionAtSoS, double[] timeAtSoS, FramePoint nominalCmpPositionAtEoS, double timeAtEoS, FramePoint nominalDcmPositionAtSoS)
-   {
-      computeNominalPeriodicDcmTrajectory(nominalCmpPositionAtSoS, timeAtSoS, nominalCmpPositionAtEoS, timeAtEoS);
-      nominalPeriodicDcmTrajectory.computeTrajectory(timeAtSoS[step]);
-      nominalPeriodicDcmTrajectory.getPosition(nominalDcmPositionAtSoS);
-   }
-
-   private void computeNominalDcmPositionAtEoS(FramePoint[] nominalCmpPositionAtSoS, double[] timeAtSoS, FramePoint nominalCmpPositionAtEoS, double timeAtEoS, FramePoint nominalDcmPositionAtEoS)
-   {
-      computeNominalPeriodicDcmTrajectory(nominalCmpPositionAtSoS, timeAtSoS, nominalCmpPositionAtEoS, timeAtEoS);
+      for (int i = 0; i < 2; i++)
+      {
+         nominalPeriodicDcmTrajectory.computeTrajectory(timeAtSoS[i]);
+         nominalPeriodicDcmTrajectory.getPosition(nominalDcmPositionAtSoS[i]);
+      }
       nominalPeriodicDcmTrajectory.computeTrajectory(timeAtEoS);
       nominalPeriodicDcmTrajectory.getPosition(nominalDcmPositionAtEoS);
    }
 
    private void computeFootholdPosition(RobotQuadrant robotQuadrant, FramePoint cmpPosition, double bodyYaw, FramePoint footholdPosition)
    {
-      double xOffset, yOffset;
-
       // compute foothold position based on the nominal stance and desired cmp
       taskSpaceEstimates.getSolePosition(robotQuadrant).changeFrame(worldFrame);
       double xStance = robotQuadrant.getEnd().negateIfHindEnd(params.get(STANCE_LENGTH_NOMINAL) / 2);
       double yStance = 0.0;
-      xOffset = Math.cos(bodyYaw) * xStance - Math.sin(bodyYaw) * yStance;
-      yOffset = Math.sin(bodyYaw) * xStance + Math.cos(bodyYaw) * yStance;
+      double xOffset = Math.cos(bodyYaw) * xStance - Math.sin(bodyYaw) * yStance;
+      double yOffset = Math.sin(bodyYaw) * xStance + Math.cos(bodyYaw) * yStance;
       footholdPosition.setIncludingFrame(cmpPosition);
       footholdPosition.changeFrame(worldFrame);
       footholdPosition.add(xOffset, yOffset, 0.0);
-
-      // compute foothold height based on estimated ground slope
-      taskSpaceEstimates.getSolePosition(robotQuadrant).changeFrame(worldFrame);
-      double xStride = footholdPosition.getX() - taskSpaceEstimates.getSolePosition(robotQuadrant).getX();
-      double yStride = footholdPosition.getY() - taskSpaceEstimates.getSolePosition(robotQuadrant).getY();
-      xOffset = Math.cos(-bodyYaw) * xStride - Math.sin(-bodyYaw) * yStride;
-      yOffset = Math.sin(-bodyYaw) * xStride + Math.cos(-bodyYaw) * yStride;
-      footholdPosition.setZ(taskSpaceEstimates.getSolePosition(robotQuadrant).getZ());
-      footholdPosition.add(0, 0, -xOffset * Math.tan(supportPolygon.getNominalPitch()));
-      footholdPosition.add(0, 0, yOffset * Math.tan(supportPolygon.getNominalRoll()));
+      groundPlaneEstimator.projectZ(footholdPosition);
    }
 
    private class QuadSupportState implements StateMachineState<TrotEvent>
    {
       private double initialTime;
       private final ThreeDoFMinimumJerkTrajectory dcmTrajectory;
-      private final double[] timeAtSoS;
-      private double timeAtEoS;
       private final FramePoint[] cmpPositionAtSoSNominal;
       private final FramePoint cmpPositionAtEoSNominal;
-      private final FramePoint dcmPositionAtSoSNominal;
+      private final FramePoint[] dcmPositionAtSoSNominal;
+      private final FramePoint dcmPositionAtEoSNominal;
 
       public QuadSupportState()
       {
          initialTime = 0.0;
          dcmTrajectory = new ThreeDoFMinimumJerkTrajectory();
-         timeAtSoS = new double[] {0.0, 0.0};
-         timeAtEoS = 0.0;
          cmpPositionAtSoSNominal = new FramePoint[] {new FramePoint(), new FramePoint()};
          cmpPositionAtEoSNominal = new FramePoint();
-         dcmPositionAtSoSNominal = new FramePoint();
+         dcmPositionAtSoSNominal = new FramePoint[] {new FramePoint(), new FramePoint()};
+         dcmPositionAtEoSNominal = new FramePoint();
       }
 
       @Override public void onEntry()
       {
          initialTime = robotTimestamp.getDoubleValue();
 
+         // initialize dcm controller height
+         dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
+
          // compute desired dcm position at start of step
-         timeAtSoS[0] = 0.0;
-         timeAtSoS[1] = params.get(DOUBLE_SUPPORT_DURATION);
-         timeAtEoS = 2 * params.get(DOUBLE_SUPPORT_DURATION);
          computeNominalCmpPositions(RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT, cmpPositionAtSoSNominal, cmpPositionAtEoSNominal);
-         computeNominalDcmPositionAtSoS(0, cmpPositionAtSoSNominal, timeAtSoS, cmpPositionAtEoSNominal, timeAtEoS, dcmPositionAtSoSNominal);
+         computeNominalDcmPositions(cmpPositionAtSoSNominal, cmpPositionAtEoSNominal, dcmPositionAtSoSNominal, dcmPositionAtEoSNominal);
 
          // compute desired dcm trajectory
-         dcmTrajectory.initializeTrajectory(dcmPositionEstimate, dcmPositionAtSoSNominal, params.get(QUAD_SUPPORT_DURATION));
+         dcmTrajectory.initializeTrajectory(dcmPositionEstimate, dcmPositionAtSoSNominal[0], params.get(QUAD_SUPPORT_DURATION));
 
          // initialize contact state
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -445,6 +389,9 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
             taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
             taskSpaceControllerSettings.setPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
          }
+
+         // compute ground plane estimate
+         groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
       }
 
       @Override public TrotEvent process()
@@ -474,11 +421,10 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       private final RobotQuadrant supportQuadrants[];
       private final RobotQuadrant swingQuadrants[];
       private final PiecewiseForwardDcmTrajectory dcmTrajectory;
-      private final double[] timeAtSoS;
-      private double timeAtEoS;
       private final FramePoint[] cmpPositionAtSoSNominal;
       private final FramePoint cmpPositionAtEoSNominal;
-      private final FramePoint dcmPositionAtSoSNominal;
+      private final FramePoint[] dcmPositionAtSoSNominal;
+      private final FramePoint dcmPositionAtEoSNominal;
       private final FramePoint cmpPositionAtEoS;
       private final FramePoint dcmPositionAtSoS;
       private final FramePoint footholdPosition;
@@ -489,11 +435,10 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
          supportQuadrants = new RobotQuadrant[] {hindSupportQuadrant, frontSupportQuadrant};
          swingQuadrants = new RobotQuadrant[] {hindSupportQuadrant.getAcrossBodyQuadrant(), frontSupportQuadrant.getAcrossBodyQuadrant()};
          dcmTrajectory = new PiecewiseForwardDcmTrajectory(1, gravity, dcmPositionController.getComHeight(), null);
-         timeAtSoS = new double[] {0.0, 0.0};
-         timeAtEoS = 0.0;
          cmpPositionAtSoSNominal = new FramePoint[] {new FramePoint(), new FramePoint()};
          cmpPositionAtEoSNominal = new FramePoint();
-         dcmPositionAtSoSNominal = new FramePoint();
+         dcmPositionAtSoSNominal = new FramePoint[] {new FramePoint(), new FramePoint()};
+         dcmPositionAtEoSNominal = new FramePoint();
          cmpPositionAtEoS = new FramePoint();
          dcmPositionAtSoS = new FramePoint();
          footholdPosition = new FramePoint();
@@ -503,12 +448,12 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       {
          initialTime = robotTimestamp.getDoubleValue();
 
+         // initialize dcm controller height
+         dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
+
          // compute desired dcm position at end of step
-         timeAtSoS[0] = 0.0;
-         timeAtSoS[1] = params.get(DOUBLE_SUPPORT_DURATION);
-         timeAtEoS = 2 * params.get(DOUBLE_SUPPORT_DURATION);
          computeNominalCmpPositions(supportQuadrants[0], supportQuadrants[1], cmpPositionAtSoSNominal, cmpPositionAtEoSNominal);
-         computeNominalDcmPositionAtSoS(1, cmpPositionAtSoSNominal, timeAtSoS, cmpPositionAtEoSNominal, timeAtEoS, dcmPositionAtSoSNominal);
+         computeNominalDcmPositions(cmpPositionAtSoSNominal, cmpPositionAtEoSNominal, dcmPositionAtSoSNominal, dcmPositionAtEoSNominal);
 
          // compute desired dcm trajectory
          dcmPositionEstimate.changeFrame(worldFrame);
@@ -519,9 +464,8 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
 
          // compute desired cmp position at end of step
          cmpPositionAtEoS.set(dcmPositionAtSoS);
-         cmpPositionAtEoS.sub(dcmPositionAtSoSNominal);
+         cmpPositionAtEoS.sub(dcmPositionAtSoSNominal[1]);
          cmpPositionAtEoS.add(cmpPositionAtSoSNominal[1]);
-         cmpPositionAtEoS.setZ(cmpPositionAtSoSNominal[1].getZ());
 
          // compute desired body yaw at end of step
          taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
@@ -557,6 +501,9 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
             taskSpaceControllerSettings.setPressureUpperLimit(swingQuadrant, params.get(NO_CONTACT_PRESSURE_LIMIT));
             taskSpaceControllerSettings.setPressureUpperLimit(supportQuadrant, Double.MAX_VALUE);
          }
+
+         // compute ground plane estimate
+         groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
       }
 
       @Override public TrotEvent process()
