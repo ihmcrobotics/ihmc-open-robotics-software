@@ -1,13 +1,20 @@
 package us.ihmc.aware.config;
 
-public class DynamicDoubleArrayProperty extends DynamicProperty
+import com.google.common.primitives.Doubles;
+
+public class DoubleArrayProperty extends Property
 {
    private double[] value;
 
-   public DynamicDoubleArrayProperty(DynamicPropertyRegistry registry, String path, double... defaultValue)
+   protected DoubleArrayProperty(String path, double... defaultValue)
    {
-      super(registry, path);
+      super(path);
       this.value = defaultValue;
+   }
+
+   public double[] get()
+   {
+      return value;
    }
 
    public void set(double[] value)
@@ -23,6 +30,6 @@ public class DynamicDoubleArrayProperty extends DynamicProperty
    @Override
    public String dump()
    {
-      return null;
+      return getPath() + "=" + Doubles.join(",", value);
    }
 }

@@ -1,12 +1,12 @@
 package us.ihmc.aware.config;
 
-public class DynamicDoubleProperty extends DynamicProperty
+public class DoubleProperty extends Property
 {
    private double value;
 
-   public DynamicDoubleProperty(DynamicPropertyRegistry registry, String path, double defaultValue)
+   protected DoubleProperty(String path, double defaultValue)
    {
-      super(registry, path);
+      super(path);
       this.value = defaultValue;
    }
 
