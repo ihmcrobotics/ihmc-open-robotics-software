@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.aware.config.DoubleParameter;
+import us.ihmc.aware.config.ParameterFactory;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMap;
@@ -18,10 +20,10 @@ import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
  */
 public class QuadrupedPositionStandPrepController implements QuadrupedPositionController
 {
-   public static final String PARAM_TRAJECTORY_TIME = "trajectoryTime";
+   private final ParameterFactory parameterFactory = new ParameterFactory(QuadrupedPositionStandPrepController.class.getName());
+   private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
 
    private final QuadrupedRobotParameters parameters;
-   private final ParameterMap params;
    private final FullRobotModel fullRobotModel;
    private final double dt;
 
@@ -32,11 +34,9 @@ public class QuadrupedPositionStandPrepController implements QuadrupedPositionCo
     */
    private double timeInTrajectory = 0.0;
 
-   public QuadrupedPositionStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedRobotParameters parameters,
-         ParameterMapRepository paramMapRepository)
+   public QuadrupedPositionStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedRobotParameters parameters)
    {
       this.parameters = parameters;
-      this.params = paramMapRepository.get(QuadrupedPositionStandPrepController.class);
       this.fullRobotModel = environment.getFullRobotModel();
       this.dt = environment.getControlDT();
 
@@ -45,9 +45,6 @@ public class QuadrupedPositionStandPrepController implements QuadrupedPositionCo
       {
          trajectories.add(new MinimumJerkTrajectory());
       }
-
-      // Configure default parameters
-      params.setDefault(PARAM_TRAJECTORY_TIME, 1.0);
    }
 
    @Override
@@ -64,7 +61,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedPositionCo
          // Start the trajectory from the current pos/vel/acc.
          MinimumJerkTrajectory trajectory = trajectories.get(i);
          trajectory.setMoveParameters(joint.getQ(), joint.getQd(), joint.getQdd(), desiredPosition, 0.0, 0.0,
-               params.get(PARAM_TRAJECTORY_TIME));
+               trajectoryTimeParameter.get());
       }
 
       // This is a new trajectory. We start at time 0.
@@ -97,7 +94,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedPositionCo
 
    private boolean isMotionExpired()
    {
-      return timeInTrajectory > params.get(PARAM_TRAJECTORY_TIME);
+      return timeInTrajectory > trajectoryTimeParameter.get();
    }
 }
 

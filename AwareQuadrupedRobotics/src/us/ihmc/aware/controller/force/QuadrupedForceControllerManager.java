@@ -42,11 +42,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
    public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters parameters) throws IOException
    {
-      // Initialize parameter map repository.
-      ParameterMapRepository paramMapRepository = new ParameterMapRepository(registry);
-
       // Initialize input providers.
-      inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), paramMapRepository, registry);
+      inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
 
       GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
       globalDataProducer.attachListener(QuadrupedForceControllerEventPacket.class, new PacketConsumer<QuadrupedForceControllerEventPacket>()
@@ -59,7 +56,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       });
 
       this.controllerContext = new QuadrupedForceControllerContext(runtimeEnvironment, parameters, registry);
-      this.stateMachine = buildStateMachine(runtimeEnvironment, parameters, paramMapRepository, inputProvider);
+      this.stateMachine = buildStateMachine(runtimeEnvironment, parameters, inputProvider);
       this.userEventTrigger = new StateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerEvent.class);
       this.runtimeEnvironment = runtimeEnvironment;
    }
@@ -119,15 +116,15 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    }
 
    private StateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
-         QuadrupedRobotParameters parameters, ParameterMapRepository paramMapRepository, QuadrupedControllerInputProviderInterface inputProvider)
+         QuadrupedRobotParameters parameters, QuadrupedControllerInputProviderInterface inputProvider)
    {
       // Initialize controllers.
       QuadrupedForceController jointInitializationController = new QuadrupedForceJointInitializationController(runtimeEnvironment, parameters.getJointMap());
-      QuadrupedVirtualModelBasedStandPrepController standPrepController = new QuadrupedVirtualModelBasedStandPrepController(runtimeEnvironment, parameters, paramMapRepository);
-      QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(runtimeEnvironment, paramMapRepository, inputProvider, controllerContext);
-      QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, paramMapRepository, inputProvider, controllerContext);
+      QuadrupedVirtualModelBasedStandPrepController standPrepController = new QuadrupedVirtualModelBasedStandPrepController(runtimeEnvironment, parameters);
+      QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(runtimeEnvironment, inputProvider, controllerContext);
+      QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, inputProvider, controllerContext);
       QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, inputProvider, controllerContext);
-      QuadrupedForceController paceController = new QuadrupedVirtualModelBasedPaceController(runtimeEnvironment, paramMapRepository, inputProvider, controllerContext);
+      QuadrupedForceController paceController = new QuadrupedVirtualModelBasedPaceController(runtimeEnvironment, inputProvider, controllerContext);
 
       StateMachineBuilder<QuadrupedForceControllerState, QuadrupedForceControllerEvent> builder = new StateMachineBuilder<>(QuadrupedForceControllerState.class,
             "forceControllerState", registry);

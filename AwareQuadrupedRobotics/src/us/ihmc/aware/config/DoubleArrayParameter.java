@@ -18,6 +18,11 @@ public class DoubleArrayParameter extends Parameter
       return value;
    }
 
+   public double get(int idx)
+   {
+      return get()[idx];
+   }
+
    public void set(double[] value)
    {
       this.value = value;
