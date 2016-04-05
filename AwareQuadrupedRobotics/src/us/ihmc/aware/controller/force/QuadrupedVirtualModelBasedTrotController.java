@@ -1,10 +1,17 @@
 package us.ihmc.aware.controller.force;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.StringReader;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.aware.config.DoubleArrayProperty;
-import us.ihmc.aware.config.DoubleProperty;
-import us.ihmc.aware.config.PropertyFactory;
-import us.ihmc.aware.config.PropertyRegistry;
+import us.ihmc.aware.config.DoubleArrayParameter;
+import us.ihmc.aware.config.DoubleParameter;
+import us.ihmc.aware.config.ParameterFactory;
+import us.ihmc.aware.config.ParameterPacketListener;
+import us.ihmc.aware.config.ParameterRegistry;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
 import us.ihmc.aware.controller.force.taskSpaceController.*;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
@@ -45,29 +52,29 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final QuadrupedControllerInputProviderInterface inputProvider;
 
    // parameters
-   private final DoubleProperty jointDampingProperty;
-   private final DoubleArrayProperty bodyOrientationProportionalGainsProperty;
-   private final DoubleArrayProperty bodyOrientationDerivativeGainsProperty;
-   private final DoubleArrayProperty bodyOrientationIntegralGainsProperty;
-   private final DoubleProperty bodyOrientationMaxIntegralErrorProperty;
-   private final DoubleArrayProperty comPositionProportionalGainsProperty;
-   private final DoubleArrayProperty comPositionDerivativeGainsProperty;
-   private final DoubleArrayProperty comPositionIntegralGainsProperty;
-   private final DoubleProperty comPositionMaxIntegralErrorProperty;
-   private final DoubleArrayProperty dcmPositionProportionalGainsProperty;
-   private final DoubleArrayProperty dcmPositionDerivativeGainsProperty;
-   private final DoubleArrayProperty dcmPositionIntegralGainsProperty;
-   private final DoubleProperty dcmPositionMaxIntegralErrorProperty;
-   private final DoubleArrayProperty swingPositionProportionalGainsProperty;
-   private final DoubleArrayProperty swingPositionDerivativeGainsProperty;
-   private final DoubleArrayProperty swingPositionIntegralGainsProperty;
-   private final DoubleProperty swingPositionMaxIntegralErrorProperty;
-   private final DoubleProperty swingTrajectoryGroundClearanceProperty;
-   private final DoubleProperty quadSupportDurationProperty;
-   private final DoubleProperty doubleSupportDurationProperty;
-   private final DoubleProperty stanceWidthNominalProperty;
-   private final DoubleProperty stanceLengthNominalProperty;
-   private final DoubleProperty noContactPressureLimitProperty;
+   private final ParameterFactory propertyFactory = new ParameterFactory(QuadrupedVirtualModelBasedTrotController.class.getSimpleName());
+   private final DoubleArrayParameter bodyOrientationProportionalGainsProperty = propertyFactory.createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
+   private final DoubleArrayParameter bodyOrientationDerivativeGainsProperty = propertyFactory.createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);
+   private final DoubleArrayParameter bodyOrientationIntegralGainsProperty = propertyFactory.createDoubleArray("bodyOrientationIntegralGains", 0, 0, 0);
+   private final DoubleParameter bodyOrientationMaxIntegralErrorProperty = propertyFactory.createDouble("bodyOrientationMaxIntegralError", 0);
+   private final DoubleArrayParameter comPositionProportionalGainsProperty = propertyFactory.createDoubleArray("comPositionProportionalGains", 0, 0, 5000);
+   private final DoubleArrayParameter comPositionDerivativeGainsProperty = propertyFactory.createDoubleArray("comPositionDerivativeGains", 0, 0, 750);
+   private final DoubleArrayParameter comPositionIntegralGainsProperty = propertyFactory.createDoubleArray("comPositionIntegralGains", 0, 0, 0);
+   private final DoubleParameter comPositionMaxIntegralErrorProperty = propertyFactory.createDouble("comPositionMaxIntegralError", 0);
+   private final DoubleArrayParameter dcmPositionProportionalGainsProperty = propertyFactory.createDoubleArray("dcmPositionProportionalGains", 1, 1, 0);
+   private final DoubleArrayParameter dcmPositionDerivativeGainsProperty = propertyFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
+   private final DoubleArrayParameter dcmPositionIntegralGainsProperty = propertyFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
+   private final DoubleParameter dcmPositionMaxIntegralErrorProperty = propertyFactory.createDouble("dcmPositionMaxIntegralError", 0);
+   private final DoubleArrayParameter swingPositionProportionalGainsProperty = propertyFactory.createDoubleArray("swingPositionProportionalGains", 50000, 50000, 100000);
+   private final DoubleArrayParameter swingPositionDerivativeGainsProperty = propertyFactory.createDoubleArray("swingPositionDerivativeGains", 500, 500, 500);
+   private final DoubleArrayParameter swingPositionIntegralGainsProperty = propertyFactory.createDoubleArray("swingPositionIntegralGains", 0, 0, 0);
+   private final DoubleParameter swingPositionMaxIntegralErrorProperty = propertyFactory.createDouble("swingPositionMaxIntegralError", 0);
+   private final DoubleParameter swingTrajectoryGroundClearanceProperty = propertyFactory.createDouble("swingTrajectoryGroundClearance", 0.1);
+   private final DoubleParameter quadSupportDurationProperty = propertyFactory.createDouble("quadSupportDuration", 1.0);
+   private final DoubleParameter doubleSupportDurationProperty = propertyFactory.createDouble("doubleSupportDuration", 0.33);
+   private final DoubleParameter stanceWidthNominalProperty = propertyFactory.createDouble("stanceWidthNominal", 0.35);
+   private final DoubleParameter stanceLengthNominalProperty = propertyFactory.createDouble("stanceLengthNominal", 1.1);
+   private final DoubleParameter noContactPressureLimitProperty = propertyFactory.createDouble("noContactPressureLimit", 75);
 
    // frames
    private final PoseReferenceFrame supportFrame;
@@ -124,33 +131,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       this.inputProvider = inputProvider;
       this.taskSpaceEstimator = taskSpaceEstimator;
       this.taskSpaceController = taskSpaceController;
-
-      // parameters
-      PropertyFactory propertyFactory = new PropertyFactory(runtimeEnvironment.getPropertyRegistry(), QuadrupedVirtualModelBasedTrotController.class.getName());
-      this.jointDampingProperty = propertyFactory.createDouble("jointDamping", 2);
-      this.bodyOrientationProportionalGainsProperty = propertyFactory.createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
-      this.bodyOrientationDerivativeGainsProperty = propertyFactory.createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);
-      this.bodyOrientationIntegralGainsProperty = propertyFactory.createDoubleArray("bodyOrientationIntegralGains", 0, 0, 0);
-      this.bodyOrientationMaxIntegralErrorProperty = propertyFactory.createDouble("bodyOrientationMaxIntegralError", 0);
-      this.comPositionProportionalGainsProperty = propertyFactory.createDoubleArray("comPositionProportionalGains", 0, 0, 5000);
-      this.comPositionDerivativeGainsProperty = propertyFactory.createDoubleArray("comPositionDerivativeGains", 0, 0, 750);
-      this.comPositionIntegralGainsProperty = propertyFactory.createDoubleArray("comPositionIntegralGains", 0, 0, 0);
-      this.comPositionMaxIntegralErrorProperty = propertyFactory.createDouble("comPositionMaxIntegralError", 0);
-      this.dcmPositionProportionalGainsProperty = propertyFactory.createDoubleArray("dcmPositionProportionalGains", 1, 1, 0);
-      this.dcmPositionDerivativeGainsProperty = propertyFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
-      this.dcmPositionIntegralGainsProperty = propertyFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
-      this.dcmPositionMaxIntegralErrorProperty = propertyFactory.createDouble("dcmPositionMaxIntegralError", 0);
-      this.swingPositionProportionalGainsProperty = propertyFactory.createDoubleArray("swingPositionProportionalGains", 50000, 50000, 100000);
-      this.swingPositionDerivativeGainsProperty = propertyFactory.createDoubleArray("swingPositionDerivativeGains", 500, 500, 500);
-      this.swingPositionIntegralGainsProperty = propertyFactory.createDoubleArray("swingPositionIntegralGains", 0, 0, 0);
-      this.swingPositionMaxIntegralErrorProperty = propertyFactory.createDouble("swingPositionMaxIntegralError", 0);
-      this.swingTrajectoryGroundClearanceProperty = propertyFactory.createDouble("swingTrajectoryGroundClearance", 0.1);
-      this.quadSupportDurationProperty = propertyFactory.createDouble("quadSupportDuration", 1.0);
-      this.doubleSupportDurationProperty = propertyFactory.createDouble("doubleSupportDuration", 0.33);
-      this.stanceWidthNominalProperty = propertyFactory.createDouble("stanceWidthNominal", 0.35);
-      this.stanceLengthNominalProperty = propertyFactory.createDouble("stanceLengthNominal", 1.1);
-      this.noContactPressureLimitProperty = propertyFactory.createDouble("noContactPressureLimit", 75);
-      runtimeEnvironment.getPropertyRegistry().save(); // TODO: Remove
 
       // frames
       ReferenceFrame comFrame = referenceFrames.getCenterOfMassZUpFrame();
