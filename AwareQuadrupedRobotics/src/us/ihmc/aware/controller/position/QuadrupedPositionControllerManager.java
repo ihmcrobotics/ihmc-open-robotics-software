@@ -5,7 +5,6 @@ import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
-import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineYoVariableTrigger;
@@ -31,19 +30,15 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
    public QuadrupedPositionControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment,
          QuadrupedRobotParameters parameters)
    {
-      ParameterMapRepository paramMapRepository = new ParameterMapRepository(registry);
-      
       // Initialize input providers.
-      QuadrupedControllerInputProvider inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), paramMapRepository, registry);
+      QuadrupedControllerInputProvider inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
 
       QuadrupedController jointInitializationController = new QuadrupedPositionJointInitializationController(
             runtimeEnvironment);
       QuadrupedController doNothingController = new QuadrupedPositionDoNothingController(runtimeEnvironment);
-      QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, parameters,
-            paramMapRepository);
+      QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, parameters);
       QuadrupedController standReadyController = new QuadrupedPositionStandReadyController(runtimeEnvironment);
-      QuadrupedController crawlController = new QuadrupedPositionBasedCrawlControllerAdapter(runtimeEnvironment,
-            parameters, inputProvider, paramMapRepository);
+      QuadrupedController crawlController = new QuadrupedPositionBasedCrawlControllerAdapter(runtimeEnvironment, parameters, inputProvider);
       QuadrupedController animationController = new QuadrupedAnimationController("***REMOVED***", "***REMOVED***", parameters, runtimeEnvironment);
 
       StateMachineBuilder<QuadrupedPositionControllerState, QuadrupedPositionControllerEvent> builder = new StateMachineBuilder<>(
