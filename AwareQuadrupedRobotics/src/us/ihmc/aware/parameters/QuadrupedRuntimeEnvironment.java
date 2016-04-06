@@ -28,9 +28,9 @@ public class QuadrupedRuntimeEnvironment
 
    private final NetClassList netClassList;
 
-   public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp, SDFFullRobotModel fullRobotModel,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead,
-         GlobalDataProducer globalDataProducer, QuadrupedLegInverseKinematicsCalculator legIkCalculator, QuadrantDependentList<FootSwitchInterface> footSwitches, NetClassList netClassList)
+   public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp, SDFFullRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry graphicsListRegistry, YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead, GlobalDataProducer globalDataProducer,
+         QuadrupedLegInverseKinematicsCalculator legIkCalculator, QuadrantDependentList<FootSwitchInterface> footSwitches, NetClassList netClassList)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;

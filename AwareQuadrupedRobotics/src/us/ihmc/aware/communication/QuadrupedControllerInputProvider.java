@@ -2,9 +2,10 @@ package us.ihmc.aware.communication;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.aware.params.DoubleArrayParameter;
+import us.ihmc.aware.params.DoubleParameter;
+import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.packets.*;
-import us.ihmc.aware.params.ParameterMap;
-import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
@@ -19,19 +20,19 @@ import javax.vecmath.Vector3d;
 
 public class QuadrupedControllerInputProvider implements QuadrupedControllerInputProviderInterface
 {
-   private final static String COM_HEIGHT_NOMINAL = "comHeightNominal";
-   private final static String COM_POSITION_LOWER_LIMITS = "comPositionLowerLimits";
-   private final static String COM_POSITION_UPPER_LIMITS = "comPositionUpperLimits";
-   private final static String COM_VELOCITY_LOWER_LIMITS = "comVelocityLowerLimits";
-   private final static String COM_VELOCITY_UPPER_LIMITS = "comVelocityUpperLimits";
-   private final static String BODY_ORIENTATION_LOWER_LIMITS = "bodyOrientationLowerLimits";
-   private final static String BODY_ORIENTATION_UPPER_LIMITS = "bodyOrientationUpperLimits";
-   private final static String BODY_ANGULAR_RATE_LOWER_LIMITS = "bodyAngularRateLowerLimits";
-   private final static String BODY_ANGULAR_RATE_UPPER_LIMITS = "bodyAngularRateUpperLimits";
-   private final static String PLANAR_VELOCITY_LOWER_LIMITS = "planarVelocityLowerLimits";
-   private final static String PLANAR_VELOCITY_UPPER_LIMITS = "planarVelocityUpperLimits";
+   private final ParameterFactory parameterFactory = new ParameterFactory(QuadrupedControllerInputProvider.class.getName());
+   private final DoubleParameter comHeightNominalParameter = parameterFactory.createDouble("comHeightNominal", 0.55);
+   private final DoubleArrayParameter comPositionLowerLimitsParameter = parameterFactory.createDoubleArray("comPositionLowerLimits", -Double.MAX_VALUE, -Double.MAX_VALUE, 0.0);
+   private final DoubleArrayParameter comPositionUpperLimitsParameter = parameterFactory.createDoubleArray("comPositionUpperLimits", Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+   private final DoubleArrayParameter comVelocityLowerLimitsParameter = parameterFactory.createDoubleArray("comVelocityLowerLimits", -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+   private final DoubleArrayParameter comVelocityUpperLimitsParameter = parameterFactory.createDoubleArray("comVelocityUpperLimits", Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+   private final DoubleArrayParameter bodyOrientationLowerLimitsParameter = parameterFactory.createDoubleArray("bodyOrientationLowerLimits", -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+   private final DoubleArrayParameter bodyOrientationUpperLimitsParameter = parameterFactory.createDoubleArray("bodyOrientationUpperLimits", Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+   private final DoubleArrayParameter bodyAngularRateLowerLimitsParameter = parameterFactory.createDoubleArray("bodyAngularRateLowerLimits", -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+   private final DoubleArrayParameter bodyAngularRateUpperLimitsParameter = parameterFactory.createDoubleArray("bodyAngularRateUpperLimits", Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+   private final DoubleArrayParameter planarVelocityLowerLimitsParameter = parameterFactory.createDoubleArray("planarVelocityLowerLimits", -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+   private final DoubleArrayParameter planarVelocityUpperLimitsParameter = parameterFactory.createDoubleArray("planarVelocityUpperLimits", Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 
-   private final ParameterMap params;
    private final AtomicReference<ComPositionPacket> comPositionPacket;
    private final AtomicReference<ComVelocityPacket> comVelocityPacket;
    private final AtomicReference<BodyOrientationPacket> bodyOrientationPacket;
@@ -58,22 +59,8 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
    private final Vector3d bodyAngularRateInput;
    private final Vector3d planarVelocityInput;
 
-
-   public QuadrupedControllerInputProvider(GlobalDataProducer globalDataProducer, ParameterMapRepository parameterMapRepository, YoVariableRegistry registry)
+   public QuadrupedControllerInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry registry)
    {
-      params = parameterMapRepository.get(QuadrupedControllerInputProvider.class);
-      params.setDefault(COM_HEIGHT_NOMINAL, 0.55);
-      params.setDefault(COM_POSITION_LOWER_LIMITS, -Double.MAX_VALUE, -Double.MAX_VALUE, 0.0);
-      params.setDefault(COM_POSITION_UPPER_LIMITS, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-      params.setDefault(COM_VELOCITY_LOWER_LIMITS, -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-      params.setDefault(COM_VELOCITY_UPPER_LIMITS, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-      params.setDefault(BODY_ORIENTATION_LOWER_LIMITS, -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-      params.setDefault(BODY_ORIENTATION_UPPER_LIMITS, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-      params.setDefault(BODY_ANGULAR_RATE_LOWER_LIMITS, -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-      params.setDefault(BODY_ANGULAR_RATE_UPPER_LIMITS, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-      params.setDefault(PLANAR_VELOCITY_LOWER_LIMITS, -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-      params.setDefault(PLANAR_VELOCITY_UPPER_LIMITS, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-
       comPositionPacket = new AtomicReference<>(new ComPositionPacket());
       comVelocityPacket = new AtomicReference<>(new ComVelocityPacket());
       bodyOrientationPacket = new AtomicReference<>(new BodyOrientationPacket());
@@ -101,7 +88,7 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
       planarVelocityInput = new Vector3d();
 
       // initialize com height
-      yoComPositionInputZ.set(params.get(COM_HEIGHT_NOMINAL));
+      yoComPositionInputZ.set(comHeightNominalParameter.get());
 
       globalDataProducer.attachListener(ComPositionPacket.class, new PacketConsumer<ComPositionPacket>()
       {
@@ -109,9 +96,9 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
          public void receivedPacket(ComPositionPacket packet)
          {
             comPositionPacket.set(packet);
-            yoComPositionInputX.set(MathTools.clipToMinMax(comPositionPacket.get().getX(), params.get(COM_POSITION_LOWER_LIMITS, 0), params.get(COM_POSITION_UPPER_LIMITS, 0)));
-            yoComPositionInputY.set(MathTools.clipToMinMax(comPositionPacket.get().getY(), params.get(COM_POSITION_LOWER_LIMITS, 1), params.get(COM_POSITION_UPPER_LIMITS, 1)));
-            yoComPositionInputZ.set(MathTools.clipToMinMax(comPositionPacket.get().getZ(), params.get(COM_POSITION_LOWER_LIMITS, 2), params.get(COM_POSITION_UPPER_LIMITS, 2)));
+            yoComPositionInputX.set(MathTools.clipToMinMax(comPositionPacket.get().getX(), comPositionLowerLimitsParameter.get(0), comPositionUpperLimitsParameter.get(0)));
+            yoComPositionInputY.set(MathTools.clipToMinMax(comPositionPacket.get().getY(), comPositionLowerLimitsParameter.get(1), comPositionUpperLimitsParameter.get(1)));
+            yoComPositionInputZ.set(MathTools.clipToMinMax(comPositionPacket.get().getZ(), comPositionLowerLimitsParameter.get(2), comPositionUpperLimitsParameter.get(2)));
          }
       });
 
@@ -121,9 +108,9 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
          public void receivedPacket(ComVelocityPacket packet)
          {
             comVelocityPacket.set(packet);
-            yoComVelocityInputX.set(MathTools.clipToMinMax(comVelocityPacket.get().getX(), params.get(COM_VELOCITY_LOWER_LIMITS, 0), params.get(COM_VELOCITY_UPPER_LIMITS, 0)));
-            yoComVelocityInputY.set(MathTools.clipToMinMax(comVelocityPacket.get().getY(), params.get(COM_VELOCITY_LOWER_LIMITS, 1), params.get(COM_VELOCITY_UPPER_LIMITS, 1)));
-            yoComVelocityInputZ.set(MathTools.clipToMinMax(comVelocityPacket.get().getZ(), params.get(COM_VELOCITY_LOWER_LIMITS, 2), params.get(COM_VELOCITY_UPPER_LIMITS, 2)));
+            yoComVelocityInputX.set(MathTools.clipToMinMax(comVelocityPacket.get().getX(), comVelocityLowerLimitsParameter.get(0), comVelocityUpperLimitsParameter.get(0)));
+            yoComVelocityInputY.set(MathTools.clipToMinMax(comVelocityPacket.get().getY(), comVelocityLowerLimitsParameter.get(1), comVelocityUpperLimitsParameter.get(1)));
+            yoComVelocityInputZ.set(MathTools.clipToMinMax(comVelocityPacket.get().getZ(), comVelocityLowerLimitsParameter.get(2), comVelocityUpperLimitsParameter.get(2)));
          }
       });
 
@@ -132,9 +119,9 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
          @Override
          public void receivedPacket(BodyOrientationPacket packet)
          {
-            yoBodyOrientationInputYaw.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getYaw(), params.get(BODY_ORIENTATION_LOWER_LIMITS, 0), params.get(BODY_ORIENTATION_UPPER_LIMITS, 0)));
-            yoBodyOrientationInputPitch.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getPitch(), params.get(BODY_ORIENTATION_LOWER_LIMITS, 1), params.get(BODY_ORIENTATION_UPPER_LIMITS, 1)));
-            yoBodyOrientationInputRoll.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getRoll(), params.get(BODY_ORIENTATION_LOWER_LIMITS, 2), params.get(BODY_ORIENTATION_UPPER_LIMITS, 2)));
+            yoBodyOrientationInputYaw.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getYaw(), bodyOrientationLowerLimitsParameter.get(0), bodyOrientationUpperLimitsParameter.get(0)));
+            yoBodyOrientationInputPitch.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getPitch(), bodyOrientationLowerLimitsParameter.get(1), bodyOrientationUpperLimitsParameter.get(1)));
+            yoBodyOrientationInputRoll.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getRoll(), bodyOrientationLowerLimitsParameter.get(2), bodyOrientationUpperLimitsParameter.get(2)));
             bodyOrientationPacket.set(packet);
          }
       });
@@ -144,9 +131,9 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
          @Override
          public void receivedPacket(BodyAngularRatePacket packet)
          {
-            yoBodyAngularRateInputX.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getX(), params.get(BODY_ANGULAR_RATE_LOWER_LIMITS, 0), params.get(BODY_ANGULAR_RATE_UPPER_LIMITS, 0)));
-            yoBodyAngularRateInputY.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getY(), params.get(BODY_ANGULAR_RATE_LOWER_LIMITS, 1), params.get(BODY_ANGULAR_RATE_UPPER_LIMITS, 1)));
-            yoBodyAngularRateInputZ.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getZ(), params.get(BODY_ANGULAR_RATE_LOWER_LIMITS, 2), params.get(BODY_ANGULAR_RATE_UPPER_LIMITS, 2)));
+            yoBodyAngularRateInputX.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getX(), bodyAngularRateLowerLimitsParameter.get(0), bodyAngularRateUpperLimitsParameter.get(0)));
+            yoBodyAngularRateInputY.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getY(), bodyAngularRateLowerLimitsParameter.get(1), bodyAngularRateUpperLimitsParameter.get(1)));
+            yoBodyAngularRateInputZ.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getZ(), bodyAngularRateLowerLimitsParameter.get(2), bodyAngularRateUpperLimitsParameter.get(2)));
             bodyAngularRatePacket.set(packet);
          }
       });
@@ -156,9 +143,9 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
          @Override
          public void receivedPacket(PlanarVelocityPacket packet)
          {
-            yoPlanarVelocityInputX.set(MathTools.clipToMinMax(planarVelocityPacket.get().getX(), params.get(PLANAR_VELOCITY_LOWER_LIMITS, 0), params.get(PLANAR_VELOCITY_UPPER_LIMITS, 0)));
-            yoPlanarVelocityInputY.set(MathTools.clipToMinMax(planarVelocityPacket.get().getY(), params.get(PLANAR_VELOCITY_LOWER_LIMITS, 1), params.get(PLANAR_VELOCITY_UPPER_LIMITS, 1)));
-            yoPlanarVelocityInputZ.set(MathTools.clipToMinMax(planarVelocityPacket.get().getZ(), params.get(PLANAR_VELOCITY_LOWER_LIMITS, 2), params.get(PLANAR_VELOCITY_UPPER_LIMITS, 2)));
+            yoPlanarVelocityInputX.set(MathTools.clipToMinMax(planarVelocityPacket.get().getX(), planarVelocityLowerLimitsParameter.get(0), planarVelocityUpperLimitsParameter.get(0)));
+            yoPlanarVelocityInputY.set(MathTools.clipToMinMax(planarVelocityPacket.get().getY(), planarVelocityLowerLimitsParameter.get(1), planarVelocityUpperLimitsParameter.get(1)));
+            yoPlanarVelocityInputZ.set(MathTools.clipToMinMax(planarVelocityPacket.get().getZ(), planarVelocityLowerLimitsParameter.get(2), planarVelocityUpperLimitsParameter.get(2)));
             planarVelocityPacket.set(packet);
          }
       });

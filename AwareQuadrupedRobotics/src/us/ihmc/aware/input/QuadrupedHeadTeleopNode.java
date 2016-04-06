@@ -1,15 +1,5 @@
 package us.ihmc.aware.input;
 
-import us.ihmc.aware.input.value.InputValueIntegrator;
-import us.ihmc.aware.packets.QuadrupedNeckJointPositionPacket;
-import us.ihmc.aware.params.ParameterMap;
-import us.ihmc.aware.params.ParameterMapRepository;
-import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -19,6 +9,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import us.ihmc.aware.packets.QuadrupedNeckJointPositionPacket;
+import us.ihmc.aware.params.DoubleParameter;
+import us.ihmc.aware.params.ParameterFactory;
+import us.ihmc.communication.net.NetClassList;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
+
 public class QuadrupedHeadTeleopNode implements InputEventCallback
 {
    /**
@@ -26,32 +24,24 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
     */
    private static final double DT = 0.01;
 
-   private static final String PARAM_PROXIMAL_NECK_YAW_SCALE = "proximalNeckYawRateScale";
-   private static final String PARAM_PROXIMAL_NECK_PITCH_SCALE = "proximalNeckPitchRateScale";
-   private static final String PARAM_PROXIMAL_NECK_ROLL_SCALE = "proximalNeckRollRateScale";
-   private static final String PARAM_DISTAL_NECK_YAW_SCALE = "distalNeckYawScale";
-   private static final String PARAM_DISTAL_NECK_PITCH_SCALE = "distalNeckPitchScale";
-   private static final String PARAM_DISTAL_NECK_ROLL_SCALE = "distalNeckRollScale";
+   private final ParameterFactory parameterFactory = new ParameterFactory(QuadrupedHeadTeleopNode.class.getName());
+   private final DoubleParameter proximalNeckYawScaleParameter = parameterFactory.createDouble("proximalNeckYawScale", 0.9);
+   private final DoubleParameter proximalNeckPitchScaleParameter = parameterFactory.createDouble("proximalNeckPitchScale", 0.9);
+   private final DoubleParameter proximalNeckRollScaleParameter = parameterFactory.createDouble("proximalNeckRollScale", 0.5);
+   private final DoubleParameter distalNeckYawScaleParameter = parameterFactory.createDouble("distalNeckYawScale", 0.8);
+   private final DoubleParameter distalNeckPitchScaleParameter = parameterFactory.createDouble("distalNeckPitchScale", 0.8);
+   private final DoubleParameter distalNeckRollScaleParameter = parameterFactory.createDouble("distalNeckRollScale", 0.5);
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedHeadTeleopNode.class.getSimpleName());
-   private final ParameterMapRepository repository = new ParameterMapRepository(registry);
-   private final ParameterMap params = repository.get(QuadrupedHeadTeleopNode.class);
-
+   private final PollingInputDevice device;
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
    private final PacketCommunicator packetCommunicator;
-   private final PollingInputDevice device;
    private final Map<InputChannel, Double> channels = Collections.synchronizedMap(new EnumMap<InputChannel, Double>(InputChannel.class));
 
+   private boolean teleopEnabled = true;
    private HashMap<QuadrupedJointName, Double> neckJointPositionSetpoints = new HashMap<>();
 
    public QuadrupedHeadTeleopNode(String host, NetClassList netClassList, PollingInputDevice device) throws IOException
    {
-      params.setDefault(PARAM_PROXIMAL_NECK_YAW_SCALE, 0.9);
-      params.setDefault(PARAM_PROXIMAL_NECK_PITCH_SCALE, 0.9);
-      params.setDefault(PARAM_PROXIMAL_NECK_ROLL_SCALE, 0.5);
-      params.setDefault(PARAM_DISTAL_NECK_YAW_SCALE, 0.8);
-      params.setDefault(PARAM_DISTAL_NECK_PITCH_SCALE, 0.8);
-      params.setDefault(PARAM_DISTAL_NECK_ROLL_SCALE, 0.5);
 
       // TODO: Don't hardcode localhost
       this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, NetworkPorts.CONTROLLER_PORT, netClassList);
@@ -87,12 +77,12 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
    {
       try
       {
-         double distalNeckYaw = get(InputChannel.RIGHT_STICK_X) * params.get(PARAM_DISTAL_NECK_YAW_SCALE);
-         double distalNeckPitch = get(InputChannel.RIGHT_STICK_Y) * params.get(PARAM_DISTAL_NECK_PITCH_SCALE);
-         double distalNeckRoll = (get(InputChannel.RIGHT_TRIGGER) - get(InputChannel.LEFT_TRIGGER)) * params.get(PARAM_DISTAL_NECK_ROLL_SCALE);
-         double proximalNeckYaw = get(InputChannel.LEFT_STICK_X) * params.get(PARAM_PROXIMAL_NECK_YAW_SCALE);
-         double proximalNeckPitch = get(InputChannel.LEFT_STICK_Y) * params.get(PARAM_PROXIMAL_NECK_PITCH_SCALE);
-         double proximalNeckRoll = 0.0;
+         double distalNeckYaw = get(InputChannel.RIGHT_STICK_X) * distalNeckYawScaleParameter.get();
+         double distalNeckPitch = get(InputChannel.RIGHT_STICK_Y) * distalNeckPitchScaleParameter.get();
+         double distalNeckRoll = (get(InputChannel.RIGHT_TRIGGER) - get(InputChannel.LEFT_TRIGGER)) * distalNeckRollScaleParameter.get();
+         double proximalNeckYaw = get(InputChannel.LEFT_STICK_X) * proximalNeckYawScaleParameter.get();
+         double proximalNeckPitch = get(InputChannel.LEFT_STICK_Y) * proximalNeckPitchScaleParameter.get();
+         double proximalNeckRoll = 0.0 * proximalNeckRollScaleParameter.get();
 
          neckJointPositionSetpoints.put(QuadrupedJointName.DISTAL_NECK_YAW, distalNeckYaw);
          neckJointPositionSetpoints.put(QuadrupedJointName.DISTAL_NECK_PITCH, distalNeckPitch);
@@ -101,10 +91,14 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
          neckJointPositionSetpoints.put(QuadrupedJointName.PROXIMAL_NECK_PITCH, proximalNeckPitch);
          neckJointPositionSetpoints.put(QuadrupedJointName.PROXIMAL_NECK_ROLL, proximalNeckRoll);
 
-         QuadrupedNeckJointPositionPacket neckJointPositionPacket = new QuadrupedNeckJointPositionPacket(neckJointPositionSetpoints);
-         packetCommunicator.send(neckJointPositionPacket);
+         if (teleopEnabled)
+         {
+            QuadrupedNeckJointPositionPacket neckJointPositionPacket = new QuadrupedNeckJointPositionPacket(neckJointPositionSetpoints);
+            packetCommunicator.send(neckJointPositionPacket);
+         }
 
-      } catch (Exception e)
+      }
+      catch (Exception e)
       {
          e.printStackTrace();
       }
@@ -122,21 +116,25 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
       case BUTTON_A:
          if (get(InputChannel.BUTTON_A) > 0.5)
          {
+            teleopEnabled = true;
          }
          break;
       case BUTTON_X:
          if (get(InputChannel.BUTTON_X) > 0.5)
          {
+            teleopEnabled = false;
          }
          break;
       case BUTTON_Y:
          if (get(InputChannel.BUTTON_Y) > 0.5)
          {
+            teleopEnabled = false;
          }
          break;
       case BUTTON_B:
          if (get(InputChannel.BUTTON_B) > 0.5)
          {
+            teleopEnabled = false;
          }
          break;
       }

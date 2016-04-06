@@ -10,6 +10,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import javax.vecmath.Vector3d;
 
@@ -56,7 +57,8 @@ public class QuadrupedSolePositionFeebackController implements QuadrupedTaskSpac
       solePositionController.compute(soleForceCommand, solePositionSetpoint, soleLinearVelocitySetpoint, soleLinearVelocityEstimate, soleForceFeedforwardSetpoint);
    }
 
-   @Override public void enableVisualization(boolean enable)
+   @Override public void registerGraphics(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+
    }
 }
