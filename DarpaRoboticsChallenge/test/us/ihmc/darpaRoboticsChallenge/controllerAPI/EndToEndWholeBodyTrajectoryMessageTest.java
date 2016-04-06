@@ -45,7 +45,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test //(timeout = 300000)
+   @Test(timeout = 300000)
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage();

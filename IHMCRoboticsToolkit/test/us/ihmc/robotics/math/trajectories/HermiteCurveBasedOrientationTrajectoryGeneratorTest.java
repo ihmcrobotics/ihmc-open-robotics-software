@@ -16,12 +16,14 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
 {
    private static boolean DEBUG = false;
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testDerivativesConsistency() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -83,7 +85,8 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testLimitConditions() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -188,7 +191,8 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testContinuityForSlowTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -296,7 +300,8 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testContinuityForFastishTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();

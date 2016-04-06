@@ -24,10 +24,12 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajecto
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class FrameEuclideanTrajectoryPointTest
 {
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testCommonUsageExample()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -67,7 +69,8 @@ public class FrameEuclideanTrajectoryPointTest
       assertTrue(expectedFrameEuclideanTrajectoryPoint.epsilonEquals(frameEuclideanTrajectoryPoint, 1e-10));
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testConstructors()
    {
       double epsilon = 1.0e-20;
@@ -131,7 +134,8 @@ public class FrameEuclideanTrajectoryPointTest
 
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSetters()
    {
       double epsilon = 1.0e-20;
@@ -214,7 +218,8 @@ public class FrameEuclideanTrajectoryPointTest
 
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testChangeFrame() throws Exception
    {
       double epsilon = 1.0e-10;
@@ -239,7 +244,8 @@ public class FrameEuclideanTrajectoryPointTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSetToZero() throws Exception
    {
       double epsilon = 1.0e-10;
@@ -273,7 +279,8 @@ public class FrameEuclideanTrajectoryPointTest
       assertTrajectoryPointContainsExpectedData(expectedFrame, expectedTime, expectedPosition, expectedLinearVelocity, testedFrameEuclideanTrajectoryPoint, epsilon);
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSetToNaN() throws Exception
    {
       Random random = new Random(21651016L);
@@ -338,7 +345,8 @@ public class FrameEuclideanTrajectoryPointTest
       assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
    }
    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSomeSetsAngGets()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -433,7 +441,8 @@ public class FrameEuclideanTrajectoryPointTest
       assertEquals(expectedString, string);
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSomeMoreSettersAndGetters()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

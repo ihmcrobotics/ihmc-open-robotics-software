@@ -30,12 +30,14 @@ import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class MotionQPInputCalculatorTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testPointAccelerationCommandsWithChainRobot() throws Exception
    {
       Random random = new Random(5641654L);
@@ -98,7 +100,8 @@ public class MotionQPInputCalculatorTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testPointAccelerationCommandsWithFloatingChainRobot() throws Exception
    {
       Random random = new Random(5641654L);

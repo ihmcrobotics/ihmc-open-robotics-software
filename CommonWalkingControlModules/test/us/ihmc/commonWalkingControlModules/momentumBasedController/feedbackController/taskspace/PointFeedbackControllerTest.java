@@ -39,12 +39,14 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class PointFeedbackControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testConvergence() throws Exception
    {
       Random random = new Random(5641654L);
@@ -138,7 +140,8 @@ public class PointFeedbackControllerTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testConvergenceWithJerryQP() throws Exception
    {
       Random random = new Random(5641654L);

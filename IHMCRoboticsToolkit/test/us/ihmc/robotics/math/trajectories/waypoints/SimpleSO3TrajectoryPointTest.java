@@ -28,11 +28,13 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPoin
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class SimpleSO3TrajectoryPointTest
 {
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testCommonUsageExample()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -72,7 +74,8 @@ public class SimpleSO3TrajectoryPointTest
       assertTrue(expectedSimpleSO3TrajectoryPoint.epsilonEquals(simpleSO3TrajectoryPoint, 1e-10));
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testConstructors()
    {
       double epsilon = 1.0e-14;
@@ -133,7 +136,8 @@ public class SimpleSO3TrajectoryPointTest
 
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSetters()
    {
       double epsilon = 1.0e-14;
@@ -214,7 +218,8 @@ public class SimpleSO3TrajectoryPointTest
 
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testChangeFrame() throws Exception
    {
       double epsilon = 1.0e-10;
@@ -241,7 +246,8 @@ public class SimpleSO3TrajectoryPointTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSetToZero() throws Exception
    {
       double epsilon = 1.0e-10;
@@ -274,7 +280,8 @@ public class SimpleSO3TrajectoryPointTest
             expectedAngularVelocity, testedSimpleSO3TrajectoryPoint, epsilon);
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSetToNaN() throws Exception
    {
       Random random = new Random(21651016L);
@@ -336,7 +343,8 @@ public class SimpleSO3TrajectoryPointTest
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSomeSetsAngGets()
    {
       SimpleSO3TrajectoryPoint simpleSO3TrajectoryPoint = new SimpleSO3TrajectoryPoint();
@@ -426,7 +434,8 @@ public class SimpleSO3TrajectoryPointTest
       assertEquals(expectedString, string);
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSomeMoreSettersAndGetters()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
