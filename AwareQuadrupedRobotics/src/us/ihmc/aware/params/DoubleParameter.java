@@ -35,7 +35,7 @@ public class DoubleParameter extends Parameter
    }
 
    @Override
-   protected String dumpValue()
+   String dumpValue()
    {
       return Double.toString(value);
    }

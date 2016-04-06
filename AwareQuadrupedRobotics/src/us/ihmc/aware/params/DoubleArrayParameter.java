@@ -62,7 +62,7 @@ public class DoubleArrayParameter extends Parameter
    }
 
    @Override
-   protected String dumpValue()
+   String dumpValue()
    {
       return Doubles.join(",", value);
    }

@@ -34,7 +34,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    // parameters
-   private final ParameterFactory parameterFactory = new ParameterFactory(QuadrupedVirtualModelBasedStandController.class.getName());
+   private final ParameterFactory parameterFactory = new ParameterFactory(getClass().getName());
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 2);
    private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory.createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 2500);
    private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory.createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 500);

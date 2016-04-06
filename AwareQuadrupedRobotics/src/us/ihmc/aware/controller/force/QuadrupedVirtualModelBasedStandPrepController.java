@@ -28,7 +28,7 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedForceController
 {
-   private final ParameterFactory parameterFactory = new ParameterFactory(QuadrupedVirtualModelBasedStandPrepController.class.getName());
+   private final ParameterFactory parameterFactory = new ParameterFactory(getClass().getName());
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("TrajectoryTime", 1.0);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
    private final DoubleArrayParameter footPositionProportionalGainsParameter = parameterFactory.createDoubleArray("footPositionProportionalGains", 10000.0, 10000.0, 10000.0);
