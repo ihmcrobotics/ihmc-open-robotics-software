@@ -28,7 +28,7 @@ public class JointStateUpdater
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final RigidBody rootBody;
 
-   private final OneDoFJoint[] oneDoFJoints;
+   private OneDoFJoint[] oneDoFJoints;
    private final SensorOutputMapReadOnly sensorMap;
    private final IMUBasedJointVelocityEstimator iMUBasedJointVelocityEstimator;
 
@@ -49,6 +49,11 @@ public class JointStateUpdater
       iMUBasedJointVelocityEstimator = createIMUBasedJointVelocityEstimator(sensorOutputMapReadOnly, stateEstimatorParameters, registry);
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setJointsToUpdate(OneDoFJoint[] oneDoFJoints)
+   {
+      this.oneDoFJoints = oneDoFJoints;
    }
 
    public IMUBasedJointVelocityEstimator createIMUBasedJointVelocityEstimator(SensorOutputMapReadOnly sensorOutputMapReadOnly,
