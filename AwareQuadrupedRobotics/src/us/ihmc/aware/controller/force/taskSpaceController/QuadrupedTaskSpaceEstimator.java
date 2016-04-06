@@ -42,7 +42,7 @@ public class QuadrupedTaskSpaceEstimator
 
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceEstimator");
 
-   public QuadrupedTaskSpaceEstimator(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public QuadrupedTaskSpaceEstimator(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
