@@ -16,7 +16,7 @@ public class FourBarKinematicLoopJacobianSolver
       jacobian = new DenseMatrix64F();
    }
 
-   public DenseMatrix64F computeJacobian(double fourBarInputJoint_q)
+   public DenseMatrix64F computeJacobian(double fourBarInputJoint_q, PassiveRevoluteJoint fourBarOutputJoint)
    {
       double ab = fourBarCalculator.getAB();
       double bc = fourBarCalculator.getBC();

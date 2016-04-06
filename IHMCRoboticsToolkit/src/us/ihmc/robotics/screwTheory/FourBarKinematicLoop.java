@@ -35,7 +35,7 @@ public class FourBarKinematicLoop
    private static final boolean DEBUG = false;
 
    private final RevoluteJoint masterJointA;
-   private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD;
+   private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD, fourBarOutputJoint;
    private final Vector3d closurePointFromLastPassiveJointVect;
 
    private final FourBarCalculatorWithDerivatives fourBarCalculator;
@@ -89,7 +89,8 @@ public class FourBarKinematicLoop
 
       // Jacobian solver
       fourBarJacobianSolver = new FourBarKinematicLoopJacobianSolver(fourBarCalculator);
-      jacobian = fourBarJacobianSolver.computeJacobian(masterJointA.getQ());
+      fourBarOutputJoint = FourBarKinematicLoopTools.setFourBarOutputJoint(passiveJointB, passiveJointC, passiveJointD);
+      jacobian = fourBarJacobianSolver.computeJacobian(masterJointA.getQ(), fourBarOutputJoint);
       outputJointLinearVelocitiesToPack = new DenseMatrix64F(3,1);
       inputJointAngularVelocities = new DenseMatrix64F(1, 1, true, new double[] {fourBarCalculator.getAngleDtDAB()});
 
@@ -360,7 +361,7 @@ public class FourBarKinematicLoop
 
       fourBarCalculator.updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd(), masterJointA.getQdd());
 
-      fourBarJacobianSolver.computeJacobian(masterJointA.getQ());
+      fourBarJacobianSolver.computeJacobian(masterJointA.getQ(), fourBarOutputJoint);
       fourBarJacobianSolver.solveLinearVelFromAngularVel(jacobian, inputJointAngularVelocities, outputJointLinearVelocitiesToPack);
 
       System.out.println("\nJacobian debugging: \n" + outputJointLinearVelocitiesToPack);
