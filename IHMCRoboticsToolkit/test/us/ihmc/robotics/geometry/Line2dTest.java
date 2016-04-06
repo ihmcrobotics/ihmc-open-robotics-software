@@ -17,6 +17,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
@@ -1646,6 +1647,13 @@ public class Line2dTest
       distance = line.distance(point);
       delta = 1e-12;
       assertEquals("Distance to a horizontal line not calculated correctly", 3.0, distance, delta);
+   }
+	
+	public static void main(String[] args)
+   {
+	   String targetTests = "us.ihmc.robotics.geometry.Line2dTest";
+	   String targetClasses = "us.ihmc.robotics.geometry.FrameTuple,us.ihmc.robotics.geometry.Line2d";
+	   MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
    }
 
 }

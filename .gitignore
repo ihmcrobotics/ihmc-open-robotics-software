@@ -4,7 +4,7 @@
 /bin
 /out
 /target
-/pitest
+/pit-reports
 
 # Top level directories in sub-projects
 */classes
@@ -12,7 +12,7 @@
 */out
 */target
 */build
-*/pitest
+*/pit-reports
 
 # directories to always ignore
 **/.gradle
