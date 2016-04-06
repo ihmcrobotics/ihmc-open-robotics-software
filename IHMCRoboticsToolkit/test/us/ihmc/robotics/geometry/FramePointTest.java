@@ -689,7 +689,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       expected.checkReferenceFrameMatch(actual);
       JUnitTools.assertTuple3dEquals(expected.getPoint(), actual.getPoint(), delta);
    }
-   
+
    public static void main(String[] args)
    {
       String targetTests = "us.ihmc.robotics.geometry.FramePointTest";
