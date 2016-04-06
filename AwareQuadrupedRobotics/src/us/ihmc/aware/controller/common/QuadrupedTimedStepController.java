@@ -1,16 +1,10 @@
 package us.ihmc.aware.controller.common;
 
-import us.ihmc.aware.controller.force.taskSpaceController.*;
-import us.ihmc.aware.params.ParameterMap;
-import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.planning.ThreeDoFSwingFootTrajectory;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineState;
-import us.ihmc.aware.util.ContactState;
-import us.ihmc.aware.util.PreallocatedQueue;
-import us.ihmc.aware.util.QuadrupedTimedStep;
-import us.ihmc.aware.util.TimeInterval;
+import us.ihmc.aware.util.*;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -20,13 +14,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 public class QuadrupedTimedStepController
 {
    private static int STEP_QUEUE_CAPACITY = 60;
-   private final static String SWING_POSITION_PROPORTIONAL_GAINS = "swingPositionProportionalGains";
-   private final static String SWING_POSITION_DERIVATIVE_GAINS = "swingPositionDerivativeGains";
-   private final static String SWING_POSITION_INTEGRAL_GAINS = "swingPositionIntegralGains";
-   private final static String SWING_POSITION_MAX_INTEGRAL_ERROR = "swingPositionMaxIntegralError";
-   private final static String SWING_TRAJECTORY_GROUND_CLEARANCE = "swingTrajectoryGroundClearance";
-   private final static String SWING_PRESSURE_LIMIT = "swingPressureLimit";
-   private final static String SUPPORT_PRESSURE_LIMIT = "supportPressureLimit";
 
    public enum StepState
    {
@@ -36,33 +23,29 @@ public class QuadrupedTimedStepController
    {
       LIFT_OFF, TOUCH_DOWN
    }
-   private final ParameterMap params;
    private final DoubleYoVariable timestamp;
-   private final PreallocatedQueue<QuadrupedTimedStep> stepQueue;
+   private final QuadrantDependentList<ContactState> contactState;
+   private final QuadrantDependentList<FramePoint> solePositionEstimate;
+   private final QuadrantDependentList<FramePoint> solePositionSetpoint;
    private final QuadrantDependentList<QuadrupedTimedStep> stepCache;
+   private final PreallocatedQueue<QuadrupedTimedStep> stepQueue;
    private final QuadrantDependentList<StateMachine<StepState, StepEvent>> stepStateMachine;
-   private QuadrupedTaskSpaceEstimates taskSpaceEstimates;
-   private QuadrupedTaskSpaceSetpoints taskSpaceSetpoints;
-   private QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings;
 
-   public QuadrupedTimedStepController(DoubleYoVariable timestamp, ParameterMapRepository parameterMapRepository,YoVariableRegistry registry)
+   public QuadrupedTimedStepController(DoubleYoVariable timestamp, YoVariableRegistry registry)
    {
-      params = parameterMapRepository.get(QuadrupedTimedStepController.class);
-      params.setDefault(SWING_POSITION_PROPORTIONAL_GAINS, 50000, 50000, 100000);
-      params.setDefault(SWING_POSITION_DERIVATIVE_GAINS, 500, 500, 500);
-      params.setDefault(SWING_POSITION_INTEGRAL_GAINS, 0, 0, 0);
-      params.setDefault(SWING_POSITION_MAX_INTEGRAL_ERROR, 0);
-      params.setDefault(SWING_TRAJECTORY_GROUND_CLEARANCE, 0.1);
-      params.setDefault(SWING_PRESSURE_LIMIT, 75);
-      params.setDefault(SUPPORT_PRESSURE_LIMIT, Double.MAX_VALUE);
-
       this.timestamp = timestamp;
-      this.stepQueue = new PreallocatedQueue<>(QuadrupedTimedStep.class, STEP_QUEUE_CAPACITY);
-      this.stepCache = new QuadrantDependentList<>();
+      contactState = new QuadrantDependentList<>();
+      solePositionEstimate = new QuadrantDependentList<>();
+      solePositionSetpoint = new QuadrantDependentList<>();
+      stepCache = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         this.stepCache.set(robotQuadrant, new QuadrupedTimedStep(robotQuadrant));
+         contactState.set(robotQuadrant, ContactState.IN_CONTACT);
+         solePositionEstimate.set(robotQuadrant, new FramePoint());
+         solePositionSetpoint.set(robotQuadrant, new FramePoint());
+         stepCache.set(robotQuadrant, new QuadrupedTimedStep());
       }
+      stepQueue = new PreallocatedQueue<>(QuadrupedTimedStep.class, STEP_QUEUE_CAPACITY);
       stepStateMachine= new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -122,7 +105,7 @@ public class QuadrupedTimedStepController
       return stepQueue.size();
    }
 
-   private void triggerStepEvents()
+   private void handleStepEvents()
    {
       double currentTime = timestamp.getDoubleValue();
 
@@ -142,16 +125,27 @@ public class QuadrupedTimedStepController
       }
    }
 
-   public void compute(QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings, QuadrupedTaskSpaceSetpoints taskSpaceSetpoints, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
+   public void reset()
    {
-      this.taskSpaceEstimates = taskSpaceEstimates;
-      this.taskSpaceSetpoints = taskSpaceSetpoints;
-      this.taskSpaceControllerSettings = taskSpaceControllerSettings;
-
-      triggerStepEvents();
+      for (int i = 0; i < stepQueue.size(); i++)
+      {
+         stepQueue.dequeue();
+      }
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         stepStateMachine.get(robotQuadrant).reset();
+      }
+   }
+
+   public void compute(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint> solePositionSetpoint, QuadrantDependentList<FramePoint> solePositionEstimate)
+   {
+      handleStepEvents();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         this.solePositionEstimate.set(robotQuadrant, solePositionSetpoint.get(robotQuadrant));
          stepStateMachine.get(robotQuadrant).process();
+         solePositionSetpoint.set(robotQuadrant, this.solePositionSetpoint.get(robotQuadrant));
+         contactState.set(robotQuadrant, this.contactState.get(robotQuadrant));
       }
    }
 
@@ -167,11 +161,7 @@ public class QuadrupedTimedStepController
       @Override public void onEntry()
       {
          // initialize contact state
-         taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
-         taskSpaceControllerSettings.setPressureUpperLimit(robotQuadrant, params.get(SUPPORT_PRESSURE_LIMIT));
-
-         // disable sole position feedback
-         taskSpaceControllerSettings.setSolePositionFeedbackGainsToZero(robotQuadrant);
+         contactState.set(robotQuadrant, ContactState.IN_CONTACT);
       }
 
       @Override public StepEvent process()
@@ -205,23 +195,15 @@ public class QuadrupedTimedStepController
       @Override public void onEntry()
       {
          // initialize swing foot controller
+         double groundClearance = stepCache.get(robotQuadrant).getGroundClearance();
          TimeInterval timeInterval = stepCache.get(robotQuadrant).getTimeInterval();
          FramePoint goalPosition = stepCache.get(robotQuadrant).getGoalPosition();
-         FramePoint solePosition = taskSpaceEstimates.getSolePosition(robotQuadrant);
+         FramePoint solePosition = solePositionEstimate.get(robotQuadrant);
          solePosition.changeFrame(goalPosition.getReferenceFrame());
-         swingTrajectory.initializeTrajectory(solePosition, goalPosition, params.get(SWING_TRAJECTORY_GROUND_CLEARANCE), timeInterval.getDuration());
-
-         // initialize sole position feedback gains
-         taskSpaceControllerSettings.setSolePositionFeedbackGains(robotQuadrant,
-               params.getVolatileArray(SWING_POSITION_PROPORTIONAL_GAINS),
-               params.getVolatileArray(SWING_POSITION_DERIVATIVE_GAINS),
-               params.getVolatileArray(SWING_POSITION_INTEGRAL_GAINS),
-               params.get(SWING_POSITION_MAX_INTEGRAL_ERROR)
-         );
+         swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval.getDuration());
 
          // initialize contact state
-         taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
-         taskSpaceControllerSettings.setPressureUpperLimit(robotQuadrant, params.get(SWING_PRESSURE_LIMIT));
+         contactState.set(robotQuadrant, ContactState.NO_CONTACT);
       }
 
       @Override public StepEvent process()
@@ -232,7 +214,7 @@ public class QuadrupedTimedStepController
 
          // compute swing trajectory
          swingTrajectory.computeTrajectory(currentTime - liftOffTime);
-         swingTrajectory.getPosition(taskSpaceSetpoints.getSolePosition(robotQuadrant));
+         swingTrajectory.getPosition(solePositionSetpoint.get(robotQuadrant));
 
          // trigger touch down event
          if (currentTime > touchDownTime)

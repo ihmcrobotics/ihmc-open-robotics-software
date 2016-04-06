@@ -2,7 +2,7 @@ package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
-import us.ihmc.aware.controller.common.GroundPlaneEstimator;
+import us.ihmc.aware.planning.GroundPlaneEstimator;
 import us.ihmc.aware.controller.force.taskSpaceController.*;
 import us.ihmc.aware.params.ParameterMap;
 import us.ihmc.aware.params.ParameterMapRepository;

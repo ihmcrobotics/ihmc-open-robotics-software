@@ -163,7 +163,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       stepCache = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         stepCache.set(robotQuadrant, new QuadrupedTimedStep(robotQuadrant));
+         stepCache.set(robotQuadrant, new QuadrupedTimedStep());
       }
 
       // state machines
@@ -411,7 +411,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       {
          // initialize contact state
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
-         taskSpaceControllerSettings.setPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
+         taskSpaceControllerSettings.setContactPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
 
          // disable sole position feedback
          taskSpaceControllerSettings.setSolePositionFeedbackGainsToZero(robotQuadrant);
@@ -486,7 +486,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
          // initialize contact state
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
-         taskSpaceControllerSettings.setPressureUpperLimit(robotQuadrant, params.get(NO_CONTACT_PRESSURE_LIMIT));
+         taskSpaceControllerSettings.setContactPressureUpperLimit(robotQuadrant, params.get(NO_CONTACT_PRESSURE_LIMIT));
       }
 
       @Override public FootEvent process()

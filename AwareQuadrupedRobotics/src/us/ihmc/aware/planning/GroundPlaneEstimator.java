@@ -1,4 +1,4 @@
-package us.ihmc.aware.controller.common;
+package us.ihmc.aware.planning;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;

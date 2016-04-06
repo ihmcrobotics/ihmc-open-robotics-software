@@ -4,7 +4,6 @@ import us.ihmc.aware.util.ContactState;
 import us.ihmc.aware.util.DoubleWrapper;
 import us.ihmc.aware.vmc.QuadrupedContactForceLimits;
 import us.ihmc.aware.vmc.QuadrupedContactForceOptimizationSettings;
-import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelControllerSettings;
 import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
@@ -15,7 +14,7 @@ public class QuadrupedTaskSpaceControllerSettings
 {
    // contact state
    private final QuadrantDependentList<ContactState> contactState;
-   private final QuadrantDependentList<DoubleWrapper> pressureUpperLimit;
+   private final QuadrantDependentList<DoubleWrapper> contactPressureUpperLimit;
    private double jointDamping = 0.0;
 
    // command weights
@@ -43,11 +42,11 @@ public class QuadrupedTaskSpaceControllerSettings
    {
       // contact settings
       contactState = new QuadrantDependentList<>();
-      pressureUpperLimit = new QuadrantDependentList<>();
+      contactPressureUpperLimit = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactState.set(robotQuadrant, ContactState.NO_CONTACT);
-         pressureUpperLimit.set(robotQuadrant, new DoubleWrapper());
+         contactPressureUpperLimit.set(robotQuadrant, new DoubleWrapper());
       }
 
       // command weights
@@ -86,7 +85,7 @@ public class QuadrupedTaskSpaceControllerSettings
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          setContactState(robotQuadrant, ContactState.NO_CONTACT);
-         setPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
+         setContactPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
       }
       setJointDamping(0.0);
       setComForceCommandWeights(1.0, 1.0, 1.0);
@@ -108,9 +107,9 @@ public class QuadrupedTaskSpaceControllerSettings
       this.contactState.set(robotQuadrant, contactState);
    }
 
-   public void setPressureUpperLimit(RobotQuadrant robotQuadrant, double pressureUpperLimit)
+   public void setContactPressureUpperLimit(RobotQuadrant robotQuadrant, double contactPressureUpperLimit)
    {
-      this.pressureUpperLimit.get(robotQuadrant).setValue(pressureUpperLimit);
+      this.contactPressureUpperLimit.get(robotQuadrant).setValue(contactPressureUpperLimit);
    }
 
    public void setJointDamping(double jointDamping)
@@ -270,7 +269,7 @@ public class QuadrupedTaskSpaceControllerSettings
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         contactForceLimits.setPressureUpperLimit(robotQuadrant, pressureUpperLimit.get(robotQuadrant).getValue());
+         contactForceLimits.setPressureUpperLimit(robotQuadrant, contactPressureUpperLimit.get(robotQuadrant).getValue());
       }
    }
 
