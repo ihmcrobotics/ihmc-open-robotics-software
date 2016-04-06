@@ -1,6 +1,7 @@
 package us.ihmc.aware.controller.force.taskSpaceController;
 
 import us.ihmc.aware.util.ContactState;
+import us.ihmc.aware.util.DoubleWrapper;
 import us.ihmc.aware.vmc.QuadrupedContactForceLimits;
 import us.ihmc.aware.vmc.QuadrupedContactForceOptimizationSettings;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
@@ -12,21 +13,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedTaskSpaceControllerSettings
 {
-   public class DoubleWrapper
-   {
-      private double value;
-
-      public double getValue()
-      {
-         return value;
-      }
-
-      public void setValue(double value)
-      {
-         this.value = value;
-      }
-   }
-
    // contact state
    private final QuadrantDependentList<ContactState> contactState;
    private final QuadrantDependentList<DoubleWrapper> pressureUpperLimit;
@@ -267,7 +253,7 @@ public class QuadrupedTaskSpaceControllerSettings
          solePositionDerivativeGains.get(robotQuadrant)[i] = derivativeGains[i];
          solePositionIntegralGains.get(robotQuadrant)[i] = integralGains[i];
       }
-      solePositionMaxIntegralError.get(robotQuadrant).value = maxIntegralError;
+      solePositionMaxIntegralError.get(robotQuadrant).setValue(maxIntegralError);
    }
 
    public ContactState getContactState(RobotQuadrant robotQuadrant)
@@ -320,7 +306,7 @@ public class QuadrupedTaskSpaceControllerSettings
    public void getSolePositionFeedbackGains(RobotQuadrant robotQuadrant, YoEuclideanPositionGains solePositionFeedbackGains)
    {
       solePositionFeedbackGains.setProportionalGains(solePositionProportionalGains.get(robotQuadrant));
-      solePositionFeedbackGains.setIntegralGains(solePositionIntegralGains.get(robotQuadrant), solePositionMaxIntegralError.get(robotQuadrant).value);
+      solePositionFeedbackGains.setIntegralGains(solePositionIntegralGains.get(robotQuadrant), solePositionMaxIntegralError.get(robotQuadrant).getValue());
       solePositionFeedbackGains.setDerivativeGains(solePositionDerivativeGains.get(robotQuadrant));
    }
 }
