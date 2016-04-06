@@ -77,12 +77,10 @@
     </xacro:revolute_joint>
   </xacro:macro>
 
-  <xacro:macro name="v1_right_index_finger_actuators" params="prefix api">
-    <xacro:v1_actuator name="${RPFA_Actuator_Name}" api="${api}" />
-  </xacro:macro>
-
-  <xacro:macro name="v1_left_index_finger_actuators" params="prefix api">
-    <xacro:v1_actuator name="${LPFA_Actuator_Name}" api="${api}" />
+  <xacro:macro name="index_finger_transmissions_hw" params="prefix reflect">
+    <xacro:simple_forearm_position_transmission jointName="${IndexFingerPitch1JointName}" actuatorName="${prefix}IndexPitch1Actuator" nodeName="${IndexFingerPitch1Node}" actuatorApi="${IndexFingerApi}" reflect="${reflect}"/>
+    <xacro:simple_forearm_position_transmission jointName="${IndexFingerPitch2JointName}" actuatorName="${prefix}IndexPitch2Actuator" nodeName="${IndexFingerPitch2Node}" actuatorApi="${IndexFingerApi}" reflect="${reflect}"/>
+    <xacro:simple_forearm_position_transmission jointName="${IndexFingerPitch3JointName}" actuatorName="${prefix}IndexPitch3Actuator" nodeName="${IndexFingerPitch3Node}" actuatorApi="${IndexFingerApi}" reflect="${reflect}"/>
   </xacro:macro>
 
 </robot>

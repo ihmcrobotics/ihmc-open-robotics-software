@@ -20,11 +20,11 @@
 
         <xacro:microstrain_sensor sensorName="pelvisMiddleImu"
                                   parentLink="${Pelvis_Link_Name}"
-                                  origin_xyz="0.012 0.0 -0.108184035"
-                                  origin_rpy="3.14159 0.0 -3.14159" />
+                                  origin_xyz="0.150 0.0 0.08"
+                                  origin_rpy="0.0 0.0 0.7854" />
     </xacro:macro>
 
-    <xacro:macro name="v1_pelvis_sensors_usb" params="sensor_node_tag sensor_api_tag sensor_port_tag">
+    <xacro:macro name="v1_pelvis_middle_sensors_usb" params="sensor_node_tag sensor_api_tag sensor_port_tag">
         <xacro:microstrain_sensor sensorName="pelvisRearImu"
                                   parentLink="${Pelvis_Link_Name}"
                                   origin_xyz="-0.075844901 0.0 -0.111056426"
@@ -32,11 +32,44 @@
 
         <xacro:usb_microstrain_sensor sensorName="pelvisMiddleImu"
                                   parentLink="${Pelvis_Link_Name}"
-                                  origin_xyz="0.012 0.0 -0.108184035"
-                                  origin_rpy="3.14159 0.0 -3.14159"
+                                  origin_xyz="0.0 0.0 -0.10819638"
+                                  origin_rpy="3.14159 0.0 0.0"
                                   sensor_node="${sensor_node_tag}"
                                   sensor_api="${sensor_api_tag}"
                                   sensor_port="${sensor_port_tag}" />
     </xacro:macro>
 
+    <xacro:macro name="v1_pelvis_rear_sensors_usb" params="sensor_node_tag sensor_api_tag sensor_port_tag">
+        <xacro:usb_microstrain_sensor sensorName="pelvisRearImu"
+                                  parentLink="${Pelvis_Link_Name}"
+                                  origin_xyz="-0.075844901 0.0 -0.111056426"
+                                  origin_rpy="-3.14159 0.476467 -3.14159" 
+                        				  sensor_node="${sensor_node_tag}"
+                        				  sensor_api="${sensor_api_tag}"
+                        				  sensor_port="${sensor_port_tag}" />
+
+        <xacro:microstrain_sensor sensorName="pelvisMiddleImu"
+                                  parentLink="${Pelvis_Link_Name}"
+                                  origin_xyz="0.0 0.0 -0.10819638"
+                                  origin_rpy="3.14159 0.0 0.0" />
+	
+    </xacro:macro>
+
+    <xacro:macro name="v1_pelvis_sensors_usb" params="middle_sensor_node_tag middle_sensor_api_tag middle_sensor_port_tag rear_sensor_node_tag rear_sensor_api_tag rear_sensor_port_tag">
+        <xacro:usb_microstrain_sensor sensorName="pelvisRearImu"
+                                  parentLink="${Pelvis_Link_Name}"
+                                  origin_xyz="-0.075844901 0.0 -0.111056426"
+                                  origin_rpy="-3.14159 0.476467 -3.14159" 
+                                  sensor_node="${rear_sensor_node_tag}"
+                                  sensor_api="${rear_sensor_api_tag}"
+                                  sensor_port="${rear_sensor_port_tag}" />
+
+        <xacro:usb_microstrain_sensor sensorName="pelvisMiddleImu"
+                                  parentLink="${Pelvis_Link_Name}"
+                                  origin_xyz="0.0 0.0 -0.10819638"
+                                  origin_rpy="3.14159 0.0 0.0"
+                                  sensor_node="${middle_sensor_node_tag}"
+                                  sensor_api="${middle_sensor_api_tag}"
+                                  sensor_port="${middle_sensor_port_tag}" />
+    </xacro:macro>
 </robot>

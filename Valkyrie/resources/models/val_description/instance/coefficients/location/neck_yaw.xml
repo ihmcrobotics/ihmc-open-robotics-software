@@ -1,0 +1,10 @@
+<CoeffData>
+  <Properties>
+    <CalibrationDate/>
+    <FileGenDate date="2013-10-25" time="21:34:25.477992"/>
+  </Properties>
+  <Coeffs>
+    <Coeff id="JointSafety_LowerLimit_Rad" value="-1.09"/>
+    <Coeff id="JointSafety_UpperLimit_Rad" value="1.09"/>
+  </Coeffs>
+</CoeffData>

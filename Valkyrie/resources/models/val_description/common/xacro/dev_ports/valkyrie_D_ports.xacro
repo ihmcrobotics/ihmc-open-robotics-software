@@ -1,0 +1,9 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="valkyrie_D_ports">
+
+    <xacro:property name="pelvis_middle_imu_port" value="UNKNOWN" />
+
+    <xacro:property name="pelvis_rear_imu_port" value="/dev/serial/by-id/usb-Lord_Microstrain_Lord_Inertial_Sensor_0000__6233.51067-if00" />
+
+    <xacro:property name="torso_left_imu_port" value="/dev/serial/by-id/usb-Lord_Microstrain_Lord_Inertial_Sensor_0000__6233.47093-if00" />
+
+</robot>

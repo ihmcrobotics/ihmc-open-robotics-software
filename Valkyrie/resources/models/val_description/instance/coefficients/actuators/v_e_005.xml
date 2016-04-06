@@ -4,7 +4,7 @@
         <FileGenDate date="2014-12-02" time="18:51:37.459301"/>
     </Properties>
     <ClassFile id="e.xml"/>
-    <ControllerFile id="e_sv.xml"/>
+    <ControllerFile id="e_dh.xml"/>
     <LocationFile id="testbench.xml"/>
     <SensorsFile id="sensors.xml"/>
     <SafetyFile id="safety.xml"/>
@@ -15,7 +15,6 @@
         <Coeff id="EncoderIndexOffset" value="4.6"/>
         <Coeff id="ForceControl_MotorForceDirection" value="1.0"/>
         <Coeff id="ForceOffset_N" value="-43.0"/>
-        <Coeff id="JointForceLimit_N" value="250000.0"/>
         <Coeff id="JointKinematicDir" value="1.0"/>
         <Coeff id="JointMaxValue" value="3.14159"/>
         <Coeff id="JointMinValue" value="-3.14159"/>
