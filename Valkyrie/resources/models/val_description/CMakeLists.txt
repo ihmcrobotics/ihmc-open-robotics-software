@@ -6,7 +6,9 @@ project(val_description)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   xacro 
-  rospy
+  rospy 
+  nasa_common_cmake 
+  nasa_common_logging
 )
 
 catkin_package(
@@ -29,8 +31,6 @@ file(GLOB instance_xacro_files ${PATH_TO_ROBOTS_INSTANCE}/*.xacro)
 
 set(URDF_OUTPUT_PATH ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/model/urdf)
 set(INSTANCE_OUTPUT_PATH ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/instance/instances/instance_files)
-
-message(${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 # Create output directories
 file(MAKE_DIRECTORY ${URDF_OUTPUT_PATH})
@@ -78,6 +78,10 @@ install(DIRECTORY model
 )
 
 install(DIRECTORY instance
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
+install(DIRECTORY common 
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
