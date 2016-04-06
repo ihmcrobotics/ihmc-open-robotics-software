@@ -41,7 +41,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private static final double EPSILON_FOR_DESIREDS = 1.0e-4;
+   private static final double EPSILON_FOR_DESIREDS = 1.2e-4;
    private static final double EPSILON_FOR_HEIGHT = 1.0e-2;
 
    private static final boolean DEBUG = false;
@@ -96,7 +96,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       drcSimulationTestHelper.send(pelvisTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 + trajectoryTime);
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
