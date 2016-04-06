@@ -78,4 +78,15 @@ public class FourBarKinematicLoopTools
          throw new RuntimeException("The minimum valid joint angle for the master joint of the " + fourBarName + " four bar is " + minValidMasterJointAngle + " to avoid flipping, but was set to " + masterJointA.getJointLimitLower());
       }
    }
+   
+   public static PassiveRevoluteJoint setFourBarOutputJoint(PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD)
+   {
+      //Check for passive joint B
+      if(passiveJointD.getSuccessor().getChildrenJoints() != null)
+      {
+         return passiveJointD;
+      }
+      else return passiveJointB; // TODO change
+     
+   }
 }
