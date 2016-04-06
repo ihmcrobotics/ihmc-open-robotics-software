@@ -2,15 +2,17 @@ package us.ihmc.robotics.math.trajectories;
 
 import org.junit.Test;
 
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 
-/**
- * Created by shadylady on 2/17/16.
- */
+
 public class IntermediateWaypointVelocityGeneratorTest
 {
-   @Test public void test()
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
+   public void test()
    {
       final ArrayList<Vector3d> waypoints;
       final ArrayList<Double> time;

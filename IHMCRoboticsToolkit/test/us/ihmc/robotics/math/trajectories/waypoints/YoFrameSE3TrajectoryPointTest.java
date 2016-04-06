@@ -27,11 +27,13 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPoin
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class YoFrameSE3TrajectoryPointTest
 {
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testCommonUsageExample()
    {
       String namePrefix = "point";
@@ -86,7 +88,8 @@ public class YoFrameSE3TrajectoryPointTest
       assertTrue(expectedYoFrameSE3TrajectoryPoint.epsilonEquals(yoFrameSE3TrajectoryPoint, 1e-10));
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testConstructor()
    {
       double epsilon = 1.0e-20;
@@ -108,7 +111,8 @@ public class YoFrameSE3TrajectoryPointTest
             expectedLinearVelocity, expectedAngularVelocity, testedYoFrameSE3TrajectoryPoint, epsilon);
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSetters()
    {
       double epsilon = 1.0e-20;
@@ -175,7 +179,8 @@ public class YoFrameSE3TrajectoryPointTest
             testedYoFrameSE3TrajectoryPoint, epsilon);
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testChangeFrame() throws Exception
    {
       double epsilon = 1.0e-10;
@@ -217,7 +222,8 @@ public class YoFrameSE3TrajectoryPointTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSetToZero() throws Exception
    {
       double epsilon = 1.0e-10;
@@ -269,7 +275,8 @@ public class YoFrameSE3TrajectoryPointTest
             expectedLinearVelocity, expectedAngularVelocity, testedYoFrameSE3TrajectoryPoint, epsilon);
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSetToNaN() throws Exception
    {
       Random random = new Random(21651016L);
@@ -383,7 +390,8 @@ public class YoFrameSE3TrajectoryPointTest
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSomeSetsAngGets()
    {
       String namePrefix = "point";
@@ -517,7 +525,8 @@ public class YoFrameSE3TrajectoryPointTest
       assertEquals(expectedString, string);
    }
    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 5.9)
+   @Test(timeout = 30000)
    public void testSomeMoreSettersAndGetters()
    {
       String namePrefix = "point";
