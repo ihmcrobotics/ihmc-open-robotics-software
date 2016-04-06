@@ -8,6 +8,7 @@ import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
 import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.params.ParameterPacketListener;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineYoVariableTrigger;
@@ -53,6 +54,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             requestedEvent.set(packet.get());
          }
       });
+
+      ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
 
       this.controllerContext = new QuadrupedForceControllerContext(runtimeEnvironment, parameters, registry);
       this.stateMachine = buildStateMachine(runtimeEnvironment, parameters, inputProvider);

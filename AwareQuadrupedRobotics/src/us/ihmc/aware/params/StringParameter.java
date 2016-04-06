@@ -29,7 +29,7 @@ public class StringParameter extends Parameter
    }
 
    @Override
-   protected String dumpValue()
+   String dumpValue()
    {
       return value;
    }

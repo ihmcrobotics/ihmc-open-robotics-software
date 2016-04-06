@@ -11,7 +11,6 @@ public abstract class Parameter
    public Parameter(String path)
    {
       this.path = path;
-      ParameterRegistry.getInstance().register(this);
    }
 
    public void addChangedListener(ParameterChangeListener listener)
@@ -66,7 +65,7 @@ public abstract class Parameter
       return path + "=" + dumpValue();
    }
 
-   protected abstract String dumpValue();
+   abstract String dumpValue();
 
    public String getPath()
    {

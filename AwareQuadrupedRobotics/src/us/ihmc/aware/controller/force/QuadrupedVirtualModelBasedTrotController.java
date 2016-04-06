@@ -13,6 +13,7 @@ import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceEsti
 import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceEstimator;
 import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceSetpoints;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.params.ParameterRegistry;
 import us.ihmc.aware.planning.PiecewiseForwardDcmTrajectory;
 import us.ihmc.aware.planning.PiecewisePeriodicDcmTrajectory;
 import us.ihmc.aware.planning.ThreeDoFMinimumJerkTrajectory;
@@ -43,7 +44,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    // parameters
-   private final ParameterFactory parameterFactory = new ParameterFactory(QuadrupedVirtualModelBasedTrotController.class.getSimpleName());
+   private final ParameterFactory parameterFactory = new ParameterFactory(getClass().getName());
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 2.0);
    private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory.createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
    private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory.createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);

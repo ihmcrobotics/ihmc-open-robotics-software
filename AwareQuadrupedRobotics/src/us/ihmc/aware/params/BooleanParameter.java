@@ -29,7 +29,7 @@ public class BooleanParameter extends Parameter
    }
 
    @Override
-   protected String dumpValue()
+   String dumpValue()
    {
       return Boolean.toString(value);
    }
