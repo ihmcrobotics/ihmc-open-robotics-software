@@ -15,14 +15,13 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
-import org.pitest.mutationtest.commandline.MutationCoverageReport;
 
 import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
 /**
@@ -693,6 +692,8 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
    
    public static void main(String[] args)
    {
-      MutationCoverageReport.main(new String[] {"--reportDir", "pitest", "--targetClasses", "us.ihmc.robotics.geometry.FramePoint", "--targetTests", "us.ihmc.robotics.geometry.FramePointTest", "--sourceDirs", "src,test"});
+      String targetTests = "us.ihmc.robotics.geometry.FramePointTest";
+      String targetClasses = "us.ihmc.robotics.geometry.FrameTuple,us.ihmc.robotics.geometry.FramePoint";
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
    }
 }
