@@ -12,7 +12,7 @@
 
     	<xacro:simple_mechanism name="${KneePitchJointName}" serial_number="${j4_serial_number}" node="${KneePitchNode}"/>
 
-    	<xacro:two_active_joint_mechanism mechanism_name="${prefix}Ankle" actuator0_name="${prefix}AnkleLeftActuator" actuator1_name="${prefix}AnkleRightActuator" joint0_name="${AnklePitchJointName}" joint1_name="${AnkleRollJointName}" actuator0_serial="${ankle_left_actuator_serial}" actuator1_serial="${ankle_right_actuator_serial}" actuator0_node="${AnkleLeftActuatorNode}" actuator1_node="${AnkleRightActuatorNode}" />
+    	<xacro:two_active_joint_mechanism mechanism_name="${prefix}Ankle" actuator0_name="${AnkleLeftActuatorName}" actuator1_name="${AnkleRightActuatorName}" joint0_name="${AnklePitchJointName}" joint1_name="${AnkleRollJointName}" actuator0_serial="${ankle_left_actuator_serial}" actuator1_serial="${ankle_right_actuator_serial}" actuator0_node="${AnkleLeftActuatorNode}" actuator1_node="${AnkleRightActuatorNode}" />
     </xacro:macro>
 
 </robot>

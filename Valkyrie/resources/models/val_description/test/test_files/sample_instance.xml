@@ -15,7 +15,7 @@
   </Channels>
   <Mechanisms>
     <Mechanism id="left_hip_yaw" type="simple">
-      <SerialNumber id="v_a_001"/>
+      <SerialNumber id="test_v_a_001"/>
       <Node id="/left_leg/j1"/>
       <CalibrationFile id="valkyrie_A_left_hip_yaw_cal.xml"/>
     </Mechanism>
@@ -27,12 +27,26 @@
         <CalibrationFile id="valkyrie_A_left_ankle_roll_cal.xml"/>
       </Joint>
       <Actuator id="left_ankle_actuator0">
-        <SerialNumber id="v_e_001"/>
+        <SerialNumber id="test_v_e_001"/>
         <Node id="/left_leg/ankle/actuator0"/>
       </Actuator>
       <Actuator id="left_ankle_actuator1">
-        <SerialNumber id="v_e_002"/>
+        <SerialNumber id="test_v_e_002"/>
         <Node id="/left_leg/ankle/actuator1"/>
+      </Actuator>
+    </Mechanism>
+    <Mechanism id="waist" type="complex">
+      <Joint id="pitch" type="active">
+      </Joint>
+      <Joint id="roll" type="active">
+      </Joint>
+      <Actuator id="waist_left_actuator">
+        <SerialNumber id="test_v_e_003"/>
+        <Node id="/trunk/left_actuator"/>
+      </Actuator>
+      <Actuator id="left_ankle_actuator1">
+        <SerialNumber id="test_v_e_004"/>
+        <Node id="/trunk/right_actuator"/>
       </Actuator>
     </Mechanism>
   </Mechanisms>

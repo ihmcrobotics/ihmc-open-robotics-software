@@ -19,9 +19,9 @@
     <Coeff id="TorqueControl_Current2MotorTorque" value="0.05"/>
     <Coeff id="TorqueControl_MotorTorqueDirection" value="1.0"/>
     <Coeff id="TorqueControl_FFd_fc_Hz" value="30.0"/>
-    <Coeff id="TorqueControl_Kd" value="0.02"/>
+    <Coeff id="TorqueControl_Kd" value="0.017"/>
     <Coeff id="TorqueControl_Kd_fc_Hz" value="100.0"/>
-    <Coeff id="TorqueControl_Kp" value="3.966"/>
+    <Coeff id="TorqueControl_Kp" value="3.97"/>
     <Coeff id="TorqueControl_PD_damp" value="0.95"/>
     <Coeff id="TorqueControl_ParallelDamping" value="0.0"/>
     <Coeff id="TorqueControl_TdobWindupLimit_Nm" value="250.0"/>
@@ -33,7 +33,8 @@
     <Coeff id="TorqueControl_enableFF" value="1.0"/>
     <Coeff id="TorqueControl_enablePID" value="1.0"/>
     <Coeff id="TorqueControl_m" value="1.5"/>
-    <Coeff id="EffortControl_Alpha" value="0.75"/>
+    <Coeff id="EffortControl_Alpha" value="0.25"/>
     <Coeff id="EffortControl_AlphaDot" value="0.0"/>
+    <Coeff id="EffortControl_OnlineTuning" value="0.0"/>
   </Coeffs>
 </CoeffData>

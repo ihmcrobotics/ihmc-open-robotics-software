@@ -1,10 +1,6 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="generic_models">
 
-  <xacro:macro name="v1_actuator" params="name api">
-    <actuator name="${name}" type="${api}"/>
-  </xacro:macro>
-
   <xacro:macro name="standard_link" params="name mass origin_rpy origin_xyz ixx ixy ixz iyy iyz izz visual_mesh collision_mesh">
     <link name="${name}">
       <inertial>
@@ -230,6 +226,34 @@
     </transmission>
   </xacro:macro>
 
+  <xacro:macro name="simple_position_transmission" params="jointName actuatorName nodeName actuatorApi">
+    <transmission name="${jointName}Transmission">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${jointName}">
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${actuatorName}">
+        <node name="${nodeName}"/>
+        <mechanicalReduction>1</mechanicalReduction>
+        <api name="${actuatorApi}" />
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+  <xacro:macro name="simple_forearm_position_transmission" params="jointName actuatorName nodeName actuatorApi reflect">
+    <transmission name="${jointName}Transmission">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${jointName}">
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${actuatorName}">
+        <node name="${nodeName}"/>
+        <mechanicalReduction>${reflect}</mechanicalReduction>
+        <api name="${actuatorApi}" />
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
   <xacro:macro name="pushrod_transmission" params="transmissionName transmissionType joint1Name joint2Name joint1Role joint2Role actuator1Name actuator2Name actuator1Node actuator2Node actuator1Api actuator2Api actuator1Role actuator2Role">
     <transmission name="${transmissionName}">
       <type>robot_transmission_interface/${transmissionType}</type>
@@ -252,6 +276,90 @@
         <role>${actuator2Role}</role>
         <mechanicalReduction>1</mechanicalReduction>
         <api name="${actuator2Api}"/>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+  <xacro:macro name="pushrod_transmission_position_control" params="transmissionName transmissionType joint1Name joint2Name joint1Role joint2Role actuator1Name actuator2Name actuator1Node actuator2Node actuator1Api actuator2Api actuator1Role actuator2Role">
+    <transmission name="${transmissionName}">
+      <type>robot_transmission_interface/${transmissionType}</type>
+      <joint name="${joint1Name}">
+        <role>${joint1Role}</role>
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <joint name="${joint2Name}">
+        <role>${joint2Role}</role>
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+       <actuator name="${actuator1Name}">
+        <node name="${actuator1Node}"/>
+        <role>${actuator1Role}</role>
+        <mechanicalReduction>1</mechanicalReduction>
+        <api name="${actuator1Api}"/>
+      </actuator>
+      <actuator name="${actuator2Name}">
+        <node name="${actuator2Node}"/>
+        <role>${actuator2Role}</role>
+        <mechanicalReduction>1</mechanicalReduction>
+        <api name="${actuator2Api}"/>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+  <xacro:macro name="athena1_transmission" params="prefix transmissionName actuatorApi nodeName">
+    <transmission name="${transmissionName}">
+      <type>robot_transmission_interface/AthenaForearmTransmission</type>
+      <joint name="${prefix}WristPitch">
+        <role>wristPitch</role>
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <joint name="${prefix}WristRoll">
+        <role>wristRoll</role>
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <joint name="${prefix}ThumbMotorRoll">
+        <role>thumbRoll</role>
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <joint name="${prefix}ThumbMotorPitch1">
+        <role>thumbPitch1</role>
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${prefix}Athena1Actuator">
+        <role>athena1Actuator</role>
+        <node name="${nodeName}"/>
+        <mechanicalReduction>1</mechanicalReduction>
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+        <api name="${actuatorApi}"/>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+  <xacro:macro name="athena2_transmission" params="prefix transmissionName actuatorApi nodeName">
+    <transmission name="${transmissionName}">
+      <type>robot_transmission_interface/AthenaFingerTransmission</type>
+      <joint name="${prefix}ThumbMotorPitch2">
+        <role>thumbPitch2</role>
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <joint name="${prefix}IndexFingerMotorPitch1">
+        <role>indexFingerPitch1</role>
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <joint name="${prefix}MiddleFingerMotorPitch1">
+        <role>middleFingerPitch1</role>
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <joint name="${prefix}PinkyMotorPitch1">
+        <role>pinkyPitch1</role>
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${prefix}Athena2Actuator">
+        <role>athena2Actuator</role>
+        <node name="${nodeName}"/>
+        <mechanicalReduction>1</mechanicalReduction>
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+        <api name="${actuatorApi}"/>
       </actuator>
     </transmission>
   </xacro:macro>
