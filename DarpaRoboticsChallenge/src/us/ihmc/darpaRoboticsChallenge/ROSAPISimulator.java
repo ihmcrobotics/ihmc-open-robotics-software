@@ -58,10 +58,11 @@ abstract public class ROSAPISimulator
       PacketCommunicator rosAPI_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
 
       networkProcessorParameters.enableROSAPICommunicator(true);
+      networkProcessorParameters.enableBehaviorModule(true);
+      networkProcessorParameters.enableBehaviorVisualizer(true);
+
       if (runAutomaticDiagnosticRoutine)
       {
-         networkProcessorParameters.enableBehaviorModule(true);
-         networkProcessorParameters.enableBehaviorVisualizer(true);
          networkProcessorParameters.enableAutomaticDiagnostic(true, 5);
       }
 
