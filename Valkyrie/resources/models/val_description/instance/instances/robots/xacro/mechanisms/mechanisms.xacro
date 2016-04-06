@@ -8,7 +8,7 @@
 
 </xacro:macro>
 
-<xacro:macro name="joint" params="name type calibration_file">
+<xacro:macro name="joint" params="name type">
 	<Joint id="${name}" type="${type}">
 	</Joint>
 </xacro:macro>
@@ -22,11 +22,21 @@
 
 <xacro:macro name="two_active_joint_mechanism" params="mechanism_name actuator0_name actuator1_name joint0_name joint1_name actuator0_serial actuator0_node actuator1_serial actuator1_node " >
 	<Mechanism id="${mechanism_name}" type="complex">
-		<xacro:joint name="${joint0_name}" type="active" calibration_file="${instance}_${mechanism_name}_${joint0_name}_cal.xml"/>
-		<xacro:joint name="${joint1_name}" type="active" calibration_file="${instance}_${mechanism_name}_${joint1_name}_cal.xml"/>
+		<xacro:joint name="${joint0_name}" type="active"/>
+		<xacro:joint name="${joint1_name}" type="active"/>
 		<xacro:actuator name="${actuator0_name}" serial_number="${actuator0_serial}" node="${actuator0_node}" />
 		<xacro:actuator name="${actuator1_name}" serial_number="${actuator1_serial}" node="${actuator1_node}" />
 	</Mechanism>
+</xacro:macro>
+
+<xacro:macro name="forearm" params="mechanism_name serial_number athena1_node athena2_node">
+    <Mechanism id="${mechanism_name}" type="forearm">
+            <SerialNumber id="${serial_number}"/>
+            <Nodes>
+                <Athena1 id="${athena1_node}"/>
+                <Athena2 id="${athena2_node}"/>
+            </Nodes>
+    </Mechanism>
 </xacro:macro>
 
 </robot>

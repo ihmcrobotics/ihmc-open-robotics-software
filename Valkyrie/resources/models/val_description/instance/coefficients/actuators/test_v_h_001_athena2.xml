@@ -1,0 +1,13 @@
+<CoeffData>
+    <Properties>
+        <CalibrationDate/>
+        <FileGenDate date="2013-10-04" time="19:23:42.085597"/>
+    </Properties>
+    <Coeffs>
+        <Coeff description="" value="0.0" id="Fing1_elecoffset"/>
+        <Coeff description="" value="100.0" id="Fing1_locmdlmt"/>
+        <Coeff description="" value="5214.0" id="Fing1_hicmdlmt"/>
+        <Coeff description="" value="1.0" id="Fing1_posKP"/>
+        <Coeff description="" value="0.0" id="Fing1_posKD"/>
+    </Coeffs>
+</CoeffData>
