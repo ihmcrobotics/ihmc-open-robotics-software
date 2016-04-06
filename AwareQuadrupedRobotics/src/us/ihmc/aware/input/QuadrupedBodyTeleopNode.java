@@ -38,7 +38,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
    private final DoubleParameter yawScaleParameter = parameterFactory.createDouble("paramYawScale", 0.15);
    private final DoubleParameter xScaleParameter = parameterFactory.createDouble("paramXScale", 0.20);
    private final DoubleParameter yScaleParameter = parameterFactory.createDouble("paramYScale", 0.10);
-   private final DoubleParameter vxScaleParameter = parameterFactory.createDouble("paramVxScale", 0.1);
+   private final DoubleParameter vxScaleParameter = parameterFactory.createDouble("paramVxScale", 1.0);
    private final DoubleParameter vyScaleParameter = parameterFactory.createDouble("paramVyScale", 0.5);
    private final DoubleParameter vzScaleParameter = parameterFactory.createDouble("paramVzScale", 0.25);
    private final DoubleParameter wzScaleParameter = parameterFactory.createDouble("paramWzScale", 1.0);
