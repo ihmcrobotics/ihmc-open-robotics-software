@@ -10,5 +10,7 @@
     <Coeff id="PhaseACurOffset" value="2048.0"/>
     <Coeff id="PhaseBCurOffset" value="2048.0"/>
     <Coeff id="PhaseCCurOffset" value="2045.0"/>
+    <Coeff id="Position_Alpha" value="0.9751"/>
+    <Coeff id="Velocity_Alpha" value="0.9751"/>
   </Coeffs>
 </CoeffData>

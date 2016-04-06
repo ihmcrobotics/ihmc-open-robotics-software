@@ -1,0 +1,21 @@
+<CoeffData>
+  <Properties>
+    <CalibrationDate/>
+    <FileGenDate date="2014-09-06" time="15:42:53.585575"/>
+  </Properties>
+  <Coeffs>
+    <Coeff id="Commutation_Select" value="2.0"/>
+    <Coeff id="CurrVelFilter_fc_Hz" value="200.0"/>
+    <Coeff id="DeadTimeCompensation" value="0.02"/>
+    <Coeff id="JointVelFilter_fc_Hz" value="100.0"/>
+    <Coeff id="MotorAccFilter_fc_Hz" value="50.0"/>
+    <Coeff id="MotorVelFilter_fc_Hz" value="800.0"/>
+    <Coeff id="PositionControl_Kd" value="0.0"/>
+    <Coeff id="PositionControl_Kd_fc_Hz" value="50.0"/>
+    <Coeff id="PositionControl_Kp" value="50.0"/>
+    <Coeff id="PositionControl_SensorFeedback" value="4.0"/>
+    <Coeff id="PositionControl_MotorTorqueDirection" value="1.0"/>
+    <Coeff id="SpaceVector_CurrentToSV" value="1.0"/>
+    <Coeff id="SpaceVector_MaxNormVoltage" value="0.666"/>
+  </Coeffs>
+</CoeffData>

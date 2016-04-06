@@ -3,7 +3,6 @@
   <xacro:include filename="$(find val_description)/common/xacro/joint_names/valkyrie_joint_names.xacro"/>
   <xacro:include filename="$(find val_description)/common/xacro/actuator_names/valkyrie_actuator_names.xacro"/>
   <xacro:include filename="$(find val_description)/common/xacro/nodes/valkyrie_nodes.xacro"/>
-  <xacro:include filename="$(find val_description)/common/xacro/api/valkyrie_api.xacro"/>
   <xacro:include filename="$(find val_description)/model/robots/common/xacro/leg/joint_axes.xacro"/>
   <xacro:include filename="$(find val_description)/model/robots/common/xacro/leg/link_names.xacro"/>
   <xacro:include filename="$(find val_description)/model/robots/common/xacro/leg/joint_limits.xacro"/>
@@ -84,7 +83,7 @@
         <xacro:if value="${(-reflect+1)/2}">
         <limit effort="${HipYawTorqueLimit}" lower="${HipYawPositionLimit_Lower}" upper="${HipYawPositionLimit_Upper}" velocity="${HipYawVelocityLimit}"/>
         </xacro:if>
-        <controller_gains Kp="15000" Kd="500"/>
+        <controller_gains Kp="0.0" Kd="0.0" Ki="0.0"/>
     </xacro:revolute_joint_ex>
 
     <xacro:revolute_joint_ex jointName="${HipRollJointName}"
@@ -99,7 +98,7 @@
         <xacro:if value="${(-reflect+1)/2}">
         <limit effort="${HipRollTorqueLimit}" lower="${HipRollPositionLimit_Lower}" upper="${HipRollPositionLimit_Upper}" velocity="${HipRollVelocityLimit}"/>
         </xacro:if>
-        <controller_gains Kp="15000" Kd="500"/>
+        <controller_gains Kp="0.0" Kd="0.0" Ki="0.0"/>
     </xacro:revolute_joint_ex>
 
     <xacro:revolute_joint_ex jointName="${HipPitchJointName}"
@@ -109,7 +108,7 @@
                           axis="${HipPitchRotationAxis}"
                           damping="0.1" friction="0.0">
         <limit effort="${HipPitchTorqueLimit}" lower="${HipPitchPositionLimit_Lower}" upper="${HipPitchPositionLimit_Upper}" velocity="${HipPitchVelocityLimit}"/>
-        <controller_gains Kp="15000" Kd="500"/>
+        <controller_gains Kp="0.0" Kd="0.0" Ki="0.0"/>
     </xacro:revolute_joint_ex>
 
     <xacro:revolute_joint_ex jointName="${KneePitchJointName}"
@@ -119,7 +118,7 @@
                           axis="${KneePitchRotationAxis}"
                           damping="0.1" friction="0.0">
         <limit effort="${KneePitchTorqueLimit}" lower="${KneePitchPositionLimit_Lower}" upper="${KneePitchPositionLimit_Upper}" velocity="${KneePitchVelocityLimit}"/>
-        <controller_gains Kp="15000" Kd="500"/>
+        <controller_gains Kp="0.0" Kd="0.0" Ki="0.0"/>
     </xacro:revolute_joint_ex>
   </xacro:macro>
 
@@ -132,7 +131,7 @@
                           axis="${AnklePitchRotationAxis}"
                           damping="0.1" friction="0.0">
         <limit effort="${AnklePitchTorqueLimit}" lower="${AnklePitchPositionLimit_Lower}" upper="${AnklePitchPositionLimit_Upper}" velocity="${AnklePitchVelocityLimit}"/>
-        <controller_gains Kp="15000" Kd="400"/>
+        <controller_gains Kp="0.0" Kd="0.0" Ki="0.0"/>
     </xacro:revolute_joint_ex>
 
     <xacro:revolute_joint_ex jointName="${AnkleRollJointName}"
@@ -142,7 +141,7 @@
                           axis="${HipRollRotationAxis}"
                           damping="0.3" friction="0.0">
         <limit effort="${AnkleRollTorqueLimit}" lower="${AnkleRollPositionLimit_Lower}" upper="${AnkleRollPositionLimit_Upper}" velocity="${AnkleRollVelocityLimit}"/>
-        <controller_gains Kp="15000" Kd="400"/>
+        <controller_gains Kp="0.0" Kd="0.0" Ki="0.0"/>
     </xacro:revolute_joint_ex>
   </xacro:macro>
 

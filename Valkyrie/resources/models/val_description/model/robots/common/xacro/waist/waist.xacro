@@ -3,7 +3,6 @@
   <xacro:include filename="$(find val_description)/common/xacro/joint_names/valkyrie_joint_names.xacro"/>
   <xacro:include filename="$(find val_description)/common/xacro/actuator_names/valkyrie_actuator_names.xacro"/>
   <xacro:include filename="$(find val_description)/common/xacro/nodes/valkyrie_nodes.xacro"/>
-  <xacro:include filename="$(find val_description)/common/xacro/api/valkyrie_api.xacro"/>
   <xacro:include filename="$(find val_description)/model/robots/common/xacro/waist/joint_axes.xacro"/>
   <xacro:include filename="$(find val_description)/model/robots/common/xacro/waist/joint_axes.xacro"/>
   <xacro:include filename="$(find val_description)/model/robots/common/xacro/waist/link_names.xacro"/>
@@ -22,7 +21,7 @@
                           axis="${TorsoYawRotationAxis}"
                           damping="0.1" friction="0.0">
         <limit effort="${TorsoYawTorqueLimit}" lower="${TorsoYawPositionLimit_Lower}" upper="${TorsoYawPositionLimit_Upper}" velocity="${TorsoYawVelocityLimit}"/>
-        <controller_gains Kp="20000" Kd="400"/>
+        <controller_gains Kp="0.0" Kd="0.0" Ki="0.0"/>
     </xacro:revolute_joint_ex>
 
     <xacro:revolute_joint_ex jointName="${TorsoPitchJointName}"
@@ -32,7 +31,7 @@
                           axis="${TorsoPitchRotationAxis}"
                           damping="0.1" friction="0.0">
         <limit effort="${TorsoPitchTorqueLimit}" lower="${TorsoPitchPositionLimit_Lower}" upper="${TorsoPitchPositionLimit_Upper}" velocity="${TorsoPitchVelocityLimit}"/>
-        <controller_gains Kp="20000" Kd="400"/>
+        <controller_gains Kp="0.0" Kd="0.0" Ki="0.0"/>
     </xacro:revolute_joint_ex>
 
 
@@ -43,7 +42,7 @@
                           axis="${TorsoRollRotationAxis}"
                           damping="0.1" friction="0.0">
         <limit effort="${TorsoRollTorqueLimit}" lower="${TorsoRollPositionLimit_Lower}" upper="${TorsoRollPositionLimit_Upper}" velocity="${TorsoRollVelocityLimit}"/>
-        <controller_gains Kp="20000" Kd="400"/>
+        <controller_gains Kp="0.0" Kd="0.0" Ki="0.0"/>
     </xacro:revolute_joint_ex>
   </xacro:macro>
 
@@ -78,17 +77,35 @@
     <xacro:make_waist_common waist_root_link="${waist_root_link}"/>
   </xacro:macro>
 
-  <xacro:macro name="waist_actuators"  params="name1 type1 name2 type2 name3 type3">
-    <actuator name="${name1}" type="${type1}"/>
-    <actuator name="${name2}" type="${type2}"/>
-    <actuator name="${name3}" type="${type3}"/>
-  </xacro:macro>
-
   <xacro:macro name="v1_trunk_sensors">
-    <xacro:microstrain_sensor sensorName="leftTorsoIMU"
+    <xacro:microstrain_sensor sensorName="leftTorsoImu"
                               parentLink="${TorsoRollLinkName}"
-                              origin_xyz="-0.046863 0.134239 0.3630676"
-                              origin_rpy="1.57 0 3.14" />
+                              origin_xyz="-0.0627634 0.134239 0.3630676"
+                              origin_rpy="-1.5707 0.0 0.0" />
+
+    <xacro:flea3_camera sensorName="rightHazardCamera"
+                        parentLink="${TorsoRollLinkName}"
+                        origin_xyz="0.0345 -0.0406 0.1135"
+                        origin_rpy="1.57 0.0 1.57"
+                        imageFormat="R8G8B8"
+                        frameRate="60"/>
+
+    <xacro:flea3_camera sensorName="leftHazardCamera"
+                        parentLink="${TorsoRollLinkName}"
+                        origin_xyz="0.0345 0.0406 0.1135"
+                        origin_rpy="1.57 0.0 1.57"
+                        imageFormat="R8G8B8"
+                        frameRate="60"/>
+   </xacro:macro>
+
+  <xacro:macro name="v1_trunk_sensors_usb" params="sensor_node_tag sensor_api_tag sensor_port_tag">
+    <xacro:usb_microstrain_sensor sensorName="leftTorsoImu"
+                              parentLink="${TorsoRollLinkName}"
+                              origin_xyz="-0.0627634 0.134239 0.3630676"
+                              origin_rpy="-1.5707 0.0 0.0"
+                              sensor_node="${sensor_node_tag}"
+                              sensor_api="${sensor_api_tag}"
+                              sensor_port="${sensor_port_tag}" />
 
     <xacro:flea3_camera sensorName="rightHazardCamera"
                         parentLink="${TorsoRollLinkName}"
