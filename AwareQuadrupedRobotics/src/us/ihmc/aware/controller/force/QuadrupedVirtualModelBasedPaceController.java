@@ -2,7 +2,7 @@ package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
-import us.ihmc.aware.controller.common.GroundPlaneEstimator;
+import us.ihmc.aware.planning.GroundPlaneEstimator;
 import us.ihmc.aware.controller.force.taskSpaceController.*;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterMap;
@@ -25,7 +25,6 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceController
 {
@@ -387,7 +386,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
-            taskSpaceControllerSettings.setPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
+            taskSpaceControllerSettings.setContactPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
          }
 
          // compute ground plane estimate
@@ -498,8 +497,8 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
             // initialize contact state
             taskSpaceControllerSettings.setContactState(swingQuadrant, ContactState.NO_CONTACT);
             taskSpaceControllerSettings.setContactState(supportQuadrant, ContactState.IN_CONTACT);
-            taskSpaceControllerSettings.setPressureUpperLimit(swingQuadrant, params.get(NO_CONTACT_PRESSURE_LIMIT));
-            taskSpaceControllerSettings.setPressureUpperLimit(supportQuadrant, Double.MAX_VALUE);
+            taskSpaceControllerSettings.setContactPressureUpperLimit(swingQuadrant, params.get(NO_CONTACT_PRESSURE_LIMIT));
+            taskSpaceControllerSettings.setContactPressureUpperLimit(supportQuadrant, Double.MAX_VALUE);
          }
 
          // compute ground plane estimate

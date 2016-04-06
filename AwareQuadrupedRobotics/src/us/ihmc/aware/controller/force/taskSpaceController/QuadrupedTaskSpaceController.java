@@ -96,7 +96,11 @@ public class QuadrupedTaskSpaceController
       // initialize settings
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         settings.getSolePositionFeedbackGains(robotQuadrant, solePositionFeedbackController.get(robotQuadrant).getGains());
+         solePositionFeedbackController.get(robotQuadrant).getGains().reset();
+         if (settings.getContactState(robotQuadrant) == ContactState.NO_CONTACT)
+         {
+            settings.getSolePositionFeedbackGains(robotQuadrant, solePositionFeedbackController.get(robotQuadrant).getGains());
+         }
       }
       settings.getBodyOrientationFeedbackGains(bodyOrientationFeedbackController.getGains());
       settings.getComPositionFeedbackGains(comPositionFeedbackController.getGains());

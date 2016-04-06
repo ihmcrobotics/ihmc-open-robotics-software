@@ -1,6 +1,7 @@
 package us.ihmc.aware.controller.force;
 
 import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
+import us.ihmc.aware.controller.common.QuadrupedTimedStepController;
 import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceController;
 import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceEstimator;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
@@ -13,6 +14,7 @@ public class QuadrupedForceControllerContext
    private final QuadrupedReferenceFrames referenceFrames;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedTaskSpaceController taskSpaceController;
+   private final QuadrupedTimedStepController timedStepController;
    private final DivergentComponentOfMotionController dcmPositionController;
 
    public QuadrupedForceControllerContext(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters parameters, YoVariableRegistry registry)
@@ -24,6 +26,7 @@ public class QuadrupedForceControllerContext
       referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), parameters.getJointMap(), parameters.getPhysicalProperties());
       taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(runtimeEnvironment.getFullRobotModel(), referenceFrames, parameters.getJointMap(), registry);
       taskSpaceController = new QuadrupedTaskSpaceController(runtimeEnvironment.getFullRobotModel(), referenceFrames, parameters.getJointMap(), parameters.getQuadrupedJointLimits(), runtimeEnvironment.getControlDT(), registry);
+      timedStepController = new QuadrupedTimedStepController(runtimeEnvironment.getRobotTimestamp(), registry);
       dcmPositionController = new DivergentComponentOfMotionController("dcmPosition", referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), mass, gravity, 1.0, registry);
 
       // register controller graphics
@@ -44,6 +47,11 @@ public class QuadrupedForceControllerContext
    public QuadrupedTaskSpaceController getTaskSpaceController()
    {
       return taskSpaceController;
+   }
+
+   public QuadrupedTimedStepController getTimedStepController()
+   {
+      return timedStepController;
    }
 
    public DivergentComponentOfMotionController getDcmPositionController()
