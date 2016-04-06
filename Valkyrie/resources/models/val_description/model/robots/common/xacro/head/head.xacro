@@ -3,12 +3,12 @@
   <xacro:include filename="$(find val_description)/common/xacro/joint_names/valkyrie_joint_names.xacro"/>
   <xacro:include filename="$(find val_description)/common/xacro/actuator_names/valkyrie_actuator_names.xacro"/>
   <xacro:include filename="$(find val_description)/common/xacro/nodes/valkyrie_nodes.xacro"/>
-  <xacro:include filename="$(find val_description)/common/xacro/api/valkyrie_api.xacro"/>
   <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/joint_axes.xacro"/>
   <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/link_names.xacro"/>
   <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/joint_limits.xacro"/>
   <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/frame_parameters.xacro"/>
   <xacro:include filename="$(find val_description)/model/robots/common/xacro/head/mass_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/model/robots/common/xacro/gains.xacro"/>
   
   <xacro:property name="NJ3_Link_Radius" value="0.139"/>
 
@@ -51,7 +51,7 @@
                           axis="${LowerNeckPitchRotationAxis}"
                           damping="0.1" friction="0.0">
       <limit effort="${LowerNeckPitchTorqueLimit}" lower="${LowerNeckPitchPositionLimit_Lower}" upper="${LowerNeckPitchPositionLimit_Upper}" velocity="${LowerNeckPitchVelocityLimit}"/>
-      <controller_gains Kp="20000" Kd="0"/>
+      <controller_gains Kp="${LowerNeckPitchKp}" Kd="${LowerNeckPitchKd}" Ki="${LowerNeckPitchKi}"/>
     </xacro:revolute_joint_ex>
 
     <xacro:revolute_joint_ex jointName="${NeckYawJointName}"
@@ -61,7 +61,7 @@
                           axis="${NeckYawRotationAxis}"
                           damping="0.1" friction="0.0">
       <limit effort="${NeckYawTorqueLimit}" lower="${NeckYawPositionLimit_Lower}" upper="${NeckYawPositionLimit_Upper}" velocity="${NeckYawVelocityLimit}"/>
-      <controller_gains Kp="20000" Kd="0"/>
+      <controller_gains Kp="${NeckYawKp}" Kd="${NeckYawKd}" Ki="${NeckYawKi}"/>
     </xacro:revolute_joint_ex>
 
     <xacro:revolute_joint_ex jointName="${UpperNeckPitchJointName}"
@@ -71,7 +71,7 @@
                           axis="${UpperNeckPitchRotationAxis}"
                           damping="0.1" friction="0.0">
       <limit effort="${UpperNeckPitchTorqueLimit}" lower="${UpperNeckPitchPositionLimit_Lower}" upper="${UpperNeckPitchPositionLimit_Upper}" velocity="${UpperNeckPitchVelocityLimit}"/>
-      <controller_gains Kp="20000" Kd="0"/>
+      <controller_gains Kp="${UpperNeckPitchKp}" Kd="${UpperNeckPitchKd}" Ki="${UpperNeckPitchKi}"/>
     </xacro:revolute_joint_ex>
   </xacro:macro>
 
@@ -86,14 +86,14 @@
     </xacro:macro>
 
     <xacro:macro name="neck_transmissions_hw">
-      <xacro:simple_transmission jointName="${LowerNeckPitchJointName}" actuatorName="${LowerNeckPitchActuatorName}" nodeName="${LowerNeckPitchNode}" actuatorApi="${LowerNeckPitchApi}"/>
-      <xacro:simple_transmission jointName="${NeckYawJointName}" actuatorName="${NeckYawActuatorName}" nodeName="${NeckYawNode}" actuatorApi="${NeckYawApi}"/>
-      <xacro:simple_transmission jointName="${UpperNeckPitchJointName}" actuatorName="${UpperNeckPitchActuatorName}" nodeName="${UpperNeckPitchNode}" actuatorApi="${UpperNeckPitchApi}"/>
+      <xacro:simple_position_transmission jointName="${LowerNeckPitchJointName}" actuatorName="${LowerNeckPitchActuatorName}" nodeName="${LowerNeckPitchNode}" actuatorApi="${LowerNeckPitchApi}"/>
+      <xacro:simple_position_transmission jointName="${NeckYawJointName}" actuatorName="${NeckYawActuatorName}" nodeName="${NeckYawNode}" actuatorApi="${NeckYawApi}"/>
+      <xacro:simple_position_transmission jointName="${UpperNeckPitchJointName}" actuatorName="${UpperNeckPitchActuatorName}" nodeName="${UpperNeckPitchNode}" actuatorApi="${UpperNeckPitchApi}"/>
     </xacro:macro>
 
     <xacro:macro name="neck_transmissions_sim">
-      <xacro:simple_transmission jointName="${LowerNeckPitchJointName}" actuatorName="${LowerNeckPitchActuatorName}" nodeName="${LowerNeckPitchNode}" actuatorApi="${SimApi}"/>
-      <xacro:simple_transmission jointName="${NeckYawJointName}" actuatorName="${NeckYawActuatorName}" nodeName="${NeckYawNode}" actuatorApi="${SimApi}"/>
-      <xacro:simple_transmission jointName="${UpperNeckPitchJointName}" actuatorName="${UpperNeckPitchActuatorName}" nodeName="${UpperNeckPitchNode}" actuatorApi="${SimApi}"/>
+      <xacro:simple_position_transmission jointName="${LowerNeckPitchJointName}" actuatorName="${LowerNeckPitchActuatorName}" nodeName="${LowerNeckPitchNode}" actuatorApi="${SimApi}"/>
+      <xacro:simple_position_transmission jointName="${NeckYawJointName}" actuatorName="${NeckYawActuatorName}" nodeName="${NeckYawNode}" actuatorApi="${SimApi}"/>
+      <xacro:simple_position_transmission jointName="${UpperNeckPitchJointName}" actuatorName="${UpperNeckPitchActuatorName}" nodeName="${UpperNeckPitchNode}" actuatorApi="${SimApi}"/>
     </xacro:macro>
 </robot>

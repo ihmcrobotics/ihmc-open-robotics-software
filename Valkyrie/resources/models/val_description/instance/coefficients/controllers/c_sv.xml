@@ -7,7 +7,7 @@
     <Coeff id="Commutation_Select" value="2.0"/>
     <Coeff id="CurrVelFilter_fc_Hz" value="100.0"/>
     <Coeff id="DeadTimeCompensation" value="0.02"/>
-    <Coeff id="JointVelFilter_fc_Hz" value="50.0"/>
+    <Coeff id="JointVelFilter_fc_Hz" value="100.0"/>
     <Coeff id="MotorAccFilter_fc_Hz" value="50.0"/>
     <Coeff id="MotorVelFilter_fc_Hz" value="1000.0"/>
     <Coeff id="PositionControl_Kd" value="10.0"/>
@@ -35,5 +35,6 @@
     <Coeff id="TorqueControl_m" value="2.3"/>
     <Coeff id="EffortControl_Alpha" value="0.5"/>
     <Coeff id="EffortControl_AlphaDot" value="0.0"/>
+    <Coeff id="EffortControl_OnlineTuning" value="0.0"/>
   </Coeffs>
 </CoeffData>

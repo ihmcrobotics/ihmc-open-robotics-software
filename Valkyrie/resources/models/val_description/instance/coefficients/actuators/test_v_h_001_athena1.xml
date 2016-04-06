@@ -1,0 +1,13 @@
+<CoeffData>
+    <Properties>
+        <CalibrationDate/>
+        <FileGenDate date="2013-10-04" time="19:23:42.085597"/>
+    </Properties>
+    <Coeffs>
+        <Coeff description="" value="-2331" id="Pitch_offset"/>
+        <Coeff description="" value="1596" id="Yaw_offset"/>
+        <Coeff description="" value="1500" id="Pitch_hilmt"/>
+        <Coeff description="" value="-1500" id="Pitch_lolmt"/>
+        <Coeff description="" value="-0.000767" id="Pitch_cnvtrad"/>
+    </Coeffs>
+</CoeffData>
