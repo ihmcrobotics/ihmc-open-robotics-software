@@ -2,4 +2,7 @@
 
 	<xacro:property name="pelvis_middle_imu_port" value="none" />
 
+	<xacro:property name="pelvis_rear_imu_port" value="none" />
+
+	<xacro:property name="torso_left_imu_port" value="none" />
 </robot>

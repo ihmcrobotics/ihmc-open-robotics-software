@@ -11,11 +11,11 @@
     <SafetyFile id="safety.xml" />
     <ModeFile id="mode.xml" />
     <Coeffs>
-        <Coeff description="Kinematic direction of joint" id="JointKinematicDir" value="1" />
+        <Coeff description="Kinematic direction of joint" id="JointKinematicDir" value="-1.0" />
         <Coeff description="hard limit, radians" id="JointMaxValue" value="3.14159265359" />
         <Coeff description="hard limit, radians" id="JointMinValue" value="-3.14159265359" />
-        <Coeff description="" id="TorqueOffset_Nm" value="1.50" />
-        <Coeff description="" id="PositionOffset_Rad" value="3.57315613428" />
+        <Coeff description="" id="TorqueOffset_Nm" value="-2.16547711716" />
+        <Coeff description="" id="PositionOffset_Rad" value="-2.7033849392" />
         <Coeff description="Incremental Encoder Enabled" id="JointSensors_MotorPosition" value="1" />
         <Coeff description="V1 actuator magnetic aps" id="JointSensors_OutputPosition" value="2.0" />
         <Coeff description="" id="JointSensors_OutputForce" value="2.0" />
