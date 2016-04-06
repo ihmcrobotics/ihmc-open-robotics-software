@@ -1,9 +1,10 @@
 package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.aware.params.DoubleArrayParameter;
+import us.ihmc.aware.params.DoubleParameter;
+import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
-import us.ihmc.aware.params.ParameterMap;
-import us.ihmc.aware.params.ParameterMapRepository;
 import us.ihmc.aware.planning.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelControllerSettings;
@@ -27,30 +28,26 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedForceController
 {
-   private static final String PARAM_TRAJECTORY_TIME = "trajectoryTime";
-
-   private static final String PARAM_JOINT_DAMPING = "jointDamping";
-
-   private static final String PARAM_FOOT_POSITION_PROPORTIONAL_GAINS = "footPositionProportionalGains";
-   private static final String PARAM_FOOT_POSITION_DERIVATIVE_GAINS = "footPositionDerivativeGains";
-   private static final String PARAM_FOOT_POSITION_INTEGRAL_GAINS = "footPositionIntegralGains";
-   private static final String PARAM_FOOT_POSITION_MAX_INTEGRAL_ERROR = "footPositionMaxIntegralError";
-
-   private static final String PARAM_STANCE_LENGTH = "stanceLength";
-   private static final String PARAM_STANCE_WIDTH = "stanceWidth";
-   private static final String PARAM_STANCE_HEIGHT = "stanceHeight";
-   private static final String PARAM_STANCE_X_OFFSET = "stanceXOffset";
-   private static final String PARAM_STANCE_Y_OFFSET = "stanceYOffset";
+   private final ParameterFactory parameterFactory = new ParameterFactory(getClass().getName());
+   private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("TrajectoryTime", 1.0);
+   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
+   private final DoubleArrayParameter footPositionProportionalGainsParameter = parameterFactory.createDoubleArray("footPositionProportionalGains", 10000.0, 10000.0, 10000.0);
+   private final DoubleArrayParameter footPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("footPositionDerivativeGains", 100.0, 100.0, 100.0);
+   private final DoubleArrayParameter footPositionIntegralGainsParameter = parameterFactory.createDoubleArray("footPositionIntegralGains", 0.0, 0.0, 0.0);
+   private final DoubleParameter footPositionMaxIntegralErrorParameter = parameterFactory.createDouble("footPositionMaxIntegralError", 0.0);
+   private final DoubleParameter stanceLengthParameter = parameterFactory.createDouble("stanceLength", 1.0);
+   private final DoubleParameter stanceWidthParameter = parameterFactory.createDouble("stanceWidth", 0.5);
+   private final DoubleParameter stanceHeightParameter = parameterFactory.createDouble("stanceHeight", 0.60);
+   private final DoubleParameter stanceXOffsetParameter = parameterFactory.createDouble("stanceXOffset", 0.05);
+   private final DoubleParameter stanceYOffsetParameter = parameterFactory.createDouble("stanceYOffset", 0.0);
 
    private final QuadrupedRuntimeEnvironment environment;
    private final QuadrupedRobotParameters robotParameters;
    private final QuadrupedReferenceFrames referenceFrames;
    private final QuadrupedVirtualModelControllerSettings vmcSettings;
    private final QuadrupedVirtualModelController vmc;
-   private final ParameterMap params;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(
-         QuadrupedVirtualModelBasedStandPrepController.class.getSimpleName());
+   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedVirtualModelBasedStandPrepController.class.getSimpleName());
    private final HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
    private final TwistCalculator twistCalculator;
@@ -80,36 +77,17 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
 
    private double trajectoryStartTime = 0.0;
 
-   public QuadrupedVirtualModelBasedStandPrepController(QuadrupedRuntimeEnvironment environment,
-         QuadrupedRobotParameters robotParameters, ParameterMapRepository parameterMapRepository)
+   public QuadrupedVirtualModelBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedRobotParameters robotParameters)
    {
       this.environment = environment;
       this.robotParameters = robotParameters;
-      this.referenceFrames = new QuadrupedReferenceFrames(environment.getFullRobotModel(),
-            robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
+      this.referenceFrames = new QuadrupedReferenceFrames(environment.getFullRobotModel(), robotParameters.getJointMap(),
+            robotParameters.getPhysicalProperties());
       this.vmcSettings = new QuadrupedVirtualModelControllerSettings();
-      this.vmc = new QuadrupedVirtualModelController(environment.getFullRobotModel(), referenceFrames,
-            robotParameters.getJointMap(), registry);
-
-      this.params = parameterMapRepository.get(QuadrupedVirtualModelBasedStandPrepController.class);
-      params.setDefault(PARAM_TRAJECTORY_TIME, 1.0);
-
-      params.setDefault(PARAM_JOINT_DAMPING, 15.0);
-
-      params.setDefault(PARAM_FOOT_POSITION_PROPORTIONAL_GAINS, 10000.0, 10000.0, 10000.0);
-      params.setDefault(PARAM_FOOT_POSITION_DERIVATIVE_GAINS, 100.0, 100.0, 100.0);
-      params.setDefault(PARAM_FOOT_POSITION_INTEGRAL_GAINS, 0.0, 0.0, 0.0);
-      params.setDefault(PARAM_FOOT_POSITION_MAX_INTEGRAL_ERROR, 0.0);
-
-      params.setDefault(PARAM_STANCE_LENGTH, 1.0);
-      params.setDefault(PARAM_STANCE_WIDTH, 0.5);
-      params.setDefault(PARAM_STANCE_HEIGHT, 0.60);
-      params.setDefault(PARAM_STANCE_X_OFFSET, 0.05);
-      params.setDefault(PARAM_STANCE_Y_OFFSET, 0.0);
+      this.vmc = new QuadrupedVirtualModelController(environment.getFullRobotModel(), referenceFrames, robotParameters.getJointMap(), registry);
 
       SDFFullRobotModel fullRobotModel = environment.getFullRobotModel();
-      this.twistCalculator = new TwistCalculator(referenceFrames.getWorldFrame(),
-            environment.getFullRobotModel().getElevator());
+      this.twistCalculator = new TwistCalculator(referenceFrames.getWorldFrame(), environment.getFullRobotModel().getElevator());
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String jointBeforeFootName = robotParameters.getJointMap().getJointBeforeFootName(robotQuadrant);
@@ -120,7 +98,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
       for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
          QuadrupedJointName jointName = robotParameters.getJointMap().getJointNameForSDFName(joint.getName());
-         vmcSettings.setJointDamping(jointName, params.get(PARAM_JOINT_DAMPING));
+         vmcSettings.setJointDamping(jointName, jointDampingParameter.get());
       }
 
       for (RobotQuadrant quadrant : RobotQuadrant.values)
@@ -128,12 +106,11 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
          footTrajectories.set(quadrant, new ThreeDoFMinimumJerkTrajectory());
 
          ReferenceFrame soleFrame = referenceFrames.getFootFrame(quadrant);
-         EuclideanPositionController positionController = new EuclideanPositionController(
-               "standPrep" + quadrant.getShortName(), soleFrame, environment.getControlDT(), registry);
-         positionController.setProportionalGains(params.getVolatileArray(PARAM_FOOT_POSITION_PROPORTIONAL_GAINS));
-         positionController.setDerivativeGains(params.getVolatileArray(PARAM_FOOT_POSITION_DERIVATIVE_GAINS));
-         positionController.setIntegralGains(params.getVolatileArray(PARAM_FOOT_POSITION_INTEGRAL_GAINS),
-               params.get(PARAM_FOOT_POSITION_MAX_INTEGRAL_ERROR));
+         EuclideanPositionController positionController = new EuclideanPositionController("standPrep" + quadrant.getShortName(), soleFrame,
+               environment.getControlDT(), registry);
+         positionController.setProportionalGains(footPositionProportionalGainsParameter.get());
+         positionController.setDerivativeGains(footPositionDerivativeGainsParameter.get());
+         positionController.setIntegralGains(footPositionIntegralGainsParameter.get(), footPositionMaxIntegralErrorParameter.get());
          footPidControllers.set(quadrant, positionController);
 
          solePositionEstimates.set(quadrant, new FramePoint(referenceFrames.getWorldFrame()));
@@ -149,19 +126,13 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          String prefix = quadrant.getCamelCaseNameForStartOfExpression();
-         yoSolePositionEstimates.set(quadrant,
-               new YoFramePoint(prefix + "SolePositionEstimate", referenceFrames.getWorldFrame(), registry));
-         yoSoleLinearVelocityEstimates.set(quadrant,
-               new YoFrameVector(prefix + "SoleLinearVelocityEstimate", referenceFrames.getWorldFrame(), registry));
+         yoSolePositionEstimates.set(quadrant, new YoFramePoint(prefix + "SolePositionEstimate", referenceFrames.getWorldFrame(), registry));
+         yoSoleLinearVelocityEstimates.set(quadrant, new YoFrameVector(prefix + "SoleLinearVelocityEstimate", referenceFrames.getWorldFrame(), registry));
 
-         yoSolePositionSetpoints.set(quadrant,
-               new YoFramePoint(prefix + "SolePositionSetpoint", referenceFrames.getWorldFrame(), registry));
-         yoSoleLinearVelocitySetpoints.set(quadrant,
-               new YoFrameVector(prefix + "SoleLinearVelocitySetpoint", referenceFrames.getWorldFrame(), registry));
-         yoSoleFeedForwardForceSetpoints.set(quadrant,
-               new YoFrameVector(prefix + "SoleFeedForwardForceSetpoint", referenceFrames.getWorldFrame(), registry));
-         yoSoleVirtualForceSetpoints.set(quadrant,
-               new YoFrameVector(prefix + "SoleVirtualForceSetpoint", referenceFrames.getWorldFrame(), registry));
+         yoSolePositionSetpoints.set(quadrant, new YoFramePoint(prefix + "SolePositionSetpoint", referenceFrames.getWorldFrame(), registry));
+         yoSoleLinearVelocitySetpoints.set(quadrant, new YoFrameVector(prefix + "SoleLinearVelocitySetpoint", referenceFrames.getWorldFrame(), registry));
+         yoSoleFeedForwardForceSetpoints.set(quadrant, new YoFrameVector(prefix + "SoleFeedForwardForceSetpoint", referenceFrames.getWorldFrame(), registry));
+         yoSoleVirtualForceSetpoints.set(quadrant, new YoFrameVector(prefix + "SoleVirtualForceSetpoint", referenceFrames.getWorldFrame(), registry));
       }
 
       environment.getParentRegistry().addChild(registry);
@@ -183,7 +154,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
 
          FramePoint finalPosition = computeFinalSolePosition(quadrant);
 
-         trajectory.initializeTrajectory(solePosition, finalPosition, params.get(PARAM_TRAJECTORY_TIME));
+         trajectory.initializeTrajectory(solePosition, finalPosition, trajectoryTimeParameter.get());
       }
 
       // Show the VMC visualizations.
@@ -262,9 +233,8 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
 
          // Compute the virtual force setpoint via the PID controller.
          soleVirtualForceSetpoints.get(quadrant).setToZero(soleFrame);
-         positionController.compute(soleVirtualForceSetpoints.get(quadrant), solePositionSetpoints.get(quadrant),
-               soleLinearVelocitySetpoints.get(quadrant), soleLinearVelocityEstimates.get(quadrant),
-               soleFeedForwardForceSetpoints.get(quadrant));
+         positionController.compute(soleVirtualForceSetpoints.get(quadrant), solePositionSetpoints.get(quadrant), soleLinearVelocitySetpoints.get(quadrant),
+               soleLinearVelocityEstimates.get(quadrant), soleFeedForwardForceSetpoints.get(quadrant));
 
          // Forward virtual forces to VMC controller to set joint torques.
          vmc.setSoleVirtualForce(quadrant, soleVirtualForceSetpoints.get(quadrant));
@@ -300,17 +270,16 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
       FramePoint finalPosition = pool.lease(FramePoint.class);
       finalPosition.setToZero(referenceFrames.getBodyFrame());
 
-      finalPosition.add(quadrant.getEnd().negateIfHindEnd(params.get(PARAM_STANCE_LENGTH) / 2.0), 0.0, 0.0);
-      finalPosition.add(0.0, quadrant.getSide().negateIfRightSide(params.get(PARAM_STANCE_WIDTH) / 2.0), 0.0);
+      finalPosition.add(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.get() / 2.0), 0.0, 0.0);
+      finalPosition.add(0.0, quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
 
-      finalPosition.add(params.get(PARAM_STANCE_X_OFFSET), params.get(PARAM_STANCE_Y_OFFSET), -params.get(
-            PARAM_STANCE_HEIGHT));
+      finalPosition.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(), -stanceHeightParameter.get());
 
       return finalPosition;
    }
 
    private boolean isMotionExpired()
    {
-      return getTimeInTrajectory() > params.get(PARAM_TRAJECTORY_TIME);
+      return getTimeInTrajectory() > trajectoryTimeParameter.get();
    }
 }

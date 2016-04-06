@@ -1,9 +1,13 @@
 package us.ihmc.aware.planning;
 
+import us.ihmc.aware.util.ArrayListSorter;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -11,19 +15,33 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class GroundPlaneEstimator
 {
    private final static int MAX_GROUND_PLANE_POINTS = 100;
    private final Plane3d groundPlane = new Plane3d();
-   private final Vector3d groundNormal = new Vector3d();
+   private final Vector3d groundPlaneNormal = new Vector3d();
+   private final Vector3d groundPlanePoint = new Vector3d();
    private final ArrayList<Point3d> groundPlanePoints = new ArrayList<>(MAX_GROUND_PLANE_POINTS);
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoFrameVector yoGroundPlaneNormal = new YoFrameVector("groundPlaneNormal", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint yoGroundPlanePoint = new YoFramePoint("groundPlanePoint", ReferenceFrame.getWorldFrame(), registry);;
 
    public GroundPlaneEstimator()
    {
+      this(null);
+   }
 
+   public GroundPlaneEstimator(YoVariableRegistry parentRegistry)
+   {
+
+      if (parentRegistry != null)
+      {
+         parentRegistry.addChild(registry);
+      }
    }
 
    /**
@@ -48,8 +66,8 @@ public class GroundPlaneEstimator
     */
    public double getPitch(double yaw)
    {
-      groundPlane.getNormal(groundNormal);
-      return Math.atan2(Math.cos(yaw) * groundNormal.getX() - Math.sin(yaw) * groundNormal.getY(), groundNormal.getZ());
+      groundPlane.getNormal(groundPlaneNormal);
+      return Math.atan2(Math.cos(yaw) * groundPlaneNormal.getX() - Math.sin(yaw) * groundPlaneNormal.getY(), groundPlaneNormal.getZ());
    }
 
    /**
@@ -58,8 +76,8 @@ public class GroundPlaneEstimator
     */
    public double getRoll(double yaw)
    {
-      groundPlane.getNormal(groundNormal);
-      return Math.atan2(Math.sin(yaw) * groundNormal.getX() + Math.cos(yaw) * groundNormal.getY(), groundNormal.getZ());
+      groundPlane.getNormal(groundPlaneNormal);
+      return Math.atan2(Math.sin(yaw) * groundPlaneNormal.getX() + Math.cos(yaw) * groundPlaneNormal.getY(), groundPlaneNormal.getZ());
    }
 
    /**
@@ -118,7 +136,7 @@ public class GroundPlaneEstimator
          contactPoints.get(i).changeFrame(ReferenceFrame.getWorldFrame());
          groundPlanePoints.add(contactPoints.get(i).getPoint());
       }
-      planeFitter.fitPlaneToPoints(groundPlanePoints, groundPlane);
+      compute();
    }
 
    /**
@@ -132,6 +150,15 @@ public class GroundPlaneEstimator
          contactPoints.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
          groundPlanePoints.add(contactPoints.get(robotQuadrant).getPoint());
       }
+      compute();
+   }
+
+   private void compute()
+   {
       planeFitter.fitPlaneToPoints(groundPlanePoints, groundPlane);
+      groundPlane.getNormal(groundPlaneNormal);
+      yoGroundPlaneNormal.set(groundPlaneNormal);
+      groundPlane.getNormal(groundPlanePoint);
+      yoGroundPlanePoint.set(groundPlanePoint);
    }
 }
