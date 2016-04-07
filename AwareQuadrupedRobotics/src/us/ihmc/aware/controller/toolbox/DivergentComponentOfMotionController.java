@@ -121,6 +121,7 @@ public class DivergentComponentOfMotionController
    public void reset()
    {
       dcmPositionController.reset();
+      dcmPositionControllerGains.reset();
    }
 
    public YoEuclideanPositionGains getGains()
@@ -154,6 +155,7 @@ public class DivergentComponentOfMotionController
       vrpPositionSetpoint.set(dcmPositionControllerFeedback);
       vrpPositionSetpoint.scale(-1.0 / omega);
       vrpPositionSetpoint.add(dcmPositionEstimate);
+      cmpPositionSetpoint.set(vrpPositionSetpoint);
       cmpPositionSetpoint.add(0, 0, -getComHeight());
       comForceCommand.set(cmpPositionSetpoint);
       comForceCommand.scale(-mass * Math.pow(omega, 2));
