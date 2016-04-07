@@ -250,7 +250,8 @@ public class CenterOfMassHeightManager
       desiredCoMHeightVelocityAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightVelocity());
       desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
 
-      feetManager.correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing);
+      if (feetManager != null)
+         feetManager.correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing);
 
       comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCoMHeightCorrected.set(desiredCenterOfMassHeightPoint.getZ());
