@@ -90,7 +90,7 @@ public class FourBarKinematicLoop
       // Jacobian solver
       fourBarJacobianSolver = new FourBarKinematicLoopJacobianSolver(fourBarCalculator);
       fourBarOutputJoint = FourBarKinematicLoopTools.setFourBarOutputJoint(passiveJointB, passiveJointC, passiveJointD);
-      jacobian = fourBarJacobianSolver.computeJacobian(masterJointA.getQ(), fourBarOutputJoint);
+      jacobian = fourBarJacobianSolver.computeJacobian(masterJointA.getQ(), fourBarOutputJoint, passiveJointB, passiveJointC, passiveJointD);
       outputJointLinearVelocitiesToPack = new DenseMatrix64F(3,1);
       inputJointAngularVelocities = new DenseMatrix64F(1, 1, true, new double[] {fourBarCalculator.getAngleDtDAB()});
 
@@ -101,10 +101,9 @@ public class FourBarKinematicLoop
       if (recomputeJointLimits)
       {
          /*
-          * - If the limits for B, C, and/or D are given and are more
-          * restrictive than those of A crop the value of Amax and/or Amin. -
-          * Else if the limits given for A are the most restrictive of all, keep
-          * them. - Else set the limits to the value given by the calculator.
+          * - If the limits for B, C, and/or D are given and are more restrictive than those of A crop the value of Amax and/or Amin. 
+          * - Else if the limits given for A are the most restrictive of all, keep them. 
+          * - Else set the limits to the value given by the calculator.
           */
          double minValidMasterJointAngle = computeMinValidMasterJointAngle(masterJointA, passiveJointB, passiveJointC, passiveJointD);
          double maxValidMasterJointAngle = computeMaxValidMasterJointAngle(masterJointA, passiveJointB, passiveJointC, passiveJointD);
@@ -361,7 +360,7 @@ public class FourBarKinematicLoop
 
       fourBarCalculator.updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd(), masterJointA.getQdd());
 
-      fourBarJacobianSolver.computeJacobian(masterJointA.getQ(), fourBarOutputJoint);
+      fourBarJacobianSolver.computeJacobian(masterJointA.getQ(), fourBarOutputJoint, passiveJointB, passiveJointC, passiveJointD);
       fourBarJacobianSolver.solveLinearVelFromAngularVel(jacobian, inputJointAngularVelocities, outputJointLinearVelocitiesToPack);
 
       System.out.println("\nJacobian debugging: \n" + outputJointLinearVelocitiesToPack);
