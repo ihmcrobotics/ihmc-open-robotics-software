@@ -81,12 +81,19 @@ public class FourBarKinematicLoopTools
    
    public static PassiveRevoluteJoint setFourBarOutputJoint(PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD)
    {
-      //Check for passive joint B
-      if(passiveJointD.getSuccessor().getChildrenJoints() != null)
+      // If the output joint is D then it will have at least 1 child, otherwise it won't have any
+      if(passiveJointD.getSuccessor().hasChildrenJoints())
       {
          return passiveJointD;
       }
-      else return passiveJointB; // TODO change
-     
+      // Joint C wil only have joint D as its child, unless it's the output joint of the fourbar
+      else if (passiveJointC.getSuccessor().getChildrenJoints().size() > 1)
+      {
+         return passiveJointC;
+      }
+      else
+      {
+         return passiveJointB;
+      }     
    }
 }
