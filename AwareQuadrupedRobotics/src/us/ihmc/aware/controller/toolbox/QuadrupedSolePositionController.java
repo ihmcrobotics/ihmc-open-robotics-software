@@ -104,7 +104,7 @@ public class QuadrupedSolePositionController
       }
    }
 
-   public void computeFeedback(QuadrantDependentList<FrameVector> soleForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
+   public void compute(QuadrantDependentList<FrameVector> soleForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
       {

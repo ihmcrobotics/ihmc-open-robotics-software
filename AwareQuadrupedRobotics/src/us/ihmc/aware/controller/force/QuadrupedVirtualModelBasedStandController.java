@@ -38,7 +38,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final DoubleArrayParameter comPositionIntegralGainsParameter = parameterFactory.createDoubleArray("comPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter comPositionMaxIntegralErrorParameter = parameterFactory.createDouble("comPositionMaxIntegralError", 0);
    private final DoubleArrayParameter dcmPositionProportionalGainsParameter = parameterFactory.createDoubleArray("dcmPositionProportionalGains", 2, 2, 0);
-   private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
+   private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 1, 1, 0);
    private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
 
@@ -126,6 +126,8 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    private void updateSetpoints()
    {
+      taskSpaceControllerCommands.initialize();
+
       // update desired dcm position
       dcmPositionControllerSetpoints.getDcmPosition().changeFrame(supportFrame);
       dcmPositionControllerSetpoints.getDcmPosition().set(inputProvider.getComVelocityInput());
@@ -174,20 +176,21 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
       // initialize feedback controllers
       dcmPositionControllerSetpoints.initialize(dcmPositionEstimate);
+      dcmPositionController.reset();
+      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
       dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
       dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
-      dcmPositionController.reset();
       comPositionControllerSetpoints.initialize(taskSpaceEstimates);
+      comPositionController.reset();
       comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
       comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
       comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
-      comPositionController.reset();
       bodyOrientationControllerSetpoints.initialize(taskSpaceEstimates);
+      bodyOrientationController.reset();
       bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
       bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
       bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
-      bodyOrientationController.reset();
 
       // initialize task space controller
       taskSpaceControllerSettings.initialize();
