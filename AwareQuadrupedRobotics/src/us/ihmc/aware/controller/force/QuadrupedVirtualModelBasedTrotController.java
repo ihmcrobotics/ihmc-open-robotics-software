@@ -86,6 +86,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    // planning
    private double bodyYawSetpoint;
    private final GroundPlaneEstimator groundPlaneEstimator;
+   private final QuadrantDependentList<FramePoint> groundPlanePositions;
    private final PiecewisePeriodicDcmTrajectory nominalPeriodicDcmTrajectory;
    private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
 
@@ -135,9 +136,11 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
       // planning
       groundPlaneEstimator = new GroundPlaneEstimator();
+      groundPlanePositions = new QuadrantDependentList<>();
       swingFootTrajectory = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         groundPlanePositions.set(robotQuadrant, new FramePoint());
          swingFootTrajectory.set(robotQuadrant, new ThreeDoFSwingFootTrajectory());
       }
       nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(1, gravity, inputProvider.getComPositionInput().getZ(), null);
@@ -172,6 +175,9 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       dcmPositionEstimate.set(taskSpaceEstimates.getComVelocity());
       dcmPositionEstimate.scale(1.0 / dcmPositionController.getNaturalFrequency());
       dcmPositionEstimate.add(taskSpaceEstimates.getComPosition());
+
+      // update ground plane estimate
+      groundPlaneEstimator.compute(groundPlanePositions);
    }
 
    private void updateSetpoints()
@@ -343,15 +349,16 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          // compute desired dcm trajectory
          dcmTrajectory.initializeTrajectory(dcmPositionEstimate, dcmPositionAtSoSNominal, quadSupportDurationParameter.get());
 
-         // initialize contact state
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
+            // initialize contact state
             taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
             taskSpaceControllerSettings.getContactForceLimits().setPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
-         }
 
-         // compute ground plane estimate
-         groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
+            // initialize ground plane points
+            groundPlanePositions.get(robotQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
+            groundPlanePositions.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+         }
       }
 
       @Override public TrotEvent process()
@@ -457,10 +464,11 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
             taskSpaceControllerSettings.setContactState(supportQuadrant, ContactState.IN_CONTACT);
             taskSpaceControllerSettings.getContactForceLimits().setPressureUpperLimit(swingQuadrant, noContactPressureLimitParameter.get());
             taskSpaceControllerSettings.getContactForceLimits().setPressureUpperLimit(supportQuadrant, Double.MAX_VALUE);
-         }
 
-         // compute ground plane estimate
-         groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
+            // initialize ground plane points
+            groundPlanePositions.get(swingQuadrants[i]).setIncludingFrame(taskSpaceEstimates.getSolePosition(swingQuadrants[i]));
+            groundPlanePositions.get(swingQuadrants[i]).changeFrame(ReferenceFrame.getWorldFrame());
+         }
       }
 
       @Override public TrotEvent process()
