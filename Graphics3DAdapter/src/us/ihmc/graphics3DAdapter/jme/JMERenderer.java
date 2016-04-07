@@ -583,7 +583,10 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
     * render anything unless necessary.
     */
    @Override
-   public void update() {
+   public void update() 
+   {
+      if (alreadyClosing) return;
+
       if (prof!=null) prof.appStep(AppStep.BeginFrame);
 
       applicationUpdate(); // makes sure to execute AppTasks
