@@ -160,6 +160,8 @@ public class PBOAwtPanelsContext implements JmeContext
 
    public PBOAwtPanel createPanel()
    {
+      if (alreadyDestroying) return null;
+
       PBOAwtPanel panel = new PBOAwtPanel(pboAwtPanelListeners);
       panels.add(panel);
 
