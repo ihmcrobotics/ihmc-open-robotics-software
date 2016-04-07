@@ -7,6 +7,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.jacobianTranspose.JacobianTransposeCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.jacobianTranspose.JacobianTransposeCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 
@@ -15,6 +17,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    private final InverseDynamicsCommandList inverseDynamicsCommandList;
    private final FeedbackControlCommandList feedbackControlCommandList;
    private final InverseKinematicsCommandList inverseKinematicsCommandList;
+   private final JacobianTransposeCommandList jacobianTransposeCommandList;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
    private WholeBodyControllerCoreMode controllerCoreMode;
 
@@ -25,6 +28,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       inverseDynamicsCommandList = new InverseDynamicsCommandList();
       feedbackControlCommandList = new FeedbackControlCommandList();
       inverseKinematicsCommandList = new InverseKinematicsCommandList();
+      jacobianTransposeCommandList = new JacobianTransposeCommandList();
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
    }
 
@@ -33,6 +37,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       inverseDynamicsCommandList.clear();
       feedbackControlCommandList.clear();
       inverseKinematicsCommandList.clear();
+      jacobianTransposeCommandList.clear();
       lowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
@@ -52,6 +57,12 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    {
       if (inverseKinematicsCommand != null)
          inverseKinematicsCommandList.addCommand(inverseKinematicsCommand);
+   }
+
+   public void addJacobianTransposeCommand(JacobianTransposeCommand<?> jacobianTransposeCommand)
+   {
+      if (jacobianTransposeCommand != null)
+         jacobianTransposeCommandList.addCommand(jacobianTransposeCommand);
    }
 
    public void completeLowLevelJointData(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelJointData)
@@ -76,6 +87,12 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    public InverseKinematicsCommandList getInverseKinematicsCommandList()
    {
       return inverseKinematicsCommandList;
+   }
+
+   @Override
+   public JacobianTransposeCommandList getJacobianTransposeCommandList()
+   {
+      return jacobianTransposeCommandList;
    }
 
    @Override
