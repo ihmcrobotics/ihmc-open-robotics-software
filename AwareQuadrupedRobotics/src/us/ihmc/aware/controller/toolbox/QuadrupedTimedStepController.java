@@ -1,4 +1,4 @@
-package us.ihmc.aware.controller.common;
+package us.ihmc.aware.controller.toolbox;
 
 import us.ihmc.aware.planning.ThreeDoFSwingFootTrajectory;
 import us.ihmc.aware.state.StateMachine;

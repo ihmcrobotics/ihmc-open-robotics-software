@@ -4,13 +4,9 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
-import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceCommands;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceController;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceControllerSettings;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceEstimates;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceEstimator;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceSetpoints;
+import us.ihmc.aware.controller.toolbox.DivergentComponentOfMotionController;
+import us.ihmc.aware.controller.toolbox.QuadrupedTaskSpaceController;
+import us.ihmc.aware.controller.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.planning.PiecewiseCopPlanner;
 import us.ihmc.aware.planning.PiecewiseReverseDcmTrajectory;
@@ -78,12 +74,12 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final DivergentComponentOfMotionController dcmPositionController;
 
    // task space controller
-   private final QuadrupedTaskSpaceCommands taskSpaceCommands;
+   private final QuadrupedTaskSpaceController.Commands taskSpaceCommands;
    private final QuadrupedTaskSpaceSetpoints taskSpaceSetpoints;
-   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
+   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedTaskSpaceController taskSpaceController;
-   private final QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings;
+   private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
 
    // planning
    private static int STEP_QUEUE_CAPACITY = 60;
@@ -107,7 +103,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final QuadrantDependentList<StateMachine<FootState, FootEvent>> footStateMachine;
 
    public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerInputProviderInterface inputProvider,
-         QuadrupedForceControllerContext controllerContext)
+         QuadrupedForceControllerToolbox controllerContext)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -129,10 +125,10 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       dcmPositionController = controllerContext.getDcmPositionController();
 
       // task space controller
-      taskSpaceCommands = new QuadrupedTaskSpaceCommands();
+      taskSpaceCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceSetpoints = new QuadrupedTaskSpaceSetpoints();
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
-      taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
+      taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+      taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       taskSpaceEstimator = controllerContext.getTaskSpaceEstimator();
       taskSpaceController = controllerContext.getTaskSpaceController();
 
