@@ -91,7 +91,7 @@ public class WholeBodyControllerCore
          break;
       case JACOBIAN_TRANSPOSE:
          feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
-         virtualModelControlSolver.submitJacobianTransposeCommandList(controllerCoreCommand.getJacobianTransposeCommandList());
+         virtualModelControlSolver.submitVirtualModelControlCommandList(controllerCoreCommand.getJacobianTransposeCommandList());
       case OFF:
          break;
       default:
@@ -158,9 +158,8 @@ public class WholeBodyControllerCore
    {
       feedbackController.compute();
       InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getOutput();
-      numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands()); // todo
-      virtualModelControlSolver.submitJacobianTransposeCommandList(feedbackControllerOutput);
-
+      numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
+      virtualModelControlSolver.submitVirtualModelControlCommandList(feedbackControllerOutput);
       virtualModelControlSolver.compute();
       feedbackController.computeAchievedAccelerations();
       LowLevelOneDoFJointDesiredDataHolder virtualModelControlOutput = virtualModelControlSolver.getOutput();

@@ -31,6 +31,7 @@ public class WholeBodyControlCoreToolbox
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final double controlDT;
    private final FullRobotModel fullRobotModel;
+   private final RigidBody[] endEffectors;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final CommonHumanoidReferenceFrames referenceFrames;
@@ -40,12 +41,13 @@ public class WholeBodyControlCoreToolbox
 
    private final JointIndexHandler jointIndexHandler;
 
-   public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints,
+   public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, RigidBody[] endEffectors, InverseDynamicsJoint[] controlledJoints,
          MomentumOptimizationSettings momentumOptimizationSettings, CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravityZ,
          GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.fullRobotModel = fullRobotModel;
+      this.endEffectors = endEffectors;
       this.momentumOptimizationSettings = momentumOptimizationSettings;
       this.referenceFrames = referenceFrames;
       this.controlDT = controlDT;
@@ -63,6 +65,11 @@ public class WholeBodyControlCoreToolbox
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       return momentumOptimizationSettings;
+   }
+
+   public RigidBody[] getEndEffectors()
+   {
+      return endEffectors;
    }
 
    public TwistCalculator getTwistCalculator()
