@@ -63,6 +63,11 @@ public interface FullHumanoidRobotModel extends FullRobotModel
    public abstract RigidBody getEndEffector(RobotSide robotSide, LimbName limbName);
 
    /**
+    * This method returns all end-effectors in the model.
+    */
+   public abstract RigidBody[] getEndEffectors();
+
+   /**
     * This methods returns the frame located right after the parent joint of this end-effector (see {@link FullHumanoidRobotModel#getEndEffector(RobotSide, LimbName)}).
     */
    public abstract ReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName);

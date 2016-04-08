@@ -30,7 +30,8 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
     
    private  SideDependentList< ArrayList<OneDoFJoint>> armJointIDsList;
    private  SideDependentList< ArrayList<OneDoFJoint>> legJointIDsList;
-    
+
+   private RigidBody[] endEffectors = new RigidBody[4];
    private SideDependentList<RigidBody> feet;
    private SideDependentList<RigidBody> hands;
    
@@ -75,6 +76,14 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
          {
             attachmentPlateFrames.put(robotSide, null);
          }
+      }
+
+      int index = 0;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         endEffectors[index] = feet.get(robotSide);
+         endEffectors[index+2] = hands.get(robotSide);
+         index++;
       }
    }
 
@@ -178,6 +187,13 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
 
    /** {@inheritDoc} */
    @Override
+   public RigidBody[] getEndEffectors()
+   {
+      return endEffectors;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public RigidBody getEndEffector(RobotSide robotSide, LimbName limbName)
    {
       switch (limbName)
@@ -187,7 +203,7 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
       case LEG:
          return feet.get(robotSide);
       default:
-         throw new RuntimeException("Unkown end effector");
+         throw new RuntimeException("Unknown end effector");
       }
    }
 
