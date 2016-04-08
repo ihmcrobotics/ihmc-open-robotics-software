@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.*;
@@ -118,6 +119,10 @@ public class VirtualModelController
       endEffectorSelectionMatrices.put(endEffector, selectionMatrix);
    }
 
+   public void submitEndEffectorVirtualWrench(VirtualWrenchCommand virtualWrenchCommand)
+   {
+      submitEndEffectorVirtualWrench(virtualWrenchCommand.getRigidBody(), virtualWrenchCommand.getVirtualWrench(), virtualWrenchCommand.getSelectionMatrix());
+   }
 
    public void reset()
    {
