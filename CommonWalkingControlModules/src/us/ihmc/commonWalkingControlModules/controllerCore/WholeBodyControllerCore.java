@@ -28,7 +28,7 @@ public class WholeBodyControllerCore
    private final WholeBodyFeedbackController feedbackController;
    private final WholeBodyInverseDynamicsSolver inverseDynamicsSolver;
    private final WholeBodyInverseKinematicsSolver inverseKinematicsSolver;
-   private final WholeBodyJacobianTransposeSolver jacobianTransposeSolver;
+   private final WholeBodyVirtualModelControlSolver jacobianTransposeSolver;
 
    private final ControllerCoreOutput controllerCoreOutput;
    private final YoRootJointDesiredConfigurationData yoRootJointDesiredConfigurationData;
@@ -43,7 +43,7 @@ public class WholeBodyControllerCore
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
       inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, registry);
       inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, registry);
-      jacobianTransposeSolver = new WholeBodyJacobianTransposeSolver(toolbox, registry);
+      jacobianTransposeSolver = new WholeBodyVirtualModelControlSolver(toolbox, registry);
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       SixDoFJoint rootJoint = toolbox.getRobotRootJoint();

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
+import org.ejml.data.DenseMatrix64F;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.*;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class WholeBodyJacobianTransposeSolver
+public class WholeBodyVirtualModelControlSolver
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -56,7 +57,7 @@ public class WholeBodyJacobianTransposeSolver
 
    private final double controlDT;
 
-   public WholeBodyJacobianTransposeSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
+   public WholeBodyVirtualModelControlSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       controlDT = toolbox.getControlDT();
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
@@ -103,7 +104,6 @@ public class WholeBodyJacobianTransposeSolver
    public void compute()
    {
       MomentumModuleSolution momentumModuleSolution;
-
       try
       {
          momentumModuleSolution = optimizationControlModule.compute();
@@ -124,8 +124,15 @@ public class WholeBodyJacobianTransposeSolver
          virtualModelController.submitEndEffectorVirtualWrench(rigidBody, externalWrenchSolution.get(rigidBody));
       }
 
+      VirtualModelControlSolution virtualModelControlSolution = virtualModelController.compute();
+      Map<OneDoFJoint, Double> jointTorquesSolution = virtualModelControlSolution.getJointTorques();
 
-      virtualModelController.compute();
+      for (OneDoFJoint joint : controlledOneDoFJoints)
+      {
+         if (jointTorquesSolution.containsKey(joint))
+            joint.setTau(jointTorquesSolution.get(joint));
+      }
+
       updateLowLevelData();
 
       rootJoint.getWrench(residualRootJointWrench);
@@ -133,11 +140,6 @@ public class WholeBodyJacobianTransposeSolver
       residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
       yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
       yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
-
-      for (int i = 0; i < controlledOneDoFJoints.length; i++)
-      {
-         OneDoFJoint joint = controlledOneDoFJoints[i];
-      }
 
       planeContactWrenchProcessor.compute(externalWrenchSolution);
       wrenchVisualizer.visualize(externalWrenchSolution);
@@ -147,6 +149,8 @@ public class WholeBodyJacobianTransposeSolver
    {
       rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
       lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
+      // TODO when we have forward dynamics solver
+      /*
       lowLevelOneDoFJointDesiredDataHolder.setDesiredAccelerationFromJoints(controlledOneDoFJoints);
 
       for (int i = 0; i < jointsToComputeDesiredPositionFor.size(); i++)
@@ -176,6 +180,7 @@ public class WholeBodyJacobianTransposeSolver
          lowLevelJointData.setDesiredVelocity(desiredVelocity);
          lowLevelJointData.setDesiredPosition(desiredPosition);
       }
+      */
    }
 
    public void submitJacobianTransposeCommandList(InverseDynamicsCommandList jacobianTransposeCommandList)
