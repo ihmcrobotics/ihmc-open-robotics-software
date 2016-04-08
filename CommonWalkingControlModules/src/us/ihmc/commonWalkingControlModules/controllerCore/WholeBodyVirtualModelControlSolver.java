@@ -4,6 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.jacobianTranspose.JacobianTransposeOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
@@ -11,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -21,6 +22,7 @@ import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +44,15 @@ public class WholeBodyVirtualModelControlSolver
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final WrenchVisualizer wrenchVisualizer;
 
+   private final VirtualWrenchCommandList virtualWrenchCommandList = new VirtualWrenchCommandList();
+   private final VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
+   private final List<RigidBody> virtualForceBodies = new ArrayList<>();
+   private final Map<RigidBody, Wrench> endEffectorWrenches = new HashMap<>();
+   private final Map<RigidBody, DenseMatrix64F> endEffectorSelectionMatrices = new HashMap<>();
+   private final TwistCalculator twistCalculator;
+   private final Wrench tmpWrench = new Wrench();
+   private final Twist tmpTwist = new Twist();
+
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>();
@@ -60,6 +71,7 @@ public class WholeBodyVirtualModelControlSolver
    public WholeBodyVirtualModelControlSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       controlDT = toolbox.getControlDT();
+      twistCalculator = toolbox.getTwistCalculator();
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
       YoGraphicsListRegistry yoGraphicsListRegistry = toolbox.getYoGraphicsListRegistry();
 
@@ -118,10 +130,17 @@ public class WholeBodyVirtualModelControlSolver
       Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
       List<RigidBody> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
 
-      // Compute body positions and Jacobians
+      // submit forces for stability
       for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
       {
          virtualModelController.submitEndEffectorVirtualWrench(rigidBody, externalWrenchSolution.get(rigidBody));
+      }
+      // submit virtual wrenches for tracking
+      for (int i = 0; i < virtualWrenchCommandList.getNumberOfCommands(); i++)
+      {
+         virtualWrenchCommand.set(virtualWrenchCommandList.getCommand(i));
+         if (!rigidBodiesWithExternalWrench.contains(virtualWrenchCommand.getRigidBody()))
+            virtualModelController.submitEndEffectorVirtualWrench(virtualWrenchCommand);
       }
 
       VirtualModelControlSolution virtualModelControlSolution = virtualModelController.compute();
@@ -190,12 +209,17 @@ public class WholeBodyVirtualModelControlSolver
          InverseDynamicsCommand<?> command = jacobianTransposeCommandList.pollCommand();
          switch (command.getCommandType())
          {
+         case TASKSPACE:
+            convertAndAddSpatialAccelerationCommand((SpatialAccelerationCommand) command);
+            break;
          case MOMENTUM:
             optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
             break;
          case EXTERNAL_WRENCH:
             optimizationControlModule.submitExternalWrenchCommand((ExternalWrenchCommand) command);
             break;
+         case JOINT_ACCELERATION_INTEGRATION:
+            submitJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) command);
          case COMMAND_LIST:
             submitJacobianTransposeCommandList((InverseDynamicsCommandList) command);
             break;
@@ -203,6 +227,25 @@ public class WholeBodyVirtualModelControlSolver
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled by the Jacobian Transpose solver mode.");
          }
       }
+   }
+
+   private void convertAndAddSpatialAccelerationCommand(SpatialAccelerationCommand command)
+   {
+      RigidBody endEffector = command.getEndEffector();
+      RigidBodyInertia inertia = endEffector.getInertia();
+      twistCalculator.getTwistOfBody(tmpTwist, endEffector);
+      inertia.computeDynamicWrenchInBodyCoordinates(tmpWrench, command.getSpatialAcceleration(), tmpTwist);
+      tmpWrench.negate();
+
+      if (!virtualForceBodies.contains(endEffector))
+      {
+         virtualForceBodies.add(endEffector);
+         endEffectorWrenches.put(endEffector, tmpWrench);
+         endEffectorSelectionMatrices.put(endEffector, command.getSelectionMatrix());
+      }
+
+      virtualWrenchCommand.set(endEffector, tmpWrench, command.getSelectionMatrix());
+      virtualWrenchCommandList.addCommand(virtualWrenchCommand);
    }
 
    private void submitJointAccelerationIntegrationCommand(JointAccelerationIntegrationCommand command)
@@ -214,7 +257,6 @@ public class WholeBodyVirtualModelControlSolver
             jointsToComputeDesiredPositionFor.add(jointToComputeDesiedPositionFor);
       }
    }
-
 
    public LowLevelOneDoFJointDesiredDataHolder getOutput()
    {

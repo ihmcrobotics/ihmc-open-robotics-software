@@ -28,7 +28,7 @@ public class WholeBodyControllerCore
    private final WholeBodyFeedbackController feedbackController;
    private final WholeBodyInverseDynamicsSolver inverseDynamicsSolver;
    private final WholeBodyInverseKinematicsSolver inverseKinematicsSolver;
-   private final WholeBodyVirtualModelControlSolver jacobianTransposeSolver;
+   private final WholeBodyVirtualModelControlSolver virtualModelControlSolver;
 
    private final ControllerCoreOutput controllerCoreOutput;
    private final YoRootJointDesiredConfigurationData yoRootJointDesiredConfigurationData;
@@ -43,7 +43,7 @@ public class WholeBodyControllerCore
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
       inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, registry);
       inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, registry);
-      jacobianTransposeSolver = new WholeBodyVirtualModelControlSolver(toolbox, registry);
+      virtualModelControlSolver = new WholeBodyVirtualModelControlSolver(toolbox, registry);
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       SixDoFJoint rootJoint = toolbox.getRobotRootJoint();
@@ -61,7 +61,7 @@ public class WholeBodyControllerCore
       feedbackController.initialize();
       inverseDynamicsSolver.initialize();
       inverseKinematicsSolver.reset();
-      jacobianTransposeSolver.reset();
+      virtualModelControlSolver.reset();
       yoLowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
@@ -70,7 +70,7 @@ public class WholeBodyControllerCore
       feedbackController.reset();
       inverseDynamicsSolver.reset();
       inverseKinematicsSolver.reset();
-      jacobianTransposeSolver.reset();
+      virtualModelControlSolver.reset();
       yoLowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
@@ -90,7 +90,8 @@ public class WholeBodyControllerCore
          inverseKinematicsSolver.submitInverseKinematicsCommand(controllerCoreCommand.getInverseKinematicsCommandList());
          break;
       case JACOBIAN_TRANSPOSE:
-         jacobianTransposeSolver.submitJacobianTransposeCommandList(controllerCoreCommand.getJacobianTransposeCommandList());
+         feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
+         virtualModelControlSolver.submitJacobianTransposeCommandList(controllerCoreCommand.getJacobianTransposeCommandList());
       case OFF:
          break;
       default:
@@ -155,11 +156,17 @@ public class WholeBodyControllerCore
 
    private void doJacobianTranspose()
    {
-      jacobianTransposeSolver.compute();
-      LowLevelOneDoFJointDesiredDataHolder jacobianTransposeOutput = jacobianTransposeSolver.getOutput();
-      RootJointDesiredConfigurationDataReadOnly jacobianTransposeOutputForRootJoint = jacobianTransposeSolver.getOutputForRootJoint();
-      yoLowLevelOneDoFJointDesiredDataHolder.completeWith(jacobianTransposeOutput);
-      yoRootJointDesiredConfigurationData.completeWith(jacobianTransposeOutputForRootJoint);
+      feedbackController.compute();
+      InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getOutput();
+      numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands()); // todo
+      virtualModelControlSolver.submitJacobianTransposeCommandList(feedbackControllerOutput);
+
+      virtualModelControlSolver.compute();
+      feedbackController.computeAchievedAccelerations();
+      LowLevelOneDoFJointDesiredDataHolder virtualModelControlOutput = virtualModelControlSolver.getOutput();
+      RootJointDesiredConfigurationDataReadOnly virtualModelControlOutputForRootJoint = virtualModelControlSolver.getOutputForRootJoint();
+      yoLowLevelOneDoFJointDesiredDataHolder.completeWith(virtualModelControlOutput);
+      yoRootJointDesiredConfigurationData.completeWith(virtualModelControlOutputForRootJoint);
    }
 
    private void doNothing()
