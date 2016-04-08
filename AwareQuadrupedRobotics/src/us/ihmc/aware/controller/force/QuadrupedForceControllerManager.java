@@ -36,7 +36,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final StateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> stateMachine;
    private final StateMachineYoVariableTrigger<QuadrupedForceControllerEvent> userEventTrigger;
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
-   private final QuadrupedForceControllerContext controllerContext;
+   private final QuadrupedForceControllerToolbox controllerContext;
 
    private final AtomicReference<QuadrupedForceControllerEvent> requestedEvent = new AtomicReference<>();
 
@@ -57,7 +57,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
 
-      this.controllerContext = new QuadrupedForceControllerContext(runtimeEnvironment, parameters, registry);
+      this.controllerContext = new QuadrupedForceControllerToolbox(runtimeEnvironment, parameters, registry);
       this.stateMachine = buildStateMachine(runtimeEnvironment, parameters, inputProvider);
       this.userEventTrigger = new StateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerEvent.class);
       this.runtimeEnvironment = runtimeEnvironment;

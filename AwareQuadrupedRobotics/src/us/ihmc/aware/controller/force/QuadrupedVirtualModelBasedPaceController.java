@@ -1,17 +1,11 @@
 package us.ihmc.aware.controller.force;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.aware.controller.toolbox.*;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
-import us.ihmc.aware.controller.common.DivergentComponentOfMotionController;
-import us.ihmc.aware.controller.common.GroundPlaneEstimator;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceCommands;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceController;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceControllerSettings;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceEstimates;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceEstimator;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceSetpoints;
+import us.ihmc.aware.planning.GroundPlaneEstimator;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.planning.PiecewiseForwardDcmTrajectory;
 import us.ihmc.aware.planning.PiecewisePeriodicDcmTrajectory;
@@ -26,7 +20,6 @@ import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -57,10 +50,10 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
    private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
-   private final DoubleArrayParameter swingPositionProportionalGainsParameter = parameterFactory.createDoubleArray("swingPositionProportionalGains", 50000, 50000, 100000);
-   private final DoubleArrayParameter swingPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("swingPositionDerivativeGains", 500, 500, 500);
-   private final DoubleArrayParameter swingPositionIntegralGainsParameter = parameterFactory.createDoubleArray("swingPositionIntegralGains", 0, 0, 0);
-   private final DoubleParameter swingPositionMaxIntegralErrorParameter = parameterFactory.createDouble("swingPositionMaxIntegralError", 0);
+   private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 50000, 50000, 100000);
+   private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 500, 500, 500);
+   private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
+   private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
    private final DoubleParameter swingTrajectoryGroundClearanceParameter = parameterFactory.createDouble("swingTrajectoryGroundClearance", 0.10);
    private final DoubleParameter quadSupportDurationParameter = parameterFactory.createDouble("quadSupportDuration", 1.00);
    private final DoubleParameter doubleSupportDurationParameter = parameterFactory.createDouble("doubleSupportDuration", 0.33);
@@ -72,40 +65,45 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    private final ReferenceFrame supportFrame;
    private final ReferenceFrame worldFrame;
 
-   // dcm controller
+   // feedback controllers
    private final FramePoint dcmPositionEstimate;
-   private final FramePoint dcmPositionSetpoint;
-   private final FrameVector dcmVelocitySetpoint;
+   private final DivergentComponentOfMotionController.Setpoints dcmPositionControllerSetpoints;
    private final DivergentComponentOfMotionController dcmPositionController;
+   private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
+   private final QuadrupedComPositionController comPositionController;
+   private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
+   private final QuadrupedBodyOrientationController bodyOrientationController;
+   private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
+   private final QuadrupedSolePositionController solePositionController;
 
    // task space controller
-   private final QuadrupedTaskSpaceCommands taskSpaceCommands;
-   private final QuadrupedTaskSpaceSetpoints taskSpaceSetpoints;
-   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
+   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
+   private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
+   private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
-   private final QuadrupedTaskSpaceControllerSettings taskSpaceControllerSettings;
 
    // planning
    private double bodyYawSetpoint;
    private final GroundPlaneEstimator groundPlaneEstimator;
+   private final QuadrantDependentList<FramePoint> groundPlanePositions;
    private final PiecewisePeriodicDcmTrajectory nominalPeriodicDcmTrajectory;
    private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
    private final double[] timeAtSoS;
 
    // state machine
-   public enum TrotState
+   public enum PaceState
    {
       QUAD_SUPPORT, HIND_LEFT_FRONT_LEFT_SUPPORT, HIND_RIGHT_FRONT_RIGHT_SUPPORT
    }
-   public enum TrotEvent
+   public enum PaceEvent
    {
       TIMEOUT
    }
-   private final StateMachine<TrotState, TrotEvent> trotStateMachine;
+   private final StateMachine<PaceState, PaceEvent> paceStateMachine;
 
    public QuadrupedVirtualModelBasedPaceController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerInputProviderInterface inputProvider,
-         QuadrupedForceControllerContext controllerContext)
+         QuadrupedForceControllerToolbox controllerToolbox)
    {
       this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -115,43 +113,49 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       this.inputProvider = inputProvider;
 
       // frames
-      QuadrupedReferenceFrames referenceFrames = controllerContext.getReferenceFrames();
+      QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       worldFrame = ReferenceFrame.getWorldFrame();
 
-      // dcm controller
+      // feedback controllers
       dcmPositionEstimate = new FramePoint();
-      dcmPositionSetpoint = new FramePoint();
-      dcmVelocitySetpoint = new FrameVector();
-      dcmPositionController = controllerContext.getDcmPositionController();
+      dcmPositionControllerSetpoints = new DivergentComponentOfMotionController.Setpoints();
+      dcmPositionController = controllerToolbox.getDcmPositionController();
+      comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
+      comPositionController = controllerToolbox.getComPositionController();
+      bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
+      bodyOrientationController = controllerToolbox.getBodyOrientationController();
+      solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints();
+      solePositionController = controllerToolbox.getSolePositionController();
 
       // task space controllers
-      taskSpaceCommands = new QuadrupedTaskSpaceCommands();
-      taskSpaceSetpoints = new QuadrupedTaskSpaceSetpoints();
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
-      taskSpaceControllerSettings = new QuadrupedTaskSpaceControllerSettings();
-      taskSpaceEstimator = controllerContext.getTaskSpaceEstimator();
-      taskSpaceController = controllerContext.getTaskSpaceController();
+      taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+      taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
+      taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
+      taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
+      taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
       groundPlaneEstimator = new GroundPlaneEstimator();
+      groundPlanePositions = new QuadrantDependentList<>();
       swingFootTrajectory = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         groundPlanePositions.set(robotQuadrant, new FramePoint());
          swingFootTrajectory.set(robotQuadrant, new ThreeDoFSwingFootTrajectory());
       }
       nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(2, gravity, inputProvider.getComPositionInput().getZ(), null);
       timeAtSoS = new double[2];
 
       // state machine
-      StateMachineBuilder<TrotState, TrotEvent> stateMachineBuilder = new StateMachineBuilder<>(TrotState.class, "TrotState", registry);
-      stateMachineBuilder.addState(TrotState.QUAD_SUPPORT, new QuadSupportState());
-      stateMachineBuilder.addState(TrotState.HIND_LEFT_FRONT_LEFT_SUPPORT, new DoubleSupportState(RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT));
-      stateMachineBuilder.addState(TrotState.HIND_RIGHT_FRONT_RIGHT_SUPPORT, new DoubleSupportState(RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_RIGHT));
-      stateMachineBuilder.addTransition(TrotEvent.TIMEOUT, TrotState.QUAD_SUPPORT, TrotState.HIND_LEFT_FRONT_LEFT_SUPPORT);
-      stateMachineBuilder.addTransition(TrotEvent.TIMEOUT, TrotState.HIND_LEFT_FRONT_LEFT_SUPPORT, TrotState.HIND_RIGHT_FRONT_RIGHT_SUPPORT);
-      stateMachineBuilder.addTransition(TrotEvent.TIMEOUT, TrotState.HIND_RIGHT_FRONT_RIGHT_SUPPORT, TrotState.HIND_LEFT_FRONT_LEFT_SUPPORT);
-      trotStateMachine = stateMachineBuilder.build(TrotState.QUAD_SUPPORT);
+      StateMachineBuilder<PaceState, PaceEvent> stateMachineBuilder = new StateMachineBuilder<>(PaceState.class, "PaceState", registry);
+      stateMachineBuilder.addState(PaceState.QUAD_SUPPORT, new QuadSupportState());
+      stateMachineBuilder.addState(PaceState.HIND_LEFT_FRONT_LEFT_SUPPORT, new DoubleSupportState(RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT));
+      stateMachineBuilder.addState(PaceState.HIND_RIGHT_FRONT_RIGHT_SUPPORT, new DoubleSupportState(RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_RIGHT));
+      stateMachineBuilder.addTransition(PaceEvent.TIMEOUT, PaceState.QUAD_SUPPORT, PaceState.HIND_LEFT_FRONT_LEFT_SUPPORT);
+      stateMachineBuilder.addTransition(PaceEvent.TIMEOUT, PaceState.HIND_LEFT_FRONT_LEFT_SUPPORT, PaceState.HIND_RIGHT_FRONT_RIGHT_SUPPORT);
+      stateMachineBuilder.addTransition(PaceEvent.TIMEOUT, PaceState.HIND_RIGHT_FRONT_RIGHT_SUPPORT, PaceState.HIND_LEFT_FRONT_LEFT_SUPPORT);
+      paceStateMachine = stateMachineBuilder.build(PaceState.QUAD_SUPPORT);
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
@@ -173,38 +177,45 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       dcmPositionEstimate.set(taskSpaceEstimates.getComVelocity());
       dcmPositionEstimate.scale(1.0 / dcmPositionController.getNaturalFrequency());
       dcmPositionEstimate.add(taskSpaceEstimates.getComPosition());
+
+      // update ground plane estimate
+      groundPlaneEstimator.compute(groundPlanePositions);
    }
 
    private void updateSetpoints()
    {
       // update desired dcm and sole setpoints
-      trotStateMachine.process();
+      paceStateMachine.process();
+      solePositionController.compute(taskSpaceControllerCommands.getSoleForce(), solePositionControllerSetpoints, taskSpaceEstimates);
 
       // update desired horizontal com forces
-      dcmPositionController.compute(taskSpaceSetpoints.getComForceFeedforward(), dcmPositionSetpoint, dcmVelocitySetpoint, dcmPositionEstimate);
+      dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
 
       // update desired com position, velocity, and vertical force
-      taskSpaceSetpoints.getComPosition().changeFrame(supportFrame);
-      taskSpaceSetpoints.getComPosition().set(inputProvider.getComPositionInput());
-      taskSpaceSetpoints.getComVelocity().setToZero();
-      taskSpaceSetpoints.getComForceFeedforward().changeFrame(worldFrame);
-      taskSpaceSetpoints.getComForceFeedforward().setZ(mass * gravity);
+      comPositionControllerSetpoints.getComPosition().changeFrame(supportFrame);
+      comPositionControllerSetpoints.getComPosition().set(inputProvider.getComPositionInput());
+      comPositionControllerSetpoints.getComVelocity().changeFrame(supportFrame);
+      comPositionControllerSetpoints.getComVelocity().set(inputProvider.getComVelocityInput());
+      comPositionControllerSetpoints.getComForceFeedforward().setIncludingFrame(taskSpaceControllerCommands.getComForce());
+      comPositionControllerSetpoints.getComForceFeedforward().changeFrame(supportFrame);
+      comPositionControllerSetpoints.getComForceFeedforward().setZ(mass * gravity);
+      comPositionController.compute(taskSpaceControllerCommands.getComForce(), comPositionControllerSetpoints, taskSpaceEstimates);
 
       // update desired body orientation, angular velocity, and torque
-      if (trotStateMachine.getState() != TrotState.QUAD_SUPPORT)
+      if (paceStateMachine.getState() != PaceState.QUAD_SUPPORT)
       {
          bodyYawSetpoint += inputProvider.getPlanarVelocityInput().getZ() * controlDT;
       }
-      taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
-      taskSpaceSetpoints.getBodyOrientation().setYawPitchRoll(bodyYawSetpoint,
+      bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(worldFrame);
+      bodyOrientationControllerSetpoints.getBodyOrientation().setYawPitchRoll(bodyYawSetpoint,
             RotationTools.computePitch(inputProvider.getBodyOrientationInput()) + groundPlaneEstimator.getPitch(bodyYawSetpoint),
-                  RotationTools.computeRoll(inputProvider.getBodyOrientationInput()));
-      taskSpaceSetpoints.getBodyAngularVelocity().setToZero();
-      taskSpaceSetpoints.getComTorqueFeedforward().setToZero();
+            RotationTools.computeRoll(inputProvider.getBodyOrientationInput()));
+      bodyOrientationControllerSetpoints.getBodyAngularVelocity().setToZero();
+      bodyOrientationControllerSetpoints.getComTorqueFeedforward().setToZero();
+      bodyOrientationController.compute(taskSpaceControllerCommands.getComTorque(), bodyOrientationControllerSetpoints, taskSpaceEstimates);
 
       // update joint setpoints
-      taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceSetpoints, taskSpaceEstimates, taskSpaceCommands);
-      taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
+      taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 
    @Override public QuadrupedForceControllerEvent process()
@@ -216,41 +227,38 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
 
    @Override public void onEntry()
    {
-      // initialize dcm controller
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
-      dcmPositionController.setGains(
-            dcmPositionProportionalGainsParameter.get(),
-            dcmPositionDerivativeGainsParameter.get(),
-            dcmPositionIntegralGainsParameter.get(),
-            dcmPositionMaxIntegralErrorParameter.get()
-      );
+      updateEstimates();
+
+      // initialize feedback controllers
+      dcmPositionControllerSetpoints.initialize(dcmPositionEstimate);
       dcmPositionController.reset();
+      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
+      dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
+      dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
+      dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
+      comPositionControllerSetpoints.initialize(taskSpaceEstimates);
+      comPositionController.reset();
+      comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
+      comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
+      comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
+      bodyOrientationControllerSetpoints.initialize(taskSpaceEstimates);
+      bodyOrientationController.reset();
+      bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
+      bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
+      bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
+      solePositionControllerSetpoints.initialize(taskSpaceEstimates);
+      solePositionController.reset();
 
       // initialize task space controller
-      taskSpaceEstimator.compute(taskSpaceEstimates);
-      taskSpaceSetpoints.initialize(taskSpaceEstimates);
       taskSpaceControllerSettings.initialize();
-      taskSpaceControllerSettings.setJointDamping(jointDampingParameter.get());
-      taskSpaceControllerSettings.setComForceCommandWeights(1.0, 1.0, 1.0);
-      taskSpaceControllerSettings.setComTorqueCommandWeights(1.0, 1.0, 1.0);
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
+      taskSpaceControllerSettings.getContactForceOptimizationSettings().setComForceCommandWeights(1.0, 1.0, 1.0);
+      taskSpaceControllerSettings.getContactForceOptimizationSettings().setComTorqueCommandWeights(1.0, 1.0, 1.0);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         taskSpaceControllerSettings.setSoleForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
+         taskSpaceControllerSettings.getContactForceOptimizationSettings().setContactForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
-         taskSpaceControllerSettings.setSolePositionFeedbackGainsToZero(robotQuadrant);
       }
-      taskSpaceControllerSettings.setBodyOrientationFeedbackGains(
-            bodyOrientationProportionalGainsParameter.get(),
-            bodyOrientationDerivativeGainsParameter.get(),
-            bodyOrientationIntegralGainsParameter.get(),
-            bodyOrientationMaxIntegralErrorParameter.get()
-      );
-      taskSpaceControllerSettings.setComPositionFeedbackGains(
-            comPositionProportionalGainsParameter.get(),
-            comPositionDerivativeGainsParameter.get(),
-            comPositionIntegralGainsParameter.get(),
-            comPositionMaxIntegralErrorParameter.get()
-      );
       taskSpaceController.reset();
 
       // initialize body yaw trajectory
@@ -258,7 +266,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       bodyYawSetpoint = taskSpaceEstimates.getBodyOrientation().getYaw();
 
       // initialize state machine
-      trotStateMachine.reset();
+      paceStateMachine.reset();
    }
 
    @Override public void onExit()
@@ -330,7 +338,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       groundPlaneEstimator.projectZ(footholdPosition);
    }
 
-   private class QuadSupportState implements StateMachineState<TrotEvent>
+   private class QuadSupportState implements StateMachineState<PaceEvent>
    {
       private double initialTime;
       private final ThreeDoFMinimumJerkTrajectory dcmTrajectory;
@@ -363,29 +371,30 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
          // compute desired dcm trajectory
          dcmTrajectory.initializeTrajectory(dcmPositionEstimate, dcmPositionAtSoSNominal[0], quadSupportDurationParameter.get());
 
-         // initialize contact state
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
+            // initialize contact state
             taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
-            taskSpaceControllerSettings.setPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
-         }
+            taskSpaceControllerSettings.getContactForceLimits().setPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
 
-         // compute ground plane estimate
-         groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
+            // initialize ground plane points
+            groundPlanePositions.get(robotQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
+            groundPlanePositions.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+         }
       }
 
-      @Override public TrotEvent process()
+      @Override public PaceEvent process()
       {
          double currentTime = robotTimestamp.getDoubleValue();
 
          // compute dcm setpoint
          dcmTrajectory.computeTrajectory(currentTime - initialTime);
-         dcmTrajectory.getPosition(dcmPositionSetpoint);
-         dcmTrajectory.getVelocity(dcmVelocitySetpoint);
+         dcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
+         dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
 
          // trigger touch down event
          if (currentTime > initialTime + quadSupportDurationParameter.get())
-            return TrotEvent.TIMEOUT;
+            return PaceEvent.TIMEOUT;
          else
             return null;
       }
@@ -395,7 +404,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       }
    }
 
-   private class DoubleSupportState implements StateMachineState<TrotEvent>
+   private class DoubleSupportState implements StateMachineState<PaceEvent>
    {
       private double initialTime;
       private final RobotQuadrant supportQuadrants[];
@@ -448,8 +457,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
          cmpPositionAtEoS.add(cmpPositionAtSoSNominal[1]);
 
          // compute desired body yaw at end of step
-         taskSpaceSetpoints.getBodyOrientation().changeFrame(worldFrame);
-         double bodyYawAtSoS = taskSpaceSetpoints.getBodyOrientation().getYaw();
+         double bodyYawAtSoS = bodyYawSetpoint;
          double bodyYawAtEoS = bodyYawAtSoS + inputProvider.getPlanarVelocityInput().getZ() * doubleSupportDurationParameter.get();
 
          for (int i = 0; i < 2; i++)
@@ -467,33 +475,31 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
                swingTrajectoryGroundClearanceParameter.get(), doubleSupportDurationParameter.get());
 
             // initialize sole position feedback gains
-            taskSpaceControllerSettings.setSolePositionFeedbackGainsToZero(supportQuadrant);
-            taskSpaceControllerSettings.setSolePositionFeedbackGains(swingQuadrant,
-                  swingPositionProportionalGainsParameter.get(),
-                  swingPositionDerivativeGainsParameter.get(),
-                  swingPositionIntegralGainsParameter.get(),
-                  swingPositionMaxIntegralErrorParameter.get()
-            );
+            solePositionController.getGains(swingQuadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
+            solePositionController.getGains(swingQuadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
+            solePositionController.getGains(swingQuadrant).setDerivativeGains(solePositionDerivativeGainsParameter.get());
+            solePositionController.getGains(supportQuadrant).reset();
 
             // initialize contact state
             taskSpaceControllerSettings.setContactState(swingQuadrant, ContactState.NO_CONTACT);
             taskSpaceControllerSettings.setContactState(supportQuadrant, ContactState.IN_CONTACT);
-            taskSpaceControllerSettings.setPressureUpperLimit(swingQuadrant, noContactPressureLimitParameter.get());
-            taskSpaceControllerSettings.setPressureUpperLimit(supportQuadrant, Double.MAX_VALUE);
-         }
+            taskSpaceControllerSettings.getContactForceLimits().setPressureUpperLimit(swingQuadrant, noContactPressureLimitParameter.get());
+            taskSpaceControllerSettings.getContactForceLimits().setPressureUpperLimit(supportQuadrant, Double.MAX_VALUE);
 
-         // compute ground plane estimate
-         groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
+            // initialize ground plane points
+            groundPlanePositions.get(swingQuadrants[i]).setIncludingFrame(taskSpaceEstimates.getSolePosition(swingQuadrants[i]));
+            groundPlanePositions.get(swingQuadrants[i]).changeFrame(ReferenceFrame.getWorldFrame());
+         }
       }
 
-      @Override public TrotEvent process()
+      @Override public PaceEvent process()
       {
          double currentTime = robotTimestamp.getDoubleValue();
 
          // compute dcm setpoint
          dcmTrajectory.computeTrajectory(currentTime);
-         dcmTrajectory.getPosition(dcmPositionSetpoint);
-         dcmTrajectory.getVelocity(dcmVelocitySetpoint);
+         dcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
+         dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
 
          for (int i = 0; i < 2; i++)
          {
@@ -501,19 +507,20 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
 
             // compute nominal sole position setpoint
             swingFootTrajectory.get(swingQuadrant).computeTrajectory(currentTime - initialTime);
-            swingFootTrajectory.get(swingQuadrant).getPosition(taskSpaceSetpoints.getSolePosition(swingQuadrant));
+            swingFootTrajectory.get(swingQuadrant).getPosition(solePositionControllerSetpoints.getSolePosition(swingQuadrant));
 
             // shift the swing foot trajectory in the direction of the dcm tracking error
+            FramePoint dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
             dcmPositionEstimate.changeFrame(worldFrame);
             dcmPositionSetpoint.changeFrame(worldFrame);
-            taskSpaceSetpoints.getSolePosition(swingQuadrant).changeFrame(worldFrame);
-            taskSpaceSetpoints.getSolePosition(swingQuadrant).add(dcmPositionEstimate.getX(), dcmPositionEstimate.getY(), 0.0);
-            taskSpaceSetpoints.getSolePosition(swingQuadrant).sub(dcmPositionSetpoint.getX(), dcmPositionSetpoint.getY(), 0.0);
+            solePositionControllerSetpoints.getSolePosition(swingQuadrant).changeFrame(worldFrame);
+            solePositionControllerSetpoints.getSolePosition(swingQuadrant).add(dcmPositionEstimate.getX(), dcmPositionEstimate.getY(), 0.0);
+            solePositionControllerSetpoints.getSolePosition(swingQuadrant).sub(dcmPositionSetpoint.getX(), dcmPositionSetpoint.getY(), 0.0);
          }
 
          // trigger touch down event
          if (currentTime > initialTime + doubleSupportDurationParameter.get())
-            return TrotEvent.TIMEOUT;
+            return PaceEvent.TIMEOUT;
          else
             return null;
       }

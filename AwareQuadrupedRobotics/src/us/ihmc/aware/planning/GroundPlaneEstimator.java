@@ -1,4 +1,4 @@
-package us.ihmc.aware.controller.common;
+package us.ihmc.aware.planning;
 
 import us.ihmc.aware.util.ArrayListSorter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
