@@ -4,18 +4,20 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class VirtualModelController
 {
    private final WholeBodyControlCoreToolbox toolbox;
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final RigidBody rootBody;
+
+   private OneDoFJoint[] jointsToCompute;
+   private Map<OneDoFJoint, Double> jointTorques = new HashMap<>();
 
    private final ArrayList<RigidBody> endEffectors = new ArrayList<>();
    private final HashMap<RigidBody, Long> endEffectorJacobians = new HashMap<>();
@@ -41,8 +43,9 @@ public class VirtualModelController
       {
          endEffectors.add(endEffector);
 
-         OneDoFJoint[] joints = ScrewTools.filterJoints(ScrewTools.createJointPath(rootBody, endEffector), OneDoFJoint.class);
+         OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(rootBody, endEffector);
          limbJoints.put(endEffector, joints);
+         jointsToCompute = appendJoints(jointsToCompute, joints);
 
          long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(joints, rootBody.getBodyFixedFrame());
          endEffectorJacobians.put(endEffector, jacobianID);
@@ -120,14 +123,15 @@ public class VirtualModelController
    {
       endEffectorWrenchMatrices.clear();
       endEffectorSelectionMatrices.clear();
+      jointTorques.clear();
    }
 
-   public void compute()
+   public VirtualModelControlSolution compute()
    {
       for (RigidBody endEffector : endEffectors)
       {
          if (!endEffectorWrenchMatrices.containsKey(endEffector) || !endEffectorSelectionMatrices.containsKey(endEffector))
-            throw new RuntimeException("Not all registered end effectors have required forces to compute desired torques.");
+            throw new RuntimeException("Not all registered end effectors have required forces to compute desired joint torques.");
       }
 
       for (RigidBody endEffector : endEffectors)
@@ -145,7 +149,26 @@ public class VirtualModelController
          // Compute desired joint torques
          CommonOps.multTransA(jacobianMatrix, tmpWrenchMatrix, jointEffortMatrix);
 
-         OneDoFJoint[] joints = limbJoints.get(endEffector);
+         // Write torques to map
+         int index = 0;
+         for (OneDoFJoint joint : limbJoints.get(endEffector))
+         {
+            jointTorques.put(joint, jointEffortMatrix.get(index));
+            index++;
+         }
       }
+
+      return new VirtualModelControlSolution(jointsToCompute, jointTorques);
+   }
+
+   private static OneDoFJoint[] appendJoints(OneDoFJoint[] currentJoints, OneDoFJoint[] newJoints)
+   {
+      OneDoFJoint[] ret = new OneDoFJoint[currentJoints.length + newJoints.length];
+      for (int i = 0; i < currentJoints.length; i++)
+         ret[i] = currentJoints[i];
+      for (int i = currentJoints.length; i < ret.length; i++)
+         ret[i] = newJoints[i - currentJoints.length];
+
+      return ret;
    }
 }
