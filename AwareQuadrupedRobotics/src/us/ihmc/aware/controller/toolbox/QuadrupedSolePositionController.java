@@ -100,7 +100,6 @@ public class QuadrupedSolePositionController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePositionController.get(robotQuadrant).reset();
-         solePositionControllerGains.get(robotQuadrant).reset();
       }
    }
 

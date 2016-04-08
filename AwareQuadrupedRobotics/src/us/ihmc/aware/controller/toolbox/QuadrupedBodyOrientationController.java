@@ -57,7 +57,6 @@ public class QuadrupedBodyOrientationController
    public void reset()
    {
       bodyOrientationController.reset();
-      bodyOrientationControllerGains.reset();
    }
 
    public void compute(FrameVector comTorqueCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
