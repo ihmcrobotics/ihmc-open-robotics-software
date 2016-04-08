@@ -12,7 +12,7 @@ public interface ControllerCoreCommandInterface
    public abstract InverseDynamicsCommandList getInverseDynamicsCommandList();
    public abstract FeedbackControlCommandList getFeedbackControlCommandList();
    public abstract InverseKinematicsCommandList getInverseKinematicsCommandList();
-   public abstract InverseDynamicsCommandList getJacobianTransposeCommandList();
+   public abstract InverseDynamicsCommandList getVirtualModelCommandList();
    public abstract LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelOneDoFJointDesiredDataHolder();
    public abstract WholeBodyControllerCoreMode getControllerCoreMode();
 }

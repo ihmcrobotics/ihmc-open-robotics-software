@@ -15,7 +15,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    private final InverseDynamicsCommandList inverseDynamicsCommandList;
    private final FeedbackControlCommandList feedbackControlCommandList;
    private final InverseKinematicsCommandList inverseKinematicsCommandList;
-   private final InverseDynamicsCommandList jacobianTransposeCommandList;
+   private final InverseDynamicsCommandList virtualModelCommandList;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
    private WholeBodyControllerCoreMode controllerCoreMode;
 
@@ -26,7 +26,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       inverseDynamicsCommandList = new InverseDynamicsCommandList();
       feedbackControlCommandList = new FeedbackControlCommandList();
       inverseKinematicsCommandList = new InverseKinematicsCommandList();
-      jacobianTransposeCommandList = new InverseDynamicsCommandList();
+      virtualModelCommandList = new InverseDynamicsCommandList();
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
    }
 
@@ -35,7 +35,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       inverseDynamicsCommandList.clear();
       feedbackControlCommandList.clear();
       inverseKinematicsCommandList.clear();
-      jacobianTransposeCommandList.clear();
+      virtualModelCommandList.clear();
       lowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
@@ -57,10 +57,10 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
          inverseKinematicsCommandList.addCommand(inverseKinematicsCommand);
    }
 
-   public void addJacobianTransposeCommand(InverseDynamicsCommand<?> jacobianTransposeCommand)
+   public void addVirtualModelCommand(InverseDynamicsCommand<?> virtualModelCommand)
    {
-      if (jacobianTransposeCommand != null)
-         jacobianTransposeCommandList.addCommand(jacobianTransposeCommand);
+      if (virtualModelCommand != null)
+         virtualModelCommandList.addCommand(virtualModelCommand);
    }
 
    public void completeLowLevelJointData(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelJointData)
@@ -88,9 +88,9 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    }
 
    @Override
-   public InverseDynamicsCommandList getJacobianTransposeCommandList()
+   public InverseDynamicsCommandList getVirtualModelCommandList()
    {
-      return jacobianTransposeCommandList;
+      return virtualModelCommandList;
    }
 
    @Override
