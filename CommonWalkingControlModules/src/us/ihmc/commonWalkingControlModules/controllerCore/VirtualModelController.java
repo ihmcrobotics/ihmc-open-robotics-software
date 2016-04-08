@@ -27,8 +27,8 @@ public class VirtualModelController
    private final HashMap<RigidBody, DenseMatrix64F> endEffectorSelectionMatrices = new HashMap<>();
    private final HashMap<RigidBody, DenseMatrix64F> jointEffortMatrices = new HashMap<>();
 
-   private final DenseMatrix64F tmpWrenchMatrix = new DenseMatrix64F();
-   private final DenseMatrix64F tmpEffortMatrix = new DenseMatrix64F();
+   private final DenseMatrix64F tmpWrenchMatrix = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F tmpEffortMatrix = new DenseMatrix64F(1, 1);
 
 
    public VirtualModelController(WholeBodyControlCoreToolbox toolbox)
@@ -168,11 +168,17 @@ public class VirtualModelController
 
    private static OneDoFJoint[] appendJoints(OneDoFJoint[] currentJoints, OneDoFJoint[] newJoints)
    {
-      OneDoFJoint[] ret = new OneDoFJoint[currentJoints.length + newJoints.length];
-      for (int i = 0; i < currentJoints.length; i++)
+      int start;
+      if (currentJoints != null)
+         start = currentJoints.length;
+      else
+         start = 0;
+
+      OneDoFJoint[] ret = new OneDoFJoint[start + newJoints.length];
+      for (int i = 0; i < start; i++)
          ret[i] = currentJoints[i];
-      for (int i = currentJoints.length; i < ret.length; i++)
-         ret[i] = newJoints[i - currentJoints.length];
+      for (int i = start; i < ret.length; i++)
+         ret[i] = newJoints[i - start];
 
       return ret;
    }

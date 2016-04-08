@@ -39,9 +39,6 @@ public class WholeBodyVirtualModelControlSolver
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
-   private final WrenchVisualizer wrenchVisualizer;
-
    private final VirtualWrenchCommandList virtualWrenchCommandList = new VirtualWrenchCommandList();
    private final VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
    private final TwistCalculator twistCalculator;
@@ -81,11 +78,6 @@ public class WholeBodyVirtualModelControlSolver
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
 
-      planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, yoGraphicsListRegistry, registry);
-
-      wrenchVisualizer = WrenchVisualizer.createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0,
-            yoGraphicsListRegistry, registry);
-
       RigidBody[] endEffectors = toolbox.getEndEffectors();
       for (int i = 0; i < endEffectors.length; i++)
          virtualModelController.registerEndEffector(endEffectors[i]);
@@ -110,7 +102,6 @@ public class WholeBodyVirtualModelControlSolver
       // where the feet are all jacked up. For example, after falling and getting back up.
       virtualModelController.compute();
       optimizationControlModule.initialize();
-      planeContactWrenchProcessor.initialize();
    }
 
    public void compute()
@@ -159,9 +150,6 @@ public class WholeBodyVirtualModelControlSolver
       residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
       yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
       yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
-
-      planeContactWrenchProcessor.compute(externalWrenchSolution);
-      wrenchVisualizer.visualize(externalWrenchSolution);
    }
 
    private void updateLowLevelData()
@@ -260,11 +248,6 @@ public class WholeBodyVirtualModelControlSolver
    public RootJointDesiredConfigurationDataReadOnly getOutputForRootJoint()
    {
       return rootJointDesiredConfiguration;
-   }
-
-   public CenterOfPressureDataHolder getDesiredCenterOfPressureDataHolder()
-   {
-      return planeContactWrenchProcessor.getDesiredCenterOfPressureDataHolder();
    }
 
    public InverseDynamicsJoint[] getJointsToOptimizeFors()

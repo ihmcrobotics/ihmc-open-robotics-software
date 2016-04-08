@@ -89,9 +89,9 @@ public class WholeBodyControllerCore
       case INVERSE_KINEMATICS:
          inverseKinematicsSolver.submitInverseKinematicsCommand(controllerCoreCommand.getInverseKinematicsCommandList());
          break;
-      case JACOBIAN_TRANSPOSE:
+      case VIRTUAL_MODEL:
          feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
-         virtualModelControlSolver.submitVirtualModelControlCommandList(controllerCoreCommand.getJacobianTransposeCommandList());
+         virtualModelControlSolver.submitVirtualModelControlCommandList(controllerCoreCommand.getVirtualModelCommandList());
       case OFF:
          break;
       default:
@@ -114,7 +114,7 @@ public class WholeBodyControllerCore
       case INVERSE_KINEMATICS:
          doInverseKinematics();
          break;
-      case JACOBIAN_TRANSPOSE:
+      case VIRTUAL_MODEL:
          doJacobianTranspose();
       case OFF:
          doNothing();

@@ -32,7 +32,7 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
       inverseDynamicsCommandDataCopier.copyFromOther(controllerCoreCommand.getInverseDynamicsCommandList());
       feedbackControlCommandDataCopier.copyFromOther(controllerCoreCommand.getFeedbackControlCommandList());
       inverseKinematicsCommandDataCopier.copyFromOther(controllerCoreCommand.getInverseKinematicsCommandList());
-      jacobianTransposeCommandDataCopier.copyFromOther(controllerCoreCommand.getJacobianTransposeCommandList());
+      jacobianTransposeCommandDataCopier.copyFromOther(controllerCoreCommand.getVirtualModelCommandList());
       lowLevelOneDoFJointDesiredDataHolder.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
    }
 
@@ -72,7 +72,7 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
    }
 
    @Override
-   public InverseDynamicsCommandList getJacobianTransposeCommandList()
+   public InverseDynamicsCommandList getVirtualModelCommandList()
    {
       return jacobianTransposeCommandDataCopier.getInverseDynamicsCommandList();
    }
