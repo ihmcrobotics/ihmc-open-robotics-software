@@ -21,18 +21,18 @@ public class QuadrupedForceControllerToolbox
 
    public QuadrupedForceControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters parameters, YoVariableRegistry registry)
    {
-      double mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
       double gravity = 9.81;
+      double mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
 
       // create controllers and estimators
       referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), parameters.getJointMap(), parameters.getPhysicalProperties());
       taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(runtimeEnvironment.getFullRobotModel(), referenceFrames, parameters.getJointMap(), registry);
       taskSpaceController = new QuadrupedTaskSpaceController(runtimeEnvironment.getFullRobotModel(), referenceFrames, parameters.getJointMap(), parameters.getQuadrupedJointLimits(), registry);
-      bodyOrientationController = new QuadrupedBodyOrientationController(referenceFrames.getBodyFrame(), runtimeEnvironment.getControlDT(), registry);
-      dcmPositionController = new DivergentComponentOfMotionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), mass, gravity, 1.0, registry);
-      solePositionController = new QuadrupedSolePositionController(referenceFrames.getFootReferenceFrames(), runtimeEnvironment.getControlDT(), registry);
       comPositionController = new QuadrupedComPositionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), registry);
-      timedStepController = new QuadrupedTimedStepController(runtimeEnvironment.getRobotTimestamp(), registry);
+      dcmPositionController = new DivergentComponentOfMotionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), mass, gravity, 1.0, registry);
+      bodyOrientationController = new QuadrupedBodyOrientationController(referenceFrames.getBodyFrame(), runtimeEnvironment.getControlDT(), registry);
+      solePositionController = new QuadrupedSolePositionController(referenceFrames.getFootReferenceFrames(), runtimeEnvironment.getControlDT(), registry);
+      timedStepController = new QuadrupedTimedStepController(solePositionController, runtimeEnvironment.getRobotTimestamp(), registry);
 
       // register controller graphics
       taskSpaceController.registerGraphics(runtimeEnvironment.getGraphicsListRegistry());
@@ -54,6 +54,11 @@ public class QuadrupedForceControllerToolbox
       return taskSpaceController;
    }
 
+   public QuadrupedComPositionController getComPositionController()
+   {
+      return comPositionController;
+   }
+
    public DivergentComponentOfMotionController getDcmPositionController()
    {
       return dcmPositionController;
@@ -67,11 +72,6 @@ public class QuadrupedForceControllerToolbox
    public QuadrupedSolePositionController getSolePositionController()
    {
       return solePositionController;
-   }
-
-   public QuadrupedComPositionController getComPositionController()
-   {
-      return comPositionController;
    }
 
    public QuadrupedTimedStepController getTimedStepController()
