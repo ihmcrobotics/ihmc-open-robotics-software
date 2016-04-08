@@ -1,6 +1,5 @@
 package us.ihmc.aware.planning;
 
-import us.ihmc.aware.controller.common.GroundPlaneEstimator;
 import us.ihmc.aware.util.PreallocatedQueue;
 import us.ihmc.aware.util.QuadrupedTimedStep;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
@@ -66,6 +65,11 @@ public class XGaitStepPlanner
     * The sideways distance at which a footstep is placed from the previous step.
     */
    private double strideWidth = 0.0;
+
+   /**
+    * The swing foot apex height.
+    */
+   private double groundClearance = 0.1;
 
    // TODO: Compute conversion of arbitrary yaw rate units to rad/s.
    private double yawRate = 0.0;
@@ -289,7 +293,7 @@ public class XGaitStepPlanner
       step.setRobotQuadrant(quadrant);
       step.getTimeInterval().setInterval(0.0, swingDuration);
       step.getTimeInterval().shiftInterval(startTime);
-
+      step.setGroundClearance(groundClearance);
       step.getGoalPosition().setToZero(referenceFrames.getFootFrame(quadrant));
 
       return step;

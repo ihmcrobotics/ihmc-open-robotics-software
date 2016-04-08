@@ -16,21 +16,9 @@ public class QuadrupedTimedStep extends QuadrupedStep
       this.timeInterval = new TimeInterval(0.5, 1.0);
    }
 
-   public QuadrupedTimedStep(RobotQuadrant robotQuadrant)
+   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, FramePoint goalPosition, double groundClearance, TimeInterval timeInterval)
    {
-      super(robotQuadrant);
-      this.timeInterval = new TimeInterval(0.5, 1.0);
-   }
-
-   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, FramePoint goalPosition)
-   {
-      super(robotQuadrant, goalPosition);
-      this.timeInterval = new TimeInterval(0.5, 1.0);
-   }
-
-   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, FramePoint goalPosition, TimeInterval timeInterval)
-   {
-      super(robotQuadrant, goalPosition);
+      super(robotQuadrant, goalPosition, groundClearance);
       this.timeInterval = new TimeInterval(timeInterval);
    }
 

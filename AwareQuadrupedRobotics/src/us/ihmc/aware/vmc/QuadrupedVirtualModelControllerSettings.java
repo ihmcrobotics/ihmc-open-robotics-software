@@ -5,22 +5,34 @@ import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 
 public class QuadrupedVirtualModelControllerSettings
 {
-   private double defaultJointDamping = 0.0;
-   private double defaultJointPositionLimitStiffness = 200.0;
-   private double defaultJointPositionLimitDamping = 5.0;
+   private double defaultJointDamping;
+   private double defaultJointPositionLimitStiffness;
+   private double defaultJointPositionLimitDamping;
    private final TObjectDoubleHashMap<QuadrupedJointName> jointDamping = new TObjectDoubleHashMap<>();
    private final TObjectDoubleHashMap<QuadrupedJointName> jointPositionLimitStiffness = new TObjectDoubleHashMap<>();
    private final TObjectDoubleHashMap<QuadrupedJointName> jointPositionLimitDamping = new TObjectDoubleHashMap<>();
 
    public QuadrupedVirtualModelControllerSettings()
    {
+      setDefaults();
    }
 
    public QuadrupedVirtualModelControllerSettings(QuadrupedVirtualModelControllerSettings quadrupedVirtualModelControllerSettings)
    {
+      setDefaults();
       jointDamping.putAll(quadrupedVirtualModelControllerSettings.jointDamping);
       jointPositionLimitStiffness.putAll(quadrupedVirtualModelControllerSettings.jointPositionLimitStiffness);
       jointPositionLimitDamping.putAll(quadrupedVirtualModelControllerSettings.jointPositionLimitDamping);
+   }
+
+   public void setDefaults()
+   {
+      defaultJointDamping = 0.0;
+      defaultJointPositionLimitStiffness = 200.0;
+      defaultJointPositionLimitDamping = 5.0;
+      jointDamping.clear();
+      jointPositionLimitStiffness.clear();
+      jointPositionLimitDamping.clear();
    }
 
    public void setJointDamping(double value)

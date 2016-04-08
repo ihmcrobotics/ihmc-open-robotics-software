@@ -1,7 +1,9 @@
-package us.ihmc.aware.controller.common;
+package us.ihmc.aware.controller.toolbox;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.controllers.PIDController;
+import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -16,14 +18,37 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactL
 
 public class DivergentComponentOfMotionController
 {
-   private double dt;
-   private double mass;
-   private double gravity;
+   public static class Setpoints
+   {
+      private final FramePoint dcmPosition = new FramePoint();
+      private final FrameVector dcmVelocity = new FrameVector();
+
+      public void initialize(FramePoint dcmPositionEstimate)
+      {
+         dcmPosition.setIncludingFrame(dcmPositionEstimate);
+         dcmVelocity.setToZero();
+      }
+
+      public FramePoint getDcmPosition()
+      {
+         return dcmPosition;
+      }
+
+      public FrameVector getDcmVelocity()
+      {
+         return dcmVelocity;
+      }
+   }
+
+   private final double controlDT;
+   private final double mass;
+   private final double gravity;
    private double comHeight;
    private final ReferenceFrame comFrame;
-   private final PIDController[] pidController;
    private final FramePoint vrpPositionSetpoint;
    private final FramePoint cmpPositionSetpoint;
+   private final PIDController[] pidController;
+   private final YoEuclideanPositionGains pidControllerGains;
 
    YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
@@ -39,20 +64,21 @@ public class DivergentComponentOfMotionController
    YoFramePoint yoCmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
    DoubleYoVariable yoLipNaturalFrequency = new DoubleYoVariable("lipNaturalFrequency", registry);
 
-   public DivergentComponentOfMotionController(String suffix, ReferenceFrame comFrame, double dt, double mass, double gravity, double comHeight, YoVariableRegistry parentRegistry)
+   public DivergentComponentOfMotionController(ReferenceFrame comFrame, double controlDT, double mass, double gravity, double comHeight, YoVariableRegistry parentRegistry)
    {
-      this.dt = dt;
+      this.controlDT = controlDT;
       this.mass = mass;
       this.gravity = gravity;
       this.comHeight = comHeight;
       this.comFrame = comFrame;
 
-      pidController = new PIDController[3];
-      pidController[0] = new PIDController(suffix + "X", parentRegistry);
-      pidController[1] = new PIDController(suffix + "Y", parentRegistry);
-      pidController[2] = new PIDController(suffix + "Z", parentRegistry);
       vrpPositionSetpoint = new FramePoint();
       cmpPositionSetpoint = new FramePoint();
+      pidController = new PIDController[3];
+      pidController[0] = new PIDController("dcmPositionX", registry);
+      pidController[1] = new PIDController("dcmPositionY", registry);
+      pidController[2] = new PIDController("dcmPositionZ", registry);
+      pidControllerGains = new YoEuclideanPositionGains("dcmPosition", registry);
 
       YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition("icpPositionEstimate", yoIcpPositionEstimate, 0.025, YoAppearance.Magenta());
       YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition("icpPositionSetpoint", yoIcpPositionSetpoint, 0.025, YoAppearance.Blue());
@@ -100,64 +126,15 @@ public class DivergentComponentOfMotionController
       }
    }
 
-   public void setProportionalGains(double[] proportionalGains)
+   public YoEuclideanPositionGains getGains()
    {
-      for (int i = 0; i < 3; i++)
-      {
-         pidController[i].setProportionalGain(proportionalGains[i]);
-      }
+      return pidControllerGains;
    }
 
-   public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
+   public void compute(FrameVector comForceCommand, Setpoints setpoints, FramePoint dcmPositionEstimate)
    {
-      pidController[0].setProportionalGain(proportionalGainX);
-      pidController[1].setProportionalGain(proportionalGainY);
-      pidController[2].setProportionalGain(proportionalGainZ);
-   }
-
-   public void setDerivativeGains(double[] derivativeGains)
-   {
-      for (int i = 0; i < 3; i++)
-      {
-         pidController[i].setDerivativeGain(derivativeGains[i]);
-      }
-   }
-
-   public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
-   {
-      pidController[0].setDerivativeGain(derivativeGainX);
-      pidController[1].setDerivativeGain(derivativeGainY);
-      pidController[2].setDerivativeGain(derivativeGainZ);
-   }
-
-   public void setIntegralGains(double[] integralGains, double maxIntegralError)
-   {
-      for (int i = 0; i < 3; i++)
-      {
-         pidController[i].setIntegralGain(integralGains[i]);
-         pidController[i].setMaxIntegralError(maxIntegralError);
-      }
-   }
-
-   public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
-   {
-      pidController[0].setIntegralGain(integralGainX);
-      pidController[1].setIntegralGain(integralGainY);
-      pidController[2].setIntegralGain(integralGainZ);
-      pidController[0].setMaxIntegralError(maxIntegralError);
-      pidController[1].setMaxIntegralError(maxIntegralError);
-      pidController[2].setMaxIntegralError(maxIntegralError);
-   }
-
-   public void setGains(double[] proportionalGains, double[] derivativeGains, double[] integralGains, double maxIntegralError)
-   {
-      setProportionalGains(proportionalGains);
-      setDerivativeGains(derivativeGains);
-      setIntegralGains(integralGains, maxIntegralError);
-   }
-
-   public void compute(FrameVector comForceCommand, FramePoint dcmPositionSetpoint, FrameVector dcmVelocitySetpoint, FramePoint dcmPositionEstimate)
-   {
+      FramePoint dcmPositionSetpoint = setpoints.getDcmPosition();
+      FrameVector dcmVelocitySetpoint = setpoints.getDcmVelocity();
       ReferenceFrame comForceCommandFrame = comForceCommand.getReferenceFrame();
       ReferenceFrame dcmPositionSetpointFrame = dcmPositionSetpoint.getReferenceFrame();
       ReferenceFrame dcmPositionVelocityFrame = dcmVelocitySetpoint.getReferenceFrame();
@@ -170,19 +147,21 @@ public class DivergentComponentOfMotionController
       vrpPositionSetpoint.changeFrame(comFrame);
       cmpPositionSetpoint.changeFrame(comFrame);
 
+      for (int i = 0; i < 3; i++)
+      {
+         pidController[i].setProportionalGain(pidControllerGains.getProportionalGains()[i]);
+         pidController[i].setIntegralGain(pidControllerGains.getIntegralGains()[i]);
+         pidController[i].setMaxIntegralError(pidControllerGains.getMaximumIntegralError());
+      }
+
       double omega = getNaturalFrequency();
-      double vrpX = dcmPositionEstimate.getX() - 1 / omega * (dcmVelocitySetpoint.getX() + pidController[0].compute(dcmPositionEstimate.getX(), dcmPositionSetpoint.getX(), 0, 0, dt));
-      double vrpY = dcmPositionEstimate.getY() - 1 / omega * (dcmVelocitySetpoint.getY() + pidController[1].compute(dcmPositionEstimate.getY(), dcmPositionSetpoint.getY(), 0, 0, dt));
-      double vrpZ = dcmPositionEstimate.getZ() - 1 / omega * (dcmVelocitySetpoint.getZ() + pidController[2].compute(dcmPositionEstimate.getZ(), dcmPositionSetpoint.getZ(), 0, 0, dt));
-      double cmpX = vrpX;
-      double cmpY = vrpY;
-      double cmpZ = vrpZ - getComHeight();
-      double fX = mass * Math.pow(omega, 2) * -cmpX;
-      double fY = mass * Math.pow(omega, 2) * -cmpY;
-      double fZ = mass * Math.pow(omega, 2) * -cmpZ;
-      comForceCommand.set(fX, fY, fZ);
-      vrpPositionSetpoint.set(vrpX, vrpY, vrpZ);
-      cmpPositionSetpoint.set(cmpX, cmpY, cmpZ);
+      vrpPositionSetpoint.setX(dcmPositionEstimate.getX() - 1 / omega * (dcmVelocitySetpoint.getX() + pidController[0].compute(dcmPositionEstimate.getX(), dcmPositionSetpoint.getX(), 0, 0, controlDT)));
+      vrpPositionSetpoint.setY(dcmPositionEstimate.getY() - 1 / omega * (dcmVelocitySetpoint.getY() + pidController[1].compute(dcmPositionEstimate.getY(), dcmPositionSetpoint.getY(), 0, 0, controlDT)));
+      vrpPositionSetpoint.setZ(dcmPositionEstimate.getZ() - 1 / omega * (dcmVelocitySetpoint.getZ() + pidController[2].compute(dcmPositionEstimate.getZ(), dcmPositionSetpoint.getZ(), 0, 0, controlDT)));
+      cmpPositionSetpoint.set(vrpPositionSetpoint);
+      cmpPositionSetpoint.add(0, 0, -getComHeight());
+      comForceCommand.set(cmpPositionSetpoint);
+      comForceCommand.scale(-mass * Math.pow(omega, 2));
 
       yoDcmPositionEstimate.setAndMatchFrame(dcmPositionEstimate);
       yoDcmPositionSetpoint.setAndMatchFrame(dcmPositionSetpoint);
