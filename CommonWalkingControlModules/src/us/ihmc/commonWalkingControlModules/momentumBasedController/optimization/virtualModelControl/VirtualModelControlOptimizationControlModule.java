@@ -1,18 +1,15 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.jacobianTranspose;
+package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.*;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
@@ -20,11 +17,10 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.io.printing.PrintTools;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JacobianTransposeOptimizationControlModule
+public class VirtualModelControlOptimizationControlModule
 {
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
    private static final boolean SETUP_RHO_TASKS = true;
@@ -33,7 +29,7 @@ public class JacobianTransposeOptimizationControlModule
 
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
    private final BasisVectorVisualizer basisVectorVisualizer;
-   private final JacobianTransposeQPSolver qpSolver;
+   private final VirtualModelControlQPSolver qpSolver;
    private final ExternalWrenchHandler externalWrenchHandler;
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
@@ -43,7 +39,7 @@ public class JacobianTransposeOptimizationControlModule
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
 
-   public JacobianTransposeOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
+   public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
@@ -69,7 +65,7 @@ public class JacobianTransposeOptimizationControlModule
 
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
 
-      qpSolver = new JacobianTransposeQPSolver(rhoSize, registry);
+      qpSolver = new VirtualModelControlQPSolver(rhoSize, registry);
       qpSolver.setMinRho(momentumOptimizationSettings.getRhoMin());
 
       parentRegistry.addChild(registry);

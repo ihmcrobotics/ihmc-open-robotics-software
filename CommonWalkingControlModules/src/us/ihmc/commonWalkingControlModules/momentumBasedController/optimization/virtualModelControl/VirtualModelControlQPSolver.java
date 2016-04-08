@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.jacobianTranspose;
+package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -10,7 +10,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
-public class JacobianTransposeQPSolver
+public class VirtualModelControlQPSolver
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -44,7 +44,7 @@ public class JacobianTransposeQPSolver
 
    private final int rhoSize;
 
-   public JacobianTransposeQPSolver(int rhoSize, YoVariableRegistry parentRegistry)
+   public VirtualModelControlQPSolver(int rhoSize, YoVariableRegistry parentRegistry)
    {
       this.rhoSize = rhoSize;
 
