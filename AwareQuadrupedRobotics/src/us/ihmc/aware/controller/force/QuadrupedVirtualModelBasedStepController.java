@@ -85,6 +85,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    // planning
    private static int STEP_QUEUE_CAPACITY = 60;
    private final FramePoint dcmPositionWaypoint;
+   private boolean dcmTrajectoryInitialized;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
    private final PiecewiseCopPlanner copPlanner;
    private final XGaitStepPlanner footstepPlanner;
@@ -230,41 +231,28 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
    private void computeDcmPositionAndVelocitySetpoints()
    {
-      if (stepQueue.size() > 0)
+      if (stepQueue.size() == 0)
       {
-         double startTime = stepQueue.getHead().getTimeInterval().getStartTime();
-         double currentTime = robotTimestamp.getDoubleValue();
-         if (currentTime >= startTime - 0.5)
-         {
-            int nTransitions = copPlanner.compute(taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), stepQueue);
-            dcmPositionWaypoint.setIncludingFrame(copPlanner.getCopAtTransition(nTransitions - 1));
-            dcmPositionWaypoint.changeFrame(worldFrame);
-            dcmPositionWaypoint.add(0, 0, inputProvider.getComPositionInput().getZ());
-            dcmTrajectory.setComHeight(dcmPositionController.getComHeight());
-            dcmTrajectory.initializeTrajectory(nTransitions, copPlanner.getTimeAtTransitions(), copPlanner.getCopAtTransitions(),
-                  copPlanner.getTimeAtTransition(nTransitions - 1), dcmPositionWaypoint);
-            dcmTrajectory.computeTrajectory(currentTime);
-            if (currentTime >= startTime)
-            {
-               // compute dcm trajectory while stepping
-               dcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
-               dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
-            }
-            else
-            {
-               // compute dcm trajectory to transition from standing to stepping
-               double deltaTime = Math.max(startTime - currentTime, 0.001);
-               dcmPositionControllerSetpoints.getDcmPosition().changeFrame(worldFrame);
-               dcmPositionControllerSetpoints.getDcmVelocity().changeFrame(worldFrame);
-               dcmTrajectory.getPosition(dcmPositionWaypoint);
-               dcmPositionWaypoint.changeFrame(worldFrame);
-               dcmPositionWaypoint.sub(dcmPositionControllerSetpoints.getDcmPosition());
-               dcmPositionWaypoint.scale(1 / deltaTime);
-               dcmPositionControllerSetpoints.getDcmVelocity().set(dcmPositionWaypoint);
-               dcmPositionWaypoint.scale(controlDT);
-               dcmPositionControllerSetpoints.getDcmPosition().add(dcmPositionWaypoint);
-            }
-         }
+         dcmTrajectoryInitialized = false;
+      }
+      else if (dcmTrajectoryInitialized == false)
+      {
+         // plan dcm trajectory
+         int nTransitions = copPlanner.compute(taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), stepQueue);
+         dcmPositionWaypoint.setIncludingFrame(copPlanner.getCopAtTransition(nTransitions - 1));
+         dcmPositionWaypoint.changeFrame(worldFrame);
+         dcmPositionWaypoint.add(0, 0, inputProvider.getComPositionInput().getZ());
+         dcmTrajectory.setComHeight(dcmPositionController.getComHeight());
+         dcmTrajectory.initializeTrajectory(nTransitions, copPlanner.getTimeAtTransitions(), copPlanner.getCopAtTransitions(), copPlanner.getTimeAtTransition(nTransitions - 1), dcmPositionWaypoint);
+         dcmTrajectoryInitialized = true;
+      }
+
+      if (dcmTrajectoryInitialized)
+      {
+         // compute dcm trajectory while stepping
+         dcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
+         dcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
+         dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
       }
       else
       {
