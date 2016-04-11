@@ -5,7 +5,6 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.tools.ArrayTools;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class QuadrupedNeckJointPositionPacket extends Packet<QuadrupedNeckJointPositionPacket>
@@ -32,7 +31,7 @@ public class QuadrupedNeckJointPositionPacket extends Packet<QuadrupedNeckJointP
       }
    }
 
-   public QuadrupedNeckJointPositionPacket(HashMap<QuadrupedJointName, Double> neckJointPositionMap)
+   public QuadrupedNeckJointPositionPacket(Map<QuadrupedJointName, Double> neckJointPositionMap)
    {
       this();
       this.neckJointName = new QuadrupedJointName[neckJointPositionMap.size()];
