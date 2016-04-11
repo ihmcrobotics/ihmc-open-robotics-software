@@ -741,6 +741,11 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public void setSlider(int channel, YoVariable<?> var, double min, double max, double exponent, double hires)
    {
+      if (var == null)
+      {
+         PrintTools.error(this, "YoVariable was null. It's not getting added to the sliderboard");
+         return;
+      }
       setControl(channel, var, var.getName(), min, max, exponent, hires, SliderType.NUMBER, ControlType.SLIDER);
    }
 
@@ -761,6 +766,11 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public void setKnob(int channel, YoVariable<?> var, double min, double max, double exponent, double hires)
    {
+      if (var == null)
+      {
+         PrintTools.error(this, "YoVariable was null. It's not getting added to the sliderboard");
+         return;
+      }
       setControl(channel - 80, var, var.getName(), min, max, exponent, hires, SliderType.NUMBER, ControlType.KNOB);
    }
 
