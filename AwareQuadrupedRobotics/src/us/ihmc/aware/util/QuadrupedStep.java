@@ -8,24 +8,21 @@ public class QuadrupedStep
 {
    private RobotQuadrant robotQuadrant;
    private final FramePoint goalPosition;
+   private double groundClearance;
 
    public QuadrupedStep()
    {
       this.robotQuadrant = RobotQuadrant.FRONT_RIGHT;
       this.goalPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+      this.groundClearance = 0.0;
    }
 
-   public QuadrupedStep(RobotQuadrant robotQuadrant)
-   {
-      this.robotQuadrant = robotQuadrant;
-      this.goalPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-   }
-
-   public QuadrupedStep(RobotQuadrant robotQuadrant, FramePoint goalPosition)
+   public QuadrupedStep(RobotQuadrant robotQuadrant, FramePoint goalPosition, double groundClearance)
    {
       this.robotQuadrant = robotQuadrant;
       this.goalPosition = new FramePoint(goalPosition);
       this.goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      this.groundClearance = groundClearance;
    }
 
    public QuadrupedStep(QuadrupedStep quadrupedStep)
@@ -33,6 +30,7 @@ public class QuadrupedStep
       this.robotQuadrant = quadrupedStep.robotQuadrant;
       this.goalPosition = new FramePoint(quadrupedStep.goalPosition);
       this.goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      this.groundClearance = quadrupedStep.groundClearance;
    }
 
    public void set(QuadrupedStep quadrupedStep)
@@ -40,12 +38,14 @@ public class QuadrupedStep
       this.robotQuadrant = quadrupedStep.robotQuadrant;
       this.goalPosition.setIncludingFrame(quadrupedStep.goalPosition);
       this.goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      this.groundClearance = quadrupedStep.groundClearance;
    }
 
    public void get(QuadrupedStep quadrupedStep)
    {
       quadrupedStep.robotQuadrant = this.robotQuadrant;
       quadrupedStep.goalPosition.setIncludingFrame(this.goalPosition);
+      quadrupedStep.groundClearance = this.groundClearance;
    }
 
    public RobotQuadrant getRobotQuadrant()
@@ -72,5 +72,15 @@ public class QuadrupedStep
    {
       this.goalPosition.setIncludingFrame(goalPosition);
       this.goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+   }
+
+   public double getGroundClearance()
+   {
+      return groundClearance;
+   }
+
+   public void setGroundClearance(double groundClearance)
+   {
+      this.groundClearance = groundClearance;
    }
 }

@@ -1,42 +1,66 @@
-package us.ihmc.aware.controller.force.taskSpaceController.feedbackController;
+package us.ihmc.aware.controller.toolbox;
 
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceCommands;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceEstimates;
-import us.ihmc.aware.controller.force.taskSpaceController.QuadrupedTaskSpaceSetpoints;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class QuadrupedBodyOrientationFeedbackController implements QuadrupedTaskSpaceFeedbackController
+public class QuadrupedBodyOrientationController
 {
+   public static class Setpoints
+   {
+      private final FrameOrientation bodyOrientation = new FrameOrientation();
+      private final FrameVector bodyAngularVelocity = new FrameVector();
+      private final FrameVector comTorqueFeedforward = new FrameVector();
+
+      public void initialize(QuadrupedTaskSpaceEstimator.Estimates estimates)
+      {
+         bodyOrientation.setIncludingFrame(estimates.getBodyOrientation());
+         bodyAngularVelocity.setToZero();
+         comTorqueFeedforward.setToZero();
+      }
+
+      public FrameOrientation getBodyOrientation()
+      {
+         return bodyOrientation;
+      }
+
+      public FrameVector getBodyAngularVelocity()
+      {
+         return bodyAngularVelocity;
+      }
+
+      public FrameVector getComTorqueFeedforward()
+      {
+         return comTorqueFeedforward;
+      }
+   }
+
    private final ReferenceFrame bodyFrame;
    private final AxisAngleOrientationController bodyOrientationController;
-   private final YoAxisAngleOrientationGains bodyOrientationFeedbackGains;
+   private final YoAxisAngleOrientationGains bodyOrientationControllerGains;
 
-   public QuadrupedBodyOrientationFeedbackController(ReferenceFrame bodyFrame, double controlDT, YoVariableRegistry registry)
+   public QuadrupedBodyOrientationController(ReferenceFrame bodyFrame, double controlDT, YoVariableRegistry registry)
    {
       this.bodyFrame = bodyFrame;
       bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, controlDT, registry);
-      bodyOrientationFeedbackGains = new YoAxisAngleOrientationGains("bodyOrientation", registry);
+      bodyOrientationControllerGains = new YoAxisAngleOrientationGains("bodyOrientation", registry);
    }
 
    public YoAxisAngleOrientationGains getGains()
    {
-      return bodyOrientationFeedbackGains;
+      return bodyOrientationControllerGains;
    }
 
-   @Override public void reset()
+   public void reset()
    {
       bodyOrientationController.reset();
    }
 
-   @Override public void computeFeedback(QuadrupedTaskSpaceEstimates estimates, QuadrupedTaskSpaceSetpoints setpoints, QuadrupedTaskSpaceCommands commands)
+   public void compute(FrameVector comTorqueCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
    {
-      FrameVector comTorqueCommand = commands.getComTorque();
       FrameOrientation bodyOrientationSetpoint = setpoints.getBodyOrientation();
       FrameVector bodyAngularVelocitySetpoint = setpoints.getBodyAngularVelocity();
       FrameVector bodyAngularVelocityEstimate = estimates.getBodyAngularVelocity();
@@ -48,12 +72,7 @@ public class QuadrupedBodyOrientationFeedbackController implements QuadrupedTask
       bodyAngularVelocitySetpoint.changeFrame(bodyFrame);
       bodyAngularVelocityEstimate.changeFrame(bodyFrame);
       comTorqueFeedforwardSetpoint.changeFrame(bodyFrame);
-      bodyOrientationController.setGains(bodyOrientationFeedbackGains);
+      bodyOrientationController.setGains(bodyOrientationControllerGains);
       bodyOrientationController.compute(comTorqueCommand, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate, comTorqueFeedforwardSetpoint);
-   }
-
-   @Override public void registerGraphics(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-
    }
 }
