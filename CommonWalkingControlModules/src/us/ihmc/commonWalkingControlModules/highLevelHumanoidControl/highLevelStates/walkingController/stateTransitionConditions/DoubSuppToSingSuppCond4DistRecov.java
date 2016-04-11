@@ -4,12 +4,12 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceMana
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 
-public class DoubleSupportToSingleSupportConditionForDisturbanceRecovery implements StateTransitionCondition
+public class DoubSuppToSingSuppCond4DistRecov implements StateTransitionCondition
 {
    private final RobotSide swingSide;
    private final BalanceManager balanceManager;
 
-   public DoubleSupportToSingleSupportConditionForDisturbanceRecovery(RobotSide singleSupportStateSwingSide, BalanceManager balanceManager)
+   public DoubSuppToSingSuppCond4DistRecov(RobotSide singleSupportStateSwingSide, BalanceManager balanceManager)
    {
       swingSide = singleSupportStateSwingSide;
       this.balanceManager = balanceManager;
