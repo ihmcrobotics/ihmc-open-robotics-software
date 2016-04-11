@@ -79,7 +79,7 @@ public class VirtualModelControlQPSolver
 
    public void setRhoRegularizationWeight(DenseMatrix64F weight)
    {
-      CommonOps.insert(weight, regularizationMatrix, rhoSize, rhoSize);
+      CommonOps.insert(weight, regularizationMatrix, 0, 0);
    }
 
    public void reset()

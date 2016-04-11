@@ -40,7 +40,7 @@ public class VirtualModelController
 
    public void registerEndEffector(RigidBody endEffector)
    {
-      if (!endEffectors.contains(endEffector))
+      if (!endEffectors.contains(endEffector) && endEffector != null)
       {
          endEffectors.add(endEffector);
 

@@ -116,6 +116,7 @@ public class WholeBodyControllerCore
          break;
       case VIRTUAL_MODEL:
          doJacobianTranspose();
+         break;
       case OFF:
          doNothing();
          break;
