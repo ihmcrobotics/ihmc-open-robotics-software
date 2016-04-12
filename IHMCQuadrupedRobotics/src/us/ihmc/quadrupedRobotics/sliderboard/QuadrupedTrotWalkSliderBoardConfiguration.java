@@ -31,8 +31,6 @@ public class QuadrupedTrotWalkSliderBoardConfiguration implements EnumDependentS
       sliderBoardConfigurationManager.setSlider(1, namespace + "desiredStanceOffsetZ", scs, -0.2, 0.2);
       sliderBoardConfigurationManager.setSlider(2, namespace + "desiredStanceOffsetX", scs, -0.2, 0.2);
       sliderBoardConfigurationManager.setSlider(3, namespace + "desiredStanceOffsetY", scs, -0.2, 0.2);
-      sliderBoardConfigurationManager.setSlider(2, namespace + "desiredStanceOffsetX", scs, -0.2, 0.2);
-      sliderBoardConfigurationManager.setSlider(3, namespace + "desiredStanceOffsetY", scs, -0.2, 0.2);
       sliderBoardConfigurationManager.setSlider(4, namespace + "desiredStanceOffsetRoll", scs, -0.2, 0.2);
       sliderBoardConfigurationManager.setSlider(5, namespace + "desiredStanceOffsetPitch", scs, -0.1, 0.1);
       sliderBoardConfigurationManager.setSlider(6, namespace + "desiredStanceOffsetYaw", scs, -0.3, 0.3);
