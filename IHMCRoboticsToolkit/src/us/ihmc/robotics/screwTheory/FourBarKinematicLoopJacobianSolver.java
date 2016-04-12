@@ -34,24 +34,24 @@ public class FourBarKinematicLoopJacobianSolver
          j11 = - ab * Math.sin(A) - bc * Math.sin(A + B) - cd * Math.sin(A + B + C);
          j12 = - bc * Math.sin(A + B) - cd * Math.sin(A + B + C);
          j13 = - cd * Math.sin(A + B + C);
-         j21 = ab * Math.cos(A) + bc * Math.cos(A + B) + cd * Math.cos(A + B + C);
-         j22 = bc * Math.cos(A + B) + cd * Math.cos(A + B + C);
-         j23 = cd * Math.cos(A + B + C);
-         j31 = -1;
-         j32 = -1;
-         j33 = -1;
+         j21 = 0.0;
+         j22 = 0.0;
+         j23 = 0.0;
+         j31 = ab * Math.cos(A) + bc * Math.cos(A + B) + cd * Math.cos(A + B + C);
+         j32 = bc * Math.cos(A + B) + cd * Math.cos(A + B + C);
+         j33 = cd * Math.cos(A + B + C);
       }
       else if (fourBarOutputJoint == jointC)
       {
-         j11 = 0.0;
-         j21 = 0.0;
-         j31 = 0.0;
+         j11 = 1.0;
+         j21 = 1.0;
+         j31 = 1.0;
       }
       else
       {
-         j11 = 0.0;
-         j21 = 0.0;
-         j31 = 0.0;
+         j11 = 1.0;
+         j21 = 1.0;
+         j31 = 1.0;
       }
 
       jacobian = new DenseMatrix64F(3, 3, true, new double[] {j11, j12, j13, j21, j22, j23, j31, j32, j33});
