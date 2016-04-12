@@ -200,6 +200,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       finalVelocity.set(finalYoFrameEuclideanWaypoint.getLinearVelocity());
    }
 
+   @Override
    public void initialize()
    {
       currentTime.set(0.0);
@@ -224,6 +225,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       initializePolynomials();
    }
 
+   @Override
    public void compute(double time)
    {
       this.currentTime.set(time);
