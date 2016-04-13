@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.VideoA})
+@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
 public class AtlasPushRecoveryStandingTest extends DRCPushRecoveryStandingTest {
 
 	@Override

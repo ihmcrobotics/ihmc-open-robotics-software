@@ -32,11 +32,11 @@ public class JointLowLevelPositionControlSimulator implements RobotController
       if (isUpperBodyJoint)
       {
          double subtreeMass = TotalMassCalculator.computeSubTreeMass(highLevelControllerOutputJoint.getSuccessor());
-         jointController.setProportionalGain(50.0 * subtreeMass);
+         jointController.setProportionalGain(15.0 * subtreeMass);
          jointController.setIntegralGain(35.0 * subtreeMass);
          jointController.setMaxIntegralError(0.3);
          jointController.setIntegralLeakRatio(integralLeakRatio);
-         jointController.setDerivativeGain(7.0 * subtreeMass);
+         jointController.setDerivativeGain(2.0 * subtreeMass);
          jointController.setMaximumOutputLimit(40.0 * subtreeMass);
       }
       else if (isBackJoint)
