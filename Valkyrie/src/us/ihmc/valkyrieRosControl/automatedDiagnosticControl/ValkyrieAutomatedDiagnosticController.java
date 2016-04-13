@@ -1,15 +1,5 @@
 package us.ihmc.valkyrieRosControl.automatedDiagnosticControl;
 
-import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.forceTorqueSensorModelNames;
-import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readForceTorqueSensors;
-import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readIMUs;
-
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -30,17 +20,14 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
-import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.robotics.sensors.*;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.rosControl.JointHandle;
-import us.ihmc.rosControl.valkyrie.ForceTorqueSensorHandle;
-import us.ihmc.rosControl.valkyrie.IHMCValkyrieControlJavaBridge;
-import us.ihmc.rosControl.valkyrie.IMUHandle;
+import us.ihmc.rosControl.EffortJointHandle;
+import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
+import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
+import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
+import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
@@ -68,7 +55,15 @@ import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisContro
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfiguration;
 
-public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJavaBridge
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.*;
+
+public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControlJavaBridge
 {
    private static final String[] controlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
          "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
@@ -110,10 +105,10 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJa
        * Create joints
        */
 
-      HashMap<String, JointHandle> jointHandles = new HashMap<>();
+      HashMap<String, EffortJointHandle> jointHandles = new HashMap<>();
       for (String joint : controlledJoints)
       {
-         jointHandles.put(joint, createJointHandle(joint));
+         jointHandles.put(joint, createEffortJointHandle(joint));
       }
 
       HashMap<String, IMUHandle> imuHandles = new HashMap<>();
@@ -154,8 +149,9 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJa
       DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters,
             stateEstimatorParameters);
 
+      HashMap<String, PositionJointHandle> emptyPositionJointHandles = new HashMap<>();
       ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider,
-            diagnosticSensorProcessingConfiguration, jointHandles, imuHandles, forceTorqueSensorHandles, sensorInformation);
+            diagnosticSensorProcessingConfiguration, jointHandles, emptyPositionJointHandles, imuHandles, forceTorqueSensorHandles, sensorInformation);
 
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
@@ -246,7 +242,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCValkyrieControlJa
 
       HumanoidReferenceFrames estimatorReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
-      SideDependentList<ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, estimatorReferenceFrames);
+      SideDependentList<? extends ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, estimatorReferenceFrames);
 
       double gravityMagnitude = Math.abs(gravity);
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityMagnitude;

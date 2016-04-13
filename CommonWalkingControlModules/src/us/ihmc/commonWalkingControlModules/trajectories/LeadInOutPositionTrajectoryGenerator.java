@@ -14,6 +14,12 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
+import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicCoordinateSystem;
@@ -21,13 +27,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
-
 
 public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
 {
@@ -63,7 +62,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    private final FramePose currentDistortionPose = new FramePose();
    private final FramePose initialDistortionPose = new FramePose();
    private final FramePose finalDistortionPose = new FramePose();
-   
+
    // For viz
    private final boolean visualize;
    private final BagOfBalls bagOfBalls;
@@ -72,7 +71,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
 
    private final YoFramePose distortedPlanePose;
 
-   /** Use a BooleanYoVariable to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */ 
+   /** Use a BooleanYoVariable to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
    private final BooleanYoVariable showViz;
 
    public LeadInOutPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
@@ -80,8 +79,8 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this(namePrefix, false, referenceFrame, parentRegistry, false, null);
    }
 
-   public LeadInOutPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry,
-         boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public LeadInOutPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry, boolean visualize,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(namePrefix, false, referenceFrame, parentRegistry, visualize, yoGraphicsListRegistry);
    }
@@ -91,8 +90,8 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this(namePrefix, allowMultipleFrames, referenceFrame, parentRegistry, false, null);
    }
 
-   public LeadInOutPositionTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry, boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public LeadInOutPositionTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry,
+         boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(allowMultipleFrames, referenceFrame);
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -170,7 +169,8 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
                finalDirectionViz.setVisible(visible);
                distortedPlaneViz.setVisible(visible);
                bagOfBalls.setVisible(visible);
-               if (!visible) bagOfBalls.hideAll();
+               if (!visible)
+                  bagOfBalls.hideAll();
             }
          });
          showViz.notifyVariableChangedListeners();
@@ -193,7 +193,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this.initialDirection.normalize();
       this.initialDirection.get(tempVector);
       GeometryTools.getRotationBasedOnNormal(tempAxisAngle, tempVector);
-      
+
       initialDistortionPose.setToZero(this.initialPosition.getReferenceFrame());
       initialDistortionPose.setPosition(initialPosition);
       initialDistortionPose.setOrientation(tempAxisAngle);
@@ -246,7 +246,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       double t1 = leaveTime.getDoubleValue();
       double t2 = trajectoryTime.getDoubleValue() - approachTime.getDoubleValue();
       double tf = trajectoryTime.getDoubleValue();
-//      xyPolynomial.setCubic(t1, t2, 0.0, 0.0, 1.0, 0.0);
+      //      xyPolynomial.setCubic(t1, t2, 0.0, 0.0, 1.0, 0.0);
       xyPolynomial.setQuintic(t1, t2, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
 
       currentDistortionPose.setPoseIncludingFrame(initialDistortionPose);
@@ -263,7 +263,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
 
       double z2 = finalPosition.getZ() + approachDistance.getDoubleValue();
       double zf = finalPosition.getZ();
-//      zPolynomial.setQuinticTwoWaypoints(0.0, t1, t2, tf, z0, 0.0, z1, z2, zf, 0.0);
+      //      zPolynomial.setQuinticTwoWaypoints(0.0, t1, t2, tf, z0, 0.0, z1, z2, zf, 0.0);
       zPolynomial.setSepticInitialAndFinalAcceleration(0.0, t1, t2, tf, z0, 0.0, 0.0, z1, z2, zf, 0.3, 0.0);
 
       changeFrame(currentTrajectoryFrame, false);
@@ -326,7 +326,8 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    @Override
    public void showVisualization()
    {
-      if (!visualize) return;
+      if (!visualize)
+         return;
 
       showViz.set(true);
    }
@@ -334,7 +335,8 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    @Override
    public void hideVisualization()
    {
-      if (!visualize) return;
+      if (!visualize)
+         return;
 
       showViz.set(false);
    }

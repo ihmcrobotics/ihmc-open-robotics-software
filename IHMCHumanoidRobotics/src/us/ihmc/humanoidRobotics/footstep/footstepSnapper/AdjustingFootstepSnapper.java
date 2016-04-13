@@ -9,7 +9,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.FramePose;
@@ -69,7 +69,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
    }
 
    @Override
-   public void adjustFootstepWithoutHeightmap(FootstepData footstep, double height, Vector3d planeNormal)
+   public void adjustFootstepWithoutHeightmap(FootstepDataMessage footstep, double height, Vector3d planeNormal)
    {
       convexHullFootstepSnapper.adjustFootstepWithoutHeightmap(footstep, height, planeNormal);
    }
@@ -112,7 +112,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
 
    @Override
    public Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap){
-      FootstepData originalFootstep = new FootstepData(footstep);
+      FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
 
       //set to the sole pose
       Vector3d position = new Vector3d();
@@ -140,7 +140,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
    }
 
    @Override
-   public Footstep.FootstepType snapFootstep(FootstepData footstep, HeightMapWithPoints heightMap)
+   public Footstep.FootstepType snapFootstep(FootstepDataMessage footstep, HeightMapWithPoints heightMap)
    {
       Footstep.FootstepType footstepFound = convexHullFootstepSnapper.snapFootstep(footstep, heightMap);
 
@@ -152,7 +152,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
          return footstepFound;
       }
 
-      FootstepData originalFootstepFound = new FootstepData(footstep);
+      FootstepDataMessage originalFootstepFound = new FootstepDataMessage(footstep);
 
       Vector3d position = new Vector3d();
       Matrix3d orientation = new Matrix3d();

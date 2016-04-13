@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.14"
+        classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.15"
     }
 }
 
@@ -45,6 +45,9 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
+   testCompile group: 'org.pitest', name: 'pitest', version: '1.1.9'
+   testCompile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
+   
 	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 
 	compile group: 'org.ejml', name: 'denseC64', version: '0.28'
@@ -61,7 +64,7 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
     compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0'
-
+    
 	compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.23'
     compile group: 'us.ihmc', name: 'IHMCHierarchicalKinematics', version: '1.0'
 

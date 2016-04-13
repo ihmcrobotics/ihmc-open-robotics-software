@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.VideoB)
 @SuiteClasses
 ({
-   us.ihmc.atlas.AtlasPushRecoveryWalkingTest.class
+   us.ihmc.atlas.pushRecovery.AtlasPushRecoveryWalkingTest.class
 })
 
 public class AtlasAVideoBTestSuite

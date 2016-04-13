@@ -228,6 +228,11 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
 //      quaternion.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
 //   }
 
+   public boolean containsNaN()
+   {
+      return Double.isNaN(quaternion.x) || Double.isNaN(quaternion.y) || Double.isNaN(quaternion.z) || Double.isNaN(quaternion.w);
+   }
+
    public void getQuaternion(Quat4d quat4d)
    {
       quat4d.set(quaternion);
@@ -340,6 +345,11 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
       this.quaternion.mul(quaternion);
    }
 
+   public void conjugate()
+   {
+      quaternion.conjugate();
+   }
+
    public double dot(FrameOrientation frameOrientation)
    {
       checkReferenceFrameMatch(frameOrientation);
@@ -396,6 +406,11 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
       boolean quaternionsAreEqual = RotationTools.quaternionEpsilonEquals(quaternion, frameOrientation.quaternion, epsilon);
 
       return referenceFramesMatch && quaternionsAreEqual;
+   }
+
+   public boolean epsilonEquals(Quat4d quaternion, double epsilon)
+   {
+      return RotationTools.quaternionEpsilonEquals(this.quaternion, quaternion, epsilon);
    }
 
    public void checkQuaternionIsUnitMagnitude()

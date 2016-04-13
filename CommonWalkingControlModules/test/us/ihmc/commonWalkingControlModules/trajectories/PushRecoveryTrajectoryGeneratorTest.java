@@ -30,7 +30,7 @@ public class PushRecoveryTrajectoryGeneratorTest
 
    private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSimpleTrajectories()
    {
@@ -43,25 +43,26 @@ public class PushRecoveryTrajectoryGeneratorTest
       YoVariableDoubleProvider stepTimeProvider = new YoVariableDoubleProvider("", new YoVariableRegistry(""));
       stepTimeProvider.set(0.8);
       YoVariableDoubleProvider timeRemainingProvider = new YoVariableDoubleProvider("", new YoVariableRegistry(""));
-      PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[] { -0.1, 2.3, 0.0 }));
-      VectorProvider initialVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[] { 0.2, 0.0, -0.05 }));
+      PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[] {-0.1, 2.3, 0.0}));
+      VectorProvider initialVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[] {0.2, 0.0, -0.05}));
 
-      Point3d firstIntermediatePosition = new Point3d(new double[] { 0.12, 2.4, 0.2 });
-      Point3d secondIntermediatePosition = new Point3d(new double[] { 0.16, 2.3, 0.15 });
+      Point3d firstIntermediatePosition = new Point3d(new double[] {0.12, 2.4, 0.2});
+      Point3d secondIntermediatePosition = new Point3d(new double[] {0.16, 2.3, 0.15});
       ArrayList<Point3d> waypoints = new ArrayList<Point3d>();
       waypoints.add(firstIntermediatePosition);
       waypoints.add(secondIntermediatePosition);
 
       YoFramePoint finalPosition = new YoFramePoint("", worldFrame, new YoVariableRegistry(""));
-      finalPosition.set(new FramePoint(worldFrame, new double[] { 0.2, 2.35, 0.03 }));
+      finalPosition.set(new FramePoint(worldFrame, new double[] {0.2, 2.35, 0.03}));
       YoPositionProvider finalPositionProvider = new YoPositionProvider(finalPosition);
-      VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[] { 0, 0, -0.02 }));
+      VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[] {0, 0, -0.02}));
 
       TrajectoryParameters trajectoryParameters = new TrajectoryParameters();
       TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
 
       TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider, initialPositionProvider,
-            initialVelocityProvider, null, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoVariableRegistry(""), null, 0.0, false);
+            initialVelocityProvider, null, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoVariableRegistry(""), null, 0.0,
+            false);
 
       List<Point3d> points = new ArrayList<Point3d>();
       points.add(firstIntermediatePosition);
@@ -107,9 +108,8 @@ public class PushRecoveryTrajectoryGeneratorTest
       PositionProvider intermediatePositionProvider = new ConstantPositionProvider(intermediatePosition);
       VectorProvider intermediateVelocityProvider = new ConstantVectorProvider(intermediateVelocity);
 
-      PositionTrajectoryGenerator pushRecoveryTrajectoryGenerator = new PushRecoveryTrajectoryGenerator("", worldFrame, stepTimeProvider,
-            timeRemainingProvider, intermediatePositionProvider, intermediateVelocityProvider, finalPositionProvider, new YoVariableRegistry(""), null,
-            trajectory);
+      PositionTrajectoryGenerator pushRecoveryTrajectoryGenerator = new PushRecoveryTrajectoryGenerator("", worldFrame, stepTimeProvider, timeRemainingProvider,
+            intermediatePositionProvider, intermediateVelocityProvider, finalPositionProvider, new YoVariableRegistry(""), null, trajectory);
 
       double tIntoStep = 0.4;
       timeRemainingProvider.set(stepTimeProvider.getValue() - tIntoStep);

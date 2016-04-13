@@ -18,11 +18,12 @@ public class AtlasProvidedMassMatrixToolRigidBodyTest extends ProvidedMassMatrix
    AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
    AtlasDefaultArmConfigurations config = new AtlasDefaultArmConfigurations();
    RobotSide side = RobotSide.LEFT;
+   AtlasRobotModel atlasRobotModel = new AtlasRobotModel(version, DRCRobotModel.RobotTarget.SCS, false);
    
    @Override
    public FullHumanoidRobotModel getFullRobotModel()
    {
-      SDFFullHumanoidRobotModel fullRobotModel = new AtlasRobotModel(version, DRCRobotModel.RobotTarget.SCS, false).createFullRobotModel();
+      SDFFullHumanoidRobotModel fullRobotModel = atlasRobotModel.createFullRobotModel();
       
       fullRobotModel.setJointAngles(side, LimbName.ARM, config.getArmDefaultConfigurationJointAngles(ArmConfigurations.HOME, side));
       fullRobotModel.updateFrames();
@@ -33,6 +34,6 @@ public class AtlasProvidedMassMatrixToolRigidBodyTest extends ProvidedMassMatrix
    @Override
    public ArmControllerParameters getArmControllerParameters()
    {
-      return new AtlasArmControllerParameters(false, version.getDistanceAttachmentPlateHand());
+      return new AtlasArmControllerParameters(false, atlasRobotModel.getJointMap());
    }
 }

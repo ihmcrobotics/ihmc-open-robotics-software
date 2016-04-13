@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.14"
+        classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.15"
     }
 }
 
@@ -41,12 +41,12 @@ repositories {
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
-evaluationDependsOn(ihmc.getProjectDependencyGradlePath("DarpaRoboticsChallenge"))
-evaluationDependsOn(ihmc.getProjectDependencyGradlePath("CommonWalkingControlModules"))
-evaluationDependsOn(ihmc.getProjectDependencyGradlePath("Graphics3DAdapter"))
-evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCWholeBodyController"))
-evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCHumanoidRobotics"))
-evaluationDependsOn(ihmc.getProjectDependencyGradlePath("SensorProcessing"))
+
+
+
+
+
+
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -87,13 +87,13 @@ dependencies {
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
 
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
-    testCompile ihmc.getProjectDependency(":CommonWalkingControlModules").sourceSets.test.output
-    testCompile ihmc.getProjectDependency(":DarpaRoboticsChallenge").sourceSets.test.output
-    testCompile ihmc.getProjectDependency(":IHMCCommunication").sourceSets.test.output
-    testCompile ihmc.getProjectDependency(":IHMCHumanoidRobotics").sourceSets.test.output
-	testCompile ihmc.getProjectDependency(":IHMCRoboticsToolkit").sourceSets.test.output
-    testCompile ihmc.getProjectDependency(":IHMCWholeBodyController").sourceSets.test.output
-    testCompile ihmc.getProjectDependency(":SensorProcessing").sourceSets.test.output
+    testCompile ihmc.getProjectTestDependency(":CommonWalkingControlModules")
+    testCompile ihmc.getProjectTestDependency(":DarpaRoboticsChallenge")
+    testCompile ihmc.getProjectTestDependency(":IHMCCommunication")
+    testCompile ihmc.getProjectTestDependency(":IHMCHumanoidRobotics")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+    testCompile ihmc.getProjectTestDependency(":IHMCWholeBodyController")
+    testCompile ihmc.getProjectTestDependency(":SensorProcessing")
   }
 
 apply plugin: 'application'

@@ -23,23 +23,25 @@ public class AntiGravityJointTorquesVisualizer
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> antiGravityJointTorques;
-   
+
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final SideDependentList<WrenchBasedFootSwitch> wrenchBasedFootSwitches;
    private final InverseDynamicsJoint[] allJoints;
    private final OneDoFJoint[] allOneDoFJoints;
    private final Wrench tempWrench = new Wrench();
 
-   public AntiGravityJointTorquesVisualizer(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, SideDependentList<WrenchBasedFootSwitch> wrenchBasedFootSwitches, YoVariableRegistry parentRegistry, double gravity)
+   public AntiGravityJointTorquesVisualizer(FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
+         SideDependentList<WrenchBasedFootSwitch> wrenchBasedFootSwitches, YoVariableRegistry parentRegistry, double gravity)
    {
       SpatialAccelerationVector rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(twistCalculator.getRootBody(), gravity);
-      this.inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), rootAcceleration, new LinkedHashMap<RigidBody, Wrench>(), new ArrayList<InverseDynamicsJoint>(), false, false, twistCalculator);
+      this.inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), rootAcceleration, new LinkedHashMap<RigidBody, Wrench>(),
+            new ArrayList<InverseDynamicsJoint>(), false, false, twistCalculator);
       this.wrenchBasedFootSwitches = wrenchBasedFootSwitches;
       allJoints = ScrewTools.computeSubtreeJoints(inverseDynamicsCalculator.getSpatialAccelerationCalculator().getRootBody());
       allOneDoFJoints = ScrewTools.filterJoints(allJoints, OneDoFJoint.class);
-      
+
       antiGravityJointTorques = new LinkedHashMap<>(allOneDoFJoints.length);
-      
+
       for (int i = 0; i < allOneDoFJoints.length; i++)
       {
          OneDoFJoint oneDoFJoint = allOneDoFJoints[i];
@@ -52,7 +54,7 @@ public class AntiGravityJointTorquesVisualizer
    public void computeAntiGravityJointTorques()
    {
       reset();
-      
+
       setFootMeasuredWrenches();
       inverseDynamicsCalculator.compute();
       for (int i = 0; i < allOneDoFJoints.length; i++)

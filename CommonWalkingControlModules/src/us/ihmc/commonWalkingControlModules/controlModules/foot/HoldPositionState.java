@@ -4,34 +4,35 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class HoldPositionState extends AbstractFootControlState
 {
-   private static final boolean CONTROL_WRT_PELVIS = false;
+   private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
    private static final double EPSILON = 0.010;
 
    private final FrameVector holdPositionNormalContactVector = new FrameVector();
    private final FrameVector fullyConstrainedNormalContactVector;
 
-   private final YoSE3PIDGains gains;
-
-   private final RigidBody pelvisBody;
    private final FramePoint2d cop = new FramePoint2d();
+   private final FramePoint2d desiredCoP = new FramePoint2d();
    private final PartialFootholdControlModule partialFootholdControlModule;
 
    private final FootSwitchInterface footSwitch;
@@ -45,14 +46,12 @@ public class HoldPositionState extends AbstractFootControlState
 
    private final BooleanYoVariable doSmartHoldPosition;
    private final YoFrameOrientation desiredHoldOrientation;
-   
-   public HoldPositionState(FootControlHelper footControlHelper, YoSE3PIDGains gains, YoVariableRegistry registry)
+
+   public HoldPositionState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.HOLD_POSITION, footControlHelper, registry);
 
-      this.gains = gains;
       fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
-      pelvisBody = momentumBasedController.getFullRobotModel().getPelvis();
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
       footPolygon.setIncludingFrameAndUpdate(footControlHelper.getContactableFoot().getContactPoints2d());
@@ -61,6 +60,22 @@ public class HoldPositionState extends AbstractFootControlState
       doSmartHoldPosition = new BooleanYoVariable(namePrefix + "DoSmartHoldPosition", registry);
 
       doSmartHoldPosition.set(true);
+      spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      spatialFeedbackControlCommand.setGains(gains);
+      FramePose anklePoseInFoot = new FramePose(contactableFoot.getFrameAfterParentJoint());
+      anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
+      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(anklePoseInFoot);
+      spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
+   }
+
+   public void setWeight(double weight)
+   {
+      spatialFeedbackControlCommand.setWeightForSolver(weight);
+   }
+
+   public void setWeights(Vector3d angular, Vector3d linear)
+   {
+      spatialFeedbackControlCommand.setWeightsForSolver(angular, linear);
    }
 
    @Override
@@ -83,19 +98,12 @@ public class HoldPositionState extends AbstractFootControlState
 
       desiredLinearAcceleration.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
-
-      footControlHelper.setGains(gains);
-
-      ConstraintType previousStateEnum = getPreviousState().getStateEnum();
-      boolean resetCurrentFootShrink = previousStateEnum != ConstraintType.FULL && previousStateEnum != ConstraintType.HOLD_POSITION;
-      footControlHelper.initializeParametersForSupportFootShrink(resetCurrentFootShrink);
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
       super.doTransitionOutOfAction();
-      footControlHelper.restoreFootContactPoints();
    }
 
    @Override
@@ -104,22 +112,13 @@ public class HoldPositionState extends AbstractFootControlState
       footSwitch.computeAndPackCoP(cop);
       correctDesiredOrientationForSmartHoldPosition();
       desiredHoldOrientation.set(desiredOrientation);
-      FramePoint2d desiredCoP = momentumBasedController.getDesiredCoP(contactableFoot);
+      momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
       partialFootholdControlModule.compute(desiredCoP, cop);
       YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
       partialFootholdControlModule.applyShrunkPolygon(contactState);
 
-      footControlHelper.setGains(gains);
-
-      footControlHelper.shrinkSupportFootContactPointsToToesIfNecessary();
-
-      RigidBody baseForControl = CONTROL_WRT_PELVIS ? pelvisBody : rootBody;
-      RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
-      accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-            desiredLinearAcceleration, desiredAngularAcceleration, baseForControl);
-      accelerationControlModule.getAcceleration(footAcceleration);
-
-      footControlHelper.submitTaskspaceConstraint(footAcceleration);
+      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
    }
 
    /**
@@ -134,10 +133,10 @@ public class HoldPositionState extends AbstractFootControlState
          return;
 
       boolean isCoPOnEdge = !footPolygon.isPointInside(cop, -EPSILON);
-      
+
       if (!isCoPOnEdge)
          return;
-      
+
       footPolygon.getClosestEdge(closestEdgeToCoP, cop);
       closestEdgeToCoP.getFrameVector(edgeVector2d);
       edgeVector.setXYIncludingFrame(edgeVector2d);
@@ -161,7 +160,7 @@ public class HoldPositionState extends AbstractFootControlState
          if (rotationOnEdge < 0.0)
             holdRotationAroundEdge = false;
       }
-      
+
       if (holdRotationAroundEdge)
          return;
 
@@ -173,5 +172,17 @@ public class HoldPositionState extends AbstractFootControlState
       desiredOrientationCopy.set(desiredAxisAngle);
       desiredOrientationCopy.changeFrame(worldFrame);
       desiredOrientation.set(desiredOrientationCopy);
+   }
+
+   @Override
+   public SpatialAccelerationCommand getInverseDynamicsCommand()
+   {
+      return null;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return spatialFeedbackControlCommand;
    }
 }

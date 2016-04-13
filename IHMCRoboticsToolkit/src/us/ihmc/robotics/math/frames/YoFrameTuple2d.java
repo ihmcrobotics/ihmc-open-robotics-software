@@ -150,6 +150,15 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
       x.set(newX);
       y.set(newY);
    }
+   
+   /**
+    * Sets x and y with no checks for reference frame matches.
+    */
+   public final void setWithoutChecks(FrameTuple2d<?, ?> frameTuple2d)
+   {
+      x.set(frameTuple2d.getX());
+      y.set(frameTuple2d.getY());
+   }
 
    public final void setAndMatchFrame(FrameTuple2d<?, ?> frameTuple2d)
    {
@@ -299,6 +308,29 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
    {
       putYoValuesIntoFrameTuple2d();
       frameTuple2d.scaleAdd(scaleFactor, yoFrameTuple1.getFrameTuple2d(), yoFrameTuple2.getFrameTuple2d());
+      getYoValuesFromFrameTuple2d();
+   }
+
+   public final void interpolate(Tuple2d tuple1, Tuple2d tuple2, double alpha)
+   {
+      putYoValuesIntoFrameTuple2d();
+      frameTuple2d.interpolate(tuple1, tuple2, alpha);
+      getYoValuesFromFrameTuple2d();
+   }
+
+   /**
+    *  Linearly interpolates between tuples frameTuple1 and frameTuple2 and places the result into this tuple:  this = (1-alpha) * frameTuple1 + alpha * frameTuple2.
+    *  @param frameTuple1  the first tuple
+    *  @param frameTuple2  the second tuple  
+    *  @param alpha  the alpha interpolation parameter
+    * @throws ReferenceFrameMismatchException
+    */
+   public final void interpolate(FrameTuple2d<?, ?> frameTuple1, FrameTuple2d<?, ?> frameTuple2, double alpha)
+   {
+      checkReferenceFrameMatch(frameTuple1);
+      checkReferenceFrameMatch(frameTuple2);
+      putYoValuesIntoFrameTuple2d();
+      frameTuple2d.interpolate(frameTuple1, frameTuple2, alpha);
       getYoValuesFromFrameTuple2d();
    }
 

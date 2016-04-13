@@ -11,7 +11,6 @@ import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFModelVisual;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWorld;
-import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleModelObjectVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -61,7 +60,7 @@ public class DRCVehicleSDFLoader extends DRCWorld
       RigidBodyTransform vehicleToWorldTransform = new RigidBodyTransform();
       ReferenceFrame vehicleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("vehicle", ReferenceFrame.getWorldFrame(),
             vehicleToWorldTransform, false, true, true);
-      DRCVehicleModelObjects vehicleModelObjects = new DRCVehicleModelObjects();
+      VehicleModelObjects vehicleModelObjects = new VehicleModelObjects();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = scs.getRootRegistry();
       VehicleModelObjectVisualizer vehicleModelObjectVisualizer = new VehicleModelObjectVisualizer(vehicleFrame, vehicleModelObjects, yoGraphicsListRegistry, registry);

@@ -91,6 +91,8 @@ import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.tools.time.Timer;
 
 public class JMERenderer extends SimpleApplication implements Graphics3DAdapter, PBOAwtPanelListener
@@ -159,6 +161,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    private ArrayList<PBOAwtPanel> pboAwtPanels;
 
    private DirectionalLight primaryLight;
+   private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
    public JMERenderer(RenderType renderType)
    {
@@ -220,7 +223,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {  
       synchronized (graphicsConch)
       {
-         JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, assetLocator, this);
+         JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, assetLocator, this, closeableAndDisposableRegistry);
    
          if (rootJoint == null)
          {
@@ -291,7 +294,9 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       ((JMEViewportAdapter) viewport).closeViewportAdapter();
       while (viewportAdapters.remove(viewport))
-      ;
+      {
+      }
+
       notifyRepaint();
    }
 
@@ -578,7 +583,10 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
     * render anything unless necessary.
     */
    @Override
-   public void update() {
+   public void update() 
+   {
+      if (alreadyClosing) return;
+
       if (prof!=null) prof.appStep(AppStep.BeginFrame);
 
       applicationUpdate(); // makes sure to execute AppTasks
@@ -775,66 +783,123 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    public void addRepaintListeners(final Component panel)
    {
-      panel.addMouseListener(new MouseAdapter() {
+      if (alreadyClosing) return;
+      if (panel == null) return;
+      
+      panel.addMouseListener(new MouseAdapter() 
+      {
          @Override
-         public void mousePressed(MouseEvent e) {
+         public void mousePressed(MouseEvent e) 
+         {
             notifyRepaint();
          }
       });
 
-      panel.addMouseMotionListener(new MouseAdapter() {
+      panel.addMouseMotionListener(new MouseAdapter() 
+      {
          @Override
-         public void mouseDragged(MouseEvent e) {
+         public void mouseDragged(MouseEvent e) 
+         {
             notifyRepaint();
          }
       });
 
-      panel.addKeyListener(new KeyAdapter() {
+      panel.addKeyListener(new KeyAdapter() 
+      {
          @Override
-         public void keyPressed(KeyEvent e) {
+         public void keyPressed(KeyEvent e) 
+         {
             notifyRepaint();
          }
       });
 
-      panel.addComponentListener(new ComponentAdapter() {
+      panel.addComponentListener(new ComponentAdapter() 
+      {
          @Override
-         public void componentResized(ComponentEvent e) {
+         public void componentResized(ComponentEvent e) 
+         {
             notifyRepaint(3);
          }
 
          @Override
-         public void componentMoved(ComponentEvent e) {
+         public void componentMoved(ComponentEvent e) 
+         {
             notifyRepaint();
          }
       });
 
-      final RepaintManager oldManager = RepaintManager.currentManager(panel);
-      RepaintManager.setCurrentManager(new RepaintManager() {
-         @Override
-         public void addDirtyRegion(Applet applet, int x, int y, int w, int h) {
-            oldManager.addDirtyRegion(applet, x, y, w, h);
-         }
 
-         @Override
-         public void addDirtyRegion(Window window, int x, int y, int w, int h) {
-            oldManager.addDirtyRegion(window, x, y, w, h);
-         }
-
-         @Override
-         public synchronized void addInvalidComponent(JComponent invalidComponent) {
-            oldManager.addInvalidComponent(invalidComponent);
-         }
-
-         @Override
-         public void addDirtyRegion(JComponent c, int x, int y, int w, int h) {
-            oldManager.addDirtyRegion(c, x, y, w, h);
-            if (c == panel)
-               notifyRepaint();
-         }
-      });
-
+      RepaintManager.setCurrentManager(new NewRepaintManager(this, panel, closeableAndDisposableRegistry));
    }
    
+   private static class NewRepaintManager extends RepaintManager implements CloseableAndDisposable
+   {
+      private RepaintManager oldManager;
+      private Component panel;
+      private JMERenderer jmeRender;
+      
+      public NewRepaintManager(JMERenderer jmeRender, Component panel, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+      {
+         oldManager = RepaintManager.currentManager(panel);
+         this.panel = panel;
+         
+         if (closeableAndDisposableRegistry != null)
+         {
+            closeableAndDisposableRegistry.registerCloseableAndDisposable(this);
+         }
+      }
+      
+      @Override
+      public void addDirtyRegion(Applet applet, int x, int y, int w, int h) 
+      {
+         if (oldManager == null) return;
+         oldManager.addDirtyRegion(applet, x, y, w, h);
+      }
+
+      @Override
+      public void addDirtyRegion(Window window, int x, int y, int w, int h) 
+      {
+         if (oldManager == null) return;
+         oldManager.addDirtyRegion(window, x, y, w, h);
+      }
+
+      @Override
+      public synchronized void addInvalidComponent(JComponent invalidComponent) 
+      {
+         if (oldManager == null) return;
+         oldManager.addInvalidComponent(invalidComponent);
+      }
+
+      @Override
+      public void addDirtyRegion(JComponent c, int x, int y, int w, int h) 
+      {
+         if (oldManager == null) return;
+         oldManager.addDirtyRegion(c, x, y, w, h);
+         
+         if (jmeRender == null) return;
+         if (c == panel)
+            jmeRender.notifyRepaint();
+      }
+
+      @Override
+      public void closeAndDispose()
+      {
+         // Have to do this messy stuff since Swing has all these static calls, like RepaintManager.setCurrentManager() and the SwingThread never dies...
+         if (oldManager != null)
+         {
+            // TODO: Something is messed up with reseting the repaintManager. Someone should look into
+            // what is going on here and clean this up.
+            // My sense right now is that every time we make a new JMERenderer, it recursively makes 
+            // a new repaint manager...
+//            RepaintManager.setCurrentManager(oldManager);
+//            oldManager = null;
+            panel = null;
+            jmeRender = null;
+         }
+      }
+   }
+
+
    @Override
    public void isCreated(PBOAwtPanel pboAwtPanel)
    {
@@ -1157,6 +1222,19 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       notifyRepaint();
       
       stop();
+      
+      // Things in jme SimpleApplication:
+      rootNode = null;
+      guiNode = null;
+      fpsText = null;
+      guiFont = null;
+      flyCam = null;
+      
+      if (closeableAndDisposableRegistry != null)
+      {
+         closeableAndDisposableRegistry.closeAndDispose();
+         closeableAndDisposableRegistry = null;
+      }
       
       if (viewportAdapters != null)
       {

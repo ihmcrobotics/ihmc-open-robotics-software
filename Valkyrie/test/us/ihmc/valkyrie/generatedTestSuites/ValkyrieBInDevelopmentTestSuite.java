@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.ValkyriePushRecoveryTest.class
+   us.ihmc.valkyrie.pushRecovery.ValkyriePushRecoveryStandingTest.class
 })
 
 public class ValkyrieBInDevelopmentTestSuite

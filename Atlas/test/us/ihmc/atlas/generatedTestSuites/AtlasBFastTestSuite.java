@@ -13,8 +13,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.atlas.AtlasFlatGroundWalkingTest.class,
-   us.ihmc.atlas.AtlasInverseDynamicsCalculatorTest.class,
-   us.ihmc.atlas.AtlasMultiContactTest.class
+   us.ihmc.atlas.AtlasInverseDynamicsCalculatorTest.class
 })
 
 public class AtlasBFastTestSuite

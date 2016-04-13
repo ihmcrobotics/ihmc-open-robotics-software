@@ -14,7 +14,7 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
    private static final boolean VERBOSE = false;
 
    private final String ipAddress;
-   private final int port;
+   private int port;
 
    private ServerSocket serverSocket;
    private Socket clientSocket;
@@ -43,11 +43,19 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
          runClient();
    }
 
+   public int getPort()
+   {
+      return port;
+   }
+
    private void runServer()
    {
       try
       {
          serverSocket = new ServerSocket(port);
+         
+         // Get the port since if you use 0, Java will find one that is free
+         this.port = serverSocket.getLocalPort();
 
          if (VERBOSE)
             System.out.println("Waiting for server socket to accept");
@@ -71,8 +79,6 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
          e.printStackTrace();
       }
    }
-
-
 
    private void runClient()
    {

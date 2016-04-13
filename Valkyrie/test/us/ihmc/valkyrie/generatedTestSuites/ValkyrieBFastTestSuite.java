@@ -12,8 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.ValkyrieFlatGroundWalkingTest.class,
-   us.ihmc.valkyrie.ValkyrieObstacleCourseEveryBuildTest.class
+   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndArmTrajectoryMessageTest.class
 })
 
 public class ValkyrieBFastTestSuite

@@ -1,7 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -11,7 +14,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 public abstract class AbstractFootControlState extends State<ConstraintType>
 {
@@ -21,7 +23,7 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
    protected final RobotSide robotSide;
    protected final RigidBody rootBody;
-   protected final ContactablePlaneBody contactableFoot;
+   protected final ContactableFoot contactableFoot;
 
    protected final FramePoint desiredPosition = new FramePoint(worldFrame);
    protected final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
@@ -48,6 +50,10 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    }
 
    public abstract void doSpecificAction();
+
+   public abstract InverseDynamicsCommand<?> getInverseDynamicsCommand();
+
+   public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
 
    @Override
    public void doAction()

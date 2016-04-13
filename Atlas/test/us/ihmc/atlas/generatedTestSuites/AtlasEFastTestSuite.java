@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasFinalsWorldStairsTest.class
+   us.ihmc.atlas.controllerAPI.AtlasEndToEndChestTrajectoryMessageTest.class
 })
 
 public class AtlasEFastTestSuite

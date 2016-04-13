@@ -38,6 +38,26 @@ public class QuaternionCalculus
       resultToPack.scale(axisAngleForLog.getAngle());
    }
 
+   private final Vector3d vectorForExp = new Vector3d();
+
+   public void exp(Vector3d rotationVector, Quat4d quaternionToPack)
+   {
+      double length = rotationVector.length();
+      if (length < 1.0e-7)
+      {
+         quaternionToPack.set(0.0, 0.0, 0.0, 1.0);
+         return;
+      }
+      
+      quaternionToPack.w = Math.cos(0.5 * length);
+      double s = Math.sin(0.5 * length);
+      vectorForExp.set(rotationVector);
+      vectorForExp.scale(1.0 / length);
+      quaternionToPack.x = s * vectorForExp.x;
+      quaternionToPack.y = s * vectorForExp.y;
+      quaternionToPack.z = s * vectorForExp.z;
+   }
+
    /**
     * Interpolation from q0 to q1 for a given alpha = [0, 1] using SLERP.
     * Computes: resultToPack = q0 (q0^-1 q1)^alpha.
@@ -79,7 +99,14 @@ public class QuaternionCalculus
 
    private final Quat4d qConj = new Quat4d();
 
-   public void computeAngularVelocity(Quat4d q, Quat4d qDot, Vector3d angularVelocityToPack)
+   public void computeAngularVelocityInBodyFixedFrame(Quat4d q, Quat4d qDot, Vector3d angularVelocityToPack)
+   {
+      qConj.conjugate(q);
+      multiply(qConj, qDot, angularVelocityToPack);
+      angularVelocityToPack.scale(2.0);
+   }
+
+   public void computeAngularVelocityInWorldFrame(Quat4d q, Quat4d qDot, Vector3d angularVelocityToPack)
    {
       qConj.conjugate(q);
       multiply(qDot, qConj, angularVelocityToPack);
@@ -100,7 +127,7 @@ public class QuaternionCalculus
 
    public void computeQDDot(Quat4d q, Quat4d qDot, Vector3d angularAcceleration, Quat4d qDDotToPack)
    {
-      computeAngularVelocity(q, qDot, intermediateAngularVelocity);
+      computeAngularVelocityInWorldFrame(q, qDot, intermediateAngularVelocity);
       computeQDDot(q, qDot, intermediateAngularVelocity, angularAcceleration, qDDotToPack);
    }
 
@@ -227,13 +254,6 @@ public class QuaternionCalculus
 
    private final Quat4d pureQuatForMultiply = new Quat4d();
 
-   public void multiply(Quat4d q, Vector3d v, Vector3d resultToPack)
-   {
-      setAsPureQuaternion(v, pureQuatForMultiply);
-      pureQuatForMultiply.mul(q, pureQuatForMultiply);
-      resultToPack.set(pureQuatForMultiply.x, pureQuatForMultiply.y, pureQuatForMultiply.z);
-   }
-
    public void multiply(Quat4d q, Vector3d v, Quat4d resultToPack)
    {
       setAsPureQuaternion(v, resultToPack);
@@ -250,6 +270,12 @@ public class QuaternionCalculus
    {
       pureQuatForMultiply.mul(q1, q2);
       setVectorFromPureQuaternion(pureQuatForMultiply, resultToPack);
+   }
+
+   public void inverseMultiply(Quat4d q1, Quat4d q2, Quat4d resultToPack)
+   {
+      qInv.conjugate(q1);
+      resultToPack.mul(qInv, q2);
    }
 
    public void setAsPureQuaternion(Vector3d vector, Quat4d pureQuaternionToSet)

@@ -12,7 +12,6 @@ import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-
 public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
    private final InitialClearancePositionTrajectoryGenerator positionTrajectoryGenerator;
@@ -26,8 +25,8 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
       this(namePrefix, false, referenceFrame, parentRegistry, false, null);
    }
 
-   public InitialClearancePoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry,
-         boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public InitialClearancePoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry, boolean visualize,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(namePrefix, false, referenceFrame, parentRegistry, visualize, yoGraphicsListRegistry);
    }
@@ -43,7 +42,8 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
    {
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
-      positionTrajectoryGenerator = new InitialClearancePositionTrajectoryGenerator(namePrefix, allowMultipleFrames, referenceFrame, registry, visualize, yoGraphicsListRegistry);
+      positionTrajectoryGenerator = new InitialClearancePositionTrajectoryGenerator(namePrefix, allowMultipleFrames, referenceFrame, registry, visualize,
+            yoGraphicsListRegistry);
       orientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator(namePrefix, allowMultipleFrames, referenceFrame, registry);
    }
 
@@ -176,11 +176,11 @@ public class InitialClearancePoseTrajectoryGenerator implements PoseTrajectoryGe
       positionTrajectoryGenerator.getPosition(tempPosition);
       framePoseToPack.changeFrame(tempPosition.getReferenceFrame());
       framePoseToPack.setPosition(tempPosition);
-      
+
       orientationTrajectoryGenerator.getOrientation(tempOrientation);
       framePoseToPack.setOrientation(tempOrientation);
    }
-   
+
    public boolean isDone()
    {
       return positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();

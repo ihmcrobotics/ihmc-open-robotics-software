@@ -1,9 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
@@ -12,8 +14,10 @@ import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -91,7 +95,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -102,6 +106,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 5.0);
+
+      assertRobotDidNotFall();
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -121,7 +127,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -133,13 +139,18 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 4.0);
 
+      assertRobotDidNotFall();
+
       //re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
 
+      assertRobotDidNotFall();
+
       BambooTools.reportTestFinishedMessage();
    }
 
+	@Ignore("Needs to be improved")
 	@DeployableTestMethod(estimatedDuration = 49.1)
 	@Test(timeout = 250000)
    public void testDoublePushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
@@ -156,7 +167,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -174,9 +185,13 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 2.0);
 
+      assertRobotDidNotFall();
+
       //re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
+
+      assertRobotDidNotFall();
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -196,7 +211,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -208,9 +223,13 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 3.0);
 
+      assertRobotDidNotFall();
+
       //re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
+
+      assertRobotDidNotFall();
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -231,7 +250,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -251,9 +270,13 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 3.0);
 
+      assertRobotDidNotFall();
+
       //re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
+
+      assertRobotDidNotFall();
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -293,5 +316,13 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false,
             robotModel);
+   }
+
+   public void assertRobotDidNotFall()
+   {
+      Point3d center = new Point3d(0.0, 0.0, 0.8882009563211146);
+      Vector3d plusMinusVector = new Vector3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      DRCSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox, drcFlatGroundWalkingTrack.getDrcSimulation().getRobot());
    }
 }

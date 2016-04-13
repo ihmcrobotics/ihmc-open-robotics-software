@@ -81,6 +81,14 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       this.lineSegment.set(endpoint0.getPoint(), endpoint1.getPoint());
    }
 
+   public void setByProjectionOntoXYPlane(FramePoint startPoint, FramePoint endPoint)
+   {
+      checkReferenceFrameMatch(startPoint);
+      checkReferenceFrameMatch(endPoint);
+      
+      this.lineSegment.set(startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY());
+   }
+
    public void set(FramePoint2d endpoint0, FrameVector2d fromPoint0ToPoint1)
    {
       checkReferenceFrameMatch(endpoint0);

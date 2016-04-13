@@ -9,20 +9,18 @@ import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-
 
 public class SmartCMPProjectorTwo extends CMPProjector
 {
    private final BooleanYoVariable cmpProjectedAlongRay, cmpProjectedToPushTowardFinalDesiredICP, cmpProjectedToVertex;
    private final FrameLine2d icpToCMPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
-   private final FrameVector2d finalDesiredICPToICPDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());   
+   private final FrameVector2d finalDesiredICPToICPDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());
    private final FrameLine2d rayFromICPAwayFromFinalDesiredICP = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
    private final FramePoint2d finalDesiredICPLocation = new FramePoint2d();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   public SmartCMPProjectorTwo(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SmartCMPProjectorTwo(YoVariableRegistry parentRegistry)
    {
       cmpProjectedAlongRay = new BooleanYoVariable("cmpProjectedAlongRay", registry);
       cmpProjectedToPushTowardFinalDesiredICP = new BooleanYoVariable("cmpProjectedToPushTowardFinalDesiredICP", registry);
@@ -31,7 +29,6 @@ public class SmartCMPProjectorTwo extends CMPProjector
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
    }
-
 
    /**
     * Project the CMP to the support polygon by moving it along the ray from ICP through CMP.
@@ -42,7 +39,8 @@ public class SmartCMPProjectorTwo extends CMPProjector
     * Therefore we try to direct the ICP towards the final desired ICP location (almost equivalent to the next footstep location).
     */
    @Override
-   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
+   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint,
+         FramePoint2d desiredCMP)
    {
       ReferenceFrame returnFrame = desiredCMP.getReferenceFrame();
 
@@ -56,9 +54,8 @@ public class SmartCMPProjectorTwo extends CMPProjector
       capturePoint.changeFrame(returnFrame);
    }
 
-   
-   
-   private void projectCMPIntoSupportPolygonIfOutsideLocal(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
+   private void projectCMPIntoSupportPolygonIfOutsideLocal(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon,
+         FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
    {
       cmpProjectedAlongRay.set(false);
       cmpProjectedToPushTowardFinalDesiredICP.set(false);
@@ -102,7 +99,7 @@ public class SmartCMPProjectorTwo extends CMPProjector
             FramePoint2d closestIntersection = findClosestIntersection(finalDesiredICPToICPIntersections, capturePoint);
             desiredCMP.set(closestIntersection);
             return;
-        }
+         }
 
          cmpProjectedToVertex.set(true);
          boolean success = supportPolygon.getClosestVertexWithRay(desiredCMP, rayFromICPAwayFromFinalDesiredICP, true);
@@ -110,7 +107,7 @@ public class SmartCMPProjectorTwo extends CMPProjector
             supportPolygon.getClosestVertex(desiredCMP, capturePoint);
          return;
       }
-      
+
       supportPolygon.orthogonalProjection(desiredCMP);
    }
 
@@ -137,14 +134,12 @@ public class SmartCMPProjectorTwo extends CMPProjector
       return (cmpProjectedAlongRay.getBooleanValue() || cmpProjectedToVertex.getBooleanValue());
    }
 
-
    public void setCMPEdgeProjectionInside(double cmpEdgeProjectionInside)
-   {      
+   {
    }
 
-
    public void setMinICPToCMPProjection(double minICPToCMPProjection)
-   {      
+   {
    }
 
 }

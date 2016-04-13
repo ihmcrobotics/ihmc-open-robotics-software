@@ -2,28 +2,18 @@ package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FootStateBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ObjectWeightBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyIKTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.FootPoseTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.ObjectWeightTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyIKTrajectoryTask;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.DrillPacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootStatePacket;
+import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
+import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -31,23 +21,17 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.taskExecutor.PipeLine;
-import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 
 public class KickBehavior extends BehaviorInterface {
 	private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 	private final DoubleYoVariable yoTime;
 	private final ReferenceFrame midZupFrame;
 	private BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
-	private final FootPoseBehavior footPoseBehavior;
+	private final FootTrajectoryBehavior footTrajectoryBehavior;
 
 	private FramePoint2d objectToKickPose;
 
@@ -67,8 +51,8 @@ public class KickBehavior extends BehaviorInterface {
 		trajectoryTime.set(0.5);
 		ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 
-		footPoseBehavior = new FootPoseBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport);
-		registry.addChild(footPoseBehavior.getYoVariableRegistry());
+		footTrajectoryBehavior = new FootTrajectoryBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport);
+		registry.addChild(footTrajectoryBehavior.getYoVariableRegistry());
 
 	}
 
@@ -130,12 +114,14 @@ public class KickBehavior extends BehaviorInterface {
 		submitFootPosition(kickFoot, new FramePoint(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0,
 				kickFoot.negateIfRightSide(0.25), 0));
 
-		final FootStateBehavior footStateBehavior = new FootStateBehavior(outgoingCommunicationBridge);
+		final EndEffectorLoadBearingBehavior footStateBehavior = new EndEffectorLoadBearingBehavior(outgoingCommunicationBridge);
 		pipeLine.submitSingleTaskStage(new BehaviorTask(footStateBehavior, yoTime) {
 
 			@Override
-			protected void setBehaviorInput() {
-				footStateBehavior.setInput(new FootStatePacket(kickFoot, true));
+			protected void setBehaviorInput()
+			{
+			   EndEffectorLoadBearingMessage message = new EndEffectorLoadBearingMessage(kickFoot, EndEffector.FOOT, LoadBearingRequest.LOAD);
+				footStateBehavior.setInput(message);
 
 			}
 		});
@@ -152,9 +138,8 @@ public class KickBehavior extends BehaviorInterface {
 		Point3d desiredFootPosition = new Point3d();
 		Quat4d desiredFootOrientation = new Quat4d();
 		desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
-		FootPoseTask footPoseTask = new FootPoseTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime,
-				footPoseBehavior, trajectoryTime.getDoubleValue(), 0.0);
-		pipeLine.submitSingleTaskStage(footPoseTask);
+		FootTrajectoryTask task = new FootTrajectoryTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footTrajectoryBehavior, trajectoryTime.getDoubleValue());
+		pipeLine.submitSingleTaskStage(task);
 	}
 
 	@Override

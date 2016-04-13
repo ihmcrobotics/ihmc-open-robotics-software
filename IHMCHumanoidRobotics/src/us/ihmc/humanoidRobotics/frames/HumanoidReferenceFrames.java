@@ -49,6 +49,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
+   private final SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<ReferenceFrame>();
    private final MidFrameZUpFrame midFeetZUpFrame;
    private final ReferenceFrame midFeetZUpWalkDirectionFrame;
    private final ReferenceFrame midFeetUnderPelvisWalkDirectionFrame;
@@ -118,7 +119,9 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
      {
          ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, getFootFrame(robotSide), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
 
-         soleFrames.put(robotSide, fullRobotModel.getSoleFrame(robotSide));
+         ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
+         soleFrames.put(robotSide, soleFrame);
+         soleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, soleFrame, soleFrame.getName() + "ZUp"));
       }
 
       midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUp", pelvisZUpFrame, getFootFrame(RobotSide.LEFT), getFootFrame(RobotSide.RIGHT));
@@ -324,6 +327,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          ankleZUpFrames.get(robotSide).update();
          soleFrames.get(robotSide).update();
+         soleZUpFrames.get(robotSide).update();
       }
 
       centerOfMassFrame.update();
@@ -357,5 +361,17 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public SideDependentList<ReferenceFrame> getSoleFrames()
    {
       return soleFrames;
+   }
+
+   @Override
+   public ReferenceFrame getSoleZUpFrame(RobotSide robotSide)
+   {
+      return soleZUpFrames.get(robotSide);
+   }
+
+   @Override
+   public SideDependentList<ReferenceFrame> getSoleZUpFrames()
+   {
+      return soleZUpFrames;
    }
 }

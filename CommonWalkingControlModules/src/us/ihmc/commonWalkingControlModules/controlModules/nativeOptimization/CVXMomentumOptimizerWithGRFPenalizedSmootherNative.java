@@ -14,11 +14,11 @@ import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 {
    // These are the max dimensions for which the solver has been configured. Make sure to update them when changing the solver.
-	public static final boolean ALLOW_EIGHT_POINTS_AND_ONLY_TWO_PLANES = false;
-	
+   public static final boolean ALLOW_EIGHT_POINTS_AND_ONLY_TWO_PLANES = false;
+
    public static final int nSupportVectors = 4;
-   public static final int nPointsPerPlane = ALLOW_EIGHT_POINTS_AND_ONLY_TWO_PLANES? 8 : 4;
-   public static final int nPlanes = ALLOW_EIGHT_POINTS_AND_ONLY_TWO_PLANES? 2 : 4;
+   public static final int nPointsPerPlane = ALLOW_EIGHT_POINTS_AND_ONLY_TWO_PLANES ? 8 : 4;
+   public static final int nPlanes = ALLOW_EIGHT_POINTS_AND_ONLY_TWO_PLANES ? 2 : 4;
    public static final int wrenchLength = 6;
    public static final int nDoF = 38;
    public static final int rhoSize = nSupportVectors * nPointsPerPlane * nPlanes;
@@ -100,20 +100,21 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 
    static
    {
-      
-      String[] nativeLibraryCandidates = {"CVXMomentumOptimizerWithGRFPenalizedSmoother_msz","CVXMomentumOptimizerWithGRFPenalizedSmoother_rel","CVXMomentumOptimizerWithGRFPenalizedSmoother"};
-      for(int i=0;i<nativeLibraryCandidates.length;i++)
+
+      String[] nativeLibraryCandidates = {"CVXMomentumOptimizerWithGRFPenalizedSmoother_msz", "CVXMomentumOptimizerWithGRFPenalizedSmoother_rel",
+            "CVXMomentumOptimizerWithGRFPenalizedSmoother"};
+      for (int i = 0; i < nativeLibraryCandidates.length; i++)
       {
-              try
-              {
-                 NativeLibraryLoader.loadLibrary("us.ihmc.commonWalkingControlModules.lib", nativeLibraryCandidates[i]);
-                    break;
-              }
-              catch(UnsatisfiedLinkError e)
-              {
-                 if(i==(nativeLibraryCandidates.length-1))
-                       throw(e);
-              }
+         try
+         {
+            NativeLibraryLoader.loadLibrary("us.ihmc.commonWalkingControlModules.lib", nativeLibraryCandidates[i]);
+            break;
+         }
+         catch (UnsatisfiedLinkError e)
+         {
+            if (i == (nativeLibraryCandidates.length - 1))
+               throw (e);
+         }
       }
 
       initialize();
@@ -229,11 +230,11 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
    {
       double[] A = new double[wrenchLength * nDoF];
       double[] b = new double[wrenchLength];
-      double[] C = new double[wrenchLength];    // diagonal
+      double[] C = new double[wrenchLength]; // diagonal
       double[] Js = new double[nDoF * nDoF];
       double[] ps = new double[nDoF];
-      double[] Ws = new double[nDoF];    // diagonal
-      double[] Lambda = new double[nDoF];    // diagonal
+      double[] Ws = new double[nDoF]; // diagonal
+      double[] Lambda = new double[nDoF]; // diagonal
       double[] Qrho = new double[wrenchLength * rhoSize];
       double[] c = new double[wrenchLength];
       double[] rhoMin = new double[rhoSize];

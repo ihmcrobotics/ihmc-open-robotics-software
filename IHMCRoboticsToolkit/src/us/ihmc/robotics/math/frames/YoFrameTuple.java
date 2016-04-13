@@ -31,6 +31,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
 
    private final DoubleYoVariable x, y, z; // This is where the data is stored. All operations must act on these numbers.
    private final T frameTuple; // This is only for assistance. The data is stored in the YoVariables, not in here!
+   /** Never use this reference frame directly, use {@link #getReferenceFrame()} instead so the multiple frames version of this {@link YoFrameTuple} will work properly. */
    private final ReferenceFrame referenceFrame; // Redundant but allows to make sure the frame isn't changed
 
    public YoFrameTuple(DoubleYoVariable xVariable, DoubleYoVariable yVariable, DoubleYoVariable zVariable, ReferenceFrame referenceFrame)
@@ -215,15 +216,27 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       checkReferenceFrameMatch(referenceFrame);
       set(x, y, z);
    }
-   
+
    public final void setAndMatchFrame(FrameTuple<?, ?> frameTuple)
    {
       setAndMatchFrame(frameTuple, true);
    }
-   
+
    public final void setAndMatchFrame(FrameTuple<?, ?> frameTuple, boolean notifyListeners)
    {
       this.frameTuple.setIncludingFrame(frameTuple);
+      this.frameTuple.changeFrame(getReferenceFrame());
+      getYoValuesFromFrameTuple(notifyListeners);
+   }
+
+   public final void setAndMatchFrame(YoFrameTuple<?, ?> yoFrameTuple)
+   {
+      setAndMatchFrame(yoFrameTuple, true);
+   }
+
+   public final void setAndMatchFrame(YoFrameTuple<?, ?> yoFrameTuple, boolean notifyListeners)
+   {
+      yoFrameTuple.getFrameTupleIncludingFrame(frameTuple);
       this.frameTuple.changeFrame(getReferenceFrame());
       getYoValuesFromFrameTuple(notifyListeners);
    }
@@ -476,6 +489,14 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
    }
 
    /**
+    * Negates the value of this YoFrameTuple in place.
+    */
+   public final void negate()
+   {
+      set(-getX(), -getY(), -getZ());
+   }
+
+   /**
     *  Linearly interpolates between tuples frameTuple1 and frameTuple2 and places the result into this tuple:  this = (1-alpha) * frameTuple1 + alpha * frameTuple2.
     *  @param frameTuple1  the first tuple
     *  @param frameTuple2  the second tuple  
@@ -503,6 +524,12 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       checkReferenceFrameMatch(yoFrameTuple1);
       checkReferenceFrameMatch(yoFrameTuple2);
       interpolate(yoFrameTuple1.getFrameTuple(), yoFrameTuple2.getFrameTuple(), alpha);
+   }
+
+   public final boolean epsilonEquals(YoFrameTuple<?, ?> frameTuple, double threshold)
+   {
+      putYoValuesIntoFrameTuple();
+      return this.frameTuple.epsilonEquals(frameTuple.getFrameTuple(), threshold);
    }
 
    public final boolean epsilonEquals(FrameTuple<?, ?> frameTuple, double threshold)

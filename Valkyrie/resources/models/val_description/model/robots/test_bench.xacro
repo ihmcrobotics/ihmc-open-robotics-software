@@ -1,0 +1,18 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="valkyrie">
+
+    <xacro:include filename="$(find val_description)/common/xacro/api/testbench_api.xacro"/>
+    <xacro:include filename="$(find val_description)/common/xacro/nodes/actuator_testbench_nodes.xacro"/>
+
+    <transmission name="testbenchTransmission">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="testbenchJoint">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="testbenchActuator">
+        <node name="${testbenchNode}"/>
+        <mechanicalReduction>1</mechanicalReduction>
+        <api name="${testbenchApi}" />
+      </actuator>
+    </transmission>
+
+</robot>

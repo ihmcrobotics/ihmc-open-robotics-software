@@ -15,10 +15,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
-import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
+import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -119,12 +119,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public boolean doToeOffIfPossibleInSingleSupport()
    {
       return false;
-   }
-
-   @Override
-   public boolean checkTrailingLegJacobianDeterminantToTriggerToeOff()
-   {
-      return true;
    }
 
    @Override
@@ -245,7 +239,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       
       // For sims using the QP and whole body controller, only allow one neck joint for now since the QP and inverse dynamics
       // don't do well with redundant joints yet. We'll have to fix that later some how.
-      else return new String[] {jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
+      else return new String[] {jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
    }
 
    @Override
@@ -454,22 +448,14 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kpOrthogonal = runningOnRealRobot ? 1.9 : 1.5;
-      double kpParallel = runningOnRealRobot ? 2.0 : 1.5;
+      double kpParallel = runningOnRealRobot ? 2.0 : 2.5;
       double ki = runningOnRealRobot ? 0.0 : 0.0;
       double kiBleedOff = 0.9;
-      boolean useRawCMP = true;
-      double cmpFilterBreakFrequencyInHertz = 16.0;
-      double cmpRateLimit = runningOnRealRobot ? 6.0 : 60.0;
-      double cmpAccelerationLimit = runningOnRealRobot ? 200.0 : 2000.0;
 
       gains.setKpParallelToMotion(kpParallel);
       gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
-      gains.setUseRawCMP(useRawCMP);
-      gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
-      gains.setCMPRateLimit(cmpRateLimit);
-      gains.setCMPAccelerationLimit(cmpAccelerationLimit);
 
       return gains;
    }
@@ -515,7 +501,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("pelvisOrientation", registry);
 
@@ -538,27 +524,44 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public YoOrientationPIDGains createHeadOrientationControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
    {
-      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
+      YoValkyrieHeadPIDGains gains = new YoValkyrieHeadPIDGains("HeadOrientation", registry);
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kp = 6.5;//40.0;
+      double kpX = 5.0;
+      double kpYZ = 20.0;//40.0;
       double zeta = runningOnRealRobot ? 0.4 : 0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
       double maxAccel = 18.0;
       double maxJerk = 270.0;
 
-      gains.setProportionalGain(kp);
+      gains.setProportionalGains(kpX, kpYZ);
       gains.setDampingRatio(zeta);
-      gains.setIntegralGain(ki);
-      gains.setMaximumIntegralError(maxIntegralError);
       gains.setMaximumAcceleration(maxAccel);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
+      return gains;
+   }
+
+   @Override
+   public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
+   {
+      YoPIDGains gains = new YoPIDGains("HeadJointspace", registry);
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
+      double kp = 40.0;
+      double zeta = realRobot ? 0.4 : 0.8;
+      double maxAccel = 18.0;
+      double maxJerk = 270.0;
+
+      gains.setKp(kp);
+      gains.setZeta(zeta);
+      gains.setMaximumAcceleration(maxAccel);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+      
       return gains;
    }
 
@@ -596,7 +599,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
 
@@ -619,7 +622,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
@@ -649,7 +652,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public YoSE3PIDGains createHoldPositionFootControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("HoldFoot", registry);
 
@@ -678,7 +681,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public YoSE3PIDGains createToeOffFootControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("ToeOffFoot", registry);
 
@@ -707,7 +710,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public YoSE3PIDGains createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("EdgeTouchdownFoot", registry);
 
@@ -732,18 +735,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       gains.createDerivativeGainUpdater(true);
 
       return gains;
-   }
-
-   @Override
-   public double getSupportSingularityEscapeMultiplier()
-   {
-      return -30; // negative as knee axis are -y direction
-   }
-
-   @Override
-   public double getSwingSingularityEscapeMultiplier()
-   {
-      return -(target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 30.0 : 200.0); // negative as knee axis are -y direction
    }
 
    @Override
@@ -866,13 +857,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getDesiredTouchdownAcceleration()
    {
-      if(target == DRCRobotModel.RobotTarget.GAZEBO)
+      switch(target)
       {
+      case REAL_ROBOT:
+      case GAZEBO:
          return -1.0;
-      }
-      else
-      {
-         return 0.0;
+      default:
+         return -2.0;
       }
    }
 
@@ -938,14 +929,14 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public void setupMomentumOptimizationSettings(MomentumOptimizationSettings momentumOptimizationSettings)
+   public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
-      momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
-      momentumOptimizationSettings.setMomentumWeight(1.4, 1.4, 10.0, 10.0);
-      momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.16); // 0.06);
-      momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
+      // The weight for the head needs to be pretty high to counter the privileged configuration task.
+      // This seems to be specific to Val's, probably because of its particular kinematics.
+      // Shouldn't affect the rest of the body as long as the head is controlled w.r.t. to the chest.
+      momentumOptimizationSettings.setHeadWeights(5.0, 500.0, 50.0);
+      return momentumOptimizationSettings;
    }
 
    @Override
@@ -979,35 +970,10 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return 0.02;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getDurationToCancelOutDesiredICPVelocityWhenStuckInTransfer()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
    @Override
    public boolean finishSingleSupportWhenICPPlannerIsDone()
    {
       return false;
-   }
-
-   @Override
-   public double minimumHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0.9649;
-   }
-
-   @Override
-   public double nominalHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0.8949;
-   }
-
-   @Override
-   public double maximumHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0.65;
    }
 
    @Override
@@ -1018,8 +984,15 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    /** {@inheritDoc} */
    @Override
-   public boolean useICPPlannerHackN13()
+   public double getHighCoPDampingDurationToPreventFootShakies()
    {
-      return false;
+      return -1.0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getCoPErrorThresholdForHighCoPDamping()
+   {
+      return Double.POSITIVE_INFINITY;
    }
 }

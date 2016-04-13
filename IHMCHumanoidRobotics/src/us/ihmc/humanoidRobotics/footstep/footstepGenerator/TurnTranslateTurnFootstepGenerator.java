@@ -207,7 +207,7 @@ public class TurnTranslateTurnFootstepGenerator implements FootstepGenerator
       lastTurn.setPoseFinderParams(footstepFittingBufferSize, boundingBoxForFootstepHeightFindingSideLength);
    }
 
-   public void setHeightMap(HeightMapWithPoints heightMap, SideDependentList<ContactablePlaneBody> contactableFeet)
+   public void setHeightMap(HeightMapWithPoints heightMap, SideDependentList<? extends ContactablePlaneBody> contactableFeet)
    {
       firstTurn.setHeightMap(heightMap, contactableFeet);
       translate.setHeightMap(heightMap, contactableFeet);

@@ -44,9 +44,9 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput
 
    public CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput()
    {
-      int rhoSize = CVXMomentumOptimizerWithGRFSmootherNative.rhoSize;
-      int wrenchLength = CVXMomentumOptimizerWithGRFSmootherNative.wrenchLength;
-      int nDoF = CVXMomentumOptimizerWithGRFSmootherNative.nDoF;
+      int rhoSize = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize;
+      int wrenchLength = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.wrenchLength;
+      int nDoF = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nDoF;
 
       AMatrix = new DenseMatrix64F(wrenchLength, nDoF);
       bMatrix = new DenseMatrix64F(wrenchLength, 1);
@@ -66,19 +66,19 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput
 
       A = new double[AMatrix.getNumElements()];
       b = new double[bMatrix.getNumElements()];
-      C = new double[CMatrix.getNumRows()];    // diagonal
+      C = new double[CMatrix.getNumRows()]; // diagonal
       Js = new double[JsMatrix.getNumElements()];
       ps = new double[psMatrix.getNumElements()];
-      Ws = new double[WsMatrix.getNumRows()];    // diagonal
-      Lambda = new double[LambdaMatrix.getNumRows()];    // diagonal
+      Ws = new double[WsMatrix.getNumRows()]; // diagonal
+      Lambda = new double[LambdaMatrix.getNumRows()]; // diagonal
       Qrho = new double[QrhoMatrix.getNumElements()];
       c = new double[cMatrix.getNumElements()];
       rhoMin = new double[rhoMinMatrix.getNumElements()];
-      WRho = new double[WRhoMatrix.getNumRows()];    // diagonal
+      WRho = new double[WRhoMatrix.getNumRows()]; // diagonal
       rhoPrevious = new double[rhoPreviousMatrix.getNumElements()];
-      WRhoSmoother = new double[WRhoSmootherMatrix.getNumRows()];    // diagonal
+      WRhoSmoother = new double[WRhoSmootherMatrix.getNumRows()]; // diagonal
       rhoPreviousMean = new double[rhoPreviousMeanMatrix.getNumElements()];
-      WRhoCoPPenalty = new double[WRhoCoPPenaltyMatrix.getNumRows()];    // diagonal
+      WRhoCoPPenalty = new double[WRhoCoPPenaltyMatrix.getNumRows()]; // diagonal
    }
 
    public void reset()

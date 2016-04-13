@@ -14,17 +14,17 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
+import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
 public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
 {
@@ -62,7 +62,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    private final FramePoint ballPosition = new FramePoint();
    private final int numberOfBalls = 50;
 
-   /** Use a BooleanYoVariable to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */ 
+   /** Use a BooleanYoVariable to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
    private final BooleanYoVariable showViz;
 
    public FinalApproachPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
@@ -70,8 +70,8 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       this(namePrefix, false, referenceFrame, parentRegistry, false, null);
    }
 
-   public FinalApproachPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry,
-         boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FinalApproachPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry, boolean visualize,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(namePrefix, false, referenceFrame, parentRegistry, visualize, yoGraphicsListRegistry);
    }
@@ -283,7 +283,8 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    @Override
    public void showVisualization()
    {
-      if (!visualize) return;
+      if (!visualize)
+         return;
 
       showViz.set(true);
    }
@@ -291,7 +292,8 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    @Override
    public void hideVisualization()
    {
-      if (!visualize) return;
+      if (!visualize)
+         return;
 
       showViz.set(false);
    }

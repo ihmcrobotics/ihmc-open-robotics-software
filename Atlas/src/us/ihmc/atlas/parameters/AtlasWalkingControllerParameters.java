@@ -16,9 +16,10 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -105,13 +106,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public boolean doToeOffIfPossibleInSingleSupport()
    {
       return false;
-   }
-
-   @Override
-   public boolean checkTrailingLegJacobianDeterminantToTriggerToeOff()
-   {
-      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
-      return !realRobot;
    }
 
   @Override
@@ -223,9 +217,9 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
 // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
-   private final double minimumHeightAboveGround = 0.595 + 0.03;
-   private double nominalHeightAboveGround = 0.675 + 0.03;
-   private final double maximumHeightAboveGround = 0.735 + 0.03;
+   private final double minimumHeightAboveGround = 0.625;
+   private double nominalHeightAboveGround = 0.705;
+   private final double maximumHeightAboveGround = 0.765;
 
 // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
 //   private final double minimumHeightAboveGround = 0.785;                                       
@@ -420,27 +414,16 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public ICPControlGains getICPControlGains()
    {
       ICPControlGains gains = new ICPControlGains();
-      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpParallel = realRobot ? 2.5 : 1.5;
+      double kpParallel = 2.5;
       double kpOrthogonal = 1.5;
-      double ki = realRobot ? 0.0 : 4.0;
-      double kiBleedOff = 0.9;
-      boolean useRawCMP = true;
-      boolean useHackToReduceFeedForward = false;
-//      double cmpFilterBreakFrequencyInHertz = 16.0;
-//      double cmpRateLimit = 60.0;
-//      double cmpAccelerationLimit = 2000.0;
+      double ki = 0.0;
+      double kiBleedOff = 0.0;
 
       gains.setKpParallelToMotion(kpParallel);
       gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
-      gains.setUseRawCMP(useRawCMP);
-      //      gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
-//      gains.setCMPRateLimit(cmpRateLimit);
-//      gains.setCMPAccelerationLimit(cmpAccelerationLimit);
-      gains.setUseHackToReduceFeedForward(useHackToReduceFeedForward);
 
       return gains;
    }
@@ -484,7 +467,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
@@ -508,26 +491,42 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public YoOrientationPIDGains createHeadOrientationControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       double kp = 40.0;
       double zeta = realRobot ? 0.4 : 0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
       double maxAccel = realRobot ? 6.0 : 36.0;
       double maxJerk = realRobot ? 60.0 : 540.0;
 
       gains.setProportionalGain(kp);
       gains.setDampingRatio(zeta);
-      gains.setIntegralGain(ki);
-      gains.setMaximumIntegralError(maxIntegralError);
       gains.setMaximumAcceleration(maxAccel);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
+      return gains;
+   }
+
+   @Override
+   public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
+   {
+      YoPIDGains gains = new YoPIDGains("HeadJointspace", registry);
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
+      double kp = 40.0;
+      double zeta = realRobot ? 0.4 : 0.8;
+      double maxAccel = realRobot ? 6.0 : 36.0;
+      double maxJerk = realRobot ? 60.0 : 540.0;
+
+      gains.setKp(kp);
+      gains.setZeta(zeta);
+      gains.setMaximumAcceleration(maxAccel);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+      
       return gains;
    }
 
@@ -564,7 +563,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
@@ -586,7 +585,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
@@ -615,7 +614,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public YoSE3PIDGains createHoldPositionFootControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("HoldFoot", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
@@ -645,7 +644,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public YoSE3PIDGains createToeOffFootControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("ToeOffFoot", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
@@ -675,7 +674,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public YoSE3PIDGains createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("EdgeTouchdownFoot", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
@@ -710,18 +709,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getSwingMaxHeightForPushRecoveryTrajectory()
    {
       return 0.15;
-   }
-
-   @Override
-   public double getSupportSingularityEscapeMultiplier()
-   {
-      return 30;
-   }
-
-   @Override
-   public double getSwingSingularityEscapeMultiplier()
-   {
-      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 50.0 : 200.0;
    }
 
    @Override
@@ -895,14 +882,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public void setupMomentumOptimizationSettings(MomentumOptimizationSettings momentumOptimizationSettings)
+   public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
-      momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
-      momentumOptimizationSettings.setMomentumWeight(2.0, 1.4, 10.0, 10.0); //(1.0, 1.0, 10.0, 10.0);
-      momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.16);  //0.06 causes a little less oscillations possibly.  // 0.01 causes ankle to flip out when rotates on edge. 0.12 prevents this.
-      momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
+      return momentumOptimizationSettings;
    }
 
    @Override
@@ -935,35 +918,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return 0.015;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getDurationToCancelOutDesiredICPVelocityWhenStuckInTransfer()
-   {
-      return 0.5;
-   }
-
    @Override
    public boolean finishSingleSupportWhenICPPlannerIsDone()
    {
       return false;
-   }
-
-   @Override
-   public double minimumHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0.3818;
-   }
-
-   @Override
-   public double nominalHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0.7049;
-   }
-
-   @Override
-   public double maximumHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0.7749;
    }
 
    @Override
@@ -992,8 +950,15 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public boolean useICPPlannerHackN13()
+   public double getHighCoPDampingDurationToPreventFootShakies()
    {
-      return false;
+      return -1.0; // 0.5;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getCoPErrorThresholdForHighCoPDamping()
+   {
+      return Double.POSITIVE_INFINITY; //0.075;
    }
 }

@@ -7,16 +7,15 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.tools.ArrayTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -40,7 +39,8 @@ public class Handstep
       this(createAutomaticID(endEffector), robotSide, endEffector, poseReferenceFrame, surfaceNormal, swingTrajectoryTime);
    }
 
-   public Handstep(String id, RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal, double swingTrajectoryTime)
+   public Handstep(String id, RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal,
+         double swingTrajectoryTime)
    {
       poseReferenceFrame.getParent().checkIsWorldFrame();
 
@@ -71,7 +71,7 @@ public class Handstep
    {
       return poseReferenceFrame.getParent();
    }
-   
+
    public void setX(double x)
    {
       poseReferenceFrame.setX(x);
@@ -106,7 +106,7 @@ public class Handstep
    {
       poseReferenceFrame.setXYFromPosition2dAndUpdate(position2d);
    }
-   
+
    public void setSurfaceNormal(FrameVector surfaceNormal)
    {
       this.surfaceNormal.set(surfaceNormal);
@@ -120,8 +120,8 @@ public class Handstep
    public RobotSide getRobotSide()
    {
       return robotSide;
-   } 
-   
+   }
+
    public double getX()
    {
       return poseReferenceFrame.getX();
@@ -176,17 +176,16 @@ public class Handstep
    {
       poseReferenceFrameToPackAndUpdate.setPoseAndUpdate(poseReferenceFrame);
    }
-   
+
    public void getSurfaceNormal(FrameVector surfaceNormalToPack)
    {
       surfaceNormalToPack.setIncludingFrame(surfaceNormal);
    }
-   
+
    public void getSurfaceNormal(Vector3d surfaceNormalToPack)
    {
       this.surfaceNormal.get(surfaceNormalToPack);
    }
-
 
    public RigidBody getBody()
    {

@@ -9,11 +9,20 @@ public class LineSegment3d
 {
    private Point3d pointA;
    private Point3d pointB;
+   
+   private final Vector3d tempVector3dOne = new Vector3d();
+   private final Vector3d tempVector3dTwo = new Vector3d();
 
    public LineSegment3d(Point3d pointA, Point3d pointB)
    {
       this.pointA = pointA;
       this.pointB = pointB;
+   }
+   
+   public LineSegment3d()
+   {
+      this.pointA = new Point3d();
+      this.pointB = new Point3d();
    }
 
    public double length()
@@ -41,30 +50,43 @@ public class LineSegment3d
 
    public Point3d projection(Point3d pointC)
    {
-      Vector3d vectorAB = new Vector3d(pointB);
-      vectorAB.sub(pointA);
-      Vector3d vectorAC = new Vector3d(pointC);
-      vectorAC.sub(pointA);
+      Point3d projection = new Point3d();
+      
+      getProjectionOntoLineSegment(pointC, projection);
+      
+      return projection;
+   }
+   
+   public void getProjectionOntoLineSegment(Point3d pointC, Point3d projectedPointToPack)
+   {
+      Vector3d vectorAB = tempVector3dOne;
+      vectorAB.sub(pointB, pointA);
+      Vector3d vectorAC = tempVector3dTwo;
+      vectorAC.sub(pointC, pointA);
       double temporaryDoubleA;
       if ((temporaryDoubleA = vectorAC.dot(vectorAB)) <= 0.0)    // pointC projection is below pointA
       {
-         return new Point3d(pointA);
+         projectedPointToPack.set(pointA.getX(), pointA.getY(), pointA.getZ());
+         return;
       }
 
       double temporaryDoubleB;
       if ((temporaryDoubleB = vectorAB.dot(vectorAB)) <= temporaryDoubleA)    // pointC projection is up pointB
       {
-         return new Point3d(pointB);
+         projectedPointToPack.set(pointB.getX(), pointB.getY(), pointB.getZ());
+         return;
       }
 
       double temporaryRoubleRatio;
       temporaryRoubleRatio = temporaryDoubleA / temporaryDoubleB;    // pointC projection is between pointA and pointB
-      Vector3d projectionOfPointC = new Vector3d(pointA);
+      Vector3d projectionOfPointC = tempVector3dTwo;
+      projectionOfPointC.set(pointA);
       vectorAB.scale(temporaryRoubleRatio);
       projectionOfPointC.add(vectorAB);
 
-      return new Point3d(projectionOfPointC);
+      projectedPointToPack.set(projectionOfPointC.getX(), projectionOfPointC.getY(), projectionOfPointC.getZ());
    }
+   
    public OneDimensionalBounds[] getOuterBounds()
    {
       double[] aVals = new double[3];

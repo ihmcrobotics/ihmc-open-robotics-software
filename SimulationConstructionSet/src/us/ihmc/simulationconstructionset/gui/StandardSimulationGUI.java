@@ -114,6 +114,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
 public class StandardSimulationGUI implements SelectGraphConfigurationCommandExecutor, GraphGroupSelector, EntryBoxGroupSelector, CameraSelector,
       ViewportSelectorCommandExecutor, CameraHolder, ActiveCameraHolder, ActiveCanvas3DHolder, ExtraPanelSelector, VarGroupSelector, ExitActionListenerNotifier
@@ -122,8 +123,8 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    private static final boolean DEBUG_CLOSE_AND_DISPOSE = false;
    private static JWindow splashWindow;
    private Graphics3DAdapter graphics3dAdapter;
-   private final ConcurrentLinkedQueue<GraphicsUpdatable> graphicsUpdatables = new ConcurrentLinkedQueue<GraphicsUpdatable>();
-   private final LinkedHashMap<Robot, GraphicsRobot> graphicsRobots = new LinkedHashMap<Robot, GraphicsRobot>();
+   private ConcurrentLinkedQueue<GraphicsUpdatable> graphicsUpdatables = new ConcurrentLinkedQueue<GraphicsUpdatable>();
+   private LinkedHashMap<Robot, GraphicsRobot> graphicsRobots = new LinkedHashMap<Robot, GraphicsRobot>();
 
    private ArrayList<ExitActionListener> exitActionListeners = new ArrayList<ExitActionListener>();
    private ConfigurationList configurationList = new ConfigurationList();
@@ -202,6 +203,8 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    private BookmarkedVariablesHolder bookmarkedVariablesHolder;
 
    private ArrayList<TickUpdateListener> tickUpdateListeners = new ArrayList<TickUpdateListener>();
+   
+   private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
    
    public StandardSimulationGUI(Graphics3DAdapter graphics3dAdapter, SimulationSynchronizer simulationSynchronizer, AllCommandsExecutor allCommandsExecutor,
          AllDialogConstructorsHolder allDialogConstructorsHolder, SimulationConstructionSet sim, YoVariableHolder yoVariableHolder, Robot[] robots,
@@ -2438,7 +2441,9 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
                }
                catch (RuntimeException exception)
                {
-                  PrintTools.warn(StandardSimulationGUI.this, "Warning: Could not find registry " + name);
+                  //TODO: Create some way to automatically figure out the registry stuff
+                  // and fix the config files when they don't have a registry.
+//                  PrintTools.warn(StandardSimulationGUI.this, "Warning: Could not find registry " + name);
                   // new Throwable().printStackTrace();
                }
             }
@@ -2669,7 +2674,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    public GraphicsDynamicGraphicsObject addYoGraphic(YoGraphic yoGraphic, boolean updateFromSimulationThread)
    {
-      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObject = new GraphicsDynamicGraphicsObject(yoGraphic);
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObject = new GraphicsDynamicGraphicsObject(yoGraphic, closeableAndDisposableRegistry);
 
       if (updateFromSimulationThread)
       {
@@ -2781,6 +2786,12 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          System.out.println("Clearing Default Var Lists");
       System.out.flush();
 
+      if (closeableAndDisposableRegistry !=  null)
+      {
+         closeableAndDisposableRegistry.closeAndDispose();
+         closeableAndDisposableRegistry = null;
+      }
+      
       if (configurationList != null)
       {
          configurationList = null;
@@ -3004,6 +3015,9 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          System.out.println("Closing and Disposing graphics3dAdapter");
       System.out.flush();
 
+      graphicsUpdatables = null;
+      graphicsRobots = null;
+      
       if (graphics3dAdapter != null)
       {
          graphics3dAdapter.closeAndDispose();

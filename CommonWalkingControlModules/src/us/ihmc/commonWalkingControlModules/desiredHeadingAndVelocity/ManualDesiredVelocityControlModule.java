@@ -23,11 +23,13 @@ public class ManualDesiredVelocityControlModule implements DesiredVelocityContro
       desiredVelocity.set(newDesiredVelocity);  
    }
 
+   @Override
    public void getDesiredVelocity(FrameVector2d desiredVelocityToPack)
    {
       desiredVelocity.getFrameVector2d(desiredVelocityToPack);
    }
 
+   @Override
    public void updateDesiredVelocity()
    {
 //      throw new RuntimeException("Set velocity manually, don't call this method.");
