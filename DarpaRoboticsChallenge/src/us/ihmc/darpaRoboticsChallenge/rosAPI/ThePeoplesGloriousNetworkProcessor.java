@@ -15,6 +15,8 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
+import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -31,9 +33,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.RequestControllerStopSubscriber;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.RosArmJointTrajectorySubscriber;
-import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangePacket;
-import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.ihmcPerception.IHMCProntoRosLocalizationUpdateSubscriber;
@@ -92,7 +92,7 @@ public class ThePeoplesGloriousNetworkProcessor
       HumanoidRobotDataReceiver robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, null);
       rosAPI_communicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
       rosAPI_communicator.attachListener(RobotConfigurationData.class, ppsOffsetProvider);
-      rosAPI_communicator.attachListener(HighLevelStateChangePacket.class, new PeriodicRosHighLevelStatePublisher(rosMainNode, namespace));
+      rosAPI_communicator.attachListener(HighLevelStateChangeStatusMessage.class, new PeriodicRosHighLevelStatePublisher(rosMainNode, namespace));
       rosAPI_communicator.attachListener(CapturabilityBasedStatus.class, new RosCapturabilityBasedStatusPublisher(rosMainNode, namespace));
 
       setupInputs(namespace, robotDataReceiver, fullRobotModel);

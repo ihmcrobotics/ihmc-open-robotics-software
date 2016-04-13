@@ -7,15 +7,15 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandControlThread;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.ManualHandControlProvider;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
+import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.RobotiqHandInterface;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
@@ -28,7 +28,7 @@ class RobotiqControlThread extends HandControlThread
    
    private final RobotSide robotSide;
    private final RobotiqHandInterface robotiqHand;
-   private final FingerStateProvider fingerStateProvider;
+   private final HandDesiredConfigurationMessageSubscriber handDesiredConfigurationMessageSubscriber;
    private final ManualHandControlProvider manualHandControlProvider;
    private final HandJointAngleCommunicator jointAngleCommunicator;
    private int errorCount = 0;
@@ -39,11 +39,11 @@ class RobotiqControlThread extends HandControlThread
       super(robotSide);
       this.robotSide = robotSide;
       robotiqHand = new RobotiqHandInterface(robotSide.equals(RobotSide.LEFT) ? NetworkParameters.getHost(NetworkParameterKeys.leftHand) : NetworkParameters.getHost(NetworkParameterKeys.rightHand));
-      fingerStateProvider = new FingerStateProvider(robotSide);
+      handDesiredConfigurationMessageSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, packetCommunicator, closeableAndDisposableRegistry);
       
-      packetCommunicator.attachListener(FingerStatePacket.class, fingerStateProvider);
+      packetCommunicator.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationMessageSubscriber);
       packetCommunicator.attachListener(ManualHandControlPacket.class, manualHandControlProvider);
    }
 
@@ -126,7 +126,7 @@ class RobotiqControlThread extends HandControlThread
    public void run()
    {
       if(CALIBRATE_ON_CONNECT)
-         fingerStateProvider.receivedPacket(new FingerStatePacket(robotSide, FingerState.CALIBRATE));
+         handDesiredConfigurationMessageSubscriber.receivedPacket(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CALIBRATE));
 
       while (packetCommunicator.isConnected())
       {
@@ -139,10 +139,10 @@ class RobotiqControlThread extends HandControlThread
             if (handStatus.hasError())
                handStatus.printError();
 
-            if (fingerStateProvider.isNewFingerStateAvailable())
+            if (handDesiredConfigurationMessageSubscriber.isNewDesiredConfigurationAvailable())
             {
-               FingerStatePacket packet = fingerStateProvider.pullPacket();
-               FingerState state = packet.getFingerState();
+               HandDesiredConfigurationMessage packet = handDesiredConfigurationMessageSubscriber.pollMessage();
+               HandConfiguration state = packet.getHandDesiredConfiguration();
                
                switch (state)
                {

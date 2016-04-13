@@ -9,9 +9,9 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTools;
-import us.ihmc.commonWalkingControlModules.trajectories.SwingTrajectoryHeightCalculator;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepOverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepValidityMetric;
@@ -47,7 +47,7 @@ public class PathToFootstepGenerator
 
    private boolean initialized = false;
    private FootstepOverheadPath overheadPath;
-   private SideDependentList<FootstepData> originalFeet = new SideDependentList<>();
+   private SideDependentList<FootstepDataMessage> originalFeet = new SideDependentList<>();
 
    public PathToFootstepGenerator(SwingTrajectoryHeightCalculator heightCalculator, FootstepSnapper footstepSnapper, FootstepValidityMetric validityMetric,
                                   HeightMapWithPoints heightMap)
@@ -78,7 +78,7 @@ public class PathToFootstepGenerator
     * @param originalFeet the original sole placement of the feet, (not the ankle position)
     * @param overheadPath the overhead path for the robot to place footsteps along
     */
-   public void initialize(SideDependentList<FootstepData> originalFeet, FootstepOverheadPath overheadPath)
+   public void initialize(SideDependentList<FootstepDataMessage> originalFeet, FootstepOverheadPath overheadPath)
    {
       overheadPath.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       this.originalFeet = originalFeet;
@@ -87,22 +87,22 @@ public class PathToFootstepGenerator
       initialized = true;
    }
 
-   public ArrayList<Footstep> generateFoootStepsAlongPath(RobotSide firstStepSide, SideDependentList<ContactablePlaneBody> contactableFeet)
+   public ArrayList<Footstep> generateFoootStepsAlongPath(RobotSide firstStepSide, SideDependentList<? extends ContactablePlaneBody> contactableFeet)
    {
-      List<FootstepData> generatedFootsteps = getStepsAlongPath(firstStepSide);
+      List<FootstepDataMessage> generatedFootsteps = getStepsAlongPath(firstStepSide);
 
       // convert from footstepData to footsteps
       ArrayList<Footstep> footsteps = new ArrayList<>();
-      for (FootstepData footstepData : generatedFootsteps)
+      for (FootstepDataMessage footstepData : generatedFootsteps)
       {
-         Footstep footstep = FootstepTools.generateFootstepFromFootstepDataSole(footstepData, contactableFeet.get(footstepData.getRobotSide()));
+         Footstep footstep = FootstepTools.generateFootstepFromFootstepData(footstepData, contactableFeet.get(footstepData.getRobotSide()));
          footsteps.add(footstep);
       }
 
       return footsteps;
    }
 
-   public ArrayList<FootstepData> getStepsAlongPath(RobotSide firstStepSide)
+   public ArrayList<FootstepDataMessage> getStepsAlongPath(RobotSide firstStepSide)
    {
       if (!initialized)
       {
@@ -114,14 +114,14 @@ public class PathToFootstepGenerator
 //         throw new RuntimeException(this.getClass().getSimpleName() + ": No HeightMap");
 //      }
 
-      ArrayList<FootstepData> footstepList = new ArrayList<>();
+      ArrayList<FootstepDataMessage> footstepList = new ArrayList<>();
       double totalDistance = overheadPath.getTotalDistance();
 
-      FootstepData stanceFoot;
-      FootstepData initialSwingFoot;
+      FootstepDataMessage stanceFoot;
+      FootstepDataMessage initialSwingFoot;
 
 
-      SideDependentList<FootstepData> lastFeet = new SideDependentList<>();
+      SideDependentList<FootstepDataMessage> lastFeet = new SideDependentList<>();
       lastFeet.put(RobotSide.LEFT, originalFeet.get(RobotSide.LEFT));
       lastFeet.put(RobotSide.RIGHT, originalFeet.get(RobotSide.RIGHT));
 
@@ -137,7 +137,7 @@ public class PathToFootstepGenerator
 
       FramePose2d currentPose = overheadPath.getPoseAtDistance(currentDistance);
       FramePose2d nextPose = overheadPath.getPoseAtDistance(nextFootDistance);
-      FootstepData currentFootstep = new FootstepData(currentSide, new Point3d(), new Quat4d());
+      FootstepDataMessage currentFootstep = new FootstepDataMessage(currentSide, new Point3d(), new Quat4d());
 
       FramePose2d goalPose = overheadPath.getPoseAtDistance(totalDistance);
 
@@ -153,7 +153,7 @@ public class PathToFootstepGenerator
             currentDistance = Math.min(totalDistance, lastDistance + stepLength);
             stanceFoot = lastFeet.get(currentSide.getOppositeSide());
             initialSwingFoot = lastFeet.get(currentSide);
-            currentFootstep = new FootstepData(currentSide, new Point3d(), new Quat4d());
+            currentFootstep = new FootstepDataMessage(currentSide, new Point3d(), new Quat4d());
             qualifierType = Footstep.FootstepType.FULL_FOOTSTEP;
          }
          else
@@ -215,6 +215,8 @@ public class PathToFootstepGenerator
                currentFootstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
             }
             currentFootstep.setSwingHeight(swingHeight);
+
+            currentFootstep.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          }
 
          stepValid = validityMetric.footstepValid(initialSwingFoot, stanceFoot, currentFootstep);
@@ -239,7 +241,7 @@ public class PathToFootstepGenerator
          RobotSide squareUpSide = currentSide;
          stanceFoot = lastFeet.get(currentSide.getOppositeSide());
          initialSwingFoot = lastFeet.get(currentSide);
-         currentFootstep = new FootstepData(currentSide, new Point3d(), new Quat4d());
+         currentFootstep = new FootstepDataMessage(currentSide, new Point3d(), new Quat4d());
          qualifierType = Footstep.FootstepType.FULL_FOOTSTEP;
 
          nextFootDistance = Math.min(totalDistance, currentDistance + stepLength);
@@ -270,6 +272,7 @@ public class PathToFootstepGenerator
 
          if (stepValid)
          {
+            currentFootstep.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
             // footstep fine, add footstep
             footstepList.add(currentFootstep);
             lastFeet.put(currentFootstep.getRobotSide(), currentFootstep);
@@ -279,7 +282,7 @@ public class PathToFootstepGenerator
       return footstepList;
    }
 
-   protected boolean isGoalFootstep(FootstepData footstep, FramePose2d goalPose, double horizontalDistance)
+   protected boolean isGoalFootstep(FootstepDataMessage footstep, FramePose2d goalPose, double horizontalDistance)
    {
       RobotSide currentSide = footstep.getRobotSide();
       double currentYaw = RotationTools.computeYaw(footstep.getOrientation());
@@ -336,7 +339,7 @@ public class PathToFootstepGenerator
       return position;
    }
 
-   private double getYawForFoot(FootstepData stanceFoot, FramePose2d currentPose, FramePose2d nextPose, double maxYaw)
+   private double getYawForFoot(FootstepDataMessage stanceFoot, FramePose2d currentPose, FramePose2d nextPose, double maxYaw)
    {
       double stanceYaw = RotationTools.computeYaw(stanceFoot.getOrientation());
       double prospectiveYaw = currentPose.getYaw();

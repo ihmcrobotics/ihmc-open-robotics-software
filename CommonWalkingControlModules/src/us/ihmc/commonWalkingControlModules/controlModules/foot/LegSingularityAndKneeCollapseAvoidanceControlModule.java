@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -18,28 +19,27 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 public class LegSingularityAndKneeCollapseAvoidanceControlModule
 {
    private boolean visualize = true;
    private boolean moreVisualizers = true;
-   
+
    private static final boolean USE_SINGULARITY_AVOIDANCE_SWING = true; // Limit the swing foot motion according to the leg motion range.
    private static final boolean USE_KNEE_MECHANICAL_LIMIT_AVOIDANCE_SWING = true; // Limit the swing foot motion according to the knee flexion limit.
    private static final boolean USE_HIP_MECHANICAL_LIMIT_AVOIDANCE_SWING = false; // Limit the swing foot motion according to the hip flexion limit.
@@ -94,13 +94,13 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final DoubleYoVariable correctedDesiredLegLength;
 
    private final RigidBody pelvis;
-   
-   private final FrameVector unachievedSwingTranslationTemp = new FrameVector();   
-   private final FrameVector unachievedSwingVelocityTemp = new FrameVector(); 
+
+   private final FrameVector unachievedSwingTranslationTemp = new FrameVector();
+   private final FrameVector unachievedSwingVelocityTemp = new FrameVector();
    private final FrameVector unachievedSwingAccelerationTemp = new FrameVector();
-   
-   private final YoFrameVector unachievedSwingTranslation;   
-   private final YoFrameVector unachievedSwingVelocity; 
+
+   private final YoFrameVector unachievedSwingTranslation;
+   private final YoFrameVector unachievedSwingVelocity;
    private final YoFrameVector unachievedSwingAcceleration;
 
    private final FramePoint desiredCenterOfMassHeightPoint = new FramePoint(worldFrame);
@@ -108,7 +108,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final FrameVector equivalentDesiredHipPitchHeightTranslation = new FrameVector();
    private final FrameVector equivalentDesiredHipVelocity = new FrameVector();
    private final FrameVector equivalentDesiredHipPitchAcceleration = new FrameVector();
-   
+
    private final ReferenceFrame frameBeforeHipPitchJoint;
 
    private final Twist pelvisTwist = new Twist();
@@ -124,7 +124,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
    private final YoFrameVector yoDesiredFootLinearVelocity;
    private final YoFrameVector yoCorrectedDesiredFootLinearVelocity;
-   
+
    private final YoGraphicReferenceFrame virtualLegTangentialFrameHipCenteredGraphics, virtualLegTangentialFrameAnkleCenteredGraphics;
    private final YoGraphicPosition yoDesiredFootPositionGraphic, yoCorrectedDesiredFootPositionGraphic;
    private final YoGraphicVector yoDesiredFootLinearVelocityGraphic, yoCorrectedDesiredFootLinearVelocityGraphic;
@@ -136,7 +136,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final BooleanYoVariable isUnreachableFootstepCompensated;
    private final BooleanYoVariable doSmoothTransitionOutOfCollapseAvoidance;
    private final BooleanYoVariable doSmoothTransitionOutOfSingularityAvoidance;
-   
+
    private final DoubleYoVariable correctionAlphaFilter;
    private final AlphaFilteredYoVariable heightCorrectedFilteredForCollapseAvoidance;
    private final AlphaFilteredYoVariable heightVelocityCorrectedFilteredForCollapseAvoidance;
@@ -148,23 +148,22 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
    private final DoubleYoVariable yoUnachievedSwingTranslation;
    private final AlphaFilteredYoVariable unachievedSwingTranslationFiltered;
-   private final AlphaFilteredYoVariable unachievedSwingVelocityFiltered; 
+   private final AlphaFilteredYoVariable unachievedSwingVelocityFiltered;
    private final AlphaFilteredYoVariable unachievedSwingAccelerationFiltered;
 
    private final double controlDT;
    private final OneDoFJoint hipPitchJoint;
-   
+
    public LegSingularityAndKneeCollapseAvoidanceControlModule(String namePrefix, ContactablePlaneBody contactablePlaneBody, final RobotSide robotSide,
-         WalkingControllerParameters walkingControllerParameters, final MomentumBasedController momentumBasedController,
-         YoVariableRegistry parentRegistry)
+         WalkingControllerParameters walkingControllerParameters, final MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
-      
-      unachievedSwingTranslation = new YoFrameVector("unachievedSwingTranslation", ReferenceFrame.getWorldFrame(), registry);  
-      unachievedSwingVelocity = new YoFrameVector("unachievedSwingVelocity", ReferenceFrame.getWorldFrame(), registry);  
-      unachievedSwingAcceleration = new YoFrameVector("unachievedSwingAcceleration", ReferenceFrame.getWorldFrame(), registry);  
-      
+
+      unachievedSwingTranslation = new YoFrameVector("unachievedSwingTranslation", ReferenceFrame.getWorldFrame(), registry);
+      unachievedSwingVelocity = new YoFrameVector("unachievedSwingVelocity", ReferenceFrame.getWorldFrame(), registry);
+      unachievedSwingAcceleration = new YoFrameVector("unachievedSwingAcceleration", ReferenceFrame.getWorldFrame(), registry);
+
       maximumLegLength = new DoubleYoVariable(namePrefix + "MaxLegLength", registry);
       maximumLegLength.set(walkingControllerParameters.getLegLength());
 
@@ -180,7 +179,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       hipPitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH);
       frameBeforeHipPitchJoint = hipPitchJoint.getFrameBeforeJoint();
       endEffectorFrame = contactablePlaneBody.getFrameAfterParentJoint();
-      
+
       checkVelocityForSwingSingularityAvoidance = new BooleanYoVariable(namePrefix + "CheckVelocityForSwingSingularityAvoidance", registry);
 
       alphaSwingSingularityAvoidance = new DoubleYoVariable(namePrefix + "AlphaSwingSingularityAvoidance", registry);
@@ -190,7 +189,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       alphaCollapseAvoidance = new DoubleYoVariable(namePrefix + "AlphaCollapseAvoidance", registry);
       alphaUnreachableFootstep = new DoubleYoVariable(namePrefix + "AlphaUnreachableFootstep", registry);
       alphaUnreachableFootstep.set(0.25);
-      
+
       yoUnachievedSwingTranslation = new DoubleYoVariable(namePrefix + "UnachievedSwingTranslation", registry);
       unachievedSwingTranslationFiltered = new AlphaFilteredYoVariable(namePrefix + "UnachievedSwingTranslationFiltered", registry, alphaUnreachableFootstep);
       unachievedSwingVelocityFiltered = new AlphaFilteredYoVariable(namePrefix + "UnachievedSwingVelocityFiltered", registry, alphaUnreachableFootstep);
@@ -240,14 +239,20 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       }
 
       correctionAlphaFilter = new DoubleYoVariable(namePrefix + "CorrectionAlphaFilter", registry);
-      heightCorrectedFilteredForCollapseAvoidance = new AlphaFilteredYoVariable(namePrefix + "HeightCorrectedFilteredForCollapseAvoidance", registry, correctionAlphaFilter);
-      heightVelocityCorrectedFilteredForCollapseAvoidance = new AlphaFilteredYoVariable(namePrefix + "HeightVelocityCorrectedFilteredForCollapseAvoidance", registry, correctionAlphaFilter);
-      heightAcceleretionCorrectedFilteredForCollapseAvoidance = new AlphaFilteredYoVariable(namePrefix + "HeightAcceleretionCorrectedFilteredForCollapseAvoidance", registry, correctionAlphaFilter);
-      
-      heightCorrectedFilteredForSingularityAvoidance = new AlphaFilteredYoVariable(namePrefix + "HeightCorrectedFilteredForSingularityAvoidance", registry, correctionAlphaFilter);
-      heightVelocityCorrectedFilteredForSingularityAvoidance = new AlphaFilteredYoVariable(namePrefix + "HeightVelocityCorrectedFilteredForSingularityAvoidance", registry, correctionAlphaFilter);
-      heightAcceleretionCorrectedFilteredForSingularityAvoidance = new AlphaFilteredYoVariable(namePrefix + "HeightAcceleretionCorrectedFilteredForSingularityAvoidance", registry, correctionAlphaFilter);
-      
+      heightCorrectedFilteredForCollapseAvoidance = new AlphaFilteredYoVariable(namePrefix + "HeightCorrectedFilteredForCollapseAvoidance", registry,
+            correctionAlphaFilter);
+      heightVelocityCorrectedFilteredForCollapseAvoidance = new AlphaFilteredYoVariable(namePrefix + "HeightVelocityCorrectedFilteredForCollapseAvoidance",
+            registry, correctionAlphaFilter);
+      heightAcceleretionCorrectedFilteredForCollapseAvoidance = new AlphaFilteredYoVariable(
+            namePrefix + "HeightAcceleretionCorrectedFilteredForCollapseAvoidance", registry, correctionAlphaFilter);
+
+      heightCorrectedFilteredForSingularityAvoidance = new AlphaFilteredYoVariable(namePrefix + "HeightCorrectedFilteredForSingularityAvoidance", registry,
+            correctionAlphaFilter);
+      heightVelocityCorrectedFilteredForSingularityAvoidance = new AlphaFilteredYoVariable(
+            namePrefix + "HeightVelocityCorrectedFilteredForSingularityAvoidance", registry, correctionAlphaFilter);
+      heightAcceleretionCorrectedFilteredForSingularityAvoidance = new AlphaFilteredYoVariable(
+            namePrefix + "HeightAcceleretionCorrectedFilteredForSingularityAvoidance", registry, correctionAlphaFilter);
+
       correctionAlphaFilter.set(0.98);
 
       desiredPercentOfLegLength = new DoubleYoVariable(namePrefix + "DesiredPercentOfLegLength", registry);
@@ -292,7 +297,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             transformToParent.setTranslation(hipPitchToParentFrame);
          }
       };
-      
+
       virtualLegTangentialFrameAnkleCentered = new ReferenceFrame(namePrefix + "VirtualLegTangentialFrameAnkleCentered", pelvisFrame)
       {
          private static final long serialVersionUID = 2338083143740929570L;
@@ -318,7 +323,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             transformToParent.setTranslation(anklePitchToParentFrame);
          }
       };
-      
+
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       visualize = visualize && yoGraphicsListRegistry != null;
       moreVisualizers = visualize && moreVisualizers;
@@ -335,9 +340,11 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       if (visualize)
       {
-         yoDesiredFootPositionGraphic = new YoGraphicPosition(namePrefix + "DesiredFootPosition", yoDesiredFootPosition, 0.025, YoAppearance.Red(), GraphicType.BALL);
+         yoDesiredFootPositionGraphic = new YoGraphicPosition(namePrefix + "DesiredFootPosition", yoDesiredFootPosition, 0.025, YoAppearance.Red(),
+               GraphicType.BALL);
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", yoDesiredFootPositionGraphic);
-         yoCorrectedDesiredFootPositionGraphic = new YoGraphicPosition(namePrefix + "CorrectedDesiredFootPosition", yoCorrectedDesiredFootPosition, 0.025, YoAppearance.Green(), GraphicType.BALL);
+         yoCorrectedDesiredFootPositionGraphic = new YoGraphicPosition(namePrefix + "CorrectedDesiredFootPosition", yoCorrectedDesiredFootPosition, 0.025,
+               YoAppearance.Green(), GraphicType.BALL);
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", yoCorrectedDesiredFootPositionGraphic);
       }
       else
@@ -345,7 +352,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          yoDesiredFootPositionGraphic = null;
          yoCorrectedDesiredFootPositionGraphic = null;
       }
-      
+
       if (moreVisualizers)
       {
          virtualLegTangentialFrameHipCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameHipCentered, registry, 0.1);
@@ -353,9 +360,11 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", virtualLegTangentialFrameHipCenteredGraphics);
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", virtualLegTangentialFrameAnkleCenteredGraphics);
 
-         yoDesiredFootLinearVelocityGraphic = new YoGraphicVector(namePrefix + "DesiredFootLinearVelocity", yoCurrentFootPosition, yoDesiredFootLinearVelocity, 0.2, YoAppearance.Red());
+         yoDesiredFootLinearVelocityGraphic = new YoGraphicVector(namePrefix + "DesiredFootLinearVelocity", yoCurrentFootPosition, yoDesiredFootLinearVelocity,
+               0.2, YoAppearance.Red());
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", yoDesiredFootLinearVelocityGraphic);
-         yoCorrectedDesiredFootLinearVelocityGraphic = new YoGraphicVector(namePrefix + "CorrectedDesiredFootLinearVelocity", yoCurrentFootPosition, yoCorrectedDesiredFootLinearVelocity, 0.2, YoAppearance.Green());
+         yoCorrectedDesiredFootLinearVelocityGraphic = new YoGraphicVector(namePrefix + "CorrectedDesiredFootLinearVelocity", yoCurrentFootPosition,
+               yoCorrectedDesiredFootLinearVelocity, 0.2, YoAppearance.Green());
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", yoCorrectedDesiredFootLinearVelocityGraphic);
       }
       else
@@ -366,7 +375,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          yoCorrectedDesiredFootLinearVelocityGraphic = null;
       }
    }
-   
+
    public void update()
    {
       virtualLegTangentialFrameHipCentered.update();
@@ -419,14 +428,15 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       checkVelocityForSwingSingularityAvoidance.set(value);
    }
 
-   public void correctSwingFootTrajectory(FramePoint desiredFootPositionToCorrect, FrameVector desiredFootLinearVelocityToCorrect, FrameVector desiredFootLinearAccelerationToCorrect)
+   public void correctSwingFootTrajectory(FramePoint desiredFootPositionToCorrect, FrameVector desiredFootLinearVelocityToCorrect,
+         FrameVector desiredFootLinearAccelerationToCorrect)
    {
       isSwingSingularityAvoidanceUsed.set(false);
       alphaSwingSingularityAvoidance.set(0.0);
 
       isSwingMechanicalLimitAvoidanceUsed.set(false);
       alphaSwingKneeMechanicalLimitAvoidance.set(0.0);
-      
+
       yoDesiredFootPosition.set(desiredFootPositionToCorrect);
       yoDesiredFootLinearVelocity.set(desiredFootLinearVelocityToCorrect);
 
@@ -436,71 +446,78 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       anklePosition.changeFrame(virtualLegTangentialFrameHipCentered);
       currentLegLength.set(-anklePosition.getZ());
       currentPercentOfLegLength.set(currentLegLength.getDoubleValue() / maximumLegLength.getDoubleValue());
-      
+
       desiredFootPosition.setIncludingFrame(desiredFootPositionToCorrect);
       desiredFootLinearAcceleration.setIncludingFrame(desiredFootLinearAccelerationToCorrect);
       desiredFootLinearVelocity.setIncludingFrame(desiredFootLinearVelocityToCorrect);
-      
+
       desiredFootPosition.changeFrame(virtualLegTangentialFrameHipCentered);
       desiredFootLinearAcceleration.changeFrame(virtualLegTangentialFrameHipCentered);
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameHipCentered);
-      
+
       desiredLegLength.set(-desiredFootPosition.getZ());
       desiredPercentOfLegLength.set(desiredLegLength.getDoubleValue() / maximumLegLength.getDoubleValue());
       correctedDesiredLegLength.set(desiredLegLength.getDoubleValue());
       correctedDesiredPercentOfLegLength.set(desiredPercentOfLegLength.getDoubleValue());
 
       if (USE_KNEE_MECHANICAL_LIMIT_AVOIDANCE_SWING)
-         correctSwingFootTrajectoryForMechanicalLimitAvoidance(desiredFootPositionToCorrect, desiredFootLinearVelocityToCorrect, desiredFootLinearAccelerationToCorrect);
+         correctSwingFootTrajectoryForMechanicalLimitAvoidance(desiredFootPositionToCorrect, desiredFootLinearVelocityToCorrect,
+               desiredFootLinearAccelerationToCorrect);
       if (USE_SINGULARITY_AVOIDANCE_SWING)
-         correctSwingFootTrajectoryForSingularityAvoidance(desiredFootPositionToCorrect, desiredFootLinearVelocityToCorrect, desiredFootLinearAccelerationToCorrect);
+         correctSwingFootTrajectoryForSingularityAvoidance(desiredFootPositionToCorrect, desiredFootLinearVelocityToCorrect,
+               desiredFootLinearAccelerationToCorrect);
    }
 
-   private void correctSwingFootTrajectoryForMechanicalLimitAvoidance(FramePoint desiredFootPositionToCorrect, FrameVector desiredFootLinearVelocityToCorrect, FrameVector desiredFootLinearAccelerationToCorrect)
+   private void correctSwingFootTrajectoryForMechanicalLimitAvoidance(FramePoint desiredFootPositionToCorrect, FrameVector desiredFootLinearVelocityToCorrect,
+         FrameVector desiredFootLinearAccelerationToCorrect)
    {
       if (desiredPercentOfLegLength.getDoubleValue() > percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue())
          return;
-      
+
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
       twistCalculator.getTwistOfBody(pelvisTwist, pelvis);
-//      pelvisTwist.changeFrame(virtualLegTangentialFrameAnkleCentered);
+      //      pelvisTwist.changeFrame(virtualLegTangentialFrameAnkleCentered);
       pelvisTwist.getLinearPart(pelvisLinearVelocity);
       pelvisLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
-         
+
       isSwingMechanicalLimitAvoidanceUsed.set(true);
 
-      alphaSwingKneeMechanicalLimitAvoidance.set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue())
-            / (minMechanicalPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue()));
+      alphaSwingKneeMechanicalLimitAvoidance
+            .set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue())
+                  / (minMechanicalPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue()));
       alphaSwingKneeMechanicalLimitAvoidance.set(MathTools.clipToMinMax(alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue(), 0.0, 1.0));
 
-//      double desiredOrMinLegLength = - Math.max(desiredLegLength.getDoubleValue(), minimumLegLength.getDoubleValue());
-      double correctedDesiredPositionZ = ((1.0 - alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue()) * desiredLegLength.getDoubleValue() + alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue() * currentLegLength.getDoubleValue());
-      correctedDesiredPositionZ = - Math.max(correctedDesiredPositionZ, minimumLegLength.getDoubleValue());
-//      unachievedSwingTranslation.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, desiredFootPosition.getZ() - correctedDesiredPositionZ);
-//      unachievedSwingTranslation.changeFrame(worldFrame);
-//      yoUnachievedSwingTranslation.set(unachievedSwingTranslation.getZ());
+      //      double desiredOrMinLegLength = - Math.max(desiredLegLength.getDoubleValue(), minimumLegLength.getDoubleValue());
+      double correctedDesiredPositionZ = ((1.0 - alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue()) * desiredLegLength.getDoubleValue()
+            + alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue() * currentLegLength.getDoubleValue());
+      correctedDesiredPositionZ = -Math.max(correctedDesiredPositionZ, minimumLegLength.getDoubleValue());
+      //      unachievedSwingTranslation.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, desiredFootPosition.getZ() - correctedDesiredPositionZ);
+      //      unachievedSwingTranslation.changeFrame(worldFrame);
+      //      yoUnachievedSwingTranslation.set(unachievedSwingTranslation.getZ());
       desiredFootPosition.setZ(correctedDesiredPositionZ);
-      
+
       correctedDesiredLegLength.set(Math.abs(correctedDesiredPositionZ));
       correctedDesiredPercentOfLegLength.set(correctedDesiredLegLength.getDoubleValue() / maximumLegLength.getDoubleValue());
-      
-//      if (desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() < 0.0) // Check if desired velocity results in leg flexion
+
+      //      if (desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() < 0.0) // Check if desired velocity results in leg flexion
       {
          double desiredLinearVelocityX = desiredFootLinearVelocity.getX();
          double desiredLinearVelocityY = desiredFootLinearVelocity.getY();
          // Mix the desired leg extension velocity to progressively follow the pelvis velocity as the the leg is more straight
-         double desiredLinearVelocityZ = (1.0 - alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue()) * desiredFootLinearVelocity.getZ() + alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue() * pelvisLinearVelocity.getZ();
+         double desiredLinearVelocityZ = (1.0 - alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue()) * desiredFootLinearVelocity.getZ()
+               + alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue() * pelvisLinearVelocity.getZ();
 
-//         unachievedSwingVelocity.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, desiredFootLinearVelocity.getZ() - desiredLinearVelocityZ);
-         desiredFootLinearVelocity.setIncludingFrame(virtualLegTangentialFrameAnkleCentered, desiredLinearVelocityX, desiredLinearVelocityY, desiredLinearVelocityZ);
+         //         unachievedSwingVelocity.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, desiredFootLinearVelocity.getZ() - desiredLinearVelocityZ);
+         desiredFootLinearVelocity.setIncludingFrame(virtualLegTangentialFrameAnkleCentered, desiredLinearVelocityX, desiredLinearVelocityY,
+               desiredLinearVelocityZ);
       }
-//      desiredFootLinearVelocity.setToZero();
-//      if (desiredFootLinearAcceleration.getZ() < 0.0) // Check if desired acceleration results in leg extension
+      //      desiredFootLinearVelocity.setToZero();
+      //      if (desiredFootLinearAcceleration.getZ() < 0.0) // Check if desired acceleration results in leg extension
       {
-//         unachievedSwingAcceleration.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, alphaSwingMechanicalLimitAvoidance.getDoubleValue() * desiredFootLinearAcceleration.getZ());
+         //         unachievedSwingAcceleration.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, alphaSwingMechanicalLimitAvoidance.getDoubleValue() * desiredFootLinearAcceleration.getZ());
          desiredFootLinearAcceleration.setZ((1.0 - alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue()) * desiredFootLinearAcceleration.getZ());
       }
-//      desiredFootLinearAcceleration.setToZero();
+      //      desiredFootLinearAcceleration.setToZero();
 
       if (USE_HIP_MECHANICAL_LIMIT_AVOIDANCE_SWING)
       {
@@ -551,17 +568,18 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          yoCorrectedDesiredFootPositionGraphic.showGraphicObject();
          if (moreVisualizers)
          {
-         yoDesiredFootLinearVelocityGraphic.showGraphicObject();
-         yoCorrectedDesiredFootLinearVelocityGraphic.showGraphicObject();
+            yoDesiredFootLinearVelocityGraphic.showGraphicObject();
+            yoCorrectedDesiredFootLinearVelocityGraphic.showGraphicObject();
          }
       }
    }
 
-   private void correctSwingFootTrajectoryForSingularityAvoidance(FramePoint desiredFootPositionToCorrect, FrameVector desiredFootLinearVelocityToCorrect, FrameVector desiredFootLinearAccelerationToCorrect)
+   private void correctSwingFootTrajectoryForSingularityAvoidance(FramePoint desiredFootPositionToCorrect, FrameVector desiredFootLinearVelocityToCorrect,
+         FrameVector desiredFootLinearAccelerationToCorrect)
    {
       if (desiredPercentOfLegLength.getDoubleValue() < percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue())
          return;
-      
+
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
       twistCalculator.getTwistOfBody(pelvisTwist, pelvis);
       pelvisTwist.getLinearPart(pelvisLinearVelocity);
@@ -569,50 +587,57 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       if (checkVelocityForSwingSingularityAvoidance.getBooleanValue() && (desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() > -1e-10))
          return;
-         
+
       checkVelocityForSwingSingularityAvoidance.set(false);
       isSwingSingularityAvoidanceUsed.set(true);
-      
+
       alphaSwingSingularityAvoidance.set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue())
-            / (maxPercentOfLegLengthForSingularityAvoidanceInSwing.getDoubleValue() - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue()));
+            / (maxPercentOfLegLengthForSingularityAvoidanceInSwing.getDoubleValue()
+                  - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue()));
       alphaSwingSingularityAvoidance.set(MathTools.clipToMinMax(alphaSwingSingularityAvoidance.getDoubleValue(), 0.0, 1.0));
 
-      double desiredOrMaxLegLength = - Math.min(desiredLegLength.getDoubleValue(), maxPercentOfLegLengthForSingularityAvoidanceInSwing.getDoubleValue() * maximumLegLength.getDoubleValue());
+      double desiredOrMaxLegLength = -Math.min(desiredLegLength.getDoubleValue(),
+            maxPercentOfLegLengthForSingularityAvoidanceInSwing.getDoubleValue() * maximumLegLength.getDoubleValue());
       double correctedDesiredPositionZ = desiredOrMaxLegLength; //(1.0 - alphaSingularityAvoidance.getDoubleValue()) * desiredFootPosition.getZ() + alphaSingularityAvoidance.getDoubleValue() * desiredOrMaxLegLength;
-      
-      unachievedSwingTranslationTemp.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, desiredFootPosition.getZ() - correctedDesiredPositionZ);
+
+      unachievedSwingTranslationTemp.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0,
+            desiredFootPosition.getZ() - correctedDesiredPositionZ);
       unachievedSwingTranslationTemp.changeFrame(worldFrame);
       unachievedSwingTranslation.set(unachievedSwingTranslationTemp);
-      
+
       yoUnachievedSwingTranslation.set(unachievedSwingTranslation.getZ());
       desiredFootPosition.setZ(correctedDesiredPositionZ);
-      
+
       correctedDesiredLegLength.set(Math.abs(correctedDesiredPositionZ));
       correctedDesiredPercentOfLegLength.set(correctedDesiredLegLength.getDoubleValue() / maximumLegLength.getDoubleValue());
-      
-//      if (desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() < 0.0) // Check if desired velocity results in leg extension
+
+      //      if (desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() < 0.0) // Check if desired velocity results in leg extension
       {
          double desiredLinearVelocityX = desiredFootLinearVelocity.getX();
          double desiredLinearVelocityY = desiredFootLinearVelocity.getY();
          // Mix the desired leg extension velocity to progressively follow the pelvis velocity as the the leg is more straight
-         double desiredLinearVelocityZ = (1.0 - alphaSwingSingularityAvoidance.getDoubleValue()) * desiredFootLinearVelocity.getZ() + alphaSwingSingularityAvoidance.getDoubleValue() * pelvisLinearVelocity.getZ();
+         double desiredLinearVelocityZ = (1.0 - alphaSwingSingularityAvoidance.getDoubleValue()) * desiredFootLinearVelocity.getZ()
+               + alphaSwingSingularityAvoidance.getDoubleValue() * pelvisLinearVelocity.getZ();
 
-         unachievedSwingVelocityTemp.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, desiredFootLinearVelocity.getZ() - desiredLinearVelocityZ);
+         unachievedSwingVelocityTemp.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0,
+               desiredFootLinearVelocity.getZ() - desiredLinearVelocityZ);
          unachievedSwingVelocityTemp.changeFrame(worldFrame);
          unachievedSwingVelocity.set(unachievedSwingVelocityTemp);
-         
-         desiredFootLinearVelocity.setIncludingFrame(virtualLegTangentialFrameAnkleCentered, desiredLinearVelocityX, desiredLinearVelocityY, desiredLinearVelocityZ);
+
+         desiredFootLinearVelocity.setIncludingFrame(virtualLegTangentialFrameAnkleCentered, desiredLinearVelocityX, desiredLinearVelocityY,
+               desiredLinearVelocityZ);
       }
-      
-//      if (desiredFootLinearAcceleration.getZ() < 0.0) // Check if desired acceleration results in leg extension
+
+      //      if (desiredFootLinearAcceleration.getZ() < 0.0) // Check if desired acceleration results in leg extension
       {
-         unachievedSwingAccelerationTemp.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, alphaSwingSingularityAvoidance.getDoubleValue() * desiredFootLinearAcceleration.getZ());
+         unachievedSwingAccelerationTemp.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0,
+               alphaSwingSingularityAvoidance.getDoubleValue() * desiredFootLinearAcceleration.getZ());
          unachievedSwingAccelerationTemp.changeFrame(worldFrame);
          unachievedSwingAcceleration.set(unachievedSwingAccelerationTemp);
-         
+
          desiredFootLinearAcceleration.setZ((1.0 - alphaSwingSingularityAvoidance.getDoubleValue()) * desiredFootLinearAcceleration.getZ());
       }
-      
+
       desiredFootPosition.changeFrame(desiredFootPositionToCorrect.getReferenceFrame());
       desiredFootLinearVelocity.changeFrame(desiredFootLinearVelocityToCorrect.getReferenceFrame());
       desiredFootLinearAcceleration.changeFrame(desiredFootLinearAccelerationToCorrect.getReferenceFrame());
@@ -636,15 +661,15 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForSupportLeg(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
-         double zCurrent, ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
+   public void correctCoMHeightTrajectoryForSupportLeg(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
+         ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
    {
       correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent, pelvisZUpFrame, constraintType);
-      
+
       if (!isSupportSingularityAvoidanceUsed.getBooleanValue())
          correctCoMHeightTrajectoryForCollapseAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent, pelvisZUpFrame, footLoadPercentage, constraintType);
    }
-   
+
    public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
          double zCurrent, ReferenceFrame pelvisZUpFrame, ConstraintType constraintType)
    {
@@ -655,7 +680,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          doSmoothTransitionOutOfSingularityAvoidance.set(false);
          return;
       }
-      
+
       comHeightDataToCorrect.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCenterOfMassHeightPoint.changeFrame(worldFrame);
       equivalentDesiredHipPitchHeightTranslation.setIncludingFrame(worldFrame, 0.0, 0.0, desiredCenterOfMassHeightPoint.getZ() - zCurrent);
@@ -682,7 +707,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          if (!isSupportSingularityAvoidanceUsed.getBooleanValue())
             return;
       }
-      
+
       if (isSupportSingularityAvoidanceUsed.getBooleanValue() || doSmoothTransitionOutOfSingularityAvoidance.getBooleanValue())
       {
          if (desiredPercentOfLegLength.getDoubleValue() < percentOfLegLengthThresholdToDisableSingularityAvoidance.getDoubleValue())
@@ -694,7 +719,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             }
          }
       }
-      
+
       // Check if the leg is extended such as the trajectory needs to be corrected
       if (desiredPercentOfLegLength.getDoubleValue() < percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue())
       {
@@ -706,7 +731,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          isSupportSingularityAvoidanceUsed.set(true);
          doSmoothTransitionOutOfSingularityAvoidance.set(false);
          timeSwitchSingularityAvoidance.set(yoTime.getDoubleValue());
-         
+
          heightCorrectedFilteredForSingularityAvoidance.reset();
          heightVelocityCorrectedFilteredForSingularityAvoidance.reset();
          heightAcceleretionCorrectedFilteredForSingularityAvoidance.reset();
@@ -721,10 +746,11 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          heightVelocityCorrectedFilteredForSingularityAvoidance.set(comHeightDataToCorrect.getComHeightVelocity());
          heightAcceleretionCorrectedFilteredForSingularityAvoidance.set(comHeightDataToCorrect.getComHeightAcceleration());
 
-         comHeightDataToCorrect.setComHeight(desiredCenterOfMassHeightPoint.getReferenceFrame(), heightCorrectedFilteredForSingularityAvoidance.getDoubleValue());
+         comHeightDataToCorrect.setComHeight(desiredCenterOfMassHeightPoint.getReferenceFrame(),
+               heightCorrectedFilteredForSingularityAvoidance.getDoubleValue());
          comHeightDataToCorrect.setComHeightVelocity(heightVelocityCorrectedFilteredForSingularityAvoidance.getDoubleValue());
          comHeightDataToCorrect.setComHeightAcceleration(heightAcceleretionCorrectedFilteredForSingularityAvoidance.getDoubleValue());
-         
+
          if (Math.abs(desiredCenterOfMassHeightPoint.getZ() - heightCorrectedFilteredForSingularityAvoidance.getDoubleValue()) <= 5e-3)
          {
             alphaSupportSingularityAvoidance.set(0.0);
@@ -740,14 +766,17 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       anklePosition.changeFrame(virtualLegTangentialFrameHipCentered);
       currentLegLength.set(-anklePosition.getZ());
       currentPercentOfLegLength.set(currentLegLength.getDoubleValue() / maximumLegLength.getDoubleValue());
-      
-      alphaSupportSingularityAvoidance.set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue())
-            / (maxPercentOfLegLengthForSingularityAvoidanceInSupport.getDoubleValue() - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue()));
+
+      alphaSupportSingularityAvoidance
+            .set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue())
+                  / (maxPercentOfLegLengthForSingularityAvoidanceInSupport.getDoubleValue()
+                        - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue()));
       alphaSupportSingularityAvoidance.set(MathTools.clipToMinMax(alphaSupportSingularityAvoidance.getDoubleValue(), 0.0, 1.0));
 
-      double desiredOrMaxLegLength = Math.min(desiredLegLength.getDoubleValue(), maxPercentOfLegLengthForSingularityAvoidanceInSupport.getDoubleValue() * maximumLegLength.getDoubleValue());
+      double desiredOrMaxLegLength = Math.min(desiredLegLength.getDoubleValue(),
+            maxPercentOfLegLengthForSingularityAvoidanceInSupport.getDoubleValue() * maximumLegLength.getDoubleValue());
       double correctedDesiredTranslationZ = desiredOrMaxLegLength - currentLegLength.getDoubleValue();
-//      double correctedDesiredTranslationZ = (1.0 - alphaSingularityAvoidance.getDoubleValue()) * equivalentDesiredHipPitchHeightTranslation.getZ() + alphaSingularityAvoidance.getDoubleValue() * (desiredOrMaxLegLength - currentLegLength.getDoubleValue());
+      //      double correctedDesiredTranslationZ = (1.0 - alphaSingularityAvoidance.getDoubleValue()) * equivalentDesiredHipPitchHeightTranslation.getZ() + alphaSingularityAvoidance.getDoubleValue() * (desiredOrMaxLegLength - currentLegLength.getDoubleValue());
       equivalentDesiredHipPitchHeightTranslation.setZ(correctedDesiredTranslationZ);
       equivalentDesiredHipPitchHeightTranslation.changeFrame(worldFrame);
 
@@ -758,7 +787,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
       comHeightDataToCorrect.setComHeight(desiredCenterOfMassHeightPoint.getReferenceFrame(), heightCorrectedFilteredForSingularityAvoidance.getDoubleValue());
 
-//      if (equivalentDesiredHipVelocity.getZ() > 0.0) // Check if desired velocity results in leg extension
+      //      if (equivalentDesiredHipVelocity.getZ() > 0.0) // Check if desired velocity results in leg extension
       {
          equivalentDesiredHipVelocity.setZ((1.0 - alphaSupportSingularityAvoidance.getDoubleValue()) * equivalentDesiredHipVelocity.getZ());
          equivalentDesiredHipVelocity.changeFrame(pelvisZUpFrame);
@@ -769,7 +798,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          comHeightDataToCorrect.setComHeightVelocity(heightVelocityCorrectedFilteredForSingularityAvoidance.getDoubleValue());
       }
 
-//      if (equivalentDesiredHipPitchAcceleration.getZ() > 0.0) // Check if desired acceleration results in leg extension
+      //      if (equivalentDesiredHipPitchAcceleration.getZ() > 0.0) // Check if desired acceleration results in leg extension
       {
          equivalentDesiredHipPitchAcceleration.setZ((1.0 - alphaSupportSingularityAvoidance.getDoubleValue()) * equivalentDesiredHipPitchAcceleration.getZ());
          equivalentDesiredHipPitchAcceleration.changeFrame(worldFrame);
@@ -777,9 +806,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          comHeightDataToCorrect.setComHeightAcceleration(heightAcceleretionCorrectedFilteredForSingularityAvoidance.getDoubleValue());
       }
    }
-   
-   public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
-         double zCurrent, ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
+
+   public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
+         ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
    {
       if (!USE_COLLAPSE_AVOIDANCE)
       {
@@ -788,7 +817,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          doSmoothTransitionOutOfCollapseAvoidance.set(false);
          return;
       }
-      
+
       comHeightDataToCorrect.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCenterOfMassHeightPoint.changeFrame(worldFrame);
       equivalentDesiredHipPitchHeightTranslation.setIncludingFrame(worldFrame, 0.0, 0.0, desiredCenterOfMassHeightPoint.getZ() - zCurrent);
@@ -813,11 +842,11 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       {
          alphaCollapseAvoidance.set(0.0);
          doSmoothTransitionOutOfCollapseAvoidance.set(isSupportCollapseAvoidanceUsed.getBooleanValue());
-         timeRemainingToDisableCollapseAvoidance.set(0.0);	
+         timeRemainingToDisableCollapseAvoidance.set(0.0);
          if (!isSupportCollapseAvoidanceUsed.getBooleanValue())
             return;
       }
-      
+
       if (!isSupportCollapseAvoidanceUsed.getBooleanValue() && !doSmoothTransitionOutOfCollapseAvoidance.getBooleanValue())
       {
          if (footLoadPercentage < footLoadThresholdToEnableCollapseAvoidance.getDoubleValue())
@@ -838,7 +867,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          timeRemainingToDisableCollapseAvoidance.set(timeDelayToDisableCollapseAvoidance.getDoubleValue());
          doSmoothTransitionOutOfCollapseAvoidance.set(false);
       }
-      
+
       // Check if there is a risk that the support knee collapse
       if (desiredPercentOfLegLength.getDoubleValue() > percentOfLegLengthThresholdForCollapseAvoidance.getDoubleValue())
       {
@@ -854,7 +883,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          doSmoothTransitionOutOfCollapseAvoidance.set(false);
          timeRemainingToDisableCollapseAvoidance.set(timeDelayToDisableCollapseAvoidance.getDoubleValue());
          timeSwitchCollapseAvoidance.set(yoTime.getDoubleValue());
-         
+
          heightCorrectedFilteredForCollapseAvoidance.reset();
          heightVelocityCorrectedFilteredForCollapseAvoidance.reset();
          heightAcceleretionCorrectedFilteredForCollapseAvoidance.reset();
@@ -862,7 +891,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          heightVelocityCorrectedFilteredForCollapseAvoidance.update(comHeightDataToCorrect.getComHeightVelocity());
          heightAcceleretionCorrectedFilteredForCollapseAvoidance.update(comHeightDataToCorrect.getComHeightAcceleration());
       }
-      
+
       if (doSmoothTransitionOutOfCollapseAvoidance.getBooleanValue())
       {
          heightCorrectedFilteredForCollapseAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
@@ -872,7 +901,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          comHeightDataToCorrect.setComHeight(desiredCenterOfMassHeightPoint.getReferenceFrame(), heightCorrectedFilteredForCollapseAvoidance.getDoubleValue());
          comHeightDataToCorrect.setComHeightVelocity(heightVelocityCorrectedFilteredForCollapseAvoidance.getDoubleValue());
          comHeightDataToCorrect.setComHeightAcceleration(heightAcceleretionCorrectedFilteredForCollapseAvoidance.getDoubleValue());
-         
+
          if (Math.abs(desiredCenterOfMassHeightPoint.getZ() - heightCorrectedFilteredForCollapseAvoidance.getDoubleValue()) <= 5e-3)
          {
             alphaCollapseAvoidance.set(0.0);
@@ -888,16 +917,17 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       anklePosition.changeFrame(virtualLegTangentialFrameHipCentered);
       currentLegLength.set(-anklePosition.getZ());
       currentPercentOfLegLength.set(currentLegLength.getDoubleValue() / maximumLegLength.getDoubleValue());
-      
+
       alphaCollapseAvoidance.set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdForCollapseAvoidance.getDoubleValue())
             / (minPercentOfLegLengthForCollapseAvoidance.getDoubleValue() - percentOfLegLengthThresholdForCollapseAvoidance.getDoubleValue()));
       alphaCollapseAvoidance.set(MathTools.clipToMinMax(alphaCollapseAvoidance.getDoubleValue(), 0.0, 1.0));
 
-      double desiredOrMinLegLength = Math.max(desiredLegLength.getDoubleValue(), minPercentOfLegLengthForCollapseAvoidance.getDoubleValue() * maximumLegLength.getDoubleValue());
+      double desiredOrMinLegLength = Math.max(desiredLegLength.getDoubleValue(),
+            minPercentOfLegLengthForCollapseAvoidance.getDoubleValue() * maximumLegLength.getDoubleValue());
       double correctedDesiredTranslationZ = desiredOrMinLegLength - currentLegLength.getDoubleValue(); //(1.0 - alphaCollapseAvoidance.getDoubleValue()) * equivalentDesiredHipPitchHeightTranslation.getZ() + alphaCollapseAvoidance.getDoubleValue() * (desiredOrMinLegLength - currentLegLength.getDoubleValue());
       equivalentDesiredHipPitchHeightTranslation.setZ(correctedDesiredTranslationZ);
       equivalentDesiredHipPitchHeightTranslation.changeFrame(worldFrame);
-      
+
       correctedDesiredLegLength.set(correctedDesiredTranslationZ + currentLegLength.getDoubleValue());
       correctedDesiredPercentOfLegLength.set(correctedDesiredLegLength.getDoubleValue() / maximumLegLength.getDoubleValue());
 
@@ -934,17 +964,17 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          heightAcceleretionCorrectedFilteredForCollapseAvoidance.update(comHeightDataToCorrect.getComHeightAcceleration());
       }
    }
-   
+
    public void correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesData comHeightDataToCorrect, ConstraintType constraintType)
    {
       isUnreachableFootstepCompensated.set(false);
-      
+
       if (!USE_UNREACHABLE_FOOTSTEP_CORRECTION)
          return;
 
-      if (constraintType != ConstraintType.SWING && constraintType != ConstraintType.MOVE_STRAIGHT)
+      if (constraintType != ConstraintType.SWING && constraintType != ConstraintType.MOVE_VIA_WAYPOINTS)
          return;
-      
+
       comHeightDataToCorrect.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCenterOfMassHeightPoint.changeFrame(worldFrame);
 
@@ -954,13 +984,13 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          unachievedSwingTranslationFiltered.update(unachievedSwingTranslation.getZ());
          desiredCenterOfMassHeightPoint.setZ(desiredCenterOfMassHeightPoint.getZ() + unachievedSwingTranslationFiltered.getDoubleValue());
          if (USE_UNREACHABLE_FOOTSTEP_CORRECTION_ON_POSITION)
-        	 comHeightDataToCorrect.setComHeight(worldFrame, desiredCenterOfMassHeightPoint.getZ());
+            comHeightDataToCorrect.setComHeight(worldFrame, desiredCenterOfMassHeightPoint.getZ());
       }
       else
       {
          unachievedSwingTranslationFiltered.set(0.0);
       }
-      
+
       if (unachievedSwingVelocity.getZ() < 0.0)
       {
          unachievedSwingVelocityFiltered.update(unachievedSwingVelocity.getZ());
@@ -970,11 +1000,12 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       {
          unachievedSwingVelocityFiltered.set(0.0);
       }
-      
+
       if (unachievedSwingAcceleration.getZ() < 0.0)
       {
          unachievedSwingAccelerationFiltered.update(unachievedSwingAcceleration.getZ());
-         comHeightDataToCorrect.setComHeightAcceleration(comHeightDataToCorrect.getComHeightAcceleration() + unachievedSwingAccelerationFiltered.getDoubleValue());
+         comHeightDataToCorrect
+               .setComHeightAcceleration(comHeightDataToCorrect.getComHeightAcceleration() + unachievedSwingAccelerationFiltered.getDoubleValue());
       }
       else
       {

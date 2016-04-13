@@ -8,22 +8,12 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -36,21 +26,16 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
-public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
+public class ScriptBasedFootstepProvider implements Updatable
 {
    private int footstepCounter = 0;
    private int completedFootstepCount = 0;
 
-   private final SideDependentList<ContactablePlaneBody> bipedFeet;
+   private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
    private final ScriptFileLoader scriptFileLoader;
    private boolean loadedScriptFile = false;
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
 
-   private final DesiredHandPoseProvider desiredHandPoseProvider;
-   private final DesiredPelvisPoseProvider desiredPelvisPoseProvider;
-   private final DesiredHandstepProvider handstepProvider;
-   private final DesiredComHeightProvider desiredComHeightProvider;
-   private final DesiredFootPoseProvider desiredFootPoseProvider;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
 
    private final DoubleYoVariable time;
@@ -58,7 +43,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 
    private final FullRobotModel fullRobotModel;
 
-   public ScriptBasedFootstepProvider(CommonHumanoidReferenceFrames referenceFrames, ScriptFileLoader scriptFileLoader, DoubleYoVariable time, SideDependentList<ContactablePlaneBody> bipedFeet,
+   public ScriptBasedFootstepProvider(CommonHumanoidReferenceFrames referenceFrames, ScriptFileLoader scriptFileLoader, DoubleYoVariable time, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
          FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters, YoVariableRegistry registry)
    {
       this.time = time;
@@ -69,12 +54,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       this.scriptEventDuration = new DoubleYoVariable("scriptEventDuration", registry);
 
       this.scriptFileLoader = scriptFileLoader;
-      desiredHandPoseProvider = new DesiredHandPoseProvider(referenceFrames,fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), null);
-      desiredPelvisPoseProvider = new DesiredPelvisPoseProvider();
-      handstepProvider = new DesiredHandstepProvider(fullRobotModel);
-      desiredComHeightProvider = new DesiredComHeightProvider(null);
 
-      desiredFootPoseProvider = new DesiredFootPoseProvider(walkingControllerParameters.getDefaultSwingTime(), null);
    }
 
    private void loadScriptFileIfNecessary()
@@ -111,44 +91,51 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       ScriptObject nextObject = scriptObjects.poll();
       Object scriptObject = nextObject.getScriptObject();
 
-      if (scriptObject instanceof FootstepDataList)
+      if (scriptObject instanceof FootstepDataListMessage)
       {
-         FootstepDataList footstepDataList = (FootstepDataList) scriptObject;
+         FootstepDataListMessage footstepDataList = (FootstepDataListMessage) scriptObject;
          this.addFootstepDataList(footstepDataList);
          setupTimesForNewScriptEvent(0.5); // Arbitrary half second duration. With footsteps, it waits till they are done before looking for a new command.
       }
-      else if (scriptObject instanceof FootPosePacket)
+//      else if (scriptObject instanceof FootTrajectoryMessage)
+//      {
+//         FootTrajectoryMessage message = (FootTrajectoryMessage) scriptObject;
+//         footTrajectoryMessageSubscriber.receivedPacket(message);
+//         setupTimesForNewScriptEvent(0.5);
+//      }
+//      else if (scriptObject instanceof HandTrajectoryMessage)
+//      {
+//         HandTrajectoryMessage handTrajectoryMessage = (HandTrajectoryMessage) scriptObject;
+//         handTrajectoryMessageSubscriber.receivedPacket(handTrajectoryMessage);
+//
+//         setupTimesForNewScriptEvent(handTrajectoryMessage.getLastTrajectoryPoint().time);
+//      }
+//      else if (scriptObject instanceof ArmTrajectoryMessage)
+//      {
+//         ArmTrajectoryMessage armTrajectoryMessage = (ArmTrajectoryMessage) scriptObject;
+//         armTrajectoryMessageSubscriber.receivedPacket(armTrajectoryMessage);
+//         
+//         setupTimesForNewScriptEvent(armTrajectoryMessage.getTrajectoryTime());
+//      }
+//      else if (scriptObject instanceof PelvisTrajectoryMessage)
+//      {
+//         PelvisTrajectoryMessage pelvisPosePacket = (PelvisTrajectoryMessage) scriptObject;
+//         pelvisTrajectoryMessageSubscriber.receivedPacket(pelvisPosePacket);
+//
+//         setupTimesForNewScriptEvent(pelvisPosePacket.getTrajectoryTime());
+//      }
+      else if (scriptObject instanceof PauseWalkingMessage)
       {
-         FootPosePacket footPosePacket = (FootPosePacket) scriptObject;
-         desiredFootPoseProvider.receivedPacket(footPosePacket);
+         PauseWalkingMessage pauseCommand = (PauseWalkingMessage) scriptObject;
          setupTimesForNewScriptEvent(0.5);
       }
-      else if (scriptObject instanceof HandPosePacket)
-      {
-         HandPosePacket handPosePacket = (HandPosePacket) scriptObject;
-         desiredHandPoseProvider.receivedPacket(handPosePacket);
 
-         setupTimesForNewScriptEvent(handPosePacket.getTrajectoryTime());
-      }
-      else if (scriptObject instanceof PelvisPosePacket)
-      {
-         PelvisPosePacket pelvisPosePacket = (PelvisPosePacket) scriptObject;
-         desiredPelvisPoseProvider.getPelvisPosePacketConsumer().receivedPacket(pelvisPosePacket);
-
-         setupTimesForNewScriptEvent(pelvisPosePacket.getTrajectoryTime());
-      }
-      else if (scriptObject instanceof PauseCommand)
-      {
-         PauseCommand pauseCommand = (PauseCommand) scriptObject;
-         setupTimesForNewScriptEvent(0.5);
-      }
-
-      else if (scriptObject instanceof ComHeightPacket)
-      {
-         ComHeightPacket comHeightPacket = (ComHeightPacket) scriptObject;
-         desiredComHeightProvider.getComHeightPacketConsumer().receivedPacket(comHeightPacket);
-         setupTimesForNewScriptEvent(2.0); // Arbitrary two second duration to allow for changing the CoM height. Might be possible to lower this a little bit. 
-      }
+//      else if (scriptObject instanceof PelvisHeightTrajectoryMessage)
+//      {
+//         PelvisHeightTrajectoryMessage comHeightPacket = (PelvisHeightTrajectoryMessage) scriptObject;
+//         pelvisHeightTrajectoryMessageSubscriber.receivedPacket(comHeightPacket);
+//         setupTimesForNewScriptEvent(2.0); // Arbitrary two second duration to allow for changing the CoM height. Might be possible to lower this a little bit. 
+//      }
    }
 
    private void setupTimesForNewScriptEvent(double scriptEventDuration)
@@ -157,12 +144,12 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       this.scriptEventDuration.set(scriptEventDuration);
    }
 
-   private void addFootstepDataList(FootstepDataList footstepDataList)
+   private void addFootstepDataList(FootstepDataListMessage footstepDataList)
    {
-      ArrayList<FootstepData> footstepList = footstepDataList.getDataList();
+      ArrayList<FootstepDataMessage> footstepList = footstepDataList.getDataList();
 
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
-      for (FootstepData footstepData : footstepList)
+      for (FootstepDataMessage footstepData : footstepList)
       {
          RobotSide robotSide = footstepData.getRobotSide();
          ContactablePlaneBody contactableBody = bipedFeet.get(robotSide);
@@ -180,19 +167,16 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       footstepQueue.addAll(footsteps);
    }
 
-   @Override
    public Footstep poll()
    {
       return footstepQueue.poll();
    }
 
-   @Override
    public Footstep peek()
    {
       return footstepQueue.peek();
    }
 
-   @Override
    public Footstep peekPeek()
    {
       Iterator<Footstep> iterator = footstepQueue.iterator();
@@ -215,58 +199,28 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       }
    }
 
-   @Override
    public boolean isEmpty()
    {
       return footstepQueue.isEmpty();
    }
 
-   @Override
    public void notifyComplete(FramePose actualFootPoseInWorld)
    {
       completedFootstepCount++;
    }
 
-   @Override
    public void notifyWalkingComplete()
    {
    }
 
-   @Override
    public int getNumberOfFootstepsToProvide()
    {
       return footstepQueue.size();
    }
 
-   @Override
    public boolean isBlindWalking()
    {
       return false;
-   }
-
-   public DesiredHandPoseProvider getDesiredHandPoseProvider()
-   {
-      return desiredHandPoseProvider;
-   }
-
-   public DesiredPelvisPoseProvider getDesiredPelvisPoseProvider()
-   {
-      return desiredPelvisPoseProvider;
-   }
-
-   public DesiredComHeightProvider getDesiredComHeightProvider()
-   {
-      return desiredComHeightProvider;
-   }
-
-   public DesiredFootPoseProvider getDesiredFootPoseProvider()
-   {
-      return desiredFootPoseProvider;
-   }
-
-   public DesiredHandstepProvider getDesiredHandstepProvider()
-   {
-      return handstepProvider;
    }
 
    @Override
@@ -275,13 +229,11 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       grabNewScriptEventIfNecessary();
    }
 
-   @Override
    public boolean isPaused()
    {
       return false;
    }
 
-   @Override
    public void cancelPlan()
    {
       footstepQueue.clear();

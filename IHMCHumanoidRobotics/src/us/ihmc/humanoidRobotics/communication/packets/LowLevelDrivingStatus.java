@@ -6,12 +6,12 @@ public class LowLevelDrivingStatus extends Packet<LowLevelDrivingStatus>
 {
    public LowLevelDrivingAction action;
    public boolean success;
-   
+
    public LowLevelDrivingStatus()
    {
-      
+
    }
-   
+
    public LowLevelDrivingStatus(LowLevelDrivingAction action, boolean success)
    {
       this.action = action;
@@ -37,10 +37,11 @@ public class LowLevelDrivingStatus extends Packet<LowLevelDrivingStatus>
    {
       this.success = success;
    }
-   
+
+   @Override
    public boolean equals(Object other)
    {
-      if(other instanceof LowLevelDrivingStatus)
+      if (other instanceof LowLevelDrivingStatus)
       {
          return isSuccess() == ((LowLevelDrivingStatus) other).isSuccess() && getAction() == ((LowLevelDrivingStatus) other).getAction();
       }
@@ -55,6 +56,5 @@ public class LowLevelDrivingStatus extends Packet<LowLevelDrivingStatus>
    {
       return equals(other);
    }
-   
-   
+
 }

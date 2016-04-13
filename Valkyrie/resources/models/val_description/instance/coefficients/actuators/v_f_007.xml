@@ -18,7 +18,7 @@
         <Coeff id="JointSensors_MotorPosition" value="1.0" />
         <Coeff id="JointSensors_OutputForce" value="2.0" />
         <Coeff id="JointSensors_OutputPosition" value="2.0" />
-        <Coeff id="JointSensors_OutputVelocity" value="3.0" />
+        <Coeff id="JointSensors_OutputVelocity" value="4.0" />
         <Coeff description="" id="PositionControl_Kp" value="400.0" />
         <Coeff description="" id="PositionControl_Kd" value="1.0" />
         <Coeff description="" id="PositionControl_Kd_fc_Hz" value="200" />
@@ -28,6 +28,6 @@
         <Coeff description="" id="SpringAPS_BitOffset" value="537711600" />
         <Coeff description="" id="SpringAPS_MountingGain" value="-1.0" />
         <Coeff id="TorqueControl_MotorTorqueDirection" value="1.0" />
-        <Coeff id="TorqueOffset_Nm" value="0.0" />
+        <Coeff id="TorqueOffset_Nm" value="0.365839277062" />
     </Coeffs>
 </CoeffData>

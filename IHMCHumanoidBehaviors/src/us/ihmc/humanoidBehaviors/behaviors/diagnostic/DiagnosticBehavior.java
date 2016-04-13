@@ -14,47 +14,43 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidArmPose;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.TurnInPlaceBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspCylinderBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.midLevel.RotateHandAboutAxisBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisOrientationTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.FootPoseTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootstepListTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootstepTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseListTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.RotateHandAboutAxisTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.PelvisHeightTrajectoryTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.PelvisOrientationTrajectoryTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.PelvisTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.GraspCylinderPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPoseListPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
-import us.ihmc.humanoidRobotics.communication.util.PacketControllerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -62,7 +58,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -73,13 +68,14 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
+import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DCalculator;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -92,13 +88,11 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.taskExecutor.NullTask;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.wholeBodyController.diagnostics.HumanoidArmPose;
 
 public class DiagnosticBehavior extends BehaviorInterface
 {
@@ -119,17 +113,19 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final DoubleYoVariable timeToWaitBeforeEnable;
    private final BooleanYoVariable enableHandOrientation;
 
-   private final SideDependentList<HandPoseBehavior> handPoseBehaviors = new SideDependentList<>();
-   private final SideDependentList<HandPoseListBehavior> handPoseListBehaviors = new SideDependentList<>();
-   private final FootPoseBehavior footPoseBehavior;
-   private final ChestOrientationBehavior chestOrientationBehavior;
-   private final PelvisPoseBehavior pelvisPoseBehavior;
+   private final SideDependentList<ArmTrajectoryBehavior> armTrajectoryBehaviors = new SideDependentList<>();
+   private final SideDependentList<HandTrajectoryBehavior> handTrajectoryBehaviors = new SideDependentList<>();
+   private final SideDependentList<GoHomeBehavior> armGoHomeBehaviors = new SideDependentList<>();
+   private final FootTrajectoryBehavior footPoseBehavior;
+   private final ChestTrajectoryBehavior chestTrajectoryBehavior;
+   private final GoHomeBehavior chestGoHomeBehavior;
+   private final PelvisTrajectoryBehavior pelvisTrajectoryBehavior;
+   private final PelvisOrientationTrajectoryBehavior pelvisOrientationTrajectoryBehavior;
+   private final GoHomeBehavior pelvisGoHomeBehavior;
    private final FootstepListBehavior footstepListBehavior;
    private final WalkToLocationBehavior walkToLocationBehavior;
-   private final ComHeightBehavior comHeightBehavior;
+   private final PelvisHeightTrajectoryBehavior pelvisHeightTrajectoryBehavior;
    private final TurnInPlaceBehavior turnInPlaceBehavior;
-   private final GraspCylinderBehavior graspCylinderBehavior;
-   private final RotateHandAboutAxisBehavior rotateHandAboutAxisBehavior;
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable trajectoryTime, flyingTrajectoryTime;
@@ -195,7 +191,6 @@ public class DiagnosticBehavior extends BehaviorInterface
       TURN_IN_PLACE_SEQUENCE,
       TURN_IN_PLACE_ANGLE,
       FEET_SQUARE_UP,
-      TURN_WHEEL,
       CUTE_WAVE,
       HAND_SHAKE_PREP,
       HAND_SHAKE_SHAKE,
@@ -242,26 +237,6 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private final DoubleYoVariable pelvisOrientationScaleFactor = new DoubleYoVariable("diagnosticBehaviorPelvisOrientationScaleFactor", registry);
    private final DoubleYoVariable bootyShakeTime = new DoubleYoVariable("diagnosticBehaviorButtyShakeTime", registry);
-
-   private final YoFramePoint steeringWheelCenter;
-   private final YoFramePose steeringWheelPose;
-   private final YoFrameOrientation steeringWheelOrientation;
-   private final BooleanYoVariable steeringWheelResetPose;
-   /**
-    * The axis of rotation of the steering wheel is defined as (0.0, 0.0, 1.0) in its frame.
-    * This frame is updated automatically based {@link #steeringWheelCenter} and {@link #steeringWheelOrientation}.
-    */
-   private final ReferenceFrame steeringWheelFrame;
-   private final DoubleYoVariable steeringWheelRadius;
-   private final int numberOfBalls = 50;
-   private final BagOfBalls steeringWheelVisualization;
-   private final BooleanYoVariable showSteeringWheel;
-   private final DoubleYoVariable steeringWheelInitialAngle;
-   private final DoubleYoVariable steeringWheelFinalAngle;
-   private final YoFramePoint steeringWheelInitialPosition;
-   private final YoFramePoint steeringWheelFinalPosition;
-   private final BooleanYoVariable steeringWheelControlRotationAxis;
-   private final BooleanYoVariable steeringWheelExecuteGraspingFirst;
 
    public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
          DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
@@ -344,20 +319,29 @@ public class DiagnosticBehavior extends BehaviorInterface
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
       registry.addChild(walkToLocationBehavior.getYoVariableRegistry());
 
-      chestOrientationBehavior = new ChestOrientationBehavior(outgoingCommunicationBridge, yoTime);
-      registry.addChild(chestOrientationBehavior.getYoVariableRegistry());
+      chestTrajectoryBehavior = new ChestTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      registry.addChild(chestTrajectoryBehavior.getYoVariableRegistry());
 
-      pelvisPoseBehavior = new PelvisPoseBehavior(outgoingCommunicationBridge, yoTime);
-      registry.addChild(pelvisPoseBehavior.getYoVariableRegistry());
+      chestGoHomeBehavior = new GoHomeBehavior("chest", outgoingCommunicationBridge, yoTime);
+      registry.addChild(chestGoHomeBehavior.getYoVariableRegistry());
 
-      footPoseBehavior = new FootPoseBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport);
+      pelvisTrajectoryBehavior = new PelvisTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      registry.addChild(pelvisTrajectoryBehavior.getYoVariableRegistry());
+
+      pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      registry.addChild(pelvisOrientationTrajectoryBehavior.getYoVariableRegistry());
+
+      pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", outgoingCommunicationBridge, yoTime);
+      registry.addChild(pelvisGoHomeBehavior.getYoVariableRegistry());
+
+      footPoseBehavior = new FootTrajectoryBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport);
       registry.addChild(footPoseBehavior.getYoVariableRegistry());
 
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
       registry.addChild(footstepListBehavior.getYoVariableRegistry());
 
-      comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
-      registry.addChild(comHeightBehavior.getYoVariableRegistry());
+      pelvisHeightTrajectoryBehavior = new PelvisHeightTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      registry.addChild(pelvisHeightTrajectoryBehavior.getYoVariableRegistry());
 
       turnInPlaceBehavior = new TurnInPlaceBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
       registry.addChild(turnInPlaceBehavior.getYoVariableRegistry());
@@ -365,20 +349,18 @@ public class DiagnosticBehavior extends BehaviorInterface
       for (RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = robotSide.getCamelCaseNameForMiddleOfExpression();
-         HandPoseBehavior handPoseBehavior = new HandPoseBehavior(namePrefix, outgoingCommunicationBridge, yoTime);
-         registry.addChild(handPoseBehavior.getYoVariableRegistry());
-         handPoseBehaviors.put(robotSide, handPoseBehavior);
+         ArmTrajectoryBehavior armTrajectoryBehavior = new ArmTrajectoryBehavior(namePrefix, outgoingCommunicationBridge, yoTime);
+         registry.addChild(armTrajectoryBehavior.getYoVariableRegistry());
+         armTrajectoryBehaviors.put(robotSide, armTrajectoryBehavior);
 
-         HandPoseListBehavior handPoseListBehavior = new HandPoseListBehavior(namePrefix, outgoingCommunicationBridge, yoTime);
-         registry.addChild(handPoseListBehavior.getYoVariableRegistry());
-         handPoseListBehaviors.put(robotSide, handPoseListBehavior);
+         HandTrajectoryBehavior handTrajectoryBehavior = new HandTrajectoryBehavior(namePrefix, outgoingCommunicationBridge, yoTime);
+         registry.addChild(handTrajectoryBehavior.getYoVariableRegistry());
+         handTrajectoryBehaviors.put(robotSide, handTrajectoryBehavior);
+
+         GoHomeBehavior armGoHomeBehavior = new GoHomeBehavior(namePrefix + "Arm", outgoingCommunicationBridge, yoTime);
+         registry.addChild(armGoHomeBehavior.getYoVariableRegistry());
+         armGoHomeBehaviors.put(robotSide, armGoHomeBehavior);
       }
-
-      graspCylinderBehavior = new GraspCylinderBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
-      registry.addChild(graspCylinderBehavior.getYoVariableRegistry());
-
-      rotateHandAboutAxisBehavior = new RotateHandAboutAxisBehavior("diagnostic_", outgoingCommunicationBridge, fullRobotModel, yoTime);
-      registry.addChild(rotateHandAboutAxisBehavior.getYoVariableRegistry());
 
       requestedDiagnostic = new EnumYoVariable<>("requestedDiagnostic", registry, DiagnosticTask.class, true);
       requestedDiagnostic.set(null);
@@ -425,45 +407,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       this.attachControllerListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
 
-      steeringWheelCenter = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelCenter", worldFrame, registry);
-      steeringWheelOrientation = new YoFrameOrientation(behaviorNameFirstLowerCase + "SteeringWheelOrientation", worldFrame, registry);
-      steeringWheelPose = new YoFramePose(steeringWheelCenter, steeringWheelOrientation);
-      steeringWheelRadius = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelRadius", registry);
-      steeringWheelResetPose = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelResetPose", registry);
-      steeringWheelControlRotationAxis = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelControlRotationAxis", registry);
-      steeringWheelExecuteGraspingFirst = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelExecuteGraspingFirst", registry);
-      steeringWheelExecuteGraspingFirst.set(true);
-
-      steeringWheelFrame = new ReferenceFrame("steeringWheelFrame", worldFrame)
-      {
-         private static final long serialVersionUID = 4561076900680410565L;
-         private final Vector3d localTranslation = new Vector3d();
-         private final Quat4d localQuaternion = new Quat4d();
-
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            steeringWheelCenter.get(localTranslation);
-            steeringWheelOrientation.getQuaternion(localQuaternion);
-            transformToParent.set(localQuaternion, localTranslation);
-         }
-      };
-
-      steeringWheelInitialAngle = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelInitialAngle", registry);
-      steeringWheelFinalAngle = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelFinalAngle", registry);
-
-      showSteeringWheel = new BooleanYoVariable(behaviorNameFirstLowerCase + "ShowSteeringWheel", registry);
-      steeringWheelInitialPosition = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelInitialPosition", worldFrame, registry);
-      steeringWheelFinalPosition = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelFinalPosition", worldFrame, registry);
-      steeringWheelVisualization = new BagOfBalls(numberOfBalls, 0.03, behaviorNameFirstLowerCase + "SteeringWheelVizualization", YoAppearance.Black(),
-            registry, yoGraphicsListRegistry);
-      steeringWheelVisualization.hideAll();
-      yoGraphicsListRegistry.registerYoGraphic("Steering Wheel",
-            new YoGraphicPosition(behaviorNameFirstLowerCase + "SteeringWheelInitialPosition", steeringWheelInitialPosition, 0.035, YoAppearance.BlueViolet()));
-      yoGraphicsListRegistry.registerYoGraphic("Steering Wheel",
-            new YoGraphicPosition(behaviorNameFirstLowerCase + "SteeringWheelFinalPosition", steeringWheelFinalPosition, 0.035, YoAppearance.Red()));
-
-      updateSteeringWheelParameters();
+      requestedDiagnostic.set(DiagnosticTask.KARATE_KID);
    }
 
    private void setupArmsInverseKinematics(FullHumanoidRobotModel fullRobotModel)
@@ -545,58 +489,6 @@ public class DiagnosticBehavior extends BehaviorInterface
                tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
          inverseKinematicsForLowerArm.setSelectionMatrix(angularSelectionMatrix);
          inverseKinematicsForLowerArms.put(robotSide, inverseKinematicsForLowerArm);
-      }
-   }
-
-   private void resetSteeringWheelToDefault()
-   {
-      fullRobotModel.updateFrames();
-      FramePose defaultSteeringWheelPose = new FramePose(fullRobotModel.getChest().getBodyFixedFrame());
-      defaultSteeringWheelPose.setPosition(0.6, 0.0, -0.4);
-      defaultSteeringWheelPose.setYawPitchRoll(0.0, Math.toRadians(-33.0), 0.0);
-      defaultSteeringWheelPose.changeFrame(worldFrame);
-      steeringWheelPose.set(defaultSteeringWheelPose);
-
-      steeringWheelInitialAngle.set(-Math.toRadians(45.0));
-      steeringWheelFinalAngle.set(Math.toRadians(45.0));
-      steeringWheelRadius.set(0.175);
-   }
-
-   private void updateSteeringWheelParameters()
-   {
-      if (steeringWheelResetPose.getBooleanValue())
-      {
-         resetSteeringWheelToDefault();
-         steeringWheelResetPose.set(false);
-      }
-
-      steeringWheelFrame.update();
-
-      FramePoint localPosition = new FramePoint();
-
-      if (showSteeringWheel.getBooleanValue())
-      {
-         CylindricalCoordinatesCalculator.getPosition(localPosition, steeringWheelFrame, steeringWheelInitialAngle.getDoubleValue(),
-               steeringWheelRadius.getDoubleValue(), 0.0);
-         steeringWheelInitialPosition.setAndMatchFrame(localPosition);
-         CylindricalCoordinatesCalculator.getPosition(localPosition, steeringWheelFrame, steeringWheelFinalAngle.getDoubleValue(),
-               steeringWheelRadius.getDoubleValue(), 0.0);
-         steeringWheelFinalPosition.setAndMatchFrame(localPosition);
-
-         double deltaAngle = 2.0 * Math.PI / (numberOfBalls - 1);
-         for (int ballIndex = 0; ballIndex < numberOfBalls; ballIndex++)
-         {
-            double angle = ballIndex * deltaAngle;
-            CylindricalCoordinatesCalculator.getPosition(localPosition, steeringWheelFrame, angle, steeringWheelRadius.getDoubleValue(), 0.0);
-            localPosition.changeFrame(worldFrame);
-            steeringWheelVisualization.setBall(localPosition, ballIndex);
-         }
-      }
-      else
-      {
-         steeringWheelVisualization.hideAll();
-         steeringWheelInitialPosition.setToNaN();
-         steeringWheelFinalPosition.setToNaN();
       }
    }
 
@@ -703,6 +595,8 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       ///////////   combinations of doom   ////////////
       //shiftWeight + pelvisOrientation
+      FramePoint currentPelvisHeight = new FramePoint(pelvisZUpFrame);
+      currentPelvisHeight.changeFrame(worldFrame);
       FrameVector2d desiredPelvisOffset = new FrameVector2d(midFeetZUpFrame);
       FramePoint2d center = new FramePoint2d(midFeetZUpFrame);
 
@@ -736,47 +630,46 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredPelvisOffset.set(supportCornerPoints.get(0));
       desiredPelvisOffset.sub(center);
       submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
-      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, minCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       desiredPelvisOffset.set(supportCornerPoints.get(1));
       desiredPelvisOffset.sub(center);
       submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
-      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, maxCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       desiredPelvisOffset.set(supportCornerPoints.get(2));
       desiredPelvisOffset.sub(center);
       submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
-      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, minCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       desiredPelvisOffset.set(supportCornerPoints.get(3));
       desiredPelvisOffset.sub(center);
       submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
-      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, maxCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       desiredPelvisOffset.set(supportCornerPoints.get(0));
       desiredPelvisOffset.sub(center);
       submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
-      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, minCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       desiredPelvisOffset.set(supportCornerPoints.get(2));
       desiredPelvisOffset.sub(center);
       submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
-      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, maxCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       desiredPelvisOffset.set(supportCornerPoints.get(1));
       desiredPelvisOffset.sub(center);
       submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
-      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, minCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       submitPelvisHomeCommand(true);
-      submitCoMHomeCommand(true);
 
       //shiftWeight + chestOrientation
       desiredPelvisOffset.set(supportCornerPoints.get(0));
@@ -862,7 +755,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.requestNewStage();
 
       submitPelvisHomeCommand(true);
-      submitHandPoseHomeCommand(true);
+      submitArmGoHomeCommand(true);
 
       //Mean stuff  (shiftWeight + CoM + chestOrientation + PelvisOrientation)
       desiredPelvisOffset.set(supportCornerPoints.get(0));
@@ -870,7 +763,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchForward, rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, maxCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       desiredPelvisOffset.set(supportCornerPoints.get(2));
@@ -878,7 +771,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, minCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       desiredPelvisOffset.set(supportCornerPoints.get(1));
@@ -886,7 +779,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, maxCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       desiredPelvisOffset.set(supportCornerPoints.get(3));
@@ -894,7 +787,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, minCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       desiredPelvisOffset.set(supportCornerPoints.get(2));
@@ -902,7 +795,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchBackward, rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, maxCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       desiredPelvisOffset.set(supportCornerPoints.get(0));
@@ -910,7 +803,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchForward, rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, minCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       desiredPelvisOffset.set(supportCornerPoints.get(3));
@@ -918,12 +811,12 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, maxCoMHeightOffset.getDoubleValue());
       pipeLine.requestNewStage();
 
       submitChestHomeCommand(true);
       submitPelvisHomeCommand(true);
-      submitDesiredCoMHeightOffset(true, 0.0);
+      submitDesiredPelvisHeight(true, 0.0);
 
       //really mean stuff (arms + CoM + shiftWeight + chestOrientation + PelvisOrientation)
       desiredPelvisOffset.set(supportCornerPoints.get(0));
@@ -931,7 +824,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, maxCoMHeightOffset.getDoubleValue());
       submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
       pipeLine.requestNewStage();
 
@@ -940,7 +833,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchBackward, rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, minCoMHeightOffset.getDoubleValue());
       submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_STRAIGHT_DOWN);
       pipeLine.requestNewStage();
 
@@ -949,7 +842,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, maxCoMHeightOffset.getDoubleValue());
       submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING);
       pipeLine.requestNewStage();
 
@@ -958,7 +851,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, minCoMHeightOffset.getDoubleValue());
       submitSymmetricHumanoidArmPose(HumanoidArmPose.SUPER_CHICKEN_WINGS);
       pipeLine.requestNewStage();
 
@@ -967,7 +860,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchBackward, rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, maxCoMHeightOffset.getDoubleValue());
       submitSymmetricHumanoidArmPose(HumanoidArmPose.LARGER_CHICKEN_WINGS);
       pipeLine.requestNewStage();
 
@@ -976,7 +869,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchForward, rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, minCoMHeightOffset.getDoubleValue());
       submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_UP3);
       pipeLine.requestNewStage();
 
@@ -985,14 +878,13 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
             pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
       submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
-      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(true, maxCoMHeightOffset.getDoubleValue());
       submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
       pipeLine.requestNewStage();
 
       submitChestHomeCommand(true);
       submitPelvisHomeCommand(true);
-      submitCoMHomeCommand(true);
-      submitHandPoseHomeCommand(true);
+      submitArmGoHomeCommand(true);
    }
 
    private void sequenceUpperBody()
@@ -1039,7 +931,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    private void sequenceGoHome()
    {
       submitPelvisHomeCommand(true);
-      submitHandPoseHomeCommand(true);
+      submitArmGoHomeCommand(true);
       submitChestHomeCommand(true);
    }
 
@@ -1232,7 +1124,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          submitFootPosesShort(robotSide);
       }
 
-      submitHandPoseHomeCommand(false);
+      submitArmGoHomeCommand(false);
    }
 
    private void submitFootPosesShort(RobotSide robotSide)
@@ -1298,7 +1190,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          submitFootPosesLong(robotSide);
       }
 
-      submitHandPoseHomeCommand(false);
+      submitArmGoHomeCommand(false);
    }
 
    private void submitFootPosesLong(RobotSide robotSide)
@@ -1663,7 +1555,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       pipeLine.requestNewStage();
 
-      submitHandPoseHomeCommand(true);
+      submitArmGoHomeCommand(true);
       pipeLine.requestNewStage();
 
       //square up the feet
@@ -1710,7 +1602,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       //turn in place
       submitWalkToLocation(false, 0.0, 0.0, 0.0, 0.0);
 
-      submitHandPoseHomeCommand(false);
+      submitArmGoHomeCommand(false);
 
       /////////// chest bending backward///////////
       submitDesiredChestOrientation(false, 0.0, Math.toRadians(-10.0), 0.0);
@@ -1775,7 +1667,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void sequenceStepsInPlace()
    {
-      FootstepDataList footstepDataList = new FootstepDataList(swingTime.getDoubleValue(), transferTime.getDoubleValue());
+      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
       FramePose footstepPose = new FramePose();
 
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
@@ -1791,7 +1683,7 @@ public class DiagnosticBehavior extends BehaviorInterface
             footstepPose.getPosition(footLocation);
             footstepPose.getOrientation(footOrientation);
 
-            FootstepData footstepData = new FootstepData(robotSide, footLocation, footOrientation);
+            FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footLocation, footOrientation);
 
             footstepDataList.add(footstepData);
          }
@@ -1801,7 +1693,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void sequenceSquareUp()
    {
-      FootstepDataList footstepDataList = new FootstepDataList(swingTime.getDoubleValue(), transferTime.getDoubleValue());
+      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
       FramePose footstepPose = new FramePose();
 
       RobotSide robotSide = activeSideForFootControl.getEnumValue();
@@ -1820,7 +1712,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          footstepPose.getPosition(footLocation);
          footstepPose.getOrientation(footOrientation);
 
-         FootstepData footstepData = new FootstepData(robotSide, footLocation, footOrientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footLocation, footOrientation);
 
          footstepDataList.add(footstepData);
          pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList, yoTime));
@@ -1882,50 +1774,52 @@ public class DiagnosticBehavior extends BehaviorInterface
       SideDependentList<double[]> armsDown1 = computeSymmetricArmJointAngles(upperArmDown1, 0.0, null, true);
 
       int numberOfHandPoses = 10;
-      SideDependentList<double[][]> armFlyingSequence = new SideDependentList<>(new double[numberOfArmJoints][numberOfHandPoses],
-            new double[numberOfArmJoints][numberOfHandPoses]);
+      
+      TrajectoryPoint1DCalculator calculator = new TrajectoryPoint1DCalculator();
 
-      for (int jointIndex = 0; jointIndex < numberOfArmJoints; jointIndex++)
+      for (RobotSide flyingSide : RobotSide.values)
       {
-         for (int poseIndex = 0; poseIndex < numberOfHandPoses; poseIndex++)
+         ArmTrajectoryMessage flyingMessage = new ArmTrajectoryMessage(flyingSide, numberOfArmJoints);
+
+         for (int jointIndex = 0; jointIndex < numberOfArmJoints; jointIndex++)
          {
-            for (RobotSide side : RobotSide.values)
+            calculator.clear();
+
+            for (int poseIndex = 0; poseIndex < numberOfHandPoses; poseIndex++)
             {
                double desiredJointAngle;
                switch (poseIndex % 6)
                {
                case 0:
-                  desiredJointAngle = armsDown1.get(side)[jointIndex];
+                  desiredJointAngle = armsDown1.get(flyingSide)[jointIndex];
                   break;
                case 1:
-                  desiredJointAngle = armsDown2.get(side)[jointIndex];
+                  desiredJointAngle = armsDown2.get(flyingSide)[jointIndex];
                   break;
                case 2:
-                  desiredJointAngle = armsIntermediateOnWayUp.get(side)[jointIndex];
+                  desiredJointAngle = armsIntermediateOnWayUp.get(flyingSide)[jointIndex];
                   break;
                case 3:
-                  desiredJointAngle = armsUp1.get(side)[jointIndex];
+                  desiredJointAngle = armsUp1.get(flyingSide)[jointIndex];
                   break;
                case 4:
-                  desiredJointAngle = armsUp2.get(side)[jointIndex];
+                  desiredJointAngle = armsUp2.get(flyingSide)[jointIndex];
                   break;
                case 5:
-                  desiredJointAngle = armsIntermediateOnWayDown.get(side)[jointIndex];
+                  desiredJointAngle = armsIntermediateOnWayDown.get(flyingSide)[jointIndex];
                   break;
                default:
                   throw new RuntimeException("Should not get there!");
                }
-               armFlyingSequence.get(side)[jointIndex][poseIndex] = desiredJointAngle;
+               calculator.appendTrajectoryPoint(desiredJointAngle);
             }
+            calculator.computeTrajectoryPointTimes(0.0, flyingTrajectoryTime.getDoubleValue());
+            calculator.computeTrajectoryPointVelocities(true);
+            flyingMessage.setTrajectory1DMessage(jointIndex, new OneDoFJointTrajectoryMessage(calculator.getTrajectoryData()));
          }
-      }
 
-      for (RobotSide tempSide : RobotSide.values)
-      {
-         HandPoseListPacket handPoseListPacket = new HandPoseListPacket(tempSide, armFlyingSequence.get(tempSide),
-               flyingTrajectoryTime.getDoubleValue() * numberOfHandPoses);
-         pipeLine.submitTaskForPallelPipesStage(handPoseListBehaviors.get(tempSide),
-               new HandPoseListTask(handPoseListPacket, handPoseListBehaviors.get(tempSide), yoTime, sleepTimeBetweenPoses.getDoubleValue()));
+         pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),
+               new ArmTrajectoryTask(flyingMessage, armTrajectoryBehaviors.get(flyingSide), yoTime, sleepTimeBetweenPoses.getDoubleValue()));
       }
 
       // Put the arms in front
@@ -1998,15 +1892,15 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
 
       //
-      submitHandPoseHomeCommand(true);
+      submitArmGoHomeCommand(true);
       submitChestHomeCommand(true);
       submitPelvisHomeCommand(true);
    }
 
    private void sequenceSquats()
    {
-      submitDesiredCoMHeightOffset(false, minCoMHeightOffset.getDoubleValue());
-      submitDesiredCoMHeightOffset(false, maxCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(false, minCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(false, maxCoMHeightOffset.getDoubleValue());
    }
 
    private void sequenceSquatathon()
@@ -2016,7 +1910,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredChestOrientation(parallelize, 0.0, Math.toRadians(15.0), 0.0);
 
       submitSymmetricHumanoidArmPose(HumanoidArmPose.REACH_WAY_FORWARD);
-      submitDesiredCoMHeightOffset(parallelize, minCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(parallelize, minCoMHeightOffset.getDoubleValue());
 
       pipeLine.requestNewStage();
 
@@ -2025,7 +1919,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
 
-      submitDesiredCoMHeightOffset(parallelize, maxCoMHeightOffset.getDoubleValue());
+      submitDesiredPelvisHeight(parallelize, maxCoMHeightOffset.getDoubleValue());
    }
 
    private ReferenceFrame findFixedFrameForPelvisOrientation()
@@ -2038,50 +1932,45 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void submitChestHomeCommand(boolean parallelize)
    {
-      ChestOrientationPacket homeChestPacket = PacketControllerTools.createGoToHomeChestOrientationPacket(trajectoryTime.getDoubleValue());
-      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(homeChestPacket, yoTime, chestOrientationBehavior,
-            sleepTimeBetweenPoses.getDoubleValue());
+      GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.CHEST, trajectoryTime.getDoubleValue());
+      GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, chestGoHomeBehavior, yoTime, sleepTimeBetweenPoses.getDoubleValue());
       if (parallelize)
-         pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, chestOrientationTask);
+         pipeLine.submitTaskForPallelPipesStage(chestGoHomeBehavior, goHomeTask);
       else
-         pipeLine.submitSingleTaskStage(chestOrientationTask);
+         pipeLine.submitSingleTaskStage(goHomeTask);
    }
 
    private void submitDesiredChestOrientation(boolean parallelize, double yaw, double pitch, double roll)
    {
       FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, yaw, pitch, roll);
       desiredChestOrientation.changeFrame(worldFrame);
-      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior,
+      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, yoTime, chestTrajectoryBehavior,
             trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
       if (parallelize)
-         pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, chestOrientationTask);
+         pipeLine.submitTaskForPallelPipesStage(chestTrajectoryBehavior, chestOrientationTask);
       else
          pipeLine.submitSingleTaskStage(chestOrientationTask);
    }
 
-   private void submitDesiredCoMHeightOffset(boolean parallelize, double offsetHeight)
+   private void submitDesiredPelvisHeight(boolean parallelize, double offsetHeight)
    {
-      CoMHeightTask comHeightTask = new CoMHeightTask(offsetHeight, yoTime, comHeightBehavior, trajectoryTime.getDoubleValue(),
+      PelvisHeightTrajectoryTask comHeightTask = new PelvisHeightTrajectoryTask(offsetHeight, yoTime, pelvisHeightTrajectoryBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue());
       if (parallelize)
-         pipeLine.submitTaskForPallelPipesStage(comHeightBehavior, comHeightTask);
+         pipeLine.submitTaskForPallelPipesStage(pelvisHeightTrajectoryBehavior, comHeightTask);
       else
          pipeLine.submitSingleTaskStage(comHeightTask);
    }
 
-   private void submitCoMHomeCommand(boolean parallelize)
-   {
-      submitDesiredCoMHeightOffset(parallelize, 0.0);
-   }
-
    private void submitPelvisHomeCommand(boolean parallelize)
    {
-      PelvisPosePacket homePelvisPacket = PacketControllerTools.createGoToHomePelvisPosePacket(trajectoryTime.getDoubleValue());
-      PelvisPoseTask pelvisPoseTask = new PelvisPoseTask(homePelvisPacket, yoTime, pelvisPoseBehavior, sleepTimeBetweenPoses.getDoubleValue());
+      GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.PELVIS, trajectoryTime.getDoubleValue());
+      GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, pelvisGoHomeBehavior, yoTime, sleepTimeBetweenPoses.getDoubleValue());
+
       if (parallelize)
-         pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, pelvisPoseTask);
+         pipeLine.submitTaskForPallelPipesStage(pelvisGoHomeBehavior, goHomeTask);
       else
-         pipeLine.submitSingleTaskStage(pelvisPoseTask);
+         pipeLine.submitSingleTaskStage(goHomeTask);
    }
 
    private void submitDesiredPelvisOrientation(boolean parallelize, double yaw, double pitch, double roll)
@@ -2093,11 +1982,13 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation(), yaw, pitch, roll);
       desiredPelvisOrientation.changeFrame(worldFrame);
-      PelvisPoseTask pelvisPoseTask = new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime, sleepTime);
+      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, desiredPelvisOrientation.getQuaternion());
+      PelvisOrientationTrajectoryTask task = new PelvisOrientationTrajectoryTask(message, yoTime, pelvisOrientationTrajectoryBehavior, sleepTime);
+
       if (parallelize)
-         pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, pelvisPoseTask);
+         pipeLine.submitTaskForPallelPipesStage(pelvisOrientationTrajectoryBehavior, task);
       else
-         pipeLine.submitSingleTaskStage(pelvisPoseTask);
+         pipeLine.submitSingleTaskStage(task);
    }
 
    private void submitDesiredPelvisPositionOffset(boolean parallelize, double dx, double dy, double dz)
@@ -2108,28 +1999,30 @@ public class DiagnosticBehavior extends BehaviorInterface
    private void submitDesiredPelvisPositionOffsetAndOrientation(boolean parallelize, double dx, double dy, double dz, double yaw, double pitch, double roll)
    {
       SixDoFJointReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
-      FramePose desiredPelvisPosition = new FramePose(frameAfterRootJoint);
-      desiredPelvisPosition.setPosition(dx, dy, dz);
-      desiredPelvisPosition.setYawPitchRoll(yaw, pitch, roll);
-      desiredPelvisPosition.changeFrame(worldFrame);
-      PelvisPoseTask pelvisPoseTask = new PelvisPoseTask(desiredPelvisPosition, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue());
+      FramePose desiredPelvisPose = new FramePose(frameAfterRootJoint);
+      desiredPelvisPose.setPosition(dx, dy, dz);
+      desiredPelvisPose.setYawPitchRoll(yaw, pitch, roll);
+      desiredPelvisPose.changeFrame(worldFrame);
+      TransformablePoint3d position = desiredPelvisPose.getGeometryObject().getPoint();
+      TransformableQuat4d orientation = desiredPelvisPose.getGeometryObject().getOrientation();
+      PelvisTrajectoryMessage message = new PelvisTrajectoryMessage(trajectoryTime.getDoubleValue(), position, orientation);
+      PelvisTrajectoryTask task = new PelvisTrajectoryTask(message, yoTime, pelvisTrajectoryBehavior, sleepTimeBetweenPoses.getDoubleValue());
       if (parallelize)
-         pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, pelvisPoseTask);
+         pipeLine.submitTaskForPallelPipesStage(pelvisTrajectoryBehavior, task);
       else
-         pipeLine.submitSingleTaskStage(pelvisPoseTask);
+         pipeLine.submitSingleTaskStage(task);
    }
 
-   private void submitHandPoseHomeCommand(boolean parallelize)
+   private void submitArmGoHomeCommand(boolean parallelize)
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         HandPosePacket handPosePacket = PacketControllerTools.createGoToHomeHandPosePacket(robotSide, trajectoryTime.getDoubleValue());
-         HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(robotSide);
+         GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.ARM, robotSide, trajectoryTime.getDoubleValue());
+         GoHomeBehavior armGoHomeBehavior = armGoHomeBehaviors.get(robotSide);
          if (parallelize)
-            pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, handPosePacket, handPoseBehavior, yoTime));
+            pipeLine.submitTaskForPallelPipesStage(armGoHomeBehavior, new GoHomeTask(goHomeMessage, armGoHomeBehavior, yoTime));
          else
-            pipeLine.submitSingleTaskStage(new HandPoseTask(robotSide, handPosePacket, handPoseBehavior, yoTime));
+            pipeLine.submitSingleTaskStage(new GoHomeTask(goHomeMessage, armGoHomeBehavior, yoTime));
       }
    }
 
@@ -2174,9 +2067,9 @@ public class DiagnosticBehavior extends BehaviorInterface
                msg += desiredJointAngles[i] + ", ";
             System.out.println(msg);
          }
-         HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(robotSide);
-         pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, desiredJointAngles, yoTime, handPoseBehavior,
-               trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+         ArmTrajectoryBehavior armTrajectoryBehavior = armTrajectoryBehaviors.get(robotSide);
+         ArmTrajectoryMessage message = new ArmTrajectoryMessage(robotSide, trajectoryTime.getDoubleValue(), desiredJointAngles);
+         pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior, new ArmTrajectoryTask(message, armTrajectoryBehavior, trajectoryTime, sleepTimeBetweenPoses.getDoubleValue()));
       }
    }
 
@@ -2352,7 +2245,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       Point3d desiredFootPosition = new Point3d();
       Quat4d desiredFootOrientation = new Quat4d();
       desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
-      FootPoseTask footPoseTask = new FootPoseTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footPoseBehavior,
+      FootTrajectoryTask footPoseTask = new FootTrajectoryTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footPoseBehavior,
             trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
 
       if (parallelize)
@@ -2373,7 +2266,6 @@ public class DiagnosticBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
-      resetSteeringWheelToDefault();
    }
 
    private final FrameOrientation tempFrameOrientation = new FrameOrientation();
@@ -2381,7 +2273,6 @@ public class DiagnosticBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      updateSteeringWheelParameters();
       diagnosticBehaviorEnabled.set(isControllerReady());
 
       handleAutomaticDiagnosticRoutine();
@@ -2559,10 +2450,6 @@ public class DiagnosticBehavior extends BehaviorInterface
                handleRequestedDiagnostic();
             }
             break;
-         case TURN_WHEEL:
-            lastDiagnosticTask.set(DiagnosticTask.TURN_WHEEL);
-            sequenceTurnWheel();
-            break;
          case CUTE_WAVE:
             lastDiagnosticTask.set(DiagnosticTask.CUTE_WAVE);
             sequenceCuteWave();
@@ -2594,56 +2481,6 @@ public class DiagnosticBehavior extends BehaviorInterface
          }
          requestedDiagnostic.set(null);
       }
-   }
-
-   private void sequenceTurnWheel()
-   {
-      if (activeSideForHandControl.getEnumValue() == null)
-      {
-         PrintTools.info("Select hand to perform diagnostic.");
-         return;
-      }
-      if (!showSteeringWheel.getBooleanValue())
-      {
-         showSteeringWheel.set(true);
-         updateSteeringWheelParameters();
-      }
-
-      if (steeringWheelExecuteGraspingFirst.getBooleanValue())
-      {
-         FramePoint graspPoint = new FramePoint();
-         steeringWheelInitialPosition.getFrameTupleIncludingFrame(graspPoint);
-         FrameVector steeringWheelAxis = new FrameVector(steeringWheelFrame, 0.0, 0.0, 1.0);
-
-         graspPoint.changeFrame(worldFrame);
-         steeringWheelAxis.changeFrame(worldFrame);
-
-         final GraspCylinderPacket graspCylinderPacket = new GraspCylinderPacket(activeSideForHandControl.getEnumValue(), graspPoint.getPointCopy(),
-               steeringWheelAxis.getVectorCopy());
-         pipeLine.submitSingleTaskStage(new BehaviorTask(graspCylinderBehavior, yoTime)
-         {
-            @Override
-            protected void setBehaviorInput()
-            {
-               graspCylinderBehavior.setInput(graspCylinderPacket);
-            }
-         });
-      }
-      else
-      {
-         FramePoint currentHandPosition = new FramePoint(fullRobotModel.getHandControlFrame(activeSideForHandControl.getEnumValue()));
-         currentHandPosition.changeFrame(steeringWheelFrame);
-         double initialAngle = CylindricalCoordinatesCalculator.getAngle(currentHandPosition);
-         steeringWheelInitialAngle.set(initialAngle);
-         updateSteeringWheelParameters();
-      }
-
-      boolean controlHandOrientationAboutAxis = steeringWheelControlRotationAxis.getBooleanValue();
-      double turnAngle = steeringWheelFinalAngle.getDoubleValue() - steeringWheelInitialAngle.getDoubleValue();
-      double rotationRateRadPerSec = turnAngle / trajectoryTime.getDoubleValue();
-      final RigidBodyTransform wheelTransformToWorld = steeringWheelFrame.getTransformToDesiredFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new RotateHandAboutAxisTask(activeSideForHandControl.getEnumValue(), yoTime, rotateHandAboutAxisBehavior,
-            wheelTransformToWorld, Axis.Z, controlHandOrientationAboutAxis, turnAngle, rotationRateRadPerSec, false));
    }
 
    private void sequenceTurnInPlace()
@@ -2829,13 +2666,11 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         handPoseBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
-         handPoseListBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
+         handTrajectoryBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
+         armTrajectoryBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
          footstepListBehavior.consumeObjectFromNetworkProcessor(object);
          walkToLocationBehavior.consumeObjectFromNetworkProcessor(object);
          turnInPlaceBehavior.consumeObjectFromNetworkProcessor(object);
-         graspCylinderBehavior.consumeObjectFromNetworkProcessor(object);
-         rotateHandAboutAxisBehavior.consumeObjectFromNetworkProcessor(object);
       }
    }
 
@@ -2844,13 +2679,11 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         handPoseBehaviors.get(robotSide).consumeObjectFromController(object);
-         handPoseListBehaviors.get(robotSide).consumeObjectFromController(object);
+         handTrajectoryBehaviors.get(robotSide).consumeObjectFromController(object);
+         armTrajectoryBehaviors.get(robotSide).consumeObjectFromController(object);
          footstepListBehavior.consumeObjectFromController(object);
          walkToLocationBehavior.consumeObjectFromController(object);
          turnInPlaceBehavior.consumeObjectFromController(object);
-         graspCylinderBehavior.consumeObjectFromController(object);
-         rotateHandAboutAxisBehavior.consumeObjectFromController(object);
       }
    }
 
@@ -2869,11 +2702,12 @@ public class DiagnosticBehavior extends BehaviorInterface
    public void pause()
    {
       isPaused.set(true);
-      pelvisPoseBehavior.pause();
-      chestOrientationBehavior.pause();
+      pelvisTrajectoryBehavior.pause();
+      chestTrajectoryBehavior.pause();
       for (RobotSide robotSide : RobotSide.values)
       {
-         handPoseBehaviors.get(robotSide).pause();
+         handTrajectoryBehaviors.get(robotSide).pause();
+         armTrajectoryBehaviors.get(robotSide).pause();
       }
    }
 
@@ -2881,11 +2715,12 @@ public class DiagnosticBehavior extends BehaviorInterface
    public void resume()
    {
       isPaused.set(false);
-      pelvisPoseBehavior.resume();
-      chestOrientationBehavior.resume();
+      pelvisTrajectoryBehavior.resume();
+      chestTrajectoryBehavior.resume();
       for (RobotSide robotSide : RobotSide.values)
       {
-         handPoseBehaviors.get(robotSide).resume();
+         handTrajectoryBehaviors.get(robotSide).pause();
+         armTrajectoryBehaviors.get(robotSide).pause();
       }
    }
 

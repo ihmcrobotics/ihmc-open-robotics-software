@@ -9,7 +9,7 @@ import java.util.Random;
 import org.junit.Test;
 import org.ros.internal.message.Message;
 
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
@@ -66,7 +66,7 @@ public class GenericROSMessageConverterTest
 //   }
 
 
-   private static <T extends IHMCRosApiPacket> boolean testPacketTranslation(Class<T> clazz, Random random)
+   private static <T extends IHMCRosApiMessage> boolean testPacketTranslation(Class<T> clazz, Random random)
    {
       T untranslated = null;
       Message translatedMessage;

@@ -4,19 +4,12 @@ import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
-import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
-import us.ihmc.commonWalkingControlModules.sensors.ReferenceFrameUpdater;
-import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
-import us.ihmc.commonWalkingControlModules.visualizer.CenterOfMassVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
-import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -24,12 +17,9 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -43,7 +33,6 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationconstructionset.JointAxisVisualizer;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
-import us.ihmc.simulationconstructionset.robotController.ModularSensorProcessor;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -57,7 +46,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private static final boolean SHOW_INERTIA_GRAPHICS = false;
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    private static final boolean SHOW_JOINTAXIS_ZALIGN_FRAMES = false;
-   private static final boolean SHOW_LEG_COM = false;
 
    private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
    private static final boolean ALLOW_MODEL_CORRUPTION = true;
@@ -106,7 +94,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
 
-   private final HumanoidGlobalDataProducer globalDataProducer;
+   private final GlobalDataProducer globalDataProducer;
    
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
    private final ReferenceFrame rootFrame;
@@ -114,7 +102,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    
    public DRCControllerThread(WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation,
          MomentumBasedControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, DRCOutputWriter outputWriter,
-         HumanoidGlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity, double estimatorDT)
+         GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity, double estimatorDT)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = outputWriter;
@@ -126,6 +114,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       this.rootFrame = this.controllerFullRobotModel.getRootJoint().getFrameAfterJoint();
       this.outputProcessor = robotModel.getOutputProcessor(controllerFullRobotModel);
       this.globalDataProducer = dataProducer;
+
+      closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerFactory);
 
       if (ALLOW_MODEL_CORRUPTION)
       {
@@ -162,7 +152,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       robotController = createMomentumBasedController(controllerFullRobotModel, outputProcessor,
             controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, threadDataSynchronizer.getControllerContactSensorHolder(),
-            centerOfPressureDataHolderForEstimator, yoGraphicsListRegistry, registry, dataProducer, arrayOfJointsToIgnore);
+            centerOfPressureDataHolderForEstimator, yoGraphicsListRegistry, registry, arrayOfJointsToIgnore);
 
       createControllerRobotMotionStatusUpdater(controllerFactory, threadDataSynchronizer.getControllerRobotMotionStatusHolder());
 
@@ -203,14 +193,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT, double gravity,
          ForceSensorDataHolderReadOnly forceSensorDataHolderForController, ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
-         HumanoidGlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
+         InverseDynamicsJoint... jointsToIgnore)
    {
-      CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(controllerModel.getElevator());
-
-      FullInverseDynamicsStructure inverseDynamicsStructureForController = createInverseDynamicsStructure(controllerModel);
-
-      TwistCalculator twistCalculator = inverseDynamicsStructureForController.getTwistCalculator();
-
       if (CREATE_COM_CALIBRATION_TOOL)
       {
          try
@@ -225,26 +209,10 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          }
       }
 
-      if (SHOW_LEG_COM)
-      {
-         for (RobotSide side : RobotSide.values)
-         {
-            String name = side.name() + "Leg";
-            CenterOfMassVisualizer comVisualizer = new CenterOfMassVisualizer(name, controllerModel.getLegJoint(side, LegJointName.HIP_PITCH), twistCalculator,
-                  registry, yoGraphicsListRegistry);
-            controllerFactory.addUpdatable(comVisualizer);
-         }
-      }
-
-      HumanoidReferenceFrames referenceFramesForController = new HumanoidReferenceFrames(controllerFullRobotModel);
-
-      RobotController robotController = controllerFactory.getController(controllerModel, referenceFramesForController, controlDT, gravity, yoTime,
-            yoGraphicsListRegistry, closeableAndDisposableRegistry, twistCalculator, centerOfMassJacobian, forceSensorDataHolderForController,
-            contactSensorHolder, centerOfPressureDataHolderForEstimator, dataProducer, jointsToIgnore);
-      final ModularSensorProcessor sensorProcessor = createSensorProcessor(twistCalculator, centerOfMassJacobian, referenceFramesForController);
+      RobotController robotController = controllerFactory.getController(controllerModel, controlDT, gravity, yoTime, yoGraphicsListRegistry,
+            forceSensorDataHolderForController, contactSensorHolder, centerOfPressureDataHolderForEstimator, jointsToIgnore);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
-      modularRobotController.setSensorProcessor(sensorProcessor);
       modularRobotController.addRobotController(robotController);
       if (outputProcessor != null)
          modularRobotController.setOutputProcessor(outputProcessor);
@@ -270,10 +238,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             JointAxisVisualizer jointAxisVisualizer = new JointAxisVisualizer(controllerModel.getElevator(), yoGraphicsListRegistry, 0.3);
             modularRobotController.addRobotController(jointAxisVisualizer);
          }
-
-         CommonHumanoidReferenceFramesVisualizer referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFramesForController,
-               yoGraphicsListRegistry);
-         modularRobotController.addRobotController(referenceFramesVisualizer);
       }
 
       if (CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR)
@@ -294,17 +258,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
 
       return inverseDynamicsStructure;
-   }
-
-   private static ModularSensorProcessor createSensorProcessor(TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
-         HumanoidReferenceFrames referenceFrames)
-   {
-      ModularSensorProcessor modularSensorProcessor = new ModularSensorProcessor("ModularSensorProcessor", "");
-      modularSensorProcessor.addSensorProcessor(new ReferenceFrameUpdater(referenceFrames));
-      modularSensorProcessor.addSensorProcessor(new TwistUpdater(twistCalculator));
-      modularSensorProcessor.addSensorProcessor(new CenterOfMassJacobianUpdater(centerOfMassJacobian));
-
-      return modularSensorProcessor;
    }
 
    @Override

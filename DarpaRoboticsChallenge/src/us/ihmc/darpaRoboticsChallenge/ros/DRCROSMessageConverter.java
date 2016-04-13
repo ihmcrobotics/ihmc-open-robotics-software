@@ -6,9 +6,7 @@ import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConve
 import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertQuat4dToQuaternion;
 import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertQuaternionToQuat4d;
 import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertVector3ToPoint3d;
-import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertVector3ToVector3d;
 import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertVector3ToVector3f;
-import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertVector3dToVector3;
 import static us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter.convertVector3fToVector3;
 
 import java.util.ArrayList;
@@ -17,26 +15,20 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
-import ihmc_msgs.FingerStatePacketMessage;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
-import geometry_msgs.Quaternion;
-import geometry_msgs.Vector3;
 import ihmc_msgs.ArmJointTrajectoryPacketMessage;
 import ihmc_msgs.AtlasDesiredPumpPSIPacketMessage;
 import ihmc_msgs.AtlasElectricMotorEnablePacketMessage;
 import ihmc_msgs.AtlasWristSensorCalibrationRequestPacketMessage;
-import ihmc_msgs.ChestOrientationPacketMessage;
-import ihmc_msgs.ComHeightPacketMessage;
-import ihmc_msgs.FootPosePacketMessage;
+import ihmc_msgs.FingerStatePacketMessage;
 import ihmc_msgs.FootstepDataListMessage;
 import ihmc_msgs.FootstepDataMessage;
 import ihmc_msgs.FootstepStatusMessage;
 import ihmc_msgs.HandComplianceControlParametersPacketMessage;
 import ihmc_msgs.HandPosePacketMessage;
-import ihmc_msgs.HeadOrientationPacketMessage;
 import ihmc_msgs.HighLevelStateChangePacketMessage;
 import ihmc_msgs.HighLevelStatePacketMessage;
 import ihmc_msgs.JointAnglesPacketMessage;
@@ -49,34 +41,27 @@ import ihmc_msgs.SingleJointAnglePacketMessage;
 import ihmc_msgs.StopMotionPacketMessage;
 import ihmc_msgs.WholeBodyTrajectoryPacketMessage;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangePacket;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorEnablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasWristSensorCalibrationRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.JointTrajectoryPoint;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopMotionPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus.Status;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.SingleJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -86,28 +71,29 @@ public class DRCROSMessageConverter
 
    public static Message convertToRosMessage(Packet<?> packet)
    {
+      /*
       if (packet instanceof HandPosePacket)
          return convertToRosMessage((HandPosePacket) packet);
       else if (packet instanceof ComHeightPacket)
          return convertToRosMessage((ComHeightPacket) packet);
-      else if (packet instanceof FootPosePacket)
-         return convertToRosMessage((FootPosePacket) packet);
-      else if (packet instanceof FootstepData)
-         return convertToRosMessage((FootstepData) packet);
-      else if (packet instanceof FootstepDataList)
-         return convertToRosMessage((FootstepDataList) packet);
+//      else if (packet instanceof FootPosePacket)
+//         return convertToRosMessage((FootPosePacket) packet);
+      else*/ if (packet instanceof us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage)
+         return convertToRosMessage((us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage) packet);
+      else if (packet instanceof us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage)
+         return convertToRosMessage((us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage) packet);
       else if (packet instanceof FootstepStatus)
          return convertToRosMessage((FootstepStatus) packet);
-      else if (packet instanceof ChestOrientationPacket)
-         return convertToRosMessage((ChestOrientationPacket) packet);
-      else if (packet instanceof HeadOrientationPacket)
-         return convertToRosMessage((HeadOrientationPacket) packet);
-      else if (packet instanceof PauseCommand)
-         return convertToRosMessage((PauseCommand) packet);
-      else if (packet instanceof HighLevelStatePacket)
-         return convertToRosMessage((HighLevelStatePacket) packet);
-      else if (packet instanceof ArmJointTrajectoryPacket)
-         return convertToRosMessage((ArmJointTrajectoryPacket) packet);
+//      else if (packet instanceof ChestOrientationPacket)
+//         return convertToRosMessage((ChestOrientationPacket) packet);
+//      else if (packet instanceof HeadOrientationPacket)
+//         return convertToRosMessage((HeadOrientationPacket) packet);
+      else if (packet instanceof PauseWalkingMessage)
+         return convertToRosMessage((PauseWalkingMessage) packet);
+      else if (packet instanceof HighLevelStateMessage)
+         return convertToRosMessage((HighLevelStateMessage) packet);
+      else if (packet instanceof ArmTrajectoryMessage)
+         return convertToRosMessage((ArmTrajectoryMessage) packet);
       else if (packet instanceof JointAnglesPacket)
          return convertToRosMessage((JointAnglesPacket) packet);
       else if (packet instanceof AtlasElectricMotorEnablePacket)
@@ -116,20 +102,20 @@ public class DRCROSMessageConverter
          return convertToRosMessage((AtlasDesiredPumpPSIPacket) packet);
       else if (packet instanceof AtlasWristSensorCalibrationRequestPacket)
          return convertToRosMessage((AtlasWristSensorCalibrationRequestPacket) packet);
-      else if (packet instanceof HighLevelStateChangePacket)
-         return convertToRosMessage((HighLevelStateChangePacket) packet);
+      else if (packet instanceof HighLevelStateChangeStatusMessage)
+         return convertToRosMessage((HighLevelStateChangeStatusMessage) packet);
       else if (packet instanceof MultiJointAnglePacket)
          return convertToRosMessage((MultiJointAnglePacket) packet);
-      else if (packet instanceof HandComplianceControlParametersPacket)
-         return convertToRosMessage((HandComplianceControlParametersPacket) packet);
+      else if (packet instanceof HandComplianceControlParametersMessage)
+         return convertToRosMessage((HandComplianceControlParametersMessage) packet);
       else if (packet instanceof LegCompliancePacket)
          return convertToRosMessage((LegCompliancePacket) packet);
-      else if (packet instanceof WholeBodyTrajectoryPacket)
-         return convertToRosMessage((WholeBodyTrajectoryPacket) packet);
-      else if (packet instanceof StopMotionPacket)
-         return convertToRosMessage((StopMotionPacket) packet);
-      else if (packet instanceof FingerStatePacket)
-         return convertToRosMessage((FingerStatePacket) packet);
+      else if (packet instanceof WholeBodyTrajectoryMessage)
+         return convertToRosMessage((WholeBodyTrajectoryMessage) packet);
+      else if (packet instanceof StopAllTrajectoryMessage)
+         return convertToRosMessage((StopAllTrajectoryMessage) packet);
+      else if (packet instanceof HandDesiredConfigurationMessage)
+         return convertToRosMessage((HandDesiredConfigurationMessage) packet);
       else
          return null;
    }
@@ -138,20 +124,20 @@ public class DRCROSMessageConverter
    {
       if (message instanceof HandPosePacketMessage)
          return convertToPacket((HandPosePacketMessage) message);
-      else if (message instanceof ComHeightPacketMessage)
-         return convertToPacket((ComHeightPacketMessage) message);
-      else if (message instanceof FootPosePacketMessage)
-         return convertToPacket((FootPosePacketMessage) message);
+//      else if (message instanceof ComHeightPacketMessage)
+//         return convertToPacket((ComHeightPacketMessage) message);
+//      else if (message instanceof FootPosePacketMessage)
+//         return convertToPacket((FootPosePacketMessage) message);
       else if (message instanceof FootstepDataMessage)
          return convertToPacket((FootstepDataMessage) message);
       else if (message instanceof FootstepDataListMessage)
          return convertToPacket((FootstepDataListMessage) message);
       else if (message instanceof FootstepStatusMessage)
          return convertToPacket((FootstepStatusMessage) message);
-      else if (message instanceof ChestOrientationPacketMessage)
-         return convertToPacket((ChestOrientationPacketMessage) message);
-      else if (message instanceof HeadOrientationPacketMessage)
-         return convertToPacket((HeadOrientationPacketMessage) message);
+//      else if (message instanceof ChestOrientationPacketMessage)
+//         return convertToPacket((ChestOrientationPacketMessage) message);
+//      else if (message instanceof HeadOrientationPacketMessage)
+//         return convertToPacket((HeadOrientationPacketMessage) message);
       else if (message instanceof PauseCommandMessage)
          return convertToPacket((PauseCommandMessage) message);
       else if (message instanceof HighLevelStatePacketMessage)
@@ -186,12 +172,12 @@ public class DRCROSMessageConverter
 
    private static Packet<?> convertToPacket(StopMotionPacketMessage message)
    {
-      StopMotionPacket ret = new StopMotionPacket();
+      StopAllTrajectoryMessage ret = new StopAllTrajectoryMessage();
       ret.setUniqueId(message.getUniqueId());
       return ret;
    }
 
-   public static StopMotionPacketMessage convertToRosMessage(StopMotionPacket packet)
+   public static StopMotionPacketMessage convertToRosMessage(StopAllTrajectoryMessage packet)
    {
       StopMotionPacketMessage ret = messageFactory.newFromType("ihmc_msgs/StopMotionPacketMessage");
       ret.setUniqueId(packet.getUniqueId());
@@ -200,92 +186,92 @@ public class DRCROSMessageConverter
 
    private static Packet<?> convertToPacket(WholeBodyTrajectoryPacketMessage message)
    {
-      WholeBodyTrajectoryPacket ret = new WholeBodyTrajectoryPacket(message.getNumWaypoints(), message.getNumJointsPerArm());ret.setUniqueId(message.getUniqueId());
-      
+//      WholeBodyTrajectoryMessage ret = new WholeBodyTrajectoryMessage(message.getNumWaypoints(), message.getNumJointsPerArm());ret.setUniqueId(message.getUniqueId());
+//      
+//
+//      if (message.getPelvisWorldPosition().size() == 0)
+//         ret.pelvisWorldPosition = null;
+//      if (message.getPelvisLinearVelocity().size() == 0)
+//         ret.pelvisLinearVelocity = null;
+//      if (message.getPelvisAngularVelocity().size() == 0)
+//         ret.pelvisAngularVelocity = null;
+//      if (message.getPelvisWorldOrientation().size() == 0)
+//         ret.pelvisWorldOrientation = null;
+//      if (message.getChestWorldOrientation().size() == 0)
+//         ret.chestWorldOrientation = null;
+//      if (message.getChestAngularVelocity().size() == 0)
+//         ret.chestAngularVelocity = null;
+//
+//      for (int i = 0; i < message.getNumWaypoints(); i++)
+//      {
+//         ret.timeAtWaypoint[i] = message.getTimeAtWaypoint()[i];
+//         if (ret.pelvisWorldPosition != null)
+//            ret.pelvisWorldPosition[i] = convertVector3ToPoint3d(message.getPelvisWorldPosition().get(i));
+//         if (ret.pelvisLinearVelocity != null)
+//            ret.pelvisLinearVelocity[i] = convertVector3ToVector3d(message.getPelvisLinearVelocity().get(i));
+//         if (ret.pelvisAngularVelocity != null)
+//            ret.pelvisAngularVelocity[i] = convertVector3ToVector3d(message.getPelvisAngularVelocity().get(i));
+//         if (ret.pelvisWorldOrientation != null)
+//            ret.pelvisWorldOrientation[i] = convertQuaternionToQuat4d(message.getPelvisWorldOrientation().get(i));
+//         if (ret.chestWorldOrientation != null)
+//            ret.chestWorldOrientation[i] = convertQuaternionToQuat4d(message.getChestWorldOrientation().get(i));
+//         if (ret.chestAngularVelocity != null)
+//            ret.chestAngularVelocity[i] = convertVector3ToVector3d(message.getChestAngularVelocity().get(i));
+//      }
+//
+//      ret.rightArmTrajectory = convertToPacket(message.getRightArmTrajectory());
+//      ret.leftArmTrajectory = convertToPacket(message.getLeftArmTrajectory());
 
-      if (message.getPelvisWorldPosition().size() == 0)
-         ret.pelvisWorldPosition = null;
-      if (message.getPelvisLinearVelocity().size() == 0)
-         ret.pelvisLinearVelocity = null;
-      if (message.getPelvisAngularVelocity().size() == 0)
-         ret.pelvisAngularVelocity = null;
-      if (message.getPelvisWorldOrientation().size() == 0)
-         ret.pelvisWorldOrientation = null;
-      if (message.getChestWorldOrientation().size() == 0)
-         ret.chestWorldOrientation = null;
-      if (message.getChestAngularVelocity().size() == 0)
-         ret.chestAngularVelocity = null;
-
-      for (int i = 0; i < message.getNumWaypoints(); i++)
-      {
-         ret.timeAtWaypoint[i] = message.getTimeAtWaypoint()[i];
-         if (ret.pelvisWorldPosition != null)
-            ret.pelvisWorldPosition[i] = convertVector3ToPoint3d(message.getPelvisWorldPosition().get(i));
-         if (ret.pelvisLinearVelocity != null)
-            ret.pelvisLinearVelocity[i] = convertVector3ToVector3d(message.getPelvisLinearVelocity().get(i));
-         if (ret.pelvisAngularVelocity != null)
-            ret.pelvisAngularVelocity[i] = convertVector3ToVector3d(message.getPelvisAngularVelocity().get(i));
-         if (ret.pelvisWorldOrientation != null)
-            ret.pelvisWorldOrientation[i] = convertQuaternionToQuat4d(message.getPelvisWorldOrientation().get(i));
-         if (ret.chestWorldOrientation != null)
-            ret.chestWorldOrientation[i] = convertQuaternionToQuat4d(message.getChestWorldOrientation().get(i));
-         if (ret.chestAngularVelocity != null)
-            ret.chestAngularVelocity[i] = convertVector3ToVector3d(message.getChestAngularVelocity().get(i));
-      }
-
-      ret.rightArmTrajectory = convertToPacket(message.getRightArmTrajectory());
-      ret.leftArmTrajectory = convertToPacket(message.getLeftArmTrajectory());
-
-      return ret;
+      return null;
    }
 
-   public static WholeBodyTrajectoryPacketMessage convertToRosMessage(WholeBodyTrajectoryPacket packet)
+   public static WholeBodyTrajectoryPacketMessage convertToRosMessage(WholeBodyTrajectoryMessage packet)
    {
-      WholeBodyTrajectoryPacketMessage ret = messageFactory.newFromType("ihmc_msgs/WholeBodyTrajectoryPacketMessage");
-      ret.setUniqueId(packet.getUniqueId());
-      ret.setNumWaypoints(packet.numWaypoints);
-      ret.setNumJointsPerArm(packet.numJointsPerArm);
-      ArrayList<Vector3> pelvisWorldPositions = new ArrayList<>();
-      ArrayList<Vector3> pelvisLinearVelocity = new ArrayList<>();
-      ArrayList<Vector3> pelvisAngularVelocity = new ArrayList<>();
-      ArrayList<Quaternion> pelvisWorldOrientation = new ArrayList<>();
-      ArrayList<Quaternion> chestWorldOrientation = new ArrayList<>();
-      ArrayList<Vector3> chestAngularVelocity = new ArrayList<>();
+//      WholeBodyTrajectoryPacketMessage ret = messageFactory.newFromType("ihmc_msgs/WholeBodyTrajectoryPacketMessage");
+//      ret.setUniqueId(packet.getUniqueId());
+//      ret.setNumWaypoints(packet.numWaypoints);
+//      ret.setNumJointsPerArm(packet.numJointsPerArm);
+//      ArrayList<Vector3> pelvisWorldPositions = new ArrayList<>();
+//      ArrayList<Vector3> pelvisLinearVelocity = new ArrayList<>();
+//      ArrayList<Vector3> pelvisAngularVelocity = new ArrayList<>();
+//      ArrayList<Quaternion> pelvisWorldOrientation = new ArrayList<>();
+//      ArrayList<Quaternion> chestWorldOrientation = new ArrayList<>();
+//      ArrayList<Vector3> chestAngularVelocity = new ArrayList<>();
+//
+//      for (int i = 0; i < packet.numWaypoints; i++)
+//      {
+//         if (packet.pelvisWorldPosition != null)
+//            pelvisWorldPositions.add(convertPoint3dToVector3(packet.pelvisWorldPosition[i]));
+//         if (packet.pelvisLinearVelocity != null)
+//            pelvisLinearVelocity.add(convertVector3dToVector3(packet.pelvisLinearVelocity[i]));
+//         if (packet.pelvisAngularVelocity != null)
+//            pelvisAngularVelocity.add(convertVector3dToVector3(packet.pelvisAngularVelocity[i]));
+//         if (packet.pelvisWorldOrientation != null)
+//            pelvisWorldOrientation.add(convertQuat4dToQuaternion(packet.pelvisWorldOrientation[i]));
+//         if (packet.chestWorldOrientation != null)
+//            chestWorldOrientation.add(convertQuat4dToQuaternion(packet.chestWorldOrientation[i]));
+//         if (packet.chestAngularVelocity != null)
+//            chestAngularVelocity.add(convertVector3dToVector3(packet.chestAngularVelocity[i]));
+//      }
+//
+//      ret.setTimeAtWaypoint(packet.timeAtWaypoint);
+//      ret.setPelvisWorldPosition(pelvisWorldPositions);
+//      ret.setPelvisLinearVelocity(pelvisLinearVelocity);
+//      ret.setPelvisAngularVelocity(pelvisAngularVelocity);
+//      ret.setPelvisWorldOrientation(pelvisWorldOrientation);
+//      ret.setChestWorldOrientation(chestWorldOrientation);
+//      ret.setChestAngularVelocity(chestAngularVelocity);
+//
+//      ret.setRightArmTrajectory(convertToRosMessage(packet.rightArmTrajectory));
+//      ret.setLeftArmTrajectory(convertToRosMessage(packet.leftArmTrajectory));
 
-      for (int i = 0; i < packet.numWaypoints; i++)
-      {
-         if (packet.pelvisWorldPosition != null)
-            pelvisWorldPositions.add(convertPoint3dToVector3(packet.pelvisWorldPosition[i]));
-         if (packet.pelvisLinearVelocity != null)
-            pelvisLinearVelocity.add(convertVector3dToVector3(packet.pelvisLinearVelocity[i]));
-         if (packet.pelvisAngularVelocity != null)
-            pelvisAngularVelocity.add(convertVector3dToVector3(packet.pelvisAngularVelocity[i]));
-         if (packet.pelvisWorldOrientation != null)
-            pelvisWorldOrientation.add(convertQuat4dToQuaternion(packet.pelvisWorldOrientation[i]));
-         if (packet.chestWorldOrientation != null)
-            chestWorldOrientation.add(convertQuat4dToQuaternion(packet.chestWorldOrientation[i]));
-         if (packet.chestAngularVelocity != null)
-            chestAngularVelocity.add(convertVector3dToVector3(packet.chestAngularVelocity[i]));
-      }
-
-      ret.setTimeAtWaypoint(packet.timeAtWaypoint);
-      ret.setPelvisWorldPosition(pelvisWorldPositions);
-      ret.setPelvisLinearVelocity(pelvisLinearVelocity);
-      ret.setPelvisAngularVelocity(pelvisAngularVelocity);
-      ret.setPelvisWorldOrientation(pelvisWorldOrientation);
-      ret.setChestWorldOrientation(chestWorldOrientation);
-      ret.setChestAngularVelocity(chestAngularVelocity);
-
-      ret.setRightArmTrajectory(convertToRosMessage(packet.rightArmTrajectory));
-      ret.setLeftArmTrajectory(convertToRosMessage(packet.leftArmTrajectory));
-
-      return ret;
+      return null;
 
    }
 
-   public static HandComplianceControlParametersPacket convertToPacket(HandComplianceControlParametersPacketMessage message)
+   public static HandComplianceControlParametersMessage convertToPacket(HandComplianceControlParametersPacketMessage message)
    {
-      HandComplianceControlParametersPacket ret = new HandComplianceControlParametersPacket();ret.setUniqueId(message.getUniqueId());
+      HandComplianceControlParametersMessage ret = new HandComplianceControlParametersMessage();ret.setUniqueId(message.getUniqueId());
 
       ret.setEnableLinearCompliance(message.getEnableLinearCompliance());
       ret.setEnableAngularCompliance(message.getEnableAngularCompliance());
@@ -307,7 +293,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HandComplianceControlParametersPacketMessage convertToRosMessage(HandComplianceControlParametersPacket packet)
+   public static HandComplianceControlParametersPacketMessage convertToRosMessage(HandComplianceControlParametersMessage packet)
    {
       HandComplianceControlParametersPacketMessage ret = messageFactory.newFromType("ihmc_msgs/HandComplianceControlParametersPacketMessage");
       ret.setUniqueId(packet.getUniqueId());
@@ -359,23 +345,23 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HandPosePacketMessage convertToRosMessage(HandPosePacket packet)
-   {
-      HandPosePacketMessage ret = messageFactory.newFromType("ihmc_msgs/HandPosePacketMessage");
-      ret.setUniqueId(packet.getUniqueId());
-
-      ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
-      ret.setDataType(convertEnumToByte(packet.getDataType()));
-      ret.setReferenceFrame(convertEnumToByte(packet.getReferenceFrame()));
-      ret.setToHomePosition(packet.isToHomePosition());
-      ret.setPosition(convertPoint3dToVector3(packet.getPosition()));
-      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
-      ret.setTrajectoryTime(packet.getTrajectoryTime());
-      ret.setJointAngles(packet.getJointAngles());
-      ret.setControlOrientation(packet.getControlOrientation());
-
-      return ret;
-   }
+//   public static HandPosePacketMessage convertToRosMessage(HandPosePacket packet)
+//   {
+//      HandPosePacketMessage ret = messageFactory.newFromType("ihmc_msgs/HandPosePacketMessage");
+//      ret.setUniqueId(packet.getUniqueId());
+//
+//      ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
+//      ret.setDataType(convertEnumToByte(packet.getDataType()));
+//      ret.setReferenceFrame(convertEnumToByte(packet.getReferenceFrame()));
+//      ret.setToHomePosition(packet.isToHomePosition());
+//      ret.setPosition(convertPoint3dToVector3(packet.getPosition()));
+//      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
+//      ret.setTrajectoryTime(packet.getTrajectoryTime());
+//      ret.setJointAngles(packet.getJointAngles());
+//      ret.setControlOrientation(packet.getControlOrientation());
+//
+//      return ret;
+//   }
 
    public static AtlasElectricMotorEnablePacket convertToPacket(AtlasElectricMotorEnablePacketMessage message)
    {
@@ -405,54 +391,54 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HandPosePacket convertToPacket(HandPosePacketMessage message)
-   {
-      HandPosePacket ret = new HandPosePacket(convertByteToEnum(RobotSide.class, message.getRobotSide()),
-            convertByteToEnum(HandPosePacket.Frame.class, message.getReferenceFrame()), convertByteToEnum(HandPosePacket.DataType.class, message.getDataType()),
-            convertVector3ToPoint3d(message.getPosition()), convertQuaternionToQuat4d(message.getOrientation()), message.getToHomePosition(),
-            message.getTrajectoryTime(), message.getJointAngles());
-      ret.setControlledOrientationAxes(message.getControlOrientation(), message.getControlOrientation(), message.getControlOrientation());
-      return ret;
-   }
+//   public static HandPosePacket convertToPacket(HandPosePacketMessage message)
+//   {
+//      HandPosePacket ret = new HandPosePacket(convertByteToEnum(RobotSide.class, message.getRobotSide()),
+//            convertByteToEnum(HandPosePacket.Frame.class, message.getReferenceFrame()), convertByteToEnum(HandPosePacket.DataType.class, message.getDataType()),
+//            convertVector3ToPoint3d(message.getPosition()), convertQuaternionToQuat4d(message.getOrientation()), message.getToHomePosition(),
+//            message.getTrajectoryTime(), message.getJointAngles());
+//      ret.setControlledOrientationAxes(message.getControlOrientation(), message.getControlOrientation(), message.getControlOrientation());
+//      return ret;
+//   }
 
-   public static ComHeightPacketMessage convertToRosMessage(ComHeightPacket packet)
-   {
-      ComHeightPacketMessage ret = messageFactory.newFromType("ihmc_msgs/ComHeightPacketMessage");
-      ret.setUniqueId(packet.getUniqueId());
-      ret.setHeightOffset(packet.getHeightOffset());
-      ret.setTrajectoryTime(packet.getTrajectoryTime());
+//   public static ComHeightPacketMessage convertToRosMessage(ComHeightPacket packet)
+//   {
+//      ComHeightPacketMessage ret = messageFactory.newFromType("ihmc_msgs/ComHeightPacketMessage");
+//      ret.setUniqueId(packet.getUniqueId());
+//      ret.setHeightOffset(packet.getHeightOffset());
+//      ret.setTrajectoryTime(packet.getTrajectoryTime());
+//
+//      return ret;
+//   }
+//
+//   public static ComHeightPacket convertToPacket(ComHeightPacketMessage message)
+//   {
+//      ComHeightPacket ret = new ComHeightPacket(message.getHeightOffset(), message.getTrajectoryTime());ret.setUniqueId(message.getUniqueId());
+//
+//      return ret;
+//   }
 
-      return ret;
-   }
+//   public static FootPosePacketMessage convertToRosMessage(FootPosePacket packet)
+//   {
+//      FootPosePacketMessage ret = messageFactory.newFromType("ihmc_msgs/FootPosePacketMessage");
+//      ret.setUniqueId(packet.getUniqueId());
+//      ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
+//      ret.setPosition(convertPoint3dToVector3(packet.getPosition()));
+//      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
+//      ret.setTrajectoryTime(packet.getTrajectoryTime());
+//
+//      return ret;
+//   }
+//
+//   public static FootPosePacket convertToPacket(FootPosePacketMessage message)
+//   {
+//      FootPosePacket ret = new FootPosePacket(convertByteToEnum(RobotSide.class, message.getRobotSide()), convertVector3ToPoint3d(message.getPosition()),
+//            convertQuaternionToQuat4d(message.getOrientation()), message.getTrajectoryTime());
+//      ret.setUniqueId(message.getUniqueId());
+//      return ret;
+//   }
 
-   public static ComHeightPacket convertToPacket(ComHeightPacketMessage message)
-   {
-      ComHeightPacket ret = new ComHeightPacket(message.getHeightOffset(), message.getTrajectoryTime());ret.setUniqueId(message.getUniqueId());
-
-      return ret;
-   }
-
-   public static FootPosePacketMessage convertToRosMessage(FootPosePacket packet)
-   {
-      FootPosePacketMessage ret = messageFactory.newFromType("ihmc_msgs/FootPosePacketMessage");
-      ret.setUniqueId(packet.getUniqueId());
-      ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
-      ret.setPosition(convertPoint3dToVector3(packet.getPosition()));
-      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
-      ret.setTrajectoryTime(packet.getTrajectoryTime());
-
-      return ret;
-   }
-
-   public static FootPosePacket convertToPacket(FootPosePacketMessage message)
-   {
-      FootPosePacket ret = new FootPosePacket(convertByteToEnum(RobotSide.class, message.getRobotSide()), convertVector3ToPoint3d(message.getPosition()),
-            convertQuaternionToQuat4d(message.getOrientation()), message.getTrajectoryTime());
-      ret.setUniqueId(message.getUniqueId());
-      return ret;
-   }
-
-   public static FootstepDataMessage convertToRosMessage(FootstepData packet)
+   public static FootstepDataMessage convertToRosMessage(us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage packet)
    {
       FootstepDataMessage ret = messageFactory.newFromType("ihmc_msgs/FootstepDataMessage");
       ret.setUniqueId(packet.getUniqueId());
@@ -475,7 +461,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static FootstepData convertToPacket(FootstepDataMessage message)
+   public static us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage convertToPacket(FootstepDataMessage message)
    {
       ArrayList<Point2d> predictedContactPoints = new ArrayList<>();
       for (int i = 0; i < message.getPredictedContactPoints().size(); i++)
@@ -483,7 +469,7 @@ public class DRCROSMessageConverter
          predictedContactPoints.add(convertToPacket(message.getPredictedContactPoints().get(i)));
       }
 
-      FootstepData ret = new FootstepData(convertByteToEnum(RobotSide.class, message.getRobotSide()), convertVector3ToPoint3d(message.getLocation()),
+      us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage ret = new us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage(convertByteToEnum(RobotSide.class, message.getRobotSide()), convertVector3ToPoint3d(message.getLocation()),
             convertQuaternionToQuat4d(message.getOrientation()), predictedContactPoints, convertByteToEnum(TrajectoryType.class, message.getTrajectoryType()),
             message.getSwingHeight());
 
@@ -508,7 +494,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static FootstepDataListMessage convertToRosMessage(FootstepDataList packet)
+   public static FootstepDataListMessage convertToRosMessage(us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage packet)
    {
       List<FootstepDataMessage> footstepDataMessageList = new ArrayList<>();
       for (int i = 0; i < packet.size(); i++)
@@ -525,14 +511,14 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static FootstepDataList convertToPacket(FootstepDataListMessage message)
+   public static us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage convertToPacket(FootstepDataListMessage message)
    {
-      ArrayList<FootstepData> footstepDataList = new ArrayList<>();
+      ArrayList<us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage> footstepDataList = new ArrayList<>();
       for (int i = 0; i < message.getFootstepDataList().size(); i++)
       {
          footstepDataList.add(convertToPacket(message.getFootstepDataList().get(i)));
       }
-      FootstepDataList ret = new FootstepDataList(footstepDataList, message.getSwingTime(), message.getTransferTime());
+      us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage ret = new us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage(footstepDataList, message.getSwingTime(), message.getTransferTime());
       ret.setUniqueId(message.getUniqueId());
       return ret;
    }
@@ -541,19 +527,15 @@ public class DRCROSMessageConverter
    {
       FootstepStatusMessage ret = messageFactory.newFromType("ihmc_msgs/FootstepStatusMessage");
       ret.setUniqueId(packet.getUniqueId());
-      ret.setIsDoneWalking(packet.isDoneWalking());
 
-      if (!packet.isDoneWalking())
-      {
-         ret.setStatus(convertEnumToByte(packet.getStatus()));
-         ret.setFootstepIndex(packet.getFootstepIndex());
-         if (packet.getActualFootPositionInWorld() != null)
-            ret.setActualFootPositionInWorld(convertPoint3dToVector3(packet.getActualFootPositionInWorld()));
-         if (packet.getActualFootOrientationInWorld() != null)
-            ret.setActualFootOrientationInWorld(convertQuat4dToQuaternion(packet.getActualFootOrientationInWorld()));
-         if (packet.getRobotSide() != null)
-            ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
-      }
+      ret.setStatus(convertEnumToByte(packet.getStatus()));
+      ret.setFootstepIndex(packet.getFootstepIndex());
+      if (packet.getActualFootPositionInWorld() != null)
+         ret.setActualFootPositionInWorld(convertPoint3dToVector3(packet.getActualFootPositionInWorld()));
+      if (packet.getActualFootOrientationInWorld() != null)
+         ret.setActualFootOrientationInWorld(convertQuat4dToQuaternion(packet.getActualFootOrientationInWorld()));
+      if (packet.getRobotSide() != null)
+         ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
 
       return ret;
    }
@@ -567,44 +549,44 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static ChestOrientationPacketMessage convertToRosMessage(ChestOrientationPacket packet)
-   {
-      ChestOrientationPacketMessage ret = messageFactory.newFromType("ihmc_msgs/ChestOrientationPacketMessage");
-      ret.setUniqueId(packet.getUniqueId());
-      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
-      ret.setToHomeOrientation(packet.isToHomeOrientation());
-      ret.setTrajectoryTime(packet.getTrajectoryTime());
+//   public static ChestOrientationPacketMessage convertToRosMessage(ChestOrientationPacket packet)
+//   {
+//      ChestOrientationPacketMessage ret = messageFactory.newFromType("ihmc_msgs/ChestOrientationPacketMessage");
+//      ret.setUniqueId(packet.getUniqueId());
+//      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
+//      ret.setToHomeOrientation(packet.isToHomeOrientation());
+//      ret.setTrajectoryTime(packet.getTrajectoryTime());
+//
+//      return ret;
+//   }
+//
+//   public static ChestOrientationPacket convertToPacket(ChestOrientationPacketMessage message)
+//   {
+//      ChestOrientationPacket ret = new ChestOrientationPacket(convertQuaternionToQuat4d(message.getOrientation()), message.getToHomeOrientation(),
+//            message.getTrajectoryTime());
+//      ret.setUniqueId(message.getUniqueId());
+//      return ret;
+//   }
 
-      return ret;
-   }
+//   public static HeadOrientationPacketMessage convertToRosMessage(HeadOrientationPacket packet)
+//   {
+//      HeadOrientationPacketMessage ret = messageFactory.newFromType("ihmc_msgs/HeadOrientationPacketMessage");
+//      ret.setUniqueId(packet.getUniqueId());
+//      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
+//      ret.setTrajectoryTime(packet.getTrajectoryTime());
+//
+//      return ret;
+//   }
+//
+//   public static HeadOrientationPacket convertToPacket(HeadOrientationPacketMessage message)
+//   {
+//      HeadOrientationPacket ret = new HeadOrientationPacket(convertQuaternionToQuat4d(message.getOrientation()), message.getTrajectoryTime());ret.setUniqueId(
+//         message.getUniqueId());
+//
+//      return ret;
+//   }
 
-   public static ChestOrientationPacket convertToPacket(ChestOrientationPacketMessage message)
-   {
-      ChestOrientationPacket ret = new ChestOrientationPacket(convertQuaternionToQuat4d(message.getOrientation()), message.getToHomeOrientation(),
-            message.getTrajectoryTime());
-      ret.setUniqueId(message.getUniqueId());
-      return ret;
-   }
-
-   public static HeadOrientationPacketMessage convertToRosMessage(HeadOrientationPacket packet)
-   {
-      HeadOrientationPacketMessage ret = messageFactory.newFromType("ihmc_msgs/HeadOrientationPacketMessage");
-      ret.setUniqueId(packet.getUniqueId());
-      ret.setOrientation(convertQuat4dToQuaternion(packet.getOrientation()));
-      ret.setTrajectoryTime(packet.getTrajectoryTime());
-
-      return ret;
-   }
-
-   public static HeadOrientationPacket convertToPacket(HeadOrientationPacketMessage message)
-   {
-      HeadOrientationPacket ret = new HeadOrientationPacket(convertQuaternionToQuat4d(message.getOrientation()), message.getTrajectoryTime());ret.setUniqueId(
-         message.getUniqueId());
-
-      return ret;
-   }
-
-   public static PauseCommandMessage convertToRosMessage(PauseCommand packet)
+   public static PauseCommandMessage convertToRosMessage(PauseWalkingMessage packet)
    {
       PauseCommandMessage ret = messageFactory.newFromType("ihmc_msgs/PauseCommandMessage");
       ret.setUniqueId(packet.getUniqueId());
@@ -613,14 +595,14 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static PauseCommand convertToPacket(PauseCommandMessage message)
+   public static PauseWalkingMessage convertToPacket(PauseCommandMessage message)
    {
-      PauseCommand ret = new PauseCommand(message.getPause());
+      PauseWalkingMessage ret = new PauseWalkingMessage(message.getPause());
       ret.setUniqueId(message.getUniqueId());
       return ret;
    }
 
-   public static HighLevelStatePacketMessage convertToRosMessage(HighLevelStatePacket packet)
+   public static HighLevelStatePacketMessage convertToRosMessage(HighLevelStateMessage packet)
    {
       HighLevelStatePacketMessage ret = messageFactory.newFromType("ihmc_msgs/HighLevelStatePacketMessage");
       ret.setUniqueId(packet.getUniqueId());
@@ -629,52 +611,69 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HighLevelStatePacket convertToPacket(HighLevelStatePacketMessage message)
+   public static HighLevelStateMessage convertToPacket(HighLevelStatePacketMessage message)
    {
-      HighLevelStatePacket ret = new HighLevelStatePacket(convertByteToEnum(HighLevelState.class, message.getHighLevelState()));ret.setUniqueId(
+      HighLevelStateMessage ret = new HighLevelStateMessage(convertByteToEnum(HighLevelState.class, message.getHighLevelState()));ret.setUniqueId(
          message.getUniqueId());
 
       return ret;
    }
 
-   public static ArmJointTrajectoryPacketMessage convertToRosMessage(ArmJointTrajectoryPacket packet)
+   public static ArmJointTrajectoryPacketMessage convertToRosMessage(ArmTrajectoryMessage ihmcMessage)
    {
-      int waypoints = packet.trajectoryPoints.length;
+      int numberOfJoints = ihmcMessage.getNumberOfJoints();
+      int numberOfWaypoints = ihmcMessage.getNumberOfJointTrajectoryPoints(0);
       List<JointTrajectoryPointMessage> trajectoryPoints = new ArrayList<JointTrajectoryPointMessage>();
 
-      for (int i = 0; i < waypoints; i++)
+      for (int waypointIndex = 0; waypointIndex < numberOfWaypoints; waypointIndex++)
       {
-         JointTrajectoryPoint point = packet.trajectoryPoints[i];
-         JointTrajectoryPointMessage pointMessage = messageFactory.newFromType("ihmc_msgs/JointTrajectoryPointMessage");
-         pointMessage.setPositions(point.positions);
-         pointMessage.setVelocities(point.velocities);
-         pointMessage.setTime(point.time);
-         trajectoryPoints.add(pointMessage);
+         double[] positions = new double[numberOfJoints];
+         double[] velocities = new double[numberOfJoints];
+
+         for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+         {
+            TrajectoryPoint1DMessage waypoint = ihmcMessage.getJointTrajectoryPoint(jointIndex, waypointIndex);
+            positions[jointIndex] = waypoint.getPosition();
+            velocities[jointIndex] = waypoint.getVelocity();
+         }
+
+         JointTrajectoryPointMessage waypointMessage = messageFactory.newFromType("ihmc_msgs/JointTrajectoryPointMessage");
+         waypointMessage.setTime(ihmcMessage.getJointTrajectoryPoint(0, waypointIndex).getTime());
+         waypointMessage.setPositions(positions);
+         waypointMessage.setVelocities(velocities);
+         trajectoryPoints.add(waypointMessage);
       }
 
-      ArmJointTrajectoryPacketMessage ret = messageFactory.newFromType("ihmc_msgs/ArmJointTrajectoryPacketMessage");
-      ret.setUniqueId(packet.getUniqueId());
-      ret.setRobotSide(convertEnumToByte(packet.robotSide));
-      ret.setTrajectoryPoints(trajectoryPoints);
+      ArmJointTrajectoryPacketMessage rosMessage = messageFactory.newFromType("ihmc_msgs/ArmJointTrajectoryPacketMessage");
+      rosMessage.setUniqueId(ihmcMessage.getUniqueId());
+      rosMessage.setRobotSide(convertEnumToByte(ihmcMessage.robotSide));
+      rosMessage.setTrajectoryPoints(trajectoryPoints);
 
-      return ret;
+      return rosMessage;
    }
 
-   public static ArmJointTrajectoryPacket convertToPacket(ArmJointTrajectoryPacketMessage message)
+   public static ArmTrajectoryMessage convertToPacket(ArmJointTrajectoryPacketMessage rosMessage)
    {
-      int waypoints = message.getTrajectoryPoints().size();
+      int numberOfWaypoints = rosMessage.getTrajectoryPoints().size();
+      int numberOfJoints = rosMessage.getTrajectoryPoints().get(0).getPositions().length;
 
-      JointTrajectoryPoint[] trajectoryPoints = new JointTrajectoryPoint[waypoints];
-      RobotSide robotSide = convertByteToEnum(RobotSide.class, message.getRobotSide());
-      ArmJointTrajectoryPacket ret = new ArmJointTrajectoryPacket(robotSide, trajectoryPoints);ret.setUniqueId(message.getUniqueId());
+      RobotSide robotSide = convertByteToEnum(RobotSide.class, rosMessage.getRobotSide());
+      ArmTrajectoryMessage ihmcMessage = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfWaypoints);
+      ihmcMessage.setUniqueId(rosMessage.getUniqueId());
 
-      for (int i = 0; i < waypoints; i++)
+      for (int waypointIndex = 0; waypointIndex < numberOfWaypoints; waypointIndex++)
       {
-         JointTrajectoryPointMessage pointMessage = message.getTrajectoryPoints().get(i);
-         ret.trajectoryPoints[i] = new JointTrajectoryPoint(pointMessage.getPositions(), pointMessage.getVelocities(), pointMessage.getTime());
+         JointTrajectoryPointMessage waypointMessage = rosMessage.getTrajectoryPoints().get(waypointIndex);
+         for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+         {
+            double time = waypointMessage.getTime();
+            double position = waypointMessage.getPositions()[jointIndex];
+            double velocity = waypointMessage.getVelocities()[jointIndex];
+            ihmcMessage.setTrajectoryPoint(jointIndex, waypointIndex, time, position, velocity);
+         }
       }
 
-      return ret;
+      return ihmcMessage;
    }
 
    public static JointAnglesPacketMessage convertToRosMessage(JointAnglesPacket packet)
@@ -751,7 +750,7 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HighLevelStateChangePacketMessage convertToRosMessage(HighLevelStateChangePacket packet)
+   public static HighLevelStateChangePacketMessage convertToRosMessage(HighLevelStateChangeStatusMessage packet)
    {
       HighLevelStateChangePacketMessage ret = messageFactory.newFromType("ihmc_msgs/HighLevelStateChangePacketMessage");
       ret.setUniqueId(packet.getUniqueId());
@@ -761,28 +760,28 @@ public class DRCROSMessageConverter
       return ret;
    }
 
-   public static HighLevelStateChangePacket convertToPacket(HighLevelStateChangePacketMessage message)
+   public static HighLevelStateChangeStatusMessage convertToPacket(HighLevelStateChangePacketMessage message)
    {
-      HighLevelStateChangePacket ret = new HighLevelStateChangePacket(convertByteToEnum(HighLevelState.class, message.getInitialState()),
+      HighLevelStateChangeStatusMessage ret = new HighLevelStateChangeStatusMessage(convertByteToEnum(HighLevelState.class, message.getInitialState()),
             convertByteToEnum(HighLevelState.class, message.getEndState()));
 
       return ret;
    }
 
-   public static FingerStatePacketMessage convertToRosMessage(FingerStatePacket packet)
+   public static FingerStatePacketMessage convertToRosMessage(HandDesiredConfigurationMessage packet)
    {
       FingerStatePacketMessage ret = messageFactory.newFromType("ihmc_msgs/FingerStatePacketMessage");
       ret.setUniqueId(packet.getUniqueId());
       ret.setRobotSide(convertEnumToByte(packet.getRobotSide()));
-      ret.setFingerState(convertEnumToByte(packet.getFingerState()));
+      ret.setFingerState(convertEnumToByte(packet.getHandDesiredConfiguration()));
 
       return ret;
    }
 
-   public static FingerStatePacket convertToPacket(FingerStatePacketMessage message)
+   public static HandDesiredConfigurationMessage convertToPacket(FingerStatePacketMessage message)
    {
-      FingerStatePacket ret = new FingerStatePacket(convertByteToEnum(RobotSide.class, message.getRobotSide()),
-            convertByteToEnum(FingerState.class, message.getFingerState()));
+      HandDesiredConfigurationMessage ret = new HandDesiredConfigurationMessage(convertByteToEnum(RobotSide.class, message.getRobotSide()),
+            convertByteToEnum(HandConfiguration.class, message.getFingerState()));
       ret.setUniqueId(message.getUniqueId());
 
       return ret;

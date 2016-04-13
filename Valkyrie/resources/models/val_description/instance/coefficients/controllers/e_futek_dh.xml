@@ -1,0 +1,42 @@
+<CoeffData>
+  <Coeffs>
+    <!-- Torque Controller -->
+        <Coeff id="EffortControl_OnlineTuning" value="0.0"/>
+        <Coeff id="EffortControl_Alpha" value="0.93"/>
+        <Coeff id="EffortControl_AlphaDot" value="0.45"/>
+
+        <!-- Model -->
+        <Coeff id="ForceControl_m" value="275.0"/>
+        <Coeff id="ForceControl_b" value="10000.0"/>
+
+        <!-- FF -->
+        <Coeff id="ForceControl_Current2MotorForce" value="0.0375"/>
+        <Coeff id="ForceControl_enableFF" value="0.0"/>
+
+        <!-- PID -->
+        <Coeff id="ForceControl_enablePID" value="1.0"/>
+        <Coeff id="ForceControl_Kp" value="0.07"/>
+        <Coeff id="ForceControl_Kd" value="0.0005"/>
+        <Coeff id="ForceControl_PD_damp" value="0.95"/>
+        <Coeff id="ForceControl_autoKd" value="0.0"/>
+        <Coeff id="ForceControl_Kd_fc_Hz" value="50.0"/>
+
+        <!-- DOB -->
+        <Coeff id="ForceControl_dobWindupLimit_N" value="1000.0"/>
+        <Coeff id="ForceControl_dob_fc_Hz" value="50.0"/>
+        <Coeff id="ForceControl_enableDOB" value="0.0"/>
+
+        <!-- DynFF -->
+        <Coeff id="ForceControl_FFd_fc_Hz" value="20.0"/>
+        <Coeff id="ForceControl_enableDynFF" value="0.0"/>
+
+        <!-- Parallel Damping -->
+        <Coeff id="ForceControl_ParallelDamping" value="0.0"/>
+
+        <!-- Sensor Feedback -->
+        <Coeff id="ForceControl_SensorFeedback" value="1.0"/>
+    <!-- end Torque Controller -->
+
+  </Coeffs>
+
+</CoeffData>

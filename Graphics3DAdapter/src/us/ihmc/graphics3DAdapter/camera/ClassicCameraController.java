@@ -82,7 +82,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    private ArrayList<Point3d> keyFrameFixPos = new ArrayList<Point3d>(0);
    private ArrayList<Integer> keyFrameTimes = new ArrayList<Integer>(0);
    
-   private Graphics3DNode fixPointNode = new Graphics3DNode("cameraFixPoint", new Graphics3DObject(new Sphere3d(0.01), YoAppearance.RGBColor(255.0, 0.0, 0.0, 0.5)));
+   private Graphics3DNode fixPointNode = new Graphics3DNode("cameraFixPoint", new Graphics3DObject(new Sphere3d(0.01), YoAppearance.RGBColor(1.0, 0.0, 0.0, 0.5)));
 
    private boolean toggleCameraKeyPoints = false;
    private int cameraKeyPointIndex;

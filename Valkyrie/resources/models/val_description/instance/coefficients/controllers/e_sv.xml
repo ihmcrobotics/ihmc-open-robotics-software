@@ -25,7 +25,7 @@
     <Coeff id="ForceControl_enablePID" value="1.0"/>
     <Coeff id="ForceControl_m" value="400.0"/>
     <Coeff id="JointVelFilter_fc_Hz" value="100.0"/>
-    <Coeff id="LinearVelFilter_fc_Hz" value="50.0"/>
+    <Coeff id="LinearVelFilter_fc_Hz" value="100.0"/>
     <Coeff id="MotorAccFilter_fc_Hz" value="50.0"/>
     <Coeff id="MotorVelFilter_fc_Hz" value="800.0"/>
     <Coeff id="PositionControl_Kd" value="20.0"/>

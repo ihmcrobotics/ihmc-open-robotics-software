@@ -1,7 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -10,35 +11,25 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
-
 public class RigidBodyOrientationControlModule
 {
    private final AxisAngleOrientationController axisAngleOrientationController;
 
    private final RigidBody endEffector;
-   private final RigidBody base;
    private final TwistCalculator twistCalculator;
    private final Twist endEffectorTwist = new Twist();
    private final FrameVector currentAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
 
-   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
+   public RigidBodyOrientationControlModule(String namePrefix, RigidBody endEffector, TwistCalculator twistCalculator, double dt, YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, endEffector, twistCalculator, dt, null, parentRegistry);
+   }
+
+   public RigidBodyOrientationControlModule(String namePrefix, RigidBody endEffector, TwistCalculator twistCalculator, double dt, YoOrientationPIDGainsInterface gains,
          YoVariableRegistry parentRegistry)
    {
-      this(namePrefix, base, endEffector, twistCalculator, dt, null, false, parentRegistry);
-   }
-
-   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
-         YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
-   {
-      this(namePrefix, base, endEffector, twistCalculator, dt, gains, false, parentRegistry);
-   }
-
-   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
-         YoOrientationPIDGains gains, boolean visualize, YoVariableRegistry parentRegistry)
-   {
-      this.base = base;
       this.endEffector = endEffector;
-      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), dt, gains, visualize, parentRegistry);
+      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), dt, gains, parentRegistry);
       this.twistCalculator = twistCalculator;
    }
 
@@ -47,7 +38,8 @@ public class RigidBodyOrientationControlModule
       axisAngleOrientationController.reset();
    }
 
-   public void compute(FrameVector outputToPack, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
+   public void compute(FrameVector outputToPack, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity,
+         FrameVector feedForwardAngularAcceleration, RigidBody base)
    {
       // using twists is a bit overkill; optimize if needed.
       twistCalculator.getRelativeTwist(endEffectorTwist, base, endEffector);
@@ -61,7 +53,7 @@ public class RigidBodyOrientationControlModule
       axisAngleOrientationController.compute(outputToPack, desiredOrientation, desiredAngularVelocity, currentAngularVelocity, feedForwardAngularAcceleration);
    }
 
-   public void setGains(YoOrientationPIDGains gains)
+   public void setGains(OrientationPIDGainsInterface gains)
    {
       axisAngleOrientationController.setGains(gains);
    }
@@ -81,9 +73,9 @@ public class RigidBodyOrientationControlModule
       axisAngleOrientationController.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 
-   public RigidBody getBase()
+   public void getEndEffectorCurrentAngularVelocity(FrameVector angularVelocityToPack)
    {
-      return base;
+      angularVelocityToPack.setIncludingFrame(currentAngularVelocity);
    }
 
    public RigidBody getEndEffector()

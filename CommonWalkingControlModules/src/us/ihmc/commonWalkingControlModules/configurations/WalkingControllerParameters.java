@@ -2,19 +2,18 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.LinkedHashMap;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
+import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public interface WalkingControllerParameters extends HeadOrientationControllerParameters, SteppingParameters
 {
@@ -40,12 +39,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double defaultOffsetHeightAboveAnkle();
 
-   public abstract double minimumHeightBetweenAnkleAndPelvisForHeightAdjustment();
-
-   public abstract double nominalHeightBetweenAnkleAndPelvisForHeightAdjustment();
-
-   public abstract double maximumHeightBetweenAnkleAndPelvisForHeightAdjustment();
-
    public abstract double pelvisToAnkleThresholdForWalking();
 
    public abstract double getTimeToGetPreparedForLocomotion();
@@ -53,8 +46,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract boolean doToeOffIfPossible();
 
    public abstract boolean doToeOffIfPossibleInSingleSupport();
-
-   public abstract boolean checkTrailingLegJacobianDeterminantToTriggerToeOff();
 
    public abstract boolean checkECMPLocationToTriggerToeOff();
 
@@ -86,7 +77,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry);
 
-   public abstract YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry);
+   public abstract YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry);
 
    public abstract YoPDGains createCoMHeightControlGains(YoVariableRegistry registry);
 
@@ -94,24 +85,20 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry);
 
-   public abstract YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry);
+   public abstract YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry);
 
-   public abstract YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry);
+   public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
 
-   public abstract YoSE3PIDGains createHoldPositionFootControlGains(YoVariableRegistry registry);
+   public abstract YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry);
 
-   public abstract YoSE3PIDGains createToeOffFootControlGains(YoVariableRegistry registry);
+   public abstract YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry);
 
-   public abstract YoSE3PIDGains createEdgeTouchdownFootControlGains(YoVariableRegistry registry);
+   public abstract YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry);
 
    public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
 
-   public abstract double getSupportSingularityEscapeMultiplier();
-
-   public abstract double getSwingSingularityEscapeMultiplier();
-
    public abstract boolean doPrepareManipulationForLocomotion();
-   
+
    public abstract boolean controlHeadAndHandsWithSliders();
 
    public abstract double getDefaultTransferTime();
@@ -149,17 +136,17 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getContactThresholdForce();
 
    public abstract double getSecondContactThresholdForceIgnoringCoP();
-   
+
    /** Returns a map of neck joint names and associated min/max value joint limits. */
-   public abstract LinkedHashMap<NeckJointName,ImmutablePair<Double,Double>> getSliderBoardControlledNeckJointsWithLimits();
-   
+   public abstract LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits();
+
    public abstract SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits();
 
    public abstract double getCoPThresholdFraction();
 
    public abstract String[] getJointsToIgnoreInController();
 
-   public abstract void setupMomentumOptimizationSettings(MomentumOptimizationSettings momentumOptimizationSettings);
+   public abstract MomentumOptimizationSettings getMomentumOptimizationSettings();
 
    public abstract boolean doFancyOnToesControl();
 
@@ -168,25 +155,23 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getContactThresholdHeight();
 
    public abstract double getMaxICPErrorBeforeSingleSupportX();
-   public abstract double getMaxICPErrorBeforeSingleSupportY();
 
-   /**
-    * Sometimes the robot can get stuck in transfer state because the ICP error is too large to to switch to swing.
-    * Even in that state, the ICP planner is still giving a desired ICP velocity preventing the ICP convergence to a certain extent.
-    * This parameter allows to cancel out this desired velocity when stuck in the transfer state helping the convergence of the ICP and will help to get the robot to switch to swing.
-    * Set it to {@link Double#POSITIVE_INFINITY} so the ICP velocity won't be cancelled out.
-    * A value around 0.5sec to 1.0sec seems reasonable.
-    */
-   public abstract double getDurationToCancelOutDesiredICPVelocityWhenStuckInTransfer();
+   public abstract double getMaxICPErrorBeforeSingleSupportY();
 
    public abstract boolean finishSingleSupportWhenICPPlannerIsDone();
 
+   /** 
+    * This is the duration for which the desired foot center of pressure will be
+    * drastically dampened to calm shakies. This particularly useful when
+    * dealing with bad footholds.
+    * Set to -1.0 to deactivate this feature.
+    */ 
+   public abstract double getHighCoPDampingDurationToPreventFootShakies();
+
    /**
-    * Whether or not to use the hack n13.
-    * This hack consists in forcing the desired ICP to move inside the foot at the end of swing.
-    * It is terrible because it is done outside the ICP planner, the parameters are not robot agnostic, and it is buggy.
-    * Best thing to do is to switch to the new ICP planner that also provides the option to move the ICP towards the inside of the foot at the end of the swing but according to the ICP dynamics, much better. 
+    * This is complimentary information to {@link #getHighCoPDampingDurationToPreventFootShakies()}.
+    * The high CoP damping is triggered on large CoP tracking error.
+    * Set to {@link Double#POSITIVE_INFINITY} to deactivate this feature.
     */
-   @Deprecated
-   public abstract boolean useICPPlannerHackN13();
+   public abstract double getCoPErrorThresholdForHighCoPDamping();
 }

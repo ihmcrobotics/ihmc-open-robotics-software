@@ -4,9 +4,8 @@ import java.io.IOException;
 
 import net.java.games.input.Component;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.util.CommonNames;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -59,12 +58,6 @@ public class ValkyrieSliderBoard
       case WALKING:
          new WalkControllerSliderBoard(scs, registry, drcRobotModel);
          setupJoyStickAndTreadmill(registry);
-         break;
-      case GRAVITY_COMPENSATION:
-
-         new InverseDynamicsJointController.GravityCompensationSliderBoard(scs, drcRobotModel.createFullRobotModel(), registry,
-               CommonNames.doIHMCControlRatio.toString(), 0.0, 1.0);
-
          break;
       }
 

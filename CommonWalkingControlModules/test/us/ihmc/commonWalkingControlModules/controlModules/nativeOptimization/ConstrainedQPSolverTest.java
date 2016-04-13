@@ -11,8 +11,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class ConstrainedQPSolverTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
-	@Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 0.2)
+   @Test(timeout = 30000)
    public void testSolveContrainedQP() throws NoConvergenceException
    {
       YoVariableRegistry registry = new YoVariableRegistry("root");
@@ -25,15 +25,15 @@ public class ConstrainedQPSolverTest
       DenseMatrix64F bin = new DenseMatrix64F(nin, 1, true, 0);
 
       ConstrainedQPSolver[] optimizers = { //new JOptimizerConstrainedQPSolver(), new OASESConstrainedQPSolver(registry), new QuadProgSolver(registry),
-            new CompositeActiveSetQPSolver(registry) };
+            new CompositeActiveSetQPSolver(registry)};
       for (int repeat = 0; repeat < 10000; repeat++)
          for (int i = 0; i < optimizers.length; i++)
          {
             DenseMatrix64F x = new DenseMatrix64F(nv, 1, true, -1, 1);
             optimizers[i].solve(Q, f, Aeq, beq, Ain, bin, x, false);
-            Assert.assertArrayEquals(x.getData(), new double[] { -.5, .5 }, 1e-10);
-//            System.out.println("i=" + i);
-//            System.out.println("xopt=" + x);
+            Assert.assertArrayEquals(x.getData(), new double[] {-.5, .5}, 1e-10);
+            //            System.out.println("i=" + i);
+            //            System.out.println("xopt=" + x);
          }
    }
 

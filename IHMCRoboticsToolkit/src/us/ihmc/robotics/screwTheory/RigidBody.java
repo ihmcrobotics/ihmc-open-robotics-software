@@ -3,13 +3,15 @@ package us.ihmc.robotics.screwTheory;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RigidBody
+public class RigidBody implements NameBasedHashCodeHolder
 {
    private final RigidBodyInertia inertia;
    private final ReferenceFrame bodyFixedFrame;
@@ -19,8 +21,11 @@ public class RigidBody
    private final List<InverseDynamicsJoint> childrenJointsReadOnly = Collections.unmodifiableList(childrenJoints);
    private final String name;
 
+   private final long nameBasedHashCode;
+
    public RigidBody(String name, ReferenceFrame rootBodyFrame)    // root body constructor
    {
+      nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(name);
       this.name = name;
       this.inertia = null;
       this.bodyFixedFrame = rootBodyFrame;
@@ -30,6 +35,7 @@ public class RigidBody
 
    public RigidBody(String name, RigidBodyInertia inertia, InverseDynamicsJoint parentJoint)
    {
+      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(name, parentJoint);
       inertia.getBodyFrame().checkReferenceFrameMatch(inertia.getExpressedInFrame());    // inertia should be expressed in body frame, otherwise it will change
       this.name = name;
       this.inertia = inertia;
@@ -140,5 +146,11 @@ public class RigidBody
 //      }
 
       return builder.toString();
+   }
+
+   @Override
+   public long nameBasedHashCode()
+   {
+      return nameBasedHashCode;
    }
 }

@@ -1,20 +1,24 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
@@ -47,7 +51,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
 
    protected double forceDuration;
 
-   protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList();
+   protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
 
    StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.LEFT);
 
@@ -84,6 +88,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @Ignore("Needs to be improved")
    @DeployableTestMethod(estimatedDuration = 67.1)
    @Test(timeout = 340000)
    public void testMultiStepForwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
@@ -94,7 +99,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       setForwardPushParameters();
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -109,6 +114,12 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       // re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
+
+      Point3d center = new Point3d(0.0, 0.0, 0.8882009563211146);
+      Vector3d plusMinusVector = new Vector3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      DRCSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox, drcFlatGroundWalkingTrack.getDrcSimulation().getRobot());
+
       createVideo(scs);
       BambooTools.reportTestFinishedMessage();
    }
@@ -123,7 +134,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       setBackwardPushParameters();
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -138,6 +149,12 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       // re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
+
+      Point3d center = new Point3d(0.0, 0.0, 0.8882009563211146);
+      Vector3d plusMinusVector = new Vector3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      DRCSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox, drcFlatGroundWalkingTrack.getDrcSimulation().getRobot());
+
       createVideo(scs);
       BambooTools.reportTestFinishedMessage();
    }
@@ -164,7 +181,8 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       {
          String prefix = fullRobotModel.getFoot(robotSide).getName();
          scs.getVariable(prefix + "FootControlModule", prefix + "State");
-         final EnumYoVariable<WalkingState> walkingState = (EnumYoVariable<WalkingState>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
+         @SuppressWarnings("unchecked")
+         final EnumYoVariable<WalkingStateEnum> walkingState = (EnumYoVariable<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
    }
@@ -185,11 +203,11 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
 
    private class DoubleSupportStartCondition implements StateTransitionCondition
    {
-      private final EnumYoVariable<WalkingState> walkingState;
+      private final EnumYoVariable<WalkingStateEnum> walkingState;
 
       private final RobotSide side;
 
-      public DoubleSupportStartCondition(EnumYoVariable<WalkingState> walkingState, RobotSide side)
+      public DoubleSupportStartCondition(EnumYoVariable<WalkingStateEnum> walkingState, RobotSide side)
       {
          this.walkingState = walkingState;
          this.side = side;
@@ -200,11 +218,11 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       {
          if (side == RobotSide.LEFT)
          {
-            return (walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT) || (walkingState.getEnumValue() == WalkingState.TRANSFER_TO_LEFT_SUPPORT);
+            return (walkingState.getEnumValue() == WalkingStateEnum.TO_STANDING) || (walkingState.getEnumValue() == WalkingStateEnum.TO_WALKING_LEFT_SUPPORT);
          }
          else
          {
-            return (walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT) || (walkingState.getEnumValue() == WalkingState.TRANSFER_TO_RIGHT_SUPPORT);
+            return (walkingState.getEnumValue() == WalkingStateEnum.TO_STANDING) || (walkingState.getEnumValue() == WalkingStateEnum.TO_WALKING_RIGHT_SUPPORT);
          }
       }
    }

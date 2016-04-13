@@ -8,11 +8,11 @@
     <xacro:make_leg prefix="right" reflect="-1" leg_root_link="${Pelvis_Link_Name}"/>
     <xacro:make_leg prefix="left" reflect="1" leg_root_link="${Pelvis_Link_Name}"/>
 
-    <xacro:v1_trunk_sensors/>
+    <xacro:v1_trunk_sensors_usb sensor_node_tag="${torso_left_imu_node}" sensor_api_tag="${ImuMicrostrainHardwareApi}" sensor_port_tag="${torso_left_imu_port}"/>
     <xacro:v1_leg_sensors prefix="left" reflect="1" ATI_serial_number="${left_foot_ATI_serial}" ATI_node="${left_foot_ATI_node}"/>
     <xacro:v1_leg_sensors prefix="right" reflect="-1" ATI_serial_number="${right_foot_ATI_serial}" ATI_node="${right_foot_ATI_node}"/>
     <xacro:include_multisense_hw />
-    <xacro:v1_pelvis_sensors/>
+    <xacro:v1_pelvis_rear_sensors_usb sensor_node_tag="${pelvis_rear_imu_node}" sensor_api_tag="${ImuMicrostrainHardwareApi}"  sensor_port_tag="${pelvis_rear_imu_port}"/>
 
     <xacro:waist_transmissions_hw />
     <xacro:leg_transmissions_hw prefix="left"/>

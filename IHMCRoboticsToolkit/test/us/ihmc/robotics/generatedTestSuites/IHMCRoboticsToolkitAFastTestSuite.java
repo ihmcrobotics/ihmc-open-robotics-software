@@ -96,6 +96,9 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.hyperCubeTree.SphericalLinearResolutionProviderTest.class,
    us.ihmc.robotics.kinematics.AverageQuaternionCalculatorTest.class,
    us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculatorTest.class,
+   us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorsComparisonTest.class,
+   us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorTest.class,
+   us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorWithDerivativesTest.class,
    us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculatorTest.class,
    us.ihmc.robotics.kinematics.TimeStampedTransform3DTest.class,
    us.ihmc.robotics.kinematics.TransformInterpolationCalculatorTest.class,
@@ -126,11 +129,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariableTest.class,
    us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternionTest.class,
    us.ihmc.robotics.math.filters.AlphaFilteredYoVariableTest.class,
-   us.ihmc.robotics.math.filters.AlphaFusedYoVariableTest.class,
-   us.ihmc.robotics.math.filters.BacklashCompensatingVelocityYoVariableTest.class,
-   us.ihmc.robotics.math.filters.BacklashProcessingYoVariableTest.class,
-   us.ihmc.robotics.math.filters.BetaFilteredYoVariableTest.class,
-   us.ihmc.robotics.math.filters.DeadzoneYoVariableTest.class
+   us.ihmc.robotics.math.filters.AlphaFusedYoVariableTest.class
 })
 
 public class IHMCRoboticsToolkitAFastTestSuite

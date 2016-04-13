@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 import java.util.Random;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.robotics.random.RandomTools;
 
@@ -11,7 +11,7 @@ import us.ihmc.robotics.random.RandomTools;
  * Created by dstephen on 3/26/15.
  */
 @ClassDocumentation("Specifies a specific electric motor in the Atlas forearm to power on or off.")
-public class AtlasElectricMotorEnablePacket extends IHMCRosApiPacket<AtlasElectricMotorEnablePacket>
+public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEnablePacket>
 {
    public AtlasElectricMotorPacketEnum motorEnableEnum;
    public boolean enable;

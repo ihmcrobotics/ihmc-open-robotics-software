@@ -14,7 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HighLevelStateBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.time.GlobalTimer;
@@ -72,7 +72,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
    {
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null,
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(),
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
@@ -91,7 +91,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
 
       highLevelStateBehavior.initialize();
-      highLevelStateBehavior.setInput(new HighLevelStatePacket(desiredState));
+      highLevelStateBehavior.setInput(new HighLevelStateMessage(desiredState));
       assertTrue(highLevelStateBehavior.hasInputBeenSet());
 
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(highLevelStateBehavior, trajectoryTime);
@@ -137,7 +137,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
 
       highLevelStateBehavior.initialize();
-      highLevelStateBehavior.setInput(new HighLevelStatePacket(desiredState));
+      highLevelStateBehavior.setInput(new HighLevelStateMessage(desiredState));
       assertTrue(highLevelStateBehavior.hasInputBeenSet());
 
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(highLevelStateBehavior, trajectoryTime);
@@ -154,6 +154,6 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
 
    private HighLevelState getCurrentHighLevelState()
    {
-      return drcBehaviorTestHelper.getDRCSimulationFactory().getControllerFactory().getHighLevelHumanoidControllerManager().getCurrentHighLevelState();
+      return drcBehaviorTestHelper.getDRCSimulationFactory().getControllerFactory().getCurrentHighLevelState();
    }
 }

@@ -88,6 +88,10 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
       set(tuple);
    }
    
+   /**
+    * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and sets the z component to zero.
+    * @param tuple2d
+    */
    public final void setXYIncludingFrame(ReferenceFrame referenceFrame, Tuple2d tuple)
    {
       this.referenceFrame = referenceFrame;
@@ -98,7 +102,6 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     * Set the x and y components of this frameTuple to frameTuple2d.x and frameTuple2d.y respectively, and sets the z component to zero.
     * Changes the referenceFrame of this frameTuple to frameTuple2d.getReferenceFrame().
     * @param frameTuple2d
-    * @throws ReferenceFrameMismatchException
     */
    public void setXYIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
    {

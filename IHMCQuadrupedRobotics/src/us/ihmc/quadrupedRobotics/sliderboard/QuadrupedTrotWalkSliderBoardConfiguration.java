@@ -36,9 +36,9 @@ public class QuadrupedTrotWalkSliderBoardConfiguration implements EnumDependentS
       sliderBoardConfigurationManager.setSlider(6, namespace + "desiredStanceOffsetYaw", scs, -0.3, 0.3);
       sliderBoardConfigurationManager.setSlider(7, namespace + "desiredICPFromCentroidX", scs, -0.2, 0.2);
       sliderBoardConfigurationManager.setSlider(8, namespace + "desiredICPFromCentroidY", scs, -0.2, 0.2);
-//      sliderBoardConfigurationManager.setButtonEnum(1, namespace + "desiredGait", scs, QuadrupedGaitCycle.STAND);
-//      sliderBoardConfigurationManager.setButtonEnum(2, namespace + "desiredGait", scs, QuadrupedGaitCycle.SAFE_WALK);
-//      sliderBoardConfigurationManager.setButtonEnum(3, namespace + "desiredGait", scs, QuadrupedGaitCycle.WALKING_TROT);
+      sliderBoardConfigurationManager.setButtonEnum(1, namespace + "desiredGait", scs, QuadrupedGaitCycle.STAND);
+      sliderBoardConfigurationManager.setButtonEnum(2, namespace + "desiredGait", scs, QuadrupedGaitCycle.SAFE_WALK);
+      sliderBoardConfigurationManager.setButtonEnum(3, namespace + "desiredGait", scs, QuadrupedGaitCycle.PERFECT_TROT);
       sliderBoardConfigurationManager.saveConfiguration(QuadrupedSliderBoardMode.TROT_WALK.toString());
    }
 

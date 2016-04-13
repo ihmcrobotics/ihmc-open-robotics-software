@@ -1,17 +1,21 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.FOOT_SWING_WEIGHT;
+
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.tools.FormattingTools;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.tools.FormattingTools;
 
 /**
  * The unconstrained state is used if the foot is moved free in space without constrains. Depending on the type of trajectory
@@ -22,51 +26,69 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public abstract class AbstractUnconstrainedState extends AbstractFootControlState
 {
    private static final boolean USE_ALL_LEG_JOINT_SWING_CORRECTOR = false;
-   private static final boolean CONTROL_WITH_RESPECT_TO_PELVIS = false;
+
+   private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
    protected boolean trajectoryWasReplanned;
-
-   protected final YoSE3PIDGains gains;
 
    protected final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
    private final LegJointLimitAvoidanceControlModule legJointLimitAvoidanceControlModule;
 
-   private final OneDoFJoint hipYawJoint, anklePitchJoint, ankleRollJoint;
-
    private final YoFramePoint yoDesiredPosition;
-   private final YoFramePoint yoAdjustedDesiredPosition;
    private final YoFrameVector yoDesiredLinearVelocity;
    private final BooleanYoVariable yoSetDesiredAccelerationToZero;
    private final BooleanYoVariable yoSetDesiredVelocityToZero;
 
-   private final RigidBody pelvis;
+   private final YoFrameVector angularWeight;
+   private final YoFrameVector linearWeight;
 
-   public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoSE3PIDGains gains, YoVariableRegistry registry)
+   public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains,
+         YoVariableRegistry registry)
    {
       super(constraintType, footControlHelper, registry);
 
       this.legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
-      this.gains = gains;
-
-      this.hipYawJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_YAW);
-      this.ankleRollJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
-      this.anklePitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
 
       RigidBody foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName() + FormattingTools.underscoredToCamelCase(constraintType.toString().toLowerCase(), true);
       yoDesiredLinearVelocity = new YoFrameVector(namePrefix + "DesiredLinearVelocity", worldFrame, registry);
       yoDesiredLinearVelocity.setToNaN();
       yoDesiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", worldFrame, registry);
-      yoAdjustedDesiredPosition = new YoFramePoint(namePrefix + "AdjustedDesiredPosition", worldFrame, registry);
       yoDesiredPosition.setToNaN();
       yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
       yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
-      pelvis = momentumBasedController.getFullRobotModel().getPelvis();
+
+      angularWeight = new YoFrameVector(namePrefix + "AngularWeight", null, registry);
+      linearWeight = new YoFrameVector(namePrefix + "LinearWeight", null, registry);
+
+      angularWeight.set(FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT);
+      linearWeight.set(FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT);
 
       if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
          legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController, robotSide);
       else
          legJointLimitAvoidanceControlModule = null;
+
+      spatialFeedbackControlCommand.set(rootBody, foot);
+      spatialFeedbackControlCommand.setPrimaryBase(footControlHelper.getMomentumBasedController().getFullRobotModel().getPelvis());
+      spatialFeedbackControlCommand.setGains(gains);
+      FramePose anklePoseInFoot = new FramePose(contactableFoot.getFrameAfterParentJoint());
+      anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
+      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(anklePoseInFoot);
+   }
+
+   public void setWeight(double weight)
+   {
+      angularWeight.set(1.0, 1.0, 1.0);
+      angularWeight.scale(weight);
+      linearWeight.set(1.0, 1.0, 1.0);
+      linearWeight.scale(weight);
+   }
+
+   public void setWeights(Vector3d angularWeight, Vector3d linearWeight)
+   {
+      this.angularWeight.set(angularWeight);
+      this.linearWeight.set(linearWeight);
    }
 
    /**
@@ -88,30 +110,20 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
 
       initializeTrajectory();
-
-      footControlHelper.setGains(gains);
-      footControlHelper.resetSelectionMatrix();
    }
+
+   private final Vector3d tempAngularWeightVector = new Vector3d();
+   private final Vector3d tempLinearWeightVector = new Vector3d();
 
    @Override
    public void doSpecificAction()
    {
-      footControlHelper.setGains(gains);
-
-      //TODO: If we reinitialize after singularity escape, we 
-      // need to do it smartly. The stuff below causes really
-      // bad swing tracking due to a huge discontinuity in the desireds.
-//      if (footControlHelper.isDoingSingularityEscape())
-//      {
-//         initializeTrajectory();
-//      }
-
       computeAndPackTrajectory();
 
       if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
       {
          legJointLimitAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-                 desiredLinearAcceleration, desiredAngularAcceleration);
+               desiredLinearAcceleration, desiredAngularAcceleration);
       }
 
       legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
@@ -126,99 +138,14 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
          desiredLinearAcceleration.setToZero();
       }
 
-      RigidBody baseForControl = CONTROL_WITH_RESPECT_TO_PELVIS ? pelvis : rootBody;
-      RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
-      accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-              desiredLinearAcceleration, desiredAngularAcceleration, baseForControl);
-      accelerationControlModule.getAcceleration(footAcceleration);
+      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      angularWeight.get(tempAngularWeightVector);
+      linearWeight.get(tempLinearWeightVector);
+      spatialFeedbackControlCommand.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
 
-      footControlHelper.updateSelectionMatrixToHandleAnkleRollAndHipYawAlignment();
-      footControlHelper.submitTaskspaceConstraint(footAcceleration);
-
-      desiredPosition.changeFrame(worldFrame);
-      yoDesiredPosition.set(desiredPosition);
-      desiredLinearVelocity.changeFrame(worldFrame);
-      yoDesiredLinearVelocity.set(desiredLinearVelocity);
-   }
-
-   private final double[] desiredYawPitchRoll = new double[3];
-   private final double epsilon = 1e-3;
-
-   // TODO Pretty much hackish...
-   private void correctInputsAccordingToJointLimits()
-   {
-      ReferenceFrame frameBeforeHipYawJoint = hipYawJoint.getFrameBeforeJoint();
-      desiredOrientation.changeFrame(frameBeforeHipYawJoint);
-      desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
-
-      if (desiredYawPitchRoll[0] > hipYawJoint.getJointLimitUpper() - epsilon)
-      {
-         desiredYawPitchRoll[0] = hipYawJoint.getJointLimitUpper();
-         desiredAngularVelocity.changeFrame(frameBeforeHipYawJoint);
-         desiredAngularVelocity.setZ(Math.min(0.0, desiredAngularVelocity.getZ()));
-         desiredAngularAcceleration.changeFrame(frameBeforeHipYawJoint);
-         desiredAngularAcceleration.setZ(Math.min(0.0, desiredAngularVelocity.getZ()));
-      }
-      else if (desiredYawPitchRoll[0] < hipYawJoint.getJointLimitLower() + epsilon)
-      {
-         desiredYawPitchRoll[0] = hipYawJoint.getJointLimitLower();
-         desiredAngularVelocity.changeFrame(frameBeforeHipYawJoint);
-         desiredAngularVelocity.setZ(Math.max(0.0, desiredAngularVelocity.getZ()));
-         desiredAngularAcceleration.changeFrame(frameBeforeHipYawJoint);
-         desiredAngularAcceleration.setZ(Math.max(0.0, desiredAngularVelocity.getZ()));
-      }
-
-      desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
-
-      ReferenceFrame frameBeforeAnklePitchJoint = anklePitchJoint.getFrameBeforeJoint();
-      desiredOrientation.changeFrame(frameBeforeAnklePitchJoint);
-      desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
-
-      if (desiredYawPitchRoll[1] > anklePitchJoint.getJointLimitUpper() - epsilon)
-      {
-         desiredYawPitchRoll[1] = anklePitchJoint.getJointLimitUpper();
-         desiredAngularVelocity.changeFrame(frameBeforeAnklePitchJoint);
-         desiredAngularVelocity.setY(Math.min(0.0, desiredAngularVelocity.getY()));
-         desiredAngularAcceleration.changeFrame(frameBeforeAnklePitchJoint);
-         desiredAngularAcceleration.setY(Math.min(0.0, desiredAngularVelocity.getY()));
-      }
-      else if (desiredYawPitchRoll[1] < anklePitchJoint.getJointLimitLower() + epsilon)
-      {
-         desiredYawPitchRoll[1] = anklePitchJoint.getJointLimitLower();
-         desiredAngularVelocity.changeFrame(frameBeforeAnklePitchJoint);
-         desiredAngularVelocity.setY(Math.max(0.0, desiredAngularVelocity.getY()));
-         desiredAngularAcceleration.changeFrame(frameBeforeAnklePitchJoint);
-         desiredAngularAcceleration.setY(Math.max(0.0, desiredAngularVelocity.getY()));
-      }
-
-      desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
-
-      ReferenceFrame frameBeforeAnkleRollJoint = ankleRollJoint.getFrameBeforeJoint();
-      desiredOrientation.changeFrame(frameBeforeAnkleRollJoint);
-      desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
-
-      if (desiredYawPitchRoll[2] > ankleRollJoint.getJointLimitUpper() - epsilon)
-      {
-         desiredYawPitchRoll[2] = ankleRollJoint.getJointLimitUpper();
-         desiredAngularVelocity.changeFrame(frameBeforeAnkleRollJoint);
-         desiredAngularVelocity.setX(Math.min(0.0, desiredAngularVelocity.getX()));
-         desiredAngularAcceleration.changeFrame(frameBeforeAnkleRollJoint);
-         desiredAngularAcceleration.setX(Math.min(0.0, desiredAngularVelocity.getX()));
-      }
-      else if (desiredYawPitchRoll[2] < ankleRollJoint.getJointLimitLower() + epsilon)
-      {
-         desiredYawPitchRoll[2] = ankleRollJoint.getJointLimitLower();
-         desiredAngularVelocity.changeFrame(frameBeforeAnkleRollJoint);
-         desiredAngularVelocity.setX(Math.max(0.0, desiredAngularVelocity.getX()));
-         desiredAngularAcceleration.changeFrame(frameBeforeAnkleRollJoint);
-         desiredAngularAcceleration.setX(Math.max(0.0, desiredAngularVelocity.getX()));
-      }
-
-      desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
-
-      desiredOrientation.changeFrame(worldFrame);
-      desiredAngularVelocity.changeFrame(worldFrame);
-      desiredAngularAcceleration.changeFrame(worldFrame);
+      yoDesiredPosition.setAndMatchFrame(desiredPosition);
+      yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
    }
 
    @Override
@@ -228,6 +155,17 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoDesiredPosition.setToNaN();
       yoDesiredLinearVelocity.setToNaN();
       trajectoryWasReplanned = false;
-      footControlHelper.resetSelectionMatrix();
+   }
+
+   @Override
+   public SpatialAccelerationCommand getInverseDynamicsCommand()
+   {
+      return null;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return spatialFeedbackControlCommand;
    }
 }

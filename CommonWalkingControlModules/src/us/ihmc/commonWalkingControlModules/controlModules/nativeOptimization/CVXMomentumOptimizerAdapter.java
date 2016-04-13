@@ -18,7 +18,7 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
 
    private final DenseMatrix64F rhoPrevious;
    private final YoMatrix rhoPreviousYoMatrix;
-   
+
    private DenseMatrix64F outputRho, outputJointAccelerations;
    private double outputOptVal;
 
@@ -34,7 +34,7 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
 
       outputRho = new DenseMatrix64F(rhoSize, 1);
       rhoPrevious = new DenseMatrix64F(rhoSize, 1);
-      
+
       rhoPreviousYoMatrix = new YoMatrix("rhoPreviousYoMatrix", rhoSize, 1, registry);
    }
 
@@ -68,14 +68,9 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
       return nPlanes;
    }
 
-   public void setInputs(
-         DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F momentumDotWeight, 
-                         DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary,
-                         DenseMatrix64F WRho, DenseMatrix64F Lambda,
-                         DenseMatrix64F WRhoSmoother, DenseMatrix64F rhoPrevAvg, DenseMatrix64F WRhoCop,
-                         DenseMatrix64F QRho, DenseMatrix64F c,
-                         DenseMatrix64F rhoMin, DenseMatrix64F QfeetCoP
-                         )
+   public void setInputs(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F momentumDotWeight, DenseMatrix64F jSecondary, DenseMatrix64F pSecondary,
+         DenseMatrix64F weightMatrixSecondary, DenseMatrix64F WRho, DenseMatrix64F Lambda, DenseMatrix64F WRhoSmoother, DenseMatrix64F rhoPrevAvg,
+         DenseMatrix64F WRhoCop, DenseMatrix64F QRho, DenseMatrix64F c, DenseMatrix64F rhoMin)
    {
       //A,b,c
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setCentroidalMomentumMatrix(a);
@@ -99,44 +94,38 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
       //QRho,c 
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setContactPointWrenchMatrix(QRho);
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setWrenchEquationRightHandSide(c);
-      
+
       //Rho_min
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoMin(rhoMin);
-      
+
       //Wrho
       rhoPreviousYoMatrix.get(rhoPrevious);
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoPrevious(rhoPrevious);
-      
-      //QfeetCoP
-//      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setQfeetCoP(QfeetCoP);
    }
 
-   
    public int solve() throws NoConvergenceException
    {
       CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput momentumOptimizerWithGRFPenalizedSmootherNativeOutput;
-      int ret=-999;
+      int ret = -999;
 
       try
       {
-         ret=momentumOptimizerWithGRFPenalizedSmootherNative.solve(momentumOptimizerWithGRFPenalizedSmootherNativeInput);
-      }
-      finally
+         ret = momentumOptimizerWithGRFPenalizedSmootherNative.solve(momentumOptimizerWithGRFPenalizedSmootherNativeInput);
+      } finally
       {
-         momentumOptimizerWithGRFPenalizedSmootherNativeOutput=momentumOptimizerWithGRFPenalizedSmootherNative.getOutput();
+         momentumOptimizerWithGRFPenalizedSmootherNativeOutput = momentumOptimizerWithGRFPenalizedSmootherNative.getOutput();
          outputRho = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getRho();
          outputJointAccelerations = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getJointAccelerations();
          outputOptVal = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getOptVal();
-         
+
          rhoPreviousYoMatrix.set(outputRho);
       }
-      
-      if (ret<0)
+
+      if (ret < 0)
          throw new NoConvergenceException();
-      
+
       return ret;
    }
-   
 
    public DenseMatrix64F getOutputRho()
    {
@@ -156,9 +145,9 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
    @Override
    public void setInputs(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F momentumDotWeight, DenseMatrix64F jPrimary, DenseMatrix64F pPrimary,
          DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary, DenseMatrix64F WRho, DenseMatrix64F Lambda,
-         DenseMatrix64F RhoSmoother, DenseMatrix64F rhoPrevAvg, DenseMatrix64F WRhoCop, DenseMatrix64F QRho, DenseMatrix64F c, DenseMatrix64F rhoMin, DenseMatrix64F QfeetCoP)
+         DenseMatrix64F RhoSmoother, DenseMatrix64F rhoPrevAvg, DenseMatrix64F WRhoCop, DenseMatrix64F QRho, DenseMatrix64F c, DenseMatrix64F rhoMin)
    {
       throw new RuntimeException("Not implemented, current CVXGEN version do not take primary constraints");
-      
+
    }
 }

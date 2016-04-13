@@ -5,10 +5,10 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.DRCVehicleModelObjects;
+import us.ihmc.darpaRoboticsChallenge.VehicleModelObjects;
+import us.ihmc.darpaRoboticsChallenge.VehicleObject;
 import us.ihmc.darpaRoboticsChallenge.controllers.SteeringWheelDisturbanceController;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -35,7 +35,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 
    public DRCDemoEnvironmentWithBoxAndSteeringWheel(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      DRCVehicleModelObjects drcVehicleModelObjects = new DRCVehicleModelObjects();
+      VehicleModelObjects drcVehicleModelObjects = new VehicleModelObjects();
 
 
 
@@ -48,7 +48,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       createBars(environmentRobots, contactables);
    }
 
-   private static ContactableToroidRobot createSteeringWheel(DRCVehicleModelObjects drcVehicleModelObjects)
+   private static ContactableToroidRobot createSteeringWheel(VehicleModelObjects drcVehicleModelObjects)
    {
       RigidBodyTransform steeringWheelTransform = drcVehicleModelObjects.getTransform(VehicleObject.STEERING_WHEEL);
 

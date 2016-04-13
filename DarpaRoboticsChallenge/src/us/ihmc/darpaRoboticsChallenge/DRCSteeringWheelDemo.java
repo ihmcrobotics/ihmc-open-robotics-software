@@ -2,7 +2,6 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPositionControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.LockPelvisController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
@@ -21,7 +20,6 @@ public class DRCSteeringWheelDemo
       CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment(percentOfSteeringWheelRadius);
 
       DRCSimulationStarter simStarter = new DRCSimulationStarter(model, environment);
-      simStarter.registerHighLevelController(new JointPositionControllerFactory(true));
 
       simStarter.setRunMultiThreaded(true);      
       simStarter.setUsePerfectSensors(true);

@@ -9,27 +9,23 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 
 public class AtlasArmControllerParameters implements ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
-   private final double handCenterOffset;
+   private final DRCRobotJointMap jointMap;
 
-   public AtlasArmControllerParameters()
-   {
-      this(false, 0.0);
-   }
-
-   public AtlasArmControllerParameters(boolean runningOnRealRobot, double handCenterOffset)
+   public AtlasArmControllerParameters(boolean runningOnRealRobot, DRCRobotJointMap jointMap)
    {
       this.runningOnRealRobot = runningOnRealRobot;
-      this.handCenterOffset = handCenterOffset;
+      this.jointMap = jointMap;
    }
 
    @Override
@@ -38,7 +34,7 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
       YoPIDGains jointspaceControlGains = new YoPIDGains("ArmJointspace", registry);
 
       double kp = runningOnRealRobot ? 40.0 : 80.0;
-      double zeta = runningOnRealRobot ? 0.0 : 0.6;
+      double zeta = runningOnRealRobot ? 0.3 : 0.6;
       double ki = 0.0;
       double maxIntegralError = 0.0;
       double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
@@ -56,12 +52,12 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    }
 
    @Override
-   public YoSE3PIDGains createTaskspaceControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createTaskspaceControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains taskspaceControlGains = new YoSymmetricSE3PIDGains("ArmTaskspace", registry);
 
-      double kp = 100.0;
-      double zeta = runningOnRealRobot ? 0.6 : 1.0;
+      double kp = runningOnRealRobot ? 40.0 :100.0;
+      double zeta = runningOnRealRobot ? 0.3 : 1.0;
       double ki = 0.0;
       double maxIntegralError = 0.0;
       double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
@@ -79,7 +75,7 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    }
 
    @Override
-   public YoSE3PIDGains createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry)
    {
       YoIndependentSE3PIDGains taskspaceControlGains = new YoIndependentSE3PIDGains("ArmLoadBearing", registry);
       taskspaceControlGains.reset();
@@ -99,15 +95,23 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    }
 
    @Override
-   public boolean useInverseKinematicsTaskspaceControl()
+   public String[] getPositionControlledJointNames(RobotSide robotSide)
    {
-      return true;
-   }
+      if (runningOnRealRobot)
+      {
+         ArmJointName[] armJointNames = jointMap.getArmJointNames();
+         int numberOfArmJoints = armJointNames.length;
+         String[] positionControlledJointNames = new String[numberOfArmJoints];
 
-   @Override
-   public boolean doLowLevelPositionControl()
-   {
-      return runningOnRealRobot; // Set to false for torque control
+         for (int i  = 0; i < numberOfArmJoints; i++)
+            positionControlledJointNames[i] = jointMap.getArmJointName(robotSide, armJointNames[i]);
+
+         return positionControlledJointNames;
+      }
+      else
+      {
+         return null;
+      }
    }
 
    @Override
@@ -124,11 +128,5 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
       jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SECOND_WRIST_PITCH), robotSide.negateIfRightSide(0.0));
 
       return jointPositions;
-   }
-
-   @Override
-   public double getWristHandCenterOffset()
-   {
-      return handCenterOffset;
    }
 }

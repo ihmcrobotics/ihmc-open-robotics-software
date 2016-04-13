@@ -25,7 +25,7 @@ public class FootRotationProcessor implements LogDataProcessorFunction
    public FootRotationProcessor(LogDataProcessorHelper logDataProcessorHelper)
    {
       this.logDataProcessorHelper = logDataProcessorHelper;
-      SideDependentList<ContactablePlaneBody> contactableFeet = logDataProcessorHelper.getContactableFeet();
+      SideDependentList<? extends ContactablePlaneBody> contactableFeet = logDataProcessorHelper.getContactableFeet();
       double controllerDT = logDataProcessorHelper.getControllerDT();
       TwistCalculator twistCalculator = logDataProcessorHelper.getTwistCalculator();
       WalkingControllerParameters walkingControllerParameters = logDataProcessorHelper.getWalkingControllerParameters();

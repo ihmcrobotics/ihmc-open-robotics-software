@@ -17,6 +17,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
@@ -67,6 +68,46 @@ public class Line2dTest
 
       }
 
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testIsPointInFrontOfLine2d()
+   {
+      Line2d line2d = new Line2d();
+      Point2d point1 = new Point2d();
+      Point2d point2 = new Point2d();
+      Point2d point3 = new Point2d();
+      Vector2d frontDirection = new Vector2d();
+      
+      point1.set(0.0, 0.0);
+      point2.set(1.0, 1.0);
+      line2d.set(point1, point2);
+      frontDirection.set(0.0, 1.0);
+      
+      point3.set(0.0, 1.0);
+      assertEquals("not equal", true, line2d.isPointInFrontOfLine(frontDirection, point3));
+      
+      point3.set(0.0, -1.0);
+      assertEquals("not equal", false, line2d.isPointInFrontOfLine(frontDirection, point3));
+      
+      point1.set(0.0, 0.0);
+      point2.set(-1.0, 1.0);
+      line2d.set(point1, point2);
+      
+      point3.set(0.0, 1.0);
+      assertEquals("not equal", true, line2d.isPointInFrontOfLine(frontDirection, point3));
+      
+      point3.set(0.0, -1.0);
+      assertEquals("not equal", false, line2d.isPointInFrontOfLine(frontDirection, point3));
+      
+      frontDirection.set(0.0, -1.0);
+      
+      point3.set(0.0, 1.0);
+      assertEquals("not equal", false, line2d.isPointInFrontOfLine(frontDirection, point3));
+      
+      point3.set(0.0, -1.0);
+      assertEquals("not equal", true, line2d.isPointInFrontOfLine(frontDirection, point3));
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -1606,6 +1647,13 @@ public class Line2dTest
       distance = line.distance(point);
       delta = 1e-12;
       assertEquals("Distance to a horizontal line not calculated correctly", 3.0, distance, delta);
+   }
+	
+	public static void main(String[] args)
+   {
+	   String targetTests = "us.ihmc.robotics.geometry.Line2dTest";
+	   String targetClasses = "us.ihmc.robotics.geometry.FrameTuple,us.ihmc.robotics.geometry.Line2d";
+	   MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
    }
 
 }

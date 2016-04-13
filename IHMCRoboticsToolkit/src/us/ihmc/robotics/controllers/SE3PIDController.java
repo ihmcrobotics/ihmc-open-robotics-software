@@ -33,23 +33,23 @@ public class SE3PIDController
    private final FrameVector currentVelocity = new FrameVector();
    private final FrameVector accelerationFromPositionController = new FrameVector();
 
-   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, boolean visualize, double dt, YoVariableRegistry registry)
+   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry registry)
    {
-      this(namePrefix, bodyFrame, visualize, dt, null, registry);
+      this(namePrefix, bodyFrame, dt, null, registry);
    }
 
-   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, boolean visualize, double dt, YoSE3PIDGains gains, YoVariableRegistry registry)
+   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       this.bodyFrame = bodyFrame;
       if (gains != null)
       {
-         orientationController = new AxisAngleOrientationController(namePrefix, bodyFrame, dt, gains.getOrientationGains(), visualize, registry);
-         positionController = new EuclideanPositionController(namePrefix, bodyFrame, dt, gains.getPositionGains(), visualize, registry);
+         orientationController = new AxisAngleOrientationController(namePrefix, bodyFrame, dt, gains.getOrientationGains(), registry);
+         positionController = new EuclideanPositionController(namePrefix, bodyFrame, dt, gains.getPositionGains(), registry);
       }
       else
       {
-         orientationController = new AxisAngleOrientationController(namePrefix, bodyFrame, dt, visualize, registry);
-         positionController = new EuclideanPositionController(namePrefix, bodyFrame, dt, visualize, registry);
+         orientationController = new AxisAngleOrientationController(namePrefix, bodyFrame, dt, registry);
+         positionController = new EuclideanPositionController(namePrefix, bodyFrame, dt, registry);
       }
    }
 
@@ -133,35 +133,6 @@ public class SE3PIDController
       orientationController.setIntegralGains(kix, kiy, kiz, maxIntegralError);
    }
 
-   public void setGains(SE3PIDGains gains)
-   {
-      positionController.setProportionalGains(gains.getPositionProportionalGains());
-      positionController.setDerivativeGains(gains.getPositionDerivativeGains());
-      positionController.setIntegralGains(gains.getPositionIntegralGains(), gains.getPositionMaxIntegralError());
-      positionController.setMaxAccelerationAndJerk(gains.getPositionMaximumAcceleration(), gains.getPositionMaximumJerk());
-
-      orientationController.setProportionalGains(gains.getOrientationProportionalGains());
-      orientationController.setDerivativeGains(gains.getOrientationDerivativeGains());
-      orientationController.setIntegralGains(gains.getOrientationIntegralGains(), gains.getOrientationMaxIntegralError());
-      orientationController.setMaxAccelerationAndJerk(gains.getOrientationMaximumAcceleration(), gains.getOrientationMaximumJerk());
-   }
-
-   public void setGains(YoSE3PIDGains gains)
-   {
-      positionController.setGains(gains.getPositionGains());
-      orientationController.setGains(gains.getOrientationGains());
-   }
-
-   public void setPositionGains(YoPositionPIDGains gains)
-   {
-      positionController.setGains(gains);
-   }
-
-   public void setOrientationGains(YoOrientationPIDGains gains)
-   {
-      orientationController.setGains(gains);
-   }
-
    public void setPositionMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       positionController.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
@@ -172,15 +143,19 @@ public class SE3PIDController
       orientationController.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 
-   public void getPositionError(FrameVector positionErrorToPack)
+   public void setGains(SE3PIDGainsInterface gains)
    {
-      positionController.getPositionError(positionErrorToPack);
+      positionController.setGains(gains.getPositionGains());
+      orientationController.setGains(gains.getOrientationGains());
    }
 
-   //TODO: Implement this
-   //   public void getOrientationError(FrameVector orientationErrorToPack)
-   //   {
-   //      orientationController.getOrientationError(orientationErrorToPack);
-   //   }
+   public void setPositionGains(PositionPIDGainsInterface gains)
+   {
+      positionController.setGains(gains);
+   }
 
+   public void setOrientationGains(OrientationPIDGainsInterface gains)
+   {
+      orientationController.setGains(gains);
+   }
 }

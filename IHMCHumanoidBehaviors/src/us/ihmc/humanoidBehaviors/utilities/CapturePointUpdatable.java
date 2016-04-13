@@ -5,8 +5,8 @@ import java.awt.Color;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.FootPolygonVisualizer;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -70,7 +70,7 @@ public class CapturePointUpdatable implements Updatable
          YoFrameConvexPolygon2d yoFootSupportPolygon = new YoFrameConvexPolygon2d(name, "", worldFrame, 4, registry);
          yoFootSupportPolygons.put(robotSide, yoFootSupportPolygon);
 
-         Color color = robotSide == RobotSide.LEFT ? FootPolygonVisualizer.defaultLeftColor : FootPolygonVisualizer.defaultRightColor;
+         Color color = FootstepListVisualizer.defaultFeetColors.get(robotSide);
          YoArtifactPolygon footSupportPolygonViz = new YoArtifactPolygon(sidePrefix + "Foot Polygon", yoFootSupportPolygon, color, false);
          yoGraphicsListRegistry.registerArtifact("Capturability", footSupportPolygonViz);
       }

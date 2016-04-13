@@ -7,7 +7,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
@@ -18,7 +18,7 @@ import us.ihmc.tools.DocumentedEnum;
  */
 @ClassDocumentation("This message gives the status of the current footstep from the controller as well as the position\n"
                                   + "and orientation of the footstep in world cooredinates. ")
-public class FootstepStatus extends IHMCRosApiPacket<FootstepStatus>
+public class FootstepStatus extends StatusPacket<FootstepStatus>
 {
    public enum Status implements DocumentedEnum<Status>
    {
@@ -58,9 +58,6 @@ public class FootstepStatus extends IHMCRosApiPacket<FootstepStatus>
    @FieldDocumentation("actualFootOrientationInWorld gives the orientation the foot is actually in as opposed to"
                                      + "the desired orientation sent to the controller\n")
    public Quat4d actualFootOrientationInWorld;
-   @FieldDocumentation("isDoneWalking will be set to true when in double-support and there are no footsteps queued. If\n"
-                                     + "isDoneWalking is set to true, the rest of the fields in this packet should be ignored")
-   public boolean isDoneWalking;
 
    public FootstepStatus()
    {
@@ -70,7 +67,6 @@ public class FootstepStatus extends IHMCRosApiPacket<FootstepStatus>
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
-      this.isDoneWalking = false;
       this.actualFootPositionInWorld = null;
       this.actualFootOrientationInWorld = null;
       this.robotSide = null;
@@ -80,7 +76,6 @@ public class FootstepStatus extends IHMCRosApiPacket<FootstepStatus>
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
-      this.isDoneWalking = false;
       this.actualFootPositionInWorld = actualFootPositionInWorld;
       this.actualFootOrientationInWorld = actualFootOrientationInWorld;
       
@@ -91,28 +86,32 @@ public class FootstepStatus extends IHMCRosApiPacket<FootstepStatus>
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
-      this.isDoneWalking = false;
       this.actualFootPositionInWorld = actualFootPositionInWorld;
       this.actualFootOrientationInWorld = actualFootOrientationInWorld;
       this.robotSide = robotSide;
    }
 
-   public static FootstepStatus createWalkingIsDonePacket()
+   @Override
+   public void set(FootstepStatus other)
    {
-      FootstepStatus footstepStatus = new FootstepStatus();
-      footstepStatus.isDoneWalking = true;
-      footstepStatus.footstepIndex = 0;
-      footstepStatus.status = null;
-      footstepStatus.actualFootPositionInWorld = null;
-      footstepStatus.actualFootOrientationInWorld = null;
-      footstepStatus.robotSide = null;
-      
-      return footstepStatus;
-   }
+      status = other.status;
+      footstepIndex = other.footstepIndex;
+      robotSide = other.robotSide;
 
-   public boolean isDoneWalking()
-   {
-      return isDoneWalking;
+      if (actualFootPositionInWorld == null)
+         actualFootPositionInWorld = new Point3d();
+      if (actualFootOrientationInWorld == null)
+         actualFootOrientationInWorld = new Quat4d();
+
+      if (other.actualFootPositionInWorld == null)
+         actualFootPositionInWorld.set(Double.NaN, Double.NaN, Double.NaN);
+      else
+         actualFootPositionInWorld.set(other.actualFootPositionInWorld);
+
+      if (other.actualFootOrientationInWorld == null)
+         actualFootOrientationInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+      else
+         actualFootOrientationInWorld.set(other.actualFootOrientationInWorld);
    }
 
    public Status getStatus()

@@ -8,6 +8,8 @@ import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.robotics.geometry.Transform3d;
+import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
 import com.jme3.app.Application;
 import com.jme3.math.Quaternion;
@@ -15,29 +17,29 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
 
-public class JMEGraphics3DNode extends Node implements JMEUpdatable
+public class JMEGraphics3DNode extends Node implements JMEUpdatable, CloseableAndDisposable
 {
-   private final Graphics3DNode graphics3dNode;
+   private Graphics3DNode graphics3dNode;
    
    private final static boolean DEBUG= false;
    
-   private final Quat4d rotation = new Quat4d();
-   private final Vector3d translation = new Vector3d();
-   private final Vector3d scale = new Vector3d();
+   private Quat4d rotation = new Quat4d();
+   private Vector3d translation = new Vector3d();
+   private Vector3d scale = new Vector3d();
    
-   private final Quaternion jmeRotation = new Quaternion();
+   private Quaternion jmeRotation = new Quaternion();
    private Quaternion oldJmeRotation = new Quaternion(Float.NaN,Float.NaN,Float.NaN,Float.NaN);
-   private final Vector3f jmeTranslation = new Vector3f();
+   private Vector3f jmeTranslation = new Vector3f();
    private Vector3f oldJmeTranslation = new Vector3f(Float.NaN,Float.NaN,Float.NaN);
-   private final Vector3f jmeScale = new Vector3f();
+   private Vector3f jmeScale = new Vector3f();
    private Vector3f oldJmeScale = new Vector3f(Float.NaN,Float.NaN,Float.NaN);
 
    private JMEGraphicsObject graphics;
    private Node graphicsObjectNode;
-   private final JMEAssetLocator assetManager;
-   private final Application application;
+   private JMEAssetLocator assetManager;
+   private Application application;
    
-   public JMEGraphics3DNode(Graphics3DNode graphics3dNode, JMEAssetLocator assetManager, Application application)
+   public JMEGraphics3DNode(Graphics3DNode graphics3dNode, JMEAssetLocator assetManager, Application application, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {  
       super(graphics3dNode.getName());
       this.graphics3dNode = graphics3dNode;
@@ -45,6 +47,11 @@ public class JMEGraphics3DNode extends Node implements JMEUpdatable
       
       this.assetManager = assetManager;
       createAndAttachGraphicsObject();
+      
+      if (closeableAndDisposableRegistry != null)
+      {
+         closeableAndDisposableRegistry.registerCloseableAndDisposable(this);
+      }
    }
 
    private void createAndAttachGraphicsObject()
@@ -145,5 +152,28 @@ public class JMEGraphics3DNode extends Node implements JMEUpdatable
    public void setType(Graphics3DNodeType nodeType)
    {
       setupNodeByType(this,nodeType);      
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      graphics3dNode = null;
+      
+      rotation = null;
+      translation = null;
+      scale = null;
+      
+      jmeRotation = null;
+      oldJmeRotation = null;
+      jmeTranslation = null;
+      oldJmeTranslation = null;
+      jmeScale = null;
+      oldJmeScale = null;
+
+      graphics = null;
+      graphicsObjectNode = null;
+      assetManager = null;
+      application = null;
+      
    }
 }

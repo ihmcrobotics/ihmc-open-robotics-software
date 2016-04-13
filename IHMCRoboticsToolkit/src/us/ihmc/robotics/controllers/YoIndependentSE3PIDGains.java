@@ -2,7 +2,7 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
-public class YoIndependentSE3PIDGains implements YoSE3PIDGains
+public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
 {
    private final YoEuclideanPositionGains positionGains;
    private final YoAxisAngleOrientationGains orientationGains;
@@ -19,11 +19,13 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGains
       orientationGains.reset();
    }
 
+   @Override
    public YoEuclideanPositionGains getPositionGains()
    {
       return positionGains;
    }
 
+   @Override
    public YoAxisAngleOrientationGains getOrientationGains()
    {
       return orientationGains;
@@ -97,5 +99,24 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGains
    public void setOrientationMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       orientationGains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+   }
+
+   @Override
+   public void set(SE3PIDGainsInterface gains)
+   {
+      set(gains.getPositionGains());
+      set(gains.getOrientationGains());
+   }
+
+   @Override
+   public void set(PositionPIDGainsInterface positionGains)
+   {
+      this.positionGains.set(positionGains);
+   }
+
+   @Override
+   public void set(OrientationPIDGainsInterface orientationGains)
+   {
+      this.orientationGains.set(orientationGains);
    }
 }

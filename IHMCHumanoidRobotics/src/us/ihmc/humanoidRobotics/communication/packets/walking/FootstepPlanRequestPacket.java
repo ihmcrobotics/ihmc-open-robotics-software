@@ -11,17 +11,17 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 		START_SEARCH, STOP_SEARCH, UPDATE_START
 	};
 
-	public FootstepData startFootstep;
+	public FootstepDataMessage startFootstep;
 	public double thetaStart;
 	public double maxSuboptimality = 1;
 	
-	public ArrayList<FootstepData> goals = new ArrayList<FootstepData>();
+	public ArrayList<FootstepDataMessage> goals = new ArrayList<FootstepDataMessage>();
 
 	public RequestType requestType;
 	
 	public FootstepPlanRequestPacket(Random random)
 	{
-	   startFootstep = new FootstepData(random);
+	   startFootstep = new FootstepDataMessage(random);
 	   thetaStart = random.nextDouble();
 	   maxSuboptimality = random.nextDouble();
 	}
@@ -31,7 +31,7 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 		// for serialization.
 	}
 	
-	public FootstepPlanRequestPacket(RequestType requestType, FootstepData startFootstep, double thetaStart, ArrayList<FootstepData> goals)
+	public FootstepPlanRequestPacket(RequestType requestType, FootstepDataMessage startFootstep, double thetaStart, ArrayList<FootstepDataMessage> goals)
 	{
 		this.requestType = requestType;
 		this.startFootstep = startFootstep;
@@ -39,7 +39,7 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 		this.goals = goals;
 	}
 
-	public FootstepPlanRequestPacket(RequestType requestType, FootstepData startFootstep, double thetaStart, ArrayList<FootstepData> goals, double maxSuboptimality)
+	public FootstepPlanRequestPacket(RequestType requestType, FootstepDataMessage startFootstep, double thetaStart, ArrayList<FootstepDataMessage> goals, double maxSuboptimality)
 	{
 		this.requestType = requestType;
 		this.startFootstep = startFootstep;

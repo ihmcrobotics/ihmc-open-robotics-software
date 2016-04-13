@@ -87,20 +87,17 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new DRCDemo01NavigationEnvironment();
       String name = "DRCDoNothingTest";
-      String scriptFileName = "";
       
 
       DRCRobotModel robotModel = getRobotModel();
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel);
-//      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCDoNothingTest", "", selectedLocation, checkNothingChanged, showGUI, createVideo,
-//            getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverSmallPlatform(simulationConstructionSet);
 
       ThreadTools.sleep(100);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
       drcSimulationTestHelper.checkNothingChanged();

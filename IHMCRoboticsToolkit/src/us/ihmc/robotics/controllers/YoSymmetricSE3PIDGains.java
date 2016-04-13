@@ -7,8 +7,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
-
-public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGains, YoOrientationPIDGains
+public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositionPIDGainsInterface, YoOrientationPIDGainsInterface
 {
    private final DoubleYoVariable proportionalGain;
    private final DoubleYoVariable derivativeGain;
@@ -34,24 +33,27 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGains
       maximumJerk.set(Double.POSITIVE_INFINITY);
    }
 
+   @Override
    public void reset()
    {
       proportionalGain.set(0.0);
       derivativeGain.set(0.0);
       dampingRatio.set(0.0);
       integralGain.set(0.0);
-      
+
       maxIntegralError.set(0.0);
       maximumAcceleration.set(Double.POSITIVE_INFINITY);
       maximumJerk.set(Double.POSITIVE_INFINITY);
    }
 
-   public YoPositionPIDGains getPositionGains()
+   @Override
+   public YoPositionPIDGainsInterface getPositionGains()
    {
       return this;
    }
 
-   public YoOrientationPIDGains getOrientationGains()
+   @Override
+   public YoOrientationPIDGainsInterface getOrientationGains()
    {
       return this;
    }
@@ -83,18 +85,44 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGains
 
    public void setMaximumAcceleration(double maxAcceleration)
    {
-      this.maximumAcceleration.set(maxAcceleration);
+      maximumAcceleration.set(maxAcceleration);
    }
 
    public void setMaximumJerk(double maxJerk)
    {
-      this.maximumJerk.set(maxJerk);
+      maximumJerk.set(maxJerk);
+   }
+
+   @Override
+   public void set(OrientationPIDGainsInterface gains)
+   {
+      setProportionalGains(gains.getProportionalGains());
+      setDerivativeGains(gains.getDerivativeGains());
+      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
+      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+   }
+
+   @Override
+   public void set(PositionPIDGainsInterface gains)
+   {
+      setProportionalGains(gains.getProportionalGains());
+      setDerivativeGains(gains.getDerivativeGains());
+      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
+      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+   }
+
+   @Override
+   public void set(SE3PIDGainsInterface gains)
+   {
+      set(gains.getPositionGains());
+      set(gains.getOrientationGains());
    }
 
    public void createDerivativeGainUpdater(boolean updateNow)
    {
       VariableChangedListener kdUpdater = new VariableChangedListener()
       {
+         @Override
          public void variableChanged(YoVariable<?> v)
          {
             derivativeGain.set(GainCalculator.computeDerivativeGain(proportionalGain.getDoubleValue(), dampingRatio.getDoubleValue()));
@@ -103,10 +131,12 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGains
 
       proportionalGain.addVariableChangedListener(kdUpdater);
       dampingRatio.addVariableChangedListener(kdUpdater);
-      
-      if (updateNow) kdUpdater.variableChanged(null);
+
+      if (updateNow)
+         kdUpdater.variableChanged(null);
    }
 
+   @Override
    public Matrix3d createProportionalGainMatrix()
    {
       Matrix3d proportionalGainMatrix = new Matrix3d();
@@ -120,6 +150,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGains
       return proportionalGainMatrix;
    }
 
+   @Override
    public Matrix3d createDerivativeGainMatrix()
    {
       Matrix3d derivativeGainMatrix = new Matrix3d();
@@ -133,6 +164,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGains
       return derivativeGainMatrix;
    }
 
+   @Override
    public Matrix3d createIntegralGainMatrix()
    {
       Matrix3d integralGainMatrix = new Matrix3d();
@@ -146,55 +178,66 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGains
       return integralGainMatrix;
    }
 
+   @Override
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
    {
       proportionalGain.set(proportionalGainX);
    }
 
+   @Override
    public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
       derivativeGain.set(derivativeGainX);
    }
 
+   @Override
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
    {
       integralGain.set(integralGainX);
       this.maxIntegralError.set(maxIntegralError);
    }
 
+   @Override
    public void setProportionalGains(double[] proportionalGains)
    {
       proportionalGain.set(proportionalGains[0]);
    }
 
+   @Override
    public void setDerivativeGains(double[] derivativeGains)
    {
       derivativeGain.set(derivativeGains[0]);
    }
 
+   @Override
    public void setIntegralGains(double[] integralGains, double maxIntegralError)
    {
       integralGain.set(integralGains[0]);
       this.maxIntegralError.set(maxIntegralError);
    }
 
+   @Override
    public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
-      this.maximumAcceleration.set(maxAcceleration);
-      this.maximumJerk.set(maxJerk);
+      maximumAcceleration.set(maxAcceleration);
+      maximumJerk.set(maxJerk);
    }
 
+   @Override
    public DoubleYoVariable getYoMaximumAcceleration()
    {
       return maximumAcceleration;
    }
 
+   @Override
    public DoubleYoVariable getYoMaximumJerk()
    {
       return maximumJerk;
    }
 
    private double[] tempPropotionalGains = new double[3];
+
+   @Override
    public double[] getProportionalGains()
    {
       for (int i = 0; i < 3; i++)
@@ -203,6 +246,8 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGains
    }
 
    private double[] tempDerivativeGains = new double[3];
+
+   @Override
    public double[] getDerivativeGains()
    {
       for (int i = 0; i < 3; i++)
@@ -211,6 +256,8 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGains
    }
 
    private double[] tempIntegralGains = new double[3];
+
+   @Override
    public double[] getIntegralGains()
    {
       for (int i = 0; i < 3; i++)
@@ -218,16 +265,19 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGains, YoPositionPIDGains
       return tempIntegralGains;
    }
 
+   @Override
    public double getMaximumIntegralError()
    {
       return maxIntegralError.getDoubleValue();
    }
 
+   @Override
    public double getMaximumAcceleration()
    {
       return maximumAcceleration.getDoubleValue();
    }
 
+   @Override
    public double getMaximumJerk()
    {
       return maximumJerk.getDoubleValue();

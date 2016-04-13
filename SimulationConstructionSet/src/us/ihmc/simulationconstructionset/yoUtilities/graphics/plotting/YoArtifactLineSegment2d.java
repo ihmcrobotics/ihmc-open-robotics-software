@@ -15,42 +15,69 @@ import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.PlotterGraphics;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 
 public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
 {
+   private static final double[] CONSTANTS = new double[] {};
+
    private static final long serialVersionUID = -2067732984899803547L;
 
-   private final YoFrameLineSegment2d yoFrameLineSegment2d;
+   private final DoubleYoVariable[] variables = new DoubleYoVariable[4];
+   private final DoubleYoVariable startX;
+   private final DoubleYoVariable endX;
+   private final DoubleYoVariable startY;
+   private final DoubleYoVariable endY;
    private final PlotterGraphics plotterGraphics = new PlotterGraphics();
    private final Color color;
    private static final int pixels = 2;
    private static final BasicStroke stroke = new BasicStroke(pixels);
 
-   private final boolean drawAsAnArrow;
+   private boolean drawArrow = false;
    private final double arrowHeadWidth;
    private final double arrowHeadHeight;
 
    public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d yoFrameLineSegment2d, Color color)
    {
-      super(name);
-      this.yoFrameLineSegment2d = yoFrameLineSegment2d;
-      this.color = color;
-      this.drawAsAnArrow = false;
-      this.arrowHeadWidth = Double.NaN;
-      this.arrowHeadHeight = Double.NaN;
+      this(name, yoFrameLineSegment2d, color, Double.NaN, Double.NaN);
    }
-
+   
    public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d yoFrameLineSegment2d, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
-      super(name);
-      this.yoFrameLineSegment2d = yoFrameLineSegment2d;
-      this.color = color;
-      this.drawAsAnArrow = true;
-      this.arrowHeadWidth = arrowHeadWidth;
-      this.arrowHeadHeight = arrowHeadHeight;
+      this(name, yoFrameLineSegment2d.getYoX0(), yoFrameLineSegment2d.getYoY0(), yoFrameLineSegment2d.getYoX1(), yoFrameLineSegment2d.getYoY1(), color, arrowHeadWidth, arrowHeadHeight);
    }
 
+   public YoArtifactLineSegment2d(String name, YoFramePoint2d startPoint, YoFramePoint2d endPoint, Color color)
+   {
+      this(name, startPoint.getYoX(), startPoint.getYoY(), endPoint.getYoX(), endPoint.getYoY(), color, Double.NaN, Double.NaN);
+   }
+   
+   public YoArtifactLineSegment2d(String name, YoFramePoint2d startPoint, YoFramePoint2d endPoint, Color color, double arrowHeadWidth, double arrowHeadHeight)
+   {
+      this(name, startPoint.getYoX(), startPoint.getYoY(), endPoint.getYoX(), endPoint.getYoY(), color, arrowHeadWidth, arrowHeadHeight);
+   }
+   
+   public YoArtifactLineSegment2d(String name, DoubleYoVariable startX, DoubleYoVariable startY, DoubleYoVariable endX, DoubleYoVariable endY, Color color, double arrowHeadWidth, double arrowHeadHeight)
+   {
+      super(name);
+      this.startX = startX;
+      this.endX = endX;
+      this.startY = startY;
+      this.endY = endY;
+      this.color = color;
+      this.arrowHeadWidth = arrowHeadWidth;
+      this.arrowHeadHeight = arrowHeadHeight;
+      
+      variables[0] = startX;
+      variables[1] = endX;
+      variables[2] = startY;
+      variables[3] = endY;
+      
+      drawArrow = true;
+   }
+
+   @Override
    public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
@@ -63,17 +90,17 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
          plotterGraphics.setCenter(Xcenter, Ycenter);
          plotterGraphics.setScale(scaleFactor);
 
-         double x0 = yoFrameLineSegment2d.getX0();
-         double x1 = yoFrameLineSegment2d.getX1();
-         double y0 = yoFrameLineSegment2d.getY0();
-         double y1 = yoFrameLineSegment2d.getY1();
+         double x0 = startX.getDoubleValue();
+         double x1 = endX.getDoubleValue();
+         double y0 = startY.getDoubleValue();
+         double y1 = endY.getDoubleValue();
 
-         if (yoFrameLineSegment2d.containsNaN())
+         if (startX.isNaN() || endX.isNaN() || startY.isNaN() || endY.isNaN())
             return;
 
          plotterGraphics.drawLineSegment(graphics, x0, y0, x1, y1);
 
-         if (drawAsAnArrow)
+         if (drawArrow)
          {
             computeArrowHeadPoints(arrowHeadPoints, x0, y0, x1, y1);
             plotterGraphics.fillPolygon(graphics, arrowHeadPoints);
@@ -123,6 +150,7 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
       return arrowHeadPoints.get(index);
    }
 
+   @Override
    public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(color);
@@ -134,31 +162,37 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
       plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.1);
    }
 
+   @Override
    public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public RemoteGraphicType getRemoteGraphicType()
    {
       return RemoteGraphicType.LINE_SEGMENT_2D_ARTIFACT;
    }
 
+   @Override
    public DoubleYoVariable[] getVariables()
    {
-      return yoFrameLineSegment2d.getDoubleYoVariables();
+      return variables;
    }
 
+   @Override
    public double[] getConstants()
    {
-      return new double[] {};
+      return CONSTANTS;
    }
 
+   @Override
    public AppearanceDefinition getAppearance()
    {
       return new YoAppearanceRGBColor(color, 0.0);
