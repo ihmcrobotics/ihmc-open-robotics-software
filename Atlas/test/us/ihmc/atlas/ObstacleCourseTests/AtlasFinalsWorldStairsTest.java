@@ -15,13 +15,13 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotModelFactory;
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCSCStartingLocations;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCFinalsEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
-import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
@@ -31,7 +31,6 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
@@ -41,7 +40,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.VideoA})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
 public class AtlasFinalsWorldStairsTest
 {
    protected SimulationTestingParameters simulationTestingParameters;
@@ -81,14 +80,11 @@ public class AtlasFinalsWorldStairsTest
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-      AtlasRobotModel robotModel = AtlasRobotModelFactory.createDefaultRobotModel();
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
       robotModel.addMoreFootContactPointsSimOnly();
       DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,
               robotModel);
-
-      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
       setupCameraForWalkingUpStairs();
 
@@ -132,7 +128,7 @@ public class AtlasFinalsWorldStairsTest
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-      AtlasRobotModel robotModel = AtlasRobotModelFactory.createDefaultRobotModel();
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
       robotModel.addMoreFootContactPointsSimOnly();
       DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,
@@ -190,7 +186,6 @@ public class AtlasFinalsWorldStairsTest
 
    private FootstepDataListMessage createFootstepsWithHighSwing(WalkingControllerParameters walkingControllerParameters)
    {
-      double swingHeight = 0.10;
       Quat4d orientation = new Quat4d();
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
