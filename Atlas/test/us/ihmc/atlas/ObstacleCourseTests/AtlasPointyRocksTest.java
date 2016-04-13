@@ -1,7 +1,5 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -30,11 +28,6 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
    }
 
    @Override
-   protected Vector3d getFootSlipVector()
-   {
-      return new Vector3d(0.05, -0.05, 0.0);//(0.06, -0.06, 0.0);
-   }
-   @Override
    protected DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
       
@@ -42,10 +35,5 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
                                                 "pelvisRotationErrorInBodyZ");
    }
 
-   @Override
-   protected double getFootSlipTimeDeltaAfterTouchdown()
-   {
-      return 0.025;
-   }
 }
 
