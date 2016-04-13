@@ -4,58 +4,54 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorWithDerivatives;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FourBarKinematicLoopJacobianSolver
 {
-   private final FourBarCalculatorWithDerivatives fourBarCalculator;
-   private DenseMatrix64F jacobian;
-   double j11, j21, j31, j12, j22, j32, j13, j23, j33;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   public FourBarKinematicLoopJacobianSolver(FourBarCalculatorWithDerivatives fourBarCalculator)
+   private final FourBarCalculatorWithDerivatives fourBarCalculator;
+   private final GeometricJacobian jacobian;
+   private final InverseDynamicsJoint[] joints;
+   
+   private final DenseMatrix64F geometricJacobianToColumnJacobian;
+
+   public FourBarKinematicLoopJacobianSolver(FourBarCalculatorWithDerivatives fourBarCalculator, InverseDynamicsJoint[] fourbarJoints)
    {
       this.fourBarCalculator = fourBarCalculator;
-      jacobian = new DenseMatrix64F();
+      this.joints = fourbarJoints;
+      jacobian = new GeometricJacobian(joints, worldFrame);
+      geometricJacobianToColumnJacobian = new DenseMatrix64F(3, 1);
    }
 
-   public DenseMatrix64F computeJacobian(PassiveRevoluteJoint fourBarOutputJoint, PassiveRevoluteJoint jointB, PassiveRevoluteJoint jointC, PassiveRevoluteJoint jointD)
+   public DenseMatrix64F computeJacobian(PassiveRevoluteJoint fourBarOutputJoint)
    {
       double ab = fourBarCalculator.getAB();
       double bc = fourBarCalculator.getBC();
       double cd = fourBarCalculator.getCD();
       double da = fourBarCalculator.getDA();
-      
+
       double A = fourBarCalculator.getAngleDAB();
       double B = fourBarCalculator.getAngleABC();
       double C = fourBarCalculator.getAngleBCD();
       double D = fourBarCalculator.getAngleCDA();
 
-      if (fourBarOutputJoint == jointD)
-      {
-         j11 = - ab * Math.sin(A) - bc * Math.sin(A + B) - cd * Math.sin(A + B + C);
-         j12 = - bc * Math.sin(A + B) - cd * Math.sin(A + B + C);
-         j13 = - cd * Math.sin(A + B + C);
-         j21 = 0.0;
-         j22 = 0.0;
-         j23 = 0.0;
-         j31 = ab * Math.cos(A) + bc * Math.cos(A + B) + cd * Math.cos(A + B + C);
-         j32 = bc * Math.cos(A + B) + cd * Math.cos(A + B + C);
-         j33 = cd * Math.cos(A + B + C);
-      }
-      else if (fourBarOutputJoint == jointC)
-      {
-         j11 = 1.0;
-         j21 = 1.0;
-         j31 = 1.0;
-      }
-      else
-      {
-         j11 = 1.0;
-         j21 = 1.0;
-         j31 = 1.0;
-      }
+      jacobian.compute();
+      
+      //      if (fourBarOutputJoint == joints[3])
+      //      {
+      //      }
+      //      else if (fourBarOutputJoint == joints[2])
+      //      {
+      //         jacobian.compute();
+      //      }
+      //      else
+      //      {
+      //         jacobian.compute();
+      //      }
 
-      jacobian = new DenseMatrix64F(3, 3, true, new double[] {j11, j12, j13, j21, j22, j23, j31, j32, j33});
-      return jacobian;
+      System.out.println(jacobian.getJacobianMatrix().getNumRows() + " , " + jacobian.getJacobianMatrix().getNumCols() );
+      return jacobian.getJacobianMatrix();
    }
 
    public void solveLinearVelFromAngularVel(DenseMatrix64F jacobian, DenseMatrix64F jointVelocities, DenseMatrix64F resultToPack)
