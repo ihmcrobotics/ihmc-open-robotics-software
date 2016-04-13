@@ -322,7 +322,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       chestTrajectoryBehavior = new ChestTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
       registry.addChild(chestTrajectoryBehavior.getYoVariableRegistry());
 
-      chestGoHomeBehavior = new GoHomeBehavior(outgoingCommunicationBridge, yoTime);
+      chestGoHomeBehavior = new GoHomeBehavior("chest", outgoingCommunicationBridge, yoTime);
       registry.addChild(chestGoHomeBehavior.getYoVariableRegistry());
 
       pelvisTrajectoryBehavior = new PelvisTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
@@ -331,7 +331,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
       registry.addChild(pelvisOrientationTrajectoryBehavior.getYoVariableRegistry());
 
-      pelvisGoHomeBehavior = new GoHomeBehavior(outgoingCommunicationBridge, yoTime);
+      pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", outgoingCommunicationBridge, yoTime);
       registry.addChild(pelvisGoHomeBehavior.getYoVariableRegistry());
 
       footPoseBehavior = new FootTrajectoryBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport);
