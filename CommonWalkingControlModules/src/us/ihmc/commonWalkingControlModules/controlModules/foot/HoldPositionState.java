@@ -21,6 +21,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class HoldPositionState extends AbstractFootControlState
 {
@@ -47,9 +48,17 @@ public class HoldPositionState extends AbstractFootControlState
    private final BooleanYoVariable doSmartHoldPosition;
    private final YoFrameOrientation desiredHoldOrientation;
 
+   private final YoSE3PIDGainsInterface gains;
+   private final YoFrameVector yoAngularWeight;
+   private final YoFrameVector yoLinearWeight;
+
+   private final Vector3d tempAngularWeightVector = new Vector3d();
+   private final Vector3d tempLinearWeightVector = new Vector3d();
+
    public HoldPositionState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.HOLD_POSITION, footControlHelper, registry);
+      this.gains = gains;
 
       fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
@@ -59,23 +68,32 @@ public class HoldPositionState extends AbstractFootControlState
       desiredHoldOrientation = new YoFrameOrientation(namePrefix + "DesiredHoldOrientation", worldFrame, registry);
       doSmartHoldPosition = new BooleanYoVariable(namePrefix + "DoSmartHoldPosition", registry);
 
+      yoAngularWeight = new YoFrameVector(namePrefix + "HoldAngularWeight", null, registry);
+      yoLinearWeight = new YoFrameVector(namePrefix + "HoldLinearWeight", null, registry);
+      yoAngularWeight.set(1.0, 1.0, 1.0);
+      yoAngularWeight.scale(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
+      yoLinearWeight.set(1.0, 1.0, 1.0);
+      yoLinearWeight.scale(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
+
       doSmartHoldPosition.set(true);
       spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
-      spatialFeedbackControlCommand.setGains(gains);
       FramePose anklePoseInFoot = new FramePose(contactableFoot.getFrameAfterParentJoint());
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(anklePoseInFoot);
-      spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
    }
 
    public void setWeight(double weight)
    {
-      spatialFeedbackControlCommand.setWeightForSolver(weight);
+      yoAngularWeight.set(1.0, 1.0, 1.0);
+      yoAngularWeight.scale(weight);
+      yoLinearWeight.set(1.0, 1.0, 1.0);
+      yoLinearWeight.scale(weight);
    }
 
    public void setWeights(Vector3d angular, Vector3d linear)
    {
-      spatialFeedbackControlCommand.setWeightsForSolver(angular, linear);
+      yoAngularWeight.set(angular);
+      yoLinearWeight.set(linear);
    }
 
    @Override
@@ -92,6 +110,7 @@ public class HoldPositionState extends AbstractFootControlState
 
       desiredOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
       desiredOrientation.changeFrame(worldFrame);
+      desiredHoldOrientation.set(desiredOrientation);
 
       desiredLinearVelocity.setToZero(worldFrame);
       desiredAngularVelocity.setToZero(worldFrame);
@@ -111,7 +130,7 @@ public class HoldPositionState extends AbstractFootControlState
    {
       footSwitch.computeAndPackCoP(cop);
       correctDesiredOrientationForSmartHoldPosition();
-      desiredHoldOrientation.set(desiredOrientation);
+      desiredHoldOrientation.getFrameOrientationIncludingFrame(desiredOrientation);
       momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
       partialFootholdControlModule.compute(desiredCoP, cop);
       YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
@@ -119,6 +138,10 @@ public class HoldPositionState extends AbstractFootControlState
 
       spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      spatialFeedbackControlCommand.setGains(gains);
+      yoAngularWeight.get(tempAngularWeightVector);
+      yoLinearWeight.get(tempLinearWeightVector);
+      spatialFeedbackControlCommand.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
    }
 
    /**
