@@ -30,6 +30,13 @@ public class ParameterFactory
       return parameter;
    }
 
+   public <E extends Enum<E>> EnumParameter<E> createEnum(String name, Class<E> clazz, E defaultValue)
+   {
+      EnumParameter<E> parameter = new EnumParameter<>(name, clazz, defaultValue);
+      register(parameter);
+      return parameter;
+   }
+
    public StringParameter createString(String name, String defaultValue)
    {
       StringParameter parameter = new StringParameter(namespace + "." + name, defaultValue);
