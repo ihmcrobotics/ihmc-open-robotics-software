@@ -188,7 +188,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
     */
    public void testHoldPositionByStandingOnOneLegAndGettingPushedSideways() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setUsePefectSensors(true);
+      simulationTestingParameters.setUsePefectSensors(false);
 
       BambooTools.reportTestStartedMessage();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
@@ -296,6 +296,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
          changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointName);
 
          success = success & drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+         if (!success) break;
       }
            
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
