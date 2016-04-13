@@ -8,7 +8,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.VideoA})
+@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.Video})
 public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldTest
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);

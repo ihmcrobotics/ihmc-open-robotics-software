@@ -9,13 +9,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.VideoA)
+@TestSuiteTarget(TestPlanTarget.Video)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseFlatTest.class
+   us.ihmc.atlas.pushRecovery.AtlasPushRecoveryStandingTest.class
 })
 
-public class AtlasEVideoATestSuite
+public class AtlasKVideoTestSuite
 {
    public static void main(String[] args)
    {

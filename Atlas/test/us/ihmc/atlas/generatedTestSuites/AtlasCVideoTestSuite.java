@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.generatedTestSuites;
+package us.ihmc.atlas.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
@@ -9,13 +9,14 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.VideoB)
+@TestSuiteTarget(TestPlanTarget.Video)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseFlatTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasFinalsWorldStairsTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseDoNothingTest.class
 })
 
-public class ValkyrieAVideoBTestSuite
+public class AtlasCVideoTestSuite
 {
    public static void main(String[] args)
    {

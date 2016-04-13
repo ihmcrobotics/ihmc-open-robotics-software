@@ -41,7 +41,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.VideoA})
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
 public class AtlasFinalsWorldStairsTest
 {
    protected SimulationTestingParameters simulationTestingParameters;
