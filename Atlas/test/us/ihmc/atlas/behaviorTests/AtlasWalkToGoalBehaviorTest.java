@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.VideoA})
+@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.Video})
 public class AtlasWalkToGoalBehaviorTest extends DRCWalkToGoalBehaviorTest
 {
    private final AtlasRobotModel robotModel;

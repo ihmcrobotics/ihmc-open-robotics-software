@@ -13,9 +13,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseFlatTest.class,
-   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
-   us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasFinalsWorldStairsTest.class
 })
 
 public class AtlasCInDevelopmentTestSuite

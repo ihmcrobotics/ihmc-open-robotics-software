@@ -9,7 +9,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-public interface ArmControllerParameters
+public abstract class ArmControllerParameters
 {
    public abstract YoPIDGains createJointspaceControlGains(YoVariableRegistry registry);
 
@@ -17,7 +17,15 @@ public interface ArmControllerParameters
 
    public abstract YoSE3PIDGainsInterface createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry);
 
-   public abstract String[] getPositionControlledJointNames(RobotSide robotSide);
+   /**
+    * Override this method to specify arm joints that should be position controlled.
+    * @param robotSide
+    * @return
+    */
+   public String[] getPositionControlledJointNames(RobotSide robotSide)
+   {
+      return null;
+   }
 
    public abstract Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide);
 }
