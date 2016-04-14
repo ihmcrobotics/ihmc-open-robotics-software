@@ -11,22 +11,13 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-
 /**
  * Created by dstephen on 2/14/14.
  */
-public class BonoArmControlParameters implements ArmControllerParameters
+public class BonoArmControlParameters extends ArmControllerParameters
 {
-   private final boolean runningOnRealRobot;
-   
    public BonoArmControlParameters()
    {
-      this(false);
-   }
-   
-   public BonoArmControlParameters(boolean runningOnRealRobot)
-   {
-      this.runningOnRealRobot = runningOnRealRobot;
    }
 
    @Override
@@ -47,11 +38,6 @@ public class BonoArmControlParameters implements ArmControllerParameters
       return null;
    }
 
-   @Override
-   public String[] getPositionControlledJointNames(RobotSide robotSide)
-   {
-      return null;
-   }
    @Override
    public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide)
    {

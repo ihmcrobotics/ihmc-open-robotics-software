@@ -15,8 +15,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-
-public class ValkyrieArmControllerParameters implements ArmControllerParameters
+public class ValkyrieArmControllerParameters extends ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
    private final DRCRobotJointMap jointMap;
@@ -46,7 +45,7 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
       jointspaceControlGains.setMaximumAcceleration(maxAccel);
       jointspaceControlGains.setMaximumJerk(maxJerk);
       jointspaceControlGains.createDerivativeGainUpdater(true);
-      
+
       return jointspaceControlGains;
    }
 
@@ -114,7 +113,6 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
       jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.FIRST_WRIST_PITCH), 0.0);
       jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), 0.0);
 
-      
       return jointPositions;
    }
 }

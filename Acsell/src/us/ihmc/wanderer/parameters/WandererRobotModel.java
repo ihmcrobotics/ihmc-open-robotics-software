@@ -96,7 +96,7 @@ public class WandererRobotModel implements DRCRobotModel
       }
 
       capturePointPlannerParameters = new WandererCapturePointPlannerParameters(runningOnRealRobot);
-      armControlParameters = new WandererArmControlParameters(runningOnRealRobot);
+      armControlParameters = new WandererArmControlParameters();
       walkingControllerParameters = new WandererWalkingControllerParameters(jointMap, runningOnRealRobot);
       multiContactControllerParameters = new WandererWalkingControllerParameters(jointMap, runningOnRealRobot);
    }
