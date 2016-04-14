@@ -1,5 +1,5 @@
 buildscript {
-   repositories {
+    repositories {
       jcenter()
    }
 
@@ -100,7 +100,7 @@ subprojects { subproject ->
 
    apply plugin: 'maven-publish'
    apply plugin: 'java'
-
+   
    subproject.ext {
       getOpenRoboticsSoftwareProject = {
          if (subproject.getParent().name.equals(rootProject.name)) {
