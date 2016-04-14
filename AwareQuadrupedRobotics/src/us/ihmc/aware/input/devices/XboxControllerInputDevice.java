@@ -80,7 +80,6 @@ public class XboxControllerInputDevice extends PollingInputDevice
       // Find the first controller with the matching name.
       for (Controller controller : controllers)
       {
-         System.err.println(Thread.currentThread().getId() + " Found match " + controller.getName() + " " + number);
          if (controller.getName().equals(name))
          {
             if (number == 0)
