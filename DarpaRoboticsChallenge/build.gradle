@@ -49,7 +49,7 @@ dependencies {
 	compile group: 'org.georegression', name: 'georegression', version: '0.8'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 	compile group: 'org.ddogleg', name: 'ddogleg', version: '0.7'
-	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160212'
+	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
 	compile group: 'org.javassist', name: 'javassist', version: '3.18.1-GA'
 	compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
 	compile group: 'com.jcraft', name: 'jsch', version: '0.1.51'
