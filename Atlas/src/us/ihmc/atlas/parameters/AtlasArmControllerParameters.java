@@ -17,7 +17,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 
-public class AtlasArmControllerParameters implements ArmControllerParameters
+public class AtlasArmControllerParameters extends ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
    private final DRCRobotJointMap jointMap;
