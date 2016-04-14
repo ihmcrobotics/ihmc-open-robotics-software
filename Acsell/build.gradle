@@ -1,5 +1,5 @@
 buildscript {
-   repositories {
+    repositories {
       jcenter()
       mavenCentral()
       maven {
@@ -7,7 +7,7 @@ buildscript {
       }
    }
    dependencies {
-      classpath group: 'gradle.plugin.us.ihmc.gradle', name: 'ihmc-build', version: '0.0.15'
+      classpath group: 'gradle.plugins.us.ihmc.gradle', name: 'ihmc-build', version: '0.0.16'
       classpath group: 'org.hidetake', name: 'gradle-ssh-plugin', version: '1.1.3'
    }
 }
