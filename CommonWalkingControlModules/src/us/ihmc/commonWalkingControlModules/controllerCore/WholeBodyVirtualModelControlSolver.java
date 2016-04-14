@@ -224,7 +224,6 @@ public class WholeBodyVirtualModelControlSolver
       RigidBodyInertia inertia = endEffector.getInertia();
       twistCalculator.getTwistOfBody(tmpTwist, endEffector);
       inertia.computeDynamicWrenchInBodyCoordinates(tmpWrench, command.getSpatialAcceleration(), tmpTwist);
-      tmpWrench.negate();
 
       virtualWrenchCommand.set(endEffector, tmpWrench, command.getSelectionMatrix());
       virtualWrenchCommandList.addCommand(virtualWrenchCommand);
