@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.15"
+        classpath group: 'gradle.plugin.us.ihmc.gradle', name: 'ihmc-build', version: '0.0.15'
     }
 }
 
@@ -15,7 +15,9 @@ apply plugin: "us.ihmc.gradle.ihmc-build"
 
 
 
-if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
+if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
+    evaluationDependsOn(':IHMCOpenRoboticsSoftware')
+}
 
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
@@ -28,44 +30,41 @@ project.ext.bintrayLicenseName = "Apache-2.0"
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 repositories {
-	maven {
-		url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
-	}
+    maven {
+        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+    }
 }
 
 repositories {
-   mavenLocal()
-   jcenter()
-   mavenCentral()
+    mavenLocal()
+    jcenter()
+    mavenCentral()
 }
 
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
-dependencies
-{
-	testCompile group: 'junit', name: 'junit', version: '4.11'
-	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+dependencies {
+//    testCompile group: 'junit', name: 'junit', version: '4.11' // this class has no unit tests. Once it does, put this back.
 
-	compile ihmc.getProjectDependency(":SimulationConstructionSet")
+    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 
-	compile ihmc.getProjectDependency(":IHMCCommunication")
-	compile ihmc.getProjectDependency(":Plotting")
-	compile ihmc.getProjectDependency(":Graphics3DAdapter")
-	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCCommunication")
+    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 }
 
 jar {
-   manifest {
-      attributes(
-              "Created-By": "IHMC Gradle Build Script",
-              "Implementation-Title": project.name,
-              "Implementation-Version": project.version,
-              "Implementation-Vendor": "IHMC",
+    manifest {
+        attributes(
+                "Created-By": "IHMC Gradle Build Script",
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "IHMC",
 
-              "Bundle-Name": project.name,
-              "Bundle-Version": project.version,
-              "Bundle-License": "${project.ext.licenseURL}",
-              "Bundle-Vendor": "IHMC")
-   }
+                "Bundle-Name": project.name,
+                "Bundle-Version": project.version,
+                "Bundle-License": "${project.ext.licenseURL}",
+                "Bundle-Vendor": "IHMC")
+    }
 }

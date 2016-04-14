@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.15"
+        classpath group: 'gradle.plugin.us.ihmc.gradle', name: 'ihmc-build', version: '0.0.15'
     }
 }
 
@@ -45,14 +45,19 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
+
 	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
-
-
-
-	compile group: 'org.ejml', name: 'all', version: '0.28'
 	compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
+    compile group: 'org.ejml', name: 'core', version: '0.28'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    compile group: 'junit', name: 'junit', version: '4.11'
+    compile group: 'org.georegression', name: 'georegression', version: '0.8'
+    compile group: 'org.boofcv', name: 'geo', version: '0.19'
+    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
+    compile group: 'org.projectbubo', name: 'ProjectBUBO', version: '160309'
+    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 
-
+    compile ihmc.getProjectDependency(":SDFLoader")
 	compile ihmc.getProjectDependency(":Graphics3DAdapter")
 	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
@@ -61,11 +66,11 @@ dependencies {
 	compile ihmc.getProjectDependency(":RobotDataCommunication")
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":IHMCWholeBodyController")
-	compile ihmc.getProjectDependency(":IHMCPerception")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 }
+
 jar {
     manifest {
         attributes(

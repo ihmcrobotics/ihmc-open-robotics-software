@@ -7,15 +7,15 @@ buildscript {
         }
     }
     dependencies {
-        classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.15"
+        classpath group: 'gradle.plugin.us.ihmc.gradle', name: 'ihmc-build', version: '0.0.15'
     }
 }
 
 apply plugin: "us.ihmc.gradle.ihmc-build"
 
-
-
-if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
+if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
+    evaluationDependsOn(':IHMCOpenRoboticsSoftware')
+}
 
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
@@ -28,15 +28,15 @@ project.ext.bintrayLicenseName = "Apache-2.0"
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 repositories {
-	maven {
-		url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
-	}
+    maven {
+        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+    }
 }
 
 repositories {
-   mavenLocal()
-   jcenter()
-   mavenCentral()
+    mavenLocal()
+    jcenter()
+    mavenCentral()
 }
 
 def strings = ['ihmc', 'robotics']
@@ -46,57 +46,28 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 
 
 dependencies {
-	testCompile group: 'junit', name: 'junit', version: '4.11'
-	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
-	compile group: 'xerces', name: 'xercesImpl', version: '2.9.1'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
 
-	compile group: 'org.boofcv', name: 'calibration', version: '0.19'
+    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
+    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-desktop', version: '3.1.0-internal2'
+    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-lwjgl', version: '3.1.0-internal2'
+    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-terrain', version: '3.1.0-internal2'
+    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-plugins', version: '3.1.0-internal2'
+    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-dae', version: '1.0.0-internal1'
+    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-ogre', version: '1.0.0-internal2'
+    compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.3'
+    compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
+    compile group: 'com.google.guava', name: 'guava', version: '17.0'
+    compile group: 'org.boofcv', name: 'geo', version: '0.19'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 
-//    compile group: 'org.ejml', name: 'all', version: '0.28'
-    compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0' //force svnkit dependency jna-3.5.2 to use jna-4.1.0
-
-	// SNAPSHOT
-    // compile group: 'com.jme3', name: 'jme3-core', version: '3.1.0-SNAPSHOT'
-    // compile group: 'com.jme3', name: 'jme3-desktop', version: '3.1.0-SNAPSHOT'
-    // compile group: 'com.jme3', name: 'jme3-lwjgl', version: '3.1.0-SNAPSHOT'
-	// compile group: 'com.jme3', name: 'jme3-terrain', version: '3.1.0-SNAPSHOT'
-	// compile group: 'com.jme3', name: 'jme3-effects', version: '3.1.0-SNAPSHOT'
-	// compile group: 'com.jme3', name: 'jme3-plugins', version: '3.1.0-SNAPSHOT'
-	// compile group: 'us.ihmc.thirdparty.jme3', name: 'jme3-dae', version: '1.0.1'
-	// compile group: 'us.ihmc.thirdparty.jme3', name: 'jme3-ogre', version: '1.0.1'
-	// compile group: 'us.ihmc.thirdparty.jme3', name: 'jme3-shape3d', version: '1.0.1'
-	// STABLE
-    // compile group: 'com.jme3', name: 'jme3-core', version: '3.0.10'
-    // compile group: 'com.jme3', name: 'jme3-desktop', version: '3.0.10'
-    // compile group: 'com.jme3', name: 'jme3-lwjgl', version: '3.0.10'
-	// compile group: 'com.jme3', name: 'jme3-terrain', version: '3.0.10'
-	// compile group: 'com.jme3', name: 'jme3-effects', version: '3.0.10'
-	// compile group: 'com.jme3', name: 'jme3-plugins', version: '3.0.10'
-	// VENDORED
-	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
-	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-desktop', version: '3.1.0-internal2'
-	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-lwjgl', version: '3.1.0-internal2'
-	// compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-testdata', version: '3.1.0-internal2'
-	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-terrain', version: '3.1.0-internal2'
-	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-effects', version: '3.1.0-internal2'
-	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-plugins', version: '3.1.0-internal2'
-	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-dae', version: '1.0.0-internal1'
- 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-ogre', version: '1.0.0-internal2'
- 	compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.3'
- 	
-	compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
-	compile group: 'com.google.guava', name: 'guava', version: '17.0'
-	compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
-    compile group: 'net.lingala.zip4j', name: 'zip4j', version: '1.3.2'
-    compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
-
-
-	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
-	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
-	testCompile ihmc.getProjectTestDependency(":IHMCJavaToolkit")
-	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+    testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 }
+
 jar {
     manifest {
         attributes(

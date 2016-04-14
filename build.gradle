@@ -5,6 +5,7 @@ buildscript {
 
    dependencies {
       classpath 'org.ajoberstar:gradle-git:1.4.0-rc.1'
+      classpath 'ca.cutterslade.gradle:gradle-dependency-analyze:1.0.3'
    }
 }
 
@@ -100,6 +101,7 @@ subprojects { subproject ->
 
    apply plugin: 'maven-publish'
    apply plugin: 'java'
+   apply plugin: 'ca.cutterslade.analyze'
 
    subproject.ext {
       getOpenRoboticsSoftwareProject = {
