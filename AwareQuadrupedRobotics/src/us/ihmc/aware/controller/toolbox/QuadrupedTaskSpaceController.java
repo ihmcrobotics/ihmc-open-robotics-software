@@ -184,19 +184,6 @@ public class QuadrupedTaskSpaceController
          }
          else
          {
-            commands.getSoleForce(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-            if (commands.getSoleForce(robotQuadrant).getZ() < -settings.getContactForceLimits().getPressureUpperLimit(robotQuadrant))
-            {
-               // apply friction pyramid limits to sole forces if contact conditions are detected during NO_CONTACT state
-               double fx = commands.getSoleForce(robotQuadrant).getX();
-               double fy = commands.getSoleForce(robotQuadrant).getY();
-               double mu = settings.getContactForceLimits().getCoefficientOfFriction(robotQuadrant);
-               commands.getSoleForce(robotQuadrant).setX(Math.min(fx, mu * settings.getContactForceLimits().getPressureUpperLimit(robotQuadrant) / Math.sqrt(2)));
-               commands.getSoleForce(robotQuadrant).setX(Math.max(fx,-mu * settings.getContactForceLimits().getPressureUpperLimit(robotQuadrant) / Math.sqrt(2)));
-               commands.getSoleForce(robotQuadrant).setY(Math.min(fy, mu * settings.getContactForceLimits().getPressureUpperLimit(robotQuadrant) / Math.sqrt(2)));
-               commands.getSoleForce(robotQuadrant).setY(Math.max(fy,-mu * settings.getContactForceLimits().getPressureUpperLimit(robotQuadrant) / Math.sqrt(2)));
-               commands.getSoleForce(robotQuadrant).setZ(-settings.getContactForceLimits().getPressureUpperLimit(robotQuadrant));
-            }
             virtualModelController.setSoleVirtualForce(robotQuadrant, commands.getSoleForce(robotQuadrant));
             virtualModelController.setSoleContactForceVisible(robotQuadrant, false);
             virtualModelController.setSoleVirtualForceVisible(robotQuadrant, true);

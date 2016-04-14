@@ -1,6 +1,5 @@
 package us.ihmc.aware.controller.force;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.aware.controller.toolbox.*;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
@@ -18,12 +17,11 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedVirtualModelBasedStandController implements QuadrupedForceController
 {
-   private final SDFFullRobotModel fullRobotModel;
+   private final QuadrupedControllerInputProviderInterface inputProvider;
    private final DoubleYoVariable robotTimestamp;
    private final double controlDT;
    private final double gravity;
    private final double mass;
-   private final QuadrupedControllerInputProviderInterface inputProvider;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    // parameters
@@ -68,12 +66,11 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerInputProviderInterface inputProvider,
          QuadrupedForceControllerToolbox controllerToolbox)
    {
-      this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
+      this.inputProvider = inputProvider;
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
-      this.mass = fullRobotModel.getTotalMass();
-      this.inputProvider = inputProvider;
+      this.mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
 
       // frames
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -135,14 +132,15 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
       dcmPositionControllerSetpoints.getDcmPosition().add(inputProvider.getComPositionInput());
       dcmPositionControllerSetpoints.getDcmVelocity().setToZero(supportFrame);
       dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
+      taskSpaceControllerCommands.getComForce().changeFrame(supportFrame);
 
       // update desired com position and velocity
       comPositionControllerSetpoints.getComPosition().changeFrame(supportFrame);
       comPositionControllerSetpoints.getComPosition().set(inputProvider.getComPositionInput());
       comPositionControllerSetpoints.getComVelocity().changeFrame(supportFrame);
       comPositionControllerSetpoints.getComVelocity().set(inputProvider.getComVelocityInput());
-      comPositionControllerSetpoints.getComForceFeedforward().setIncludingFrame(taskSpaceControllerCommands.getComForce());
       comPositionControllerSetpoints.getComForceFeedforward().changeFrame(supportFrame);
+      comPositionControllerSetpoints.getComForceFeedforward().set(taskSpaceControllerCommands.getComForce());
       comPositionControllerSetpoints.getComForceFeedforward().setZ(mass * gravity);
       comPositionController.compute(taskSpaceControllerCommands.getComForce(), comPositionControllerSetpoints, taskSpaceEstimates);
 
