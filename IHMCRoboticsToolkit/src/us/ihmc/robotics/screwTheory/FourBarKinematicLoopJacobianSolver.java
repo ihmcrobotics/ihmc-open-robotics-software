@@ -28,6 +28,7 @@ public class FourBarKinematicLoopJacobianSolver
    {
       // Geometric Jacobian 
       jacobian.compute();
+//      jacobian.changeFrame(worldFrame);
 
       // Vector containing angular velocity of passive joints for angular velocity of input joint (master) equal 1
       double dqA_functionOfqA = 1.0;
