@@ -1,6 +1,5 @@
 package us.ihmc.aware.controller.force;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.aware.controller.toolbox.*;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
@@ -8,28 +7,20 @@ import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.planning.PiecewiseCopPlanner;
 import us.ihmc.aware.planning.PiecewiseReverseDcmTrajectory;
-import us.ihmc.aware.planning.ThreeDoFSwingFootTrajectory;
 import us.ihmc.aware.planning.XGaitStepPlanner;
-import us.ihmc.aware.state.StateMachine;
-import us.ihmc.aware.state.StateMachineBuilder;
-import us.ihmc.aware.state.StateMachineState;
 import us.ihmc.aware.util.ContactState;
-import us.ihmc.aware.util.PreallocatedQueue;
 import us.ihmc.aware.util.QuadrupedTimedStep;
-import us.ihmc.aware.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceController
 {
-   private final SDFFullRobotModel fullRobotModel;
    private final DoubleYoVariable robotTimestamp;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final double controlDT;
@@ -53,11 +44,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
    private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
-   private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 50000, 50000, 100000);
-   private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 500, 500, 500);
-   private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
-   private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
-   private final DoubleParameter swingTrajectoryGroundClearanceParameter = parameterFactory.createDouble("swingTrajectoryGroundClearance", 0.1);
    private final DoubleParameter noContactPressureLimitParameter = parameterFactory.createDouble("noContactPressureLimit", 75);
 
    // frames
@@ -72,8 +58,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final QuadrupedComPositionController comPositionController;
    private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
    private final QuadrupedBodyOrientationController bodyOrientationController;
-   private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
-   private final QuadrupedSolePositionController solePositionController;
+   private final QuadrupedTimedStepController.Setpoints timedStepControllerSetpoints;
+   private final QuadrupedTimedStepController timedStepController;
 
    // task space controller
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
@@ -83,36 +69,21 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final QuadrupedTaskSpaceController taskSpaceController;
 
    // planning
-   private static int STEP_QUEUE_CAPACITY = 60;
-   private final FramePoint dcmPositionWaypoint;
    private boolean dcmTrajectoryInitialized;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
+   private final FramePoint dcmPositionWaypoint;
    private final PiecewiseCopPlanner copPlanner;
    private final XGaitStepPlanner footstepPlanner;
-   private final PreallocatedQueue<QuadrupedTimedStep> stepQueue;
-   private final QuadrantDependentList<QuadrupedTimedStep> stepCache;
-   private final QuadrantDependentList<ThreeDoFSwingFootTrajectory> swingFootTrajectory;
-
-   // state machine
-   public enum FootState
-   {
-      SUPPORT, TRANSFER, SWING
-   }
-   public enum FootEvent
-   {
-      TRANSFER, LIFT_OFF, TOUCH_DOWN
-   }
-   private final QuadrantDependentList<StateMachine<FootState, FootEvent>> footStateMachine;
 
    public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerInputProviderInterface inputProvider,
          QuadrupedForceControllerToolbox controllerToolbox)
    {
-      this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
+
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       this.yoGraphicsListRegistry = runtimeEnvironment.getGraphicsListRegistry();
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
-      this.mass = fullRobotModel.getTotalMass();
+      this.mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
       this.inputProvider = inputProvider;
 
       // utilities
@@ -128,8 +99,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       comPositionController = controllerToolbox.getComPositionController();
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
-      solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints();
-      solePositionController = controllerToolbox.getSolePositionController();
+      timedStepControllerSetpoints = new QuadrupedTimedStepController.Setpoints();
+      timedStepController = controllerToolbox.getTimedStepController();
 
       // task space controllers
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
@@ -139,36 +110,11 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
-      copPlanner = new PiecewiseCopPlanner(2 * STEP_QUEUE_CAPACITY);
+      int maxStepTransitions = 2 * timedStepController.getStepQueue().capacity();
+      copPlanner = new PiecewiseCopPlanner(maxStepTransitions);
+      dcmTrajectory = new PiecewiseReverseDcmTrajectory(maxStepTransitions, gravity, inputProvider.getComPositionInput().getZ(), registry);
       dcmPositionWaypoint = new FramePoint(worldFrame);
-      dcmTrajectory = new PiecewiseReverseDcmTrajectory(2 * STEP_QUEUE_CAPACITY, gravity, inputProvider.getComPositionInput().getZ(), registry);
       footstepPlanner = new XGaitStepPlanner(registry, yoGraphicsListRegistry, referenceFrames);
-      swingFootTrajectory = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         swingFootTrajectory.set(robotQuadrant, new ThreeDoFSwingFootTrajectory());
-      }
-      stepQueue = new PreallocatedQueue<>(QuadrupedTimedStep.class, STEP_QUEUE_CAPACITY);
-      stepCache = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         stepCache.set(robotQuadrant, new QuadrupedTimedStep());
-      }
-
-      // state machines
-      footStateMachine = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         StateMachineBuilder<FootState, FootEvent> stateMachineBuilder = new StateMachineBuilder<>(FootState.class, prefix + "FootState", registry);
-         stateMachineBuilder.addState(FootState.SUPPORT, new SupportState(robotQuadrant));
-         stateMachineBuilder.addState(FootState.TRANSFER, new TransferState(robotQuadrant));
-         stateMachineBuilder.addState(FootState.SWING, new SwingState(robotQuadrant));
-         stateMachineBuilder.addTransition(FootEvent.TRANSFER, FootState.SUPPORT, FootState.TRANSFER);
-         stateMachineBuilder.addTransition(FootEvent.LIFT_OFF, FootState.TRANSFER, FootState.SWING);
-         stateMachineBuilder.addTransition(FootEvent.TOUCH_DOWN, FootState.SWING, FootState.SUPPORT);
-         footStateMachine.set(robotQuadrant, stateMachineBuilder.build(FootState.SUPPORT));
-      }
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
@@ -178,67 +124,26 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       return registry;
    }
 
-   public boolean addStep(QuadrupedTimedStep quadrupedTimedStep)
+   public boolean addStep(QuadrupedTimedStep timedStep)
    {
-      if ((quadrupedTimedStep.getTimeInterval().getStartTime() > robotTimestamp.getDoubleValue()) && stepQueue.enqueue())
-      {
-         stepQueue.getTail().set(quadrupedTimedStep);
-         return true;
-      }
-      return false;
+      return timedStepController.addStep(timedStep);
    }
 
    public void removeSteps()
    {
-      for (int i = 0; i < stepQueue.size(); i++)
-      {
-         // keep ongoing steps in the queue
-         QuadrupedTimedStep step = stepQueue.getHead();
-         if (step.getTimeInterval().getStartTime() < robotTimestamp.getDoubleValue())
-         {
-            stepQueue.enqueue();
-            stepQueue.getTail().set(step);
-         }
-         // remove future steps from the queue
-         stepQueue.dequeue();
-      }
+      timedStepController.removeSteps();
    }
 
-   public int getStepQueueSize()
+   private void computeDcmTrajectory()
    {
-      return stepQueue.size();
-   }
-
-   private void handleStepEvents()
-   {
-      double currentTime = robotTimestamp.getDoubleValue();
-
-      while ((stepQueue.size() > 0) && (stepQueue.getHead().getTimeInterval().getEndTime() < currentTime))
-      {
-         stepQueue.dequeue();
-      }
-
-      for (int i = 0; i < stepQueue.size(); i++)
-      {
-         QuadrupedTimedStep step = stepQueue.get(i);
-         if (step.getTimeInterval().getStartTime() <= currentTime)
-         {
-            footStateMachine.get(step.getRobotQuadrant()).trigger(FootEvent.TRANSFER);
-            stepCache.get(step.getRobotQuadrant()).set(step);
-         }
-      }
-   }
-
-   private void computeDcmPositionAndVelocitySetpoints()
-   {
-      if (stepQueue.size() == 0)
+      if (timedStepController.getStepQueue().size() == 0)
       {
          dcmTrajectoryInitialized = false;
       }
       else if (dcmTrajectoryInitialized == false)
       {
          // plan dcm trajectory
-         int nTransitions = copPlanner.compute(taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), stepQueue);
+         int nTransitions = copPlanner.compute(taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), timedStepController.getStepQueue());
          dcmPositionWaypoint.setIncludingFrame(copPlanner.getCopAtTransition(nTransitions - 1));
          dcmPositionWaypoint.changeFrame(worldFrame);
          dcmPositionWaypoint.add(0, 0, inputProvider.getComPositionInput().getZ());
@@ -279,15 +184,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
    private void updateSetpoints()
    {
-      // compute virtual foot forces
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         footStateMachine.get(robotQuadrant).process();
-      }
-      solePositionController.compute(taskSpaceControllerCommands.getSoleForce(), solePositionControllerSetpoints, taskSpaceEstimates);
-
       // update desired horizontal com forces
-      computeDcmPositionAndVelocitySetpoints();
+      computeDcmTrajectory();
       dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
 
       // update desired com position, velocity, and vertical force
@@ -307,6 +205,26 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       bodyOrientationControllerSetpoints.getComTorqueFeedforward().setToZero();
       bodyOrientationController.compute(taskSpaceControllerCommands.getComTorque(), bodyOrientationControllerSetpoints, taskSpaceEstimates);
 
+      // update desired contact state and sole forces
+      FramePoint dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
+      dcmPositionSetpoint.changeFrame(worldFrame);
+      dcmPositionEstimate.changeFrame(worldFrame);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         timedStepControllerSetpoints.getStepAdjustment(robotQuadrant).changeFrame(worldFrame);
+         timedStepControllerSetpoints.getStepAdjustment(robotQuadrant).set(dcmPositionEstimate.getX(), dcmPositionEstimate.getY(), 0.0);
+         timedStepControllerSetpoints.getStepAdjustment(robotQuadrant).sub(dcmPositionSetpoint.getX(), dcmPositionSetpoint.getY(), 0.0);
+         timedStepControllerSetpoints.getStepAdjustment(robotQuadrant).scale(1.5);
+      }
+      timedStepController.compute(taskSpaceControllerSettings.getContactState(), taskSpaceControllerCommands.getSoleForce(), timedStepControllerSetpoints, taskSpaceEstimates);
+
+      // update contact force limits
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         double pressureUpperLimit = taskSpaceControllerSettings.getContactState(robotQuadrant) == ContactState.NO_CONTACT ? noContactPressureLimitParameter.get() : Double.MAX_VALUE;
+         taskSpaceControllerSettings.getContactForceLimits().setPressureUpperLimit(robotQuadrant, pressureUpperLimit);
+      }
+
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
@@ -314,7 +232,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    @Override public QuadrupedForceControllerEvent process()
    {
       dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
-      handleStepEvents();
       updateEstimates();
       updateSetpoints();
       return null;
@@ -341,8 +258,8 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
       bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
       bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
-      solePositionControllerSetpoints.initialize(taskSpaceEstimates);
-      solePositionController.reset();
+      timedStepControllerSetpoints.initialize(taskSpaceEstimates);
+      timedStepController.reset();
 
       // initialize task space controller
       taskSpaceControllerSettings.initialize();
@@ -357,137 +274,12 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       taskSpaceController.reset();
 
       // initialize step queue
-      footstepPlanner.plan(stepQueue, robotTimestamp.getDoubleValue() + 2.0, true);
-
-      // initialize state machine
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         footStateMachine.get(robotQuadrant).reset();
-      }
+      footstepPlanner.plan(timedStepController.getStepQueue(), robotTimestamp.getDoubleValue() + 2.0, true);
    }
 
    @Override public void onExit()
    {
       // remove remaining steps from the queue
       removeSteps();
-   }
-
-   private class SupportState implements StateMachineState<FootEvent>
-   {
-      private final RobotQuadrant robotQuadrant;
-
-      public SupportState(RobotQuadrant robotQuadrant)
-      {
-         this.robotQuadrant = robotQuadrant;
-      }
-
-      @Override public void onEntry()
-      {
-         // initialize contact state
-         taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
-         taskSpaceControllerSettings.getContactForceLimits().setPressureUpperLimit(robotQuadrant, Double.MAX_VALUE);
-
-         // disable sole position feedback
-         solePositionController.getGains(robotQuadrant).reset();
-      }
-
-      @Override public FootEvent process()
-      {
-         return null;
-      }
-
-      @Override public void onExit()
-      {
-      }
-   }
-
-   private class TransferState implements StateMachineState<FootEvent>
-   {
-      private final RobotQuadrant robotQuadrant;
-
-      public TransferState(RobotQuadrant robotQuadrant)
-      {
-         this.robotQuadrant = robotQuadrant;
-      }
-
-      @Override public void onEntry()
-      {
-      }
-
-      @Override public FootEvent process()
-      {
-         double currentTime = robotTimestamp.getDoubleValue();
-         double liftOffTime = stepCache.get(robotQuadrant).getTimeInterval().getStartTime();
-
-         // trigger lift off event
-         if (currentTime > liftOffTime)
-            return FootEvent.LIFT_OFF;
-         else
-            return null;
-      }
-
-      @Override public void onExit()
-      {
-      }
-   }
-
-   private class SwingState implements StateMachineState<FootEvent>
-   {
-      private final RobotQuadrant robotQuadrant;
-
-      public SwingState(RobotQuadrant robotQuadrant)
-      {
-         this.robotQuadrant = robotQuadrant;
-      }
-
-      @Override public void onEntry()
-      {
-         // initialize swing foot controller
-         TimeInterval timeInterval = stepCache.get(robotQuadrant).getTimeInterval();
-         FramePoint goalPosition = stepCache.get(robotQuadrant).getGoalPosition();
-         FramePoint solePosition = taskSpaceEstimates.getSolePosition(robotQuadrant);
-         solePosition.changeFrame(goalPosition.getReferenceFrame());
-         swingFootTrajectory.get(robotQuadrant).initializeTrajectory(
-               solePosition, goalPosition, swingTrajectoryGroundClearanceParameter.get(), timeInterval.getDuration());
-
-         // initialize sole position feedback gains
-         solePositionController.getGains(robotQuadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
-         solePositionController.getGains(robotQuadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
-         solePositionController.getGains(robotQuadrant).setDerivativeGains(solePositionDerivativeGainsParameter.get());
-
-         // initialize contact state
-         taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
-         taskSpaceControllerSettings.getContactForceLimits().setPressureUpperLimit(robotQuadrant, noContactPressureLimitParameter.get());
-      }
-
-      @Override public FootEvent process()
-      {
-         double currentTime = robotTimestamp.getDoubleValue();
-         double liftOffTime = stepCache.get(robotQuadrant).getTimeInterval().getStartTime();
-         double touchDownTime = stepCache.get(robotQuadrant).getTimeInterval().getEndTime();
-
-         // compute swing trajectory
-         swingFootTrajectory.get(robotQuadrant).computeTrajectory(currentTime - liftOffTime);
-         swingFootTrajectory.get(robotQuadrant).getPosition(solePositionControllerSetpoints.getSolePosition(robotQuadrant));
-
-         // shift the swing foot trajectory in the direction of the dcm tracking error
-         double alpha = 1.5 * Math.sqrt((currentTime - liftOffTime) / (touchDownTime - liftOffTime));
-         FramePoint dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
-         dcmPositionSetpoint.changeFrame(worldFrame);
-         dcmPositionEstimate.changeFrame(worldFrame);
-         solePositionControllerSetpoints.getSolePosition(robotQuadrant).changeFrame(worldFrame);
-         solePositionControllerSetpoints.getSolePosition(robotQuadrant).add(alpha * dcmPositionEstimate.getX(), alpha * dcmPositionEstimate.getY(), 0.0);
-         solePositionControllerSetpoints.getSolePosition(robotQuadrant).sub(alpha * dcmPositionSetpoint.getX(), alpha * dcmPositionSetpoint.getY(), 0.0);
-
-         // trigger touch down event
-         if (currentTime > touchDownTime)
-            return FootEvent.TOUCH_DOWN;
-         else
-            return null;
-      }
-
-      @Override public void onExit()
-      {
-      }
    }
 }
