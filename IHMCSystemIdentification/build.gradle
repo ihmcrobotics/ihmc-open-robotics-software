@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'gradle.plugin.us.ihmc.gradle', name: 'ihmc-build', version: '0.0.15'
+        classpath group: 'gradle.plugins.us.ihmc.gradle', name: 'ihmc-build', version: '0.0.16'
     }
 }
 
