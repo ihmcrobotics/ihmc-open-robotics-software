@@ -37,13 +37,13 @@ public class FourBarKinematicLoop
 
    private final RevoluteJoint masterJointA;
    private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD, fourBarOutputJoint;
-   private final InverseDynamicsJoint[] joints = new InverseDynamicsJoint[4] ;
+   private final InverseDynamicsJoint[] joints = new InverseDynamicsJoint[3] ;
    private final Vector3d closurePointFromLastPassiveJointVect;
 
    private final FourBarCalculatorWithDerivatives fourBarCalculator;
 
    private final FourBarKinematicLoopJacobianSolver fourBarJacobianSolver;
-   private DenseMatrix64F jacobian, inputJointAngularVelocities, outputJointLinearVelocitiesToPack;
+   private DenseMatrix64F jacobian, outputJointLinearVelocities;
 
    private final double[] passiveInteriorAnglesAtZeroConfiguration = new double[3];
    private final double[] passiveJointSigns = new double[3];
@@ -62,7 +62,6 @@ public class FourBarKinematicLoop
       joints[0] = masterJointA;
       joints[1] = passiveJointB;
       joints[2] = passiveJointC;
-      joints[3] = passiveJointD;
 
       // Rotation axis
       FrameVector masterJointAxis = masterJointA.getJointAxis();
@@ -108,8 +107,7 @@ public class FourBarKinematicLoop
          jacobian = fourBarJacobianSolver.computeJacobian(fourBarOutputJoint);         
       }
       
-      outputJointLinearVelocitiesToPack = new DenseMatrix64F(6,1);
-      inputJointAngularVelocities = new DenseMatrix64F(6, 1); // TODO: adapt if the output joint is not D
+//      outputJointLinearVelocitiesToPack = new DenseMatrix64F(6,1);
 
       // Initialize interior angle offsets and signs
       initializeInteriorAnglesAtZeroConfigurationAndJointSigns(vectorDAProjected, vectorABProjected, vectorBCProjected, vectorCDProjected);
@@ -378,15 +376,19 @@ public class FourBarKinematicLoop
       fourBarCalculator.updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(masterJointA.getQ(), masterJointA.getQd(), masterJointA.getQdd());
 
       jacobian = fourBarJacobianSolver.computeJacobian(fourBarOutputJoint);
-
-      inputJointAngularVelocities.setData(new double[] {fourBarCalculator.getAngleDtDAB(), fourBarCalculator.getAngleDtABC(), fourBarCalculator.getAngleDtBCD()});
-      fourBarJacobianSolver.solveLinearVelFromAngularVel(jacobian, inputJointAngularVelocities, outputJointLinearVelocitiesToPack);
-     
-      if(DEBUG)
-      {
+      
+//      if(DEBUG)
+//      {
          System.out.println("\nJacobian: \n" + jacobian);
-         System.out.println("\nLinear velocity output joint: \n" + outputJointLinearVelocitiesToPack);      
-      }
+//      }
+      
+      fourBarJacobianSolver.solveLinearVelFromAngularVel(jacobian, masterJointA.getQd());
+      outputJointLinearVelocities = jacobian;
+     
+//      if(DEBUG)
+//      {
+         System.out.println("\nLinear velocity output joint: \n" + outputJointLinearVelocities);      
+//      }
       
       passiveJointB.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleABC(), 0));
       passiveJointC.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleBCD(), 1));
@@ -438,6 +440,6 @@ public class FourBarKinematicLoop
    
    public DenseMatrix64F getOutputJointLinearVelocities()
    {
-      return outputJointLinearVelocitiesToPack;
+      return outputJointLinearVelocities;
    }
 }
