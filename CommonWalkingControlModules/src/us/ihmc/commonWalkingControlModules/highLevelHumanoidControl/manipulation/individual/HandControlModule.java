@@ -4,11 +4,13 @@ import static us.ihmc.robotics.stateMachines.StateMachineTools.addRequestedState
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -86,6 +88,10 @@ public class HandControlModule
    private final boolean isAtLeastOneJointPositionControlled;
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand;
+   private final Map<OneDoFJoint, DoubleYoVariable> accelerationIntegrationAlphaPosition;
+   private final Map<OneDoFJoint, DoubleYoVariable> accelerationIntegrationAlphaVelocity;
+   private final Map<OneDoFJoint, DoubleYoVariable> accelerationIntegrationMaxPositionError;
+   private final Map<OneDoFJoint, DoubleYoVariable> accelerationIntegrationMaxVelocity;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
 
    private final ReferenceFrame chestFrame;
@@ -183,6 +189,31 @@ public class HandControlModule
 
          for (OneDoFJoint positionControlledJoint : positionControlledJoints)
             jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(positionControlledJoint);
+
+         Map<ArmJointName, DoubleYoVariable> alphaPosition = armControlParameters.getOrCreateAccelerationIntegrationAlphaPosition(parentRegistry);
+         Map<ArmJointName, DoubleYoVariable> alphaVelocity = armControlParameters.getOrCreateAccelerationIntegrationAlphaVelocity(parentRegistry);
+         Map<ArmJointName, DoubleYoVariable> alphaMaxPositionError = armControlParameters.getOrCreateAccelerationIntegrationMaxPositionError(parentRegistry);
+         Map<ArmJointName, DoubleYoVariable> alphaMaxVelocity = armControlParameters.getOrCreateAccelerationIntegrationMaxVelocity(parentRegistry);
+
+         accelerationIntegrationAlphaPosition = new HashMap<>();
+         accelerationIntegrationAlphaVelocity = new HashMap<>();
+         accelerationIntegrationMaxPositionError = new HashMap<>();
+         accelerationIntegrationMaxVelocity = new HashMap<>();
+
+         ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
+
+         for (ArmJointName armJointName : armJointNames)
+         {
+            OneDoFJoint armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
+            if (alphaPosition != null && alphaPosition.containsKey(armJointName))
+               accelerationIntegrationAlphaPosition.put(armJoint, alphaPosition.get(armJoint));
+            if (alphaVelocity != null && alphaVelocity.containsKey(armJointName))
+               accelerationIntegrationAlphaVelocity.put(armJoint, alphaVelocity.get(armJoint));
+            if (alphaMaxPositionError != null && alphaMaxPositionError.containsKey(armJointName))
+               accelerationIntegrationMaxPositionError.put(armJoint, alphaMaxPositionError.get(armJoint));
+            if (alphaMaxVelocity != null && alphaMaxVelocity.containsKey(armJointName))
+               accelerationIntegrationMaxVelocity.put(armJoint, alphaMaxVelocity.get(armJoint));
+         }
       }
       else
       {
@@ -190,6 +221,10 @@ public class HandControlModule
                hand, registry);
          jointAccelerationIntegrationCommand = null;
          lowLevelOneDoFJointDesiredDataHolder = null;
+         accelerationIntegrationAlphaPosition = null;
+         accelerationIntegrationAlphaVelocity = null;
+         accelerationIntegrationMaxPositionError = null;
+         accelerationIntegrationMaxVelocity = null;
       }
 
       setupStateMachine();
@@ -267,6 +302,8 @@ public class HandControlModule
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
 
+      updateAccelerationIntegrationParameters();
+
       updateInverseDynamicsCommandList();
    }
 
@@ -279,6 +316,29 @@ public class HandControlModule
             return true;
       }
       return false;
+   }
+
+   private void updateAccelerationIntegrationParameters()
+   {
+      for (int i = 0; i < jointAccelerationIntegrationCommand.getNumberOfJointsToComputeDesiredPositionFor(); i++)
+      {
+         OneDoFJoint jointToComputeDesiredPositionFor = jointAccelerationIntegrationCommand.getJointToComputeDesiredPositionFor(i);
+         double alphaPosition = Double.NaN;
+         double alphaVelocity = Double.NaN;
+         if (accelerationIntegrationAlphaPosition != null && accelerationIntegrationAlphaPosition.containsValue(jointToComputeDesiredPositionFor))
+            alphaPosition = accelerationIntegrationAlphaPosition.get(jointToComputeDesiredPositionFor).getDoubleValue();
+         if (accelerationIntegrationAlphaVelocity != null && accelerationIntegrationAlphaVelocity.containsValue(jointToComputeDesiredPositionFor))
+            alphaVelocity = accelerationIntegrationAlphaVelocity.get(jointToComputeDesiredPositionFor).getDoubleValue();
+         jointAccelerationIntegrationCommand.setJointAlphas(i, alphaPosition, alphaVelocity);
+
+         double maxPositionError = Double.NaN;
+         double maxVelocity = Double.NaN;
+         if (accelerationIntegrationMaxPositionError != null && accelerationIntegrationMaxPositionError.containsValue(jointToComputeDesiredPositionFor))
+            maxPositionError = accelerationIntegrationMaxPositionError.get(jointToComputeDesiredPositionFor).getDoubleValue();
+         if (accelerationIntegrationMaxVelocity != null && accelerationIntegrationMaxVelocity.containsValue(jointToComputeDesiredPositionFor))
+            maxVelocity = accelerationIntegrationMaxVelocity.get(jointToComputeDesiredPositionFor).getDoubleValue();
+         jointAccelerationIntegrationCommand.setJointMaxima(i, maxPositionError, maxVelocity);
+      }
    }
 
    private void updateInverseDynamicsCommandList()
