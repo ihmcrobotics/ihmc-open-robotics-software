@@ -13,10 +13,10 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.VideoB})
+@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
 public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
@@ -73,7 +73,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 41.4, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.VideoB})
+   @DeployableTestMethod(estimatedDuration = 41.4, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
    @Test(timeout = 210000)
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
    {
@@ -145,7 +145,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 26.5, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.VideoB})
+   @DeployableTestMethod(estimatedDuration = 26.5, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
    @Test(timeout = 130000)
    public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
    {
