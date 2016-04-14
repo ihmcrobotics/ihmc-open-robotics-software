@@ -52,6 +52,8 @@ public class QuadrupedTimedStepController
    private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 500, 500, 500);
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
+   private final DoubleParameter solePressureUpperLimitParameter = parameterFactory.createDouble("solePressureUpperLimit", 75);
+   private final DoubleParameter soleCoefficientOfFrictionParameter = parameterFactory.createDouble("soleCoefficientOfFrictionParameter", 75);
    private final DoubleParameter stepAdjustmentEnvelopeAttackParameter = parameterFactory.createDouble("stepAdjustmentEnvelopeAttack", 0.5);
 
    // control variables
@@ -109,18 +111,18 @@ public class QuadrupedTimedStepController
       }
    }
 
-   public boolean addStep(QuadrupedTimedStep step)
+   public boolean addStep(QuadrupedTimedStep timedStep)
    {
       for (int i = 0; i < stepQueue.size(); i++)
       {
-         if ((step.getRobotQuadrant() == stepQueue.get(i).getRobotQuadrant()) && (step.getTimeInterval().getStartTime() < step.getTimeInterval().getEndTime()))
+         if ((timedStep.getRobotQuadrant() == stepQueue.get(i).getRobotQuadrant()) && (timedStep.getTimeInterval().getStartTime() < timedStep.getTimeInterval().getEndTime()))
          {
             return false;
          }
       }
-      if ((step.getTimeInterval().getStartTime() < timestamp.getDoubleValue()) && stepQueue.enqueue())
+      if ((timedStep.getTimeInterval().getStartTime() < timestamp.getDoubleValue()) && stepQueue.enqueue())
       {
-         stepQueue.getTail().set(step);
+         stepQueue.getTail().set(timedStep);
          return true;
       }
       else
@@ -150,6 +152,19 @@ public class QuadrupedTimedStepController
       return stepQueue;
    }
 
+   public QuadrupedTimedStep getCurrentStep(RobotQuadrant robotQuadrant)
+   {
+      for (int i = 0; i < stepQueue.size(); i++)
+      {
+         QuadrupedTimedStep step = stepQueue.get(i);
+         if (step.getRobotQuadrant() == robotQuadrant)
+         {
+            return step;
+         }
+      }
+      return null;
+   }
+
    public void reset()
    {
       for (int i = 0; i < stepQueue.size(); i++)
@@ -173,6 +188,7 @@ public class QuadrupedTimedStepController
          contactState.set(robotQuadrant, this.contactState.get(robotQuadrant));
       }
       solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, estimates);
+      limitSoleForceCommand(soleForceCommand);
       handleStepEvents();
    }
 
@@ -195,17 +211,24 @@ public class QuadrupedTimedStepController
       }
    }
 
-   private QuadrupedTimedStep getCurrentStep(RobotQuadrant robotQuadrant)
+   private void limitSoleForceCommand(QuadrantDependentList<FrameVector> soleForceCommand)
    {
-      for (int i = 0; i < stepQueue.size(); i++)
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         QuadrupedTimedStep step = stepQueue.get(i);
-         if (step.getRobotQuadrant() == robotQuadrant)
+         double coefficientOfFriction = soleCoefficientOfFrictionParameter.get();
+         double pressureLimit = solePressureUpperLimitParameter.get();
+         FrameVector soleForce = soleForceCommand.get(robotQuadrant);
+         soleForce.changeFrame(ReferenceFrame.getWorldFrame());
+         if (soleForce.getZ() < -pressureLimit)
          {
-            return step;
+            // limit vertical force and project horizontal forces into friction pyramid
+            soleForce.setX(Math.min(soleForce.getX(), coefficientOfFriction * pressureLimit));
+            soleForce.setX(Math.max(soleForce.getX(), -coefficientOfFriction * pressureLimit));
+            soleForce.setY(Math.min(soleForce.getY(), coefficientOfFriction * pressureLimit));
+            soleForce.setY(Math.max(soleForce.getY(), -coefficientOfFriction * pressureLimit));
+            soleForce.setZ(-pressureLimit);
          }
       }
-      return null;
    }
 
    private class SupportState implements StateMachineState<StepEvent>
