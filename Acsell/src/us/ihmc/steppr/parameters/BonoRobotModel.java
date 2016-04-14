@@ -96,7 +96,7 @@ public class BonoRobotModel implements DRCRobotModel
       }
 
       capturePointPlannerParameters = new BonoCapturePointPlannerParameters(runningOnRealRobot);
-      armControlParameters = new BonoArmControlParameters(runningOnRealRobot);
+      armControlParameters = new BonoArmControlParameters();
       walkingControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
       multiContactControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
    }
