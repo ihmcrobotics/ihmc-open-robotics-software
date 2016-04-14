@@ -7,13 +7,15 @@ buildscript {
         }
     }
     dependencies {
-        classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.15"
+        classpath group: 'gradle.plugin.us.ihmc.gradle', name: 'ihmc-build', version: '0.0.15'
     }
 }
 
 apply plugin: "us.ihmc.gradle.ihmc-build"
 
-if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
+if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
+    evaluationDependsOn(':IHMCOpenRoboticsSoftware')
+}
 
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
@@ -26,34 +28,43 @@ project.ext.bintrayLicenseName = "Apache-2.0"
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 repositories {
-	maven {
-		url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
-	}
+    maven {
+        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+    }
 }
 
 repositories {
-   mavenLocal()
-   jcenter()
-   mavenCentral()
+    mavenLocal()
+    jcenter()
+    mavenCentral()
 }
 
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
-dependencies
-{
-	testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
-	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
 
+    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    compile group: 'org.ejml', name: 'core', version: '0.28'
+    compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
+    compile group: 'org.georegression', name: 'georegression', version: '0.8'
+    compile group: 'org.ejml', name: 'dense64', version: '0.28'
+    compile group: 'org.boofcv', name: 'geo', version: '0.19'
+
+    compile ihmc.getProjectDependency(":SimulationConstructionSet")
+    compile ihmc.getProjectDependency(":Graphics3DAdapter")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCCommunication")
-    testCompile ihmc.getProjectTestDependency(":IHMCCommunication")
     compile ihmc.getProjectDependency(":SDFLoader")
     compile ihmc.getProjectDependency(":SensorProcessing")
+
+    testCompile ihmc.getProjectTestDependency(":IHMCCommunication")
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 }
+
 jar {
     manifest {
         attributes(

@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.15"
+        classpath group: 'gradle.plugin.us.ihmc.gradle', name: 'ihmc-build', version: '0.0.15'
     }
 }
 
@@ -45,14 +45,16 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+    compile group: 'org.ejml', name: 'dense64', version: '0.28'
+    compile group: 'org.ejml', name: 'core', version: '0.28'
+
+    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
- 	compile ihmc.getProjectDependency(":IHMCCommunication")
-
-
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":Graphics3DAdapter")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
-	compile ihmc.getProjectDependency(":Plotting")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
