@@ -107,8 +107,6 @@ public class FourBarKinematicLoop
          jacobian = fourBarJacobianSolver.computeJacobian(fourBarOutputJoint);         
       }
       
-//      outputJointLinearVelocitiesToPack = new DenseMatrix64F(6,1);
-
       // Initialize interior angle offsets and signs
       initializeInteriorAnglesAtZeroConfigurationAndJointSigns(vectorDAProjected, vectorABProjected, vectorBCProjected, vectorCDProjected);
 

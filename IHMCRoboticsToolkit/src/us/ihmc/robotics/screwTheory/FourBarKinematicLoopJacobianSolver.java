@@ -4,10 +4,12 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorWithDerivatives;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FourBarKinematicLoopJacobianSolver
 {
    private static final boolean DEBUG = false;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final FourBarCalculatorWithDerivatives fourBarCalculator;
    private final GeometricJacobian jacobian;
@@ -28,7 +30,7 @@ public class FourBarKinematicLoopJacobianSolver
    {
       // Geometric Jacobian 
       jacobian.compute();
-//      jacobian.changeFrame(worldFrame);
+      jacobian.changeFrame(worldFrame);
 
       // Vector containing angular velocity of passive joints for angular velocity of input joint (master) equal 1
       double dqA_functionOfqA = 1.0;
