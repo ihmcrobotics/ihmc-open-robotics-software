@@ -7,23 +7,23 @@ public enum XBoxOneMapping implements JoystickMapping
 {
    // TODO windows and mac mapping
 
-   A(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Button.A),
-   B(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Button.B),
-   X(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Button.X),
-   Y(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Button.Y),
-   LEFT_BUMPER(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Button.LEFT_THUMB),
-   RIGHT_BUMPER(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Button.RIGHT_THUMB),
-   SELECT(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Button.SELECT),
-   START(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Button.START),
-   MODE(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Button.MODE),
-   LEFT_TRIGGER(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Axis.Z),
-   RIGHT_TRIGGER(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Axis.RZ),
-   LEFT_JOYSTICK_X(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Axis.X),
-   LEFT_JOYSTICK_Y(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Axis.Y),
-   RIGHT_JOYSTICK_X(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Axis.RX),
-   RIGHT_JOYSTICK_Y(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Axis.RY),
-   LEFT_JOYSTICK_BUTTON(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Button.LEFT_THUMB3),
-   RIGHT_JOYSTICK_BUTTON(Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN, Identifier.Button.RIGHT_THUMB3);
+   A(Identifier.Button.UNKNOWN, Identifier.Button._0, Identifier.Button.A),
+   B(Identifier.Button.UNKNOWN, Identifier.Button._1, Identifier.Button.B),
+   X(Identifier.Button.UNKNOWN, Identifier.Button._2, Identifier.Button.X),
+   Y(Identifier.Button.UNKNOWN, Identifier.Button._3, Identifier.Button.Y),
+   LEFT_BUMPER(Identifier.Button.UNKNOWN, Identifier.Button._4, Identifier.Button.LEFT_THUMB),
+   RIGHT_BUMPER(Identifier.Button.UNKNOWN, Identifier.Button._5, Identifier.Button.RIGHT_THUMB),
+   SELECT(Identifier.Button.UNKNOWN, Identifier.Button._9, Identifier.Button.SELECT),
+   START(Identifier.Button.UNKNOWN, Identifier.Button._8, Identifier.Button.START),
+   MODE(Identifier.Button.UNKNOWN, Identifier.Button._10, Identifier.Button.MODE),
+   LEFT_TRIGGER(Identifier.Button.UNKNOWN, Identifier.Axis.Z, Identifier.Axis.Z),
+   RIGHT_TRIGGER(Identifier.Button.UNKNOWN, Identifier.Axis.RZ, Identifier.Axis.RZ),
+   LEFT_JOYSTICK_X(Identifier.Button.UNKNOWN, Identifier.Axis.X, Identifier.Axis.X),
+   LEFT_JOYSTICK_Y(Identifier.Button.UNKNOWN, Identifier.Axis.Y, Identifier.Axis.Y),
+   RIGHT_JOYSTICK_X(Identifier.Button.UNKNOWN, Identifier.Axis.RX, Identifier.Axis.RX),
+   RIGHT_JOYSTICK_Y(Identifier.Button.UNKNOWN, Identifier.Axis.RY, Identifier.Axis.RY),
+   LEFT_JOYSTICK_BUTTON(Identifier.Button.UNKNOWN, Identifier.Button._6, Identifier.Button.LEFT_THUMB3),
+   RIGHT_JOYSTICK_BUTTON(Identifier.Button.UNKNOWN, Identifier.Button._7, Identifier.Button.RIGHT_THUMB3);
    
    private final Identifier identifier;
 
