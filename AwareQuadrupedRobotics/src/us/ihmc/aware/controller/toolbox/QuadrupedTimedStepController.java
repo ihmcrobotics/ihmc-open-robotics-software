@@ -115,12 +115,12 @@ public class QuadrupedTimedStepController
    {
       for (int i = 0; i < stepQueue.size(); i++)
       {
-         if ((timedStep.getRobotQuadrant() == stepQueue.get(i).getRobotQuadrant()) && (timedStep.getTimeInterval().getStartTime() < timedStep.getTimeInterval().getEndTime()))
+         if ((timedStep.getRobotQuadrant() == stepQueue.get(i).getRobotQuadrant()) && (timedStep.getTimeInterval().getStartTime() < stepQueue.get(i).getTimeInterval().getEndTime()))
          {
             return false;
          }
       }
-      if ((timedStep.getTimeInterval().getStartTime() < timestamp.getDoubleValue()) && stepQueue.enqueue())
+      if ((timestamp.getDoubleValue() <= timedStep.getTimeInterval().getStartTime()) && stepQueue.enqueue())
       {
          stepQueue.getTail().set(timedStep);
          return true;
@@ -133,7 +133,8 @@ public class QuadrupedTimedStepController
 
    public void removeSteps()
    {
-      for (int i = 0; i < stepQueue.size(); i++)
+      int size = stepQueue.size();
+      for (int i = 0; i < size; i++)
       {
          // keep ongoing steps in the queue
          QuadrupedTimedStep step = stepQueue.getHead();
@@ -167,7 +168,7 @@ public class QuadrupedTimedStepController
 
    public void reset()
    {
-      for (int i = 0; i < stepQueue.size(); i++)
+      while (stepQueue.size() > 0)
       {
          stepQueue.dequeue();
       }
