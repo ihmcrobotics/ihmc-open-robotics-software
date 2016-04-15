@@ -5,7 +5,7 @@ import org.apache.commons.lang3.SystemUtils;
 
 public enum XBoxOneMapping implements JoystickMapping
 {
-   // TODO mac mapping
+   // NOTE: OS X does not recognize XBOX controllers
 
    A(Identifier.Button._0, Identifier.Button.UNKNOWN, Identifier.Button.A),
    B(Identifier.Button._1, Identifier.Button.UNKNOWN, Identifier.Button.B),
