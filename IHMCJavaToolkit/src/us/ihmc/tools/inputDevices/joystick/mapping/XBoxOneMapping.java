@@ -26,8 +26,12 @@ public enum XBoxOneMapping implements JoystickMapping
    RIGHT_JOYSTICK_Y(Identifier.Axis.RY, Identifier.Axis.RY, Identifier.Axis.RY),
    LEFT_JOYSTICK_BUTTON(Identifier.Button._8, Identifier.Button._6, Identifier.Button.LEFT_THUMB3),
    RIGHT_JOYSTICK_BUTTON(Identifier.Button._9, Identifier.Button._7, Identifier.Button.RIGHT_THUMB3),
-   CROSS(Identifier.Axis.POV, Identifier.Axis.POV, Identifier.Axis.POV);
-   
+   CROSS(Identifier.Axis.POV, Identifier.Button.UNKNOWN, Identifier.Axis.POV), // Linux and Windows
+   DPAD_UP(Identifier.Button.UNKNOWN, Identifier.Button._11, Identifier.Button.UNKNOWN), // OS X
+   DPAD_DOWN(Identifier.Button.UNKNOWN, Identifier.Button._12, Identifier.Button.UNKNOWN), // OS X
+   DPAD_LEFT(Identifier.Button.UNKNOWN, Identifier.Button._13, Identifier.Button.UNKNOWN), // OS X
+   DPAD_RIGHT(Identifier.Button.UNKNOWN, Identifier.Button._14, Identifier.Button.UNKNOWN); // OS X
+
    private final Identifier identifier;
 
    private XBoxOneMapping(Identifier windowsIdentifier, Identifier macIdentifier, Identifier linuxIdentifier)
