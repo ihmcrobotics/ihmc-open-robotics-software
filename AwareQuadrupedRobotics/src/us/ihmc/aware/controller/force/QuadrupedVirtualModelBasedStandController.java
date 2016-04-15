@@ -44,7 +44,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    private final ReferenceFrame supportFrame;
    private final ReferenceFrame worldFrame;
 
-   // feedback controllers
+   // feedback controller
    private final FramePoint dcmPositionEstimate;
    private final DivergentComponentOfMotionController.Setpoints dcmPositionControllerSetpoints;
    private final DivergentComponentOfMotionController dcmPositionController;
@@ -123,8 +123,6 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
 
    private void updateSetpoints()
    {
-      taskSpaceControllerCommands.initialize();
-
       // update desired dcm position
       dcmPositionControllerSetpoints.getDcmPosition().changeFrame(supportFrame);
       dcmPositionControllerSetpoints.getDcmPosition().set(inputProvider.getComVelocityInput());
