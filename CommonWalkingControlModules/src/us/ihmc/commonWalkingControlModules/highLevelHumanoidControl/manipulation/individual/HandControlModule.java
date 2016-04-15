@@ -72,7 +72,7 @@ public class HandControlModule
    private final HandUserControlModeState userControlModeState;
 
    private final EnumYoVariable<HandControlMode> requestedState;
-   private final OneDoFJoint[] jointsOriginal;
+   private final OneDoFJoint[] controlledJoints;
 
    private final Map<OneDoFJoint, BooleanYoVariable> areJointsEnabled;
    private final String name;
@@ -137,13 +137,13 @@ public class HandControlModule
       chestFrame = chest.getBodyFixedFrame();
       handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
 
-      jointsOriginal = ScrewTools.createOneDoFJointPath(chest, hand);
+      controlledJoints = ScrewTools.createOneDoFJointPath(chest, hand);
 
       requestedState = new EnumYoVariable<HandControlMode>(name + "RequestedState", "", registry, HandControlMode.class, true);
       requestedState.set(null);
 
       areJointsEnabled = new LinkedHashMap<>();
-      for (OneDoFJoint oneDoFJoint : jointsOriginal)
+      for (OneDoFJoint oneDoFJoint : controlledJoints)
       {
          areJointsEnabled.put(oneDoFJoint, new BooleanYoVariable(namePrefix + oneDoFJoint.getName() + "IsEnabled", registry));
       }
@@ -157,7 +157,7 @@ public class HandControlModule
 
       OneDoFJoint[] positionControlledJoints;
       if (isAtLeastOneJointPositionControlled)
-         positionControlledJoints = ScrewTools.filterJoints(ScrewTools.findJointsWithNames(jointsOriginal, positionControlledJointNames), OneDoFJoint.class);
+         positionControlledJoints = ScrewTools.filterJoints(ScrewTools.findJointsWithNames(controlledJoints, positionControlledJointNames), OneDoFJoint.class);
       else
          positionControlledJoints = new OneDoFJoint[0];
 
@@ -171,10 +171,10 @@ public class HandControlModule
 
       Map<OneDoFJoint, Double> homeConfiguration = armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
 
-      jointspaceControlState = new JointSpaceHandControlState(stateNamePrefix, homeConfiguration, jointsOriginal, jointspaceGains, registry);
+      jointspaceControlState = new JointSpaceHandControlState(stateNamePrefix, homeConfiguration, controlledJoints, jointspaceGains, registry);
       taskspaceControlState = new TaskspaceHandControlState(stateNamePrefix, elevator, hand, chest, taskspaceGains, baseForControlToReferenceFrameMap,
             yoGraphicsListRegistry, registry);
-      userControlModeState = new HandUserControlModeState(stateNamePrefix, jointsOriginal, momentumBasedController, registry);
+      userControlModeState = new HandUserControlModeState(stateNamePrefix, controlledJoints, momentumBasedController, registry);
 
       if (isAtLeastOneJointPositionControlled)
       {
@@ -206,13 +206,13 @@ public class HandControlModule
          {
             OneDoFJoint armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
             if (alphaPosition != null && alphaPosition.containsKey(armJointName))
-               accelerationIntegrationAlphaPosition.put(armJoint, alphaPosition.get(armJoint));
+               accelerationIntegrationAlphaPosition.put(armJoint, alphaPosition.get(armJointName));
             if (alphaVelocity != null && alphaVelocity.containsKey(armJointName))
-               accelerationIntegrationAlphaVelocity.put(armJoint, alphaVelocity.get(armJoint));
+               accelerationIntegrationAlphaVelocity.put(armJoint, alphaVelocity.get(armJointName));
             if (alphaMaxPositionError != null && alphaMaxPositionError.containsKey(armJointName))
-               accelerationIntegrationMaxPositionError.put(armJoint, alphaMaxPositionError.get(armJoint));
+               accelerationIntegrationMaxPositionError.put(armJoint, alphaMaxPositionError.get(armJointName));
             if (alphaMaxVelocity != null && alphaMaxVelocity.containsKey(armJointName))
-               accelerationIntegrationMaxVelocity.put(armJoint, alphaMaxVelocity.get(armJoint));
+               accelerationIntegrationMaxVelocity.put(armJoint, alphaMaxVelocity.get(armJointName));
          }
       }
       else
@@ -309,10 +309,10 @@ public class HandControlModule
 
    private boolean checkIfAtLeastOneJointIsDisabled()
    {
-      for (int i = 0; i < jointsOriginal.length; i++)
+      for (int i = 0; i < controlledJoints.length; i++)
       {
-         areJointsEnabled.get(jointsOriginal[i]).set(jointsOriginal[i].isEnabled());
-         if (!jointsOriginal[i].isEnabled())
+         areJointsEnabled.get(controlledJoints[i]).set(controlledJoints[i].isEnabled());
+         if (!controlledJoints[i].isEnabled())
             return true;
       }
       return false;
@@ -325,17 +325,17 @@ public class HandControlModule
          OneDoFJoint jointToComputeDesiredPositionFor = jointAccelerationIntegrationCommand.getJointToComputeDesiredPositionFor(i);
          double alphaPosition = Double.NaN;
          double alphaVelocity = Double.NaN;
-         if (accelerationIntegrationAlphaPosition != null && accelerationIntegrationAlphaPosition.containsValue(jointToComputeDesiredPositionFor))
+         if (accelerationIntegrationAlphaPosition != null && accelerationIntegrationAlphaPosition.containsKey(jointToComputeDesiredPositionFor))
             alphaPosition = accelerationIntegrationAlphaPosition.get(jointToComputeDesiredPositionFor).getDoubleValue();
-         if (accelerationIntegrationAlphaVelocity != null && accelerationIntegrationAlphaVelocity.containsValue(jointToComputeDesiredPositionFor))
+         if (accelerationIntegrationAlphaVelocity != null && accelerationIntegrationAlphaVelocity.containsKey(jointToComputeDesiredPositionFor))
             alphaVelocity = accelerationIntegrationAlphaVelocity.get(jointToComputeDesiredPositionFor).getDoubleValue();
          jointAccelerationIntegrationCommand.setJointAlphas(i, alphaPosition, alphaVelocity);
 
          double maxPositionError = Double.NaN;
          double maxVelocity = Double.NaN;
-         if (accelerationIntegrationMaxPositionError != null && accelerationIntegrationMaxPositionError.containsValue(jointToComputeDesiredPositionFor))
+         if (accelerationIntegrationMaxPositionError != null && accelerationIntegrationMaxPositionError.containsKey(jointToComputeDesiredPositionFor))
             maxPositionError = accelerationIntegrationMaxPositionError.get(jointToComputeDesiredPositionFor).getDoubleValue();
-         if (accelerationIntegrationMaxVelocity != null && accelerationIntegrationMaxVelocity.containsValue(jointToComputeDesiredPositionFor))
+         if (accelerationIntegrationMaxVelocity != null && accelerationIntegrationMaxVelocity.containsKey(jointToComputeDesiredPositionFor))
             maxVelocity = accelerationIntegrationMaxVelocity.get(jointToComputeDesiredPositionFor).getDoubleValue();
          jointAccelerationIntegrationCommand.setJointMaxima(i, maxPositionError, maxVelocity);
       }
@@ -416,7 +416,7 @@ public class HandControlModule
 
    public void handleArmDesiredAccelerationsCommand(ArmDesiredAccelerationsCommand command)
    {
-      if (!ControllerCommandValidationTools.checkArmDesiredAccelerationsCommand(jointsOriginal, command))
+      if (!ControllerCommandValidationTools.checkArmDesiredAccelerationsCommand(controlledJoints, command))
          return;
 
       switch (command.getArmControlMode())
@@ -459,7 +459,7 @@ public class HandControlModule
 
    public void resetJointIntegrators()
    {
-      for (OneDoFJoint joint : jointsOriginal)
+      for (OneDoFJoint joint : controlledJoints)
          joint.resetIntegrator();
    }
 
