@@ -24,7 +24,7 @@ public enum XBoxOneMapping implements JoystickMapping
    RIGHT_JOYSTICK_Y(Identifier.Axis.RY, Identifier.Button.UNKNOWN, Identifier.Axis.RY),
    LEFT_JOYSTICK_BUTTON(Identifier.Button._8, Identifier.Button.UNKNOWN, Identifier.Button.LEFT_THUMB3),
    RIGHT_JOYSTICK_BUTTON(Identifier.Button._9, Identifier.Button.UNKNOWN, Identifier.Button.RIGHT_THUMB3),
-   CROSS(Identifier.Axis.POV, Identifier.Button.UNKNOWN, Identifier.Button.UNKNOWN);
+   CROSS(Identifier.Axis.POV, Identifier.Button.UNKNOWN, Identifier.Axis.POV);
    
    private final Identifier identifier;
 
