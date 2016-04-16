@@ -15,6 +15,7 @@ import us.ihmc.aware.input.PollingInputDevice;
 public class XboxControllerInputDevice extends PollingInputDevice
 {
    private static final String CONTROLLER_ID = "Microsoft X-Box One pad";
+//   private static final String CONTROLLER_ID = "Controller (Xbox One For Windows)";
    private static final Map<Component.Identifier, InputChannelConfig> AXES = new HashMap<>();
 
    static
