@@ -84,7 +84,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
       this.referenceFrames = new QuadrupedReferenceFrames(environment.getFullRobotModel(), robotParameters.getJointMap(),
             robotParameters.getPhysicalProperties());
       this.vmcSettings = new QuadrupedVirtualModelControllerSettings();
-      this.vmc = new QuadrupedVirtualModelController(environment.getFullRobotModel(), referenceFrames, robotParameters.getJointMap(), registry);
+      this.vmc = new QuadrupedVirtualModelController(environment.getFullRobotModel(), referenceFrames, robotParameters.getJointMap(), environment.getControlDT(), registry);
 
       SDFFullRobotModel fullRobotModel = environment.getFullRobotModel();
       this.twistCalculator = new TwistCalculator(referenceFrames.getWorldFrame(), environment.getFullRobotModel().getElevator());
