@@ -10,14 +10,15 @@ import com.jme3.math.Transform;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
+import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.acsell.network.AcsellSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.NoArmsArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -46,7 +47,6 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.wanderer.controlParameters.WandererArmControlParameters;
 import us.ihmc.wanderer.controlParameters.WandererCapturePointPlannerParameters;
 import us.ihmc.wanderer.controlParameters.WandererStateEstimatorParameters;
 import us.ihmc.wanderer.controlParameters.WandererWalkingControllerParameters;
@@ -69,7 +69,7 @@ public class WandererRobotModel implements DRCRobotModel
    private final JaxbSDFLoader loader;
    private final WandererJointMap jointMap = new WandererJointMap();
    private final DRCRobotSensorInformation sensorInformation;
-   private final WandererArmControlParameters armControlParameters;
+   private final NoArmsArmControllerParameters armControlParameters;
    private final WandererCapturePointPlannerParameters capturePointPlannerParameters;
    private final WandererWalkingControllerParameters walkingControllerParameters;
    private final WandererWalkingControllerParameters multiContactControllerParameters;
@@ -96,7 +96,7 @@ public class WandererRobotModel implements DRCRobotModel
       }
 
       capturePointPlannerParameters = new WandererCapturePointPlannerParameters(runningOnRealRobot);
-      armControlParameters = new WandererArmControlParameters(runningOnRealRobot);
+      armControlParameters = new NoArmsArmControllerParameters();
       walkingControllerParameters = new WandererWalkingControllerParameters(jointMap, runningOnRealRobot);
       multiContactControllerParameters = new WandererWalkingControllerParameters(jointMap, runningOnRealRobot);
    }
