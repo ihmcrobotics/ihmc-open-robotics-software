@@ -5,9 +5,10 @@ import java.util.List;
 
 public class PreallocatedQueue<T>
 {
-   private final List<T> elements;
-   private int position;
    private int size;
+   private int position;
+   private final List<T> elements;
+   private int capacity;
 
    public PreallocatedQueue(Class<T> type, int capacity)
    {
@@ -25,6 +26,7 @@ public class PreallocatedQueue<T>
             e.printStackTrace();
          }
       }
+      this.capacity = capacity;
    }
 
    public PreallocatedQueue(ArrayList<T> elements)
@@ -37,6 +39,11 @@ public class PreallocatedQueue<T>
    public int size()
    {
       return size;
+   }
+
+   public int capacity()
+   {
+      return capacity;
    }
 
    public boolean enqueue()
