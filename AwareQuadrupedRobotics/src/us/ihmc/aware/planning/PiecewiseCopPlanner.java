@@ -5,7 +5,9 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+
 import java.util.Comparator;
+import java.util.List;
 
 public class PiecewiseCopPlanner
 {
@@ -41,6 +43,7 @@ public class PiecewiseCopPlanner
    private final double[] timeAtTransition;
    private final FramePoint[] copAtTransition;
    private final QuadrupedStepTransition[] stepTransition;
+   private final QuadrupedTimedStep[] stepArray;
    private final QuadrantDependentList<FramePoint> solePosition;
    private final QuadrantDependentList<ContactState> contactState;
 
@@ -49,11 +52,13 @@ public class PiecewiseCopPlanner
       timeAtTransition = new double[maxIntervals];
       copAtTransition = new FramePoint[maxIntervals];
       stepTransition = new QuadrupedStepTransition[maxIntervals];
+      stepArray = new QuadrupedTimedStep[maxIntervals];
       for (int i = 0; i < maxIntervals; i++)
       {
          timeAtTransition[i] = 0.0;
          copAtTransition[i] = new FramePoint(ReferenceFrame.getWorldFrame());
          stepTransition[i] = new QuadrupedStepTransition();
+         stepArray[i] = new QuadrupedTimedStep();
       }
       solePosition = new QuadrantDependentList<>();
       contactState = new QuadrantDependentList<>();
@@ -64,7 +69,49 @@ public class PiecewiseCopPlanner
       }
    }
 
+   /**
+    * compute piecewise center of pressure plan given a preallocated queue of upcoming steps
+    * @param initialSolePosition initial sole positions
+    * @param initialContactState initial sole contact state
+    * @param stepQueue queue of upcoming steps
+    * @return numberOfTransitions
+    */
    public int compute(QuadrantDependentList<FramePoint> initialSolePosition, QuadrantDependentList<ContactState> initialContactState, PreallocatedQueue<QuadrupedTimedStep> stepQueue)
+   {
+      double numberOfSteps = stepQueue.size();
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         stepArray[i].set(stepQueue.get(i));
+      }
+      return compute(initialSolePosition, initialContactState, stepArray, numberOfSteps);
+   }
+
+   /**
+    * compute piecewise center of pressure plan given a list of upcoming steps
+    * @param initialSolePosition initial sole positions
+    * @param initialContactState initial sole contact state
+    * @param stepList list of upcoming steps
+    * @return numberOfTransitions
+    */
+   public int compute(QuadrantDependentList<FramePoint> initialSolePosition, QuadrantDependentList<ContactState> initialContactState, List<QuadrupedTimedStep> stepList)
+   {
+      double numberOfSteps = stepList.size();
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         stepArray[i].set(stepList.get(i));
+      }
+      return compute(initialSolePosition, initialContactState, stepArray, numberOfSteps);
+   }
+
+   /**
+    * compute piecewise center of pressure plan given an array of upcoming steps
+    * @param initialSolePosition initial sole positions
+    * @param initialContactState initial sole contact state
+    * @param stepArray array of upcoming steps
+    * @param numberOfSteps number of upcoming steps
+    * @return numberOfTransitions
+    */
+   private int compute(QuadrantDependentList<FramePoint> initialSolePosition, QuadrantDependentList<ContactState> initialContactState, QuadrupedTimedStep[] stepArray, double numberOfSteps)
    {
       // initialize contact state and sole positions
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -80,9 +127,9 @@ public class PiecewiseCopPlanner
          stepTransition[i].time = Double.MAX_VALUE;
       }
 
-      for (int i = 0; i < stepQueue.size(); i++)
+      for (int i = 0; i < numberOfSteps; i++)
       {
-         QuadrupedTimedStep step = stepQueue.get(i);
+         QuadrupedTimedStep step = stepArray[i];
 
          stepTransition[2 * i].time = step.getTimeInterval().getStartTime();
          stepTransition[2 * i].type = QuadrupedStepTransitionType.LIFT_OFF;
@@ -100,7 +147,7 @@ public class PiecewiseCopPlanner
 
       // compute transition time and center of pressure for each time interval
       int numberOfTransitions = 0;
-      for (int i = 0; i < 2 * stepQueue.size(); i++)
+      for (int i = 0; i < 2 * numberOfSteps; i++)
       {
          switch (stepTransition[i].type)
          {
@@ -113,10 +160,10 @@ public class PiecewiseCopPlanner
             solePosition.get(stepTransition[i].robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
             break;
          }
-         if ((i + 1 == 2 * stepQueue.size()) || (stepTransition[i].time != stepTransition[i + 1].time))
+         if ((i + 1 == 2 * numberOfSteps) || (stepTransition[i].time != stepTransition[i + 1].time))
          {
             timeAtTransition[numberOfTransitions] = stepTransition[i].time;
-            computeNominalCop(solePosition, contactState, copAtTransition[numberOfTransitions]);
+            computeNominalCopPosition(solePosition, contactState, copAtTransition[numberOfTransitions]);
             numberOfTransitions++;
          }
       }
@@ -154,7 +201,7 @@ public class PiecewiseCopPlanner
       return copAtTransition;
    }
 
-   private void computeNominalCop(QuadrantDependentList<FramePoint> solePosition, QuadrantDependentList<ContactState> contactState, FramePoint copPosition)
+   private void computeNominalCopPosition(QuadrantDependentList<FramePoint> solePosition, QuadrantDependentList<ContactState> contactState, FramePoint copPosition)
    {
       int hindContacts = 0;
       if (contactState.get(RobotQuadrant.HIND_LEFT) == ContactState.IN_CONTACT)
