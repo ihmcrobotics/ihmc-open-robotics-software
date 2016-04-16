@@ -1,14 +1,14 @@
 package us.ihmc.aware.util;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Comparator;
 
-public class ArrayListSorter
+public class ListSorter
 {
    /**
     * Sort an array in place without allocating any memory.
     */
-   public static <T> void sort(ArrayList<T> ts, Comparator<T> comparator)
+   public static <T> void sort(List<T> ts, Comparator<T> comparator)
    {
       boolean ordered = false;
 
@@ -29,7 +29,7 @@ public class ArrayListSorter
       }
    }
 
-   public static <T> void swap(ArrayList<T> ts, int a, int b)
+   public static <T> void swap(List<T> ts, int a, int b)
    {
       T tmp = ts.get(a);
       ts.set(a, ts.get(b));
