@@ -51,21 +51,6 @@ public class QuadrupedSolePositionController
       {
          return soleForceFeedforward.get(robotQuadrant);
       }
-
-      public QuadrantDependentList<FramePoint> getSolePosition()
-      {
-         return solePosition;
-      }
-
-      public QuadrantDependentList<FrameVector> getSoleLinearVelocity()
-      {
-         return soleLinearVelocity;
-      }
-
-      public QuadrantDependentList<FrameVector> getSoleForceFeedforward()
-      {
-         return soleForceFeedforward;
-      }
    }
 
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
