@@ -34,17 +34,17 @@ public class XGaitStepPlanner
    /**
     * The time a foot should spend in the air during its swing state in s.
     */
-   private double swingDuration = 0.4;
+   private double swingDuration = 0.3;
 
    /**
     * The time during which both feet of a front or back pair are in support in s.
     */
-   private double endPairSupportDuration = 0.8;
+   private double endPairSupportDuration = 1.0;
 
    /**
     * The phase offset of the front and back feet pairs in deg.
     */
-   private double phaseShift = 120.0;
+   private double phaseShift = 60.0;
 
    /**
     * The distance between same-side legs during stance.
@@ -72,7 +72,7 @@ public class XGaitStepPlanner
    private double groundClearance = 0.1;
 
    // TODO: Compute conversion of arbitrary yaw rate units to rad/s.
-   private double yawRate = 0.0;
+   private double yawRate = 0.1;
 
    /**
     * The appearance of the footstep visualization markers for each robot quadrant.

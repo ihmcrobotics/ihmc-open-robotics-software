@@ -5,9 +5,7 @@ import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
-import us.ihmc.aware.planning.PiecewiseCopPlanner;
-import us.ihmc.aware.planning.PiecewiseReverseDcmTrajectory;
-import us.ihmc.aware.planning.XGaitStepPlanner;
+import us.ihmc.aware.planning.*;
 import us.ihmc.aware.util.ContactState;
 import us.ihmc.aware.util.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
@@ -66,10 +64,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final QuadrupedTaskSpaceController taskSpaceController;
 
    // planning
-   private boolean dcmTrajectoryInitialized;
-   private final PiecewiseReverseDcmTrajectory dcmTrajectory;
-   private final FramePoint dcmPositionWaypoint;
-   private final PiecewiseCopPlanner copPlanner;
+   private final QuadrupedTimedStepDcmPlanner dcmTrajectory;
    private final XGaitStepPlanner footstepPlanner;
 
    public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerInputProviderInterface inputProvider,
@@ -106,10 +101,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
-      int maxStepTransitions = 2 * timedStepController.getStepQueue().capacity();
-      copPlanner = new PiecewiseCopPlanner(maxStepTransitions);
-      dcmTrajectory = new PiecewiseReverseDcmTrajectory(maxStepTransitions, gravity, inputProvider.getComPositionInput().getZ(), registry);
-      dcmPositionWaypoint = new FramePoint(worldFrame);
+      dcmTrajectory = new QuadrupedTimedStepDcmPlanner(timedStepController.getStepQueue().capacity(), gravity, inputProvider.getComPositionInput().getZ());
       footstepPlanner = new XGaitStepPlanner(registry, runtimeEnvironment.getGraphicsListRegistry(), referenceFrames);
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
@@ -130,45 +122,13 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       timedStepController.removeSteps();
    }
 
-   private void computeDcmTrajectory()
-   {
-      if (timedStepController.getStepQueue().size() == 0)
-      {
-         dcmTrajectoryInitialized = false;
-      }
-      else if (dcmTrajectoryInitialized == false)
-      {
-         int nTransitions = copPlanner.compute(taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), timedStepController.getStepQueue());
-         dcmPositionWaypoint.setIncludingFrame(copPlanner.getCopAtTransition(nTransitions - 1));
-         dcmPositionWaypoint.changeFrame(worldFrame);
-         dcmPositionWaypoint.add(0, 0, inputProvider.getComPositionInput().getZ());
-         dcmTrajectory.setComHeight(dcmPositionController.getComHeight());
-         dcmTrajectory.initializeTrajectory(nTransitions, copPlanner.getTimeAtTransitions(), copPlanner.getCopAtTransitions(), copPlanner.getTimeAtTransition(nTransitions - 1), dcmPositionWaypoint);
-         dcmTrajectoryInitialized = true;
-      }
-
-      if (dcmTrajectoryInitialized)
-      {
-         // compute dcm trajectory while stepping
-         dcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
-         dcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
-         dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
-      }
-      else
-      {
-         // compute dcm trajectory while standing
-         dcmPositionControllerSetpoints.getDcmPosition().setToZero(supportFrame);
-         dcmPositionControllerSetpoints.getDcmPosition().add(0, 0, dcmPositionController.getComHeight());
-         dcmPositionControllerSetpoints.getDcmVelocity().setToZero(supportFrame);
-      }
-   }
-
    private void updateEstimates()
    {
       // update task space estimates
       taskSpaceEstimator.compute(taskSpaceEstimates);
 
       // update dcm estimate
+      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       taskSpaceEstimates.getComPosition().changeFrame(worldFrame);
       taskSpaceEstimates.getComVelocity().changeFrame(worldFrame);
       dcmPositionEstimate.changeFrame(worldFrame);
@@ -180,7 +140,9 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private void updateSetpoints()
    {
       // update desired horizontal com forces
-      computeDcmTrajectory();
+      dcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
+      dcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
+      dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
       dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
       taskSpaceControllerCommands.getComForce().changeFrame(supportFrame);
 
@@ -220,10 +182,16 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
    @Override public QuadrupedForceControllerEvent process()
    {
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       updateEstimates();
       updateSetpoints();
-      return null;
+      if (timedStepController.getStepQueue().size() == 0)
+      {
+         return QuadrupedForceControllerEvent.FINAL_STEP_COMPLETED;
+      }
+      else
+      {
+         return null;
+      }
    }
 
    @Override public void onEntry()
@@ -264,6 +232,9 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       // initialize step queue
       footstepPlanner.plan(timedStepController.getStepQueue(), robotTimestamp.getDoubleValue() + 2.0, true);
+
+      // initialize dcm trajectory
+      dcmTrajectory.initializeTrajectory(timedStepController.getStepQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), inputProvider.getComPositionInput().getZ(), dcmPositionEstimate);
    }
 
    @Override public void onExit()

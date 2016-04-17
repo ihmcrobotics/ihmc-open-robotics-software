@@ -290,7 +290,7 @@ public class QuadrupedTimedStepController
          FramePoint goalPosition = timedStep.getGoalPosition();
          FramePoint solePosition = solePositionEstimate.get(robotQuadrant);
          solePosition.changeFrame(goalPosition.getReferenceFrame());
-         swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval.getDuration());
+         swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval);
 
          // initialize contact state and feedback gains
          contactState.set(robotQuadrant, ContactState.NO_CONTACT);
@@ -307,7 +307,7 @@ public class QuadrupedTimedStepController
          double touchDownTime = timedStep.getTimeInterval().getEndTime();
 
          // compute swing trajectory
-         swingTrajectory.computeTrajectory(currentTime - liftOffTime);
+         swingTrajectory.computeTrajectory(currentTime);
          swingTrajectory.getPosition(solePositionControllerSetpoints.getSolePosition(robotQuadrant));
 
          // compute step adjustment envelope as a function of normalized step time

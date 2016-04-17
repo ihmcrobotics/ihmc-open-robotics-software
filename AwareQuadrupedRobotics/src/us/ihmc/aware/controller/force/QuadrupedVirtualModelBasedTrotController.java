@@ -14,6 +14,7 @@ import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineState;
 import us.ihmc.aware.util.ContactState;
 import us.ihmc.aware.util.QuadrupedTimedStep;
+import us.ihmc.aware.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -132,7 +133,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       {
          groundPlanePositions.set(robotQuadrant, new FramePoint());
       }
-      nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(1, gravity, inputProvider.getComPositionInput().getZ(), null);
+      nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(1, gravity, inputProvider.getComPositionInput().getZ());
 
       // state machine
       StateMachineBuilder<TrotState, TrotEvent> stateMachineBuilder = new StateMachineBuilder<>(TrotState.class, "TrotState", registry);
@@ -317,26 +318,26 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
    private class QuadSupportState implements StateMachineState<TrotEvent>
    {
-      private double initialTime;
       private final ThreeDoFMinimumJerkTrajectory dcmTrajectory;
       private final FramePoint cmpPositionAtSoSNominal;
       private final FramePoint cmpPositionAtEoSNominal;
       private final FramePoint dcmPositionAtSoSNominal;
       private final FramePoint dcmPositionAtEoSNominal;
+      private final TimeInterval timeInterval;
 
       public QuadSupportState()
       {
-         initialTime = 0.0;
          dcmTrajectory = new ThreeDoFMinimumJerkTrajectory();
          cmpPositionAtSoSNominal = new FramePoint();
          cmpPositionAtEoSNominal = new FramePoint();
          dcmPositionAtSoSNominal = new FramePoint();
          dcmPositionAtEoSNominal = new FramePoint();
+         timeInterval = new TimeInterval();
       }
 
       @Override public void onEntry()
       {
-         initialTime = robotTimestamp.getDoubleValue();
+         timeInterval.setInterval(robotTimestamp.getDoubleValue(), robotTimestamp.getDoubleValue() + quadSupportDurationParameter.get());
 
          // initialize dcm controller height
          dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
@@ -346,7 +347,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          computeNominalDcmPositions(cmpPositionAtSoSNominal, cmpPositionAtEoSNominal, dcmPositionAtSoSNominal, dcmPositionAtEoSNominal);
 
          // compute desired dcm trajectory
-         dcmTrajectory.initializeTrajectory(dcmPositionEstimate, dcmPositionAtSoSNominal, quadSupportDurationParameter.get());
+         dcmTrajectory.initializeTrajectory(dcmPositionEstimate, dcmPositionAtSoSNominal, timeInterval);
 
          // initialize ground plane points
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -361,12 +362,12 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          double currentTime = robotTimestamp.getDoubleValue();
 
          // compute dcm setpoint
-         dcmTrajectory.computeTrajectory(currentTime - initialTime);
+         dcmTrajectory.computeTrajectory(currentTime);
          dcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
          dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
 
          // trigger touch down event
-         if (currentTime > initialTime + quadSupportDurationParameter.get())
+         if (currentTime > timeInterval.getEndTime())
             return TrotEvent.TIMEOUT;
          else
             return null;
@@ -379,7 +380,6 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
    private class DoubleSupportState implements StateMachineState<TrotEvent>
    {
-      private double initialTime;
       private final RobotQuadrant supportQuadrants[];
       private final RobotQuadrant swingQuadrants[];
       private final PiecewiseForwardDcmTrajectory dcmTrajectory;
@@ -394,10 +394,9 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
       public DoubleSupportState(RobotQuadrant hindSupportQuadrant, RobotQuadrant frontSupportQuadrant)
       {
-         initialTime = 0.0;
          supportQuadrants = new RobotQuadrant[] {hindSupportQuadrant, frontSupportQuadrant};
          swingQuadrants = new RobotQuadrant[] {hindSupportQuadrant.getAcrossBodyQuadrant(), frontSupportQuadrant.getAcrossBodyQuadrant()};
-         dcmTrajectory = new PiecewiseForwardDcmTrajectory(1, gravity, dcmPositionController.getComHeight(), null);
+         dcmTrajectory = new PiecewiseForwardDcmTrajectory(1, gravity, dcmPositionController.getComHeight());
          cmpPositionAtSoSNominal = new FramePoint();
          cmpPositionAtEoSNominal = new FramePoint();
          dcmPositionAtSoSNominal = new FramePoint();
@@ -410,7 +409,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
       @Override public void onEntry()
       {
-         initialTime = robotTimestamp.getDoubleValue();
+         double initialTime = robotTimestamp.getDoubleValue();
 
          // initialize dcm controller height
          dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
@@ -465,7 +464,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
          dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
 
          // trigger touch down event
-         if (currentTime > initialTime + doubleSupportDurationParameter.get())
+         if (currentTime > timedStep.getTimeInterval().getEndTime())
             return TrotEvent.TIMEOUT;
          else
             return null;

@@ -1,5 +1,6 @@
 package us.ihmc.aware.planning;
 
+import us.ihmc.aware.util.TimeInterval;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -14,7 +15,8 @@ public class ThreeDoFSwingFootTrajectory
    final private FrameVector velocity;
    final private FrameVector acceleration;
    private ReferenceFrame referenceFrame;
-   private boolean moveInitialized;
+   private TimeInterval timeInterval;
+   private boolean initialized;
 
    public ThreeDoFSwingFootTrajectory()
    {
@@ -25,7 +27,13 @@ public class ThreeDoFSwingFootTrajectory
       velocity = new FrameVector();
       acceleration = new FrameVector();
       referenceFrame = ReferenceFrame.getWorldFrame();
-      moveInitialized = false;
+      timeInterval = new TimeInterval();
+      initialized = false;
+   }
+
+   public void getTimeInterval(TimeInterval timeInterval)
+   {
+      timeInterval.set(this.timeInterval);
    }
 
    public void getPosition(FramePoint position)
@@ -48,16 +56,24 @@ public class ThreeDoFSwingFootTrajectory
       return referenceFrame;
    }
 
-   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double groundClearance, double swingDuration)
+   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double groundClearance, TimeInterval timeInterval)
    {
+      initializeTrajectory(initialPosition, finalPosition, groundClearance, timeInterval.getStartTime(), timeInterval.getEndTime());
+   }
+
+   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double groundClearance, double startTime, double endTime)
+   {
+      timeInterval.setInterval(startTime, endTime);
+      double duration = timeInterval.getDuration();
+
       initialPosition.checkReferenceFrameMatch(finalPosition);
       referenceFrame = initialPosition.getReferenceFrame();
 
       double midwayPositionZ = groundClearance + Math.max(initialPosition.getZ(), finalPosition.getZ());
-      xTrajectory.setMoveParameters(initialPosition.getX(), 0, 0, finalPosition.getX(), 0, 0, swingDuration);
-      yTrajectory.setMoveParameters(initialPosition.getY(), 0, 0, finalPosition.getY(), 0, 0, swingDuration);
-      zTrajectory.setMoveParameters(initialPosition.getZ(), midwayPositionZ, finalPosition.getZ(), swingDuration);
-      moveInitialized = true;
+      xTrajectory.setMoveParameters(initialPosition.getX(), 0, 0, finalPosition.getX(), 0, 0, timeInterval.getDuration());
+      yTrajectory.setMoveParameters(initialPosition.getY(), 0, 0, finalPosition.getY(), 0, 0, timeInterval.getDuration());
+      zTrajectory.setMoveParameters(initialPosition.getZ(), midwayPositionZ, finalPosition.getZ(), timeInterval.getDuration());
+      initialized = true;
 
       position.changeFrame(referenceFrame);
       velocity.changeFrame(referenceFrame);
@@ -65,14 +81,14 @@ public class ThreeDoFSwingFootTrajectory
       computeTrajectory(0);
    }
 
-   public void computeTrajectory(double timeInMove)
+   public void computeTrajectory(double currentTime)
    {
-      if (!moveInitialized)
-         throw new RuntimeException("move parameters must be initialized before computing trajectory");
+      if (!initialized)
+         throw new RuntimeException("parameters must be initialized before computing trajectory");
 
-      xTrajectory.computeTrajectory(timeInMove);
-      yTrajectory.computeTrajectory(timeInMove);
-      zTrajectory.computeTrajectory(timeInMove);
+      xTrajectory.computeTrajectory(currentTime - timeInterval.getStartTime());
+      yTrajectory.computeTrajectory(currentTime - timeInterval.getStartTime());
+      zTrajectory.computeTrajectory(currentTime - timeInterval.getStartTime());
 
       position.setX(xTrajectory.getPosition());
       position.setY(yTrajectory.getPosition());
