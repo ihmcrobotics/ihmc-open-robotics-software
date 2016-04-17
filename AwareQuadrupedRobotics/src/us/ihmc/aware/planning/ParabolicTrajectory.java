@@ -46,9 +46,9 @@ public class ParabolicTrajectory
 
       this.moveDuration = moveDuration;
 
-      C0 = 1.000 * X0;
-      C1 =-1.000 * Xf + 4.000 * Xm - 3.000 * X0;
-      C2 = 2.000 * Xf - 4.000 * Xm + 2.000 * X0;
+      C0 = X0;
+      C1 =-1 * Xf + 4 * Xm - 3 * X0;
+      C2 = 2 * Xf - 4 * Xm + 2 * X0;
 
       moveInitialized = true;
    }
