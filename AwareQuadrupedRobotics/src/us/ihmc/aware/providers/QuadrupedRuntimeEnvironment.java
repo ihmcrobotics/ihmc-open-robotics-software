@@ -1,4 +1,4 @@
-package us.ihmc.aware.parameters;
+package us.ihmc.aware.providers;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;

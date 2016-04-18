@@ -1,10 +1,10 @@
 package us.ihmc.aware.controller.position;
 
 import us.ihmc.aware.animation.QuadrupedAnimationController;
-import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
+import us.ihmc.aware.providers.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
-import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.providers.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;
 import us.ihmc.aware.state.StateMachineYoVariableTrigger;

@@ -3,12 +3,12 @@ package us.ihmc.aware.controller.force;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
-import us.ihmc.aware.communication.QuadrupedTimedStepInputProvider;
+import us.ihmc.aware.providers.QuadrupedControllerInputProvider;
+import us.ihmc.aware.providers.QuadrupedTimedStepInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
 import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
-import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.providers.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterPacketListener;
 import us.ihmc.aware.state.StateMachine;
 import us.ihmc.aware.state.StateMachineBuilder;

@@ -1,14 +1,14 @@
 package us.ihmc.aware.controller.force;
 
-import us.ihmc.aware.communication.QuadrupedTimedStepInputProvider;
+import us.ihmc.aware.providers.QuadrupedTimedStepInputProvider;
 import us.ihmc.aware.controller.toolbox.*;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
-import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.providers.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.planning.*;
 import us.ihmc.aware.util.ContactState;
-import us.ihmc.aware.util.QuadrupedTimedStep;
+import us.ihmc.aware.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -69,7 +69,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final QuadrupedTaskSpaceController taskSpaceController;
 
    // planning
-   private final XGaitStepPlanner footstepPlanner;
+   private final QuadrupedXGaitStepPlanner footstepPlanner;
    private final QuadrupedTimedStepCopPlanner copPlanner;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
    private final ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory;
@@ -111,7 +111,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
-      footstepPlanner = new XGaitStepPlanner(registry, runtimeEnvironment.getGraphicsListRegistry(), referenceFrames);
+      footstepPlanner = new QuadrupedXGaitStepPlanner(registry, runtimeEnvironment.getGraphicsListRegistry(), referenceFrames);
       copPlanner = new QuadrupedTimedStepCopPlanner(2 * timedStepController.getQueueCapacity());
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(timedStepController.getQueueCapacity(), gravity, inputProvider.getComPositionInput().getZ());
       dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
