@@ -1,6 +1,5 @@
 package us.ihmc.aware.params;
 
-import us.ihmc.aware.packets.SetDoubleParameterPacket;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 

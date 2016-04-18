@@ -1,7 +1,7 @@
 package us.ihmc.aware.controller.position;
 
-import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
-import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.providers.QuadrupedControllerInputProvider;
+import us.ihmc.aware.providers.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionBasedCrawlController;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 

@@ -1,7 +1,6 @@
 package us.ihmc.aware.planning;
 
 import us.ihmc.aware.util.PreallocatedQueue;
-import us.ihmc.aware.util.QuadrupedTimedStep;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
@@ -21,7 +20,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 /**
  * A footstep planner capable of planning pace, amble, and trot gaits.
  */
-public class XGaitStepPlanner
+public class QuadrupedXGaitStepPlanner
 {
    /**
     * The number of footsteps to generate for each foot. The total number of steps in a plan is 4 times this number.
@@ -98,7 +97,7 @@ public class XGaitStepPlanner
 
    private final HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
-   public XGaitStepPlanner(YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry,
+   public QuadrupedXGaitStepPlanner(YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry,
          QuadrupedReferenceFrames referenceFrames)
    {
       this.referenceFrames = referenceFrames;
