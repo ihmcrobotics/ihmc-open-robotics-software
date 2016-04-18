@@ -94,8 +94,9 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    }
    private final StateMachine<TrotState, TrotEvent> trotStateMachine;
 
-   public QuadrupedVirtualModelBasedTrotController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerInputProviderInterface inputProvider,
-         QuadrupedForceControllerToolbox controllerToolbox)
+   public QuadrupedVirtualModelBasedTrotController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
+         QuadrupedControllerInputProviderInterface inputProvider)
+
    {
       this.inputProvider = inputProvider;
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();

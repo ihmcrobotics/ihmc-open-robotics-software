@@ -95,8 +95,8 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    }
    private final StateMachine<PaceState, PaceEvent> paceStateMachine;
 
-   public QuadrupedVirtualModelBasedPaceController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerInputProviderInterface inputProvider,
-         QuadrupedForceControllerToolbox controllerToolbox)
+   public QuadrupedVirtualModelBasedPaceController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
+          QuadrupedControllerInputProviderInterface inputProvider)
    {
       this.inputProvider = inputProvider;
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
