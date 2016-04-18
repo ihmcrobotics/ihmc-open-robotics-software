@@ -1,9 +1,7 @@
 package us.ihmc.aware.controller.position;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.aware.controller.QuadrupedController;
-import us.ihmc.aware.controller.position.QuadrupedPositionControllerEvent;
-import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.providers.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
