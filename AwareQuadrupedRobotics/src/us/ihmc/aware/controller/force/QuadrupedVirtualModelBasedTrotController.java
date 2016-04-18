@@ -226,12 +226,13 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
 
    @Override public void onEntry()
    {
+      // initialize estimates
+      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       updateEstimates();
 
       // initialize feedback controllers
       dcmPositionControllerSetpoints.initialize(dcmPositionEstimate);
       dcmPositionController.reset();
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
       dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
       dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());

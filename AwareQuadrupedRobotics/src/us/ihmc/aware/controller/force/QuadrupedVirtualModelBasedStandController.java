@@ -169,6 +169,7 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    @Override public void onEntry()
    {
       // initialize estimates
+      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       updateEstimates();
 
       // initialize feedback controllers
