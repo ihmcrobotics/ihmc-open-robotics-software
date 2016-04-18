@@ -3,7 +3,7 @@ package us.ihmc.aware.controller.force;
 import us.ihmc.aware.controller.toolbox.*;
 import us.ihmc.aware.controller.toolbox.QuadrupedTaskSpaceController;
 import us.ihmc.aware.controller.toolbox.QuadrupedTaskSpaceEstimator;
-import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.providers.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
