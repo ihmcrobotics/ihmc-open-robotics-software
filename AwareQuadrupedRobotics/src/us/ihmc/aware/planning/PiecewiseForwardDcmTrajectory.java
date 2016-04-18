@@ -86,6 +86,7 @@ public class PiecewiseForwardDcmTrajectory
          this.dcmPositionAtSoS[i + 1].add(this.vrpPositionAtSoS[i]);
       }
       this.initialized = true;
+      computeTrajectory(timeAtSoS[0]);
    }
 
    public void initializeTrajectory(double timeAtSoS, FramePoint cmpPositionAtSoS, FramePoint dcmPositionAtSoS)
@@ -124,10 +125,9 @@ public class PiecewiseForwardDcmTrajectory
       this.comHeight = comHeight;
    }
 
-   public void getTimeInterval(TimeInterval timeInterval)
+   public double getStartTime()
    {
-      timeInterval.setStartTime(timeAtSoS[0]);
-      timeInterval.setEndTime(timeAtSoS[numSteps - 1]);
+      return timeAtSoS[0];
    }
 
    public void getPosition(FramePoint dcmPosition)

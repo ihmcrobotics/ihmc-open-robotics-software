@@ -127,6 +127,7 @@ public class PiecewisePeriodicDcmTrajectory
          this.dcmPositionAtSoS[i + 1].add(this.vrpPositionAtSoS[i]);
       }
       this.initialized = true;
+      computeTrajectory(timeAtSoS[0]);
    }
 
    public void initializeTrajectory(double timeAtSoS, FramePoint cmpPositionAtSoS, double timeAtEoS, FramePoint cmpPositionAtEoS, double relativeYawAtEoS)
@@ -160,15 +161,14 @@ public class PiecewisePeriodicDcmTrajectory
       }
    }
 
-   public void getTimeInterval(TimeInterval timeInterval)
-   {
-      timeInterval.setStartTime(timeAtSoS[0]);
-      timeInterval.setEndTime(timeAtSoS[numSteps - 1]);
-   }
-
    public void setComHeight(double comHeight)
    {
       this.comHeight = comHeight;
+   }
+
+   public double getStartTime()
+   {
+      return timeAtSoS[0];
    }
 
    public void getPosition(FramePoint dcmPosition)

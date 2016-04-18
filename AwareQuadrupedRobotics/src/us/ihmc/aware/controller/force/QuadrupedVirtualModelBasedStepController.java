@@ -40,6 +40,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
    private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
+   private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDurationParameter", 0.5);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -64,8 +65,11 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private final QuadrupedTaskSpaceController taskSpaceController;
 
    // planning
-   private final QuadrupedTimedStepDcmPlanner dcmTrajectory;
    private final XGaitStepPlanner footstepPlanner;
+   private final QuadrupedTimedStepCopPlanner copPlanner;
+   private final PiecewiseReverseDcmTrajectory dcmTrajectory;
+   private final ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory;
+   private final FramePoint dcmPositionWaypoint;
 
    public QuadrupedVirtualModelBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerInputProviderInterface inputProvider,
          QuadrupedForceControllerToolbox controllerToolbox)
@@ -101,8 +105,11 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
-      dcmTrajectory = new QuadrupedTimedStepDcmPlanner(timedStepController.getStepQueue().capacity(), gravity, inputProvider.getComPositionInput().getZ());
       footstepPlanner = new XGaitStepPlanner(registry, runtimeEnvironment.getGraphicsListRegistry(), referenceFrames);
+      copPlanner = new QuadrupedTimedStepCopPlanner(2 * timedStepController.getStepQueue().capacity());
+      dcmTrajectory = new PiecewiseReverseDcmTrajectory(timedStepController.getStepQueue().capacity(), gravity, inputProvider.getComPositionInput().getZ());
+      dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
+      dcmPositionWaypoint = new FramePoint();
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
@@ -140,9 +147,7 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
    private void updateSetpoints()
    {
       // update desired horizontal com forces
-      dcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
-      dcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
-      dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
+      computeDcmSetpoints();
       dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
       taskSpaceControllerCommands.getComForce().changeFrame(supportFrame);
 
@@ -178,6 +183,22 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
+   }
+
+   private void computeDcmSetpoints()
+   {
+      if (robotTimestamp.getDoubleValue() < dcmTrajectory.getStartTime())
+      {
+         dcmTransitionTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
+         dcmTransitionTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
+         dcmTransitionTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
+      }
+      else
+      {
+         dcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
+         dcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
+         dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
+      }
    }
 
    @Override public QuadrupedForceControllerEvent process()
@@ -233,8 +254,21 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       // initialize step queue
       footstepPlanner.plan(timedStepController.getStepQueue(), robotTimestamp.getDoubleValue() + 2.0, true);
 
-      // initialize dcm trajectory
-      dcmTrajectory.initializeTrajectory(timedStepController.getStepQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), inputProvider.getComPositionInput().getZ(), dcmPositionEstimate);
+      // compute dcm trajectory for desired step plan
+      int nTransitions = copPlanner.compute(timedStepController.getStepQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState());
+      dcmPositionWaypoint.setIncludingFrame(copPlanner.getCopAtTransition(nTransitions - 1));
+      dcmPositionWaypoint.changeFrame(ReferenceFrame.getWorldFrame());
+      dcmPositionWaypoint.add(0, 0, dcmPositionController.getComHeight());
+      dcmTrajectory.setComHeight(dcmPositionController.getComHeight());
+      dcmTrajectory.initializeTrajectory(nTransitions, copPlanner.getTimeAtTransitions(), copPlanner.getCopAtTransitions(),
+            copPlanner.getTimeAtTransition(nTransitions - 1), dcmPositionWaypoint);
+
+      // compute dcm trajectory for initial transition
+      double transitionEndTime = dcmTrajectory.getStartTime();
+      double transitionStartTime = Math.max(robotTimestamp.getDoubleValue(), transitionEndTime - initialTransitionDurationParameter.get());
+      dcmTrajectory.computeTrajectory(transitionEndTime);
+      dcmTrajectory.getPosition(dcmPositionWaypoint);
+      dcmTransitionTrajectory.initializeTrajectory(dcmPositionEstimate, dcmPositionWaypoint, transitionStartTime, transitionEndTime);
    }
 
    @Override public void onExit()
