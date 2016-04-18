@@ -320,6 +320,9 @@ public class HandControlModule
 
    private void updateAccelerationIntegrationParameters()
    {
+      if (jointAccelerationIntegrationCommand == null)
+         return;
+
       for (int i = 0; i < jointAccelerationIntegrationCommand.getNumberOfJointsToComputeDesiredPositionFor(); i++)
       {
          OneDoFJoint jointToComputeDesiredPositionFor = jointAccelerationIntegrationCommand.getJointToComputeDesiredPositionFor(i);
