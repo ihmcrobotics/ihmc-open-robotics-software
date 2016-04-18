@@ -50,6 +50,9 @@ public class PartialFootholdControlModule
    private final IntegerYoVariable shrinkMaxLimit;
    private final IntegerYoVariable shrinkCounter;
 
+   private final IntegerYoVariable numberOfVerticesRemoved;
+   private final IntegerYoVariable numberOfCellsOccupiedOnSideOfLine;
+
    private final IntegerYoVariable thresholdForCoPCellOccupancy;
    private final IntegerYoVariable thresholdForCoPRegionOccupancy;
    private final DoubleYoVariable distanceFromLineOfRotationToComputeCoPOccupancy;
@@ -76,6 +79,9 @@ public class PartialFootholdControlModule
       shrinkMaxLimit = new IntegerYoVariable(namePrefix + "MaximumNumberOfFootShrink", registry);
       shrinkMaxLimit.set(1);
       shrinkCounter = new IntegerYoVariable(namePrefix + "FootShrinkCounter", registry);
+
+      numberOfVerticesRemoved = new IntegerYoVariable(namePrefix + "NumberOfVerticesRemoved", registry);
+      numberOfCellsOccupiedOnSideOfLine = new IntegerYoVariable(namePrefix + "NumberOfCellsOccupiedOnSideOfLine", registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -118,13 +124,13 @@ public class PartialFootholdControlModule
       {
          footRotationCalculator.getLineOfRotation(lineOfRotation);
 
-         int numberOfVerticesRemoved = ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, unsafePolygon, RobotSide.LEFT);
+         numberOfVerticesRemoved.set(ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, unsafePolygon, RobotSide.LEFT));
 
-         if (numberOfVerticesRemoved <= 0)
+         if (numberOfVerticesRemoved.getIntegerValue() <= 0)
          {
             doNothing();
          }
-         else if (numberOfVerticesRemoved == 1)
+         else if (numberOfVerticesRemoved.getIntegerValue() == 1)
          {
             footholdState.set(PartialFootholdState.UNSAFE_CORNER);
             computeShrunkFoothold(desiredCenterOfPressure);
@@ -149,9 +155,9 @@ public class PartialFootholdControlModule
 
    private void computeShrunkFoothold(FramePoint2d desiredCenterOfPressure)
    {
-      int numberOfCellsOccupiedOnSideOfLine = footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT,
-            distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue());
-      boolean wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine >= thresholdForCoPRegionOccupancy.getIntegerValue();
+      numberOfCellsOccupiedOnSideOfLine.set(footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT,
+            distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue()));
+      boolean wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine.getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
       if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3) && !wasCoPInThatRegion)
       {
          ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkFootPolygon, RobotSide.RIGHT);
