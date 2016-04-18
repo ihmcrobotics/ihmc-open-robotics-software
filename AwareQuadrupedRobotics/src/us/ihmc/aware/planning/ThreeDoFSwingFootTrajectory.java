@@ -61,6 +61,11 @@ public class ThreeDoFSwingFootTrajectory
       initializeTrajectory(initialPosition, finalPosition, groundClearance, timeInterval.getStartTime(), timeInterval.getEndTime());
    }
 
+   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double groundClearance, double duration)
+   {
+      initializeTrajectory(initialPosition, finalPosition, groundClearance, 0, duration);
+   }
+
    public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double groundClearance, double startTime, double endTime)
    {
       timeInterval.setInterval(startTime, endTime);

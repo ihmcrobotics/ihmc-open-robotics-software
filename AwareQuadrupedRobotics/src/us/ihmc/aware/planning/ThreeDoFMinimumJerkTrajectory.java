@@ -62,6 +62,11 @@ public class ThreeDoFMinimumJerkTrajectory
       initializeTrajectory(initialPosition, finalPosition, timeInterval.getStartTime(), timeInterval.getEndTime());
    }
 
+   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double duration)
+   {
+      initializeTrajectory(initialPosition, finalPosition, 0, duration);
+   }
+
    public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double startTime, double endTime)
    {
       timeInterval.setInterval(startTime, endTime);
