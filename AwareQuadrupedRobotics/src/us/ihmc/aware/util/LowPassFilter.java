@@ -28,7 +28,7 @@ public class LowPassFilter
 
    public double compute(double input)
    {
-      double alpha = 1 / (1 + 2 * Math.PI * breakFrequency * dt);
-      return output = alpha * output + (1 - alpha) * input;
+      double alpha = 1.0 - 1.0 / (1.0 + 2.0 * Math.PI * breakFrequency * dt);
+      return output = alpha * input + (1 - alpha) * output;
    }
 }

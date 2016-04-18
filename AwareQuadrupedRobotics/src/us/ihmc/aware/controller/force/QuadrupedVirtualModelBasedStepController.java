@@ -141,7 +141,6 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       taskSpaceEstimator.compute(taskSpaceEstimates);
 
       // update dcm estimate
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       taskSpaceEstimates.getComPosition().changeFrame(worldFrame);
       taskSpaceEstimates.getComVelocity().changeFrame(worldFrame);
       dcmPositionEstimate.changeFrame(worldFrame);
@@ -220,12 +219,13 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
 
    @Override public void onEntry()
    {
+      // initialize estimates
+      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       updateEstimates();
 
       // initialize feedback controllers
       dcmPositionControllerSetpoints.initialize(dcmPositionEstimate);
       dcmPositionController.reset();
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
       dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
       dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
