@@ -85,6 +85,7 @@ public class PiecewiseReverseDcmTrajectory
          this.dcmPositionAtSoS[i].add(this.vrpPositionAtSoS[i]);
       }
       this.initialized = true;
+      computeTrajectory(timeAtSoS[0]);
    }
 
    public void initializeTrajectory(double timeAtSoS, FramePoint cmpPositionAtSoS, double timeAtEoS, FramePoint dcmPositionAtEoS)
@@ -123,10 +124,9 @@ public class PiecewiseReverseDcmTrajectory
       this.comHeight = comHeight;
    }
 
-   public void getTimeInterval(TimeInterval timeInterval)
+   public double getStartTime()
    {
-      timeInterval.setStartTime(timeAtSoS[0]);
-      timeInterval.setEndTime(timeAtSoS[numSteps - 1]);
+      return timeAtSoS[0];
    }
 
    public void getPosition(FramePoint dcmPosition)

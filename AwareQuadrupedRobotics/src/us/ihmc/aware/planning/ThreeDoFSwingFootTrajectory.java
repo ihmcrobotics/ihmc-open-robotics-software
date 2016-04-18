@@ -31,9 +31,9 @@ public class ThreeDoFSwingFootTrajectory
       initialized = false;
    }
 
-   public void getTimeInterval(TimeInterval timeInterval)
+   public double getStartTime()
    {
-      timeInterval.set(this.timeInterval);
+      return timeInterval.getStartTime();
    }
 
    public void getPosition(FramePoint position)

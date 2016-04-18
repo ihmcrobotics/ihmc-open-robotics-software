@@ -69,6 +69,26 @@ public class QuadrupedTimedStepCopPlanner
       }
    }
 
+   public double getTimeAtTransition(int transition)
+   {
+      return timeAtTransition[transition];
+   }
+
+   public double[] getTimeAtTransitions()
+   {
+      return timeAtTransition;
+   }
+
+   public FramePoint getCopAtTransition(int transition)
+   {
+      return copAtTransition[transition];
+   }
+
+   public FramePoint[] getCopAtTransitions()
+   {
+      return copAtTransition;
+   }
+
    /**
     * compute piecewise center of pressure plan given a preallocated queue of upcoming steps
     * @param stepQueue queue of upcoming steps
@@ -181,26 +201,6 @@ public class QuadrupedTimedStepCopPlanner
       return numberOfTransitions;
    }
 
-   public double getTimeAtTransition(int transition)
-   {
-      return timeAtTransition[transition];
-   }
-
-   public double[] getTimeAtTransitions()
-   {
-      return timeAtTransition;
-   }
-
-   public FramePoint getCopAtTransition(int transition)
-   {
-      return copAtTransition[transition];
-   }
-
-   public FramePoint[] getCopAtTransitions()
-   {
-      return copAtTransition;
-   }
-
    private void computeNominalCopPosition(QuadrantDependentList<FramePoint> solePosition, QuadrantDependentList<ContactState> contactState, FramePoint copPosition)
    {
       int hindContacts = 0;
@@ -253,6 +253,5 @@ public class QuadrupedTimedStepCopPlanner
    {
       point.checkReferenceFrameMatch(pointToAdd);
       point.add(scaleFactor * pointToAdd.getX(), scaleFactor * pointToAdd.getY(), scaleFactor * pointToAdd.getZ());
-
    }
 }
