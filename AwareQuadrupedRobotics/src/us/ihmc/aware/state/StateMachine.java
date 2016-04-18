@@ -26,15 +26,19 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
     */
    private EnumYoVariable<S> state;
 
-   private boolean needToCallOnEntry = false;
+   /**
+    * Whether or not the current state's {@link StateMachineState#onEntry()} needs to be called at the beginning of the next {@link #process()} call. This is
+    * required because we don't want to call it immediately when the transition occurs. Rather, we want to wait until the next control cycle so the state's
+    * {@link StateMachineState#onEntry()} and {@link StateMachineState#process()} methods are called in the same control loop.
+    */
+   // True so we don't forget to initialize the first state at startup
+   private boolean needToCallOnEntry = true;
 
    /**
-    * Whether or not the initial state's {@link StateMachineState#onEntry()} method has been called.
+    * Use {@link StateMachineBuilder} instead.
     */
-   private boolean initialized = false;
-
-   public StateMachine(Map<S, StateMachineState<E>> states, List<StateMachineTransition<S, E>> transitions,
-         S initialState, Class<S> enumType, String yoVariableName, YoVariableRegistry registry)
+   StateMachine(Map<S, StateMachineState<E>> states, List<StateMachineTransition<S, E>> transitions, S initialState, Class<S> enumType, String yoVariableName,
+         YoVariableRegistry registry)
    {
       this.states = states;
       this.transitions = transitions;
@@ -70,16 +74,9 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
     */
    public void process()
    {
-      // Call the initial state's onEntry if it has not been called yet.
-      if (!initialized)
-      {
-         StateMachineState<E> instance = getInstanceForEnum(getState());
-         instance.onEntry();
-         initialized = true;
-      }
-
       StateMachineState<E> instance = states.get(getState());
 
+      // Call the delayed onEntry() function at the beginning of the process(), rather than at the end of the previous process().
       if (needToCallOnEntry)
       {
          instance.onEntry();
@@ -103,14 +100,24 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
       return state.getEnumValue();
    }
 
+   /**
+    * Forcefully set the current state.
+    * <p/>
+    * NOTE: Use this method with caution. It does not enforce reachability of the new state.
+    *
+    * @param state the new state
+    */
    public void setState(S state)
    {
       this.state.set(state);
    }
 
+   /**
+    * @return the current state, as an instance of {@link StateMachineState}
+    */
    public StateMachineState<E> getStateInstance()
    {
-      return states.get(state);
+      return getInstanceForEnum(getState());
    }
 
    /**
