@@ -148,11 +148,20 @@ public class QuadrupedTimedStepController
       }
    }
 
-   public PreallocatedQueue<QuadrupedTimedStep> getStepQueue()
+   public PreallocatedQueue<QuadrupedTimedStep> getQueue()
    {
       return stepQueue;
    }
 
+   public int getQueueSize()
+   {
+      return stepQueue.size();
+   }
+
+   public int getQueueCapacity()
+   {
+      return stepQueue.capacity();
+   }
    public QuadrupedTimedStep getCurrentStep(RobotQuadrant robotQuadrant)
    {
       for (int i = 0; i < stepQueue.size(); i++)
