@@ -133,12 +133,12 @@ public class QuadrupedTaskSpaceController
    private final FrameVector contactForceStorage;
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceController");
 
-   public QuadrupedTaskSpaceController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, QuadrupedJointLimits jointLimits, YoVariableRegistry parentRegistry)
+   public QuadrupedTaskSpaceController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, QuadrupedJointLimits jointLimits, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.jointLimits = jointLimits;
 
       // virtual model controller
-      virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap, registry);
+      virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap, controlDT, registry);
       contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames, registry);
       contactForceStorage = new FrameVector();
 

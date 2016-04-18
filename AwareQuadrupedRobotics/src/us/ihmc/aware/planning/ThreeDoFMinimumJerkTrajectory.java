@@ -1,5 +1,6 @@
 package us.ihmc.aware.planning;
 
+import us.ihmc.aware.util.TimeInterval;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -14,7 +15,8 @@ public class ThreeDoFMinimumJerkTrajectory
    final private FrameVector velocity;
    final private FrameVector acceleration;
    private ReferenceFrame referenceFrame;
-   private boolean moveInitialized;
+   private TimeInterval timeInterval;
+   private boolean initialized;
 
    public ThreeDoFMinimumJerkTrajectory()
    {
@@ -25,7 +27,14 @@ public class ThreeDoFMinimumJerkTrajectory
       velocity = new FrameVector();
       acceleration = new FrameVector();
       referenceFrame = ReferenceFrame.getWorldFrame();
-      moveInitialized = false;
+      timeInterval = new TimeInterval();
+      initialized = false;
+   }
+
+   public double getStartTime()
+
+   {
+      return timeInterval.getStartTime();
    }
 
    public void getPosition(FramePoint position)
@@ -48,30 +57,43 @@ public class ThreeDoFMinimumJerkTrajectory
       return referenceFrame;
    }
 
+   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, TimeInterval timeInterval)
+   {
+      initializeTrajectory(initialPosition, finalPosition, timeInterval.getStartTime(), timeInterval.getEndTime());
+   }
+
    public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double duration)
    {
+      initializeTrajectory(initialPosition, finalPosition, 0, duration);
+   }
+
+   public void initializeTrajectory(FramePoint initialPosition, FramePoint finalPosition, double startTime, double endTime)
+   {
+      timeInterval.setInterval(startTime, endTime);
+      double duration = timeInterval.getDuration();
+
       initialPosition.checkReferenceFrameMatch(finalPosition);
       referenceFrame = initialPosition.getReferenceFrame();
 
       xTrajectory.setMoveParameters(initialPosition.getX(), 0, 0, finalPosition.getX(), 0, 0, duration);
       yTrajectory.setMoveParameters(initialPosition.getY(), 0, 0, finalPosition.getY(), 0, 0, duration);
       zTrajectory.setMoveParameters(initialPosition.getZ(), 0, 0, finalPosition.getZ(), 0, 0, duration);
-      moveInitialized = true;
+      initialized = true;
 
       position.changeFrame(referenceFrame);
       velocity.changeFrame(referenceFrame);
       acceleration.changeFrame(referenceFrame);
-      computeTrajectory(0);
+      computeTrajectory(startTime);
    }
 
-   public void computeTrajectory(double timeInMove)
+   public void computeTrajectory(double currentTime)
    {
-      if (!moveInitialized)
-         throw new RuntimeException("move parameters must be initialized before computing trajectory");
+      if (!initialized)
+         throw new RuntimeException("parameters must be initialized before computing trajectory");
 
-      xTrajectory.computeTrajectory(timeInMove);
-      yTrajectory.computeTrajectory(timeInMove);
-      zTrajectory.computeTrajectory(timeInMove);
+      xTrajectory.computeTrajectory(currentTime - timeInterval.getStartTime());
+      yTrajectory.computeTrajectory(currentTime - timeInterval.getStartTime());
+      zTrajectory.computeTrajectory(currentTime - timeInterval.getStartTime());
 
       position.setX(xTrajectory.getPosition());
       position.setY(yTrajectory.getPosition());

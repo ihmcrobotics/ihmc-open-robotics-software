@@ -1,6 +1,5 @@
 package us.ihmc.aware.planning;
 
-import us.ihmc.aware.util.ArrayListSorter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -15,7 +14,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class GroundPlaneEstimator

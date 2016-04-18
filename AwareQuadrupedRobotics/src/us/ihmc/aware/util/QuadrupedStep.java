@@ -1,5 +1,6 @@
 package us.ihmc.aware.util;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -82,5 +83,17 @@ public class QuadrupedStep
    public void setGroundClearance(double groundClearance)
    {
       this.groundClearance = groundClearance;
+   }
+
+   public boolean epsilonEquals(QuadrupedStep other, double epsilon)
+   {
+      if (this.robotQuadrant != other.robotQuadrant)
+      {
+         return false;
+      }
+      else
+      {
+         return this.goalPosition.epsilonEquals(other.goalPosition, epsilon) && MathTools.epsilonEquals(this.groundClearance, other.groundClearance, epsilon);
+      }
    }
 }

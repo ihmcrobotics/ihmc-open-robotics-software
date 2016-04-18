@@ -6,6 +6,7 @@ import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.planning.ThreeDoFMinimumJerkTrajectory;
+import us.ihmc.aware.util.TimeInterval;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelController;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelControllerSettings;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
@@ -75,7 +76,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
    private final QuadrantDependentList<YoFrameVector> yoSoleFeedForwardForceSetpoints = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFrameVector> yoSoleVirtualForceSetpoints = new QuadrantDependentList<>();
 
-   private double trajectoryStartTime = 0.0;
+   private final TimeInterval trajectoryTimeInterval = new TimeInterval();
 
    public QuadrupedVirtualModelBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedRobotParameters robotParameters)
    {
@@ -84,7 +85,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
       this.referenceFrames = new QuadrupedReferenceFrames(environment.getFullRobotModel(), robotParameters.getJointMap(),
             robotParameters.getPhysicalProperties());
       this.vmcSettings = new QuadrupedVirtualModelControllerSettings();
-      this.vmc = new QuadrupedVirtualModelController(environment.getFullRobotModel(), referenceFrames, robotParameters.getJointMap(), registry);
+      this.vmc = new QuadrupedVirtualModelController(environment.getFullRobotModel(), referenceFrames, robotParameters.getJointMap(), environment.getControlDT(), registry);
 
       SDFFullRobotModel fullRobotModel = environment.getFullRobotModel();
       this.twistCalculator = new TwistCalculator(referenceFrames.getWorldFrame(), environment.getFullRobotModel().getElevator());
@@ -143,6 +144,10 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
    {
       updateEstimates();
 
+      double currentTime = environment.getRobotTimestamp().getDoubleValue();
+      trajectoryTimeInterval.setInterval(0, trajectoryTimeParameter.get());
+      trajectoryTimeInterval.shiftInterval(currentTime);
+
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          ThreeDoFMinimumJerkTrajectory trajectory = footTrajectories.get(quadrant);
@@ -154,7 +159,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
 
          FramePoint finalPosition = computeFinalSolePosition(quadrant);
 
-         trajectory.initializeTrajectory(solePosition, finalPosition, trajectoryTimeParameter.get());
+         trajectory.initializeTrajectory(solePosition, finalPosition, trajectoryTimeInterval);
       }
 
       // Show the VMC visualizations.
@@ -164,8 +169,6 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
          vmc.setSoleVirtualForceVisible(quadrant, true);
          vmc.setSoleContactForceVisible(quadrant, false);
       }
-
-      trajectoryStartTime = environment.getRobotTimestamp().getDoubleValue();
    }
 
    @Override
@@ -214,7 +217,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
 
    private void updateSetpoints()
    {
-      double timeInTrajectory = getTimeInTrajectory();
+      double currentTime = environment.getRobotTimestamp().getDoubleValue();
 
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
@@ -223,7 +226,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
          // Compute the position setpoint along the minimum jerk trajectory.
          ThreeDoFMinimumJerkTrajectory trajectory = footTrajectories.get(quadrant);
          EuclideanPositionController positionController = footPidControllers.get(quadrant);
-         trajectory.computeTrajectory(timeInTrajectory);
+         trajectory.computeTrajectory(currentTime);
 
          trajectory.getPosition(solePositionSetpoints.get(quadrant));
          solePositionSetpoints.get(quadrant).changeFrame(soleFrame);
@@ -260,11 +263,6 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
       }
    }
 
-   private double getTimeInTrajectory()
-   {
-      return environment.getRobotTimestamp().getDoubleValue() - trajectoryStartTime;
-   }
-
    private FramePoint computeFinalSolePosition(RobotQuadrant quadrant)
    {
       FramePoint finalPosition = pool.lease(FramePoint.class);
@@ -280,6 +278,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
 
    private boolean isMotionExpired()
    {
-      return getTimeInTrajectory() > trajectoryTimeParameter.get();
+      double currentTime = environment.getRobotTimestamp().getDoubleValue();
+      return currentTime > trajectoryTimeInterval.getEndTime();
    }
 }
