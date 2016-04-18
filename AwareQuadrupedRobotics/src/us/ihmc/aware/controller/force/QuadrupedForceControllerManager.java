@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.aware.communication.QuadrupedControllerInputProvider;
+import us.ihmc.aware.communication.QuadrupedTimedStepInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
 import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
@@ -32,11 +33,12 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
    private final QuadrupedControllerInputProviderInterface inputProvider;
+   private final QuadrupedTimedStepInputProvider stepProvider;
 
    private final StateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> stateMachine;
    private final StateMachineYoVariableTrigger<QuadrupedForceControllerEvent> userEventTrigger;
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
-   private final QuadrupedForceControllerToolbox controllerContext;
+   private final QuadrupedForceControllerToolbox controllerToolbox;
 
    private final AtomicReference<QuadrupedForceControllerEvent> requestedEvent = new AtomicReference<>();
 
@@ -44,6 +46,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    {
       // Initialize input providers.
       inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      stepProvider = new QuadrupedTimedStepInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
 
       GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
       globalDataProducer.attachListener(QuadrupedForceControllerEventPacket.class, new PacketConsumer<QuadrupedForceControllerEventPacket>()
@@ -57,7 +60,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
 
-      this.controllerContext = new QuadrupedForceControllerToolbox(runtimeEnvironment, parameters, registry);
+      this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, parameters, registry);
       this.stateMachine = buildStateMachine(runtimeEnvironment, parameters, inputProvider);
       this.userEventTrigger = new StateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerEvent.class);
       this.runtimeEnvironment = runtimeEnvironment;
@@ -83,7 +86,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       // update contact state used for state estimation
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (controllerContext.getTaskSpaceController().getContactState(robotQuadrant) == ContactState.IN_CONTACT)
+         if (controllerToolbox.getTaskSpaceController().getContactState(robotQuadrant) == ContactState.IN_CONTACT)
          {
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
          }
@@ -123,10 +126,10 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       // Initialize controllers.
       QuadrupedForceController jointInitializationController = new QuadrupedForceJointInitializationController(runtimeEnvironment, parameters.getJointMap());
       QuadrupedVirtualModelBasedStandPrepController standPrepController = new QuadrupedVirtualModelBasedStandPrepController(runtimeEnvironment, parameters);
-      QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(runtimeEnvironment, inputProvider, controllerContext);
-      QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, inputProvider, controllerContext);
-      QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, inputProvider, controllerContext);
-      QuadrupedForceController paceController = new QuadrupedVirtualModelBasedPaceController(runtimeEnvironment, inputProvider, controllerContext);
+      QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(runtimeEnvironment, controllerToolbox, inputProvider);
+      QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, controllerToolbox, inputProvider, stepProvider);
+      QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, controllerToolbox, inputProvider);
+      QuadrupedForceController paceController = new QuadrupedVirtualModelBasedPaceController(runtimeEnvironment, controllerToolbox, inputProvider);
 
       StateMachineBuilder<QuadrupedForceControllerState, QuadrupedForceControllerEvent> builder = new StateMachineBuilder<>(QuadrupedForceControllerState.class,
             "forceControllerState", registry);
@@ -142,6 +145,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       builder.addTransition(QuadrupedForceControllerEvent.JOINTS_INITIALIZED, QuadrupedForceControllerState.JOINT_INITIALIZATION,
             QuadrupedForceControllerState.STAND_PREP);
       builder.addTransition(QuadrupedForceControllerEvent.STARTING_POSE_REACHED, QuadrupedForceControllerState.STAND_PREP, QuadrupedForceControllerState.STAND);
+      builder.addTransition(QuadrupedForceControllerEvent.FINAL_STEP_COMPLETED, QuadrupedForceControllerState.STEP, QuadrupedForceControllerState.STAND);
 
       // Manually triggered events to transition to main controllers.
       builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND, QuadrupedForceControllerState.STAND_PREP, QuadrupedForceControllerState.STAND);

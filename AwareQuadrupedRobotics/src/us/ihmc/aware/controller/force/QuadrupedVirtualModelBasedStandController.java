@@ -63,8 +63,9 @@ public class QuadrupedVirtualModelBasedStandController implements QuadrupedForce
    // planning
    private final GroundPlaneEstimator groundPlaneEstimator;
 
-   public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerInputProviderInterface inputProvider,
-         QuadrupedForceControllerToolbox controllerToolbox)
+   public QuadrupedVirtualModelBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
+         QuadrupedControllerInputProviderInterface inputProvider)
+
    {
       this.inputProvider = inputProvider;
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();

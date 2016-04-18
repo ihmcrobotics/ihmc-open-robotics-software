@@ -1,11 +1,13 @@
 package us.ihmc.aware.communication;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.packets.*;
+import us.ihmc.aware.util.QuadrupedTimedStep;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
@@ -119,10 +121,10 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
          @Override
          public void receivedPacket(BodyOrientationPacket packet)
          {
+            bodyOrientationPacket.set(packet);
             yoBodyOrientationInputYaw.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getYaw(), bodyOrientationLowerLimitsParameter.get(0), bodyOrientationUpperLimitsParameter.get(0)));
             yoBodyOrientationInputPitch.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getPitch(), bodyOrientationLowerLimitsParameter.get(1), bodyOrientationUpperLimitsParameter.get(1)));
             yoBodyOrientationInputRoll.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getRoll(), bodyOrientationLowerLimitsParameter.get(2), bodyOrientationUpperLimitsParameter.get(2)));
-            bodyOrientationPacket.set(packet);
          }
       });
 
@@ -131,10 +133,10 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
          @Override
          public void receivedPacket(BodyAngularRatePacket packet)
          {
+            bodyAngularRatePacket.set(packet);
             yoBodyAngularRateInputX.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getX(), bodyAngularRateLowerLimitsParameter.get(0), bodyAngularRateUpperLimitsParameter.get(0)));
             yoBodyAngularRateInputY.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getY(), bodyAngularRateLowerLimitsParameter.get(1), bodyAngularRateUpperLimitsParameter.get(1)));
             yoBodyAngularRateInputZ.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getZ(), bodyAngularRateLowerLimitsParameter.get(2), bodyAngularRateUpperLimitsParameter.get(2)));
-            bodyAngularRatePacket.set(packet);
          }
       });
 
@@ -143,10 +145,10 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
          @Override
          public void receivedPacket(PlanarVelocityPacket packet)
          {
+            planarVelocityPacket.set(packet);
             yoPlanarVelocityInputX.set(MathTools.clipToMinMax(planarVelocityPacket.get().getX(), planarVelocityLowerLimitsParameter.get(0), planarVelocityUpperLimitsParameter.get(0)));
             yoPlanarVelocityInputY.set(MathTools.clipToMinMax(planarVelocityPacket.get().getY(), planarVelocityLowerLimitsParameter.get(1), planarVelocityUpperLimitsParameter.get(1)));
             yoPlanarVelocityInputZ.set(MathTools.clipToMinMax(planarVelocityPacket.get().getZ(), planarVelocityLowerLimitsParameter.get(2), planarVelocityUpperLimitsParameter.get(2)));
-            planarVelocityPacket.set(packet);
          }
       });
    }

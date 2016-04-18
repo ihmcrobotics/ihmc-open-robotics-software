@@ -1,5 +1,7 @@
 package us.ihmc.aware.util;
 
+import us.ihmc.robotics.MathTools;
+
 public class TimeInterval
 {
    private double startTime;
@@ -72,5 +74,10 @@ public class TimeInterval
       this.startTime = this.startTime + shiftTime;
       this.endTime = this.endTime + shiftTime;
       return this;
+   }
+
+   public boolean epsilonEquals(TimeInterval other, double epsilon)
+   {
+      return MathTools.epsilonEquals(this.startTime, other.startTime, epsilon) && MathTools.epsilonEquals(this.endTime, other.endTime, epsilon);
    }
 }

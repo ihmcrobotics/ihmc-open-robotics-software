@@ -48,8 +48,8 @@ public class QuadrupedTimedStepController
 
    // parameters
    private final ParameterFactory parameterFactory = new ParameterFactory(getClass().getName());
-   private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 50000, 50000, 100000);
-   private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 500, 500, 500);
+   private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 20000, 20000, 20000);
+   private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
    private final DoubleParameter solePressureUpperLimitParameter = parameterFactory.createDouble("solePressureUpperLimit", 75);
@@ -148,11 +148,20 @@ public class QuadrupedTimedStepController
       }
    }
 
-   public PreallocatedQueue<QuadrupedTimedStep> getStepQueue()
+   public PreallocatedQueue<QuadrupedTimedStep> getQueue()
    {
       return stepQueue;
    }
 
+   public int getQueueSize()
+   {
+      return stepQueue.size();
+   }
+
+   public int getQueueCapacity()
+   {
+      return stepQueue.capacity();
+   }
    public QuadrupedTimedStep getCurrentStep(RobotQuadrant robotQuadrant)
    {
       for (int i = 0; i < stepQueue.size(); i++)
@@ -290,7 +299,7 @@ public class QuadrupedTimedStepController
          FramePoint goalPosition = timedStep.getGoalPosition();
          FramePoint solePosition = solePositionEstimate.get(robotQuadrant);
          solePosition.changeFrame(goalPosition.getReferenceFrame());
-         swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval.getDuration());
+         swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval);
 
          // initialize contact state and feedback gains
          contactState.set(robotQuadrant, ContactState.NO_CONTACT);
@@ -307,7 +316,7 @@ public class QuadrupedTimedStepController
          double touchDownTime = timedStep.getTimeInterval().getEndTime();
 
          // compute swing trajectory
-         swingTrajectory.computeTrajectory(currentTime - liftOffTime);
+         swingTrajectory.computeTrajectory(currentTime);
          swingTrajectory.getPosition(solePositionControllerSetpoints.getSolePosition(robotQuadrant));
 
          // compute step adjustment envelope as a function of normalized step time

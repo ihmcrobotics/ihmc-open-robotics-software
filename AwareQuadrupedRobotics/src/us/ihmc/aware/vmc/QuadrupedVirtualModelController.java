@@ -4,8 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.aware.util.LowPassFilter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
@@ -48,6 +48,7 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<GeometricJacobian> footJacobian;
    private final QuadrantDependentList<PointJacobian> soleJacobian;
    private final QuadrantDependentList<DenseMatrix64F> legEffortVector;
+   private final QuadrantDependentList<LowPassFilter[]> legEffortFilter;
    private final DenseMatrix64F virtualForceVector;
 
    private final YoGraphicsList yoGraphicsList;
@@ -58,8 +59,7 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<YoFramePoint> yoSoleContactForceGraphicPosition;
    private final QuadrantDependentList<BooleanYoVariable> yoSoleContactForceGraphicVisible;
 
-   public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap,
-         YoVariableRegistry parentRegistry)
+   public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.jointNameMap = jointNameMap;
       registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -98,6 +98,7 @@ public class QuadrupedVirtualModelController
       footJacobian = new QuadrantDependentList<>();
       soleJacobian = new QuadrantDependentList<>();
       legEffortVector = new QuadrantDependentList<>();
+      legEffortFilter = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String jointBeforeFootName = jointNameMap.getJointBeforeFootName(robotQuadrant);
@@ -108,6 +109,11 @@ public class QuadrupedVirtualModelController
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
          soleJacobian.set(robotQuadrant, new PointJacobian());
          legEffortVector.set(robotQuadrant, new DenseMatrix64F(legJoints.get(robotQuadrant).length, 1));
+         legEffortFilter.set(robotQuadrant, new LowPassFilter[legJoints.get(robotQuadrant).length]);
+         for (int i = 0; i < legJoints.get(robotQuadrant).length; i++)
+         {
+            legEffortFilter.get(robotQuadrant)[i] = new LowPassFilter(controlDT, 0.5 / controlDT);
+         }
       }
       virtualForceVector = new DenseMatrix64F(3, 1);
 
@@ -169,7 +175,7 @@ public class QuadrupedVirtualModelController
       soleVirtualForce.get(robotQuadrant).scale(-1.0);
    }
 
-   public void compute(QuadrupedJointLimits jointLimits, QuadrupedVirtualModelControllerSettings controllerSettings)
+   public void compute(QuadrupedJointLimits jointLimits, QuadrupedVirtualModelControllerSettings settings)
    {
       // compute sole positions and jacobians
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -196,20 +202,18 @@ public class QuadrupedVirtualModelController
          {
             QuadrupedJointName jointName = jointNameMap.getJointNameForSDFName(joint.getName());
 
-            // compute joint torque and with damping
-            double tau = legEffortVector.get(robotQuadrant).get(index, 0) - controllerSettings.getJointDamping(jointName) * joint.getQd();
-
-            // apply position and torque limits
-            double tauPositionLowerLimit =
-                  controllerSettings.getJointPositionLimitStiffness(jointName) * (jointLimits.getSoftPositionLowerLimit(jointName) - joint.getQ())
-                        - controllerSettings.getJointPositionLimitDamping(jointName) * joint.getQd();
-            double tauPositionUpperLimit =
-                  controllerSettings.getJointPositionLimitStiffness(jointName) * (jointLimits.getSoftPositionUpperLimit(jointName) - joint.getQ())
-                        - controllerSettings.getJointPositionLimitDamping(jointName) * joint.getQd();
+            // compute desired joint torque with position and torque limits
+            double tau = legEffortVector.get(robotQuadrant).get(index, 0);
+            double tauPositionLowerLimit = settings.getJointPositionLimitStiffness(jointName) * (jointLimits.getSoftPositionLowerLimit(jointName) - joint.getQ()) - settings.getJointPositionLimitDamping(jointName) * joint.getQd();
+            double tauPositionUpperLimit = settings.getJointPositionLimitStiffness(jointName) * (jointLimits.getSoftPositionUpperLimit(jointName) - joint.getQ()) - settings.getJointPositionLimitDamping(jointName) * joint.getQd();
             double tauEffortLowerLimit = -jointLimits.getEffortLimit(jointName);
             double tauEffortUpperLimit = jointLimits.getEffortLimit(jointName);
             tau = Math.min(Math.max(tau, tauPositionLowerLimit), tauPositionUpperLimit);
             tau = Math.min(Math.max(tau, tauEffortLowerLimit), tauEffortUpperLimit);
+
+            // filter desired joint torque and add damping
+            legEffortFilter.get(robotQuadrant)[index].setBreakFrequency(settings.getJointEffortBreakFrequency(jointName));
+            tau = legEffortFilter.get(robotQuadrant)[index].compute(tau) - settings.getJointDamping(jointName) * joint.getQd();
 
             // update joint torques in full robot model
             joint.setTau(tau);

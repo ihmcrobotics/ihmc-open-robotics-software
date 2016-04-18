@@ -2,6 +2,7 @@ package us.ihmc.aware.planning;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.aware.util.TimeInterval;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -21,9 +22,8 @@ public class PiecewiseForwardDcmTrajectory
    private final FrameVector dcmVelocity;
    private final double[] temporaryDouble;
    private final FramePoint[] temporaryFramePoint;
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   public PiecewiseForwardDcmTrajectory(int maxSteps, double gravity, double comHeight, YoVariableRegistry parentRegistry)
+   public PiecewiseForwardDcmTrajectory(int maxSteps, double gravity, double comHeight)
    {
       if (maxSteps < 1)
          throw new RuntimeException("maxSteps must be greater than 0");
@@ -45,11 +45,6 @@ public class PiecewiseForwardDcmTrajectory
       this.dcmVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
       this.temporaryDouble = new double[] {0.0};
       this.temporaryFramePoint = new FramePoint[] {new FramePoint(ReferenceFrame.getWorldFrame())};
-
-      if (parentRegistry != null)
-      {
-         parentRegistry.addChild(registry);
-      }
    }
 
    /**
@@ -91,6 +86,7 @@ public class PiecewiseForwardDcmTrajectory
          this.dcmPositionAtSoS[i + 1].add(this.vrpPositionAtSoS[i]);
       }
       this.initialized = true;
+      computeTrajectory(timeAtSoS[0]);
    }
 
    public void initializeTrajectory(double timeAtSoS, FramePoint cmpPositionAtSoS, FramePoint dcmPositionAtSoS)
@@ -129,6 +125,11 @@ public class PiecewiseForwardDcmTrajectory
       this.comHeight = comHeight;
    }
 
+   public double getStartTime()
+   {
+      return timeAtSoS[0];
+   }
+
    public void getPosition(FramePoint dcmPosition)
    {
       dcmPosition.setIncludingFrame(this.dcmPosition);
@@ -143,7 +144,7 @@ public class PiecewiseForwardDcmTrajectory
    {
       double comHeight = 1.0;
       double gravity = 9.81;
-      PiecewiseForwardDcmTrajectory dcmTrajectory = new PiecewiseForwardDcmTrajectory(10, gravity, comHeight, null);
+      PiecewiseForwardDcmTrajectory dcmTrajectory = new PiecewiseForwardDcmTrajectory(10, gravity, comHeight);
 
       double[] timeAtSoS = new double[] {0.0, 0.4};
       FramePoint[] cmpPositionAtSoS = new FramePoint[2];

@@ -60,5 +60,10 @@ public class QuadrupedTimedStep extends QuadrupedStep
    {
       this.timeInterval.set(timeInterval);
    }
+
+   public boolean epsilonEquals(QuadrupedTimedStep other, double epsilon)
+   {
+      return super.epsilonEquals(other, epsilon) && this.timeInterval.epsilonEquals(other.timeInterval, epsilon);
+   }
 }
 
