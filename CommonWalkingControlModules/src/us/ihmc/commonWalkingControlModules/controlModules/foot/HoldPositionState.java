@@ -176,10 +176,17 @@ public class HoldPositionState extends AbstractFootControlState
       footSwitch.computeAndPackCoP(cop);
       momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
 
-      if (!cop.containsNaN())
-         desiredCoP.setIncludingFrame(cop);
-      else
-         desiredCoP.setToZero(soleFrame);
+      if (desiredCoP.containsNaN())
+      {
+         if (!cop.containsNaN())
+         {
+            desiredCoP.setIncludingFrame(cop);
+         }
+         else
+         {
+            desiredCoP.setToZero(soleFrame);
+         }
+      }     
 
       desiredCoP.changeFrame(soleFrame);
 

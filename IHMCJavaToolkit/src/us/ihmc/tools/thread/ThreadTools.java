@@ -164,6 +164,12 @@ public class ThreadTools
 
       return null;
    }
+   
+   public static void startAThread(Runnable runnable, String threadName)
+   {
+      Thread newThread = new Thread(runnable, threadName);
+      newThread.start();
+   }
 
    public static void startAsDaemon(Runnable daemonThreadRunnable, String threadName)
    {
