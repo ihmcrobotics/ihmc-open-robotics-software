@@ -14,7 +14,6 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
@@ -40,6 +39,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -150,21 +150,25 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      SideDependentList<String> jointNames = new SideDependentList<>("l_leg_akx", "r_leg_akx");
 
       int numberOfSteps = 5;
       double footShrinkagePercentWidth = 0.25;
       double footShrinkagePercentLength = 0.75;
       for (int i = 0; i < numberOfSteps; i++)
       {
+         boolean setPredictedContactPoints = true;
          RobotSide robotSide = RobotSide.LEFT;
+         FramePoint stepInPlaceLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide));
+
          ArrayList<Point2d> contactPointsInAnkleFrame = generateContactPointsForSlightlyPulledInAnkleFrame(walkingControllerParameters, footShrinkagePercentWidth, footShrinkagePercentLength);
-         String jointName = "l_leg_akx";
-         success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, contactPointsInAnkleFrame, jointName);
+         success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, contactPointsInAnkleFrame, stepInPlaceLocation, jointNames, setPredictedContactPoints);
 
          robotSide = RobotSide.RIGHT;
+         stepInPlaceLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide));
+
          contactPointsInAnkleFrame = generateContactPointsForSlightlyPulledInAnkleFrame(walkingControllerParameters, footShrinkagePercentWidth, footShrinkagePercentLength);
-         jointName = "r_leg_akx";
-         success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, contactPointsInAnkleFrame, jointName);
+         success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, contactPointsInAnkleFrame, stepInPlaceLocation, jointNames, setPredictedContactPoints);
       }
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
@@ -240,9 +244,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    @Test(timeout = 230000)
    /**
     * In this test, the robot is standing, but then the floor is dropped out from underneath it. So the robot has to detect the rotation
-    * and hold position.
+    * and hold position. Then it takes some steps in place with the part of foot changing each step.
     */
-   public void testStandingWithLeftFootContactsChangeToFrontOnly() throws SimulationExceededMaximumTimeException
+   public void testStandingAndStepsInPlaceWithHalfFootContactsChanges() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
@@ -256,15 +260,104 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
+      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      
+      RobotSide robotSide = RobotSide.LEFT;
+      SideDependentList<String> jointNames = new SideDependentList<>("l_leg_akx", "r_leg_akx");
 
-      ArrayList<Point2d> newContactPoints = generateContactPointsForFrontOfFoot(getRobotModel().getWalkingControllerParameters());
-      String jointName = "l_leg_akx";
-      changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointName);
+      ArrayList<Point2d> newContactPoints = generateContactPointsForLeftOfFoot(getRobotModel().getWalkingControllerParameters());
+      changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointNames.get(RobotSide.LEFT));
+      success = success & drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      
+      boolean setPredictedContactPoints = false;      
+      FramePoint stepInPlaceLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide));
 
-      success = success & drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, newContactPoints, stepInPlaceLocation, jointNames, setPredictedContactPoints);
+      
+      newContactPoints = generateContactPointsForBackOfFoot(getRobotModel().getWalkingControllerParameters());
+      success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, newContactPoints, stepInPlaceLocation, jointNames, setPredictedContactPoints);
 
+      newContactPoints = generateContactPointsForFrontOfFoot(getRobotModel().getWalkingControllerParameters());
+      success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, newContactPoints, stepInPlaceLocation, jointNames, setPredictedContactPoints);
+      
+      newContactPoints = generateContactPointsForRightOfFoot(getRobotModel().getWalkingControllerParameters());
+      success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, newContactPoints, stepInPlaceLocation, jointNames, setPredictedContactPoints);
+
+      robotSide = RobotSide.RIGHT;
+      
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+
+      stepInPlaceLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide));
+
+      newContactPoints = generateContactPointsForBackOfFoot(getRobotModel().getWalkingControllerParameters());
+      success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, newContactPoints, stepInPlaceLocation, jointNames, setPredictedContactPoints);
+
+      newContactPoints = generateContactPointsForFrontOfFoot(getRobotModel().getWalkingControllerParameters());
+      success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, newContactPoints, stepInPlaceLocation, jointNames, setPredictedContactPoints);
+      
+      newContactPoints = generateContactPointsForRightOfFoot(getRobotModel().getWalkingControllerParameters());
+      success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, newContactPoints, stepInPlaceLocation, jointNames, setPredictedContactPoints);
+
+      assertTrue(success);
+      
       BambooTools.reportTestFinishedMessage();
    }
+   
+   
+   @DeployableTestMethod(estimatedDuration = 45.9)
+   @Test(timeout = 230000)
+   /**
+    * In this test, the robot walks forward. On each step a half of the foot is cut out.
+    */
+   public void testWalkingForwardWithHalfFootContactChangesStopBetweenSteps() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+      FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+
+      setupCameraForWalkingUpToRamp();
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
+      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      
+      RobotSide robotSide = RobotSide.LEFT;
+      SideDependentList<String> jointNames = new SideDependentList<>("l_leg_akx", "r_leg_akx");
+      boolean setPredictedContactPoints = false;
+
+      Vector3d stepVector = new Vector3d();
+      
+      stepVector.set(0.2, 0.0, 0.0);
+      
+      int numberOfSteps = 10;
+      ArrayList<Point2d> newContactPoints;
+      
+      Random random = new Random(1984L);
+      for (int i=0; i<numberOfSteps; i++)
+      {         
+         newContactPoints = generateContactPointsForHalfOfFoot(random, getRobotModel().getWalkingControllerParameters());          
+//         newContactPoints = generateContactPointsForSideOfFoot(robotSide, getRobotModel().getWalkingControllerParameters());          
+
+         double stepLength = 0.3;
+         double stepWidth = 0.3;
+         
+         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide.getOppositeSide()), stepLength, robotSide.negateIfRightSide(stepWidth), 0.0);
+
+         success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, newContactPoints, stepLocation, jointNames, setPredictedContactPoints);
+         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+         
+         robotSide = robotSide.getOppositeSide();
+      }
+      
+      assertTrue(success);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+
 
    @DeployableTestMethod(estimatedDuration = 45.9)
    @Test(timeout = 230000)
@@ -285,16 +378,14 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
+      String jointName = "l_leg_akx";
 
       int numberOfChanges = 4;
       
       for (int i=0; i<numberOfChanges; i++)
       {
          ArrayList<Point2d> newContactPoints = generatePredictedContactPoints(random);
-
-         String jointName = "l_leg_akx";
          changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointName);
-
          success = success & drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
          if (!success) break;
       }
@@ -404,25 +495,41 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private boolean takeAStepOntoNewFootGroundContactPoints(SDFHumanoidRobot robot, SDFFullHumanoidRobotModel fullRobotModel, RobotSide robotSide, ArrayList<Point2d> contactPointsInAnkleFrame, String jointName)
+   private boolean takeAStepOntoNewFootGroundContactPoints(SDFHumanoidRobot robot, 
+         SDFFullHumanoidRobotModel fullRobotModel, RobotSide robotSide, 
+         ArrayList<Point2d> contactPointsInAnkleFrame, FramePoint placeToStep,
+         SideDependentList<String> jointNames, boolean setPredictedContactPoints)
          throws SimulationExceededMaximumTimeException
    {
+      String jointName = jointNames.get(robotSide);
+      
       FootstepDataListMessage message = new FootstepDataListMessage();
       FootstepDataMessage footstepData = new FootstepDataMessage();
 
       ReferenceFrame ankleFrame = fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
       ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
-      ArrayList<Point2d> contactPointsInSoleFrame = transformFromAnkleFrameToSoleFrame(contactPointsInAnkleFrame, ankleFrame, soleFrame);
 
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      FramePoint soleLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide));
-      soleLocation.changeFrame(worldFrame);
-
-      footstepData.setLocation(soleLocation.getPointCopy());
+//      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+//      FramePoint soleLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide));
+//      soleLocation.changeFrame(worldFrame);
+//
+//      Point3d placeToStep = soleLocation.getPointCopy();
+//      placeToStep.add(stepVector);
+      
+      FramePoint placeToStepInWorld = new FramePoint(placeToStep);
+      placeToStepInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      footstepData.setLocation(placeToStepInWorld.getPointCopy());
       footstepData.setOrientation(new Quat4d(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(robotSide);
       footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
-      footstepData.setPredictedContactPoints(contactPointsInSoleFrame);
+      
+      if (setPredictedContactPoints && (contactPointsInAnkleFrame != null))
+      {
+         ArrayList<Point2d> contactPointsInSoleFrame = transformFromAnkleFrameToSoleFrame(contactPointsInAnkleFrame, ankleFrame, soleFrame);
+         footstepData.setPredictedContactPoints(contactPointsInSoleFrame);
+      }
+      
       message.add(footstepData);
 
       drcSimulationTestHelper.send(message);
@@ -477,21 +584,102 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private ArrayList<Point2d> generateContactPointsForFrontOfFoot(WalkingControllerParameters walkingControllerParameters)
+   private ArrayList<Point2d> generateContactPointsForAllOfFoot(WalkingControllerParameters walkingControllerParameters)
    {
-      double footLength = walkingControllerParameters.getFootLength();
       double footForwardOffset = walkingControllerParameters.getFootForwardOffset();
       double footBackwardOffset = walkingControllerParameters.getFootBackwardOffset();
       double footWidth = walkingControllerParameters.getFootWidth();
 
       ArrayList<Point2d> ret = new ArrayList<Point2d>();
-      //      ret.add(new Point2d(-footBackwardOffset, footWidth/2.0));
-      //      ret.add(new Point2d(-footBackwardOffset, -footWidth/2.0));
+      
+      ret.add(new Point2d(footForwardOffset, footWidth / 2.0));
+      ret.add(new Point2d(footForwardOffset, -footWidth / 2.0));
+      ret.add(new Point2d(-footBackwardOffset, -footWidth / 2.0));
+      ret.add(new Point2d(-footBackwardOffset, footWidth / 2.0));
+      return ret;
+   }
+   
+   private ArrayList<Point2d> generateContactPointsForFrontOfFoot(WalkingControllerParameters walkingControllerParameters)
+   {
+      double footForwardOffset = walkingControllerParameters.getFootForwardOffset();
+      double footWidth = walkingControllerParameters.getFootWidth();
 
+      ArrayList<Point2d> ret = new ArrayList<Point2d>();
+      
       ret.add(new Point2d(footForwardOffset / 2.0, footWidth / 2.0));
       ret.add(new Point2d(footForwardOffset / 2.0, -footWidth / 2.0));
       ret.add(new Point2d(footForwardOffset, -footWidth / 2.0));
       ret.add(new Point2d(footForwardOffset, footWidth / 2.0));
+      return ret;
+   }
+   
+   private ArrayList<Point2d> generateContactPointsForHalfOfFoot(Random random, WalkingControllerParameters walkingControllerParameters)
+   {
+      int footHalf = random.nextInt(4);
+      
+      if (footHalf == 0)
+         return generateContactPointsForLeftOfFoot(walkingControllerParameters);
+      if (footHalf == 1)
+         return generateContactPointsForRightOfFoot(walkingControllerParameters);
+      if (footHalf == 2)
+         return generateContactPointsForFrontOfFoot(walkingControllerParameters);
+     
+      return generateContactPointsForBackOfFoot(walkingControllerParameters);
+   }
+   
+   private ArrayList<Point2d> generateContactPointsForSideOfFoot(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters)
+   {
+      if (robotSide == RobotSide.LEFT)
+      {
+         return generateContactPointsForLeftOfFoot(getRobotModel().getWalkingControllerParameters());          
+      }
+      else
+      {
+         return generateContactPointsForRightOfFoot(getRobotModel().getWalkingControllerParameters());            
+      }
+   }
+   
+   private ArrayList<Point2d> generateContactPointsForLeftOfFoot(WalkingControllerParameters walkingControllerParameters)
+   {
+      double footForwardOffset = walkingControllerParameters.getFootForwardOffset();
+      double footBackwardOffset = walkingControllerParameters.getFootBackwardOffset();
+      double footWidth = walkingControllerParameters.getFootWidth();
+
+      ArrayList<Point2d> ret = new ArrayList<Point2d>();
+      
+      ret.add(new Point2d(footForwardOffset, footWidth / 2.0));
+      ret.add(new Point2d(footForwardOffset, 0.0));
+      ret.add(new Point2d(-footBackwardOffset, 0.0));
+      ret.add(new Point2d(-footBackwardOffset, footWidth / 2.0));
+      return ret;
+   }
+   
+   private ArrayList<Point2d> generateContactPointsForRightOfFoot(WalkingControllerParameters walkingControllerParameters)
+   {
+      double footForwardOffset = walkingControllerParameters.getFootForwardOffset();
+      double footBackwardOffset = walkingControllerParameters.getFootBackwardOffset();
+      double footWidth = walkingControllerParameters.getFootWidth();
+
+      ArrayList<Point2d> ret = new ArrayList<Point2d>();
+      
+      ret.add(new Point2d(footForwardOffset, 0.0));
+      ret.add(new Point2d(footForwardOffset, -footWidth / 2.0));
+      ret.add(new Point2d(-footBackwardOffset, -footWidth / 2.0));
+      ret.add(new Point2d(-footBackwardOffset, 0.0));
+      return ret;
+   }
+   
+   private ArrayList<Point2d> generateContactPointsForBackOfFoot(WalkingControllerParameters walkingControllerParameters)
+   {
+      double footBackwardOffset = walkingControllerParameters.getFootBackwardOffset();
+      double footWidth = walkingControllerParameters.getFootWidth();
+
+      ArrayList<Point2d> ret = new ArrayList<Point2d>();
+
+      ret.add(new Point2d(0.0, footWidth / 2.0));
+      ret.add(new Point2d(0.0, -footWidth / 2.0));
+      ret.add(new Point2d(-footBackwardOffset, -footWidth / 2.0));
+      ret.add(new Point2d(-footBackwardOffset, footWidth / 2.0));
       return ret;
    }
 
