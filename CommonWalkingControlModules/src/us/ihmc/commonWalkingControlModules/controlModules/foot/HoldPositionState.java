@@ -194,7 +194,9 @@ public class HoldPositionState extends AbstractFootControlState
 
       partialFootholdControlModule.compute(desiredCoP, cop);
       YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
-      partialFootholdControlModule.applyShrunkPolygon(contactState);
+      boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
+      if (contactStateHasChanged)
+         contactState.notifyContactStateHasChanged();
 
       // Update the control frame to be at the desired center of pressure
       desiredCoP3d.setXYIncludingFrame(desiredCoP);

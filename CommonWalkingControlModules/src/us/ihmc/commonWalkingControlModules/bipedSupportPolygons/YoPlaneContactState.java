@@ -33,6 +33,8 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final FrameConvexPolygon2d contactPointsPolygon = new FrameConvexPolygon2d();
    private final YoFramePoint2d contactPointCentroid;
 
+   private final BooleanYoVariable hasContactStateChanged;
+
    public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2d> contactFramePoints,
          double coefficientOfFriction, YoVariableRegistry parentRegistry)
    {
@@ -60,6 +62,8 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
       contactPointCentroid = new YoFramePoint2d(namePrefix + "ContactPointCentroid", planeFrame, registry);
       contactPointCentroid.setToNaN();
+
+      hasContactStateChanged = new BooleanYoVariable(namePrefix + "HasChanged", registry);
    }
 
    private final FramePoint tempContactPointPosition = new FramePoint();
@@ -423,11 +427,25 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       inContact.set(true);
    }
 
+   public void notifyContactStateHasChanged()
+   {
+      hasContactStateChanged.set(true);
+   }
+
+   public boolean pollContactHasChangedNotification()
+   {
+      boolean ret = hasContactStateChanged.getBooleanValue();
+      hasContactStateChanged.set(false);
+      return ret;
+   }
+
    @Override
    public RigidBody getRigidBody()
    {
       return rigidBody;
    }
+
+   
 
    @Override
    public String toString()
