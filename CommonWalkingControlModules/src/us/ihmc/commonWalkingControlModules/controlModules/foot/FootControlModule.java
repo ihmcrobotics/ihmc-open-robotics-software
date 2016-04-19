@@ -25,7 +25,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
@@ -376,11 +376,6 @@ public class FootControlModule
       }
    }
 
-   public void setPredictedToeOffDuration(double predictedToeOffDuration)
-   {
-      onToesState.setPredictedToeOffDuration(predictedToeOffDuration);
-   }
-
    public void resetHeightCorrectionParametersForSingularityAvoidance()
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.resetHeightCorrectionParameters();
@@ -391,9 +386,9 @@ public class FootControlModule
       swingState.requestSwingSpeedUp(speedUpFactor);
    }
 
-   public void registerDesiredContactPointForToeOff(FramePoint2d desiredContactPoint)
+   public void setExitCMPForToeOff(FramePoint exitCMP)
    {
-      onToesState.setDesiredToeOffContactPoint(desiredContactPoint);
+      onToesState.setExitCMP(exitCMP);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
