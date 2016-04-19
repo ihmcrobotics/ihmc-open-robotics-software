@@ -209,7 +209,14 @@ public class OnToesState extends AbstractFootControlState
          BipedSupportPolygons bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
          FrameConvexPolygon2d footPolygonInSoleFrame = bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide);
 
-         rayThroughExitCMP.set(exitCMP2d, exitCMPRayDirection2d);
+         FramePoint2d rayOrigin;
+
+         if (footPolygonInSoleFrame.isPointInside(exitCMP2d))
+            rayOrigin = exitCMP2d;
+         else
+            rayOrigin = footPolygonInSoleFrame.getCentroid();
+
+         rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
          FramePoint2d[] intersectionWithRay = footPolygonInSoleFrame.intersectionWithRay(rayThroughExitCMP);
          toeOffContactPoint2d.set(intersectionWithRay[0]);
       }
