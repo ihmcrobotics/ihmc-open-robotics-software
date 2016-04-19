@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -25,6 +24,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -69,7 +69,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final YoFramePoint previousCoP;
 
    private final BooleanYoVariable hasReceivedCenterOfPressureCommand;
-   private final Point2d desiredCoPCommandInSoleFrame = new Point2d();
+   private final YoFramePoint2d desiredCoPCommandInSoleFrame;
    private final Vector2d desiredCoPCommandWeightInSoleFrame = new Vector2d();
 
    private final List<FramePoint> basisVectorsOrigin = new ArrayList<>();
@@ -112,7 +112,8 @@ public class PlaneContactStateToWrenchMatrixHelper
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
 
       hasReceivedCenterOfPressureCommand = new BooleanYoVariable(namePrefix + "HasReceivedCoPCommand", registry);
-
+      desiredCoPCommandInSoleFrame = new YoFramePoint2d(namePrefix + "DesiredCoPCommand", planeFrame, registry);
+      
       yoRho = new YoMatrix(namePrefix + "Rho", rhoSize, 1, registry);
 
       for (int i = 0; i < rhoSize; i++)
