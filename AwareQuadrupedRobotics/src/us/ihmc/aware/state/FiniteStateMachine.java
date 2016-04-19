@@ -6,9 +6,9 @@ import java.util.Map;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 
-public class StateMachine<S extends Enum<S>, E extends Enum<E>>
+public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
 {
-   private final Map<S, StateMachineState<E>> states;
+   private final Map<S, FiniteStateMachineState<E>> states;
 
    /**
     * The list of possible transitions. This is equivalent to a state-transition function in FSM literature.
@@ -17,7 +17,7 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
     * NOTE: This should be a {@link java.util.Set}, but due to real-time constraints a {@link List} must be used
     * instead.
     */
-   private final List<StateMachineTransition<S, E>> transitions;
+   private final List<FiniteStateMachineTransition<S, E>> transitions;
 
    private final S initialState;
 
@@ -27,17 +27,17 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
    private EnumYoVariable<S> state;
 
    /**
-    * Whether or not the current state's {@link StateMachineState#onEntry()} needs to be called at the beginning of the next {@link #process()} call. This is
+    * Whether or not the current state's {@link FiniteStateMachineState#onEntry()} needs to be called at the beginning of the next {@link #process()} call. This is
     * required because we don't want to call it immediately when the transition occurs. Rather, we want to wait until the next control cycle so the state's
-    * {@link StateMachineState#onEntry()} and {@link StateMachineState#process()} methods are called in the same control loop.
+    * {@link FiniteStateMachineState#onEntry()} and {@link FiniteStateMachineState#process()} methods are called in the same control loop.
     */
    // True so we don't forget to initialize the first state at startup
    private boolean needToCallOnEntry = true;
 
    /**
-    * Use {@link StateMachineBuilder} instead.
+    * Use {@link FiniteStateMachineBuilder} instead.
     */
-   StateMachine(Map<S, StateMachineState<E>> states, List<StateMachineTransition<S, E>> transitions, S initialState, Class<S> enumType, String yoVariableName,
+   FiniteStateMachine(Map<S, FiniteStateMachineState<E>> states, List<FiniteStateMachineTransition<S, E>> transitions, S initialState, Class<S> enumType, String yoVariableName,
          YoVariableRegistry registry)
    {
       this.states = states;
@@ -58,7 +58,7 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
    {
       for (int i = 0; i < transitions.size(); i++)
       {
-         StateMachineTransition<S, E> transition = transitions.get(i);
+         FiniteStateMachineTransition<S, E> transition = transitions.get(i);
 
          // Check if this transition matches the source state and event.
          if (transition.getFrom() == getState() && event == transition.getEvent())
@@ -70,11 +70,11 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
    }
 
    /**
-    * Run the current state's {@link StateMachineState#process()} method and transition on any generated events.
+    * Run the current state's {@link FiniteStateMachineState#process()} method and transition on any generated events.
     */
    public void process()
    {
-      StateMachineState<E> instance = states.get(getState());
+      FiniteStateMachineState<E> instance = states.get(getState());
 
       // Call the delayed onEntry() function at the beginning of the process(), rather than at the end of the previous process().
       if (needToCallOnEntry)
@@ -113,9 +113,9 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
    }
 
    /**
-    * @return the current state, as an instance of {@link StateMachineState}
+    * @return the current state, as an instance of {@link FiniteStateMachineState}
     */
-   public StateMachineState<E> getStateInstance()
+   public FiniteStateMachineState<E> getStateInstance()
    {
       return getInstanceForEnum(getState());
    }
@@ -128,7 +128,7 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
       transition(getState(), initialState);
    }
 
-   private StateMachineState<E> getInstanceForEnum(S state)
+   private FiniteStateMachineState<E> getInstanceForEnum(S state)
    {
       if (!states.containsKey(state))
       {
@@ -140,7 +140,7 @@ public class StateMachine<S extends Enum<S>, E extends Enum<E>>
 
    private void transition(S from, S to)
    {
-      StateMachineState<E> fromInstance = getInstanceForEnum(from);
+      FiniteStateMachineState<E> fromInstance = getInstanceForEnum(from);
 
       // It does, so transition to the next state.
       fromInstance.onExit();

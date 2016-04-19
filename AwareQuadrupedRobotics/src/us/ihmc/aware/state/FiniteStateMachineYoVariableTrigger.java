@@ -10,9 +10,9 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
  *
  * @param <E> the state machine event type.
  */
-public class StateMachineYoVariableTrigger<E extends Enum<E>>
+public class FiniteStateMachineYoVariableTrigger<E extends Enum<E>>
 {
-   public StateMachineYoVariableTrigger(final StateMachine<?, E> stateMachine, String name, YoVariableRegistry registry,
+   public FiniteStateMachineYoVariableTrigger(final FiniteStateMachine<?, E> stateMachine, String name, YoVariableRegistry registry,
          Class<E> enumType)
    {
       final EnumYoVariable<E> yoVariable = new EnumYoVariable<>(name, registry, enumType, true);

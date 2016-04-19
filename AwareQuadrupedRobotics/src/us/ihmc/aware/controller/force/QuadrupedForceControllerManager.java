@@ -10,9 +10,9 @@ import us.ihmc.aware.controller.QuadrupedControllerManager;
 import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.aware.providers.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.ParameterPacketListener;
-import us.ihmc.aware.state.StateMachine;
-import us.ihmc.aware.state.StateMachineBuilder;
-import us.ihmc.aware.state.StateMachineYoVariableTrigger;
+import us.ihmc.aware.state.FiniteStateMachine;
+import us.ihmc.aware.state.FiniteStateMachineBuilder;
+import us.ihmc.aware.state.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.aware.util.ContactState;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -35,8 +35,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final QuadrupedControllerInputProviderInterface inputProvider;
    private final QuadrupedTimedStepInputProvider stepProvider;
 
-   private final StateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> stateMachine;
-   private final StateMachineYoVariableTrigger<QuadrupedForceControllerEvent> userEventTrigger;
+   private final FiniteStateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> stateMachine;
+   private final FiniteStateMachineYoVariableTrigger<QuadrupedForceControllerEvent> userEventTrigger;
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
    private final QuadrupedForceControllerToolbox controllerToolbox;
 
@@ -62,7 +62,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, parameters, registry);
       this.stateMachine = buildStateMachine(runtimeEnvironment, parameters, inputProvider);
-      this.userEventTrigger = new StateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerEvent.class);
+      this.userEventTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerEvent.class);
       this.runtimeEnvironment = runtimeEnvironment;
    }
 
@@ -120,7 +120,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       return motionStatusHolder;
    }
 
-   private StateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
+   private FiniteStateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
          QuadrupedRobotParameters parameters, QuadrupedControllerInputProviderInterface inputProvider)
    {
       // Initialize controllers.
@@ -131,7 +131,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, controllerToolbox, inputProvider);
       QuadrupedForceController paceController = new QuadrupedVirtualModelBasedPaceController(runtimeEnvironment, controllerToolbox, inputProvider);
 
-      StateMachineBuilder<QuadrupedForceControllerState, QuadrupedForceControllerEvent> builder = new StateMachineBuilder<>(QuadrupedForceControllerState.class,
+      FiniteStateMachineBuilder<QuadrupedForceControllerState, QuadrupedForceControllerEvent> builder = new FiniteStateMachineBuilder<>(QuadrupedForceControllerState.class,
             "forceControllerState", registry);
 
       builder.addState(QuadrupedForceControllerState.JOINT_INITIALIZATION, jointInitializationController);
