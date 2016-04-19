@@ -1,7 +1,7 @@
 package us.ihmc.aware.controller.force;
 
+import us.ihmc.aware.controller.force.toolbox.*;
 import us.ihmc.aware.providers.QuadrupedTimedStepInputProvider;
-import us.ihmc.aware.controller.toolbox.*;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
