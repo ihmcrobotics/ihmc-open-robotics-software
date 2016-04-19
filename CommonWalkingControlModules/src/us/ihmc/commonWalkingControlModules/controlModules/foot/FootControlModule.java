@@ -368,11 +368,6 @@ public class FootControlModule
       }
    }
 
-   public void setPredictedToeOffDuration(double predictedToeOffDuration)
-   {
-      onToesState.setPredictedToeOffDuration(predictedToeOffDuration);
-   }
-
    public void resetHeightCorrectionParametersForSingularityAvoidance()
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.resetHeightCorrectionParameters();

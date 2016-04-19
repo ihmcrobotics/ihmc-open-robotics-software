@@ -168,8 +168,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             nextExitCMP.changeFrame(feet.get(supportSide).getSoleFrame());
             toeOffContactPoint.setByProjectionOntoXYPlaneIncludingFrame(nextExitCMP);
             feetManager.registerDesiredContactPointForToeOff(supportSide, toeOffContactPoint);
-            double predictedToeOffDuration = balanceManager.getTimeRemainingInCurrentState() + walkingMessageHandler.getTransferTime();
-            feetManager.requestToeOff(supportSide, predictedToeOffDuration);
+            feetManager.requestToeOff(supportSide);
          }
       }
    }

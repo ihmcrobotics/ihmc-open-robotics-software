@@ -276,11 +276,10 @@ public class FeetManager
       return walkOnTheEdgesManager.doToeOff();
    }
 
-   public void requestToeOff(RobotSide trailingLeg, double predictedToeOffDuration)
+   public void requestToeOff(RobotSide trailingLeg)
    {
       if (footControlModules.get(trailingLeg).isInToeOff())
          return;
-      footControlModules.get(trailingLeg).setPredictedToeOffDuration(predictedToeOffDuration);
       setOnToesContactState(trailingLeg);
    }
 
