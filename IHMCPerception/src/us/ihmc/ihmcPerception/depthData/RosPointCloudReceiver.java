@@ -12,6 +12,8 @@ import java.util.Arrays;
 
 public class RosPointCloudReceiver extends RosPointCloudSubscriber
 {
+   private final boolean DEBUG = false;
+
    private final ReferenceFrame cloudFrame;
    private final PointCloudDataReceiverInterface pointCloudDataReceiver;
    private final ReferenceFrame sensorframe;
@@ -43,7 +45,10 @@ public class RosPointCloudReceiver extends RosPointCloudSubscriber
    @Override
 	public void onNewMessage(PointCloud2 pointCloud) 
 	{
-		UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
+      if(DEBUG)
+         System.out.println(getClass().getSimpleName() + ": Received point cloud from ROS");
+
+      UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
 		Point3d[] points = pointCloudData.getPoints();
 		ArrayList<Point3d> pointsAsArrayList = new ArrayList<Point3d>(Arrays.asList(points));
 	   long[] timestamps = new long[points.length];
