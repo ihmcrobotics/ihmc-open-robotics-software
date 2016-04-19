@@ -45,10 +45,13 @@ public class FeetManager
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
+   private final MomentumBasedController momentumBasedController;
+
    // TODO Needs to be cleaned up someday... (Sylvain)
    public FeetManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
+      this.momentumBasedController = momentumBasedController;
       feet = momentumBasedController.getContactableFeet();
       walkOnTheEdgesManager = new WalkOnTheEdgesManager(momentumBasedController, walkingControllerParameters, feet, registry);
 
@@ -239,6 +242,9 @@ public class FeetManager
       else
          footNormalContactVector.setIncludingFrame(feet.get(robotSide).getSoleFrame(), 0.0, 0.0, 1.0);
       footControlModules.get(robotSide).setContactState(ConstraintType.FULL, footNormalContactVector);
+
+      if (footControlModules.get(robotSide).getCurrentConstraintType() == ConstraintType.TOES)
+         momentumBasedController.restorePreviousFootContactPoints(robotSide);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)

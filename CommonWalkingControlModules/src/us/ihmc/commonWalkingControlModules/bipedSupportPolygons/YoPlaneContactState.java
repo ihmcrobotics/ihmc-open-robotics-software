@@ -14,6 +14,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -181,25 +182,6 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       this.contactPointCentroid.set(contactPointsPolygon.getCentroid());
    }
 
-   public void setContactFramePoints(FrameTuple2dArrayList<FramePoint2d> contactPointLocations)
-   {
-      int contactPointLocationsSize = contactPointLocations.size();
-
-      if (contactPointLocationsSize != totalNumberOfContactPoints)
-         throw new RuntimeException("contactPointLocationsSize != totalNumberOfContactPoints");
-
-      for (int i = 0; i < contactPointLocationsSize; i++)
-      {
-         FramePoint2d contactPointLocation = contactPointLocations.get(i);
-         YoContactPoint yoContactPoint = contactPoints.get(i);
-
-         yoContactPoint.setPosition(contactPointLocation);
-      }
-
-      contactPointsPolygon.setIncludingFrameAndUpdate(contactPointLocations);
-      this.contactPointCentroid.set(contactPointsPolygon.getCentroid());
-   }
-
    public void getContactPointCentroid(FramePoint2d centroidToPack)
    {
       this.contactPointCentroid.getFrameTuple2dIncludingFrame(centroidToPack);
@@ -240,6 +222,34 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
             contactPointListToPack.add(new FramePoint());
 
          contactPoint.getPosition(contactPointListToPack.get(counter));
+         counter++;
+      }
+
+      for (int i = contactPointListToPack.size() - 1; i >= counter; i--)
+      {
+         contactPointListToPack.remove(i);
+      }
+   }
+
+   public void getContactFramePoint2dsInContact(List<FramePoint2d> contactPointListToPack)
+   {
+      int counter = 0;
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
+      {
+         YoContactPoint contactPoint = contactPoints.get(i);
+
+         if (!contactPoint.isInContact())
+            continue;
+
+         if (counter >= contactPointListToPack.size())
+         {
+            if (contactPointListToPack instanceof RecyclingArrayList<?>)
+               ((RecyclingArrayList<?>) contactPointListToPack).add();
+            else
+               contactPointListToPack.add(new FramePoint2d());
+         }
+
+         contactPoint.getPosition2d(contactPointListToPack.get(counter));
          counter++;
       }
 
