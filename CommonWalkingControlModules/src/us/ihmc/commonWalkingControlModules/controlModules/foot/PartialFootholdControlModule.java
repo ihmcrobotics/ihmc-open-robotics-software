@@ -77,7 +77,7 @@ public class PartialFootholdControlModule
       yoUnsafePolygon = new YoFrameConvexPolygon2d(namePrefix + "UnsafeFootPolygon", "", ReferenceFrame.getWorldFrame(), 10, registry);
 
       shrinkMaxLimit = new IntegerYoVariable(namePrefix + "MaximumNumberOfFootShrink", registry);
-      shrinkMaxLimit.set(1);
+      shrinkMaxLimit.set(6);
       shrinkCounter = new IntegerYoVariable(namePrefix + "FootShrinkCounter", registry);
 
       numberOfVerticesRemoved = new IntegerYoVariable(namePrefix + "NumberOfVerticesRemoved", registry);
@@ -114,8 +114,7 @@ public class PartialFootholdControlModule
          return;
       }
 
-      shrunkFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
-      unsafePolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
+      unsafePolygon.setIncludingFrameAndUpdate(shrunkFootPolygon);
       footCoPOccupancyGrid.registerCenterOfPressureLocation(centerOfPressure);
 
       footRotationCalculator.compute(desiredCenterOfPressure, centerOfPressure);
@@ -145,6 +144,11 @@ public class PartialFootholdControlModule
       {
          doNothing();
       }
+   }
+
+   public void getShrunkPolygonCentroid(FramePoint2d centroidToPack)
+   {
+      shrunkFootPolygon.getCentroid(centroidToPack);
    }
 
    private void doNothing()
@@ -206,5 +210,6 @@ public class PartialFootholdControlModule
       footRotationCalculator.reset();
       footCoPOccupancyGrid.reset();
       footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy.getIntegerValue());
+      shrunkFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
    }
 }

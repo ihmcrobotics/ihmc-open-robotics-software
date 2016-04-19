@@ -21,7 +21,7 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
    public void set(CenterOfPressureCommand other)
    {
       this.weightInSoleFrame.set(other.weightInSoleFrame);
-      this.weightInSoleFrame.set(other.weightInSoleFrame);
+      this.desiredCoPInSoleFrame.set(other.desiredCoPInSoleFrame);
 
       this.contactingRigidBody = other.getContactingRigidBody();
       this.contactingRigidBodyName = other.contactingRigidBodyName;
