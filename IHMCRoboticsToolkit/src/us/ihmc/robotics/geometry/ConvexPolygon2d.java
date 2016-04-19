@@ -474,10 +474,17 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
          area *= 0.5;
 
-         Cx *= 1.0 / (6.0 * area);
-         Cy *= 1.0 / (6.0 * area);
+         if (area < 1.0e-5)
+         {
+            centroid.set(getVertex(0));
+         }
+         else
+         {
+            Cx *= 1.0 / (6.0 * area);
+            Cy *= 1.0 / (6.0 * area);
 
-         centroid.set(Cx, Cy);
+            centroid.set(Cx, Cy);
+         }
       }
       else if (hasAtLeastOneVertex())
       {
