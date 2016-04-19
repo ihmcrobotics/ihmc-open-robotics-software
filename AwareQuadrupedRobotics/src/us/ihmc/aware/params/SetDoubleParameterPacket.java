@@ -1,4 +1,4 @@
-package us.ihmc.aware.packets;
+package us.ihmc.aware.params;
 
 import com.google.common.math.DoubleMath;
 import us.ihmc.communication.packets.Packet;

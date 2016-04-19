@@ -1,13 +1,11 @@
-package us.ihmc.aware.communication;
+package us.ihmc.aware.providers;
 
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.packets.*;
-import us.ihmc.aware.util.QuadrupedTimedStep;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;

@@ -1,7 +1,7 @@
-package us.ihmc.aware.communication;
+package us.ihmc.aware.providers;
 
 import us.ihmc.aware.packets.QuadrupedTimedStepPacket;
-import us.ihmc.aware.util.QuadrupedTimedStep;
+import us.ihmc.aware.planning.QuadrupedTimedStep;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
