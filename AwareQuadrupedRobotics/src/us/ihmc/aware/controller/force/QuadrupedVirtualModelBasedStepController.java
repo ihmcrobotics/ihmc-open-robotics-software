@@ -258,9 +258,14 @@ public class QuadrupedVirtualModelBasedStepController implements QuadrupedForceC
       ArrayList<QuadrupedTimedStep> steps = stepProvider.get();
       for (int i = 0; i < steps.size(); i++)
       {
-         timedStepController.addStep(steps.get(i));
+         if (!timedStepController.addStep(steps.get(i)))
+         {
+            // only execute if all steps can be processed
+            removeSteps();
+            return;
+         }
       }
-      if (timedStepController.getQueueSize() == 0)
+      if (steps.size() == 0)
       {
          return;
       }
