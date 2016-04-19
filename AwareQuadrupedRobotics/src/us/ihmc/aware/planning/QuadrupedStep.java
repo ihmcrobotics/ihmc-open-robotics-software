@@ -1,4 +1,4 @@
-package us.ihmc.aware.util;
+package us.ihmc.aware.planning;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;

@@ -4,7 +4,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
-import us.ihmc.aware.parameters.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.providers.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.planning.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.aware.util.TimeInterval;
 import us.ihmc.aware.vmc.QuadrupedVirtualModelController;

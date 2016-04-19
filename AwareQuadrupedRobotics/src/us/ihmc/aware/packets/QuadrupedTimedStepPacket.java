@@ -1,6 +1,6 @@
 package us.ihmc.aware.packets;
 
-import us.ihmc.aware.util.QuadrupedTimedStep;
+import us.ihmc.aware.planning.QuadrupedTimedStep;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 
