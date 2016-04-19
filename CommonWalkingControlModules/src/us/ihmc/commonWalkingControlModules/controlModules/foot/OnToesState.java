@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -25,17 +24,12 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.trajectories.ThirdOrderPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class OnToesState extends AbstractFootControlState
 {
-   private static final boolean USE_TOEOFF_TRAJECTORY = false;
-   private static final double MIN_TRAJECTORY_TIME = 0.1;
-
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
    private final PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
@@ -58,12 +52,6 @@ public class OnToesState extends AbstractFootControlState
 
    private final DoubleYoVariable toeOffDesiredPitchAngle, toeOffDesiredPitchVelocity, toeOffDesiredPitchAcceleration;
    private final DoubleYoVariable toeOffCurrentPitchAngle, toeOffCurrentPitchVelocity;
-
-   private final DoubleYoVariable toeOffInitialAngle;
-   private final DoubleYoVariable toeOffInitialVelocity;
-   private final DoubleYoVariable toeOffFinalAngle;
-   private final DoubleYoVariable toeOffTrajectoryTime;
-   private final ThirdOrderPolynomialTrajectoryGenerator toeOffTrajectory;
 
    private final FramePoint2d userDefinedContactPoint = new FramePoint2d();
    private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
@@ -89,23 +77,6 @@ public class OnToesState extends AbstractFootControlState
 
       toeOffCurrentPitchAngle = new DoubleYoVariable(namePrefix + "ToeOffCurrentPitchAngle", registry);
       toeOffCurrentPitchVelocity = new DoubleYoVariable(namePrefix + "ToeOffCurrentPitchVelocity", registry);
-
-      toeOffInitialAngle = new DoubleYoVariable(namePrefix + "ToeOffInitialAngle", registry);
-      toeOffInitialVelocity = new DoubleYoVariable(namePrefix + "ToeOffInitialVelocity", registry);
-      toeOffFinalAngle = new DoubleYoVariable(namePrefix + "ToeOffFinalAngle", registry);
-      toeOffFinalAngle.set(footControlHelper.getWalkingControllerParameters().getMaximumToeOffAngle());
-      toeOffTrajectoryTime = new DoubleYoVariable(namePrefix + "ToeOffTrajectoryTime", registry);
-      toeOffTrajectoryTime.set(Double.NaN);
-      DoubleProvider initialPositionProvider = new YoVariableDoubleProvider(toeOffInitialAngle);
-      DoubleProvider initialVelocityProvider = new YoVariableDoubleProvider(toeOffInitialVelocity);
-      DoubleProvider finalPositionProvider = new YoVariableDoubleProvider(toeOffFinalAngle);
-      DoubleProvider trajectoryTimeProvider = new YoVariableDoubleProvider(toeOffTrajectoryTime);
-      toeOffTrajectory = new ThirdOrderPolynomialTrajectoryGenerator(namePrefix + "ToeOffTrajectory", initialPositionProvider, initialVelocityProvider,
-            finalPositionProvider, trajectoryTimeProvider, registry);
-
-      toeOffInitialAngle.set(Double.NaN);
-      toeOffInitialVelocity.set(Double.NaN);
-      toeOffTrajectoryTime.set(Double.NaN);
 
       toeOffDesiredPitchAngle.set(Double.NaN);
       toeOffDesiredPitchVelocity.set(Double.NaN);
@@ -159,10 +130,7 @@ public class OnToesState extends AbstractFootControlState
       desiredPosition.setToZero(contactableFoot.getFrameAfterParentJoint());
       desiredPosition.changeFrame(worldFrame);
 
-      if (USE_TOEOFF_TRAJECTORY)
-         computeDesiredsForTrajectoryBasedMotion();
-      else
-         computeDesiredsForFreeMotion();
+      computeDesiredsForFreeMotion();
 
       desiredOrientation.setYawPitchRoll(desiredYawToHold, toeOffDesiredPitchAngle.getDoubleValue(), desiredRollToHold);
 
@@ -196,32 +164,6 @@ public class OnToesState extends AbstractFootControlState
       }
 
       toeOffDesiredPitchAcceleration.set(0.0);
-   }
-
-   private void computeDesiredsForTrajectoryBasedMotion()
-   {
-      if (toeOffTrajectoryTime.isNaN() || toeOffTrajectoryTime.getDoubleValue() < MIN_TRAJECTORY_TIME)
-      {
-         computeDesiredsForFreeMotion();
-         return;
-      }
-
-      double time = MathTools.clipToMinMax(getTimeInCurrentState(), 0.0, toeOffTrajectoryTime.getDoubleValue());
-      toeOffTrajectory.compute(time);
-
-      boolean isToeOffAngleBehindTrajectory = tempYawPitchRoll[1] < toeOffTrajectory.getValue();
-      if (isToeOffAngleBehindTrajectory)
-         toeOffDesiredPitchAngle.set(toeOffTrajectory.getValue());
-      else
-         toeOffDesiredPitchAngle.set(desiredOrientation.getPitch());
-
-      boolean isToeOffTooSlow = footTwist.getAngularPartY() < toeOffTrajectory.getVelocity();
-      if (isToeOffTooSlow)
-         toeOffDesiredPitchVelocity.set(toeOffTrajectory.getVelocity());
-      else
-         toeOffDesiredPitchVelocity.set(footTwist.getAngularPartY());
-
-      toeOffDesiredPitchAcceleration.set(Math.max(0.0, toeOffTrajectory.getAcceleration()));
    }
 
    public void getDesireds(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack)
@@ -259,21 +201,6 @@ public class OnToesState extends AbstractFootControlState
       desiredOrientation.changeFrame(worldFrame);
       desiredYawToHold = desiredOrientation.getYaw();
       desiredRollToHold = desiredOrientation.getRoll();
-
-      if (toeOffTrajectoryTime.getDoubleValue() > MIN_TRAJECTORY_TIME) // Returns false if the trajectory time is NaN
-      {
-         twistCalculator.getRelativeTwist(footTwist, rootBody, contactableFoot.getRigidBody());
-         footTwist.changeFrame(contactableFoot.getFrameAfterParentJoint());
-
-         toeOffInitialAngle.set(desiredOrientation.getPitch());
-         toeOffInitialVelocity.set(footTwist.getAngularPartY());
-
-         toeOffTrajectory.initialize();
-      }
-      else
-      {
-         toeOffTrajectoryTime.set(Double.NaN);
-      }
    }
 
    @Override
@@ -281,21 +208,12 @@ public class OnToesState extends AbstractFootControlState
    {
       super.doTransitionOutOfAction();
 
-      toeOffInitialAngle.set(Double.NaN);
-      toeOffInitialVelocity.set(Double.NaN);
-      toeOffTrajectoryTime.set(Double.NaN);
-
       toeOffDesiredPitchAngle.set(Double.NaN);
       toeOffDesiredPitchVelocity.set(Double.NaN);
       toeOffDesiredPitchAcceleration.set(Double.NaN);
 
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
-   }
-
-   public void setPredictedToeOffDuration(double predictedToeOffDuration)
-   {
-      toeOffTrajectoryTime.set(predictedToeOffDuration);
    }
 
    public void setDesiredToeOffContactPoint(FramePoint2d toeOffContactPoint)

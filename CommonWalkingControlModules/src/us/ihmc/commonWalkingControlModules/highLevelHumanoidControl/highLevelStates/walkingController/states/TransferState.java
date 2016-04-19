@@ -82,8 +82,6 @@ public abstract class TransferState extends WalkingState
       // the only case left for determining the contact state of the trailing foot
       if (feetManager.getCurrentConstraintType(trailingLeg) != ConstraintType.TOES)
       {
-         double predictedToeOffDuration = balanceManager.getTimeRemainingInCurrentState();
-
          balanceManager.getDesiredCMP(desiredCMP);
          balanceManager.getDesiredICP(desiredICPLocal);
          balanceManager.getCapturePoint(capturePoint2d);
@@ -92,7 +90,7 @@ public abstract class TransferState extends WalkingState
 
          if (doToeOff)
          {
-            feetManager.requestToeOff(trailingLeg, predictedToeOffDuration);
+            feetManager.requestToeOff(trailingLeg);
             momentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
          }
       }
