@@ -1,4 +1,4 @@
-package us.ihmc.aware.controller.toolbox;
+package us.ihmc.aware.controller.force.toolbox;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;

@@ -1,5 +1,6 @@
 package us.ihmc.aware.planning;
 
+import us.ihmc.aware.estimator.GroundPlaneEstimator;
 import us.ihmc.aware.util.PreallocatedQueue;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;

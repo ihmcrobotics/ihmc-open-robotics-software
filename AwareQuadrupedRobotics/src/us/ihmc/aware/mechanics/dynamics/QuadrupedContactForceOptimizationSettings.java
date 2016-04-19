@@ -1,4 +1,4 @@
-package us.ihmc.aware.vmc;
+package us.ihmc.aware.mechanics.dynamics;
 
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;

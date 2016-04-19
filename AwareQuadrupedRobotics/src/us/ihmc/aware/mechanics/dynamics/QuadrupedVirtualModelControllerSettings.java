@@ -1,4 +1,4 @@
-package us.ihmc.aware.vmc;
+package us.ihmc.aware.mechanics.dynamics;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;

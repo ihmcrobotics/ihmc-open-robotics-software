@@ -1,4 +1,4 @@
-package us.ihmc.aware.controller.toolbox;
+package us.ihmc.aware.controller.force.toolbox;
 
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;

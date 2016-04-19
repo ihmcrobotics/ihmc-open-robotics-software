@@ -1,14 +1,13 @@
-package us.ihmc.aware.controller.toolbox;
+package us.ihmc.aware.controller.force.toolbox;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.aware.mechanics.dynamics.*;
 import us.ihmc.aware.util.ContactState;
-import us.ihmc.aware.vmc.*;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
 import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedJointLimits;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;

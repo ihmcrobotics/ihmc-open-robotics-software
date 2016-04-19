@@ -1,4 +1,4 @@
-package us.ihmc.aware.planning;
+package us.ihmc.aware.estimator;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
