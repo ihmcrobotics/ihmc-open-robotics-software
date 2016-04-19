@@ -5,7 +5,7 @@ package us.ihmc.aware.state;
  *
  * @param <E> the event enum type.
  */
-public class StateMachineTransition<S extends Enum<S>, E extends Enum<E>>
+public class FiniteStateMachineTransition<S extends Enum<S>, E extends Enum<E>>
 {
    /**
     * The event on which to transition.
@@ -22,7 +22,7 @@ public class StateMachineTransition<S extends Enum<S>, E extends Enum<E>>
     */
    private final S to;
 
-   public StateMachineTransition(E event, S from, S to)
+   public FiniteStateMachineTransition(E event, S from, S to)
    {
       this.event = event;
       this.from = from;

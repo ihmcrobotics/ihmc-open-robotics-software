@@ -1,6 +1,6 @@
 package us.ihmc.aware.state;
 
-public interface StateMachineState<E extends Enum<E>>
+public interface FiniteStateMachineState<E extends Enum<E>>
 {
    /**
     * Called when the state machine is transitioning into this state.

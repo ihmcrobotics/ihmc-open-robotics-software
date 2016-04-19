@@ -9,9 +9,9 @@ import us.ihmc.aware.providers.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.planning.PiecewiseForwardDcmTrajectory;
 import us.ihmc.aware.planning.PiecewisePeriodicDcmTrajectory;
 import us.ihmc.aware.planning.ThreeDoFMinimumJerkTrajectory;
-import us.ihmc.aware.state.StateMachine;
-import us.ihmc.aware.state.StateMachineBuilder;
-import us.ihmc.aware.state.StateMachineState;
+import us.ihmc.aware.state.FiniteStateMachine;
+import us.ihmc.aware.state.FiniteStateMachineBuilder;
+import us.ihmc.aware.state.FiniteStateMachineState;
 import us.ihmc.aware.util.ContactState;
 import us.ihmc.aware.planning.QuadrupedTimedStep;
 import us.ihmc.aware.util.TimeInterval;
@@ -92,7 +92,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
    {
       TIMEOUT
    }
-   private final StateMachine<TrotState, TrotEvent> trotStateMachine;
+   private final FiniteStateMachine<TrotState, TrotEvent> trotStateMachine;
 
    public QuadrupedVirtualModelBasedTrotController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedControllerInputProviderInterface inputProvider)
@@ -137,7 +137,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(1, gravity, inputProvider.getComPositionInput().getZ());
 
       // state machine
-      StateMachineBuilder<TrotState, TrotEvent> stateMachineBuilder = new StateMachineBuilder<>(TrotState.class, "TrotState", registry);
+      FiniteStateMachineBuilder<TrotState, TrotEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(TrotState.class, "TrotState", registry);
       stateMachineBuilder.addState(TrotState.QUAD_SUPPORT, new QuadSupportState());
       stateMachineBuilder.addState(TrotState.HIND_LEFT_FRONT_RIGHT_SUPPORT, new DoubleSupportState(RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_RIGHT));
       stateMachineBuilder.addState(TrotState.HIND_RIGHT_FRONT_LEFT_SUPPORT, new DoubleSupportState(RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_LEFT));
@@ -318,7 +318,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       groundPlaneEstimator.projectZ(footholdPosition);
    }
 
-   private class QuadSupportState implements StateMachineState<TrotEvent>
+   private class QuadSupportState implements FiniteStateMachineState<TrotEvent>
    {
       private final ThreeDoFMinimumJerkTrajectory dcmTrajectory;
       private final FramePoint cmpPositionAtSoSNominal;
@@ -380,7 +380,7 @@ public class QuadrupedVirtualModelBasedTrotController implements QuadrupedForceC
       }
    }
 
-   private class DoubleSupportState implements StateMachineState<TrotEvent>
+   private class DoubleSupportState implements FiniteStateMachineState<TrotEvent>
    {
       private final RobotQuadrant supportQuadrants[];
       private final RobotQuadrant swingQuadrants[];

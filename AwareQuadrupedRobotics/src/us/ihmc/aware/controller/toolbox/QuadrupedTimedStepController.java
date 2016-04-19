@@ -5,9 +5,9 @@ import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.planning.QuadrupedTimedStep;
 import us.ihmc.aware.planning.ThreeDoFSwingFootTrajectory;
-import us.ihmc.aware.state.StateMachine;
-import us.ihmc.aware.state.StateMachineBuilder;
-import us.ihmc.aware.state.StateMachineState;
+import us.ihmc.aware.state.FiniteStateMachine;
+import us.ihmc.aware.state.FiniteStateMachineBuilder;
+import us.ihmc.aware.state.FiniteStateMachineState;
 import us.ihmc.aware.util.*;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -75,7 +75,7 @@ public class QuadrupedTimedStepController
    {
       LIFT_OFF, TOUCH_DOWN
    }
-   private final QuadrantDependentList<StateMachine<StepState, StepEvent>> stepStateMachine;
+   private final QuadrantDependentList<FiniteStateMachine<StepState, StepEvent>> stepStateMachine;
 
    public QuadrupedTimedStepController(QuadrupedSolePositionController solePositionController, DoubleYoVariable timestamp, YoVariableRegistry registry)
    {
@@ -101,7 +101,7 @@ public class QuadrupedTimedStepController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         StateMachineBuilder<StepState, StepEvent> stateMachineBuilder = new StateMachineBuilder<>(StepState.class, prefix + "StepState", registry);
+         FiniteStateMachineBuilder<StepState, StepEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(StepState.class, prefix + "StepState", registry);
          stateMachineBuilder.addState(StepState.SUPPORT, new SupportState(robotQuadrant));
          stateMachineBuilder.addState(StepState.SWING, new SwingState(robotQuadrant));
          stateMachineBuilder.addTransition(StepEvent.LIFT_OFF, StepState.SUPPORT, StepState.SWING);
@@ -240,7 +240,7 @@ public class QuadrupedTimedStepController
       }
    }
 
-   private class SupportState implements StateMachineState<StepEvent>
+   private class SupportState implements FiniteStateMachineState<StepEvent>
    {
       RobotQuadrant robotQuadrant;
 
@@ -278,7 +278,7 @@ public class QuadrupedTimedStepController
       }
    }
 
-   private class SwingState implements StateMachineState<StepEvent>
+   private class SwingState implements FiniteStateMachineState<StepEvent>
    {
       RobotQuadrant robotQuadrant;
       private final ThreeDoFSwingFootTrajectory swingTrajectory;

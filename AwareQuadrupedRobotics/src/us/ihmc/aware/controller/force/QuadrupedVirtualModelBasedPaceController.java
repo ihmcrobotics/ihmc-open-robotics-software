@@ -9,9 +9,9 @@ import us.ihmc.aware.providers.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.planning.PiecewiseForwardDcmTrajectory;
 import us.ihmc.aware.planning.PiecewisePeriodicDcmTrajectory;
 import us.ihmc.aware.planning.ThreeDoFMinimumJerkTrajectory;
-import us.ihmc.aware.state.StateMachine;
-import us.ihmc.aware.state.StateMachineBuilder;
-import us.ihmc.aware.state.StateMachineState;
+import us.ihmc.aware.state.FiniteStateMachine;
+import us.ihmc.aware.state.FiniteStateMachineBuilder;
+import us.ihmc.aware.state.FiniteStateMachineState;
 import us.ihmc.aware.util.ContactState;
 import us.ihmc.aware.planning.QuadrupedTimedStep;
 import us.ihmc.aware.util.TimeInterval;
@@ -93,7 +93,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
    {
       TIMEOUT
    }
-   private final StateMachine<PaceState, PaceEvent> paceStateMachine;
+   private final FiniteStateMachine<PaceState, PaceEvent> paceStateMachine;
 
    public QuadrupedVirtualModelBasedPaceController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
           QuadrupedControllerInputProviderInterface inputProvider)
@@ -138,7 +138,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       timeAtSoS = new double[2];
 
       // state machine
-      StateMachineBuilder<PaceState, PaceEvent> stateMachineBuilder = new StateMachineBuilder<>(PaceState.class, "PaceState", registry);
+      FiniteStateMachineBuilder<PaceState, PaceEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(PaceState.class, "PaceState", registry);
       stateMachineBuilder.addState(PaceState.QUAD_SUPPORT, new QuadSupportState());
       stateMachineBuilder.addState(PaceState.HIND_LEFT_FRONT_LEFT_SUPPORT, new DoubleSupportState(RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_LEFT));
       stateMachineBuilder.addState(PaceState.HIND_RIGHT_FRONT_RIGHT_SUPPORT, new DoubleSupportState(RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_RIGHT));
@@ -339,7 +339,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       groundPlaneEstimator.projectZ(footholdPosition);
    }
 
-   private class QuadSupportState implements StateMachineState<PaceEvent>
+   private class QuadSupportState implements FiniteStateMachineState<PaceEvent>
    {
       private final ThreeDoFMinimumJerkTrajectory dcmTrajectory;
       private final FramePoint[] cmpPositionAtSoSNominal;
@@ -401,7 +401,7 @@ public class QuadrupedVirtualModelBasedPaceController implements QuadrupedForceC
       }
    }
 
-   private class DoubleSupportState implements StateMachineState<PaceEvent>
+   private class DoubleSupportState implements FiniteStateMachineState<PaceEvent>
    {
       private final RobotQuadrant supportQuadrants[];
       private final RobotQuadrant swingQuadrants[];
