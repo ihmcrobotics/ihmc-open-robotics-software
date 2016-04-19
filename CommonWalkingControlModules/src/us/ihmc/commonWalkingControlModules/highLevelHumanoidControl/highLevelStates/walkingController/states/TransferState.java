@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceMana
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -29,6 +30,7 @@ public abstract class TransferState extends WalkingState
    private final FramePoint2d desiredICPLocal = new FramePoint2d();
    private final FramePoint2d capturePoint2d = new FramePoint2d();
    private final FramePoint2d desiredCMP = new FramePoint2d();
+   private final FramePoint nextExitCMP = new FramePoint();
 
    public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler,
          MomentumBasedController momentumBasedController, HighLevelControlManagerFactory managerFactory,
@@ -90,6 +92,8 @@ public abstract class TransferState extends WalkingState
 
          if (doToeOff)
          {
+            balanceManager.getNextExitCMP(nextExitCMP);
+            feetManager.setExitCMPForToeOff(trailingLeg, nextExitCMP);
             feetManager.requestToeOff(trailingLeg);
             momentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
          }

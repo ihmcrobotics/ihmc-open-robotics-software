@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -19,12 +20,16 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
@@ -53,10 +58,15 @@ public class OnToesState extends AbstractFootControlState
    private final DoubleYoVariable toeOffDesiredPitchAngle, toeOffDesiredPitchVelocity, toeOffDesiredPitchAcceleration;
    private final DoubleYoVariable toeOffCurrentPitchAngle, toeOffCurrentPitchVelocity;
 
-   private final FramePoint2d userDefinedContactPoint = new FramePoint2d();
    private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
+   private final FramePoint exitCMP = new FramePoint();
+   private final FramePoint2d exitCMP2d = new FramePoint2d();
+   private final FrameVector2d exitCMPRayDirection2d = new FrameVector2d();
+   private final FrameLine2d rayThroughExitCMP = new FrameLine2d();
 
    private final TwistCalculator twistCalculator;
+
+   private final ReferenceFrame soleFrame;
 
    public OnToesState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
@@ -65,10 +75,11 @@ public class OnToesState extends AbstractFootControlState
       twistCalculator = momentumBasedController.getTwistCalculator();
 
       String namePrefix = contactableFoot.getName();
+      soleFrame = contactableFoot.getSoleFrame();
+
       maximumToeOffAngleProvider = new YoVariableDoubleProvider(namePrefix + "MaximumToeOffAngle", registry);
       maximumToeOffAngleProvider.set(footControlHelper.getWalkingControllerParameters().getMaximumToeOffAngle());
 
-      userDefinedContactPoint.setToNaN();
       contactableFoot.getToeOffContactPoint(toeOffContactPoint2d);
 
       toeOffDesiredPitchAngle = new DoubleYoVariable(namePrefix + "ToeOffDesiredPitchAngle", registry);
@@ -100,6 +111,10 @@ public class OnToesState extends AbstractFootControlState
          MatrixTools.removeRow(selectionMatrix, 3); // Remove linear part
       MatrixTools.removeRow(selectionMatrix, 1); // Remove pitch
       orientationFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
+
+      exitCMP2d.setToNaN(soleFrame);
+      exitCMPRayDirection2d.setIncludingFrame(soleFrame, 1.0, 0.0);
+      rayThroughExitCMP.setToNaN(soleFrame);
    }
 
    public void setWeight(double weight)
@@ -185,10 +200,19 @@ public class OnToesState extends AbstractFootControlState
    {
       super.doTransitionIntoAction();
 
-      if (userDefinedContactPoint.containsNaN())
+      if (exitCMP2d.containsNaN())
+      {
          contactableFoot.getToeOffContactPoint(toeOffContactPoint2d);
+      }
       else
-         toeOffContactPoint2d.setIncludingFrame(userDefinedContactPoint);
+      {
+         BipedSupportPolygons bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
+         FrameConvexPolygon2d footPolygonInSoleFrame = bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide);
+
+         rayThroughExitCMP.set(exitCMP2d, exitCMPRayDirection2d);
+         FramePoint2d[] intersectionWithRay = footPolygonInSoleFrame.intersectionWithRay(rayThroughExitCMP);
+         toeOffContactPoint2d.set(intersectionWithRay[0]);
+      }
 
       contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -214,12 +238,15 @@ public class OnToesState extends AbstractFootControlState
 
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
+
+      exitCMP2d.setToNaN();
    }
 
-   public void setDesiredToeOffContactPoint(FramePoint2d toeOffContactPoint)
+   public void setExitCMP(FramePoint exitCMP)
    {
-      toeOffContactPoint.checkReferenceFrameMatch(contactableFoot.getSoleFrame());
-      userDefinedContactPoint.setIncludingFrame(toeOffContactPoint);
+      this.exitCMP.setIncludingFrame(exitCMP);
+      this.exitCMP.changeFrame(soleFrame);
+      exitCMP2d.setByProjectionOntoXYPlaneIncludingFrame(this.exitCMP);
    }
 
    @Override
