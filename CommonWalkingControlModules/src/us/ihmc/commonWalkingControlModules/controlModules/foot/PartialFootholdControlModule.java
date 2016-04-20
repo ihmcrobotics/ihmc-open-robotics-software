@@ -44,6 +44,7 @@ public class PartialFootholdControlModule
 
    private final FrameConvexPolygon2d defaultFootPolygon;
    private final FrameConvexPolygon2d shrunkFootPolygon;
+   private final FrameConvexPolygon2d backupFootPolygon;
    private final FrameConvexPolygon2d unsafePolygon;
    private final YoFrameConvexPolygon2d yoUnsafePolygon;
 
@@ -59,6 +60,8 @@ public class PartialFootholdControlModule
 
    private final BooleanYoVariable doPartialFootholdDetection;
 
+   private final IntegerYoVariable confusingCutIndex;
+
    private final FrameLine2d lineOfRotation;
 
    public PartialFootholdControlModule(String namePrefix, double dt, ContactablePlaneBody contactableFoot, TwistCalculator twistCalculator,
@@ -67,6 +70,7 @@ public class PartialFootholdControlModule
       soleFrame = contactableFoot.getSoleFrame();
       defaultFootPolygon = new FrameConvexPolygon2d(contactableFoot.getContactPoints2d());
       shrunkFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
+      backupFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
       unsafePolygon = new FrameConvexPolygon2d(defaultFootPolygon);
       lineOfRotation = new FrameLine2d(soleFrame);
 
@@ -79,6 +83,8 @@ public class PartialFootholdControlModule
       shrinkMaxLimit = new IntegerYoVariable(namePrefix + "MaximumNumberOfFootShrink", registry);
       shrinkMaxLimit.set(6);
       shrinkCounter = new IntegerYoVariable(namePrefix + "FootShrinkCounter", registry);
+
+      confusingCutIndex = new IntegerYoVariable(namePrefix + "ConfusingCutIndex", registry);
 
       numberOfVerticesRemoved = new IntegerYoVariable(namePrefix + "NumberOfVerticesRemoved", registry);
       numberOfCellsOccupiedOnSideOfLine = new IntegerYoVariable(namePrefix + "NumberOfCellsOccupiedOnSideOfLine", registry);
@@ -127,6 +133,14 @@ public class PartialFootholdControlModule
 
          if (numberOfVerticesRemoved.getIntegerValue() <= 0)
          {
+            confusingCutIndex.increment();
+            
+//            System.out.println("\nCutting polygon but no vertices removed?");
+//            System.out.println("confusingCutIndex = " + confusingCutIndex.getIntegerValue());
+//            System.out.println("lineOfRotation = " + lineOfRotation);
+//            System.out.println("unsafePolygon = " + unsafePolygon);
+//            System.out.println("shrunkFootPolygon = " + shrunkFootPolygon);
+            
             doNothing();
          }
          else if (numberOfVerticesRemoved.getIntegerValue() == 1)
@@ -164,6 +178,7 @@ public class PartialFootholdControlModule
       boolean wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine.getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
       if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3) && !wasCoPInThatRegion)
       {
+         backupFootPolygon.set(shrunkFootPolygon);
          ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkFootPolygon, RobotSide.RIGHT);
          unsafePolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
          yoUnsafePolygon.setFrameConvexPolygon2d(unsafePolygon);
@@ -179,18 +194,32 @@ public class PartialFootholdControlModule
    public boolean applyShrunkPolygon(YoPlaneContactState contactStateToModify)
    {
       if (!doPartialFootholdDetection.getBooleanValue())
+      {
+         shrunkFootPolygon.set(backupFootPolygon);
          return false;
+      }
 
+      //TODO: Do something when a corner case (literally!)
       if (footholdState.getEnumValue() != PartialFootholdState.PARTIAL)
+      {
+         shrunkFootPolygon.set(backupFootPolygon);
          return false;
+      }
 
       if (shrinkCounter.getIntegerValue() >= shrinkMaxLimit.getIntegerValue())
+      {
+         shrunkFootPolygon.set(backupFootPolygon);
          return false;
+      }
 
       List<YoContactPoint> contactPoints = contactStateToModify.getContactPoints();
 
+      // TODO: Do something when add or subtract a vertex! Need contact state to allow for shifting number of vertices
       if (contactPoints.size() != shrunkFootPolygon.getNumberOfVertices())
+      {
+         shrunkFootPolygon.set(backupFootPolygon);
          return false;
+      }
 
       for (int i = 0; i < shrunkFootPolygon.getNumberOfVertices(); i++)
       {
