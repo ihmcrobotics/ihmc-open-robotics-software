@@ -4,6 +4,11 @@ public class ParameterFactory
 {
    private final String namespace;
 
+   public ParameterFactory(Class<?> namespace)
+   {
+      this(namespace.getName());
+   }
+
    public ParameterFactory(String namespace)
    {
       this.namespace = namespace;

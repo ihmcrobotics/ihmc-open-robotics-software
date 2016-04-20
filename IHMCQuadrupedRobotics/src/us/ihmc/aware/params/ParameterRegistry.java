@@ -1,41 +1,81 @@
 package us.ihmc.aware.params;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.Reader;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import com.google.common.base.Preconditions;
+import com.google.common.io.LineReader;
+
+/**
+ * A centralized repository of all registered parameters in the system. Provides methods to load and store parameters to and from the filesystem.
+ * <p/>
+ * <pre>
+ * ParameterRegistry parameterRegistry = ParameterRegistry.getInstance();
+ * // First, load the default parameters file. This should likely always be done.
+ * parameterRegistry.loadFromDefaultParametersResource();
+ * // Then, load any overlay-specific parameter files. This can also be done at runtime from a user-facing utility.
+ * parameterRegistry.loadFromResources("parameters_new_pid_gains_testing.conf");
+ * </pre>
+ * <p/>
+ * Users of the Parameters API should not directly interface with this class except when initially loading parameter files. Instead, parameters can be created
+ * with the {@link ParameterFactory} class.
+ */
 public class ParameterRegistry
 {
+   private static final String DEFAULT_PARAMETERS_FILE = "parameters.conf";
+
    private static final class AtomicInstanceHolder
    {
       // Creation of INSTANCE is guaranteed to be thread-safe by the class loader.
       static final ParameterRegistry INSTANCE = new ParameterRegistry();
    }
 
+   /**
+    * @return the singleton instance.
+    */
    public static ParameterRegistry getInstance()
    {
       return AtomicInstanceHolder.INSTANCE;
    }
 
+   // Disallow construction to enfore singleton.
    private ParameterRegistry()
    {
 
    }
 
+   /**
+    * The list of registered parameters.
+    */
    private final List<Parameter> parameters = new ArrayList<>();
 
+   /**
+    * Loads the default parameters file from the class path.
+    * <p/>
+    * NOTE: All of the parameters to be loaded must already be registered.
+    *
+    * @throws IOException if the resource is not found or an I/O error occurs
+    */
    public void loadFromDefaultParametersResource() throws IOException
    {
-      final String defaultResourcePath = "parameters.conf";
-      loadFromResources(defaultResourcePath);
+      loadFromResources(DEFAULT_PARAMETERS_FILE);
    }
 
+   /**
+    * Loads the resource with the given filename from the class path. If more than one class path resource exists with the given name then every matching
+    * resource will be loaded in an undefined order.
+    * <p/>
+    * NOTE: All of the parameters to be loaded must already be registered.
+    *
+    * @param name the full parameters file name, i.e. "parameters_testing_123.conf"
+    * @throws IOException if the resource is not found or an I/O error occurs
+    */
    public void loadFromResources(String name) throws IOException
    {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -45,20 +85,29 @@ public class ParameterRegistry
          throw new IOException("Cannot locate " + name + " as a classpath resource");
       }
 
+      // Load from all parameters files in the class path that match the given name.
       while (resources.hasMoreElements())
       {
          URL url = resources.nextElement();
-         Reader reader = new InputStreamReader(url.openStream());
-         loadFromReader(reader);
+         Readable readable = new InputStreamReader(url.openStream());
+         loadFromReadable(readable);
       }
    }
 
-   public void loadFromReader(Reader reader) throws IOException
+   /**
+    * Load parameters from the given {@link Readable} source.
+    * <p/>
+    * NOTE: All of the parameters to be loaded must already be registered.
+    *
+    * @param readable
+    * @throws IOException
+    */
+   public void loadFromReadable(Readable readable) throws IOException
    {
-      BufferedReader br = new BufferedReader(reader);
+      LineReader reader = new LineReader(readable);
 
       String line;
-      while ((line = br.readLine()) != null)
+      while ((line = reader.readLine()) != null)
       {
          for (Parameter parameter : parameters)
          {
@@ -66,20 +115,28 @@ public class ParameterRegistry
             {
                break;
             }
+
+            // TODO: Print warning if no parameters match.
          }
       }
    }
 
-   public void save(PrintStream ps)
+   /**
+    * Save all registered parameters to the given {@link Writer}.
+    */
+   public void save(Writer writer)
    {
+      PrintWriter pw = new PrintWriter(writer);
       for (Parameter parameter : parameters)
       {
-         ps.println(parameter.dump());
+         pw.println(parameter.dump());
       }
    }
 
    void register(Parameter parameter)
    {
+      Preconditions.checkNotNull(parameter, "Registered parameter cannot be null");
+
       parameters.add(parameter);
    }
 

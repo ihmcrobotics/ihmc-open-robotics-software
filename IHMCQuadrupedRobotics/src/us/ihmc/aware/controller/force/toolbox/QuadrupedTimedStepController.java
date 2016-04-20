@@ -46,7 +46,7 @@ public class QuadrupedTimedStepController
    }
 
    // parameters
-   private final ParameterFactory parameterFactory = new ParameterFactory(getClass().getName());
+   private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
    private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 20000, 20000, 20000);
    private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
