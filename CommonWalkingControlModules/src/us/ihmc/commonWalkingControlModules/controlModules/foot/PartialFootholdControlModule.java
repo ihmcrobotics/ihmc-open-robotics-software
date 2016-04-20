@@ -227,6 +227,7 @@ public class PartialFootholdControlModule
          contactPoints.get(i).setPosition(tempPosition);
       }
 
+      backupFootPolygon.set(shrunkFootPolygon);
       shrinkCounter.increment();
       return true;
    }
@@ -240,5 +241,6 @@ public class PartialFootholdControlModule
       footCoPOccupancyGrid.reset();
       footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy.getIntegerValue());
       shrunkFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
+      backupFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
    }
 }
