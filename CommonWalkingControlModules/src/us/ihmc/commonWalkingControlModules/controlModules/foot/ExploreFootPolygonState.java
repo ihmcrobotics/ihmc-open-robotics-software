@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
@@ -96,6 +95,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    }
 
    private final FramePoint2d shrunkPolygonCentroid = new FramePoint2d();
+   private final FramePoint2d desiredCenterOfPressure = new FramePoint2d();
    @Override
    public void doSpecificAction()
    {
@@ -135,11 +135,15 @@ public class ExploreFootPolygonState extends AbstractFootControlState
          spiralAngle.add(2.0 * Math.PI * freq * dt);
       }
 
+      ReferenceFrame soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
       partialFootholdControlModule.getShrunkPolygonCentroid(shrunkPolygonCentroid);
-      shrunkPolygonCentroid.changeFrame(footControlHelper.getContactableFoot().getSoleFrame());
+      shrunkPolygonCentroid.changeFrame(soleFrame);
 
-      Point2d centerOfPressure = new Point2d(shrunkPolygonCentroid.getX() + 0.10 * percentRampOut * Math.cos(spiralAngle.getDoubleValue()), shrunkPolygonCentroid.getY() + 0.05 * percentRampOut * Math.sin(spiralAngle.getDoubleValue()));
-      centerOfPressureCommand.setDesiredCoP(centerOfPressure);
+      desiredCenterOfPressure.setIncludingFrame(soleFrame, shrunkPolygonCentroid.getX() + 0.10 * percentRampOut * Math.cos(spiralAngle.getDoubleValue()), shrunkPolygonCentroid.getY() + 0.05 * percentRampOut * Math.sin(spiralAngle.getDoubleValue()));
+      
+      partialFootholdControlModule.projectOntoShrunkenPolygon(desiredCenterOfPressure);
+      desiredCenterOfPressure.scale(0.9);
+      centerOfPressureCommand.setDesiredCoP(desiredCenterOfPressure.getPoint());
    }
 
    @Override
@@ -154,7 +158,8 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      return orientationFeedbackControlCommand;
+      return null;
+//      return orientationFeedbackControlCommand;
    }
 
 }

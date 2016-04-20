@@ -241,4 +241,10 @@ public class PartialFootholdControlModule
       footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy.getIntegerValue());
       shrunkFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
    }
+
+   public void projectOntoShrunkenPolygon(FramePoint2d pointToProject)
+   {
+      shrunkFootPolygon.orthogonalProjection(pointToProject);
+      
+   }
 }
