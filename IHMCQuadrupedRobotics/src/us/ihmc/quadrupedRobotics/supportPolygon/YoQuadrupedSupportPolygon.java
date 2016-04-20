@@ -400,6 +400,14 @@ public class YoQuadrupedSupportPolygon
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getCentroid(centroidToPack);
    }
+   
+   public void getCentroid(YoFramePoint centroidToPack)
+   {
+      putYoValuesIntoSupportPolygon();
+      FramePoint innerTuple = centroidToPack.getFrameTuple();
+      quadrupedSupportPolygon.getCentroid(innerTuple);
+      centroidToPack.setWithoutChecks(innerTuple);
+   }
 
    public void snapPointToClosestEdgeOfPolygonIfOutside2d(YoFramePoint2d pointToSnap)
    {

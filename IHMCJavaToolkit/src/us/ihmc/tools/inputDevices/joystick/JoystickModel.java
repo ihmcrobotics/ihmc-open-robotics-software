@@ -9,6 +9,7 @@ public enum JoystickModel
    MAD_CATZ_FLY5_STICK("Mad Catz F.L.Y.5 Stick"),
    SAITEK_X52("Saitek X52 Flight Control System"),
    THRUSTMASTER_16000M("T.16000M"),
+   XBOX_ONE("Xbox One For Windows"),
    UNKNOWN("Unknown"),
    
    ;

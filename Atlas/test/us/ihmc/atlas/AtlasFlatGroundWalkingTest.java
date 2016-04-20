@@ -14,7 +14,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 // This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
-@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.VideoA})
+@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.Video})
 public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;

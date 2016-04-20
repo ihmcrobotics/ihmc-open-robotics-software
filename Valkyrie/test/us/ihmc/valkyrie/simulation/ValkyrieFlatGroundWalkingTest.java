@@ -9,11 +9,11 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 //This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
-@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.VideoB})
+@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.Video})
 public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;

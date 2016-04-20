@@ -69,6 +69,8 @@ public class FootRotationCalculator
    private final DoubleYoVariable yoLoRAngularVelocityAlphaFilter;
    /** Filtered yaw rate of the line of rotation. */
    private final FilteredVelocityYoVariable yoLoRAngularVelocityFiltered;
+   /** Amount that the foot drops or lifts around the axis of rotation */
+   private final DoubleYoVariable yoFootDropOrLift;
 
    private final DoubleYoVariable yoCoPErrorAlphaFilter;
    private final AlphaFilteredYoFrameVector2d yoCoPErrorFiltered;
@@ -88,6 +90,10 @@ public class FootRotationCalculator
    private final DoubleYoVariable yoAngularVelocityAroundLoRThreshold;
    private final BooleanYoVariable yoIsAngularVelocityAroundLoRPastThreshold;
 
+   /** Threshold on the foot drop around the line of rotation. */
+   private final DoubleYoVariable yoFootDropThreshold;
+   private final BooleanYoVariable yoIsFootDropPastThreshold;
+
    /** Main output of this class that informs on wether or not the foot is rotating. */
    private final BooleanYoVariable yoIsFootRotating;
 
@@ -97,10 +103,14 @@ public class FootRotationCalculator
    private final FrameVector2d angularVelocity2d = new FrameVector2d();
    private final FrameVector2d copError2d = new FrameVector2d();
 
+   private final FrameVector2d footAngularVelocityUnitVector = new FrameVector2d();
+
    private final FramePoint2d centerOfRotation = new FramePoint2d();
    private final FrameLine2d lineOfRotationInSoleFrame = new FrameLine2d();
    private final FrameLine2d lineOfRotationInWorldFrame = new FrameLine2d();
    private final FrameLineSegment2d lineSegmentOfRotation = new FrameLineSegment2d();
+
+   private final FrameVector pointingBackwardVector = new FrameVector();
 
    private final ContactablePlaneBody rotatingBody;
    private final TwistCalculator twistCalculator;
@@ -146,23 +156,29 @@ public class FootRotationCalculator
 
       yoAngularVelocityAroundLoR = new DoubleYoVariable(namePrefix + "AngularVelocityAroundLoR", generalDescription, registry);
 
+      yoFootDropOrLift = new DoubleYoVariable(namePrefix + "FootDropOrLift", generalDescription, registry);
+
       yoCoPErrorAlphaFilter = new DoubleYoVariable(namePrefix + "CoPErrorAlphaFilter", registry);
       yoCoPErrorFiltered = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d(namePrefix + "CoPErrorFilt", "", registry, yoCoPErrorAlphaFilter,
             soleFrame);
       yoCoPErrorPerpendicularToRotation = new DoubleYoVariable(namePrefix + "CoPErrorPerpendicularToRotation", registry);
 
       yoStableLoRAngularVelocityThreshold = new DoubleYoVariable(namePrefix + "LoRStableAngularVelocityThreshold", generalDescription, registry);
-      yoStableLoRAngularVelocityThreshold.set(2.0);
+      yoStableLoRAngularVelocityThreshold.set(10.0); //2.0);
       yoIsLoRStable = new BooleanYoVariable(namePrefix + "IsLoRStable", generalDescription, registry);
 
       yoStableCoRLinearVelocityThreshold = new DoubleYoVariable(namePrefix + "CoRStableLinearVelocityThreshold", generalDescription, registry);
-      yoStableCoRLinearVelocityThreshold.set(0.01);
+      yoStableCoRLinearVelocityThreshold.set(0.1); //0.01);
       yoIsCoRStable = new BooleanYoVariable(namePrefix + "IsCoRStable", generalDescription, registry);
 
       yoAngularVelocityAroundLoRThreshold = new DoubleYoVariable(namePrefix + "AngularVelocityAroundLoRThreshold", generalDescription, registry);
       yoAngularVelocityAroundLoRThreshold.set(0.5);
       yoIsAngularVelocityAroundLoRPastThreshold = new BooleanYoVariable(namePrefix + "IsAngularVelocityAroundLoRPastThreshold", generalDescription, registry);
 
+      yoFootDropThreshold = new DoubleYoVariable(namePrefix + "FootDropThreshold", generalDescription, registry);
+      yoFootDropThreshold.set(-0.015);
+      yoIsFootDropPastThreshold = new BooleanYoVariable(namePrefix + "IsFootDropPastThreshold", generalDescription, registry);
+      
       yoIsFootRotating = new BooleanYoVariable(namePrefix + "IsFootRotating", generalDescription, registry);
 
       hasBeenInitialized = new BooleanYoVariable(namePrefix + "HasBeenInitialized", registry);
@@ -204,18 +220,32 @@ public class FootRotationCalculator
       copError2d.sub(desiredCoP, cop);
 
       yoCoPErrorFiltered.update(copError2d);
-      yoCoPErrorPerpendicularToRotation.set(yoCoPErrorFiltered.cross(yoFootAngularVelocityFiltered));
+
+      yoFootAngularVelocityFiltered.getFrameVector2d(footAngularVelocityUnitVector);
+      footAngularVelocityUnitVector.normalize();
+
+      yoCoPErrorPerpendicularToRotation.set(yoCoPErrorFiltered.cross(footAngularVelocityUnitVector));
 
       yoCoRPositionFiltered.update(cop);
       yoCoRPositionFiltered.getFrameTuple2dIncludingFrame(centerOfRotation);
       yoCoRVelocityFiltered.update();
-      yoCoRTransversalVelocity.set(yoCoRVelocityFiltered.cross(yoFootAngularVelocityFiltered));
+      yoCoRTransversalVelocity.set(yoCoRVelocityFiltered.cross(footAngularVelocityUnitVector));
 
       if (!hasBeenInitialized.getBooleanValue())
       {
          hasBeenInitialized.set(true);
          return;
       }
+
+      
+      // Compute Foot Drop or Lift...
+      pointingBackwardVector.setIncludingFrame(soleFrame, footAngularVelocityUnitVector.getY(), -footAngularVelocityUnitVector.getX(), 0.0);
+      pointingBackwardVector.normalize();
+      pointingBackwardVector.scale(0.15);
+      pointingBackwardVector.changeFrame(worldFrame);
+      
+      yoFootDropOrLift.set(pointingBackwardVector.getZ());
+      yoIsFootDropPastThreshold.set(yoFootDropOrLift.getDoubleValue() < yoFootDropThreshold.getDoubleValue());
 
       yoIsLoRStable.set(Math.abs(yoLoRAngularVelocityFiltered.getDoubleValue()) < yoStableLoRAngularVelocityThreshold.getDoubleValue());
 
@@ -224,7 +254,7 @@ public class FootRotationCalculator
       yoAngularVelocityAroundLoR.set(yoFootAngularVelocityFiltered.length());
       yoIsAngularVelocityAroundLoRPastThreshold.set(yoAngularVelocityAroundLoR.getDoubleValue() > yoAngularVelocityAroundLoRThreshold.getDoubleValue());
 
-      yoIsFootRotating.set(yoIsLoRStable.getBooleanValue() && yoIsCoRStable.getBooleanValue() && yoIsAngularVelocityAroundLoRPastThreshold.getBooleanValue());
+      yoIsFootRotating.set(yoIsLoRStable.getBooleanValue() && yoIsCoRStable.getBooleanValue() && yoIsAngularVelocityAroundLoRPastThreshold.getBooleanValue() && yoIsFootDropPastThreshold.getBooleanValue());
 
       if (VISUALIZE || yoIsFootRotating.getBooleanValue())
       {

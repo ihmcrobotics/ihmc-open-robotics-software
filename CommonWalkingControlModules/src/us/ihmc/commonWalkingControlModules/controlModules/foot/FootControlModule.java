@@ -25,7 +25,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
@@ -58,6 +58,8 @@ public class FootControlModule
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
    private final BooleanYoVariable doFancyOnToesControl;
+   /** For testing purpose only. */
+   private final BooleanYoVariable alwaysHoldPosition;
 
    private final HoldPositionState holdPositionState;
    private final SwingState swingState;
@@ -90,8 +92,10 @@ public class FootControlModule
       footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
 
-      doFancyOnToesControl = new BooleanYoVariable(contactableFoot.getName() + "DoFancyOnToesControl", registry);
+      doFancyOnToesControl = new BooleanYoVariable(namePrefix + "DoFancyOnToesControl", registry);
       doFancyOnToesControl.set(walkingControllerParameters.doFancyOnToesControl());
+      alwaysHoldPosition = new BooleanYoVariable(namePrefix + "AlwaysHoldPosition", registry);
+      alwaysHoldPosition.set(false);
 
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
@@ -159,6 +163,8 @@ public class FootControlModule
          @Override
          public boolean checkCondition()
          {
+            if (alwaysHoldPosition.getBooleanValue())
+               return true;
             if (isFootBarelyLoaded())
                return true;
             if (!doFancyOnToesControl.getBooleanValue())
@@ -172,6 +178,8 @@ public class FootControlModule
          @Override
          public boolean checkCondition()
          {
+            if (alwaysHoldPosition.getBooleanValue())
+               return false;
             if (isFootBarelyLoaded())
                return false;
             return !footControlHelper.isCoPOnEdge();
@@ -360,11 +368,6 @@ public class FootControlModule
       }
    }
 
-   public void setPredictedToeOffDuration(double predictedToeOffDuration)
-   {
-      onToesState.setPredictedToeOffDuration(predictedToeOffDuration);
-   }
-
    public void resetHeightCorrectionParametersForSingularityAvoidance()
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.resetHeightCorrectionParameters();
@@ -375,9 +378,9 @@ public class FootControlModule
       swingState.requestSwingSpeedUp(speedUpFactor);
    }
 
-   public void registerDesiredContactPointForToeOff(FramePoint2d desiredContactPoint)
+   public void setExitCMPForToeOff(FramePoint exitCMP)
    {
-      onToesState.setDesiredToeOffContactPoint(desiredContactPoint);
+      onToesState.setExitCMP(exitCMP);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
