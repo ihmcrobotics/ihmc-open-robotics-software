@@ -1,6 +1,5 @@
 package us.ihmc.aware.controller.position;
 
-import us.ihmc.aware.animation.QuadrupedAnimationController;
 import us.ihmc.aware.providers.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
@@ -39,7 +38,6 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, parameters);
       QuadrupedController standReadyController = new QuadrupedPositionStandReadyController(runtimeEnvironment);
       QuadrupedController crawlController = new QuadrupedPositionBasedCrawlControllerAdapter(runtimeEnvironment, parameters, inputProvider);
-      QuadrupedController animationController = new QuadrupedAnimationController();
 
       FiniteStateMachineBuilder<QuadrupedPositionControllerState, QuadrupedPositionControllerEvent> builder = new FiniteStateMachineBuilder<>(
             QuadrupedPositionControllerState.class, "positionControllerState", registry);
@@ -49,7 +47,6 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       builder.addState(QuadrupedPositionControllerState.STAND_PREP, standPrepController);
       builder.addState(QuadrupedPositionControllerState.STAND_READY, standReadyController);
       builder.addState(QuadrupedPositionControllerState.CRAWL, crawlController);
-      builder.addState(QuadrupedPositionControllerState.ANIMATION, animationController);
 
       // TODO: Define more state transitions.
       builder.addTransition(QuadrupedPositionControllerEvent.JOINTS_INITIALIZED,
