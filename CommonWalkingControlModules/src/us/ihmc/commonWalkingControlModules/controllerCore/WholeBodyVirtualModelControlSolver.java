@@ -231,9 +231,9 @@ public class WholeBodyVirtualModelControlSolver
 
    private void submitJointAccelerationIntegrationCommand(JointAccelerationIntegrationCommand command)
    {
-      for (int i = 0; i < command.getNumberOfJointsToComputeDesiedPositionFor(); i++)
+      for (int i = 0; i < command.getNumberOfJointsToComputeDesiredPositionFor(); i++)
       {
-         OneDoFJoint jointToComputeDesiedPositionFor = command.getJointToComputeDesiedPositionFor(i);
+         OneDoFJoint jointToComputeDesiedPositionFor = command.getJointToComputeDesiredPositionFor(i);
          if (!jointsToComputeDesiredPositionFor.contains(jointToComputeDesiedPositionFor))
             jointsToComputeDesiredPositionFor.add(jointToComputeDesiedPositionFor);
       }
