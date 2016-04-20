@@ -53,20 +53,18 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
       centerOfPressureCommand.setContactingRigidBody(contactableFoot.getRigidBody());
       centerOfPressureCommand.setWeight(new Vector2d(2000.0, 2000.0));
-      
+
       inverseDynamicsCommandList.addCommand(spatialAccelerationCommand);
       inverseDynamicsCommandList.addCommand(centerOfPressureCommand);
-      
+
       lastShrunkTime = new DoubleYoVariable(contactableFoot.getName() + "LastShrunkTime", registry);
       spiralAngle = new DoubleYoVariable(contactableFoot.getName() + "SpiralAngle", registry);
-      
-      
+
       orientationFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       desiredOrientation.setToZero();
       desiredAngularVelocity.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
       orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
- 
 
       //TODO: Gains for damping, but not necessarily position control
       orientationFeedbackControlCommand.setGains(gains);
@@ -122,13 +120,13 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
       // Foot exploration through CoP shifting...
       double timeInCurrentState = getTimeInCurrentState();
-      double freq = 0.5;
-      double rampOutDuration = 0.5;
-      double settleDuration = 0.2;
-      
+      double freq = 0.6;
+      double rampOutDuration = 0.3;
+      double settleDuration = 0.1;
+
       double percentRampOut = (timeInCurrentState - lastShrunkTime.getDoubleValue() - settleDuration) / rampOutDuration;
       rampOutDuration = MathTools.clipToMinMax(rampOutDuration, 0.0, 1.0);
-      
+
       boolean doSpiral = timeInCurrentState - lastShrunkTime.getDoubleValue() - settleDuration > rampOutDuration;
 
       if (doSpiral)
@@ -136,10 +134,10 @@ public class ExploreFootPolygonState extends AbstractFootControlState
          double dt = 0.004; //Hack! Subtract from previous tick time or construct with dt!
          spiralAngle.add(2.0 * Math.PI * freq * dt);
       }
-      
+
       partialFootholdControlModule.getShrunkPolygonCentroid(shrunkPolygonCentroid);
       shrunkPolygonCentroid.changeFrame(footControlHelper.getContactableFoot().getSoleFrame());
- 
+
       Point2d centerOfPressure = new Point2d(shrunkPolygonCentroid.getX() + 0.10 * percentRampOut * Math.cos(spiralAngle.getDoubleValue()), shrunkPolygonCentroid.getY() + 0.05 * percentRampOut * Math.sin(spiralAngle.getDoubleValue()));
       centerOfPressureCommand.setDesiredCoP(centerOfPressure);
    }
