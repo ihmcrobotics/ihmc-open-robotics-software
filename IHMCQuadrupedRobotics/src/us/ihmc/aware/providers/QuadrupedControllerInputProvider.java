@@ -20,7 +20,7 @@ import javax.vecmath.Vector3d;
 
 public class QuadrupedControllerInputProvider implements QuadrupedControllerInputProviderInterface
 {
-   private final ParameterFactory parameterFactory = new ParameterFactory(QuadrupedControllerInputProvider.class.getName());
+   private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
    private final DoubleParameter comHeightNominalParameter = parameterFactory.createDouble("comHeightNominal", 0.55);
    private final DoubleArrayParameter comPositionLowerLimitsParameter = parameterFactory.createDoubleArray("comPositionLowerLimits", -Double.MAX_VALUE, -Double.MAX_VALUE, 0.0);
    private final DoubleArrayParameter comPositionUpperLimitsParameter = parameterFactory.createDoubleArray("comPositionUpperLimits", Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
