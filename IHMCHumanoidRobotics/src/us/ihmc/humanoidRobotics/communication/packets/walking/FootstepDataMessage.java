@@ -223,6 +223,11 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       return swingHeight;
    }
 
+   public void setRobotSide(RobotSide robotSide)
+   {
+      this.robotSide = robotSide;
+   }
+
    public void setOrigin(FootstepOrigin origin)
    {
       this.origin = origin;
@@ -230,11 +235,13 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
 
    public void setLocation(Point3d location)
    {
+      if (this.location == null) this.location = new Point3d();
       this.location.set(location);
    }
 
    public void setOrientation(Quat4d orientation)
    {
+      if (this.orientation == null) this.orientation = new Quat4d();
       this.orientation.set(orientation);
       RotationTools.checkQuaternionNormalized(this.orientation);
    }

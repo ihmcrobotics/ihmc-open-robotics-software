@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArrayList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -11,7 +13,6 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
@@ -27,6 +28,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -126,6 +128,8 @@ public class MomentumBasedController
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
+   private final SideDependentList<FrameTuple2dArrayList<FramePoint2d>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(), createFramePoint2dArrayList());
+
    public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
          SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ,
@@ -205,6 +209,7 @@ public class MomentumBasedController
       for (RobotSide robotSide : RobotSide.values)
       {
          footContactStates.put(robotSide, yoPlaneContactStates.get(feet.get(robotSide)));
+         previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(feet.get(robotSide).getContactPoints2d());
       }
 
       controlledJoints = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
@@ -606,44 +611,28 @@ public class MomentumBasedController
       }
    }
 
-   public void setFootstepsContactPointsBasedOnFootContactStatePoints(Footstep footstep)
-   {
-      RobotSide robotSide = footstep.getRobotSide();
-      ContactablePlaneBody foot = feet.get(robotSide);
-      YoPlaneContactState footContactState = yoPlaneContactStates.get(foot);
-      List<YoContactPoint> contactPoints = footContactState.getContactPoints();
-
-      ArrayList<FramePoint2d> contactPointList = new ArrayList<FramePoint2d>();
-
-      for (YoContactPoint contactPoint : contactPoints)
-      {
-         FramePoint2d framePoint2 = new FramePoint2d();
-         contactPoint.getPosition2d(framePoint2);
-         contactPointList.add(framePoint2);
-      }
-
-      footstep.setPredictedContactPointsFromFramePoint2ds(contactPointList);
-   }
-
-   public void getCenterOfFootContactPoints(RobotSide robotSide, FramePoint2d centroidToPack)
-   {
-      ContactablePlaneBody foot = feet.get(robotSide);
-      YoPlaneContactState footContactState = yoPlaneContactStates.get(foot);
-      footContactState.getContactPointCentroid(centroidToPack);
-   }
-
    private void resetFootPlaneContactPoint(RobotSide robotSide)
    {
       ContactablePlaneBody foot = feet.get(robotSide);
       YoPlaneContactState footContactState = yoPlaneContactStates.get(foot);
-      footContactState.setContactFramePoints(foot.getContactPoints2d());
+      List<FramePoint2d> defaultContactPoints = foot.getContactPoints2d();
+      previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(defaultContactPoints);
+      footContactState.setContactFramePoints(defaultContactPoints);
    }
 
    private void setFootPlaneContactPoints(RobotSide robotSide, List<Point2d> predictedContactPoints)
    {
       ContactablePlaneBody foot = feet.get(robotSide);
       YoPlaneContactState footContactState = yoPlaneContactStates.get(foot);
+      footContactState.getContactFramePoint2dsInContact(previousFootContactPoints.get(robotSide));
       footContactState.setContactPoints(predictedContactPoints);
+   }
+
+   public void restorePreviousFootContactPoints(RobotSide robotSide)
+   {
+      ContactablePlaneBody foot = feet.get(robotSide);
+      YoPlaneContactState footContactState = yoPlaneContactStates.get(foot);
+      footContactState.setContactFramePoints(previousFootContactPoints.get(robotSide));
    }
 
    public void setPlaneContactCoefficientOfFriction(ContactablePlaneBody contactableBody, double coefficientOfFriction)

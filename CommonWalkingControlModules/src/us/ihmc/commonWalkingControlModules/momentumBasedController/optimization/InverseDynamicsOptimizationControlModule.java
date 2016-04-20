@@ -7,6 +7,7 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
@@ -62,6 +63,7 @@ public class InverseDynamicsOptimizationControlModule
    private final DoubleYoVariable absoluteMaximumJointAcceleration = new DoubleYoVariable("absoluteMaximumJointAcceleration", registry);
    private final Map<OneDoFJoint, DoubleYoVariable> jointMaximumAccelerations = new HashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> jointMinimumAccelerations = new HashMap<>();
+   private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMin", registry);
 
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
@@ -112,10 +114,11 @@ public class InverseDynamicsOptimizationControlModule
          jointMinimumAccelerations.put(joint, new DoubleYoVariable("qdd_min_qp_" + joint.getName(), registry));
       }
 
+      rhoMin.set(momentumOptimizationSettings.getRhoMin());
+
       qpSolver = new InverseDynamicsQPSolver(numberOfDoFs, rhoSize, registry);
       qpSolver.setAccelerationRegularizationWeight(momentumOptimizationSettings.getJointAccelerationWeight());
       qpSolver.setJerkRegularizationWeight(momentumOptimizationSettings.getJointJerkWeight());
-      qpSolver.setMinRho(momentumOptimizationSettings.getRhoMin());
 
       parentRegistry.addChild(registry);
    }
@@ -136,6 +139,8 @@ public class InverseDynamicsOptimizationControlModule
       qpSolver.addRegularization();
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
+      qpSolver.setMinRho(rhoMin.getDoubleValue());
+
       setupWrenchesEquilibriumConstraint();
       computePrivilegedJointAccelerations();
 
@@ -273,6 +278,11 @@ public class InverseDynamicsOptimizationControlModule
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)
    {
       wrenchMatrixCalculator.submitPlaneContactStateCommand(command);
+   }
+
+   public void submitCenterOfPressureCommand(CenterOfPressureCommand command)
+   {
+      wrenchMatrixCalculator.submitCenterOfPressureCommand(command);
    }
 
    public void submitExternalWrenchCommand(ExternalWrenchCommand command)

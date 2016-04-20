@@ -32,7 +32,6 @@ import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.CameraMount;
 import us.ihmc.simulationconstructionset.DummyOneDegreeOfFreedomJoint;
@@ -140,9 +139,9 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
             Vector3d gcOffset = jointContactPoint.getRight();
             
-
-            GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset,
+            GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, null,
                   this.getRobotsYoVariableRegistry());
+            groundContactPoint.setOffsetJoint(gcOffset);
 
             ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset,
                   this.getRobotsYoVariableRegistry());

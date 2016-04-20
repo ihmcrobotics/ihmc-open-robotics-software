@@ -7,7 +7,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.VideoB})
+@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.Video})
 public class ValkyrieObstacleCourseRampFootstepSnapperTest extends DRCObstacleCourseRampFootstepSnapperTest
 {
    @Override
