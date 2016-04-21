@@ -1,7 +1,6 @@
 package us.ihmc.aware.controller.force.toolbox;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

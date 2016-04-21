@@ -15,7 +15,7 @@ import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
+import us.ihmc.aware.model.QuadrupedJointName;
 
 public class QuadrupedHeadTeleopNode implements InputEventCallback
 {

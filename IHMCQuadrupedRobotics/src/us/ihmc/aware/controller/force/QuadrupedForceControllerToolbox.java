@@ -1,9 +1,9 @@
 package us.ihmc.aware.controller.force;
 
 import us.ihmc.aware.controller.force.toolbox.*;
-import us.ihmc.aware.providers.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
-import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.model.QuadrupedRobotParameters;
+import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class QuadrupedForceControllerToolbox

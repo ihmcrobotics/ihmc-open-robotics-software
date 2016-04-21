@@ -12,12 +12,10 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedLegJointSliderBoardControll
 import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionBasedCrawlController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedStandPrepController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedStandReadyController;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedVirtualModelBasedStandController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedTrotWalkController;
-import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
+import us.ihmc.aware.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedCommonControllerParameters;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
-import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedVirtualModelController;
+import us.ihmc.aware.model.QuadrupedRobotParameters;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
@@ -80,14 +78,6 @@ public class QuadrupedControllerStateMachineBuilder
       .add(new QuadrupedCenterOfMassVerificationController(commonControllerParameters.getControlDt(), robotParameters,
             commonControllerParameters.getFullRobotModel(), legIkCalc, commonControllerParameters.getRobotTimestamp(),
             commonControllerParameters.getParentRegistry(), commonControllerParameters.getGraphicsListRegistry()));
-   }
-
-   public void addVirtualModelBasedStandController(QuadrupedVirtualModelController virtualModelController)
-   {
-      controllers.add(new QuadrupedVirtualModelBasedStandController(commonControllerParameters.getControlDt(),
-            robotParameters, commonControllerParameters.getFullRobotModel(), virtualModelController,
-            commonControllerParameters.getRobotTimestamp(), commonControllerParameters.getParentRegistry(),
-            commonControllerParameters.getGraphicsListRegistry()));
    }
 
    public void addSliderBoardController()

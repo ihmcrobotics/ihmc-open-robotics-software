@@ -1,16 +1,18 @@
 package us.ihmc.aware.controller.force;
 
 import us.ihmc.aware.controller.force.toolbox.*;
+import us.ihmc.aware.planning.trajectory.PiecewiseReverseDcmTrajectory;
+import us.ihmc.aware.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.aware.providers.QuadrupedTimedStepInputProvider;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
-import us.ihmc.aware.providers.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.planning.*;
-import us.ihmc.aware.util.ContactState;
+import us.ihmc.aware.planning.ContactState;
 import us.ihmc.aware.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
-import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.aware.providers.QuadrupedControllerInputProviderInterface;
+import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;

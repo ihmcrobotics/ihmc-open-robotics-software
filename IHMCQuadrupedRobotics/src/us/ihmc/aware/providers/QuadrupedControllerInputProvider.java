@@ -8,7 +8,6 @@ import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.packets.*;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.quadrupedRobotics.dataProviders.QuadrupedControllerInputProviderInterface;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
