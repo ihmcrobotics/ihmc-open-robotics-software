@@ -125,7 +125,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    {
       // Initialize controllers.
       QuadrupedForceController jointInitializationController = new QuadrupedForceJointInitializationController(runtimeEnvironment, parameters.getJointMap());
-      QuadrupedVirtualModelBasedStandPrepController standPrepController = new QuadrupedVirtualModelBasedStandPrepController(runtimeEnvironment, parameters);
+      QuadrupedVirtualModelBasedStandPrepController standPrepController = new QuadrupedVirtualModelBasedStandPrepController(runtimeEnvironment, controllerToolbox);
       QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(runtimeEnvironment, controllerToolbox, inputProvider);
       QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, controllerToolbox, inputProvider, stepProvider);
       QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, controllerToolbox, inputProvider);
