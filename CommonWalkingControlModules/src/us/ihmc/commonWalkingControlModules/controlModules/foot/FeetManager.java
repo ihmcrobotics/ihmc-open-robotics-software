@@ -335,4 +335,11 @@ public class FeetManager
       }
       return ret;
    }
+
+   public void initializeFootExploration(RobotSide robotSideToExplore)
+   {
+      if (robotSideToExplore == null) return;
+      FootControlModule footControlModule = footControlModules.get(robotSideToExplore);
+      footControlModule.initializeFootExploration();
+   }
 }
