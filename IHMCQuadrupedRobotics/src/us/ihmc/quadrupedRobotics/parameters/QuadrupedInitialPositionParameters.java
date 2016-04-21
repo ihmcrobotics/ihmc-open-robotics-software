@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.parameters;
 
+import us.ihmc.aware.model.QuadrupedJointName;
+
 public interface QuadrupedInitialPositionParameters
 {
    /**

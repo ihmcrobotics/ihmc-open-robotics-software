@@ -1,9 +1,9 @@
 package us.ihmc.aware.controller.position;
 
 import us.ihmc.aware.providers.QuadrupedControllerInputProvider;
-import us.ihmc.aware.providers.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionBasedCrawlController;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
+import us.ihmc.aware.model.QuadrupedRobotParameters;
 
 public class QuadrupedPositionBasedCrawlControllerAdapter implements QuadrupedPositionController
 {

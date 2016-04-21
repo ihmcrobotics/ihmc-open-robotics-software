@@ -5,11 +5,10 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerStateMachineBuilder;
-import us.ihmc.quadrupedRobotics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
+import us.ihmc.aware.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedCommonControllerParameters;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
+import us.ihmc.aware.model.QuadrupedRobotParameters;
 import us.ihmc.quadrupedRobotics.sliderboard.QuadrupedSliderBoardMode;
-import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedVirtualModelController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -61,9 +60,6 @@ public class QuadrupedControllerManager implements RobotController
             simulationDT, controllerTimestamp, sdfFullRobotModel, footSwitches, registry, yoGraphicsListRegistry,
             yoGraphicsListRegistryForDetachedOverhead);
 
-      QuadrupedVirtualModelController virtualModelController = new QuadrupedVirtualModelController(sdfFullRobotModel,
-            quadrupedRobotParameters, registry, yoGraphicsListRegistry);
-
       // Build controller state machine.
       QuadrupedControllerStateMachineBuilder builder = new QuadrupedControllerStateMachineBuilder(
             commonControllerParameters, quadrupedRobotParameters, requestedState);
@@ -73,7 +69,6 @@ public class QuadrupedControllerManager implements RobotController
       builder.addStandReadyController();
 //      builder.addQuadrupedCenterOfMassVerificationController(inverseKinematicsCalculators);
       builder.addPositionBasedCrawlController(inverseKinematicsCalculators, globalDataProducer);
-      builder.addVirtualModelBasedStandController(virtualModelController);
       builder.addTrotWalkController();
       builder.addSliderBoardController();
       

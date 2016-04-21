@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.aware.params.DoubleParameter;
+import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointName;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedRobotParameters;
+import us.ihmc.aware.model.QuadrupedJointName;
+import us.ihmc.aware.model.QuadrupedRobotParameters;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -25,6 +27,9 @@ public class QuadrupedStandPrepController extends QuadrupedController
    private final double dt;
 
    private final List<YoMinimumJerkTrajectory> trajectories;
+
+   private final ParameterFactory parameterFactory = new ParameterFactory(getClass().getName());
+   private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("TrajectoryTime", 1.0);
 
    /**
     * The time from the beginning of the current preparation trajectory in seconds.
@@ -64,7 +69,7 @@ public class QuadrupedStandPrepController extends QuadrupedController
          OneDoFJoint joint = oneDoFJoints[i];
          YoMinimumJerkTrajectory trajectory = trajectories.get(i);
 
-         double time = MathTools.clipToMinMax(timeInTrajectory.getDoubleValue(), 0.0, parameters.getQuadrupedStandPrepParameters().getTrajectoryTime());
+         double time = MathTools.clipToMinMax(timeInTrajectory.getDoubleValue(), 0.0, trajectoryTimeParameter.get());
          trajectory.computeTrajectory(time);
          joint.setqDesired(trajectory.getPosition());
       }
@@ -86,7 +91,7 @@ public class QuadrupedStandPrepController extends QuadrupedController
          // Start the trajectory from the current pos/vel/acc.
          YoMinimumJerkTrajectory trajectory = trajectories.get(i);
          trajectory.setParams(joint.getQ(), joint.getQd(), joint.getQdd(), desiredPosition, 0.0, 0.0, 0.0,
-               parameters.getQuadrupedStandPrepParameters().getTrajectoryTime());
+               trajectoryTimeParameter.get());
       }
 
       // This is a new trajectory. We start at time 0.
@@ -102,7 +107,7 @@ public class QuadrupedStandPrepController extends QuadrupedController
    public RobotMotionStatus getMotionStatus()
    {
       // If the trajectory has been exhausted, then the robot is standing.
-      if (timeInTrajectory.getDoubleValue() > parameters.getQuadrupedStandPrepParameters().getTrajectoryTime())
+      if (timeInTrajectory.getDoubleValue() > trajectoryTimeParameter.get())
       {
          return RobotMotionStatus.STANDING;
       }

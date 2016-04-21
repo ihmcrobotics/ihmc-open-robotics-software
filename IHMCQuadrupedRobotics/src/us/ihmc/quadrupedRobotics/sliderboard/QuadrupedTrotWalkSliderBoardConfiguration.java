@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.sliderboard;
 
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
-import us.ihmc.quadrupedRobotics.gait.QuadrupedGaitCycle;
+import us.ihmc.aware.planning.gait.QuadrupedGaitCycle;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;

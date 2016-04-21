@@ -1,8 +1,8 @@
 package us.ihmc.aware.controller.force.toolbox;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
-import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.aware.model.QuadrupedJointNameMap;
+import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;

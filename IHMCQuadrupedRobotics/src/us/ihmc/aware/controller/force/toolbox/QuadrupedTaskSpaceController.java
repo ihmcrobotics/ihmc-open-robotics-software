@@ -1,11 +1,13 @@
 package us.ihmc.aware.controller.force.toolbox;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.aware.mechanics.dynamics.*;
-import us.ihmc.aware.util.ContactState;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedJointNameMap;
-import us.ihmc.quadrupedRobotics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.virtualModelController.QuadrupedJointLimits;
+import us.ihmc.aware.mechanics.contactForces.QuadrupedContactForceLimits;
+import us.ihmc.aware.mechanics.contactForces.QuadrupedContactForceOptimization;
+import us.ihmc.aware.mechanics.contactForces.QuadrupedContactForceOptimizationSettings;
+import us.ihmc.aware.mechanics.virtualModelControl.*;
+import us.ihmc.aware.planning.ContactState;
+import us.ihmc.aware.model.QuadrupedJointNameMap;
+import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
