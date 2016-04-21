@@ -37,7 +37,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       QuadrupedController doNothingController = new QuadrupedPositionDoNothingController(runtimeEnvironment);
       QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, parameters);
       QuadrupedController standReadyController = new QuadrupedPositionStandReadyController(runtimeEnvironment);
-      QuadrupedController crawlController = new QuadrupedPositionBasedCrawlControllerAdapter(runtimeEnvironment, parameters, inputProvider);
+      QuadrupedController crawlController = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, parameters, inputProvider);
 
       FiniteStateMachineBuilder<QuadrupedPositionControllerState, QuadrupedPositionControllerEvent> builder = new FiniteStateMachineBuilder<>(
             QuadrupedPositionControllerState.class, "positionControllerState", registry);
