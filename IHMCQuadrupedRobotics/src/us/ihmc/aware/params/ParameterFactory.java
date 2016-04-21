@@ -1,12 +1,30 @@
 package us.ihmc.aware.params;
 
+/**
+ * A factory for creating and registering parameters and their default values.
+ * <p/>
+ * This class is the front-end for declaring parameters in user classes.
+ * <p/>
+ * Example usage:
+ * <pre>
+ * class MyClass {
+ *    ParameterFactory parameterFactory = new ParameterFactory(getClass());
+ *    DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 2);
+ * }
+ * </pre>
+ */
 public class ParameterFactory
 {
    private final String namespace;
 
-   public ParameterFactory(String namespace)
+   /**
+    * Create a new parameter factory. Each namespace (class) should create its own
+    *
+    * @param namespace
+    */
+   public ParameterFactory(Class<?> namespace)
    {
-      this.namespace = namespace;
+      this.namespace = namespace.getName();
    }
 
    public BooleanParameter createBoolean(String name, boolean defaultValue)
@@ -44,7 +62,7 @@ public class ParameterFactory
       return parameter;
    }
 
-   private void register(Parameter parameter)
+   private static void register(Parameter parameter)
    {
       ParameterRegistry.getInstance().register(parameter);
    }
