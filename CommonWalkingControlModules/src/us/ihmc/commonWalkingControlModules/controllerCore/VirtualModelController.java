@@ -18,7 +18,7 @@ public class VirtualModelController
    private final RigidBody rootBody;
 
    private OneDoFJoint[] jointsToCompute;
-   private Map<OneDoFJoint, Double> jointTorques = new HashMap<>();
+   private Map<InverseDynamicsJoint, Double> jointTorques = new HashMap<>();
 
    private final ArrayList<RigidBody> endEffectors = new ArrayList<>();
    private final HashMap<RigidBody, Long> endEffectorJacobians = new HashMap<>();
@@ -40,18 +40,23 @@ public class VirtualModelController
 
    public void registerEndEffector(RigidBody endEffector)
    {
+      registerEndEffector(rootBody, endEffector);
+   }
+
+   public void registerEndEffector(RigidBody base, RigidBody endEffector)
+   {
       if (!endEffectors.contains(endEffector) && endEffector != null)
       {
          endEffectors.add(endEffector);
 
-         OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(rootBody, endEffector);
+         OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(base, endEffector);
          limbJoints.put(endEffector, joints);
          jointsToCompute = appendJoints(jointsToCompute, joints);
 
-         long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(joints, rootBody.getBodyFixedFrame());
+         long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(joints, base.getBodyFixedFrame());
          endEffectorJacobians.put(endEffector, jacobianID);
 
-         tmpEffortMatrix.reshape(limbJoints.size(), 1);
+         tmpEffortMatrix.reshape(joints.length, 1);
          tmpEffortMatrix.zero();
          jointEffortMatrices.put(endEffector, tmpEffortMatrix);
       }
@@ -59,9 +64,6 @@ public class VirtualModelController
 
    public void submitEndEffectorVirtualForce(RigidBody endEffector, FrameVector force)
    {
-      if (limbJoints.get(endEffector).length != 3)
-         throw new RuntimeException("This limb requires a wrench to be full rank.");
-
       tmpWrenchMatrix.reshape(3, 1);
       tmpWrenchMatrix.set(0, 0, force.getX());
       tmpWrenchMatrix.set(1, 0, force.getY());
@@ -73,9 +75,6 @@ public class VirtualModelController
 
    public void submitEndEffectorVirtualForce(RigidBody endEffector, FrameVector force, DenseMatrix64F selectionMatrix)
    {
-      if (limbJoints.get(endEffector).length != selectionMatrix.numRows)
-         throw new RuntimeException("This limb does not have the number of joints to achieve this end effector force.");
-
       tmpWrenchMatrix.reshape(3, 1);
       tmpWrenchMatrix.set(0, 0, force.getX());
       tmpWrenchMatrix.set(1, 0, force.getY());
@@ -87,8 +86,6 @@ public class VirtualModelController
 
    public void submitEndEffectorVirtualWrench(RigidBody endEffector, Wrench wrench)
    {
-      if (limbJoints.get(endEffector).length != SpatialAccelerationVector.SIZE)
-         throw new RuntimeException("This limb does not have the number of joints to achieve this end effector force.");
 
       tmpWrenchMatrix.reshape(SpatialAccelerationVector.SIZE, 1);
       tmpWrenchMatrix.set(0, 0, wrench.getAngularPartX());
@@ -104,9 +101,6 @@ public class VirtualModelController
 
    public void submitEndEffectorVirtualWrench(RigidBody endEffector, Wrench wrench, DenseMatrix64F selectionMatrix)
    {
-      if (limbJoints.get(endEffector).length != selectionMatrix.numRows)
-         throw new RuntimeException("This limb does not have the number of joints to achieve this end effector force.");
-
       tmpWrenchMatrix.reshape(SpatialAccelerationVector.SIZE, 1);
       tmpWrenchMatrix.set(0, 0, wrench.getAngularPartX());
       tmpWrenchMatrix.set(1, 0, wrench.getAngularPartY());
@@ -131,7 +125,9 @@ public class VirtualModelController
       jointTorques.clear();
    }
 
-   public VirtualModelControlSolution compute()
+
+   public final DenseMatrix64F tmpEndEffectorWrench = new DenseMatrix64F(1, 1);
+   public void compute(VirtualModelControlSolution virtualModelControlSolutionToPack)
    {
       for (RigidBody endEffector : endEffectors)
       {
@@ -148,11 +144,11 @@ public class VirtualModelController
          jointEffortMatrix.zero();
 
          // Fix dimensionality of desired force to be achievable with the limb joints.
-         tmpWrenchMatrix.reshape(endEffectorSelectionMatrix.numRows, endEffectorWrenchMatrix.numRows);
-         CommonOps.mult(endEffectorSelectionMatrix, endEffectorWrenchMatrix, tmpWrenchMatrix);
+         tmpEndEffectorWrench.reshape(Wrench.SIZE, 1);
+         CommonOps.mult(endEffectorSelectionMatrix, endEffectorWrenchMatrix, tmpEndEffectorWrench);
 
          // Compute desired joint torques
-         CommonOps.multTransA(jacobianMatrix, tmpWrenchMatrix, jointEffortMatrix);
+         CommonOps.multTransA(jacobianMatrix, tmpEndEffectorWrench, jointEffortMatrix);
 
          // Write torques to map
          int index = 0;
@@ -163,7 +159,7 @@ public class VirtualModelController
          }
       }
 
-      return new VirtualModelControlSolution(jointsToCompute, jointTorques);
+      virtualModelControlSolutionToPack.setJointTorques(jointTorques);
    }
 
    private static OneDoFJoint[] appendJoints(OneDoFJoint[] currentJoints, OneDoFJoint[] newJoints)
