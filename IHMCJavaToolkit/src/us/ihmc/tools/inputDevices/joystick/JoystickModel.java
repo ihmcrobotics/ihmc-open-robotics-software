@@ -53,7 +53,7 @@ public enum JoystickModel
    {
       for (JoystickModel joystickModel : values)
       {
-         if (name.contains(joystickModel.getJinputName()))
+         if (name.toLowerCase().contains(joystickModel.getJinputName().toLowerCase()))
             return joystickModel;
       }
       
