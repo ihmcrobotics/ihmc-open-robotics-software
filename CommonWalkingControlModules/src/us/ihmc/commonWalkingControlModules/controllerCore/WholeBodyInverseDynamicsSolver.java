@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
@@ -217,6 +218,9 @@ public class WholeBodyInverseDynamicsSolver
             break;
          case PLANE_CONTACT_STATE:
             optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
+            break;
+         case CENTER_OF_PRESSURE:
+            optimizationControlModule.submitCenterOfPressureCommand((CenterOfPressureCommand) command);
             break;
          case JOINT_ACCELERATION_INTEGRATION:
             jointAccelerationIntegrationCalculator.submitJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) command);

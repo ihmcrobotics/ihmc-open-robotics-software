@@ -592,12 +592,17 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       throw new RuntimeException("Not yet implemented");
    }
 
-   private void checkEndpointsDistinct(Point2d[] endpoints)
+   private static void checkEndpointsDistinct(Point2d[] endpoints)
    {
-      if ((endpoints[0].x == endpoints[1].x) && (endpoints[0].y == endpoints[1].y))
+      if (areEndpointsTheSame(endpoints[0], endpoints[1]))
       {
          throw new RuntimeException("Line segment must have two distinct endpoints");
       }
+   }
+
+   public static boolean areEndpointsTheSame(Point2d endpoint0, Point2d endpoint1)
+   {
+      return (endpoint0.x == endpoint1.x) && (endpoint0.y == endpoint1.y);
    }
 
    @Override
