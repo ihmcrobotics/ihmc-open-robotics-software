@@ -358,9 +358,9 @@ public class MomentumBasedController
 
    public void update()
    {
+      referenceFrames.updateFrames();
       twistCalculator.compute();
       centerOfMassJacobian.compute();
-      referenceFrames.updateFrames();
       referenceFramesVisualizer.update();
 
       updateBipedSupportPolygons();

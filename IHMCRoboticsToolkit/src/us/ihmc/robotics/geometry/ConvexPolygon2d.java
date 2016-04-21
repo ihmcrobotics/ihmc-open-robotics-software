@@ -969,9 +969,15 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       {
          Point2d point0 = getVertex(0);
          Point2d point1 = getVertex(1);
-         LineSegment2d lineSegment = new LineSegment2d(point0.getX(), point0.getY(), point1.getX(), point1.getY());
-
-         return lineSegment.isPointOnLineSegment(new Point2d(x, y));
+         if (LineSegment2d.areEndpointsTheSame(point0, point1))
+         {
+            return (point0.getX() == x) && (point0.getY() == y);
+         }
+         else
+         {
+            LineSegment2d lineSegment = new LineSegment2d(point0.getX(), point0.getY(), point1.getX(), point1.getY());
+            return lineSegment.isPointOnLineSegment(new Point2d(x, y));
+         }
       }
       else if (hasAtLeastOneVertex())
       {
