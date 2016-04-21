@@ -32,7 +32,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       POSITION, VELOCITY
    }
 
-   private final ParameterFactory parameterFactory = new ParameterFactory(QuadrupedBodyTeleopNode.class.getName());
+   private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
    private final DoubleParameter rollScaleParameter = parameterFactory.createDouble("paramRollScale", 0.15);
    private final DoubleParameter pitchScaleParameter = parameterFactory.createDouble("paramPitchScale", 0.15);
    private final DoubleParameter yawScaleParameter = parameterFactory.createDouble("paramYawScale", 0.15);

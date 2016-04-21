@@ -24,7 +24,7 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
     */
    private static final double DT = 0.01;
 
-   private final ParameterFactory parameterFactory = new ParameterFactory(QuadrupedHeadTeleopNode.class.getName());
+   private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
    private final DoubleParameter proximalNeckYawScaleParameter = parameterFactory.createDouble("proximalNeckYawScale", 0.9);
    private final DoubleParameter proximalNeckPitchScaleParameter = parameterFactory.createDouble("proximalNeckPitchScale", 0.9);
    private final DoubleParameter proximalNeckRollScaleParameter = parameterFactory.createDouble("proximalNeckRollScale", 0.5);
