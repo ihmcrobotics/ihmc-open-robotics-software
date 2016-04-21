@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.controller;
+package us.ihmc.aware.controller.position;
 
 import java.awt.Color;
 import java.util.Random;
@@ -12,21 +12,19 @@ import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.aware.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.aware.model.QuadrupedRobotParameters;
+import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.planning.chooser.footstepChooser.MidFootZUpSwingTargetGenerator;
 import us.ihmc.aware.planning.chooser.footstepChooser.SwingTargetGenerator;
 import us.ihmc.aware.planning.chooser.swingLegChooser.DefaultGaitSwingLegChooser;
 import us.ihmc.aware.planning.chooser.swingLegChooser.NextSwingLegChooser;
 import us.ihmc.aware.planning.trajectory.QuadrupedSwingTrajectoryGenerator;
+import us.ihmc.aware.providers.QuadrupedControllerInputProvider;
 import us.ihmc.aware.providers.QuadrupedControllerInputProviderInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPositionBasedCrawlControllerParameters;
-import us.ihmc.quadrupedRobotics.providers.DesiredVelocityProvider;
-import us.ihmc.quadrupedRobotics.providers.DesiredYawInPlaceProvider;
-import us.ihmc.quadrupedRobotics.providers.DesiredYawRateProvider;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -61,7 +59,6 @@ import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -74,7 +71,6 @@ import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
@@ -83,7 +79,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
-public class QuadrupedPositionBasedCrawlController extends QuadrupedController
+public class QuadrupedPositionBasedCrawlController implements QuadrupedPositionController
 {
    private static final double MAX_YAW_IN_PLACE = 0.4;
    
@@ -348,20 +344,21 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    private final DoubleYoVariable maximumCoMTrajectoryDuration = new DoubleYoVariable("maximumCoMTrajectoryDuration", registry);
    private final DoubleYoVariable minimumCoMTrajectoryDuration = new DoubleYoVariable("minimumCoMTrajectoryDuration", registry);
    
-   private DesiredVelocityProvider desiredVelocityProvider;
-   private DesiredYawRateProvider desiredYawRateProvider;
-   private DesiredYawInPlaceProvider desiredYawInPlaceProvider;
    private final QuadrupedControllerInputProviderInterface inputProvider;
    
    private final TwistCalculator twistCalculator;
    private final Twist bodyTwist = new Twist();
 
+   public QuadrupedPositionBasedCrawlController(QuadrupedRuntimeEnvironment environment, QuadrupedRobotParameters parameters, QuadrupedControllerInputProvider inputProvider)
+   {
+      this(environment.getControlDT(), parameters, environment.getFullRobotModel(), inputProvider, environment.getFootSwitches(), environment.getLegIkCalculator(), environment.getGlobalDataProducer(), environment.getRobotTimestamp(),
+            environment.getParentRegistry(), environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
+   }
 
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
          QuadrupedControllerInputProviderInterface inputProvider, QuadrantDependentList<FootSwitchInterface> footSwitches, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
-      super(QuadrupedControllerState.POSITION_CRAWL);
       QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedPositionBasedCrawlControllerParameters();
 
       swingDuration.set(quadrupedControllerParameters.getDefaultSwingDuration());
@@ -434,9 +431,6 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       
       this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, feedForwardReferenceFrames, registry);
       this.footSwitches = footSwitches;
-      desiredVelocityProvider = new DesiredVelocityProvider(dataProducer, "userProvided", registry);
-      desiredYawRateProvider = new DesiredYawRateProvider(dataProducer, "userProvided", registry);
-      desiredYawInPlaceProvider = new DesiredYawInPlaceProvider(dataProducer, "userProvided", registry);
 
       desiredVelocity = new YoFrameVector("desiredVelocity", feedForwardBodyFrame, registry);
       lastDesiredVelocity = new YoFrameVector("lastDesiredVelocity", feedForwardBodyFrame, registry); 
@@ -723,7 +717,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    }
 
    @Override
-   public void doAction()
+   public QuadrupedPositionControllerEvent process()
    {
       doActionTimer.startTimer();
       
@@ -750,6 +744,7 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
       updateFeedForwardModelAndFrames();
       
       doActionTimer.stopTimer();
+      return null;
    }
 
    private void checkForReversedVelocity()
@@ -912,51 +907,13 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
          {
             desiredYawInPlace.set(providedDesiredYawInPlace);
          } 
-         else
-         {
-            desiredYawInPlaceProvider.setToZero();
-         }
-         
+
          desiredCoMOrientation.setPitch(RotationTools.computePitch(bodyOrientationInput));
          desiredCoMOrientation.setRoll(RotationTools.computeRoll(bodyOrientationInput));
          
          //com height
          Point3d comPositionInput = inputProvider.getComPositionInput();// support z up
          desiredCoMHeight.set(comPositionInput.getZ());
-      }
-      else
-      {
-         if(desiredVelocityProvider != null)
-         {
-            providedDesiredVelocity.setToNaN(desiredVelocity.getReferenceFrame());
-            desiredVelocityProvider.get(providedDesiredVelocity);
-            desiredVelocity.set(providedDesiredVelocity);
-         }
-
-         if(desiredYawRateProvider != null)
-         {
-            double providedDesiredYawRate = desiredYawRateProvider.getValue();
-            providedDesiredYawRate = MathTools.clipToMinMax(providedDesiredYawRate, minYawRate.getDoubleValue(), maxYawRate.getDoubleValue());
-            if (providedDesiredYawRate != lastProvidedDesiredYawRate)
-            {
-               desiredYawRate.set(providedDesiredYawRate);
-               lastProvidedDesiredYawRate = providedDesiredYawRate;
-            }
-         }
-         
-         if(desiredYawInPlaceProvider != null)
-         {
-            double providedDesiredYawInPlace = desiredYawInPlaceProvider.getValue();
-            providedDesiredYawInPlace = MathTools.clipToMinMax(providedDesiredYawInPlace, -MAX_YAW_IN_PLACE, MAX_YAW_IN_PLACE);
-            if (isDesiredVelocityAndYawRateZero())
-            {
-               desiredYawInPlace.set(providedDesiredYawInPlace);
-            } 
-            else
-            {
-               desiredYawInPlaceProvider.setToZero();
-            }
-         }
       }
    }
    
@@ -2228,11 +2185,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      desiredVelocityProvider.setToZero();
-      desiredYawRateProvider.setToZero();
-      
       for(OneDoFJoint oneDofJoint : oneDoFJointsActual)
       {
          oneDofJoint.setUnderPositionControl(true);
@@ -2248,14 +2202,8 @@ public class QuadrupedPositionBasedCrawlController extends QuadrupedController
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       
-   }
-
-   @Override
-   public RobotMotionStatus getMotionStatus()
-   {
-      return RobotMotionStatus.IN_MOTION;
    }
 }

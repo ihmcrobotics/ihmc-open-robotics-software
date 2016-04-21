@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.sliderboard;
+package us.ihmc.quadrupedRobotics.controller.sliderboard;
 
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

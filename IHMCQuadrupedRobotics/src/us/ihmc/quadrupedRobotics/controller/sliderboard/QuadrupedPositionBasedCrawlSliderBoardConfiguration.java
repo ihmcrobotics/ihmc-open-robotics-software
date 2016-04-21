@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.sliderboard;
+package us.ihmc.quadrupedRobotics.controller.sliderboard;
 
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
