@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commonWalkingControlModules.controllerCore.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.*;
@@ -77,7 +78,7 @@ public class VirtualModelControlOptimizationControlModule
       externalWrenchHandler.reset();
    }
 
-   public MomentumModuleSolution compute() throws MomentumControlModuleException
+   public VirtualModelControlSolution compute() throws VirtualModelControlModuleException
    {
       wrenchMatrixCalculator.computeMatrices();
       if (VISUALIZE_RHO_BASIS_VECTORS)
@@ -115,14 +116,16 @@ public class VirtualModelControlOptimizationControlModule
 
       Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
       List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
-      MomentumModuleSolution momentumModuleSolution = new MomentumModuleSolution(jointsToOptimizeFor, null, null, externalWrenchSolution, rigidBodiesWithExternalWrench);
+      VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
+      virtualModelControlSolution.setJointsToCompute(jointsToOptimizeFor);
+      virtualModelControlSolution.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
 
       if (noConvergenceException != null)
       {
-         throw new MomentumControlModuleException(noConvergenceException, momentumModuleSolution);
+         throw new VirtualModelControlModuleException(noConvergenceException, virtualModelControlSolution);
       }
 
-      return momentumModuleSolution;
+      return virtualModelControlSolution;
    }
 
    private void setupRhoTasks()

@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
@@ -91,35 +92,35 @@ public class WholeBodyVirtualModelControlSolver
 
    public void reset()
    {
+      optimizationControlModule.initialize();
       virtualModelController.reset();
       virtualWrenchCommandList.clear();
-      optimizationControlModule.initialize();
    }
 
    public void initialize()
    {
       // When you initialize into this controller, reset the estimator positions to current. Otherwise it might be in a bad state
       // where the feet are all jacked up. For example, after falling and getting back up.
-      virtualModelController.compute();
       optimizationControlModule.initialize();
+      virtualModelController.reset();
    }
 
    public void compute()
    {
-      MomentumModuleSolution momentumModuleSolution;
+      VirtualModelControlSolution virtualModelControlSolution;
       try
       {
-         momentumModuleSolution = optimizationControlModule.compute();
+         virtualModelControlSolution = optimizationControlModule.compute();
       }
-      catch (MomentumControlModuleException momentumControlModuleException)
+      catch (VirtualModelControlModuleException virtualModelControlModuleException)
       {
          // Don't crash and burn. Instead do the best you can with what you have.
          // Or maybe just use the previous ticks solution.
-         momentumModuleSolution = momentumControlModuleException.getMomentumModuleSolution();
+         virtualModelControlSolution = virtualModelControlModuleException.getVirtualModelControlSolution();
       }
 
-      Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
-      List<RigidBody> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
+      Map<RigidBody, Wrench> externalWrenchSolution = virtualModelControlSolution.getExternalWrenchSolution();
+      List<RigidBody> rigidBodiesWithExternalWrench = virtualModelControlSolution.getRigidBodiesWithExternalWrench();
 
       // submit forces for stability
       for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
@@ -134,8 +135,8 @@ public class WholeBodyVirtualModelControlSolver
             virtualModelController.submitEndEffectorVirtualWrench(virtualWrenchCommand);
       }
 
-      VirtualModelControlSolution virtualModelControlSolution = virtualModelController.compute();
-      Map<OneDoFJoint, Double> jointTorquesSolution = virtualModelControlSolution.getJointTorques();
+      virtualModelController.compute(virtualModelControlSolution);
+      Map<InverseDynamicsJoint, Double> jointTorquesSolution = virtualModelControlSolution.getJointTorques();
 
       for (OneDoFJoint joint : controlledOneDoFJoints)
       {
