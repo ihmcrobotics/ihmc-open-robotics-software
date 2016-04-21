@@ -1,139 +1,73 @@
 package us.ihmc.aware.controller.force;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.aware.controller.force.toolbox.QuadrupedSolePositionController;
+import us.ihmc.aware.controller.force.toolbox.QuadrupedTaskSpaceController;
+import us.ihmc.aware.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
+import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
-import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.planning.ContactState;
 import us.ihmc.aware.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.aware.util.TimeInterval;
-import us.ihmc.aware.mechanics.virtualModelControl.QuadrupedVirtualModelController;
-import us.ihmc.aware.mechanics.virtualModelControl.QuadrupedVirtualModelControllerSettings;
-import us.ihmc.aware.model.QuadrupedJointName;
-import us.ihmc.aware.model.QuadrupedRobotParameters;
-import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.aware.util.HeterogeneousMemoryPool;
-import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedForceController
 {
    private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
-   private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("TrajectoryTime", 1.0);
+   private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
-   private final DoubleArrayParameter footPositionProportionalGainsParameter = parameterFactory.createDoubleArray("footPositionProportionalGains", 10000.0, 10000.0, 10000.0);
-   private final DoubleArrayParameter footPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("footPositionDerivativeGains", 100.0, 100.0, 100.0);
-   private final DoubleArrayParameter footPositionIntegralGainsParameter = parameterFactory.createDoubleArray("footPositionIntegralGains", 0.0, 0.0, 0.0);
-   private final DoubleParameter footPositionMaxIntegralErrorParameter = parameterFactory.createDouble("footPositionMaxIntegralError", 0.0);
    private final DoubleParameter stanceLengthParameter = parameterFactory.createDouble("stanceLength", 1.0);
    private final DoubleParameter stanceWidthParameter = parameterFactory.createDouble("stanceWidth", 0.5);
    private final DoubleParameter stanceHeightParameter = parameterFactory.createDouble("stanceHeight", 0.60);
    private final DoubleParameter stanceXOffsetParameter = parameterFactory.createDouble("stanceXOffset", 0.05);
    private final DoubleParameter stanceYOffsetParameter = parameterFactory.createDouble("stanceYOffset", 0.0);
+   private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 20000, 20000, 20000);
+   private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
+   private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
+   private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
 
-   private final QuadrupedRuntimeEnvironment environment;
-   private final QuadrupedRobotParameters robotParameters;
+   private final DoubleYoVariable robotTime;
    private final QuadrupedReferenceFrames referenceFrames;
-   private final QuadrupedVirtualModelControllerSettings vmcSettings;
-   private final QuadrupedVirtualModelController vmc;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedVirtualModelBasedStandPrepController.class.getSimpleName());
-   private final HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
 
-   private final TwistCalculator twistCalculator;
-   private final QuadrantDependentList<RigidBody> footRigidBody = new QuadrantDependentList<>();
-   private final QuadrantDependentList<ThreeDoFMinimumJerkTrajectory> footTrajectories = new QuadrantDependentList<>();
-   private final QuadrantDependentList<EuclideanPositionController> footPidControllers = new QuadrantDependentList<>();
-
-   // Estimates
-   private final QuadrantDependentList<FramePoint> solePositionEstimates = new QuadrantDependentList<>();
-   private final QuadrantDependentList<FrameVector> soleLinearVelocityEstimates = new QuadrantDependentList<>();
-
-   // Setpoints
-   private final QuadrantDependentList<FramePoint> solePositionSetpoints = new QuadrantDependentList<>();
-   private final QuadrantDependentList<FrameVector> soleLinearVelocitySetpoints = new QuadrantDependentList<>();
-   private final QuadrantDependentList<FrameVector> soleFeedForwardForceSetpoints = new QuadrantDependentList<>();
-   private final QuadrantDependentList<FrameVector> soleVirtualForceSetpoints = new QuadrantDependentList<>();
-
-   // YoVariable estimate
-   private final QuadrantDependentList<YoFramePoint> yoSolePositionEstimates = new QuadrantDependentList<>();
-   private final QuadrantDependentList<YoFrameVector> yoSoleLinearVelocityEstimates = new QuadrantDependentList<>();
-
-   // YoVariable setpoints
-   private final QuadrantDependentList<YoFramePoint> yoSolePositionSetpoints = new QuadrantDependentList<>();
-   private final QuadrantDependentList<YoFrameVector> yoSoleLinearVelocitySetpoints = new QuadrantDependentList<>();
-   private final QuadrantDependentList<YoFrameVector> yoSoleFeedForwardForceSetpoints = new QuadrantDependentList<>();
-   private final QuadrantDependentList<YoFrameVector> yoSoleVirtualForceSetpoints = new QuadrantDependentList<>();
-
+   // Sole trajectories
    private final TimeInterval trajectoryTimeInterval = new TimeInterval();
+   private final FramePoint finalSolePosition = new FramePoint();
+   private final QuadrantDependentList<ThreeDoFMinimumJerkTrajectory> solePositionTrajectories = new QuadrantDependentList<>();
 
-   public QuadrupedVirtualModelBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedRobotParameters robotParameters)
+   // Task space controllers
+   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
+   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
+   private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
+   private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
+   private final QuadrupedTaskSpaceController taskSpaceController;
+   private final QuadrupedSolePositionController solePositionController;
+   private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
+
+   public QuadrupedVirtualModelBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
    {
-      this.environment = environment;
-      this.robotParameters = robotParameters;
-      this.referenceFrames = new QuadrupedReferenceFrames(environment.getFullRobotModel(), robotParameters.getJointMap(),
-            robotParameters.getPhysicalProperties());
-      this.vmcSettings = new QuadrupedVirtualModelControllerSettings();
-      this.vmc = new QuadrupedVirtualModelController(environment.getFullRobotModel(), referenceFrames, robotParameters.getJointMap(), environment.getControlDT(), registry);
+      this.robotTime = environment.getRobotTimestamp();
+      this.referenceFrames = controllerToolbox.getReferenceFrames();
 
-      SDFFullRobotModel fullRobotModel = environment.getFullRobotModel();
-      this.twistCalculator = new TwistCalculator(referenceFrames.getWorldFrame(), environment.getFullRobotModel().getElevator());
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         String jointBeforeFootName = robotParameters.getJointMap().getJointBeforeFootName(robotQuadrant);
-         OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointByName(jointBeforeFootName);
-         footRigidBody.set(robotQuadrant, jointBeforeFoot.getSuccessor());
-      }
-
-      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
-      {
-         QuadrupedJointName jointName = robotParameters.getJointMap().getJointNameForSDFName(joint.getName());
-         vmcSettings.setJointDamping(jointName, jointDampingParameter.get());
-      }
+      // Task space controllers
+      taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+      taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
+      taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
+      taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
+      taskSpaceController = controllerToolbox.getTaskSpaceController();
+      solePositionController = controllerToolbox.getSolePositionController();
+      solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints();
 
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         footTrajectories.set(quadrant, new ThreeDoFMinimumJerkTrajectory());
+         solePositionTrajectories.set(quadrant, new ThreeDoFMinimumJerkTrajectory());
 
-         ReferenceFrame soleFrame = referenceFrames.getFootFrame(quadrant);
-         EuclideanPositionController positionController = new EuclideanPositionController("standPrep" + quadrant.getShortName(), soleFrame,
-               environment.getControlDT(), registry);
-         positionController.setProportionalGains(footPositionProportionalGainsParameter.get());
-         positionController.setDerivativeGains(footPositionDerivativeGainsParameter.get());
-         positionController.setIntegralGains(footPositionIntegralGainsParameter.get(), footPositionMaxIntegralErrorParameter.get());
-         footPidControllers.set(quadrant, positionController);
-
-         solePositionEstimates.set(quadrant, new FramePoint(referenceFrames.getWorldFrame()));
-         soleLinearVelocityEstimates.set(quadrant, new FrameVector(referenceFrames.getWorldFrame()));
-
-         solePositionSetpoints.set(quadrant, new FramePoint(referenceFrames.getWorldFrame()));
-         soleLinearVelocitySetpoints.set(quadrant, new FrameVector(referenceFrames.getWorldFrame()));
-         soleFeedForwardForceSetpoints.set(quadrant, new FrameVector(referenceFrames.getWorldFrame()));
-         soleVirtualForceSetpoints.set(quadrant, new FrameVector(referenceFrames.getWorldFrame()));
-      }
-
-      // Initialize the YoVariables.
-      for (RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         String prefix = quadrant.getCamelCaseNameForStartOfExpression();
-         yoSolePositionEstimates.set(quadrant, new YoFramePoint(prefix + "SolePositionEstimate", referenceFrames.getWorldFrame(), registry));
-         yoSoleLinearVelocityEstimates.set(quadrant, new YoFrameVector(prefix + "SoleLinearVelocityEstimate", referenceFrames.getWorldFrame(), registry));
-
-         yoSolePositionSetpoints.set(quadrant, new YoFramePoint(prefix + "SolePositionSetpoint", referenceFrames.getWorldFrame(), registry));
-         yoSoleLinearVelocitySetpoints.set(quadrant, new YoFrameVector(prefix + "SoleLinearVelocitySetpoint", referenceFrames.getWorldFrame(), registry));
-         yoSoleFeedForwardForceSetpoints.set(quadrant, new YoFrameVector(prefix + "SoleFeedForwardForceSetpoint", referenceFrames.getWorldFrame(), registry));
-         yoSoleVirtualForceSetpoints.set(quadrant, new YoFrameVector(prefix + "SoleVirtualForceSetpoint", referenceFrames.getWorldFrame(), registry));
       }
 
       environment.getParentRegistry().addChild(registry);
@@ -144,42 +78,49 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
    {
       updateEstimates();
 
-      double currentTime = environment.getRobotTimestamp().getDoubleValue();
+      double currentTime = robotTime.getDoubleValue();
       trajectoryTimeInterval.setInterval(0, trajectoryTimeParameter.get());
       trajectoryTimeInterval.shiftInterval(currentTime);
 
+      // Initialize sole trajectories
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         ThreeDoFMinimumJerkTrajectory trajectory = footTrajectories.get(quadrant);
-         ReferenceFrame soleFrame = referenceFrames.getFootFrame(quadrant);
+         ThreeDoFMinimumJerkTrajectory trajectory = solePositionTrajectories.get(quadrant);
 
-         FramePoint solePosition = pool.lease(FramePoint.class);
-         solePosition.setToZero(soleFrame);
-         solePosition.changeFrame(referenceFrames.getBodyFrame());
+         FramePoint initialSolePosition = taskSpaceEstimates.getSolePosition(quadrant);
+         initialSolePosition.changeFrame(referenceFrames.getBodyFrame());
 
-         FramePoint finalPosition = computeFinalSolePosition(quadrant);
+         computeFinalSolePosition(quadrant, finalSolePosition);
+         finalSolePosition.changeFrame(referenceFrames.getBodyFrame());
 
-         trajectory.initializeTrajectory(solePosition, finalPosition, trajectoryTimeInterval);
+         trajectory.initializeTrajectory(initialSolePosition, finalSolePosition, trajectoryTimeInterval);
       }
 
-      // Show the VMC visualizations.
-      vmc.setVisible(true);
+      // Initialize sole position controller
+      solePositionControllerSetpoints.initialize(taskSpaceEstimates);
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         vmc.setSoleVirtualForceVisible(quadrant, true);
-         vmc.setSoleContactForceVisible(quadrant, false);
+         solePositionController.getGains(quadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
+         solePositionController.getGains(quadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
+         solePositionController.getGains(quadrant).setDerivativeGains(solePositionDerivativeGainsParameter.get());
       }
+      solePositionController.reset();
+
+      // Initialize task space controller
+      taskSpaceControllerSettings.initialize();
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
+      }
+      taskSpaceController.reset();
    }
 
    @Override
    public QuadrupedForceControllerEvent process()
    {
-      pool.evict();
-
-      readYoVariables();
       updateEstimates();
       updateSetpoints();
-      writeYoVariables();
 
       return isMotionExpired() ? QuadrupedForceControllerEvent.STARTING_POSE_REACHED : null;
    }
@@ -187,98 +128,44 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
    @Override
    public void onExit()
    {
-      // Hide the VMC visualizations.
-      vmc.setVisible(false);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         vmc.setSoleVirtualForceVisible(robotQuadrant, false);
-      }
    }
 
    private void updateEstimates()
    {
-      referenceFrames.updateFrames();
-      twistCalculator.compute();
-
-      for (RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         ReferenceFrame soleFrame = referenceFrames.getFootFrame(quadrant);
-
-         // Compute sole positions and linear velocities.
-         solePositionEstimates.get(quadrant).setToZero(soleFrame);
-
-         Twist twist = pool.lease(Twist.class);
-         twistCalculator.getTwistOfBody(twist, footRigidBody.get(quadrant));
-         twist.changeFrame(soleFrame);
-
-         twist.getLinearPart(soleLinearVelocityEstimates.get(quadrant));
-      }
+      taskSpaceEstimator.compute(taskSpaceEstimates);
    }
 
    private void updateSetpoints()
    {
-      double currentTime = environment.getRobotTimestamp().getDoubleValue();
+      double currentTime = robotTime.getDoubleValue();
 
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         ReferenceFrame soleFrame = referenceFrames.getFootFrame(quadrant);
-
-         // Compute the position setpoint along the minimum jerk trajectory.
-         ThreeDoFMinimumJerkTrajectory trajectory = footTrajectories.get(quadrant);
-         EuclideanPositionController positionController = footPidControllers.get(quadrant);
+         // Compute the sole position setpoint along the minimum jerk trajectory.
+         ThreeDoFMinimumJerkTrajectory trajectory = solePositionTrajectories.get(quadrant);
          trajectory.computeTrajectory(currentTime);
 
-         trajectory.getPosition(solePositionSetpoints.get(quadrant));
-         solePositionSetpoints.get(quadrant).changeFrame(soleFrame);
-
-         soleLinearVelocitySetpoints.get(quadrant).setToZero(soleFrame);
-         soleFeedForwardForceSetpoints.get(quadrant).setToZero(soleFrame);
-
-         // Compute the virtual force setpoint via the PID controller.
-         soleVirtualForceSetpoints.get(quadrant).setToZero(soleFrame);
-         positionController.compute(soleVirtualForceSetpoints.get(quadrant), solePositionSetpoints.get(quadrant), soleLinearVelocitySetpoints.get(quadrant),
-               soleLinearVelocityEstimates.get(quadrant), soleFeedForwardForceSetpoints.get(quadrant));
-
-         // Forward virtual forces to VMC controller to set joint torques.
-         vmc.setSoleVirtualForce(quadrant, soleVirtualForceSetpoints.get(quadrant));
-         vmc.compute(robotParameters.getQuadrupedJointLimits(), vmcSettings);
+         trajectory.getPosition(solePositionControllerSetpoints.getSolePosition(quadrant));
+         // trajectory.getVelocity(solePositionControllerSetpoints.getSoleLinearVelocity(quadrant));
       }
+
+      solePositionController.compute(taskSpaceControllerCommands.getSoleForce(), solePositionControllerSetpoints, taskSpaceEstimates);
+      taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 
-   private void readYoVariables()
+   private void computeFinalSolePosition(RobotQuadrant quadrant, FramePoint finalSolePosition)
    {
+      finalSolePosition.setToZero(referenceFrames.getBodyFrame());
 
-   }
+      finalSolePosition.add(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.get() / 2.0), 0.0, 0.0);
+      finalSolePosition.add(0.0, quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
 
-   private void writeYoVariables()
-   {
-      for (RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         yoSolePositionEstimates.get(quadrant).setAndMatchFrame(solePositionEstimates.get(quadrant));
-         yoSoleLinearVelocityEstimates.get(quadrant).setAndMatchFrame(soleLinearVelocityEstimates.get(quadrant));
-         yoSolePositionSetpoints.get(quadrant).setAndMatchFrame(solePositionSetpoints.get(quadrant));
-         yoSoleLinearVelocitySetpoints.get(quadrant).setAndMatchFrame(soleLinearVelocitySetpoints.get(quadrant));
-         yoSoleFeedForwardForceSetpoints.get(quadrant).setAndMatchFrame(soleFeedForwardForceSetpoints.get(quadrant));
-         yoSoleVirtualForceSetpoints.get(quadrant).setAndMatchFrame(soleVirtualForceSetpoints.get(quadrant));
-      }
-   }
-
-   private FramePoint computeFinalSolePosition(RobotQuadrant quadrant)
-   {
-      FramePoint finalPosition = pool.lease(FramePoint.class);
-      finalPosition.setToZero(referenceFrames.getBodyFrame());
-
-      finalPosition.add(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.get() / 2.0), 0.0, 0.0);
-      finalPosition.add(0.0, quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
-
-      finalPosition.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(), -stanceHeightParameter.get());
-
-      return finalPosition;
+      finalSolePosition.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(), -stanceHeightParameter.get());
    }
 
    private boolean isMotionExpired()
    {
-      double currentTime = environment.getRobotTimestamp().getDoubleValue();
+      double currentTime = robotTime.getDoubleValue();
       return currentTime > trajectoryTimeInterval.getEndTime();
    }
 }

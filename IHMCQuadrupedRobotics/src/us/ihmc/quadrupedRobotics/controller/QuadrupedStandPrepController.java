@@ -28,7 +28,7 @@ public class QuadrupedStandPrepController extends QuadrupedController
 
    private final List<YoMinimumJerkTrajectory> trajectories;
 
-   private final ParameterFactory parameterFactory = new ParameterFactory(getClass().getName());
+   private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("TrajectoryTime", 1.0);
 
    /**
