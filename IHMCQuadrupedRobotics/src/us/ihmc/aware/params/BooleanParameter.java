@@ -18,7 +18,6 @@ public class BooleanParameter extends Parameter
    public void set(boolean value)
    {
       this.value = value;
-      notifyChangedListeners();
    }
 
    @Override

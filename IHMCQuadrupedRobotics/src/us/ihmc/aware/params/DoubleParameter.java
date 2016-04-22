@@ -18,7 +18,6 @@ public class DoubleParameter extends Parameter
    public void set(double value)
    {
       this.value = value;
-      notifyChangedListeners();
    }
 
    @Override
