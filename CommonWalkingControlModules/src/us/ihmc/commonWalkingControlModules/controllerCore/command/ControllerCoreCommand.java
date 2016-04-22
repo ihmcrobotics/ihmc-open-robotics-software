@@ -105,6 +105,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       inverseDynamicsCommandList.set(other.inverseDynamicsCommandList);
       feedbackControlCommandList.set(other.feedbackControlCommandList);
       inverseKinematicsCommandList.set(other.inverseKinematicsCommandList);
+      virtualModelCommandList.set(other.virtualModelCommandList);
       lowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
    }
 
