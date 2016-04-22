@@ -1,32 +1,12 @@
 package us.ihmc.aware.params;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class Parameter
 {
    private final String path;
-   private final List<ParameterChangeListener> changedListeners = new ArrayList<>();
 
    public Parameter(String path)
    {
       this.path = path;
-   }
-
-   public void addChangedListener(ParameterChangeListener listener)
-   {
-      if (listener != null)
-      {
-         changedListeners.add(listener);
-      }
-   }
-
-   protected void notifyChangedListeners()
-   {
-      for (ParameterChangeListener changedListener : changedListeners)
-      {
-         changedListener.onPropertyChanged(this);
-      }
    }
 
    /**
