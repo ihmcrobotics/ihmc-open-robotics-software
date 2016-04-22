@@ -6,6 +6,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.OutputWriter;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -13,7 +14,6 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.model.QuadrupedActuatorParameters;
-import us.ihmc.aware.model.QuadrupedJointNameMap;
 import us.ihmc.aware.model.QuadrupedRobotParameters;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
@@ -59,7 +59,7 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
    private final YoFramePoint cop = new YoFramePoint("cop", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition copViz = new YoGraphicPosition("copViz", cop, 0.01, YoAppearance.Red());
    
-   public SimulatedOutputWriterWithControlModeSelection(SDFFullRobotModel sdfFullRobotModel, SDFRobot robot, QuadrupedRobotParameters robotParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SimulatedOutputWriterWithControlModeSelection(SDFFullQuadrupedRobotModel sdfFullRobotModel, SDFRobot robot, QuadrupedRobotParameters robotParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.sdfRobot = robot;
       this.sdfFullRobotModel = sdfFullRobotModel;
@@ -150,9 +150,8 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
       }
    }
    
-   private void createPDControllers(SDFFullRobotModel sdfFullRobotModel, QuadrupedRobotParameters robotParameters, ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints)
+   private void createPDControllers(SDFFullQuadrupedRobotModel sdfFullRobotModel, QuadrupedRobotParameters robotParameters, ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints)
    {
-      QuadrupedJointNameMap jointMap = robotParameters.getJointMap();
       QuadrupedActuatorParameters actuatorParameters = robotParameters.getActuatorParameters();
       for(OneDegreeOfFreedomJoint simulatedJoint : oneDegreeOfFreedomJoints)
       {
@@ -162,7 +161,7 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
          double kd = actuatorParameters.getLegKd();
          double maxTorque = actuatorParameters.getLegSoftTorqueLimit();
          
-         if(jointMap.getJointRole(jointName) == JointRole.NECK)
+         if(sdfFullRobotModel.getNameForOneDoFJoint(oneDoFJoint).getRole() == JointRole.NECK)
          {
             kp = actuatorParameters.getNeckKp();
             kd = actuatorParameters.getNeckKd();

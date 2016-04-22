@@ -13,8 +13,6 @@ public abstract class QuadrupedRobotParameters
 
    public abstract SDFRobot createSdfRobot();
 
-   public abstract QuadrupedJointNameMap getJointMap();
-   
    public abstract SDFFullQuadrupedRobotModel createFullRobotModel();
 
    public abstract String getModelName();

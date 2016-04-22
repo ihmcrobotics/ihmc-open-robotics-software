@@ -4,7 +4,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import com.google.common.base.CaseFormat;
-import us.ihmc.aware.model.QuadrupedJointName;
+import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;

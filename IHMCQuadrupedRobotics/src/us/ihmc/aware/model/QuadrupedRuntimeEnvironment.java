@@ -1,6 +1,6 @@
 package us.ihmc.aware.model;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -15,7 +15,7 @@ public class QuadrupedRuntimeEnvironment
    private final double controlDT;
    private final DoubleYoVariable robotTimestamp;
 
-   private final SDFFullRobotModel fullRobotModel;
+   private final SDFFullQuadrupedRobotModel fullRobotModel;
 
    private final YoVariableRegistry parentRegistry;
    private final YoGraphicsListRegistry graphicsListRegistry;
@@ -28,7 +28,7 @@ public class QuadrupedRuntimeEnvironment
 
    private final NetClassList netClassList;
 
-   public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp, SDFFullRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
+   public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp, SDFFullQuadrupedRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry graphicsListRegistry, YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead, GlobalDataProducer globalDataProducer,
          QuadrupedLegInverseKinematicsCalculator legIkCalculator, QuadrantDependentList<FootSwitchInterface> footSwitches, NetClassList netClassList)
    {
@@ -54,7 +54,7 @@ public class QuadrupedRuntimeEnvironment
       return robotTimestamp;
    }
 
-   public SDFFullRobotModel getFullRobotModel()
+   public SDFFullQuadrupedRobotModel getFullRobotModel()
    {
       return fullRobotModel;
    }

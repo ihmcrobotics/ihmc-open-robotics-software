@@ -2,9 +2,8 @@ package us.ihmc.aware.estimator.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.aware.model.QuadrupedJointNameMap;
 import us.ihmc.aware.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.aware.estimator.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -18,7 +17,6 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedContactBasedFootSwitch;
 
 public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSensorReader implements FootSwitchOutputReadOnly, SensorReader
@@ -29,7 +27,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    
    private final BooleanYoVariable enableDrives;
    
-   public SDFQuadrupedPerfectSimulatedSensor(SDFRobot sdfRobot, SDFFullRobotModel sdfFullRobotModel, CommonQuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointMap)
+   public SDFQuadrupedPerfectSimulatedSensor(SDFRobot sdfRobot, SDFFullQuadrupedRobotModel sdfFullRobotModel, CommonQuadrupedReferenceFrames referenceFrames)
    {
       super(sdfRobot, sdfFullRobotModel, referenceFrames);
       
@@ -41,12 +39,11 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
          String prefix = quadrant.getCamelCaseNameForStartOfExpression();
-         String jointBeforeFootName = jointMap.getJointBeforeFootName(quadrant);
-         Joint jointBeforeFoot = sdfRobot.getJoint(jointBeforeFootName);
-         
+         OneDoFJoint jointBeforeFoot = sdfFullRobotModel.getOneDoFJointBeforeFoot(quadrant);
+
          for(GroundContactPoint groundContactPoint : groundContactPoints)
          {
-            if(groundContactPoint.getParentJoint() == jointBeforeFoot)
+            if(groundContactPoint.getParentJoint().getName().equals(jointBeforeFoot.getName()))
             {
                footSwitches.set(quadrant, new SimulatedContactBasedFootSwitch(prefix + groundContactPoint.getName(), groundContactPoint, super.getYoVariableRegistry()));
             }

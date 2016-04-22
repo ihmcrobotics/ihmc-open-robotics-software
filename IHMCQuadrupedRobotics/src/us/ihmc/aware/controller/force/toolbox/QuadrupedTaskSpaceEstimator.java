@@ -1,7 +1,6 @@
 package us.ihmc.aware.controller.force.toolbox;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.aware.model.QuadrupedJointNameMap;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -139,7 +138,7 @@ public class QuadrupedTaskSpaceEstimator
 
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceEstimator");
 
-   public QuadrupedTaskSpaceEstimator(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, YoVariableRegistry parentRegistry)
+   public QuadrupedTaskSpaceEstimator(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
@@ -150,8 +149,7 @@ public class QuadrupedTaskSpaceEstimator
       footRigidBody = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         String jointBeforeFootName = jointNameMap.getJointBeforeFootName(robotQuadrant);
-         OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointByName(jointBeforeFootName);
+         OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(robotQuadrant);
          footRigidBody.set(robotQuadrant, jointBeforeFoot.getSuccessor());
       }
 

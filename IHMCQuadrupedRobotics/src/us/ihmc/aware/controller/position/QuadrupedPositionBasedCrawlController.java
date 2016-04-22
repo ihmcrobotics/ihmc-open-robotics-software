@@ -7,6 +7,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;
@@ -111,7 +112,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedPositionC
       safeToShiftMode.set(SafeStartingShiftMode.TROTLINE_MIDPOINT);
    }
    
-   private final SDFFullRobotModel feedForwardFullRobotModel;
+   private final SDFFullQuadrupedRobotModel feedForwardFullRobotModel;
    private final QuadrupedReferenceFrames feedForwardReferenceFrames;
    
    private final StateMachine<CrawlGateWalkingState> walkingStateMachine;
@@ -355,7 +356,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedPositionC
             environment.getParentRegistry(), environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
    }
 
-   public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel,
+   public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullQuadrupedRobotModel fullRobotModel,
          QuadrupedControllerInputProviderInterface inputProvider, QuadrantDependentList<FootSwitchInterface> footSwitches, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
@@ -389,7 +390,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedPositionC
       this.inputProvider = inputProvider;
       this.robotTimestamp = yoTime;
       this.dt = dt;
-      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
+      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getPhysicalProperties());
       this.actualFullRobotModel = fullRobotModel;
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>("QuadrupedCrawlState", "walkingStateTranistionTime", CrawlGateWalkingState.class, yoTime, registry);
@@ -402,7 +403,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedPositionC
       
       feedForwardFullRobotModel = robotParameters.createFullRobotModel();
       this.feedForwardCenterOfMassJacobian = new CenterOfMassJacobian(feedForwardFullRobotModel.getElevator());
-      feedForwardReferenceFrames = new QuadrupedReferenceFrames(feedForwardFullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
+      feedForwardReferenceFrames = new QuadrupedReferenceFrames(feedForwardFullRobotModel, robotParameters.getPhysicalProperties());
       feedForwardCenterOfMassFrame = new TranslationReferenceFrame("offsetFeedForwardCenterOfMassFrame", feedForwardReferenceFrames.getCenterOfMassFrame());
       feedForwardReferenceFrames.updateFrames();
       feedForwardBodyFrame = feedForwardReferenceFrames.getBodyFrame();

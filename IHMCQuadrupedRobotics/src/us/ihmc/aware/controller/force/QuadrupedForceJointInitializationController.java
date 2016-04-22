@@ -1,13 +1,12 @@
 package us.ihmc.aware.controller.force;
 
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.common.primitives.Booleans;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.aware.model.QuadrupedJointNameMap;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -16,8 +15,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
  */
 public class QuadrupedForceJointInitializationController implements QuadrupedForceController
 {
-   private final SDFFullRobotModel fullRobotModel;
-   private final QuadrupedJointNameMap jointMap;
+   private final SDFFullQuadrupedRobotModel fullRobotModel;
 
    /**
     * A map specifying which joints have been come online and had their desired positions set. Indices align with the
@@ -25,10 +23,9 @@ public class QuadrupedForceJointInitializationController implements QuadrupedFor
     */
    private final boolean initialized[];
 
-   public QuadrupedForceJointInitializationController(QuadrupedRuntimeEnvironment environment, QuadrupedJointNameMap jointMap)
+   public QuadrupedForceJointInitializationController(QuadrupedRuntimeEnvironment environment)
    {
       this.fullRobotModel = environment.getFullRobotModel();
-      this.jointMap = jointMap;
       this.initialized = new boolean[fullRobotModel.getOneDoFJoints().length];
    }
 
@@ -39,13 +36,10 @@ public class QuadrupedForceJointInitializationController implements QuadrupedFor
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         for (int i = 0; i < jointMap.getLegJointNames().length; i++)
+         List<OneDoFJoint> joints = fullRobotModel.getLegOneDoFJoints(robotQuadrant);
+         for (int i = 0; i < joints.size(); i++)
          {
-            // initialize leg joint mode to force control
-            LegJointName legJointName = jointMap.getLegJointNames()[i];
-            String jointName = jointMap.getLegJointName(robotQuadrant, legJointName);
-            OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
-            joint.setUnderPositionControl(false);
+            joints.get(i).setUnderPositionControl(false);
          }
       }
    }

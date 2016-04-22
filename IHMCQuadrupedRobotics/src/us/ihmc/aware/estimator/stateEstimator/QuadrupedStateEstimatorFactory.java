@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.aware.model.QuadrupedContactPointParameters;
-import us.ihmc.aware.model.QuadrupedJointNameMap;
 import us.ihmc.aware.model.QuadrupedRobotParameters;
 import us.ihmc.aware.model.QuadrupedSensorInformation;
 import us.ihmc.aware.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
@@ -90,7 +89,7 @@ public class QuadrupedStateEstimatorFactory
       return footSwitches;
    }
 
-   public static QuadrantDependentList<ContactablePlaneBody> createFootContactableBodies(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedJointNameMap jointMap, CommonQuadrupedReferenceFrames referenceFrames,
+   public static QuadrantDependentList<ContactablePlaneBody> createFootContactableBodies(SDFFullQuadrupedRobotModel fullRobotModel, CommonQuadrupedReferenceFrames referenceFrames,
          QuadrupedContactPointParameters quadrupedContactPointParameters)
    {
       QuadrantDependentList<ArrayList<Point2d>> footGroundContactPoints = quadrupedContactPointParameters.getFootGroundContactPoints();
