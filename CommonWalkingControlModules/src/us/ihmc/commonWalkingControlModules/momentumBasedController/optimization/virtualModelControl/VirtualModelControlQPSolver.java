@@ -115,7 +115,7 @@ public class VirtualModelControlQPSolver
       MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, rhoSize, rhoSize, 1.0);
 
       // Compute f += -J^T W Objective
-      CommonOps.mult(taskJtW, taskJacobian, tempRhoTask_f);
+      CommonOps.mult(taskJtW, taskObjective, tempRhoTask_f);
       MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
    }
 
