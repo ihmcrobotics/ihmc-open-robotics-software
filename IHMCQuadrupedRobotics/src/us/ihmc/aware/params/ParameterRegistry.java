@@ -44,7 +44,7 @@ public class ParameterRegistry
       return AtomicInstanceHolder.INSTANCE;
    }
 
-   // Disallow construction to enfore singleton.
+   // Disallow construction to enforce singleton.
    private ParameterRegistry()
    {
 
@@ -109,14 +109,19 @@ public class ParameterRegistry
       String line;
       while ((line = reader.readLine()) != null)
       {
+         boolean found = false;
          for (Parameter parameter : parameters)
          {
             if (parameter.tryLoad(line))
             {
+               found = true;
                break;
             }
+         }
 
-            // TODO: Print warning if no parameters match.
+         if (!found)
+         {
+            System.out.println("Tried to load parameter not present in registry: " + line);
          }
       }
    }
