@@ -82,7 +82,9 @@ public class VirtualModelControlOptimizationControlModule
       externalWrenchHandler.reset();
    }
 
-   private final DenseMatrix64F totalWrench = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+   private final DenseMatrix64F contactWrench = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final DenseMatrix64F totalWrench = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final DenseMatrix64F tmpWrench = new DenseMatrix64F(Wrench.SIZE, 1);
 
    public VirtualModelControlSolution compute() throws VirtualModelControlModuleException
    {
@@ -125,8 +127,13 @@ public class VirtualModelControlOptimizationControlModule
       List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
 
       DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
-      DenseMatrix64F externalWrench = externalWrenchHandler.getSumOfExternalWrenches();
-      CommonOps.subtract(externalWrench, gravityWrench, totalWrench);
+      contactWrench.zero();
+      for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
+      {
+         externalWrenchSolution.get(rigidBody).getMatrix(tmpWrench);
+         CommonOps.add(contactWrench, tmpWrench, contactWrench);
+      }
+      CommonOps.subtract(contactWrench, gravityWrench, totalWrench);
       centroidalMomentumRateSolution.set(null, totalWrench);
 
       VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
@@ -170,6 +177,8 @@ public class VirtualModelControlOptimizationControlModule
    {
       DenseMatrix64F selectionMatrix = command.getSelectionMatrix();
       int taskSize = selectionMatrix.getNumRows();
+      taskObjective.reshape(taskSize, 1);
+      taskWeightMatrix.reshape(taskSize, taskSize);
 
       if (taskSize == 0)
          return;
@@ -177,13 +186,13 @@ public class VirtualModelControlOptimizationControlModule
       // Compute the weight: W = S * W * S^T
       tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
       tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-      taskWeightMatrix.reshape(taskSize, taskSize);
       command.getWeightMatrix(tempTaskWeight);
       CommonOps.mult(selectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
       DenseMatrix64F rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
+      taskJacobian.reshape(taskSize, rhoJacobian.numCols);
       CommonOps.mult(selectionMatrix, rhoJacobian, taskJacobian);
 
       // Compute the task objective: p = S * (hDot - sum W_user - W_g)
