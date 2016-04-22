@@ -60,7 +60,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
 
-      this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, parameters, registry);
+      this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, parameters.getPhysicalProperties(), registry);
       this.stateMachine = buildStateMachine(runtimeEnvironment, parameters, inputProvider);
       this.userEventTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerEvent.class);
       this.runtimeEnvironment = runtimeEnvironment;
