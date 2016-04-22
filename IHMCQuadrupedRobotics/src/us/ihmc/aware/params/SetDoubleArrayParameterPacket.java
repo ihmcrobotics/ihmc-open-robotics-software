@@ -8,6 +8,7 @@ public class SetDoubleArrayParameterPacket extends Packet<SetDoubleArrayParamete
    private final String parameterName;
    private final double[] parameterValue;
 
+   // Empty constructor for serialization
    public SetDoubleArrayParameterPacket()
    {
       this(null, new double[] { });
