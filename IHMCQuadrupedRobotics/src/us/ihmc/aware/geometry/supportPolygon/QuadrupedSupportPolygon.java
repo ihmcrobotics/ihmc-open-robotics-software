@@ -363,6 +363,50 @@ public class QuadrupedSupportPolygon implements Serializable
          getFootstep(robotQuadrant).add(x, y, z);
       }
    }
+   
+   /**
+    * Translates the polygon forward a distance or backward when distance is negative.
+    */
+   public void translateForward(double forwardDistance)
+   {
+      FramePoint frontMidPoint = tempInCircleCenter;
+      FramePoint hindMidPoint = tempIntersection;
+      FrameVector forwardVector = tempVectorsForCommonSupportPolygon[0];
+      
+      getFrontMidpoint(frontMidPoint);
+      getHindMidpoint(hindMidPoint);
+      
+      forwardVector.sub(frontMidPoint, hindMidPoint);
+      forwardVector.normalize();
+      forwardVector.scale(forwardDistance);
+      
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         getFootstep(robotQuadrant).add(forwardVector);
+      }
+   }
+   
+   /**
+    * Translates the polygon sideways to the right a distance or to the left when distance is negative.
+    */
+   public void translateSideways(double rightwaysDistance)
+   {
+      FramePoint rightMidpoint = tempInCircleCenter;
+      FramePoint leftMidpoint = tempIntersection;
+      FrameVector rightwaysVector = tempVectorsForCommonSupportPolygon[0];
+      
+      getRightMidpoint(rightMidpoint);
+      getLeftMidpoint(leftMidpoint);
+      
+      rightwaysVector.sub(rightMidpoint, leftMidpoint);
+      rightwaysVector.normalize();
+      rightwaysVector.scale(rightwaysDistance);
+      
+      for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+      {
+         getFootstep(robotQuadrant).add(rightwaysVector);
+      }
+   }
 
    /**
     * Rotates the feet about the Centroid, keeping the z heights.
@@ -1359,9 +1403,23 @@ public class QuadrupedSupportPolygon implements Serializable
          GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, originalPreviousEdgeFoot, originalShrinkEdgeFoot);
          GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, originalPreviousEdgeFoot, originalNextEdgeFoot);
       }
+      else if (size() == 2)
+      {
+         RobotQuadrant nextEdgeQuadrant = getNextClockwiseSupportingQuadrant(sideToShrink);
+         RobotQuadrant shrinkQuadrant = getNextClockwiseSupportingQuadrant(nextEdgeQuadrant);
+         
+         FramePoint shrinkFootstep = getFootstep(shrinkQuadrant);
+         FramePoint shrinkTowardsFootstep = getFootstep(nextEdgeQuadrant);
+         
+         FrameVector shrinkVector = tempVectorsForInCirclePoint[0];
+         shrinkVector.sub(shrinkTowardsFootstep, shrinkFootstep);
+         shrinkVector.normalize();
+         shrinkVector.scale(distance);
+         shrinkFootstep.add(shrinkVector);
+      }
       else
       {
-         throw new UndefinedOperationException("Can only shrink 3 or 4 side polygon");
+         throw new UndefinedOperationException("Can only shrink 2, 3 or 4 sided polygons");
       }
    }
    

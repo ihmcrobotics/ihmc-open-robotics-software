@@ -166,7 +166,7 @@ public class Joystick
    
       for (Controller controller : controllers)
       {
-         if (controller.getType() == Controller.Type.STICK)
+         if (isValidControllerType(controller))
          {
             return controller;
          }
@@ -181,7 +181,7 @@ public class Joystick
       
       for (Controller controller : controllers)
       {
-         if (controller.getType() == Controller.Type.STICK)
+         if (isValidControllerType(controller))
          {
             PrintTools.info(this, "Found: " + controller.getName());
          }
@@ -196,7 +196,7 @@ public class Joystick
       int occurancesOfModel2 = 0;
       for (Controller controller : controllers)
       {
-         if (controller.getType() == Controller.Type.STICK)
+         if (isValidControllerType(controller))
          {
             if (JoystickModel.getModelFromName(controller.getName()) == model1)
             {
@@ -226,7 +226,7 @@ public class Joystick
       int i = 0;
       for (Controller controller : controllers)
       {
-         if (controller.getType() == Controller.Type.STICK)
+         if (isValidControllerType(controller))
          {
             if (JoystickModel.getModelFromName(controller.getName()) == model)
             {
@@ -253,6 +253,11 @@ public class Joystick
       {
          return false;
       }
+   }
+   
+   private static boolean isValidControllerType(Controller controller)
+   {
+      return controller.getType() == Controller.Type.STICK || controller.getType() == Controller.Type.GAMEPAD;
    }
 
    public static void main(String[] args)
