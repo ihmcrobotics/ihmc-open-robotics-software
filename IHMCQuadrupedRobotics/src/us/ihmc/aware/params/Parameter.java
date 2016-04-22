@@ -29,6 +29,12 @@ public abstract class Parameter
       }
    }
 
+   /**
+    * Attempt to load the given line as this particular type of parameter, with no a priori knowledge of the actual type.
+    *
+    * @param line the line from which to load
+    * @return whether or not the line matched the expected format for this parameter type
+    */
    public boolean tryLoad(String line)
    {
       String[] split = line.split("=");
@@ -39,12 +45,12 @@ public abstract class Parameter
          return false;
       }
 
-      String path = split[0];
-      String value = split[1];
+      String targetPath = split[0];
+      String targetValue = split[1];
 
-      if (this.path.equals(path))
+      if (path.equals(targetPath))
       {
-         if (tryLoadValue(value))
+         if (tryLoadValue(targetValue))
          {
             return true;
          }
