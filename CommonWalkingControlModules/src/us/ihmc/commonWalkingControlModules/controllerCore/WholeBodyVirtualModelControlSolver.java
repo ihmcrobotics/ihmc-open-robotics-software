@@ -232,8 +232,15 @@ public class WholeBodyVirtualModelControlSolver
    {
       RigidBody endEffector = command.getEndEffector();
       RigidBodyInertia inertia = endEffector.getInertia();
+
+      SpatialAccelerationVector accelerationVector = command.getSpatialAcceleration();
+      accelerationVector.changeBodyFrameNoRelativeAcceleration(inertia.getBodyFrame());
+      accelerationVector.changeBaseFrameNoRelativeAcceleration(ReferenceFrame.getWorldFrame());
+
+      tmpWrench.setToZero(accelerationVector.getBodyFrame(), accelerationVector.getExpressedInFrame());
+
       twistCalculator.getTwistOfBody(tmpTwist, endEffector);
-      inertia.computeDynamicWrenchInBodyCoordinates(tmpWrench, command.getSpatialAcceleration(), tmpTwist);
+      inertia.computeDynamicWrenchInBodyCoordinates(tmpWrench, accelerationVector, tmpTwist);
 
       virtualWrenchCommand.set(endEffector, tmpWrench, command.getSelectionMatrix());
       virtualWrenchCommandList.addCommand(virtualWrenchCommand);
