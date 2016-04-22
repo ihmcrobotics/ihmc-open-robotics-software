@@ -43,6 +43,9 @@ public class WholeBodyControlCoreToolbox
    private final YoFrameVector yoDesiredMomentumRateLinear;
    private final YoFrameVector yoAchievedMomentumRateLinear;
 
+   private final YoFrameVector yoResidualRootJointForce;
+   private final YoFrameVector yoResidualRootJointTorque;
+
    private final JointIndexHandler jointIndexHandler;
 
    public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, RigidBody[] endEffectors, InverseDynamicsJoint[] controlledJoints,
@@ -67,6 +70,9 @@ public class WholeBodyControlCoreToolbox
 
       this.yoDesiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", referenceFrames.getCenterOfMassFrame(), registry);
       this.yoAchievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", referenceFrames.getCenterOfMassFrame(), registry);
+
+      this.yoResidualRootJointForce = new YoFrameVector("residualRootJointForce", ReferenceFrame.getWorldFrame(), registry);
+      this.yoResidualRootJointTorque = new YoFrameVector("residualRootJointTorque", ReferenceFrame.getWorldFrame(), registry);
 
       this.jointIndexHandler = new JointIndexHandler(controlledJoints);
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
@@ -181,6 +187,16 @@ public class WholeBodyControlCoreToolbox
    public YoFrameVector getYoAchievedMomentumRateLinear()
    {
       return yoAchievedMomentumRateLinear;
+   }
+
+   public YoFrameVector getYoResidualRootJointForce()
+   {
+      return yoResidualRootJointForce;
+   }
+
+   public YoFrameVector getYoResidualRootJointTorque()
+   {
+      return yoResidualRootJointTorque;
    }
 
    public JointIndexHandler getJointIndexHandler()

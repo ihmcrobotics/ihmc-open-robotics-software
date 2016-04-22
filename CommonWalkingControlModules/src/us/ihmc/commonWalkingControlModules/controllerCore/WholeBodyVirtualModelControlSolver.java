@@ -64,8 +64,9 @@ public class WholeBodyVirtualModelControlSolver
    private final Wrench residualRootJointWrench = new Wrench();
    private final FrameVector residualRootJointForce = new FrameVector();
    private final FrameVector residualRootJointTorque = new FrameVector();
-   private final YoFrameVector yoResidualRootJointForce = new YoFrameVector("residualRootJointForce", worldFrame, registry);
-   private final YoFrameVector yoResidualRootJointTorque = new YoFrameVector("residualRootJointTorque", worldFrame, registry);
+
+   private final YoFrameVector yoResidualRootJointForce;
+   private final YoFrameVector yoResidualRootJointTorque;
 
    private final double controlDT;
 
@@ -103,6 +104,9 @@ public class WholeBodyVirtualModelControlSolver
       yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
       yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
 
+      yoResidualRootJointForce  = toolbox.getYoResidualRootJointForce();
+      yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
+
       parentRegistry.addChild(registry);
    }
 
@@ -119,6 +123,7 @@ public class WholeBodyVirtualModelControlSolver
       // where the feet are all jacked up. For example, after falling and getting back up.
       optimizationControlModule.initialize();
       virtualModelController.reset();
+      planeContactWrenchProcessor.initialize();
    }
 
    public void compute()
@@ -252,6 +257,16 @@ public class WholeBodyVirtualModelControlSolver
    public RootJointDesiredConfigurationDataReadOnly getOutputForRootJoint()
    {
       return rootJointDesiredConfiguration;
+   }
+
+   public CenterOfPressureDataHolder getDesiredCenterOfPressureDataHolder()
+   {
+      return planeContactWrenchProcessor.getDesiredCenterOfPressureDataHolder();
+   }
+
+   public FrameVector getAchievedMomentumRateLinear()
+   {
+      return achievedMomentumRateLinear;
    }
 
    public InverseDynamicsJoint[] getJointsToOptimizeFors()
