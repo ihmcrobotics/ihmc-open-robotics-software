@@ -8,6 +8,7 @@ public class SetDoubleParameterPacket extends Packet<SetDoubleParameterPacket>
    private final String parameterName;
    private final double parameterValue;
 
+   // Empty constructor for serialization
    public SetDoubleParameterPacket()
    {
       this(null, Double.NaN);

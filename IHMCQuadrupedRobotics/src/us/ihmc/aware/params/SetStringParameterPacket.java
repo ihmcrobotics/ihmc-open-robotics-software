@@ -8,6 +8,7 @@ public class SetStringParameterPacket extends Packet<SetStringParameterPacket>
    private final String parameterName;
    private final String parameterValue;
 
+   // Empty constructor for serialization
    public SetStringParameterPacket()
    {
       this(null, "");

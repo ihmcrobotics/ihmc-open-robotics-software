@@ -7,6 +7,7 @@ public class SetBooleanParameterPacket extends Packet<SetBooleanParameterPacket>
    private final String parameterName;
    private final boolean parameterValue;
 
+   // Empty constructor for serialization
    public SetBooleanParameterPacket()
    {
       this(null, false);
