@@ -18,7 +18,6 @@ public class StringParameter extends Parameter
    public void set(String value)
    {
       this.value = value;
-      notifyChangedListeners();
    }
 
    @Override

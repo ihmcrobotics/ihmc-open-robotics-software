@@ -26,13 +26,11 @@ public class DoubleArrayParameter extends Parameter
    public void set(double[] value)
    {
       this.value = value;
-      notifyChangedListeners();
    }
 
    public void set(int idx, double value)
    {
       this.value[idx] = value;
-      notifyChangedListeners();
    }
 
    @Override
