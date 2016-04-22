@@ -4,17 +4,15 @@ import java.util.List;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -39,12 +37,18 @@ public class WholeBodyControlCoreToolbox
 
    private final MomentumOptimizationSettings momentumOptimizationSettings;
 
+   private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
+   private final WrenchVisualizer wrenchVisualizer;
+
+   private final YoFrameVector yoDesiredMomentumRateLinear;
+   private final YoFrameVector yoAchievedMomentumRateLinear;
+
    private final JointIndexHandler jointIndexHandler;
 
    public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, RigidBody[] endEffectors, InverseDynamicsJoint[] controlledJoints,
          MomentumOptimizationSettings momentumOptimizationSettings, CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravityZ,
          GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       this.fullRobotModel = fullRobotModel;
       this.endEffectors = endEffectors;
@@ -56,6 +60,13 @@ public class WholeBodyControlCoreToolbox
       this.geometricJacobianHolder = geometricJacobianHolder;
       this.contactablePlaneBodies = contactablePlaneBodies;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+
+      this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, yoGraphicsListRegistry, registry);
+      this.wrenchVisualizer = WrenchVisualizer.createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0,
+            yoGraphicsListRegistry, registry);
+
+      this.yoDesiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", referenceFrames.getCenterOfMassFrame(), registry);
+      this.yoAchievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", referenceFrames.getCenterOfMassFrame(), registry);
 
       this.jointIndexHandler = new JointIndexHandler(controlledJoints);
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
@@ -150,6 +161,26 @@ public class WholeBodyControlCoreToolbox
    public List<? extends ContactablePlaneBody> getContactablePlaneBodies()
    {
       return contactablePlaneBodies;
+   }
+
+   public PlaneContactWrenchProcessor getPlaneContactWrenchProcessor()
+   {
+      return planeContactWrenchProcessor;
+   }
+
+   public WrenchVisualizer getWrenchVisualizer()
+   {
+      return wrenchVisualizer;
+   }
+
+   public YoFrameVector getYoDesiredMomentumRateLinear()
+   {
+      return yoDesiredMomentumRateLinear;
+   }
+
+   public YoFrameVector getYoAchievedMomentumRateLinear()
+   {
+      return yoAchievedMomentumRateLinear;
    }
 
    public JointIndexHandler getJointIndexHandler()

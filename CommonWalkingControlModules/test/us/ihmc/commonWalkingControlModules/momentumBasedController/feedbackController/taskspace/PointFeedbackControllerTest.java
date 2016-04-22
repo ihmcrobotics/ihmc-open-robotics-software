@@ -81,7 +81,7 @@ public class PointFeedbackControllerTest
       double controlDT = 0.004;
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, null, jointsToOptimizeFor, null, null, controlDT, 0.0, geometricJacobianHolder,
-            twistCalculator, null, null);
+            twistCalculator, null, null, registry);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
 
@@ -176,7 +176,7 @@ public class PointFeedbackControllerTest
       double controlDT = 0.004;
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, null, jointsToOptimizeFor, null, null, controlDT, 0.0, geometricJacobianHolder,
-            twistCalculator, null, null);
+            twistCalculator, null, null, registry);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
 

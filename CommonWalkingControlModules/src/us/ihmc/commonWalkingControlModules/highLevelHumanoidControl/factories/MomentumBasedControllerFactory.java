@@ -287,7 +287,8 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       InverseDynamicsJoint[] jointsToOptimizeFor = MomentumBasedController.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
       List<? extends ContactablePlaneBody> contactablePlaneBodies = momentumBasedController.getContactablePlaneBodyList();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, fullRobotModel.getEndEffectors(), jointsToOptimizeFor,
-            momentumOptimizationSettings, referenceFrames, controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies, yoGraphicsListRegistry);
+            momentumOptimizationSettings, referenceFrames, controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies,
+            yoGraphicsListRegistry, registry);
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
       WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, registry);
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();

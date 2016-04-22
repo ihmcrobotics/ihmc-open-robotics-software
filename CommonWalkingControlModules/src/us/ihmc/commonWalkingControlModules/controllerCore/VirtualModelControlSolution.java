@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 
 import java.util.List;
@@ -11,6 +12,7 @@ public class VirtualModelControlSolution
 {
    private InverseDynamicsJoint[] jointsToCompute;
    private Map<InverseDynamicsJoint, Double> jointTorques;
+   private SpatialForceVector centroidalMomentumRateSolution;
    private Map<RigidBody, Wrench> externalWrenchSolution;
    private List<RigidBody> rigidBodiesWithExternalWrench;
 
@@ -26,6 +28,11 @@ public class VirtualModelControlSolution
    public void setJointTorques(Map<InverseDynamicsJoint, Double> jointTorques)
    {
       this.jointTorques = jointTorques;
+   }
+
+   public void setCentroidalMomentumRateSolution(SpatialForceVector centroidalMomentumRateSolution)
+   {
+      this.centroidalMomentumRateSolution = centroidalMomentumRateSolution;
    }
 
    public void setExternalWrenchSolution(List<RigidBody> rigidBodiesWithExternalWrench, Map<RigidBody, Wrench> externalWrenchSolution)
@@ -52,5 +59,10 @@ public class VirtualModelControlSolution
    public Map<InverseDynamicsJoint, Double> getJointTorques()
    {
       return jointTorques;
+   }
+
+   public SpatialForceVector getCentroidalMomentumRateSolution()
+   {
+      return centroidalMomentumRateSolution;
    }
 }
