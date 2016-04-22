@@ -102,16 +102,13 @@ public class WholeBodyInverseDynamicsSolver
          jointAccelerationsSolution.put(joint, jointAccelerationSolution);
       }
 
-      planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, yoGraphicsListRegistry, registry);
-
-      wrenchVisualizer = WrenchVisualizer.createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0,
-            yoGraphicsListRegistry, registry);
+      planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
+      wrenchVisualizer = toolbox.getWrenchVisualizer();
 
       jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(controlDT, registry);
 
-      ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
-      yoDesiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", centerOfMassFrame, registry);
-      yoAchievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", centerOfMassFrame, registry);
+      yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
+      yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
 
       parentRegistry.addChild(registry);
    }

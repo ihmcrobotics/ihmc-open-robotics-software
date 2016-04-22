@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalcul
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
@@ -32,10 +33,12 @@ public class VirtualModelControlOptimizationControlModule
    private final BasisVectorVisualizer basisVectorVisualizer;
    private final VirtualModelControlQPSolver qpSolver;
    private final ExternalWrenchHandler externalWrenchHandler;
+   private final SpatialForceVector centroidalMomentumRateSolution = new SpatialForceVector();
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
 
    private final JointIndexHandler jointIndexHandler;
+   private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMinVMC", registry);
 
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
@@ -66,6 +69,7 @@ public class VirtualModelControlOptimizationControlModule
 
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
 
+      rhoMin.set(momentumOptimizationSettings.getRhoMin());
       qpSolver = new VirtualModelControlQPSolver(rhoSize, registry);
       qpSolver.setMinRho(momentumOptimizationSettings.getRhoMin());
 
@@ -78,6 +82,8 @@ public class VirtualModelControlOptimizationControlModule
       externalWrenchHandler.reset();
    }
 
+   private final DenseMatrix64F totalWrench = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+
    public VirtualModelControlSolution compute() throws VirtualModelControlModuleException
    {
       wrenchMatrixCalculator.computeMatrices();
@@ -87,6 +93,7 @@ public class VirtualModelControlOptimizationControlModule
       qpSolver.addRegularization();
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
+      qpSolver.setMinRho(rhoMin.getDoubleValue());
 
       NoConvergenceException noConvergenceException = null;
 
@@ -116,9 +123,16 @@ public class VirtualModelControlOptimizationControlModule
 
       Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
       List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
+
+      DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
+      DenseMatrix64F externalWrench = externalWrenchHandler.getSumOfExternalWrenches();
+      CommonOps.subtract(externalWrench, gravityWrench, totalWrench);
+      centroidalMomentumRateSolution.set(null, totalWrench);
+
       VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
       virtualModelControlSolution.setJointsToCompute(jointsToOptimizeFor);
       virtualModelControlSolution.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
+      virtualModelControlSolution.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
 
       if (noConvergenceException != null)
       {
