@@ -350,17 +350,16 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedPositionC
    private final TwistCalculator twistCalculator;
    private final Twist bodyTwist = new Twist();
 
-   public QuadrupedPositionBasedCrawlController(QuadrupedRuntimeEnvironment environment, QuadrupedRobotParameters parameters, QuadrupedControllerInputProvider inputProvider)
+   public QuadrupedPositionBasedCrawlController(QuadrupedRuntimeEnvironment environment, QuadrupedRobotParameters parameters, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedControllerInputProvider inputProvider, QuadrupedLegInverseKinematicsCalculator legIkCalculator)
    {
-      this(environment.getControlDT(), parameters, environment.getFullRobotModel(), inputProvider, environment.getFootSwitches(), environment.getLegIkCalculator(), environment.getGlobalDataProducer(), environment.getRobotTimestamp(),
+      this(environment.getControlDT(), parameters, crawlControllerParameters, environment.getFullRobotModel(), inputProvider, environment.getFootSwitches(), legIkCalculator, environment.getGlobalDataProducer(), environment.getRobotTimestamp(),
             environment.getParentRegistry(), environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
    }
 
-   public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullQuadrupedRobotModel fullRobotModel,
+   public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters, SDFFullQuadrupedRobotModel fullRobotModel,
          QuadrupedControllerInputProviderInterface inputProvider, QuadrantDependentList<FootSwitchInterface> footSwitches, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
-      QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters = robotParameters.getQuadrupedPositionBasedCrawlControllerParameters();
 
       swingDuration.set(quadrupedControllerParameters.getDefaultSwingDuration());
       swingHeight.set(quadrupedControllerParameters.getDefaultSwingHeight());

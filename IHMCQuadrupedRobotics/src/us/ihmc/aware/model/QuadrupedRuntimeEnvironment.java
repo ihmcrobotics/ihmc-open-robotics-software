@@ -14,23 +14,18 @@ public class QuadrupedRuntimeEnvironment
 {
    private final double controlDT;
    private final DoubleYoVariable robotTimestamp;
-
    private final SDFFullQuadrupedRobotModel fullRobotModel;
-
    private final YoVariableRegistry parentRegistry;
    private final YoGraphicsListRegistry graphicsListRegistry;
    private final YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead;
-
-   // TODO: These are currently only for the position-based crawl controller. Can they be moved somewhere else?
    private final GlobalDataProducer globalDataProducer;
-   private final QuadrupedLegInverseKinematicsCalculator legIkCalculator;
-   private final QuadrantDependentList<FootSwitchInterface> footSwitches;
 
-   private final NetClassList netClassList;
+   // TODO: These are used to provide feedback from the controllers to the state estimator. Can they be moved somewhere else?
+   private final QuadrantDependentList<FootSwitchInterface> footSwitches;
 
    public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp, SDFFullQuadrupedRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry graphicsListRegistry, YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead, GlobalDataProducer globalDataProducer,
-         QuadrupedLegInverseKinematicsCalculator legIkCalculator, QuadrantDependentList<FootSwitchInterface> footSwitches, NetClassList netClassList)
+         QuadrantDependentList<FootSwitchInterface> footSwitches)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -39,9 +34,7 @@ public class QuadrupedRuntimeEnvironment
       this.graphicsListRegistry = graphicsListRegistry;
       this.graphicsListRegistryForDetachedOverhead = graphicsListRegistryForDetachedOverhead;
       this.globalDataProducer = globalDataProducer;
-      this.legIkCalculator = legIkCalculator;
       this.footSwitches = footSwitches;
-      this.netClassList = netClassList;
    }
 
    public double getControlDT()
@@ -79,18 +72,8 @@ public class QuadrupedRuntimeEnvironment
       return globalDataProducer;
    }
 
-   public QuadrupedLegInverseKinematicsCalculator getLegIkCalculator()
-   {
-      return legIkCalculator;
-   }
-
    public QuadrantDependentList<FootSwitchInterface> getFootSwitches()
    {
       return footSwitches;
-   }
-
-   public NetClassList getNetClassList()
-   {
-      return netClassList;
    }
 }

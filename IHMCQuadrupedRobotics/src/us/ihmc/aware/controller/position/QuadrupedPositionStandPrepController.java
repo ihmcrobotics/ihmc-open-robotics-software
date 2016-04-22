@@ -10,6 +10,7 @@ import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.aware.model.QuadrupedRobotParameters;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedInitialPositionParameters;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 
@@ -20,8 +21,8 @@ public class QuadrupedPositionStandPrepController implements QuadrupedPositionCo
 {
    private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
+   private final QuadrupedInitialPositionParameters initialPositionParameters;
 
-   private final QuadrupedRobotParameters parameters;
    private final SDFFullQuadrupedRobotModel fullRobotModel;
    private final double dt;
 
@@ -32,9 +33,9 @@ public class QuadrupedPositionStandPrepController implements QuadrupedPositionCo
     */
    private double timeInTrajectory = 0.0;
 
-   public QuadrupedPositionStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedRobotParameters parameters)
+   public QuadrupedPositionStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedInitialPositionParameters initialPositionParameters)
    {
-      this.parameters = parameters;
+      this.initialPositionParameters = initialPositionParameters;
       this.fullRobotModel = environment.getFullRobotModel();
       this.dt = environment.getControlDT();
 
@@ -54,7 +55,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedPositionCo
          joint.setUnderPositionControl(true);
 
          QuadrupedJointName jointId = fullRobotModel.getNameForOneDoFJoint(joint);
-         double desiredPosition = parameters.getQuadrupedInitialPositionParameters().getInitialPosition(jointId);
+         double desiredPosition = initialPositionParameters.getInitialPosition(jointId);
 
          // Start the trajectory from the current pos/vel/acc.
          MinimumJerkTrajectory trajectory = trajectories.get(i);
