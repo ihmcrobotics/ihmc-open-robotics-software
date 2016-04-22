@@ -5,6 +5,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
 import us.ihmc.robotics.geometry.transformables.TransformableVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -553,9 +554,29 @@ public class Line2d implements Geometry2d<Line2d>
       return side.negateIfRightSide(crossProduct) > 0.0;
    }
    
+   /**
+    * This method could be improved but must be tested better first.
+    */
    public boolean isPointInFrontOfLine(Vector2d frontDirection, Point2d point)
    {
-      return isPointInFrontOfLine(point.getX(), point.getY(), frontDirection.getX(), frontDirection.getY());
+      double lineAngle = MathTools.angleFromZeroToTwoPi(normalizedVector.getX(), normalizedVector.getY());
+      double frontAngle = MathTools.angleFromZeroToTwoPi(frontDirection.getX(), frontDirection.getY());
+      double pointAngle = MathTools.angleFromZeroToTwoPi(point.getX() - this.point.getX(), point.getY() - this.point.getY());
+      
+      double lineToFront = frontAngle - lineAngle;
+      double lineToPoint = pointAngle - lineAngle;
+      
+      if (Math.abs(lineToFront) > Math.PI) lineToFront = -(lineToFront % Math.PI);
+      if (Math.abs(lineToPoint) > Math.PI) lineToPoint = -(lineToPoint % Math.PI);
+      
+      if (lineToFront > 0.0 == lineToPoint > 0.0)
+      {
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
    
    private boolean isPointInFrontOfLine(double x, double y, double vFrontX, double vFrontY)

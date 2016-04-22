@@ -39,6 +39,7 @@ import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptBasedControllerCommandG
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -165,6 +166,16 @@ public class DRCSimulationTestHelper
       }
    }
 
+   public YoVariable<?> getYoVariable(String name)
+   {
+      return scs.getVariable(name);
+   }
+   
+   public YoVariable<?> getYoVariable(String nameSpace, String name)
+   {
+      return scs.getVariable(nameSpace, name);
+   }
+   
    public void loadScriptFile(String scriptFilename, ReferenceFrame referenceFrame)
    {
       ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator = simulationStarter.getScriptBasedControllerCommandGenerator();
