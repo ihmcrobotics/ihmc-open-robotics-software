@@ -160,11 +160,12 @@ public class SimulatedOutputWriterWithControlModeSelection implements OutputWrit
          double kp = actuatorParameters.getLegKp();
          double kd = actuatorParameters.getLegKd();
          double maxTorque = actuatorParameters.getLegSoftTorqueLimit();
-         
+
          if(sdfFullRobotModel.getNameForOneDoFJoint(oneDoFJoint).getRole() == JointRole.NECK)
          {
             kp = actuatorParameters.getNeckKp();
             kd = actuatorParameters.getNeckKd();
+            maxTorque = actuatorParameters.getNeckSoftTorqueLimit();
          }
          
          positionControllers.add(new PDPositionControllerForOneDoFJoint(oneDoFJoint, kp, kd, maxTorque));
