@@ -7,12 +7,12 @@ import java.util.EnumMap;
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.planning.gait.QuadrupedGaitCycle;
 import us.ihmc.aware.planning.gait.QuadrupedSupportConfiguration;
-import us.ihmc.aware.model.QuadrupedJointNameMap;
 import us.ihmc.aware.model.QuadrupedRobotParameters;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.YoQuadrupedSupportPolygon;
@@ -208,23 +208,21 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       gaitCyclePeriodMap.put(QuadrupedGaitCycle.PERFECT_TROT, 0.7); // 0.30);
    }
 
-   public QuadrupedTrotWalkController(QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
+   public QuadrupedTrotWalkController(QuadrupedRobotParameters robotParameters, SDFFullQuadrupedRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
          DoubleYoVariable yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(QuadrupedControllerState.TROT_WALK);
       this.fullRobotModel = fullRobotModel;
-      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
+      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getPhysicalProperties());
       this.dt = DT;
       this.yoTime = yoTime;
       
       centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
-      QuadrupedJointNameMap quadrupedJointMap = robotParameters.getJointMap();
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          ArrayList<OneDoFJoint> jointsToControl = new ArrayList<OneDoFJoint>();
-         String jointBeforeFootName = quadrupedJointMap.getJointBeforeFootName(robotQuadrant);
-         OneDoFJoint oneDoFJointBeforeFoot = fullRobotModel.getOneDoFJointByName(jointBeforeFootName);
+         OneDoFJoint oneDoFJointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(robotQuadrant);
          fullRobotModel.getOneDoFJointsFromRootToHere(oneDoFJointBeforeFoot, jointsToControl);
          oneDofJoints.set(robotQuadrant, jointsToControl);
       }
@@ -385,7 +383,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    
       kp_z.set(300.0);
       kd_z.set(25.0);
-      
+
       kp_swing.setX(-5000.0);
       kd_swing.setX(-100.0);
       kp_swing.setY(-5000.0);

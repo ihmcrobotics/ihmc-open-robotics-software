@@ -2,9 +2,8 @@ package us.ihmc.aware.mechanics.inverseKinematics;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.aware.model.QuadrupedJointNameMap;
 import us.ihmc.aware.model.QuadrupedPhysicalProperties;
 import us.ihmc.aware.model.QuadrupedRobotParameters;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -78,10 +77,9 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
    public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromLegAttachmentFrame(RobotQuadrant robotQuadrant, QuadrupedRobotParameters quadrupedRobotParams)
    {
       //make these here to ensure we get a zero pose
-      QuadrupedJointNameMap jointMap = quadrupedRobotParams.getJointMap();
       QuadrupedPhysicalProperties physicalProperties = quadrupedRobotParams.getPhysicalProperties();
-      SDFFullRobotModel fullRobotModel = quadrupedRobotParams.createFullRobotModel();
-      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointMap, physicalProperties);
+      SDFFullQuadrupedRobotModel fullRobotModel = quadrupedRobotParams.createFullRobotModel();
+      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       
       ReferenceFrame legAttachmentFrame = referenceFrames.getLegAttachmentFrame(robotQuadrant);
       ReferenceFrame frameBeforeHipPitch = referenceFrames.getHipPitchFrame(robotQuadrant).getParent();
@@ -95,10 +93,9 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
    public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromHipRollFrame(RobotQuadrant robotQuadrant, QuadrupedRobotParameters quadrupedRobotParams)
    {
       //make these here to ensure we get a zero pose
-      QuadrupedJointNameMap jointMap = quadrupedRobotParams.getJointMap();
       QuadrupedPhysicalProperties physicalProperties = quadrupedRobotParams.getPhysicalProperties();
-      SDFFullRobotModel fullRobotModel = quadrupedRobotParams.createFullRobotModel();
-      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, jointMap, physicalProperties);
+      SDFFullQuadrupedRobotModel fullRobotModel = quadrupedRobotParams.createFullRobotModel();
+      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       
       ReferenceFrame frameAfterHipRoll = referenceFrames.getFrameBeforeLegJoint(robotQuadrant, LegJointName.HIP_ROLL);
       ReferenceFrame frameBeforeHipPitch = referenceFrames.getHipPitchFrame(robotQuadrant).getParent();

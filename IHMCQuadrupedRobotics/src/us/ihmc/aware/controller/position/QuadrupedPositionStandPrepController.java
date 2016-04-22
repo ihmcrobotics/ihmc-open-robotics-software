@@ -3,11 +3,12 @@ package us.ihmc.aware.controller.position;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.aware.model.QuadrupedJointName;
+import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.aware.model.QuadrupedRobotParameters;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
@@ -21,7 +22,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedPositionCo
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
 
    private final QuadrupedRobotParameters parameters;
-   private final FullRobotModel fullRobotModel;
+   private final SDFFullQuadrupedRobotModel fullRobotModel;
    private final double dt;
 
    private final List<MinimumJerkTrajectory> trajectories;
@@ -52,7 +53,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedPositionCo
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
          joint.setUnderPositionControl(true);
 
-         QuadrupedJointName jointId = parameters.getJointMap().getJointNameForSDFName(joint.getName());
+         QuadrupedJointName jointId = fullRobotModel.getNameForOneDoFJoint(joint);
          double desiredPosition = parameters.getQuadrupedInitialPositionParameters().getInitialPosition(jointId);
 
          // Start the trajectory from the current pos/vel/acc.

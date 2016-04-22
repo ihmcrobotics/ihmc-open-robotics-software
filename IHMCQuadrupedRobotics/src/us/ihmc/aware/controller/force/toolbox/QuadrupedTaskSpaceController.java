@@ -1,12 +1,11 @@
 package us.ihmc.aware.controller.force.toolbox;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.aware.mechanics.contactForces.QuadrupedContactForceLimits;
 import us.ihmc.aware.mechanics.contactForces.QuadrupedContactForceOptimization;
 import us.ihmc.aware.mechanics.contactForces.QuadrupedContactForceOptimizationSettings;
 import us.ihmc.aware.mechanics.virtualModelControl.*;
 import us.ihmc.aware.planning.ContactState;
-import us.ihmc.aware.model.QuadrupedJointNameMap;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -134,12 +133,12 @@ public class QuadrupedTaskSpaceController
    private final FrameVector contactForceStorage;
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceController");
 
-   public QuadrupedTaskSpaceController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, QuadrupedJointLimits jointLimits, double controlDT, YoVariableRegistry parentRegistry)
+   public QuadrupedTaskSpaceController(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointLimits jointLimits, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.jointLimits = jointLimits;
 
       // virtual model controller
-      virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, jointNameMap, controlDT, registry);
+      virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, controlDT, registry);
       contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames, registry);
       contactForceStorage = new FrameVector();
 

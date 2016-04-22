@@ -3,11 +3,10 @@ package us.ihmc.aware.mechanics.virtualModelControl;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.aware.util.LowPassFilter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.aware.model.QuadrupedJointName;
-import us.ihmc.aware.model.QuadrupedJointNameMap;
+import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -30,8 +29,8 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 public class QuadrupedVirtualModelController
 {
    private final YoVariableRegistry registry;
-   private final QuadrupedJointNameMap jointNameMap;
 
+   private final SDFFullQuadrupedRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame worldFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
@@ -58,9 +57,9 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<YoFramePoint> yoSoleContactForceGraphicPosition;
    private final QuadrantDependentList<BooleanYoVariable> yoSoleContactForceGraphicVisible;
 
-   public QuadrupedVirtualModelController(SDFFullRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointNameMap jointNameMap, double controlDT, YoVariableRegistry parentRegistry)
+   public QuadrupedVirtualModelController(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT, YoVariableRegistry parentRegistry)
    {
-      this.jointNameMap = jointNameMap;
+      this.fullRobotModel = fullRobotModel;
       registry = new YoVariableRegistry(getClass().getSimpleName());
 
       // initialize reference frames
@@ -100,8 +99,7 @@ public class QuadrupedVirtualModelController
       legEffortFilter = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         String jointBeforeFootName = jointNameMap.getJointBeforeFootName(robotQuadrant);
-         OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointByName(jointBeforeFootName);
+         OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(robotQuadrant);
          RigidBody body = fullRobotModel.getRootJoint().getSuccessor();
          RigidBody foot = jointBeforeFoot.getSuccessor();
          legJoints.set(robotQuadrant, ScrewTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJoint.class));
@@ -199,7 +197,7 @@ public class QuadrupedVirtualModelController
          int index = 0;
          for (OneDoFJoint joint : legJoints.get(robotQuadrant))
          {
-            QuadrupedJointName jointName = jointNameMap.getJointNameForSDFName(joint.getName());
+            QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(joint);
 
             // compute desired joint torque with position and torque limits
             double tau = legEffortVector.get(robotQuadrant).get(index, 0);

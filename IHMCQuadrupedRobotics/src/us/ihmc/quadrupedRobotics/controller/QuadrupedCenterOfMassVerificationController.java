@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -103,7 +104,7 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
    private final FramePoint desiredFootPosition = new FramePoint(worldFrame);
    private final FramePoint desiredFootPositionInLegAttachmentFrame = new FramePoint();
 
-   public QuadrupedCenterOfMassVerificationController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullRobotModel fullRobotModel, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, DoubleYoVariable yoTime,
+   public QuadrupedCenterOfMassVerificationController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(QuadrupedControllerState.COM_VERIFICATION);
@@ -121,7 +122,7 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
       this.robotTimestamp = yoTime;
       this.dt = dt;
       this.fullRobotModel = fullRobotModel;
-      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getJointMap(), robotParameters.getPhysicalProperties());
+      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getPhysicalProperties());
       this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
       this.oneDoFJoints = fullRobotModel.getOneDoFJoints();
 

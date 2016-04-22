@@ -1,15 +1,16 @@
 package us.ihmc.aware.estimator.referenceFrames;
 
 import java.util.EnumMap;
+import java.util.Map;
 
 import javax.vecmath.Quat4d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
-import us.ihmc.aware.model.QuadrupedJointNameMap;
 import us.ihmc.aware.model.QuadrupedPhysicalProperties;
 import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -39,8 +40,8 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final ZUpFrame bodyZUpFrame;
 
    private final EnumMap<NeckJointName, ReferenceFrame> neckReferenceFrames = ContainerTools.createEnumMap(NeckJointName.class);
-   private final QuadrantDependentList<EnumMap<LegJointName, ReferenceFrame>> framesBeforeLegJoint = QuadrantDependentList.createListOfEnumMaps(LegJointName.class);
-   private final QuadrantDependentList<EnumMap<LegJointName, ReferenceFrame>> framesAfterLegJoint = QuadrantDependentList.createListOfEnumMaps(LegJointName.class);
+   private final Map<QuadrupedJointName, ReferenceFrame> framesBeforeLegJoint = new EnumMap<>(QuadrupedJointName.class);
+   private final Map<QuadrupedJointName, ReferenceFrame> framesAfterLegJoint = new EnumMap<>(QuadrupedJointName.class);
    private final QuadrantDependentList<ReferenceFrame> soleFrames = new QuadrantDependentList<ReferenceFrame>();
    
    private final QuadrantDependentList<PoseReferenceFrame> tripleSupportFrames = new QuadrantDependentList<PoseReferenceFrame>();
@@ -69,7 +70,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    
    private QuadrupedSupportPolygon supportPolygonForCentroids = new QuadrupedSupportPolygon();
 
-   public QuadrupedReferenceFrames(SDFFullRobotModel fullRobotModel, QuadrupedJointNameMap quadrupedJointNameMap, QuadrupedPhysicalProperties quadrupedPhysicalProperties)
+   public QuadrupedReferenceFrames(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedPhysicalProperties quadrupedPhysicalProperties)
    {
       this.fullRobotModel = fullRobotModel;
 
@@ -85,21 +86,20 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
          this.neckReferenceFrames.put(neckJointName, fullRobotModel.getNeckJoint(neckJointName).getFrameAfterJoint());
       }
 
-      LegJointName[] legJointNames = quadrupedJointNameMap.getLegJointNames();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {         
-         for (LegJointName legJointName : legJointNames)
+         for (OneDoFJoint oneDoFJoint : fullRobotModel.getLegOneDoFJoints(robotQuadrant))
          {
-            String jointName = quadrupedJointNameMap.getLegJointName(robotQuadrant, legJointName);
-            OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
             ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
             ReferenceFrame frameAfterJoint = oneDoFJoint.getFrameAfterJoint();
-            
-            framesBeforeLegJoint.get(robotQuadrant).put(legJointName, frameBeforeJoint);
-            framesAfterLegJoint.get(robotQuadrant).put(legJointName, frameAfterJoint);
+
+            QuadrupedJointName legJointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
+            framesBeforeLegJoint.put(legJointName, frameBeforeJoint);
+            framesAfterLegJoint.put(legJointName, frameAfterJoint);
          }
-         
-         ReferenceFrame frameAfterKnee = framesAfterLegJoint.get(robotQuadrant).get(LegJointName.KNEE);
+
+         QuadrupedJointName kneeJointName = QuadrupedJointName.getName(robotQuadrant, LegJointName.KNEE);
+         ReferenceFrame frameAfterKnee = framesAfterLegJoint.get(kneeJointName);
 
          TranslationReferenceFrame soleFrame = new TranslationReferenceFrame(robotQuadrant.toString() + "SoleFrame", frameAfterKnee);
          soleFrame.updateTranslation(quadrupedPhysicalProperties.getOffsetFromKneeToFoot(robotQuadrant));
@@ -121,9 +121,12 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       }
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      { 
-         ReferenceFrame frameBeforeHipRoll = framesBeforeLegJoint.get(robotQuadrant).get(LegJointName.HIP_ROLL);         
-         ReferenceFrame frameBeforeHipPitch = framesBeforeLegJoint.get(robotQuadrant).get(LegJointName.HIP_PITCH);
+      {
+         QuadrupedJointName hipRollJointName = QuadrupedJointName.getName(robotQuadrant, LegJointName.HIP_ROLL);
+         ReferenceFrame frameBeforeHipRoll = framesBeforeLegJoint.get(hipRollJointName);
+
+         QuadrupedJointName hipPitchJointName = QuadrupedJointName.getName(robotQuadrant, LegJointName.HIP_PITCH);
+         ReferenceFrame frameBeforeHipPitch = framesBeforeLegJoint.get(hipPitchJointName);
          
          FramePoint xyOffsetFromRollToPitch = new FramePoint(frameBeforeHipPitch);
          xyOffsetFromRollToPitch.changeFrame(frameBeforeHipRoll);
@@ -307,12 +310,12 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    @Override
    public ReferenceFrame getFrameBeforeLegJoint(RobotQuadrant robotQuadrant, LegJointName legJointName)
    {
-      return framesBeforeLegJoint.get(robotQuadrant).get(legJointName);
+      return framesBeforeLegJoint.get(QuadrupedJointName.getName(robotQuadrant, legJointName));
    }
    
    public ReferenceFrame getLegJointFrame(RobotQuadrant robotQuadrant, LegJointName legJointName)
    {
-      return framesAfterLegJoint.get(robotQuadrant).get(legJointName);
+      return framesAfterLegJoint.get(QuadrupedJointName.getName(robotQuadrant, legJointName));
    }
    
    @Override
