@@ -12,6 +12,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.kinematics.JointLimit;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -172,7 +173,7 @@ public class QuadrupedVirtualModelController
       soleVirtualForce.get(robotQuadrant).scale(-1.0);
    }
 
-   public void compute(QuadrupedJointLimits jointLimits, QuadrupedVirtualModelControllerSettings settings)
+   public void compute(QuadrupedVirtualModelControllerSettings settings)
    {
       // compute sole positions and jacobians
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -198,13 +199,14 @@ public class QuadrupedVirtualModelController
          for (OneDoFJoint joint : legJoints.get(robotQuadrant))
          {
             QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(joint);
+            JointLimit jointLimit = fullRobotModel.getJointLimit(jointName);
 
             // compute desired joint torque with position and torque limits
             double tau = legEffortVector.get(robotQuadrant).get(index, 0);
-            double tauPositionLowerLimit = settings.getJointPositionLimitStiffness(jointName) * (jointLimits.getSoftPositionLowerLimit(jointName) - joint.getQ()) - settings.getJointPositionLimitDamping(jointName) * joint.getQd();
-            double tauPositionUpperLimit = settings.getJointPositionLimitStiffness(jointName) * (jointLimits.getSoftPositionUpperLimit(jointName) - joint.getQ()) - settings.getJointPositionLimitDamping(jointName) * joint.getQd();
-            double tauEffortLowerLimit = -jointLimits.getEffortLimit(jointName);
-            double tauEffortUpperLimit = jointLimits.getEffortLimit(jointName);
+            double tauPositionLowerLimit = settings.getJointPositionLimitStiffness(jointName) * (jointLimit.getSoftLowerPositionLimit() - joint.getQ()) - settings.getJointPositionLimitDamping(jointName) * joint.getQd();
+            double tauPositionUpperLimit = settings.getJointPositionLimitStiffness(jointName) * (jointLimit.getSoftUpperPositionLimit() - joint.getQ()) - settings.getJointPositionLimitDamping(jointName) * joint.getQd();
+            double tauEffortLowerLimit = -jointLimit.getTorqueLimit();
+            double tauEffortUpperLimit = jointLimit.getTorqueLimit();
             tau = Math.min(Math.max(tau, tauPositionLowerLimit), tauPositionUpperLimit);
             tau = Math.min(Math.max(tau, tauEffortLowerLimit), tauEffortUpperLimit);
 
