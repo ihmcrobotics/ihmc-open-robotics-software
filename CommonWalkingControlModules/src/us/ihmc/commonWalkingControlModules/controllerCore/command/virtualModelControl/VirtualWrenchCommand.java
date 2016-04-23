@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -11,7 +12,7 @@ public class VirtualWrenchCommand implements InverseDynamicsCommand<VirtualWrenc
    private RigidBody rigidBody;
    private String rigidBodyName;
    private final Wrench virtualWrenchAppliedByRigidBody = new Wrench();
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F();
+   private final DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
 
    public VirtualWrenchCommand()
    {
