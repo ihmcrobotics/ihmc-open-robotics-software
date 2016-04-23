@@ -13,8 +13,6 @@ public abstract class QuadrupedRobotParameters
 
    public abstract QuadrupedPhysicalProperties getPhysicalProperties();
 
-   public abstract QuadrupedSensorInformation getQuadrupedSensorInformation();
-
    public QuadrupedContactPointParameters getQuadrupedContactPointParameters()
    {
       return contactPointParameters;

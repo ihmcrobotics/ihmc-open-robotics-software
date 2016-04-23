@@ -13,8 +13,6 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.aware.model.QuadrupedContactPointParameters;
-import us.ihmc.aware.model.QuadrupedRobotParameters;
-import us.ihmc.aware.model.QuadrupedSensorInformation;
 import us.ihmc.aware.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -36,7 +34,7 @@ public class QuadrupedStateEstimatorFactory
 
    private static double switchZThreshold = 0.005;
    
-   public static DRCKinematicsBasedStateEstimator createStateEstimator(QuadrupedRobotParameters robotParameters, StateEstimatorParameters stateEstimatorParameters, SDFFullRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly,
+   public static DRCKinematicsBasedStateEstimator createStateEstimator(QuadrupedSensorInformation sensorInformation, StateEstimatorParameters stateEstimatorParameters, SDFFullRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly,
          QuadrantDependentList<ContactablePlaneBody> feet, QuadrantDependentList<FootSwitchInterface> footSwitches, double gravity, double estimatorDT, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       RigidBody elevator = fullRobotModel.getElevator();
@@ -44,7 +42,6 @@ public class QuadrupedStateEstimatorFactory
       RigidBody estimationLink = fullRobotModel.getPelvis();
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
 
-      QuadrupedSensorInformation sensorInformation = robotParameters.getQuadrupedSensorInformation();
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
       robotMotionStatusFromController.setCurrentRobotMotionStatus(RobotMotionStatus.IN_MOTION);
       ForceSensorDataHolder forceSensorDataHolderToUpdate = null;

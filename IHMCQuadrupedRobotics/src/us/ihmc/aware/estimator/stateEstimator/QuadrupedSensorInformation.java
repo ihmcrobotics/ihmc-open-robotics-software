@@ -1,4 +1,4 @@
-package us.ihmc.aware.model;
+package us.ihmc.aware.estimator.stateEstimator;
 
 public interface QuadrupedSensorInformation
 {
