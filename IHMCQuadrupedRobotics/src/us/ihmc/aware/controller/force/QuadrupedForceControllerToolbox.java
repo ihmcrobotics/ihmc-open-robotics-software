@@ -1,7 +1,6 @@
 package us.ihmc.aware.controller.force;
 
 import us.ihmc.aware.controller.force.toolbox.*;
-import us.ihmc.aware.mechanics.virtualModelControl.QuadrupedJointLimits;
 import us.ihmc.aware.model.QuadrupedPhysicalProperties;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -9,7 +8,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class QuadrupedForceControllerToolbox
 {
-   private final QuadrupedJointLimits jointLimits;
    private final QuadrupedReferenceFrames referenceFrames;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedTaskSpaceController taskSpaceController;
@@ -25,10 +23,9 @@ public class QuadrupedForceControllerToolbox
       double mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
 
       // create controllers and estimators
-      jointLimits = new QuadrupedJointLimits();
       referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), physicalProperties);
       taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(runtimeEnvironment.getFullRobotModel(), referenceFrames, registry);
-      taskSpaceController = new QuadrupedTaskSpaceController(runtimeEnvironment.getFullRobotModel(), referenceFrames, jointLimits, runtimeEnvironment.getControlDT(), registry);
+      taskSpaceController = new QuadrupedTaskSpaceController(runtimeEnvironment.getFullRobotModel(), referenceFrames, runtimeEnvironment.getControlDT(), registry);
       comPositionController = new QuadrupedComPositionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), registry);
       dcmPositionController = new DivergentComponentOfMotionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), mass, gravity, 1.0, registry);
       bodyOrientationController = new QuadrupedBodyOrientationController(referenceFrames.getBodyFrame(), runtimeEnvironment.getControlDT(), registry);
@@ -38,11 +35,6 @@ public class QuadrupedForceControllerToolbox
       // register controller graphics
       taskSpaceController.registerGraphics(runtimeEnvironment.getGraphicsListRegistry());
       dcmPositionController.registerGraphics(runtimeEnvironment.getGraphicsListRegistry());
-   }
-
-   public QuadrupedJointLimits getJointLimits()
-   {
-      return jointLimits;
    }
 
    public QuadrupedReferenceFrames getReferenceFrames()

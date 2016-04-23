@@ -127,16 +127,13 @@ public class QuadrupedTaskSpaceController
       }
    }
 
-   private final QuadrupedJointLimits jointLimits;
    private final QuadrupedVirtualModelController virtualModelController;
    private final QuadrupedContactForceOptimization contactForceOptimization;
    private final FrameVector contactForceStorage;
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceController");
 
-   public QuadrupedTaskSpaceController(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, QuadrupedJointLimits jointLimits, double controlDT, YoVariableRegistry parentRegistry)
+   public QuadrupedTaskSpaceController(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT, YoVariableRegistry parentRegistry)
    {
-      this.jointLimits = jointLimits;
-
       // virtual model controller
       virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, controlDT, registry);
       contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames, registry);
@@ -189,7 +186,7 @@ public class QuadrupedTaskSpaceController
             virtualModelController.setSoleVirtualForceVisible(robotQuadrant, true);
          }
       }
-      virtualModelController.compute(jointLimits, settings.getVirtualModelControllerSettings());
+      virtualModelController.compute(settings.getVirtualModelControllerSettings());
    }
 
    public ContactState getContactState(RobotQuadrant robotQuadrant)
