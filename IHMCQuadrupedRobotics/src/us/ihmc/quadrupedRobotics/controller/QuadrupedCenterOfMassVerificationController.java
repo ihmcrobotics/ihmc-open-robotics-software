@@ -7,10 +7,11 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.aware.model.QuadrupedPhysicalProperties;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
-import us.ihmc.aware.model.QuadrupedRobotParameters;
+import us.ihmc.aware.model.QuadrupedModelFactory;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
@@ -104,7 +105,7 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
    private final FramePoint desiredFootPosition = new FramePoint(worldFrame);
    private final FramePoint desiredFootPositionInLegAttachmentFrame = new FramePoint();
 
-   public QuadrupedCenterOfMassVerificationController(final double dt, QuadrupedRobotParameters robotParameters, SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, DoubleYoVariable yoTime,
+   public QuadrupedCenterOfMassVerificationController(final double dt, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(QuadrupedControllerState.COM_VERIFICATION);
@@ -122,7 +123,7 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
       this.robotTimestamp = yoTime;
       this.dt = dt;
       this.fullRobotModel = fullRobotModel;
-      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getPhysicalProperties());
+      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
       this.oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
@@ -176,7 +177,7 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
 
       //Create State Machine and States
       this.stateMachine = new StateMachine<COM_ESTIMATE_STATES>("centerOfMassVerificationStateMachine", "walkingStateTranistionTime", COM_ESTIMATE_STATES.class, yoTime, registry);
-      this.filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState(robotParameters);
+      this.filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState(modelFactory);
       MoveCenterOfMassAround moveCenterOfMassAroundState = new MoveCenterOfMassAround();
       MoveFeet pickFeetUp = new MoveFeet("pickFeetUp", footZHeightOnPickUp, trotPairToRaise, COM_ESTIMATE_STATES.PICK_UP_FEET);
       MoveFeet putFeetDown = new MoveFeet("putFeetDown", footZHeightOnTouchdown, trotPairInAir, COM_ESTIMATE_STATES.PUT_DOWN_FEET);
@@ -685,11 +686,11 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
       private final AlphaFilteredYoVariable filterStandPrepDesiredsToWalkingDesireds;
       private final SDFFullRobotModel initialDesiredsUponEnteringFullRobotModel;
 
-      public FilterDesiredsToMatchCrawlControllerState(QuadrupedRobotParameters robotParameters)
+      public FilterDesiredsToMatchCrawlControllerState(QuadrupedModelFactory modelFactory)
       {
          super(COM_ESTIMATE_STATES.ALPHA_FILTERING_DESIREDS);
 
-         initialDesiredsUponEnteringFullRobotModel = robotParameters.createFullRobotModel();
+         initialDesiredsUponEnteringFullRobotModel = modelFactory.createFullRobotModel();
 
          double filterStandPrepDesiredsToWalkingDesiredsAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.5, dt);
          filterStandPrepDesiredsToWalkingDesireds = new AlphaFilteredYoVariable("filterStandPrepDesiredsToWalkingDesireds", registry, filterStandPrepDesiredsToWalkingDesiredsAlpha);

@@ -1,10 +1,15 @@
 package us.ihmc.aware.model;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+
+import java.util.ArrayList;
 
 public interface QuadrupedPhysicalProperties
 {
-   public Vector3d getOffsetFromKneeToFoot(RobotQuadrant robotQuadrant);
+   Vector3d getOffsetFromJointBeforeFootToSole(RobotQuadrant robotQuadrant);
+   ArrayList<Point2d> getFootGroundContactPoints(RobotQuadrant robotQuadrant);
 }

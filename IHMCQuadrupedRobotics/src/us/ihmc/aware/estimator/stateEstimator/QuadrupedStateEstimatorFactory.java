@@ -8,11 +8,11 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.aware.model.QuadrupedPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.aware.model.QuadrupedContactPointParameters;
 import us.ihmc.aware.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -87,19 +87,15 @@ public class QuadrupedStateEstimatorFactory
    }
 
    public static QuadrantDependentList<ContactablePlaneBody> createFootContactableBodies(SDFFullQuadrupedRobotModel fullRobotModel, CommonQuadrupedReferenceFrames referenceFrames,
-         QuadrupedContactPointParameters quadrupedContactPointParameters)
+         QuadrupedPhysicalProperties quadrupedPhysicalProperties)
    {
-      QuadrantDependentList<ArrayList<Point2d>> footGroundContactPoints = quadrupedContactPointParameters.getFootGroundContactPoints();
-      if (footGroundContactPoints == null)
-         return null;
-
       QuadrantDependentList<ContactablePlaneBody> footContactableBodies = new QuadrantDependentList<ContactablePlaneBody>();
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          RigidBody foot = fullRobotModel.getFoot(robotQuadrant);
          System.out.println(foot.getName() + " " + foot.hashCode());
-         ListOfPointsContactablePlaneBody footContactableBody = new ListOfPointsContactablePlaneBody(foot, referenceFrames.getFootFrame(robotQuadrant), footGroundContactPoints.get(robotQuadrant));
+         ListOfPointsContactablePlaneBody footContactableBody = new ListOfPointsContactablePlaneBody(foot, referenceFrames.getFootFrame(robotQuadrant), quadrupedPhysicalProperties.getFootGroundContactPoints(robotQuadrant));
          footContactableBodies.set(robotQuadrant, footContactableBody);
       }
       return footContactableBodies;

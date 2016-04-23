@@ -3,6 +3,7 @@ package us.ihmc.aware.controller.force;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.aware.model.QuadrupedPhysicalProperties;
 import us.ihmc.aware.providers.QuadrupedControllerInputProvider;
 import us.ihmc.aware.providers.QuadrupedTimedStepInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
@@ -17,7 +18,6 @@ import us.ihmc.aware.planning.ContactState;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.aware.providers.QuadrupedControllerInputProviderInterface;
-import us.ihmc.aware.model.QuadrupedRobotParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -42,7 +42,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
    private final AtomicReference<QuadrupedForceControllerEvent> requestedEvent = new AtomicReference<>();
 
-   public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters parameters) throws IOException
+   public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties) throws IOException
    {
       // Initialize input providers.
       inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
@@ -60,8 +60,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
 
-      this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, parameters.getPhysicalProperties(), registry);
-      this.stateMachine = buildStateMachine(runtimeEnvironment, parameters, inputProvider);
+      this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry);
+      this.stateMachine = buildStateMachine(runtimeEnvironment, inputProvider);
       this.userEventTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerEvent.class);
       this.runtimeEnvironment = runtimeEnvironment;
    }
@@ -120,8 +120,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       return motionStatusHolder;
    }
 
-   private FiniteStateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
-         QuadrupedRobotParameters parameters, QuadrupedControllerInputProviderInterface inputProvider)
+   private FiniteStateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerInputProviderInterface inputProvider)
    {
       // Initialize controllers.
       QuadrupedForceController jointInitializationController = new QuadrupedForceJointInitializationController(runtimeEnvironment);

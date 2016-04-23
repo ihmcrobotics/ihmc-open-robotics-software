@@ -11,10 +11,10 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.aware.model.QuadrupedPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.planning.gait.TrotPair;
-import us.ihmc.aware.model.QuadrupedRobotParameters;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
@@ -198,13 +198,13 @@ public class QuadrupedTrotWalkControllerOld extends QuadrupedController
       QuadSupport, RightTrotLine, LeftTrotLine;
    }
 
-   public QuadrupedTrotWalkControllerOld(QuadrupedRobotParameters robotParameters, SDFFullQuadrupedRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
+   public QuadrupedTrotWalkControllerOld(QuadrupedPhysicalProperties physicalProperties, SDFFullQuadrupedRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
          DoubleYoVariable yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(QuadrupedControllerState.TROT_WALK);
       this.fullRobotModel = fullRobotModel;
       this.footSwitches = footSwitches;
-      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getPhysicalProperties());
+      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       this.dt = DT;
       

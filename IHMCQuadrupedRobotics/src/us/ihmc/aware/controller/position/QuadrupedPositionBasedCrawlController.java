@@ -12,7 +12,8 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.aware.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
-import us.ihmc.aware.model.QuadrupedRobotParameters;
+import us.ihmc.aware.model.QuadrupedPhysicalProperties;
+import us.ihmc.aware.model.QuadrupedModelFactory;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.planning.chooser.footstepChooser.MidFootZUpSwingTargetGenerator;
 import us.ihmc.aware.planning.chooser.footstepChooser.SwingTargetGenerator;
@@ -349,13 +350,13 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedPositionC
    private final TwistCalculator twistCalculator;
    private final Twist bodyTwist = new Twist();
 
-   public QuadrupedPositionBasedCrawlController(QuadrupedRuntimeEnvironment environment, QuadrupedRobotParameters parameters, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedControllerInputProvider inputProvider, QuadrupedLegInverseKinematicsCalculator legIkCalculator)
+   public QuadrupedPositionBasedCrawlController(QuadrupedRuntimeEnvironment environment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedControllerInputProvider inputProvider, QuadrupedLegInverseKinematicsCalculator legIkCalculator)
    {
-      this(environment.getControlDT(), parameters, crawlControllerParameters, environment.getFullRobotModel(), inputProvider, environment.getFootSwitches(), legIkCalculator, environment.getGlobalDataProducer(), environment.getRobotTimestamp(),
+      this(environment.getControlDT(), modelFactory, physicalProperties, crawlControllerParameters, environment.getFullRobotModel(), inputProvider, environment.getFootSwitches(), legIkCalculator, environment.getGlobalDataProducer(), environment.getRobotTimestamp(),
             environment.getParentRegistry(), environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
    }
 
-   public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedRobotParameters robotParameters, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters, SDFFullQuadrupedRobotModel fullRobotModel,
+   public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters, SDFFullQuadrupedRobotModel fullRobotModel,
          QuadrupedControllerInputProviderInterface inputProvider, QuadrantDependentList<FootSwitchInterface> footSwitches, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
@@ -388,7 +389,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedPositionC
       this.inputProvider = inputProvider;
       this.robotTimestamp = yoTime;
       this.dt = dt;
-      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getPhysicalProperties());
+      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       this.actualFullRobotModel = fullRobotModel;
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>("QuadrupedCrawlState", "walkingStateTranistionTime", CrawlGateWalkingState.class, yoTime, registry);
@@ -399,9 +400,9 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedPositionC
       referenceFrames.updateFrames();
       comFrame = referenceFrames.getCenterOfMassFrame();
       
-      feedForwardFullRobotModel = robotParameters.createFullRobotModel();
+      feedForwardFullRobotModel = modelFactory.createFullRobotModel();
       this.feedForwardCenterOfMassJacobian = new CenterOfMassJacobian(feedForwardFullRobotModel.getElevator());
-      feedForwardReferenceFrames = new QuadrupedReferenceFrames(feedForwardFullRobotModel, robotParameters.getPhysicalProperties());
+      feedForwardReferenceFrames = new QuadrupedReferenceFrames(feedForwardFullRobotModel, physicalProperties);
       feedForwardCenterOfMassFrame = new TranslationReferenceFrame("offsetFeedForwardCenterOfMassFrame", feedForwardReferenceFrames.getCenterOfMassFrame());
       feedForwardReferenceFrames.updateFrames();
       feedForwardBodyFrame = feedForwardReferenceFrames.getBodyFrame();
@@ -577,7 +578,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedPositionC
       quadrupleSupportState = new QuadrupleSupportState(CrawlGateWalkingState.QUADRUPLE_SUPPORT, DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT, 0.2);
       TripleSupportState tripleSupportState = new TripleSupportState(CrawlGateWalkingState.TRIPLE_SUPPORT);
       
-      filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS, robotParameters); 
+      filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS, modelFactory);
       
       walkingStateMachine.addState(filterDesiredsToMatchCrawlControllerOnTransitionIn);
       walkingStateMachine.addState(quadrupleSupportState);
@@ -1346,7 +1347,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedPositionC
 
       private final MinimumJerkTrajectory minimumJerkTrajectory = new MinimumJerkTrajectory();
 
-      public FilterDesiredsToMatchCrawlControllerState(CrawlGateWalkingState stateEnum, QuadrupedRobotParameters robotParameters)
+      public FilterDesiredsToMatchCrawlControllerState(CrawlGateWalkingState stateEnum, QuadrupedModelFactory robotParameters)
       {
          super(stateEnum);
          
