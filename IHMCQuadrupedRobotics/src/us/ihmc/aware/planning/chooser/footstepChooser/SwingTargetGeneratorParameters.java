@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.parameters;
+package us.ihmc.aware.planning.chooser.footstepChooser;
 
 public interface SwingTargetGeneratorParameters
 {
