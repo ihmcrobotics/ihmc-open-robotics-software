@@ -15,8 +15,6 @@ public abstract class QuadrupedRobotParameters
 
    public abstract QuadrupedPhysicalProperties getPhysicalProperties();
 
-   public abstract QuadrupedActuatorParameters getActuatorParameters();
-
    public abstract QuadrupedSensorInformation getQuadrupedSensorInformation();
 
    public QuadrupedContactPointParameters getQuadrupedContactPointParameters()

@@ -10,6 +10,7 @@ import com.google.common.collect.HashBiMap;
 import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.robotics.kinematics.JointLimit;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -18,10 +19,18 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements FullQuadrupedRobotModel
 {
    private final BiMap<QuadrupedJointName, OneDoFJoint> jointNameOneDoFJointBiMap = HashBiMap.create();
-
    private final QuadrantDependentList<List<OneDoFJoint>> legOneDoFJoints = new QuadrantDependentList<>();
+   private final Map<QuadrupedJointName, JointLimit> jointLimits = new EnumMap<>(QuadrupedJointName.class);
 
    private QuadrantDependentList<RigidBody> feet;
+
+   public SDFFullQuadrupedRobotModel(SDFLinkHolder rootLink, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack,
+         Map<QuadrupedJointName, JointLimit> jointLimits)
+   {
+      this(rootLink, sdfJointNameMap, sensorLinksToTrack);
+
+      this.jointLimits.putAll(jointLimits);
+   }
 
    public SDFFullQuadrupedRobotModel(SDFLinkHolder rootLink, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
@@ -32,6 +41,7 @@ public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements Ful
          QuadrupedJointName quadrupedJointName = sdfJointNameMap.getJointNameForSDFName(oneDoFJoint.getName());
          jointNameOneDoFJointBiMap.put(quadrupedJointName, oneDoFJoint);
 
+         // Map leg names to quadrants
          if (quadrupedJointName.getRole() == JointRole.LEG)
          {
             RobotQuadrant quadrant = quadrupedJointName.getQuadrant();
@@ -42,6 +52,10 @@ public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements Ful
 
             legOneDoFJoints.get(quadrant).add(oneDoFJoint);
          }
+
+         // Assign default joint limits
+         JointLimit jointLimit = new JointLimit(oneDoFJoint);
+         jointLimits.put(quadrupedJointName, jointLimit);
       }
    }
 
@@ -91,5 +105,10 @@ public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements Ful
    public QuadrupedJointName getNameForOneDoFJoint(OneDoFJoint oneDoFJoint)
    {
       return jointNameOneDoFJointBiMap.inverse().get(oneDoFJoint);
+   }
+
+   public JointLimit getJointLimit(QuadrupedJointName jointName)
+   {
+      return jointLimits.get(jointName);
    }
 }
