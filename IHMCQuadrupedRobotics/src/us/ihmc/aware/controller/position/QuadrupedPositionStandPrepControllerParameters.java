@@ -1,8 +1,8 @@
-package us.ihmc.quadrupedRobotics.parameters;
+package us.ihmc.aware.controller.position;
 
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 
-public interface QuadrupedInitialPositionParameters
+public interface QuadrupedPositionStandPrepControllerParameters
 {
    /**
     * @return the height at which the root frame stands off the ground.

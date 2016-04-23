@@ -4,13 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
-import us.ihmc.aware.model.QuadrupedRobotParameters;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedInitialPositionParameters;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 
@@ -21,7 +18,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedPositionCo
 {
    private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
-   private final QuadrupedInitialPositionParameters initialPositionParameters;
+   private final QuadrupedPositionStandPrepControllerParameters initialPositionParameters;
 
    private final SDFFullQuadrupedRobotModel fullRobotModel;
    private final double dt;
@@ -33,7 +30,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedPositionCo
     */
    private double timeInTrajectory = 0.0;
 
-   public QuadrupedPositionStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedInitialPositionParameters initialPositionParameters)
+   public QuadrupedPositionStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedPositionStandPrepControllerParameters initialPositionParameters)
    {
       this.initialPositionParameters = initialPositionParameters;
       this.fullRobotModel = environment.getFullRobotModel();

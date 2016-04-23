@@ -1,4 +1,6 @@
-package us.ihmc.quadrupedRobotics.parameters;
+package us.ihmc.aware.controller.position;
+
+import us.ihmc.aware.planning.chooser.footstepChooser.SwingTargetGeneratorParameters;
 
 import javax.vecmath.Vector2d;
 
