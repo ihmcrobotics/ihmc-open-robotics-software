@@ -11,8 +11,6 @@ public abstract class QuadrupedRobotParameters
 
    public abstract SDFFullQuadrupedRobotModel createFullRobotModel();
 
-   public abstract String getModelName();
-
    public abstract QuadrupedPhysicalProperties getPhysicalProperties();
 
    public abstract QuadrupedSensorInformation getQuadrupedSensorInformation();
