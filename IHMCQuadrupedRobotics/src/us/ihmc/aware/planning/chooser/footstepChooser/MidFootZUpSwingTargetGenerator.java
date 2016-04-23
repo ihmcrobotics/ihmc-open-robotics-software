@@ -3,7 +3,6 @@ package us.ihmc.aware.planning.chooser.footstepChooser;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.quadrupedRobotics.parameters.SwingTargetGeneratorParameters;
 import us.ihmc.aware.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.aware.mechanics.inverseKinematics.QuadrupedLinkLengths;

@@ -1,7 +1,8 @@
-package us.ihmc.aware.geometry.supportPolygon;
+package us.ihmc.aware.planning.chooser.footstepChooser;
 
 import java.awt.Color;
 
+import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.aware.planning.chooser.footstepChooser.SwingTargetGenerator;
 import us.ihmc.aware.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

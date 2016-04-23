@@ -1,4 +1,6 @@
-package us.ihmc.quadrupedRobotics.parameters;
+package us.ihmc.aware.planning.chooser.footstepChooser;
+
+import us.ihmc.aware.controller.position.QuadrupedPositionBasedCrawlControllerParameters;
 
 import javax.vecmath.Vector2d;
 

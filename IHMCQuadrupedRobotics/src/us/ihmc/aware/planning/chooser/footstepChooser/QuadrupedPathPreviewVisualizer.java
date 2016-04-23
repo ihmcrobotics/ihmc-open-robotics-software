@@ -1,9 +1,7 @@
-package us.ihmc.aware.geometry.supportPolygon;
+package us.ihmc.aware.planning.chooser.footstepChooser;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.aware.planning.chooser.footstepChooser.MidFootZUpSwingTargetGenerator;
-import us.ihmc.quadrupedRobotics.parameters.DefaultSwingTargetGeneratorParameters;
 import us.ihmc.aware.estimator.referenceFrames.MockQuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
