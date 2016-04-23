@@ -1,6 +1,7 @@
 package us.ihmc.aware.controller.position;
 
 import us.ihmc.aware.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
+import us.ihmc.aware.model.QuadrupedPhysicalProperties;
 import us.ihmc.aware.providers.QuadrupedControllerInputProvider;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
@@ -8,7 +9,7 @@ import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.state.FiniteStateMachine;
 import us.ihmc.aware.state.FiniteStateMachineBuilder;
 import us.ihmc.aware.state.FiniteStateMachineYoVariableTrigger;
-import us.ihmc.aware.model.QuadrupedRobotParameters;
+import us.ihmc.aware.model.QuadrupedModelFactory;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -27,7 +28,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
    private final FiniteStateMachine<QuadrupedPositionControllerState, QuadrupedPositionControllerEvent> stateMachine;
    private final FiniteStateMachineYoVariableTrigger<QuadrupedPositionControllerEvent> userEventTrigger;
 
-   public QuadrupedPositionControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters parameters, QuadrupedPositionStandPrepControllerParameters initialPositionParameters, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedLegInverseKinematicsCalculator legIKCalculator)
+   public QuadrupedPositionControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionStandPrepControllerParameters initialPositionParameters, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedLegInverseKinematicsCalculator legIKCalculator)
    {
       // Initialize input providers.
       QuadrupedControllerInputProvider inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
@@ -37,7 +38,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       QuadrupedController doNothingController = new QuadrupedPositionDoNothingController(runtimeEnvironment);
       QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, initialPositionParameters);
       QuadrupedController standReadyController = new QuadrupedPositionStandReadyController(runtimeEnvironment);
-      QuadrupedController crawlController = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, parameters, crawlControllerParameters, inputProvider, legIKCalculator);
+      QuadrupedController crawlController = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, modelFactory, physicalProperties, crawlControllerParameters, inputProvider, legIKCalculator);
 
       FiniteStateMachineBuilder<QuadrupedPositionControllerState, QuadrupedPositionControllerEvent> builder = new FiniteStateMachineBuilder<>(
             QuadrupedPositionControllerState.class, "positionControllerState", registry);

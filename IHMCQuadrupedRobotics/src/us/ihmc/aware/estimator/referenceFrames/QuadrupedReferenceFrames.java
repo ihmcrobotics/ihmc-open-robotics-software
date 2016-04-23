@@ -102,7 +102,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
          ReferenceFrame frameAfterKnee = framesAfterLegJoint.get(kneeJointName);
 
          TranslationReferenceFrame soleFrame = new TranslationReferenceFrame(robotQuadrant.toString() + "SoleFrame", frameAfterKnee);
-         soleFrame.updateTranslation(quadrupedPhysicalProperties.getOffsetFromKneeToFoot(robotQuadrant));
+         soleFrame.updateTranslation(quadrupedPhysicalProperties.getOffsetFromJointBeforeFootToSole(robotQuadrant));
          soleFrame.update();
          
          soleFrames.set(robotQuadrant, soleFrame);

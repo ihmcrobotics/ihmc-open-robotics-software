@@ -9,11 +9,11 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.aware.model.QuadrupedPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.planning.gait.QuadrupedGaitCycle;
 import us.ihmc.aware.planning.gait.QuadrupedSupportConfiguration;
-import us.ihmc.aware.model.QuadrupedRobotParameters;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.YoQuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
@@ -228,12 +228,12 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       gaitCyclePeriodMap.put(QuadrupedGaitCycle.WALKING_TROT, 1.0); // 0.30);
    }
 
-   public QuadrupedTrotWalkController(QuadrupedRobotParameters robotParameters, SDFFullQuadrupedRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
+   public QuadrupedTrotWalkController(QuadrupedPhysicalProperties physicalProperties, SDFFullQuadrupedRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
          DoubleYoVariable yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(QuadrupedControllerState.TROT_WALK);
       this.fullRobotModel = fullRobotModel;
-      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, robotParameters.getPhysicalProperties());
+      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       this.dt = DT;
       this.yoTime = yoTime;
       

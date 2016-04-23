@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.aware.model.QuadrupedPhysicalProperties;
-import us.ihmc.aware.model.QuadrupedRobotParameters;
+import us.ihmc.aware.model.QuadrupedModelFactory;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -74,11 +74,10 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
 
    }
    
-   public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromLegAttachmentFrame(RobotQuadrant robotQuadrant, QuadrupedRobotParameters quadrupedRobotParams)
+   public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromLegAttachmentFrame(RobotQuadrant robotQuadrant, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties)
    {
       //make these here to ensure we get a zero pose
-      QuadrupedPhysicalProperties physicalProperties = quadrupedRobotParams.getPhysicalProperties();
-      SDFFullQuadrupedRobotModel fullRobotModel = quadrupedRobotParams.createFullRobotModel();
+      SDFFullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       
       ReferenceFrame legAttachmentFrame = referenceFrames.getLegAttachmentFrame(robotQuadrant);
@@ -90,11 +89,10 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
       return new QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(offsetFromHipRollToHipPitch.getVectorCopy(), referenceFrames, robotQuadrant);
    }
    
-   public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromHipRollFrame(RobotQuadrant robotQuadrant, QuadrupedRobotParameters quadrupedRobotParams)
+   public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromHipRollFrame(RobotQuadrant robotQuadrant, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties)
    {
       //make these here to ensure we get a zero pose
-      QuadrupedPhysicalProperties physicalProperties = quadrupedRobotParams.getPhysicalProperties();
-      SDFFullQuadrupedRobotModel fullRobotModel = quadrupedRobotParams.createFullRobotModel();
+      SDFFullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       
       ReferenceFrame frameAfterHipRoll = referenceFrames.getFrameBeforeLegJoint(robotQuadrant, LegJointName.HIP_ROLL);
