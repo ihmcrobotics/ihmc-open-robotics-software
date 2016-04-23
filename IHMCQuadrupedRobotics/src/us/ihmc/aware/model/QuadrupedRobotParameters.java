@@ -1,10 +1,7 @@
 package us.ihmc.aware.model;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.SDFParameters;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.aware.mechanics.virtualModelControl.QuadrupedJointLimits;
-import us.ihmc.quadrupedRobotics.parameters.*;
 
 public abstract class QuadrupedRobotParameters
 {

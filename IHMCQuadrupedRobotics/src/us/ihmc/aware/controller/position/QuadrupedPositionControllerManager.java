@@ -9,8 +9,6 @@ import us.ihmc.aware.state.FiniteStateMachine;
 import us.ihmc.aware.state.FiniteStateMachineBuilder;
 import us.ihmc.aware.state.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.aware.model.QuadrupedRobotParameters;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedInitialPositionParameters;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -29,7 +27,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
    private final FiniteStateMachine<QuadrupedPositionControllerState, QuadrupedPositionControllerEvent> stateMachine;
    private final FiniteStateMachineYoVariableTrigger<QuadrupedPositionControllerEvent> userEventTrigger;
 
-   public QuadrupedPositionControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters parameters, QuadrupedInitialPositionParameters initialPositionParameters, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedLegInverseKinematicsCalculator legIKCalculator)
+   public QuadrupedPositionControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedRobotParameters parameters, QuadrupedPositionStandPrepControllerParameters initialPositionParameters, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedLegInverseKinematicsCalculator legIKCalculator)
    {
       // Initialize input providers.
       QuadrupedControllerInputProvider inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
