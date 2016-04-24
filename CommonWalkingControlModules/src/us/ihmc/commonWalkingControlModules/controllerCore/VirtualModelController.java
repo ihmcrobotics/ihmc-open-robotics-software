@@ -13,9 +13,8 @@ import java.util.Map;
 
 public class VirtualModelController
 {
-   private final WholeBodyControlCoreToolbox toolbox;
    private final GeometricJacobianHolder geometricJacobianHolder;
-   private final RigidBody rootBody;
+   private final RigidBody defaultRootBody;
 
    private OneDoFJoint[] jointsToCompute;
    private Map<InverseDynamicsJoint, Double> jointTorques = new HashMap<>();
@@ -31,16 +30,15 @@ public class VirtualModelController
    private final DenseMatrix64F tmpEffortMatrix = new DenseMatrix64F(1, 1);
 
 
-   public VirtualModelController(WholeBodyControlCoreToolbox toolbox)
+   public VirtualModelController(GeometricJacobianHolder geometricJacobianHolder, RigidBody defaultRootBody)
    {
-      this.toolbox = toolbox;
-      rootBody = toolbox.getRobotRootJoint().getSuccessor();
-      geometricJacobianHolder = toolbox.getGeometricJacobianHolder();
+      this.geometricJacobianHolder = geometricJacobianHolder;
+      this.defaultRootBody = defaultRootBody;
    }
 
    public void registerEndEffector(RigidBody endEffector)
    {
-      registerEndEffector(rootBody, endEffector);
+      registerEndEffector(defaultRootBody, endEffector);
    }
 
    public void registerEndEffector(RigidBody base, RigidBody endEffector)
