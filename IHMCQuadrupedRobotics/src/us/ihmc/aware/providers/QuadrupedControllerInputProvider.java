@@ -21,7 +21,7 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
 {
    private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
    private final DoubleParameter comHeightNominalParameter = parameterFactory.createDouble("comHeightNominal", 0.55);
-   private final DoubleArrayParameter comPositionLowerLimitsParameter = parameterFactory.createDoubleArray("comPositionLowerLimits", -Double.MAX_VALUE, -Double.MAX_VALUE, 0.0);
+   private final DoubleArrayParameter comPositionLowerLimitsParameter = parameterFactory.createDoubleArray("comPositionLowerLimits", -Double.MAX_VALUE, -Double.MAX_VALUE, 0.2);
    private final DoubleArrayParameter comPositionUpperLimitsParameter = parameterFactory.createDoubleArray("comPositionUpperLimits", Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
    private final DoubleArrayParameter comVelocityLowerLimitsParameter = parameterFactory.createDoubleArray("comVelocityLowerLimits", -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
    private final DoubleArrayParameter comVelocityUpperLimitsParameter = parameterFactory.createDoubleArray("comVelocityUpperLimits", Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
