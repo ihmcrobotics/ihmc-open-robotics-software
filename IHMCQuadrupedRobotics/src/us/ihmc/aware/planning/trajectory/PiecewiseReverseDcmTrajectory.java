@@ -28,7 +28,7 @@ public class PiecewiseReverseDcmTrajectory
       this.maxSteps = maxSteps;
       this.numSteps = maxSteps;
       this.gravity = gravity;
-      this.comHeight = comHeight;
+      this.comHeight = Math.max(comHeight, 0.001);
       this.timeAtSoS = new double[maxSteps + 1];
       this.dcmPositionAtSoS = new FramePoint[maxSteps + 1];
       this.vrpPositionAtSoS = new FramePoint[maxSteps + 1];
@@ -120,7 +120,7 @@ public class PiecewiseReverseDcmTrajectory
 
    public void setComHeight(double comHeight)
    {
-      this.comHeight = comHeight;
+      this.comHeight = Math.max(comHeight, 0.001);
    }
 
    public double getStartTime()
