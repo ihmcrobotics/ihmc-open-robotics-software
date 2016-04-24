@@ -79,7 +79,7 @@ public class WholeBodyVirtualModelControlSolver
 
       controllerModel = toolbox.getFullRobotModel();
       rootJoint = toolbox.getRobotRootJoint();
-      virtualModelController = new VirtualModelController(toolbox);
+      virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), rootJoint.getSuccessor());
       optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, registry);
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
