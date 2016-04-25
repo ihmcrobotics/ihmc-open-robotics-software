@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -21,6 +22,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
+import java.util.Map;
 import java.util.Random;
 
 public class VirtualModelControllerTest
@@ -60,7 +62,7 @@ public class VirtualModelControllerTest
 
    @DeployableTestMethod
    @Test(timeout = 30000)
-   public void testPointJacobianCalculation()
+   public void testJacobianCalculation()
    {
       double gravity = -9.81;
 
@@ -104,167 +106,68 @@ public class VirtualModelControllerTest
 
       compareWrenches(wrench, appliedWrench);
    }
-   /*
+
    @DeployableTestMethod
    @Test(timeout = 30000)
-   public void testJacobianCalculation()
+   public void testCorrectFrameVirtualModelControl()
    {
       double gravity = -9.81;
 
-      RobotArm robotArm = createRobotArm(gravity);
-      RigidBody base = robotArm.getBase();
-      RigidBody endEffector = robotArm.getEndEffector();
+      RobotLeg robotLeg = createRobotLeg(gravity);
+      RigidBody base = robotLeg.getBase();
+      RigidBody endEffector = robotLeg.getEndEffector();
+      RigidBody foot = endEffector.getParentJoint().getSuccessor();
+      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
-      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
-      InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(base, endEffector);
+      FrameVector desiredForce = new FrameVector(foot.getBodyFixedFrame(), new Vector3d(-20.0, 2.0, 60.0));
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce.getVector(), new Vector3d());
 
-      Wrench desiredWrench = new Wrench(endEffector.getBodyFixedFrame(), endEffector.getBodyFixedFrame());
-      desiredWrench.setLinearPart(new Vector3d(5.0, 0.0, 10.0));
-      desiredWrench.setAngularPart(new Vector3d(0.0, 1.0, 0.0));
-      desiredWrench.changeFrame(base.getBodyFixedFrame());
-
-      long endJacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(controlledJoints, base.getBodyFixedFrame());
-      GeometricJacobian endJacobian = geometricJacobianHolder.getJacobian(endJacobianID);
-      PointJacobian pointJacobian = new PointJacobian();
-      FramePoint endPoint = new FramePoint(ReferenceFrame.getWorldFrame());
-      endPoint.setToZero(endEffector.getBodyFixedFrame());
-      pointJacobian.set(endJacobian, endPoint);
-      endJacobian.compute();
-      pointJacobian.compute();
-      DenseMatrix64F jacobianMatrix = endJacobian.getJacobianMatrix();
-      DenseMatrix64F pointJacobianMatrix = pointJacobian.getJacobianMatrix();
-
-      DenseMatrix64F desiredWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      desiredWrench.setAngularPart(new Vector3d());
-      desiredWrench.getMatrix(desiredWrenchMatrix);
-      DenseMatrix64F desiredForceMatrix = new DenseMatrix64F(3, 1);
-      Vector3d desiredForce = desiredWrench.getLinearPart();
-      desiredForceMatrix.set(0, 0, desiredForce.getX());
-      desiredForceMatrix.set(1, 0, desiredForce.getY());
-      desiredForceMatrix.set(2, 0, desiredForce.getZ());
-
-      DenseMatrix64F altJointEffort = new DenseMatrix64F(controlledJoints.length, 1);
-      DenseMatrix64F jointEffort = endJacobian.computeJointTorques(desiredWrench);
-      CommonOps.multTransA(jacobianMatrix, desiredWrenchMatrix, jointEffort);
-      CommonOps.multTransA(pointJacobianMatrix, desiredForceMatrix, altJointEffort);
-      DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      DenseMatrix64F appliedForceMatrix = new DenseMatrix64F(3, 1);
-      CommonOps.mult(jacobianMatrix, jointEffort, appliedWrenchMatrix);
-      CommonOps.mult(pointJacobianMatrix, altJointEffort, appliedForceMatrix);
-
-      Wrench appliedWrench = new Wrench(desiredWrench.getBodyFrame(), desiredWrench.getExpressedInFrame(), appliedWrenchMatrix);
-      compareWrenches(desiredWrench, appliedWrench);
+      submitAndCheckVirtualModelControl(pelvis, foot, desiredWrench, null);
    }
-   */
 
-   /*
    @DeployableTestMethod
    @Test(timeout = 30000)
-   public void testPlanarTorqueComputation()
+   public void testCorrectFrameVirtualModelControlSelectAll()
    {
       double gravity = -9.81;
 
-      RobotArm robotArm = createPlanarRobotArm(gravity);
-      RigidBody base = robotArm.getBase();
-      RigidBody endEffector = robotArm.getEndEffector();
+      RobotLeg robotLeg = createRobotLeg(gravity);
+      RigidBody base = robotLeg.getBase();
+      RigidBody endEffector = robotLeg.getEndEffector();
+      RigidBody foot = endEffector.getParentJoint().getSuccessor();
+      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
-      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
+      FrameVector desiredForce = new FrameVector(foot.getBodyFixedFrame(), new Vector3d(-20.0, 2.0, 60.0));
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce.getVector(), new Vector3d());
+
+      submitAndCheckVirtualModelControl(pelvis, foot, desiredWrench, CommonOps.identity(Wrench.SIZE, Wrench.SIZE));
+   }
+
+   private void submitAndCheckVirtualModelControl(RigidBody base, RigidBody endEffector, Wrench desiredWrench, DenseMatrix64F selectionMatrix)
+   {
       InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(base, endEffector);
-
-      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, base);
-      virtualModelController.registerEndEffector(base, endEffector);
-
-      Wrench desiredWrench = new Wrench(endEffector.getBodyFixedFrame(), endEffector.getBodyFixedFrame());
-      //desiredWrench.setAngularPart(new Vector3d(0.0, 2.0, 0.0));
-      desiredWrench.setLinearPart(new Vector3d(5.0, 0.0, 10.0));
-      //desiredWrench.changeFrame(base.getBodyFixedFrame());
-
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, Wrench.SIZE);
-      selectionMatrix.set(0, 3, 1);
-      selectionMatrix.set(1, 5, 1);
-
-      //virtualModelController.submitEndEffectorVirtualWrench(endEffector, desiredWrench, selectionMatrix);
-      virtualModelController.submitEndEffectorVirtualWrench(endEffector, desiredWrench);
-
-      // find jacobian transpose solution
-      geometricJacobianHolder.compute();
-      VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
-      virtualModelController.compute(virtualModelControlSolution);
-
-      // compute end effector force from torques
-      Map<InverseDynamicsJoint, Double> jointTorques = virtualModelControlSolution.getJointTorques();
-      DenseMatrix64F jointEffortMatrix = new DenseMatrix64F(controlledJoints.length, 1);
-      for (int i = 0; i < controlledJoints.length; i++)
-      {
-         jointEffortMatrix.set(i, 0, jointTorques.get(controlledJoints[i]));
-      }
-      //DenseMatrix64F altJointEffortMatrix = new DenseMatrix64F(controlledJoints.length, 1);
-      long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(controlledJoints, base.getBodyFixedFrame());
-      GeometricJacobian jacobian = geometricJacobianHolder.getJacobian(jacobianID);
+      GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, base.getBodyFixedFrame());
       jacobian.compute();
 
-      desiredWrench.changeFrame(endEffector.getBodyFixedFrame());
-
-
       DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
-      ReferenceFrame jacobianFrame = jacobian.getBaseFrame();
-      desiredWrench.changeBodyFrameAttachedToSameBody(jacobianFrame);
-      desiredWrench.changeFrame(jacobianFrame);
-      DenseMatrix64F desiredWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      desiredWrench.getMatrix(desiredWrenchMatrix);
-      DenseMatrix64F altJointEffort = jacobian.computeJointTorques(desiredWrench);
-      DenseMatrix64F altaltJointEffort = new DenseMatrix64F(jacobianMatrix.numCols, 1);
-      CommonOps.multTransA(jacobianMatrix, desiredWrenchMatrix, altaltJointEffort);
+      DenseMatrix64F transposeJacobianMatrix = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
+      CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
+      CommonOps.invert(transposeJacobianMatrix);
 
-
-
-      DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      CommonOps.mult(jacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);
-      Wrench appliedWrench = new Wrench(jacobian.getBaseFrame(), jacobian.getJacobianFrame(), appliedWrenchMatrix);
-      Wrench altAppliedWrench = new Wrench(jacobian.getJacobianFrame(), jacobian.getEndEffectorFrame(), appliedWrenchMatrix);
-
-      desiredWrench.changeFrame(endEffector.getBodyFixedFrame());
-      appliedWrench.changeBodyFrameAttachedToSameBody(desiredWrench.getBodyFrame());
-      appliedWrench.changeFrame(endEffector.getBodyFixedFrame());
-      altAppliedWrench.changeBodyFrameAttachedToSameBody(endEffector.getBodyFixedFrame());
-      altAppliedWrench.changeFrame(endEffector.getBodyFixedFrame());
-      compareWrenches(desiredWrench, appliedWrench);
-   }
-   */
-
-   /*
-   @DeployableTestMethod
-   @Test(timeout = 30000)
-   public void testTorqueComputation()
-   {
-      double gravity = -9.81;
-
-      RobotArm robotArm = createRobotArm(gravity);
-      RigidBody base = robotArm.getBase();
-      RigidBody endEffector = robotArm.getEndEffector();
-
-      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
-      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), base);
-
-      RigidBody[] endEffectors = {endEffector};
-      InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(base, endEffector);
-
-      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, base);
+      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), base);
       virtualModelController.registerEndEffector(base, endEffector);
 
-      Wrench desiredWrench = new Wrench(endEffector.getBodyFixedFrame(), endEffector.getBodyFixedFrame());
-      desiredWrench.setLinearPartX(5.0);
-      desiredWrench.setLinearPartY(0.0);
-      desiredWrench.setLinearPartZ(10);
-      desiredWrench.setAngularPartX(0.0);
-      desiredWrench.setAngularPartY(2.0);
-      desiredWrench.setAngularPartZ(0.0);
+      desiredWrench.changeFrame(base.getBodyFixedFrame());
 
-      virtualModelController.submitEndEffectorVirtualWrench(endEffector, desiredWrench);
+      if (selectionMatrix == null)
+         virtualModelController.submitEndEffectorVirtualWrench(endEffector, desiredWrench);
+      else
+         virtualModelController.submitEndEffectorVirtualWrench(endEffector, desiredWrench, selectionMatrix);
 
       // find jacobian transpose solution
       VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
       virtualModelController.compute(virtualModelControlSolution);
+      desiredWrench.changeFrame(endEffector.getBodyFixedFrame());
 
       // compute end effector force from torques
       Map<InverseDynamicsJoint, Double> jointTorques = virtualModelControlSolution.getJointTorques();
@@ -273,15 +176,15 @@ public class VirtualModelControllerTest
       {
          jointEffortMatrix.set(i, 0, jointTorques.get(controlledJoints[i]));
       }
-      long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(controlledJoints, endEffector.getBodyFixedFrame());
-      DenseMatrix64F jacobianMatrix = geometricJacobianHolder.getJacobian(jacobianID).getJacobianMatrix();
-      DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      CommonOps.mult(jacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);
-      Wrench appliedWrench = new Wrench(endEffector.getBodyFixedFrame(), endEffector.getBodyFixedFrame(), appliedWrenchMatrix);
 
-      compareWrenches(desiredWrench, appliedWrench);
+      DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+      CommonOps.mult(transposeJacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);
+      Wrench appliedWrench = new Wrench(endEffector.getBodyFixedFrame(), jacobian.getJacobianFrame(), appliedWrenchMatrix);
+      appliedWrench.changeFrame(endEffector.getBodyFixedFrame());
+
+      compareWrenches(appliedWrench, desiredWrench);
+
    }
-   */
 
 
    private RobotLeg createRobotLeg(double gravity)
@@ -517,7 +420,7 @@ public class VirtualModelControllerTest
       inputWrench.getBodyFrame().checkReferenceFrameMatch(outputWrench.getBodyFrame());
       inputWrench.getExpressedInFrame().checkReferenceFrameMatch(outputWrench.getExpressedInFrame());
 
-      double epsilon = 1e-12; //3;
+      double epsilon = 1e-4;
       JUnitTools.assertTuple3dEquals(inputWrench.getAngularPartCopy(), outputWrench.getAngularPartCopy(), epsilon);
       JUnitTools.assertTuple3dEquals(inputWrench.getLinearPartCopy(), outputWrench.getLinearPartCopy(), epsilon);
    }

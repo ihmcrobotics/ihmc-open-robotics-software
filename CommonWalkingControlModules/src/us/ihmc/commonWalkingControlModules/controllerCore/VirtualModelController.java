@@ -90,8 +90,8 @@ public class VirtualModelController
 
    public void submitEndEffectorVirtualWrench(RigidBody endEffector, Wrench wrench)
    {
-      wrench.changeFrame(baseOfEndEffector.get(endEffector).getBodyFixedFrame());
-      wrench.changeBodyFrameAttachedToSameBody(endEffector.getBodyFixedFrame());
+      //wrench.changeFrame(baseOfEndEffector.get(endEffector).getBodyFixedFrame());
+      //wrench.changeBodyFrameAttachedToSameBody(endEffector.getBodyFixedFrame());
 
       endEffectorWrenches.put(endEffector, wrench);
       endEffectorSelectionMatrices.put(endEffector, CommonOps.identity(Wrench.SIZE));
@@ -140,7 +140,6 @@ public class VirtualModelController
          GeometricJacobian jacobian = geometricJacobianHolder.getJacobian(endEffectorJacobians.get(endEffector));
          Wrench endEffectorWrench = endEffectorWrenches.get(endEffector);
          endEffectorWrench.changeFrame(jacobian.getBaseFrame());
-         endEffectorWrench.changeBodyFrameAttachedToSameBody(jacobian.getJacobianFrame());
 
          DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
          endEffectorWrench.getMatrix(wrenchMatrix);
@@ -154,8 +153,6 @@ public class VirtualModelController
          CommonOps.mult(endEffectorSelectionMatrix, jacobianMatrix, tmpJacobianMatrix);
 
          // Compute desired joint torques
-         DenseMatrix64F altJointEffortMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-         altJointEffortMatrix = jacobian.computeJointTorques(endEffectorWrench);
          CommonOps.multTransA(tmpJacobianMatrix, tmpEndEffectorWrench, jointEffortMatrix);
 
          // Write torques to map
