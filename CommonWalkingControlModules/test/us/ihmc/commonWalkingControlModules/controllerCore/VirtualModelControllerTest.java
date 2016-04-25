@@ -3,14 +3,16 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -19,7 +21,6 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
-import java.util.Map;
 import java.util.Random;
 
 public class VirtualModelControllerTest
@@ -31,30 +32,132 @@ public class VirtualModelControllerTest
    public static final double POUNDS = 1.0 / 2.2;    // Pound to Kg conversion.
    public static final double INCHES = 0.0254;    // Inch to Meter Conversion.
 
-   public static final double BASE_HEIGHT = 1.0;
-   public static final double BASE_RAD = 0.1;
+   public static final double PELVIS_HEIGHT = 1.0;
+   public static final double PELVIS_RAD = 0.1;
 
-   public static final double SHOULDER_DIFFERENTIAL_HEIGHT = 0.05;
-   public static final double SHOULDER_DIFFERENTIAL_WIDTH = 0.075;
+   public static final double HIP_WIDTH = 0.2;
 
-   public static final double UPPER_ARM_LENGTH = 23.29 * INCHES;
-   public static final double UPPER_ARM_RAD = 0.05;
-   public static final double UPPER_ARM_MASS = 6.7 * POUNDS;
+   public static final double HIP_DIFFERENTIAL_HEIGHT = 0.05;
+   public static final double HIP_DIFFERENTIAL_WIDTH = 0.075;
 
-   public static final double FOREARM_LENGTH = 9.1 * INCHES;
-   public static final double FOREARM_RAD = 0.03;
-   public static final double FOREARM_MASS = 1.0 * POUNDS;
+   public static final double THIGH_LENGTH = 23.29 * INCHES;
+   public static final double THIGH_RAD = 0.05;
+   public static final double THIGH_MASS = 6.7 * POUNDS;
 
-   public static final double WRIST_DIFFERENTIAL_HEIGHT = 0.025;
-   public static final double WRIST_DIFFERENTIAL_WIDTH = 0.0375;
+   public static final double SHIN_LENGTH = 9.1 * INCHES;
+   public static final double SHIN_RAD = 0.03;
+   public static final double SHIN_MASS = 1.0 * POUNDS;
 
-   public static final double GRIPPER_LENGTH = 0.08;
-   public static final double GRIPPER_COM_OFFSET = 3.0 * INCHES;
-   public static final double GRIPPER_RAD = 0.05;
-   public static final double GRIPPER_MASS = 3.0 * POUNDS;
+   public static final double ANKLE_DIFFERENTIAL_HEIGHT = 0.025;
+   public static final double ANKLE_DIFFERENTIAL_WIDTH = 0.0375;
+
+   public static final double FOOT_LENGTH = 0.08;
+   public static final double FOOT_COM_OFFSET = 3.0 * INCHES;
+   public static final double FOOT_RAD = 0.05;
+   public static final double FOOT_MASS = 3.0 * POUNDS;
 
    private final Random random = new Random(100L);
 
+   @DeployableTestMethod
+   @Test(timeout = 30000)
+   public void testPointJacobianCalculation()
+   {
+      double gravity = -9.81;
+
+      RobotLeg robotLeg = createRobotLeg(gravity);
+      RigidBody base = robotLeg.getBase();
+      RigidBody endEffector = robotLeg.getEndEffector();
+      RigidBody foot = endEffector.getParentJoint().getSuccessor();
+      RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
+
+      FrameVector desiredForce = new FrameVector(foot.getBodyFixedFrame(), new Vector3d(-20.0, 2.0, 60.0));
+      Wrench wrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce.getVector(), new Vector3d());
+
+      InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(pelvis, foot);
+      GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, pelvis.getBodyFixedFrame());
+      jacobian.compute();
+
+      DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
+      DenseMatrix64F transposeJacobianMatrix = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
+      CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
+
+      wrench.changeFrame(pelvis.getBodyFixedFrame());
+      DenseMatrix64F wrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+      wrenchMatrix.set(0, 0, wrench.getAngularPartX());
+      wrenchMatrix.set(1, 0, wrench.getAngularPartY());
+      wrenchMatrix.set(2, 0, wrench.getAngularPartZ());
+      wrenchMatrix.set(3, 0, wrench.getLinearPartX());
+      wrenchMatrix.set(4, 0, wrench.getLinearPartY());
+      wrenchMatrix.set(5, 0, wrench.getLinearPartZ());
+
+      DenseMatrix64F jointEffort = new DenseMatrix64F(controlledJoints.length, 1);
+      CommonOps.multTransA(jacobianMatrix, wrenchMatrix, jointEffort);
+
+      desiredForce.changeFrame(foot.getBodyFixedFrame());
+      wrench.changeFrame(foot.getBodyFixedFrame());
+
+      DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+      CommonOps.invert(transposeJacobianMatrix);
+      CommonOps.mult(transposeJacobianMatrix, jointEffort, appliedWrenchMatrix);
+      Wrench appliedWrench = new Wrench(foot.getBodyFixedFrame(), jacobian.getJacobianFrame(), appliedWrenchMatrix);
+      appliedWrench.changeFrame(foot.getBodyFixedFrame());
+
+      compareWrenches(wrench, appliedWrench);
+   }
+   /*
+   @DeployableTestMethod
+   @Test(timeout = 30000)
+   public void testJacobianCalculation()
+   {
+      double gravity = -9.81;
+
+      RobotArm robotArm = createRobotArm(gravity);
+      RigidBody base = robotArm.getBase();
+      RigidBody endEffector = robotArm.getEndEffector();
+
+      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
+      InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(base, endEffector);
+
+      Wrench desiredWrench = new Wrench(endEffector.getBodyFixedFrame(), endEffector.getBodyFixedFrame());
+      desiredWrench.setLinearPart(new Vector3d(5.0, 0.0, 10.0));
+      desiredWrench.setAngularPart(new Vector3d(0.0, 1.0, 0.0));
+      desiredWrench.changeFrame(base.getBodyFixedFrame());
+
+      long endJacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(controlledJoints, base.getBodyFixedFrame());
+      GeometricJacobian endJacobian = geometricJacobianHolder.getJacobian(endJacobianID);
+      PointJacobian pointJacobian = new PointJacobian();
+      FramePoint endPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      endPoint.setToZero(endEffector.getBodyFixedFrame());
+      pointJacobian.set(endJacobian, endPoint);
+      endJacobian.compute();
+      pointJacobian.compute();
+      DenseMatrix64F jacobianMatrix = endJacobian.getJacobianMatrix();
+      DenseMatrix64F pointJacobianMatrix = pointJacobian.getJacobianMatrix();
+
+      DenseMatrix64F desiredWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+      desiredWrench.setAngularPart(new Vector3d());
+      desiredWrench.getMatrix(desiredWrenchMatrix);
+      DenseMatrix64F desiredForceMatrix = new DenseMatrix64F(3, 1);
+      Vector3d desiredForce = desiredWrench.getLinearPart();
+      desiredForceMatrix.set(0, 0, desiredForce.getX());
+      desiredForceMatrix.set(1, 0, desiredForce.getY());
+      desiredForceMatrix.set(2, 0, desiredForce.getZ());
+
+      DenseMatrix64F altJointEffort = new DenseMatrix64F(controlledJoints.length, 1);
+      DenseMatrix64F jointEffort = endJacobian.computeJointTorques(desiredWrench);
+      CommonOps.multTransA(jacobianMatrix, desiredWrenchMatrix, jointEffort);
+      CommonOps.multTransA(pointJacobianMatrix, desiredForceMatrix, altJointEffort);
+      DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+      DenseMatrix64F appliedForceMatrix = new DenseMatrix64F(3, 1);
+      CommonOps.mult(jacobianMatrix, jointEffort, appliedWrenchMatrix);
+      CommonOps.mult(pointJacobianMatrix, altJointEffort, appliedForceMatrix);
+
+      Wrench appliedWrench = new Wrench(desiredWrench.getBodyFrame(), desiredWrench.getExpressedInFrame(), appliedWrenchMatrix);
+      compareWrenches(desiredWrench, appliedWrench);
+   }
+   */
+
+   /*
    @DeployableTestMethod
    @Test(timeout = 30000)
    public void testPlanarTorqueComputation()
@@ -62,6 +165,81 @@ public class VirtualModelControllerTest
       double gravity = -9.81;
 
       RobotArm robotArm = createPlanarRobotArm(gravity);
+      RigidBody base = robotArm.getBase();
+      RigidBody endEffector = robotArm.getEndEffector();
+
+      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
+      InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(base, endEffector);
+
+      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, base);
+      virtualModelController.registerEndEffector(base, endEffector);
+
+      Wrench desiredWrench = new Wrench(endEffector.getBodyFixedFrame(), endEffector.getBodyFixedFrame());
+      //desiredWrench.setAngularPart(new Vector3d(0.0, 2.0, 0.0));
+      desiredWrench.setLinearPart(new Vector3d(5.0, 0.0, 10.0));
+      //desiredWrench.changeFrame(base.getBodyFixedFrame());
+
+      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, Wrench.SIZE);
+      selectionMatrix.set(0, 3, 1);
+      selectionMatrix.set(1, 5, 1);
+
+      //virtualModelController.submitEndEffectorVirtualWrench(endEffector, desiredWrench, selectionMatrix);
+      virtualModelController.submitEndEffectorVirtualWrench(endEffector, desiredWrench);
+
+      // find jacobian transpose solution
+      geometricJacobianHolder.compute();
+      VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
+      virtualModelController.compute(virtualModelControlSolution);
+
+      // compute end effector force from torques
+      Map<InverseDynamicsJoint, Double> jointTorques = virtualModelControlSolution.getJointTorques();
+      DenseMatrix64F jointEffortMatrix = new DenseMatrix64F(controlledJoints.length, 1);
+      for (int i = 0; i < controlledJoints.length; i++)
+      {
+         jointEffortMatrix.set(i, 0, jointTorques.get(controlledJoints[i]));
+      }
+      //DenseMatrix64F altJointEffortMatrix = new DenseMatrix64F(controlledJoints.length, 1);
+      long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(controlledJoints, base.getBodyFixedFrame());
+      GeometricJacobian jacobian = geometricJacobianHolder.getJacobian(jacobianID);
+      jacobian.compute();
+
+      desiredWrench.changeFrame(endEffector.getBodyFixedFrame());
+
+
+      DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
+      ReferenceFrame jacobianFrame = jacobian.getBaseFrame();
+      desiredWrench.changeBodyFrameAttachedToSameBody(jacobianFrame);
+      desiredWrench.changeFrame(jacobianFrame);
+      DenseMatrix64F desiredWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+      desiredWrench.getMatrix(desiredWrenchMatrix);
+      DenseMatrix64F altJointEffort = jacobian.computeJointTorques(desiredWrench);
+      DenseMatrix64F altaltJointEffort = new DenseMatrix64F(jacobianMatrix.numCols, 1);
+      CommonOps.multTransA(jacobianMatrix, desiredWrenchMatrix, altaltJointEffort);
+
+
+
+      DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+      CommonOps.mult(jacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);
+      Wrench appliedWrench = new Wrench(jacobian.getBaseFrame(), jacobian.getJacobianFrame(), appliedWrenchMatrix);
+      Wrench altAppliedWrench = new Wrench(jacobian.getJacobianFrame(), jacobian.getEndEffectorFrame(), appliedWrenchMatrix);
+
+      desiredWrench.changeFrame(endEffector.getBodyFixedFrame());
+      appliedWrench.changeBodyFrameAttachedToSameBody(desiredWrench.getBodyFrame());
+      appliedWrench.changeFrame(endEffector.getBodyFixedFrame());
+      altAppliedWrench.changeBodyFrameAttachedToSameBody(endEffector.getBodyFixedFrame());
+      altAppliedWrench.changeFrame(endEffector.getBodyFixedFrame());
+      compareWrenches(desiredWrench, appliedWrench);
+   }
+   */
+
+   /*
+   @DeployableTestMethod
+   @Test(timeout = 30000)
+   public void testTorqueComputation()
+   {
+      double gravity = -9.81;
+
+      RobotArm robotArm = createRobotArm(gravity);
       RigidBody base = robotArm.getBase();
       RigidBody endEffector = robotArm.getEndEffector();
 
@@ -103,119 +281,105 @@ public class VirtualModelControllerTest
 
       compareWrenches(desiredWrench, appliedWrench);
    }
+   */
 
-   private RobotArm createPlanarRobotArm(double gravity)
+
+   private RobotLeg createRobotLeg(double gravity)
    {
-      Robot robotArm = new Robot("robotArm");
-      robotArm.setGravity(gravity);
+      Robot robotLeg = new Robot("robotLeg");
+      robotLeg.setGravity(gravity);
 
-      Link baseLink = base();
-      robotArm.addStaticLink(baseLink);
-      ReferenceFrame baseFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
-      RigidBody baseBody = new RigidBody("base", baseFrame);
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
+      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
 
-      Vector3d shoulderPitchOffset = new Vector3d(0.0, 0.0, SHOULDER_DIFFERENTIAL_HEIGHT);
-      PinJoint shoulder_pitch = new PinJoint("shoulder_pitch", shoulderPitchOffset, robotArm, Axis.Y);
-      shoulder_pitch.setQ(random.nextDouble());
-      Link upper_arm = upper_arm();
-      shoulder_pitch.setLink(upper_arm);
-      robotArm.addRootJoint(shoulder_pitch);
-      RevoluteJoint shoulderPitch = ScrewTools.addRevoluteJoint("shoulder_pitch", baseBody, shoulderPitchOffset, Y);
-      RigidBody upperArmBody = copyLinkAsRigidBody(upper_arm, shoulderPitch, "upper_arm");
+      FloatingJoint floatingJoint = new FloatingJoint("pelvis", new Vector3d(), robotLeg);
+      robotLeg.addRootJoint(floatingJoint);
+      SixDoFJoint rootJoint = new SixDoFJoint("pelvis", elevator, elevatorFrame);
 
-      Vector3d elbowPitchOffset = new Vector3d(0.0, 0.0, UPPER_ARM_LENGTH);
-      PinJoint elbow_pitch = new PinJoint("elbow_pitch", elbowPitchOffset, robotArm, Axis.Y);
-      elbow_pitch.setQ(random.nextDouble());
-      Link forearm = forearm();
-      elbow_pitch.setLink(forearm);
-      shoulder_pitch.addJoint(elbow_pitch);
-      RevoluteJoint elbowPitch = ScrewTools.addRevoluteJoint("elbow_pitch", upperArmBody, elbowPitchOffset, Y);
-      RigidBody forearmBody = copyLinkAsRigidBody(forearm, elbowPitch, "forearm");
+      Link pelvisLink = pelvis();
+      floatingJoint.setLink(pelvisLink);
+      RigidBody pelvisBody = copyLinkAsRigidBody(pelvisLink, rootJoint, "pelvis");
 
-      Vector3d wristPitchOffset = new Vector3d(0.0, 0.0, FOREARM_LENGTH);
-      PinJoint wrist_pitch = new PinJoint("wrist_pitch", wristPitchOffset, robotArm, Axis.Y);
-      wrist_pitch.setQ(random.nextDouble());
-      Link gripper = gripper();
-      wrist_pitch.setLink(gripper);
-      elbow_pitch.addJoint(wrist_pitch);
-      RevoluteJoint wristPitch = ScrewTools.addRevoluteJoint("wrist_pitch", forearmBody, wristPitchOffset, Z);
-      RigidBody gripperBody = copyLinkAsRigidBody(gripper, wristPitch, "gripper");
+      Vector3d hipYawOffset = new Vector3d(0.0, -HIP_WIDTH, 0.0);
+      PinJoint hip_yaw = new PinJoint("hip_yaw", hipYawOffset, robotLeg, Axis.Z);
+      hip_yaw.setQ(0);
 
-      return new RobotArm(baseBody, gripperBody);
+      Link hip_differential = hip_differential();
+      hip_yaw.setLink(hip_differential);
+      floatingJoint.addJoint(hip_yaw);
+
+      RevoluteJoint hipYaw = ScrewTools.addRevoluteJoint("hip_yaw", pelvisBody, hipYawOffset, Z);
+      hipYaw.setQ(hip_yaw.getQ().getDoubleValue());
+      RigidBody hipDifferentialBody = copyLinkAsRigidBody(hip_differential, hipYaw, "hip_differential");
+
+      Vector3d hipRollOffset = new Vector3d();
+      PinJoint hip_roll = new PinJoint("hip_roll", hipRollOffset, robotLeg, Axis.X);
+      hip_roll.setQ(0);
+
+      Link hip_differential2 = hip_differential();
+      hip_roll.setLink(hip_differential2);
+      hip_yaw.addJoint(hip_roll);
+
+      RevoluteJoint hipRoll = ScrewTools.addRevoluteJoint("hip_roll", hipDifferentialBody, hipRollOffset, X);
+      hipRoll.setQ(hip_roll.getQ().getDoubleValue());
+      RigidBody hipDifferentialBody2 = copyLinkAsRigidBody(hip_differential2, hipRoll, "hip_differential");
+
+      Vector3d hipPitchOffset = new Vector3d();
+      PinJoint hip_pitch = new PinJoint("hip_pitch", hipPitchOffset, robotLeg, Axis.Y);
+      hip_pitch.setQ(-0.2);
+
+      Link thigh = thigh();
+      hip_pitch.setLink(thigh);
+      hip_roll.addJoint(hip_pitch);
+
+      RevoluteJoint hipPitch = ScrewTools.addRevoluteJoint("hip_pitch", hipDifferentialBody2, hipPitchOffset, Y);
+      hipPitch.setQ(hip_pitch.getQ().getDoubleValue());
+      RigidBody thighBody = copyLinkAsRigidBody(thigh, hipPitch, "thigh");
+
+      Vector3d kneePitchOffset = new Vector3d(0.0, 0.0, -THIGH_LENGTH);
+      PinJoint knee_pitch = new PinJoint("knee_pitch", kneePitchOffset, robotLeg, Axis.Y);
+      knee_pitch.setQ(0.4);
+
+      Link shin = shin();
+      knee_pitch.setLink(shin);
+      hip_pitch.addJoint(knee_pitch);
+
+      RevoluteJoint kneePitch = ScrewTools.addRevoluteJoint("knee_pitch", thighBody, kneePitchOffset, Y);
+      kneePitch.setQ(knee_pitch.getQ().getDoubleValue());
+      RigidBody shinBody = copyLinkAsRigidBody(shin, kneePitch, "shin");
+
+      Vector3d anklePitchOffset = new Vector3d(0.0, 0.0, -SHIN_LENGTH);
+      PinJoint ankle_pitch = new PinJoint("ankle_pitch", anklePitchOffset, robotLeg, Axis.Y);
+      ankle_pitch.setQ(0.2);
+
+      Link ankle_differential = ankle_differential();
+      ankle_pitch.setLink(ankle_differential);
+      knee_pitch.addJoint(ankle_pitch);
+
+      RevoluteJoint anklePitch = ScrewTools.addRevoluteJoint("ankle_pitch", shinBody, anklePitchOffset, Y);
+      anklePitch.setQ(ankle_pitch.getQ().getDoubleValue());
+      RigidBody ankleDifferentialBody = copyLinkAsRigidBody(ankle_differential, anklePitch, "ankle_differential");
+
+      Vector3d ankleRollOffset = new Vector3d();
+      PinJoint ankle_roll = new PinJoint("ankle_roll", ankleRollOffset, robotLeg, Axis.X);
+      ankle_roll.setQ(0.0);
+
+      Link foot = foot();
+      ankle_roll.setLink(foot);
+      ankle_pitch.addJoint(ankle_roll);
+
+      RevoluteJoint ankleRoll = ScrewTools.addRevoluteJoint("ankle_roll", ankleDifferentialBody, ankleRollOffset, X);
+      ankleRoll.setQ(ankle_roll.getQ().getDoubleValue());
+      RigidBody footBody = copyLinkAsRigidBody(foot, ankleRoll, "foot");
+
+      return new RobotLeg(pelvisBody, footBody, rootJoint);
    }
 
-   private RobotArm createRobotArm(double gravity)
+   private Link pelvis()
    {
-      Robot robotArm = new Robot("robotArm");
-      robotArm.setGravity(gravity);
+      AppearanceDefinition pelvisAppearance = YoAppearance.Blue();
 
-      Link baseLink = base();
-      robotArm.addStaticLink(baseLink);
-      ReferenceFrame baseFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
-      RigidBody baseBody = new RigidBody("base", baseFrame);
-
-      Vector3d shoulderYawOffset = new Vector3d(0.0, 0.0, BASE_HEIGHT);
-      PinJoint shoulder_yaw = new PinJoint("shoulder_yaw", shoulderYawOffset, robotArm, Axis.X);
-      shoulder_yaw.setQ(random.nextDouble());
-      Link shoulder_differential = shoulder_differential();
-      shoulder_yaw.setLink(shoulder_differential);
-      robotArm.addRootJoint(shoulder_yaw);
-      RevoluteJoint shoulderYaw = ScrewTools.addRevoluteJoint("shoulder_yaw", baseBody, shoulderYawOffset, X);
-      RigidBody shoulderDifferentialBody = copyLinkAsRigidBody(shoulder_differential, shoulderYaw, "shoulder_differential");
-
-      Vector3d shoulderPitchOffset = new Vector3d(0.0, 0.0, SHOULDER_DIFFERENTIAL_HEIGHT);
-      PinJoint shoulder_pitch = new PinJoint("shoulder_pitch", shoulderPitchOffset, robotArm, Axis.Y);
-      shoulder_pitch.setQ(random.nextDouble());
-      Link upper_arm = upper_arm();
-      shoulder_pitch.setLink(upper_arm);
-      shoulder_yaw.addJoint(shoulder_pitch);
-      RevoluteJoint shoulderPitch = ScrewTools.addRevoluteJoint("shoulder_pitch", shoulderDifferentialBody, shoulderPitchOffset, Y);
-      RigidBody upperArmBody = copyLinkAsRigidBody(upper_arm, shoulderPitch, "upper_arm");
-
-      Vector3d elbowPitchOffset = new Vector3d(0.0, 0.0, UPPER_ARM_LENGTH);
-      PinJoint elbow_pitch = new PinJoint("elbow_pitch", elbowPitchOffset, robotArm, Axis.Y);
-      elbow_pitch.setQ(random.nextDouble());
-      Link forearm = forearm();
-      elbow_pitch.setLink(forearm);
-      shoulder_pitch.addJoint(elbow_pitch);
-      RevoluteJoint elbowPitch = ScrewTools.addRevoluteJoint("elbow_pitch", upperArmBody, elbowPitchOffset, Y);
-      RigidBody forearmBody = copyLinkAsRigidBody(forearm, elbowPitch, "forearm");
-
-      Vector3d wristPitchOffset = new Vector3d(0.0, 0.0, FOREARM_LENGTH);
-      PinJoint wrist_pitch = new PinJoint("wrist_pitch", wristPitchOffset, robotArm, Axis.Y);
-      wrist_pitch.setQ(random.nextDouble());
-      Link wrist_differential = wrist_differential();
-      wrist_pitch.setLink(wrist_differential);
-      elbow_pitch.addJoint(wrist_pitch);
-      RevoluteJoint wristPitch = ScrewTools.addRevoluteJoint("wrist_pitch", forearmBody, wristPitchOffset, Y);
-      RigidBody wristDifferentialBody = copyLinkAsRigidBody(wrist_differential, wristPitch, "wrist_differential");
-
-      Vector3d wristYawOffset = new Vector3d();
-      PinJoint wrist_yaw = new PinJoint("wrist_yaw", wristYawOffset, robotArm, Axis.X);
-      wrist_yaw.setQ(random.nextDouble());
-      Link wrist_differential2 = wrist_differential();
-      wrist_yaw.setLink(wrist_differential2);
-      wrist_pitch.addJoint(wrist_yaw);
-      RevoluteJoint wristYaw = ScrewTools.addRevoluteJoint("wrist_yaw", wristDifferentialBody, wristYawOffset, X);
-      RigidBody wristDifferential2Body = copyLinkAsRigidBody(wrist_differential2, wristYaw, "wrist_differential");
-
-      Vector3d wristRollOffset = new Vector3d(0.0, 0.0, WRIST_DIFFERENTIAL_HEIGHT);
-      PinJoint wrist_roll = new PinJoint("wrist_roll", wristRollOffset, robotArm, Axis.Z);
-      wrist_roll.setQ(random.nextDouble());
-      Link gripper = gripper();
-      wrist_roll.setLink(gripper);
-      wrist_yaw.addJoint(wrist_roll);
-      RevoluteJoint wristRoll = ScrewTools.addRevoluteJoint("wrist_roll", wristDifferential2Body, wristRollOffset, Z);
-      RigidBody gripperBody = copyLinkAsRigidBody(gripper, wristRoll, "gripper");
-
-      return new RobotArm(baseBody, gripperBody);
-   }
-
-   private Link base()
-   {
-      AppearanceDefinition baseAppearance = YoAppearance.Blue();
-
-      Link ret = new Link("base");
+      Link ret = new Link("pelvis");
 
       ret.setMass(100.0);
       ret.setMomentOfInertia(1.0, 1.0, 1.0);
@@ -224,97 +388,97 @@ public class VirtualModelControllerTest
       Graphics3DObject linkGraphics = new Graphics3DObject();
 
       linkGraphics.addCoordinateSystem(1.0);
-      linkGraphics.addCylinder(BASE_HEIGHT, BASE_RAD, baseAppearance);
+      linkGraphics.addCylinder(PELVIS_HEIGHT, PELVIS_RAD, pelvisAppearance);
       ret.setLinkGraphics(linkGraphics);
 
       return ret;
    }
 
-   private Link shoulder_differential()
+   private Link hip_differential()
    {
-      Link ret = new Link("shoulder_differential");
+      Link ret = new Link("hip_differential");
 
       ret.setMass(0.1);
       ret.setMomentOfInertia(0.005, 0.005, 0.005);
-      ret.setComOffset(0.0, 0.0, SHOULDER_DIFFERENTIAL_HEIGHT / 2.0);
+      ret.setComOffset(0.0, 0.0, 0.0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
 
-      linkGraphics.addCube(SHOULDER_DIFFERENTIAL_WIDTH, SHOULDER_DIFFERENTIAL_WIDTH, SHOULDER_DIFFERENTIAL_HEIGHT);
+      linkGraphics.addCube(HIP_DIFFERENTIAL_WIDTH, HIP_DIFFERENTIAL_WIDTH, HIP_DIFFERENTIAL_HEIGHT);
       ret.setLinkGraphics(linkGraphics);
 
       return ret;
    }
 
 
-   private Link upper_arm()
+   private Link thigh()
    {
-      AppearanceDefinition upperArmApp = YoAppearance.Green();
+      AppearanceDefinition thighApp = YoAppearance.Green();
 
-      Link ret = new Link("upper_arm");
+      Link ret = new Link("thigh");
 
-      ret.setMass(UPPER_ARM_MASS);    // 2.35);
+      ret.setMass(THIGH_MASS);    // 2.35);
       ret.setMomentOfInertia(0.0437, 0.0437, 0.0054);
-      ret.setComOffset(0.0, 0.0, UPPER_ARM_LENGTH / 2.0);
+      ret.setComOffset(0.0, 0.0, -THIGH_LENGTH / 2.0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
 
-      linkGraphics.addCylinder(UPPER_ARM_LENGTH, UPPER_ARM_RAD, upperArmApp);
+      linkGraphics.addCylinder(THIGH_LENGTH, THIGH_RAD, thighApp);
       ret.setLinkGraphics(linkGraphics);
 
       return ret;
    }
 
 
-   private Link forearm()
+   private Link shin()
    {
-      AppearanceDefinition forearmApp = YoAppearance.Red();
+      AppearanceDefinition shinApp = YoAppearance.Red();
 
-      Link ret = new Link("forearm");
+      Link ret = new Link("shin");
 
-      ret.setMass(FOREARM_MASS);    // 0.864);
+      ret.setMass(SHIN_MASS);    // 0.864);
       ret.setMomentOfInertia(0.00429, 0.00429, 0.00106);
-      ret.setComOffset(0.0, 0.0, FOREARM_LENGTH / 2.0);
+      ret.setComOffset(0.0, 0.0, -SHIN_LENGTH / 2.0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
 
-      linkGraphics.addCylinder(FOREARM_LENGTH, FOREARM_RAD, forearmApp);
+      linkGraphics.addCylinder(SHIN_LENGTH, SHIN_RAD, shinApp);
       ret.setLinkGraphics(linkGraphics);
 
       return ret;
    }
 
-   private Link wrist_differential()
+   private Link ankle_differential()
    {
-      Link ret = new Link("wrist_differential");
+      Link ret = new Link("ankle_differential");
 
       ret.setMass(0.1);
       ret.setMomentOfInertia(0.005, 0.005, 0.005);
-      ret.setComOffset(0.0, 0.0, WRIST_DIFFERENTIAL_HEIGHT / 2.0);
+      ret.setComOffset(0.0, 0.0, 0.0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
 
-      linkGraphics.addCube(WRIST_DIFFERENTIAL_WIDTH, WRIST_DIFFERENTIAL_WIDTH, WRIST_DIFFERENTIAL_HEIGHT);
+      linkGraphics.addCube(ANKLE_DIFFERENTIAL_WIDTH, ANKLE_DIFFERENTIAL_WIDTH, ANKLE_DIFFERENTIAL_HEIGHT);
       ret.setLinkGraphics(linkGraphics);
 
       return ret;
    }
 
-   private Link gripper()
+   private Link foot()
    {
-      AppearanceDefinition gripperApp = YoAppearance.PlaneMaterial();
+      AppearanceDefinition footApp = YoAppearance.PlaneMaterial();
 
-      Link ret = new Link("gripper");
+      Link ret = new Link("foot");
 
-      ret.setMass(GRIPPER_MASS);    // 0.207);
+      ret.setMass(FOOT_MASS);    // 0.207);
       ret.setMomentOfInertia(0.00041, 0.00041, 0.00001689);
-      ret.setComOffset(0.0, 0.0, GRIPPER_COM_OFFSET);
+      ret.setComOffset(FOOT_COM_OFFSET, 0.0, 0.0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
 
-      linkGraphics.addCylinder(GRIPPER_LENGTH, GRIPPER_RAD, gripperApp);
+      linkGraphics.addCylinder(FOOT_LENGTH, FOOT_RAD, footApp);
 
-      linkGraphics.translate(0.05, 0.0, GRIPPER_LENGTH);
+      linkGraphics.translate(0.05, 0.0, FOOT_LENGTH);
       linkGraphics.addCube(0.02, 0.1, 0.1, YoAppearance.Black());
 
       linkGraphics.translate(-0.1, 0.0, 0.0);
@@ -324,7 +488,6 @@ public class VirtualModelControllerTest
 
       return ret;
    }
-
    private RigidBody copyLinkAsRigidBody(Link link, InverseDynamicsJoint currentInverseDynamicsJoint, String bodyName)
    {
       Vector3d comOffset = new Vector3d();
@@ -359,15 +522,17 @@ public class VirtualModelControllerTest
       JUnitTools.assertTuple3dEquals(inputWrench.getLinearPartCopy(), outputWrench.getLinearPartCopy(), epsilon);
    }
 
-   private class RobotArm
+   private class RobotLeg
    {
       private final RigidBody base;
       private final RigidBody endEffector;
+      private final InverseDynamicsJoint rootJoint;
 
-      public RobotArm(RigidBody base, RigidBody endEffector)
+      public RobotLeg(RigidBody base, RigidBody endEffector, InverseDynamicsJoint rootJoint)
       {
          this.base = base;
          this.endEffector = endEffector;
+         this.rootJoint = rootJoint;
       }
 
       public RigidBody getBase()
@@ -378,6 +543,11 @@ public class VirtualModelControllerTest
       public RigidBody getEndEffector()
       {
          return endEffector;
+      }
+
+      public InverseDynamicsJoint getRootJoint()
+      {
+         return rootJoint;
       }
    }
 }
