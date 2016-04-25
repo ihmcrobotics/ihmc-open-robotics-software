@@ -64,12 +64,28 @@ public class WholeBodyControlCoreToolbox
       this.contactablePlaneBodies = contactablePlaneBodies;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
-      this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, yoGraphicsListRegistry, registry);
-      this.wrenchVisualizer = WrenchVisualizer.createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0,
-            yoGraphicsListRegistry, registry);
+      if (contactablePlaneBodies != null)
+      {
+         this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, yoGraphicsListRegistry, registry);
+         this.wrenchVisualizer = WrenchVisualizer
+               .createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
+      }
+      else
+      {
+         this.planeContactWrenchProcessor = null;
+         this.wrenchVisualizer = null;
+      }
 
-      this.yoDesiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", referenceFrames.getCenterOfMassFrame(), registry);
-      this.yoAchievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", referenceFrames.getCenterOfMassFrame(), registry);
+      if (referenceFrames != null)
+      {
+         this.yoDesiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", referenceFrames.getCenterOfMassFrame(), registry);
+         this.yoAchievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", referenceFrames.getCenterOfMassFrame(), registry);
+      }
+      else
+      {
+         yoDesiredMomentumRateLinear = null;
+         yoAchievedMomentumRateLinear = null;
+      }
 
       this.yoResidualRootJointForce = new YoFrameVector("residualRootJointForce", ReferenceFrame.getWorldFrame(), registry);
       this.yoResidualRootJointTorque = new YoFrameVector("residualRootJointTorque", ReferenceFrame.getWorldFrame(), registry);
