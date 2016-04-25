@@ -471,7 +471,7 @@ public class VirtualModelControllerTest
 
       Vector3d hipYawOffset = new Vector3d(0.0, -HIP_WIDTH, 0.0);
       PinJoint hip_yaw = new PinJoint("hip_yaw", hipYawOffset, robotLeg, Axis.Z);
-      hip_yaw.setQ(0);
+      hip_yaw.setQ(random.nextDouble());
 
       Link hip_differential = hip_differential();
       hip_yaw.setLink(hip_differential);
@@ -483,7 +483,7 @@ public class VirtualModelControllerTest
 
       Vector3d hipRollOffset = new Vector3d();
       PinJoint hip_roll = new PinJoint("hip_roll", hipRollOffset, robotLeg, Axis.X);
-      hip_roll.setQ(0);
+      hip_roll.setQ(random.nextDouble());
 
       Link hip_differential2 = hip_differential();
       hip_roll.setLink(hip_differential2);
@@ -495,7 +495,7 @@ public class VirtualModelControllerTest
 
       Vector3d hipPitchOffset = new Vector3d();
       PinJoint hip_pitch = new PinJoint("hip_pitch", hipPitchOffset, robotLeg, Axis.Y);
-      hip_pitch.setQ(-0.2);
+      hip_pitch.setQ(random.nextDouble());
 
       Link thigh = thigh();
       hip_pitch.setLink(thigh);
@@ -507,7 +507,7 @@ public class VirtualModelControllerTest
 
       Vector3d kneePitchOffset = new Vector3d(0.0, 0.0, -THIGH_LENGTH);
       PinJoint knee_pitch = new PinJoint("knee_pitch", kneePitchOffset, robotLeg, Axis.Y);
-      knee_pitch.setQ(0.4);
+      knee_pitch.setQ(random.nextDouble());
 
       Link shin = shin();
       knee_pitch.setLink(shin);
@@ -519,7 +519,7 @@ public class VirtualModelControllerTest
 
       Vector3d anklePitchOffset = new Vector3d(0.0, 0.0, -SHIN_LENGTH);
       PinJoint ankle_pitch = new PinJoint("ankle_pitch", anklePitchOffset, robotLeg, Axis.Y);
-      ankle_pitch.setQ(0.2);
+      ankle_pitch.setQ(random.nextDouble());
 
       Link ankle_differential = ankle_differential();
       ankle_pitch.setLink(ankle_differential);
@@ -531,7 +531,7 @@ public class VirtualModelControllerTest
 
       Vector3d ankleRollOffset = new Vector3d();
       PinJoint ankle_roll = new PinJoint("ankle_roll", ankleRollOffset, robotLeg, Axis.X);
-      ankle_roll.setQ(0.0);
+      ankle_roll.setQ(random.nextDouble());
 
       Link foot = foot();
       ankle_roll.setLink(foot);
