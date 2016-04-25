@@ -90,17 +90,12 @@ public class VirtualModelController
 
    public void submitEndEffectorVirtualWrench(RigidBody endEffector, Wrench wrench)
    {
-      //wrench.changeFrame(baseOfEndEffector.get(endEffector).getBodyFixedFrame());
-      //wrench.changeBodyFrameAttachedToSameBody(endEffector.getBodyFixedFrame());
-
-      endEffectorWrenches.put(endEffector, wrench);
-      endEffectorSelectionMatrices.put(endEffector, CommonOps.identity(Wrench.SIZE));
+      submitEndEffectorVirtualWrench(endEffector, wrench, new CommonOps().identity(Wrench.SIZE, Wrench.SIZE));
    }
 
    public void submitEndEffectorVirtualWrench(RigidBody endEffector, Wrench wrench, DenseMatrix64F selectionMatrix)
    {
-      //wrench.changeFrame(baseOfEndEffector.get(endEffector).getBodyFixedFrame());
-      //wrench.changeBodyFrameAttachedToSameBody(endEffector.getBodyFixedFrame());
+      wrench.changeBodyFrameAttachedToSameBody(endEffector.getBodyFixedFrame());
 
       endEffectorWrenches.put(endEffector, wrench);
       endEffectorSelectionMatrices.put(endEffector, selectionMatrix);
