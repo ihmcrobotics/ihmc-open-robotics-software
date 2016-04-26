@@ -76,11 +76,13 @@ public class QuadrupedTrotWalkJoystickMap implements EnumDependentJoystickMappin
          break;
       }
 
-//      String pitchName = "root.babyBeastSimple.QuadrupedSimulationController.QuadrupedControllerManager.TrotWalkController.q_d_pitch";
+      String namespace = "root.babyBeastSimple.QuadrupedSimulationController.QuadrupedControllerManager.TrotWalkController.";
+      joystickToYoVariableMapper.mapDoubleYoVariableToComponent(rightStickPitchComponent, namespace + "desiredRobotVelocityX", -0.2, 0.2, DEFAULT_DEAD_ZONE, true);
+      joystickToYoVariableMapper.mapDoubleYoVariableToComponent(rightStickRollComponent, namespace + "desiredRobotVelocityY", -0.2, 0.2, DEFAULT_DEAD_ZONE, false);
+      joystickToYoVariableMapper.mapDoubleYoVariableToComponent(rightStickYawComponent, namespace + "desiredRobotAngularVelocityZ", -0.2, 0.2, DEFAULT_DEAD_ZONE, true);
+      
 //      joystickToYoVariableMapper.mapDoubleYoVariableToComponent(rightStickPitchComponent, pitchName, -BODY_MAX_PITCH, BODY_MAX_PITCH, DEFAULT_DEAD_ZONE, true);
-//      String rollName = "root.babyBeastSimple.QuadrupedSimulationController.QuadrupedControllerManager.TrotWalkController.q_d_roll";
 //      joystickToYoVariableMapper.mapDoubleYoVariableToComponent(rightStickRollComponent, rollName, -BODY_MAX_ROLL, BODY_MAX_ROLL, DEFAULT_DEAD_ZONE, false);
-//      String yawName = "root.babyBeastSimple.QuadrupedSimulationController.QuadrupedControllerManager.TrotWalkController.q_d_yaw";
 //      joystickToYoVariableMapper.mapDoubleYoVariableToComponent(rightStickYawComponent, yawName, -BODY_MAX_YAW, BODY_MAX_YAW, DEFAULT_DEAD_ZONE, false);
    }
 
