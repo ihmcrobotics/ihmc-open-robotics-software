@@ -18,6 +18,7 @@ public class QuadrupedComPositionController
       public void initialize(QuadrupedTaskSpaceEstimator.Estimates estimates)
       {
          comPosition.setIncludingFrame(estimates.getComPosition());
+         comPosition.changeFrame(ReferenceFrame.getWorldFrame());
          comVelocity.setToZero();
          comForceFeedforward.setToZero();
       }
@@ -67,6 +68,11 @@ public class QuadrupedComPositionController
       FrameVector comVelocityEstimate = estimates.getComVelocity();
       FrameVector comForceFeedforwardSetpoint = setpoints.getComForceFeedforward();
 
+      ReferenceFrame comPositionSetpointFrame = comPositionSetpoint.getReferenceFrame();
+      ReferenceFrame comVelocitySetpointFrame = comVelocitySetpoint.getReferenceFrame();
+      ReferenceFrame comVelocityEstimateFrame = comVelocityEstimate.getReferenceFrame();
+      ReferenceFrame comForceFeedforwardSetpointFrame = comForceFeedforwardSetpoint.getReferenceFrame();
+
       // compute com force
       comForceCommand.setToZero(comZUpFrame);
       comPositionSetpoint.changeFrame(comZUpFrame);
@@ -75,5 +81,10 @@ public class QuadrupedComPositionController
       comForceFeedforwardSetpoint.changeFrame(comZUpFrame);
       comPositionController.setGains(comPositionControllerGains);
       comPositionController.compute(comForceCommand, comPositionSetpoint, comVelocitySetpoint, comVelocityEstimate, comForceFeedforwardSetpoint);
+
+      comPositionSetpoint.changeFrame(comPositionSetpointFrame);
+      comVelocitySetpoint.changeFrame(comVelocitySetpointFrame);
+      comVelocityEstimate.changeFrame(comVelocityEstimateFrame);
+      comForceFeedforwardSetpoint.changeFrame(comForceFeedforwardSetpointFrame);
    }
 }
