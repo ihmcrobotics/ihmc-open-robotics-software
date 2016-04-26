@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.controllerCore.VirtualModelControlSolution;
+import us.ihmc.commonWalkingControlModules.controllerCore.VirtualModelController;
 import us.ihmc.commonWalkingControlModules.controllerCore.VirtualModelControllerTestHelper.RobotLeg;
 import us.ihmc.commonWalkingControlModules.controllerCore.VirtualModelControllerTestHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -12,13 +13,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJaco
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
@@ -40,7 +39,7 @@ public class VirtualModelControlOptimizationControlModuleTest
    private static final double rhoWeight = 0.00001;
 
    @DeployableTestMethod
-   @Test(timeout = 30000)
+   @Test(timeout = 30000000)
    public void testOptimization()
    {
       double gravity = -9.81;
@@ -86,8 +85,12 @@ public class VirtualModelControlOptimizationControlModuleTest
 
       PlaneContactStateCommand planeContactStateCommand = new PlaneContactStateCommand();
       planeContactStateCommand.setContactingRigidBody(endEffector);
+      planeContactStateCommand.clearContactPoints();
       for (FramePoint2d contactPoint : contactableFoot.getContactPoints2d())
+      {
+         contactPoint.changeFrame(soleFrame);
          planeContactStateCommand.addPointInContact(contactPoint);
+      }
 
       VirtualModelControlOptimizationControlModule optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, robotLeg.getRootJoint(),
             registry);
@@ -95,13 +98,17 @@ public class VirtualModelControlOptimizationControlModuleTest
       optimizationControlModule.submitMomentumRateCommand(momentumRateCommand);
       optimizationControlModule.submitPlaneContactStateCommand(planeContactStateCommand);
 
+      VirtualModelControlSolution virtualModelControlSolution;
       try
       {
-         VirtualModelControlSolution virtualModelControlSolution = optimizationControlModule.compute();
+         virtualModelControlSolution = optimizationControlModule.compute();
       }
       catch (VirtualModelControlModuleException e)
       {
+         virtualModelControlSolution = e.getVirtualModelControlSolution();
          PrintTools.error("No solution is found");
       }
+
+      SpatialForceVector momentumRateSolution = virtualModelControlSolution.getCentroidalMomentumRateSolution();
    }
 }
