@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -9,12 +10,16 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.tools.testing.JUnitTools;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -168,12 +173,15 @@ public class VirtualModelControllerTestHelper
       ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("Sole",
             footBody.getBodyFixedFrame(), soleToAnkleFrame);
 
+      CommonHumanoidReferenceFrames referenceFrames = new LegReferenceFrames(pelvisBody, footBody, soleFrame);
+
       robotLeg.setBase(pelvisBody);
       robotLeg.setEndEffector(footBody);
+      robotLeg.setElevator(elevator);
       robotLeg.setRootJoint(rootJoint);
       robotLeg.setJointMap(jointMap);
       robotLeg.setSoleFrame(soleFrame);
-
+      robotLeg.setReferenceFrames(referenceFrames);
 
       return robotLeg;
    }
@@ -359,13 +367,21 @@ public class VirtualModelControllerTestHelper
    {
       private RigidBody base;
       private RigidBody endEffector;
+      private RigidBody elevator;
       private ReferenceFrame soleFrame;
       private InverseDynamicsJoint rootJoint;
       private HashMap<InverseDynamicsJoint, Joint> jointMap;
 
+      private CommonHumanoidReferenceFrames referenceFrames;
+
       public RobotLeg(String name)
       {
          super(name);
+      }
+
+      public void setElevator(RigidBody elevator)
+      {
+         this.elevator = elevator;
       }
 
       public void setBase(RigidBody base)
@@ -393,6 +409,11 @@ public class VirtualModelControllerTestHelper
          this.jointMap = jointMap;
       }
 
+      public void setReferenceFrames(CommonHumanoidReferenceFrames referenceFrames)
+      {
+         this.referenceFrames = referenceFrames;
+      }
+
       public RigidBody getBase()
       {
          return base;
@@ -401,6 +422,11 @@ public class VirtualModelControllerTestHelper
       public RigidBody getEndEffector()
       {
          return endEffector;
+      }
+
+      public RigidBody getElevator()
+      {
+         return elevator;
       }
 
       public ReferenceFrame getSoleFrame()
@@ -416,6 +442,120 @@ public class VirtualModelControllerTestHelper
       public Map<InverseDynamicsJoint, Joint> getJointMap()
       {
          return jointMap;
+      }
+
+      public CommonHumanoidReferenceFrames getReferenceFrames()
+      {
+         return referenceFrames;
+      }
+   }
+
+   private class LegReferenceFrames implements CommonHumanoidReferenceFrames
+   {
+      private final ReferenceFrame pelvisFrame;
+
+      private final SideDependentList<ReferenceFrame> footReferenceFrames = new SideDependentList<>();
+      private final SideDependentList<ReferenceFrame> soleReferenceFrames = new SideDependentList<>();
+
+      public LegReferenceFrames(RigidBody pelvis, RigidBody foot, ReferenceFrame soleFrame)
+      {
+         pelvisFrame = pelvis.getBodyFixedFrame();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            footReferenceFrames.put(robotSide, foot.getBodyFixedFrame());
+            soleReferenceFrames.put(robotSide, soleFrame);
+         }
+      }
+
+      public void updateFrames()
+      {
+      }
+
+      public ReferenceFrame getABodyAttachedZUpFrame()
+      {
+         return null;
+      }
+
+      public ReferenceFrame getMidFeetZUpFrame()
+      {
+         return null;
+      }
+
+      public ReferenceFrame getMidFeetUnderPelvisFrame()
+      {
+         return null;
+      }
+
+
+      public SideDependentList<ReferenceFrame> getAnkleZUpReferenceFrames()
+      {
+         return null;
+      }
+
+      public SideDependentList<ReferenceFrame> getFootReferenceFrames()
+      {
+         return footReferenceFrames;
+      }
+
+      public SideDependentList<ReferenceFrame> getSoleFrames()
+      {
+         return soleReferenceFrames;
+      }
+
+      public ReferenceFrame getPelvisFrame()
+      {
+         return pelvisFrame;
+      }
+
+      public ReferenceFrame getAnkleZUpFrame(RobotSide robotSide)
+      {
+         return null;
+      }
+
+      public ReferenceFrame getFootFrame(RobotSide robotSide)
+      {
+         return footReferenceFrames.get(robotSide);
+      }
+
+      public ReferenceFrame getLegJointFrame(RobotSide robotSide, LegJointName legJointName)
+      {
+         return null;
+      }
+
+      public EnumMap<LegJointName, ReferenceFrame> getLegJointFrames(RobotSide robotSide)
+      {
+         return null;
+      }
+
+      public ReferenceFrame getIMUFrame()
+      {
+         return null;
+      }
+
+      public ReferenceFrame getCenterOfMassFrame()
+      {
+         return pelvisFrame;
+      }
+
+      public ReferenceFrame getPelvisZUpFrame()
+      {
+         return null;
+      }
+
+      public ReferenceFrame getSoleFrame(RobotSide robotSide)
+      {
+         return soleReferenceFrames.get(robotSide);
+      }
+
+      public ReferenceFrame getSoleZUpFrame(RobotSide robotSide)
+      {
+         return null;
+      }
+
+      public SideDependentList<ReferenceFrame> getSoleZUpFrames()
+      {
+         return null;
       }
    }
 }

@@ -18,6 +18,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
@@ -39,7 +40,7 @@ public class VirtualModelControlOptimizationControlModuleTest
    private static final double rhoWeight = 0.00001;
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 30000)
    public void testOptimization()
    {
       double gravity = -9.81;
@@ -69,12 +70,14 @@ public class VirtualModelControlOptimizationControlModuleTest
 
       Point2d toeOffContactPoint = new Point2d(VirtualModelControllerTestHelper.footLength / 2.0, 0.0);
 
+      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), robotLeg.getElevator());
+
       ArrayList<ContactableFoot> contactableBodies = new ArrayList<>();
       ListOfPointsContactableFoot contactableFoot = new ListOfPointsContactableFoot(endEffector, soleFrame, contactPointsInSoleFrame, toeOffContactPoint);
       contactableBodies.add(contactableFoot);
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, endEffectors, controlledJoints, momentumOptimizationSettings, null, controlDT,
-            gravity, new GeometricJacobianHolder(), null, contactableBodies, graphicsListRegistry, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, endEffectors, controlledJoints, momentumOptimizationSettings,
+            robotLeg.getReferenceFrames(), controlDT, -gravity, new GeometricJacobianHolder(), twistCalculator, contactableBodies, graphicsListRegistry, registry);
 
       FrameVector linearMomentumRate = new FrameVector(null, new Vector3d(10.0, 20.0, 50.0));
       MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
@@ -82,10 +85,12 @@ public class VirtualModelControlOptimizationControlModuleTest
       momentumRateCommand.setWeights(angularMomentumPitchRoll, angularMomentumPitchRoll, angularMomentumYaw, linearMomentumX, linearMomentumY, linearMomentumZ);
 
       PlaneContactStateCommand planeContactStateCommand = new PlaneContactStateCommand();
+      planeContactStateCommand.setContactingRigidBody(endEffector);
       for (FramePoint2d contactPoint : contactableFoot.getContactPoints2d())
          planeContactStateCommand.addPointInContact(contactPoint);
 
-      VirtualModelControlOptimizationControlModule optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, registry);
+      VirtualModelControlOptimizationControlModule optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, robotLeg.getRootJoint(),
+            registry);
       optimizationControlModule.initialize();
       optimizationControlModule.submitMomentumRateCommand(momentumRateCommand);
       optimizationControlModule.submitPlaneContactStateCommand(planeContactStateCommand);
