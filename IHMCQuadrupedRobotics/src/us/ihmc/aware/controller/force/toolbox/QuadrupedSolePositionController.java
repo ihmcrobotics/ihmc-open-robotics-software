@@ -32,6 +32,7 @@ public class QuadrupedSolePositionController
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             solePosition.get(robotQuadrant).setIncludingFrame(estimates.getSolePosition(robotQuadrant));
+            solePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
             soleLinearVelocity.get(robotQuadrant).setToZero();
             soleForceFeedforward.get(robotQuadrant).setToZero();
          }
@@ -97,6 +98,11 @@ public class QuadrupedSolePositionController
          FrameVector soleLinearVelocityEstimate = estimates.getSoleLinearVelocity(robotQuadrant);
          FrameVector soleForceFeedforwardSetpoint = setpoints.getSoleForceFeedforward(robotQuadrant);
 
+         ReferenceFrame solePositionSetpointFrame = solePositionSetpoint.getReferenceFrame();
+         ReferenceFrame soleLinearVelocitySetpointFrame = soleLinearVelocitySetpoint.getReferenceFrame();
+         ReferenceFrame soleLinearVelocityEstimateFrame = soleLinearVelocityEstimate.getReferenceFrame();
+         ReferenceFrame soleForceFeedforwardSetpointFrame = soleForceFeedforwardSetpoint.getReferenceFrame();
+
          // compute sole force
          soleForceCommand.get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
          solePositionSetpoint.changeFrame(soleFrame.get(robotQuadrant));
@@ -105,6 +111,11 @@ public class QuadrupedSolePositionController
          soleForceFeedforwardSetpoint.changeFrame(soleFrame.get(robotQuadrant));
          solePositionController.get(robotQuadrant).setGains(solePositionControllerGains.get(robotQuadrant));
          solePositionController.get(robotQuadrant).compute(soleForceCommand.get(robotQuadrant), solePositionSetpoint, soleLinearVelocitySetpoint, soleLinearVelocityEstimate, soleForceFeedforwardSetpoint);
+
+         solePositionSetpoint.changeFrame(solePositionSetpointFrame);
+         soleLinearVelocitySetpoint.changeFrame(soleLinearVelocitySetpointFrame);
+         soleLinearVelocityEstimate.changeFrame(soleLinearVelocityEstimateFrame);
+         soleForceFeedforwardSetpoint.changeFrame(soleForceFeedforwardSetpointFrame);
       }
    }
 }

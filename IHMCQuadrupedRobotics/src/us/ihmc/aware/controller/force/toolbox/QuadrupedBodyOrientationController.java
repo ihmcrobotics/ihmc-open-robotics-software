@@ -18,6 +18,7 @@ public class QuadrupedBodyOrientationController
       public void initialize(QuadrupedTaskSpaceEstimator.Estimates estimates)
       {
          bodyOrientation.setIncludingFrame(estimates.getBodyOrientation());
+         bodyOrientation.changeFrame(ReferenceFrame.getWorldFrame());
          bodyAngularVelocity.setToZero();
          comTorqueFeedforward.setToZero();
       }
@@ -66,6 +67,11 @@ public class QuadrupedBodyOrientationController
       FrameVector bodyAngularVelocityEstimate = estimates.getBodyAngularVelocity();
       FrameVector comTorqueFeedforwardSetpoint = setpoints.getComTorqueFeedforward();
 
+      ReferenceFrame bodyOrientationSetpointFrame = bodyOrientationSetpoint.getReferenceFrame();
+      ReferenceFrame bodyAngularVelocitySetpointFrame = bodyAngularVelocitySetpoint.getReferenceFrame();
+      ReferenceFrame bodyAngularVelocityEstimateFrame = bodyAngularVelocityEstimate.getReferenceFrame();
+      ReferenceFrame comTorqueFeedforwardSetpointFrame = comTorqueFeedforwardSetpoint.getReferenceFrame();
+
       // compute body torque
       comTorqueCommand.setToZero(bodyFrame);
       bodyOrientationSetpoint.changeFrame(bodyFrame);
@@ -74,5 +80,10 @@ public class QuadrupedBodyOrientationController
       comTorqueFeedforwardSetpoint.changeFrame(bodyFrame);
       bodyOrientationController.setGains(bodyOrientationControllerGains);
       bodyOrientationController.compute(comTorqueCommand, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate, comTorqueFeedforwardSetpoint);
+
+      bodyOrientationSetpoint.changeFrame(bodyOrientationSetpointFrame);
+      bodyAngularVelocitySetpoint.changeFrame(bodyAngularVelocitySetpointFrame);
+      bodyAngularVelocityEstimate.changeFrame(bodyAngularVelocityEstimateFrame);
+      comTorqueFeedforwardSetpoint.changeFrame(comTorqueFeedforwardSetpointFrame);
    }
 }
