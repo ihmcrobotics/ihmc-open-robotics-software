@@ -6,43 +6,28 @@ import us.ihmc.aware.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.aware.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.aware.controller.force.toolbox.QuadrupedTaskSpaceController;
 import us.ihmc.aware.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
-import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.planning.ContactState;
-import us.ihmc.aware.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
-import us.ihmc.aware.util.TimeInterval;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedForceBasedStandPrepController implements QuadrupedController
+public class QuadrupedForceBasedStandReadyController implements QuadrupedController
 {
    private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
-   private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
-   private final DoubleParameter stanceLengthParameter = parameterFactory.createDouble("stanceLength", 1.0);
-   private final DoubleParameter stanceWidthParameter = parameterFactory.createDouble("stanceWidth", 0.5);
-   private final DoubleParameter stanceHeightParameter = parameterFactory.createDouble("stanceHeight", 0.60);
-   private final DoubleParameter stanceXOffsetParameter = parameterFactory.createDouble("stanceXOffset", 0.05);
-   private final DoubleParameter stanceYOffsetParameter = parameterFactory.createDouble("stanceYOffset", 0.0);
    private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 20000, 20000, 20000);
    private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
 
-   private final DoubleYoVariable robotTime;
-   private final QuadrupedReferenceFrames referenceFrames;
-   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedStandPrepController.class.getSimpleName());
+   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedStandReadyController.class.getSimpleName());
 
-   // Sole trajectories
-   private final TimeInterval trajectoryTimeInterval = new TimeInterval();
-   private final FramePoint finalSolePosition = new FramePoint();
-   private final QuadrantDependentList<ThreeDoFMinimumJerkTrajectory> solePositionTrajectories = new QuadrantDependentList<>();
+   // Reference frames
+   private final ReferenceFrame bodyFrame;
 
    // Feedback controller
    private final QuadrupedSolePositionController solePositionController;
@@ -55,10 +40,10 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
 
-   public QuadrupedForceBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
+   public QuadrupedForceBasedStandReadyController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
    {
-      this.robotTime = environment.getRobotTimestamp();
-      this.referenceFrames = controllerToolbox.getReferenceFrames();
+      // Reference frames
+      bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
 
       // Feedback controller
       solePositionController = controllerToolbox.getSolePositionController();
@@ -71,11 +56,6 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       taskSpaceController = controllerToolbox.getTaskSpaceController();
 
-      for (RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         solePositionTrajectories.set(quadrant, new ThreeDoFMinimumJerkTrajectory());
-      }
-
       environment.getParentRegistry().addChild(registry);
    }
 
@@ -83,24 +63,6 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    public void onEntry()
    {
       updateEstimates();
-
-      double currentTime = robotTime.getDoubleValue();
-      trajectoryTimeInterval.setInterval(0, trajectoryTimeParameter.get());
-      trajectoryTimeInterval.shiftInterval(currentTime);
-
-      // Initialize sole trajectories
-      for (RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         ThreeDoFMinimumJerkTrajectory trajectory = solePositionTrajectories.get(quadrant);
-
-         FramePoint initialSolePosition = taskSpaceEstimates.getSolePosition(quadrant);
-         initialSolePosition.changeFrame(referenceFrames.getBodyFrame());
-
-         computeFinalSolePosition(quadrant, finalSolePosition);
-         finalSolePosition.changeFrame(referenceFrames.getBodyFrame());
-
-         trajectory.initializeTrajectory(initialSolePosition, finalSolePosition, trajectoryTimeInterval);
-      }
 
       // Initialize sole position controller
       solePositionControllerSetpoints.initialize(taskSpaceEstimates);
@@ -120,6 +82,13 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
       }
       taskSpaceController.reset();
+
+      // Initial sole position setpoints
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         solePositionControllerSetpoints.getSolePosition(robotQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
+         solePositionControllerSetpoints.getSolePosition(robotQuadrant).changeFrame(bodyFrame);
+      }
    }
 
    @Override
@@ -127,8 +96,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    {
       updateEstimates();
       updateSetpoints();
-
-      return isMotionExpired() ? ControllerEvent.DONE : null;
+      return null;
    }
 
    @Override
@@ -143,34 +111,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
 
    private void updateSetpoints()
    {
-      double currentTime = robotTime.getDoubleValue();
-
-      for (RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         // Compute the sole position setpoint along the minimum jerk trajectory.
-         ThreeDoFMinimumJerkTrajectory trajectory = solePositionTrajectories.get(quadrant);
-         trajectory.computeTrajectory(currentTime);
-
-         trajectory.getPosition(solePositionControllerSetpoints.getSolePosition(quadrant));
-      }
-
       solePositionController.compute(taskSpaceControllerCommands.getSoleForce(), solePositionControllerSetpoints, taskSpaceEstimates);
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
-   }
-
-   private void computeFinalSolePosition(RobotQuadrant quadrant, FramePoint finalSolePosition)
-   {
-      finalSolePosition.setToZero(referenceFrames.getBodyFrame());
-
-      finalSolePosition.add(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.get() / 2.0), 0.0, 0.0);
-      finalSolePosition.add(0.0, quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
-
-      finalSolePosition.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(), -stanceHeightParameter.get());
-   }
-
-   private boolean isMotionExpired()
-   {
-      double currentTime = robotTime.getDoubleValue();
-      return currentTime > trajectoryTimeInterval.getEndTime();
    }
 }
