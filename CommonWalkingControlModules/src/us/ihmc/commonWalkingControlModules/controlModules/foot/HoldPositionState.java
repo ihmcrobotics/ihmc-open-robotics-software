@@ -273,7 +273,7 @@ public class HoldPositionState extends AbstractFootControlState
       desiredAxisAngle.set(desiredRotationVector, angle);
       desiredOrientationCopy.set(desiredAxisAngle);
       desiredOrientationCopy.changeFrame(worldFrame);
-      desiredHoldOrientation.set(desiredOrientation);
+      desiredHoldOrientation.set(desiredOrientationCopy);
       desiredHoldOrientation.getFrameOrientationIncludingFrame(desiredOrientation);
    }
 
