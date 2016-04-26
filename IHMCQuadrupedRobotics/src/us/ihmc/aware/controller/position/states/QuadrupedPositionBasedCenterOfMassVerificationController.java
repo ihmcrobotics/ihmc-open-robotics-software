@@ -1,20 +1,23 @@
-package us.ihmc.quadrupedRobotics.controller;
+package us.ihmc.aware.controller.position.states;
 
 import java.awt.Color;
+
 import java.util.HashMap;
 
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.aware.controller.ControllerEvent;
+import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.model.QuadrupedPhysicalProperties;
+import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.aware.model.QuadrupedModelFactory;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;
-import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -45,13 +48,12 @@ import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
-public class QuadrupedCenterOfMassVerificationController extends QuadrupedController
+public class QuadrupedPositionBasedCenterOfMassVerificationController implements QuadrupedController
 {
    private static final double DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY = 0.5;
 
@@ -105,11 +107,8 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
    private final FramePoint desiredFootPosition = new FramePoint(worldFrame);
    private final FramePoint desiredFootPositionInLegAttachmentFrame = new FramePoint();
 
-   public QuadrupedCenterOfMassVerificationController(final double dt, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, DoubleYoVariable yoTime,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public QuadrupedPositionBasedCenterOfMassVerificationController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, YoVariableRegistry parentRegistry)
    {
-      super(QuadrupedControllerState.COM_VERIFICATION);
-
       //Set Initial Values
       this.swingTime.set(2.0);
       this.footZHeightOnPickUp.set(0.04);
@@ -120,10 +119,10 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
       this.trotPairToRaise.set(TrotPair.NONE);
       this.trotPairInAir.set(TrotPair.NONE);
 
-      this.robotTimestamp = yoTime;
-      this.dt = dt;
-      this.fullRobotModel = fullRobotModel;
-      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
+      this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
+      this.dt = runtimeEnvironment.getControlDT();
+      this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
+      this.referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), physicalProperties);
       this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
       this.oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
@@ -176,7 +175,7 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
       }
 
       //Create State Machine and States
-      this.stateMachine = new StateMachine<COM_ESTIMATE_STATES>("centerOfMassVerificationStateMachine", "walkingStateTranistionTime", COM_ESTIMATE_STATES.class, yoTime, registry);
+      this.stateMachine = new StateMachine<COM_ESTIMATE_STATES>("centerOfMassVerificationStateMachine", "walkingStateTranistionTime", COM_ESTIMATE_STATES.class, runtimeEnvironment.getRobotTimestamp(), registry);
       this.filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState(modelFactory);
       MoveCenterOfMassAround moveCenterOfMassAroundState = new MoveCenterOfMassAround();
       MoveFeet pickFeetUp = new MoveFeet("pickFeetUp", footZHeightOnPickUp, trotPairToRaise, COM_ESTIMATE_STATES.PICK_UP_FEET);
@@ -198,13 +197,13 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
       PickUpTrotLineFeetTransitionCondition pickUpTransitionCondition = new PickUpTrotLineFeetTransitionCondition();
       PutDownTrotLineFeetTransitionCondition putDownTransitionCondition = new PutDownTrotLineFeetTransitionCondition();
 
-      StateTransition<COM_ESTIMATE_STATES> pickUpFeetTransition = new StateTransition<QuadrupedCenterOfMassVerificationController.COM_ESTIMATE_STATES>(COM_ESTIMATE_STATES.PICK_UP_FEET, pickUpTransitionCondition);
-      StateTransition<COM_ESTIMATE_STATES> putDownFeetTransition = new StateTransition<QuadrupedCenterOfMassVerificationController.COM_ESTIMATE_STATES>(COM_ESTIMATE_STATES.PUT_DOWN_FEET, putDownTransitionCondition);
+      StateTransition<COM_ESTIMATE_STATES> pickUpFeetTransition = new StateTransition<QuadrupedPositionBasedCenterOfMassVerificationController.COM_ESTIMATE_STATES>(COM_ESTIMATE_STATES.PICK_UP_FEET, pickUpTransitionCondition);
+      StateTransition<COM_ESTIMATE_STATES> putDownFeetTransition = new StateTransition<QuadrupedPositionBasedCenterOfMassVerificationController.COM_ESTIMATE_STATES>(COM_ESTIMATE_STATES.PUT_DOWN_FEET, putDownTransitionCondition);
 
       moveCenterOfMassAroundState.addStateTransition(pickUpFeetTransition);
       moveCenterOfMassAroundState.addStateTransition(putDownFeetTransition);
 
-      createGraphicsAndArtifacts(yoGraphicsListRegistry);
+      createGraphicsAndArtifacts(runtimeEnvironment.getGraphicsListRegistry());
       parentRegistry.addChild(registry);
    }
 
@@ -250,7 +249,7 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
    }
 
    @Override
-   public void doAction()
+   public ControllerEvent process()
    {
       referenceFrames.updateFrames();
       updateFeetLocations();
@@ -266,6 +265,7 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
       {
          filterDesiredsToMatchCrawlControllerOnTransitionIn.filterDesireds(oneDoFJoints);
       }
+      return null;
    }
 
    private final FramePoint currentFootLocation = new FramePoint();
@@ -751,7 +751,7 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       for (OneDoFJoint oneDofJoint : oneDoFJoints)
       {
@@ -764,15 +764,9 @@ public class QuadrupedCenterOfMassVerificationController extends QuadrupedContro
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
 
-   }
-
-   @Override
-   public RobotMotionStatus getMotionStatus()
-   {
-      return RobotMotionStatus.IN_MOTION;
    }
 
    private enum TrotPair
