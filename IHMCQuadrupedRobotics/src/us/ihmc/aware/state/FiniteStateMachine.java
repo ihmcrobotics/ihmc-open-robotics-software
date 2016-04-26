@@ -6,6 +6,12 @@ import java.util.Map;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 
+/**
+ * A finite state machine implementation capable of holding states of type {@link S} and firing events of any arbitrary enum type.
+ *
+ * @param <S> the state enum type
+ * @param <E> the default event enum type, for convenience
+ */
 public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
 {
    private final Map<S, FiniteStateMachineState<E>> states;
@@ -19,8 +25,15 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
     */
    private final Map<Class<?>, List<FiniteStateMachineTransition<S, ? extends Enum<?>>>> transitions;
 
+   /**
+    * The default type of events, {@link E}. Specifying this is a convenience that allows the type to be omitted from calls to {@link #trigger(Enum)} unless the
+    * event is of a different type.
+    */
    private final Class<E> standardEventType;
 
+   /**
+    * The state to be called on the first call to {@link #process()}, assuming it has not been overridden.
+    */
    private final S initialState;
 
    /**
@@ -39,9 +52,8 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
    /**
     * Use {@link FiniteStateMachineBuilder} instead.
     */
-   FiniteStateMachine(Map<S, FiniteStateMachineState<E>> states,
-         Map<Class<?>, List<FiniteStateMachineTransition<S, ? extends Enum<?>>>> transitions, S initialState, Class<S> enumType, Class<E> standardEventType,
-         String yoVariableName, YoVariableRegistry registry)
+   FiniteStateMachine(Map<S, FiniteStateMachineState<E>> states, Map<Class<?>, List<FiniteStateMachineTransition<S, ? extends Enum<?>>>> transitions,
+         S initialState, Class<S> enumType, Class<E> standardEventType, String yoVariableName, YoVariableRegistry registry)
    {
       this.states = states;
       this.transitions = transitions;
@@ -56,19 +68,27 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
     * <p/>
     * If no transition is defined for the present state and given event then no action will be taken.
     *
-    * @param event the triggered event.
+    * @param event the triggered event
     */
    public void trigger(E event)
    {
       trigger(standardEventType, event);
    }
 
+   /**
+    * Trigger an event of an arbitrary type.
+    *
+    * @param type  the class of {@link M}
+    * @param event the triggered event
+    * @param <M>   the type of the event
+    * @see #trigger(Enum)
+    */
    public <M extends Enum<M>> void trigger(Class<M> type, M event)
    {
-      List<FiniteStateMachineTransition<S, ? extends Enum<?>>> transitionsOnE = transitions.get(type);
-      for (int i = 0; i < transitionsOnE.size(); i++)
+      List<FiniteStateMachineTransition<S, ? extends Enum<?>>> transitionsTypeM = transitions.get(type);
+      for (int i = 0; i < transitionsTypeM.size(); i++)
       {
-         FiniteStateMachineTransition<S, ?> transition = transitionsOnE.get(i);
+         FiniteStateMachineTransition<S, ?> transition = transitionsTypeM.get(i);
 
          // Check if this transition matches the source state and event.
          if (transition.getFrom() == getState() && event == transition.getEvent())
@@ -123,7 +143,8 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
    }
 
    /**
-    * Resets the state machine to the initial state, regardless of whether or not there is a transition to follow.
+    * Resets the state machine to the initial state, regardless of whether or not there is a transition to follow. Still calls {@link
+    * FiniteStateMachineState#onEntry()} and {@link FiniteStateMachineState#onExit()} to ensure states are cleaned up.
     */
    public void reset()
    {
@@ -144,10 +165,10 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
    {
       FiniteStateMachineState<?> fromInstance = getInstanceForEnum(from);
 
-      // It does, so transition to the next state.
       fromInstance.onExit();
       setState(to);
 
+      // Delay call to onEntry until beginning of next process().
       needToCallOnEntry = true;
    }
 }
