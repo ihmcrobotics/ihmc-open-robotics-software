@@ -1,30 +1,31 @@
 package us.ihmc.aware.controller.force.states;
 
-import us.ihmc.aware.controller.force.QuadrupedForceController;
-import us.ihmc.aware.controller.force.QuadrupedForceControllerEvent;
+import java.util.ArrayList;
+
+import us.ihmc.aware.controller.ControllerEvent;
+import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.aware.controller.force.toolbox.*;
-import us.ihmc.aware.planning.trajectory.PiecewiseReverseDcmTrajectory;
-import us.ihmc.aware.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
-import us.ihmc.aware.providers.QuadrupedTimedStepInputProvider;
+import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
-import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.aware.planning.*;
 import us.ihmc.aware.planning.ContactState;
 import us.ihmc.aware.planning.QuadrupedTimedStep;
+import us.ihmc.aware.planning.QuadrupedTimedStepCopPlanner;
+import us.ihmc.aware.planning.QuadrupedXGaitStepPlanner;
+import us.ihmc.aware.planning.trajectory.PiecewiseReverseDcmTrajectory;
+import us.ihmc.aware.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.aware.providers.QuadrupedControllerInputProviderInterface;
-import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.aware.providers.QuadrupedTimedStepInputProvider;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-import java.util.ArrayList;
-
-public class QuadrupedDcmBasedStepController implements QuadrupedForceController
+public class QuadrupedDcmBasedStepController implements QuadrupedController
 {
    private final QuadrupedTimedStepInputProvider stepProvider;
    private final QuadrupedControllerInputProviderInterface inputProvider;
@@ -211,11 +212,11 @@ public class QuadrupedDcmBasedStepController implements QuadrupedForceController
       }
    }
 
-   @Override public QuadrupedForceControllerEvent process()
+   @Override public ControllerEvent process()
    {
       if (timedStepController.getQueueSize() == 0)
       {
-         return QuadrupedForceControllerEvent.FINAL_STEP_COMPLETED;
+         return ControllerEvent.DONE;
       }
       updateEstimates();
       updateSetpoints();

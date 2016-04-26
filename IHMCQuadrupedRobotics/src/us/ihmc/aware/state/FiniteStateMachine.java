@@ -17,7 +17,9 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
     * NOTE: This should be a {@link java.util.Set}, but due to real-time constraints a {@link List} must be used
     * instead.
     */
-   private final List<FiniteStateMachineTransition<S, E>> transitions;
+   private final Map<Class<?>, List<FiniteStateMachineTransition<S, ? extends Enum<?>>>> transitions;
+
+   private final Class<E> standardEventType;
 
    private final S initialState;
 
@@ -27,8 +29,8 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
    private EnumYoVariable<S> state;
 
    /**
-    * Whether or not the current state's {@link FiniteStateMachineState#onEntry()} needs to be called at the beginning of the next {@link #process()} call. This is
-    * required because we don't want to call it immediately when the transition occurs. Rather, we want to wait until the next control cycle so the state's
+    * Whether or not the current state's {@link FiniteStateMachineState#onEntry()} needs to be called at the beginning of the next {@link #process()} call. This
+    * is required because we don't want to call it immediately when the transition occurs. Rather, we want to wait until the next control cycle so the state's
     * {@link FiniteStateMachineState#onEntry()} and {@link FiniteStateMachineState#process()} methods are called in the same control loop.
     */
    // True so we don't forget to initialize the first state at startup
@@ -37,12 +39,14 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
    /**
     * Use {@link FiniteStateMachineBuilder} instead.
     */
-   FiniteStateMachine(Map<S, FiniteStateMachineState<E>> states, List<FiniteStateMachineTransition<S, E>> transitions, S initialState, Class<S> enumType, String yoVariableName,
-         YoVariableRegistry registry)
+   FiniteStateMachine(Map<S, FiniteStateMachineState<E>> states,
+         Map<Class<?>, List<FiniteStateMachineTransition<S, ? extends Enum<?>>>> transitions, S initialState, Class<S> enumType, Class<E> standardEventType,
+         String yoVariableName, YoVariableRegistry registry)
    {
       this.states = states;
       this.transitions = transitions;
       this.initialState = initialState;
+      this.standardEventType = standardEventType;
       this.state = new EnumYoVariable<>(yoVariableName, registry, enumType);
       this.state.set(initialState);
    }
@@ -56,9 +60,15 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
     */
    public void trigger(E event)
    {
-      for (int i = 0; i < transitions.size(); i++)
+      trigger(standardEventType, event);
+   }
+
+   public <M extends Enum<M>> void trigger(Class<M> type, M event)
+   {
+      List<FiniteStateMachineTransition<S, ? extends Enum<?>>> transitionsOnE = transitions.get(type);
+      for (int i = 0; i < transitionsOnE.size(); i++)
       {
-         FiniteStateMachineTransition<S, E> transition = transitions.get(i);
+         FiniteStateMachineTransition<S, ?> transition = transitionsOnE.get(i);
 
          // Check if this transition matches the source state and event.
          if (transition.getFrom() == getState() && event == transition.getEvent())
@@ -88,7 +98,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
 
       if (event != null)
       {
-         trigger(event);
+         trigger(standardEventType, event);
       }
    }
 
@@ -113,14 +123,6 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
    }
 
    /**
-    * @return the current state, as an instance of {@link FiniteStateMachineState}
-    */
-   public FiniteStateMachineState<E> getStateInstance()
-   {
-      return getInstanceForEnum(getState());
-   }
-
-   /**
     * Resets the state machine to the initial state, regardless of whether or not there is a transition to follow.
     */
    public void reset()
@@ -128,7 +130,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
       transition(getState(), initialState);
    }
 
-   private FiniteStateMachineState<E> getInstanceForEnum(S state)
+   private FiniteStateMachineState<?> getInstanceForEnum(S state)
    {
       if (!states.containsKey(state))
       {
@@ -140,7 +142,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
 
    private void transition(S from, S to)
    {
-      FiniteStateMachineState<E> fromInstance = getInstanceForEnum(from);
+      FiniteStateMachineState<?> fromInstance = getInstanceForEnum(from);
 
       // It does, so transition to the next state.
       fromInstance.onExit();

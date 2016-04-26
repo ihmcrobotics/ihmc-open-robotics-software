@@ -1,15 +1,15 @@
 package us.ihmc.aware.controller.position.states;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.aware.controller.position.QuadrupedPositionController;
-import us.ihmc.aware.controller.position.QuadrupedPositionControllerEvent;
+import us.ihmc.aware.controller.ControllerEvent;
+import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
  * A controller that does nothing, but signifies that the robot is ready to transition to
  */
-public class QuadrupedPositionDoNothingController implements QuadrupedPositionController
+public class QuadrupedPositionDoNothingController implements QuadrupedController
 {
    private final FullRobotModel fullRobotModel;
 
@@ -29,7 +29,7 @@ public class QuadrupedPositionDoNothingController implements QuadrupedPositionCo
    }
 
    @Override
-   public QuadrupedPositionControllerEvent process()
+   public ControllerEvent process()
    {
       return null;
    }

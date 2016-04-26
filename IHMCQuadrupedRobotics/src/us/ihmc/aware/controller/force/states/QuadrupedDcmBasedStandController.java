@@ -1,24 +1,24 @@
 package us.ihmc.aware.controller.force.states;
 
-import us.ihmc.aware.controller.force.QuadrupedForceController;
-import us.ihmc.aware.controller.force.QuadrupedForceControllerEvent;
+import us.ihmc.aware.controller.ControllerEvent;
+import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.aware.controller.force.toolbox.*;
+import us.ihmc.aware.estimator.GroundPlaneEstimator;
+import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
-import us.ihmc.aware.estimator.GroundPlaneEstimator;
 import us.ihmc.aware.planning.ContactState;
-import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.providers.QuadrupedControllerInputProviderInterface;
-import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedDcmBasedStandController implements QuadrupedForceController
+public class QuadrupedDcmBasedStandController implements QuadrupedController
 {
    private final QuadrupedControllerInputProviderInterface inputProvider;
    private final DoubleYoVariable robotTimestamp;
@@ -161,7 +161,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedForceControlle
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 
-   @Override public QuadrupedForceControllerEvent process()
+   @Override public ControllerEvent process()
    {
       dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       updateEstimates();

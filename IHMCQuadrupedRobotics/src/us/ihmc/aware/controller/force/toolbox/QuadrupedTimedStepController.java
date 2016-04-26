@@ -98,11 +98,11 @@ public class QuadrupedTimedStepController
       stepQueue = new PreallocatedQueue<>(QuadrupedTimedStep.class, 100);
 
       // state machine
-      stepStateMachine= new QuadrantDependentList<>();
+      stepStateMachine = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         FiniteStateMachineBuilder<StepState, StepEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(StepState.class, prefix + "StepState", registry);
+         FiniteStateMachineBuilder<StepState, StepEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(StepState.class, StepEvent.class, prefix + "StepState", registry);
          stateMachineBuilder.addState(StepState.SUPPORT, new SupportState(robotQuadrant));
          stateMachineBuilder.addState(StepState.SWING, new SwingState(robotQuadrant));
          stateMachineBuilder.addTransition(StepEvent.LIFT_OFF, StepState.SUPPORT, StepState.SWING);

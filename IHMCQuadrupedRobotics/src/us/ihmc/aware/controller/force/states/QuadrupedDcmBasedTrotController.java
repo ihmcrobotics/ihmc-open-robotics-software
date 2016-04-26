@@ -1,25 +1,25 @@
 package us.ihmc.aware.controller.force.states;
 
-import us.ihmc.aware.controller.force.QuadrupedForceController;
-import us.ihmc.aware.controller.force.QuadrupedForceControllerEvent;
+import us.ihmc.aware.controller.ControllerEvent;
+import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.aware.controller.force.toolbox.*;
+import us.ihmc.aware.estimator.GroundPlaneEstimator;
+import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.aware.params.DoubleArrayParameter;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
-import us.ihmc.aware.estimator.GroundPlaneEstimator;
-import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.planning.ContactState;
+import us.ihmc.aware.planning.QuadrupedTimedStep;
 import us.ihmc.aware.planning.trajectory.PiecewiseForwardDcmTrajectory;
 import us.ihmc.aware.planning.trajectory.PiecewisePeriodicDcmTrajectory;
 import us.ihmc.aware.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
+import us.ihmc.aware.providers.QuadrupedControllerInputProviderInterface;
 import us.ihmc.aware.state.FiniteStateMachine;
 import us.ihmc.aware.state.FiniteStateMachineBuilder;
 import us.ihmc.aware.state.FiniteStateMachineState;
-import us.ihmc.aware.planning.ContactState;
-import us.ihmc.aware.planning.QuadrupedTimedStep;
 import us.ihmc.aware.util.TimeInterval;
-import us.ihmc.aware.providers.QuadrupedControllerInputProviderInterface;
-import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -28,7 +28,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedDcmBasedTrotController implements QuadrupedForceController
+public class QuadrupedDcmBasedTrotController implements QuadrupedController
 {
    private final QuadrupedControllerInputProviderInterface inputProvider;
    private final DoubleYoVariable robotTimestamp;
@@ -140,7 +140,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedForceController
       nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(1, gravity, inputProvider.getComPositionInput().getZ());
 
       // state machine
-      FiniteStateMachineBuilder<TrotState, TrotEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(TrotState.class, "TrotState", registry);
+      FiniteStateMachineBuilder<TrotState, TrotEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(TrotState.class, TrotEvent.class, "TrotState", registry);
       stateMachineBuilder.addState(TrotState.QUAD_SUPPORT, new QuadSupportState());
       stateMachineBuilder.addState(TrotState.HIND_LEFT_FRONT_RIGHT_SUPPORT, new DoubleSupportState(RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_RIGHT));
       stateMachineBuilder.addState(TrotState.HIND_RIGHT_FRONT_LEFT_SUPPORT, new DoubleSupportState(RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_LEFT));
@@ -220,7 +220,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedForceController
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 
-   @Override public QuadrupedForceControllerEvent process()
+   @Override public ControllerEvent process()
    {
       updateEstimates();
       updateSetpoints();

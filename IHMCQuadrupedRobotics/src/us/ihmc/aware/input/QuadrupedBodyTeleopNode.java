@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import us.ihmc.aware.controller.force.QuadrupedForceControllerEvent;
+import us.ihmc.aware.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.aware.input.value.InputValueIntegrator;
 import us.ihmc.aware.packets.BodyOrientationPacket;
 import us.ihmc.aware.packets.ComPositionPacket;
@@ -136,7 +136,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       case BUTTON_A:
          if (get(InputChannel.BUTTON_A) > 0.5)
          {
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent.REQUEST_STAND);
+            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
             packetCommunicator.send(eventPacket);
             mode = QuadrupedTeleopMode.POSITION;
          }
@@ -144,7 +144,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       case BUTTON_X:
          if (get(InputChannel.BUTTON_X) > 0.5)
          {
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent.REQUEST_TROT);
+            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_TROT);
             packetCommunicator.send(eventPacket);
             mode = QuadrupedTeleopMode.VELOCITY;
          }
@@ -152,7 +152,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       case BUTTON_Y:
          if (get(InputChannel.BUTTON_Y) > 0.5)
          {
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent.REQUEST_AMBLE);
+            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_AMBLE);
             packetCommunicator.send(eventPacket);
             mode = QuadrupedTeleopMode.VELOCITY;
          }
@@ -160,7 +160,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       case BUTTON_B:
          if (get(InputChannel.BUTTON_B) > 0.5)
          {
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent.REQUEST_PACE);
+            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_PACE);
             packetCommunicator.send(eventPacket);
             mode = QuadrupedTeleopMode.VELOCITY;
          }

@@ -1,7 +1,7 @@
 package us.ihmc.aware.controller.force.states;
 
-import us.ihmc.aware.controller.force.QuadrupedForceController;
-import us.ihmc.aware.controller.force.QuadrupedForceControllerEvent;
+import us.ihmc.aware.controller.ControllerEvent;
+import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.aware.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.aware.controller.force.toolbox.QuadrupedTaskSpaceController;
@@ -20,7 +20,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedForceBasedStandPrepController implements QuadrupedForceController
+public class QuadrupedForceBasedStandPrepController implements QuadrupedController
 {
    private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
@@ -120,12 +120,12 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedForceCon
    }
 
    @Override
-   public QuadrupedForceControllerEvent process()
+   public ControllerEvent process()
    {
       updateEstimates();
       updateSetpoints();
 
-      return isMotionExpired() ? QuadrupedForceControllerEvent.STARTING_POSE_REACHED : null;
+      return isMotionExpired() ? ControllerEvent.DONE : null;
    }
 
    @Override
