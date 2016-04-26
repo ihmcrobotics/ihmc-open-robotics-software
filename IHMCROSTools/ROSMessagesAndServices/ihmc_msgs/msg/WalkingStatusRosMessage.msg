@@ -4,7 +4,7 @@
 # Status of walking. Either STARTED, COMPLETED, or ABORT_REQUESTED.
 # Options for status
 uint8 STARTED=0 # The robot has begun its initial transfer/sway at the start of a walking plan
-uint8 COMPLETED=1 # The robot has finished its final transwer/sway at the end of a walking plan
+uint8 COMPLETED=1 # The robot has finished its final transfer/sway at the end of a walking plan
 uint8 ABORT_REQUESTED=2 # A walking abort has been requested
 uint8 status
 
