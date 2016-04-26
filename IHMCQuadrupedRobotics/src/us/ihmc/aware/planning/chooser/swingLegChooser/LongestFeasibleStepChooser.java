@@ -3,7 +3,7 @@ package us.ihmc.aware.planning.chooser.swingLegChooser;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.aware.controller.position.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.aware.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.aware.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.QuadrupedGeometryTools;
 import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;

@@ -1,4 +1,4 @@
-package us.ihmc.aware.controller.force;
+package us.ihmc.aware.controller.force.states;
 
 import java.util.Arrays;
 import java.util.List;
@@ -6,6 +6,8 @@ import java.util.List;
 import com.google.common.primitives.Booleans;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.aware.controller.force.QuadrupedForceController;
+import us.ihmc.aware.controller.force.QuadrupedForceControllerEvent;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -13,7 +15,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 /**
  * This controller sets desired joint angles to their actual values when the joint comes online.
  */
-public class QuadrupedForceJointInitializationController implements QuadrupedForceController
+public class QuadrupedForceBasedJointInitializationController implements QuadrupedForceController
 {
    private final SDFFullQuadrupedRobotModel fullRobotModel;
 
@@ -23,7 +25,7 @@ public class QuadrupedForceJointInitializationController implements QuadrupedFor
     */
    private final boolean initialized[];
 
-   public QuadrupedForceJointInitializationController(QuadrupedRuntimeEnvironment environment)
+   public QuadrupedForceBasedJointInitializationController(QuadrupedRuntimeEnvironment environment)
    {
       this.fullRobotModel = environment.getFullRobotModel();
       this.initialized = new boolean[fullRobotModel.getOneDoFJoints().length];

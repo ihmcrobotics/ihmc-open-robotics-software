@@ -1,4 +1,4 @@
-package us.ihmc.aware.controller.position;
+package us.ihmc.aware.controller.position.states;
 
 import java.awt.Color;
 import java.util.Random;
@@ -9,6 +9,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.aware.controller.position.QuadrupedPositionController;
+import us.ihmc.aware.controller.position.QuadrupedPositionControllerEvent;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.aware.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;

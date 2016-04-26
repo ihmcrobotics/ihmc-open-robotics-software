@@ -1,4 +1,4 @@
-package us.ihmc.aware.controller.position;
+package us.ihmc.aware.controller.position.states;
 
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 

@@ -1,5 +1,6 @@
 package us.ihmc.aware.controller.position;
 
+import us.ihmc.aware.controller.position.states.*;
 import us.ihmc.aware.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.aware.model.QuadrupedPhysicalProperties;
 import us.ihmc.aware.providers.QuadrupedControllerInputProvider;

@@ -1,9 +1,11 @@
-package us.ihmc.aware.controller.position;
+package us.ihmc.aware.controller.position.states;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.aware.controller.position.QuadrupedPositionController;
+import us.ihmc.aware.controller.position.QuadrupedPositionControllerEvent;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
