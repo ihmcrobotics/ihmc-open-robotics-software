@@ -1,22 +1,17 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 import org.junit.Assert;
-import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -29,6 +24,15 @@ public class VirtualModelControllerTestHelper
    private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
+
+   public static final double toFootCenterX = 0.05042;
+   public static final double toFootCenterY = 0.082;
+
+   public static final double footWidth = 0.11;
+   public static final double footBack = 0.085;
+   public static final double footLength = 0.22;
+   public static final double toeWidth = 0.085;
+   public static final double ankleHeight = 0.0875;
 
    public static final double POUNDS = 1.0 / 2.2;    // Pound to Kg conversion.
    public static final double INCHES = 0.0254;    // Inch to Meter Conversion.
@@ -58,7 +62,6 @@ public class VirtualModelControllerTestHelper
    public static final double FOOT_MASS = 3.0 * POUNDS;
 
    private final Random random = new Random(100L);
-   private final Random bigRandom = new Random(1000L);
 
    public VirtualModelControllerTestHelper()
    {
@@ -160,10 +163,17 @@ public class VirtualModelControllerTestHelper
       RigidBody footBody = copyLinkAsRigidBody(foot, ankleRoll, "foot");
       jointMap.put(ankleRoll, ankle_roll);
 
+      RigidBodyTransform soleToAnkleFrame = TransformTools.createTranslationTransform(footLength / 2.0 - footBack + toFootCenterX,
+            -toFootCenterY, -ankleHeight);
+      ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("Sole",
+            footBody.getBodyFixedFrame(), soleToAnkleFrame);
+
       robotLeg.setBase(pelvisBody);
       robotLeg.setEndEffector(footBody);
       robotLeg.setRootJoint(rootJoint);
       robotLeg.setJointMap(jointMap);
+      robotLeg.setSoleFrame(soleFrame);
+
 
       return robotLeg;
    }
@@ -349,6 +359,7 @@ public class VirtualModelControllerTestHelper
    {
       private RigidBody base;
       private RigidBody endEffector;
+      private ReferenceFrame soleFrame;
       private InverseDynamicsJoint rootJoint;
       private HashMap<InverseDynamicsJoint, Joint> jointMap;
 
@@ -365,6 +376,11 @@ public class VirtualModelControllerTestHelper
       public void setEndEffector(RigidBody endEffector)
       {
          this.endEffector = endEffector;
+      }
+
+      public void setSoleFrame(ReferenceFrame soleFrame)
+      {
+         this.soleFrame = soleFrame;
       }
 
       public void setRootJoint(InverseDynamicsJoint rootJoint)
@@ -385,6 +401,11 @@ public class VirtualModelControllerTestHelper
       public RigidBody getEndEffector()
       {
          return endEffector;
+      }
+
+      public ReferenceFrame getSoleFrame()
+      {
+         return soleFrame;
       }
 
       public InverseDynamicsJoint getRootJoint()
