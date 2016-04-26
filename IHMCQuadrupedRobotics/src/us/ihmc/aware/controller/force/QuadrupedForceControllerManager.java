@@ -3,22 +3,23 @@ package us.ihmc.aware.controller.force;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.aware.controller.force.states.*;
-import us.ihmc.aware.model.QuadrupedPhysicalProperties;
-import us.ihmc.aware.providers.QuadrupedControllerInputProvider;
-import us.ihmc.aware.providers.QuadrupedTimedStepInputProvider;
+import us.ihmc.aware.controller.ControllerEvent;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
-import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
+import us.ihmc.aware.controller.force.states.*;
+import us.ihmc.aware.model.QuadrupedPhysicalProperties;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.aware.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.aware.params.ParameterPacketListener;
+import us.ihmc.aware.planning.ContactState;
+import us.ihmc.aware.providers.QuadrupedControllerInputProvider;
+import us.ihmc.aware.providers.QuadrupedControllerInputProviderInterface;
+import us.ihmc.aware.providers.QuadrupedTimedStepInputProvider;
 import us.ihmc.aware.state.FiniteStateMachine;
 import us.ihmc.aware.state.FiniteStateMachineBuilder;
 import us.ihmc.aware.state.FiniteStateMachineYoVariableTrigger;
-import us.ihmc.aware.planning.ContactState;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.aware.providers.QuadrupedControllerInputProviderInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -36,12 +37,12 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final QuadrupedControllerInputProviderInterface inputProvider;
    private final QuadrupedTimedStepInputProvider stepProvider;
 
-   private final FiniteStateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> stateMachine;
-   private final FiniteStateMachineYoVariableTrigger<QuadrupedForceControllerEvent> userEventTrigger;
+   private final FiniteStateMachine<QuadrupedForceControllerState, ControllerEvent> stateMachine;
+   private final FiniteStateMachineYoVariableTrigger<QuadrupedForceControllerRequestedEvent> userEventTrigger;
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
    private final QuadrupedForceControllerToolbox controllerToolbox;
 
-   private final AtomicReference<QuadrupedForceControllerEvent> requestedEvent = new AtomicReference<>();
+   private final AtomicReference<QuadrupedForceControllerRequestedEvent> requestedEvent = new AtomicReference<>();
 
    public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties) throws IOException
    {
@@ -63,7 +64,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry);
       this.stateMachine = buildStateMachine(runtimeEnvironment, inputProvider);
-      this.userEventTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerEvent.class);
+      this.userEventTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerRequestedEvent.class);
       this.runtimeEnvironment = runtimeEnvironment;
    }
 
@@ -76,10 +77,10 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    @Override
    public void doControl()
    {
-      QuadrupedForceControllerEvent reqEvent = requestedEvent.getAndSet(null);
+      QuadrupedForceControllerRequestedEvent reqEvent = requestedEvent.getAndSet(null);
       if (reqEvent != null)
       {
-         stateMachine.trigger(reqEvent);
+         stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, reqEvent);
       }
 
       stateMachine.process();
@@ -121,18 +122,18 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       return motionStatusHolder;
    }
 
-   private FiniteStateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerInputProviderInterface inputProvider)
+   private FiniteStateMachine<QuadrupedForceControllerState, ControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerInputProviderInterface inputProvider)
    {
       // Initialize controllers.
-      QuadrupedForceController jointInitializationController = new QuadrupedForceBasedJointInitializationController(runtimeEnvironment);
-      QuadrupedForceBasedStandPrepController standPrepController = new QuadrupedForceBasedStandPrepController(runtimeEnvironment, controllerToolbox);
+      QuadrupedController jointInitializationController = new QuadrupedForceBasedJointInitializationController(runtimeEnvironment);
+      QuadrupedController standPrepController = new QuadrupedForceBasedStandPrepController(runtimeEnvironment, controllerToolbox);
       QuadrupedController standController = new QuadrupedDcmBasedStandController(runtimeEnvironment, controllerToolbox, inputProvider);
       QuadrupedController stepController = new QuadrupedDcmBasedStepController(runtimeEnvironment, controllerToolbox, inputProvider, stepProvider);
-      QuadrupedForceController trotController = new QuadrupedDcmBasedTrotController(runtimeEnvironment, controllerToolbox, inputProvider);
-      QuadrupedForceController paceController = new QuadrupedDcmBasedPaceController(runtimeEnvironment, controllerToolbox, inputProvider);
+      QuadrupedController trotController = new QuadrupedDcmBasedTrotController(runtimeEnvironment, controllerToolbox, inputProvider);
+      QuadrupedController paceController = new QuadrupedDcmBasedPaceController(runtimeEnvironment, controllerToolbox, inputProvider);
 
-      FiniteStateMachineBuilder<QuadrupedForceControllerState, QuadrupedForceControllerEvent> builder = new FiniteStateMachineBuilder<>(QuadrupedForceControllerState.class,
-            "forceControllerState", registry);
+      FiniteStateMachineBuilder<QuadrupedForceControllerState, ControllerEvent> builder = new FiniteStateMachineBuilder<>(
+            QuadrupedForceControllerState.class, ControllerEvent.class, "forceControllerState", registry);
 
       builder.addState(QuadrupedForceControllerState.JOINT_INITIALIZATION, jointInitializationController);
       builder.addState(QuadrupedForceControllerState.STAND_PREP, standPrepController);
@@ -142,24 +143,21 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       builder.addState(QuadrupedForceControllerState.PACE, paceController);
 
       // Add automatic transitions that lead into the stand state.
-      builder.addTransition(QuadrupedForceControllerEvent.JOINTS_INITIALIZED, QuadrupedForceControllerState.JOINT_INITIALIZATION,
-            QuadrupedForceControllerState.STAND_PREP);
-      builder.addTransition(QuadrupedForceControllerEvent.STARTING_POSE_REACHED, QuadrupedForceControllerState.STAND_PREP, QuadrupedForceControllerState.STAND);
-      builder.addTransition(QuadrupedForceControllerEvent.FINAL_STEP_COMPLETED, QuadrupedForceControllerState.STEP, QuadrupedForceControllerState.STAND);
+      builder.addTransition(ControllerEvent.DONE, QuadrupedForceControllerState.JOINT_INITIALIZATION, QuadrupedForceControllerState.STAND_PREP);
+      builder.addTransition(ControllerEvent.DONE, QuadrupedForceControllerState.STAND_PREP, QuadrupedForceControllerState.STAND);
+      builder.addTransition(ControllerEvent.DONE, QuadrupedForceControllerState.STEP, QuadrupedForceControllerState.STAND);
 
       // Manually triggered events to transition to main controllers.
-      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND, QuadrupedForceControllerState.STAND_PREP, QuadrupedForceControllerState.STAND);
-      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND, QuadrupedForceControllerState.STEP, QuadrupedForceControllerState.STAND);
-      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND, QuadrupedForceControllerState.TROT, QuadrupedForceControllerState.STAND);
-      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND, QuadrupedForceControllerState.PACE, QuadrupedForceControllerState.STAND);
-      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STEP, QuadrupedForceControllerState.STAND_PREP, QuadrupedForceControllerState.STEP);
-      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STEP, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.STEP);
-      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_TROT, QuadrupedForceControllerState.STAND_PREP, QuadrupedForceControllerState.TROT);
-      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_TROT, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.TROT);
-      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_PACE, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.PACE);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND, QuadrupedForceControllerState.STAND_PREP, QuadrupedForceControllerState.STAND);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND, QuadrupedForceControllerState.STEP, QuadrupedForceControllerState.STAND);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND, QuadrupedForceControllerState.TROT, QuadrupedForceControllerState.STAND);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND, QuadrupedForceControllerState.PACE, QuadrupedForceControllerState.STAND);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STEP, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.STEP);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_TROT, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.TROT);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_PACE, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.PACE);
 
       // Transitions from controllers back to stand prep.
-      builder.addTransition(QuadrupedForceControllerEvent.REQUEST_STAND_PREP, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.STAND_PREP);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.STAND_PREP);
 
       return builder.build(QuadrupedForceControllerState.JOINT_INITIALIZATION);
    }

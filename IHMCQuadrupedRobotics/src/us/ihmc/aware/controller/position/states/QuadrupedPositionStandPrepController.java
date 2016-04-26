@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.aware.controller.position.QuadrupedPositionController;
-import us.ihmc.aware.controller.position.QuadrupedPositionControllerEvent;
+import us.ihmc.aware.controller.ControllerEvent;
+import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.params.DoubleParameter;
 import us.ihmc.aware.params.ParameterFactory;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
@@ -16,7 +16,7 @@ import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 /**
  * A controller that will track the minimum jerk trajectory to bring joints to a preparatory pose.
  */
-public class QuadrupedPositionStandPrepController implements QuadrupedPositionController
+public class QuadrupedPositionStandPrepController implements QuadrupedController
 {
    private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
@@ -67,7 +67,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedPositionCo
    }
 
    @Override
-   public QuadrupedPositionControllerEvent process()
+   public ControllerEvent process()
    {
       fullRobotModel.updateFrames();
 
@@ -82,7 +82,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedPositionCo
 
       timeInTrajectory += dt;
 
-      return isMotionExpired() ? QuadrupedPositionControllerEvent.STARTING_POSE_REACHED : null;
+      return isMotionExpired() ? ControllerEvent.DONE : null;
    }
 
    @Override

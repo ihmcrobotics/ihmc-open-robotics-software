@@ -12,8 +12,8 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
  */
 public class FiniteStateMachineYoVariableTrigger<E extends Enum<E>>
 {
-   public FiniteStateMachineYoVariableTrigger(final FiniteStateMachine<?, E> stateMachine, String name, YoVariableRegistry registry,
-         Class<E> enumType)
+   public FiniteStateMachineYoVariableTrigger(final FiniteStateMachine<?, ?> stateMachine, String name, YoVariableRegistry registry,
+         final Class<E> enumType)
    {
       final EnumYoVariable<E> yoVariable = new EnumYoVariable<>(name, registry, enumType, true);
       yoVariable.set(null);
@@ -26,7 +26,7 @@ public class FiniteStateMachineYoVariableTrigger<E extends Enum<E>>
          {
             if (yoVariable.getEnumValue() != null)
             {
-               stateMachine.trigger(yoVariable.getEnumValue());
+               stateMachine.trigger(enumType, yoVariable.getEnumValue());
 
                // Reset to null to be ready for another event.
                yoVariable.set(null);

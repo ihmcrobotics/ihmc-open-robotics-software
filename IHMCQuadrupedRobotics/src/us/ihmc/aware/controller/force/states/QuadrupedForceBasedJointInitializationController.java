@@ -5,15 +5,15 @@ import java.util.BitSet;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
-import us.ihmc.aware.controller.force.QuadrupedForceController;
-import us.ihmc.aware.controller.force.QuadrupedForceControllerEvent;
+import us.ihmc.aware.controller.ControllerEvent;
+import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
  * This controller sets desired joint angles to their actual values when the joint comes online.
  */
-public class QuadrupedForceBasedJointInitializationController implements QuadrupedForceController
+public class QuadrupedForceBasedJointInitializationController implements QuadrupedController
 {
    private final SDFFullQuadrupedRobotModel fullRobotModel;
 
@@ -45,7 +45,7 @@ public class QuadrupedForceBasedJointInitializationController implements Quadrup
    }
 
    @Override
-   public QuadrupedForceControllerEvent process()
+   public ControllerEvent process()
    {
       OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
       for (int i = 0; i < joints.length; i++)
@@ -60,7 +60,7 @@ public class QuadrupedForceBasedJointInitializationController implements Quadrup
          }
       }
 
-      return allJointsInitialized() ? QuadrupedForceControllerEvent.JOINTS_INITIALIZED : null;
+      return allJointsInitialized() ? ControllerEvent.DONE : null;
    }
 
    @Override

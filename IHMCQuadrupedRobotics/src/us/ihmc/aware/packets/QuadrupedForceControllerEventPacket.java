@@ -1,23 +1,23 @@
 package us.ihmc.aware.packets;
 
-import us.ihmc.aware.controller.force.QuadrupedForceControllerEvent;
+import us.ihmc.aware.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.communication.packets.Packet;
 
 public class QuadrupedForceControllerEventPacket extends Packet<QuadrupedForceControllerEventPacket>
 {
-   private QuadrupedForceControllerEvent event;
+   private QuadrupedForceControllerRequestedEvent event;
 
    public QuadrupedForceControllerEventPacket()
    {
       this.event = null;
    }
 
-   public QuadrupedForceControllerEventPacket(QuadrupedForceControllerEvent event)
+   public QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent event)
    {
       this.event = event;
    }
 
-   public QuadrupedForceControllerEvent get()
+   public QuadrupedForceControllerRequestedEvent get()
    {
       return event;
    }

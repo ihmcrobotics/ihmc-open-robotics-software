@@ -9,8 +9,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.aware.controller.position.QuadrupedPositionController;
-import us.ihmc.aware.controller.position.QuadrupedPositionControllerEvent;
+import us.ihmc.aware.controller.ControllerEvent;
+import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.aware.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
@@ -82,7 +82,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
-public class QuadrupedPositionBasedCrawlController implements QuadrupedPositionController
+public class QuadrupedPositionBasedCrawlController implements QuadrupedController
 {
    private static final double MAX_YAW_IN_PLACE = 0.4;
    
@@ -719,7 +719,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedPositionC
    }
 
    @Override
-   public QuadrupedPositionControllerEvent process()
+   public ControllerEvent process()
    {
       doActionTimer.startTimer();
       
