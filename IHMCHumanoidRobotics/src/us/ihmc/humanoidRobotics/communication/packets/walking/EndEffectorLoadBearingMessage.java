@@ -1,18 +1,19 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.annotations.ros.RosExportedField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
 
-@ClassDocumentation("This message commands the controller to start loading an end effector that was unloaded to support the robot weight. "
+@RosMessagePacket(documentation = "This message commands the controller to start loading an end effector that was unloaded to support the robot weight. "
       + " One application is making a foot loadbearing."
       + " When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support."
-      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.")
-public class EndEffectorLoadBearingMessage extends IHMCRosApiMessage<EndEffectorLoadBearingMessage>
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
+                  rosPackage = "ihmc_msgs",
+                  topic = "/control/end_effector_load_bearing")
+public class EndEffectorLoadBearingMessage extends Packet<EndEffectorLoadBearingMessage>
 {
    public enum EndEffector implements DocumentedEnum<EndEffector>
    {
@@ -86,11 +87,11 @@ public class EndEffectorLoadBearingMessage extends IHMCRosApiMessage<EndEffector
       }
    }
 
-   @FieldDocumentation("Needed to identify a side dependent end-effector.")
+   @RosExportedField(documentation = "Needed to identify a side dependent end-effector.")
    public RobotSide robotSide;
-   @FieldDocumentation("Specifies which end-effector should be loaded/unloaded.")
+   @RosExportedField(documentation = "Specifies which end-effector should be loaded/unloaded.")
    public EndEffector endEffector;
-   @FieldDocumentation("Wether the end-effector should be loaded or unloaded.")
+   @RosExportedField(documentation = "Wether the end-effector should be loaded or unloaded.")
    public LoadBearingRequest request;
 
    /**

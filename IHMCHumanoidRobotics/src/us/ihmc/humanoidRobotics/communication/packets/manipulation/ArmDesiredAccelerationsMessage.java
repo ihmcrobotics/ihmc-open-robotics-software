@@ -3,18 +3,21 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.annotations.ros.RosExportedField;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.DocumentedEnum;
 
-@ClassDocumentation("This message gives the user the option to bypass IHMC feedback controllers for the arm joints by sending desired arm joint accelerations."
-      + " One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations."
-      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.")
-public class ArmDesiredAccelerationsMessage extends IHMCRosApiMessage<ArmDesiredAccelerationsMessage>
+@RosMessagePacket(documentation =
+      "This message gives the user the option to bypass IHMC feedback controllers for the arm joints by sending desired arm joint accelerations."
+            + " One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations."
+            + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
+      rosPackage = "ihmc_msgs",
+      topic = "/control/arm_desired_joint_accelerations")
+public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAccelerationsMessage>
 {
    public enum ArmControlMode implements DocumentedEnum<ArmControlMode>
    {
@@ -26,9 +29,10 @@ public class ArmDesiredAccelerationsMessage extends IHMCRosApiMessage<ArmDesired
          switch (var)
          {
          case IHMC_CONTROL_MODE:
-            return "The IHMC controller controls the arm joints to execute desired inputs given from ArmTrajectoryMessage, HandTrajectoryMessage, and WholeBodyTrajectoryMessage."
-                  + " PD controllers are run for the given inputs and will either compute the desired hand spatial acceleration or arm joint desired accelerations."
-                  + "The desired joint torques to achieve these desired accelerations are computed by the IHMC QP solver & inverse dynamics calculator.";
+            return
+                  "The IHMC controller controls the arm joints to execute desired inputs given from ArmTrajectoryMessage, HandTrajectoryMessage, and WholeBodyTrajectoryMessage."
+                        + " PD controllers are run for the given inputs and will either compute the desired hand spatial acceleration or arm joint desired accelerations."
+                        + "The desired joint torques to achieve these desired accelerations are computed by the IHMC QP solver & inverse dynamics calculator.";
          case USER_CONTROL_MODE:
             return "The user directly sets what the arm joint desired accelerations have to be."
                   + " The IHMC controller will stop tracking positions and the user desired accelerations will be fed to the IHMC QP solver & inverse dynamics to compute the desired joint torques.";
@@ -45,12 +49,11 @@ public class ArmDesiredAccelerationsMessage extends IHMCRosApiMessage<ArmDesired
       }
    }
 
-
-   @FieldDocumentation("Specifies the side of the robot that will execute the trajectory.")
+   @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public RobotSide robotSide;
-   @FieldDocumentation("Specifies the control mode for controlling the arm joints. See ArmControlMode.")
+   @RosExportedField(documentation = "Specifies the control mode for controlling the arm joints. See ArmControlMode.")
    public ArmControlMode armControlMode;
-   @FieldDocumentation("Specifies the desired joint accelerations. Only necessary when armControlMode == USER_CONTROL_MODE.")
+   @RosExportedField(documentation = "Specifies the desired joint accelerations. Only necessary when armControlMode == USER_CONTROL_MODE.")
    public double[] armDesiredJointAccelerations;
 
    public ArmDesiredAccelerationsMessage()

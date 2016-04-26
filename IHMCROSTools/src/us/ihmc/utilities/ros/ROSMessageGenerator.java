@@ -15,10 +15,10 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packetAnnotations.IgnoreField;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import org.apache.commons.lang3.StringUtils;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.annotations.ros.RosExportedField;
+import us.ihmc.communication.annotations.ros.RosIgnoredField;
 import us.ihmc.tools.DocumentedEnum;
 import us.ihmc.utilities.ros.documentation.enums.EnumDocumentationFactory;
 
@@ -44,16 +44,23 @@ public class ROSMessageGenerator
          return "";
       }
 
-      if (topLevel && !IHMCRosApiMessage.class.isAssignableFrom(clazz))
-         System.err.println(clazz.getSimpleName() + " does not extend IHMCRosApiPacket");
-
       File file = new File(messageFolder);
       if (!file.exists())
       {
          file.mkdirs();
       }
 
-      String messageName = clazz.getSimpleName() + "Message";
+      String messageName = clazz.getSimpleName();
+
+      if(!messageName.endsWith("Message"))
+      {
+          messageName += "Message";
+      }
+      else
+      {
+         messageName = StringUtils.replace(messageName, "Message", "RosMessage");
+      }
+
       File messageFile = new File((messageFolder + File.separator + messageName + ".msg"));
 
       if (overwrite ||!messageFile.exists())
@@ -67,10 +74,10 @@ public class ROSMessageGenerator
             PrintStream fileStream = new PrintStream(messageFile);
 
             String outBuffer = "## " + messageName + "\n";
-            ClassDocumentation annotation = (ClassDocumentation) clazz.getAnnotation(ClassDocumentation.class);
+            RosMessagePacket annotation = (RosMessagePacket) clazz.getAnnotation(RosMessagePacket.class);
             if (annotation != null)
             {
-               String[] annotationString = annotation.value().split("\r?\n|\r");
+               String[] annotationString = annotation.documentation().split("\r?\n|\r");
                for (String line : annotationString)
                {
                   outBuffer += "# " + line + "\n";
@@ -136,7 +143,7 @@ public class ROSMessageGenerator
 
    private boolean isIgnoredField(Field field)
    {
-      return field.isAnnotationPresent(IgnoreField.class);
+      return field.isAnnotationPresent(RosIgnoredField.class);
    }
 
    private boolean isConstant(Field field)
@@ -154,10 +161,10 @@ public class ROSMessageGenerator
    private String printType(Field field, boolean duplicateEnum) throws Exception
    {
       String buffer = "";
-      FieldDocumentation fieldAnnotation = field.getAnnotation(FieldDocumentation.class);
+      RosExportedField fieldAnnotation = field.getAnnotation(RosExportedField.class);
       if (fieldAnnotation != null)
       {
-         String[] annotationString = fieldAnnotation.value().split("\r?\n|\r");
+         String[] annotationString = fieldAnnotation.documentation().split("\r?\n|\r");
          for (String line : annotationString)
          {
             buffer += "# " + line + "\n";

@@ -23,13 +23,10 @@ geometry_msgs/Vector3 actual_foot_position_in_world
 # actualFootOrientationInWorld gives the orientation the foot is actually in as opposed tothe desired orientation sent to the controller
 geometry_msgs/Quaternion actual_foot_orientation_in_world
 
-# isDoneWalking will be set to true when in double-support and there are no footsteps queued. If
-# isDoneWalking is set to true, the rest of the fields in this packet should be ignored
-bool is_done_walking
-
 # A unique id for the current message. This can be a timestamp or sequence number.
 # Only the unique id in the top level message is used, the unique id in nested messages is ignored.
 # Use /output/last_received_message for feedback about when the last message was received.
+# A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.
 int64 unique_id
 
 

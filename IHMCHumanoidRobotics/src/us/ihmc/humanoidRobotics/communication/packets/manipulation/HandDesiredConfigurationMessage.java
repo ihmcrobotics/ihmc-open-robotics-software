@@ -2,20 +2,21 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import java.util.Random;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.annotations.ros.RosExportedField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation(value = "Packet for commanding the hands to perform various predefined grasps."
-      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.")
-public class HandDesiredConfigurationMessage extends IHMCRosApiMessage<HandDesiredConfigurationMessage>
+@RosMessagePacket(documentation = "Packet for commanding the hands to perform various predefined grasps."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
+      rosPackage = "ihmc_msgs",
+      topic = "/control/hand_desired_configuration")
+public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigurationMessage>
 {
-   @FieldDocumentation(value = "Specifies the side of the robot that will execute the trajectory")
+   @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory")
    public RobotSide robotSide;
-   @FieldDocumentation(value = "Specifies the grasp to perform")
+   @RosExportedField(documentation = "Specifies the grasp to perform")
    public HandConfiguration handDesiredConfiguration;
 
    /**
