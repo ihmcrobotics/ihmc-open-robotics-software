@@ -43,13 +43,10 @@ public class VirtualModelControlOptimizationControlModule
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
 
-   public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
+   public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, InverseDynamicsJoint rootJoint, YoVariableRegistry parentRegistry)
    {
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
-
-      InverseDynamicsJoint rootJoint = toolbox.getRobotRootJoint();
-      ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
       int rhoSize = WholeBodyControlCoreToolbox.rhoSize;
 
@@ -67,7 +64,7 @@ public class VirtualModelControlOptimizationControlModule
       else
          basisVectorVisualizer = null;
 
-      externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
+      externalWrenchHandler = new ExternalWrenchHandler(gravityZ, toolbox.getCenterOfMassFrame(), rootJoint, contactablePlaneBodies);
 
       rhoMin.set(momentumOptimizationSettings.getRhoMin());
       qpSolver = new VirtualModelControlQPSolver(rhoSize, registry);
