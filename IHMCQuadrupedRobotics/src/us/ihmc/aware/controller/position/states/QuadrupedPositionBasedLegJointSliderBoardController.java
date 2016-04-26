@@ -1,18 +1,18 @@
-package us.ihmc.quadrupedRobotics.controller;
+package us.ihmc.aware.controller.position.states;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
+import us.ihmc.aware.controller.ControllerEvent;
+import us.ihmc.aware.controller.QuadrupedController;
+import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
-public class QuadrupedLegJointSliderBoardController extends QuadrupedController
+public class QuadrupedPositionBasedLegJointSliderBoardController implements QuadrupedController
 {
    private final YoVariableRegistry sliderBoardRegistry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -22,11 +22,9 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
    private final Map<String, AlphaFilteredYoVariable> alphaFilteredQDesiredMap = new HashMap<>();
    private final Map<String, DoubleYoVariable> QDesiredMap = new HashMap<>();
 
-   public QuadrupedLegJointSliderBoardController(SDFFullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
+   public QuadrupedPositionBasedLegJointSliderBoardController(QuadrupedRuntimeEnvironment runtimeEnvironment, YoVariableRegistry parentRegistry)
    {
-      super(QuadrupedControllerState.SLIDER_BOARD);
-
-      jointMap = fullRobotModel.getOneDoFJointsAsMap();
+      jointMap = runtimeEnvironment.getFullRobotModel().getOneDoFJointsAsMap();
       jointMapKeySet.addAll(jointMap.keySet());
 
       for (String key : jointMap.keySet())
@@ -43,13 +41,7 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
    }
 
    @Override
-   public RobotMotionStatus getMotionStatus()
-   {
-      return RobotMotionStatus.STANDING;
-   }
-
-   @Override
-   public void doAction()
+   public ControllerEvent process()
    {
       for (int i = 0; i < jointMapKeySet.size(); i++)
       {
@@ -59,10 +51,11 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
          alphaFilteredYoVariable.update();
          oneDoFJoint.setqDesired(alphaFilteredYoVariable.getDoubleValue());
       }
+      return null;
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       for (int i = 0; i < jointMapKeySet.size(); i++)
       {
@@ -81,7 +74,7 @@ public class QuadrupedLegJointSliderBoardController extends QuadrupedController
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
 
    }

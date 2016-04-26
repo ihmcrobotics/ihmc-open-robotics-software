@@ -41,6 +41,8 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, initialPositionParameters);
       QuadrupedController standReadyController = new QuadrupedPositionStandReadyController(runtimeEnvironment);
       QuadrupedController crawlController = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, modelFactory, physicalProperties, crawlControllerParameters, inputProvider, legIKCalculator);
+      QuadrupedController jointSliderBoardController = new QuadrupedPositionBasedLegJointSliderBoardController(runtimeEnvironment, registry);
+      QuadrupedController comVerificationController = new QuadrupedPositionBasedCenterOfMassVerificationController(runtimeEnvironment, modelFactory, physicalProperties, legIKCalculator, registry);
 
       FiniteStateMachineBuilder<QuadrupedPositionControllerState, ControllerEvent> builder = new FiniteStateMachineBuilder<>(
             QuadrupedPositionControllerState.class, ControllerEvent.class, "positionControllerState", registry);
@@ -50,6 +52,8 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       builder.addState(QuadrupedPositionControllerState.STAND_PREP, standPrepController);
       builder.addState(QuadrupedPositionControllerState.STAND_READY, standReadyController);
       builder.addState(QuadrupedPositionControllerState.CRAWL, crawlController);
+      builder.addState(QuadrupedPositionControllerState.COM_VERIFICATION, comVerificationController);
+      builder.addState(QuadrupedPositionControllerState.JOINT_SLIDER_BOARD, jointSliderBoardController);
 
       // TODO: Define more state transitions.
       builder.addTransition(ControllerEvent.DONE, QuadrupedPositionControllerState.JOINT_INITIALIZATION, QuadrupedPositionControllerState.DO_NOTHING);
@@ -60,9 +64,17 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
             QuadrupedPositionControllerState.STAND_PREP);
       builder.addTransition(QuadrupedPositionControllerRequestedEvent.class, QuadrupedPositionControllerRequestedEvent.REQUEST_CRAWL, QuadrupedPositionControllerState.STAND_READY,
             QuadrupedPositionControllerState.CRAWL);
+      builder.addTransition(QuadrupedPositionControllerRequestedEvent.class, QuadrupedPositionControllerRequestedEvent.REQUEST_COM_VERIFICATION, QuadrupedPositionControllerState.STAND_READY,
+            QuadrupedPositionControllerState.COM_VERIFICATION);
+      builder.addTransition(QuadrupedPositionControllerRequestedEvent.class, QuadrupedPositionControllerRequestedEvent.REQUEST_JOINT_SLIDER_BOARD, QuadrupedPositionControllerState.STAND_READY,
+            QuadrupedPositionControllerState.JOINT_SLIDER_BOARD);
 
       // Transitions from controllers back to stand prep.
       builder.addTransition(QuadrupedPositionControllerRequestedEvent.class, QuadrupedPositionControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedPositionControllerState.CRAWL,
+            QuadrupedPositionControllerState.STAND_PREP);
+      builder.addTransition(QuadrupedPositionControllerRequestedEvent.class, QuadrupedPositionControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedPositionControllerState.COM_VERIFICATION,
+            QuadrupedPositionControllerState.STAND_PREP);
+      builder.addTransition(QuadrupedPositionControllerRequestedEvent.class, QuadrupedPositionControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedPositionControllerState.JOINT_SLIDER_BOARD,
             QuadrupedPositionControllerState.STAND_PREP);
 
       this.stateMachine = builder.build(QuadrupedPositionControllerState.JOINT_INITIALIZATION);
