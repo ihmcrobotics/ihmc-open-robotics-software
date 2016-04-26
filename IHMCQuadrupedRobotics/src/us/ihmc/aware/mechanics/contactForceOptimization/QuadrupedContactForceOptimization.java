@@ -1,4 +1,4 @@
-package us.ihmc.aware.mechanics.contactForces;
+package us.ihmc.aware.mechanics.contactForceOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;

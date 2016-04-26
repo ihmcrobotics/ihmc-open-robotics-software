@@ -1,4 +1,4 @@
-package us.ihmc.aware.mechanics.virtualModelControl;
+package us.ihmc.aware.mechanics.virtualModelController;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
