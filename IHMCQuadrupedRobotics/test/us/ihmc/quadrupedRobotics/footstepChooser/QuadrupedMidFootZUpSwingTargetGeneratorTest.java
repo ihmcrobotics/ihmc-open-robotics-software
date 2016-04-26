@@ -11,7 +11,7 @@ import org.junit.Before;
 import us.ihmc.aware.planning.chooser.footstepChooser.MidFootZUpSwingTargetGenerator;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.aware.controller.position.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.aware.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.aware.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;

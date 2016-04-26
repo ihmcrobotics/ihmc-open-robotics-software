@@ -3,6 +3,7 @@ package us.ihmc.aware.controller.force;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.aware.controller.force.states.*;
 import us.ihmc.aware.model.QuadrupedPhysicalProperties;
 import us.ihmc.aware.providers.QuadrupedControllerInputProvider;
 import us.ihmc.aware.providers.QuadrupedTimedStepInputProvider;
@@ -123,12 +124,12 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private FiniteStateMachine<QuadrupedForceControllerState, QuadrupedForceControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedControllerInputProviderInterface inputProvider)
    {
       // Initialize controllers.
-      QuadrupedForceController jointInitializationController = new QuadrupedForceJointInitializationController(runtimeEnvironment);
-      QuadrupedVirtualModelBasedStandPrepController standPrepController = new QuadrupedVirtualModelBasedStandPrepController(runtimeEnvironment, controllerToolbox);
-      QuadrupedController standController = new QuadrupedVirtualModelBasedStandController(runtimeEnvironment, controllerToolbox, inputProvider);
-      QuadrupedController stepController = new QuadrupedVirtualModelBasedStepController(runtimeEnvironment, controllerToolbox, inputProvider, stepProvider);
-      QuadrupedForceController trotController = new QuadrupedVirtualModelBasedTrotController(runtimeEnvironment, controllerToolbox, inputProvider);
-      QuadrupedForceController paceController = new QuadrupedVirtualModelBasedPaceController(runtimeEnvironment, controllerToolbox, inputProvider);
+      QuadrupedForceController jointInitializationController = new QuadrupedForceBasedJointInitializationController(runtimeEnvironment);
+      QuadrupedForceBasedStandPrepController standPrepController = new QuadrupedForceBasedStandPrepController(runtimeEnvironment, controllerToolbox);
+      QuadrupedController standController = new QuadrupedDcmBasedStandController(runtimeEnvironment, controllerToolbox, inputProvider);
+      QuadrupedController stepController = new QuadrupedDcmBasedStepController(runtimeEnvironment, controllerToolbox, inputProvider, stepProvider);
+      QuadrupedForceController trotController = new QuadrupedDcmBasedTrotController(runtimeEnvironment, controllerToolbox, inputProvider);
+      QuadrupedForceController paceController = new QuadrupedDcmBasedPaceController(runtimeEnvironment, controllerToolbox, inputProvider);
 
       FiniteStateMachineBuilder<QuadrupedForceControllerState, QuadrupedForceControllerEvent> builder = new FiniteStateMachineBuilder<>(QuadrupedForceControllerState.class,
             "forceControllerState", registry);

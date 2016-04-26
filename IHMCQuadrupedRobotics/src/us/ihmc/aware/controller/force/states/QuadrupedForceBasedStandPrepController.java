@@ -1,5 +1,8 @@
-package us.ihmc.aware.controller.force;
+package us.ihmc.aware.controller.force.states;
 
+import us.ihmc.aware.controller.force.QuadrupedForceController;
+import us.ihmc.aware.controller.force.QuadrupedForceControllerEvent;
+import us.ihmc.aware.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.aware.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.aware.controller.force.toolbox.QuadrupedTaskSpaceController;
 import us.ihmc.aware.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
@@ -17,7 +20,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedForceController
+public class QuadrupedForceBasedStandPrepController implements QuadrupedForceController
 {
    private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
@@ -34,7 +37,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
 
    private final DoubleYoVariable robotTime;
    private final QuadrupedReferenceFrames referenceFrames;
-   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedVirtualModelBasedStandPrepController.class.getSimpleName());
+   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedStandPrepController.class.getSimpleName());
 
    // Sole trajectories
    private final TimeInterval trajectoryTimeInterval = new TimeInterval();
@@ -50,7 +53,7 @@ public class QuadrupedVirtualModelBasedStandPrepController implements QuadrupedF
    private final QuadrupedSolePositionController solePositionController;
    private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
 
-   public QuadrupedVirtualModelBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
+   public QuadrupedForceBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
    {
       this.robotTime = environment.getRobotTimestamp();
       this.referenceFrames = controllerToolbox.getReferenceFrames();
