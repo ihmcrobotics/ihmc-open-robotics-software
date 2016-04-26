@@ -1,19 +1,21 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.IgnoreField;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.annotations.ros.RosIgnoredField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.MathTools;
 
-@ClassDocumentation("This message contains a desired joint angle for a single joint.")
+@RosMessagePacket(documentation = "This message contains a desired joint angle for a single joint.",
+      rosPackage = "ihmc_msgs",
+      topic = "/control/single_joint_angle")
 public class SingleJointAnglePacket extends Packet<SingleJointAnglePacket> implements VisualizablePacket
 {   
    public String jointName;
    public double angle;
    public double trajcetoryTime;
    
-   @IgnoreField
+   @RosIgnoredField
    public double resetAngle = Double.NaN;
    
    public SingleJointAnglePacket()

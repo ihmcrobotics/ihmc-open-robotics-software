@@ -3,16 +3,19 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-@ClassDocumentation("This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified trajectory points."
+@RosMessagePacket(documentation =
+      "This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified trajectory points."
       + " A hermite based curve (third order) is used to interpolate the orientations."
       + " To excute a simple trajectory to reach a desired chest orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time."
-      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
+                  rosPackage = "ihmc_msgs",
+                  topic = "/control/chest_trajectory")
 public class ChestTrajectoryMessage extends AbstractSO3TrajectoryMessage<ChestTrajectoryMessage> implements VisualizablePacket
 {
    /**

@@ -1,14 +1,16 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.annotations.ros.RosExportedField;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
 
-@ClassDocumentation("The message commands the controller to bring the given part of the body back to a default configuration called 'home'."
-      + " It is useful to get back to a safe configuration before walking.")
-public class GoHomeMessage extends IHMCRosApiMessage<GoHomeMessage>
+@RosMessagePacket(documentation = "The message commands the controller to bring the given part of the body back to a default configuration called 'home'."
+      + " It is useful to get back to a safe configuration before walking.",
+                  rosPackage = "ihmc_msgs",
+                  topic = "/control/go_home")
+public class GoHomeMessage extends Packet<GoHomeMessage>
 {
    public enum BodyPart implements DocumentedEnum<BodyPart>
    {
@@ -54,11 +56,11 @@ public class GoHomeMessage extends IHMCRosApiMessage<GoHomeMessage>
       }
    }
 
-   @FieldDocumentation("Specifies the part of the body the user wants to move back to it home configuration.")
+   @RosExportedField(documentation = "Specifies the part of the body the user wants to move back to it home configuration.")
    public BodyPart bodyPart;
-   @FieldDocumentation("Needed to identify a side dependent end-effector.")
+   @RosExportedField(documentation = "Needed to identify a side dependent end-effector.")
    public RobotSide robotSide;
-   @FieldDocumentation("How long the trajectory will spline from the current desired to the home configuration.")
+   @RosExportedField(documentation = "How long the trajectory will spline from the current desired to the home configuration.")
    public double trajectoryTime;
 
    public GoHomeMessage()

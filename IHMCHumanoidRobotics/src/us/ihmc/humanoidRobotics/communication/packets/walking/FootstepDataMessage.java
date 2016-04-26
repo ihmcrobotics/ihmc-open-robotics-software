@@ -9,9 +9,9 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.annotations.ros.RosExportedField;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -25,8 +25,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.DocumentedEnum;
 
-@ClassDocumentation("This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.")
-public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
+@RosMessagePacket(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.",
+                  rosPackage = "ihmc_msgs",
+                  topic = "/output/footstep")
+public class FootstepDataMessage extends Packet<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
 {
    public enum FootstepOrigin implements DocumentedEnum<FootstepOrigin>
    {
@@ -61,26 +63,26 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
       }
    }
 
-   @FieldDocumentation("Specifies whether the given location is the location of the ankle or the sole.")
+   @RosExportedField(documentation = "Specifies whether the given location is the location of the ankle or the sole.")
    public FootstepOrigin origin;
-   @FieldDocumentation("Specifies which foot will swing to reach the foostep.")
+   @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;
-   @FieldDocumentation("Specifies the position of the footstep. It is expressed in world frame.")
+   @RosExportedField(documentation = "Specifies the position of the footstep. It is expressed in world frame.")
    public Point3d location;
-   @FieldDocumentation("Specifies the orientation of the footstep. It is expressed in world frame.")
+   @RosExportedField(documentation = "Specifies the orientation of the footstep. It is expressed in world frame.")
    public Quat4d orientation;
 
-   @FieldDocumentation("predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
+   @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
          + "the world. A value of null or an empty list will default to using the entire foot. Contact points  are expressed in sole frame. This ordering does not matter.\n"
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
    public ArrayList<Point2d> predictedContactPoints;
 
-   @FieldDocumentation("This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.\n")
+   @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.\n")
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
 
-   @FieldDocumentation("Contains information on how high the robot should step. This affects only basic and obstacle clearance trajectories."
+   @RosExportedField(documentation = "Contains information on how high the robot should step. This affects only basic and obstacle clearance trajectories."
          + "Recommended values are between 0.1 (default) and 0.25.\n")
    public double swingHeight = 0;
 

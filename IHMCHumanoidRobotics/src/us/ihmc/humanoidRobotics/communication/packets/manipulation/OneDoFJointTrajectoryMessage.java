@@ -2,12 +2,14 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import java.util.Random;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.Abstract1DTrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 
-@ClassDocumentation("This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory."
-      + " A third order polynomial function is used to interpolate between trajectory points.")
+@RosMessagePacket(documentation =
+      "This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory."
+      + " A third order polynomial function is used to interpolate between trajectory points.",
+      rosPackage = "ihmc_msgs")
 public class OneDoFJointTrajectoryMessage extends Abstract1DTrajectoryMessage<OneDoFJointTrajectoryMessage>
 {
    /**

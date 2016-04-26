@@ -7,27 +7,28 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packetAnnotations.IgnoreField;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.annotations.ros.RosExportedField;
+import us.ihmc.communication.annotations.ros.RosIgnoredField;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.Transformable;
 
-@ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the necessary information for one trajectory point. "
-      + "Feel free to look at EuclideanTrajectoryPointMessage (translational) and EuclideanTrajectoryPointMessage (rotational)")
-public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPointMessage> implements Transformable
+@RosMessagePacket(documentation = "This class is used to build trajectory messages in taskspace. It holds the necessary information for one trajectory point. "
+      + "Feel free to look at EuclideanTrajectoryPointMessage (translational) and EuclideanTrajectoryPointMessage (rotational)",
+      rosPackage = "ihmc_msgs")
+public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage> implements Transformable
 {
-   @FieldDocumentation("Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
+   @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
-   @FieldDocumentation("Define the desired 3D position to be reached at this trajectory point. It is expressed in world frame.")
+   @RosExportedField(documentation = "Define the desired 3D position to be reached at this trajectory point. It is expressed in world frame.")
    public Point3d position;
-   @FieldDocumentation("Define the desired 3D orientation to be reached at this trajectory point. It is expressed in world frame.")
+   @RosExportedField(documentation = "Define the desired 3D orientation to be reached at this trajectory point. It is expressed in world frame.")
    public Quat4d orientation;
-   @FieldDocumentation("Define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.")
+   @RosExportedField(documentation = "Define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.")
    public Vector3d linearVelocity;
-   @FieldDocumentation("Define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in world frame.")
+   @RosExportedField(documentation = "Define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in world frame.")
    public Vector3d angularVelocity;
 
    /**
@@ -322,7 +323,7 @@ public class SE3TrajectoryPointMessage extends IHMCRosApiMessage<SE3TrajectoryPo
 //      return transformedTrajectoryPointMessage;
 //   }
 
-   @IgnoreField
+   @RosIgnoredField
    public Quat4d tempQuaternionForTransform;
 
    @Override

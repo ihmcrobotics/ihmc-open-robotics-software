@@ -3,10 +3,9 @@ package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
-import us.ihmc.communication.packets.MultiplePacketHolder;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
@@ -18,10 +17,12 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMe
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation("Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.\n"
+@RosMessagePacket(documentation = "Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.\n"
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule DOES apply to the fields of this message."
-      + " If setting a field to null is not an option (going through IHMC ROS API), the user can use the latter rule to select the messages to be processed by the controller.")
-public class WholeBodyTrajectoryMessage extends IHMCRosApiMessage<WholeBodyTrajectoryMessage>
+      + " If setting a field to null is not an option (going through IHMC ROS API), the user can use the latter rule to select the messages to be processed by the controller.",
+      rosPackage = "ihmc_msgs",
+      topic = "/control/whole_body_trajectory")
+public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessage>
       implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryMessage>, MultiplePacketHolder
 {
    public HandTrajectoryMessage leftHandTrajectoryMessage, rightHandTrajectoryMessage;

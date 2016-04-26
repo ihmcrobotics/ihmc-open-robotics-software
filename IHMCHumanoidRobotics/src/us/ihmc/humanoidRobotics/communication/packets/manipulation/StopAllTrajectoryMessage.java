@@ -2,13 +2,14 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import java.util.Random;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
 
-@ClassDocumentation("Stop the execution of any trajectory being executed."
-      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.")
-public class StopAllTrajectoryMessage extends IHMCRosApiMessage<StopAllTrajectoryMessage>
+@RosMessagePacket(documentation = "Stop the execution of any trajectory being executed."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
+      rosPackage = "ihmc_msgs",
+      topic = "/control/stop_all_trajectories")
+public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage>
 {
 
    /**

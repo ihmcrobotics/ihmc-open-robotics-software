@@ -2,7 +2,6 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import java.util.Random;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 
@@ -10,7 +9,6 @@ import us.ihmc.communication.packets.PacketDestination;
  *
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-@ClassDocumentation("Automates the process of powering each of the electric motors in the Atlas forearm")
 public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectricMotorAutoEnableFlagPacket>
 {
    public boolean shouldAutoEnable;

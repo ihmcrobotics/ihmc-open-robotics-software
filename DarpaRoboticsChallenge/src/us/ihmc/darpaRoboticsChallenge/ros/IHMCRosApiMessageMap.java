@@ -27,6 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTraject
  */
 public class IHMCRosApiMessageMap
 {
+
    public static final Class[] PACKET_LIST =
    {
 //	   HandPosePacket.class,

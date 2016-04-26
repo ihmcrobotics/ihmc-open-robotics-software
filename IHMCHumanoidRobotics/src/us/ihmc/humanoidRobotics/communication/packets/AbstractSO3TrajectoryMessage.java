@@ -3,20 +3,20 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.annotations.ros.RosExportedField;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends IHMCRosApiMessage<T>
+public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends Packet<T>
       implements TransformableDataObject<T>, Transformable
 {
-   @FieldDocumentation("List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
+   @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
    public SO3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
-   @FieldDocumentation("When OVERRIDE is chosen:"
+   @RosExportedField(documentation = "When OVERRIDE is chosen:"
          + "\n - The time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point."
          + " Otherwise the controller will prepend a first trajectory point at the current desired position." + "\n When QUEUE is chosen:"
          + "\n - The message must carry the ID of the message it should be queued to."
@@ -24,7 +24,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
          + "\n - The trajectory point times are relative to the the last trajectory point time of the previous message."
          + "\n - The controller will queue the joint trajectory messages as a per joint basis." + " The first trajectory point has to be greater than zero.")
    public ExecutionMode executionMode = ExecutionMode.OVERRIDE;
-   @FieldDocumentation("Only needed when using QUEUE mode, it refers to the message Id to which this message should be queued to."
+   @RosExportedField(documentation = "Only needed when using QUEUE mode, it refers to the message Id to which this message should be queued to."
          + " It is used by the controller to ensure that no message has been lost on the way."
          + " If a message appears to be missing (previousMessageId different from the last message ID received by the controller), the motion is aborted."
          + " If previousMessageId == 0, the controller will not check for the ID of the last received message.")

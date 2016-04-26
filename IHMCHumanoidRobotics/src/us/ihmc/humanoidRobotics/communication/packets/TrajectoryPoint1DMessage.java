@@ -3,22 +3,23 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.annotations.ros.RosExportedField;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
-@ClassDocumentation("This class is used to build 1D trajectory messages including jointspace trajectory messages."
-      + " For 3D trajectory points look at EuclideanTrajectoryMessage (translational), SO3TrajectoryPointMessage (rotational), and SE3TrajectoryPointMessage (translational AND rotational).")
-public class TrajectoryPoint1DMessage extends IHMCRosApiMessage<TrajectoryPoint1DMessage> implements OneDoFTrajectoryPointInterface<TrajectoryPoint1DMessage>
+@RosMessagePacket(documentation = "This class is used to build 1D trajectory messages including jointspace trajectory messages."
+      + " For 3D trajectory points look at EuclideanTrajectoryMessage (translational), SO3TrajectoryPointMessage (rotational), and SE3TrajectoryPointMessage (translational AND rotational).",
+      rosPackage = "ihmc_msgs")
+public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> implements OneDoFTrajectoryPointInterface<TrajectoryPoint1DMessage>
 {
-   @FieldDocumentation("Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
+   @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
-   @FieldDocumentation("Define the desired 1D position to be reached at this trajectory point.")
+   @RosExportedField(documentation = "Define the desired 1D position to be reached at this trajectory point.")
    public double position;
-   @FieldDocumentation("Define the desired 1D velocity to be reached at this trajectory point.")
+   @RosExportedField(documentation = "Define the desired 1D velocity to be reached at this trajectory point.")
    public double velocity;
 
    /**

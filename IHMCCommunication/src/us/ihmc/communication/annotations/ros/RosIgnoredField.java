@@ -1,4 +1,4 @@
-package us.ihmc.communication.packetAnnotations;
+package us.ihmc.communication.annotations.ros;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface IgnoreField
+public @interface RosIgnoredField
 {
 }

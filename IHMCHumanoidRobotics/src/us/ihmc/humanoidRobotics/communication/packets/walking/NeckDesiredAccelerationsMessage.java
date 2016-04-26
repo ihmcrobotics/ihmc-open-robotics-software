@@ -3,17 +3,20 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.annotations.ros.RosExportedField;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.DocumentedEnum;
 
-@ClassDocumentation("This message gives the user the option to bypass IHMC feedback controllers for the neck joints by sending desired neck joint accelerations."
+@RosMessagePacket(documentation =
+      "This message gives the user the option to bypass IHMC feedback controllers for the neck joints by sending desired neck joint accelerations."
       + " One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations."
-      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.")
-public class NeckDesiredAccelerationsMessage extends IHMCRosApiMessage<NeckDesiredAccelerationsMessage>
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
+                  rosPackage = "ihmc_msgs",
+                  topic = "/control/neck_desired_acceleration")
+public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerationsMessage>
 {
    public enum NeckControlMode implements DocumentedEnum<NeckControlMode>
    {
@@ -45,9 +48,9 @@ public class NeckDesiredAccelerationsMessage extends IHMCRosApiMessage<NeckDesir
    }
 
 
-   @FieldDocumentation("Specifies the control mode for controlling the neck joints. See NeckControlMode.")
+   @RosExportedField(documentation = "Specifies the control mode for controlling the neck joints. See NeckControlMode.")
    public NeckControlMode neckControlMode;
-   @FieldDocumentation("Specifies the desired joint accelerations. Only necessary when neckControlMode == USER_CONTROL_MODE.")
+   @RosExportedField(documentation = "Specifies the desired joint accelerations. Only necessary when neckControlMode == USER_CONTROL_MODE.")
    public double[] neckDesiredJointAccelerations;
 
    public NeckDesiredAccelerationsMessage()

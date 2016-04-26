@@ -1,11 +1,11 @@
-package us.ihmc.communication.packetAnnotations;
+package us.ihmc.communication.annotations.ros;
 
 import java.lang.annotation.*;
 
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface FieldDocumentation
+public @interface RosExportedField
 {
-	String value();
+	String documentation();
 }

@@ -1,15 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.DocumentedEnum;
 
 /**
-* Created by dstephen on 3/26/15.
+ * Enum for the various joints in the Atlas forearm. Note the joint names correspond to their
+ * orientation in the canonical 'zero pose' where the arms are held out perpendicular to the
+ * sides of the robot.
 */
-@ClassDocumentation("Enum for the various joints in the Atlas forearm. Note the joint names correspond to their\n"
-                                  + "orientation in the canonical 'zero pose' where the arms are held out perpendicular to the\n"
-                                  + "sides of the robot.")
 public enum AtlasElectricMotorPacketEnum implements DocumentedEnum<AtlasElectricMotorPacketEnum>
 {
    L_ARM_WRY(0), L_ARM_WRX(1), L_ARM_WRY2(2), R_ARM_WRY(3), R_ARM_WRX(4), R_ARM_WRY2(5);
