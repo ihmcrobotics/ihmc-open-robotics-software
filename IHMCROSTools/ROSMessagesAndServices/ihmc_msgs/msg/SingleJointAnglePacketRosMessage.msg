@@ -1,10 +1,11 @@
-## AtlasWristSensorCalibrationRequestPacketMessage
-# Request taring of the wrist force/torque sensors.
+## SingleJointAnglePacketRosMessage
+# This message contains a desired joint angle for a single joint.
 
-# Options for robotSide
-uint8 LEFT=0 # refers to the LEFT side of a robot
-uint8 RIGHT=1 # refers to the RIGHT side of a robot
-uint8 robot_side
+string joint_name
+
+float64 angle
+
+float64 trajcetory_time
 
 # A unique id for the current message. This can be a timestamp or sequence number.
 # Only the unique id in the top level message is used, the unique id in nested messages is ignored.

@@ -27,7 +27,7 @@ geometry_msgs/Quaternion orientation
 # - {x: 0.5 * foot_length, y: 0.5 * toe_width}
 # - {x: -0.5 * foot_length, y: -0.5 * heel_width}
 # - {x: -0.5 * foot_length, y: 0.5 * heel_width}
-Point2dMessage[] predicted_contact_points
+Point2dRosMessage[] predicted_contact_points
 
 # This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.
 # Options for trajectoryType

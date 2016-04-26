@@ -56,10 +56,8 @@ public class ROSMessageGenerator
       {
           messageName += "Message";
       }
-      else
-      {
-         messageName = StringUtils.replace(messageName, "Message", "RosMessage");
-      }
+
+      messageName = StringUtils.replace(messageName, "Message", "RosMessage");
 
       File messageFile = new File((messageFolder + File.separator + messageName + ".msg"));
 

@@ -1,4 +1,4 @@
-## AtlasElectricMotorEnablePacketMessage
+## AtlasElectricMotorEnablePacketRosMessage
 # Specifies a specific electric motor in the Atlas forearm to power on or off.
 
 # Options for motorEnableEnum

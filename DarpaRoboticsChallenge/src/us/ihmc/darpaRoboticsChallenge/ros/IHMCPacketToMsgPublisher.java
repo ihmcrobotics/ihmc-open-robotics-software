@@ -25,7 +25,8 @@ public class IHMCPacketToMsgPublisher<T extends Message, U extends Packet> exten
       }
       try
       {
-         T msg = (T) DRCROSMessageConverter.convertToRosMessage(packet);
+//         T msg = (T) DRCROSMessageConverter.convertToRosMessage(packet);
+         T msg = null;
          if(isConnected())
          {
             publish(msg);

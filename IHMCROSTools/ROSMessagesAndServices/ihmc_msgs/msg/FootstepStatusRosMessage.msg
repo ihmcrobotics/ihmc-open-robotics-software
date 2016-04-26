@@ -1,4 +1,4 @@
-## FootstepStatusMessage
+## FootstepStatusRosMessage
 # This message gives the status of the current footstep from the controller as well as the position
 # and orientation of the footstep in world cooredinates. 
 

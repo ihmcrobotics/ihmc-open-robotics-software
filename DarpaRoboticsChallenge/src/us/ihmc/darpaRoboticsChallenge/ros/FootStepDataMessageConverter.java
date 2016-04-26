@@ -1,19 +1,18 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import java.util.ArrayList;
-import java.util.List;
+import geometry_msgs.Quaternion;
+import geometry_msgs.Vector3;
+import ihmc_msgs.FootstepDataRosMessage;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-
-import geometry_msgs.Quaternion;
-import geometry_msgs.Vector3;
-import ihmc_msgs.FootstepDataMessage;
-import us.ihmc.robotics.robotSide.RobotSide;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FootStepDataMessageConverter
 {
-   public static us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage convertFootStepData(FootstepDataMessage msg)
+   public static us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage convertFootStepData(FootstepDataRosMessage msg)
    {
       RobotSide robotSide = RobotSide.values[(int) msg.getRobotSide()];
 
@@ -26,7 +25,7 @@ public class FootStepDataMessageConverter
       return new us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage(robotSide, location, orientation);
    }
 
-   public static void convertFootStepDataList(List<FootstepDataMessage> footStepDataList, ArrayList<us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage> footStepDataArrayList)
+   public static void convertFootStepDataList(List<FootstepDataRosMessage> footStepDataList, ArrayList<us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage> footStepDataArrayList)
    {
       for (int i = 0; i < footStepDataList.size(); i++)
       {
