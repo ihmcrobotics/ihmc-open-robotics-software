@@ -15,7 +15,7 @@ public class WalkingStatusMessage extends StatusPacket<WalkingStatusMessage>
       STARTED, COMPLETED, ABORT_REQUESTED;
 
       public static final Status[] values = values();
-      private static Status[] documentedValues;
+
       @Override
       public String getDocumentation(Status var)
       {
