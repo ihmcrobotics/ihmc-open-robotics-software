@@ -1,15 +1,13 @@
 package us.ihmc.aware.controller.force.states;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.BitSet;
 
-import com.google.common.primitives.Booleans;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.aware.controller.force.QuadrupedForceController;
 import us.ihmc.aware.controller.force.QuadrupedForceControllerEvent;
 import us.ihmc.aware.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
@@ -20,28 +18,28 @@ public class QuadrupedForceBasedJointInitializationController implements Quadrup
    private final SDFFullQuadrupedRobotModel fullRobotModel;
 
    /**
-    * A map specifying which joints have been come online and had their desired positions set. Indices align with the
-    * {@link FullRobotModel#getOneDoFJoints()} array.
+    * A map specifying which joints have been come online and had their desired positions set. Indices align with the {@link FullRobotModel#getOneDoFJoints()}
+    * array.
     */
-   private final boolean initialized[];
+   private final BitSet initialized;
 
    public QuadrupedForceBasedJointInitializationController(QuadrupedRuntimeEnvironment environment)
    {
       this.fullRobotModel = environment.getFullRobotModel();
-      this.initialized = new boolean[fullRobotModel.getOneDoFJoints().length];
+      this.initialized = new BitSet(fullRobotModel.getOneDoFJoints().length);
    }
 
    @Override
    public void onEntry()
    {
-      Arrays.fill(initialized, false);
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
+      for (int i = 0; i < joints.length; i++)
       {
-         List<OneDoFJoint> joints = fullRobotModel.getLegOneDoFJoints(robotQuadrant);
-         for (int i = 0; i < joints.size(); i++)
+         OneDoFJoint joint = joints[i];
+
+         if (fullRobotModel.getNameForOneDoFJoint(joint).getRole() == JointRole.LEG)
          {
-            joints.get(i).setUnderPositionControl(false);
+            joint.setUnderPositionControl(false);
          }
       }
    }
@@ -49,15 +47,16 @@ public class QuadrupedForceBasedJointInitializationController implements Quadrup
    @Override
    public QuadrupedForceControllerEvent process()
    {
-      for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
+      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
+      for (int i = 0; i < joints.length; i++)
       {
-         OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
+         OneDoFJoint joint = joints[i];
 
          // Only set a desired if the actuator has just come online.
-         if (!initialized[i] && joint.isOnline())
+         if (!initialized.get(i) && joint.isOnline())
          {
             joint.setTau(0.0);
-            initialized[i] = true;
+            initialized.set(i);
          }
       }
 
@@ -71,7 +70,7 @@ public class QuadrupedForceBasedJointInitializationController implements Quadrup
 
    private boolean allJointsInitialized()
    {
-      return !Booleans.contains(initialized, false);
+      return initialized.cardinality() == initialized.length();
    }
 }
 
