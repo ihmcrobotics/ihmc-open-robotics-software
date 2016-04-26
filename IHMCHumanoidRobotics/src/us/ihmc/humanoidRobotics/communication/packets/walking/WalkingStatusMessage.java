@@ -24,7 +24,7 @@ public class WalkingStatusMessage extends StatusPacket<WalkingStatusMessage>
          case STARTED:
             return "The robot has begun its initial transfer/sway at the start of a walking plan";
          case COMPLETED:
-            return "The robot has finished its final transwer/sway at the end of a walking plan";
+            return "The robot has finished its final transfer/sway at the end of a walking plan";
          case ABORT_REQUESTED:
             return "A walking abort has been requested";
          default:
