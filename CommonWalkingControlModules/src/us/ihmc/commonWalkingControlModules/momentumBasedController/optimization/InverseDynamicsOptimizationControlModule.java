@@ -7,6 +7,7 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
@@ -277,6 +278,11 @@ public class InverseDynamicsOptimizationControlModule
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)
    {
       wrenchMatrixCalculator.submitPlaneContactStateCommand(command);
+   }
+
+   public void submitCenterOfPressureCommand(CenterOfPressureCommand command)
+   {
+      wrenchMatrixCalculator.submitCenterOfPressureCommand(command);
    }
 
    public void submitExternalWrenchCommand(ExternalWrenchCommand command)

@@ -66,7 +66,9 @@ public class FullyConstrainedState extends AbstractFootControlState
       momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
       partialFootholdControlModule.compute(desiredCoP, cop);
       YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
-      partialFootholdControlModule.applyShrunkPolygon(contactState);
+      boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
+      if (contactStateHasChanged)
+         contactState.notifyContactStateHasChanged();
 
       footAcceleration.setToZero(contactableFoot.getFrameAfterParentJoint(), rootBody.getBodyFixedFrame(), contactableFoot.getFrameAfterParentJoint());
 

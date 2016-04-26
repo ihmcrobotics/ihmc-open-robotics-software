@@ -539,6 +539,12 @@ public class BalanceManager
       return capturabilityBasedStatus;
    }
 
+   public void updateCurrentICPPlan()
+   {
+      icpPlanner.updateCurrentPlan();
+      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
+   }
+
    public void updateICPPlanForSingleSupportDisturbances()
    {
       yoCapturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);

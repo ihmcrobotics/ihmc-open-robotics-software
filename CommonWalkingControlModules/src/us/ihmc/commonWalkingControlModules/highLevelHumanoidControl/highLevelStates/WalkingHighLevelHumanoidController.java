@@ -512,6 +512,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       updateManagers(currentState);      
 
+      handleChangeInContactState();
+
       submitControllerCoreCommands();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -523,6 +525,23 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       momentumBasedController.doProportionalControlOnCoP(footDesiredCoPs);
 
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
+   }
+
+   private void handleChangeInContactState()
+   {
+      boolean haveContactStatesChanged = false;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         YoPlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
+         if (contactState.pollContactHasChangedNotification())
+            haveContactStatesChanged = true;
+      }
+
+      if (!haveContactStatesChanged)
+         return;
+
+      momentumBasedController.updateBipedSupportPolygons();
+      balanceManager.updateCurrentICPPlan();
    }
 
    public void updateFailureDetection()

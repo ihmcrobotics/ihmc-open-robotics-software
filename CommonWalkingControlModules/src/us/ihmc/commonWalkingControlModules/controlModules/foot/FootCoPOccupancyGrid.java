@@ -99,7 +99,7 @@ public class FootCoPOccupancyGrid
                YoFramePoint pointForViz = new YoFramePoint(namePrefix + namePrefix2, ReferenceFrame.getWorldFrame(), registry);
                pointForViz.setToNaN();
                cellViz[i][j] = pointForViz;
-               YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(namePrefix + namePrefix2, pointForViz, 0.008, YoAppearance.Black());
+               YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(namePrefix + namePrefix2, pointForViz, 0.004, YoAppearance.Orange());
                yoGraphicsListRegistry.registerArtifact(name, yoGraphicPosition.createArtifact());
                yoGraphicsListRegistry.registerYoGraphic(name, yoGraphicPosition);
             }
@@ -109,6 +109,8 @@ public class FootCoPOccupancyGrid
       {
          cellViz = null;
       }
+      
+      parentRegistry.addChild(registry);
    }
 
    private void setupChangedGridParameterListeners()
