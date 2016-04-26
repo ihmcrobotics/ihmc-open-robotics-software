@@ -1,4 +1,4 @@
-package us.ihmc.aware.mechanics.virtualModelControl;
+package us.ihmc.aware.mechanics.virtualModelController;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;

@@ -1,4 +1,4 @@
-package us.ihmc.aware.mechanics.contactForces;
+package us.ihmc.aware.mechanics.contactForceOptimization;
 
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;

@@ -1,10 +1,10 @@
 package us.ihmc.aware.controller.force.toolbox;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.aware.mechanics.contactForces.QuadrupedContactForceLimits;
-import us.ihmc.aware.mechanics.contactForces.QuadrupedContactForceOptimization;
-import us.ihmc.aware.mechanics.contactForces.QuadrupedContactForceOptimizationSettings;
-import us.ihmc.aware.mechanics.virtualModelControl.*;
+import us.ihmc.aware.mechanics.contactForceOptimization.QuadrupedContactForceLimits;
+import us.ihmc.aware.mechanics.contactForceOptimization.QuadrupedContactForceOptimization;
+import us.ihmc.aware.mechanics.contactForceOptimization.QuadrupedContactForceOptimizationSettings;
+import us.ihmc.aware.mechanics.virtualModelController.*;
 import us.ihmc.aware.planning.ContactState;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
