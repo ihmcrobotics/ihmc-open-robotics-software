@@ -1,4 +1,4 @@
-## Point2dMessage
+## Point2dRosMessage
 # No Documentation Annotation Found
 
 float64 x

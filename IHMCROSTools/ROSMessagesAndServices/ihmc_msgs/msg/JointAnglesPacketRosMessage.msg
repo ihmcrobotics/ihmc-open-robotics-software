@@ -1,4 +1,4 @@
-## JointAnglesPacketMessage
+## JointAnglesPacketRosMessage
 # This message commands the IHMC joint position controller to move Atlas's joints to the desired angles.
 
 # trajectoryTime specifies how fast or how slow to move to the desired joint angles

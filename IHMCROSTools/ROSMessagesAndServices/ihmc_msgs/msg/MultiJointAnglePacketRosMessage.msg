@@ -1,11 +1,7 @@
-## SingleJointAnglePacketMessage
-# This message contains a desired joint angle for a single joint.
+## MultiJointAnglePacketRosMessage
+# This message contains wraps up multiple SingleJointAnglePackets so they will beexecuted simultaneusly.
 
-string joint_name
-
-float64 angle
-
-float64 trajcetory_time
+SingleJointAnglePacketRosMessage[] single_joint_angle_packets
 
 # A unique id for the current message. This can be a timestamp or sequence number.
 # Only the unique id in the top level message is used, the unique id in nested messages is ignored.

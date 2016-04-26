@@ -27,11 +27,9 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.publisher.RosCachedRawIMUDataPublisher;
 import us.ihmc.utilities.ros.publisher.RosImuPublisher;
 import us.ihmc.utilities.ros.publisher.RosInt32Publisher;
 import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
-import us.ihmc.utilities.ros.publisher.RosLastReceivedMessagePublisher;
 import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
 import us.ihmc.utilities.ros.publisher.RosStringPublisher;
 import us.ihmc.utilities.ros.publisher.RosWrenchPublisher;
@@ -48,11 +46,10 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private RosJointStatePublisher[] additionalJointStatePublishers = new RosJointStatePublisher[0];
    private final RosJointStatePublisher jointStatePublisher;
    private final RosImuPublisher[] imuPublishers;
-   private final RosCachedRawIMUDataPublisher[] batchImuPublishers;
    private final RosOdometryPublisher pelvisOdometryPublisher;
    private final RosStringPublisher robotMotionStatusPublisher;
    private final RosInt32Publisher robotBehaviorPublisher;
-   private final RosLastReceivedMessagePublisher lastReceivedMessagePublisher;
+//   private final RosLastReceivedMessagePublisher lastReceivedMessagePublisher; //TODO reimplement this
    private final ForceSensorDefinition[] forceSensorDefinitions;
    private final IMUDefinition[] imuDefinitions;
    private final ArrayList<String> nameList = new ArrayList<String>();
@@ -89,23 +86,16 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       this.pelvisOdometryPublisher = new RosOdometryPublisher(latched);
       this.robotMotionStatusPublisher = new RosStringPublisher(latched);
       this.robotBehaviorPublisher = new RosInt32Publisher(latched);
-      this.lastReceivedMessagePublisher = new RosLastReceivedMessagePublisher(latched);
-      
-      this.batchImuPublishers = new RosCachedRawIMUDataPublisher[imuDefinitions.length];
+
       this.imuPublishers = new RosImuPublisher[imuDefinitions.length];
       for (int sensorNumber = 0; sensorNumber < imuDefinitions.length; sensorNumber++)
       {
          IMUDefinition imuDefinition = imuDefinitions[sensorNumber];
          String imuName = imuDefinition.getName();
-         ReferenceFrame imuFrame = imuDefinition.getIMUFrame();
          
          RosImuPublisher rosImuPublisher = new RosImuPublisher(latched);
          this.imuPublishers[sensorNumber] = rosImuPublisher;
          rosMainNode.attachPublisher(rosNameSpace + "/output/imu/" + imuName, rosImuPublisher);
-         
-         RosCachedRawIMUDataPublisher batchImuPublisher = new RosCachedRawIMUDataPublisher(latched, imuFrame.getName());
-         this.batchImuPublishers[sensorNumber] = batchImuPublisher;
-         rosMainNode.attachPublisher(rosNameSpace + "/output/imu/" + imuName + "_" + "batch", batchImuPublisher);
       }
       
       SideDependentList<String> feetForceSensorNames =  sensorInformation.getFeetForceSensorNames();
@@ -136,7 +126,6 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       rosMainNode.attachPublisher(rosNameSpace + "/output/behavior", robotBehaviorPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/left", footForceSensorPublishers.get(RobotSide.LEFT));
       rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/right", footForceSensorPublishers.get(RobotSide.RIGHT));
-      rosMainNode.attachPublisher(rosNameSpace + "/output/last_received_message", lastReceivedMessagePublisher);
       
       if(!wristForceSensorPublishers.isEmpty())
       {
@@ -246,9 +235,6 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                IMUPacket imuPacket = robotConfigurationData.getImuPacketForSensor(sensorNumber);
                ReferenceFrame imuFrame = imuDefinitions[sensorNumber].getIMUFrame();
                rosImuPublisher.publish(timeStamp, imuPacket, imuFrame.getName());
-               
-               RosCachedRawIMUDataPublisher batchImuPublisher = batchImuPublishers[sensorNumber];
-               batchImuPublisher.appendRawImuData(timeStamp, imuPacket);
             }
             
             
@@ -271,16 +257,16 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                }
             }
             
-            
-            if(robotConfigurationData.getLastReceivedPacketTypeID() != -1)
-            {
-               Class<?> packetClass = netClassList.getClass(robotConfigurationData.getLastReceivedPacketTypeID());
-               String messageType = IHMCRosApiMessageMap.MESSAGE_NAME_PACKET_MAP.get(packetClass);
-               if(messageType != null)
-               {
-                  lastReceivedMessagePublisher.publish(messageType, robotConfigurationData.getLastReceivedPacketUniqueId(), robotConfigurationData.getTimestamp(), robotConfigurationData.getLastReceivedPacketRobotTimestamp());
-               }
-            }
+            //TODO reimplement this
+//            if(robotConfigurationData.getLastReceivedPacketTypeID() != -1)
+//            {
+//               Class<?> packetClass = netClassList.getClass(robotConfigurationData.getLastReceivedPacketTypeID());
+//               String messageType = IHMCRosApiMessageMap.MESSAGE_NAME_PACKET_MAP.get(packetClass);
+//               if(messageType != null)
+//               {
+//                  lastReceivedMessagePublisher.publish(messageType, robotConfigurationData.getLastReceivedPacketUniqueId(), robotConfigurationData.getTimestamp(), robotConfigurationData.getLastReceivedPacketRobotTimestamp());
+//               }
+//            }
             
          }
       }
