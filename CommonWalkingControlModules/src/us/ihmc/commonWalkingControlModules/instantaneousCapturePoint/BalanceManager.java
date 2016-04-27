@@ -201,6 +201,21 @@ public class BalanceManager
       icpPlanner.clearPlan();
    }
 
+   public void setICPPlanSupportSide(RobotSide robotSide)
+   {
+      icpPlanner.setSupportLeg(robotSide);
+   }
+
+   public void setICPPlanTransferToSide(RobotSide robotSide)
+   {
+      icpPlanner.setTransferToSide(robotSide);
+   }
+
+   public void setICPPlanTransferFromSide(RobotSide robotSide)
+   {
+      icpPlanner.setTransferFromSide(robotSide);
+   }
+
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon)
    {
       yoCapturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
@@ -348,9 +363,9 @@ public class BalanceManager
       pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
    }
 
-   public void initializeICPPlanForSingleSupport(RobotSide supportSide)
+   public void initializeICPPlanForSingleSupport()
    {
-      icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide);
+      icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
@@ -365,14 +380,14 @@ public class BalanceManager
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
-   public void initializeICPPlanForTransfer(RobotSide transferToSide)
+   public void initializeICPPlanForTransfer()
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      icpPlanner.initializeForTransfer(yoTime.getDoubleValue(), transferToSide);
+      icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
