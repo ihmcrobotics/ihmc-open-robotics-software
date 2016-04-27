@@ -447,6 +447,9 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
    
    public boolean isPointInFrontOfLine(FrameVector2d frontDirection, FramePoint2d framePoint)
    {
+      checkReferenceFrameMatch(frontDirection);
+      checkReferenceFrameMatch(framePoint);
+      
       return line.isPointInFrontOfLine(frontDirection.getVector(), framePoint.getPoint());
    }
 
