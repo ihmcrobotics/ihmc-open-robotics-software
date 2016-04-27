@@ -13,7 +13,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -25,7 +24,7 @@ import java.util.Map;
 public class VirtualModelControlOptimizationControlModule
 {
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
-   private static final boolean SETUP_RHO_TASKS = true;
+   private static final boolean SETUP_RHO_TASKS = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -34,6 +33,8 @@ public class VirtualModelControlOptimizationControlModule
    private final VirtualModelControlQPSolver qpSolver;
    private final ExternalWrenchHandler externalWrenchHandler;
    private final SpatialForceVector centroidalMomentumRateSolution = new SpatialForceVector();
+
+   private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
 
@@ -94,6 +95,8 @@ public class VirtualModelControlOptimizationControlModule
          setupRhoTasks();
       qpSolver.setMinRho(rhoMin.getDoubleValue());
 
+      processMomentumRateCommand();
+
       NoConvergenceException noConvergenceException = null;
 
       try
@@ -130,7 +133,7 @@ public class VirtualModelControlOptimizationControlModule
          externalWrenchSolution.get(rigidBody).getMatrix(tmpWrench);
          CommonOps.add(contactWrench, tmpWrench, contactWrench);
       }
-      CommonOps.subtract(contactWrench, gravityWrench, totalWrench);
+      CommonOps.add(contactWrench, gravityWrench, totalWrench);
       centroidalMomentumRateSolution.set(null, totalWrench);
 
       VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
@@ -172,7 +175,14 @@ public class VirtualModelControlOptimizationControlModule
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
-      DenseMatrix64F selectionMatrix = command.getSelectionMatrix();
+      momentumRateCommand.set(command);
+      momentumRateCommand.setWeights(command.getWeightVector().get(0, 0), command.getWeightVector().get(1, 0), command.getWeightVector().get(2, 0),
+            command.getWeightVector().get(3, 0), command.getWeightVector().get(4, 0), command.getWeightVector().get(5, 0));
+   }
+
+   private void processMomentumRateCommand()
+   {
+      DenseMatrix64F selectionMatrix = momentumRateCommand.getSelectionMatrix();
       int taskSize = selectionMatrix.getNumRows();
       taskObjective.reshape(taskSize, 1);
       taskWeightMatrix.reshape(taskSize, taskSize);
@@ -183,7 +193,7 @@ public class VirtualModelControlOptimizationControlModule
       // Compute the weight: W = S * W * S^T
       tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
       tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-      command.getWeightMatrix(tempTaskWeight);
+      momentumRateCommand.getWeightMatrix(tempTaskWeight);
       CommonOps.mult(selectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, taskWeightMatrix);
 
@@ -195,12 +205,12 @@ public class VirtualModelControlOptimizationControlModule
       // Compute the task objective: p = S * (hDot - sum W_user - W_g)
       DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
       DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
-      DenseMatrix64F momentumRate = command.getMomentumRate();
+      DenseMatrix64F momentumRate = momentumRateCommand.getMomentumRate();
       CommonOps.subtract(momentumRate, additionalExternalWrench, tempTaskObjective);
       CommonOps.subtract(tempTaskObjective, gravityWrench, tempTaskObjective);
       CommonOps.mult(selectionMatrix, tempTaskObjective, taskObjective);
 
-      qpSolver.addMotionTask(taskJacobian, taskObjective, taskWeightMatrix);
+      qpSolver.addMomentumTask(taskJacobian, taskObjective, taskWeightMatrix);
    }
 
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)
