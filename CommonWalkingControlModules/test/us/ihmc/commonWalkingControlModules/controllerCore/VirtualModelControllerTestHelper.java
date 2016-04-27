@@ -2,27 +2,32 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
+import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.sensors.ContactSensorDefinition;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.tools.testing.JUnitTools;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class VirtualModelControllerTestHelper
 {
@@ -72,9 +77,9 @@ public class VirtualModelControllerTestHelper
    {
    }
 
-   public RobotLeg createRobotLeg(double gravity)
+   public RobotLegs createRobotLeg(double gravity)
    {
-      RobotLeg robotLeg = new RobotLeg("robotLeg");
+      RobotLegs robotLeg = new RobotLegs("robotLegs");
       robotLeg.setGravity(gravity);
       HashMap<InverseDynamicsJoint, Joint> jointMap = new HashMap<>();
 
@@ -90,98 +95,169 @@ public class VirtualModelControllerTestHelper
       floatingJoint.setLink(pelvisLink);
       RigidBody pelvisBody = copyLinkAsRigidBody(pelvisLink, rootJoint, "pelvis");
 
-      Vector3d hipYawOffset = new Vector3d(0.0, -HIP_WIDTH, 0.0);
-      PinJoint hip_yaw = new PinJoint("hip_yaw", hipYawOffset, robotLeg, Axis.Z);
-      hip_yaw.setQ(random.nextDouble());
+      Vector3d leftHipYawOffset = new Vector3d(0.0, HIP_WIDTH, 0.0);
+      Vector3d rightHipYawOffset = new Vector3d(0.0, -HIP_WIDTH, 0.0);
+      PinJoint l_hip_yaw = new PinJoint("l_leg_hpz", leftHipYawOffset, robotLeg, Axis.Z);
+      PinJoint r_hip_yaw = new PinJoint("r_leg_hpz", rightHipYawOffset, robotLeg, Axis.Z);
+      l_hip_yaw.setQ(random.nextDouble());
+      r_hip_yaw.setQ(random.nextDouble());
 
-      Link hip_differential = hip_differential();
-      hip_yaw.setLink(hip_differential);
-      floatingJoint.addJoint(hip_yaw);
+      Link l_hip_differential = hip_differential();
+      Link r_hip_differential = hip_differential();
+      l_hip_yaw.setLink(l_hip_differential);
+      r_hip_yaw.setLink(r_hip_differential);
+      floatingJoint.addJoint(l_hip_yaw);
+      floatingJoint.addJoint(r_hip_yaw);
 
-      RevoluteJoint hipYaw = ScrewTools.addRevoluteJoint("hip_yaw", pelvisBody, hipYawOffset, Z);
-      hipYaw.setQ(hip_yaw.getQ().getDoubleValue());
-      RigidBody hipDifferentialBody = copyLinkAsRigidBody(hip_differential, hipYaw, "hip_differential");
-      jointMap.put(hipYaw, hip_yaw);
+      RevoluteJoint l_leg_hpz = ScrewTools.addRevoluteJoint("l_leg_hpz", pelvisBody, leftHipYawOffset, Z);
+      RevoluteJoint r_leg_hpz = ScrewTools.addRevoluteJoint("r_leg_hpz", pelvisBody, rightHipYawOffset, Z);
+      l_leg_hpz.setQ(l_hip_yaw.getQ().getDoubleValue());
+      r_leg_hpz.setQ(r_hip_yaw.getQ().getDoubleValue());
+      RigidBody leftHipDifferentialBody = copyLinkAsRigidBody(l_hip_differential, l_leg_hpz, "l_hip_differential");
+      RigidBody rightHipDifferentialBody = copyLinkAsRigidBody(r_hip_differential, r_leg_hpz, "r_hip_differential");
+      jointMap.put(l_leg_hpz, l_hip_yaw);
+      jointMap.put(r_leg_hpz, r_hip_yaw);
 
-      Vector3d hipRollOffset = new Vector3d();
-      PinJoint hip_roll = new PinJoint("hip_roll", hipRollOffset, robotLeg, Axis.X);
-      hip_roll.setQ(random.nextDouble());
+      Vector3d leftHipRollOffset = new Vector3d();
+      Vector3d rightHipRollOffset = new Vector3d();
+      PinJoint l_hip_roll = new PinJoint("l_leg_hpx", leftHipRollOffset, robotLeg, Axis.X);
+      PinJoint r_hip_roll = new PinJoint("r_leg_hpx", rightHipRollOffset, robotLeg, Axis.X);
+      l_hip_roll.setQ(random.nextDouble());
+      r_hip_roll.setQ(random.nextDouble());
 
-      Link hip_differential2 = hip_differential();
-      hip_roll.setLink(hip_differential2);
-      hip_yaw.addJoint(hip_roll);
+      Link l_hip_differential2 = hip_differential();
+      Link r_hip_differential2 = hip_differential();
+      l_hip_roll.setLink(l_hip_differential2);
+      r_hip_roll.setLink(r_hip_differential2);
+      l_hip_yaw.addJoint(l_hip_roll);
+      r_hip_yaw.addJoint(r_hip_roll);
 
-      RevoluteJoint hipRoll = ScrewTools.addRevoluteJoint("hip_roll", hipDifferentialBody, hipRollOffset, X);
-      hipRoll.setQ(hip_roll.getQ().getDoubleValue());
-      RigidBody hipDifferentialBody2 = copyLinkAsRigidBody(hip_differential2, hipRoll, "hip_differential");
-      jointMap.put(hipRoll, hip_roll);
+      RevoluteJoint l_leg_hpx = ScrewTools.addRevoluteJoint("l_leg_hpx", leftHipDifferentialBody, leftHipRollOffset, X);
+      RevoluteJoint r_leg_hpx = ScrewTools.addRevoluteJoint("r_leg_hpx", rightHipDifferentialBody, rightHipRollOffset, X);
+      l_leg_hpx.setQ(l_hip_roll.getQ().getDoubleValue());
+      r_leg_hpx.setQ(r_hip_roll.getQ().getDoubleValue());
+      RigidBody leftHipDifferentialBody2 = copyLinkAsRigidBody(l_hip_differential2, l_leg_hpx, "l_hip_differential");
+      RigidBody rightHipDifferentialBody2 = copyLinkAsRigidBody(r_hip_differential2, r_leg_hpx, "r_hip_differential");
+      jointMap.put(l_leg_hpx, l_hip_roll);
+      jointMap.put(r_leg_hpx, r_hip_roll);
 
-      Vector3d hipPitchOffset = new Vector3d();
-      PinJoint hip_pitch = new PinJoint("hip_pitch", hipPitchOffset, robotLeg, Axis.Y);
-      hip_pitch.setQ(random.nextDouble());
+      Vector3d leftHipPitchOffset = new Vector3d();
+      Vector3d rightHipPitchOffset = new Vector3d();
+      PinJoint l_hip_pitch = new PinJoint("l_leg_hpy", leftHipPitchOffset, robotLeg, Axis.Y);
+      PinJoint r_hip_pitch = new PinJoint("r_leg_hpy", rightHipPitchOffset, robotLeg, Axis.Y);
+      l_hip_pitch.setQ(random.nextDouble());
+      r_hip_pitch.setQ(random.nextDouble());
 
-      Link thigh = thigh();
-      hip_pitch.setLink(thigh);
-      hip_roll.addJoint(hip_pitch);
+      Link leftThigh = thigh();
+      Link rightThigh = thigh();
+      l_hip_pitch.setLink(leftThigh);
+      r_hip_pitch.setLink(rightThigh);
+      l_hip_roll.addJoint(l_hip_pitch);
+      r_hip_roll.addJoint(r_hip_pitch);
 
-      RevoluteJoint hipPitch = ScrewTools.addRevoluteJoint("hip_pitch", hipDifferentialBody2, hipPitchOffset, Y);
-      hipPitch.setQ(hip_pitch.getQ().getDoubleValue());
-      RigidBody thighBody = copyLinkAsRigidBody(thigh, hipPitch, "thigh");
-      jointMap.put(hipPitch, hip_pitch);
+      RevoluteJoint l_leg_hpy = ScrewTools.addRevoluteJoint("l_leg_hpy", leftHipDifferentialBody2, leftHipPitchOffset, Y);
+      RevoluteJoint r_leg_hpy = ScrewTools.addRevoluteJoint("r_leg_hpy", rightHipDifferentialBody2, rightHipPitchOffset, Y);
+      l_leg_hpy.setQ(l_hip_pitch.getQ().getDoubleValue());
+      r_leg_hpy.setQ(r_hip_pitch.getQ().getDoubleValue());
+      RigidBody leftThighBody = copyLinkAsRigidBody(leftThigh, l_leg_hpy, "l_thigh");
+      RigidBody rightThighBody = copyLinkAsRigidBody(rightThigh, r_leg_hpy, "r_thigh");
+      jointMap.put(l_leg_hpy, l_hip_pitch);
+      jointMap.put(r_leg_hpy, r_hip_pitch);
 
-      Vector3d kneePitchOffset = new Vector3d(0.0, 0.0, -THIGH_LENGTH);
-      PinJoint knee_pitch = new PinJoint("knee_pitch", kneePitchOffset, robotLeg, Axis.Y);
-      knee_pitch.setQ(random.nextDouble());
+      Vector3d leftKneePitchOffset = new Vector3d(0.0, 0.0, -THIGH_LENGTH);
+      Vector3d rightKneePitchOffset = new Vector3d(0.0, 0.0, -THIGH_LENGTH);
+      PinJoint l_knee_pitch = new PinJoint("l_leg_kny", leftKneePitchOffset, robotLeg, Axis.Y);
+      PinJoint r_knee_pitch = new PinJoint("r_leg_kny", rightKneePitchOffset, robotLeg, Axis.Y);
+      l_knee_pitch.setQ(random.nextDouble());
+      r_knee_pitch.setQ(random.nextDouble());
 
-      Link shin = shin();
-      knee_pitch.setLink(shin);
-      hip_pitch.addJoint(knee_pitch);
+      Link l_shin = shin();
+      Link r_shin = shin();
+      l_knee_pitch.setLink(l_shin);
+      r_knee_pitch.setLink(r_shin);
+      l_hip_pitch.addJoint(l_knee_pitch);
+      r_hip_pitch.addJoint(r_knee_pitch);
 
-      RevoluteJoint kneePitch = ScrewTools.addRevoluteJoint("knee_pitch", thighBody, kneePitchOffset, Y);
-      kneePitch.setQ(knee_pitch.getQ().getDoubleValue());
-      RigidBody shinBody = copyLinkAsRigidBody(shin, kneePitch, "shin");
-      jointMap.put(kneePitch, knee_pitch);
+      RevoluteJoint l_leg_kny = ScrewTools.addRevoluteJoint("l_leg_kny", leftThighBody, leftKneePitchOffset, Y);
+      RevoluteJoint r_leg_kny = ScrewTools.addRevoluteJoint("r_leg_kny", rightThighBody, rightKneePitchOffset, Y);
+      l_leg_kny.setQ(l_knee_pitch.getQ().getDoubleValue());
+      r_leg_kny.setQ(r_knee_pitch.getQ().getDoubleValue());
+      RigidBody leftShinBody = copyLinkAsRigidBody(l_shin, l_leg_kny, "l_shin");
+      RigidBody rightShinBody = copyLinkAsRigidBody(r_shin, r_leg_kny, "r_shin");
+      jointMap.put(l_leg_kny, l_knee_pitch);
+      jointMap.put(r_leg_kny, r_knee_pitch);
 
-      Vector3d anklePitchOffset = new Vector3d(0.0, 0.0, -SHIN_LENGTH);
-      PinJoint ankle_pitch = new PinJoint("ankle_pitch", anklePitchOffset, robotLeg, Axis.Y);
-      ankle_pitch.setQ(random.nextDouble());
+      Vector3d leftAnklePitchOffset = new Vector3d(0.0, 0.0, -SHIN_LENGTH);
+      Vector3d rightAnklePitchOffset = new Vector3d(0.0, 0.0, -SHIN_LENGTH);
+      PinJoint l_ankle_pitch = new PinJoint("l_leg_aky", leftAnklePitchOffset, robotLeg, Axis.Y);
+      PinJoint r_ankle_pitch = new PinJoint("r_leg_aky", rightAnklePitchOffset, robotLeg, Axis.Y);
+      l_ankle_pitch.setQ(random.nextDouble());
+      r_ankle_pitch.setQ(random.nextDouble());
 
-      Link ankle_differential = ankle_differential();
-      ankle_pitch.setLink(ankle_differential);
-      knee_pitch.addJoint(ankle_pitch);
+      Link l_ankle_differential = ankle_differential();
+      Link r_ankle_differential = ankle_differential();
+      l_ankle_pitch.setLink(l_ankle_differential);
+      r_ankle_pitch.setLink(r_ankle_differential);
+      l_knee_pitch.addJoint(r_ankle_pitch);
+      l_knee_pitch.addJoint(r_ankle_pitch);
 
-      RevoluteJoint anklePitch = ScrewTools.addRevoluteJoint("ankle_pitch", shinBody, anklePitchOffset, Y);
-      anklePitch.setQ(ankle_pitch.getQ().getDoubleValue());
-      RigidBody ankleDifferentialBody = copyLinkAsRigidBody(ankle_differential, anklePitch, "ankle_differential");
-      jointMap.put(anklePitch, ankle_pitch);
+      RevoluteJoint l_leg_aky = ScrewTools.addRevoluteJoint("l_leg_aky", leftShinBody, leftAnklePitchOffset, Y);
+      RevoluteJoint r_leg_aky = ScrewTools.addRevoluteJoint("r_leg_aky", rightShinBody, rightAnklePitchOffset, Y);
+      l_leg_aky.setQ(l_ankle_pitch.getQ().getDoubleValue());
+      r_leg_aky.setQ(r_ankle_pitch.getQ().getDoubleValue());
+      RigidBody leftAnkleDifferentialBody = copyLinkAsRigidBody(l_ankle_differential, l_leg_aky, "l_ankle_differential");
+      RigidBody rightAnkleDifferentialBody = copyLinkAsRigidBody(r_ankle_differential, r_leg_aky, "r_ankle_differential");
+      jointMap.put(l_leg_aky, l_ankle_pitch);
+      jointMap.put(r_leg_aky, r_ankle_pitch);
 
-      Vector3d ankleRollOffset = new Vector3d();
-      PinJoint ankle_roll = new PinJoint("ankle_roll", ankleRollOffset, robotLeg, Axis.X);
-      ankle_roll.setQ(random.nextDouble());
+      Vector3d leftAnkleRollOffset = new Vector3d();
+      Vector3d rightAnkleRollOffset = new Vector3d();
+      PinJoint l_ankle_roll = new PinJoint("l_leg_akx", leftAnkleRollOffset, robotLeg, Axis.X);
+      PinJoint r_ankle_roll = new PinJoint("r_leg_akx", rightAnkleRollOffset, robotLeg, Axis.X);
+      l_ankle_roll.setQ(random.nextDouble());
+      r_ankle_roll.setQ(random.nextDouble());
 
-      Link foot = foot();
-      ankle_roll.setLink(foot);
-      ankle_pitch.addJoint(ankle_roll);
+      Link l_foot = foot();
+      Link r_foot = foot();
+      l_ankle_roll.setLink(l_foot);
+      r_ankle_roll.setLink(r_foot);
+      l_ankle_pitch.addJoint(l_ankle_roll);
+      r_ankle_pitch.addJoint(r_ankle_roll);
 
-      RevoluteJoint ankleRoll = ScrewTools.addRevoluteJoint("ankle_roll", ankleDifferentialBody, ankleRollOffset, X);
-      ankleRoll.setQ(ankle_roll.getQ().getDoubleValue());
-      RigidBody footBody = copyLinkAsRigidBody(foot, ankleRoll, "foot");
-      jointMap.put(ankleRoll, ankle_roll);
+      RevoluteJoint l_leg_akx = ScrewTools.addRevoluteJoint("l_leg_akx", leftAnkleDifferentialBody, leftAnkleRollOffset, X);
+      RevoluteJoint r_leg_akx = ScrewTools.addRevoluteJoint("r_leg_akx", rightAnkleDifferentialBody, rightAnkleRollOffset, X);
+      l_leg_akx.setQ(l_ankle_roll.getQ().getDoubleValue());
+      r_leg_akx.setQ(r_ankle_roll.getQ().getDoubleValue());
+      RigidBody leftFootBody = copyLinkAsRigidBody(l_foot, l_leg_akx, "l_foot");
+      RigidBody rightFootBody = copyLinkAsRigidBody(r_foot, r_leg_akx, "r_foot");
+      jointMap.put(l_leg_akx, l_ankle_roll);
+      jointMap.put(r_leg_akx, r_ankle_roll);
 
-      RigidBodyTransform soleToAnkleFrame = TransformTools.createTranslationTransform(footLength / 2.0 - footBack + toFootCenterX,
+      RigidBodyTransform leftSoleToAnkleFrame = TransformTools.createTranslationTransform(footLength / 2.0 - footBack + toFootCenterX,
+            toFootCenterY, -ankleHeight);
+      RigidBodyTransform rightSoleToAnkleFrame = TransformTools.createTranslationTransform(footLength / 2.0 - footBack + toFootCenterX,
             -toFootCenterY, -ankleHeight);
-      ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("Sole",
-            footBody.getBodyFixedFrame(), soleToAnkleFrame);
+      ReferenceFrame leftSoleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("Left_Sole",
+            leftFootBody.getBodyFixedFrame(), leftSoleToAnkleFrame);
+      ReferenceFrame rightSoleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("Right_Sole",
+            rightFootBody.getBodyFixedFrame(), rightSoleToAnkleFrame);
 
-      CommonHumanoidReferenceFrames referenceFrames = new LegReferenceFrames(pelvisBody, footBody, soleFrame);
+      SideDependentList<RigidBody> feet = new SideDependentList<>();
+      feet.put(RobotSide.LEFT, leftFootBody);
+      feet.put(RobotSide.RIGHT, rightFootBody);
+      SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+      soleFrames.put(RobotSide.LEFT, leftSoleFrame);
+      soleFrames.put(RobotSide.RIGHT, rightSoleFrame);
 
-      robotLeg.setBase(pelvisBody);
-      robotLeg.setEndEffector(footBody);
+      OneDoFJoint[] joints = {l_leg_hpz, l_leg_hpx, l_leg_hpy, l_leg_kny, l_leg_akx, l_leg_aky, r_leg_hpz, r_leg_hpx, r_leg_hpy, r_leg_kny, r_leg_akx, r_leg_aky};
+
+      robotLeg.setPelvis(pelvisBody);
+      robotLeg.setFeet(feet);
       robotLeg.setElevator(elevator);
       robotLeg.setRootJoint(rootJoint);
-      robotLeg.setJointMap(jointMap);
-      robotLeg.setSoleFrame(soleFrame);
-      robotLeg.setReferenceFrames(referenceFrames);
+      robotLeg.setSoleFrames(soleFrames);
+      robotLeg.createReferenceFrames();
+      robotLeg.setOneDoFJoints(joints);
 
       return robotLeg;
    }
@@ -363,20 +439,33 @@ public class VirtualModelControllerTestHelper
       JUnitTools.assertTuple3dEquals(inputWrench.getLinearPartCopy(), outputWrench.getLinearPartCopy(), epsilon);
    }
 
-   public class RobotLeg extends Robot
+   public class RobotLegs extends Robot implements FullRobotModel
    {
-      private RigidBody base;
-      private RigidBody endEffector;
       private RigidBody elevator;
-      private ReferenceFrame soleFrame;
-      private InverseDynamicsJoint rootJoint;
-      private HashMap<InverseDynamicsJoint, Joint> jointMap;
+      private RigidBody pelvis;
+
+      private SideDependentList<RigidBody> feet = new SideDependentList<>();
+      private SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+      private SixDoFJoint rootJoint;
+      private OneDoFJoint[] joints;
 
       private CommonHumanoidReferenceFrames referenceFrames;
+      private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      public RobotLeg(String name)
+      public RobotLegs(String name)
       {
          super(name);
+      }
+
+      public void updateFrames()
+      {
+         worldFrame.update();
+         referenceFrames.updateFrames();
+      }
+
+      public void setRootJoint(SixDoFJoint rootJoint)
+      {
+         this.rootJoint = rootJoint;
       }
 
       public void setElevator(RigidBody elevator)
@@ -384,44 +473,49 @@ public class VirtualModelControllerTestHelper
          this.elevator = elevator;
       }
 
-      public void setBase(RigidBody base)
+      public void setPelvis(RigidBody pelvis)
       {
-         this.base = base;
+         this.pelvis = pelvis;
       }
 
-      public void setEndEffector(RigidBody endEffector)
+      public void setFeet(SideDependentList<RigidBody> feet)
       {
-         this.endEffector = endEffector;
+         this.feet.set(feet);
       }
 
-      public void setSoleFrame(ReferenceFrame soleFrame)
+      public void setSoleFrames(SideDependentList<ReferenceFrame> soleFrames)
       {
-         this.soleFrame = soleFrame;
+         this.soleFrames.set(soleFrames);
       }
 
-      public void setRootJoint(InverseDynamicsJoint rootJoint)
+      public void setOneDoFJoints(OneDoFJoint[] joints)
       {
-         this.rootJoint = rootJoint;
+         this.joints = joints;
       }
 
-      public void setJointMap(HashMap<InverseDynamicsJoint, Joint> jointMap)
+      public void createReferenceFrames()
       {
-         this.jointMap = jointMap;
+         referenceFrames = new LegReferenceFrames(pelvis, elevator, feet, soleFrames);
       }
 
-      public void setReferenceFrames(CommonHumanoidReferenceFrames referenceFrames)
+      public RobotSpecificJointNames getRobotSpecificJointNames()
       {
-         this.referenceFrames = referenceFrames;
+         return null;
       }
 
-      public RigidBody getBase()
+      public ReferenceFrame getWorldFrame()
       {
-         return base;
+         return worldFrame;
       }
 
-      public RigidBody getEndEffector()
+      public ReferenceFrame getElevatorFrame()
       {
-         return endEffector;
+         return elevator.getBodyFixedFrame();
+      }
+
+      public SixDoFJoint getRootJoint()
+      {
+         return rootJoint;
       }
 
       public RigidBody getElevator()
@@ -429,19 +523,71 @@ public class VirtualModelControllerTestHelper
          return elevator;
       }
 
-      public ReferenceFrame getSoleFrame()
+      public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
       {
-         return soleFrame;
+         return null;
       }
 
-      public InverseDynamicsJoint getRootJoint()
+      public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
       {
-         return rootJoint;
+         return null;
       }
 
-      public Map<InverseDynamicsJoint, Joint> getJointMap()
+      public InverseDynamicsJoint getLidarJoint(String lidarName)
       {
-         return jointMap;
+         return null;
+      }
+
+      public RigidBody getPelvis()
+      {
+         return pelvis;
+      }
+
+      public RigidBody getChest()
+      {
+         return null;
+      }
+
+      public RigidBody getHead()
+      {
+         return null;
+      }
+
+      public OneDoFJoint[] getOneDoFJoints()
+      {
+         return joints;
+      }
+
+      public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+         oneDoFJointsToPack.clear();
+         for (OneDoFJoint joint : joints)
+            oneDoFJointsToPack.add(joint);
+      }
+
+      public IMUDefinition[] getIMUDefinitions()
+      {
+         return null;
+      }
+
+      public ForceSensorDefinition[] getForceSensorDefinitions()
+      {
+         return null;
+      }
+
+      public ContactSensorDefinition[] getContactSensorDefinitions()
+      {
+         return null;
+      }
+
+      public RigidBody getFoot(RobotSide robotSide)
+      {
+         return feet.get(robotSide);
+      }
+
+      public ReferenceFrame getSoleFrame(RobotSide robotSide)
+      {
+         return soleFrames.get(robotSide);
       }
 
       public CommonHumanoidReferenceFrames getReferenceFrames()
@@ -453,18 +599,20 @@ public class VirtualModelControllerTestHelper
    private class LegReferenceFrames implements CommonHumanoidReferenceFrames
    {
       private final ReferenceFrame pelvisFrame;
+      private final ReferenceFrame centerOfMassFrame;
 
       private final SideDependentList<ReferenceFrame> footReferenceFrames = new SideDependentList<>();
       private final SideDependentList<ReferenceFrame> soleReferenceFrames = new SideDependentList<>();
 
-      public LegReferenceFrames(RigidBody pelvis, RigidBody foot, ReferenceFrame soleFrame)
+      public LegReferenceFrames(RigidBody pelvis, RigidBody elevator, SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames)
       {
          pelvisFrame = pelvis.getBodyFixedFrame();
+         centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), elevator);
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            footReferenceFrames.put(robotSide, foot.getBodyFixedFrame());
-            soleReferenceFrames.put(robotSide, soleFrame);
+            footReferenceFrames.put(robotSide, feet.get(robotSide).getBodyFixedFrame());
+            soleReferenceFrames.put(robotSide, soleFrames.get(robotSide));
          }
       }
 
@@ -535,7 +683,7 @@ public class VirtualModelControllerTestHelper
 
       public ReferenceFrame getCenterOfMassFrame()
       {
-         return pelvisFrame;
+         return centerOfMassFrame;
       }
 
       public ReferenceFrame getPelvisZUpFrame()
