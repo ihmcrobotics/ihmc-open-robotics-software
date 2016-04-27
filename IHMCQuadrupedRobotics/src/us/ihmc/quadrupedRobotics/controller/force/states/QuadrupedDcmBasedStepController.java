@@ -75,7 +75,6 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
    private final QuadrupedTaskSpaceController taskSpaceController;
 
    // planning
-   private final QuadrupedXGaitStepPlanner footstepPlanner;
    private final QuadrupedTimedStepCopPlanner copPlanner;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
    private final ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory;
@@ -117,7 +116,6 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
-      footstepPlanner = new QuadrupedXGaitStepPlanner(registry, runtimeEnvironment.getGraphicsListRegistry(), referenceFrames);
       copPlanner = new QuadrupedTimedStepCopPlanner(2 * timedStepController.getQueueCapacity());
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(timedStepController.getQueueCapacity(), gravity, inputProvider.getComPositionInput().getZ());
       dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
