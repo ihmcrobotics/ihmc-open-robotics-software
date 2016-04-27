@@ -6,7 +6,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
-import us.ihmc.quadrupedRobotics.util.HeterogeneousMemoryPool;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -90,13 +89,17 @@ public class QuadrupedXGaitStepPlanner
    private final QuadrantDependentList<PreallocatedQueue<QuadrupedTimedStep>> queues = new QuadrantDependentList<>();
 
    /**
-    * Used to estimate the ground plane at the beginning of each plan to compute the foothold heights.
+    * Estimator used to compute the ground plane at the beginning of each step plan.
     */
    private static final GroundPlaneEstimator groundPlaneEstimator = new GroundPlaneEstimator();
-
    private static final QuadrantDependentList<FramePoint> initialFootholds = new QuadrantDependentList();
 
-   private final HeterogeneousMemoryPool pool = new HeterogeneousMemoryPool();
+   /**
+    * Temporary variables used to compute the step plan.
+    */
+   private final RigidBodyTransform temporaryTransform = new RigidBodyTransform();
+   private final FramePoint temporaryFramePoint = new FramePoint();
+   private final FrameVector temporaryFrameVector = new FrameVector();
 
    public QuadrupedXGaitStepPlanner(YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry,
          QuadrupedReferenceFrames referenceFrames)
@@ -129,8 +132,6 @@ public class QuadrupedXGaitStepPlanner
     */
    public void plan(PreallocatedQueue<QuadrupedTimedStep> steps, double startTime, boolean needInitialization)
    {
-      pool.evict();
-
       footstepVisualization.reset();
 
       // Estimate the ground plane.
@@ -257,14 +258,14 @@ public class QuadrupedXGaitStepPlanner
       double nominalYaw = polygon.getNominalYaw();
       polygon.yawAboutCentroid(yawRate);
 
-      RigidBodyTransform tf = pool.lease(RigidBodyTransform.class);
+      RigidBodyTransform tf = temporaryTransform;
       tf.rotZ(nominalYaw);
 
-      FramePoint centroid = pool.lease(FramePoint.class);
+      FramePoint centroid = temporaryFramePoint;
       polygon.getCentroid(centroid);
 
       // Compute the stride vector and rotate it to the new yaw angle.
-      FrameVector stride = pool.lease(FrameVector.class);
+      FrameVector stride = temporaryFrameVector;
       stride.setToZero(referenceFrames.getWorldFrame());
       stride.add(quadrant.getEnd().negateIfHindEnd(stanceLength) / 2.0, quadrant.getSide().negateIfRightSide(stanceWidth) / 2.0, 0.0);
       stride.add(strideLength, strideWidth, 0.0);
@@ -309,11 +310,7 @@ public class QuadrupedXGaitStepPlanner
       {
          return queues.get(quadrant).getTail().getGoalPosition();
       }
-
-      FramePoint solePositionEstimate = pool.lease(FramePoint.class);
-      solePositionEstimate.setToZero(referenceFrames.getFootFrame(quadrant));
-
-      return solePositionEstimate;
+      return initialFootholds.get(quadrant);
    }
 
    /**
