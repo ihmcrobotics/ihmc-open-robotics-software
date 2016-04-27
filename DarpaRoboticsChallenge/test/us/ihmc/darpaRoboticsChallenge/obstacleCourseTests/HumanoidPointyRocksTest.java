@@ -57,7 +57,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 {
    private final double swingTime = 0.6;
-   private final double transferTime = 2.5;
+   private final double transferTime = 0.0;
    
    private SimulationTestingParameters simulationTestingParameters;
 
@@ -430,6 +430,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       
       DoubleYoVariable swingTime = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("swingTime");
       swingTime.set(this.swingTime);
+      
+      DoubleYoVariable percentageChickenSupport = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("PercentageChickenSupport");
+      percentageChickenSupport.set(0.25);
    }
    
    @DeployableTestMethod(estimatedDuration = 45.9)
