@@ -5,12 +5,12 @@ import java.util.Random;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import us.ihmc.communication.annotations.ros.RosEnumValueDocumentation;
 import us.ihmc.communication.annotations.ros.RosMessagePacket;
 import us.ihmc.communication.annotations.ros.RosExportedField;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.DocumentedEnum;
 
 /**
  * User: Matt
@@ -22,30 +22,12 @@ import us.ihmc.tools.DocumentedEnum;
                   topic = "/output/footstep_status")
 public class FootstepStatus extends StatusPacket<FootstepStatus>
 {
-   public enum Status implements DocumentedEnum<Status>
+   public enum Status
    {
-      STARTED, COMPLETED;
-      
-      @Override
-      public String getDocumentation(Status var)
-      {
-         switch (var)
-         {
-         case STARTED:
-            return "execution of a footstep has begun. actualFootPositionInWorld and actualFootOrientationInWorld should be ignored in this state";
-         case COMPLETED:
-            return "a footstep is completed";
-
-         default:
-            return "no documentation available";
-         }
-      }
-
-      @Override
-      public Status[] getDocumentedValues()
-      {
-         return values();
-      }
+      @RosEnumValueDocumentation(documentation = "execution of a footstep has begun. actualFootPositionInWorld and actualFootOrientationInWorld should be ignored in this state")
+      STARTED,
+      @RosEnumValueDocumentation(documentation = "a footstep is completed")
+      COMPLETED
    }
 
    public Status status;

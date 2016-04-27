@@ -51,9 +51,9 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
       double value = random.nextInt(3);
       HighLevelState highLevelState = HighLevelState.WALKING;
       if (value == 1)
-         highLevelState = HighLevelState.DRIVING;
+         highLevelState = HighLevelState.DO_NOTHING_BEHAVIOR;
       else if (value == 2)
-         highLevelState = HighLevelState.INGRESS_EGRESS;
+         highLevelState = HighLevelState.DIAGNOSTICS;
 
       this.highLevelState = highLevelState;
    }

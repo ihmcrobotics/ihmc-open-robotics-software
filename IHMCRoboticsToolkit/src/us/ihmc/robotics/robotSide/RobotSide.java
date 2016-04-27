@@ -197,9 +197,4 @@ public enum RobotSide
          return "no documentation available";
       }
    }
-
-   public RobotSide[] getDocumentedValues()
-   {
-      return values;
-   }
 }

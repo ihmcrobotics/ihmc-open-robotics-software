@@ -1,26 +1,40 @@
 package us.ihmc.humanoidRobotics.communication.packets.dataobjects;
 
-import us.ihmc.tools.DocumentedEnum;
+import us.ihmc.communication.annotations.ros.RosEnumValueDocumentation;
 
 /**
 * @author twan
 *         Date: 6/8/13
 */
-public enum HandConfiguration implements DocumentedEnum<HandConfiguration>
+public enum HandConfiguration
 {
+   @RosEnumValueDocumentation(documentation = "stops the fingers at their current position")
    STOP,
+   @RosEnumValueDocumentation(documentation = "fully opens the fingers")
    OPEN,
+   @RosEnumValueDocumentation(documentation = "fully closes the fingers")
    CLOSE,
+   @RosEnumValueDocumentation(documentation = "fully closes the fingers applying maximum force")
    CRUSH,
+   @RosEnumValueDocumentation(documentation = "closes all but one finger to create a hook")
    HOOK,
+   @RosEnumValueDocumentation(documentation = "sets gripper to use a standard grasp")
    BASIC_GRIP,
+   @RosEnumValueDocumentation(documentation = "sets gripper to use a pinch grasp where the thumb and fingers come together when closed")
    PINCH_GRIP,
+   @RosEnumValueDocumentation(documentation = "sets gripper to use a wide-spread finger grasp")
    WIDE_GRIP,
+   @RosEnumValueDocumentation(documentation = "sets gripper to use a scissor grasp where the index and middle finger come together when closed")
    SCISSOR_GRIP,
+   @RosEnumValueDocumentation(documentation = "sets all fingers to their zero position")
    RESET,
+   @RosEnumValueDocumentation(documentation = "fully open all fingers except the thumb")
    OPEN_FINGERS,
+   @RosEnumValueDocumentation(documentation = "fully open the thumb only")
    OPEN_THUMB,
+   @RosEnumValueDocumentation(documentation = "fully close all fingers except the thumb")
    CLOSE_FINGERS,
+   @RosEnumValueDocumentation(documentation = "fully close the thumb only")
    CLOSE_THUMB,
    OPEN_INDEX,
    OPEN_MIDDLE,
@@ -38,49 +52,5 @@ public enum HandConfiguration implements DocumentedEnum<HandConfiguration>
    PARTIAL_CREEPY_GRASP,
    CREEPY_GRASPING,
    CREEPY_GRASPING_HARD,
-   SLOW_CLOSE;
-
-   @Override
-   public String getDocumentation(HandConfiguration handConfiguration)
-   {
-      switch (handConfiguration)
-      {
-      case STOP:
-         return "stops the fingers at their current position";
-      case OPEN:
-         return "fully opens the fingers";
-      case CLOSE:
-         return "fully closes the fingers";
-      case CRUSH:
-         return "fully closes the fingers applying maximum force";
-      case HOOK:
-         return "closes all but one finger to create a hook";
-      case BASIC_GRIP:
-         return "sets gripper to use a standard grasp";
-      case PINCH_GRIP:
-         return "sets gripper to use a pinch grasp where the thumb and fingers come together when closed";
-      case WIDE_GRIP:
-         return "sets gripper to use a wide-spread finger grasp";
-      case SCISSOR_GRIP:
-         return "sets gripper to use a scissor grasp where the index and middle finger come together when closed";
-      case RESET:
-         return "sets all fingers to their zero position";
-      case OPEN_FINGERS:
-         return "fully open all fingers except the thumb";
-      case OPEN_THUMB:
-         return "fully open the thumb only";
-      case CLOSE_FINGERS:
-         return "fully close all fingers except the thumb";
-      case CLOSE_THUMB:
-         return "fully close the thumb only";
-      default:
-         return "no documentation available";
-      }
-   }
-
-   @Override
-   public HandConfiguration[] getDocumentedValues()
-   {
-      return new HandConfiguration[] {STOP, OPEN, CLOSE, CRUSH, HOOK, BASIC_GRIP, PINCH_GRIP, WIDE_GRIP, SCISSOR_GRIP, RESET, OPEN_FINGERS, OPEN_THUMB, CLOSE_FINGERS, CLOSE_THUMB};
-   }
+   SLOW_CLOSE
 }
