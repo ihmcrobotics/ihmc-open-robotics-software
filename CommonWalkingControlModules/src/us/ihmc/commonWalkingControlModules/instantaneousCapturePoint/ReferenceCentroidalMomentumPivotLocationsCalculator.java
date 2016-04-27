@@ -518,7 +518,9 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
                centroidOfFootstepToConsider.set(previousExitCMP2d);
          }
 
-         constrainCMPAccordingToSupportPolygonAndUserOffsets(cmp2d, centroidOfFootstepToConsider, entryCMPUserOffsets.get(robotSide),
+         centroidOfCurrentFootstep.setIncludingFrame(supportFootPolygonsInSoleZUpFrame.get(robotSide).getCentroid());
+         centroidOfCurrentFootstep.changeFrameAndProjectToXYPlane(soleFrame);
+         constrainCMPAccordingToSupportPolygonAndUserOffsets(cmp2d, centroidOfCurrentFootstep, centroidOfFootstepToConsider, entryCMPUserOffsets.get(robotSide),
                minForwardEntryCMPOffset.getDoubleValue(), maxForwardEntryCMPOffset.getDoubleValue());
       }
       else
@@ -600,8 +602,12 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       if (putCMPOnToes)
          putExitCMPOnToes(cmp2d);
       else
-         constrainCMPAccordingToSupportPolygonAndUserOffsets(cmp2d, centroidOfFootstepToConsider, exitCMPUserOffsets.get(robotSide),
+      {
+         centroidOfCurrentFootstep.setIncludingFrame(supportFootPolygonsInSoleZUpFrame.get(robotSide).getCentroid());
+         centroidOfCurrentFootstep.changeFrameAndProjectToXYPlane(soleFrame);
+         constrainCMPAccordingToSupportPolygonAndUserOffsets(cmp2d, centroidOfCurrentFootstep, centroidOfFootstepToConsider, exitCMPUserOffsets.get(robotSide),
                minForwardExitCMPOffset.getDoubleValue(), maxForwardExitCMPOffset.getDoubleValue());
+      }
 
       exitCMPToPack.setXYIncludingFrame(cmp2d);
       exitCMPToPack.changeFrame(worldFrame);
@@ -622,11 +628,11 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       tempSupportPolygon.orthogonalProjection(exitCMPToPack);
    }
 
-   private void constrainCMPAccordingToSupportPolygonAndUserOffsets(FramePoint2d cmpToPack, FramePoint2d centroidOfFootstepToConsider,
-         YoFrameVector2d cmpOffset, double minForwardCMPOffset, double maxForwardCMPOffset)
+   private void constrainCMPAccordingToSupportPolygonAndUserOffsets(FramePoint2d cmpToPack, FramePoint2d centroidOfCurrentFootstep,
+         FramePoint2d centroidOfFootstepToConsider, YoFrameVector2d cmpOffset, double minForwardCMPOffset, double maxForwardCMPOffset)
    {
       // First constrain the computed CMP to the given min/max along the x-axis.
-      double cmpXOffsetFromCentroid = stepLengthToCMPOffsetFactor.getDoubleValue() * centroidOfFootstepToConsider.getX() + cmpOffset.getX();
+      double cmpXOffsetFromCentroid = stepLengthToCMPOffsetFactor.getDoubleValue() * (centroidOfFootstepToConsider.getX() - centroidOfCurrentFootstep.getX()) + cmpOffset.getX();
       cmpXOffsetFromCentroid = MathTools.clipToMinMax(cmpXOffsetFromCentroid, minForwardCMPOffset, maxForwardCMPOffset);
 
       cmpToPack.setIncludingFrame(tempSupportPolygon.getCentroid());
