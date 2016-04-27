@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.QuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -97,7 +98,7 @@ public class VirtualModelControlQPSolver
       CommonOps.addEquals(solverInput_H, regularizationMatrix);
    }
 
-   public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   public void addMomentumTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
       int taskSize = taskJacobian.getNumRows();
 
@@ -105,10 +106,10 @@ public class VirtualModelControlQPSolver
       tempJtW.reshape(rhoSize, taskSize);
       CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
 
-      addMotionTaskInternal(tempJtW, taskJacobian, taskObjective);
+      addMomentumTaskInternal(tempJtW, taskJacobian, taskObjective);
    }
 
-   public void addMotionTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   public void addMomentumTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       // Compute: H += J^T W J
       CommonOps.mult(taskJtW, taskJacobian, tempRhoTask_H);
