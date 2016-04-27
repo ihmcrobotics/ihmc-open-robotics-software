@@ -347,13 +347,18 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       Random random = new Random(1984L);
       for (int i=0; i<numberOfSteps; i++)
       {         
-         boolean uniformShrinkage = false; //random.nextBoolean();
-         
+         boolean uniformShrinkage = random.nextBoolean();
+         boolean lineOfContact = false; //random.nextBoolean();
+      
          if (uniformShrinkage)
          {
             double shrinkageLengthPercent = RandomTools.generateRandomDouble(random, 0.5, 0.6);
             double shrinkageWidthPercent = RandomTools.generateRandomDouble(random, 0.5, 0.6);
             newContactPoints = generateContactPointsForUniformFootShrinkage(getRobotModel().getWalkingControllerParameters(), shrinkageLengthPercent, shrinkageWidthPercent);
+         }
+         else if (lineOfContact)
+         {
+            newContactPoints = generateContactPointsForRandomRotatedLineOfContact(random);
          }
          else
          {
@@ -505,7 +510,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       
       for (int i=0; i<numberOfChanges; i++)
       {
-         ArrayList<Point2d> newContactPoints = generatePredictedContactPoints(random);
+         ArrayList<Point2d> newContactPoints = generateContactPointsForRandomRotatedLineOfContact(random);
          changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointName);
          success = success & drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
          if (!success) break;
@@ -543,7 +548,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       footstepData.setLocation(new Point3d(0.50, 0.10, 0.0));
       footstepData.setOrientation(new Quat4d(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(RobotSide.LEFT);
-      footstepData.setPredictedContactPoints(generatePredictedContactPoints(random));
+      footstepData.setPredictedContactPoints(generateContactPointsForRandomRotatedLineOfContact(random));
       message.add(footstepData);
       messages.add(message);
 
@@ -553,7 +558,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       footstepData.setLocation(new Point3d(1.0, -0.10, 0.0));
       footstepData.setOrientation(new Quat4d(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(RobotSide.RIGHT);
-      footstepData.setPredictedContactPoints(generatePredictedContactPoints(random));
+      footstepData.setPredictedContactPoints(generateContactPointsForRandomRotatedLineOfContact(random));
       message.add(footstepData);
       messages.add(message);
 
@@ -563,7 +568,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       footstepData.setLocation(new Point3d(1.5, 0.10, 0.0));
       footstepData.setOrientation(new Quat4d(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(RobotSide.LEFT);
-      footstepData.setPredictedContactPoints(generatePredictedContactPoints(random));
+      footstepData.setPredictedContactPoints(generateContactPointsForRandomRotatedLineOfContact(random));
       message.add(footstepData);
       messages.add(message);
 
@@ -573,7 +578,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       footstepData.setLocation(new Point3d(1.5, -0.1, 0.0));
       footstepData.setOrientation(new Quat4d(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(RobotSide.RIGHT);
-      footstepData.setPredictedContactPoints(generatePredictedContactPoints(random));
+      footstepData.setPredictedContactPoints(generateContactPointsForRandomRotatedLineOfContact(random));
       message.add(footstepData);
       messages.add(message);
 
@@ -583,7 +588,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       footstepData.setLocation(new Point3d(1.5, 0.4, 0.0));
       footstepData.setOrientation(new Quat4d(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(RobotSide.LEFT);
-      footstepData.setPredictedContactPoints(generatePredictedContactPoints(random));
+      footstepData.setPredictedContactPoints(generateContactPointsForRandomRotatedLineOfContact(random));
       message.add(footstepData);
       messages.add(message);
 
@@ -593,7 +598,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       footstepData.setLocation(new Point3d(1.5, 0.2, 0.0));
       footstepData.setOrientation(new Quat4d(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(RobotSide.RIGHT);
-      footstepData.setPredictedContactPoints(generatePredictedContactPoints(random));
+      footstepData.setPredictedContactPoints(generateContactPointsForRandomRotatedLineOfContact(random));
       message.add(footstepData);
       messages.add(message);
 
@@ -825,7 +830,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private ArrayList<Point2d> generatePredictedContactPoints(Random random)
+   private ArrayList<Point2d> generateContactPointsForRandomRotatedLineOfContact(Random random)
    {
       double angle = RandomTools.generateRandomDouble(random, Math.PI);
       RigidBodyTransform transform = new RigidBodyTransform();
