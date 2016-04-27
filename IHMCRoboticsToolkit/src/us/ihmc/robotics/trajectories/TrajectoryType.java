@@ -21,9 +21,4 @@ public enum TrajectoryType
          return "no documentation available";
       }
    }
-
-   public TrajectoryType[] getDocumentedValues()
-   {
-      return values();
-   }
 }

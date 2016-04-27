@@ -1,11 +1,14 @@
 package us.ihmc.utilities.ros;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -16,41 +19,32 @@ import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import us.ihmc.communication.annotations.ros.RosMessagePacket;
 import us.ihmc.communication.annotations.ros.RosExportedField;
 import us.ihmc.communication.annotations.ros.RosIgnoredField;
-import us.ihmc.tools.DocumentedEnum;
-import us.ihmc.utilities.ros.documentation.enums.EnumDocumentationFactory;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class ROSMessageGenerator
 {
-   public static String messageFolder = ("../IHMCROSTools/ROSMessagesAndServices/ihmc_msgs/msg/").replace("/", File.separator);
    boolean overwriteSubMessages;
 
    public ROSMessageGenerator(boolean overwriteSubMessages)
    {
       this.overwriteSubMessages = overwriteSubMessages;
    }
-   
-   public void createNewRosMessage(Class clazz, boolean overwrite) throws Exception
-   {
-      createNewRosMessage(clazz, overwrite, true);
-   }
-   
-   private String createNewRosMessage(Class clazz, boolean overwrite, boolean topLevel) throws Exception
-   {
-      if (clazz == null)
-      {
-         return "";
-      }
 
-      File file = new File(messageFolder);
-      if (!file.exists())
-      {
-         file.mkdirs();
-      }
-
+   @SuppressWarnings("unchecked")
+   public String createNewRosMessage(Class clazz, boolean overwrite) throws Exception
+   {
+      RosMessagePacket rosMessageAnnotation = (RosMessagePacket) clazz.getAnnotation(RosMessagePacket.class);
       String messageName = clazz.getSimpleName();
+
+      Path msgDirectoryPath = Paths.get("..", "IHMCROSTools", "ROSMessagesAndServices", rosMessageAnnotation.rosPackage(), "msg");
+      if(!Files.exists(msgDirectoryPath))
+      {
+         Files.createDirectories(msgDirectoryPath);
+      }
 
       if(!messageName.endsWith("Message"))
       {
@@ -59,39 +53,35 @@ public class ROSMessageGenerator
 
       messageName = StringUtils.replace(messageName, "Message", "RosMessage");
 
-      File messageFile = new File((messageFolder + File.separator + messageName + ".msg"));
+      File messageFile = msgDirectoryPath.resolve(messageName + ".msg").toFile();
 
-      if (overwrite ||!messageFile.exists())
+      if (overwrite ||  !messageFile.exists())
       {
          messageFile.delete();
 
-         try
+         try(FileWriter writer = new FileWriter(messageFile))
          {
             messageFile.createNewFile();
-            System.out.println("Message Created: " + messageFile.getName());
-            PrintStream fileStream = new PrintStream(messageFile);
+            PrintTools.info("Created empty msg file: " + messageFile.getCanonicalPath());
 
-            String outBuffer = "## " + messageName + "\n";
-            RosMessagePacket annotation = (RosMessagePacket) clazz.getAnnotation(RosMessagePacket.class);
-            if (annotation != null)
-            {
-               String[] annotationString = annotation.documentation().split("\r?\n|\r");
-               for (String line : annotationString)
-               {
-                  outBuffer += "# " + line + "\n";
-               }
-            }
-            else
-            {
-               outBuffer += "# No Documentation Annotation Found" + "\n";
-            }
+            StringBuilder fileContents = new StringBuilder();
 
-            outBuffer += "\n";
+            fileContents.append("## ").append(messageName).append("\n");
+
+            String classDocumentation = rosMessageAnnotation.documentation();
+
+            cleanupAndLineWrapDocumentation(fileContents, classDocumentation);
+
+            fileContents.append("\n");
 
             Field[] fields = clazz.getFields();
             Set<String> enumsAlreadyDocumented = new TreeSet<String>();
             for (Field field : fields)
             {
+//               if(Enum.class.isAssignableFrom(field.getType()) && RosMessageGenerationTools.isDocumented((Class<? extends Enum<?>>) field.getType()))
+//               {
+//                  addEnumFieldToFileContents(field, fileContents);
+//               }
                if (isConstant(field) || isIgnoredField(field))
                {
                   continue;
@@ -106,18 +96,18 @@ public class ROSMessageGenerator
                      enumsAlreadyDocumented.add(enumName);
                   }
 
-                  outBuffer += printType(field, duplicateEnum);
+//                  outBuffer += printType(field, duplicateEnum);
                }
                else
                {
-                  outBuffer += printType(field);
+//                  outBuffer += printType(field);
                }
 
                String formattedFieldName = camelCaseToLowerCaseWithUnderscores(field.getName());
-               outBuffer += " " + formattedFieldName + "\n" + "\n";
+//               outBuffer += " " + formattedFieldName + "\n" + "\n";
             }
 
-            fileStream.println(outBuffer);
+//            writer.write(fileContents.toString());
          }
          catch (IOException e)
          {
@@ -126,6 +116,45 @@ public class ROSMessageGenerator
       }
 
       return messageName;
+   }
+
+   @SuppressWarnings("unchecked")
+   private void addEnumFieldToFileContents(Field field, StringBuilder fileContents)
+   {
+//      DocumentedEnum documentedEnum = RosMessageGenerationTools.getDocumentation((Class<? extends Enum<?>>) field.getType());
+//      Object[] documentedValues = documentedEnum.getDocumentedValues();
+
+//      fileContents.append("# Options for ").append(field.getName()).append("\n");
+
+//      for (int i = 0; i < documentedValues.length; i++)
+//      {
+//         buffer +=
+//         if (duplicateEnum)
+//         {
+//            buffer += "# ";
+//         }
+//         else
+//         {
+//            buffer += "uint8 ";
+//         }
+//         buffer += documentedValues[i].toString() + "=" + i;
+//
+//         String documentation = documentedEnum.getDocumentation(documentedValues[i]);
+//         buffer += " # " + documentation;
+//         buffer += "\n";
+//      }
+//
+//      buffer += "uint8";
+   }
+
+   private void cleanupAndLineWrapDocumentation(StringBuilder fileContents, String documentation)
+   {
+      String[] documentationLines = WordUtils.wrap(documentation.replace("\n", " ").replace("\r", " ").replace("\r\n", " "), 78).split(System.lineSeparator());
+
+      for (String line : documentationLines)
+      {
+         fileContents.append("# ").append(line).append("\n");
+      }
    }
 
    private String camelCaseToLowerCaseWithUnderscores(String in)
@@ -205,35 +234,35 @@ public class ROSMessageGenerator
       }
       else if (clazz.isEnum())
       {
-         DocumentedEnum documentedEnum = EnumDocumentationFactory.getDocumentation(clazz);
-         if(documentedEnum != null)
+//         DocumentedEnum documentedEnum = RosMessageGenerationTools.getDocumentation(clazz);
+         if(false)
          {
-            Object[] documentedValues = documentedEnum.getDocumentedValues();
-
-            buffer += "# Options for " + varName + "\n";
-
-            for (int i = 0; i < documentedValues.length; i++)
-            {
-               if (duplicateEnum)
-               {
-                  buffer += "# ";
-               }
-               else
-               {
-                  buffer += "uint8 ";
-               }
-               buffer += documentedValues[i].toString() + "=" + i;
-
-               String documentation = documentedEnum.getDocumentation(documentedValues[i]);
-               buffer += " # " + documentation;
-               buffer += "\n";
-            }
+//            Object[] documentedValues = documentedEnum.getDocumentedValues();
+//
+//            buffer += "# Options for " + varName + "\n";
+//
+//            for (int i = 0; i < documentedValues.length; i++)
+//            {
+//               if (duplicateEnum)
+//               {
+//                  buffer += "# ";
+//               }
+//               else
+//               {
+//                  buffer += "uint8 ";
+//               }
+//               buffer += documentedValues[i].toString() + "=" + i;
+//
+//               String documentation = documentedEnum.getDocumentation(documentedValues[i]);
+//               buffer += " # " + documentation;
+//               buffer += "\n";
+//            }
 
             buffer += "uint8";
          }
          else
          {
-            System.err.println(clazz.getSimpleName() + " is not a DocumentedEnum and not defined EnumDocumentationFactory! Fix and rerun!");
+            System.err.println(clazz.getSimpleName() + " is not a DocumentedEnum and not defined RosMessageGenerationTools! Fix and rerun!");
          }
 
       }
@@ -284,7 +313,7 @@ public class ROSMessageGenerator
       }
       else
       {
-         buffer += createNewRosMessage(clazz, overwriteSubMessages, false);
+         buffer += createNewRosMessage(clazz, overwriteSubMessages);
       }
 
       return buffer;

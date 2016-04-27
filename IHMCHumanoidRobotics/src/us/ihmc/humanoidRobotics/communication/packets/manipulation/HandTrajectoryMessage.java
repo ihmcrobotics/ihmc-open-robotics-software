@@ -4,6 +4,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.communication.annotations.ros.RosEnumValueDocumentation;
 import us.ihmc.communication.annotations.ros.RosMessagePacket;
 import us.ihmc.communication.annotations.ros.RosExportedField;
 import us.ihmc.communication.packets.Packet;
@@ -12,7 +13,6 @@ import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessa
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.DocumentedEnum;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified trajectory points."
@@ -23,32 +23,14 @@ import us.ihmc.tools.DocumentedEnum;
       topic = "/control/hand_trajectory")
 public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTrajectoryMessage> implements VisualizablePacket
 {
-   public enum BaseForControl implements DocumentedEnum<BaseForControl>
+   public enum BaseForControl
    {
-      CHEST, WORLD, WALKING_PATH;
-
-      @Override
-      public String getDocumentation(BaseForControl var)
-      {
-         switch (var)
-         {
-         case CHEST:
-            return "The hand is controlled with respect to the chest. In other words, the controlled hand moves along with the chest.";
-         case WORLD:
-            return "The hand is controlled with respect to the estimated world. In other words, the controlled hand will remain fixed in world even if the robot starts moving.";
-         case WALKING_PATH:
-            return "The hand is controlled with respect to the middle of the feet. In other words, the controlled hand moves along with the robot when walking but is not affected by swaying.";
-
-         default:
-            return "No documentation available.";
-         }
-      }
-
-      @Override
-      public BaseForControl[] getDocumentedValues()
-      {
-         return values();
-      }
+      @RosEnumValueDocumentation(documentation = "The hand is controlled with respect to the chest. In other words, the controlled hand moves along with the chest.")
+      CHEST,
+      @RosEnumValueDocumentation(documentation = "The hand is controlled with respect to the estimated world. In other words, the controlled hand will remain fixed in world even if the robot starts moving.")
+      WORLD,
+      @RosEnumValueDocumentation(documentation = "The hand is controlled with respect to the middle of the feet. In other words, the controlled hand moves along with the robot when walking but is not affected by swaying.")
+      WALKING_PATH
    }
 
    @RosExportedField(documentation = "Specifies which hand will execute the trajectory.")

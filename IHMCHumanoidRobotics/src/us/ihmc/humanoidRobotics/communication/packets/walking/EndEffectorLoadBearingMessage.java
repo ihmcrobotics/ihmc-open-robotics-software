@@ -1,11 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
+import us.ihmc.communication.annotations.ros.RosEnumValueDocumentation;
 import us.ihmc.communication.annotations.ros.RosMessagePacket;
 import us.ihmc.communication.annotations.ros.RosExportedField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.DocumentedEnum;
 
 @RosMessagePacket(documentation = "This message commands the controller to start loading an end effector that was unloaded to support the robot weight. "
       + " One application is making a foot loadbearing."
@@ -15,9 +15,16 @@ import us.ihmc.tools.DocumentedEnum;
                   topic = "/control/end_effector_load_bearing")
 public class EndEffectorLoadBearingMessage extends Packet<EndEffectorLoadBearingMessage>
 {
-   public enum EndEffector implements DocumentedEnum<EndEffector>
+   public enum EndEffector
    {
-      FOOT, HAND;
+      @RosEnumValueDocumentation(documentation = "In this case, the user also needs to provide the robotSide."
+            + " If in the air, the corresponding foot will enter first a vertical ground approach transition and eventually touch the ground and switch to loadbearing."
+            + " Then the robot is ready to walk."
+            + " It is preferable to request a foot to switch to load bearing when it is aready close to the ground.")
+      FOOT,
+      @RosEnumValueDocumentation(documentation = "In this case, the user also needs to provide the robotSide."
+            + " It is preferable to request a hand to switch to load bearing when it is aready close to the ground.")
+      HAND;
 
       public static final EndEffector[] values = values();
 
@@ -32,59 +39,16 @@ public class EndEffectorLoadBearingMessage extends Packet<EndEffectorLoadBearing
             throw new RuntimeException("Should not get there.");
          }
       }
-
-      @Override
-      public String getDocumentation(EndEffector var)
-      {
-         switch (var)
-         {
-         case FOOT:
-            return "In this case, the user also needs to provide the robotSide."
-                  + " If in the air, the corresponding foot will enter first a vertical ground approach transition and eventually touch the ground and switch to loadbearing."
-                  + " Then the robot is ready to walk."
-                  + " It is preferable to request a foot to switch to load bearing when it is aready close to the ground.";
-
-         case HAND:
-            return "In this case, the user also needs to provide the robotSide."
-                  + " It is preferable to request a hand to switch to load bearing when it is aready close to the ground.";
-
-         default:
-            return "No documentation available.";
-         }
-      }
-
-      @Override
-      public EndEffector[] getDocumentedValues()
-      {
-         return values();
-      }
    }
 
-   public enum LoadBearingRequest implements DocumentedEnum<LoadBearingRequest>
+   public enum LoadBearingRequest
    {
-      LOAD, UNLOAD;
+      @RosEnumValueDocumentation(documentation = "Request to load the given end-effector.")
+      LOAD,
+      @RosEnumValueDocumentation(documentation = "Request to unload the given end-effector.")
+      UNLOAD;
 
       public static final LoadBearingRequest[] values = values();
-
-      @Override
-      public String getDocumentation(LoadBearingRequest var)
-      {
-         switch (var)
-         {
-         case LOAD:
-            return "Request to load the given end-effector.";
-         case UNLOAD:
-            return "Request to unload the given end-effector.";
-         default:
-            return "No documentation available.";
-         }
-      }
-
-      @Override
-      public LoadBearingRequest[] getDocumentedValues()
-      {
-         return values();
-      }
    }
 
    @RosExportedField(documentation = "Needed to identify a side dependent end-effector.")

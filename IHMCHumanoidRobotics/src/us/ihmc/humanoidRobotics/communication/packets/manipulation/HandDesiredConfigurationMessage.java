@@ -71,10 +71,4 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
 
       return ret;
    }
-
-   public HandDesiredConfigurationMessage(Random random)
-   {
-      this(random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT, HandConfiguration.values()[random.nextInt(HandConfiguration.BASIC_GRIP.getDocumentedValues().length)]);
-
-   }
 }
