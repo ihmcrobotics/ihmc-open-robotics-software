@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.controller;
+package us.ihmc.aware.controller.forcedev.states;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -9,6 +9,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.aware.controller.*;
 import us.ihmc.aware.model.QuadrupedPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -16,7 +17,6 @@ import us.ihmc.aware.planning.gait.QuadrupedGaitCycle;
 import us.ihmc.aware.planning.gait.QuadrupedSupportConfiguration;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.YoQuadrupedSupportPolygon;
-import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -44,7 +44,6 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
@@ -55,7 +54,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
-public class QuadrupedTrotWalkController extends QuadrupedController
+public class QuadrupedTrotWalkController implements us.ihmc.aware.controller.QuadrupedController
 {
    // Constants
    private static final double GRAVITY = 9.81;
@@ -231,7 +230,6 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    public QuadrupedTrotWalkController(QuadrupedPhysicalProperties physicalProperties, SDFFullQuadrupedRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
          DoubleYoVariable yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(QuadrupedControllerState.TROT_WALK);
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       this.dt = DT;
@@ -339,7 +337,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       initializeInheritedVariables();
       initialize();
@@ -422,7 +420,7 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    }
 
    @Override
-   public void doAction()
+   public ControllerEvent process()
    {
       updatePreGaitCheckEstimates();
       checkGaitTransitionConditions();
@@ -435,6 +433,8 @@ public class QuadrupedTrotWalkController extends QuadrupedController
       distributeForcesToFeet();
       
       computeStanceJacobians();
+
+      return null;
    }
 
    private void initializeInheritedVariables()
@@ -1020,14 +1020,8 @@ public class QuadrupedTrotWalkController extends QuadrupedController
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
 
-   }
-
-   @Override
-   public RobotMotionStatus getMotionStatus()
-   {
-      return RobotMotionStatus.IN_MOTION;
    }
 }

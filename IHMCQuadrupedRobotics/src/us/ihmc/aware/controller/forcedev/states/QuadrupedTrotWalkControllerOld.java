@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.controller;
+package us.ihmc.aware.controller.forcedev.states;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -17,7 +17,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.aware.planning.gait.TrotPair;
 import us.ihmc.aware.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.aware.geometry.supportPolygon.QuadrupedSupportPolygon;
-import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -57,7 +56,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
  * 
  * @author Duncan
  */
-public class QuadrupedTrotWalkControllerOld extends QuadrupedController
+public class QuadrupedTrotWalkControllerOld
 {
    private static final double GRAVITY = 9.81;
    private static final double ESTIMATED_MASS = 63.9; // TODO PDControl this when z-vel=0
@@ -201,7 +200,6 @@ public class QuadrupedTrotWalkControllerOld extends QuadrupedController
    public QuadrupedTrotWalkControllerOld(QuadrupedPhysicalProperties physicalProperties, SDFFullQuadrupedRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
          DoubleYoVariable yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(QuadrupedControllerState.TROT_WALK);
       this.fullRobotModel = fullRobotModel;
       this.footSwitches = footSwitches;
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
@@ -404,7 +402,6 @@ public class QuadrupedTrotWalkControllerOld extends QuadrupedController
       stateMachine.addState(leftTrotState);
    }
 
-   @Override
    public void doAction()
    {
       initializeInheritedVariables();
@@ -1078,19 +1075,16 @@ public class QuadrupedTrotWalkControllerOld extends QuadrupedController
       return getName();
    }
 
-   @Override
    public void doTransitionIntoAction()
    {
       initialize();
    }
 
-   @Override
    public void doTransitionOutOfAction()
    {
 
    }
 
-   @Override
    public RobotMotionStatus getMotionStatus()
    {
       return RobotMotionStatus.IN_MOTION;
