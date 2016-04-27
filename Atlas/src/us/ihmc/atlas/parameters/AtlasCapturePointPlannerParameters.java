@@ -91,6 +91,13 @@ public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParam
 
    /** {@inheritDoc} */
    @Override
+   public double getCMPSafeDistanceAwayFromSupportEdges()
+   {
+      return 0.02;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public boolean useExitCMPOnToesForSteppingDown()
    {
       return true;
