@@ -1,6 +1,6 @@
-package us.ihmc.aware.controller;
+package us.ihmc.quadrupedRobotics.controller;
 
-import us.ihmc.aware.state.FiniteStateMachineState;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
 
 public interface QuadrupedController extends FiniteStateMachineState<ControllerEvent>
 {

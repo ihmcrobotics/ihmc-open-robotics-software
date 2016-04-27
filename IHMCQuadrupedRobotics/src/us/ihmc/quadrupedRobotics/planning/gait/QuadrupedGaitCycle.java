@@ -1,6 +1,6 @@
-package us.ihmc.aware.planning.gait;
+package us.ihmc.quadrupedRobotics.planning.gait;
 
-import static us.ihmc.aware.planning.gait.QuadrupedSupportConfiguration.*;
+import static us.ihmc.quadrupedRobotics.planning.gait.QuadrupedSupportConfiguration.*;
 
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
