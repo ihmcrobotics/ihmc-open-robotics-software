@@ -54,6 +54,9 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 {
+   private final double swingTime = 0.6;
+   private final double transferTime = 2.5;
+   
    private SimulationTestingParameters simulationTestingParameters;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -421,7 +424,10 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       doFootExplorationInTransferToStanding.set(true);
       
       DoubleYoVariable transferTime = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("transferTime");
-      transferTime.set(2.5);
+      transferTime.set(this.transferTime);
+      
+      DoubleYoVariable swingTime = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("swingTime");
+      swingTime.set(this.swingTime);
    }
    
    @DeployableTestMethod(estimatedDuration = 45.9)
@@ -497,6 +503,14 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       drcSimulationTestHelper = new DRCSimulationTestHelper("HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper);
+      
+      // Since the foot support points change while standing, the parts of the support polygon that need to be cut off might have had the CoP in them.
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String footName = drcSimulationTestHelper.getControllerFullRobotModel().getFoot(robotSide).getName();
+         BooleanYoVariable useCoPOccupancyGrid = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable(footName + "UseCoPOccupancyGrid");
+         useCoPOccupancyGrid.set(false);
+      }
 
       setupCameraForWalkingUpToRamp();
 
