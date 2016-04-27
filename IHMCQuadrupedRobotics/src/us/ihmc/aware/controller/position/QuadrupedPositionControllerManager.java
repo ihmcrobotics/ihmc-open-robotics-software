@@ -4,6 +4,8 @@ import us.ihmc.aware.controller.ControllerEvent;
 import us.ihmc.aware.controller.QuadrupedController;
 import us.ihmc.aware.controller.QuadrupedControllerManager;
 import us.ihmc.aware.controller.position.states.*;
+import us.ihmc.aware.controller.positiondev.states.QuadrupedPositionBasedCenterOfMassVerificationController;
+import us.ihmc.aware.controller.positiondev.states.QuadrupedPositionBasedLegJointSliderBoardController;
 import us.ihmc.aware.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.aware.model.QuadrupedModelFactory;
 import us.ihmc.aware.model.QuadrupedPhysicalProperties;

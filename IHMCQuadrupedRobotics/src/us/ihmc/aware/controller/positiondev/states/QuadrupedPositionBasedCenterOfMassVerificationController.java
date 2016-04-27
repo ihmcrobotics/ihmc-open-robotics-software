@@ -1,4 +1,4 @@
-package us.ihmc.aware.controller.position.states;
+package us.ihmc.aware.controller.positiondev.states;
 
 import java.awt.Color;
 
@@ -6,7 +6,6 @@ import java.util.HashMap;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.aware.controller.ControllerEvent;
 import us.ihmc.aware.controller.QuadrupedController;
