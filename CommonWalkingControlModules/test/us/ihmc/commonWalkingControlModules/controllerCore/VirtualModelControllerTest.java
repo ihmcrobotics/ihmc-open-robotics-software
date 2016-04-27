@@ -4,9 +4,10 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.VirtualModelControllerTestHelper.RobotLeg;
+import us.ihmc.commonWalkingControlModules.controllerCore.VirtualModelControllerTestHelper.RobotLegs;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
@@ -19,15 +20,14 @@ public class VirtualModelControllerTest
    private final Random bigRandom = new Random(1000L);
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testJacobianCalculation()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -74,9 +74,8 @@ public class VirtualModelControllerTest
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -95,9 +94,8 @@ public class VirtualModelControllerTest
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -110,15 +108,14 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCSelectForce()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -137,15 +134,14 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCSelectTorque()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -164,15 +160,14 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCSelectForceX()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -189,15 +184,14 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCSelectForceY()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -214,15 +208,14 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCSelectForceZ()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -239,15 +232,14 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCSelectTorqueX()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -264,15 +256,14 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCSelectTorqueY()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -289,15 +280,14 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCSelectTorqueZ()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -314,15 +304,14 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCSelectForceXTorqueY()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -340,15 +329,14 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCSelectForceYZTorqueX()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -367,15 +355,14 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCSelectForceXTorqueXZ()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -394,22 +381,21 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCWrongExpressedInFrame()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
       // send in the correct frame with identity selection matrix
       FrameVector desiredForce = new FrameVector(foot.getBodyFixedFrame(), new Vector3d(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector desiredTorque = new FrameVector(foot.getBodyFixedFrame(), new Vector3d(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), base.getBodyFixedFrame(), desiredForce.getVector(), desiredTorque.getVector());
+      Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), pelvis.getBodyFixedFrame(), desiredForce.getVector(), desiredTorque.getVector());
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -421,22 +407,21 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCWrongExpressedOnFrame()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
       // send in the correct frame with identity selection matrix
       FrameVector desiredForce = new FrameVector(foot.getBodyFixedFrame(), new Vector3d(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector desiredTorque = new FrameVector(foot.getBodyFixedFrame(), new Vector3d(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(base.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce.getVector(), desiredTorque.getVector());
+      Wrench desiredWrench = new Wrench(pelvis.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce.getVector(), desiredTorque.getVector());
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -448,22 +433,21 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCWrongExpressedInAndOnFrame()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
       // send in the correct frame with identity selection matrix
       FrameVector desiredForce = new FrameVector(foot.getBodyFixedFrame(), new Vector3d(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       FrameVector desiredTorque = new FrameVector(foot.getBodyFixedFrame(), new Vector3d(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
-      Wrench desiredWrench = new Wrench(base.getBodyFixedFrame(), base.getBodyFixedFrame(), desiredForce.getVector(), desiredTorque.getVector());
+      Wrench desiredWrench = new Wrench(pelvis.getBodyFixedFrame(), pelvis.getBodyFixedFrame(), desiredForce.getVector(), desiredTorque.getVector());
 
       // select only torque
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
@@ -475,15 +459,14 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCVirtualWrenchCommand()
    {
       double gravity = -9.81;
 
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLeg robotLeg = testHelper.createRobotLeg(gravity);
-      RigidBody base = robotLeg.getBase();
-      RigidBody endEffector = robotLeg.getEndEffector();
+      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
 
@@ -494,8 +477,8 @@ public class VirtualModelControllerTest
 
       DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
 
-      InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(base, endEffector);
-      GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, base.getBodyFixedFrame());
+      InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(pelvis, endEffector);
+      GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, pelvis.getBodyFixedFrame());
       jacobian.compute();
 
       DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
@@ -503,8 +486,8 @@ public class VirtualModelControllerTest
       CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
       CommonOps.invert(transposeJacobianMatrix);
 
-      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), base);
-      virtualModelController.registerEndEffector(base, endEffector);
+      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), pelvis);
+      virtualModelController.registerEndEffector(pelvis, endEffector);
 
       VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
       virtualWrenchCommand.set(foot, desiredWrench, selectionMatrix);
@@ -515,7 +498,7 @@ public class VirtualModelControllerTest
       VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
       virtualModelController.compute(virtualModelControlSolution);
 
-      desiredWrench.changeFrame(base.getBodyFixedFrame());
+      desiredWrench.changeFrame(pelvis.getBodyFixedFrame());
 
       // compute end effector force from torques
       Map<InverseDynamicsJoint, Double> jointTorques = virtualModelControlSolution.getJointTorques();
