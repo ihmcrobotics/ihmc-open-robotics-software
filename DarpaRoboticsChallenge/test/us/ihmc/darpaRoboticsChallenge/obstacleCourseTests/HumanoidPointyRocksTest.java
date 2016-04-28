@@ -109,7 +109,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       drcSimulationTestHelper = new DRCSimulationTestHelper("HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
-      enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper);
+      enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultSwingTime, 0.0, defaultChickenPercentage);
 
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
@@ -336,7 +336,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
-      enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultSwingTime, 0.0, 0.15);
+      enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultSwingTime, 0.0, 0.25);
 
       setupCameraForWalkingUpToRamp();
 
@@ -354,7 +354,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       stepVector.set(0.2, 0.0, 0.0);
 
-      int numberOfSteps = 20;
+      int numberOfSteps = 5;
       ArrayList<Point2d> newContactPoints;
 
       Random random = new Random(1984L);
@@ -461,7 +461,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
-      enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultSwingTime, 0.0, 0.15);
+      enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultSwingTime, defaultTransferTime, 0.15);
 
       setupCameraForWalkingUpToRamp();
 
