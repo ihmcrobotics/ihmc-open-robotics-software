@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -31,14 +32,18 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
+import us.ihmc.plotting.Plotter;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -49,7 +54,10 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
@@ -59,7 +67,13 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private final double defaultSwingTime = 0.6;
    private final double defaultTransferTime = 2.5;
    private final double defaultChickenPercentage = 0.5;
-   private final boolean keepSCSup = false;
+   private final boolean keepSCSup = true;
+
+   private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
+   private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   private SideDependentList<YoFrameConvexPolygon2d> supportPolygons = null;
+   private SideDependentList<ArrayList<Point2d>> footContactsInAnkleFrame = null;
 
    private SimulationTestingParameters simulationTestingParameters;
 
@@ -229,7 +243,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       double lengthPercentage = 1.0;
       ArrayList<Point2d> newContactPoints = generateContactPointsForSlightlyPulledInAnkleFrame(getRobotModel().getWalkingControllerParameters(), widthPercentage, lengthPercentage);
       String jointName = "l_leg_akx";
-      changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointName);
+      changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointName, RobotSide.LEFT);
 
       ConcurrentLinkedQueue<Command<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
 
@@ -239,7 +253,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       ReferenceFrame ankleFrame = fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
       FramePoint footPosition = new FramePoint(ankleFrame);
-      footPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      footPosition.changeFrame(worldFrame);
 
       footPosition.setZ(footPosition.getZ() + 0.1);
 
@@ -285,7 +299,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
 
       ArrayList<Point2d> newContactPoints = generateContactPointsForLeftOfFoot(getRobotModel().getWalkingControllerParameters());
-      changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointNames.get(RobotSide.LEFT));
+      changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointNames.get(RobotSide.LEFT), RobotSide.LEFT);
       success = success & drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       boolean setPredictedContactPoints = false;
@@ -337,6 +351,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultSwingTime, 0.0, 0.25);
+
+      setupSupportViz();
 
       setupCameraForWalkingUpToRamp();
 
@@ -549,7 +565,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       for (int i=0; i<numberOfChanges; i++)
       {
          ArrayList<Point2d> newContactPoints = generateContactPointsForRandomRotatedLineOfContact(random);
-         changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointNames.get(robotSide));
+         changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointNames.get(robotSide), robotSide);
          success = success & drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
          if (!success) break;
 
@@ -690,7 +706,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       drcSimulationTestHelper.send(message);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.6);
-      changeAppendageGroundContactPointsToNewOffsets(robot, contactPointsInAnkleFrame, jointName);
+      changeAppendageGroundContactPointsToNewOffsets(robot, contactPointsInAnkleFrame, jointName, robotSide);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       return success;
@@ -705,7 +721,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FootstepDataMessage footstepData = new FootstepDataMessage();
 
       FramePoint placeToStepInWorld = new FramePoint(placeToStep);
-      placeToStepInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+      placeToStepInWorld.changeFrame(worldFrame);
 
       footstepData.setLocation(placeToStepInWorld.getPointCopy());
       footstepData.setOrientation(new Quat4d(0.0, 0.0, 0.0, 1.0));
@@ -720,7 +736,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       return footstepData;
    }
 
-   private void changeAppendageGroundContactPointsToNewOffsets(SDFHumanoidRobot robot, ArrayList<Point2d> newContactPoints, String jointName)
+   private void changeAppendageGroundContactPointsToNewOffsets(SDFHumanoidRobot robot, ArrayList<Point2d> newContactPoints, String jointName, RobotSide robotSide)
    {
       double time = robot.getTime();
       System.out.println("Changing contact points at time " + time);
@@ -749,6 +765,11 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
             pointIndex++;
          }
+      }
+
+      if (footContactsInAnkleFrame != null)
+      {
+         footContactsInAnkleFrame.set(robotSide, newContactPoints);
       }
    }
 
@@ -917,4 +938,51 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    }
 
    protected abstract DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs);
+
+   private void setupSupportViz()
+   {
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+
+      supportPolygons = new SideDependentList<YoFrameConvexPolygon2d>();
+      supportPolygons.set(RobotSide.LEFT, new YoFrameConvexPolygon2d("FootPolygonLeft", "", worldFrame, 4, registry));
+      supportPolygons.set(RobotSide.RIGHT, new YoFrameConvexPolygon2d("FootPolygonRight", "", worldFrame, 4, registry));
+
+      footContactsInAnkleFrame = new SideDependentList<ArrayList<Point2d>>();
+      footContactsInAnkleFrame.set(RobotSide.LEFT, null);
+      footContactsInAnkleFrame.set(RobotSide.RIGHT, null);
+
+      yoGraphicsListRegistry.registerArtifact("SupportLeft", new YoArtifactPolygon("SupportLeft", supportPolygons.get(RobotSide.LEFT), Color.BLACK, false));
+      yoGraphicsListRegistry.registerArtifact("SupportRight", new YoArtifactPolygon("SupportRight", supportPolygons.get(RobotSide.RIGHT), Color.BLACK, false));
+
+      scs.addYoVariableRegistry(registry);
+      yoGraphicsListRegistry.addArtifactListsToPlotter((Plotter) scs.getExtraPanel("Plotter"));
+      scs.addScript(new VizUpdater());
+   }
+
+   private class VizUpdater implements Script
+   {
+      @Override
+      public void doScript(double t)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            ArrayList<Point2d> contactPoints = footContactsInAnkleFrame.get(robotSide);
+            if (contactPoints == null) continue;
+
+            ReferenceFrame ankleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getEndEffectorFrame(robotSide, LimbName.LEG);
+            FrameConvexPolygon2d footSupport = new FrameConvexPolygon2d(worldFrame);
+
+            for (int i = 0; i < contactPoints.size(); i++)
+            {
+               FramePoint2d point = new FramePoint2d(ankleFrame, contactPoints.get(i));
+               point.changeFrameAndProjectToXYPlane(worldFrame);
+               footSupport.addVertex(point.getPoint());
+            }
+
+            footSupport.update();
+            supportPolygons.get(robotSide).setFrameConvexPolygon2d(footSupport);
+         }
+      }
+   };
 }
