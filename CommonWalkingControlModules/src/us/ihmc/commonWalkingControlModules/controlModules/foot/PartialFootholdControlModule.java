@@ -64,6 +64,8 @@ public class PartialFootholdControlModule
 
    private final FrameLine2d lineOfRotation;
 
+   private final BooleanYoVariable useCoPOccupancyGrid;
+
    public PartialFootholdControlModule(String namePrefix, double dt, ContactablePlaneBody contactableFoot, TwistCalculator twistCalculator,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -110,6 +112,9 @@ public class PartialFootholdControlModule
 
       doPartialFootholdDetection = new BooleanYoVariable(namePrefix + "DoPartialFootholdDetection", registry);
       doPartialFootholdDetection.set(false);
+
+      useCoPOccupancyGrid = new BooleanYoVariable(namePrefix + "UseCoPOccupancyGrid", registry);
+      useCoPOccupancyGrid.set(true);
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
@@ -173,9 +178,13 @@ public class PartialFootholdControlModule
 
    private void computeShrunkFoothold(FramePoint2d desiredCenterOfPressure)
    {
-      numberOfCellsOccupiedOnSideOfLine.set(footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT,
-            distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue()));
-      boolean wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine.getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
+      boolean wasCoPInThatRegion = false;
+      if (useCoPOccupancyGrid.getBooleanValue()) {
+         numberOfCellsOccupiedOnSideOfLine.set(footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT,
+               distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue()));
+         wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine.getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
+      }
+      
       if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3) && !wasCoPInThatRegion)
       {
          backupFootPolygon.set(shrunkFootPolygon);

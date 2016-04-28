@@ -143,7 +143,8 @@ public class FlamingoStanceState extends SingleSupportState
       balanceManager.setDoubleSupportTime(loadFootTransferDuration.getDoubleValue());
       balanceManager.clearICPPlan();
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
-      balanceManager.initializeICPPlanForSingleSupport(swingSide.getOppositeSide());
+      balanceManager.setICPPlanSupportSide(supportSide);
+      balanceManager.initializeICPPlanForSingleSupport();
       
       balanceManager.freezePelvisXYControl();
    }
