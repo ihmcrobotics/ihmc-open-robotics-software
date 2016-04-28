@@ -424,8 +424,6 @@ public class VirtualModelControllerTestHelper
       {
          if (selectedValues.get(i, 0) == 1)
             Assert.assertEquals(inputWrenchMatrix.get(i, 0), outputWrenchMatrix.get(i, 0), epsilon);
-         else
-            Assert.assertNotEquals(inputWrenchMatrix.get(i, 0), outputWrenchMatrix.get(i, 0), epsilon);
       }
    }
 
