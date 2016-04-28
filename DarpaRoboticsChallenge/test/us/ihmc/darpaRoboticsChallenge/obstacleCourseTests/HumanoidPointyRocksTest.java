@@ -461,7 +461,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
-      enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper);
+      enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultSwingTime, 0.0, 0.15);
 
       setupCameraForWalkingUpToRamp();
 
