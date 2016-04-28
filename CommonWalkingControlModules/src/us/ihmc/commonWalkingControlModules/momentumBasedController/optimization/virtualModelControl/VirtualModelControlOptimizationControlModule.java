@@ -176,8 +176,7 @@ public class VirtualModelControlOptimizationControlModule
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
       momentumRateCommand.set(command);
-      momentumRateCommand.setWeights(command.getWeightVector().get(0, 0), command.getWeightVector().get(1, 0), command.getWeightVector().get(2, 0),
-            command.getWeightVector().get(3, 0), command.getWeightVector().get(4, 0), command.getWeightVector().get(5, 0));
+      momentumRateCommand.setWeights(command.getWeightVector());
    }
 
    private void processMomentumRateCommand()
