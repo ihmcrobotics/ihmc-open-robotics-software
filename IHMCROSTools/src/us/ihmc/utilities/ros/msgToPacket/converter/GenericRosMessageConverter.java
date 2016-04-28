@@ -4,10 +4,13 @@ import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 import ihmc_msgs.Point2dRosMessage;
 import org.apache.commons.lang3.StringUtils;
+import org.reflections.ReflectionUtils;
+import org.reflections.Reflections;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.utilities.ros.RosMessageGenerationTools;
@@ -17,17 +20,23 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class GenericRosMessageConverter
 {
    private static final MessageFactory messageFactory = NodeConfiguration.newPrivate().getTopicMessageFactory();
 
+   private static final Reflections ihmcPackageReflector = new Reflections("us.ihmc.humanoidRobotics.communication.packets");
+   private static Set<Class<?>> rosMessagePacketAnnotatedTypes = null;
+
    public static MessageFactory getMessageFactory()
    {
       return messageFactory;
+   }
+
+   public static Reflections getIhmcPackageReflector()
+   {
+      return ihmcPackageReflector;
    }
 
    public static Message convertIHMCMessageToRosMessage(Packet<?> ihmcMessage)
@@ -53,9 +62,73 @@ public class GenericRosMessageConverter
       return message;
    }
 
-   public static Packet<?> convertRosMessageToIHMCMessage(Message rosMessage)
+   public static Packet<?> convertRosMessageToIHMCMessage(Message rosMessage) throws ClassNotFoundException, NoSuchFieldException
    {
+      Set<Class<?>> typesAnnotatedWith = getRosMessagePacketAnnotatedClasses();
+      String fullRosTypeName = rosMessage.toRawMessage().getType();
+      String rosMessageName = fullRosTypeName.split("/")[1];
+      Class<?> rosMessageClass = Class.forName(fullRosTypeName.replace("/", "."));
+
+      Set<Method> getters = ReflectionUtils.getMethods(rosMessageClass, ReflectionUtils.withPrefix("get"));
+      Set<String> fieldNames = new HashSet<>();
+
+      for (Method getter : getters)
+      {
+         String fieldName = StringUtils.uncapitalize(getter.getName().replace("get", ""));
+         fieldNames.add(fieldName);
+      }
+
+      String ihmcMessageClassName = rosMessageName.replace("RosMessage", "Message");
+      if(ihmcMessageClassName.endsWith("PacketMessage"))
+      {
+         ihmcMessageClassName = ihmcMessageClassName.replace("PacketMessage", "Packet");
+      }
+
+      Class<? extends Packet> ihmcMessageClass = null;
+      for (Class<?> aClass : typesAnnotatedWith)
+      {
+
+         if(aClass.getSimpleName().equals(ihmcMessageClassName))
+         {
+            ihmcMessageClass = (Class<? extends Packet>) aClass;
+            break;
+         }
+         else if(StatusPacket.class.isAssignableFrom(aClass) && aClass.getSimpleName().equals(ihmcMessageClassName.replace("Message", "")))
+         {
+            ihmcMessageClass = (Class<? extends Packet>) aClass;
+            break;
+         }
+      }
+
+      if(ihmcMessageClass == null)
+      {
+         System.out.println("Couldn't get class for message type " + rosMessageName);
+      }
+
+      for (String fieldName : fieldNames)
+      {
+         try
+         {
+//            System.out.println("Looking for field with name " + fieldName + " in class " + ihmcMessageClass.getSimpleName());
+            Field field = ihmcMessageClass.getField(fieldName);
+//            System.out.println(field);
+         }
+         catch(NoSuchFieldException e)
+         {
+            System.out.println("Couldn't find field " + fieldName + " for class " + ihmcMessageClass.getSimpleName());
+         }
+      }
+
       return null;
+   }
+
+   private static Set<Class<?>> getRosMessagePacketAnnotatedClasses()
+   {
+      if(rosMessagePacketAnnotatedTypes == null)
+      {
+         rosMessagePacketAnnotatedTypes = ihmcPackageReflector.getTypesAnnotatedWith(RosMessagePacket.class);
+      }
+      return rosMessagePacketAnnotatedTypes;
    }
 
    private static void convertIHMCMessageFieldsToROSFields(Packet<?> ihmcMessage, Message message, ArrayList<Field> fields)
@@ -237,7 +310,8 @@ public class GenericRosMessageConverter
    public static Tuple4d convertQuaternion(Quaternion quaternion)
    {
       if(quaternion == null)
-         return new Quat4d(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+         return null;
+//         return new Quat4d(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
 
       Quat4d quat = new Quat4d(quaternion.getX(), quaternion.getY(), quaternion.getZ(), quaternion.getW());
 
