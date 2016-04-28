@@ -80,6 +80,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             walkingMessageHandler.clearFootsteps();
 
             balanceManager.clearICPPlan();
+            balanceManager.setICPPlanSupportSide(supportSide);
             balanceManager.addFootstepToPlan(nextFootstep);
             balanceManager.updateICPPlanForSingleSupportDisturbances();
          }
@@ -126,7 +127,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.addFootstepToPlan(nextFootstep);
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0));
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1));
-      balanceManager.initializeICPPlanForSingleSupport(supportSide);
+      balanceManager.setICPPlanSupportSide(supportSide);
+      balanceManager.initializeICPPlanForSingleSupport();
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {

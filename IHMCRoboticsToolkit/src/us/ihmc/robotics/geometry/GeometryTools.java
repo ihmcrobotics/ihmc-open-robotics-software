@@ -2444,4 +2444,9 @@ public class GeometryTools
       // to the leaving point:    P(tL) = P0 + tL * dS
       return true;
    }
+
+   public static double cross(Vector2d firstVector, Vector2d secondVector)
+   {
+      return firstVector.getX() * secondVector.getY() - firstVector.getY() * secondVector.getX();
+   }
 }
