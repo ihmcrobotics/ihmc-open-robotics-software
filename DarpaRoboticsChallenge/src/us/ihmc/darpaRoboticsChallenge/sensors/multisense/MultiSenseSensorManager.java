@@ -6,10 +6,7 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
-import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
-import us.ihmc.ihmcPerception.camera.CameraLogger;
-import us.ihmc.ihmcPerception.camera.RosCameraReceiver;
-import us.ihmc.ihmcPerception.camera.VideoPacketHandler;
+import us.ihmc.ihmcPerception.camera.*;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.ihmcPerception.depthData.PointCloudSource;
 import us.ihmc.ihmcPerception.depthData.RosPointCloudReceiver;
@@ -100,7 +97,7 @@ public class MultiSenseSensorManager
       cameraReceiver = new CameraDataReceiver(fullRobotModelFactory, cameraParamaters.getPoseFrameForSdf(), robotConfigurationDataBuffer, new VideoPacketHandler(packetCommunicator),
             ppsTimestampOffsetProvider);
 
-      new RosCameraReceiver(cameraParamaters, rosMainNode, logger, cameraReceiver);
+      new RosCameraCompressedImageReceiver(cameraParamaters, rosMainNode, logger, cameraReceiver);
 
       cameraReceiver.start();
    }

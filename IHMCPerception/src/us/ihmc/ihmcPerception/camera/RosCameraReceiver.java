@@ -15,7 +15,7 @@ import us.ihmc.utilities.ros.subscriber.RosImageSubscriber;
 
 import java.awt.image.BufferedImage;
 
-public class RosCameraReceiver
+public abstract class RosCameraReceiver
 {
    static final boolean DEBUG = false;
    private final RigidBodyTransform staticTransform = new RigidBodyTransform();
@@ -55,46 +55,10 @@ public class RosCameraReceiver
 
       final RobotSide robotSide = cameraParameters.getRobotSide();
 
-//      RosImageSubscriber imageSubscriber = new RosImageSubscriber()
-//      {
-//         @Override
-//         protected void imageReceived(long timeStamp, BufferedImage image)
-//         {
-//            if (logger != null)
-//            {
-//               logger.log(image, timeStamp);
-//            }
-//            IntrinsicParameters intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
-//            if (DEBUG)
-//            {
-//               PrintTools.debug(this, "Sending intrinsicParameters");
-//               intrinsicParameters.print();
-//            }
-//            cameraDataReceiver.updateImage(robotSide, image, timeStamp, intrinsicParameters);
-//         }
-//      };
-//      rosMainNode.attachSubscriber(cameraParameters.getRosTopic(), imageSubscriber);
-
-      RosCompressedImageSubscriber imageSubscriberSubscriber = new RosCompressedImageSubscriber()
-      {
-         @Override
-         protected void imageReceived(long timeStamp, BufferedImage image)
-         {
-            if (logger != null)
-            {
-               logger.log(image, timeStamp);
-            }
-            IntrinsicParameters intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
-            if (DEBUG)
-            {
-               PrintTools.debug(this, "Sending intrinsicParameters");
-               intrinsicParameters.print();
-            }
-            cameraDataReceiver.updateImage(robotSide, image, timeStamp, intrinsicParameters);
-
-         }
-      };
-      rosMainNode.attachSubscriber(cameraParameters.getRosTopic(), imageSubscriberSubscriber);
+      createImageSubscriber(robotSide, logger, cameraDataReceiver, imageInfoSubscriber, rosMainNode, cameraParameters);
    }
+
+   protected abstract void createImageSubscriber(RobotSide robotSide, CameraLogger logger, CameraDataReceiver cameraDataReceiver, RosCameraInfoSubscriber imageInfoSubscriber,
+         RosMainNode rosMainNode, DRCRobotCameraParameters cameraParameters);
 
 }
