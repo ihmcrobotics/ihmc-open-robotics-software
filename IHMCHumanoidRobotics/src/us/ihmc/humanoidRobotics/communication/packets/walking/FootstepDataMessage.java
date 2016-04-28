@@ -228,7 +228,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       if (this.orientation == null) this.orientation = new Quat4d();
       this.orientation.set(orientation);
-      RotationTools.checkQuaternionNormalized(this.orientation);
    }
 
    public void setSwingHeight(double swingHeight)
@@ -240,9 +239,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    public void setPredictedContactPoints(ArrayList<Point2d> predictedContactPoints)
    {
-      if (predictedContactPoints != null && predictedContactPoints.size() == 0)
-         throw new RuntimeException(
-               "Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
       this.predictedContactPoints = predictedContactPoints;
    }
 

@@ -1,14 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
+import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.robotics.MathTools;
 
-@RosMessagePacket(documentation = "This message contains a desired joint angle for a single joint.",
-      rosPackage = "ihmc_msgs",
-      topic = "/control/single_joint_angle")
 public class SingleJointAnglePacket extends Packet<SingleJointAnglePacket> implements VisualizablePacket
 {   
    public String jointName;

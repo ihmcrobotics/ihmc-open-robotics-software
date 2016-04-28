@@ -1,11 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
-import java.util.Arrays;
-import java.util.Random;
-
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.communication.ros.generators.RosExportedField;
-import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.MathTools;
@@ -13,45 +7,29 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.FormattingTools;
 
-@RosMessagePacket(documentation = "This message commands the IHMC joint position controller to move Atlas's joints to the desired angles.",
-      rosPackage = "ihmc_msgs",
-      topic = "/control/joint_angles")
+import java.util.Arrays;
+import java.util.Random;
+
 public class JointAnglesPacket extends Packet<JointAnglesPacket> implements VisualizablePacket
 {
-   @RosExportedField(documentation = "trajectoryTime specifies how fast or how slow to move to the desired joint angles")
    public double trajectoryTime;
-   @RosExportedField(documentation = "neckJointAngle neck_ry")
    public double neckJointAngle;
-   @RosExportedField(documentation = "spineJointAngles back_bky back_bkx back_bkz")
    public double[] spineJointAngle;
-   @RosExportedField(documentation = "rightLegJointAngle r_leg_hpz r_leg_hpx r_leg_hpy r_leg_kny r_leg_aky r_leg_akx")
    public double[] rightLegJointAngle;
-   @RosExportedField(documentation = "leftLegJointAngle l_leg_hpz l_leg_hpx l_leg_hpy l_leg_kny l_leg_aky l_leg_akx")
    public double[] leftLegJointAngle;
-   @RosExportedField(documentation = "rightArmJointAngle r_arm_shz r_arm_shx r_arm_ely r_arm_elx r_arm_wry r_arm_wrx r_arm_wry2")
    public double[] rightArmJointAngle;
-   @RosExportedField(documentation = "leftArmJointAngle l_arm_shz l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx l_arm_wry2")
    public double[] leftArmJointAngle;
 
-   @RosExportedField(documentation = "spineJointLimits back_bky back_bkx back_bkz")
    public int[] spineTorqueLimit;
-   @RosExportedField(documentation = "rightLegJointTorqueLimit r_leg_hpz r_leg_hpx r_leg_hpy r_leg_kny r_leg_aky r_leg_akx")
    public int[] rightLegTorqueLimit;
-   @RosExportedField(documentation = "leftLegJointTorqueLimit l_leg_hpz l_leg_hpx l_leg_hpy l_leg_kny l_leg_aky l_leg_akx")
    public int[] leftLegTorqueLimit;
-   @RosExportedField(documentation = "rightArmTorqueLimit l_arm_shz l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx l_arm_wry2")
    public int[] rightArmTorqueLimit;
-   @RosExportedField(documentation = "leftArmTorqueLimit l_arm_shz l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx l_arm_wry2")
    public int[] leftArmTorqueLimit;
-   
-   @RosExportedField(documentation = "keepLeftHandInTaskspacePosition specifies whether the position controller should try to maintain the left hand position in task space")
+
    public boolean keepLeftHandInTaskspacePosition;
-   
-   @RosExportedField(documentation = "keepRightHandInTaskspacePosition specifies whether the position controller should try to maintain the right hand position in task space")
+
    public boolean keepRightHandInTaskspacePosition;
-   
-   @RosIgnoredField
-   @RosExportedField(documentation = "if flattenFeetAtTheEnd is true, the ankles will move at the end of the trajectory to adapt to the inclination of the ground")
+
    public boolean flattenFeetAtTheEnd;
    
    public JointAnglesPacket()

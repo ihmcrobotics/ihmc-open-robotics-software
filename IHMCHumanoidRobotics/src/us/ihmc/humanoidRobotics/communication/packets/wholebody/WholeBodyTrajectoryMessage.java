@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.MultiplePacketHolder;
@@ -25,11 +26,26 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessage>
       implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryMessage>, MultiplePacketHolder
 {
-   public HandTrajectoryMessage leftHandTrajectoryMessage, rightHandTrajectoryMessage;
-   public ArmTrajectoryMessage leftArmTrajectoryMessage, rightArmTrajectoryMessage;
+   @RosExportedField(documentation = "Trajectory for the left hand")
+   public HandTrajectoryMessage leftHandTrajectoryMessage;
+   @RosExportedField(documentation = "Trajectory for the right hand")
+   public HandTrajectoryMessage rightHandTrajectoryMessage;
+
+   @RosExportedField(documentation = "Trajectory for the left arm joints")
+   public ArmTrajectoryMessage leftArmTrajectoryMessage;
+   @RosExportedField(documentation = "Trajectory for the right arm joints")
+   public ArmTrajectoryMessage rightArmTrajectoryMessage;
+
+   @RosExportedField(documentation = "Trajectory for the chest")
    public ChestTrajectoryMessage chestTrajectoryMessage;
+
+   @RosExportedField(documentation = "Trajectory for the pelvis")
    public PelvisTrajectoryMessage pelvisTrajectoryMessage;
-   public FootTrajectoryMessage leftFootTrajectoryMessage, rightFootTrajectoryMessage;
+
+   @RosExportedField(documentation = "Trajectory for the left foot")
+   public FootTrajectoryMessage leftFootTrajectoryMessage;
+   @RosExportedField(documentation = "Trajectory for the right foot")
+   public FootTrajectoryMessage rightFootTrajectoryMessage;
 
    /**
     * Empty constructor for serialization.
