@@ -233,9 +233,17 @@ public class PartialFootholdControlModule
          int removeVertex = -1;
          double shortestEdgeLength = Double.POSITIVE_INFINITY;
          Point2d lastVertex = shrunkFootPolygon.getVertex(0);
-         for (int i = 1; i < newFootCornerPoints; i++)
+         for (int i = 1; i < newFootCornerPoints+1; i++)
          {
-            Point2d nextVertex = shrunkFootPolygon.getVertex(i);
+            Point2d nextVertex = null;
+            if (i == newFootCornerPoints)
+            {
+               nextVertex = shrunkFootPolygon.getVertex(0);
+            }
+            else
+            {
+               nextVertex = shrunkFootPolygon.getVertex(i);
+            }
             double edgeLength = lastVertex.distance(nextVertex);
             if (edgeLength < shortestEdgeLength)
             {
@@ -250,12 +258,25 @@ public class PartialFootholdControlModule
             throw new RuntimeException("Did not find an edge in support polygon.");
          }
 
-         Point2d vertexA = shrunkFootPolygon.getVertex(removeVertex-1);
-         Point2d vertexB = shrunkFootPolygon.getVertex(removeVertex);
+         int idx1 = -1;
+         int idx2 = -1;
+         if (removeVertex == newFootCornerPoints)
+         {
+            idx1 = newFootCornerPoints-1;
+            idx2 = 0;
+         }
+         else
+         {
+            idx1 = removeVertex;
+            idx2 = removeVertex-1;
+         }
+
+         Point2d vertexA = shrunkFootPolygon.getVertex(idx1);
+         Point2d vertexB = shrunkFootPolygon.getVertex(idx2);
          newVertex.interpolate(vertexA, vertexB, 0.5);
 
-         shrunkFootPolygon.removeVertex(removeVertex-1);
-         shrunkFootPolygon.removeVertex(removeVertex);
+         shrunkFootPolygon.removeVertex(idx1);
+         shrunkFootPolygon.removeVertex(idx2);
          shrunkFootPolygon.addVertex(newVertex);
          shrunkFootPolygon.update();
       }
@@ -268,9 +289,18 @@ public class PartialFootholdControlModule
             int index = -1;
             double longestEdgeLength = Double.NEGATIVE_INFINITY;
             Point2d lastVertex = shrunkFootPolygon.getVertex(0);
-            for (int i = 1; i < newFootCornerPoints; i++)
+            for (int i = 1; i < newFootCornerPoints+1; i++)
             {
-               Point2d nextVertex = shrunkFootPolygon.getVertex(i);
+               Point2d nextVertex = null;
+               if (i == newFootCornerPoints)
+               {
+                  nextVertex = shrunkFootPolygon.getVertex(0);
+               }
+               else
+               {
+                  nextVertex = shrunkFootPolygon.getVertex(i);
+               }
+
                double edgeLength = lastVertex.distance(nextVertex);
                if (edgeLength > longestEdgeLength)
                {
@@ -285,8 +315,21 @@ public class PartialFootholdControlModule
                throw new RuntimeException("Did not find an edge in support polygon.");
             }
 
-            Point2d vertexA = shrunkFootPolygon.getVertex(index-1);
-            Point2d vertexB = shrunkFootPolygon.getVertex(index);
+            int idx1 = -1;
+            int idx2 = -1;
+            if (index == newFootCornerPoints)
+            {
+               idx1 = newFootCornerPoints-1;
+               idx2 = 0;
+            }
+            else
+            {
+               idx1 = index;
+               idx2 = index-1;
+            }
+
+            Point2d vertexA = shrunkFootPolygon.getVertex(idx1);
+            Point2d vertexB = shrunkFootPolygon.getVertex(idx2);
             newVertex.interpolate(vertexA, vertexB, 0.5);
 
             shrunkFootPolygon.addVertex(newVertex);
