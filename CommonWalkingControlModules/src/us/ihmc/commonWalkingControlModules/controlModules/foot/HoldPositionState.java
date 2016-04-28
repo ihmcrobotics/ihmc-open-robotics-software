@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -139,6 +140,11 @@ public class HoldPositionState extends AbstractFootControlState
    {
       yoAngularWeight.set(angular);
       yoLinearWeight.set(linear);
+   }
+   
+   public void setDoSmartHoldPosition(boolean doSmartHold)
+   {
+      doSmartHoldPosition.set(doSmartHold);
    }
 
    @Override

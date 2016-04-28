@@ -470,4 +470,11 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    {
       return commandInputManager;
    }
+
+   public MomentumBasedController getMomentumBasedController() {
+      if (momentumBasedController == null)
+         throw new RuntimeException("momentumBasedController was not created yet.");
+      
+      return momentumBasedController;
+   }
 }

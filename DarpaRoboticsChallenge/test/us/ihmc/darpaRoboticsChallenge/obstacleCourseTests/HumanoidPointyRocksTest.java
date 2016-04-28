@@ -20,6 +20,7 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -34,6 +35,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -54,6 +56,9 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 {
+   private final double swingTime = 0.6;
+   private final double transferTime = 0.0;
+   
    private SimulationTestingParameters simulationTestingParameters;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -421,7 +426,13 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       doFootExplorationInTransferToStanding.set(true);
       
       DoubleYoVariable transferTime = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("transferTime");
-      transferTime.set(2.5);
+      transferTime.set(this.transferTime);
+      
+      DoubleYoVariable swingTime = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("swingTime");
+      swingTime.set(this.swingTime);
+      
+      DoubleYoVariable percentageChickenSupport = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("PercentageChickenSupport");
+      percentageChickenSupport.set(0.25);
    }
    
    @DeployableTestMethod(estimatedDuration = 45.9)
@@ -489,7 +500,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    /**
     * This test will drop the floor out from underneath the sim randomly while standing. Tests if detection and hold position are working well.
     */
-   public void testStandingWithGCPointsChangingOnTheFly() throws SimulationExceededMaximumTimeException
+   public void testStandingWithGCPointsChangingOnTheFly() throws SimulationExceededMaximumTimeException, RuntimeException
    {
       BambooTools.reportTestStartedMessage();
       Random random = new Random(1984L);
@@ -497,6 +508,16 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       drcSimulationTestHelper = new DRCSimulationTestHelper("HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper);
+      
+      // Since the foot support points change while standing, the parts of the support polygon that need to be cut off might have had the CoP in them.
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String footName = drcSimulationTestHelper.getControllerFullRobotModel().getFoot(robotSide).getName();
+         BooleanYoVariable useCoPOccupancyGrid = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable(footName + "UseCoPOccupancyGrid");
+         useCoPOccupancyGrid.set(false);
+      }
+      BooleanYoVariable doFootExplorationInTransferToStanding = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
+      doFootExplorationInTransferToStanding.set(false);
 
       setupCameraForWalkingUpToRamp();
 
@@ -504,15 +525,31 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
-      String jointName = "l_leg_akx";
+      RobotSide robotSide = RobotSide.LEFT;
+      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
+      MomentumBasedController momentumBasedController = drcSimulationTestHelper.getDRCSimulationFactory().getControllerFactory().getMomentumBasedController();
 
       int numberOfChanges = 4;
       
       for (int i=0; i<numberOfChanges; i++)
       {
          ArrayList<Point2d> newContactPoints = generateContactPointsForRandomRotatedLineOfContact(random);
-         changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointName);
-         success = success & drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+         changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointNames.get(robotSide));
+         success = success & drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+         if (!success) break;
+         
+         // check if the found support polygon is close to the actual one
+         FrameConvexPolygon2d foundSupport = momentumBasedController.getBipedSupportPolygons().getFootPolygonInSoleFrame(robotSide);
+         FrameConvexPolygon2d actualSupport = new FrameConvexPolygon2d(foundSupport.getReferenceFrame(), newContactPoints);
+         // currently failing because cutting off a foot corner is not implemented.
+         boolean close = Math.abs(foundSupport.getArea() - actualSupport.getArea()) < 10E-6;
+         assertTrue("Support polygon found does not match the actual one.", close);
+         
+         // step in place to reset robot
+         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), 0.0, 0.0, 0.0);
+         newContactPoints = generateContactPointsForAllOfFoot(getRobotModel().getWalkingControllerParameters());
+         success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, newContactPoints, stepLocation, jointNames, true);
          if (!success) break;
       }
            
