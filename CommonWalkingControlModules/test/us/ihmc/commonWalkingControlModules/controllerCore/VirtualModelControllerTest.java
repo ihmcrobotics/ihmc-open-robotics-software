@@ -40,7 +40,7 @@ public class VirtualModelControllerTest
       jacobian.compute();
 
       DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
-      DenseMatrix64F transposeJacobianMatrix = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
+      DenseMatrix64F transposeJacobianMatrix = new DenseMatrix64F(jacobianMatrix.numCols, Wrench.SIZE);
       CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
 
       wrench.changeFrame(pelvis.getBodyFixedFrame());
@@ -482,7 +482,7 @@ public class VirtualModelControllerTest
       jacobian.compute();
 
       DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
-      DenseMatrix64F transposeJacobianMatrix = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
+      DenseMatrix64F transposeJacobianMatrix = new DenseMatrix64F(jacobianMatrix.numCols, Wrench.SIZE);
       CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
       CommonOps.invert(transposeJacobianMatrix);
 
@@ -522,7 +522,7 @@ public class VirtualModelControllerTest
       jacobian.compute();
 
       DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
-      DenseMatrix64F transposeJacobianMatrix = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
+      DenseMatrix64F transposeJacobianMatrix = new DenseMatrix64F(jacobianMatrix.numCols, Wrench.SIZE);
       CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
       CommonOps.invert(transposeJacobianMatrix);
 
