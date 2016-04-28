@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -26,7 +27,7 @@ public class FootControlHelper
    private final FrameVector fullyConstrainedNormalContactVector;
    private final BooleanYoVariable isDesiredCoPOnEdge;
 
-   private final FrameConvexPolygon2d contactPolygon = new FrameConvexPolygon2d();
+   private final BipedSupportPolygons bipedSupportPolygons;
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
@@ -51,7 +52,7 @@ public class FootControlHelper
 
       fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
 
-      contactPolygon.setIncludingFrameAndUpdate(contactableFoot.getContactPoints2d());
+      bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
 
       legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
             walkingControllerParameters, momentumBasedController, registry);
@@ -66,7 +67,10 @@ public class FootControlHelper
       if (desiredCoP.containsNaN())
          isDesiredCoPOnEdge.set(false);
       else
-         isDesiredCoPOnEdge.set(!contactPolygon.isPointInside(desiredCoP, -EPSILON_POINT_ON_EDGE)); // Minus means that the check is done with a smaller polygon
+      {
+         FrameConvexPolygon2d footSupportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide);
+         isDesiredCoPOnEdge.set(!footSupportPolygon.isPointInside(desiredCoP, -EPSILON_POINT_ON_EDGE)); // Minus means that the check is done with a smaller polygon
+      }
    }
 
    public boolean isCoPOnEdge()

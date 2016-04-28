@@ -17,6 +17,8 @@ import com.google.caliper.Benchmark;
 import com.google.caliper.api.VmOptions;
 import com.google.caliper.runner.CaliperMain;
 
+import us.ihmc.quadrupedRobotics.geometry.supportPolygon.EmptySupportPolygonException;
+import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
