@@ -89,65 +89,83 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
       // initialize com height
       yoComPositionInputZ.set(comHeightNominalParameter.get());
 
-      globalDataProducer.attachListener(ComPositionPacket.class, new PacketConsumer<ComPositionPacket>()
+      if (globalDataProducer != null)
       {
-         @Override
-         public void receivedPacket(ComPositionPacket packet)
+         globalDataProducer.attachListener(ComPositionPacket.class, new PacketConsumer<ComPositionPacket>()
          {
-            comPositionPacket.set(packet);
-            yoComPositionInputX.set(MathTools.clipToMinMax(comPositionPacket.get().getX(), comPositionLowerLimitsParameter.get(0), comPositionUpperLimitsParameter.get(0)));
-            yoComPositionInputY.set(MathTools.clipToMinMax(comPositionPacket.get().getY(), comPositionLowerLimitsParameter.get(1), comPositionUpperLimitsParameter.get(1)));
-            yoComPositionInputZ.set(MathTools.clipToMinMax(comPositionPacket.get().getZ(), comPositionLowerLimitsParameter.get(2), comPositionUpperLimitsParameter.get(2)));
-         }
-      });
+            @Override
+            public void receivedPacket(ComPositionPacket packet)
+            {
+               comPositionPacket.set(packet);
+               yoComPositionInputX.set(
+                     MathTools.clipToMinMax(comPositionPacket.get().getX(), comPositionLowerLimitsParameter.get(0), comPositionUpperLimitsParameter.get(0)));
+               yoComPositionInputY.set(
+                     MathTools.clipToMinMax(comPositionPacket.get().getY(), comPositionLowerLimitsParameter.get(1), comPositionUpperLimitsParameter.get(1)));
+               yoComPositionInputZ.set(
+                     MathTools.clipToMinMax(comPositionPacket.get().getZ(), comPositionLowerLimitsParameter.get(2), comPositionUpperLimitsParameter.get(2)));
+            }
+         });
 
-      globalDataProducer.attachListener(ComVelocityPacket.class, new PacketConsumer<ComVelocityPacket>()
-      {
-         @Override
-         public void receivedPacket(ComVelocityPacket packet)
+         globalDataProducer.attachListener(ComVelocityPacket.class, new PacketConsumer<ComVelocityPacket>()
          {
-            comVelocityPacket.set(packet);
-            yoComVelocityInputX.set(MathTools.clipToMinMax(comVelocityPacket.get().getX(), comVelocityLowerLimitsParameter.get(0), comVelocityUpperLimitsParameter.get(0)));
-            yoComVelocityInputY.set(MathTools.clipToMinMax(comVelocityPacket.get().getY(), comVelocityLowerLimitsParameter.get(1), comVelocityUpperLimitsParameter.get(1)));
-            yoComVelocityInputZ.set(MathTools.clipToMinMax(comVelocityPacket.get().getZ(), comVelocityLowerLimitsParameter.get(2), comVelocityUpperLimitsParameter.get(2)));
-         }
-      });
+            @Override
+            public void receivedPacket(ComVelocityPacket packet)
+            {
+               comVelocityPacket.set(packet);
+               yoComVelocityInputX.set(
+                     MathTools.clipToMinMax(comVelocityPacket.get().getX(), comVelocityLowerLimitsParameter.get(0), comVelocityUpperLimitsParameter.get(0)));
+               yoComVelocityInputY.set(
+                     MathTools.clipToMinMax(comVelocityPacket.get().getY(), comVelocityLowerLimitsParameter.get(1), comVelocityUpperLimitsParameter.get(1)));
+               yoComVelocityInputZ.set(
+                     MathTools.clipToMinMax(comVelocityPacket.get().getZ(), comVelocityLowerLimitsParameter.get(2), comVelocityUpperLimitsParameter.get(2)));
+            }
+         });
 
-      globalDataProducer.attachListener(BodyOrientationPacket.class, new PacketConsumer<BodyOrientationPacket>()
-      {
-         @Override
-         public void receivedPacket(BodyOrientationPacket packet)
+         globalDataProducer.attachListener(BodyOrientationPacket.class, new PacketConsumer<BodyOrientationPacket>()
          {
-            bodyOrientationPacket.set(packet);
-            yoBodyOrientationInputYaw.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getYaw(), bodyOrientationLowerLimitsParameter.get(0), bodyOrientationUpperLimitsParameter.get(0)));
-            yoBodyOrientationInputPitch.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getPitch(), bodyOrientationLowerLimitsParameter.get(1), bodyOrientationUpperLimitsParameter.get(1)));
-            yoBodyOrientationInputRoll.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getRoll(), bodyOrientationLowerLimitsParameter.get(2), bodyOrientationUpperLimitsParameter.get(2)));
-         }
-      });
+            @Override
+            public void receivedPacket(BodyOrientationPacket packet)
+            {
+               bodyOrientationPacket.set(packet);
+               yoBodyOrientationInputYaw.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getYaw(), bodyOrientationLowerLimitsParameter.get(0),
+                     bodyOrientationUpperLimitsParameter.get(0)));
+               yoBodyOrientationInputPitch.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getPitch(), bodyOrientationLowerLimitsParameter.get(1),
+                     bodyOrientationUpperLimitsParameter.get(1)));
+               yoBodyOrientationInputRoll.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getRoll(), bodyOrientationLowerLimitsParameter.get(2),
+                     bodyOrientationUpperLimitsParameter.get(2)));
+            }
+         });
 
-      globalDataProducer.attachListener(BodyAngularRatePacket.class, new PacketConsumer<BodyAngularRatePacket>()
-      {
-         @Override
-         public void receivedPacket(BodyAngularRatePacket packet)
+         globalDataProducer.attachListener(BodyAngularRatePacket.class, new PacketConsumer<BodyAngularRatePacket>()
          {
-            bodyAngularRatePacket.set(packet);
-            yoBodyAngularRateInputX.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getX(), bodyAngularRateLowerLimitsParameter.get(0), bodyAngularRateUpperLimitsParameter.get(0)));
-            yoBodyAngularRateInputY.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getY(), bodyAngularRateLowerLimitsParameter.get(1), bodyAngularRateUpperLimitsParameter.get(1)));
-            yoBodyAngularRateInputZ.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getZ(), bodyAngularRateLowerLimitsParameter.get(2), bodyAngularRateUpperLimitsParameter.get(2)));
-         }
-      });
+            @Override
+            public void receivedPacket(BodyAngularRatePacket packet)
+            {
+               bodyAngularRatePacket.set(packet);
+               yoBodyAngularRateInputX.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getX(), bodyAngularRateLowerLimitsParameter.get(0),
+                     bodyAngularRateUpperLimitsParameter.get(0)));
+               yoBodyAngularRateInputY.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getY(), bodyAngularRateLowerLimitsParameter.get(1),
+                     bodyAngularRateUpperLimitsParameter.get(1)));
+               yoBodyAngularRateInputZ.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getZ(), bodyAngularRateLowerLimitsParameter.get(2),
+                     bodyAngularRateUpperLimitsParameter.get(2)));
+            }
+         });
 
-      globalDataProducer.attachListener(PlanarVelocityPacket.class, new PacketConsumer<PlanarVelocityPacket>()
-      {
-         @Override
-         public void receivedPacket(PlanarVelocityPacket packet)
+         globalDataProducer.attachListener(PlanarVelocityPacket.class, new PacketConsumer<PlanarVelocityPacket>()
          {
-            planarVelocityPacket.set(packet);
-            yoPlanarVelocityInputX.set(MathTools.clipToMinMax(planarVelocityPacket.get().getX(), planarVelocityLowerLimitsParameter.get(0), planarVelocityUpperLimitsParameter.get(0)));
-            yoPlanarVelocityInputY.set(MathTools.clipToMinMax(planarVelocityPacket.get().getY(), planarVelocityLowerLimitsParameter.get(1), planarVelocityUpperLimitsParameter.get(1)));
-            yoPlanarVelocityInputZ.set(MathTools.clipToMinMax(planarVelocityPacket.get().getZ(), planarVelocityLowerLimitsParameter.get(2), planarVelocityUpperLimitsParameter.get(2)));
-         }
-      });
+            @Override
+            public void receivedPacket(PlanarVelocityPacket packet)
+            {
+               planarVelocityPacket.set(packet);
+               yoPlanarVelocityInputX.set(MathTools.clipToMinMax(planarVelocityPacket.get().getX(), planarVelocityLowerLimitsParameter.get(0),
+                     planarVelocityUpperLimitsParameter.get(0)));
+               yoPlanarVelocityInputY.set(MathTools.clipToMinMax(planarVelocityPacket.get().getY(), planarVelocityLowerLimitsParameter.get(1),
+                     planarVelocityUpperLimitsParameter.get(1)));
+               yoPlanarVelocityInputZ.set(MathTools.clipToMinMax(planarVelocityPacket.get().getZ(), planarVelocityLowerLimitsParameter.get(2),
+                     planarVelocityUpperLimitsParameter.get(2)));
+            }
+         });
+      }
    }
 
    @Override
