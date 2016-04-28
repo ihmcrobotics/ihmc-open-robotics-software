@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.annotations.ros.RosExportedField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.robotics.MathTools;

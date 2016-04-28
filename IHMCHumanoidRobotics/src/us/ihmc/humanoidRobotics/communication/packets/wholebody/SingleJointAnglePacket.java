@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
-import us.ihmc.communication.annotations.ros.RosMessagePacket;
-import us.ihmc.communication.annotations.ros.RosIgnoredField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.MathTools;
@@ -13,7 +13,7 @@ public class SingleJointAnglePacket extends Packet<SingleJointAnglePacket> imple
 {   
    public String jointName;
    public double angle;
-   public double trajcetoryTime;
+   public double trajectoryTime;
    
    @RosIgnoredField
    public double resetAngle = Double.NaN;
@@ -22,11 +22,11 @@ public class SingleJointAnglePacket extends Packet<SingleJointAnglePacket> imple
    {
    }
    
-   public SingleJointAnglePacket(String jointName, double angle, double trajcetoryTime, double resetAngle)
+   public SingleJointAnglePacket(String jointName, double angle, double trajectoryTime, double resetAngle)
    {
       this.jointName = jointName;
       this.angle = angle;
-      this.trajcetoryTime = trajcetoryTime;
+      this.trajectoryTime = trajectoryTime;
       this.resetAngle = resetAngle;
    }
 
@@ -34,6 +34,6 @@ public class SingleJointAnglePacket extends Packet<SingleJointAnglePacket> imple
    public boolean epsilonEquals(SingleJointAnglePacket other, double epsilon)
    {
       return other.jointName.equals(this.jointName) && MathTools.epsilonEquals(other.angle, this.angle, epsilon)
-            && MathTools.epsilonEquals(other.trajcetoryTime, this.trajcetoryTime, epsilon);
+            && MathTools.epsilonEquals(other.trajectoryTime, this.trajectoryTime, epsilon);
    }
 }

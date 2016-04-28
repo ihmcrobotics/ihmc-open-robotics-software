@@ -31,7 +31,7 @@ import geometry_msgs.Point;
 import geometry_msgs.Pose;
 import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
-import us.ihmc.communication.annotations.ros.RosIgnoredField;
+import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;

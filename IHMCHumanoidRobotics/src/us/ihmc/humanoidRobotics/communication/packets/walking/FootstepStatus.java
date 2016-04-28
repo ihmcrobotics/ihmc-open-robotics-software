@@ -5,9 +5,9 @@ import java.util.Random;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.annotations.ros.RosEnumValueDocumentation;
-import us.ihmc.communication.annotations.ros.RosMessagePacket;
-import us.ihmc.communication.annotations.ros.RosExportedField;
+import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -30,11 +30,13 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
       COMPLETED
    }
 
+   @RosExportedField(documentation = "The current footstep status enum value.")
    public Status status;
    @RosExportedField(documentation = "footstepIndex starts at 0 and monotonically increases with each completed footstep in a given\n"
                                      + "FootstepDataListMessage.")
    public int footstepIndex;
 
+   @RosExportedField(documentation = "The robot side (left or right) that this footstep status correlates to.")
    public RobotSide robotSide;
    @RosExportedField(documentation = "actualFootPositionInWorld gives the position of where the foot actually landed as opposed\n"
                                      + "to the desired position sent to the controller")

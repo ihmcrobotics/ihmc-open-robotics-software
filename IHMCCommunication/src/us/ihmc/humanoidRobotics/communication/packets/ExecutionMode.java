@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import us.ihmc.communication.annotations.ros.RosEnumValueDocumentation;
+import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 
 public enum ExecutionMode
 {

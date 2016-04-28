@@ -1,12 +1,13 @@
 package us.ihmc.utilities.ros;
 
+import org.apache.commons.lang3.StringUtils;
 import org.reflections.ReflectionUtils;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.tools.io.printing.PrintTools;
 
 import javax.vecmath.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Collections;
+import java.lang.reflect.*;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -47,6 +48,8 @@ public class RosMessageGenerationTools
 
       javaClassToRosMessageTypeMap.put(String.class, "string");
 
+      javaClassToRosMessageTypeMap.put(Point2d.class, "ihmc_msgs/Point2dRosMessage");
+
       javaClassToRosMessageTypeMap.put(Quat4d.class, "geometry_msgs/Quaternion");
       javaClassToRosMessageTypeMap.put(Quat4f.class, "geometry_msgs/Quaternion");
 
@@ -54,6 +57,67 @@ public class RosMessageGenerationTools
       javaClassToRosMessageTypeMap.put(Point3f.class, "geometry_msgs/Vector3");
       javaClassToRosMessageTypeMap.put(Vector3d.class, "geometry_msgs/Vector3");
       javaClassToRosMessageTypeMap.put(Vector3f.class, "geometry_msgs/Vector3");
+   }
+
+   public static String getRosTypeForJavaType(Field field, Class<?> javaType)
+   {
+      if (javaClassToRosMessageTypeMap.containsKey(javaType))
+      {
+         return javaClassToRosMessageTypeMap.get(javaType);
+      }
+      else if (javaType.isArray() && javaClassToRosMessageTypeMap.containsKey(javaType.getComponentType()))
+      {
+         return javaClassToRosMessageTypeMap.get(javaType.getComponentType()) + "[]";
+      }
+      else if(Enum.class.isAssignableFrom(javaType))
+      {
+         return "uint8";
+      }
+      else if(Collection.class.isAssignableFrom(javaType))
+      {
+         if(javaType.isArray())
+         {
+            System.out.println("I've made a huge mistake.");
+         }
+         ParameterizedType fieldGenericType = (ParameterizedType) field.getGenericType();
+
+         return getRosTypeForJavaType(field, (Class<?>) fieldGenericType.getActualTypeArguments()[0]) + "[]";
+      }
+      else
+      {
+         boolean isArray = javaType.isArray();
+         Class<?> workingClass = isArray ? javaType.getComponentType() : javaType;
+
+         if(workingClass.isAnnotationPresent(RosMessagePacket.class))
+         {
+            RosMessagePacket annotation = workingClass.getAnnotation(RosMessagePacket.class);
+            String messageName = workingClass.getSimpleName();
+
+            if(!messageName.endsWith("Message"))
+            {
+               messageName += "Message";
+            }
+
+            messageName = StringUtils.replace(messageName, "Message", "RosMessage");
+
+            String retString = annotation.rosPackage() + "/" + messageName;
+            if(isArray)
+            {
+               retString += "[]";
+            }
+
+            return retString;
+         }
+         else
+         {
+            System.out.println("wat");
+            System.out.println(javaType.getSimpleName());
+            System.out.println(field.getDeclaringClass().getSimpleName());
+            System.out.println();
+         }
+      }
+
+      return null;
    }
 
    @SuppressWarnings("unchecked")
@@ -69,7 +133,7 @@ public class RosMessageGenerationTools
                .getMethods(documentedEnumClass, ReflectionUtils.withModifier(Modifier.PUBLIC), ReflectionUtils.withModifier(Modifier.STATIC),
                      ReflectionUtils.withName("getDocumentation"));
 
-         if(reflectionUtilsResult.isEmpty())
+         if (reflectionUtilsResult.isEmpty())
          {
             throw new RuntimeException(failureMessage);
          }
@@ -79,11 +143,18 @@ public class RosMessageGenerationTools
             return (String) method.invoke(null, documentedEnum);
          }
       }
-      catch(Exception e)
+      catch (Exception e)
       {
-         throw new RuntimeException(failureMessage, e);
+         PrintTools.error(failureMessage);
       }
 
       return null;
+   }
+
+   @SuppressWarnings("unchecked")
+   public static <T extends Enum> boolean hasDocumentation(Class<? extends T> documentedEnumClass)
+   {
+      return !ReflectionUtils.getMethods(documentedEnumClass, ReflectionUtils.withModifier(Modifier.PUBLIC), ReflectionUtils.withModifier(Modifier.STATIC),
+            ReflectionUtils.withName("getDocumentation")).isEmpty();
    }
 }

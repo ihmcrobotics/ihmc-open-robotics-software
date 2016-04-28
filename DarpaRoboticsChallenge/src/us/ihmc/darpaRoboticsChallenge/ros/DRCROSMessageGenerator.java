@@ -1,9 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
 import org.reflections.Reflections;
-import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosCustomGenerator;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.utilities.ros.ROSMessageGenerator;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,6 +24,13 @@ public class DRCROSMessageGenerator
          {
             concreteTypes.add(aClass);
          }
+      }
+
+      for (Class<? extends RosCustomGenerator> aClass : reflections.getSubTypesOf(RosCustomGenerator.class))
+      {
+         Constructor<? extends RosCustomGenerator> constructor = aClass.getConstructor();
+         RosCustomGenerator rosCustomGenerator = constructor.newInstance();
+         messageGenerator.createNewRosMessageFromGenerator(rosCustomGenerator, true);
       }
 
       for (Class<?> concreteType : concreteTypes)

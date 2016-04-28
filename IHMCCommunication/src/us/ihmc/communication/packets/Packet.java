@@ -2,8 +2,8 @@ package us.ihmc.communication.packets;
 
 import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
-import us.ihmc.communication.annotations.ros.RosExportedField;
-import us.ihmc.communication.annotations.ros.RosIgnoredField;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.robotics.EpsilonComparable;
 
 public abstract class Packet<T extends Packet<T>> implements EpsilonComparable<T>

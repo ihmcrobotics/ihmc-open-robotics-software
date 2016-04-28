@@ -4,7 +4,7 @@ public enum TrajectoryType
 {
    DEFAULT, BASIC, PUSH_RECOVERY, OBSTACLE_CLEARANCE;
 
-   public String getDocumentation(TrajectoryType var)
+   public static String getDocumentation(TrajectoryType var)
    {
       switch (var)
       {
