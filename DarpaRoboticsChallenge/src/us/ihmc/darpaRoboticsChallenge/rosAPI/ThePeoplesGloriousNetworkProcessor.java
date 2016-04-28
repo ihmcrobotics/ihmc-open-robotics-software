@@ -1,15 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.rosAPI;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
@@ -20,16 +13,7 @@ import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.footstepGenerator.TimestampedPoseFootStepGenerator;
-import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.ros.IHMCPacketToMsgPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
-import us.ihmc.darpaRoboticsChallenge.ros.PeriodicRosHighLevelStatePublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosCapturabilityBasedStatusPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosRobotConfigurationDataPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.*;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.RequestControllerStopSubscriber;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.RosArmJointTrajectorySubscriber;
@@ -48,6 +32,12 @@ import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class ThePeoplesGloriousNetworkProcessor
 {
@@ -198,10 +188,6 @@ public class ThePeoplesGloriousNetworkProcessor
          subscribers.add(subscriber);
          rosMainNode.attachSubscriber(namespace + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue()), subscriber);
       }
-
-      TimestampedPoseFootStepGenerator footPoseGenerator = new TimestampedPoseFootStepGenerator(robotDataReceiver, fullRobotModel,
-            controllerCommunicationBridge);
-      rosMainNode.attachSubscriber(namespace + "/control/endpoint_footstep_generator", footPoseGenerator);
 
       RosArmJointTrajectorySubscriber rosJointTrajectorySubscriber = new RosArmJointTrajectorySubscriber(controllerCommunicationBridge, fullRobotModel);
       rosMainNode.attachSubscriber(namespace + "/control/arm_joint_trajectory2", rosJointTrajectorySubscriber);

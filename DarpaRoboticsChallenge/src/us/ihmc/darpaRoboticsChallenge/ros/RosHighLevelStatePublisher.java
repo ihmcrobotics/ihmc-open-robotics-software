@@ -18,8 +18,8 @@ public class RosHighLevelStatePublisher extends RosTopicPublisher<ihmc_msgs.High
 
    public void publish(HighLevelState highLevelState)
    {
-      HighLevelStateRosMessage message = getMessage();
-      message.setHighLevelState(GenericRosMessageConverter.convertEnumToByte(highLevelState));
-      publish(message);
+//      HighLevelStateRosMessage message = getMessage();
+//      message.setHighLevelState(GenericRosMessageConverter.convertEnumToByte(highLevelState));
+//      publish(message);
    }
 }

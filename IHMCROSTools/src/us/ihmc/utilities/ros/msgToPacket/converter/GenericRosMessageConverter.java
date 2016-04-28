@@ -1,806 +1,356 @@
 package us.ihmc.utilities.ros.msgToPacket.converter;
 
+import geometry_msgs.Quaternion;
+import geometry_msgs.Vector3;
+import ihmc_msgs.Point2dRosMessage;
+import org.apache.commons.lang3.StringUtils;
+import org.ros.internal.message.Message;
+import org.ros.message.MessageFactory;
+import org.ros.node.NodeConfiguration;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.utilities.ros.RosMessageGenerationTools;
+
+import javax.vecmath.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.ros.internal.message.Message;
-import org.ros.message.MessageFactory;
-import org.ros.node.NodeConfiguration;
-
-import com.google.common.base.CaseFormat;
-
-/**
- * Created by agrabertilton on 4/23/15.
- */
-import geometry_msgs.Point;
-import geometry_msgs.Pose;
-import geometry_msgs.Quaternion;
-import geometry_msgs.Vector3;
-import us.ihmc.communication.ros.generators.RosIgnoredField;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GenericRosMessageConverter
 {
    private static final MessageFactory messageFactory = NodeConfiguration.newPrivate().getTopicMessageFactory();
 
-   public static Message convertToIHMCRosMessage(Object packet)
-           throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException
+   public static MessageFactory getMessageFactory()
    {
+      return messageFactory;
+   }
 
-      String simpleName = packet.getClass().getSimpleName();
-      Field[] fields = packet.getClass().getFields();
+   public static Message convertIHMCMessageToRosMessage(Packet<?> ihmcMessage)
+         throws IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException
+   {
+      Class<? extends Packet> ihmcMessageClass = ihmcMessage.getClass();
+      String rosMessageClassNameFromIHMCMessage = RosMessageGenerationTools.getRosMessageClassNameFromIHMCMessage(ihmcMessageClass.getSimpleName());
+      RosMessagePacket rosAnnotation = ihmcMessageClass.getAnnotation(RosMessagePacket.class);
 
-      String messageClassName = "ihmc_msgs/" + simpleName + "Message";
+      Message message = messageFactory.newFromType(rosAnnotation.rosPackage() + "/" + rosMessageClassNameFromIHMCMessage);
 
-      // create new instance of messageClassName
-      Message message = messageFactory.newFromType(messageClassName);
-
-
-      for (Field field : fields)
+      ArrayList<Field> fields = new ArrayList<>();
+      for (Field field : ihmcMessageClass.getFields())
       {
-         String fieldName = field.getName().replace("_", "");
-         String methodName = getMethodNameForFieldName("set", fieldName);
-         Class fieldType = field.getType();
-         Method setValue = null;
-         Object fieldValue = null;
-
-         if (field.get(packet) == null)
+         if (field.isAnnotationPresent(RosExportedField.class))
          {
-            continue;
-         }
-
-         if (isConstant(field) || isIgnoredField(field))
-         {
-            continue;
-         }
-
-         if (fieldType.isPrimitive() || fieldType.equals(String.class))
-         {
-            setValue = message.getClass().getMethod(methodName, fieldType);
-            fieldValue = field.get(packet);
-         }
-         else if (fieldType.isEnum())
-         {
-            // will be going to uint8 field
-            setValue = message.getClass().getMethod(methodName, byte.class);
-            fieldValue = (byte) ((java.lang.Enum) field.get(packet)).ordinal();
-         }
-         else if (fieldType.isArray())
-         {
-            // will be in form field[]
-            Class componentType = fieldType.getComponentType();
-            if (componentType.equals(byte.class))
-            {
-               // Deal with ChannelBuffer set/get
-               // must convert from byte[] to ChannelBuffer
-               setValue = message.getClass().getMethod(methodName, ChannelBuffer.class);
-               fieldValue = ChannelBuffers.wrappedBuffer((byte[]) field.get(packet));
-            }
-            else if (componentType.isEnum())
-            {
-               // is ENUM[]
-               // will be going to uint8[] field, requires channelbuffer
-               java.lang.Enum[] objects = ((java.lang.Enum[]) field.get(packet));
-               byte[] values = new byte[objects.length];
-
-               for (int i = 0; i < values.length; i++)
-               {
-                  values[i] = (byte) objects[i].ordinal();
-               }
-
-               setValue = message.getClass().getMethod(methodName, ChannelBuffer.class);
-               fieldValue = ChannelBuffers.wrappedBuffer(values);
-            }
-            else if (componentType.isPrimitive())
-            {
-               // no conversion
-               setValue = message.getClass().getMethod(methodName, fieldType);
-               fieldValue = field.get(packet);
-            }
-            else if (componentType.equals(String.class))
-            {
-               setValue = message.getClass().getMethod(methodName, List.class);
-               fieldValue = Arrays.asList(field.get(packet));
-            }
-            else if (componentType.equals(Point3d.class))
-            {
-               List<geometry_msgs.Vector3> value = new ArrayList<Vector3>();
-               List<Point3d> points = Arrays.asList((Point3d[]) field.get(packet));
-
-               for (Point3d point : points)
-               {
-                  value.add(convertPoint3dToVector3(point));
-               }
-
-               setValue = message.getClass().getMethod(methodName, value.getClass());
-               fieldValue = value;
-            }
-            else if (componentType.equals(Vector3d.class))
-            {
-               List<geometry_msgs.Vector3> value = new ArrayList<geometry_msgs.Vector3>();
-               List<Vector3d> vectors = Arrays.asList((Vector3d[]) field.get(packet));
-
-               for (Vector3d vector3d : vectors)
-               {
-                  value.add(convertVector3dToVector3(vector3d));
-               }
-
-               setValue = message.getClass().getMethod(methodName, value.getClass());
-               fieldValue = value;
-            }
-            else if (componentType.equals(Vector3f.class))
-            {
-               List<geometry_msgs.Vector3> value = new ArrayList<geometry_msgs.Vector3>();
-               List<Vector3f> vectors = Arrays.asList((Vector3f[]) field.get(packet));
-
-               for (Vector3f vector3f : vectors)
-               {
-                  value.add(convertVector3fToVector3(vector3f));
-               }
-
-               setValue = message.getClass().getMethod(methodName, value.getClass());
-               fieldValue = value;
-            }
-            else if (componentType.equals(Quat4d.class))
-            {
-               List<geometry_msgs.Quaternion> value = new ArrayList<geometry_msgs.Quaternion>();
-               List<Quat4d> quats = Arrays.asList((Quat4d[]) field.get(packet));
-
-               for (Quat4d quat : quats)
-               {
-                  value.add(convertQuat4dToQuaternion(quat));
-               }
-
-               setValue = message.getClass().getMethod(methodName, value.getClass());
-               fieldValue = value;
-            }
-            else
-            {
-               // Array of Objects J -> List of JMessage
-               List<Message> value = new ArrayList<org.ros.internal.message.Message>();
-               Object array = field.get(packet);
-               int size = Array.getLength(array);
-
-               for (int i = 0; i < size; i++){
-                  value.add(convertToIHMCRosMessage(Array.get(array, i)));
-               }
-
-               setValue = message.getClass().getMethod(methodName, List.class);
-               fieldValue = value;
-            }
-         }
-         else if (List.class.isAssignableFrom(fieldType))
-         {
-            // field is a List
-            Class componentType = ((Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]);
-
-            if (componentType.equals(byte.class))
-            {
-               // Deal with ChannelBuffer set/get
-               // must convert from byte[] to ChannelBuffer
-               List<Byte> objects = (List<Byte>) field.get(packet);
-               byte[] byteArray = new byte[objects.size()];
-
-               for (int i = 0; i < objects.size(); i++)
-               {
-                  byteArray[i] = objects.get(i).byteValue();
-               }
-
-               ChannelBuffer value = ChannelBuffers.wrappedBuffer(byteArray);
-               setValue = message.getClass().getMethod(methodName, value.getClass());
-               fieldValue = value;
-            }
-            else if (componentType.isEnum())
-            {
-               // is List<ENUM>
-               // will be going to uint8[] field, requires channelbuffer
-               List<Enum> objects = (List<Enum>) field.get(packet);
-               byte[] values = new byte[objects.size()];
-
-               for (int i = 0; i < values.length; i++)
-               {
-                  values[i] = (byte) objects.get(i).ordinal();
-               }
-
-               setValue = message.getClass().getMethod(methodName, ChannelBuffer.class);
-               fieldValue = ChannelBuffers.wrappedBuffer(values);
-            }
-            else if (isPrimativeWrapper(componentType))
-            {
-               Object value = 0;
-
-               if (componentType.equals(Boolean.class))
-               {
-                  List<Boolean> objects = (List<Boolean>) field.get(packet);
-
-                  value = ArrayUtils.toPrimitive(objects.toArray(new Boolean[objects.size()]));
-               }
-               else if (componentType.equals(Short.class))
-               {
-                  List<Short> objects = (List<Short>) field.get(packet);
-
-                  value = ArrayUtils.toPrimitive(objects.toArray(new Short[objects.size()]));
-               }
-               else if (componentType.equals(Integer.class))
-               {
-                  List<Integer> objects = (List<Integer>) field.get(packet);
-
-                  value = ArrayUtils.toPrimitive(objects.toArray(new Integer[objects.size()]));
-               }
-               else if (componentType.equals(Long.class))
-               {
-                  List<Long> objects = (List<Long>) field.get(packet);
-
-                  value = ArrayUtils.toPrimitive(objects.toArray(new Long[objects.size()]));
-               }
-               else if (componentType.equals(Float.class))
-               {
-                  List<Float> objects = (List<Float>) field.get(packet);
-
-                  value = ArrayUtils.toPrimitive(objects.toArray(new Float[objects.size()]));
-               }
-               else if (componentType.equals(Double.class))
-               {
-                  List<Double> objects = (List<Double>) field.get(packet);
-
-                  value = ArrayUtils.toPrimitive(objects.toArray(new Double[objects.size()]));
-               }
-
-               setValue = message.getClass().getMethod(methodName, List.class);
-               fieldValue = value;
-            }
-            else if (componentType.equals(String.class))
-            {
-               setValue = message.getClass().getMethod(methodName, List.class);
-               fieldValue = field.get(packet);
-            }
-            else if (componentType.equals(Point3d.class))
-            {
-               List<geometry_msgs.Vector3> value = new ArrayList<geometry_msgs.Vector3>();
-               List<Point3d> points = (List<Point3d>) field.get(packet);
-
-               for (Point3d point : points)
-               {
-                  value.add(convertPoint3dToVector3(point));
-               }
-
-               setValue = message.getClass().getMethod(methodName, List.class);
-               fieldValue = value;
-            }
-            else if (componentType.equals(Vector3d.class))
-            {
-               List<geometry_msgs.Vector3> value = new ArrayList<geometry_msgs.Vector3>();
-               List<Vector3d> vectors = (List<Vector3d>) field.get(packet);
-
-               for (Vector3d vector3d : vectors)
-               {
-                  value.add(convertVector3dToVector3(vector3d));
-               }
-
-               setValue = message.getClass().getMethod(methodName, List.class);
-               fieldValue = value;
-            }
-            else if (componentType.equals(Vector3f.class))
-            {
-               List<geometry_msgs.Vector3> value = new ArrayList<geometry_msgs.Vector3>();
-               List<Vector3f> vectors = (List<Vector3f>) field.get(packet);
-
-               for (Vector3f vector3f : vectors)
-               {
-                  value.add(convertVector3fToVector3(vector3f));
-               }
-
-               setValue = message.getClass().getMethod(methodName, List.class);
-               fieldValue = value;
-            }
-            else if (componentType.equals(Quat4d.class))
-            {
-               List<geometry_msgs.Quaternion> value = new ArrayList<geometry_msgs.Quaternion>();
-               List<Quat4d> quats = (List<Quat4d>) field.get(packet);
-
-               for (Quat4d quat : quats)
-               {
-                  value.add(convertQuat4dToQuaternion(quat));
-               }
-
-               setValue = message.getClass().getMethod(methodName, List.class);
-               fieldValue = value;
-            }
-            else
-            {
-               // Array of Objects J -> List of JMessage
-               List<?> objects = (List<?>) field.get(packet);
-               List<Message> value = new ArrayList<Message>();
-
-               for (Object object : objects)
-               {
-                  value.add(convertToIHMCRosMessage(object));
-               }
-
-               setValue = message.getClass().getMethod(methodName, List.class);
-               fieldValue = value;
-            }
-         }
-         else if (fieldType.equals(Point3d.class))
-         {
-            // message is geometry_msgs/Vector3
-            setValue = message.getClass().getMethod(methodName, geometry_msgs.Vector3.class);
-            fieldValue = convertPoint3dToVector3((Point3d) field.get(packet));
-         }
-         else if (fieldType.equals(Vector3d.class))
-         {
-            // message is geometry_msgs/Quaternion
-            setValue = message.getClass().getMethod(methodName, geometry_msgs.Vector3.class);
-            fieldValue = convertVector3dToVector3((Vector3d) field.get(packet));
-         }
-         else if (fieldType.equals(Vector3f.class))
-         {
-            // message is geometry_msgs/Quaternion
-            setValue = message.getClass().getMethod(methodName, geometry_msgs.Vector3.class);
-            fieldValue = convertVector3fToVector3((Vector3f) field.get(packet));
-         }
-         else if (fieldType.equals(Quat4d.class))
-         {
-            // message is geometry_msgs/Quaternion
-            setValue = message.getClass().getMethod(methodName, geometry_msgs.Quaternion.class);
-            fieldValue = convertQuat4dToQuaternion((Quat4d) field.get(packet));
-         }
-         else
-         {
-            // message is ihmc_msgs/(classname+Message)
-            Message value = convertToIHMCRosMessage(field.get(packet));
-            setValue = message.getClass().getMethod(methodName, (Class.forName((value.toRawMessage().getType()).replace('/', '.'))));
-            fieldValue = value;
-         }
-
-         if ((setValue != null) && (fieldValue != null))
-         {
-            setValue.setAccessible(true);
-            setValue.invoke(message, fieldValue);
+            fields.add(field);
          }
       }
+
+      convertIHMCMessageFieldsToROSFields(ihmcMessage, message, fields);
 
       return message;
    }
 
-   private static String getMethodNameForFieldName(String type, String fieldName)
+   public static Packet<?> convertRosMessageToIHMCMessage(Message rosMessage)
    {
-      String regex = "([a-z])([A-Z]+)";
-      String replacement = "$1_$2";
-
-      String inWithUnderscores = fieldName.replaceAll(regex, replacement);
-      String ret = inWithUnderscores.toLowerCase();
-      ret = type + "_" + ret;
-
-      String methodName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, ret);
-      return methodName;
+      return null;
    }
 
-   public static void convertToPacket(Message message, Object outputPacket)
-           throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, SecurityException, InstantiationException
+   private static void convertIHMCMessageFieldsToROSFields(Packet<?> ihmcMessage, Message message, ArrayList<Field> fields)
+         throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException
    {
-      Field[] fields = outputPacket.getClass().getFields();
-
       for (Field field : fields)
       {
-         if (Modifier.isFinal(field.getModifiers()) || isConstant(field) || isIgnoredField(field))
+         if (field.getType().getCanonicalName().contains("javax.vecmath"))
          {
-            continue;
+            convertVecmathField(ihmcMessage, message, field);
          }
-
-         String fieldName = field.getName();
-         String methodName = getMethodNameForFieldName("get", fieldName);
-         Class fieldType = field.getType();
-         Method getValue = message.getClass().getMethod(methodName);
-         getValue.setAccessible(true);
-
-         if (fieldType.isPrimitive() || fieldType.equals(String.class))
+         else if (field.getType().isArray())
          {
-            field.set(outputPacket, getValue.invoke(message));
+            setListFromArray(ihmcMessage, message, field);
          }
-         else if (fieldType.isEnum())
+         else if (Enum.class.isAssignableFrom(field.getType()))
          {
-            // will be going to uint8 field
-            int index = (byte) getValue.invoke(message);
-            if ((index < 0) || (index >= fieldType.getEnumConstants().length))
-            {
-               // print a useful message to syserr for ROS API users:
-               System.err.println(fieldName + " has invalid value of " + index + " (the size of enum " + fieldType.getName() + " is "
-                                  + fieldType.getEnumConstants().length + ")");
-
-               outputPacket = null;
-
-               return;
-            }
-            else
-            {
-               field.set(outputPacket, (fieldType.getEnumConstants())[index]);
-            }
-         }
-         else if (fieldType.isArray())
-         {
-            // will be in form field[] or List going to []
-            Class componentType = fieldType.getComponentType();
-
-            if (componentType.equals(byte.class))
-            {
-               // Deal with ChannelBuffer set/get
-               // must convert from byte[] to ChannelBuffer
-               ChannelBuffer buffer = (ChannelBuffer) getValue.invoke(message);
-               field.set(outputPacket, buffer.array());
-            }
-            else if (componentType.isEnum())
-            {
-               // is ENUM[]
-               // will be going from uint8[] field, requires channelbuffer
-               ChannelBuffer buffer = (ChannelBuffer) getValue.invoke(message);
-               byte[] indices = buffer.array();
-               Object[] enumValues = componentType.getEnumConstants();
-               Enum[] values = new Enum[indices.length];
-               for (int i = 0; i < indices.length; i++)
-               {
-                  values[i] = (Enum) enumValues[indices[i]];
-               }
-
-               field.set(outputPacket, values);
-            }
-            else if (componentType.isPrimitive())
-            {
-               // no conversion
-               field.set(outputPacket, getValue.invoke(message));
-            }
-            else if (componentType.equals(String.class))
-            {
-               // comes in as List, must leave as Array
-               field.set(outputPacket, ((List) getValue.invoke(message)).get(0));
-            }
-            else if (componentType.equals(Point3d.class))
-            {
-               List<Vector3> vectors = (List) getValue.invoke(message);
-               List<Point3d> points = new ArrayList<Point3d>();
-
-               for (Vector3 vector3 : vectors)
-               {
-                  points.add(convertVector3ToPoint3d(vector3));
-               }
-
-               field.set(outputPacket, points.toArray());
-            }
-            else if (fieldType.equals(Vector3d.class))
-            {
-               List<Vector3> vectors = (List) getValue.invoke(message);
-               List<Vector3d> points = new ArrayList<Vector3d>();
-
-               for (Vector3 vector3 : vectors)
-               {
-                  points.add(convertVector3ToVector3d(vector3));
-               }
-
-               field.set(outputPacket, points.toArray());
-            }
-            else if (fieldType.equals(Vector3f.class))
-            {
-               List<Vector3> vectors = (List) getValue.invoke(message);
-               List<Vector3f> points = new ArrayList<Vector3f>();
-
-               for (Vector3 vector3 : vectors)
-               {
-                  points.add(convertVector3ToVector3f(vector3));
-               }
-
-               field.set(outputPacket, points.toArray());
-            }
-            else if (componentType.equals(Quat4d.class))
-            {
-               List<Quaternion> quaternions = (List) getValue.invoke(message);
-               List<Quat4d> quat4ds = new ArrayList<Quat4d>();
-
-               for (Quaternion quaternion : quaternions)
-               {
-                  quat4ds.add(convertQuaternionToQuat4d(quaternion));
-               }
-
-               field.set(outputPacket, quat4ds.toArray());
-
-            }
-            else
-            {
-               // List of JMessage -> Array of Objects J
-               List<Message> objects = (List) getValue.invoke(message);
-
-               Object valueArray = Array.newInstance(componentType, objects.size());
-               int index = 0;
-               for (Message object : objects)
-               {
-                  // create new object of ComonentType
-                  Object value = componentType.newInstance();
-
-                  // set from message
-                  convertToPacket(object, value);
-                  Array.set(valueArray, index, value);
-                  index++;
-               }
-
-               {
-                  field.set(outputPacket, valueArray);
-               }
-
-            }
-         }
-         else if (List.class.isAssignableFrom(fieldType))
-         {
-            // field is a List
-            Class componentType = ((Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]);
-            List valueList;
-
-            if (componentType.equals(Byte.class))
-            {
-               // Deal with ChannelBuffer set/get
-               // must convert from byte[] to ChannelBuffer
-               ChannelBuffer buffer = (ChannelBuffer) getValue.invoke(message);
-               valueList = Arrays.asList(buffer.array());
-            }
-            else if (componentType.isEnum())
-            {
-               // will be going from uint8[] field, requires channelbuffer
-               ChannelBuffer buffer = (ChannelBuffer) getValue.invoke(message);
-               byte[] indices = buffer.array();
-               Object[] enumValues = componentType.getEnumConstants();
-               Enum[] values = new Enum[indices.length];
-               for (int i = 0; i < indices.length; i++)
-               {
-                  values[i] = (Enum) enumValues[indices[i]];
-               }
-
-               valueList = Arrays.asList(values);
-            }
-            else if (componentType.isPrimitive() || isPrimativeWrapper(componentType))
-            {
-               // no conversion
-               valueList = Arrays.asList(getValue.invoke(message));
-            }
-            else if (componentType.equals(String.class))
-            {
-               // comes in as List, must leave as Array
-               valueList = (List) (getValue.invoke(message));
-            }
-            else if (componentType.equals(Point3d.class))
-            {
-               List<Vector3> vectors = (List) getValue.invoke(message);
-               List<Point3d> points = new ArrayList<Point3d>();
-
-               for (Vector3 vector3 : vectors)
-               {
-                  points.add(convertVector3ToPoint3d(vector3));
-               }
-
-               valueList = points;
-            }
-            else if (fieldType.equals(Vector3d.class))
-            {
-               List<Vector3> vectors = (List) getValue.invoke(message);
-               List<Vector3d> points = new ArrayList<Vector3d>();
-
-               for (Vector3 vector3 : vectors)
-               {
-                  points.add(convertVector3ToVector3d(vector3));
-               }
-
-               valueList = points;
-            }
-            else if (fieldType.equals(Vector3f.class))
-            {
-               List<Vector3> vectors = (List) getValue.invoke(message);
-               List<Vector3f> points = new ArrayList<Vector3f>();
-
-               for (Vector3 vector3 : vectors)
-               {
-                  points.add(convertVector3ToVector3f(vector3));
-               }
-
-               valueList = points;
-            }
-            else if (componentType.equals(Quat4d.class))
-            {
-               List<Quaternion> quaternions = (List) getValue.invoke(message);
-               List<Quat4d> quat4ds = new ArrayList<Quat4d>();
-
-               for (Quaternion quaternion : quaternions)
-               {
-                  quat4ds.add(convertQuaternionToQuat4d(quaternion));
-               }
-
-               valueList = quat4ds;
-            }
-            else
-            {
-               // List of JMessage -> Array of Objects J
-               List<Message> objects = (List) getValue.invoke(message);
-
-               List values = new ArrayList<>();
-
-               for (Message object : objects)
-               {
-                  // create new object of ComonentType
-                  Object value = componentType.newInstance();
-
-                  // set from message
-                  convertToPacket(object, value);
-                  values.add(value);
-
-               }
-
-               valueList = values;
-            }
-
-            if (valueList.size() != 0)
-            {
-               field.set(outputPacket, valueList);
-            }
-         }
-         else if (fieldType.equals(Point3d.class))
-         {
-            field.set(outputPacket, convertVector3ToPoint3d((Vector3) getValue.invoke(message)));
-         }
-         else if (fieldType.equals(Vector3d.class))
-         {
-            field.set(outputPacket, convertVector3ToVector3d((Vector3) getValue.invoke(message)));
-         }
-         else if (fieldType.equals(Vector3f.class))
-         {
-            field.set(outputPacket, convertVector3ToVector3f((Vector3) getValue.invoke(message)));
-         }
-         else if (fieldType.equals(Quat4d.class))
-         {
-            field.set(outputPacket, convertQuaternionToQuat4d((Quaternion) getValue.invoke(message)));
+            setByteFromEnum(ihmcMessage, message, field);
          }
          else
          {
-            // message is ihmc_msgs/(classname+Message)
-
-            // create new object of ComonentType
-            Object value = fieldType.newInstance();
-
-            // set from message
-            convertToPacket((Message) getValue.invoke(message), value);
-            field.set(outputPacket, value);
+            setField(message, field, field.get(ihmcMessage));
          }
       }
-
-      return;
    }
 
-   public static geometry_msgs.Vector3 convertPoint3dToVector3(Point3d point)
+   private static void convertVecmathField(Packet<?> ihmcMessage, Message message, Field field)
+         throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException
    {
-      geometry_msgs.Vector3 value = messageFactory.newFromType("geometry_msgs/Vector3");
-
-      value.setX(point.getX());
-      value.setY(point.getY());
-      value.setZ(point.getZ());
-
-      return value;
+      if (field.getType().equals(Point2d.class))
+      {
+         Point2d point = (Point2d) field.get(ihmcMessage);
+         setPoint2dField(message, field, point);
+      }
+      else
+      {
+         Object vecmathObject = field.get(ihmcMessage);
+         setVecmathField(message, field, vecmathObject);
+      }
    }
 
-
-   public static Vector3 convertVector3dToVector3(Vector3d vector3d)
+   private static void setPoint2dField(Message message, Field field, Point2d value)
+         throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
    {
-      geometry_msgs.Vector3 value = messageFactory.newFromType("geometry_msgs/Vector3");
+      String setterName = getRosGetterNameForField(field);
+      Method setterMethod = message.getClass().getMethod(setterName, Point2dRosMessage.class);
+      setterMethod.setAccessible(true);
 
-      value.setX(vector3d.getX());
-      value.setY(vector3d.getY());
-      value.setZ(vector3d.getZ());
-
-      return value;
-   }
-   public static Vector3 convertVector3fToVector3(Vector3f vector3f){
-      geometry_msgs.Vector3 value = messageFactory.newFromType("geometry_msgs/Vector3");
-
-      value.setX(vector3f.getX());
-      value.setY(vector3f.getY());
-      value.setZ(vector3f.getZ());
-
-      return value;
+      setterMethod.invoke(message, convertPoint2d(value));
    }
 
-   public static FramePose convertPoseStampedToFramePose(ReferenceFrame referenceFrame, Pose msg)
+   private static void setVecmathField(Message message, Field field, Object value)
+         throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException
    {
-      Point point = msg.getPosition();
-      Quat4d quat = convertQuaternionToQuat4d(msg.getOrientation());
-      double[] yawPitchRoll = new double[3];
-      RotationTools.convertQuaternionToYawPitchRoll(quat, yawPitchRoll);
+      String setterName = getRosSetterNameForField(field);
+      String rosTypeForJavaType = RosMessageGenerationTools.getRosTypeForJavaType(field, field.getType());
 
-      FramePoint position = new FramePoint(referenceFrame, point.getX(), point.getY(), point.getZ());
-      FrameOrientation orientation = new FrameOrientation(referenceFrame, yawPitchRoll);
+      assert rosTypeForJavaType != null;
+      Method setterMethod = message.getClass().getMethod(setterName, Class.forName(rosTypeForJavaType.replace("/", ".")));
+      setterMethod.setAccessible(true);
 
-      return new FramePose(position, orientation);
+      Class<?> vecmathClass = field.getType();
+      Class<?> genericVecmathClass = Class.forName(vecmathClass.getGenericSuperclass().getTypeName());
+      String genericVecmathClassName = genericVecmathClass.getSimpleName();
+      Method converterMethod = GenericRosMessageConverter.class.getMethod("convert" + genericVecmathClassName, genericVecmathClass);
+      converterMethod.setAccessible(true);
+
+      setterMethod.invoke(message, converterMethod.invoke(null, value));
    }
 
-   public static geometry_msgs.Quaternion convertQuat4dToQuaternion(Quat4d quat)
+   private static void setField(Message message, Field field, Object value) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
    {
-      geometry_msgs.Quaternion value = messageFactory.newFromType("geometry_msgs/Quaternion");
-
-      value.setX(quat.getX());
-      value.setY(quat.getY());
-      value.setZ(quat.getZ());
-      value.setW(quat.getW());
-
-      return value;
+      Method rosSetterForField = getRosSetterForField(message.getClass(), field);
+      rosSetterForField.invoke(message, value);
    }
 
-   public static Point3d convertVector3ToPoint3d(geometry_msgs.Vector3 vector)
+   private static void setByteFromEnum(Packet<?> ihmcMessage, Message message, Field field)
+         throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
    {
-      Point3d point = new Point3d(vector.getX(), vector.getY(), vector.getZ());
+      Method rosSetterForField = getRosSetterForField(message.getClass(), field);
+      Enum enumField = (Enum) field.get(ihmcMessage);
+      if(enumField != null)
+      {
+         rosSetterForField.invoke(message, (byte) enumField.ordinal());
+      }
+   }
+
+   private static void setListFromArray(Packet<?> ihmcMessage, Message message, Field field)
+         throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
+   {
+      Object[] fieldAsArray = (Object[]) field.get(ihmcMessage);
+
+      String setterMethodName = getRosSetterNameForField(field);
+      Method listSetterMethod;
+
+      if(field.getType().isArray() && field.getType().getComponentType().isPrimitive())
+      {
+         listSetterMethod = message.getClass().getMethod(setterMethodName, field.getType());
+         listSetterMethod.setAccessible(true);
+         if (fieldAsArray == null)
+         {
+            listSetterMethod.invoke(message, Array.newInstance(field.getType().getComponentType(), 0));
+         }
+         else
+         {
+            listSetterMethod.invoke(message, fieldAsArray);
+         }
+      }
+      else
+      {
+         List<Object> objects;
+
+         if (fieldAsArray == null)
+         {
+            objects = new ArrayList<>();
+         }
+         else
+         {
+            objects = Arrays.asList(fieldAsArray);
+         }
+
+         listSetterMethod = message.getClass().getMethod(setterMethodName, List.class);
+         listSetterMethod.setAccessible(true);
+         listSetterMethod.invoke(message, objects);
+      }
+
+   }
+
+   private static Method getRosGetterForField(Class<? extends Message> rosMessageClass, Field field) throws NoSuchMethodException
+   {
+      String methodName = getRosGetterNameForField(field);
+      Method method = rosMessageClass.getMethod(methodName);
+      method.setAccessible(true);
+
+      return method;
+   }
+
+   private static Method getRosSetterForField(Class<? extends Message> rosMessageClass, Field field) throws NoSuchMethodException
+   {
+      String methodName = getRosSetterNameForField(field);
+      Class<?> type = field.getType().isEnum() ? byte.class : field.getType();
+
+      Method method = rosMessageClass.getMethod(methodName, type);
+      method.setAccessible(true);
+
+      return method;
+   }
+
+   private static String getRosGetterNameForField(Field field)
+   {
+      return "get" + StringUtils.capitalize(field.getName());
+   }
+
+   private static String getRosSetterNameForField(Field field)
+   {
+      return "set" + StringUtils.capitalize(field.getName());
+   }
+
+   public static Point2d convertPoint2DRos(Point2dRosMessage point2dRosMessage)
+   {
+      if(point2dRosMessage == null)
+         return new Point2d(Double.NaN, Double.NaN);
+
+      Point2d point = new Point2d(point2dRosMessage.getX(), point2dRosMessage.getY());
 
       return point;
    }
 
-   public static Vector3d convertVector3ToVector3d(geometry_msgs.Vector3 vector)
+   public static Tuple3d convertVector3(Vector3 vector3)
    {
-      Vector3d vector3d = new Vector3d(vector.getX(), vector.getY(), vector.getZ());
+      if(vector3 == null)
+         return new Point3d(Double.NaN, Double.NaN, Double.NaN);
 
-      return vector3d;
+      Point3d point = new Point3d(vector3.getX(), vector3.getY(), vector3.getZ());
+
+      return point;
    }
 
-   public static Vector3f convertVector3ToVector3f(geometry_msgs.Vector3 vector)
+   public static Tuple4d convertQuaternion(Quaternion quaternion)
    {
-      Vector3f vector3f = new Vector3f((float) vector.getX(), (float)vector.getY(), (float)vector.getZ());
+      if(quaternion == null)
+         return new Quat4d(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
 
-      return vector3f;
+      Quat4d quat = new Quat4d(quaternion.getX(), quaternion.getY(), quaternion.getZ(), quaternion.getW());
+
+      return quat;
    }
 
-   public static Quat4d convertQuaternionToQuat4d(geometry_msgs.Quaternion quaternion)
+   /*
+    * Do not delete, used by reflection!
+    */
+   public static Vector3 convertTuple3d(Tuple3d tuple)
    {
-      Quat4d quat4d = new Quat4d(quaternion.getX(), quaternion.getY(), quaternion.getZ(), quaternion.getW());
+      Vector3 vector3 = messageFactory.newFromType("geometry_msgs/Vector3");
+      if(tuple == null)
+      {
+         vector3.setX(Double.NaN);
+         vector3.setY(Double.NaN);
+         vector3.setZ(Double.NaN);
+      }
+      else
+      {
+         vector3.setX(tuple.getX());
+         vector3.setY(tuple.getY());
+         vector3.setZ(tuple.getZ());
+      }
 
-      return quat4d;
+      return vector3;
    }
 
-   public static boolean isPrimativeWrapper(Class type)
+   /*
+    * Do not delete, used by reflection!
+    */
+   public static Vector3 convertTuple3f(Tuple3f tuple)
    {
-      return (type.equals(Boolean.class) || type.equals(Byte.class) || type.equals(Short.class) || type.equals(Integer.class) || type.equals(Long.class)
-              || type.equals(Float.class) || type.equals(Double.class));
+      Vector3 vector3 = messageFactory.newFromType("geometry_msgs/Vector3");
+
+      if(tuple == null)
+      {
+         vector3.setX(Double.NaN);
+         vector3.setY(Double.NaN);
+         vector3.setZ(Double.NaN);
+      }
+      else
+      {
+         vector3.setX(tuple.getX());
+         vector3.setY(tuple.getY());
+         vector3.setZ(tuple.getZ());
+      }
+
+      return vector3;
    }
 
-   private static boolean isConstant(Field field)
+   /*
+    * Do not delete, used by reflection!
+    */
+   public static Quaternion convertTuple4d(Tuple4d tuple)
    {
-      int modifier = field.getModifiers();
+      Quaternion quaternion = messageFactory.newFromType("geometry_msgs/Quaternion");
+      if(tuple == null)
+      {
+         quaternion.setX(Double.NaN);
+         quaternion.setY(Double.NaN);
+         quaternion.setZ(Double.NaN);
+         quaternion.setW(Double.NaN);
+      }
+      else
+      {
+         quaternion.setX(tuple.getX());
+         quaternion.setY(tuple.getY());
+         quaternion.setZ(tuple.getZ());
+         quaternion.setW(tuple.getW());
+      }
 
-      return Modifier.isFinal(modifier) && Modifier.isPublic(modifier) && Modifier.isStatic(modifier);
+      return quaternion;
    }
 
-   private static boolean isIgnoredField(Field field)
+   /*
+    * Do not delete, used by reflection!
+    */
+   public static Quaternion convertTuple4f(Tuple4f tuple)
    {
-      return field.isAnnotationPresent(RosIgnoredField.class);
+      Quaternion quaternion = messageFactory.newFromType("geometry_msgs/Quaternion");
+      if(tuple == null)
+      {
+         quaternion.setX(Double.NaN);
+         quaternion.setY(Double.NaN);
+         quaternion.setZ(Double.NaN);
+         quaternion.setW(Double.NaN);
+      }
+      else
+      {
+         quaternion.setX(tuple.getX());
+         quaternion.setY(tuple.getY());
+         quaternion.setZ(tuple.getZ());
+         quaternion.setW(tuple.getW());
+      }
+
+      return quaternion;
    }
-   
-   public static <E extends Enum<E>> E convertByteToEnum(Class<E> enumClass, byte ordinal)
+
+   public static Point2dRosMessage convertPoint2d(Point2d point2d)
    {
-      E[] enumConstants = enumClass.getEnumConstants();
-      return enumConstants[MathTools.clipToMinMax(ordinal, 0, enumConstants.length - 1)];
-   }
-   
-   public static byte convertEnumToByte(Enum<?> val)
-   {
-      return (byte)val.ordinal();
+      Point2dRosMessage point2dMessage = messageFactory.newFromType("ihmc_msgs/Point2dRosMessage");
+      if(point2d == null)
+      {
+         point2dMessage.setX(Double.NaN);
+         point2dMessage.setY(Double.NaN);
+      }
+      else
+      {
+         point2dMessage.setX(point2d.getX());
+         point2dMessage.setY(point2d.getY());
+      }
+
+      return point2dMessage;
    }
 }

@@ -75,10 +75,6 @@ public class RosMessageGenerationTools
       }
       else if(Collection.class.isAssignableFrom(javaType))
       {
-         if(javaType.isArray())
-         {
-            System.out.println("I've made a huge mistake.");
-         }
          ParameterizedType fieldGenericType = (ParameterizedType) field.getGenericType();
 
          return getRosTypeForJavaType(field, (Class<?>) fieldGenericType.getActualTypeArguments()[0]) + "[]";
@@ -156,5 +152,16 @@ public class RosMessageGenerationTools
    {
       return !ReflectionUtils.getMethods(documentedEnumClass, ReflectionUtils.withModifier(Modifier.PUBLIC), ReflectionUtils.withModifier(Modifier.STATIC),
             ReflectionUtils.withName("getDocumentation")).isEmpty();
+   }
+
+   public static String getRosMessageClassNameFromIHMCMessage(String messageName)
+   {
+      if(!messageName.endsWith("Message"))
+      {
+          messageName += "Message";
+      }
+
+      messageName = StringUtils.replace(messageName, "Message", "RosMessage");
+      return messageName;
    }
 }

@@ -1,6 +1,5 @@
 package us.ihmc.utilities.ros;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import us.ihmc.communication.ros.generators.*;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -73,12 +72,7 @@ public class ROSMessageGenerator
          Files.createDirectories(msgDirectoryPath);
       }
 
-      if(!messageName.endsWith("Message"))
-      {
-          messageName += "Message";
-      }
-
-      messageName = StringUtils.replace(messageName, "Message", "RosMessage");
+      messageName = RosMessageGenerationTools.getRosMessageClassNameFromIHMCMessage(messageName);
 
       File messageFile = msgDirectoryPath.resolve(messageName + ".msg").toFile();
 
