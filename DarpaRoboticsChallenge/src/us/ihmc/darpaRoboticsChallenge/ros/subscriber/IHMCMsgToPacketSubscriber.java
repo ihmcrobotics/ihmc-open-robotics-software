@@ -4,7 +4,7 @@ import org.ros.internal.message.Message;
 
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
-//import us.ihmc.darpaRoboticsChallenge.ros.DRCROSMessageConverter;
+//import us.ihmc.darpaRoboticsChallenge.ros.IHMCMessageToROSTranslator;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class IHMCMsgToPacketSubscriber<T extends Message> extends AbstractRosTopicSubscriber<T>
@@ -25,7 +25,7 @@ public class IHMCMsgToPacketSubscriber<T extends Message> extends AbstractRosTop
       try
       {
          Packet<?> packet = null;
-//         Packet<?> packet = DRCROSMessageConverter.convertToPacket(message);
+//         Packet<?> packet = IHMCMessageToROSTranslator.convertToPacket(message);
          packet.setDestination(packetDestination);
          controllerCommunicator.send(packet);
       }
