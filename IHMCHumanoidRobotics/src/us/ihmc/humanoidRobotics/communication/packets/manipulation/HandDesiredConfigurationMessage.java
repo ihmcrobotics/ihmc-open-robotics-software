@@ -1,9 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
-import us.ihmc.communication.annotations.ros.RosMessagePacket;
-import us.ihmc.communication.annotations.ros.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;

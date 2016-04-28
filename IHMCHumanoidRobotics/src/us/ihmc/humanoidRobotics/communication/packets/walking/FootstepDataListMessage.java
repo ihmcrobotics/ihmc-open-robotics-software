@@ -7,8 +7,8 @@ import java.util.Random;
 
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.annotations.ros.RosMessagePacket;
-import us.ihmc.communication.annotations.ros.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;

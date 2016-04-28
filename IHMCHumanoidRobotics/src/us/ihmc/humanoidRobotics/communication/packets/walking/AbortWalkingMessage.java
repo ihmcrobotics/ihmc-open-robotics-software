@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
 
 /**

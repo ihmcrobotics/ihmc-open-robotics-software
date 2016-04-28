@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
 import java.util.Random;
 
-import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.random.RandomTools;

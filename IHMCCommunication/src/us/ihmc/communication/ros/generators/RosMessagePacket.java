@@ -1,4 +1,4 @@
-package us.ihmc.communication.annotations.ros;
+package us.ihmc.communication.ros.generators;
 
 import java.lang.annotation.*;
 
@@ -7,7 +7,9 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 public @interface RosMessagePacket
 {
+   String NO_CORRESPONDING_TOPIC_STRING = "NONE";
+
    String documentation();
-   String topic() default "NONE";
+   String topic() default NO_CORRESPONDING_TOPIC_STRING;
    String rosPackage();
 }

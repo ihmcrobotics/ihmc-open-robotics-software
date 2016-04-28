@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import us.ihmc.communication.annotations.ros.RosEnumValueDocumentation;
+import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**

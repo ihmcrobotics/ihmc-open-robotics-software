@@ -2,7 +2,8 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
-import us.ihmc.communication.annotations.ros.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 
@@ -12,6 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState
       topic = "/output/high_level_state")
 public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
 {
+   @RosExportedField(documentation = "The enum value of the current high level state of the robot.")
    public HighLevelState highLevelState;
 
    public HighLevelStateMessage()

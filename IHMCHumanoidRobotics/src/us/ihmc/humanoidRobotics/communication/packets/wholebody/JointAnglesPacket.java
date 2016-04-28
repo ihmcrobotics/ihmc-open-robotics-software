@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 import java.util.Arrays;
 import java.util.Random;
 
-import us.ihmc.communication.annotations.ros.RosMessagePacket;
-import us.ihmc.communication.annotations.ros.RosExportedField;
-import us.ihmc.communication.annotations.ros.RosIgnoredField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.MathTools;

@@ -184,7 +184,7 @@ public enum RobotSide
       System.out.println(side.toString());
    }
 
-   public String getDocumentation(RobotSide var)
+   public static String getDocumentation(RobotSide var)
    {
       switch (var)
       {

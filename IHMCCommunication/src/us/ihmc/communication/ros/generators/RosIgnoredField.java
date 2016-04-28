@@ -1,4 +1,4 @@
-package us.ihmc.communication.annotations.ros;
+package us.ihmc.communication.ros.generators;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

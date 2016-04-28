@@ -1,4 +1,4 @@
-package us.ihmc.communication.annotations.ros;
+package us.ihmc.communication.ros.generators;
 
 import java.lang.annotation.*;
 
@@ -7,10 +7,8 @@ import java.lang.annotation.*;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface RosCustomGenerator
+@Target(ElementType.FIELD)
+public @interface RosEnumValueDocumentation
 {
    String documentation();
-   String topic();
-   String rosPackage();
 }
