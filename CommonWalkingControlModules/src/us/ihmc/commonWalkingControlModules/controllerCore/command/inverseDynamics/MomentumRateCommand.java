@@ -89,6 +89,11 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       weightVector.set(5, 0, linearZ);
    }
 
+   public void setWeights(DenseMatrix64F weights)
+   {
+      weightVector.set(weights);
+   }
+
    public void setAlphaTaskPriority(double angularX, double angularY, double angularZ, double linearX, double linearY, double linearZ)
    {
       setAngularAlphasTaskPriority(angularX, angularY, angularZ);
