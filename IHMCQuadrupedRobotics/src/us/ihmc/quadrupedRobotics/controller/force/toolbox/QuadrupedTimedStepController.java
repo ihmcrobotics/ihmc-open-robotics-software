@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
+
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -61,12 +62,10 @@ public class QuadrupedTimedStepController
    private final DoubleYoVariable timestamp;
    private final QuadrupedSolePositionController solePositionController;
    private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
+   private final PreallocatedQueue<QuadrupedTimedStep> stepQueue;
    private final QuadrantDependentList<ContactState> contactState;
    private final QuadrantDependentList<FramePoint> solePositionEstimate;
    private final QuadrantDependentList<FrameVector> stepAdjustmentSetpoint;
-
-   // step queue
-   private final PreallocatedQueue<QuadrupedTimedStep> stepQueue;
 
    // state machine
    public enum StepState
@@ -78,6 +77,7 @@ public class QuadrupedTimedStepController
       LIFT_OFF, TOUCH_DOWN
    }
    private final QuadrantDependentList<FiniteStateMachine<StepState, StepEvent>> stepStateMachine;
+   private QuadrupedTimedStepTransitionCallback stepTransitionCallback;
 
    public QuadrupedTimedStepController(QuadrupedSolePositionController solePositionController, DoubleYoVariable timestamp, YoVariableRegistry registry)
    {
@@ -85,6 +85,7 @@ public class QuadrupedTimedStepController
       this.timestamp = timestamp;
       this.solePositionController = solePositionController;
       solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints();
+      stepQueue = new PreallocatedQueue<>(QuadrupedTimedStep.class, 100);
       contactState = new QuadrantDependentList<>();
       solePositionEstimate = new QuadrantDependentList<>();
       stepAdjustmentSetpoint = new QuadrantDependentList<>();
@@ -94,9 +95,6 @@ public class QuadrupedTimedStepController
          solePositionEstimate.set(robotQuadrant, new FramePoint());
          stepAdjustmentSetpoint.set(robotQuadrant, new FrameVector());
       }
-
-      // step queue
-      stepQueue = new PreallocatedQueue<>(QuadrupedTimedStep.class, 100);
 
       // state machine
       stepStateMachine = new QuadrantDependentList<>();
@@ -110,6 +108,12 @@ public class QuadrupedTimedStepController
          stateMachineBuilder.addTransition(StepEvent.TOUCH_DOWN, StepState.SWING, StepState.SUPPORT);
          stepStateMachine.set(robotQuadrant, stateMachineBuilder.build(StepState.SUPPORT));
       }
+      stepTransitionCallback = null;
+   }
+
+   public void registerStepTransitionCallback(QuadrupedTimedStepTransitionCallback stepTransitionCallback)
+   {
+      this.stepTransitionCallback = stepTransitionCallback;
    }
 
    public boolean addStep(QuadrupedTimedStep timedStep)
@@ -163,6 +167,7 @@ public class QuadrupedTimedStepController
    {
       return stepQueue.capacity();
    }
+
    public QuadrupedTimedStep getCurrentStep(RobotQuadrant robotQuadrant)
    {
       for (int i = 0; i < stepQueue.size(); i++)
@@ -267,7 +272,7 @@ public class QuadrupedTimedStepController
             double liftOffTime = timedStep.getTimeInterval().getStartTime();
 
             // trigger lift off event
-            if (currentTime > liftOffTime)
+            if (currentTime >= liftOffTime)
             {
                return StepEvent.LIFT_OFF;
             }
@@ -277,6 +282,9 @@ public class QuadrupedTimedStepController
 
       @Override public void onExit()
       {
+         // trigger lift off transition
+         if (stepTransitionCallback != null)
+            stepTransitionCallback.onLiftOff(robotQuadrant);
       }
    }
 
@@ -328,7 +336,7 @@ public class QuadrupedTimedStepController
          solePositionControllerSetpoints.getSolePosition(robotQuadrant).add(stepAdjustmentSetpoint.get(robotQuadrant));
 
          // trigger touch down event
-         if (currentTime > touchDownTime)
+         if (currentTime >= touchDownTime)
             return StepEvent.TOUCH_DOWN;
          else
             return null;
@@ -336,6 +344,9 @@ public class QuadrupedTimedStepController
 
       @Override public void onExit()
       {
+         // trigger touch down transition
+         if (stepTransitionCallback != null)
+            stepTransitionCallback.onTouchDown(robotQuadrant);
       }
    }
 }
