@@ -177,8 +177,10 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
 
    private void updateSetpoints()
    {
-      // update desired horizontal com forces
+      // update state machines
       paceStateMachine.process();
+
+      // update desired horizontal com forces
       dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
       taskSpaceControllerCommands.getComForce().changeFrame(supportFrame);
 

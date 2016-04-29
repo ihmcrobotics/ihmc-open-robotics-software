@@ -275,7 +275,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       }
 
       // compute dcm trajectory for desired step plan
-      int nTransitions = copPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState());
+      double initialTime = robotTimestamp.getDoubleValue();
+      int nTransitions = copPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), initialTime);
       dcmPositionWaypoint.setIncludingFrame(copPlanner.getCopAtTransition(nTransitions - 1));
       dcmPositionWaypoint.changeFrame(ReferenceFrame.getWorldFrame());
       dcmPositionWaypoint.add(0, 0, dcmPositionController.getComHeight());

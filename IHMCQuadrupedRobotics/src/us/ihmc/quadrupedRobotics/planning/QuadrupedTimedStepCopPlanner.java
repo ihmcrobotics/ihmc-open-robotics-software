@@ -95,16 +95,17 @@ public class QuadrupedTimedStepCopPlanner
     * @param stepQueue queue of upcoming steps
     * @param initialSolePosition initial sole positions
     * @param initialContactState initial sole contact state
+    * @param initialTime initial time
     * @return numberOfTransitions
     */
-   public int compute(PreallocatedQueue<QuadrupedTimedStep> stepQueue, QuadrantDependentList<FramePoint> initialSolePosition, QuadrantDependentList<ContactState> initialContactState)
+   public int compute(PreallocatedQueue<QuadrupedTimedStep> stepQueue, QuadrantDependentList<FramePoint> initialSolePosition, QuadrantDependentList<ContactState> initialContactState, double initialTime)
    {
       int numberOfSteps = stepQueue.size();
       for (int i = 0; i < numberOfSteps; i++)
       {
          stepArray[i].set(stepQueue.get(i));
       }
-      return compute(numberOfSteps, stepArray, initialSolePosition, initialContactState);
+      return compute(numberOfSteps, stepArray, initialSolePosition, initialContactState, initialTime);
    }
 
    /**
@@ -112,16 +113,17 @@ public class QuadrupedTimedStepCopPlanner
     * @param stepList list of upcoming steps
     * @param initialSolePosition initial sole positions
     * @param initialContactState initial sole contact state
+    * @param initialTime initial time
     * @return numberOfTransitions
     */
-   public int compute(List<QuadrupedTimedStep> stepList, QuadrantDependentList<FramePoint> initialSolePosition, QuadrantDependentList<ContactState> initialContactState)
+   public int compute(List<QuadrupedTimedStep> stepList, QuadrantDependentList<FramePoint> initialSolePosition, QuadrantDependentList<ContactState> initialContactState, double initialTime)
    {
       int numberOfSteps = stepList.size();
       for (int i = 0; i < numberOfSteps; i++)
       {
          stepArray[i].set(stepList.get(i));
       }
-      return compute(numberOfSteps, stepArray, initialSolePosition, initialContactState);
+      return compute(numberOfSteps, stepArray, initialSolePosition, initialContactState, initialTime);
    }
 
    /**
@@ -130,9 +132,10 @@ public class QuadrupedTimedStepCopPlanner
     * @param stepArray array of upcoming steps
     * @param initialSolePosition initial sole positions
     * @param initialContactState initial sole contact state
+    * @param initialTime initial time
     * @return numberOfTransitions
     */
-   public int compute(int numberOfSteps, QuadrupedTimedStep[] stepArray, QuadrantDependentList<FramePoint> initialSolePosition, QuadrantDependentList<ContactState> initialContactState)
+   public int compute(int numberOfSteps, QuadrupedTimedStep[] stepArray, QuadrantDependentList<FramePoint> initialSolePosition, QuadrantDependentList<ContactState> initialContactState, double initialTime)
    {
       // initialize contact state and sole positions
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -148,27 +151,36 @@ public class QuadrupedTimedStepCopPlanner
          stepTransition[i].time = Double.MAX_VALUE;
       }
 
+      int numberOfStepTransitions = 0;
       for (int i = 0; i < numberOfSteps; i++)
       {
          QuadrupedTimedStep step = stepArray[i];
 
-         stepTransition[2 * i].time = step.getTimeInterval().getStartTime();
-         stepTransition[2 * i].type = QuadrupedStepTransitionType.LIFT_OFF;
-         stepTransition[2 * i].robotQuadrant = step.getRobotQuadrant();
-         stepTransition[2 * i].solePosition = step.getGoalPosition();
+         if (step.getTimeInterval().getStartTime() > initialTime - 0.05)
+         {
+            stepTransition[numberOfStepTransitions].time = step.getTimeInterval().getStartTime();
+            stepTransition[numberOfStepTransitions].type = QuadrupedStepTransitionType.LIFT_OFF;
+            stepTransition[numberOfStepTransitions].robotQuadrant = step.getRobotQuadrant();
+            stepTransition[numberOfStepTransitions].solePosition = step.getGoalPosition();
+            numberOfStepTransitions++;
+         }
 
-         stepTransition[2 * i + 1].time = step.getTimeInterval().getEndTime();
-         stepTransition[2 * i + 1].type = QuadrupedStepTransitionType.TOUCH_DOWN;
-         stepTransition[2 * i + 1].robotQuadrant = step.getRobotQuadrant();
-         stepTransition[2 * i + 1].solePosition = step.getGoalPosition();
+         if (step.getTimeInterval().getEndTime() > initialTime - 0.05)
+         {
+            stepTransition[numberOfStepTransitions].time = step.getTimeInterval().getEndTime();
+            stepTransition[numberOfStepTransitions].type = QuadrupedStepTransitionType.TOUCH_DOWN;
+            stepTransition[numberOfStepTransitions].robotQuadrant = step.getRobotQuadrant();
+            stepTransition[numberOfStepTransitions].solePosition = step.getGoalPosition();
+            numberOfStepTransitions++;
+         }
       }
 
       // sort step transitions in ascending order as a function of time
       ArraySorter.sort(stepTransition, compareByTime);
 
       // compute transition time and center of pressure for each time interval
-      int numberOfTransitions = 0;
-      for (int i = 0; i < 2 * numberOfSteps; i++)
+      int numberOfCopTransitions = 0;
+      for (int i = 0; i < numberOfStepTransitions; i++)
       {
          switch (stepTransition[i].type)
          {
@@ -181,25 +193,25 @@ public class QuadrupedTimedStepCopPlanner
             solePosition.get(stepTransition[i].robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
             break;
          }
-         if ((i + 1 == 2 * numberOfSteps) || (stepTransition[i].time != stepTransition[i + 1].time))
+         if ((i + 1 == numberOfStepTransitions) || (stepTransition[i].time != stepTransition[i + 1].time))
          {
-            timeAtTransition[numberOfTransitions] = stepTransition[i].time;
-            computeNominalCopPosition(solePosition, contactState, copAtTransition[numberOfTransitions]);
-            numberOfTransitions++;
+            timeAtTransition[numberOfCopTransitions] = stepTransition[i].time;
+            computeNominalCopPosition(solePosition, contactState, copAtTransition[numberOfCopTransitions]);
+            numberOfCopTransitions++;
          }
       }
 
       // pad transition time and center of pressure arrays
-      if (numberOfTransitions > 0)
+      if (numberOfCopTransitions > 0)
       {
-         for (int i = numberOfTransitions; i < timeAtTransition.length; i++)
+         for (int i = numberOfCopTransitions; i < timeAtTransition.length; i++)
          {
-            timeAtTransition[i] = timeAtTransition[numberOfTransitions - 1];
-            copAtTransition[i].setIncludingFrame(copAtTransition[numberOfTransitions - 1]);
+            timeAtTransition[i] = timeAtTransition[numberOfCopTransitions - 1];
+            copAtTransition[i].setIncludingFrame(copAtTransition[numberOfCopTransitions - 1]);
          }
       }
 
-      return numberOfTransitions;
+      return numberOfCopTransitions;
    }
 
    private void computeNominalCopPosition(QuadrantDependentList<FramePoint> solePosition, QuadrantDependentList<ContactState> contactState, FramePoint copPosition)
@@ -232,6 +244,10 @@ public class QuadrupedTimedStepCopPlanner
 
       // compute total center of pressure assuming equal force distribution for hind and front ends
       copPosition.setToZero(ReferenceFrame.getWorldFrame());
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         solePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+      }
       if (contactState.get(RobotQuadrant.HIND_LEFT) == ContactState.IN_CONTACT)
       {
          addPointWithScaleFactor(copPosition, solePosition.get(RobotQuadrant.HIND_LEFT), endContactWeight / hindContacts);
