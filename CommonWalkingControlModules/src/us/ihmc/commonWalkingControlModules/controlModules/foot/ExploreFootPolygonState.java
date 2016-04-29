@@ -11,10 +11,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ExploreFootPolygonState extends AbstractFootControlState
@@ -46,7 +49,25 @@ public class ExploreFootPolygonState extends AbstractFootControlState
     */
    private final DoubleYoVariable recoverTime;
    private final static double defaultRecoverTime = 0.1;
-
+   
+   /**
+    * This is the amount of time the line exploration uses to go to a corner
+    */
+   private final DoubleYoVariable timeToGoToCorner;
+   private final static double defaultTimeToGoToCorner = 0.1;
+   
+   /**
+    * This is the amount of time the line exploration will keep the cop in a corner
+    */
+   private final DoubleYoVariable timeToStayInCorner;
+   private final static double defaultTimeToStayInCorner = 0.1;
+   
+   /**
+    * This is the amount of time the line exploration will keep the cop in a corner
+    */
+   private final YoFrameVector2d copCommandWeight;
+   private final static double defaultcCopCommandWeight = 2000.0;
+   
    public ExploreFootPolygonState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.EXPLORE_POLYGON, footControlHelper, registry);
@@ -62,14 +83,38 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
 
       centerOfPressureCommand.setContactingRigidBody(contactableFoot.getRigidBody());
-      centerOfPressureCommand.setWeight(new Vector2d(2000.0, 2000.0));
 
       lastShrunkTime = new DoubleYoVariable(contactableFoot.getName() + "LastShrunkTime", registry);
       spiralAngle = new DoubleYoVariable(contactableFoot.getName() + "SpiralAngle", registry);
 
       recoverTime = new DoubleYoVariable(contactableFoot.getName() + "RecoverTime", registry);
       recoverTime.set(defaultRecoverTime);
-
+      
+      timeToGoToCorner = new DoubleYoVariable(contactableFoot.getName() + "TimeToGoToCorner", registry);
+      timeToGoToCorner.set(defaultTimeToGoToCorner);
+      timeToGoToCorner.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            lastShrunkTime.set(getTimeInCurrentState());
+         }
+      });
+      
+      timeToStayInCorner = new DoubleYoVariable(contactableFoot.getName() + "TimeToStayInCorner", registry);
+      timeToStayInCorner.set(defaultTimeToStayInCorner);
+      timeToStayInCorner.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            lastShrunkTime.set(getTimeInCurrentState());
+         }
+      });
+      
+      copCommandWeight = new YoFrameVector2d(contactableFoot.getName() + "CopCommandWeight", null, registry);
+      copCommandWeight.set(defaultcCopCommandWeight, defaultcCopCommandWeight);
+      
       desiredOrientation.setToZero();
       desiredAngularVelocity.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
@@ -102,6 +147,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       internalHoldPositionState.doTransitionOutOfAction();
    }
 
+   private final Vector2d tempVector2d = new Vector2d();
    private final FramePoint2d shrunkPolygonCentroid = new FramePoint2d();
    private final FramePoint2d desiredCenterOfPressure = new FramePoint2d();
    @Override
@@ -163,8 +209,8 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             FramePoint2d centroid = supportPolygon.getCentroid();
             int corners = supportPolygon.getNumberOfVertices();
 
-            double timeToGoToCorner = 0.25;
-            double timeToStayAtCorner = 0.25;
+            double timeToGoToCorner = this.timeToGoToCorner.getDoubleValue();
+            double timeToStayAtCorner = this.timeToStayInCorner.getDoubleValue();
 
             double timeExploring = timeInState - lastShrunkTime.getDoubleValue();
             double timeToExploreCorner = timeToGoToCorner + timeToStayAtCorner;
@@ -172,7 +218,9 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             int currentCornerIdx = (int) (timeExploring / timeToExploreCorner);
             if (currentCornerIdx >= corners)
             {
-               done = true;
+               lastShrunkTime.set(timeInState);
+               currentCornerIdx = 0;
+//               done = true;
             }
             else
             {
@@ -194,6 +242,8 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
          }
          centerOfPressureCommand.setDesiredCoP(desiredCenterOfPressure.getPoint());
+         copCommandWeight.get(tempVector2d);
+         centerOfPressureCommand.setWeight(tempVector2d);
       }
       else
       {
