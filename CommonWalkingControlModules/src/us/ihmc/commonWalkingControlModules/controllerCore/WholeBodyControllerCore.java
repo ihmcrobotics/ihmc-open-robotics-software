@@ -115,7 +115,7 @@ public class WholeBodyControllerCore
          doInverseKinematics();
          break;
       case VIRTUAL_MODEL:
-         doJacobianTranspose();
+         doVirtualModelControl();
          break;
       case OFF:
          doNothing();
@@ -155,7 +155,7 @@ public class WholeBodyControllerCore
       yoRootJointDesiredConfigurationData.completeWith(inverseKinematicsOutputForRootJoint);
    }
 
-   private void doJacobianTranspose()
+   private void doVirtualModelControl()
    {
       feedbackController.compute();
       InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getOutput();
