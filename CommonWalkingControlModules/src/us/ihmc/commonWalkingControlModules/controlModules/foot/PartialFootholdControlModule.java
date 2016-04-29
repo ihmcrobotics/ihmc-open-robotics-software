@@ -378,6 +378,10 @@ public class PartialFootholdControlModule
    public void projectOntoShrunkenPolygon(FramePoint2d pointToProject)
    {
       shrunkFootPolygon.orthogonalProjection(pointToProject);
+   }
 
+   public void getSupportPolygon(FrameConvexPolygon2d polygonToPack)
+   {
+      polygonToPack.setIncludingFrame(shrunkFootPolygon);
    }
 }
