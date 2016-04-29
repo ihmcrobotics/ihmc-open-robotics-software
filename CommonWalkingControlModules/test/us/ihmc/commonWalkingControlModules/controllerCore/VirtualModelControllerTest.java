@@ -10,11 +10,14 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 import javax.vecmath.Vector3d;
 import java.util.Map;
 import java.util.Random;
 
+@DeployableTestClass(targets = TestPlanTarget.Fast)
 public class VirtualModelControllerTest
 {
    private final Random bigRandom = new Random(1000L);
@@ -68,7 +71,7 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMC()
    {
       double gravity = -9.81;
@@ -88,7 +91,7 @@ public class VirtualModelControllerTest
    }
 
    @DeployableTestMethod
-   @Test(timeout = 500)
+   @Test(timeout = 1500)
    public void testVMCSelectAll()
    {
       double gravity = -9.81;
