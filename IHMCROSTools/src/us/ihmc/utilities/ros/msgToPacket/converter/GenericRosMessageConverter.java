@@ -62,22 +62,129 @@ public class GenericRosMessageConverter
       return message;
    }
 
-   public static Packet<?> convertRosMessageToIHMCMessage(Message rosMessage) throws ClassNotFoundException, NoSuchFieldException
+   @SuppressWarnings("unchecked")
+   public static Packet<?> convertRosMessageToIHMCMessage(Message rosMessage)
+         throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException, InstantiationException, InvocationTargetException,
+         RosEnumConversionException
    {
       Set<Class<?>> typesAnnotatedWith = getRosMessagePacketAnnotatedClasses();
       String fullRosTypeName = rosMessage.toRawMessage().getType();
       String rosMessageName = fullRosTypeName.split("/")[1];
       Class<?> rosMessageClass = Class.forName(fullRosTypeName.replace("/", "."));
 
-      Set<Method> getters = ReflectionUtils.getMethods(rosMessageClass, ReflectionUtils.withPrefix("get"));
-      Set<String> fieldNames = new HashSet<>();
+      Class<? extends Packet> ihmcMessageClass = getIHMCMessageClassForROSMessage(typesAnnotatedWith, rosMessageName);
 
-      for (Method getter : getters)
+      Map<Method, Field> rosGetterToIHMCFieldMap = new HashMap<>();
+
+      for (Method getter : ReflectionUtils.getMethods(rosMessageClass, ReflectionUtils.withPrefix("get")))
       {
          String fieldName = StringUtils.uncapitalize(getter.getName().replace("get", ""));
-         fieldNames.add(fieldName);
+         try
+         {
+            Field field = ihmcMessageClass.getField(fieldName);
+            rosGetterToIHMCFieldMap.put(getter, field);
+         }
+         catch(NoSuchFieldException e)
+         {
+            System.out.println("Couldn't find field " + fieldName + " for class " + ihmcMessageClass.getSimpleName());
+         }
       }
 
+      if(!rosGetterToIHMCFieldMap.isEmpty())
+      {
+         Packet<?> ihmcMessage = ihmcMessageClass.newInstance();
+         for (Map.Entry<Method, Field> methodFieldEntry : rosGetterToIHMCFieldMap.entrySet())
+         {
+            Method rosGetter = methodFieldEntry.getKey();
+            Field ihmcField = methodFieldEntry.getValue();
+
+            Class<?> ihmcMessageFieldType = ihmcField.getType();
+            if(List.class.isAssignableFrom(rosGetter.getReturnType()) && ihmcMessageFieldType.isArray())
+            {
+               setArrayFromList(rosMessage, ihmcMessage, rosGetter, ihmcField, ihmcMessageFieldType);
+            }
+            else if(ihmcMessageFieldType.isEnum())
+            {
+               setEnumFromByte(rosMessage, ihmcMessage, rosGetter, ihmcField, (Class<? extends Enum>) ihmcMessageFieldType);
+            }
+            else if(ihmcMessageFieldType.getCanonicalName().contains("javax.vecmath"))
+            {
+               setVecmathFieldFromRosGeometryMessage(rosMessage, ihmcMessage, rosGetter, ihmcField, ihmcMessageFieldType);
+            }
+            else
+            {
+               ihmcField.set(ihmcMessage, rosGetter.invoke(rosMessage));
+            }
+         }
+
+         return ihmcMessage;
+      }
+
+      return null;
+   }
+
+   private static void setVecmathFieldFromRosGeometryMessage(Message rosMessage, Packet<?> ihmcMessage, Method rosGetter, Field ihmcField,
+         Class<?> ihmcMessageFieldType) throws IllegalAccessException, InvocationTargetException, InstantiationException
+   {
+      if(ihmcMessageFieldType.equals(Point2d.class))
+      {
+         Point2d point2d = convertPoint2DRos((Point2dRosMessage) rosGetter.invoke(rosMessage));
+         ihmcField.set(ihmcMessage, point2d);
+      }
+      else
+      {
+         if(rosGetter.getReturnType().equals(Quaternion.class))
+         {
+            Tuple4d newTuple = (Tuple4d) ihmcField.getType().newInstance();
+            newTuple.set(convertQuaternion((Quaternion) rosGetter.invoke(rosMessage)));
+            ihmcField.set(ihmcMessage, newTuple);
+         }
+         else if(rosGetter.getReturnType().equals(Vector3.class))
+         {
+            Tuple3d newTuple = (Tuple3d) ihmcField.getType().newInstance();
+            newTuple.set(convertVector3((Vector3) rosGetter.invoke(rosMessage)));
+            ihmcField.set(ihmcMessage, newTuple);
+         }
+      }
+   }
+
+   private static void setEnumFromByte(Message rosMessage, Packet<?> ihmcMessage, Method rosGetter, Field ihmcField, Class<? extends Enum> fieldType)
+         throws IllegalAccessException, InvocationTargetException, RosEnumConversionException
+   {
+      Class<? extends Enum> enumClass = fieldType;
+      byte ordinal = (byte) rosGetter.invoke(rosMessage);
+
+      Enum[] enumConstants = enumClass.getEnumConstants();
+      if(ordinal >= enumConstants.length)
+      {
+         throw new RosEnumConversionException(enumClass, ordinal, "");
+      }
+      else
+      {
+         ihmcField.set(ihmcMessage, enumConstants[ordinal]);
+      }
+   }
+
+   private static void setArrayFromList(Message rosMessage, Packet<?> ihmcMessage, Method rosGetter, Field ihmcField, Class<?> fieldType)
+         throws IllegalAccessException, InvocationTargetException
+   {
+      List rosValues = (List) rosGetter.invoke(rosMessage);
+
+      Class<?> componentType = fieldType.getComponentType();
+      Object ihmcArray = Array.newInstance(componentType, rosValues.size());
+
+      int i = 0;
+      for(Object value : rosValues)
+      {
+         Array.set(ihmcArray, i, value);
+         i++;
+      }
+
+      ihmcField.set(ihmcMessage, ihmcArray);
+   }
+
+   private static Class<? extends Packet> getIHMCMessageClassForROSMessage(Set<Class<?>> typesAnnotatedWith, String rosMessageName)
+   {
       String ihmcMessageClassName = rosMessageName.replace("RosMessage", "Message");
       if(ihmcMessageClassName.endsWith("PacketMessage"))
       {
@@ -99,27 +206,7 @@ public class GenericRosMessageConverter
             break;
          }
       }
-
-      if(ihmcMessageClass == null)
-      {
-         System.out.println("Couldn't get class for message type " + rosMessageName);
-      }
-
-      for (String fieldName : fieldNames)
-      {
-         try
-         {
-//            System.out.println("Looking for field with name " + fieldName + " in class " + ihmcMessageClass.getSimpleName());
-            Field field = ihmcMessageClass.getField(fieldName);
-//            System.out.println(field);
-         }
-         catch(NoSuchFieldException e)
-         {
-            System.out.println("Couldn't find field " + fieldName + " for class " + ihmcMessageClass.getSimpleName());
-         }
-      }
-
-      return null;
+      return ihmcMessageClass;
    }
 
    private static Set<Class<?>> getRosMessagePacketAnnotatedClasses()

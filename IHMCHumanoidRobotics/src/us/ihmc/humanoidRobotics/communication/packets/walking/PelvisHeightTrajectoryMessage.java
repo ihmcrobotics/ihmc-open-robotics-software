@@ -7,6 +7,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.Abstract1DTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
@@ -91,5 +92,11 @@ public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<P
          trajectoryPoint.setPosition(trajectoryPoint.getPosition() + translation.getZ());
       }
       return transformedMessage;
+   }
+
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validatePelvisHeightTrajectoryMessage(this);
    }
 }
