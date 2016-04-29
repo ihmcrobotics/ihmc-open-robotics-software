@@ -150,6 +150,7 @@ public class WholeBodyVirtualModelControlSolver
       // submit forces for stability
       for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
       {
+         externalWrenchSolution.get(rigidBody).negate();
          virtualModelController.submitEndEffectorVirtualWrench(rigidBody, externalWrenchSolution.get(rigidBody));
       }
       // submit virtual wrenches for tracking
