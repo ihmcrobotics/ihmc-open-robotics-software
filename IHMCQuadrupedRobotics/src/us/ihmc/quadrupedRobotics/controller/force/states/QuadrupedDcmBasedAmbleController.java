@@ -54,7 +54,8 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
    private final DoubleParameter stanceWidthNominalParameter = parameterFactory.createDouble("stanceWidthNominal", 0.25);
    private final DoubleParameter stanceLengthNominalParameter = parameterFactory.createDouble("stanceLengthNominal", 1.1);
    private final DoubleParameter stepGroundClearanceParameter = parameterFactory.createDouble("stepGroundClearance", 0.10);
-   private final DoubleParameter stepDurationParameter = parameterFactory.createDouble("stepDuration", 0.35);
+   private final DoubleParameter stepDurationParameter = parameterFactory.createDouble("stepDuration", 0.20);
+   private final DoubleParameter xGaitPhaseParameter = parameterFactory.createDouble("xGaitPhase", 90);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -362,20 +363,32 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
       @Override public void onTouchDown(RobotQuadrant robotQuadrant)
       {
          double currentTime = robotTimestamp.getDoubleValue();
-         RobotQuadrant swingQuadrant = robotQuadrant.getAcrossBodyQuadrant();
+         RobotQuadrant currSwingQuadrant = robotQuadrant.getAcrossBodyQuadrant();
+         RobotQuadrant prevSwingQuadrant = currSwingQuadrant.getNextReversedRegularGaitSwingQuadrant();
 
-         footholdPosition.setIncludingFrame(taskSpaceEstimates.getSolePosition(swingQuadrant));
-         timedStep.setRobotQuadrant(swingQuadrant);
-         timedStep.setGroundClearance(stepGroundClearanceParameter.get());
-         timedStep.getTimeInterval().setStartTime(currentTime);
-         timedStep.getTimeInterval().setEndTime(currentTime + stepDurationParameter.get());
-         timedStep.getGoalPosition().setIncludingFrame(footholdPosition);
-         timedStepController.addStep(timedStep);
+         // compute step duration
+         double prevSwingEndTime = timedStepController.getCurrentStep(prevSwingQuadrant).getTimeInterval().getEndTime();
+         double nextPhaseShift = robotQuadrant.isQuadrantInFront() ? xGaitPhaseParameter.get() : 180.0 - xGaitPhaseParameter.get();
+         double nextSwingTime = prevSwingEndTime + Math.max(stepDurationParameter.get() * nextPhaseShift / 180.0, controlDT);
+         double stepDuration = nextSwingTime - currentTime;
+         Math.min(Math.max(stepDuration, stepDurationParameter.get()), 1.5 * stepDurationParameter.get());
 
          // compute nominal cmp position at start of step
          int nTransitions = copPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), currentTime);
          nominalDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
          nominalDcmTrajectory.initializeTrajectory(nTransitions, copPlanner.getTimeAtTransitions(), copPlanner.getCopAtTransitions(), dcmPositionEstimate);
+
+         nominalDcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue() + stepDurationParameter.get());
+         nominalDcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
+
+         footholdPosition.setIncludingFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
+         timedStep.setRobotQuadrant(currSwingQuadrant);
+         timedStep.setGroundClearance(stepGroundClearanceParameter.get());
+         timedStep.getTimeInterval().setInterval(0, stepDuration);
+         timedStep.getTimeInterval().shiftInterval(currentTime);
+         timedStep.getGoalPosition().setIncludingFrame(footholdPosition);
+         timedStepController.addStep(timedStep);
+
       }
 
       @Override public AmbleEvent process()
