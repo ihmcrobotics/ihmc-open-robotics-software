@@ -5,6 +5,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class VirtualModelController
 
          OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(base, endEffector);
 
-         long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(joints, base.getBodyFixedFrame());
+         long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(joints, base.getParentJoint().getFrameAfterJoint());
          endEffectorJacobians.put(endEffector, jacobianID);
 
          tmpEffortMatrix.reshape(joints.length, 1);
