@@ -69,10 +69,17 @@ public class HoldPositionState extends AbstractFootControlState
 
    private final Vector3d tempAngularWeightVector = new Vector3d();
    private final Vector3d tempLinearWeightVector = new Vector3d();
-   
+
    private final FramePose bodyFixedControlledPoint = new FramePose();
    private final ReferenceFrame soleFrame;
    private final ReferenceFrame desiredSoleFrame;
+
+   /**
+    * Determined whether the state is allowed to change the support polygon based on the exploration
+    * done in the PartialFootholdControlModule.
+    */
+   private BooleanYoVariable doFootholdAdjustments;
+   private final static boolean defaultDoFootholdAsjustments = true;
 
    public HoldPositionState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
@@ -88,6 +95,9 @@ public class HoldPositionState extends AbstractFootControlState
       desiredHoldOrientation = new YoFrameOrientation(namePrefix + "DesiredHoldOrientation", worldFrame, registry);
       desiredHoldPosition = new YoFramePoint(namePrefix + "DesiredHoldPosition", worldFrame, registry);
       doSmartHoldPosition = new BooleanYoVariable(namePrefix + "DoSmartHoldPosition", registry);
+
+      doFootholdAdjustments = new BooleanYoVariable(namePrefix + "DoFootholdAdjustments", registry);
+      doFootholdAdjustments.set(defaultDoFootholdAsjustments);
 
       yoAngularWeight = new YoFrameVector(namePrefix + "HoldAngularWeight", null, registry);
       yoLinearWeight = new YoFrameVector(namePrefix + "HoldLinearWeight", null, registry);
@@ -141,6 +151,16 @@ public class HoldPositionState extends AbstractFootControlState
       yoLinearWeight.set(linear);
    }
 
+   public void setDoSmartHoldPosition(boolean doSmartHold)
+   {
+      doSmartHoldPosition.set(doSmartHold);
+   }
+
+   public void doFootholdAdjustments(boolean doAdjustments)
+   {
+      doFootholdAdjustments.set(doAdjustments);
+   }
+
    @Override
    public void doTransitionIntoAction()
    {
@@ -186,17 +206,20 @@ public class HoldPositionState extends AbstractFootControlState
          {
             desiredCoP.setToZero(soleFrame);
          }
-      }     
+      }
 
       desiredCoP.changeFrame(soleFrame);
 
       correctDesiredOrientationForSmartHoldPosition();
 
-      partialFootholdControlModule.compute(desiredCoP, cop);
-      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
-      boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
-      if (contactStateHasChanged)
-         contactState.notifyContactStateHasChanged();
+      if (doFootholdAdjustments.getBooleanValue())
+      {
+         partialFootholdControlModule.compute(desiredCoP, cop);
+         YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+         boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
+         if (contactStateHasChanged)
+            contactState.notifyContactStateHasChanged();
+      }
 
       // Update the control frame to be at the desired center of pressure
       desiredCoP3d.setXYIncludingFrame(desiredCoP);

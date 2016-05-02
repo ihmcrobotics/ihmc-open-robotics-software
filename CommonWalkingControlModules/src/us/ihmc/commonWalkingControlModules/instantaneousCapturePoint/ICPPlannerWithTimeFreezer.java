@@ -10,7 +10,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -76,19 +75,19 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    }
 
    @Override
-   public void initializeForTransfer(double initialTime, RobotSide transferToSide)
+   public void initializeForTransfer(double initialTime)
    {
       timeDelay.set(0.0);
       previousTime.set(initialTime);
-      super.initializeForTransfer(initialTime, transferToSide);
+      super.initializeForTransfer(initialTime);
    }
 
    @Override
-   public void initializeForSingleSupport(double initialTime, RobotSide supportSide)
+   public void initializeForSingleSupport(double initialTime)
    {
       timeDelay.set(0.0);
       previousTime.set(initialTime);
-      super.initializeForSingleSupport(initialTime, supportSide);
+      super.initializeForSingleSupport(initialTime);
    }
 
    private void doTimeFreezeIfNeeded(FramePoint2d currentCapturePointPosition, double time)
