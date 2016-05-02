@@ -67,7 +67,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private final double defaultSwingTime = 0.6;
    private final double defaultTransferTime = 2.5;
    private final double defaultChickenPercentage = 0.5;
-   private final boolean keepSCSup = true;
+   private final boolean keepSCSup = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
