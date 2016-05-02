@@ -10,6 +10,8 @@ import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
+import java.util.Random;
+
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace the pelvis to the desired pose (position & orientation) while going through the specified trajectory points."
       + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations."
@@ -27,6 +29,12 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    public PelvisTrajectoryMessage()
    {
       super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public PelvisTrajectoryMessage(Random random)
+   {
+      super(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

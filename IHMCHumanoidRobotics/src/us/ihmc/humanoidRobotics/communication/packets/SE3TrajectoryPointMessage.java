@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -14,6 +15,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.Transformable;
+import us.ihmc.robotics.random.RandomTools;
 
 @RosMessagePacket(documentation = "This class is used to build trajectory messages in taskspace. It holds the necessary information for one trajectory point. "
       + "Feel free to look at EuclideanTrajectoryPointMessage (translational) and EuclideanTrajectoryPointMessage (rotational)",
@@ -36,6 +38,15 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
     */
    public SE3TrajectoryPointMessage()
    {
+   }
+
+   public SE3TrajectoryPointMessage(Random random)
+   {
+      time = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
+      position = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
+      orientation = RandomTools.generateRandomQuaternion(random);
+      linearVelocity = RandomTools.generateRandomVector(random);
+      angularVelocity = RandomTools.generateRandomVector(random);
    }
 
    public SE3TrajectoryPointMessage(SE3TrajectoryPointMessage se3TrajectoryPointMessage)

@@ -11,6 +11,8 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
+import java.util.Random;
+
 @RosMessagePacket(documentation =
       "This mesage commands the controller to move the pelvis to a new height in world while going through the specified trajectory points."
       + " Sending this command will not affect the pelvis horizontal position. To control the pelvis 3D position use the PelvisTrajectoryMessage instead."
@@ -27,6 +29,12 @@ public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<P
    public PelvisHeightTrajectoryMessage()
    {
       super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public PelvisHeightTrajectoryMessage(Random random)
+   {
+      super(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

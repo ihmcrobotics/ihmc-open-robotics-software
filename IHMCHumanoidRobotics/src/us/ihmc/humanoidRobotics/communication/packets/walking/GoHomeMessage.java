@@ -4,7 +4,10 @@ import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.Random;
 
 @RosMessagePacket(documentation = "The message commands the controller to bring the given part of the body back to a default configuration called 'home'."
       + " It is useful to get back to a safe configuration before walking.",
@@ -47,6 +50,14 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
 
    public GoHomeMessage()
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public GoHomeMessage(Random random)
+   {
+      bodyPart = RandomTools.generateRandomEnum(random, BodyPart.class);
+      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
+      trajectoryTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

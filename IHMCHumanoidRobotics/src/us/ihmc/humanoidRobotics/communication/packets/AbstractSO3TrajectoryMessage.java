@@ -1,15 +1,17 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+import java.util.Random;
 
 public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends Packet<T>
       implements TransformableDataObject<T>, Transformable
@@ -32,6 +34,18 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    public AbstractSO3TrajectoryMessage()
    {
+   }
+
+   public AbstractSO3TrajectoryMessage(Random random)
+   {
+      int randomNumberOfPoints = random.nextInt(16) + 1;
+      taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[randomNumberOfPoints];
+      for(int i = 0; i < randomNumberOfPoints; i++)
+      {
+         taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(random);
+      }
+
+      executionMode = RandomTools.generateRandomEnum(random, ExecutionMode.class);
    }
 
    public AbstractSO3TrajectoryMessage(T so3TrajectoryMessage)

@@ -2,13 +2,16 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Random;
 
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.tools.ArrayTools;
 
 @RosMessagePacket(documentation =
@@ -40,6 +43,20 @@ public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAcceleratio
    public ArmDesiredAccelerationsMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public ArmDesiredAccelerationsMessage(Random random)
+   {
+      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
+      armControlMode = RandomTools.generateRandomEnum(random, ArmControlMode.class);
+
+      int randomNumberOfAccels = random.nextInt(16) + 1;
+      armDesiredJointAccelerations = new double[randomNumberOfAccels];
+
+      for(int i = 0; i < randomNumberOfAccels; i++)
+      {
+         armDesiredJointAccelerations[i] = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
+      }
    }
 
    public ArmDesiredAccelerationsMessage(RobotSide robotSide, ArmControlMode armControlMode, double[] armDesiredJointAccelerations)

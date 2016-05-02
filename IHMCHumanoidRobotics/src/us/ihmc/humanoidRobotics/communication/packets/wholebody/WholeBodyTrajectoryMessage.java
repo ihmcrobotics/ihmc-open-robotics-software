@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -54,6 +55,30 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
    public WholeBodyTrajectoryMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public WholeBodyTrajectoryMessage(Random random)
+   {
+      leftHandTrajectoryMessage = new HandTrajectoryMessage(random);
+      leftHandTrajectoryMessage.robotSide = RobotSide.LEFT;
+
+      rightHandTrajectoryMessage = new HandTrajectoryMessage(random);
+      rightHandTrajectoryMessage.robotSide = RobotSide.RIGHT;
+
+      leftArmTrajectoryMessage = new ArmTrajectoryMessage(random);
+      leftArmTrajectoryMessage.robotSide = RobotSide.LEFT;
+
+      rightArmTrajectoryMessage = new ArmTrajectoryMessage(random);
+      rightArmTrajectoryMessage.robotSide = RobotSide.RIGHT;
+
+      leftFootTrajectoryMessage = new FootTrajectoryMessage(random);
+      leftFootTrajectoryMessage.robotSide = RobotSide.LEFT;
+
+      rightFootTrajectoryMessage = new FootTrajectoryMessage(random);
+      rightFootTrajectoryMessage.robotSide = RobotSide.RIGHT;
+
+      chestTrajectoryMessage = new ChestTrajectoryMessage(random);
+      pelvisTrajectoryMessage = new PelvisTrajectoryMessage(random);
    }
 
    public HandTrajectoryMessage getHandTrajectoryMessage(RobotSide robotSide)

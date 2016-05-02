@@ -10,7 +10,10 @@ import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+
+import java.util.Random;
 
 public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3TrajectoryMessage<T>> extends Packet<T>
       implements TransformableDataObject<T>, Transformable
@@ -33,6 +36,18 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
 
    public AbstractSE3TrajectoryMessage()
    {
+   }
+
+   public AbstractSE3TrajectoryMessage(Random random)
+   {
+      int randomNumberOfPoints = random.nextInt(16) + 1;
+      taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[randomNumberOfPoints];
+      for(int i = 0; i < randomNumberOfPoints; i++)
+      {
+         taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(random);
+      }
+
+      executionMode = RandomTools.generateRandomEnum(random, ExecutionMode.class);
    }
 
    public AbstractSE3TrajectoryMessage(T se3TrajectoryMessage)
