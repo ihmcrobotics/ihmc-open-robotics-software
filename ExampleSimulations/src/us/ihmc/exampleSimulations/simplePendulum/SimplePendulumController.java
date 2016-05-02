@@ -29,7 +29,6 @@ public class SimplePendulumController implements RobotController
    // This is the desired torque that we will apply to the fulcrum joint (PinJoint)
    private double torque;
 
-
    /* Constructor:
       Where we instantiate and initialize control variables
    */
@@ -58,7 +57,6 @@ public class SimplePendulumController implements RobotController
    @Override public void doControl()
    {
 
-
       // ERROR term: Compute the difference between the desired position the pendulum and its current position
       positionError = desiredPositionRadians.getDoubleValue() - robot.getFulcrumAngularPosition();
 
@@ -66,9 +64,8 @@ public class SimplePendulumController implements RobotController
       integralError += positionError * SimplePendulumSimulation.DT;   //
 
       // P.I.D
-      torque =   p_gain.getDoubleValue() * positionError
-               + i_gain.getDoubleValue() * integralError
-               + d_gain.getDoubleValue() * (0 - robot.getFulcrumAngularVelocity());
+      torque = p_gain.getDoubleValue() * positionError + i_gain.getDoubleValue() * integralError + d_gain.getDoubleValue() * (0 - robot
+            .getFulcrumAngularVelocity());
 
       robot.setFulcrumTorque(torque);
 

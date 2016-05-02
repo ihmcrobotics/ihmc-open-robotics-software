@@ -12,7 +12,6 @@ public class SimplePendulumSimulation
    public static final double DT = 0.001;
    private SimulationConstructionSet sim;
 
-
    public SimplePendulumSimulation()
    {
       SimplePendulumRobot robot = new SimplePendulumRobot();

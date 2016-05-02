@@ -61,7 +61,6 @@ public class SimplePendulumRobot extends Robot
       qd_fulcrum = fulcrumPinJoint.getQD();
       tau_fulcrum = fulcrumPinJoint.getTau();
 
-
       this.addRootJoint(fulcrumPinJoint);
    }
 
