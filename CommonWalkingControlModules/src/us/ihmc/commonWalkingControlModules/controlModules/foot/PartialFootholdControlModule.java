@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import java.awt.Color;
 import java.util.List;
 
+import javax.vecmath.Point2d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -30,7 +32,7 @@ public class PartialFootholdControlModule
 
    public enum PartialFootholdState
    {
-      FULL, UNSAFE_CORNER, PARTIAL, SAFE_PARTIAL
+      FULL, PARTIAL
    };
 
    private final YoVariableRegistry registry;
@@ -64,9 +66,15 @@ public class PartialFootholdControlModule
 
    private final FrameLine2d lineOfRotation;
 
+   private final BooleanYoVariable useCoPOccupancyGrid;
+
+   private final int footCornerPoints;
+   private Point2d newVertex = new Point2d();
+
    public PartialFootholdControlModule(String namePrefix, double dt, ContactablePlaneBody contactableFoot, TwistCalculator twistCalculator,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      footCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
       soleFrame = contactableFoot.getSoleFrame();
       defaultFootPolygon = new FrameConvexPolygon2d(contactableFoot.getContactPoints2d());
       shrunkFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
@@ -110,6 +118,9 @@ public class PartialFootholdControlModule
 
       doPartialFootholdDetection = new BooleanYoVariable(namePrefix + "DoPartialFootholdDetection", registry);
       doPartialFootholdDetection.set(false);
+
+      useCoPOccupancyGrid = new BooleanYoVariable(namePrefix + "UseCoPOccupancyGrid", registry);
+      useCoPOccupancyGrid.set(true);
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
@@ -134,19 +145,14 @@ public class PartialFootholdControlModule
          if (numberOfVerticesRemoved.getIntegerValue() <= 0)
          {
             confusingCutIndex.increment();
-            
+
 //            System.out.println("\nCutting polygon but no vertices removed?");
 //            System.out.println("confusingCutIndex = " + confusingCutIndex.getIntegerValue());
 //            System.out.println("lineOfRotation = " + lineOfRotation);
 //            System.out.println("unsafePolygon = " + unsafePolygon);
 //            System.out.println("shrunkFootPolygon = " + shrunkFootPolygon);
-            
+
             doNothing();
-         }
-         else if (numberOfVerticesRemoved.getIntegerValue() == 1)
-         {
-            footholdState.set(PartialFootholdState.UNSAFE_CORNER);
-            computeShrunkFoothold(desiredCenterOfPressure);
          }
          else
          {
@@ -173,9 +179,13 @@ public class PartialFootholdControlModule
 
    private void computeShrunkFoothold(FramePoint2d desiredCenterOfPressure)
    {
-      numberOfCellsOccupiedOnSideOfLine.set(footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT,
-            distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue()));
-      boolean wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine.getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
+      boolean wasCoPInThatRegion = false;
+      if (useCoPOccupancyGrid.getBooleanValue()) {
+         numberOfCellsOccupiedOnSideOfLine.set(footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT,
+               distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue()));
+         wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine.getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
+      }
+
       if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3) && !wasCoPInThatRegion)
       {
          backupFootPolygon.set(shrunkFootPolygon);
@@ -199,8 +209,7 @@ public class PartialFootholdControlModule
          return false;
       }
 
-      //TODO: Do something when a corner case (literally!)
-      if (footholdState.getEnumValue() != PartialFootholdState.PARTIAL)
+      if (footholdState.getEnumValue() == PartialFootholdState.FULL)
       {
          shrunkFootPolygon.set(backupFootPolygon);
          return false;
@@ -212,9 +221,131 @@ public class PartialFootholdControlModule
          return false;
       }
 
+      int newFootCornerPoints = shrunkFootPolygon.getNumberOfVertices();
+      if (newFootCornerPoints == footCornerPoints)
+      {
+         // everything is well
+      }
+      else if (newFootCornerPoints == footCornerPoints + 1)
+      {
+         // we cut off an edge
+         // remove one corner by merging the two closest vertices
+         int removeVertex = -1;
+         double shortestEdgeLength = Double.POSITIVE_INFINITY;
+         Point2d lastVertex = shrunkFootPolygon.getVertex(0);
+         for (int i = 1; i < newFootCornerPoints+1; i++)
+         {
+            Point2d nextVertex = null;
+            if (i == newFootCornerPoints)
+            {
+               nextVertex = shrunkFootPolygon.getVertex(0);
+            }
+            else
+            {
+               nextVertex = shrunkFootPolygon.getVertex(i);
+            }
+            double edgeLength = lastVertex.distance(nextVertex);
+            if (edgeLength < shortestEdgeLength)
+            {
+               shortestEdgeLength = edgeLength;
+               removeVertex = i;
+            }
+            lastVertex = nextVertex;
+         }
+
+         if (removeVertex < 1)
+         {
+            throw new RuntimeException("Did not find an edge in support polygon.");
+         }
+
+         int idx1 = -1;
+         int idx2 = -1;
+         if (removeVertex == newFootCornerPoints)
+         {
+            idx1 = newFootCornerPoints-1;
+            idx2 = 0;
+         }
+         else
+         {
+            idx1 = removeVertex;
+            idx2 = removeVertex-1;
+         }
+
+         Point2d vertexA = shrunkFootPolygon.getVertex(idx1);
+         Point2d vertexB = shrunkFootPolygon.getVertex(idx2);
+         newVertex.interpolate(vertexA, vertexB, 0.5);
+
+         shrunkFootPolygon.removeVertex(idx1);
+         shrunkFootPolygon.removeVertex(idx2);
+         shrunkFootPolygon.addVertex(newVertex);
+         shrunkFootPolygon.update();
+      }
+      else if (newFootCornerPoints < footCornerPoints)
+      {
+         // we cut off too many corners
+         // add vertices in the longest edges of the polygon
+         int pointsToAdd = footCornerPoints - newFootCornerPoints;
+         while (pointsToAdd > 0) {
+            int index = -1;
+            double longestEdgeLength = Double.NEGATIVE_INFINITY;
+            Point2d lastVertex = shrunkFootPolygon.getVertex(0);
+            for (int i = 1; i < newFootCornerPoints+1; i++)
+            {
+               Point2d nextVertex = null;
+               if (i == newFootCornerPoints)
+               {
+                  nextVertex = shrunkFootPolygon.getVertex(0);
+               }
+               else
+               {
+                  nextVertex = shrunkFootPolygon.getVertex(i);
+               }
+
+               double edgeLength = lastVertex.distance(nextVertex);
+               if (edgeLength > longestEdgeLength)
+               {
+                  longestEdgeLength = edgeLength;
+                  index = i;
+               }
+               lastVertex = nextVertex;
+            }
+
+            if (index < 1)
+            {
+               throw new RuntimeException("Did not find an edge in support polygon.");
+            }
+
+            int idx1 = -1;
+            int idx2 = -1;
+            if (index == newFootCornerPoints)
+            {
+               idx1 = newFootCornerPoints-1;
+               idx2 = 0;
+            }
+            else
+            {
+               idx1 = index;
+               idx2 = index-1;
+            }
+
+            Point2d vertexA = shrunkFootPolygon.getVertex(idx1);
+            Point2d vertexB = shrunkFootPolygon.getVertex(idx2);
+            newVertex.interpolate(vertexA, vertexB, 0.5);
+
+            shrunkFootPolygon.addVertex(newVertex);
+            shrunkFootPolygon.update();
+
+            pointsToAdd--;
+         }
+      }
+      else
+      {
+         // cutting a convex polygon with a line should never result in the number of vertices increasing by more then one.
+         throw new RuntimeException("This is not possible.");
+      }
+
       List<YoContactPoint> contactPoints = contactStateToModify.getContactPoints();
 
-      // TODO: Do something when add or subtract a vertex! Need contact state to allow for shifting number of vertices
       if (contactPoints.size() != shrunkFootPolygon.getNumberOfVertices())
       {
          shrunkFootPolygon.set(backupFootPolygon);
@@ -247,6 +378,10 @@ public class PartialFootholdControlModule
    public void projectOntoShrunkenPolygon(FramePoint2d pointToProject)
    {
       shrunkFootPolygon.orthogonalProjection(pointToProject);
-      
+   }
+
+   public void getSupportPolygon(FrameConvexPolygon2d polygonToPack)
+   {
+      polygonToPack.setIncludingFrame(shrunkFootPolygon);
    }
 }

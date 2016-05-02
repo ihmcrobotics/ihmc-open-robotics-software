@@ -197,6 +197,22 @@ public class ICPPlanner
       referenceCMPsCalculator.clear();
    }
 
+   public void setSupportLeg(RobotSide robotSide)
+   {
+      supportSide.set(robotSide);
+   }
+
+   public void setTransferToSide(RobotSide robotSide)
+   {
+      transferToSide.set(robotSide);
+   }
+
+   public void setTransferFromSide(RobotSide robotSide)
+   {
+      if (robotSide != null)
+         transferToSide.set(robotSide.getOppositeSide());
+   }
+
    public void addFootstepToPlan(Footstep footstep)
    {
       referenceCMPsCalculator.addUpcomingFootstep(footstep);
@@ -248,17 +264,13 @@ public class ICPPlanner
    {
       clearPlan();
       isStanding.set(true);
-      transferToSide.set(null);
-      supportSide.set(null);
       isDoubleSupport.set(true);
       this.initialTime.set(initialTime);
       updateTransferPlan();
    }
 
-   public void initializeForTransfer(double initialTime, RobotSide transferToSide)
+   public void initializeForTransfer(double initialTime)
    {
-      this.transferToSide.set(transferToSide);
-      supportSide.set(null);
       isDoubleSupport.set(true);
       this.initialTime.set(initialTime);
       updateTransferPlan();
@@ -378,10 +390,8 @@ public class ICPPlanner
       icpDoubleSupportTrajectoryGenerator.initialize();
    }
 
-   public void initializeForSingleSupport(double initialTime, RobotSide supportSide)
+   public void initializeForSingleSupport(double initialTime)
    {
-      this.transferToSide.set(null);
-      this.supportSide.set(supportSide);
       isHoldingPosition.set(false);
 
       isStanding.set(false);
@@ -487,7 +497,7 @@ public class ICPPlanner
 
    public void updatePlanForSingleSupportDisturbances(double time, FramePoint2d actualCapturePointPosition)
    {
-      initializeForSingleSupport(initialTime.getDoubleValue(), supportSide.getEnumValue());
+      initializeForSingleSupport(initialTime.getDoubleValue());
 
       if (isDone(time))
          return;

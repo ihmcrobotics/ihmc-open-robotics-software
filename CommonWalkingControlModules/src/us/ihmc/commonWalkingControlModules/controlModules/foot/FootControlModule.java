@@ -121,8 +121,8 @@ public class FootControlModule
 
       supportState = new FullyConstrainedState(footControlHelper, registry);
       states.add(supportState);
-      
-      exploreFootPolygonState = new ExploreFootPolygonState(footControlHelper, holdPositionFootControlGains.getOrientationGains(), registry);
+
+      exploreFootPolygonState = new ExploreFootPolygonState(footControlHelper, holdPositionFootControlGains, registry);
       states.add(exploreFootPolygonState);
 
       holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
@@ -204,7 +204,7 @@ public class FootControlModule
       moveViaWaypointsState.setWeight(defaultFootWeight);
       onToesState.setWeight(highFootWeight);
       supportState.setWeight(highFootWeight);
-      exploreFootPolygonState.setWeight(highFootWeight);
+      exploreFootPolygonState.setWeight(defaultFootWeight);
       holdPositionState.setWeight(defaultFootWeight);
    }
 
@@ -214,7 +214,7 @@ public class FootControlModule
       moveViaWaypointsState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       onToesState.setWeights(highAngularFootWeight, highLinearFootWeight);
       supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
-      exploreFootPolygonState.setWeights(highAngularFootWeight, highLinearFootWeight);
+      exploreFootPolygonState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       holdPositionState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
    }
 
@@ -416,5 +416,10 @@ public class FootControlModule
    public void initializeFootExploration()
    {
       setContactState(ConstraintType.EXPLORE_POLYGON);
+   }
+
+   public void setAllowFootholdAdjustments(boolean allow)
+   {
+      holdPositionState.doFootholdAdjustments(allow);
    }
 }
