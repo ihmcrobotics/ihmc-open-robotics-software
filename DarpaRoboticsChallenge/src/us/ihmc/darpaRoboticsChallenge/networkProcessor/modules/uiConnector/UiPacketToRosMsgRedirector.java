@@ -14,14 +14,13 @@ import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.ros.IHMCPacketToMsgPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 
+//TODO reimplement this class
 public class UiPacketToRosMsgRedirector implements GlobalPacketConsumer
 {
-   private static final Map<String, Class> PACKETS_TO_REDIRECT_TO_ROS = IHMCRosApiMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
+   private static final Map<String, Class> PACKETS_TO_REDIRECT_TO_ROS = null; //IHMCRosApiMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
    private final String ROS_NAMESPACE;
    
    private final RosMainNode rosMainNode;
@@ -55,16 +54,16 @@ public class UiPacketToRosMsgRedirector implements GlobalPacketConsumer
 
    private void setupMsgTopics(PacketCommunicator rosAPI_communicator)
    {
-      Map<String, Class> outputPacketList = PACKETS_TO_REDIRECT_TO_ROS;
-
-      for (Map.Entry<String, Class> e : outputPacketList.entrySet())
-      {
-         Message message = messageFactory.newFromType(e.getKey());
-
-         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false, rosAPI_communicator,
-               e.getValue());
-         publishers.add(publisher);
-         rosMainNode.attachPublisher(ROS_NAMESPACE + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue()), publisher);
-      }
+//      Map<String, Class> outputPacketList = PACKETS_TO_REDIRECT_TO_ROS;
+//
+//      for (Map.Entry<String, Class> e : outputPacketList.entrySet())
+//      {
+//         Message message = messageFactory.newFromType(e.getKey());
+//
+//         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false, rosAPI_communicator,
+//               e.getValue());
+//         publishers.add(publisher);
+////         rosMainNode.attachPublisher(ROS_NAMESPACE + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue()), publisher);
+//      }
    }
 }

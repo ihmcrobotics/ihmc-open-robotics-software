@@ -11,22 +11,23 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.*;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.utilities.ros.RosMessageGenerationTools;
-import us.ihmc.utilities.ros.msgToPacket.converter.GenericRosMessageConverter;
+import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
+import us.ihmc.utilities.ros.msgToPacket.converter.RosEnumConversionException;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IHMCMessageToROSTranslator
+public class IHMCROSTranslationRuntimeTools
 {
-   private static final MessageFactory messageFactory = GenericRosMessageConverter.getMessageFactory();
-   //   private static final MessageFactory messageFactory = NodeConfiguration.newPrivate().getTopicMessageFactory();
+   private static final MessageFactory messageFactory = GenericROSTranslationTools.getMessageFactory();
 
-   public static Message convertToRosMessage(Packet<?> ihmcMessage) throws Exception
+   public static Message convertToRosMessage(Packet<?> ihmcMessage)
+         throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException
    {
       if(ihmcMessage == null)
       {
@@ -35,17 +36,19 @@ public class IHMCMessageToROSTranslator
       Class<? extends Packet> aClass = ihmcMessage.getClass();
       try
       {
-         Method convertToRosMessageMethod = IHMCMessageToROSTranslator.class.getDeclaredMethod("customConvertToRosMessage", aClass);
+         Method convertToRosMessageMethod = IHMCROSTranslationRuntimeTools.class.getDeclaredMethod("customConvertToRosMessage", aClass);
          convertToRosMessageMethod.setAccessible(true);
          return (Message) convertToRosMessageMethod.invoke(null, ihmcMessage);
       }
       catch (NoSuchMethodException exception)
       {
-         return GenericRosMessageConverter.convertIHMCMessageToRosMessage(ihmcMessage);
+         return GenericROSTranslationTools.convertIHMCMessageToRosMessage(ihmcMessage);
       }
    }
 
-   public static Packet<?> convertToIHMCMessage(Message rosMessage) throws Exception
+   public static Packet<?> convertToIHMCMessage(Message rosMessage)
+         throws ClassNotFoundException, InvocationTargetException, IllegalAccessException, RosEnumConversionException, NoSuchFieldException,
+         InstantiationException
    {
       if(rosMessage == null)
       {
@@ -55,13 +58,13 @@ public class IHMCMessageToROSTranslator
 
       try
       {
-         Method convertToIHMCMessageMethod = IHMCMessageToROSTranslator.class.getDeclaredMethod("customConvertToIHMCMessage", aClass);
+         Method convertToIHMCMessageMethod = IHMCROSTranslationRuntimeTools.class.getDeclaredMethod("customConvertToIHMCMessage", aClass);
          convertToIHMCMessageMethod.setAccessible(true);
          return (Packet<?>) convertToIHMCMessageMethod.invoke(null, rosMessage);
       }
       catch (NoSuchMethodException exception)
       {
-         return GenericRosMessageConverter.convertRosMessageToIHMCMessage(rosMessage);
+         return GenericROSTranslationTools.convertRosMessageToIHMCMessage(rosMessage);
       }
    }
 
@@ -90,8 +93,8 @@ public class IHMCMessageToROSTranslator
 
       ihmcMessage.setOrigin(FootstepDataMessage.FootstepOrigin.values()[message.getOrigin()]);
       ihmcMessage.setRobotSide(RobotSide.values[message.getRobotSide()]);
-      ihmcMessage.setLocation(new Point3d(GenericRosMessageConverter.convertVector3(message.getLocation())));
-      ihmcMessage.setOrientation(new Quat4d(GenericRosMessageConverter.convertQuaternion(message.getOrientation())));
+      ihmcMessage.setLocation(new Point3d(GenericROSTranslationTools.convertVector3(message.getLocation())));
+      ihmcMessage.setOrientation(new Quat4d(GenericROSTranslationTools.convertQuaternion(message.getOrientation())));
       ihmcMessage.setSwingHeight(message.getSwingHeight());
       ihmcMessage.setTrajectoryType(TrajectoryType.values()[message.getTrajectoryType()]);
       ihmcMessage.setUniqueId(message.getUniqueId());
@@ -99,7 +102,7 @@ public class IHMCMessageToROSTranslator
       ArrayList<Point2d> predictedContactPoints = new ArrayList<>();
       for (Point2dRosMessage point2dRosMessage : message.getPredictedContactPoints())
       {
-         predictedContactPoints.add(GenericRosMessageConverter.convertPoint2DRos(point2dRosMessage));
+         predictedContactPoints.add(GenericROSTranslationTools.convertPoint2DRos(point2dRosMessage));
       }
 
       ihmcMessage.setPredictedContactPoints(predictedContactPoints);
@@ -127,7 +130,7 @@ public class IHMCMessageToROSTranslator
    private static Message customConvertToRosMessage(WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage) throws Exception
    {
       Class<? extends Packet> ihmcMessageClass = WholeBodyTrajectoryMessage.class;
-      String rosMessageClassNameFromIHMCMessage = RosMessageGenerationTools.getRosMessageClassNameFromIHMCMessage(ihmcMessageClass.getSimpleName());
+      String rosMessageClassNameFromIHMCMessage = GenericROSTranslationTools.getRosMessageClassNameFromIHMCMessage(ihmcMessageClass.getSimpleName());
       RosMessagePacket rosAnnotation = ihmcMessageClass.getAnnotation(RosMessagePacket.class);
 
       WholeBodyTrajectoryRosMessage message = messageFactory.newFromType(rosAnnotation.rosPackage() + "/" + rosMessageClassNameFromIHMCMessage);
@@ -207,14 +210,14 @@ public class IHMCMessageToROSTranslator
    private static Message customConvertToRosMessage(FootstepDataMessage footstep) throws Exception
    {
       Class<? extends Packet> ihmcMessageClass = FootstepDataMessage.class;
-      String rosMessageClassNameFromIHMCMessage = RosMessageGenerationTools.getRosMessageClassNameFromIHMCMessage(ihmcMessageClass.getSimpleName());
+      String rosMessageClassNameFromIHMCMessage = GenericROSTranslationTools.getRosMessageClassNameFromIHMCMessage(ihmcMessageClass.getSimpleName());
       RosMessagePacket rosAnnotation = ihmcMessageClass.getAnnotation(RosMessagePacket.class);
 
       FootstepDataRosMessage message = messageFactory.newFromType(rosAnnotation.rosPackage() + "/" + rosMessageClassNameFromIHMCMessage);
 
       message.setUniqueId(footstep.getUniqueId());
-      message.setLocation(GenericRosMessageConverter.convertTuple3d(footstep.getLocation()));
-      message.setOrientation(GenericRosMessageConverter.convertTuple4d(footstep.getOrientation()));
+      message.setLocation(GenericROSTranslationTools.convertTuple3d(footstep.getLocation()));
+      message.setOrientation(GenericROSTranslationTools.convertTuple4d(footstep.getOrientation()));
       message.setOrigin((byte) footstep.getOrigin().ordinal());
       message.setRobotSide((byte) footstep.getRobotSide().ordinal());
       message.setSwingHeight(footstep.getSwingHeight());
@@ -225,7 +228,7 @@ public class IHMCMessageToROSTranslator
       {
          for (Point2d predictedContactPoint : footstep.predictedContactPoints)
          {
-            predictedContatcPointsRos.add(GenericRosMessageConverter.convertPoint2d(predictedContactPoint));
+            predictedContatcPointsRos.add(GenericROSTranslationTools.convertPoint2d(predictedContactPoint));
          }
       }
 
@@ -237,7 +240,7 @@ public class IHMCMessageToROSTranslator
    private static Message customConvertToRosMessage(FootstepDataListMessage footstepList) throws Exception
    {
       Class<? extends Packet> ihmcMessageClass = FootstepDataListMessage.class;
-      String rosMessageClassNameFromIHMCMessage = RosMessageGenerationTools.getRosMessageClassNameFromIHMCMessage(ihmcMessageClass.getSimpleName());
+      String rosMessageClassNameFromIHMCMessage = GenericROSTranslationTools.getRosMessageClassNameFromIHMCMessage(ihmcMessageClass.getSimpleName());
       RosMessagePacket rosAnnotation = ihmcMessageClass.getAnnotation(RosMessagePacket.class);
 
       FootstepDataListRosMessage message = messageFactory.newFromType(rosAnnotation.rosPackage() + "/" + rosMessageClassNameFromIHMCMessage);
@@ -255,31 +258,5 @@ public class IHMCMessageToROSTranslator
       message.setFootstepDataList(convertedFootsteps);
 
       return message;
-   }
-
-   public static void main(String[] args) throws Exception
-   {
-      ArrayList<FootstepDataMessage> steps = new ArrayList<>();
-      for (int i = 0; i < 10; i++)
-      {
-         FootstepDataMessage data = new FootstepDataMessage(RobotSide.values[i % 2], new Point3d(0, 0, 0), new Quat4d(0, 0, 0, 1));
-         ArrayList<Point2d> contactPoints = new ArrayList<>();
-         contactPoints.add(new Point2d(0, 0));
-         contactPoints.add(new Point2d(1, 0));
-         contactPoints.add(new Point2d(1, 1));
-         contactPoints.add(new Point2d(0, 1));
-         data.setPredictedContactPoints(contactPoints);
-         steps.add(data);
-      }
-
-      FootstepDataListMessage footstepDataMessages = new FootstepDataListMessage(steps, 1.0, 1.0);
-
-      Message message = IHMCMessageToROSTranslator.convertToRosMessage(footstepDataMessages);
-
-      //      System.out.println("Message: " + message);
-
-      Packet<?> packet = IHMCMessageToROSTranslator.convertToIHMCMessage(message);
-
-      //      System.out.println("Packet: " + packet);
    }
 }
