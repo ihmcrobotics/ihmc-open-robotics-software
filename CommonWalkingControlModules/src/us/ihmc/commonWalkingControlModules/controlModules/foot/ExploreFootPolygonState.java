@@ -49,25 +49,25 @@ public class ExploreFootPolygonState extends AbstractFootControlState
     */
    private final DoubleYoVariable recoverTime;
    private final static double defaultRecoverTime = 0.1;
-   
+
    /**
     * This is the amount of time the line exploration uses to go to a corner
     */
    private final DoubleYoVariable timeToGoToCorner;
    private final static double defaultTimeToGoToCorner = 0.1;
-   
+
    /**
     * This is the amount of time the line exploration will keep the cop in a corner
     */
    private final DoubleYoVariable timeToStayInCorner;
-   private final static double defaultTimeToStayInCorner = 0.1;
-   
+   private final static double defaultTimeToStayInCorner = 0.3;
+
    /**
     * This is the amount of time the line exploration will keep the cop in a corner
     */
    private final YoFrameVector2d copCommandWeight;
-   private final static double defaultcCopCommandWeight = 2000.0;
-   
+   private final static double defaultCopCommandWeight = 2000.0;
+
    public ExploreFootPolygonState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.EXPLORE_POLYGON, footControlHelper, registry);
@@ -89,7 +89,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
       recoverTime = new DoubleYoVariable(contactableFoot.getName() + "RecoverTime", registry);
       recoverTime.set(defaultRecoverTime);
-      
+
       timeToGoToCorner = new DoubleYoVariable(contactableFoot.getName() + "TimeToGoToCorner", registry);
       timeToGoToCorner.set(defaultTimeToGoToCorner);
       timeToGoToCorner.addVariableChangedListener(new VariableChangedListener()
@@ -100,7 +100,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             lastShrunkTime.set(getTimeInCurrentState());
          }
       });
-      
+
       timeToStayInCorner = new DoubleYoVariable(contactableFoot.getName() + "TimeToStayInCorner", registry);
       timeToStayInCorner.set(defaultTimeToStayInCorner);
       timeToStayInCorner.addVariableChangedListener(new VariableChangedListener()
@@ -111,10 +111,10 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             lastShrunkTime.set(getTimeInCurrentState());
          }
       });
-      
+
       copCommandWeight = new YoFrameVector2d(contactableFoot.getName() + "CopCommandWeight", null, registry);
-      copCommandWeight.set(defaultcCopCommandWeight, defaultcCopCommandWeight);
-      
+      copCommandWeight.set(defaultCopCommandWeight, defaultCopCommandWeight);
+
       desiredOrientation.setToZero();
       desiredAngularVelocity.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
@@ -150,6 +150,8 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    private final Vector2d tempVector2d = new Vector2d();
    private final FramePoint2d shrunkPolygonCentroid = new FramePoint2d();
    private final FramePoint2d desiredCenterOfPressure = new FramePoint2d();
+   private final FramePoint2d currentCorner = new FramePoint2d();
+
    @Override
    public void doSpecificAction()
    {
@@ -206,7 +208,6 @@ public class ExploreFootPolygonState extends AbstractFootControlState
          else if (method == ExplorationMethod.LINES)
          {
             partialFootholdControlModule.getSupportPolygon(supportPolygon);
-            FramePoint2d centroid = supportPolygon.getCentroid();
             int corners = supportPolygon.getNumberOfVertices();
 
             double timeToGoToCorner = this.timeToGoToCorner.getDoubleValue();
@@ -216,31 +217,35 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             double timeToExploreCorner = timeToGoToCorner + timeToStayAtCorner;
 
             int currentCornerIdx = (int) (timeExploring / timeToExploreCorner);
+            ReferenceFrame soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
             if (currentCornerIdx >= corners)
             {
                lastShrunkTime.set(timeInState);
                currentCornerIdx = 0;
-//               done = true;
+               // done = true;
+            }
+
+            supportPolygon.getFrameVertex(currentCornerIdx, currentCorner);
+            FramePoint2d centroid = supportPolygon.getCentroid();
+
+            currentCorner.changeFrame(soleFrame);
+            centroid.changeFrame(soleFrame);
+            desiredCenterOfPressure.changeFrame(soleFrame);
+
+            double timeExploringCurrentCorner = timeExploring - (double)currentCornerIdx * timeToExploreCorner;
+            if (timeExploringCurrentCorner <= timeToGoToCorner)
+            {
+               double percent = timeExploringCurrentCorner / timeToGoToCorner;
+               percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+               desiredCenterOfPressure.interpolate(centroid, currentCorner, percent);
             }
             else
             {
-               FramePoint2d curretCorner = new FramePoint2d();
-               supportPolygon.getFrameVertex(currentCornerIdx, curretCorner);
-
-               double timeExploringCurrentCorner = timeExploring - (double)currentCornerIdx * timeToExploreCorner;
-               if (timeExploringCurrentCorner <= timeToGoToCorner)
-               {
-                  double percent = timeExploringCurrentCorner / timeToGoToCorner;
-                  percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
-                  desiredCenterOfPressure.interpolate(centroid, curretCorner, percent);
-               }
-               else
-               {
-                  desiredCenterOfPressure.set(curretCorner);
-               }
+               desiredCenterOfPressure.set(currentCorner);
             }
 
          }
+
          centerOfPressureCommand.setDesiredCoP(desiredCenterOfPressure.getPoint());
          copCommandWeight.get(tempVector2d);
          centerOfPressureCommand.setWeight(tempVector2d);
