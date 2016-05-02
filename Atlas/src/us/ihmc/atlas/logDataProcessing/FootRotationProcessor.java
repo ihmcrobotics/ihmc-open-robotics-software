@@ -32,7 +32,7 @@ public class FootRotationProcessor implements LogDataProcessorFunction
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
+         String namePrefix = contactableFeet.get(robotSide).getName();
          PartialFootholdControlModule partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controllerDT, contactableFeet.get(robotSide),
                twistCalculator, walkingControllerParameters, registry, yoGraphicsListRegistry);
          partialFootholdControlModules.put(robotSide, partialFootholdControlModule);
