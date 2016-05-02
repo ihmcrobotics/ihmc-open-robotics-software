@@ -1,8 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.Test;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -12,13 +16,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import org.junit.Test;
-
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import static org.junit.Assert.*;
 
 @DeployableTestClass(targets = TestPlanTarget.CodeQuality)
 public class PacketCodeQualityTest
@@ -42,7 +40,7 @@ public class PacketCodeQualityTest
 
    @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testAllNetClassListPacketsHaveRandomConstructor()
+   public void testAllRosExportedPacketsHaveRandomConstructor()
    {
       IHMCCommunicationKryoNetClassList classList = new IHMCCommunicationKryoNetClassList();
       Set<Class> badClasses = new HashSet<>();
@@ -72,7 +70,7 @@ public class PacketCodeQualityTest
          return;
       }
 
-      if(Packet.class.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers()))
+      if(Packet.class.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers()) && clazz.isAnnotationPresent(RosMessagePacket.class))
       {
          try
          {
