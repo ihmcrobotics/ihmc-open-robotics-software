@@ -227,7 +227,7 @@ public class GenericRosMessageConverter
          {
             convertVecmathField(ihmcMessage, message, field);
          }
-         else if (field.getType().isArray())
+         else if (field.getType().isArray() && !field.getType().getComponentType().isPrimitive())
          {
             setListFromArray(ihmcMessage, message, field);
          }
