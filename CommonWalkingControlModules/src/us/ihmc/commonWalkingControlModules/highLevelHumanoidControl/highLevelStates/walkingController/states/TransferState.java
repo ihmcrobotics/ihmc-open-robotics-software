@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceMana
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -17,7 +18,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public abstract class TransferState extends WalkingState
 {
    protected final RobotSide transferToSide;
-   
+
    protected final WalkingMessageHandler walkingMessageHandler;
    protected final MomentumBasedController momentumBasedController;
    protected final WalkingFailureDetectionControlModule failureDetectionControlModule;
@@ -69,8 +70,14 @@ public abstract class TransferState extends WalkingState
    {
       if (!balanceManager.isICPPlanDone())
          return false;
+      balanceManager.getCapturePoint(capturePoint2d);
+      FrameConvexPolygon2d supportPolygonInWorld = momentumBasedController.getBipedSupportPolygons().getSupportPolygonInWorld();
+      boolean isICPInsideSupportPolygon = supportPolygonInWorld.isPointInside(capturePoint2d);
 
-      return balanceManager.isTransitionToSingleSupportSafe(transferToSide);
+      if (!isICPInsideSupportPolygon)
+         return true;
+      else
+         return balanceManager.isTransitionToSingleSupportSafe(transferToSide);
    }
 
    public boolean isStopWalkingSafe()
