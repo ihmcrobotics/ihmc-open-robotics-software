@@ -54,8 +54,9 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
    private final DoubleParameter quadSupportDurationParameter = parameterFactory.createDouble("quadSupportDuration", 1.00);
    private final DoubleParameter doubleSupportDurationParameter = parameterFactory.createDouble("doubleSupportDuration", 0.33);
-   private final DoubleParameter stanceWidthNominalParameter = parameterFactory.createDouble("stanceWidthNominal", 0.25);
    private final DoubleParameter stanceLengthNominalParameter = parameterFactory.createDouble("stanceLengthNominal", 1.1);
+   private final DoubleParameter stanceWidthNominalParameter = parameterFactory.createDouble("stanceWidthNominal", 0.2);
+   private final DoubleParameter stanceWidthVelocityScalingParameter = parameterFactory.createDouble("stanceWidthVelocityScaling", 0.35);
    private final DoubleParameter stepGroundClearanceParameter = parameterFactory.createDouble("stepGroundClearance", 0.10);
 
    // frames
@@ -281,6 +282,8 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
 
    private void computeNominalCmpPositions(RobotQuadrant hindQuadrant, RobotQuadrant frontQuadrant, FramePoint[] nominalCmpPositionAtSoS, FramePoint nominalCmpPositionAtEoS)
    {
+      // increase stance width in proportion to lateral velocity to prevent self collision
+      double stanceWidth = stanceWidthNominalParameter.get() + stanceWidthVelocityScalingParameter.get() * Math.abs(inputProvider.getPlanarVelocityInput().getY());
       double xStride = inputProvider.getPlanarVelocityInput().getX() * doubleSupportDurationParameter.get();
       double yStride = inputProvider.getPlanarVelocityInput().getY() * doubleSupportDurationParameter.get() * 2;
       double bodyYaw, yStance, xOffset, yOffset;
@@ -296,7 +299,7 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
 
       // cmp position after 1 step
       bodyYaw = bodyYaw + inputProvider.getPlanarVelocityInput().getZ() * doubleSupportDurationParameter.get();
-      yStance = hindQuadrant.getSide().negateIfLeftSide(stanceWidthNominalParameter.get());
+      yStance = hindQuadrant.getSide().negateIfLeftSide(stanceWidth);
       xOffset =-Math.sin(bodyYaw) * yStance + Math.cos(bodyYaw) * xStride - Math.sin(bodyYaw) * yStride;
       yOffset = Math.cos(bodyYaw) * yStance + Math.sin(bodyYaw) * xStride + Math.cos(bodyYaw) * yStride;
       nominalCmpPositionAtSoS[1].setIncludingFrame(nominalCmpPositionAtSoS[0]);
@@ -305,7 +308,7 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
 
       // cmp position after 2 steps
       bodyYaw = bodyYaw + inputProvider.getPlanarVelocityInput().getZ() * doubleSupportDurationParameter.get();
-      yStance = hindQuadrant.getSide().negateIfRightSide(stanceWidthNominalParameter.get());
+      yStance = hindQuadrant.getSide().negateIfRightSide(stanceWidth);
       xOffset =-Math.sin(bodyYaw) * yStance + Math.cos(bodyYaw) * xStride - Math.sin(bodyYaw) * yStride;
       yOffset = Math.cos(bodyYaw) * yStance + Math.sin(bodyYaw) * xStride + Math.cos(bodyYaw) * yStride;
       nominalCmpPositionAtEoS.setIncludingFrame(nominalCmpPositionAtSoS[1]);
