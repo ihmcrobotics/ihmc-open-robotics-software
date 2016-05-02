@@ -3,6 +3,7 @@ package us.ihmc.utilities.ros;
 import org.apache.commons.lang3.text.WordUtils;
 import us.ihmc.communication.ros.generators.*;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,12 +17,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ROSMessageGenerator
+public class ROSMessageFileCreator
 {
    private static final int WRAP_LENGTH = 100;
    boolean overwriteSubMessages;
 
-   public ROSMessageGenerator(boolean overwriteSubMessages)
+   public ROSMessageFileCreator(boolean overwriteSubMessages)
    {
       this.overwriteSubMessages = overwriteSubMessages;
    }
@@ -72,7 +73,7 @@ public class ROSMessageGenerator
          Files.createDirectories(msgDirectoryPath);
       }
 
-      messageName = RosMessageGenerationTools.getRosMessageClassNameFromIHMCMessage(messageName);
+      messageName = GenericROSTranslationTools.getRosMessageClassNameFromIHMCMessage(messageName);
 
       File messageFile = msgDirectoryPath.resolve(messageName + ".msg").toFile();
 
@@ -134,7 +135,7 @@ public class ROSMessageGenerator
       for (Field exportedField : exportedFields)
       {
          cleanupAndLineWrapDocumentation(fileContents, exportedField.getAnnotation(RosExportedField.class).documentation());
-         String rosTypeForJavaType = RosMessageGenerationTools.getRosTypeForJavaType(exportedField, exportedField.getType());
+         String rosTypeForJavaType = GenericROSTranslationTools.getRosTypeForJavaType(exportedField, exportedField.getType());
          System.out.println("Received ros type of " + rosTypeForJavaType + " for field " + exportedField.getName() + " declared in " + exportedField
                .getDeclaringClass().getSimpleName());
          fileContents.append(rosTypeForJavaType).append(" ").append(camelCaseToLowerCaseWithUnderscores(exportedField.getName())).append("\n\n");
@@ -160,14 +161,14 @@ public class ROSMessageGenerator
          {
             addExplicitlyDocumentedEnumToFileContents(fileContents, exportedEnumClass, documentedFields);
          }
-         else if(RosMessageGenerationTools.hasDocumentation(exportedEnumClass))
+         else if(GenericROSTranslationTools.hasDocumentation(exportedEnumClass))
          {
             addImplicitlyDocumentedEnumToFileContents(fileContents, exportedEnumClass);
          }
          else
          {
-            PrintTools.error(ROSMessageGenerator.class, "Could not find any documentation for the enum values of " + exportedEnumClass.getCanonicalName()
-            + " even though it is ROS Exported Field. Excluding from generated files. Please add documentation to the enum values. If this is a low-level/implicitly documented enum, consult RosMessageGenerationTools.java's getDocumentation() method.");
+            PrintTools.error(ROSMessageFileCreator.class, "Could not find any documentation for the enum values of " + exportedEnumClass.getCanonicalName()
+            + " even though it is ROS Exported Field. Excluding from generated files. Please add documentation to the enum values. If this is a low-level/implicitly documented enum, consult ROSMessageConversionTools.java's getDocumentation() method.");
          }
 
          fileContents.append("\n");
@@ -193,7 +194,7 @@ public class ROSMessageGenerator
       for (Enum enumConstant : enumConstants)
       {
          fileContents.append("uint8 ").append(enumConstant.name()).append("=");
-         String enumDocumentation = RosMessageGenerationTools.getDocumentation(exportedEnumClass, enumConstant);
+         String enumDocumentation = GenericROSTranslationTools.getDocumentation(exportedEnumClass, enumConstant);
          fileContents.append(enumConstant.ordinal()).append(" ");
          fileContents.append("# ").append(enumDocumentation).append("\n");
       }

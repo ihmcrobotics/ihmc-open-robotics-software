@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class IHMCMessageToROSTranslatorTest
+public class IHMCROSTranslationRuntimeToolsTest
 {
 
    @Test
@@ -43,8 +43,8 @@ public class IHMCMessageToROSTranslatorTest
          {
             randomConstructor = concreteType.getConstructor(Random.class);
             ihmcMessage = (Packet<?>) randomConstructor.newInstance(random);
-            rosMessage = IHMCMessageToROSTranslator.convertToRosMessage(ihmcMessage);
-            Packet packet = IHMCMessageToROSTranslator.convertToIHMCMessage(rosMessage);
+            rosMessage = IHMCROSTranslationRuntimeTools.convertToRosMessage(ihmcMessage);
+            Packet packet = IHMCROSTranslationRuntimeTools.convertToIHMCMessage(rosMessage);
             assertTrue("Problem with packet " + concreteType + ". \n" + ihmcMessage + ", \n" + packet, packet.epsilonEquals(ihmcMessage, 0.1));
          }
          catch (Exception e)

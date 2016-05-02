@@ -37,6 +37,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable
 {
+   public static final String JOINT_STATE_TOPIC = "/output/joint_states";
    public static final String WORLD_FRAME = "world";
    private final IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
 
@@ -120,7 +121,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
       jointNameHash = RobotConfigurationData.calculateJointNameHash(joints, forceSensorDefinitions, imuDefinitions);
 
-      rosMainNode.attachPublisher(rosNameSpace + IHMCRosApiMessageMap.JOINT_STATE_TOPIC, jointStatePublisher);
+      rosMainNode.attachPublisher(rosNameSpace + JOINT_STATE_TOPIC, jointStatePublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/robot_pose", pelvisOdometryPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/robot_motion_status", robotMotionStatusPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/behavior", robotBehaviorPublisher);

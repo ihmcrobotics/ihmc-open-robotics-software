@@ -26,8 +26,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @RosMessagePacket(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.",
-                  rosPackage = "ihmc_msgs",
-                  topic = "/output/footstep")
+                  rosPackage = "ihmc_msgs")
 public class FootstepDataMessage extends Packet<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
 {
    public enum FootstepOrigin

@@ -15,6 +15,6 @@ public class ROSMessageFolderExistsTest
    @Test(timeout = 30000)
    public void testROSMessageFolderExists()
    {
-//      assertTrue(Files.exists(Paths.get(ROSMessageGenerator.messageRootFolder)));
+//      assertTrue(Files.exists(Paths.get(ROSMessageFileCreator.messageRootFolder)));
    }
 }

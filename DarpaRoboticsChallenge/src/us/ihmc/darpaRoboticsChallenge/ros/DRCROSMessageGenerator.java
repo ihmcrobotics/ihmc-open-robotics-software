@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.ros;
 import org.reflections.Reflections;
 import us.ihmc.communication.ros.generators.RosCustomGenerator;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.utilities.ros.ROSMessageGenerator;
+import us.ihmc.utilities.ros.ROSMessageFileCreator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -14,7 +14,7 @@ public class DRCROSMessageGenerator
 {
    public static void generate() throws Exception
    {
-      ROSMessageGenerator messageGenerator = new ROSMessageGenerator(true);
+      ROSMessageFileCreator messageGenerator = new ROSMessageFileCreator(true);
 
       Reflections reflections = new Reflections("us.ihmc");
       Set<Class<?>> concreteTypes = new HashSet<>();
