@@ -425,6 +425,11 @@ public class DRCSimulationFactory
       return threadDataSynchronizer.getControllerFullRobotModel();
    }
 
+   /**
+    * For unit testing only
+    *
+    * @param controller
+    */
    public void addRobotControllerOnControllerThread(RobotController controller)
    {
       drcControllerThread.addRobotController(controller);
