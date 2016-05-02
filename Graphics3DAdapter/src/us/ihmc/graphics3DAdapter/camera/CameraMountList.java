@@ -38,5 +38,10 @@ public class CameraMountList implements java.io.Serializable
 
       return null;
    }
+
+   public ArrayList<CameraMountInterface> getCameraMountList()
+   {
+      return mounts;
+   }
 }
 

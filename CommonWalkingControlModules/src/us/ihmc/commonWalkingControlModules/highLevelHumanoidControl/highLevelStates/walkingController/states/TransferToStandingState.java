@@ -10,12 +10,15 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceMana
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class TransferToStandingState extends WalkingState
 {
    private final DoubleYoVariable maxICPErrorToSwitchToStanding = new DoubleYoVariable("maxICPErrorToSwitchToStanding", registry);
+
+   private final BooleanYoVariable doFootExplorationInTransferToStanding = new BooleanYoVariable("doFootExplorationInTransferToStanding", registry);
 
    private final WalkingMessageHandler walkingMessageHandler;
    private final MomentumBasedController momentumBasedController;
@@ -40,6 +43,8 @@ public class TransferToStandingState extends WalkingState
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
+
+      doFootExplorationInTransferToStanding.set(false);
    }
 
    @Override
@@ -65,6 +70,18 @@ public class TransferToStandingState extends WalkingState
       balanceManager.resetPushRecovery();
 
       feetManager.initializeContactStatesForDoubleSupport(null);
+
+      WalkingState previousState = (WalkingState) getPreviousState();
+      RobotSide previousSupportSide = previousState.getSupportSide();
+
+      if (doFootExplorationInTransferToStanding.getBooleanValue())
+      {
+         if (previousSupportSide != null)
+         {
+            feetManager.initializeFootExploration(previousSupportSide.getOppositeSide());
+         }
+      }
+
       momentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
       failureDetectionControlModule.setNextFootstep(null);
@@ -76,6 +93,7 @@ public class TransferToStandingState extends WalkingState
 
       // Just standing in double support, do nothing
       pelvisOrientationManager.setToHoldCurrentDesiredInMidFeetZUpFrame();
+      balanceManager.setICPPlanTransferFromSide(previousSupportSide);
       balanceManager.initializeICPPlanForStanding();
    }
 
