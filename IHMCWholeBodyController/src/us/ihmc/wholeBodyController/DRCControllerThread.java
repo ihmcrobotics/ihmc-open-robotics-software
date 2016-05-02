@@ -413,6 +413,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       return robotController;
    }
 
+   /**
+    * For unit testing only
+    *
+    * @param controller
+    */
    public void addRobotController(RobotController controller)
    {
       robotController.addRobotController(controller);

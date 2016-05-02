@@ -224,6 +224,11 @@ public class DRCSimulationTestHelper
       return (SDFFullHumanoidRobotModel) fullRobotModel;
    }
 
+   /**
+    * For unit testing only
+    *
+    * @param controller
+    */
    public void addRobotControllerOnControllerThread(RobotController controller)
    {
       drcSimulationFactory.addRobotControllerOnControllerThread(controller);
