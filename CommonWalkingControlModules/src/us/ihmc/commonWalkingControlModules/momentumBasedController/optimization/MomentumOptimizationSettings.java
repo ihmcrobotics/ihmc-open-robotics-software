@@ -26,9 +26,9 @@ public class MomentumOptimizationSettings
    private final Vector2d copWeight = new Vector2d(100.0, 200.0); //750.0, 1500.0);
    private final Vector2d copRateDefaultWeight = new Vector2d(20000.0, 20000.0); //100000.0, 200000.0);
    private final Vector2d copRateHighWeight = new Vector2d(2500000.0, 10000000.0);
-   private double headJointspaceWeight  = 1.0;
-   private double headTaskspaceWeight  = 1.0;
-   private double headUserModeWeight  = 1.0;
+   private double headJointspaceWeight = 1.0;
+   private double headTaskspaceWeight = 1.0;
+   private double headUserModeWeight = 1.0;
    private double handUserModeWeight = 50.0;
    private double handJointspaceWeight = 1.0;
    private Vector3d handAngularTaskspaceWeight = new Vector3d(1.0, 1.0, 1.0);
@@ -53,8 +53,8 @@ public class MomentumOptimizationSettings
 
    public void setBodyWeights(Vector3d chestAngularWeight, Vector3d pelvisAngularWeight)
    {
-      chestAngularWeight.set(chestAngularWeight);
-      pelvisAngularWeight.set(pelvisAngularWeight);
+      this.chestAngularWeight.set(chestAngularWeight);
+      this.pelvisAngularWeight.set(pelvisAngularWeight);
    }
 
    public void setManipulationWeights(double jointspace, double taskspace, double userMode)
@@ -81,18 +81,17 @@ public class MomentumOptimizationSettings
       defaultAngularFootWeight.set(swingAngular);
    }
 
-   public void setPelvisWeight(double weight)
+   public void setPelvisWeight(double pelvisAngularWeight)
    {
-      pelvisAngularWeight.set(weight, weight, weight);
+      this.pelvisAngularWeight.set(pelvisAngularWeight, pelvisAngularWeight, pelvisAngularWeight);
    }
 
-   public void setPelvisWeights(Vector3d angular)
+   public void setPelvisWeights(Vector3d pelvisAngularWeight)
    {
-      pelvisAngularWeight.set(angular);
+      this.pelvisAngularWeight.set(pelvisAngularWeight);
    }
 
-   public void setMomentumWeight(double linearMomentumWeightX, double linearMomentumWeightY, double linearMomentumWeightZ, double angularMomentumWeightXY,
-         double angularMomentumWeightZ)
+   public void setMomentumWeight(double linearMomentumWeightX, double linearMomentumWeightY, double linearMomentumWeightZ, double angularMomentumWeightXY, double angularMomentumWeightZ)
    {
       linearMomentumWeight.set(linearMomentumWeightX, linearMomentumWeightY, linearMomentumWeightZ);
       angularMomentumWeight.set(angularMomentumWeightXY, angularMomentumWeightXY, angularMomentumWeightZ);

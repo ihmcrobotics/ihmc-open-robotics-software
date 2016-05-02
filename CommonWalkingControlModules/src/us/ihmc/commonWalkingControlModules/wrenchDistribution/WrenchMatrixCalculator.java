@@ -11,6 +11,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -111,6 +112,12 @@ public class WrenchMatrixCalculator
       PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(command.getContactingRigidBody());
       helper.setPlaneContactStateCommand(command);
       useForceRateHighWeight.set(command.isUseHighCoPDamping());
+   }
+
+   public void submitCenterOfPressureCommand(CenterOfPressureCommand command)
+   {
+      PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(command.getContactingRigidBody());
+      helper.setCenterOfPressureCommand(command);
    }
 
    private final Vector2d tempDeisredCoPWeight = new Vector2d();

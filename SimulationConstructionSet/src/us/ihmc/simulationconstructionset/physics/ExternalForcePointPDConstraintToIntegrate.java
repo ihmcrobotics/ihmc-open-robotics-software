@@ -47,7 +47,7 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
          YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
-      stiffness = new DoubleYoVariable(name + "_Stiffnes", registry);
+      stiffness = new DoubleYoVariable(name + "_Stiffness", registry);
       damping = new DoubleYoVariable(name + "_Damping", registry);
 
       this.connectionPointA = connectionPointA;
@@ -95,8 +95,6 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
 
       totalForce.add(springForce);
       totalForce.add(damperForce);
-
-      totalForce.changeFrame(worldFrame);
 
       connectionPointA.setForce(totalForce.getVector());
       totalForce.scale(-1.0);

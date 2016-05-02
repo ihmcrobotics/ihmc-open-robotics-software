@@ -25,7 +25,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
@@ -44,7 +44,7 @@ public class FootControlModule
 
    public enum ConstraintType
    {
-      FULL, HOLD_POSITION, TOES, SWING, MOVE_VIA_WAYPOINTS
+      FULL, HOLD_POSITION, TOES, SWING, MOVE_VIA_WAYPOINTS, EXPLORE_POLYGON
    }
 
    private static final double coefficientOfFriction = 0.8;
@@ -66,6 +66,7 @@ public class FootControlModule
    private final MoveViaWaypointsState moveViaWaypointsState;
    private final OnToesState onToesState;
    private final FullyConstrainedState supportState;
+   private final ExploreFootPolygonState exploreFootPolygonState;
 
    private final FootSwitchInterface footSwitch;
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
@@ -121,6 +122,9 @@ public class FootControlModule
       supportState = new FullyConstrainedState(footControlHelper, registry);
       states.add(supportState);
 
+      exploreFootPolygonState = new ExploreFootPolygonState(footControlHelper, holdPositionFootControlGains, registry);
+      states.add(exploreFootPolygonState);
+
       holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
       states.add(holdPositionState);
 
@@ -143,6 +147,7 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.SWING, falses);
       contactStatesMap.put(ConstraintType.MOVE_VIA_WAYPOINTS, falses);
       contactStatesMap.put(ConstraintType.FULL, trues);
+      contactStatesMap.put(ConstraintType.EXPLORE_POLYGON, trues);
       contactStatesMap.put(ConstraintType.HOLD_POSITION, trues);
       contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
    }
@@ -199,6 +204,7 @@ public class FootControlModule
       moveViaWaypointsState.setWeight(defaultFootWeight);
       onToesState.setWeight(highFootWeight);
       supportState.setWeight(highFootWeight);
+      exploreFootPolygonState.setWeight(defaultFootWeight);
       holdPositionState.setWeight(defaultFootWeight);
    }
 
@@ -208,6 +214,7 @@ public class FootControlModule
       moveViaWaypointsState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       onToesState.setWeights(highAngularFootWeight, highLinearFootWeight);
       supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
+      exploreFootPolygonState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       holdPositionState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
    }
 
@@ -287,7 +294,8 @@ public class FootControlModule
 
    public boolean isInFlatSupportState()
    {
-      return getCurrentConstraintType() == ConstraintType.FULL || getCurrentConstraintType() == ConstraintType.HOLD_POSITION;
+      ConstraintType currentConstraintType = getCurrentConstraintType();
+      return currentConstraintType == ConstraintType.FULL || currentConstraintType == ConstraintType.EXPLORE_POLYGON || currentConstraintType == ConstraintType.HOLD_POSITION;
    }
 
    public boolean isInToeOff()
@@ -368,11 +376,6 @@ public class FootControlModule
       }
    }
 
-   public void setPredictedToeOffDuration(double predictedToeOffDuration)
-   {
-      onToesState.setPredictedToeOffDuration(predictedToeOffDuration);
-   }
-
    public void resetHeightCorrectionParametersForSingularityAvoidance()
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.resetHeightCorrectionParameters();
@@ -383,9 +386,9 @@ public class FootControlModule
       swingState.requestSwingSpeedUp(speedUpFactor);
    }
 
-   public void registerDesiredContactPointForToeOff(FramePoint2d desiredContactPoint)
+   public void setExitCMPForToeOff(FramePoint exitCMP)
    {
-      onToesState.setDesiredToeOffContactPoint(desiredContactPoint);
+      onToesState.setExitCMP(exitCMP);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
@@ -408,5 +411,15 @@ public class FootControlModule
             ret.addCommand(state.getFeedbackControlCommand());
       }
       return ret;
+   }
+
+   public void initializeFootExploration()
+   {
+      setContactState(ConstraintType.EXPLORE_POLYGON);
+   }
+
+   public void setAllowFootholdAdjustments(boolean allow)
+   {
+      holdPositionState.doFootholdAdjustments(allow);
    }
 }

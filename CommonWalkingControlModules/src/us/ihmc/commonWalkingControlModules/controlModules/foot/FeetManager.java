@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -24,8 +26,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
-import javax.vecmath.Vector3d;
-
 public class FeetManager
 {
    private static final boolean USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED = true;
@@ -45,10 +45,13 @@ public class FeetManager
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
+   private final MomentumBasedController momentumBasedController;
+
    // TODO Needs to be cleaned up someday... (Sylvain)
    public FeetManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
+      this.momentumBasedController = momentumBasedController;
       feet = momentumBasedController.getContactableFeet();
       walkOnTheEdgesManager = new WalkOnTheEdgesManager(momentumBasedController, walkingControllerParameters, feet, registry);
 
@@ -239,12 +242,21 @@ public class FeetManager
       else
          footNormalContactVector.setIncludingFrame(feet.get(robotSide).getSoleFrame(), 0.0, 0.0, 1.0);
       footControlModules.get(robotSide).setContactState(ConstraintType.FULL, footNormalContactVector);
+
+      if (footControlModules.get(robotSide).getCurrentConstraintType() == ConstraintType.TOES)
+         momentumBasedController.restorePreviousFootContactPoints(robotSide);
+
+      FootControlModule supportFootControlModule = footControlModules.get(robotSide.getOppositeSide());
+      supportFootControlModule.setAllowFootholdAdjustments(true);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)
    {
       FootControlModule footControlModule = footControlModules.get(robotSide);
       footControlModule.setContactState(ConstraintType.SWING);
+
+      FootControlModule supportFootControlModule = footControlModules.get(robotSide.getOppositeSide());
+      supportFootControlModule.setAllowFootholdAdjustments(false);
    }
 
    private void setContactStateForMoveViaWaypoints(RobotSide robotSide)
@@ -270,17 +282,16 @@ public class FeetManager
       return walkOnTheEdgesManager.doToeOff();
    }
 
-   public void requestToeOff(RobotSide trailingLeg, double predictedToeOffDuration)
+   public void requestToeOff(RobotSide trailingLeg)
    {
       if (footControlModules.get(trailingLeg).isInToeOff())
          return;
-      footControlModules.get(trailingLeg).setPredictedToeOffDuration(predictedToeOffDuration);
       setOnToesContactState(trailingLeg);
    }
 
-   public void registerDesiredContactPointForToeOff(RobotSide robotSide, FramePoint2d desiredContactPoint)
+   public void setExitCMPForToeOff(RobotSide robotSide, FramePoint exitCMP)
    {
-      footControlModules.get(robotSide).registerDesiredContactPointForToeOff(desiredContactPoint);
+      footControlModules.get(robotSide).setExitCMPForToeOff(exitCMP);
    }
 
    public void reset()
@@ -329,5 +340,12 @@ public class FeetManager
             ret.addCommand(template.getCommand(i));
       }
       return ret;
+   }
+
+   public void initializeFootExploration(RobotSide robotSideToExplore)
+   {
+      if (robotSideToExplore == null) return;
+      FootControlModule footControlModule = footControlModules.get(robotSideToExplore);
+      footControlModule.initializeFootExploration();
    }
 }

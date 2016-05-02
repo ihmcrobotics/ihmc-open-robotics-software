@@ -10,17 +10,14 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class WalkingSingleSupportState extends SingleSupportState
@@ -30,7 +27,6 @@ public class WalkingSingleSupportState extends SingleSupportState
    private Footstep nextFootstep;
    private final FramePose actualFootPoseInWorld = new FramePose(worldFrame);
    private final FramePoint nextExitCMP = new FramePoint();
-   private final FramePoint2d toeOffContactPoint = new FramePoint2d();
 
    private final MomentumBasedController momentumBasedController;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
@@ -44,7 +40,6 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final DoubleYoVariable icpErrorThresholdToSpeedUpSwing = new DoubleYoVariable("icpErrorThresholdToSpeedUpSwing", registry);
 
    private final BooleanYoVariable finishSingleSupportWhenICPPlannerIsDone = new BooleanYoVariable("finishSingleSupportWhenICPPlannerIsDone", registry);
-   private final SideDependentList<ContactableFoot> feet;
 
    public WalkingSingleSupportState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, MomentumBasedController momentumBasedController,
          HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
@@ -62,8 +57,6 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
-
-      feet = momentumBasedController.getContactableFeet();
    }
 
    @Override
@@ -87,6 +80,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             walkingMessageHandler.clearFootsteps();
 
             balanceManager.clearICPPlan();
+            balanceManager.setICPPlanSupportSide(supportSide);
             balanceManager.addFootstepToPlan(nextFootstep);
             balanceManager.updateICPPlanForSingleSupportDisturbances();
          }
@@ -133,7 +127,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.addFootstepToPlan(nextFootstep);
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0));
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1));
-      balanceManager.initializeICPPlanForSingleSupport(supportSide);
+      balanceManager.setICPPlanSupportSide(supportSide);
+      balanceManager.initializeICPPlanForSingleSupport();
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
@@ -165,11 +160,8 @@ public class WalkingSingleSupportState extends SingleSupportState
          if (feetManager.isInFlatSupportState(supportSide) && willDoToeOff && balanceManager.isOnExitCMP())
          {
             balanceManager.getNextExitCMP(nextExitCMP);
-            nextExitCMP.changeFrame(feet.get(supportSide).getSoleFrame());
-            toeOffContactPoint.setByProjectionOntoXYPlaneIncludingFrame(nextExitCMP);
-            feetManager.registerDesiredContactPointForToeOff(supportSide, toeOffContactPoint);
-            double predictedToeOffDuration = balanceManager.getTimeRemainingInCurrentState() + walkingMessageHandler.getTransferTime();
-            feetManager.requestToeOff(supportSide, predictedToeOffDuration);
+            feetManager.setExitCMPForToeOff(supportSide, nextExitCMP);
+            feetManager.requestToeOff(supportSide);
          }
       }
    }
