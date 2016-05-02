@@ -54,7 +54,7 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.scripts.Script;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
@@ -964,13 +964,13 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       scs.addYoVariableRegistry(registry);
       yoGraphicsListRegistry.addArtifactListsToPlotter((Plotter) scs.getExtraPanel("Plotter"));
-      scs.addScript(new VizUpdater());
+      drcSimulationTestHelper.addRobotControllerOnControllerThread(new VizUpdater());
    }
 
-   private class VizUpdater implements Script
+   private class VizUpdater implements RobotController
    {
       @Override
-      public void doScript(double t)
+      public void doControl()
       {
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -990,6 +990,29 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
             footSupport.update();
             supportPolygons.get(robotSide).setFrameConvexPolygon2d(footSupport);
          }
+      }
+
+      @Override
+      public void initialize()
+      {
+      }
+
+      @Override
+      public YoVariableRegistry getYoVariableRegistry()
+      {
+         return null;
+      }
+
+      @Override
+      public String getName()
+      {
+         return null;
+      }
+
+      @Override
+      public String getDescription()
+      {
+         return null;
       }
    };
 }

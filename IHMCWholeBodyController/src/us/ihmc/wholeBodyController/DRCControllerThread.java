@@ -71,7 +71,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final ThreadDataSynchronizerInterface threadDataSynchronizer;
    private final DRCOutputWriter outputWriter;
 
-   private final RobotController robotController;
+   private final ModularRobotController robotController;
 
    private final ExecutionTimer controllerTimer = new ExecutionTimer("controllerTimer", 10.0, registry);
    private final LongYoVariable lastEstimatorStartTime = new LongYoVariable("nextExecutionTime", registry);
@@ -95,11 +95,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
 
    private final GlobalDataProducer globalDataProducer;
-   
+
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
    private final ReferenceFrame rootFrame;
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
-   
+
    public DRCControllerThread(WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation,
          MomentumBasedControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, DRCOutputWriter outputWriter,
          GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity, double estimatorDT)
@@ -189,7 +189,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       return fullRobotModelCorruptor;
    }
 
-   private RobotController createMomentumBasedController(SDFFullHumanoidRobotModel controllerModel, OutputProcessor outputProcessor,
+   private ModularRobotController createMomentumBasedController(SDFFullHumanoidRobotModel controllerModel, OutputProcessor outputProcessor,
          MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT, double gravity,
          ForceSensorDataHolderReadOnly forceSensorDataHolderForController, ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
@@ -317,7 +317,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          {
             globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_READ, e.getMessage());
          }
-         
+
          throw new RuntimeException(e);
       }
    }
@@ -363,7 +363,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             {
                robotVisualizer.update(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()), registry);
             }
-            
+
             rootFrame.getTransformToDesiredFrame(rootToWorldTransform, ReferenceFrame.getWorldFrame());
             yoGraphicsListRegistry.setControllerTransformToWorld(rootToWorldTransform);
          }
@@ -411,6 +411,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    public RobotController getRobotController()
    {
       return robotController;
+   }
+
+   public void addRobotController(RobotController controller)
+   {
+      robotController.addRobotController(controller);
    }
 
    public FullRobotModel getFullRobotModel()
