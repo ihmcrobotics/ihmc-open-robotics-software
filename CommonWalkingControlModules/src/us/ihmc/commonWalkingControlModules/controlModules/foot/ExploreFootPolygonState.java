@@ -63,7 +63,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    private final static double defaultTimeToStayInCorner = 0.3;
 
    /**
-    * This is the amount of time the line exploration will keep the cop in a corner
+    * The weight the cop command gets for the qp solver
     */
    private final YoFrameVector2d copCommandWeight;
    private final static double defaultCopCommandWeight = 2000.0;
