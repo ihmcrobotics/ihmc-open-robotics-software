@@ -7,6 +7,11 @@ public class RealSenseR200Parameters implements RGBDCameraParameters
    private final DRCRobotCameraParameters realSenseCameraParameters;
    private final DRCRobotPointCloudParameters realSensePointCloudParameters;
 
+   public RealSenseR200Parameters(String namespace)
+   {
+      this(namespace, namespace);
+   }
+
    public RealSenseR200Parameters(String topicNamespace, String cameraName)
    {
       String rosTopic = "/" + topicNamespace + "/rgb/image_rect_color";
