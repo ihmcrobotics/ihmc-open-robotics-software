@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import java.util.Random;
 
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
@@ -15,7 +16,8 @@ import us.ihmc.communication.packets.PacketDestination;
       topic = "/control/desired_pump_psi")
 public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
 {
-   public int desiredPumpPSI;
+   @RosExportedField(documentation = "The desired hydraulic pump PSI.")
+   public int desiredPumpPsi;
 
    public AtlasDesiredPumpPSIPacket()
    {
@@ -27,14 +29,14 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
       this(random.nextInt());
    }
 
-   public AtlasDesiredPumpPSIPacket(int desiredPumpPSI)
+   public AtlasDesiredPumpPSIPacket(int desiredPumpPsi)
    {
       setDestination(PacketDestination.CONTROLLER.ordinal());
-      this.desiredPumpPSI = desiredPumpPSI;
+      this.desiredPumpPsi = desiredPumpPsi;
    }
 
    @Override public boolean epsilonEquals(AtlasDesiredPumpPSIPacket other, double epsilon)
    {
-      return desiredPumpPSI == other.desiredPumpPSI;
+      return desiredPumpPsi == other.desiredPumpPsi;
    }
 }
