@@ -39,9 +39,13 @@ public class PartialFootholdControlModule
 
    private final EnumYoVariable<PartialFootholdState> footholdState;
 
+   public enum RotationCalculatorType
+   {
+      VELOCITY, GEOMETRY
+   }
+   private final EnumYoVariable<RotationCalculatorType> rotationCalculatorType;
    private final VelocityFootRotationCalculator velocityFootRotationCalculator;
    private final GeometricFootRotationCalculator geometricFootRotationCalculator;
-   private final FootRotationCalculator footRotationCalculator;
 
    private final FootCoPOccupancyGrid footCoPOccupancyGrid;
 
@@ -127,7 +131,8 @@ public class PartialFootholdControlModule
       useCoPOccupancyGrid = new BooleanYoVariable(namePrefix + "UseCoPOccupancyGrid", registry);
       useCoPOccupancyGrid.set(true);
 
-      footRotationCalculator = geometricFootRotationCalculator;
+      rotationCalculatorType = new EnumYoVariable<RotationCalculatorType>(namePrefix + "RotationCalculatorType", registry, RotationCalculatorType.class);
+      rotationCalculatorType.set(RotationCalculatorType.GEOMETRY);
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
@@ -143,6 +148,18 @@ public class PartialFootholdControlModule
 
       velocityFootRotationCalculator.compute(desiredCenterOfPressure, centerOfPressure);
       geometricFootRotationCalculator.compute(desiredCenterOfPressure, centerOfPressure);
+      FootRotationCalculator footRotationCalculator;
+      switch (rotationCalculatorType.getEnumValue())
+      {
+      case GEOMETRY:
+         footRotationCalculator = geometricFootRotationCalculator;
+         break;
+      case VELOCITY:
+         footRotationCalculator = velocityFootRotationCalculator;
+         break;
+      default:
+         throw new RuntimeException();
+      }
 
       if (footRotationCalculator.isFootRotating())
       {
