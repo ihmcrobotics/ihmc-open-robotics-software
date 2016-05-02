@@ -216,7 +216,7 @@ public class IHMCMessageToROSTranslator
       message.setLocation(GenericRosMessageConverter.convertTuple3d(footstep.getLocation()));
       message.setOrientation(GenericRosMessageConverter.convertTuple4d(footstep.getOrientation()));
       message.setOrigin((byte) footstep.getOrigin().ordinal());
-      message.setRobotSide((byte) footstep.getOrigin().ordinal());
+      message.setRobotSide((byte) footstep.getRobotSide().ordinal());
       message.setSwingHeight(footstep.getSwingHeight());
       message.setTrajectoryType((byte) footstep.getTrajectoryType().ordinal());
 
