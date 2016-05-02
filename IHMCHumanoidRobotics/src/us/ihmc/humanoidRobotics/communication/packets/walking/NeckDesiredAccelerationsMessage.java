@@ -90,7 +90,7 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
    {
       if (neckControlMode != other.neckControlMode)
          return false;
-      if (ArrayTools.deltaEquals(neckDesiredJointAccelerations, other.neckDesiredJointAccelerations, epsilon))
+      if (!ArrayTools.deltaEquals(neckDesiredJointAccelerations, other.neckDesiredJointAccelerations, epsilon))
          return false;
       return true;
    }

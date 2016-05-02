@@ -102,7 +102,7 @@ public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAcceleratio
          return false;
       if (armControlMode != other.armControlMode)
          return false;
-      if (ArrayTools.deltaEquals(armDesiredJointAccelerations, other.armDesiredJointAccelerations, epsilon))
+      if (!ArrayTools.deltaEquals(armDesiredJointAccelerations, other.armDesiredJointAccelerations, epsilon))
          return false;
       return true;
    }
