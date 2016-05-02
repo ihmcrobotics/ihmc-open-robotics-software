@@ -4,6 +4,9 @@ import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.robotics.random.RandomTools;
+
+import java.util.Random;
 
 @RosMessagePacket(documentation = "This class is used to report the status of walking.",
       rosPackage = "ihmc_msgs",
@@ -27,6 +30,11 @@ public class WalkingStatusMessage extends StatusPacket<WalkingStatusMessage>
 
    public WalkingStatusMessage()
    {
+   }
+
+   public WalkingStatusMessage(Random random)
+   {
+      status = RandomTools.generateRandomEnum(random, Status.class);
    }
 
    @Override

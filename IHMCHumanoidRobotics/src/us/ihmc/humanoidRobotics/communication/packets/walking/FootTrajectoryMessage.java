@@ -10,7 +10,10 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.Random;
 
 @RosMessagePacket(documentation =
       "This message commands the controller first to unload if necessary and then to move in taskspace a foot to the desired pose (position & orientation) while going through the specified trajectory points."
@@ -31,6 +34,13 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    public FootTrajectoryMessage()
    {
       super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public FootTrajectoryMessage(Random random)
+   {
+      super(random);
+      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

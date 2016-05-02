@@ -156,10 +156,7 @@ public abstract class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectory
 
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
       {
-         double time = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
-         double position = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
-         double velocity = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
-         setTrajectoryPoint(i, time, position, velocity);
+         trajectoryPoints[i] = new TrajectoryPoint1DMessage(random);
       }
    }
 

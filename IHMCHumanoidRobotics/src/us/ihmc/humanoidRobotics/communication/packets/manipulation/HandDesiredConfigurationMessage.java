@@ -1,10 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.Random;
 
 @RosMessagePacket(documentation = "Packet for commanding the hands to perform various predefined grasps."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
@@ -37,6 +40,12 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       this.handDesiredConfiguration = handDesiredConfiguration;
+   }
+
+   public HandDesiredConfigurationMessage(Random random)
+   {
+      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
+      handDesiredConfiguration = RandomTools.generateRandomEnum(random, HandConfiguration.class);
    }
 
    public HandConfiguration getHandDesiredConfiguration()

@@ -10,6 +10,8 @@ import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessa
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
+import java.util.Random;
+
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace the head to the desired orientation while going through the specified trajectory points."
       + " A hermite based curve (third order) is used to interpolate the orientations."
@@ -26,6 +28,12 @@ public class HeadTrajectoryMessage extends AbstractSO3TrajectoryMessage<HeadTraj
    public HeadTrajectoryMessage()
    {
       super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public HeadTrajectoryMessage(Random random)
+   {
+      super(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

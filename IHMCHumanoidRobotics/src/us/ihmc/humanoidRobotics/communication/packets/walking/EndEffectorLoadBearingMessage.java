@@ -5,7 +5,10 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.Random;
 
 @RosMessagePacket(documentation = "This message commands the controller to start loading an end effector that was unloaded to support the robot weight. "
       + " One application is making a foot loadbearing."
@@ -67,6 +70,12 @@ public class EndEffectorLoadBearingMessage extends Packet<EndEffectorLoadBearing
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   public EndEffectorLoadBearingMessage(Random random)
+   {
+      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
+      endEffector = RandomTools.generateRandomEnum(random, EndEffector.class);
+      request = RandomTools.generateRandomEnum(random, LoadBearingRequest.class);
+   }
    /**
     * Create a message to request one end-effector to switch to load bearing.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
