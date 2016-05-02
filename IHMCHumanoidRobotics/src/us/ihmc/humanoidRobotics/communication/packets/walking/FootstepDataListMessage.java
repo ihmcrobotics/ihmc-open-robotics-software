@@ -138,8 +138,6 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
          startingFootstep = startingFootstep + ", ypr= " + Arrays.toString(frameOrientation.getYawPitchRoll());
       }
 
-      System.out.println(this.size());
-
       if (this.size() == 1)
       {
          RobotSide footSide = footstepDataList.get(0).getRobotSide();
