@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 
 import java.util.Random;
 
@@ -14,9 +14,14 @@ import java.util.Random;
 
 public class AbortWalkingMessage extends Packet<AbortWalkingMessage>
 {
+   public AbortWalkingMessage()
+   {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
    public AbortWalkingMessage(Random random)
    {
-      super(); // Do nothing, needed to make some unit tests work though.
+      this();
    }
 
    @Override
