@@ -19,7 +19,7 @@ import us.ihmc.robotics.random.RandomTools;
 
 @RosMessagePacket(documentation = "This class is used to build trajectory messages in taskspace. It holds the necessary information for one trajectory point. "
       + "Feel free to look at EuclideanTrajectoryPointMessage (translational) and EuclideanTrajectoryPointMessage (rotational)",
-      rosPackage = "ihmc_msgs")
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage> implements Transformable
 {
    @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")

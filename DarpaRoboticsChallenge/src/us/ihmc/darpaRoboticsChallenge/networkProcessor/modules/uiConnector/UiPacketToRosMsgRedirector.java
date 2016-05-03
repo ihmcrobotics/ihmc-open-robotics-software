@@ -1,9 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector;
 
-import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Set;
 
 import org.ros.internal.message.Message;
@@ -26,7 +24,7 @@ import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 public class UiPacketToRosMsgRedirector implements GlobalPacketConsumer
 {
 //   private static final Map<String, Class> PACKETS_TO_REDIRECT_TO_ROS = null; //IHMCRosApiMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
-   private static final Set<Class<?>> PACKETS_TO_REDIRECT_TO_ROS = GenericROSTranslationTools.getInputTopics();
+   private static final Set<Class<?>> PACKETS_TO_REDIRECT_TO_ROS = GenericROSTranslationTools.getCoreInputTopics();
    private final String ROS_NAMESPACE;
    
    private final RosMainNode rosMainNode;

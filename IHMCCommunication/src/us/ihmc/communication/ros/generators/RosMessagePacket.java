@@ -8,6 +8,7 @@ import java.lang.annotation.*;
 public @interface RosMessagePacket
 {
    String NO_CORRESPONDING_TOPIC_STRING = "NONE";
+   String CORE_IHMC_PACKAGE = "ihmc_msgs";
 
    String documentation();
    String topic() default NO_CORRESPONDING_TOPIC_STRING;

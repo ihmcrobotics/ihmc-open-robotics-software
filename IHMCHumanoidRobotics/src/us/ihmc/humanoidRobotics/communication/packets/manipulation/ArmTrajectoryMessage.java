@@ -17,7 +17,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " The jointTrajectoryMessages can have different waypoint times and different number of waypoints."
       + " If a joint trajectory message is empty, the controller will hold the last desired joint position while executing the other joint trajectories."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
-      rosPackage = "ihmc_msgs",
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/arm_trajectory")
 public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implements VisualizablePacket
 {

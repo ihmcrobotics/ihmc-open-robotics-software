@@ -11,7 +11,7 @@ import java.util.Random;
 
 @RosMessagePacket(documentation = "Packet for commanding the hands to perform various predefined grasps."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
-      rosPackage = "ihmc_msgs",
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/hand_desired_configuration")
 public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigurationMessage>
 {

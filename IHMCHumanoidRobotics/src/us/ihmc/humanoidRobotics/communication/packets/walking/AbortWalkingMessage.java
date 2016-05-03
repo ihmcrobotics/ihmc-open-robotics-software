@@ -9,7 +9,7 @@ import java.util.Random;
  * Created by agrabertilton on 4/28/15.
  */
 @RosMessagePacket(documentation = "This message is used to abort walking, forcing the robot to switch back to double support and clear the footstep list.",
-                  rosPackage = "ihmc_msgs",
+                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/abort_walking")
 
 public class AbortWalkingMessage extends Packet<AbortWalkingMessage>

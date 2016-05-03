@@ -9,7 +9,7 @@ import us.ihmc.robotics.random.RandomTools;
 import java.util.Random;
 
 @RosMessagePacket(documentation = "This class is used to report the status of walking.",
-      rosPackage = "ihmc_msgs",
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/output/walking_status")
 public class WalkingStatusMessage extends StatusPacket<WalkingStatusMessage>
 {

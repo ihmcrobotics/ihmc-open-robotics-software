@@ -11,7 +11,7 @@ import java.util.Random;
 
 @RosMessagePacket(documentation = "The message commands the controller to bring the given part of the body back to a default configuration called 'home'."
       + " It is useful to get back to a safe configuration before walking.",
-                  rosPackage = "ihmc_msgs",
+                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/go_home")
 public class GoHomeMessage extends Packet<GoHomeMessage>
 {

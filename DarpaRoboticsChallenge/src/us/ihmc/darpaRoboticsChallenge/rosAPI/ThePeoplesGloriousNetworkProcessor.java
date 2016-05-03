@@ -36,10 +36,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ThePeoplesGloriousNetworkProcessor
 {
@@ -58,14 +55,26 @@ public class ThePeoplesGloriousNetworkProcessor
    private final MessageFactory messageFactory;
    private final FullHumanoidRobotModel fullRobotModel;
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
-         DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix) throws IOException
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace,
+         String tfPrefix) throws IOException
    {
-      this(rosUri, rosAPI_communicator, sensorCommunicator, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, null, null);
+      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, Collections.<Class>emptySet());
+   }
+
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace,
+         String tfPrefix, Collection<Class> additionalPacketTypes) throws IOException
+   {
+      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, additionalPacketTypes);
    }
 
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
-         DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix,
+         DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix, Collection<Class> additionalPacketTypes) throws IOException
+   {
+      this(rosUri, rosAPI_communicator, sensorCommunicator, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, additionalPacketTypes, null, null);
+   }
+
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
+         DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix, Collection<Class> additionalPacketTypes,
          List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> customSubscribers,
          List<Map.Entry<String, RosTopicPublisher<? extends Message>>> customPublishers) throws IOException
    {
@@ -122,11 +131,7 @@ public class ThePeoplesGloriousNetworkProcessor
       System.out.println("IHMC ROS API node successfully started.");
    }
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace,
-         String tfPrefix) throws IOException
-   {
-      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix);
-   }
+
 
    @SuppressWarnings("unchecked")
    private void setupOutputs(String namespace, String tfPrefix)
@@ -144,7 +149,7 @@ public class ThePeoplesGloriousNetworkProcessor
          publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, robotConfigurationPublisher);
       }
 
-      Set<Class<?>> outputTypes = GenericROSTranslationTools.getOutputTopics();
+      Set<Class<?>> outputTypes = GenericROSTranslationTools.getCoreOutputTopics();
 
       for (Class outputType : outputTypes)
       {
@@ -182,7 +187,7 @@ public class ThePeoplesGloriousNetworkProcessor
 
    private void setupInputs(String namespace, HumanoidRobotDataReceiver robotDataReceiver, FullHumanoidRobotModel fullRobotModel)
    {
-      Set<Class<?>> inputTypes = GenericROSTranslationTools.getInputTopics();
+      Set<Class<?>> inputTypes = GenericROSTranslationTools.getCoreInputTopics();
 
       for (Class inputType : inputTypes)
       {

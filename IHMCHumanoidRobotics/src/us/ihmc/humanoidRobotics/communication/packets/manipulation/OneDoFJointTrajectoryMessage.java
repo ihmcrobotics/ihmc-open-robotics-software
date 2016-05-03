@@ -9,7 +9,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 @RosMessagePacket(documentation =
       "This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory."
       + " A third order polynomial function is used to interpolate between trajectory points.",
-      rosPackage = "ihmc_msgs")
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class OneDoFJointTrajectoryMessage extends Abstract1DTrajectoryMessage<OneDoFJointTrajectoryMessage>
 {
    /**

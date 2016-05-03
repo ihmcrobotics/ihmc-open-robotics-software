@@ -24,7 +24,8 @@ public class GenericROSTranslationTools
    private static final MessageFactory messageFactory = NodeConfiguration.newPrivate().getTopicMessageFactory();
 
    private static final Reflections ihmcPackageReflector = new Reflections("us.ihmc.humanoidRobotics.communication.packets");
-   private static Set<Class<?>> rosMessagePacketAnnotatedTypes = null;
+   private static Set<Class<?>> ihmcCoreAnnotatedPacket = null;
+   private static Set<Class<?>> allAnnotatedPackets = null;
    private static Set<Class<?>> outputTopics;
    private static Set<Class<?>> inputTopics;
 
@@ -108,7 +109,7 @@ public class GenericROSTranslationTools
          throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException, InstantiationException, InvocationTargetException,
          RosEnumConversionException
    {
-      Set<Class<?>> typesAnnotatedWith = getRosMessagePacketAnnotatedClasses();
+      Set<Class<?>> typesAnnotatedWith = getAllRosMessagePacketAnnotatedClasses();
       String fullRosTypeName = rosMessage.toRawMessage().getType();
       String rosMessageName = fullRosTypeName.split("/")[1];
       Class<?> rosMessageClass = Class.forName(fullRosTypeName.replace("/", "."));
@@ -250,21 +251,41 @@ public class GenericROSTranslationTools
       return ihmcMessageClass;
    }
 
-   public static Set<Class<?>> getRosMessagePacketAnnotatedClasses()
+   public static Set<Class<?>> getAllRosMessagePacketAnnotatedClasses()
    {
-      if(rosMessagePacketAnnotatedTypes == null)
+      if(allAnnotatedPackets == null)
       {
-         rosMessagePacketAnnotatedTypes = ihmcPackageReflector.getTypesAnnotatedWith(RosMessagePacket.class);
+         allAnnotatedPackets = ihmcPackageReflector.getTypesAnnotatedWith(RosMessagePacket.class);
       }
-      return rosMessagePacketAnnotatedTypes;
+
+      return allAnnotatedPackets;
    }
 
-   public static Set<Class<?>> getOutputTopics()
+   public static Set<Class<?>> getIHMCCoreRosMessagePacketAnnotatedClasses()
+   {
+      if(ihmcCoreAnnotatedPacket == null)
+      {
+         ihmcCoreAnnotatedPacket = new HashSet<>();
+
+         for (Class<?> aClass : getAllRosMessagePacketAnnotatedClasses())
+         {
+            RosMessagePacket annotation = aClass.getAnnotation(RosMessagePacket.class);
+            if(annotation.rosPackage().equals(RosMessagePacket.CORE_IHMC_PACKAGE));
+            {
+               ihmcCoreAnnotatedPacket.add(aClass);
+            }
+         }
+      }
+
+      return ihmcCoreAnnotatedPacket;
+   }
+
+   public static Set<Class<?>> getCoreOutputTopics()
    {
       if(outputTopics == null)
       {
          outputTopics = new HashSet<>();
-         for (Class<?> aClass : getRosMessagePacketAnnotatedClasses())
+         for (Class<?> aClass : getIHMCCoreRosMessagePacketAnnotatedClasses())
          {
             if(StatusPacket.class.isAssignableFrom(aClass) && !aClass.getAnnotation(RosMessagePacket.class).topic().equals(RosMessagePacket.NO_CORRESPONDING_TOPIC_STRING))
             {
@@ -276,12 +297,12 @@ public class GenericROSTranslationTools
       return outputTopics;
    }
 
-   public static Set<Class<?>> getInputTopics()
+   public static Set<Class<?>> getCoreInputTopics()
    {
       if(inputTopics == null)
       {
          inputTopics = new HashSet<>();
-         for (Class<?> aClass : getRosMessagePacketAnnotatedClasses())
+         for (Class<?> aClass : getIHMCCoreRosMessagePacketAnnotatedClasses())
          {
             if(!StatusPacket.class.isAssignableFrom(aClass) && !aClass.getAnnotation(RosMessagePacket.class).topic().equals(RosMessagePacket.NO_CORRESPONDING_TOPIC_STRING))
             {

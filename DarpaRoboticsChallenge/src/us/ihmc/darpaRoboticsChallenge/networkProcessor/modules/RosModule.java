@@ -148,7 +148,7 @@ public class RosModule
       NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate();
       MessageFactory messageFactory = nodeConfiguration.getTopicMessageFactory();
 
-      Set<Class<?>> inputTypes = GenericROSTranslationTools.getInputTopics();
+      Set<Class<?>> inputTypes = GenericROSTranslationTools.getCoreInputTopics();
       for (Class inputType : inputTypes)
       {
          RosMessagePacket rosAnnotation = (RosMessagePacket) inputType.getAnnotation(RosMessagePacket.class);

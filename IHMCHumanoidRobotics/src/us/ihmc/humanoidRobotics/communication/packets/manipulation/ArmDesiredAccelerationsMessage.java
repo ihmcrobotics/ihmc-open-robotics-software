@@ -18,7 +18,7 @@ import us.ihmc.tools.ArrayTools;
       "This message gives the user the option to bypass IHMC feedback controllers for the arm joints by sending desired arm joint accelerations."
             + " One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations."
             + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
-      rosPackage = "ihmc_msgs",
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/arm_desired_joint_accelerations")
 public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAccelerationsMessage>
 {

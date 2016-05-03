@@ -22,7 +22,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 @RosMessagePacket(documentation =
       "This message commands the controller to execute a list of footsteps. See FootstepDataMessage for information about defining a footstep."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
-                  rosPackage = "ihmc_msgs",
+                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/footstep_list")
 public class FootstepDataListMessage extends Packet<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket
 {
