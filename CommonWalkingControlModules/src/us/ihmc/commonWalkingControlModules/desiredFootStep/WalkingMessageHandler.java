@@ -288,6 +288,11 @@ public class WalkingMessageHandler
       return transferTime.getDoubleValue() + swingTime.getDoubleValue();
    }
 
+   public double getCurrentNumberOfFootsteps()
+   {
+      return currentNumberOfFootsteps.getIntegerValue();
+   }
+
    private void updateVisualization()
    {
       for (int i = 0; i < upcomingFootsteps.size(); i++)
