@@ -288,7 +288,7 @@ public class WalkingMessageHandler
       return transferTime.getDoubleValue() + swingTime.getDoubleValue();
    }
 
-   public double getCurrentNumberOfFootsteps()
+   public int getCurrentNumberOfFootsteps()
    {
       return currentNumberOfFootsteps.getIntegerValue();
    }
