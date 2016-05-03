@@ -1,0 +1,3 @@
+root*false*false
+root.CollisionExample*false*false
+root.CollisionExample.CollisionExampleController*false*false
