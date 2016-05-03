@@ -27,12 +27,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.publisher.RosImuPublisher;
-import us.ihmc.utilities.ros.publisher.RosInt32Publisher;
-import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
-import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
-import us.ihmc.utilities.ros.publisher.RosStringPublisher;
-import us.ihmc.utilities.ros.publisher.RosWrenchPublisher;
+import us.ihmc.utilities.ros.publisher.*;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable
@@ -50,7 +45,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final RosOdometryPublisher pelvisOdometryPublisher;
    private final RosStringPublisher robotMotionStatusPublisher;
    private final RosInt32Publisher robotBehaviorPublisher;
-//   private final RosLastReceivedMessagePublisher lastReceivedMessagePublisher; //TODO reimplement this
+   private final RosLastReceivedMessagePublisher lastReceivedMessagePublisher;
    private final ForceSensorDefinition[] forceSensorDefinitions;
    private final IMUDefinition[] imuDefinitions;
    private final ArrayList<String> nameList = new ArrayList<String>();
@@ -87,6 +82,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       this.pelvisOdometryPublisher = new RosOdometryPublisher(latched);
       this.robotMotionStatusPublisher = new RosStringPublisher(latched);
       this.robotBehaviorPublisher = new RosInt32Publisher(latched);
+      this.lastReceivedMessagePublisher = new RosLastReceivedMessagePublisher(latched);
 
       this.imuPublishers = new RosImuPublisher[imuDefinitions.length];
       for (int sensorNumber = 0; sensorNumber < imuDefinitions.length; sensorNumber++)
@@ -257,17 +253,17 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                   tfPublisher.publish(staticTransform, timeStamp, from, to);
                }
             }
-            
-            //TODO reimplement this
-//            if(robotConfigurationData.getLastReceivedPacketTypeID() != -1)
-//            {
-//               Class<?> packetClass = netClassList.getClass(robotConfigurationData.getLastReceivedPacketTypeID());
-//               String messageType = IHMCRosApiMessageMap.MESSAGE_NAME_PACKET_MAP.get(packetClass);
-//               if(messageType != null)
-//               {
-//                  lastReceivedMessagePublisher.publish(messageType, robotConfigurationData.getLastReceivedPacketUniqueId(), robotConfigurationData.getTimestamp(), robotConfigurationData.getLastReceivedPacketRobotTimestamp());
-//               }
-//            }
+
+            if(robotConfigurationData.getLastReceivedPacketTypeID() != -1)
+            {
+               Class<?> packetClass = netClassList.getClass(robotConfigurationData.getLastReceivedPacketTypeID());
+
+               String messageType = IHMCROSTranslationRuntimeTools.getROSMessageTypeStringFromIHMCMessageClass(packetClass);
+               if(messageType != null)
+               {
+                  lastReceivedMessagePublisher.publish(messageType, robotConfigurationData.getLastReceivedPacketUniqueId(), robotConfigurationData.getTimestamp(), robotConfigurationData.getLastReceivedPacketRobotTimestamp());
+               }
+            }
             
          }
       }

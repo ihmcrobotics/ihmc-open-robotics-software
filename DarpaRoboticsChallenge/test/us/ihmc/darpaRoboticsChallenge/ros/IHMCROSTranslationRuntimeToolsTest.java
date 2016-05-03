@@ -5,6 +5,7 @@ import org.reflections.Reflections;
 import org.ros.internal.message.Message;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.tools.testing.TestPlanAnnotations;
 
 import java.lang.reflect.*;
 import java.util.HashSet;
@@ -19,7 +20,8 @@ import static org.junit.Assert.*;
 public class IHMCROSTranslationRuntimeToolsTest
 {
 
-   @Test
+   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 1.0)
+   @Test(timeout = 30000)
    public void testBidirectionalConversionWithRandomConstructors()
    {
       Reflections reflections = new Reflections("us.ihmc");
