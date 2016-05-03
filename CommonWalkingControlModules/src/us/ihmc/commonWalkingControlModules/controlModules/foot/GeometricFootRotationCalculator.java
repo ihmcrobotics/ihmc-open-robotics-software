@@ -11,7 +11,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -46,14 +45,13 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private static final Vector3d zero = new Vector3d(0.0, 0.0, 0.0);
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final static double defaultCopAlpha = 0.99;
-   private final static double defaultAngleThreshold = 5.0 * Math.PI/180.0;
+   private final static double defaultAngleThreshold = 10.0 * Math.PI/180.0;
 
    private final ReferenceFrame soleFrame;
    private final FrameConvexPolygon2d defaultFootPolygon;
 
    private final FramePoint groundPlanePoint = new FramePoint();
    private final FrameVector groundPlaneNormal = new FrameVector();
-   private final FrameLine lineOfRotation = new FrameLine(worldFrame);
    private final FrameLine2d lineOfRotationInSoleFrame = new FrameLine2d();
    private final FrameLine2d lineOfRotationInWorldFrame = new FrameLine2d();
    private final FrameConvexPolygon2d footPolygonInWorld = new FrameConvexPolygon2d();
@@ -162,15 +160,13 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       angleFootGround.set(alpha);
       footRotating.set(alpha > angleTreshold.getDoubleValue());
 
-      lineOfRotation.setOrigin(cop);
-      lineOfRotation.setDirection(lineOfContact);
-
-      centerOfRotation2d.setByProjectionOntoXYPlane(lineOfRotation.getFrameOrigin());
-      lineOfRotation2d.setByProjectionOntoXYPlane(lineOfRotation.getFrameDirection());
+      centerOfRotation2d.setByProjectionOntoXYPlane(cop);
+      lineOfRotation2d.setByProjectionOntoXYPlane(lineOfContact);
       lineOfRotationInWorldFrame.set(centerOfRotation2d, lineOfRotation2d);
 
       lineOfRotationInSoleFrame.setIncludingFrame(lineOfRotationInWorldFrame);
       lineOfRotationInSoleFrame.changeFrameAndProjectToXYPlane(soleFrame);
+      lineOfRotationInSoleFrame.setOrigin(centerOfPressure);
 
       if (yoLineOfRotation != null)
       {
