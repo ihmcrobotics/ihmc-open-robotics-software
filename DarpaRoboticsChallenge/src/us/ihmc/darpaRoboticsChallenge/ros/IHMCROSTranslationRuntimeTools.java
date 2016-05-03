@@ -17,6 +17,7 @@ import us.ihmc.utilities.ros.msgToPacket.converter.RosEnumConversionException;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -258,5 +259,12 @@ public class IHMCROSTranslationRuntimeTools
       message.setFootstepDataList(convertedFootsteps);
 
       return message;
+   }
+
+   public static String getROSMessageTypeStringFromIHMCMessageClass(Class outputType)
+   {
+      String rosMessageClassNameFromIHMCMessage = GenericROSTranslationTools.getRosMessageClassNameFromIHMCMessage(outputType.getSimpleName());
+      RosMessagePacket annotation = (RosMessagePacket) outputType.getAnnotation(RosMessagePacket.class);
+      return annotation.rosPackage() + "/" + rosMessageClassNameFromIHMCMessage;
    }
 }
