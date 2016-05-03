@@ -267,11 +267,11 @@ public class SpringFlamingoSimulation
 
       if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
       {
-         sim.readState("initial_state.state");
+         sim.readState("resources/initial_state.state");
       }
       else if (controllerToUse == FAST_WALKING_CONTROLLER)
       {
-//       sim.readState("initial_state.state");
+//       sim.readState("resources/initial_state.state");
       }
 
       if (ENABLE_FREEZE_FRAME & SHOW_GUI)

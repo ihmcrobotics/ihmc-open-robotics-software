@@ -1,11 +1,6 @@
-package us.ihmc.simulationDispatcherExamples.springFlamingoDispatcher;
+package us.ihmc.exampleSimulations.m2;
 
 
-import us.ihmc.exampleSimulations.m2.LittleM2Parameters;
-import us.ihmc.exampleSimulations.m2.M2Parameters;
-import us.ihmc.exampleSimulations.m2.M2ProcessedSensorsControllerWithStateTransitions;
-import us.ihmc.exampleSimulations.m2.M2Robot;
-import us.ihmc.exampleSimulations.m2.M2Simulation;
 import us.ihmc.exampleSimulations.m2.Output.PerfectProcessedOutputs;
 import us.ihmc.exampleSimulations.m2.Sensors.PerfectSensorProcessing;
 import us.ihmc.exampleSimulations.m2.Sensors.ProcessedSensors;
