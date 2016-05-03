@@ -18,7 +18,7 @@ import java.util.Random;
       + " Sending this command will not affect the pelvis horizontal position. To control the pelvis 3D position use the PelvisTrajectoryMessage instead."
       + " A third order polynomial is used to interpolate between trajectory points."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
-                  rosPackage = "ihmc_msgs",
+                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/pelvis_height_trajectory")
 public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<PelvisHeightTrajectoryMessage> implements VisualizablePacket, TransformableDataObject<PelvisHeightTrajectoryMessage>
 {

@@ -14,7 +14,7 @@ import us.ihmc.robotics.random.RandomTools;
 
 @RosMessagePacket(documentation = "This class is used to build 1D trajectory messages including jointspace trajectory messages."
       + " For 3D trajectory points look at EuclideanTrajectoryMessage (translational), SO3TrajectoryPointMessage (rotational), and SE3TrajectoryPointMessage (translational AND rotational).",
-      rosPackage = "ihmc_msgs")
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> implements OneDoFTrajectoryPointInterface<TrajectoryPoint1DMessage>
 {
    @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")

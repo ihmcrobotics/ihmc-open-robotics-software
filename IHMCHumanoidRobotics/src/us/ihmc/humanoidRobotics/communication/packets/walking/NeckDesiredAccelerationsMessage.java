@@ -16,7 +16,7 @@ import us.ihmc.tools.ArrayTools;
       "This message gives the user the option to bypass IHMC feedback controllers for the neck joints by sending desired neck joint accelerations."
       + " One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
-                  rosPackage = "ihmc_msgs",
+                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/neck_desired_acceleration")
 public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerationsMessage>
 {

@@ -28,7 +28,7 @@ public class ROSMessageFileCreatorTest
    @Test(timeout = 30000)
    public void testAllExportedPacketsWithTopicsAreFormattedCorrectly()
    {
-      Set<Class<?>> rosMessagePacketAnnotatedClasses = GenericROSTranslationTools.getRosMessagePacketAnnotatedClasses();
+      Set<Class<?>> rosMessagePacketAnnotatedClasses = GenericROSTranslationTools.getIHMCCoreRosMessagePacketAnnotatedClasses();
       for (Class<?> rosMessagePacketAnnotatedClass : rosMessagePacketAnnotatedClasses)
       {
          RosMessagePacket annotation = rosMessagePacketAnnotatedClass.getAnnotation(RosMessagePacket.class);

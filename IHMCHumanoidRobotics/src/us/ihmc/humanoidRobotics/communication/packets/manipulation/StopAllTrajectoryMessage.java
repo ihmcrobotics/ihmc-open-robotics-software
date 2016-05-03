@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.Packet;
 
 @RosMessagePacket(documentation = "Stop the execution of any trajectory being executed."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
-      rosPackage = "ihmc_msgs",
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/stop_all_trajectories")
 public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage>
 {

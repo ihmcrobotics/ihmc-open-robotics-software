@@ -9,7 +9,7 @@ import us.ihmc.communication.packets.Packet;
 @RosMessagePacket(documentation = "This message pauses the execution of a list of footsteps. If this message is\n"
       + "sent in the middle of executing a footstep, the robot will finish the step and\n" + "pause when back in double support."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
-                  rosPackage = "ihmc_msgs",
+                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/pause_walking")
 public class PauseWalkingMessage extends Packet<PauseWalkingMessage>
 {

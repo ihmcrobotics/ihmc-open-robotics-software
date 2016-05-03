@@ -55,6 +55,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -161,7 +162,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
          SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
          String nameSpace = "/ihmc_ros/atlas";
          String tfPrefix = null;
-         new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator_server, null, ppsOffsetProvider, robotModel, nameSpace, tfPrefix);
+         new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator_server, null, ppsOffsetProvider, robotModel, nameSpace, tfPrefix, Collections.<Class>emptySet());
       }
       catch (IOException e)
       {
@@ -174,7 +175,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       }
 
       ArrayList<Class<?>> rosAPIPacketList = new ArrayList<>();
-      rosAPIPacketList.addAll(GenericROSTranslationTools.getRosMessagePacketAnnotatedClasses());
+      rosAPIPacketList.addAll(GenericROSTranslationTools.getAllRosMessagePacketAnnotatedClasses());
 
       int randomModulus = random.nextInt(250) + 1;
 
@@ -258,7 +259,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       }
 
       ArrayList<Class<?>> inputTopics = new ArrayList<>();
-      inputTopics.addAll(GenericROSTranslationTools.getInputTopics());
+      inputTopics.addAll(GenericROSTranslationTools.getCoreInputTopics());
       for (int i = 0; i < inputTopics.size(); i++)
       {
          for (int j = 0; j < 100000; j++)

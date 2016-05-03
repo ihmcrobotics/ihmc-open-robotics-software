@@ -20,7 +20,7 @@ import java.util.Random;
             + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations."
             + " To excute a single straight line trajectory to reach a desired foot pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time."
             + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
-      rosPackage = "ihmc_msgs",
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/foot_trajectory")
 public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTrajectoryMessage> implements VisualizablePacket
 {

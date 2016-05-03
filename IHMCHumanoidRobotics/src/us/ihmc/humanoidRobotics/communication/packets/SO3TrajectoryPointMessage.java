@@ -20,7 +20,7 @@ import us.ihmc.robotics.random.RandomTools;
 @RosMessagePacket(documentation =
       "This class is used to build trajectory messages in taskspace. It holds the only the rotational information for one trajectory point (orientation & angular velocity). "
       + "Feel free to look at EuclideanTrajectoryPointMessage (translational) and SE3TrajectoryPointMessage (rotational AND translational)",
-      rosPackage = "ihmc_msgs")
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage> implements Transformable
       //implements SO3TrajectoryPointInterface<SO3TrajectoryPointMessage>, TransformableDataObject<SO3TrajectoryPointMessage>
 {

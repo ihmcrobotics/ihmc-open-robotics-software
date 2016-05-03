@@ -18,7 +18,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
  */
 @RosMessagePacket(documentation = "This message gives the status of the current footstep from the controller as well as the position\n"
                                   + "and orientation of the footstep in world cooredinates. ",
-                  rosPackage = "ihmc_msgs",
+                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/output/footstep_status")
 public class FootstepStatus extends StatusPacket<FootstepStatus>
 {

@@ -14,7 +14,7 @@ import java.util.Random;
       + " One application is making a foot loadbearing."
       + " When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
-                  rosPackage = "ihmc_msgs",
+                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/end_effector_load_bearing")
 public class EndEffectorLoadBearingMessage extends Packet<EndEffectorLoadBearingMessage>
 {

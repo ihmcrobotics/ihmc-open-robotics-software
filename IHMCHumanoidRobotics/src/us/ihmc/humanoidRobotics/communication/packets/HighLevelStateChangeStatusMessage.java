@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState
 
 @RosMessagePacket(documentation = "This message notifies the user of a change in the high level state. This message's primary\n"
                                   + "use is to signal a requested state change is completed.",
-      rosPackage = "ihmc_msgs",
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/output/high_level_state_change")
 public class HighLevelStateChangeStatusMessage extends StatusPacket<HighLevelStateChangeStatusMessage>
 {

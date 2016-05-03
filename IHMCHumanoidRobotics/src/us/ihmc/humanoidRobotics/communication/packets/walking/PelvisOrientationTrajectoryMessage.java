@@ -17,7 +17,7 @@ import java.util.Random;
       + " This message allows controlling the pelvis orientation without interferring with position that will still be controlled to maintain the current desired capture poit position."
       + " To excute a normal trajectory to reach a desired pelvis orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
-                  rosPackage = "ihmc_msgs",
+                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/pelvis_orientation_trajectory")
 public class PelvisOrientationTrajectoryMessage extends AbstractSO3TrajectoryMessage<PelvisOrientationTrajectoryMessage>  implements VisualizablePacket
 {
