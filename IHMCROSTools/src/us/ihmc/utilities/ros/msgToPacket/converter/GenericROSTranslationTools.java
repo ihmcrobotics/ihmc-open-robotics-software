@@ -208,7 +208,8 @@ public class GenericROSTranslationTools
    }
 
    private static void setArrayFromList(Message rosMessage, Packet<?> ihmcMessage, Method rosGetter, Field ihmcField, Class<?> fieldType)
-         throws IllegalAccessException, InvocationTargetException
+         throws IllegalAccessException, InvocationTargetException, ClassNotFoundException, InstantiationException, RosEnumConversionException,
+         NoSuchFieldException
    {
       List rosValues = (List) rosGetter.invoke(rosMessage);
 
@@ -218,7 +219,15 @@ public class GenericROSTranslationTools
       int i = 0;
       for(Object value : rosValues)
       {
-         Array.set(ihmcArray, i, value);
+         if(value instanceof Message)
+         {
+            Array.set(ihmcArray, i, convertRosMessageToIHMCMessage((Message) value));
+         }
+         else
+         {
+            Array.set(ihmcArray, i, value);
+         }
+
          i++;
       }
 
@@ -270,7 +279,7 @@ public class GenericROSTranslationTools
          for (Class<?> aClass : getAllRosMessagePacketAnnotatedClasses())
          {
             RosMessagePacket annotation = aClass.getAnnotation(RosMessagePacket.class);
-            if(annotation.rosPackage().equals(RosMessagePacket.CORE_IHMC_PACKAGE));
+            if(annotation.rosPackage().equals(RosMessagePacket.CORE_IHMC_PACKAGE))
             {
                ihmcCoreAnnotatedPacket.add(aClass);
             }
