@@ -9,7 +9,6 @@ import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -20,7 +19,6 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
-@ClassDocumentation("Full configuration data for the robot")
 public class RobotConfigurationData extends Packet<RobotConfigurationData>
 {
    public long timestamp = 0;

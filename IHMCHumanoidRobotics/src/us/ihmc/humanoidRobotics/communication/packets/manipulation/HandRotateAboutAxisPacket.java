@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.robotics.MathTools;
@@ -13,7 +12,6 @@ public class HandRotateAboutAxisPacket extends Packet<HandRotateAboutAxisPacket>
 {
    public RobotSide robotSide;
 
-   @FieldDocumentation("trajectoryTime specifies how fast to move the hand to the desired position")
    public double trajectoryTime;
 
    public Point3d rotationAxisOriginInWorld;
