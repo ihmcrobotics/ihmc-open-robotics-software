@@ -2,18 +2,24 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.Abstract1DTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-@ClassDocumentation("This mesage commands the controller to move the pelvis to a new height in world while going through the specified trajectory points."
+import java.util.Random;
+
+@RosMessagePacket(documentation =
+      "This mesage commands the controller to move the pelvis to a new height in world while going through the specified trajectory points."
       + " Sending this command will not affect the pelvis horizontal position. To control the pelvis 3D position use the PelvisTrajectoryMessage instead."
       + " A third order polynomial is used to interpolate between trajectory points."
-      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
+                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
+                  topic = "/control/pelvis_height_trajectory")
 public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<PelvisHeightTrajectoryMessage> implements VisualizablePacket, TransformableDataObject<PelvisHeightTrajectoryMessage>
 {
    /**
@@ -23,6 +29,12 @@ public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<P
    public PelvisHeightTrajectoryMessage()
    {
       super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public PelvisHeightTrajectoryMessage(Random random)
+   {
+      super(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -88,5 +100,11 @@ public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<P
          trajectoryPoint.setPosition(trajectoryPoint.getPosition() + translation.getZ());
       }
       return transformedMessage;
+   }
+
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validatePelvisHeightTrajectoryMessage(this);
    }
 }

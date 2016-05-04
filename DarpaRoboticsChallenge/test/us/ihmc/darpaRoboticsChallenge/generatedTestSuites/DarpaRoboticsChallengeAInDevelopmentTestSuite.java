@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.darpaRoboticsChallenge.ros.GenericROSMessageConverterTest.class
+
 })
 
 public class DarpaRoboticsChallengeAInDevelopmentTestSuite

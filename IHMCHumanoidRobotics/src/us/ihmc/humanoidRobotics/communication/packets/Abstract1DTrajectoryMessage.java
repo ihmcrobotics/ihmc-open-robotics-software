@@ -2,18 +2,20 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.random.RandomTools;
 
-@ClassDocumentation("This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory."
-      + " A third order polynomial function is used to interpolate between trajectory points.")
-public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T>> extends IHMCRosApiMessage<T>
+/**
+ * This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory.
+ * A third order polynomial function is used to interpolate between trajectory points.
+ */
+
+public abstract class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T>> extends Packet<T>
 {
-   @FieldDocumentation("List of trajectory points to go through while executing the trajectory.")
+   @RosExportedField(documentation = "List of trajectory points to go through while executing the trajectory.")
    public TrajectoryPoint1DMessage[] trajectoryPoints;
 
    /**
@@ -154,10 +156,7 @@ public class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T
 
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
       {
-         double time = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
-         double position = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
-         double velocity = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
-         setTrajectoryPoint(i, time, position, velocity);
+         trajectoryPoints[i] = new TrajectoryPoint1DMessage(random);
       }
    }
 
