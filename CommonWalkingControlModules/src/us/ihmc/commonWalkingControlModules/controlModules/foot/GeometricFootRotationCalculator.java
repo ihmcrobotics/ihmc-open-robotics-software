@@ -105,7 +105,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
          caption = namePrefix + "PlaneNormal";
          yoPlaneNormal = new YoFrameVector(caption, worldFrame, registry);
          YoGraphicVector planeNormalViz =
-               new YoGraphicVector(caption, yoPlanePoint, yoPlaneNormal, 0.5, YoAppearance.Blue(), true, 0.05);
+               new YoGraphicVector(caption, yoPlanePoint, yoPlaneNormal, YoAppearance.Blue());
          yoGraphicsListRegistry.registerYoGraphic(caption, planeNormalViz);
 
          caption = namePrefix + "LineOfRotationGeometric";
@@ -200,6 +200,19 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    {
       copFiltered.reset();
       footRotating.set(false);
+
+      if (yoLineOfRotation != null)
+      {
+         yoLineOfRotation.setToNaN();
+      }
+      if (yoPlanePoint != null)
+      {
+         yoPlanePoint.setToNaN();
+      }
+      if (yoPlaneNormal != null)
+      {
+         yoPlaneNormal.setToNaN();
+      }
    }
 
    public boolean isFootRotating()
