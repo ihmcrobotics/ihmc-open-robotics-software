@@ -215,7 +215,7 @@ public class FootControlModule
       onToesState.setWeights(highAngularFootWeight, highLinearFootWeight);
       supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
       exploreFootPolygonState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
-      holdPositionState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
+      holdPositionState.setWeights(highAngularFootWeight, highLinearFootWeight);
    }
 
    public void replanTrajectory(Footstep footstep, double swingTime)
