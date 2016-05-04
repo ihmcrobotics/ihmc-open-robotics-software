@@ -191,6 +191,15 @@ public class FootControlModule
          }
       }));
 
+      exploreFootPolygonState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.FULL, new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return exploreFootPolygonState.isDoneExploring();
+         }
+      }));
+
       for (AbstractFootControlState state : states)
       {
          stateMachine.addState(state);

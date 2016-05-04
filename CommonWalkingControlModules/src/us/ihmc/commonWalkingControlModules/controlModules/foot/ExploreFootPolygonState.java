@@ -253,6 +253,11 @@ public class ExploreFootPolygonState extends AbstractFootControlState
                desiredCenterOfPressure.set(currentCorner);
             }
 
+            if (timeInState - lastShrunkTime.getDoubleValue() > 2.0 * timeToExploreCorner * corners)
+            {
+               done = true;
+            }
+
          }
 
          centerOfPressureCommand.setDesiredCoP(desiredCenterOfPressure.getPoint());
@@ -282,6 +287,11 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return internalHoldPositionState.getFeedbackControlCommand();
+   }
+
+   public boolean isDoneExploring()
+   {
+      return done;
    }
 
 }
