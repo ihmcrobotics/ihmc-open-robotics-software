@@ -14,6 +14,7 @@ public class YoPIDGains extends YoPDGains
       ki = new DoubleYoVariable("ki" + suffix, registry);
       maxIntegralError = new DoubleYoVariable("maxIntegralError" + suffix, registry);
       integralLeakRatio = new DoubleYoVariable("integralLeakRatio" + suffix, registry);
+      integralLeakRatio.set(1.0);
    }
 
    public void setPIDGains(double kp, double zeta, double ki, double maxIntegralError)
