@@ -98,8 +98,8 @@ public class ThePeoplesGloriousNetworkProcessor
 
       setupInputs(namespace, robotDataReceiver, fullRobotModel);
       setupOutputs(namespace, tfPrefix);
-      setupRosLocalization();
-      setupErrorTopics();
+//      setupRosLocalization();
+//      setupErrorTopics();
 
       if (customSubscribers != null)
       {
@@ -162,9 +162,9 @@ public class ThePeoplesGloriousNetworkProcessor
          rosMainNode.attachPublisher(namespace + rosAnnotation.topic(), publisher);
       }
 
-      PrintStreamToRosBridge printStreamBridge = new PrintStreamToRosBridge(rosMainNode, namespace);
-      printStreamBridge.start();
-      System.setErr(printStreamBridge);
+//      PrintStreamToRosBridge printStreamBridge = new PrintStreamToRosBridge(rosMainNode, namespace);
+//      printStreamBridge.start();
+//      System.setErr(printStreamBridge);
    }
 
    private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation,
