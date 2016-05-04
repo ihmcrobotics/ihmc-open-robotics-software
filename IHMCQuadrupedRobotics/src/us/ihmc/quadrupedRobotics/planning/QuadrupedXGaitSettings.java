@@ -15,13 +15,12 @@ public class QuadrupedXGaitSettings
    /**
     * Ground clearance for each step (in meters).
     */
-   private double groundClearance;
-
+   private double stepGroundClearance;
 
    /**
     * Time duration of each swing phase.
     */
-   private double swingDuration;
+   private double stepDuration;
 
    /**
     * Time duration that both hind or both front feet feet are in support (in seconds).
@@ -31,16 +30,16 @@ public class QuadrupedXGaitSettings
    /**
     * Nominal phase shift between front and hind steps in degrees. (0: pace, 90: amble, 180: trot)
     */
-   private double xGaitPhase;
+   private double endPhaseShift;
 
    public QuadrupedXGaitSettings()
    {
       stanceLength = 1.0;
       stanceWidth = 0.25;
-      groundClearance = 0.2;
-      swingDuration = 0.35;
+      stepGroundClearance = 0.2;
+      stepDuration = 0.35;
       endPairSupportDuration = 0.0;
-      xGaitPhase = 90.0;
+      endPhaseShift = 90.0;
    }
 
    public double getStanceLength()
@@ -63,24 +62,24 @@ public class QuadrupedXGaitSettings
       this.stanceWidth = stanceWidth;
    }
 
-   public double getGroundClearance()
+   public double getStepGroundClearance()
    {
-      return groundClearance;
+      return stepGroundClearance;
    }
 
-   public void setGroundClearance(double groundClearance)
+   public void setStepGroundClearance(double stepGroundClearance)
    {
-      this.groundClearance = groundClearance;
+      this.stepGroundClearance = stepGroundClearance;
    }
 
-   public double getSwingDuration()
+   public double getStepDuration()
    {
-      return swingDuration;
+      return stepDuration;
    }
 
-   public void setSwingDuration(double swingDuration)
+   public void setStepDuration(double stepDuration)
    {
-      this.swingDuration = swingDuration;
+      this.stepDuration = stepDuration;
    }
 
    public double getEndPairSupportDuration()
@@ -93,13 +92,13 @@ public class QuadrupedXGaitSettings
       this.endPairSupportDuration = endPairSupportDuration;
    }
 
-   public double getXGaitPhase()
+   public double getEndPhaseShift()
    {
-      return xGaitPhase;
+      return endPhaseShift;
    }
 
-   public void setXGaitPhase(double xGaitPhase)
+   public void setEndPhaseShift(double xGaitPhase)
    {
-      this.xGaitPhase = xGaitPhase;
+      this.endPhaseShift = xGaitPhase;
    }
 }
