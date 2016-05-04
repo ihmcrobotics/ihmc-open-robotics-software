@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.gazebo;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -126,7 +127,8 @@ public class GazeboControllerFactory
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
 
       new UiPacketToRosMsgRedirector(robotModel, rosURI, rosAPI_communicator, networkProcessor.getPacketRouter(), nameSpace + "/" + robotName);
-      new ThePeoplesGloriousNetworkProcessor(rosURI, rosAPI_communicator, null, ppsOffsetProvider, robotModel, nameSpace + "/" + robotName, tfPrefix);
+      new ThePeoplesGloriousNetworkProcessor(rosURI, rosAPI_communicator, null, ppsOffsetProvider, robotModel, nameSpace + "/" + robotName, tfPrefix,
+            Collections.<Class>emptySet());
 
       yoVariableServer.start();
 

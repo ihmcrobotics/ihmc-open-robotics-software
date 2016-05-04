@@ -184,7 +184,7 @@ public enum RobotSide
       System.out.println(side.toString());
    }
 
-   public String getDocumentation(RobotSide var)
+   public static String getDocumentation(RobotSide var)
    {
       switch (var)
       {
@@ -196,10 +196,5 @@ public enum RobotSide
       default:
          return "no documentation available";
       }
-   }
-
-   public RobotSide[] getDocumentedValues()
-   {
-      return values;
    }
 }

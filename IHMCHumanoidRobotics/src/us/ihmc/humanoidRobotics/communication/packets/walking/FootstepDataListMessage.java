@@ -7,9 +7,8 @@ import java.util.Random;
 
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
@@ -20,16 +19,19 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation("This message commands the controller to execute a list of footsteps. See FootstepDataMessage for information about defining a footstep."
-      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
-public class FootstepDataListMessage extends IHMCRosApiMessage<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket
+@RosMessagePacket(documentation =
+      "This message commands the controller to execute a list of footsteps. See FootstepDataMessage for information about defining a footstep."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
+                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
+                  topic = "/control/footstep_list")
+public class FootstepDataListMessage extends Packet<FootstepDataListMessage> implements TransformableDataObject<FootstepDataListMessage>, Iterable<FootstepDataMessage>, VisualizablePacket
 {
-   @FieldDocumentation("Defines the list of footstep to perform.")
+   @RosExportedField(documentation = "Defines the list of footstep to perform.")
    public ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();
 
-   @FieldDocumentation("swingTime is the time spent in single-support when stepping")
+   @RosExportedField(documentation = "swingTime is the time spent in single-support when stepping")
    public double swingTime = 0.0;
-   @FieldDocumentation("transferTime is the time spent in double-support between steps")
+   @RosExportedField(documentation = "transferTime is the time spent in double-support between steps")
    public double transferTime = 0.0;
 
    /**
@@ -135,8 +137,6 @@ public class FootstepDataListMessage extends IHMCRosApiMessage<FootstepDataListM
          FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), quat4d);
          startingFootstep = startingFootstep + ", ypr= " + Arrays.toString(frameOrientation.getYawPitchRoll());
       }
-
-      System.out.println(this.size());
 
       if (this.size() == 1)
       {
