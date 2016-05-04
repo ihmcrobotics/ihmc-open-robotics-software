@@ -8,4 +8,6 @@ public interface RosFieldDefinition
    String getType();
    String getFieldName();
    String getDocumentation();
+   boolean isConstant();
+   Object getConstantValue();
 }

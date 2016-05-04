@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
       + " A third order polynomial function is used to interpolate between trajectory points."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
-                  topic = "/contrl/neck_trajectory")
+                  topic = "/control/neck_trajectory")
 public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> implements VisualizablePacket
 {
    @RosExportedField(documentation = "List of points in the trajectory."

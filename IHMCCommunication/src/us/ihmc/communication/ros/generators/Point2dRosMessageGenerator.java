@@ -28,6 +28,16 @@ public class Point2dRosMessageGenerator implements RosCustomGenerator
          {
             return "The first coordinate of the point in a 2D plane";
          }
+
+         @Override public boolean isConstant()
+         {
+            return false;
+         }
+
+         @Override public Object getConstantValue()
+         {
+            return null;
+         }
       };
 
       RosFieldDefinition yFieldDefinition = new RosFieldDefinition()
@@ -48,6 +58,16 @@ public class Point2dRosMessageGenerator implements RosCustomGenerator
          public String getDocumentation()
          {
             return "The second coordinate of the point in a 2D plane";
+         }
+
+         @Override public boolean isConstant()
+         {
+            return false;
+         }
+
+         @Override public Object getConstantValue()
+         {
+            return null;
          }
       };
 

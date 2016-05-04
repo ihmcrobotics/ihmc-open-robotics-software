@@ -28,6 +28,16 @@ public class LastReceivedMessageGenerator implements RosCustomGenerator
          {
             return "The type of the last message received";
          }
+
+         @Override public boolean isConstant()
+         {
+            return false;
+         }
+
+         @Override public Object getConstantValue()
+         {
+            return null;
+         }
       };
 
       RosFieldDefinition idField = new RosFieldDefinition()
@@ -48,6 +58,16 @@ public class LastReceivedMessageGenerator implements RosCustomGenerator
          public String getDocumentation()
          {
             return "The Unique ID of the last message received.";
+         }
+
+         @Override public boolean isConstant()
+         {
+            return false;
+         }
+
+         @Override public Object getConstantValue()
+         {
+            return null;
          }
       };
 
@@ -70,6 +90,16 @@ public class LastReceivedMessageGenerator implements RosCustomGenerator
          {
             return "The timestamp at which the message was received.";
          }
+
+         @Override public boolean isConstant()
+         {
+            return false;
+         }
+
+         @Override public Object getConstantValue()
+         {
+            return null;
+         }
       };
 
       RosFieldDefinition timeSinceLastReceivedField = new RosFieldDefinition()
@@ -90,6 +120,16 @@ public class LastReceivedMessageGenerator implements RosCustomGenerator
          public String getDocumentation()
          {
             return "The time since a message was received";
+         }
+
+         @Override public boolean isConstant()
+         {
+            return false;
+         }
+
+         @Override public Object getConstantValue()
+         {
+            return null;
          }
       };
 

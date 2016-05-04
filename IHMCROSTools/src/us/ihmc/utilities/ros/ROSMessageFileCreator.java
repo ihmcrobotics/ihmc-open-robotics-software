@@ -48,7 +48,13 @@ public class ROSMessageFileCreator
             for (RosFieldDefinition rosFieldDefinition : generator.getFields())
             {
                cleanupAndLineWrapDocumentation(fileContents, rosFieldDefinition.getDocumentation());
-               fileContents.append(rosFieldDefinition.getType()).append(" ").append(rosFieldDefinition.getFieldName()).append("\n\n");
+               fileContents.append(rosFieldDefinition.getType()).append(" ").append(rosFieldDefinition.getFieldName()); //.append("\n\n");
+               if(rosFieldDefinition.isConstant())
+               {
+                  fileContents.append("=").append(rosFieldDefinition.getConstantValue());
+               }
+
+               fileContents.append("\n\n");
             }
 
             writer.append(fileContents.toString());
