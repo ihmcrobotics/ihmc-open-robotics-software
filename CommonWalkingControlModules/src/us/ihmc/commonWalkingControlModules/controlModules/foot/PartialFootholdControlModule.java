@@ -28,6 +28,9 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 
 public class PartialFootholdControlModule
 {
+   private static final double thresholdForCoPCellOccupancy = 3.0;
+   private static final double copGridDecay = 0.997;
+
    private final String name = getClass().getSimpleName();
 
    public enum PartialFootholdState
@@ -63,7 +66,6 @@ public class PartialFootholdControlModule
    private final IntegerYoVariable numberOfVerticesRemoved;
    private final IntegerYoVariable numberOfCellsOccupiedOnSideOfLine;
 
-   private final IntegerYoVariable thresholdForCoPCellOccupancy;
    private final IntegerYoVariable thresholdForCoPRegionOccupancy;
    private final DoubleYoVariable distanceFromLineOfRotationToComputeCoPOccupancy;
 
@@ -113,12 +115,10 @@ public class PartialFootholdControlModule
       velocityFootRotationCalculator = new VelocityFootRotationCalculator(namePrefix, dt, contactableFoot, twistCalculator, yoGraphicsListRegistry, registry);
       footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, walkingControllerParameters.getFootLength(),
             walkingControllerParameters.getFootWidth(), 20, 10, yoGraphicsListRegistry, registry);
+      footCoPOccupancyGrid.setDecayRate(copGridDecay);
+      footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy);
 
       geometricFootRotationCalculator = new GeometricFootRotationCalculator(namePrefix, contactableFoot, parentRegistry, yoGraphicsListRegistry);
-
-      thresholdForCoPCellOccupancy = new IntegerYoVariable(namePrefix + "ThresholdForCoPCellOccupancy", registry);
-      thresholdForCoPCellOccupancy.set(3);
-      footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy.getIntegerValue());
 
       thresholdForCoPRegionOccupancy = new IntegerYoVariable(namePrefix + "ThresholdForCoPRegionOccupancy", registry);
       thresholdForCoPRegionOccupancy.set(2);
@@ -137,6 +137,8 @@ public class PartialFootholdControlModule
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
    {
+      footCoPOccupancyGrid.update();
+
       if (desiredCenterOfPressure.containsNaN() || centerOfPressure.containsNaN())
       {
          doNothing();
@@ -396,7 +398,6 @@ public class PartialFootholdControlModule
       velocityFootRotationCalculator.reset();
       geometricFootRotationCalculator.reset();
       footCoPOccupancyGrid.reset();
-      footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy.getIntegerValue());
       shrunkFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
       backupFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
    }
