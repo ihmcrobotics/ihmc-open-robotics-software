@@ -182,7 +182,8 @@ public class PIDController
    {
       // LIMIT THE MAX INTEGRAL ERROR SO WON'T WIND UP
       double maxError = maxIntegralError.getDoubleValue();
-      cumulativeError.set(pdController.getPositionError() * deltaTime + integralLeakRatio.getDoubleValue()*cumulativeError.getDoubleValue());
+      double errorAfterLeak = pdController.getPositionError() * deltaTime + integralLeakRatio.getDoubleValue() * cumulativeError.getDoubleValue();
+      cumulativeError.set(errorAfterLeak);
       if (cumulativeError.getDoubleValue() > maxError)
          cumulativeError.set(maxError);
       else if (cumulativeError.getDoubleValue() < -maxError)
