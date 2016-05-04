@@ -41,8 +41,8 @@ public class QuadrupedTimedStepCopPlanner
       }
    };
 
-   private final double[] timeAtTransition;
-   private final FramePoint[] copAtTransition;
+   private final double[] timeAtStartOfInterval;
+   private final FramePoint[] copAtStartOfInterval;
    private final QuadrupedStepTransition[] stepTransition;
    private final QuadrupedTimedStep[] stepArray;
    private final QuadrantDependentList<FramePoint> solePosition;
@@ -50,14 +50,14 @@ public class QuadrupedTimedStepCopPlanner
 
    public QuadrupedTimedStepCopPlanner(int maxIntervals)
    {
-      timeAtTransition = new double[maxIntervals];
-      copAtTransition = new FramePoint[maxIntervals];
+      timeAtStartOfInterval = new double[maxIntervals];
+      copAtStartOfInterval = new FramePoint[maxIntervals];
       stepTransition = new QuadrupedStepTransition[maxIntervals];
       stepArray = new QuadrupedTimedStep[maxIntervals];
       for (int i = 0; i < maxIntervals; i++)
       {
-         timeAtTransition[i] = 0.0;
-         copAtTransition[i] = new FramePoint(ReferenceFrame.getWorldFrame());
+         timeAtStartOfInterval[i] = 0.0;
+         copAtStartOfInterval[i] = new FramePoint(ReferenceFrame.getWorldFrame());
          stepTransition[i] = new QuadrupedStepTransition();
          stepArray[i] = new QuadrupedTimedStep();
       }
@@ -70,24 +70,24 @@ public class QuadrupedTimedStepCopPlanner
       }
    }
 
-   public double getTimeAtTransition(int transition)
+   public double getTimeAtStartOfInterval(int transition)
    {
-      return timeAtTransition[transition];
+      return timeAtStartOfInterval[transition];
    }
 
-   public double[] getTimeAtTransitions()
+   public double[] getTimeAtStartOfInterval()
    {
-      return timeAtTransition;
+      return timeAtStartOfInterval;
    }
 
-   public FramePoint getCopAtTransition(int transition)
+   public FramePoint getCopAtStartOfInterval(int transition)
    {
-      return copAtTransition[transition];
+      return copAtStartOfInterval[transition];
    }
 
-   public FramePoint[] getCopAtTransitions()
+   public FramePoint[] getCopAtStartOfInterval()
    {
-      return copAtTransition;
+      return copAtStartOfInterval;
    }
 
    /**
@@ -133,7 +133,7 @@ public class QuadrupedTimedStepCopPlanner
     * @param initialSolePosition initial sole positions
     * @param initialContactState initial sole contact state
     * @param initialTime initial time
-    * @return numberOfTransitions
+    * @return numberOfIntervals
     */
    public int compute(int numberOfSteps, QuadrupedTimedStep[] stepArray, QuadrantDependentList<FramePoint> initialSolePosition, QuadrantDependentList<ContactState> initialContactState, double initialTime)
    {
@@ -156,7 +156,7 @@ public class QuadrupedTimedStepCopPlanner
       {
          QuadrupedTimedStep step = stepArray[i];
 
-         if (step.getTimeInterval().getStartTime() > initialTime - 0.05)
+         if (step.getTimeInterval().getStartTime() >= initialTime)
          {
             stepTransition[numberOfStepTransitions].time = step.getTimeInterval().getStartTime();
             stepTransition[numberOfStepTransitions].type = QuadrupedStepTransitionType.LIFT_OFF;
@@ -165,7 +165,7 @@ public class QuadrupedTimedStepCopPlanner
             numberOfStepTransitions++;
          }
 
-         if (step.getTimeInterval().getEndTime() > initialTime - 0.05)
+         if (step.getTimeInterval().getEndTime() >= initialTime)
          {
             stepTransition[numberOfStepTransitions].time = step.getTimeInterval().getEndTime();
             stepTransition[numberOfStepTransitions].type = QuadrupedStepTransitionType.TOUCH_DOWN;
@@ -179,7 +179,9 @@ public class QuadrupedTimedStepCopPlanner
       ArraySorter.sort(stepTransition, compareByTime);
 
       // compute transition time and center of pressure for each time interval
-      int numberOfCopTransitions = 0;
+      int numberOfIntervals = 1;
+      timeAtStartOfInterval[0] = initialTime;
+      computeNominalCopPosition(solePosition, contactState, copAtStartOfInterval[0]);
       for (int i = 0; i < numberOfStepTransitions; i++)
       {
          switch (stepTransition[i].type)
@@ -195,23 +197,23 @@ public class QuadrupedTimedStepCopPlanner
          }
          if ((i + 1 == numberOfStepTransitions) || (stepTransition[i].time != stepTransition[i + 1].time))
          {
-            timeAtTransition[numberOfCopTransitions] = stepTransition[i].time;
-            computeNominalCopPosition(solePosition, contactState, copAtTransition[numberOfCopTransitions]);
-            numberOfCopTransitions++;
+            timeAtStartOfInterval[numberOfIntervals] = stepTransition[i].time;
+            computeNominalCopPosition(solePosition, contactState, copAtStartOfInterval[numberOfIntervals]);
+            numberOfIntervals++;
          }
       }
 
       // pad transition time and center of pressure arrays
-      if (numberOfCopTransitions > 0)
+      if (numberOfIntervals > 0)
       {
-         for (int i = numberOfCopTransitions; i < timeAtTransition.length; i++)
+         for (int i = numberOfIntervals; i < timeAtStartOfInterval.length; i++)
          {
-            timeAtTransition[i] = timeAtTransition[numberOfCopTransitions - 1];
-            copAtTransition[i].setIncludingFrame(copAtTransition[numberOfCopTransitions - 1]);
+            timeAtStartOfInterval[i] = timeAtStartOfInterval[numberOfIntervals - 1];
+            copAtStartOfInterval[i].setIncludingFrame(copAtStartOfInterval[numberOfIntervals - 1]);
          }
       }
 
-      return numberOfCopTransitions;
+      return numberOfIntervals;
    }
 
    private void computeNominalCopPosition(QuadrantDependentList<FramePoint> solePosition, QuadrantDependentList<ContactState> contactState, FramePoint copPosition)
