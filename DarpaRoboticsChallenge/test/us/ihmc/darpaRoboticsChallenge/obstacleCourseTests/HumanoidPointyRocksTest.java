@@ -343,6 +343,88 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
+   @DeployableTestMethod(estimatedDuration = 45.9)
+   @Test(timeout = 230000)
+   /**
+    * In this test, the robot walks forward. On each step a part of the foot is cut away. The controller knows about the foothold. No exploration is done
+    */
+   public void testWalkingForwardWithPartialFootholdsAndStopBetweenSteps() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+      FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultSwingTime, 0.0, defaultChickenPercentage);
+      BooleanYoVariable doFootExplorationInTransferToStanding = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
+      doFootExplorationInTransferToStanding.set(false);
+
+      setupSupportViz();
+
+      setupCameraForWalkingUpToRamp();
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
+      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      boolean setPredictedContactPoints = true;
+
+      Vector3d stepVector = new Vector3d();
+
+      stepVector.set(0.2, 0.0, 0.0);
+
+      int numberOfSteps = 20;
+      ArrayList<Point2d> newContactPoints;
+
+      Random random = new Random(1984L);
+      for (int i=0; i<numberOfSteps; i++)
+      {
+         // Type of contact change options:
+         //  0    uniform shrinking
+         //  1    line of contact
+         //  2    half foot
+         int typeOfContactChange = random.nextInt(3);
+
+         if (typeOfContactChange == 0)
+         {
+            double shrinkageLengthPercent = RandomTools.generateRandomDouble(random, 0.5, 0.6);
+            double shrinkageWidthPercent = RandomTools.generateRandomDouble(random, 0.5, 0.6);
+            newContactPoints = generateContactPointsForUniformFootShrinkage(getRobotModel().getWalkingControllerParameters(), shrinkageLengthPercent, shrinkageWidthPercent);
+         }
+         else if (typeOfContactChange == 1)
+         {
+            newContactPoints = generateContactPointsForRandomRotatedLineOfContact(random);
+         }
+         else if (typeOfContactChange == 2)
+         {
+            double percentOfFootToKeep = RandomTools.generateRandomDouble(random, 0.0, 0.5);
+            newContactPoints = generateContactPointsForHalfOfFoot(random, getRobotModel().getWalkingControllerParameters(), percentOfFootToKeep);
+         }
+         else
+         {
+            throw new RuntimeException("Should not go here");
+         }
+
+         double stepLength = 0.3;
+         double stepWidth = 0.3;
+
+         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide.getOppositeSide()), stepLength, robotSide.negateIfRightSide(stepWidth), 0.0);
+
+         success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, newContactPoints, stepLocation, jointNames, setPredictedContactPoints);
+         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+
+         robotSide = robotSide.getOppositeSide();
+      }
+
+      assertTrue(success);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
 
    @DeployableTestMethod(estimatedDuration = 45.9)
    @Test(timeout = 230000)
