@@ -64,10 +64,11 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 {
-   private final double defaultSwingTime = 0.6;
-   private final double defaultTransferTime = 2.5;
-   private final double defaultChickenPercentage = 0.5;
-   private final boolean keepSCSup = false;
+   private final static double defaultSwingTime = 0.6;
+   private final static double defaultTransferTime = 2.5;
+   private final static double defaultChickenPercentage = 0.5;
+   private final static boolean keepSCSup = false;
+   private final static boolean usePefectSensors = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -87,6 +88,11 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       {
          simulationTestingParameters.setKeepSCSUp(keepSCSup);
       }
+      if (System.getProperty("use.perfect.sensors") == null)
+      {
+         simulationTestingParameters.setUsePefectSensors(usePefectSensors);
+      }
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
