@@ -73,8 +73,8 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
 
    public GeometricFootRotationCalculator(String namePrefix,
          ContactablePlaneBody contactableFoot,
-         YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry,
+         YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
@@ -82,8 +82,8 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       soleFrame = contactableFoot.getSoleFrame();
       defaultFootPolygon = new FrameConvexPolygon2d(contactableFoot.getContactPoints2d());
 
-      angleFootGround = new DoubleYoVariable(namePrefix + "AngleFootGround", registry);
-      angleTreshold = new DoubleYoVariable(namePrefix + "AngleTresholdFootRotation", registry);
+      angleFootGround = new DoubleYoVariable(namePrefix + "AngleToGround", registry);
+      angleTreshold = new DoubleYoVariable(namePrefix + "AngleTresholdForRotation", registry);
       angleTreshold.set(defaultAngleThreshold);
       footRotating = new BooleanYoVariable(namePrefix + "Rotating", registry);
 
