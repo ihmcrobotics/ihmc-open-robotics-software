@@ -52,6 +52,8 @@ public class PartialFootholdControlModule
    private final EnumYoVariable<RotationCalculatorType> rotationCalculatorType;
    private static final RotationCalculatorType defaultRotationCalculatorType = RotationCalculatorType.GEOMETRY;
 
+   private final RotationVerificator rotationVerificator;
+
    private final FootCoPOccupancyGrid footCoPOccupancyGrid;
 
    private final ReferenceFrame soleFrame;
@@ -139,6 +141,8 @@ public class PartialFootholdControlModule
 
       rotationCalculatorType = new EnumYoVariable<RotationCalculatorType>(namePrefix + "RotationCalculatorType", registry, RotationCalculatorType.class);
       rotationCalculatorType.set(defaultRotationCalculatorType);
+
+      rotationVerificator = new RotationVerificator(namePrefix, contactableFoot, registry);
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
@@ -161,10 +165,11 @@ public class PartialFootholdControlModule
       }
       FootRotationCalculator activeCalculator = rotationCalculators.get(rotationCalculatorType.getEnumValue());
 
-      if (activeCalculator.isFootRotating())
-      {
-         activeCalculator.getLineOfRotation(lineOfRotation);
+      activeCalculator.getLineOfRotation(lineOfRotation);
+      boolean verified = rotationVerificator.isRotating(centerOfPressure, desiredCenterOfPressure, lineOfRotation);
 
+      if (activeCalculator.isFootRotating() && verified)
+      {
          numberOfVerticesRemoved.set(ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, unsafePolygon, RobotSide.LEFT));
 
          if (numberOfVerticesRemoved.getIntegerValue() <= 0)
