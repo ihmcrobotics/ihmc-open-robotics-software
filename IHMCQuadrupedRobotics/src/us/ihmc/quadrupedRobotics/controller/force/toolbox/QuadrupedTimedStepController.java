@@ -282,9 +282,12 @@ public class QuadrupedTimedStepController
 
       @Override public void onExit()
       {
+         // set contact state
+         contactState.set(robotQuadrant, ContactState.NO_CONTACT);
+
          // trigger lift off transition
          if (stepTransitionCallback != null)
-            stepTransitionCallback.onLiftOff(robotQuadrant);
+            stepTransitionCallback.onLiftOff(robotQuadrant, contactState);
       }
    }
 
@@ -311,7 +314,6 @@ public class QuadrupedTimedStepController
          swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval);
 
          // initialize contact state and feedback gains
-         contactState.set(robotQuadrant, ContactState.NO_CONTACT);
          solePositionController.getGains(robotQuadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
          solePositionController.getGains(robotQuadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
          solePositionController.getGains(robotQuadrant).setDerivativeGains(solePositionDerivativeGainsParameter.get());
@@ -344,9 +346,12 @@ public class QuadrupedTimedStepController
 
       @Override public void onExit()
       {
+         // set contact state
+         contactState.set(robotQuadrant, ContactState.IN_CONTACT);
+
          // trigger touch down transition
          if (stepTransitionCallback != null)
-            stepTransitionCallback.onTouchDown(robotQuadrant);
+            stepTransitionCallback.onTouchDown(robotQuadrant, contactState);
       }
    }
 }

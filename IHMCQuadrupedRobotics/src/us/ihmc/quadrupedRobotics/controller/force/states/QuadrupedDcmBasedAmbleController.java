@@ -137,7 +137,7 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
          groundPlanePositions.set(robotQuadrant, new FramePoint());
       }
       nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(4, gravity, inputProvider.getComPositionInput().getZ());
-      copPlanner = new QuadrupedTimedStepCopPlanner(2 * timedStepController.getQueueCapacity());
+      copPlanner = new QuadrupedTimedStepCopPlanner(2 * timedStepController.getQueueCapacity() + 1);
 
       // state machine
       FiniteStateMachineBuilder<AmbleState, AmbleEvent> ambleStateMachineBuilder = new FiniteStateMachineBuilder<>(AmbleState.class, AmbleEvent.class, "AmbleState", registry);
@@ -364,20 +364,26 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
 
       @Override public void onEntry()
       {
-         double initialTime = robotTimestamp.getDoubleValue();
+         double currentTime = robotTimestamp.getDoubleValue();
          timedStepController.registerStepTransitionCallback(this);
 
          // compute nominal dcm trajectory
-         int nTransitions = copPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), initialTime);
+         int nIntervals = copPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), currentTime);
          nominalDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
-         nominalDcmTrajectory.initializeTrajectory(nTransitions, copPlanner.getTimeAtTransitions(), copPlanner.getCopAtTransitions(), dcmPositionEstimate);
+         nominalDcmTrajectory.initializeTrajectory(nIntervals, copPlanner.getTimeAtStartOfInterval(), copPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
       }
 
-      @Override public void onLiftOff(RobotQuadrant robotQuadrant)
+      @Override public void onLiftOff(RobotQuadrant robotQuadrant, QuadrantDependentList<ContactState> contactState)
       {
+         double currentTime = robotTimestamp.getDoubleValue();
+
+         // compute nominal dcm trajectory
+         int nIntervals = copPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), contactState, currentTime);
+         nominalDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
+         nominalDcmTrajectory.initializeTrajectory(nIntervals, copPlanner.getTimeAtStartOfInterval(), copPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
       }
 
-      @Override public void onTouchDown(RobotQuadrant robotQuadrant)
+      @Override public void onTouchDown(RobotQuadrant robotQuadrant, QuadrantDependentList<ContactState> contactState)
       {
          double currentTime = robotTimestamp.getDoubleValue();
          RobotQuadrant nextSwingQuadrant = robotQuadrant.getAcrossBodyQuadrant();
@@ -399,15 +405,11 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
          timedStep.getTimeInterval().shiftInterval(currentTime);
          timedStep.getGoalPosition().setIncludingFrame(footholdPosition);
          timedStepController.addStep(timedStep);
-
-         // compute nominal dcm trajectory
-         int nTransitions = copPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), currentTime);
-         nominalDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
-         nominalDcmTrajectory.initializeTrajectory(nTransitions, copPlanner.getTimeAtTransitions(), copPlanner.getCopAtTransitions(), dcmPositionEstimate);
       }
 
       @Override public AmbleEvent process()
       {
+         // compute nominal dcm trajectory
          nominalDcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
          nominalDcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
          nominalDcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
@@ -429,11 +431,11 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
       {
       }
 
-      @Override public void onLiftOff(RobotQuadrant robotQuadrant)
+      @Override public void onLiftOff(RobotQuadrant robotQuadrant, QuadrantDependentList<ContactState> contactState)
       {
       }
 
-      @Override public void onTouchDown(RobotQuadrant robotQuadrant)
+      @Override public void onTouchDown(RobotQuadrant robotQuadrant, QuadrantDependentList<ContactState> contactState)
       {
       }
 

@@ -36,6 +36,11 @@ public class ThreeDoFSwingFootTrajectory
       return timeInterval.getStartTime();
    }
 
+   public double getEndTime()
+   {
+      return timeInterval.getEndTime();
+   }
+
    public void getPosition(FramePoint position)
    {
       position.setIncludingFrame(this.position);
