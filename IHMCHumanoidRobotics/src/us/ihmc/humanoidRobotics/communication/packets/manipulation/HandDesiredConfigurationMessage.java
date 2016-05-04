@@ -1,21 +1,23 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation(value = "Packet for commanding the hands to perform various predefined grasps."
-      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.")
-public class HandDesiredConfigurationMessage extends IHMCRosApiMessage<HandDesiredConfigurationMessage>
+import java.util.Random;
+
+@RosMessagePacket(documentation = "Packet for commanding the hands to perform various predefined grasps."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
+      topic = "/control/hand_desired_configuration")
+public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigurationMessage>
 {
-   @FieldDocumentation(value = "Specifies the side of the robot that will execute the trajectory")
+   @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory")
    public RobotSide robotSide;
-   @FieldDocumentation(value = "Specifies the grasp to perform")
+   @RosExportedField(documentation = "Specifies the grasp to perform")
    public HandConfiguration handDesiredConfiguration;
 
    /**
@@ -38,6 +40,12 @@ public class HandDesiredConfigurationMessage extends IHMCRosApiMessage<HandDesir
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       this.handDesiredConfiguration = handDesiredConfiguration;
+   }
+
+   public HandDesiredConfigurationMessage(Random random)
+   {
+      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
+      handDesiredConfiguration = RandomTools.generateRandomEnum(random, HandConfiguration.class);
    }
 
    public HandConfiguration getHandDesiredConfiguration()
@@ -69,11 +77,5 @@ public class HandDesiredConfigurationMessage extends IHMCRosApiMessage<HandDesir
       ret &= (this.getHandDesiredConfiguration().equals(other.getHandDesiredConfiguration()));
 
       return ret;
-   }
-
-   public HandDesiredConfigurationMessage(Random random)
-   {
-      this(random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT, HandConfiguration.values()[random.nextInt(HandConfiguration.BASIC_GRIP.getDocumentedValues().length)]);
-
    }
 }

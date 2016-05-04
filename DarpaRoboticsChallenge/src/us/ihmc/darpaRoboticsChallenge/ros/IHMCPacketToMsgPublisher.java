@@ -7,6 +7,8 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 
+import java.lang.reflect.InvocationTargetException;
+
 public class IHMCPacketToMsgPublisher<T extends Message, U extends Packet> extends RosTopicPublisher<T> implements PacketConsumer<U>
 {
    private static final boolean DEBUG = false;
@@ -23,24 +25,23 @@ public class IHMCPacketToMsgPublisher<T extends Message, U extends Packet> exten
       {
          System.out.println("converting " + packet.getClass() + " to ros");
       }
+
+      T msg = null;
+
       try
       {
-         T msg = (T) DRCROSMessageConverter.convertToRosMessage(packet);
-         if(isConnected())
-         {
-            publish(msg);
-         }
+         msg = (T) IHMCROSTranslationRuntimeTools.convertToRosMessage(packet);
       }
-      catch (IllegalArgumentException | SecurityException e)
+      catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e)
       {
-         System.out.println("Problem consuming Packet of class: " + packet.getClass().getSimpleName());
-         System.out.println(this.getMessageType().getClass().getSimpleName() + " failed to convert packet to message! see exception below.");
+         System.err.println("Could not convert IHMC Message to ROS Message. Will not publish.");
+         System.err.println("Original packet: " + packet);
          e.printStackTrace();
       }
-      catch (NullPointerException e)
+
+      if(isConnected() && msg != null)
       {
-         System.err.println("Received a malformed packet of type " + packet.getClass().getSimpleName());
-         e.printStackTrace();
+         publish(msg);
       }
    }
 
