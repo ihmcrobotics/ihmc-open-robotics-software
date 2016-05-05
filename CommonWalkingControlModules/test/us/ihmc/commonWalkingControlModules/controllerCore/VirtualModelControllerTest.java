@@ -48,7 +48,7 @@ import javax.vecmath.Vector3d;
 import java.util.Map;
 import java.util.Random;
 
-@DeployableTestClass(targets = TestPlanTarget.Fast)
+//@DeployableTestClass(targets = TestPlanTarget.Fast)
 public class VirtualModelControllerTest
 {
    private final Random bigRandom = new Random(1000L);
@@ -611,8 +611,8 @@ public class VirtualModelControllerTest
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("robert");
-      simulationTestingParameters.setKeepSCSUp(true);
-      hasSCSSimulation = true;
+      //simulationTestingParameters.setKeepSCSUp(true);
+      //hasSCSSimulation = true;
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -641,7 +641,7 @@ public class VirtualModelControllerTest
 
       Vector3d contactForce = new Vector3d();
       contactForce.set(desiredForce);
-      contactForce.negate();
+      contactForce.scale(-1.0);
 
       ForcePointController forcePointController = new ForcePointController(robotArm.getExternalForcePoint(), handFrame, desiredHandPose);
       forcePointController.setInitialForce(contactForce);
@@ -656,20 +656,88 @@ public class VirtualModelControllerTest
       yoGraphicsListRegistry.registerYoGraphicsList(forcePointController.getYoGraphicsList());
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
+      /*
       BlockingSimulationRunner blockingSimulationRunner = new BlockingSimulationRunner(scs, 1500.0);
       scs.startOnAThread();
       testHelper.setSCSAndCreateSimulationRunner(scs);
       ThreadTools.sleep(TimeTools.secondsToMilliSeconds(1));
+      */
+      scs.startOnAThread();
+      scs.simulate();
 
+      /*
       double timeIncrement = 1.0;
       while (scs.getTime() < simulationDuration)
       {
          blockingSimulationRunner.simulateAndBlock(timeIncrement);
       }
+      */
 
-      simulationTestingParameters.setKeepSCSUp(false);
+      //simulationTestingParameters.setKeepSCSUp(false);
    }
 
+   public static void testVMCWithPlanarArm() throws Exception
+   {
+      double simulationDuration = 20.0;
+
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      //simulationTestingParameters.setKeepSCSUp(true);
+      //hasSCSSimulation = true;
+
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
+      VirtualModelControllerTestHelper.PlanarRobotArm robotArm = testHelper.createPlanarArm();
+      SCSRobotFromInverseDynamicsRobotModel scsRobotArm = robotArm.getSCSRobotArm();
+
+      RigidBody hand = robotArm.getHand();
+      ReferenceFrame handFrame = robotArm.getHandFrame();
+
+      FramePose desiredHandPose = new FramePose(handFrame);
+      desiredHandPose.setToZero();
+      desiredHandPose.changeFrame(worldFrame);
+
+      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
+      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, robotArm.getElevator(), registry, yoGraphicsListRegistry);
+      virtualModelController.registerEndEffector(robotArm.getElevator(), hand);
+
+      Wrench desiredWrench = new Wrench(handFrame, worldFrame);
+      Vector3d desiredForce = new Vector3d(6.0, 0.0, 7.0);
+      //Vector3d desiredForce = new Vector3d(0.0, 0.0, 0.0);
+      desiredWrench.set(new FrameVector(worldFrame, desiredForce), new FrameVector(worldFrame, new Vector3d()));
+
+      YoWrench yoDesiredWrench = new YoWrench("desiredWrench", handFrame, ReferenceFrame.getWorldFrame(), registry);
+      yoDesiredWrench.set(desiredWrench);
+
+      Vector3d contactForce = new Vector3d();
+      contactForce.set(desiredForce);
+      contactForce.scale(-1.0);
+
+      ForcePointController forcePointController = new ForcePointController(robotArm.getExternalForcePoint(), handFrame, desiredHandPose);
+      forcePointController.setInitialForce(contactForce);
+
+      DummyArmController armController = new DummyArmController(scsRobotArm, robotArm, robotArm.getOneDoFJoints(), forcePointController, virtualModelController, hand,
+            yoDesiredWrench);
+
+      SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
+      SimulationConstructionSet scs = new SimulationConstructionSet(scsRobotArm, scsParameters);
+      scsRobotArm.setController(armController);
+      scs.getRootRegistry().addChild(registry);
+      yoGraphicsListRegistry.registerYoGraphicsList(forcePointController.getYoGraphicsList());
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+
+      /*
+      BlockingSimulationRunner blockingSimulationRunner = new BlockingSimulationRunner(scs, 1500.0);
+      scs.startOnAThread();
+      testHelper.setSCSAndCreateSimulationRunner(scs);
+      ThreadTools.sleep(TimeTools.secondsToMilliSeconds(1));
+      */
+      scs.startOnAThread();
+      scs.simulate();
+
+      //simulationTestingParameters.setKeepSCSUp(false);
+   }
 
    @After
    public void destroySimulationAndRecycleMemory()
@@ -680,7 +748,7 @@ public class VirtualModelControllerTest
       }
    }
 
-   private class ForcePointController implements RobotController
+   private static class ForcePointController implements RobotController
    {
       private static final double linearKp = 5.0;
       private static final double linearKi = 1.0;
@@ -763,7 +831,7 @@ public class VirtualModelControllerTest
 
          AppearanceDefinition forceAppearance = YoAppearance.Red();
          forcePoint.getYoPosition().getFramePointCopy();
-         forceVisualizer = new YoGraphicVector("contactForceVisualizer", forcePoint.getYoPosition(), contactForce, forceAppearance);
+         forceVisualizer = new YoGraphicVector("contactForceVisualizer", forcePoint.getYoPosition(), contactForce, 0.05, forceAppearance);
 
          yoGraphicsList.add(forceVisualizer);
       }
@@ -818,6 +886,10 @@ public class VirtualModelControllerTest
          double linearForceY = pidControllerLinearY.compute(currentPosition.getY(), desiredPosition.getY(), 0.0, 0.0, 0.0);
          double linearForceZ = pidControllerLinearZ.compute(currentPosition.getZ(), desiredPosition.getZ(), 0.0, 0.0, 0.0);
 
+         linearForceX += initialForce.getX();
+         linearForceY += initialForce.getY();
+         linearForceZ += initialForce.getZ();
+
          contactForce.setX(linearForceX);
          contactForce.setY(linearForceY);
          contactForce.setZ(linearForceZ);
@@ -826,7 +898,7 @@ public class VirtualModelControllerTest
          double torqueY = pidControllerY.compute(currentOrientation.getY(), desiredOrientation.getY(), 0.0, 0.0, 0.0);
          double torqueZ = pidControllerZ.compute(currentOrientation.getZ(), desiredOrientation.getZ(), 0.0, 0.0, 0.0);
 
-         forcePoint.setForce(initialForce.getX() + linearForceX, initialForce.getY() + linearForceY, initialForce.getZ() + linearForceZ);
+         forcePoint.setForce(linearForceX, linearForceY, linearForceZ);
          forcePoint.setMoment(torqueX, torqueY, torqueZ);
 
          forceVisualizer.update();
@@ -848,7 +920,7 @@ public class VirtualModelControllerTest
       }
    }
 
-   private class DummyArmController implements RobotController
+   private static class DummyArmController implements RobotController
    {
       private final YoVariableRegistry registry = new YoVariableRegistry("controller");
 
@@ -974,5 +1046,10 @@ public class VirtualModelControllerTest
          VirtualModelControllerTestHelper.compareWrenches(desiredWrench, appliedWrench);
       else
          VirtualModelControllerTestHelper.compareWrenches(desiredWrench, appliedWrench, selectionMatrix);
+   }
+
+   public static void main(String[] args) throws Exception
+   {
+      testVMCWithPlanarArm();
    }
 }
