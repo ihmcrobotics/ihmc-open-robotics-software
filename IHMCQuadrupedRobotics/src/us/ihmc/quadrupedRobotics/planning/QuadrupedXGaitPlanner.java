@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 public class QuadrupedXGaitPlanner
 {
+   private final FramePoint goalPosition;
    private final QuadrupedXGaitSettings xGaitSettings;
    private final QuadrantDependentList<FramePoint> xGaitRectangle;
    private final FramePose xGaitRectanglePose;
@@ -19,6 +20,7 @@ public class QuadrupedXGaitPlanner
 
    public QuadrupedXGaitPlanner()
    {
+      goalPosition = new FramePoint();
       xGaitSettings = new QuadrupedXGaitSettings();
       xGaitRectangle = new QuadrantDependentList<>();
       xGaitRectanglePose = new FramePose();
@@ -108,10 +110,8 @@ public class QuadrupedXGaitPlanner
 
          // compute step goal position by sampling the corner position of the xGait rectangle at touch down
          RobotQuadrant robotQuadrant = step.getRobotQuadrant();
-         FramePoint goalPosition = step.getGoalPosition();
-         goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
          goalPosition.setIncludingFrame(xGaitRectangle.get(robotQuadrant));
-         goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         step.setGoalPosition(goalPosition);
 
          // compute step ground clearance
          step.setGroundClearance(xGaitSettings.getStepGroundClearance());
@@ -124,8 +124,9 @@ public class QuadrupedXGaitPlanner
       // translate step goal positions to match initial constraint
       for (int i = plannedSteps.size(); i > 0; i--)
       {
+         initialStepGoalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         plannedSteps.get(i - 1).getGoalPosition().add(initialStepGoalPosition.getPoint());
          plannedSteps.get(i - 1).getGoalPosition().sub(plannedSteps.get(0).getGoalPosition());
-         plannedSteps.get(i - 1).getGoalPosition().add(initialStepGoalPosition);
       }
    }
 }
