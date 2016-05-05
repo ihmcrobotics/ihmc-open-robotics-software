@@ -2,18 +2,16 @@ package us.ihmc.communication.packets;
 
 import static java.lang.Double.isInfinite;
 import static java.lang.Double.isNaN;
+import us.ihmc.robotics.geometry.RotationTools;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Tuple4d;
+import javax.vecmath.*;
 
 public abstract class ObjectValidityChecker
 {
 
    public enum ObjectErrorType
    {
-      NULL, CONTAINS_NaN, CONTAINS_INFINITY, INVALID_TIME_VALUE, WRONG_ARRAY_SIZE;
+      NULL, CONTAINS_NaN, CONTAINS_INFINITY, INVALID_TIME_VALUE, WRONG_ARRAY_SIZE, NOT_NORMALIZED;
 
       private int expectedArraySize, actualArraySize;
 
@@ -41,6 +39,8 @@ public abstract class ObjectValidityChecker
             return "is null";
          case WRONG_ARRAY_SIZE:
             return "has a different size than expected. Expected size: " + expectedArraySize + ", actual size: " + actualArraySize;
+         case NOT_NORMALIZED:
+            return "Indicates that something isn't normalized, e.g. a non-unit Quaternion.";
          default:
             throw new RuntimeException("Enum value not handled: " + this);
          }
@@ -96,6 +96,27 @@ public abstract class ObjectValidityChecker
          return ObjectErrorType.CONTAINS_INFINITY;
 
       return null;
+   }
+
+   public static ObjectErrorType validateQuat4d(Quat4d quat4dToCheck)
+   {
+      ObjectErrorType objectErrorType = validateTuple4d(quat4dToCheck);
+      if(objectErrorType != null)
+      {
+         return objectErrorType;
+      }
+      else
+      {
+         boolean quaternionNormalized = RotationTools.isQuaternionNormalized(quat4dToCheck);
+         if(!quaternionNormalized)
+         {
+            return ObjectErrorType.NOT_NORMALIZED;
+         }
+         else
+         {
+            return null;
+         }
+      }
    }
 
    /**
