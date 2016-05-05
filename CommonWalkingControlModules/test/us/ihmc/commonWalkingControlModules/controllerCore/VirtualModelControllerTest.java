@@ -1,7 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
+import static org.junit.Assert.assertTrue;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import org.jfree.chart.block.Block;
 import org.junit.After;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
@@ -18,9 +21,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanTarget;
@@ -588,8 +594,10 @@ public class VirtualModelControllerTest
 
    @DeployableTestMethod
    @Test(timeout = 300000000)
-   public void testVMCWithArm()
+   public void testVMCWithArm() throws Exception
    {
+      double simulationDuration = 30.0;
+
       YoVariableRegistry registry = new YoVariableRegistry("robert");
       simulationTestingParameters.setKeepSCSUp(true);
       hasSCSSimulation = true;
@@ -620,16 +628,26 @@ public class VirtualModelControllerTest
       yoDesiredWrench.set(desiredWrench);
 
       ForcePointController forcePointController = new ForcePointController(robotArm.getExternalForcePoint(), currentHandPose, desiredHandPose);
+      forcePointController.setInitialForce(desiredForce);
 
-      DummyArmController armController = new DummyArmController(scsRobotArm, robotArm.getOneDoFJoints(), forcePointController, virtualModelController, hand, yoDesiredWrench);
+      DummyArmController armController = new DummyArmController(scsRobotArm, robotArm.getOneDoFJoints(), forcePointController, virtualModelController, hand,
+            yoDesiredWrench);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(scsRobotArm);
       scsRobotArm.setController(armController);
       scs.getRootRegistry().addChild(registry);
 
+      BlockingSimulationRunner blockingSimulationRunner = new BlockingSimulationRunner(scs, 1500.0);
       scs.startOnAThread();
+      testHelper.setSCSAndCreateSimulationRunner(scs);
 
+      double timeIncrement = 1.0;
+      while (scs.getTime() < simulationDuration)
+      {
+         blockingSimulationRunner.simulateAndBlock(timeIncrement);
+      }
    }
+
 
    @After
    public void destroySimulationAndRecycleMemory()
@@ -668,6 +686,8 @@ public class VirtualModelControllerTest
       private final Vector3d currentPosition = new Vector3d();
       private final Quat4d currentOrientation = new Quat4d();
 
+      private boolean hasInitialForce = false;
+
       public ForcePointController(ExternalForcePoint forcePoint, FramePose currentPose, FramePose desiredPose)
       {
          this.forcePoint = forcePoint;
@@ -695,9 +715,16 @@ public class VirtualModelControllerTest
          pidControllerLinearZ = new PIDController(linearPidGains, "angular_Z", registry);
       }
 
+      public void setInitialForce(Vector3d initialForce)
+      {
+         forcePoint.setForce(initialForce);
+         hasInitialForce = true;
+      }
+
       public void initialize()
       {
-         forcePoint.setForce(0.0, 0.0, 0.0);
+         if (!hasInitialForce)
+            forcePoint.setForce(0.0, 0.0, 0.0);
 
          pidControllerX.resetIntegrator();
          pidControllerY.resetIntegrator();

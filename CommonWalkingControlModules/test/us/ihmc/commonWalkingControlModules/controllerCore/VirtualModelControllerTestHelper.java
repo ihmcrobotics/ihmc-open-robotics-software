@@ -24,6 +24,8 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.testing.JUnitTools;
 
 import javax.vecmath.Matrix3d;
@@ -74,8 +76,35 @@ public class VirtualModelControllerTestHelper
 
    private final Random random = new Random(100L);
 
+
+   private BlockingSimulationRunner blockingSimulationRunner;
+
    public VirtualModelControllerTestHelper()
    {
+   }
+
+   public void setSCSAndCreateSimulationRunner(SimulationConstructionSet scs)
+   {
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 10.0);
+   }
+
+   public void simulateAndBlock(double simulationTime) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      blockingSimulationRunner.simulateAndBlock(simulationTime);
+   }
+
+   public boolean simulateAndBlockAndCatchExceptions(double simulationTime) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   {
+      try
+      {
+         simulateAndBlock(simulationTime);
+         return true;
+      }
+      catch (Exception e)
+      {
+         System.err.println("Caught exception in " + getClass().getSimpleName() + ".simulateAndBlockAndCatchExceptions. Exception = /n" + e);
+         return false;
+      }
    }
 
    public RobotLegs createRobotLeg(double gravity)
