@@ -26,6 +26,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2dReadOnly;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
@@ -129,6 +130,8 @@ public class MomentumBasedController
    private final BipedSupportPolygons bipedSupportPolygons;
 
    private final SideDependentList<FrameTuple2dArrayList<FramePoint2d>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(), createFramePoint2dArrayList());
+
+   private FramePoint2dReadOnly capturePoint = null;
 
    public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
@@ -890,5 +893,20 @@ public class MomentumBasedController
       wrenchToPack.setToZero(measurementFrames, measurementFrames);
       wrenchToPack.setLinearPart(tempWristForce);
       wrenchToPack.setAngularPart(tempWristTorque);
+   }
+
+   public void setCapturePoint(FramePoint2dReadOnly capturePoint)
+   {
+      if (this.capturePoint != null)
+      {
+         // warning?
+         return;
+      }
+      this.capturePoint = capturePoint;
+   }
+
+   public FramePoint2dReadOnly getCapturePoint()
+   {
+      return capturePoint;
    }
 }
