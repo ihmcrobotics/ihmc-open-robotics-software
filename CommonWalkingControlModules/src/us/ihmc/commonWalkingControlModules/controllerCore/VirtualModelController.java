@@ -50,7 +50,7 @@ public class VirtualModelController
 
          OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(base, endEffector);
 
-         long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(joints, base.getParentJoint().getFrameAfterJoint());
+         long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(joints, base.getBodyFixedFrame());
          endEffectorJacobians.put(endEffector, jacobianID);
 
          tmpEffortMatrix.reshape(joints.length, 1);

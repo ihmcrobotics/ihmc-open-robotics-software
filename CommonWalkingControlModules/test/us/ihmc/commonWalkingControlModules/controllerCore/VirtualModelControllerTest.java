@@ -10,16 +10,13 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJaco
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.ExternalTorque;
-import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -597,6 +594,8 @@ public class VirtualModelControllerTest
       simulationTestingParameters.setKeepSCSUp(true);
       hasSCSSimulation = true;
 
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
       VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
       VirtualModelControllerTestHelper.RobotArm robotArm = testHelper.createRobotArm();
       SCSRobotFromInverseDynamicsRobotModel scsRobotArm = robotArm.getSCSRobotArm();
@@ -607,11 +606,22 @@ public class VirtualModelControllerTest
       FramePose currentHandPose = new FramePose(handFrame);
       FramePose desiredHandPose = new FramePose(handFrame);
       desiredHandPose.setToZero();
-      desiredHandPose.changeFrame(robotArm.getWorldFrame());
+      desiredHandPose.changeFrame(worldFrame);
+
+      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
+      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, robotArm.getElevator());
+      virtualModelController.registerEndEffector(robotArm.getElevator(), hand);
+
+      Wrench desiredWrench = new Wrench(handFrame, worldFrame);
+      Vector3d desiredForce = new Vector3d(6.0, 5.0, 7.0);
+      desiredWrench.set(new FrameVector(worldFrame, desiredForce), new FrameVector(worldFrame, new Vector3d()));
+
+      YoWrench yoDesiredWrench = new YoWrench("desiredWrench", handFrame, ReferenceFrame.getWorldFrame(), registry);
+      yoDesiredWrench.set(desiredWrench);
 
       ForcePointController forcePointController = new ForcePointController(robotArm.getExternalForcePoint(), currentHandPose, desiredHandPose);
 
-      DummyArmController armController = new DummyArmController(scsRobotArm, forcePointController);
+      DummyArmController armController = new DummyArmController(scsRobotArm, robotArm.getOneDoFJoints(), forcePointController, virtualModelController, hand, yoDesiredWrench);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(scsRobotArm);
       scsRobotArm.setController(armController);
@@ -619,8 +629,6 @@ public class VirtualModelControllerTest
 
       scs.startOnAThread();
 
-      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
-      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, robotArm.getElevator());
    }
 
    @After
@@ -734,13 +742,28 @@ public class VirtualModelControllerTest
    private class DummyArmController implements RobotController
    {
       private final YoVariableRegistry registry = new YoVariableRegistry("controller");
+
       private final SCSRobotFromInverseDynamicsRobotModel scsRobot;
+      private final OneDoFJoint[] controlledJoints;
+
       private final ForcePointController forcePointController;
 
-      public DummyArmController(SCSRobotFromInverseDynamicsRobotModel scsRobot, ForcePointController forcePointController)
+      private final VirtualModelController virtualModelController;
+      private final YoWrench yoDesiredWrench;
+
+      private Wrench desiredWrench = new Wrench();
+
+      private final RigidBody hand;
+
+      public DummyArmController(SCSRobotFromInverseDynamicsRobotModel scsRobot, OneDoFJoint[] controlledJoints, ForcePointController forcePointController,
+            VirtualModelController virtualModelController, RigidBody hand, YoWrench yoDesiredWrench)
       {
          this.scsRobot = scsRobot;
+         this.controlledJoints = controlledJoints;
          this.forcePointController = forcePointController;
+         this.virtualModelController = virtualModelController;
+         this.hand = hand;
+         this.yoDesiredWrench = yoDesiredWrench;
 
          registry.addChild(forcePointController.getYoVariableRegistry());
       }
@@ -752,11 +775,25 @@ public class VirtualModelControllerTest
 
       public void doControl()
       {
+         // copy from scs
          scsRobot.updateJointPositions_SCS_to_ID();
          scsRobot.updateJointVelocities_SCS_to_ID();
 
          forcePointController.doControl();
 
+         // compute forces
+         VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
+         desiredWrench = yoDesiredWrench.getWrench();
+         virtualModelController.submitEndEffectorVirtualWrench(hand, desiredWrench);
+         virtualModelController.compute(virtualModelControlSolution);
+
+         Map<InverseDynamicsJoint, Double> jointTorques = virtualModelControlSolution.getJointTorques();
+         for (OneDoFJoint joint : controlledJoints)
+         {
+            joint.setTau(jointTorques.get(joint));
+         }
+
+         // write to scs
          scsRobot.updateJointPositions_ID_to_SCS();
          scsRobot.updateJointVelocities_ID_to_SCS();
          scsRobot.updateJointTorques_ID_to_SCS();
