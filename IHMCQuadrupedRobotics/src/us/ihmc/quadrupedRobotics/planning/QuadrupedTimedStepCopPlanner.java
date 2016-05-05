@@ -10,6 +10,8 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.vecmath.Point3d;
+
 public class QuadrupedTimedStepCopPlanner
 {
    private enum QuadrupedStepTransitionType
@@ -21,14 +23,14 @@ public class QuadrupedTimedStepCopPlanner
    {
       QuadrupedStepTransitionType type;
       RobotQuadrant robotQuadrant;
-      FramePoint solePosition;
+      Point3d solePosition;
       double time;
 
       public QuadrupedStepTransition()
       {
          time = 0.0;
          type = QuadrupedStepTransitionType.LIFT_OFF;
-         solePosition = new FramePoint(ReferenceFrame.getWorldFrame());
+         solePosition = new Point3d();
          robotQuadrant = RobotQuadrant.FRONT_LEFT;
       }
    }
@@ -192,8 +194,8 @@ public class QuadrupedTimedStepCopPlanner
             break;
          case TOUCH_DOWN:
             contactState.set(stepTransition[i].robotQuadrant, ContactState.IN_CONTACT);
-            solePosition.get(stepTransition[i].robotQuadrant).setIncludingFrame(stepTransition[i].solePosition);
             solePosition.get(stepTransition[i].robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+            solePosition.get(stepTransition[i].robotQuadrant).setPoint(stepTransition[i].solePosition);
             break;
          }
          if ((i + 1 == numberOfStepTransitions) || (stepTransition[i].time != stepTransition[i + 1].time))

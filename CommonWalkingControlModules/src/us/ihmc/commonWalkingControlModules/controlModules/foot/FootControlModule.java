@@ -121,7 +121,7 @@ public class FootControlModule
 
       supportState = new FullyConstrainedState(footControlHelper, registry);
       states.add(supportState);
-      
+
       exploreFootPolygonState = new ExploreFootPolygonState(footControlHelper, holdPositionFootControlGains, registry);
       states.add(exploreFootPolygonState);
 
@@ -416,5 +416,10 @@ public class FootControlModule
    public void initializeFootExploration()
    {
       setContactState(ConstraintType.EXPLORE_POLYGON);
+   }
+
+   public void setAllowFootholdAdjustments(boolean allow)
+   {
+      holdPositionState.doFootholdAdjustments(allow);
    }
 }

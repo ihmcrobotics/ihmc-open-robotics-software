@@ -295,10 +295,12 @@ public class QuadrupedTimedStepController
    {
       RobotQuadrant robotQuadrant;
       private final ThreeDoFSwingFootTrajectory swingTrajectory;
+      private final FramePoint goalPosition;
 
       public SwingState(RobotQuadrant robotQuadrant)
       {
          this.robotQuadrant = robotQuadrant;
+         this.goalPosition = new FramePoint();
          this.swingTrajectory =  new ThreeDoFSwingFootTrajectory();
       }
 
@@ -308,7 +310,7 @@ public class QuadrupedTimedStepController
          QuadrupedTimedStep timedStep = getCurrentStep(robotQuadrant);
          double groundClearance = timedStep.getGroundClearance();
          TimeInterval timeInterval = timedStep.getTimeInterval();
-         FramePoint goalPosition = timedStep.getGoalPosition();
+         timedStep.getGoalPosition(goalPosition);
          FramePoint solePosition = solePositionEstimate.get(robotQuadrant);
          solePosition.changeFrame(goalPosition.getReferenceFrame());
          swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval);

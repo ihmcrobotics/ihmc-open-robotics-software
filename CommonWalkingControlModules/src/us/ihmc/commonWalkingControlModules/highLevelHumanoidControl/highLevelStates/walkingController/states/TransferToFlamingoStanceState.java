@@ -37,6 +37,7 @@ public class TransferToFlamingoStanceState extends TransferState
 
       balanceManager.setSingleSupportTime(Double.POSITIVE_INFINITY);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()));
-      balanceManager.initializeICPPlanForTransfer(transferToSide);
+      balanceManager.setICPPlanTransferToSide(transferToSide);
+      balanceManager.initializeICPPlanForTransfer();
    }
 }

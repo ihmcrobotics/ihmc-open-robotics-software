@@ -2,6 +2,8 @@ package us.ihmc.valkyrie;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.ros.internal.message.Message;
 
@@ -57,10 +59,15 @@ public class OpenHumanoidsSimulator
 	   		callbackROSAPI(message.getData());
 	   	}
    }
-   
+
+	public OpenHumanoidsSimulator(String model, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
+			boolean runAutomaticDiagnosticRoutine, boolean disableViz, boolean extra_sim_points) throws IOException
+	{
+		this(model, startingLocation, nameSpace, tfPrefix, runAutomaticDiagnosticRoutine, disableViz, extra_sim_points, Collections.<Class>emptySet());
+	}
    
    public OpenHumanoidsSimulator(String model, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
-         boolean runAutomaticDiagnosticRoutine, boolean disableViz, boolean extra_sim_points) throws IOException
+         boolean runAutomaticDiagnosticRoutine, boolean disableViz, boolean extra_sim_points, Collection<Class> additionalPacketTypes) throws IOException
    {
 	      DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false, model);
 	      if(load_sdf_contacts)
@@ -128,7 +135,7 @@ public class OpenHumanoidsSimulator
 		  java.util.Map.Entry<String,RosTopicSubscriberInterface<? extends Message>> pair=new java.util.AbstractMap.SimpleEntry<String,RosTopicSubscriberInterface<? extends Message>>(nameSpace+"/api_command", sub);
 		  subscribers.add(pair);
 			  
-		  new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace, tfPrefix, subscribers, null);
+		  new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace, tfPrefix, additionalPacketTypes, subscribers, null);
 
 		  drcSimulationFactory = simulationStarter.getDRCSimulationFactory();
    }

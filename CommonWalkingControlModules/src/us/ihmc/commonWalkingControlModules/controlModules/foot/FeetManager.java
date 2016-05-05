@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -23,8 +25,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-
-import javax.vecmath.Vector3d;
 
 public class FeetManager
 {
@@ -245,12 +245,18 @@ public class FeetManager
 
       if (footControlModules.get(robotSide).getCurrentConstraintType() == ConstraintType.TOES)
          momentumBasedController.restorePreviousFootContactPoints(robotSide);
+
+      FootControlModule supportFootControlModule = footControlModules.get(robotSide.getOppositeSide());
+      supportFootControlModule.setAllowFootholdAdjustments(true);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)
    {
       FootControlModule footControlModule = footControlModules.get(robotSide);
       footControlModule.setContactState(ConstraintType.SWING);
+
+      FootControlModule supportFootControlModule = footControlModules.get(robotSide.getOppositeSide());
+      supportFootControlModule.setAllowFootholdAdjustments(false);
    }
 
    private void setContactStateForMoveViaWaypoints(RobotSide robotSide)

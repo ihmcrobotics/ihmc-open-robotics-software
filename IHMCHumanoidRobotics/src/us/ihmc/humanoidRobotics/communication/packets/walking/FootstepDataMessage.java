@@ -9,9 +9,10 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -23,64 +24,47 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.tools.DocumentedEnum;
 
-@ClassDocumentation("This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.")
-public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
+@RosMessagePacket(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.",
+                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
+public class FootstepDataMessage extends Packet<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
 {
-   public enum FootstepOrigin implements DocumentedEnum<FootstepOrigin>
+   public enum FootstepOrigin
    {
-      @Deprecated AT_ANKLE_FRAME, AT_SOLE_FRAME;
-
-      @Override
-      public String getDocumentation(FootstepOrigin var)
-      {
-         switch (var)
-         {
-         case AT_ANKLE_FRAME:
-            return "The location of the footstep refers to the location of the ankle frame."
-                  + " The ankle frame is fixed in the foot, centered at the last ankle joint."
-                  + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
-                  + " This option is for backward compatibility only and will be gone in an upcoming release."
-                  + " This origin is deprecated as it directly depends on the robot structure and is not directly related to the actual foot sole.";
-         case AT_SOLE_FRAME:
-            return "The location of the footstep refers to the location of the sole frame."
-                  + " The sole frame is fixed in the foot, centered at the center of the sole."
-                  + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
-                  + " This origin is preferred as it directly depends on the actual foot sole and is less dependent on the robot structure.";
-
-         default:
-            return "No documentation available.";
-         }
-      }
-
-      @Override
-      public FootstepOrigin[] getDocumentedValues()
-      {
-         return values();
-      }
+      @Deprecated
+      @RosEnumValueDocumentation(documentation = "The location of the footstep refers to the location of the ankle frame."
+            + " The ankle frame is fixed in the foot, centered at the last ankle joint."
+            + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
+            + " This option is for backward compatibility only and will be gone in an upcoming release."
+            + " This origin is deprecated as it directly depends on the robot structure and is not directly related to the actual foot sole.")
+      AT_ANKLE_FRAME,
+      @RosEnumValueDocumentation(documentation = "The location of the footstep refers to the location of the sole frame."
+            + " The sole frame is fixed in the foot, centered at the center of the sole."
+            + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
+            + " This origin is preferred as it directly depends on the actual foot sole and is less dependent on the robot structure.")
+      AT_SOLE_FRAME
    }
 
-   @FieldDocumentation("Specifies whether the given location is the location of the ankle or the sole.")
+   @RosExportedField(documentation = "Specifies whether the given location is the location of the ankle or the sole.")
    public FootstepOrigin origin;
-   @FieldDocumentation("Specifies which foot will swing to reach the foostep.")
+   @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;
-   @FieldDocumentation("Specifies the position of the footstep. It is expressed in world frame.")
+   @RosExportedField(documentation = "Specifies the position of the footstep. It is expressed in world frame.")
    public Point3d location;
-   @FieldDocumentation("Specifies the orientation of the footstep. It is expressed in world frame.")
+   @RosExportedField(documentation = "Specifies the orientation of the footstep. It is expressed in world frame.")
    public Quat4d orientation;
 
-   @FieldDocumentation("predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
+   @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
          + "the world. A value of null or an empty list will default to using the entire foot. Contact points  are expressed in sole frame. This ordering does not matter.\n"
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
    public ArrayList<Point2d> predictedContactPoints;
 
-   @FieldDocumentation("This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.\n")
+   @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.\n")
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
 
-   @FieldDocumentation("Contains information on how high the robot should step. This affects only basic and obstacle clearance trajectories."
+   @RosExportedField(documentation = "Contains information on how high the robot should step. This affects only basic and obstacle clearance trajectories."
          + "Recommended values are between 0.1 (default) and 0.25.\n")
    public double swingHeight = 0;
 
@@ -243,7 +227,6 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
    {
       if (this.orientation == null) this.orientation = new Quat4d();
       this.orientation.set(orientation);
-      RotationTools.checkQuaternionNormalized(this.orientation);
    }
 
    public void setSwingHeight(double swingHeight)
@@ -255,9 +238,6 @@ public class FootstepDataMessage extends IHMCRosApiMessage<FootstepDataMessage> 
 
    public void setPredictedContactPoints(ArrayList<Point2d> predictedContactPoints)
    {
-      if (predictedContactPoints != null && predictedContactPoints.size() == 0)
-         throw new RuntimeException(
-               "Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
       this.predictedContactPoints = predictedContactPoints;
    }
 
