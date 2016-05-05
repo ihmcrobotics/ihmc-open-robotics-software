@@ -499,9 +499,9 @@ public class VirtualModelControllerTestHelper
          RigidBody lowerArm = createLowerArm(upperArm);
 
          RigidBody wristDifferentialRoll = createDifferential("wristDifferential", lowerArm, new Vector3d(0.0, 0.0, SHIN_LENGTH), X);
-         RigidBody wristDifferentialYaw = createDifferential("wristDifferential", wristDifferentialRoll, new Vector3d(), Z);
+         //RigidBody wristDifferentialYaw = createDifferential("wristDifferential", wristDifferentialRoll, new Vector3d(), Z);
 
-         hand = createHand(wristDifferentialYaw);
+         hand = createHand(wristDifferentialRoll);
 
          scsRobotArm = new SCSRobotFromInverseDynamicsRobotModel("robotArm", elevator.getChildrenJoints().get(0));
          scsRobotArm.setGravity(0);
@@ -530,7 +530,7 @@ public class VirtualModelControllerTestHelper
 
          upperArmGraphics.addCylinder(THIGH_LENGTH, THIGH_RAD, upperArmAppearance);
          lowerArmGraphics.addCylinder(SHIN_LENGTH, SHIN_RAD, lowerArmAppearance);
-         handGraphics.addCylinder(FOOT_LENGTH, FOOT_RAD, handAppearance);
+         handGraphics.addCylinder(SHIN_LENGTH / 2.0, FOOT_RAD, handAppearance);
 
          upperArmLink.setLinkGraphics(upperArmGraphics);
          lowerArmLink.setLinkGraphics(lowerArmGraphics);
@@ -539,10 +539,9 @@ public class VirtualModelControllerTestHelper
 
       private void addForcePoint()
       {
-         PinJoint fakeJoint = new PinJoint("l_leg_akx", scsRobotArm.getLink("hand").getComOffset(), scsRobotArm, Axis.X);
-         externalForcePoint = new ExternalForcePoint("handForcePoint", scsRobotArm);
+         externalForcePoint = new ExternalForcePoint("handForcePoint", scsRobotArm.getLink("hand").getComOffset(), scsRobotArm);
 
-         fakeJoint.addExternalForcePoint(externalForcePoint);
+         scsRobotArm.getLink("hand").getParentJoint().addExternalForcePoint(externalForcePoint);
       }
 
       public ExternalForcePoint getExternalForcePoint()
@@ -726,7 +725,7 @@ public class VirtualModelControllerTestHelper
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("wristPitch_y", parentBody, new Vector3d(0.0, 0.0, 0.0), Y);
          joint.setQ(random.nextDouble());
 
-         Vector3d comOffset = new Vector3d(0.0, 0.0, FOOT_LENGTH / 2.0);
+         Vector3d comOffset = new Vector3d(0.0, 0.0, SHIN_LENGTH / 4.0);
          ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "handFrame");
          nextFrame.update();
 
