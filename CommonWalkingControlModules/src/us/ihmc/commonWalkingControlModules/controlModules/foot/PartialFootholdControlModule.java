@@ -84,6 +84,14 @@ public class PartialFootholdControlModule
    private final int footCornerPoints;
    private Point2d newVertex = new Point2d();
 
+   /**
+    * Variables for checking the area of the unsafe part of the foothold.
+    */
+   private final DoubleYoVariable unsafeArea;
+   private final DoubleYoVariable minAreaToConsider;
+   private static final double defaultMinAreaToConsider = 0.0;
+   private final BooleanYoVariable unsafeAreaAboveThreshold;
+
    public PartialFootholdControlModule(String namePrefix, double dt, ContactablePlaneBody contactableFoot, TwistCalculator twistCalculator,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -143,6 +151,11 @@ public class PartialFootholdControlModule
       rotationCalculatorType.set(defaultRotationCalculatorType);
 
       rotationVerificator = new RotationVerificator(namePrefix, contactableFoot, registry);
+
+      unsafeArea = new DoubleYoVariable(namePrefix + "UnsafeArea", registry);
+      minAreaToConsider = new DoubleYoVariable(namePrefix + "MinAreaToConsider", registry);
+      minAreaToConsider.set(defaultMinAreaToConsider);
+      unsafeAreaAboveThreshold = new BooleanYoVariable(namePrefix + "UnsafeAreaAboveThreshold", registry);
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
@@ -205,6 +218,7 @@ public class PartialFootholdControlModule
    {
       footholdState.set(PartialFootholdState.FULL);
       yoUnsafePolygon.hide();
+      unsafeArea.set(0.0);
    }
 
    private void computeShrunkFoothold(FramePoint2d desiredCenterOfPressure)
@@ -216,7 +230,11 @@ public class PartialFootholdControlModule
          wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine.getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
       }
 
-      if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3) && !wasCoPInThatRegion)
+      unsafeArea.set(unsafePolygon.getArea());
+      boolean areaBigEnough = unsafeArea.getDoubleValue() >= minAreaToConsider.getDoubleValue();
+      unsafeAreaAboveThreshold.set(areaBigEnough);
+
+      if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3) && !wasCoPInThatRegion && areaBigEnough)
       {
          backupFootPolygon.set(shrunkFootPolygon);
          ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkFootPolygon, RobotSide.RIGHT);
@@ -233,18 +251,21 @@ public class PartialFootholdControlModule
 
    public boolean applyShrunkPolygon(YoPlaneContactState contactStateToModify)
    {
+      // if we are not doing partial foothold detection exit
       if (!doPartialFootholdDetection.getBooleanValue())
       {
          shrunkFootPolygon.set(backupFootPolygon);
          return false;
       }
 
+      // if the module did not find a partial foothold exit
       if (footholdState.getEnumValue() == PartialFootholdState.FULL)
       {
          shrunkFootPolygon.set(backupFootPolygon);
          return false;
       }
 
+      // if we shrunk the foothold too many times exit
       if (shrinkCounter.getIntegerValue() >= shrinkMaxLimit.getIntegerValue())
       {
          shrunkFootPolygon.set(backupFootPolygon);
