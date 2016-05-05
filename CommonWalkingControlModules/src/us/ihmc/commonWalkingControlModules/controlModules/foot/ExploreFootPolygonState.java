@@ -11,48 +11,118 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ExploreFootPolygonState extends AbstractFootControlState
 {
+   private boolean done = true;
+   private enum ExplorationMethod
+   {
+      SPRIAL, LINES
+   };
+   private final ExplorationMethod method = ExplorationMethod.LINES;
+
    private final HoldPositionState internalHoldPositionState;
-   
+
+   private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
-   
+
    private final FramePoint2d cop = new FramePoint2d();
    private final FramePoint2d desiredCoP = new FramePoint2d();
    private final PartialFootholdControlModule partialFootholdControlModule;
-   
+
    private final FootSwitchInterface footSwitch;
-   
+
    private final DoubleYoVariable lastShrunkTime, spiralAngle;
    private final double dt;
-   
+
+   /**
+    * This is the amount of time after touch down during which no foothold exploration is done
+    */
+   private final DoubleYoVariable recoverTime;
+   private final static double defaultRecoverTime = 0.05;
+
+   /**
+    * This is the amount of time the line exploration uses to go to a corner
+    */
+   private final DoubleYoVariable timeToGoToCorner;
+   private final static double defaultTimeToGoToCorner = 0.1;
+
+   /**
+    * This is the amount of time the line exploration will keep the cop in a corner
+    */
+   private final DoubleYoVariable timeToStayInCorner;
+   private final static double defaultTimeToStayInCorner = 0.5;
+
+   /**
+    * The weight the cop command gets for the qp solver
+    */
+   private final YoFrameVector2d copCommandWeight;
+   private final static double defaultCopCommandWeight = 2000.0;
+
+   private final IntegerYoVariable yoCurrentCorner;
+
    public ExploreFootPolygonState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.EXPLORE_POLYGON, footControlHelper, registry);
       dt = momentumBasedController.getControlDT();
-      
+
       YoVariableRegistry childRegistry = new YoVariableRegistry("ExploreFootPolygon");
       registry.addChild(childRegistry);
       internalHoldPositionState = new HoldPositionState(footControlHelper, gains, childRegistry);
       internalHoldPositionState.setDoSmartHoldPosition(false);
+      internalHoldPositionState.doFootholdAdjustments(false);
 
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
 
       centerOfPressureCommand.setContactingRigidBody(contactableFoot.getRigidBody());
-      centerOfPressureCommand.setWeight(new Vector2d(2000.0, 2000.0));
 
       lastShrunkTime = new DoubleYoVariable(contactableFoot.getName() + "LastShrunkTime", registry);
       spiralAngle = new DoubleYoVariable(contactableFoot.getName() + "SpiralAngle", registry);
 
+      recoverTime = new DoubleYoVariable(contactableFoot.getName() + "RecoverTime", registry);
+      recoverTime.set(defaultRecoverTime);
+
+      timeToGoToCorner = new DoubleYoVariable(contactableFoot.getName() + "TimeToGoToCorner", registry);
+      timeToGoToCorner.set(defaultTimeToGoToCorner);
+      timeToGoToCorner.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            lastShrunkTime.set(getTimeInCurrentState());
+         }
+      });
+
+      timeToStayInCorner = new DoubleYoVariable(contactableFoot.getName() + "TimeToStayInCorner", registry);
+      timeToStayInCorner.set(defaultTimeToStayInCorner);
+      timeToStayInCorner.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            lastShrunkTime.set(getTimeInCurrentState());
+         }
+      });
+
+      copCommandWeight = new YoFrameVector2d(contactableFoot.getName() + "CopCommandWeight", null, registry);
+      copCommandWeight.set(defaultCopCommandWeight, defaultCopCommandWeight);
+
       desiredOrientation.setToZero();
       desiredAngularVelocity.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
+
+      yoCurrentCorner = new IntegerYoVariable(contactableFoot.getName() + "CurrentCornerExplored", registry);
    }
 
    public void setWeight(double weight)
@@ -71,7 +141,9 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       super.doTransitionIntoAction();
       lastShrunkTime.set(0.0);
       spiralAngle.set(0.0);
+      lastCornerCropped = 0;
       internalHoldPositionState.doTransitionIntoAction();
+      done = false;
    }
 
    @Override
@@ -79,50 +151,119 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    {
       super.doTransitionOutOfAction();
       internalHoldPositionState.doTransitionOutOfAction();
+      yoCurrentCorner.set(0);
    }
 
+   private final Vector2d tempVector2d = new Vector2d();
    private final FramePoint2d shrunkPolygonCentroid = new FramePoint2d();
    private final FramePoint2d desiredCenterOfPressure = new FramePoint2d();
+   private final FramePoint2d currentCorner = new FramePoint2d();
+   private int currentCornerIdx = 0;
+   private int lastCornerCropped = 0;
+
    @Override
    public void doSpecificAction()
    {
-      footSwitch.computeAndPackCoP(cop);
-      momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
-      partialFootholdControlModule.compute(desiredCoP, cop);
-      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
-      boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
-      if (contactStateHasChanged)
+      double timeInState = getTimeInCurrentState();
+
+      if (timeInState > recoverTime.getDoubleValue() && !done)
       {
-         contactState.notifyContactStateHasChanged();
-         lastShrunkTime.set(getTimeInCurrentState());
-         spiralAngle.add(Math.PI/2.0);
+         footSwitch.computeAndPackCoP(cop);
+         momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
+         partialFootholdControlModule.compute(desiredCoP, cop);
+         YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+         boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
+         if (contactStateHasChanged)
+         {
+            contactState.notifyContactStateHasChanged();
+            lastShrunkTime.set(timeInState);
+            spiralAngle.add(Math.PI/2.0);
+            done = false;
+         }
+
+         // Foot exploration through CoP shifting...
+         if (method == ExplorationMethod.SPRIAL)
+         {
+            double freq = 0.6;
+            double rampOutDuration = 0.3;
+            double settleDuration = 0.1;
+
+            double percentRampOut = (timeInState - lastShrunkTime.getDoubleValue() - settleDuration) / rampOutDuration;
+            rampOutDuration = MathTools.clipToMinMax(rampOutDuration, 0.0, 1.0);
+
+            boolean doSpiral = timeInState - lastShrunkTime.getDoubleValue() - settleDuration > rampOutDuration;
+
+            if (doSpiral)
+            {
+               spiralAngle.add(2.0 * Math.PI * freq * dt);
+            }
+
+            if (timeInState - lastShrunkTime.getDoubleValue() - settleDuration - rampOutDuration > 1.0/freq)
+            {
+               done = true;
+            }
+
+            ReferenceFrame soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
+            partialFootholdControlModule.getShrunkPolygonCentroid(shrunkPolygonCentroid);
+            shrunkPolygonCentroid.changeFrame(soleFrame);
+
+            desiredCenterOfPressure.setIncludingFrame(soleFrame,
+                  shrunkPolygonCentroid.getX() + 0.10 * percentRampOut * Math.cos(spiralAngle.getDoubleValue()),
+                  shrunkPolygonCentroid.getY() + 0.05 * percentRampOut * Math.sin(spiralAngle.getDoubleValue()));
+
+            partialFootholdControlModule.projectOntoShrunkenPolygon(desiredCenterOfPressure);
+            desiredCenterOfPressure.scale(0.9);
+         }
+         else if (method == ExplorationMethod.LINES)
+         {
+            if (contactStateHasChanged)
+            {
+               lastCornerCropped = currentCornerIdx+1;
+            }
+
+            double timeToGoToCorner = this.timeToGoToCorner.getDoubleValue();
+            double timeToStayAtCorner = this.timeToStayInCorner.getDoubleValue();
+
+            double timeToExploreCorner = timeToGoToCorner + timeToStayAtCorner;
+            double timeExploring = timeInState - lastShrunkTime.getDoubleValue() + lastCornerCropped*timeToExploreCorner;
+
+            partialFootholdControlModule.getSupportPolygon(supportPolygon);
+            int corners = supportPolygon.getNumberOfVertices();
+            currentCornerIdx = (int) (timeExploring / timeToExploreCorner);
+            currentCornerIdx = currentCornerIdx % corners;
+            yoCurrentCorner.set(currentCornerIdx);
+
+            supportPolygon.getFrameVertex(currentCornerIdx, currentCorner);
+            FramePoint2d centroid = supportPolygon.getCentroid();
+
+            ReferenceFrame soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
+            currentCorner.changeFrame(soleFrame);
+            centroid.changeFrame(soleFrame);
+            desiredCenterOfPressure.changeFrame(soleFrame);
+
+            double timeExploringCurrentCorner = timeExploring - (double)currentCornerIdx * timeToExploreCorner;
+            if (timeExploringCurrentCorner <= timeToGoToCorner)
+            {
+               double percent = timeExploringCurrentCorner / timeToGoToCorner;
+               percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+               desiredCenterOfPressure.interpolate(centroid, currentCorner, percent);
+            }
+            else
+            {
+               desiredCenterOfPressure.set(currentCorner);
+            }
+
+         }
+
+         centerOfPressureCommand.setDesiredCoP(desiredCenterOfPressure.getPoint());
+         copCommandWeight.get(tempVector2d);
+         centerOfPressureCommand.setWeight(tempVector2d);
       }
-
-      // Foot exploration through CoP shifting...
-      double timeInCurrentState = getTimeInCurrentState();
-      double freq = 0.6;
-      double rampOutDuration = 0.3;
-      double settleDuration = 0.1;
-
-      double percentRampOut = (timeInCurrentState - lastShrunkTime.getDoubleValue() - settleDuration) / rampOutDuration;
-      rampOutDuration = MathTools.clipToMinMax(rampOutDuration, 0.0, 1.0);
-
-      boolean doSpiral = timeInCurrentState - lastShrunkTime.getDoubleValue() - settleDuration > rampOutDuration;
-
-      if (doSpiral)
+      else
       {
-         spiralAngle.add(2.0 * Math.PI * freq * dt);
+         lastShrunkTime.set(timeInState);
+         spiralAngle.set(0.0);
       }
-
-      ReferenceFrame soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
-      partialFootholdControlModule.getShrunkPolygonCentroid(shrunkPolygonCentroid);
-      shrunkPolygonCentroid.changeFrame(soleFrame);
-
-      desiredCenterOfPressure.setIncludingFrame(soleFrame, shrunkPolygonCentroid.getX() + 0.10 * percentRampOut * Math.cos(spiralAngle.getDoubleValue()), shrunkPolygonCentroid.getY() + 0.05 * percentRampOut * Math.sin(spiralAngle.getDoubleValue()));
-      
-      partialFootholdControlModule.projectOntoShrunkenPolygon(desiredCenterOfPressure);
-      desiredCenterOfPressure.scale(0.9);
-      centerOfPressureCommand.setDesiredCoP(desiredCenterOfPressure.getPoint());
 
       internalHoldPositionState.doSpecificAction();
    }
@@ -130,7 +271,11 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return centerOfPressureCommand;
+      if (getTimeInCurrentState() > recoverTime.getDoubleValue() && !done)
+      {
+         return centerOfPressureCommand;
+      }
+      return null;
    }
 
    @Override

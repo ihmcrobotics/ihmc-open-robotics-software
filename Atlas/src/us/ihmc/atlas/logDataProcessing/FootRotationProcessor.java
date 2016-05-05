@@ -32,7 +32,7 @@ public class FootRotationProcessor implements LogDataProcessorFunction
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
+         String namePrefix = contactableFeet.get(robotSide).getName();
          PartialFootholdControlModule partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controllerDT, contactableFeet.get(robotSide),
                twistCalculator, walkingControllerParameters, registry, yoGraphicsListRegistry);
          partialFootholdControlModules.put(robotSide, partialFootholdControlModule);
@@ -49,7 +49,9 @@ public class FootRotationProcessor implements LogDataProcessorFunction
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (logDataProcessorHelper.getCurrenFootState(robotSide) == ConstraintType.FULL)
+         if (logDataProcessorHelper.getCurrenFootState(robotSide) == ConstraintType.FULL
+               || logDataProcessorHelper.getCurrenFootState(robotSide) == ConstraintType.EXPLORE_POLYGON
+               || logDataProcessorHelper.getCurrenFootState(robotSide) == ConstraintType.HOLD_POSITION)
          {
             logDataProcessorHelper.getMeasuredCoP(robotSide, measuredCoP2d);
             logDataProcessorHelper.getDesiredCoP(robotSide, desiredCoP2d);

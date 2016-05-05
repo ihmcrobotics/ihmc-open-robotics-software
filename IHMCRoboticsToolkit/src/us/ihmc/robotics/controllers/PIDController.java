@@ -57,6 +57,24 @@ public class PIDController
       integralLeakRatio = new DoubleYoVariable("leak_" + suffix, registry);     
       integralLeakRatio.set(1.0);
    }
+
+   public PIDController(YoPIDGains yoPIDGains, String suffix, YoVariableRegistry registry)
+   {
+      pdController = new PDController(yoPIDGains.getYoKp(), yoPIDGains.getYoKd(), suffix, registry);
+      this.integralGain = yoPIDGains.getYoKi();
+      this.maxIntegralError = yoPIDGains.getYoMaxIntegralError();
+
+      maxOutput = new DoubleYoVariable("maxOutput_" + suffix, registry);
+      maxOutput.set(Double.POSITIVE_INFINITY);
+
+      cumulativeError = new DoubleYoVariable("cumulativeError_" + suffix, registry);
+      cumulativeError.set(0.0);
+
+      actionI = new DoubleYoVariable("integralAction_" + suffix, registry);
+      actionI.set(0.0);
+
+      integralLeakRatio = yoPIDGains.getYoIntegralLeakRatio();
+   }
    
    public double getMaximumOutputLimit()
    {
@@ -164,7 +182,8 @@ public class PIDController
    {
       // LIMIT THE MAX INTEGRAL ERROR SO WON'T WIND UP
       double maxError = maxIntegralError.getDoubleValue();
-      cumulativeError.set(pdController.getPositionError() * deltaTime + integralLeakRatio.getDoubleValue()*cumulativeError.getDoubleValue());
+      double errorAfterLeak = pdController.getPositionError() * deltaTime + integralLeakRatio.getDoubleValue() * cumulativeError.getDoubleValue();
+      cumulativeError.set(errorAfterLeak);
       if (cumulativeError.getDoubleValue() > maxError)
          cumulativeError.set(maxError);
       else if (cumulativeError.getDoubleValue() < -maxError)

@@ -1,64 +1,75 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Arrays;
-import java.util.Random;
-
-import javax.vecmath.Vector3f;
-
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation("This message setup the hand controller to activate a compliance module if at least one of the fields is set and deactivate if the message is empty.\n"
-                                  + "To compliance module works only when the last hand command sent with the HandPosePacket is a hand pose (not joint angles).\n"
-                                  + "Once activated, an integrator is used on the error in force/torque measured to keep adjusting the desired hand pose until the desired\n"
-                                  + "force/torque are achieved or until the maximum correction is reached (set to 5cm for translation and 0.2rad for the orientation).\n"
-                                  + "As it uses the measurements from wrist force sensors, a calibration of these is preferred prior to activation of compliance.")
+import javax.vecmath.Vector3f;
+import java.util.Arrays;
+import java.util.Random;
+
+/**
+ * This message setup the hand controller to activate a compliance module if at least one of the fields is set and deactivate if the message is empty.
+ * To compliance module works only when the last hand command sent with the HandPosePacket is a hand pose (not joint angles).
+ * Once activated, an integrator is used on the error in force/torque measured to keep adjusting the desired hand pose until the desired
+ * force/torque are achieved or until the maximum correction is reached (set to 5cm for translation and 0.2rad for the orientation).
+ * As it uses the measurements from wrist force sensors, a calibration of these is preferred prior to activation of compliance.
+ */
+
 public class HandComplianceControlParametersMessage extends Packet<HandComplianceControlParametersMessage>
 {
    
    public RobotSide robotSide;
 
-   @FieldDocumentation("enableLinearCompliance allows to activate/deactivate the compliance in translation for each individual axes (X, Y, and Z).\n"
-                                     + "The axes are in the hand control frame attached to the hand:\n"
-                                     + " - X refers to the axis perpendicular to the hand palm (e.g. forward/backward),\n"
-                                     + " - Y refers to the grasping axis (e.g. left/right),\n"
-                                     + " - Z refers to the axis orthogonal to the two other axes (e.g. up/down).\n"
-                                     + "If the field is null, the linear compliance will be deactivated.")
+   /**
+    * enableLinearCompliance allows to activate/deactivate the compliance in translation for each individual axes (X, Y, and Z).
+    * The axes are in the hand control frame attached to the hand:
+    *  - X refers to the axis perpendicular to the hand palm (e.g. forward/backward),
+    *  - Y refers to the grasping axis (e.g. left/right),
+    *  - Z refers to the axis orthogonal to the two other axes (e.g. up/down).
+    * If the field is null, the linear compliance will be deactivated.
+    */
    public boolean[] enableLinearCompliance;
-   @FieldDocumentation("enableAngularCompliance allows to activate/deactivate the compliance in orientation for each individual axes (X, Y, and Z).\n"
-                                     + "The axes are in the hand control frame attached to the hand:\n"
-                                     + " - X refers to the axis perpendicular to the hand palm,\n"
-                                     + " - Y refers to the grasping axis,\n"
-                                     + " - Z refers to the axis orthogonal to the two other axes.\n"
-                                     + "If the field is null, the angular compliance will be deactivated.")
+
+   /**
+    * enableAngularCompliance allows to activate/deactivate the compliance in orientation for each individual axes (X, Y, and Z).
+    * The axes are in the hand control frame attached to the hand:
+    *  - X refers to the axis perpendicular to the hand palm,
+    *  - Y refers to the grasping axis,
+    *  - Z refers to the axis orthogonal to the two other axes.
+    * If the field is null, the angular compliance will be deactivated.
+    */
    public boolean[] enableAngularCompliance;
 
-
-   @FieldDocumentation("desiredForce allows to set the desired force to be achieved on the hand for each individual axes (X, Y, and Z).\n"
-                                     + "The axes are in the hand control frame attached to the hand:\n"
-                                     + " - X refers to the axis perpendicular to the hand palm (e.g. forward/backward),\n"
-                                     + " - Y refers to the grasping axis (e.g. left/right),\n"
-                                     + " - Z refers to the axis orthogonal to the two other axes (e.g. up/down).\n"
-                                     + "If the field is null, the desired force will be set to zero.")
+   /**
+    * desiredForce allows to set the desired force to be achieved on the hand for each individual axes (X, Y, and Z).
+    * The axes are in the hand control frame attached to the hand:
+    *  - X refers to the axis perpendicular to the hand palm (e.g. forward/backward),
+    *  - Y refers to the grasping axis (e.g. left/right),
+    *  - Z refers to the axis orthogonal to the two other axes (e.g. up/down).
+    * If the field is null, the desired force will be set to zero.
+    */
    public Vector3f desiredForce;
-   @FieldDocumentation("desiredTorque allows to set the desired torque to be achieved on the hand for each individual axes (X, Y, and Z).\n"
-                                     + "The axes are in the hand control frame attached to the hand:\n"
-                                     + " - X refers to the axis perpendicular to the hand palm,\n"
-                                     + " - Y refers to the grasping axis,\n"
-                                     + " - Z refers to the axis orthogonal to the two other axes.\n"
-                                     + "If the field is null, the desired torque will be set to zero.")
+
+   /**
+    * desiredTorque allows to set the desired torque to be achieved on the hand for each individual axes (X, Y, and Z).
+    * The axes are in the hand control frame attached to the hand:
+    *  - X refers to the axis perpendicular to the hand palm,
+    *  - Y refers to the grasping axis,
+    *  - Z refers to the axis orthogonal to the two other axes.
+    * If the field is null, the desired torque will be set to zero.
+    */
    public Vector3f desiredTorque;
 
-   @FieldDocumentation("wrenchDeadzones set the deadzones that are used on the force and torque measurements, respectively.\n"
-                                     + "For instance, if wrenchDeadzones = {5.0, 0.5}, the controller will perceive only forces that are outside the range [-5N, 5N],\n"
-                                     + "and torques that are outside the range [-0.5N.m, 0.5N.m].\n"
-                                     + "As results, the compliance control will start adjusting the desired hand pose only for measured forces/torques greater\n"
-                                     + "than the specified deadzones.\n"
-                                     + "If the field is null, the deadzone won't be changed.\n"
-                                     + "We have found that wrenchDeadzones = {10.0, 0.5} does not affect much the position control accuracy of the hand but still gives good compliance.")
+   /**
+    * wrenchDeadzones set the deadzones that are used on the force and torque measurements, respectively.
+    * For instance, if wrenchDeadzones = {5.0, 0.5}, the controller will perceive only forces that are outside the range [-5N, 5N],
+    * and torques that are outside the range [-0.5N.m, 0.5N.m].
+    * As results, the compliance control will start adjusting the desired hand pose only for measured forces/torques greater
+    * than the specified deadzones.
+    * If the field is null, the deadzone won't be changed.
+    * We have found that wrenchDeadzones = {10.0, 0.5} does not affect much the position control accuracy of the hand but still gives good compliance.
+    */
    public float[] wrenchDeadzones;
 
    public HandComplianceControlParametersMessage()

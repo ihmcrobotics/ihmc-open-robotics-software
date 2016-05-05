@@ -54,7 +54,7 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.scripts.Script;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
@@ -67,7 +67,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private final double defaultSwingTime = 0.6;
    private final double defaultTransferTime = 2.5;
    private final double defaultChickenPercentage = 0.5;
-   private final boolean keepSCSup = true;
+   private final boolean keepSCSup = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -350,7 +350,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
-      enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultSwingTime, 0.0, 0.25);
+      enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, 0.5, 0.0, 0.2);
 
       setupSupportViz();
 
@@ -376,23 +376,30 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       Random random = new Random(1984L);
       for (int i=0; i<numberOfSteps; i++)
       {
-         boolean uniformShrinkage = random.nextBoolean();
-         boolean lineOfContact = false; //random.nextBoolean();
+         // Type of contact change options:
+         //  0    uniform shrinking
+         //  1    line of contact
+         //  2    half foot
+         int typeOfContactChange = random.nextInt(3);
 
-         if (uniformShrinkage)
+         if (typeOfContactChange == 0)
          {
             double shrinkageLengthPercent = RandomTools.generateRandomDouble(random, 0.5, 0.6);
             double shrinkageWidthPercent = RandomTools.generateRandomDouble(random, 0.5, 0.6);
             newContactPoints = generateContactPointsForUniformFootShrinkage(getRobotModel().getWalkingControllerParameters(), shrinkageLengthPercent, shrinkageWidthPercent);
          }
-         else if (lineOfContact)
+         else if (typeOfContactChange == 1)
          {
             newContactPoints = generateContactPointsForRandomRotatedLineOfContact(random);
          }
-         else
+         else if (typeOfContactChange == 2)
          {
             double percentOfFootToKeep = RandomTools.generateRandomDouble(random, 0.0, 0.5);
             newContactPoints = generateContactPointsForHalfOfFoot(random, getRobotModel().getWalkingControllerParameters(), percentOfFootToKeep);
+         }
+         else
+         {
+            throw new RuntimeException("Should not go here");
          }
 
          double stepLength = 0.3;
@@ -705,9 +712,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       message.add(footstepData);
 
       drcSimulationTestHelper.send(message);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.6);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.2);
       changeAppendageGroundContactPointsToNewOffsets(robot, contactPointsInAnkleFrame, jointName, robotSide);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       return success;
    }
@@ -957,13 +964,13 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       scs.addYoVariableRegistry(registry);
       yoGraphicsListRegistry.addArtifactListsToPlotter((Plotter) scs.getExtraPanel("Plotter"));
-      scs.addScript(new VizUpdater());
+      drcSimulationTestHelper.addRobotControllerOnControllerThread(new VizUpdater());
    }
 
-   private class VizUpdater implements Script
+   private class VizUpdater implements RobotController
    {
       @Override
-      public void doScript(double t)
+      public void doControl()
       {
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -983,6 +990,29 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
             footSupport.update();
             supportPolygons.get(robotSide).setFrameConvexPolygon2d(footSupport);
          }
+      }
+
+      @Override
+      public void initialize()
+      {
+      }
+
+      @Override
+      public YoVariableRegistry getYoVariableRegistry()
+      {
+         return null;
+      }
+
+      @Override
+      public String getName()
+      {
+         return null;
+      }
+
+      @Override
+      public String getDescription()
+      {
+         return null;
       }
    };
 }
