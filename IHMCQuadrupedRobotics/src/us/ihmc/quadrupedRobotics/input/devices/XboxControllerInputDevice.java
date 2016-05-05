@@ -22,7 +22,7 @@ public class XboxControllerInputDevice extends PollingInputDevice
    {
       AXES.put(Component.Identifier.Button.MODE, new InputChannelConfig(InputChannel.HOME_BUTTON, false));
       AXES.put(Component.Identifier.Button.SELECT, new InputChannelConfig(InputChannel.VIEW_BUTTON, false));
-      // AXES.put(Component.Identifier, new InputChannelConfig(InputChannel.MENU_BUTTON, false));
+      AXES.put(Component.Identifier.Button.START, new InputChannelConfig(InputChannel.MENU_BUTTON, false));
       AXES.put(Component.Identifier.Button.LEFT_THUMB, new InputChannelConfig(InputChannel.LEFT_BUTTON, false));
       AXES.put(Component.Identifier.Button.RIGHT_THUMB, new InputChannelConfig(InputChannel.RIGHT_BUTTON, false));
       AXES.put(Component.Identifier.Axis.Z, new InputChannelConfig(InputChannel.LEFT_TRIGGER, false, 0.05, 1));
