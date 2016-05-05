@@ -437,6 +437,209 @@ public class VirtualModelControllerTestHelper
       JUnitTools.assertTuple3dEquals(inputWrench.getLinearPartCopy(), outputWrench.getLinearPartCopy(), epsilon);
    }
 
+   public class RobotArm implements FullRobotModel
+   {
+      private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      private final ReferenceFrame elevatorFrame;
+
+      private final RigidBody elevator;
+
+      private final OneDoFJoint[] oneDoFJoints;
+
+      public RobotArm()
+      {
+         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
+         elevator = new RigidBody("elevator", elevatorFrame);
+
+         RigidBody shoulderDifferentialYaw = createDifferential("shoulderDifferential", elevator, new Vector3d(), Z);
+         RigidBody shoulderDifferentialRoll = createDifferential("shoulderDifferential", shoulderDifferentialYaw, new Vector3d(), X);
+
+         RigidBody upperArm = createUpperArm(shoulderDifferentialRoll);
+         RigidBody lowerArm = createLowerArm(upperArm);
+
+         RigidBody wristDifferentialRoll = createDifferential("wristDifferential", lowerArm, new Vector3d(0.0, 0.0, SHIN_LENGTH), X);
+         RigidBody wristDifferentialYaw = createDifferential("wristDifferential", wristDifferentialRoll, new Vector3d(), Z);
+
+         RigidBody hand = createHand(wristDifferentialYaw);
+
+         oneDoFJoints = ScrewTools.createOneDoFJointPath(elevator, hand);
+      }
+
+      public RobotSpecificJointNames getRobotSpecificJointNames()
+      {
+         return null;
+      }
+
+      public void updateFrames()
+      {
+         worldFrame.update();
+         elevator.updateFramesRecursively();
+      }
+
+      public ReferenceFrame getWorldFrame()
+      {
+         return worldFrame;
+      }
+
+      public ReferenceFrame getElevatorFrame()
+      {
+         return elevatorFrame;
+      }
+
+      public SixDoFJoint getRootJoint()
+      {
+         return null;
+      }
+
+      public RigidBody getElevator()
+      {
+         return elevator;
+      }
+
+      public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
+      {
+         return null;
+      }
+
+      public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
+      {
+         return null;
+      }
+
+      public InverseDynamicsJoint getLidarJoint(String lidarName)
+      {
+         return null;
+      }
+
+      public RigidBody getPelvis()
+      {
+         return null;
+      }
+
+      public RigidBody getChest()
+      {
+         return null;
+      }
+
+      public RigidBody getHead()
+      {
+         return null;
+      }
+
+      public OneDoFJoint[] getOneDoFJoints()
+      {
+         return oneDoFJoints;
+      }
+
+      public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+         List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
+
+         for (int i = 0; i < list.size(); i++)
+            oneDoFJointsToPack.set(i, list.get(i));
+      }
+
+      public IMUDefinition[] getIMUDefinitions()
+      {
+         return null;
+      }
+
+      public ForceSensorDefinition[] getForceSensorDefinitions()
+      {
+         return null;
+      }
+
+      public ContactSensorDefinition[] getContactSensorDefinitions()
+      {
+         return null;
+      }
+
+      private RigidBody createDifferential(String name, RigidBody parentBody, Vector3d jointOffset, Vector3d jointAxis)
+      {
+         String jointName;
+         if (jointAxis == X)
+            jointName = name + "_x";
+         else if (jointAxis == Y)
+            jointName = name + "_y";
+         else
+            jointName = name + "_z";
+         RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
+
+
+         Vector3d comOffset = new Vector3d();
+         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, name + "Frame");
+         nextFrame.update();
+
+         Matrix3d momentOfInertia = new Matrix3d();
+         momentOfInertia.setElement(0, 0, 0.005);
+         momentOfInertia.setElement(1, 1, 0.005);
+         momentOfInertia.setElement(2, 2, 0.005);
+
+         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, 0.1);
+         RigidBody rigidBody = new RigidBody(name, inertia, joint);
+
+         return rigidBody;
+      }
+
+      private RigidBody createUpperArm(RigidBody parentBody)
+      {
+         RevoluteJoint joint = ScrewTools.addRevoluteJoint("shoulderPitch_y", parentBody, new Vector3d(0.0, 0.0, 0.0), Y);
+
+         Vector3d comOffset = new Vector3d(0.0, 0.0, THIGH_LENGTH / 2.0);
+         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "upperArmFrame");
+         nextFrame.update();
+
+         Matrix3d momentOfInertia = new Matrix3d();
+         momentOfInertia.setElement(0, 0, 0.0437);
+         momentOfInertia.setElement(1, 1, 0.0437);
+         momentOfInertia.setElement(2, 2, 0.0054);
+
+         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, THIGH_MASS);
+         RigidBody rigidBody = new RigidBody("upperArm", inertia, joint);
+
+         return rigidBody;
+      }
+
+      private RigidBody createLowerArm(RigidBody parentBody)
+      {
+         RevoluteJoint joint = ScrewTools.addRevoluteJoint("elbow_y", parentBody, new Vector3d(0.0, 0.0, THIGH_LENGTH), Y);
+
+         Vector3d comOffset = new Vector3d(0.0, 0.0, SHIN_LENGTH / 2.0);
+         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "lowerArmFrame");
+         nextFrame.update();
+
+         Matrix3d momentOfInertia = new Matrix3d();
+         momentOfInertia.setElement(0, 0, 0.0437);
+         momentOfInertia.setElement(1, 1, 0.0437);
+         momentOfInertia.setElement(2, 2, 0.0054);
+
+         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, SHIN_MASS);
+         RigidBody rigidBody = new RigidBody("lowerArm", inertia, joint);
+
+         return rigidBody;
+      }
+
+      private RigidBody createHand(RigidBody parentBody)
+      {
+         RevoluteJoint joint = ScrewTools.addRevoluteJoint("wristPitch_y", parentBody, new Vector3d(0.0, 0.0, 0.0), Y);
+
+         Vector3d comOffset = new Vector3d(0.0, 0.0, FOOT_LENGTH / 2.0);
+         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "handFrame");
+         nextFrame.update();
+
+         Matrix3d momentOfInertia = new Matrix3d();
+         momentOfInertia.setElement(0, 0, 0.0437);
+         momentOfInertia.setElement(1, 1, 0.0437);
+         momentOfInertia.setElement(2, 2, 0.0054);
+
+         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, FOOT_MASS);
+         RigidBody rigidBody = new RigidBody("hand", inertia, joint);
+
+         return rigidBody;
+      }
+   }
+
+
    public class RobotLegs extends Robot implements FullRobotModel
    {
       private RigidBody elevator;
