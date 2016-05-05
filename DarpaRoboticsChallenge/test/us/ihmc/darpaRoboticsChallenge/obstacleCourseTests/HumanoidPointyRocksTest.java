@@ -236,6 +236,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper);
+      BooleanYoVariable doFootExplorationInTransferToStanding = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
+      doFootExplorationInTransferToStanding.set(false);
+      setupSupportViz();
 
       SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
@@ -1057,6 +1060,10 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
    private class VizUpdater implements RobotController
    {
+      FrameConvexPolygon2d footSupport = new FrameConvexPolygon2d(worldFrame);
+      FramePoint2d point = new FramePoint2d(worldFrame);
+      FramePoint point3d = new FramePoint();
+
       @Override
       public void doControl()
       {
@@ -1065,13 +1072,17 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
             ArrayList<Point2d> contactPoints = footContactsInAnkleFrame.get(robotSide);
             if (contactPoints == null) continue;
 
+            footSupport.clear(worldFrame);
             ReferenceFrame ankleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getEndEffectorFrame(robotSide, LimbName.LEG);
-            FrameConvexPolygon2d footSupport = new FrameConvexPolygon2d(worldFrame);
+            ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrames().get(robotSide);
 
             for (int i = 0; i < contactPoints.size(); i++)
             {
-               FramePoint2d point = new FramePoint2d(ankleFrame, contactPoints.get(i));
-               point.changeFrameAndProjectToXYPlane(worldFrame);
+               point3d.setXYIncludingFrame(ankleFrame, contactPoints.get(i));
+               point3d.changeFrame(soleFrame);
+               point3d.setZ(0.0);
+               point3d.changeFrame(worldFrame);
+               point3d.getFramePoint2d(point);
                footSupport.addVertex(point.getPoint());
             }
 
