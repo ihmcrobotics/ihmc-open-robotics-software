@@ -116,7 +116,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
-      copPlanner = new QuadrupedTimedStepCopPlanner(2 * timedStepController.getQueueCapacity() + 1);
+      copPlanner = new QuadrupedTimedStepCopPlanner(timedStepController.getQueueCapacity());
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(timedStepController.getQueueCapacity(), gravity, inputProvider.getComPositionInput().getZ());
       dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
       dcmPositionWaypoint = new FramePoint();
