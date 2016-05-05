@@ -8,6 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorHelper;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2dReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
@@ -29,12 +30,13 @@ public class FootRotationProcessor implements LogDataProcessorFunction
       double controllerDT = logDataProcessorHelper.getControllerDT();
       TwistCalculator twistCalculator = logDataProcessorHelper.getTwistCalculator();
       WalkingControllerParameters walkingControllerParameters = logDataProcessorHelper.getWalkingControllerParameters();
+      FramePoint2dReadOnly capturePoint = logDataProcessorHelper.getCapturePoint();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = contactableFeet.get(robotSide).getName();
          PartialFootholdControlModule partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controllerDT, contactableFeet.get(robotSide),
-               twistCalculator, walkingControllerParameters, registry, yoGraphicsListRegistry);
+               twistCalculator, walkingControllerParameters, capturePoint, registry, yoGraphicsListRegistry);
          partialFootholdControlModules.put(robotSide, partialFootholdControlModule);
       }
    }
