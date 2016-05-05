@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import javax.vecmath.Point3d;
+
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -10,6 +12,7 @@ public class QuadrupedTimedStep extends QuadrupedStep
     * The relative time interval of the swing phase (with respect to the start of the previous swing phase).
     */
    private final TimeInterval timeInterval;
+   private boolean absolute = true;
 
    public QuadrupedTimedStep()
    {
@@ -21,6 +24,19 @@ public class QuadrupedTimedStep extends QuadrupedStep
    {
       super(robotQuadrant, goalPosition, groundClearance);
       this.timeInterval = new TimeInterval(timeInterval);
+   }
+
+   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, Point3d goalPosition, double groundClearance, TimeInterval timeInterval)
+   {
+      super(robotQuadrant, goalPosition, groundClearance);
+      this.timeInterval = new TimeInterval(timeInterval);
+   }
+
+   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, Point3d goalPosition, double groundClearance, TimeInterval timeInterval, boolean absolute)
+   {
+      super(robotQuadrant, goalPosition, groundClearance);
+      this.timeInterval = new TimeInterval(timeInterval);
+      this.absolute = absolute;
    }
 
    public QuadrupedTimedStep(QuadrupedStep quadrupedStep, TimeInterval timeInterval)
@@ -60,6 +76,16 @@ public class QuadrupedTimedStep extends QuadrupedStep
    public void setTimeInterval(TimeInterval timeInterval)
    {
       this.timeInterval.set(timeInterval);
+   }
+
+   public boolean isAbsolute()
+   {
+      return absolute;
+   }
+
+   public void setAbsolute(boolean absolute)
+   {
+      this.absolute = absolute;
    }
 
    public boolean epsilonEquals(QuadrupedTimedStep other, double epsilon)

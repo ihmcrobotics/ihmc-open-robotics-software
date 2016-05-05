@@ -450,7 +450,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
             timedStep.setGroundClearance(stepGroundClearanceParameter.get());
             timedStep.getTimeInterval().setStartTime(initialTime);
             timedStep.getTimeInterval().setEndTime(initialTime + doubleSupportDurationParameter.get());
-            timedStep.getGoalPosition().setIncludingFrame(footholdPosition);
+            timedStep.setGoalPosition(footholdPosition);
             timedStepController.addStep(timedStep);
 
             // initialize ground plane points

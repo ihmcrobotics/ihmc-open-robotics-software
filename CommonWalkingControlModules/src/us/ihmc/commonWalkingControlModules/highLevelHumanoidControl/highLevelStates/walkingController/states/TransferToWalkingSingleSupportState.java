@@ -35,6 +35,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       for (int i = 0; i < 3; i++)
          balanceManager.addFootstepToPlan(walkingMessageHandler.peek(i));
-      balanceManager.initializeICPPlanForTransfer(transferToSide);
+      balanceManager.setICPPlanTransferToSide(transferToSide);
+      balanceManager.initializeICPPlanForTransfer();
    }
 }
