@@ -23,6 +23,7 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.tools.testing.JUnitTools;
 
 import javax.vecmath.Matrix3d;
@@ -59,9 +60,9 @@ public class VirtualModelControllerTestHelper
    public static final double THIGH_RAD = 0.05;
    public static final double THIGH_MASS = 6.7 * POUNDS;
 
-   public static final double SHIN_LENGTH = 9.1 * INCHES;
+   public static final double SHIN_LENGTH = 23.29 * INCHES;
    public static final double SHIN_RAD = 0.03;
-   public static final double SHIN_MASS = 1.0 * POUNDS;
+   public static final double SHIN_MASS = 6.7 * POUNDS;
 
    public static final double ANKLE_DIFFERENTIAL_HEIGHT = 0.025;
    public static final double ANKLE_DIFFERENTIAL_WIDTH = 0.0375;
@@ -437,12 +438,22 @@ public class VirtualModelControllerTestHelper
       JUnitTools.assertTuple3dEquals(inputWrench.getLinearPartCopy(), outputWrench.getLinearPartCopy(), epsilon);
    }
 
+   public RobotArm createRobotArm()
+   {
+      return new RobotArm();
+   }
+
    public class RobotArm implements FullRobotModel
    {
+      private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
+
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       private final ReferenceFrame elevatorFrame;
 
       private final RigidBody elevator;
+      private final RigidBody hand;
+
+      private ExternalForcePoint externalForcePoint;
 
       private final OneDoFJoint[] oneDoFJoints;
 
@@ -455,14 +466,64 @@ public class VirtualModelControllerTestHelper
          RigidBody shoulderDifferentialRoll = createDifferential("shoulderDifferential", shoulderDifferentialYaw, new Vector3d(), X);
 
          RigidBody upperArm = createUpperArm(shoulderDifferentialRoll);
+
          RigidBody lowerArm = createLowerArm(upperArm);
 
          RigidBody wristDifferentialRoll = createDifferential("wristDifferential", lowerArm, new Vector3d(0.0, 0.0, SHIN_LENGTH), X);
          RigidBody wristDifferentialYaw = createDifferential("wristDifferential", wristDifferentialRoll, new Vector3d(), Z);
 
-         RigidBody hand = createHand(wristDifferentialYaw);
+         hand = createHand(wristDifferentialYaw);
+
+         scsRobotArm = new SCSRobotFromInverseDynamicsRobotModel("robotArm", elevator.getChildrenJoints().get(0));
+         scsRobotArm.setGravity(0);
+         scsRobotArm.updateJointPositions_ID_to_SCS();
+         scsRobotArm.update();
+
+         addLinkGraphics();
+         addForcePoint();
 
          oneDoFJoints = ScrewTools.createOneDoFJointPath(elevator, hand);
+      }
+
+      private void addLinkGraphics()
+      {
+         AppearanceDefinition upperArmAppearance = YoAppearance.Red();
+         AppearanceDefinition lowerArmAppearance = YoAppearance.Red();
+         AppearanceDefinition handAppearance = YoAppearance.Red();
+
+         Link upperArmLink = scsRobotArm.getLink("upperArm");
+         Link lowerArmLink = scsRobotArm.getLink("lowerArm");
+         Link handLink = scsRobotArm.getLink("hand");
+
+         Graphics3DObject upperArmGraphics = new Graphics3DObject();
+         Graphics3DObject lowerArmGraphics = new Graphics3DObject();
+         Graphics3DObject handGraphics = new Graphics3DObject();
+
+         upperArmGraphics.addCylinder(THIGH_LENGTH, THIGH_RAD, upperArmAppearance);
+         lowerArmGraphics.addCylinder(SHIN_LENGTH, SHIN_RAD, lowerArmAppearance);
+         handGraphics.addCylinder(FOOT_LENGTH, FOOT_RAD, handAppearance);
+
+         upperArmLink.setLinkGraphics(upperArmGraphics);
+         lowerArmLink.setLinkGraphics(lowerArmGraphics);
+         handLink.setLinkGraphics(handGraphics);
+      }
+
+      private void addForcePoint()
+      {
+         PinJoint fakeJoint = new PinJoint("l_leg_akx", scsRobotArm.getLink("hand").getComOffset(), scsRobotArm, Axis.X);
+         externalForcePoint = new ExternalForcePoint("handForcePoint", scsRobotArm);
+
+         fakeJoint.addExternalForcePoint(externalForcePoint);
+      }
+
+      public ExternalForcePoint getExternalForcePoint()
+      {
+         return externalForcePoint;
+      }
+
+      public SCSRobotFromInverseDynamicsRobotModel getSCSRobotArm()
+      {
+         return scsRobotArm;
       }
 
       public RobotSpecificJointNames getRobotSpecificJointNames()
@@ -486,6 +547,11 @@ public class VirtualModelControllerTestHelper
          return elevatorFrame;
       }
 
+      public ReferenceFrame getHandFrame()
+      {
+         return hand.getBodyFixedFrame();
+      }
+
       public SixDoFJoint getRootJoint()
       {
          return null;
@@ -494,6 +560,11 @@ public class VirtualModelControllerTestHelper
       public RigidBody getElevator()
       {
          return elevator;
+      }
+
+      public RigidBody getHand()
+      {
+         return hand;
       }
 
       public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
@@ -564,7 +635,7 @@ public class VirtualModelControllerTestHelper
          else
             jointName = name + "_z";
          RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
-
+         joint.setQ(random.nextDouble());
 
          Vector3d comOffset = new Vector3d();
          ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, name + "Frame");
@@ -584,6 +655,7 @@ public class VirtualModelControllerTestHelper
       private RigidBody createUpperArm(RigidBody parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("shoulderPitch_y", parentBody, new Vector3d(0.0, 0.0, 0.0), Y);
+         joint.setQ(random.nextDouble());
 
          Vector3d comOffset = new Vector3d(0.0, 0.0, THIGH_LENGTH / 2.0);
          ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "upperArmFrame");
@@ -603,6 +675,7 @@ public class VirtualModelControllerTestHelper
       private RigidBody createLowerArm(RigidBody parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("elbow_y", parentBody, new Vector3d(0.0, 0.0, THIGH_LENGTH), Y);
+         joint.setQ(random.nextDouble());
 
          Vector3d comOffset = new Vector3d(0.0, 0.0, SHIN_LENGTH / 2.0);
          ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "lowerArmFrame");
@@ -622,6 +695,7 @@ public class VirtualModelControllerTestHelper
       private RigidBody createHand(RigidBody parentBody)
       {
          RevoluteJoint joint = ScrewTools.addRevoluteJoint("wristPitch_y", parentBody, new Vector3d(0.0, 0.0, 0.0), Y);
+         joint.setQ(random.nextDouble());
 
          Vector3d comOffset = new Vector3d(0.0, 0.0, FOOT_LENGTH / 2.0);
          ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "handFrame");
