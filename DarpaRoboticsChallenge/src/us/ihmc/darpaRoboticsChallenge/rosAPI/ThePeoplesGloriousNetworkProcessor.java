@@ -1,15 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.rosAPI;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
@@ -19,20 +12,11 @@ import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.footstepGenerator.TimestampedPoseFootStepGenerator;
-import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.ros.IHMCPacketToMsgPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.IHMCRosApiMessageMap;
-import us.ihmc.darpaRoboticsChallenge.ros.PeriodicRosHighLevelStatePublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosCapturabilityBasedStatusPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosRobotConfigurationDataPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.*;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.RequestControllerStopSubscriber;
-import us.ihmc.darpaRoboticsChallenge.ros.subscriber.RosArmJointTrajectorySubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
@@ -43,11 +27,16 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.utilities.ros.publisher.PrintStreamToRosBridge;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.*;
 
 public class ThePeoplesGloriousNetworkProcessor
 {
@@ -66,14 +55,26 @@ public class ThePeoplesGloriousNetworkProcessor
    private final MessageFactory messageFactory;
    private final FullHumanoidRobotModel fullRobotModel;
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
-         DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix) throws IOException
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace,
+         String tfPrefix) throws IOException
    {
-      this(rosUri, rosAPI_communicator, sensorCommunicator, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, null, null);
+      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, Collections.<Class>emptySet());
+   }
+
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace,
+         String tfPrefix, Collection<Class> additionalPacketTypes) throws IOException
+   {
+      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, additionalPacketTypes);
    }
 
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
-         DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix,
+         DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix, Collection<Class> additionalPacketTypes) throws IOException
+   {
+      this(rosUri, rosAPI_communicator, sensorCommunicator, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, additionalPacketTypes, null, null);
+   }
+
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
+         DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix, Collection<Class> additionalPacketTypes,
          List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> customSubscribers,
          List<Map.Entry<String, RosTopicPublisher<? extends Message>>> customPublishers) throws IOException
    {
@@ -97,8 +98,8 @@ public class ThePeoplesGloriousNetworkProcessor
 
       setupInputs(namespace, robotDataReceiver, fullRobotModel);
       setupOutputs(namespace, tfPrefix);
-      setupRosLocalization();
-      setupErrorTopics();
+//      setupRosLocalization();
+//      setupErrorTopics();
 
       if (customSubscribers != null)
       {
@@ -130,12 +131,9 @@ public class ThePeoplesGloriousNetworkProcessor
       System.out.println("IHMC ROS API node successfully started.");
    }
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace,
-         String tfPrefix) throws IOException
-   {
-      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix);
-   }
 
+
+   @SuppressWarnings("unchecked")
    private void setupOutputs(String namespace, String tfPrefix)
    {
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
@@ -151,21 +149,22 @@ public class ThePeoplesGloriousNetworkProcessor
          publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, robotConfigurationPublisher);
       }
 
-      Map<String, Class> outputPacketList = IHMCRosApiMessageMap.OUTPUT_PACKET_MESSAGE_NAME_MAP;
+      Set<Class<?>> outputTypes = GenericROSTranslationTools.getCoreOutputTopics();
 
-      for (Map.Entry<String, Class> e : outputPacketList.entrySet())
+      for (Class outputType : outputTypes)
       {
-         Message message = messageFactory.newFromType(e.getKey());
+         RosMessagePacket rosAnnotation = (RosMessagePacket) outputType.getAnnotation(RosMessagePacket.class);
+         String rosMessageTypeString = IHMCROSTranslationRuntimeTools.getROSMessageTypeStringFromIHMCMessageClass(outputType);
+         Message message = messageFactory.newFromType(rosMessageTypeString);
 
-         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false,
-               controllerCommunicationBridge, e.getValue());
+         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false, controllerCommunicationBridge, outputType);
          publishers.add(publisher);
-         rosMainNode.attachPublisher(namespace + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue()), publisher);
+         rosMainNode.attachPublisher(namespace + rosAnnotation.topic(), publisher);
       }
 
-      PrintStreamToRosBridge printStreamBridge = new PrintStreamToRosBridge(rosMainNode, namespace);
-      printStreamBridge.start();
-      System.setErr(printStreamBridge);
+//      PrintStreamToRosBridge printStreamBridge = new PrintStreamToRosBridge(rosMainNode, namespace);
+//      printStreamBridge.start();
+//      System.setErr(printStreamBridge);
    }
 
    private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation,
@@ -188,23 +187,19 @@ public class ThePeoplesGloriousNetworkProcessor
 
    private void setupInputs(String namespace, HumanoidRobotDataReceiver robotDataReceiver, FullHumanoidRobotModel fullRobotModel)
    {
-      Map<String, Class> inputPacketList = IHMCRosApiMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
+      Set<Class<?>> inputTypes = GenericROSTranslationTools.getCoreInputTopics();
 
-      for (Map.Entry<String, Class> e : inputPacketList.entrySet())
+      for (Class inputType : inputTypes)
       {
-         Message message = messageFactory.newFromType(e.getKey());
-         IHMCMsgToPacketSubscriber<Message> subscriber = IHMCMsgToPacketSubscriber.createIHMCMsgToPacketSubscriber(message, controllerCommunicationBridge,
-               PacketDestination.CONTROLLER.ordinal());
+         RosMessagePacket rosAnnotation = (RosMessagePacket) inputType.getAnnotation(RosMessagePacket.class);
+         String rosMessageTypeString = IHMCROSTranslationRuntimeTools.getROSMessageTypeStringFromIHMCMessageClass(inputType);
+         Message message = messageFactory.newFromType(rosMessageTypeString);
+
+         IHMCMsgToPacketSubscriber<Message> subscriber = IHMCMsgToPacketSubscriber
+               .createIHMCMsgToPacketSubscriber(message, controllerCommunicationBridge, PacketDestination.CONTROLLER.ordinal());
          subscribers.add(subscriber);
-         rosMainNode.attachSubscriber(namespace + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue()), subscriber);
+         rosMainNode.attachSubscriber(namespace + rosAnnotation.topic(), subscriber);
       }
-
-      TimestampedPoseFootStepGenerator footPoseGenerator = new TimestampedPoseFootStepGenerator(robotDataReceiver, fullRobotModel,
-            controllerCommunicationBridge);
-      rosMainNode.attachSubscriber(namespace + "/control/endpoint_footstep_generator", footPoseGenerator);
-
-      RosArmJointTrajectorySubscriber rosJointTrajectorySubscriber = new RosArmJointTrajectorySubscriber(controllerCommunicationBridge, fullRobotModel);
-      rosMainNode.attachSubscriber(namespace + "/control/arm_joint_trajectory2", rosJointTrajectorySubscriber);
 
       RequestControllerStopSubscriber requestStopSubscriber = new RequestControllerStopSubscriber(controllerCommunicationBridge);
       rosMainNode.attachSubscriber(namespace + "/control/request_stop", requestStopSubscriber);

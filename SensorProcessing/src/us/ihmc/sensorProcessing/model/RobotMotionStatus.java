@@ -1,10 +1,13 @@
 package us.ihmc.sensorProcessing.model;
 
-import us.ihmc.tools.DocumentedEnum;
+import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 
-public enum RobotMotionStatus implements DocumentedEnum<RobotMotionStatus>
+public enum RobotMotionStatus
 {
-   STANDING(3), IN_MOTION(4);
+   @RosEnumValueDocumentation(documentation = "Robot is standing")
+   STANDING(3),
+   @RosEnumValueDocumentation(documentation = "Robot is in motion")
+   IN_MOTION(4);
 
    public int behaviorId;
 
@@ -16,25 +19,5 @@ public enum RobotMotionStatus implements DocumentedEnum<RobotMotionStatus>
    public int getBehaviorId()
    {
       return behaviorId;
-   }
-
-   @Override
-   public String getDocumentation(RobotMotionStatus var)
-   {
-      switch (var)
-      {
-      case STANDING:
-         return "Robot is standing";
-      case IN_MOTION:
-         return "Robot is in motion";
-      }
-
-      return "Undocumented value";
-   }
-
-   @Override
-   public RobotMotionStatus[] getDocumentedValues()
-   {
-      return values();
    }
 }

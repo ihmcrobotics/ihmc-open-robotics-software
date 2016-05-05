@@ -51,7 +51,7 @@ public abstract class PacketValidityChecker
       if (packetFieldErrorType != null)
          return "location field " + packetFieldErrorType.getMessage();
 
-      packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getOrientation());
+      packetFieldErrorType = ObjectValidityChecker.validateQuat4d(packetToCheck.getOrientation());
       if (packetFieldErrorType != null)
          return "orientation field " + packetFieldErrorType.getMessage();
 
@@ -139,7 +139,7 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getActualFootOrientationInWorld());
+      packetFieldErrorType = ObjectValidityChecker.validateQuat4d(packetToCheck.getActualFootOrientationInWorld());
       if (packetFieldErrorType != null)
       {
          String errorMessage = "actualFootOrientationInWorld field " + packetFieldErrorType.getMessage();
@@ -685,7 +685,7 @@ public abstract class PacketValidityChecker
       if (errorType != null)
          return "SE3 waypoint position field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateTuple4d(se3TrajectoryPoint.orientation);
+      errorType = ObjectValidityChecker.validateQuat4d(se3TrajectoryPoint.orientation);
       if (errorType != null)
          return "SE3 waypoint orientation field " + errorType.getMessage();
 
@@ -718,7 +718,7 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateTuple4d(so3TrajectoryPoint.orientation);
+      errorType = ObjectValidityChecker.validateQuat4d(so3TrajectoryPoint.orientation);
       if (errorType != null)
          return "SO3 waypoint orientation field " + errorType.getMessage();
 
