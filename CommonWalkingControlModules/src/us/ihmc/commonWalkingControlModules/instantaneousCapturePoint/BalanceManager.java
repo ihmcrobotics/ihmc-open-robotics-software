@@ -37,6 +37,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2dReadOnly;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -130,6 +131,7 @@ public class BalanceManager
       double minimumSwingTimeForDisturbanceRecovery = walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery();
 
       this.momentumBasedController = momentumBasedController;
+      momentumBasedController.setCapturePoint((FramePoint2dReadOnly) capturePoint2d);
       yoTime = momentumBasedController.getYoTime();
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -352,7 +354,7 @@ public class BalanceManager
       update();
       yoFinalDesiredICP.set(Double.NaN, Double.NaN);
       yoDesiredCapturePoint.setByProjectionOntoXYPlane(yoCapturePoint);
-      
+
       yoCapturePoint.getFrameTupleIncludingFrame(tempCapturePoint);
       icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), tempCapturePoint);
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
