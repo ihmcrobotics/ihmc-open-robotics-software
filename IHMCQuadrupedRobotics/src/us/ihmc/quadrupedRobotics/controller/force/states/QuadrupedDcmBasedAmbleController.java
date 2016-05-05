@@ -310,7 +310,7 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
          timedStep.setGroundClearance(stepGroundClearanceParameter.get());
          timedStep.getTimeInterval().setInterval(0.0, stepDurationParameter.get());
          timedStep.getTimeInterval().shiftInterval(initialTime + initialTransitionDurationParameter.get());
-         timedStep.getGoalPosition().setIncludingFrame(footholdPosition);
+         timedStep.setGoalPosition(footholdPosition);
          timedStepController.addStep(timedStep);
 
          // trigger second step
@@ -318,7 +318,7 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
          timedStep.setRobotQuadrant(secondQuadrant);
          timedStep.setGroundClearance(stepGroundClearanceParameter.get());
          timedStep.getTimeInterval().shiftInterval(stepTimeShift);
-         timedStep.getGoalPosition().setIncludingFrame(footholdPosition);
+         timedStep.setGoalPosition(footholdPosition);
          timedStepController.addStep(timedStep);
 
          // initialize ground plane points
