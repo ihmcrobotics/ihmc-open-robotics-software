@@ -258,7 +258,7 @@ public class PartialFootholdControlModule
       }
       else if (newFootCornerPoints == footCornerPoints + 1)
       {
-         // we cut off an edge
+         // we cut off a corner
          // remove one corner by merging the two closest vertices
          int removeVertex = -1;
          double shortestEdgeLength = Double.POSITIVE_INFINITY;
