@@ -29,7 +29,7 @@
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.desiredMomentumRateLinearZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.achievedMomentumRateLinearZ</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
-			<ScalingMethod>1</ScalingMethod>
+			<ScalingMethod>0</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
@@ -38,7 +38,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.utorsoOrientationFBController.utorsoDesiredAngularAccelerationX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.utorsoOrientationFBController.utorsoAchievedAngularAccelerationX</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.utorsoDesiredAngularAccelerationX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.utorsoAchievedAngularAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -50,10 +50,10 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.utorsoOrientationFBController.utorsoDesiredAngularAccelerationY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.utorsoOrientationFBController.utorsoAchievedAngularAccelerationY</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.utorsoDesiredAngularAccelerationY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.utorsoAchievedAngularAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
-			<ScalingMethod>1</ScalingMethod>
+			<ScalingMethod>0</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
@@ -62,7 +62,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.utorsoOrientationFBController.utorsoDesiredAngularAccelerationZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.utorsoOrientationFBController.utorsoAchievedAngularAccelerationZ</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.utorsoDesiredAngularAccelerationZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.utorsoAchievedAngularAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -74,7 +74,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisDesiredAngularAccelerationX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAchievedAngularAccelerationX</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.pelvisDesiredAngularAccelerationX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.pelvisAchievedAngularAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -86,7 +86,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisDesiredAngularAccelerationY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAchievedAngularAccelerationY</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.pelvisDesiredAngularAccelerationY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.pelvisAchievedAngularAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -98,7 +98,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisDesiredAngularAccelerationZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAchievedAngularAccelerationZ</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.pelvisDesiredAngularAccelerationZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.pelvisAchievedAngularAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>

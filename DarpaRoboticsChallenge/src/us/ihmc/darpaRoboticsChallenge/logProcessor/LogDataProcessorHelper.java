@@ -11,6 +11,7 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createZName;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
@@ -55,7 +56,7 @@ public class LogDataProcessorHelper
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final SideDependentList<FootSwitchInterface> stateEstimatorFootSwitches;
-   
+
    private final SimulationConstructionSet scs;
 
    public LogDataProcessorHelper(DRCRobotModel model, SimulationConstructionSet scs, SDFRobot sdfRobot)
@@ -66,7 +67,7 @@ public class LogDataProcessorHelper
       sensorReader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
       rawSensorMap = new LogDataRawSensorMap(fullRobotModel, scs);
       twistCalculator = new TwistCalculator(fullRobotModel.getElevatorFrame(), fullRobotModel.getElevator());
-      
+
       inverseDynamicsStructure = new FullInverseDynamicsStructure(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel.getRootJoint());
 
       controllerDT = model.getControllerDT();
@@ -99,9 +100,9 @@ public class LogDataProcessorHelper
          YoFramePoint2d desiredCoP = new YoFramePoint2d(desiredCoPx, desiredCoPy, soleFrame);
          desiredCoPs.put(robotSide, desiredCoP);
 
-         String namePrefix = robotSide.getShortLowerCaseName() + "_foot";
-         String footStateNameSpace = "DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager."
-               + namePrefix + "FootControlModule";
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+         String namePrefix = sidePrefix + "Foot";
+         String footStateNameSpace = sidePrefix + FootControlModule.class.getSimpleName();
          String footStateName = namePrefix + "State";
          @SuppressWarnings("unchecked")
          EnumYoVariable<?> footState = (EnumYoVariable<ConstraintType>) scs.getVariable(footStateNameSpace, footStateName);
@@ -114,7 +115,7 @@ public class LogDataProcessorHelper
    private SideDependentList<FootSwitchInterface> createStateEstimatorFootSwitches(YoVariableHolder yoVariableHolder)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
-      
+
       for (final RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = contactableFeet.get(robotSide).getName() + "StateEstimator";
@@ -125,41 +126,41 @@ public class LogDataProcessorHelper
 
          FootSwitchInterface footSwitch = new FootSwitchInterface()
          {
-            
+
             @Override
             public void reset()
             {
             }
-            
+
             @Override
             public boolean hasFootHitGround()
             {
                return hasFootHitGround.getBooleanValue();
             }
-            
+
             @Override
             public ReferenceFrame getMeasurementFrame()
             {
                return null;
             }
-            
+
             @Override
             public boolean getForceMagnitudePastThreshhold()
             {
                return forceMagnitudePastThreshhold.getBooleanValue();
             }
-            
+
             @Override
             public double computeFootLoadPercentage()
             {
                return footLoadPercentage.getDoubleValue();
             }
-            
+
             @Override
             public void computeAndPackFootWrench(Wrench footWrenchToPack)
             {
             }
-            
+
             @Override
             public void computeAndPackCoP(FramePoint2d copToPack)
             {
@@ -172,10 +173,10 @@ public class LogDataProcessorHelper
             {
             }
          };
-         
+
          footSwitches.put(robotSide, footSwitch);
       }
-      
+
       return footSwitches;
    }
 
@@ -222,7 +223,7 @@ public class LogDataProcessorHelper
 
    public ConstraintType getCurrenFootState(RobotSide robotSide)
    {
-      return ConstraintType.valueOf(footStates.get(robotSide).getEnumValue().toString());
+      return ConstraintType.valueOf(footStates.get(robotSide).getStringValue());
    }
 
    public void getMeasuredCoP(RobotSide robotSide, FramePoint2d copToPack)
@@ -270,7 +271,7 @@ public class LogDataProcessorHelper
    {
       return findYoFrameVector(vectorPrefix, "", vectorFrame);
    }
-   
+
    public YoFrameVector findYoFrameVector(String vectorPrefix, String vectorSuffix, ReferenceFrame vectorFrame)
    {
       DoubleYoVariable x = (DoubleYoVariable) scs.getVariable(createXName(vectorPrefix, vectorSuffix));
@@ -286,7 +287,7 @@ public class LogDataProcessorHelper
    {
       return findYoFrameQuaternion(quaternionPrefix, "", quaternionFrame);
    }
-   
+
    public YoFrameQuaternion findYoFrameQuaternion(String quaternionPrefix, String quaternionSuffix, ReferenceFrame quaternionFrame)
    {
       DoubleYoVariable qx = (DoubleYoVariable) scs.getVariable(createQxName(quaternionPrefix, quaternionSuffix));

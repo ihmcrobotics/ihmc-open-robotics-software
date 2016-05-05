@@ -398,11 +398,6 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       }
    }
 
-   public void reinitializePositionControl()
-   {
-      highLevelHumanoidControllerManager.requestHighLevelState(HighLevelState.JOINT_POSITION_CONTROL);
-   }
-
    public void setListenToHighLevelStatePackets(boolean isListening)
    {
       if (highLevelHumanoidControllerManager != null)

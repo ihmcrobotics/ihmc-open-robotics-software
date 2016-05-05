@@ -28,6 +28,9 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 
 public class PartialFootholdControlModule
 {
+   private static final double thresholdForCoPCellOccupancy = 3.0;
+   private static final double copGridDecay = 0.997;
+
    private final String name = getClass().getSimpleName();
 
    public enum PartialFootholdState
@@ -39,7 +42,14 @@ public class PartialFootholdControlModule
 
    private final EnumYoVariable<PartialFootholdState> footholdState;
 
-   private final FootRotationCalculator footRotationCalculator;
+   public enum RotationCalculatorType
+   {
+      VELOCITY, GEOMETRY
+   }
+   private final EnumYoVariable<RotationCalculatorType> rotationCalculatorType;
+   private final VelocityFootRotationCalculator velocityFootRotationCalculator;
+   private final GeometricFootRotationCalculator geometricFootRotationCalculator;
+
    private final FootCoPOccupancyGrid footCoPOccupancyGrid;
 
    private final ReferenceFrame soleFrame;
@@ -56,7 +66,6 @@ public class PartialFootholdControlModule
    private final IntegerYoVariable numberOfVerticesRemoved;
    private final IntegerYoVariable numberOfCellsOccupiedOnSideOfLine;
 
-   private final IntegerYoVariable thresholdForCoPCellOccupancy;
    private final IntegerYoVariable thresholdForCoPRegionOccupancy;
    private final DoubleYoVariable distanceFromLineOfRotationToComputeCoPOccupancy;
 
@@ -103,13 +112,13 @@ public class PartialFootholdControlModule
          yoGraphicsListRegistry.registerArtifact("Partial Foothold", yoGraphicPolygon);
       }
 
-      footRotationCalculator = new FootRotationCalculator(namePrefix, dt, contactableFoot, twistCalculator, yoGraphicsListRegistry, registry);
+      velocityFootRotationCalculator = new VelocityFootRotationCalculator(namePrefix, dt, contactableFoot, twistCalculator, yoGraphicsListRegistry, registry);
       footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, walkingControllerParameters.getFootLength(),
             walkingControllerParameters.getFootWidth(), 20, 10, yoGraphicsListRegistry, registry);
+      footCoPOccupancyGrid.setDecayRate(copGridDecay);
+      footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy);
 
-      thresholdForCoPCellOccupancy = new IntegerYoVariable(namePrefix + "ThresholdForCoPCellOccupancy", registry);
-      thresholdForCoPCellOccupancy.set(3);
-      footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy.getIntegerValue());
+      geometricFootRotationCalculator = new GeometricFootRotationCalculator(namePrefix, contactableFoot, parentRegistry, yoGraphicsListRegistry);
 
       thresholdForCoPRegionOccupancy = new IntegerYoVariable(namePrefix + "ThresholdForCoPRegionOccupancy", registry);
       thresholdForCoPRegionOccupancy.set(2);
@@ -121,10 +130,15 @@ public class PartialFootholdControlModule
 
       useCoPOccupancyGrid = new BooleanYoVariable(namePrefix + "UseCoPOccupancyGrid", registry);
       useCoPOccupancyGrid.set(true);
+
+      rotationCalculatorType = new EnumYoVariable<RotationCalculatorType>(namePrefix + "RotationCalculatorType", registry, RotationCalculatorType.class);
+      rotationCalculatorType.set(RotationCalculatorType.GEOMETRY);
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
    {
+      footCoPOccupancyGrid.update();
+
       if (desiredCenterOfPressure.containsNaN() || centerOfPressure.containsNaN())
       {
          doNothing();
@@ -134,7 +148,20 @@ public class PartialFootholdControlModule
       unsafePolygon.setIncludingFrameAndUpdate(shrunkFootPolygon);
       footCoPOccupancyGrid.registerCenterOfPressureLocation(centerOfPressure);
 
-      footRotationCalculator.compute(desiredCenterOfPressure, centerOfPressure);
+      velocityFootRotationCalculator.compute(desiredCenterOfPressure, centerOfPressure);
+      geometricFootRotationCalculator.compute(desiredCenterOfPressure, centerOfPressure);
+      FootRotationCalculator footRotationCalculator;
+      switch (rotationCalculatorType.getEnumValue())
+      {
+      case GEOMETRY:
+         footRotationCalculator = geometricFootRotationCalculator;
+         break;
+      case VELOCITY:
+         footRotationCalculator = velocityFootRotationCalculator;
+         break;
+      default:
+         throw new RuntimeException();
+      }
 
       if (footRotationCalculator.isFootRotating())
       {
@@ -368,9 +395,9 @@ public class PartialFootholdControlModule
       shrinkCounter.set(0);
       footholdState.set(null);
       yoUnsafePolygon.hide();
-      footRotationCalculator.reset();
+      velocityFootRotationCalculator.reset();
+      geometricFootRotationCalculator.reset();
       footCoPOccupancyGrid.reset();
-      footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy.getIntegerValue());
       shrunkFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
       backupFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
    }
@@ -378,6 +405,10 @@ public class PartialFootholdControlModule
    public void projectOntoShrunkenPolygon(FramePoint2d pointToProject)
    {
       shrunkFootPolygon.orthogonalProjection(pointToProject);
+   }
 
+   public void getSupportPolygon(FrameConvexPolygon2d polygonToPack)
+   {
+      polygonToPack.setIncludingFrame(shrunkFootPolygon);
    }
 }

@@ -2,29 +2,33 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
+import us.ihmc.robotics.random.RandomTools;
 
-@ClassDocumentation("This class is used to build trajectory messages in taskspace. It holds the only the translational information for one trajectory point (position & linear velocity). "
-      + "Feel free to look at SO3TrajectoryPointMessage (rotational) and SE3TrajectoryPointMessage (rotational AND translational)")
-public class EuclideanTrajectoryPointMessage extends IHMCRosApiMessage<EuclideanTrajectoryPointMessage>
+@RosMessagePacket(documentation =
+      "This class is used to build trajectory messages in taskspace. It holds the only the translational information for one trajectory point (position & linear velocity). "
+      + "Feel free to look at SO3TrajectoryPointMessage (rotational) and SE3TrajectoryPointMessage (rotational AND translational)",
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
+public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryPointMessage>
       implements EuclideanTrajectoryPointInterface<EuclideanTrajectoryPointMessage>, TransformableDataObject<EuclideanTrajectoryPointMessage>
 {
-   @FieldDocumentation("Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
+   @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
-   @FieldDocumentation("Define the desired 3D position to be reached at this trajectory point. It is expressed in world frame.")
+   @RosExportedField(documentation = "Define the desired 3D position to be reached at this trajectory point. It is expressed in world frame.")
    public Point3d position;
-   @FieldDocumentation("Define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.")
+   @RosExportedField(documentation = "Define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.")
    public Vector3d linearVelocity;
 
    /**
@@ -32,6 +36,13 @@ public class EuclideanTrajectoryPointMessage extends IHMCRosApiMessage<Euclidean
     */
    public EuclideanTrajectoryPointMessage()
    {
+   }
+
+   public EuclideanTrajectoryPointMessage(Random random)
+   {
+      time = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
+      position = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
+      linearVelocity = RandomTools.generateRandomVector(random);
    }
 
    public EuclideanTrajectoryPointMessage(EuclideanTrajectoryPointMessage trajectoryPoint)
