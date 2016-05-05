@@ -159,9 +159,9 @@ public class QuadrupedXGaitStepPlanner
          {
             QuadrupedTimedStep step = queues.get(quadrant).get(i);
 
-            step.getGoalPosition().changeFrame(referenceFrames.getWorldFrame());
+            step.getGoalPosition(temporaryFramePoint);
             footstepVisualization
-                  .setBallLoop(step.getGoalPosition(), footstepAppearance.get(quadrant));
+                  .setBallLoop(temporaryFramePoint, footstepAppearance.get(quadrant));
          }
       }
 
@@ -188,7 +188,7 @@ public class QuadrupedXGaitStepPlanner
                quadrant);
 
          // Set initial stance position based on stanceWidth/stanceHeight in the body frame
-         FramePoint stepGoalPosition = step.getGoalPosition();
+         FramePoint stepGoalPosition = temporaryFramePoint;
          stepGoalPosition.setToZero(referenceFrames.getBodyZUpFrame());
 
          double initialX = quadrant.getEnd().negateIfHindEnd(stanceLength / 2.0);
@@ -202,8 +202,10 @@ public class QuadrupedXGaitStepPlanner
          // Shift right feet forward half a stride.
          if (quadrant.isQuadrantOnRightSide())
          {
-            step.getGoalPosition().add(strideLength / 2.0, strideWidth / 2.0, 0.0);
+            stepGoalPosition.add(strideLength / 2.0, strideWidth / 2.0, 0.0);
          }
+
+         step.setGoalPosition(stepGoalPosition);
 
          stepIndex++;
       }
@@ -241,7 +243,7 @@ public class QuadrupedXGaitStepPlanner
 
       // Start with the new step positioned at the previous step for this quadrant.
       QuadrupedTimedStep step = addZeroStep(startTime, quadrant);
-      FramePoint stepGoalPosition = step.getGoalPosition();
+      FramePoint stepGoalPosition = temporaryFramePoint;
       stepGoalPosition.setIncludingFrame(previousStepGoalPosition);
       stepGoalPosition.changeFrame(referenceFrames.getWorldFrame());
       groundPlaneEstimator.projectZ(stepGoalPosition);
@@ -272,9 +274,10 @@ public class QuadrupedXGaitStepPlanner
       stride.applyTransform(tf);
       stride.add(centroid);
 
-//    step.setGoalPosition(polygon.getFootstep(quadrant));
-      step.getGoalPosition().set(stride);
-      groundPlaneEstimator.projectZ(step.getGoalPosition());
+      step.setGoalPosition(polygon.getFootstep(quadrant));
+      stepGoalPosition.set(stride);
+      groundPlaneEstimator.projectZ(stepGoalPosition);
+
 
       return step;
    }
@@ -295,7 +298,10 @@ public class QuadrupedXGaitStepPlanner
       step.getTimeInterval().setInterval(0.0, swingDuration);
       step.getTimeInterval().shiftInterval(startTime);
       step.setGroundClearance(groundClearance);
-      step.getGoalPosition().setToZero(referenceFrames.getFootFrame(quadrant));
+
+      FramePoint stepGoalPosition = temporaryFramePoint;
+      stepGoalPosition.setToZero(referenceFrames.getFootFrame(quadrant));
+      step.setGoalPosition(stepGoalPosition);
 
       return step;
    }
@@ -308,7 +314,9 @@ public class QuadrupedXGaitStepPlanner
    {
       if (queues.get(quadrant).size() > 0)
       {
-         return queues.get(quadrant).getTail().getGoalPosition();
+         FramePoint stepGoalPosition = temporaryFramePoint;
+         queues.get(quadrant).getTail().getGoalPosition(temporaryFramePoint`);
+         return stepGoalPosition;
       }
       return initialFootholds.get(quadrant);
    }

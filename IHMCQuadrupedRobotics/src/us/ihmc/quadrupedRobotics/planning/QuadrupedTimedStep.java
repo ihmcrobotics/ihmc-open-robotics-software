@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import javax.vecmath.Point3d;
+
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -18,6 +20,12 @@ public class QuadrupedTimedStep extends QuadrupedStep
    }
 
    public QuadrupedTimedStep(RobotQuadrant robotQuadrant, FramePoint goalPosition, double groundClearance, TimeInterval timeInterval)
+   {
+      super(robotQuadrant, goalPosition, groundClearance);
+      this.timeInterval = new TimeInterval(timeInterval);
+   }
+
+   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, Point3d goalPosition, double groundClearance, TimeInterval timeInterval)
    {
       super(robotQuadrant, goalPosition, groundClearance);
       this.timeInterval = new TimeInterval(timeInterval);
