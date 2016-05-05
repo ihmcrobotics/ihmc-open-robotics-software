@@ -262,6 +262,12 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       ArrayList<QuadrupedTimedStep> steps = stepProvider.get();
       for (int i = 0; i < steps.size(); i++)
       {
+         if (!steps.get(i).isAbsolute())
+         {
+            steps.get(i).getTimeInterval().shiftInterval(robotTimestamp.getDoubleValue());
+            steps.get(i).setAbsolute(true);
+         }
+
          if (!timedStepController.addStep(steps.get(i)))
          {
             // only execute if all steps can be processed
