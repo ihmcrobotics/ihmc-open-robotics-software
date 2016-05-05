@@ -48,8 +48,9 @@ public class QuadrupedTimedStepCopPlanner
    private final QuadrantDependentList<FramePoint> solePosition;
    private final QuadrantDependentList<ContactState> contactState;
 
-   public QuadrupedTimedStepCopPlanner(int maxIntervals)
+   public QuadrupedTimedStepCopPlanner(int maxSteps)
    {
+      int maxIntervals = 2 * maxSteps + 1;
       timeAtStartOfInterval = new double[maxIntervals];
       copAtStartOfInterval = new FramePoint[maxIntervals];
       stepTransition = new QuadrupedStepTransition[maxIntervals];

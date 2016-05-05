@@ -10,9 +10,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStepCopPlanner;
+import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseForwardDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewisePeriodicDcmTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
@@ -25,6 +23,8 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.*;
+
+import java.util.ArrayList;
 
 public class QuadrupedDcmBasedAmbleController implements QuadrupedController
 {
@@ -55,7 +55,7 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
    private final DoubleParameter stanceLengthNominalParameter = parameterFactory.createDouble("stanceLengthNominal", 1.1);
    private final DoubleParameter stepGroundClearanceParameter = parameterFactory.createDouble("stepGroundClearance", 0.10);
    private final DoubleParameter stepDurationParameter = parameterFactory.createDouble("stepDuration", 0.20);
-   private final DoubleParameter xGaitPhaseParameter = parameterFactory.createDouble("xGaitPhase", 90);
+   private final DoubleParameter endPairPhaseShiftParameter = parameterFactory.createDouble("endPairPhaseShift", 90);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -83,8 +83,6 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
    private double bodyYawSetpoint;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrantDependentList<FramePoint> groundPlanePositions;
-   private final PiecewisePeriodicDcmTrajectory nominalPeriodicDcmTrajectory;
-   private final QuadrupedTimedStepCopPlanner copPlanner;
 
    // state machine
    public enum AmbleState
@@ -136,8 +134,6 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
       {
          groundPlanePositions.set(robotQuadrant, new FramePoint());
       }
-      nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(4, gravity, inputProvider.getComPositionInput().getZ());
-      copPlanner = new QuadrupedTimedStepCopPlanner(2 * timedStepController.getQueueCapacity() + 1);
 
       // state machine
       FiniteStateMachineBuilder<AmbleState, AmbleEvent> ambleStateMachineBuilder = new FiniteStateMachineBuilder<>(AmbleState.class, AmbleEvent.class, "AmbleState", registry);
@@ -296,15 +292,15 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
          double stepTimeShift;
 
          // select initial step quadrants
-         if (xGaitPhaseParameter.get() < 90)
+         if (endPairPhaseShiftParameter.get() < 90)
          {
             firstQuadrant = RobotQuadrant.HIND_LEFT;
-            stepTimeShift = Math.max(stepDurationParameter.get() * xGaitPhaseParameter.get() / 180.0, controlDT);
+            stepTimeShift = Math.max(stepDurationParameter.get() * endPairPhaseShiftParameter.get() / 180.0, controlDT);
          }
          else
          {
             firstQuadrant = RobotQuadrant.FRONT_LEFT;
-            stepTimeShift = Math.max(stepDurationParameter.get() * (1.0 - xGaitPhaseParameter.get() / 180.0), controlDT);
+            stepTimeShift = Math.max(stepDurationParameter.get() * (1.0 - endPairPhaseShiftParameter.get() / 180.0), controlDT);
          }
          secondQuadrant = firstQuadrant.getNextRegularGaitSwingQuadrant();
 
@@ -351,15 +347,19 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
 
    private class ForwardAmbleState implements FiniteStateMachineState<AmbleEvent>, QuadrupedTimedStepTransitionCallback
    {
+      private final FramePoint previewDcmPositionAtEndOfStep;
+      private final PiecewiseForwardDcmTrajectory previewDcmTrajectory;
+      private final QuadrupedTimedStepCopPlanner previewCopPlanner;
+      private final FramePoint currentFootholdPosition;
       private final QuadrupedTimedStep nextStep;
-      private final FramePoint footholdPosition;
-      private final PiecewiseForwardDcmTrajectory nominalDcmTrajectory;
 
       public ForwardAmbleState()
       {
+         previewDcmPositionAtEndOfStep = new FramePoint();
+         previewDcmTrajectory = new PiecewiseForwardDcmTrajectory(2 * timedStepController.getQueueCapacity() + 1, gravity, dcmPositionController.getComHeight());
+         previewCopPlanner = new QuadrupedTimedStepCopPlanner(timedStepController.getQueueCapacity());
+         currentFootholdPosition = new FramePoint();
          nextStep = new QuadrupedTimedStep();
-         footholdPosition = new FramePoint();
-         nominalDcmTrajectory = new PiecewiseForwardDcmTrajectory(2 * timedStepController.getQueueCapacity(), gravity, dcmPositionController.getComHeight());
       }
 
       @Override public void onEntry()
@@ -368,9 +368,9 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
          timedStepController.registerStepTransitionCallback(this);
 
          // compute nominal dcm trajectory
-         int nIntervals = copPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), currentTime);
-         nominalDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
-         nominalDcmTrajectory.initializeTrajectory(nIntervals, copPlanner.getTimeAtStartOfInterval(), copPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
+         int nIntervals = previewCopPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), currentTime);
+         previewDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
+         previewDcmTrajectory.initializeTrajectory(nIntervals, previewCopPlanner.getTimeAtStartOfInterval(), previewCopPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
       }
 
       @Override public void onLiftOff(RobotQuadrant robotQuadrant, QuadrantDependentList<ContactState> contactState)
@@ -390,19 +390,22 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
          timedStepController.addStep(nextStep);
 
          // compute nominal dcm trajectory
-         int nIntervals = copPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), contactState, currentTime);
-         nominalDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
-         nominalDcmTrajectory.initializeTrajectory(nIntervals, copPlanner.getTimeAtStartOfInterval(), copPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
+         int nIntervals = previewCopPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), contactState, currentTime);
+         previewDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
+         previewDcmTrajectory.initializeTrajectory(nIntervals, previewCopPlanner.getTimeAtStartOfInterval(), previewCopPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
 
          // compute current step duration
-         double phaseShift = robotQuadrant.isQuadrantInFront() ? xGaitPhaseParameter.get() : 180.0 - xGaitPhaseParameter.get();
+         double phaseShift = robotQuadrant.isQuadrantInFront() ? endPairPhaseShiftParameter.get() : 180.0 - endPairPhaseShiftParameter.get();
          double currentStepEndTime = nextStepStartTime + Math.max(stepDurationParameter.get() * phaseShift / 180.0, controlDT);
          double currentStepDuration = Math.min(Math.max(currentStepEndTime - currentTime, stepDurationParameter.get()), 1.5 * stepDurationParameter.get());
-         currentStep.getTimeInterval().setEndTime(currentTime + currentStepDuration);
+         currentStepEndTime = currentTime + currentStepDuration;
+         currentStep.getTimeInterval().setEndTime(currentStepEndTime);
 
          // compute current step goal position and ground clearance
-         footholdPosition.setIncludingFrame(taskSpaceEstimates.getSolePosition(currentStepQuadrant));
-         currentStep.setGoalPosition(footholdPosition);
+         currentFootholdPosition.setIncludingFrame(taskSpaceEstimates.getSolePosition(currentStepQuadrant));
+         previewDcmTrajectory.computeTrajectory(currentStepEndTime);
+         previewDcmTrajectory.getPosition(previewDcmPositionAtEndOfStep);
+         currentStep.setGoalPosition(currentFootholdPosition);
          currentStep.setGroundClearance(stepGroundClearanceParameter.get());
       }
 
@@ -413,9 +416,9 @@ public class QuadrupedDcmBasedAmbleController implements QuadrupedController
       @Override public AmbleEvent process()
       {
          // compute nominal dcm trajectory
-         nominalDcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
-         nominalDcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
-         nominalDcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
+         previewDcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
+         previewDcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
+         previewDcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
          return null;
       }
 
