@@ -20,6 +20,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2dReadOnly;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -58,6 +59,8 @@ public class PartialFootholdControlModule
 
    private final ReferenceFrame soleFrame;
 
+   private final FramePoint2dReadOnly icp;
+
    private final FrameConvexPolygon2d defaultFootPolygon;
    private final FrameConvexPolygon2d shrunkFootPolygon;
    private final FrameConvexPolygon2d backupFootPolygon;
@@ -93,7 +96,8 @@ public class PartialFootholdControlModule
    private final BooleanYoVariable unsafeAreaAboveThreshold;
 
    public PartialFootholdControlModule(String namePrefix, double dt, ContactablePlaneBody contactableFoot, TwistCalculator twistCalculator,
-         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         WalkingControllerParameters walkingControllerParameters, FramePoint2dReadOnly capturePoint, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       footCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
       soleFrame = contactableFoot.getSoleFrame();
@@ -102,6 +106,7 @@ public class PartialFootholdControlModule
       backupFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
       unsafePolygon = new FrameConvexPolygon2d(defaultFootPolygon);
       lineOfRotation = new FrameLine2d(soleFrame);
+      icp = capturePoint;
 
       registry = new YoVariableRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
