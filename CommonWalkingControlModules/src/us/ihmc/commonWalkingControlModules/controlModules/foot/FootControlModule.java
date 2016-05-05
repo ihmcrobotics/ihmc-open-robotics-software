@@ -191,6 +191,15 @@ public class FootControlModule
          }
       }));
 
+      exploreFootPolygonState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.FULL, new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return exploreFootPolygonState.isDoneExploring();
+         }
+      }));
+
       for (AbstractFootControlState state : states)
       {
          stateMachine.addState(state);
@@ -215,7 +224,7 @@ public class FootControlModule
       onToesState.setWeights(highAngularFootWeight, highLinearFootWeight);
       supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
       exploreFootPolygonState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
-      holdPositionState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
+      holdPositionState.setWeights(highAngularFootWeight, highLinearFootWeight);
    }
 
    public void replanTrajectory(Footstep footstep, double swingTime)
