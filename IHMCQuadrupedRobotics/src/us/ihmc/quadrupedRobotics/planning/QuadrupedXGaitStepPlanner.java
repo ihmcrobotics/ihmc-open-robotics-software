@@ -315,7 +315,7 @@ public class QuadrupedXGaitStepPlanner
       if (queues.get(quadrant).size() > 0)
       {
          FramePoint stepGoalPosition = temporaryFramePoint;
-         queues.get(quadrant).getTail().getGoalPosition(temporaryFramePoint`);
+         queues.get(quadrant).getTail().getGoalPosition(temporaryFramePoint);
          return stepGoalPosition;
       }
       return initialFootholds.get(quadrant);
