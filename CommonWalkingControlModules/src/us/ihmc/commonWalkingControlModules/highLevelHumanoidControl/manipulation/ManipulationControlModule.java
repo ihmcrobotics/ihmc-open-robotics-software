@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EndEffectorLoadBearingCommand;
@@ -51,7 +51,7 @@ public class ManipulationControlModule
 
    private final FullHumanoidRobotModel fullRobotModel;
 
-   public ManipulationControlModule(ArmControllerParameters armControllerParameters, MomentumBasedController momentumBasedController,
+   public ManipulationControlModule(ArmControllerParameters armControllerParameters, HighLevelHumanoidControllerToolbox momentumBasedController,
          YoVariableRegistry parentRegistry)
    {
       fullRobotModel = momentumBasedController.getFullRobotModel();
