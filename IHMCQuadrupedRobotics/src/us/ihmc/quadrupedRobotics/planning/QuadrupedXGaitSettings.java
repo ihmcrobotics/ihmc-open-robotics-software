@@ -25,7 +25,7 @@ public class QuadrupedXGaitSettings
    /**
     * Time duration that both hind or both front feet feet are in support (in seconds).
     */
-   private double endDoubleSupportDuration = 1.0;
+   private double endDoubleSupportDuration;
 
    /**
     * Nominal phase shift between front and hind steps in degrees. (0: pace, 90: amble, 180: trot)
@@ -34,12 +34,12 @@ public class QuadrupedXGaitSettings
 
    public QuadrupedXGaitSettings()
    {
-      stanceLength = 1.0;
+      stanceLength = 1.1;
       stanceWidth = 0.25;
-      stepGroundClearance = 0.2;
-      stepDuration = 0.35;
+      stepGroundClearance = 0.1;
+      stepDuration = 0.33;
       endDoubleSupportDuration = 0.0;
-      endPhaseShift = 90.0;
+      endPhaseShift = 180;
    }
 
    public double getStanceLength()

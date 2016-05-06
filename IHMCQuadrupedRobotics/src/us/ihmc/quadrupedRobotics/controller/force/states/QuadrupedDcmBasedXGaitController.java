@@ -23,6 +23,7 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.*;
 
+import java.util.ArrayList;
 
 public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 {
@@ -49,11 +50,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
    private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDuration", 1.00);
-   private final DoubleParameter stanceWidthNominalParameter = parameterFactory.createDouble("stanceWidthNominal", 0.25);
-   private final DoubleParameter stanceLengthNominalParameter = parameterFactory.createDouble("stanceLengthNominal", 1.1);
-   private final DoubleParameter stepGroundClearanceParameter = parameterFactory.createDouble("stepGroundClearance", 0.10);
-   private final DoubleParameter stepDurationParameter = parameterFactory.createDouble("stepDuration", 0.20);
-   private final DoubleParameter endPairPhaseShiftParameter = parameterFactory.createDouble("endPairPhaseShift", 90);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -81,17 +77,21 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    private double bodyYawSetpoint;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrantDependentList<FramePoint> groundPlanePositions;
+   private final QuadrupedTimedStepCopPlanner copPlanner;
+   private final QuadrupedXGaitSettings xGaitSettings;
+   private final QuadrupedXGaitPlanner xGaitStepPlanner;
+   private final ArrayList<QuadrupedTimedStep> xGaitPreviewSteps;
 
    // state machine
-   public enum AmbleState
+   public enum XGaitState
    {
-      INITIAL_TRANSITION, FORWARD_AMBLE, REVERSE_AMBLE
+      INITIAL_TRANSITION, FORWARD_XGAIT, REVERSE_XGAIT
    }
-   public enum AmbleEvent
+   public enum XGaitEvent
    {
       TIMEOUT, FORWARD, REVERSE
    }
-   private final FiniteStateMachine<AmbleState, AmbleEvent> ambleStateMachine;
+   private final FiniteStateMachine<XGaitState, XGaitEvent> xGaitStateMachine;
 
    public QuadrupedDcmBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedControllerInputProviderInterface inputProvider)
@@ -132,16 +132,24 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       {
          groundPlanePositions.set(robotQuadrant, new FramePoint());
       }
+      copPlanner = new QuadrupedTimedStepCopPlanner(16);
+      xGaitStepPlanner = new QuadrupedXGaitPlanner();
+      xGaitPreviewSteps = new ArrayList<>(16);
+      for (int i = 0; i < 16; i++)
+      {
+         xGaitPreviewSteps.add(new QuadrupedTimedStep());
+      }
+      xGaitSettings = new QuadrupedXGaitSettings();
 
       // state machine
-      FiniteStateMachineBuilder<AmbleState, AmbleEvent> ambleStateMachineBuilder = new FiniteStateMachineBuilder<>(AmbleState.class, AmbleEvent.class, "AmbleState", registry);
-      ambleStateMachineBuilder.addState(AmbleState.INITIAL_TRANSITION, new InitialTransitionState());
-      ambleStateMachineBuilder.addState(AmbleState.FORWARD_AMBLE, new ForwardAmbleState());
-      ambleStateMachineBuilder.addState(AmbleState.REVERSE_AMBLE, new ReverseAmbleState());
-      ambleStateMachineBuilder.addTransition(AmbleEvent.TIMEOUT, AmbleState.INITIAL_TRANSITION, AmbleState.FORWARD_AMBLE);
-      ambleStateMachineBuilder.addTransition(AmbleEvent.REVERSE, AmbleState.FORWARD_AMBLE, AmbleState.REVERSE_AMBLE);
-      ambleStateMachineBuilder.addTransition(AmbleEvent.FORWARD, AmbleState.REVERSE_AMBLE, AmbleState.FORWARD_AMBLE);
-      ambleStateMachine = ambleStateMachineBuilder.build(AmbleState.INITIAL_TRANSITION);
+      FiniteStateMachineBuilder<XGaitState, XGaitEvent> ambleStateMachineBuilder = new FiniteStateMachineBuilder<>(XGaitState.class, XGaitEvent.class, "XGaitState", registry);
+      ambleStateMachineBuilder.addState(XGaitState.INITIAL_TRANSITION, new InitialTransitionState());
+      ambleStateMachineBuilder.addState(XGaitState.FORWARD_XGAIT, new ForwardXGaitState());
+      ambleStateMachineBuilder.addState(XGaitState.REVERSE_XGAIT, new ReverseXGaitState());
+      ambleStateMachineBuilder.addTransition(XGaitEvent.TIMEOUT, XGaitState.INITIAL_TRANSITION, XGaitState.FORWARD_XGAIT);
+      ambleStateMachineBuilder.addTransition(XGaitEvent.REVERSE, XGaitState.FORWARD_XGAIT, XGaitState.REVERSE_XGAIT);
+      ambleStateMachineBuilder.addTransition(XGaitEvent.FORWARD, XGaitState.REVERSE_XGAIT, XGaitState.FORWARD_XGAIT);
+      xGaitStateMachine = ambleStateMachineBuilder.build(XGaitState.INITIAL_TRANSITION);
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
 
@@ -170,7 +178,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    private void updateSetpoints()
    {
       // update state machines
-      ambleStateMachine.process();
+      xGaitStateMachine.process();
 
       // update desired horizontal com forces
       dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
@@ -187,7 +195,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       comPositionController.compute(taskSpaceControllerCommands.getComForce(), comPositionControllerSetpoints, taskSpaceEstimates);
 
       // update desired body orientation, angular velocity, and torque
-      if (ambleStateMachine.getState() != AmbleState.INITIAL_TRANSITION)
+      if (xGaitStateMachine.getState() != XGaitState.INITIAL_TRANSITION)
       {
          bodyYawSetpoint += inputProvider.getPlanarVelocityInput().getZ() * controlDT;
       }
@@ -264,60 +272,35 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       bodyYawSetpoint = taskSpaceEstimates.getBodyOrientation().getYaw();
 
       // initialize state machine
-      ambleStateMachine.reset();
+      xGaitStateMachine.reset();
    }
 
    @Override public void onExit()
    {
    }
 
-   private class InitialTransitionState implements FiniteStateMachineState<AmbleEvent>
+   private class InitialTransitionState implements FiniteStateMachineState<XGaitEvent>
    {
-      double initialTime;
-      private final QuadrupedTimedStep timedStep;
-      private final FramePoint footholdPosition;
+      double initialTransitionTime;
+      private RobotQuadrant initialQuadrant;
+      private final FramePoint initialSupportCentroid;
 
       public InitialTransitionState()
       {
-         timedStep = new QuadrupedTimedStep();
-         footholdPosition = new FramePoint();
+         initialSupportCentroid = new FramePoint();
       }
 
       @Override public void onEntry()
       {
-         initialTime = robotTimestamp.getDoubleValue();
-         RobotQuadrant firstQuadrant, secondQuadrant;
-         double stepTimeShift;
+         initialSupportCentroid.setToZero(supportFrame);
+         initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
+         initialTransitionTime = robotTimestamp.getDoubleValue() + initialTransitionDurationParameter.get();
 
-         // select initial step quadrants
-         if (endPairPhaseShiftParameter.get() < 90)
-         {
-            firstQuadrant = RobotQuadrant.HIND_LEFT;
-            stepTimeShift = Math.max(stepDurationParameter.get() * endPairPhaseShiftParameter.get() / 180.0, controlDT);
-         }
-         else
-         {
-            firstQuadrant = RobotQuadrant.FRONT_LEFT;
-            stepTimeShift = Math.max(stepDurationParameter.get() * (1.0 - endPairPhaseShiftParameter.get() / 180.0), controlDT);
-         }
-         secondQuadrant = firstQuadrant.getNextRegularGaitSwingQuadrant();
-
-         // trigger first step
-         footholdPosition.setIncludingFrame(taskSpaceEstimates.getSolePosition(firstQuadrant));
-         timedStep.setRobotQuadrant(firstQuadrant);
-         timedStep.setGroundClearance(stepGroundClearanceParameter.get());
-         timedStep.getTimeInterval().setInterval(0.0, stepDurationParameter.get());
-         timedStep.getTimeInterval().shiftInterval(initialTime + initialTransitionDurationParameter.get());
-         timedStep.setGoalPosition(footholdPosition);
-         timedStepController.addStep(timedStep);
-
-         // trigger second step
-         footholdPosition.setIncludingFrame(taskSpaceEstimates.getSolePosition(secondQuadrant));
-         timedStep.setRobotQuadrant(secondQuadrant);
-         timedStep.setGroundClearance(stepGroundClearanceParameter.get());
-         timedStep.getTimeInterval().shiftInterval(stepTimeShift);
-         timedStep.setGoalPosition(footholdPosition);
-         timedStepController.addStep(timedStep);
+         // compute initial step plan
+         xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, inputProvider.getPlanarVelocityInput(),
+               initialQuadrant, initialSupportCentroid, initialTransitionTime, bodyYawSetpoint, xGaitSettings);
+         timedStepController.addStep(xGaitPreviewSteps.get(0));
+         timedStepController.addStep(xGaitPreviewSteps.get(1));
 
          // initialize ground plane points
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -327,15 +310,12 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          }
       }
 
-      @Override public AmbleEvent process()
+      @Override public XGaitEvent process()
       {
-         double currentTime = robotTimestamp.getDoubleValue();
-
-         if (currentTime > initialTime + initialTransitionDurationParameter.get())
-         {
-            return AmbleEvent.TIMEOUT;
-         }
-         return null;
+         if (robotTimestamp.getDoubleValue() > initialTransitionTime - controlDT)
+            return XGaitEvent.TIMEOUT;
+         else
+            return null;
       }
 
       @Override public void onExit()
@@ -343,7 +323,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       }
    }
 
-   private class ForwardAmbleState implements FiniteStateMachineState<AmbleEvent>, QuadrupedTimedStepTransitionCallback
+   private class ForwardXGaitState implements FiniteStateMachineState<XGaitEvent>, QuadrupedTimedStepTransitionCallback
    {
       private final FramePoint previewDcmPositionAtEndOfStep;
       private final PiecewiseForwardDcmTrajectory previewDcmTrajectory;
@@ -351,7 +331,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       private final FramePoint currentFootholdPosition;
       private final QuadrupedTimedStep nextStep;
 
-      public ForwardAmbleState()
+      public ForwardXGaitState()
       {
          previewDcmPositionAtEndOfStep = new FramePoint();
          previewDcmTrajectory = new PiecewiseForwardDcmTrajectory(2 * timedStepController.getQueueCapacity() + 1, gravity, dcmPositionController.getComHeight());
@@ -371,20 +351,25 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          previewDcmTrajectory.initializeTrajectory(nIntervals, previewCopPlanner.getTimeAtStartOfInterval(), previewCopPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
       }
 
-      @Override public void onLiftOff(RobotQuadrant robotQuadrant, QuadrantDependentList<ContactState> contactState)
+      @Override public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> contactState)
       {
          double currentTime = robotTimestamp.getDoubleValue();
-         QuadrupedTimedStep currentStep = timedStepController.getCurrentStep(robotQuadrant);
-         RobotQuadrant lastStepQuadrant = robotQuadrant.getNextReversedRegularGaitSwingQuadrant();
-         RobotQuadrant nextStepQuadrant = robotQuadrant.getNextRegularGaitSwingQuadrant();
-         RobotQuadrant currentStepQuadrant = robotQuadrant;
+         RobotQuadrant lastStepQuadrant = thisStepQuadrant.getNextReversedRegularGaitSwingQuadrant();
+         RobotQuadrant nextStepQuadrant = thisStepQuadrant.getNextRegularGaitSwingQuadrant();
+         QuadrupedTimedStep thisStep = timedStepController.getCurrentStep(thisStepQuadrant);
+         QuadrupedTimedStep lastStep = timedStepController.getCurrentStep(lastStepQuadrant);
+
+         if (lastStep == null)
+         {
+            return;
+         }
 
          // enqueue next step
          double lastStepEndTime = timedStepController.getCurrentStep(lastStepQuadrant).getTimeInterval().getEndTime();
          double nextStepStartTime = lastStepEndTime + controlDT;
          nextStep.setRobotQuadrant(nextStepQuadrant);
          nextStep.getTimeInterval().setStartTime(nextStepStartTime);
-         nextStep.getTimeInterval().setEndTime(lastStepEndTime + stepDurationParameter.get());
+         nextStep.getTimeInterval().setEndTime(lastStepEndTime + xGaitSettings.getStepDuration());
          timedStepController.addStep(nextStep);
 
          // compute nominal dcm trajectory
@@ -392,26 +377,26 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          previewDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
          previewDcmTrajectory.initializeTrajectory(nIntervals, previewCopPlanner.getTimeAtStartOfInterval(), previewCopPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
 
-         // compute current step duration
-         double phaseShift = robotQuadrant.isQuadrantInFront() ? endPairPhaseShiftParameter.get() : 180.0 - endPairPhaseShiftParameter.get();
-         double currentStepEndTime = nextStepStartTime + Math.max(stepDurationParameter.get() * phaseShift / 180.0, controlDT);
-         double currentStepDuration = Math.min(Math.max(currentStepEndTime - currentTime, stepDurationParameter.get()), 1.5 * stepDurationParameter.get());
-         currentStepEndTime = currentTime + currentStepDuration;
-         currentStep.getTimeInterval().setEndTime(currentStepEndTime);
+         // compute step duration
+         double phaseShift = thisStepQuadrant.isQuadrantInFront() ? xGaitSettings.getEndPhaseShift() : 180.0 - xGaitSettings.getEndPhaseShift();
+         double thisStepEndTime = nextStepStartTime + Math.max(xGaitSettings.getStepDuration() * phaseShift / 180.0, controlDT);
+         double thisStepDuration = Math.min(Math.max(thisStepEndTime - currentTime, xGaitSettings.getStepDuration()), 1.5 * xGaitSettings.getStepDuration());
+         thisStepEndTime = currentTime + thisStepDuration;
+         thisStep.getTimeInterval().setEndTime(thisStepEndTime);
 
-         // compute current step goal position and ground clearance
-         currentFootholdPosition.setIncludingFrame(taskSpaceEstimates.getSolePosition(currentStepQuadrant));
-         previewDcmTrajectory.computeTrajectory(currentStepEndTime);
+         // compute step goal position and ground clearance
+         currentFootholdPosition.setIncludingFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
+         previewDcmTrajectory.computeTrajectory(thisStepEndTime);
          previewDcmTrajectory.getPosition(previewDcmPositionAtEndOfStep);
-         currentStep.setGoalPosition(currentFootholdPosition);
-         currentStep.setGroundClearance(stepGroundClearanceParameter.get());
+         thisStep.setGoalPosition(currentFootholdPosition);
+         thisStep.setGroundClearance(xGaitSettings.getStepGroundClearance());
       }
 
       @Override public void onTouchDown(RobotQuadrant robotQuadrant, QuadrantDependentList<ContactState> contactState)
       {
       }
 
-      @Override public AmbleEvent process()
+      @Override public XGaitEvent process()
       {
          // compute nominal dcm trajectory
          previewDcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
@@ -425,9 +410,9 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       }
    }
 
-   private class ReverseAmbleState implements FiniteStateMachineState<AmbleEvent>, QuadrupedTimedStepTransitionCallback
+   private class ReverseXGaitState implements FiniteStateMachineState<XGaitEvent>, QuadrupedTimedStepTransitionCallback
    {
-      public ReverseAmbleState()
+      public ReverseXGaitState()
       {
       }
 
@@ -443,7 +428,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       {
       }
 
-      @Override public AmbleEvent process()
+      @Override public XGaitEvent process()
       {
          return null;
       }
