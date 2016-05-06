@@ -115,7 +115,14 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             mode = XGaitInputMode.VELOCITY;
          }
          break;
-
+      case BUTTON_Y:
+         if (channels.get(InputChannel.BUTTON_Y) > 0.5)
+         {
+            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+            packetCommunicator.send(eventPacket);
+            mode = XGaitInputMode.VELOCITY;
+         }
+         break;
       case BUTTON_B:
          if (channels.get(InputChannel.BUTTON_B) > 0.5)
          {
