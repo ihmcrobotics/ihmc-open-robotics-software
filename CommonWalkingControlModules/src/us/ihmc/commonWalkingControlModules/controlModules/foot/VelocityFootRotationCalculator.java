@@ -72,9 +72,9 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    /** Amount that the foot drops or lifts around the axis of rotation */
    private final DoubleYoVariable yoFootDropOrLift;
 
-   private final DoubleYoVariable yoCoPErrorAlphaFilter;
-   private final AlphaFilteredYoFrameVector2d yoCoPErrorFiltered;
-   private final DoubleYoVariable yoCoPErrorPerpendicularToRotation;
+//   private final DoubleYoVariable yoCoPErrorAlphaFilter;
+//   private final AlphaFilteredYoFrameVector2d yoCoPErrorFiltered;
+//   private final DoubleYoVariable yoCoPErrorPerpendicularToRotation;
 
    private final Footstep currentDesiredFootstep;
 
@@ -101,7 +101,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
 
    private final FrameVector angularVelocity = new FrameVector();
    private final FrameVector2d angularVelocity2d = new FrameVector2d();
-   private final FrameVector2d copError2d = new FrameVector2d();
+//   private final FrameVector2d copError2d = new FrameVector2d();
 
    private final FrameVector2d footAngularVelocityUnitVector = new FrameVector2d();
 
@@ -158,10 +158,10 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
 
       yoFootDropOrLift = new DoubleYoVariable(namePrefix + "FootDropOrLift", generalDescription, registry);
 
-      yoCoPErrorAlphaFilter = new DoubleYoVariable(namePrefix + "CoPErrorAlphaFilter", registry);
-      yoCoPErrorFiltered = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d(namePrefix + "CoPErrorFilt", "", registry, yoCoPErrorAlphaFilter,
-            soleFrame);
-      yoCoPErrorPerpendicularToRotation = new DoubleYoVariable(namePrefix + "CoPErrorPerpendicularToRotation", registry);
+//      yoCoPErrorAlphaFilter = new DoubleYoVariable(namePrefix + "CoPErrorAlphaFilter", registry);
+//      yoCoPErrorFiltered = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d(namePrefix + "CoPErrorFilt", "", registry, yoCoPErrorAlphaFilter,
+//            soleFrame);
+//      yoCoPErrorPerpendicularToRotation = new DoubleYoVariable(namePrefix + "CoPErrorPerpendicularToRotation", registry);
 
       yoStableLoRAngularVelocityThreshold = new DoubleYoVariable(namePrefix + "LoRStableAngularVelocityThreshold", generalDescription, registry);
       yoStableLoRAngularVelocityThreshold.set(10.0); //2.0);
@@ -179,7 +179,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       yoFootDropThreshold.set(-0.015);
       yoIsFootDropPastThreshold = new BooleanYoVariable(namePrefix + "IsFootDropPastThreshold", generalDescription, registry);
 
-      yoIsFootRotating = new BooleanYoVariable(namePrefix + "IsFootRotating", generalDescription, registry);
+      yoIsFootRotating = new BooleanYoVariable(namePrefix + "Rotating", generalDescription, registry);
 
       hasBeenInitialized = new BooleanYoVariable(namePrefix + "HasBeenInitialized", registry);
 
@@ -216,15 +216,14 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       yoAngleOfLoR.set(Math.atan2(angularVelocity2d.getY(), angularVelocity2d.getX()));
       yoLoRAngularVelocityFiltered.updateForAngles();
 
-      copError2d.setToZero(soleFrame);
-      copError2d.sub(desiredCoP, centerOfPressure);
-
-      yoCoPErrorFiltered.update(copError2d);
+//      copError2d.setToZero(soleFrame);
+//      copError2d.sub(desiredCoP, centerOfPressure);
+//
+//      yoCoPErrorFiltered.update(copError2d);
+//      yoCoPErrorPerpendicularToRotation.set(yoCoPErrorFiltered.cross(footAngularVelocityUnitVector));
 
       yoFootAngularVelocityFiltered.getFrameVector2d(footAngularVelocityUnitVector);
       footAngularVelocityUnitVector.normalize();
-
-      yoCoPErrorPerpendicularToRotation.set(yoCoPErrorFiltered.cross(footAngularVelocityUnitVector));
 
       yoCoRPositionFiltered.update(centerOfPressure);
       yoCoRPositionFiltered.getFrameTuple2dIncludingFrame(centerOfRotation);

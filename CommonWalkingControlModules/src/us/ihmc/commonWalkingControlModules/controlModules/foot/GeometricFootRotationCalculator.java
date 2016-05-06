@@ -73,8 +73,8 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
 
    public GeometricFootRotationCalculator(String namePrefix,
          ContactablePlaneBody contactableFoot,
-         YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry,
+         YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
@@ -82,8 +82,8 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       soleFrame = contactableFoot.getSoleFrame();
       defaultFootPolygon = new FrameConvexPolygon2d(contactableFoot.getContactPoints2d());
 
-      angleFootGround = new DoubleYoVariable(namePrefix + "AngleFootGround", registry);
-      angleTreshold = new DoubleYoVariable(namePrefix + "AngleTresholdFootRotation", registry);
+      angleFootGround = new DoubleYoVariable(namePrefix + "AngleToGround", registry);
+      angleTreshold = new DoubleYoVariable(namePrefix + "AngleTresholdForRotation", registry);
       angleTreshold.set(defaultAngleThreshold);
       footRotating = new BooleanYoVariable(namePrefix + "Rotating", registry);
 
@@ -105,7 +105,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
          caption = namePrefix + "PlaneNormal";
          yoPlaneNormal = new YoFrameVector(caption, worldFrame, registry);
          YoGraphicVector planeNormalViz =
-               new YoGraphicVector(caption, yoPlanePoint, yoPlaneNormal, 0.5, YoAppearance.Blue(), true, 0.05);
+               new YoGraphicVector(caption, yoPlanePoint, yoPlaneNormal, YoAppearance.Blue());
          yoGraphicsListRegistry.registerYoGraphic(caption, planeNormalViz);
 
          caption = namePrefix + "LineOfRotationGeometric";
@@ -200,6 +200,19 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    {
       copFiltered.reset();
       footRotating.set(false);
+
+      if (yoLineOfRotation != null)
+      {
+         yoLineOfRotation.setToNaN();
+      }
+      if (yoPlanePoint != null)
+      {
+         yoPlanePoint.setToNaN();
+      }
+      if (yoPlaneNormal != null)
+      {
+         yoPlaneNormal.setToNaN();
+      }
    }
 
    public boolean isFootRotating()
