@@ -17,9 +17,9 @@ public class InputValueIntegrator
       return value;
    }
 
-   public void reset()
+   public void reset(double value)
    {
-      value = 0.0;
+      this.value = value;
    }
 
    public double value()
