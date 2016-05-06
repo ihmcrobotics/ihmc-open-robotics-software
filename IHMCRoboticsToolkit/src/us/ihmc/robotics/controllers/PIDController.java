@@ -1,7 +1,10 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public class PIDController
 {
@@ -35,7 +38,16 @@ public class PIDController
       
       integralLeakRatio = new DoubleYoVariable("leak_" + suffix, registry);     
       integralLeakRatio.set(1.0);
-      
+
+      VariableChangedListener leakRatioClipper = new VariableChangedListener()
+      {
+         @Override public void variableChanged(YoVariable<?> v)
+         {
+            integralLeakRatio.set(MathTools.clipToMinMax(integralLeakRatio.getDoubleValue(), 0.0, 1.0));
+         }
+      };
+
+      integralLeakRatio.addVariableChangedListener(leakRatioClipper);
    }
 
    public PIDController(DoubleYoVariable proportionalGain, DoubleYoVariable integralGain, DoubleYoVariable derivativeGain, DoubleYoVariable maxIntegralError,
@@ -60,7 +72,7 @@ public class PIDController
 
    public PIDController(YoPIDGains yoPIDGains, String suffix, YoVariableRegistry registry)
    {
-      pdController = new PDController(yoPIDGains.getYoKp(), yoPIDGains.getYoKd(), suffix, registry);
+      pdController = new PDController(yoPIDGains, suffix, registry);
       this.integralGain = yoPIDGains.getYoKi();
       this.maxIntegralError = yoPIDGains.getYoMaxIntegralError();
 
@@ -109,6 +121,11 @@ public class PIDController
       pdController.setDerivativeGain(derivativeGain);
    }
 
+   public void setPositionDeadband(double deadband)
+   {
+      pdController.setPositionDeadband(deadband);
+   }
+
    public double getPositionError()
    {
       return pdController.getPositionError();
@@ -134,6 +151,11 @@ public class PIDController
       return integralGain.getDoubleValue();
    }
 
+   public double getPositionDeadband()
+   {
+      return pdController.getPositionDeadband();
+   }
+
    public double getMaxIntegralError()
    {
       return maxIntegralError.getDoubleValue();
@@ -146,7 +168,7 @@ public class PIDController
    
    public void setIntegralLeakRatio(double integralLeakRatio)
    {
-      this.integralLeakRatio.set(integralLeakRatio);
+      this.integralLeakRatio.set(MathTools.clipToMinMax(integralLeakRatio, 0.0, 1.0));
    }
    
    public double getIntegralLeakRatio()

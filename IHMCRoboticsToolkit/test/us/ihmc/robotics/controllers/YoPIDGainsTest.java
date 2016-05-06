@@ -1,6 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Random;
 
 import org.junit.Test;
@@ -25,7 +26,7 @@ public class YoPIDGainsTest
          double maxAcc = random.nextDouble() * 100;
          double maxJerk = random.nextDouble() * 100;
          double maxIntegralError = random.nextDouble() * 100;
-         double integratorLeakRatio = random.nextDouble() * 100;
+         double integratorLeakRatio = random.nextDouble();
          double zeta = random.nextDouble() * 100;
 
          pidGains.setKp(kp);
@@ -67,7 +68,7 @@ public class YoPIDGainsTest
          double maxAcc = random.nextDouble() * 100;
          double maxJerk = random.nextDouble() * 100;
          double maxIntegralError = random.nextDouble() * 100;
-         double integratorLeakRatio = random.nextDouble() * 100;
+         double integratorLeakRatio = random.nextDouble();
          double zeta = random.nextDouble() * 100;
          
          pidGains.setPDGains(kp, zeta);
@@ -108,7 +109,7 @@ public class YoPIDGainsTest
          double maxAcc = random.nextDouble() * 100;
          double maxJerk = random.nextDouble() * 100;
          double maxIntegralError = random.nextDouble() * 100;
-         double integratorLeakRatio = random.nextDouble() * 100;
+         double integratorLeakRatio = random.nextDouble();
          double zeta = random.nextDouble() * 100;
          
          pidGains.setPIDGains(kp, zeta, ki, maxIntegralError);
@@ -129,6 +130,27 @@ public class YoPIDGainsTest
          assertEquals(zeta, pidGains.getZeta(), 1e-6);
          assertEquals(integratorLeakRatio, pidGains.getYoIntegralLeakRatio().getDoubleValue(), 1e-6);
          assertEquals(maxIntegralError, pidGains.getYoMaxIntegralError().getDoubleValue(), 1e-6);
+      }
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testClippingLeakRate()
+   {
+      YoPIDGains pidGains = new YoPIDGains("test", new YoVariableRegistry("PIDGainsRegistry"));
+
+      Random random = new Random();
+      for (int i = 0; i < 1000; i++)
+      {
+         double integratorLeakRatio = random.nextDouble() * 100;
+         pidGains.setIntegralLeakRatio(integratorLeakRatio);
+
+         assertTrue(pidGains.getYoIntegralLeakRatio().getDoubleValue() <= 1.0);
+
+         integratorLeakRatio = -random.nextDouble() * 100;
+         pidGains.setIntegralLeakRatio(integratorLeakRatio);
+
+         assertTrue(pidGains.getYoIntegralLeakRatio().getDoubleValue() >= 0.0);
       }
    }
 

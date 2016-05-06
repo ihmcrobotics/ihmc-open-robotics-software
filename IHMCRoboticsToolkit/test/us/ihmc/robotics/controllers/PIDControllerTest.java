@@ -1,6 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -63,6 +64,64 @@ public class PIDControllerTest
       double integral = random.nextDouble();
       double derivative = random.nextDouble();
       double maxError = random.nextDouble();
+      double deadband = random.nextDouble();
+      double leakRate = random.nextDouble();
+
+      YoPIDGains pidGains = new YoPIDGains("", registry);
+      pidGains.setKp(proportional);
+      pidGains.setKi(integral);
+      pidGains.setKd(derivative);
+      pidGains.setMaximumIntegralError(maxError);
+      pidGains.setPositionDeadband(deadband);
+      pidGains.setIntegralLeakRatio(leakRate);
+
+      PIDController pid = new PIDController(pidGains, "", registry);
+      assertEquals(proportional, pid.getProportionalGain(), 0.001);
+      assertEquals(integral, pid.getIntegralGain(), 0.001);
+      assertEquals(derivative, pid.getDerivativeGain(), 0.001);
+      assertEquals(maxError, pid.getMaxIntegralError(), 0.001);
+      assertEquals(deadband, pid.getPositionDeadband(), 0.001);
+      assertEquals(leakRate, pid.getIntegralLeakRatio(), 0.001);
+   }
+
+   @DeployableTestMethod
+   @Test(timeout=300000)
+   public void testPIDControllerConstructorFromGains2()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+
+      double proportional = random.nextDouble();
+      double integral = random.nextDouble();
+      double derivative = random.nextDouble();
+      double maxError = random.nextDouble();
+      double deadband = random.nextDouble();
+
+      YoPIDGains pidGains = new YoPIDGains("", registry);
+      pidGains.setKp(proportional);
+      pidGains.setKi(integral);
+      pidGains.setKd(derivative);
+      pidGains.setMaximumIntegralError(maxError);
+      pidGains.setPositionDeadband(deadband);
+
+      PIDController pid = new PIDController(pidGains, "", registry);
+      assertEquals(proportional, pid.getProportionalGain(), 0.001);
+      assertEquals(integral, pid.getIntegralGain(), 0.001);
+      assertEquals(derivative, pid.getDerivativeGain(), 0.001);
+      assertEquals(maxError, pid.getMaxIntegralError(), 0.001);
+      assertEquals(deadband, pid.getPositionDeadband(), 0.001);
+      assertEquals(1.0, pid.getIntegralLeakRatio(), 0.001);
+   }
+
+   @DeployableTestMethod
+   @Test(timeout=300000)
+   public void testPIDControllerConstructorFromGains3()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+
+      double proportional = random.nextDouble();
+      double integral = random.nextDouble();
+      double derivative = random.nextDouble();
+      double maxError = random.nextDouble();
 
       YoPIDGains pidGains = new YoPIDGains("", registry);
       pidGains.setKp(proportional);
@@ -75,6 +134,8 @@ public class PIDControllerTest
       assertEquals(integral, pid.getIntegralGain(), 0.001);
       assertEquals(derivative, pid.getDerivativeGain(), 0.001);
       assertEquals(maxError, pid.getMaxIntegralError(), 0.001);
+      assertEquals(0.0, pid.getPositionDeadband(), 0.001);
+      assertEquals(1.0, pid.getIntegralLeakRatio(), 0.001);
    }
 
 	@DeployableTestMethod
@@ -104,6 +165,15 @@ public class PIDControllerTest
       assertEquals(0.0, pid.getDerivativeGain(), 0.001);
    }
 
+   @DeployableTestMethod
+   @Test(timeout=300000)
+   public void testGetDeadband()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      PIDController pid = new PIDController("", registry);
+      assertEquals(0.0, pid.getPositionDeadband(), 0.001);
+   }
+
 	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGetMaxIntegralError()
@@ -120,6 +190,15 @@ public class PIDControllerTest
       YoVariableRegistry registry = new YoVariableRegistry("mike");
       PIDController pid = new PIDController("", registry);
       assertEquals(0.0, pid.getCumulativeError(), 0.001);
+   }
+
+   @DeployableTestMethod
+   @Test(timeout=300000)
+   public void testGetLeakRate()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      PIDController pid = new PIDController("", registry);
+      assertEquals(1.0, pid.getIntegralLeakRatio(), 0.001);
    }
 
 	@DeployableTestMethod
@@ -152,6 +231,18 @@ public class PIDControllerTest
       assertEquals(5.0, pid.getDerivativeGain(), 0.001);
    }
 
+   @DeployableTestMethod
+   @Test(timeout=300000)
+   public void testSetDeadband()
+   {
+      double deadband = random.nextDouble() * 10.0;
+
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      PIDController pid = new PIDController("", registry);
+      pid.setPositionDeadband(deadband);
+      assertEquals(deadband, pid.getPositionDeadband(), 0.001);
+   }
+
 	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testSetMaxIntegralError()
@@ -170,6 +261,60 @@ public class PIDControllerTest
       PIDController pid = new PIDController("", registry);
       pid.setCumulativeError(5.0);
       assertEquals(5.0, pid.getCumulativeError(), 0.001);
+   }
+
+   @DeployableTestMethod
+   @Test(timeout=300000)
+   public void testSetIntegralLeakRatio()
+   {
+      double leakRatio = random.nextDouble();
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      PIDController pid = new PIDController("", registry);
+      pid.setIntegralLeakRatio(leakRatio);
+      assertEquals(leakRatio, pid.getIntegralLeakRatio(), 0.001);
+   }
+
+   @DeployableTestMethod
+   @Test(timeout=300000)
+   public void testSetIntegralLeakRatio2()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      PIDController pid = new PIDController("", registry);
+
+      double leakRatio = random.nextDouble() * 100.0;
+      pid.setIntegralLeakRatio(leakRatio);
+
+      assertTrue(pid.getIntegralLeakRatio() <= 1.0);
+
+      leakRatio = random.nextDouble() * -100.0;
+      pid.setIntegralLeakRatio(leakRatio);
+
+      assertTrue(pid.getIntegralLeakRatio() >= 0.0);
+   }
+
+   @DeployableTestMethod
+   @Test(timeout=300000)
+   public void testSetIntegralLeakRatio3()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      PIDController pid = new PIDController("", registry);
+
+      DoubleYoVariable yoLeakRatio = (DoubleYoVariable)registry.getVariable("leak_");
+
+      double leakRatio = random.nextDouble();
+      yoLeakRatio.set(leakRatio);
+      assertEquals(leakRatio, yoLeakRatio.getDoubleValue(), 1e-5);
+      assertEquals(leakRatio, pid.getIntegralLeakRatio(), 1e-5);
+
+      leakRatio = random.nextDouble() * 100.0;
+      yoLeakRatio.set(leakRatio);
+      assertTrue(pid.getIntegralLeakRatio() <= 1.0);
+      assertTrue(pid.getIntegralLeakRatio() >= 0.0);
+
+      leakRatio = random.nextDouble() * -100.0;
+      yoLeakRatio.set(leakRatio);
+      assertTrue(pid.getIntegralLeakRatio() <= 1.0);
+      assertTrue(pid.getIntegralLeakRatio() >= 0.0);
    }
 
 	@DeployableTestMethod
