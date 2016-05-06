@@ -44,9 +44,9 @@ public class QuadrupedXGaitPlanner
       }
       ReferenceFrame supportCentroidFrame = supportCentroidAtSoS.getReferenceFrame();
       supportCentroidAtSoS.changeFrame(ReferenceFrame.getWorldFrame());
-      supportCentroidAtSoS.changeFrame(supportCentroidFrame);
       xGaitRectanglePoseAtSoS.setPosition(supportCentroidAtSoS);
       xGaitRectanglePoseAtSoS.setYawPitchRoll(yawAtSoS, 0, 0);
+      supportCentroidAtSoS.changeFrame(supportCentroidFrame);
 
       // plan steps
       double lastStepStartTime = timeAtSoS;
