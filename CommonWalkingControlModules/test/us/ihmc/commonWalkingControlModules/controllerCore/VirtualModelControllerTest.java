@@ -633,12 +633,15 @@ public class VirtualModelControllerTest
       VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, robotArm.getElevator(), registry, yoGraphicsListRegistry);
       virtualModelController.registerEndEffector(robotArm.getElevator(), hand);
 
-      double linearForceX = random.nextDouble() * 10.0;
-      double linearForceY = random.nextDouble() * 10.0;
-      double linearForceZ = random.nextDouble() * 10.0;
+      double forceX = random.nextDouble() * 10.0;
+      double forceY = random.nextDouble() * 10.0;
+      double forceZ = random.nextDouble() * 10.0;
+      double torqueX = random.nextDouble() * 10.0;
+      double torqueY = random.nextDouble() * 10.0;
+      double torqueZ = random.nextDouble() * 10.0;
       Wrench desiredWrench = new Wrench(handFrame, handFrame);
-      Vector3d desiredForce = new Vector3d(linearForceX, linearForceY, linearForceZ);
-      Vector3d desiredTorque = new Vector3d();
+      Vector3d desiredForce = new Vector3d(forceX, forceY, forceZ);
+      Vector3d desiredTorque = new Vector3d(torqueX, torqueY, torqueZ);
       FrameVector forceFrameVector = new FrameVector(worldFrame, desiredForce);
       FrameVector torqueFrameVector = new FrameVector(worldFrame, desiredTorque);
       forceFrameVector.changeFrame(handFrame);
@@ -680,6 +683,7 @@ public class VirtualModelControllerTest
       Vector3d desiredPosition = armController.getDesiredPosition();
       Quat4d desiredOrientation = armController.getDesiredOrientation();
 
+      // check that the end effector doesn't move, and that the desired force is very close to what we want
       double timeIncrement = 1.0;
       while (scs.getTime() < simulationDuration)
       {
@@ -726,10 +730,12 @@ public class VirtualModelControllerTest
       VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, robotArm.getElevator(), registry, yoGraphicsListRegistry);
       virtualModelController.registerEndEffector(robotArm.getElevator(), hand);
 
+      double forceX = random.nextDouble() * 10.0;
+      double forceZ = random.nextDouble() * 10.0;
+      double torqueY = random.nextDouble() * 10.0;
       Wrench desiredWrench = new Wrench(handFrame, handFrame);
-      //Vector3d desiredForce = new Vector3d(0.0, 0.0, 0.0);
-      Vector3d desiredForce = new Vector3d(5.0, 0.0, 7.0);
-      Vector3d desiredTorque = new Vector3d();
+      Vector3d desiredForce = new Vector3d(forceX, 0.0, forceZ);
+      Vector3d desiredTorque = new Vector3d(0.0, torqueY, 0.0);
       FrameVector forceFrameVector = new FrameVector(worldFrame, desiredForce);
       FrameVector torqueFrameVector = new FrameVector(worldFrame, desiredTorque);
       forceFrameVector.changeFrame(handFrame);
@@ -771,6 +777,7 @@ public class VirtualModelControllerTest
       Vector3d desiredPosition = armController.getDesiredPosition();
       Quat4d desiredOrientation = armController.getDesiredOrientation();
 
+      // check that the end effector doesn't move, and that the desired force is very close to what we want
       double timeIncrement = 1.0;
       while (scs.getTime() < simulationDuration)
       {
