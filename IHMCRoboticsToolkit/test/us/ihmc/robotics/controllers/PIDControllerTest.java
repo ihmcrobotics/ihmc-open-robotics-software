@@ -389,6 +389,26 @@ public class PIDControllerTest
       assertEquals(30.0, pid.compute(currentPosition, desiredPosition, currentRate, desiredRate, 0.1), 0.001);
    }
 
+   @DeployableTestMethod
+   @Test(timeout=300000)
+   public void testCompute_proportional_withDeadband()
+   {
+      PIDController pid = new PIDController("", null);
+      pid.setProportionalGain(3.0);
+      pid.setPositionDeadband(1.0);
+
+      double currentPosition = 0.0;
+      double desiredPosition = 5.0;
+      double currentRate = 0.0;
+      double desiredRate = 1.0;
+
+      assertEquals(12.0, pid.compute(currentPosition, desiredPosition, currentRate, desiredRate, 0.1), 0.001);
+
+      pid.setProportionalGain(6.0);
+      pid.setPositionDeadband(4.0);
+      assertEquals(6.0, pid.compute(currentPosition, desiredPosition, currentRate, desiredRate, 0.1), 0.001);
+   }
+
 	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testCompute_integral()
@@ -446,6 +466,30 @@ public class PIDControllerTest
 
       // tests max integration error
       assertEquals((10.0 + 30.0 + 8.0), pid.compute(currentPosition, desiredPosition, currentRate, desiredRate, 1.01), 0.001);
+   }
+
+   @DeployableTestMethod
+   @Test(timeout=300000)
+   public void testCompute_all_PID_withDeadband()
+   {
+      PIDController pid = new PIDController("", null);
+      pid.setProportionalGain(2.0);
+      pid.setIntegralGain(3.0);
+      pid.setDerivativeGain(4.0);
+      pid.setMaxIntegralError(10.0);
+      pid.setPositionDeadband(1.5);
+
+      double currentPosition = 0.0;
+      double desiredPosition = 5.0;
+      double currentRate = 0.0;
+      double desiredRate = 2.0;
+
+      assertEquals((7.0 + 1.05 + 8.0), pid.compute(currentPosition, desiredPosition, currentRate, desiredRate, 0.1), 0.001);
+      assertEquals((7.0 + 2.1 + 8.0), pid.compute(currentPosition, desiredPosition, currentRate, desiredRate, 0.1), 0.001);
+      assertEquals((7.0 + 12.6 + 8.0), pid.compute(currentPosition, desiredPosition, currentRate, desiredRate, 1.0), 0.001);
+
+      // tests max integration error
+      assertEquals((7.0 + 30.0 + 8.0), pid.compute(currentPosition, desiredPosition, currentRate, desiredRate, 3.0), 0.001);
    }
 
    @DeployableTestMethod
