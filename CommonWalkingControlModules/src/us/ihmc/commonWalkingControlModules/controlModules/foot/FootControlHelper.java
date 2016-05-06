@@ -8,7 +8,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FramePoint2dReadOnly;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -45,10 +44,9 @@ public class FootControlHelper
       RigidBody foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName();
       double controlDT = momentumBasedController.getControlDT();
-      FramePoint2dReadOnly capturePoint = momentumBasedController.getCapturePoint();
 
-      partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controlDT, contactableFoot, twistCalculator, walkingControllerParameters,
-            capturePoint, registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
+      partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controlDT, contactableFoot, twistCalculator,
+            walkingControllerParameters, registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
 
       isDesiredCoPOnEdge = new BooleanYoVariable(namePrefix + "IsDesiredCoPOnEdge", registry);
 

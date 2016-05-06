@@ -131,7 +131,7 @@ public class MomentumBasedController
 
    private final SideDependentList<FrameTuple2dArrayList<FramePoint2d>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(), createFramePoint2dArrayList());
 
-   private FramePoint2dReadOnly capturePoint = null;
+   private final FramePoint2d capturePoint2d = new FramePoint2d();
 
    public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
@@ -895,18 +895,13 @@ public class MomentumBasedController
       wrenchToPack.setAngularPart(tempWristTorque);
    }
 
-   public void setCapturePoint(FramePoint2dReadOnly capturePoint)
+   public void setCapturePoint(FramePoint2dReadOnly point)
    {
-      if (this.capturePoint != null)
-      {
-         // warning?
-         return;
-      }
-      this.capturePoint = capturePoint;
+      this.capturePoint2d.setIncludingFrame(point.getReferenceFrame(), point.getX(), point.getY());
    }
 
    public FramePoint2dReadOnly getCapturePoint()
    {
-      return capturePoint;
+      return (FramePoint2dReadOnly) capturePoint2d;
    }
 }
