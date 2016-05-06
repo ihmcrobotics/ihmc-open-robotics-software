@@ -206,20 +206,16 @@ public class PIDController
       double maxError = maxIntegralError.getDoubleValue();
       double errorAfterLeak = pdController.getPositionError() * deltaTime + integralLeakRatio.getDoubleValue() * cumulativeError.getDoubleValue();
       cumulativeError.set(errorAfterLeak);
-      if (cumulativeError.getDoubleValue() > maxError)
-         cumulativeError.set(maxError);
-      else if (cumulativeError.getDoubleValue() < -maxError)
-         cumulativeError.set(-maxError);
-      
+      cumulativeError.set(MathTools.clipToMinMax(cumulativeError.getDoubleValue(), maxError));
+
       actionI.set(integralGain.getDoubleValue() * cumulativeError.getDoubleValue());
 
       double outputSignal = (pdController.getProportionalGain() * pdController.getPositionError()) + (integralGain.getDoubleValue() * cumulativeError.getDoubleValue())
             + (pdController.getDerivativeGain() * pdController.getRateError());
       
       double maximumOutput = Math.abs( maxOutput.getDoubleValue() );
-      
-      if( outputSignal >  maximumOutput) return  maximumOutput;
-      if( outputSignal < -maximumOutput) return -maximumOutput;
+
+      outputSignal = MathTools.clipToMinMax(outputSignal, maximumOutput);
       return outputSignal;
    }
 }
