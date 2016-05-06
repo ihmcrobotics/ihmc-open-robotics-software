@@ -8,17 +8,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
-import us.ihmc.quadrupedRobotics.packets.BodyOrientationPacket;
-import us.ihmc.quadrupedRobotics.packets.ComPositionPacket;
-import us.ihmc.quadrupedRobotics.packets.PlanarVelocityPacket;
-import us.ihmc.quadrupedRobotics.packets.QuadrupedForceControllerEventPacket;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
+import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.input.mode.QuadrupedTeleopMode;
+import us.ihmc.quadrupedRobotics.input.mode.QuadrupedTestTeleopMode;
+import us.ihmc.quadrupedRobotics.input.mode.QuadrupedXGaitTeleopMode;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
+import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotDataCommunication.logger.LogSettings;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
 public class QuadrupedBodyTeleopNode implements InputEventCallback
 {
@@ -27,59 +33,79 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
     */
    private static final double DT = 0.01;
 
-   private enum QuadrupedTeleopMode
-   {
-      POSITION, VELOCITY
-   }
-
-   private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
-   private final DoubleParameter rollScaleParameter = parameterFactory.createDouble("paramRollScale", 0.15);
-   private final DoubleParameter pitchScaleParameter = parameterFactory.createDouble("paramPitchScale", 0.15);
-   private final DoubleParameter yawScaleParameter = parameterFactory.createDouble("paramYawScale", 0.15);
-   private final DoubleParameter xScaleParameter = parameterFactory.createDouble("paramXScale", 0.20);
-   private final DoubleParameter yScaleParameter = parameterFactory.createDouble("paramYScale", 0.10);
-   private final DoubleParameter vxScaleParameter = parameterFactory.createDouble("paramVxScale", 1.0);
-   private final DoubleParameter vyScaleParameter = parameterFactory.createDouble("paramVyScale", 0.5);
-   private final DoubleParameter vzScaleParameter = parameterFactory.createDouble("paramVzScale", 0.25);
-   private final DoubleParameter wzScaleParameter = parameterFactory.createDouble("paramWzScale", 1.0);
-   private final DoubleParameter defaultComHeightParameter = parameterFactory.createDouble("paramDefaultComHeight", 0.55);
-
-   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-   private final PacketCommunicator packetCommunicator;
    private final PollingInputDevice device;
    private final Map<InputChannel, Double> channels = Collections.synchronizedMap(new EnumMap<InputChannel, Double>(InputChannel.class));
+   private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-   private InputValueIntegrator comZ;
-   private QuadrupedTeleopMode mode;
+   private final YoVariableServer server;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   public QuadrupedBodyTeleopNode(String host, NetClassList netClassList, PollingInputDevice device) throws IOException
+   private final PacketCommunicator packetCommunicator;
+   private final RobotDataReceiver robotDataReceiver;
+   private final QuadrupedReferenceFrames referenceFrames;
+   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
+   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+
+   private final QuadrupedXGaitTeleopMode xGaitTeleopMode;
+   private final QuadrupedTestTeleopMode testTeleopMode;
+   private QuadrupedTeleopMode activeTeleopMode;
+
+   public QuadrupedBodyTeleopNode(String host, NetClassList netClassList, PollingInputDevice device, SDFFullQuadrupedRobotModel fullRobotModel,
+         QuadrupedPhysicalProperties physicalProperties) throws IOException
    {
-      // TODO: Don't hardcode localhost
-      this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, NetworkPorts.CONTROLLER_PORT, netClassList);
       this.device = device;
-      this.comZ = new InputValueIntegrator(DT, defaultComHeightParameter.get());
+
+      this.server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName()), null, LogSettings.BABY_BEAST, DT);
+      this.server.setMainRegistry(registry, fullRobotModel, new YoGraphicsListRegistry());
+      this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, NetworkPorts.CONTROLLER_PORT, netClassList);
+      this.robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
+      this.packetCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
+
+      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
+      this.taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(fullRobotModel, referenceFrames, registry);
+      this.xGaitTeleopMode = new QuadrupedXGaitTeleopMode(packetCommunicator, referenceFrames);
+      this.testTeleopMode = new QuadrupedTestTeleopMode(packetCommunicator, referenceFrames);
+
+      // Set the default teleop mode.
+      this.activeTeleopMode = xGaitTeleopMode;
 
       // Initialize all channels to zero.
       for (InputChannel channel : InputChannel.values())
       {
          channels.put(channel, 0.0);
       }
-
-      // Initialize teleop mode
-      mode = QuadrupedTeleopMode.POSITION;
    }
 
-   public void start() throws IOException
+   public void start() throws IOException, InterruptedException
    {
       packetCommunicator.connect();
+      server.start();
+
+      // Poll the data receiver until the first packet has been received and frames are properly initialized.
+      // TODO: Polling isn't the best solution.
+      while (!robotDataReceiver.framesHaveBeenSetUp())
+      {
+         robotDataReceiver.updateRobotModel();
+         Thread.sleep(10);
+      }
+
+      activeTeleopMode.onEntry();
 
       // Send packets and integrate at fixed interval.
-      executorService.scheduleAtFixedRate(new Runnable()
+      executor.scheduleAtFixedRate(new Runnable()
       {
          @Override
          public void run()
          {
-            update();
+            try
+            {
+               update();
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+               executor.shutdown();
+            }
          }
       }, 0, (long) (DT * 1000), TimeUnit.MILLISECONDS);
 
@@ -90,38 +116,12 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
 
    public void update()
    {
-      double bodyYaw = 0.0;
-      double bodyRoll = 0.0;
-      double bodyPitch = get(InputChannel.RIGHT_STICK_Y) * pitchScaleParameter.get();
-      if (mode == QuadrupedTeleopMode.POSITION)
-      {
-         bodyYaw = get(InputChannel.RIGHT_STICK_X) * yawScaleParameter.get();
-         bodyRoll = -get(InputChannel.LEFT_STICK_X) * rollScaleParameter.get();
-      }
-      BodyOrientationPacket orientationPacket = new BodyOrientationPacket(bodyYaw, bodyPitch, bodyRoll);
-      packetCommunicator.send(orientationPacket);
+      robotDataReceiver.updateRobotModel();
+      taskSpaceEstimator.compute(taskSpaceEstimates);
 
-      double xVelocity = 0.0;
-      double yVelocity = 0.0;
-      double yawRate = 0.0;
-      if (mode == QuadrupedTeleopMode.VELOCITY)
-      {
-         xVelocity = get(InputChannel.LEFT_STICK_Y) * vxScaleParameter.get();
-         yVelocity = get(InputChannel.LEFT_STICK_X) * vyScaleParameter.get();
-         yawRate = get(InputChannel.RIGHT_STICK_X) * wzScaleParameter.get();
-      }
-      PlanarVelocityPacket velocityPacket = new PlanarVelocityPacket(xVelocity, yVelocity, yawRate);
-      packetCommunicator.send(velocityPacket);
+      activeTeleopMode.update(Collections.unmodifiableMap(channels), taskSpaceEstimates);
 
-      double comX = 0.0;
-      double comY = 0.0;
-      double comZdot = (get(InputChannel.RIGHT_BUTTON) - get(InputChannel.LEFT_BUTTON)) * vzScaleParameter.get();
-      if (mode == QuadrupedTeleopMode.POSITION)
-      {
-         comX = get(InputChannel.LEFT_STICK_Y) * xScaleParameter.get();
-      }
-      ComPositionPacket comPositionPacket = new ComPositionPacket(comX, comY, comZ.update(comZdot));
-      packetCommunicator.send(comPositionPacket);
+      server.update(robotDataReceiver.getSimTimestamp());
    }
 
    @Override
@@ -133,43 +133,19 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       // Handle events that should trigger once immediately after the event is triggered.
       switch (e.getChannel())
       {
-      case BUTTON_A:
-         if (get(InputChannel.BUTTON_A) > 0.5)
-         {
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
-            packetCommunicator.send(eventPacket);
-            mode = QuadrupedTeleopMode.POSITION;
-         }
+      case VIEW_BUTTON:
+         activeTeleopMode.onExit();
+         activeTeleopMode = testTeleopMode;
+         activeTeleopMode.onEntry();
          break;
-      case BUTTON_X:
-         if (get(InputChannel.BUTTON_X) > 0.5)
-         {
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_TROT);
-            packetCommunicator.send(eventPacket);
-            mode = QuadrupedTeleopMode.VELOCITY;
-         }
+      case MENU_BUTTON:
+         activeTeleopMode.onExit();
+         activeTeleopMode = xGaitTeleopMode;
+         activeTeleopMode.onEntry();
          break;
-      case BUTTON_Y:
-         if (get(InputChannel.BUTTON_Y) > 0.5)
-         {
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_AMBLE);
-            packetCommunicator.send(eventPacket);
-            mode = QuadrupedTeleopMode.VELOCITY;
-         }
-         break;
-      case BUTTON_B:
-         if (get(InputChannel.BUTTON_B) > 0.5)
-         {
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_PACE);
-            packetCommunicator.send(eventPacket);
-            mode = QuadrupedTeleopMode.VELOCITY;
-         }
-         break;
+      default:
+         // Pass any non-mode-switching events down to the active mode.
+         activeTeleopMode.onInputEvent(Collections.unmodifiableMap(channels), taskSpaceEstimates, e);
       }
-   }
-
-   private double get(InputChannel channel)
-   {
-      return channels.get(channel);
    }
 }
