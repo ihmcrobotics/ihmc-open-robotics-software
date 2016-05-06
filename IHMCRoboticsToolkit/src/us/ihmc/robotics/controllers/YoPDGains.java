@@ -12,6 +12,7 @@ public class YoPDGains implements PDGainsInterface
    private final DoubleYoVariable kd;
    private final DoubleYoVariable maximumAcceleration;
    private final DoubleYoVariable maximumJerk;
+   private final DoubleYoVariable positionDeadband;
 
    public YoPDGains(String suffix, YoVariableRegistry registry)
    {
@@ -21,6 +22,8 @@ public class YoPDGains implements PDGainsInterface
 
       maximumAcceleration = new DoubleYoVariable("maximumAcceleration" + suffix, registry);
       maximumJerk = new DoubleYoVariable("maximumJerk" + suffix, registry);
+
+      positionDeadband = new DoubleYoVariable("positionDeadband" + suffix, registry);
 
       maximumAcceleration.set(Double.POSITIVE_INFINITY);
       maximumJerk.set(Double.POSITIVE_INFINITY);
@@ -61,6 +64,11 @@ public class YoPDGains implements PDGainsInterface
    {
       maximumAcceleration.set(maxAcceleration);
       maximumJerk.set(maxJerk);
+   }
+
+   public void setPositionDeadband(double deadband)
+   {
+      positionDeadband.set(deadband);
    }
 
    @Override
@@ -115,6 +123,11 @@ public class YoPDGains implements PDGainsInterface
    public DoubleYoVariable getYoMaximumJerk()
    {
       return maximumJerk;
+   }
+
+   public DoubleYoVariable getPositionDeadband()
+   {
+      return positionDeadband;
    }
 
    public void createDerivativeGainUpdater(boolean updateNow)
