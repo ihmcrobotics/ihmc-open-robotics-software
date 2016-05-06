@@ -2,11 +2,12 @@ package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiMessage;
-import us.ihmc.communication.packets.MultiplePacketHolder;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
@@ -18,17 +19,34 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMe
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation("Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.\n"
+@RosMessagePacket(documentation = "Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.\n"
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule DOES apply to the fields of this message."
-      + " If setting a field to null is not an option (going through IHMC ROS API), the user can use the latter rule to select the messages to be processed by the controller.")
-public class WholeBodyTrajectoryMessage extends IHMCRosApiMessage<WholeBodyTrajectoryMessage>
+      + " If setting a field to null is not an option (going through IHMC ROS API), the user can use the latter rule to select the messages to be processed by the controller.",
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
+      topic = "/control/whole_body_trajectory")
+public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessage>
       implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryMessage>, MultiplePacketHolder
 {
-   public HandTrajectoryMessage leftHandTrajectoryMessage, rightHandTrajectoryMessage;
-   public ArmTrajectoryMessage leftArmTrajectoryMessage, rightArmTrajectoryMessage;
+   @RosExportedField(documentation = "Trajectory for the left hand")
+   public HandTrajectoryMessage leftHandTrajectoryMessage;
+   @RosExportedField(documentation = "Trajectory for the right hand")
+   public HandTrajectoryMessage rightHandTrajectoryMessage;
+
+   @RosExportedField(documentation = "Trajectory for the left arm joints")
+   public ArmTrajectoryMessage leftArmTrajectoryMessage;
+   @RosExportedField(documentation = "Trajectory for the right arm joints")
+   public ArmTrajectoryMessage rightArmTrajectoryMessage;
+
+   @RosExportedField(documentation = "Trajectory for the chest")
    public ChestTrajectoryMessage chestTrajectoryMessage;
+
+   @RosExportedField(documentation = "Trajectory for the pelvis")
    public PelvisTrajectoryMessage pelvisTrajectoryMessage;
-   public FootTrajectoryMessage leftFootTrajectoryMessage, rightFootTrajectoryMessage;
+
+   @RosExportedField(documentation = "Trajectory for the left foot")
+   public FootTrajectoryMessage leftFootTrajectoryMessage;
+   @RosExportedField(documentation = "Trajectory for the right foot")
+   public FootTrajectoryMessage rightFootTrajectoryMessage;
 
    /**
     * Empty constructor for serialization.
@@ -37,6 +55,30 @@ public class WholeBodyTrajectoryMessage extends IHMCRosApiMessage<WholeBodyTraje
    public WholeBodyTrajectoryMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public WholeBodyTrajectoryMessage(Random random)
+   {
+      leftHandTrajectoryMessage = new HandTrajectoryMessage(random);
+      leftHandTrajectoryMessage.robotSide = RobotSide.LEFT;
+
+      rightHandTrajectoryMessage = new HandTrajectoryMessage(random);
+      rightHandTrajectoryMessage.robotSide = RobotSide.RIGHT;
+
+      leftArmTrajectoryMessage = new ArmTrajectoryMessage(random);
+      leftArmTrajectoryMessage.robotSide = RobotSide.LEFT;
+
+      rightArmTrajectoryMessage = new ArmTrajectoryMessage(random);
+      rightArmTrajectoryMessage.robotSide = RobotSide.RIGHT;
+
+      leftFootTrajectoryMessage = new FootTrajectoryMessage(random);
+      leftFootTrajectoryMessage.robotSide = RobotSide.LEFT;
+
+      rightFootTrajectoryMessage = new FootTrajectoryMessage(random);
+      rightFootTrajectoryMessage.robotSide = RobotSide.RIGHT;
+
+      chestTrajectoryMessage = new ChestTrajectoryMessage(random);
+      pelvisTrajectoryMessage = new PelvisTrajectoryMessage(random);
    }
 
    public HandTrajectoryMessage getHandTrajectoryMessage(RobotSide robotSide)

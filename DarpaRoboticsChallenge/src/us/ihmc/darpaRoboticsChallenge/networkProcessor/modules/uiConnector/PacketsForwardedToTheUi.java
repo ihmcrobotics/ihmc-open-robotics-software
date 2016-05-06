@@ -52,7 +52,7 @@ public class PacketsForwardedToTheUi
       BehaviorControlModeResponsePacket.class,
       BDIBehaviorStatusPacket.class,                 
       ControlStatusPacket.class,                     
-      FootstepDataListMessage.class,                        
+      FootstepDataListMessage.class,
       PelvisHeightTrajectoryMessage.class,                         
       HeadTrajectoryMessage.class,                   
       NeckTrajectoryMessage.class,                   
