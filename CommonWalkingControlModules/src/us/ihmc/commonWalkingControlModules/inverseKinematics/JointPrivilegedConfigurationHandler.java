@@ -85,9 +85,9 @@ public class JointPrivilegedConfigurationHandler
          yoJointPriviligedAccelerations.put(joint, new DoubleYoVariable("qdd_priv_" + jointName, registry));
       }
 
-      configurationGain.set(20.0); //5.0);
-      velocityGain.set(6.0); //10.0);
-      maxVelocity.set(2.0); //0.4);
+      configurationGain.set(40.0); //20.0);
+      velocityGain.set(6.0);
+      maxVelocity.set(2.0);
       maxAcceleration.set(Double.POSITIVE_INFINITY);
       weight.set(5.0);
 
