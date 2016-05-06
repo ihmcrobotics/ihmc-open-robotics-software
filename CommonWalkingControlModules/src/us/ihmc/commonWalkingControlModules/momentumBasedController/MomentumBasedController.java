@@ -121,6 +121,8 @@ public class MomentumBasedController
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
+   private final InverseDynamicsJoint[] controlledJoints;
+
    private final SideDependentList<Wrench> handWrenches = new SideDependentList<>();
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
@@ -215,6 +217,8 @@ public class MomentumBasedController
          FrameConvexPolygon2d defaultFootPolygon = new FrameConvexPolygon2d(feet.get(robotSide).getContactPoints2d());
          defaultFootPolygons.put(robotSide, defaultFootPolygon);
       }
+
+      controlledJoints = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
 
       ContactPointVisualizer contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList),
             yoGraphicsListRegistry, registry);
@@ -814,6 +818,11 @@ public class MomentumBasedController
    public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
       return yoGraphicsListRegistry;
+   }
+
+   public InverseDynamicsJoint[] getControlledJoints()
+   {
+      return controlledJoints;
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)
