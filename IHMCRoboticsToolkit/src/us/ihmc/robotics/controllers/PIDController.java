@@ -75,9 +75,7 @@ public class PIDController
       pdController = new PDController(yoPIDGains, suffix, registry);
       this.integralGain = yoPIDGains.getYoKi();
       this.maxIntegralError = yoPIDGains.getYoMaxIntegralError();
-
-      maxOutput = new DoubleYoVariable("maxOutput_" + suffix, registry);
-      maxOutput.set(Double.POSITIVE_INFINITY);
+      this.maxOutput = yoPIDGains.getYoMaximumOutput();
 
       cumulativeError = new DoubleYoVariable("cumulativeError_" + suffix, registry);
       cumulativeError.set(0.0);
