@@ -2,19 +2,21 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 
-@ClassDocumentation("This message notifies the user of a change in the high level state. This message's primary\n"
-                                  + "use is to signal a requested state change is completed.")
+@RosMessagePacket(documentation = "This message notifies the user of a change in the high level state. This message's primary\n"
+                                  + "use is to signal a requested state change is completed.",
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
+      topic = "/output/high_level_state_change")
 public class HighLevelStateChangeStatusMessage extends StatusPacket<HighLevelStateChangeStatusMessage>
 {
-   @FieldDocumentation("initialState gives the controller's state prior to transition")
+   @RosExportedField(documentation = "initialState gives the controller's state prior to transition")
    public HighLevelState initialState;
-   @FieldDocumentation("endState gives the state the controller has transitioned into")
+   @RosExportedField(documentation = "endState gives the state the controller has transitioned into")
    public HighLevelState endState;
    
    public HighLevelStateChangeStatusMessage()

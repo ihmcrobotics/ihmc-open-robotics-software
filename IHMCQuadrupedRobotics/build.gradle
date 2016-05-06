@@ -54,6 +54,7 @@ dependencies {
     compile group: 'org.ejml', name: 'dense64', version: '0.28'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
 
+    compile ihmc.getProjectDependency(":RobotDataCommunication")
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":Graphics3DAdapter")
     compile ihmc.getProjectDependency(":CommonWalkingControlModules")

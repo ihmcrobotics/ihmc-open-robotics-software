@@ -97,7 +97,7 @@ public class DRCSimulationTestHelper
    {
       this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null, null);
    }
-   
+
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name,
          DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
          DRCNetworkModuleParameters drcNetworkModuleParameters, HighLevelBehaviorFactory highLevelBehaviorFactoryToAdd, DRCRobotInitialSetup<SDFHumanoidRobot> initialSetup)
@@ -153,9 +153,9 @@ public class DRCSimulationTestHelper
       drcSimulationFactory = simulationStarter.getDRCSimulationFactory();
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
       simulationStarter.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
-      
 
-      
+
+
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
          nothingChangedVerifier = new NothingChangedVerifier(name, scs);
@@ -170,24 +170,24 @@ public class DRCSimulationTestHelper
    {
       return scs.getVariable(name);
    }
-   
+
    public YoVariable<?> getYoVariable(String nameSpace, String name)
    {
       return scs.getVariable(nameSpace, name);
    }
-   
+
    public void loadScriptFile(String scriptFilename, ReferenceFrame referenceFrame)
    {
       ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator = simulationStarter.getScriptBasedControllerCommandGenerator();
       scriptBasedControllerCommandGenerator.loadScriptFile(scriptFilename, referenceFrame);
    }
-   
+
    public void loadScriptFile(InputStream scriptInputStream, ReferenceFrame referenceFrame)
    {
       ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator = simulationStarter.getScriptBasedControllerCommandGenerator();
       scriptBasedControllerCommandGenerator.loadScriptFile(scriptInputStream, referenceFrame);
    }
-   
+
    public ConcurrentLinkedQueue<Command<?, ?>> getQueuedControllerCommands()
    {
       return simulationStarter.getQueuedControllerCommands();
@@ -197,17 +197,17 @@ public class DRCSimulationTestHelper
    {
       return blockingSimulationRunner;
    }
-   
+
    public SimulationConstructionSet getSimulationConstructionSet()
    {
       return scs;
    }
-   
+
    public DRCSimulationFactory getDRCSimulationFactory()
    {
       return drcSimulationFactory;
    }
-   
+
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
    {
       MomentumBasedControllerFactory controllerFactory = drcSimulationFactory.getControllerFactory();
@@ -222,6 +222,16 @@ public class DRCSimulationTestHelper
    public SDFFullHumanoidRobotModel getSDFFullRobotModel()
    {
       return (SDFFullHumanoidRobotModel) fullRobotModel;
+   }
+
+   /**
+    * For unit testing only
+    *
+    * @param controller
+    */
+   public void addRobotControllerOnControllerThread(RobotController controller)
+   {
+      drcSimulationFactory.addRobotControllerOnControllerThread(controller);
    }
 
    public CommonAvatarEnvironmentInterface getTestEnviroment()
@@ -397,37 +407,37 @@ public class DRCSimulationTestHelper
    {
       return controllerCommunicator;
    }
-   
+
    public ArrayList<RobotController> getFootForceSensorHysteresisCreators()
    {
       SideDependentList<ArrayList<WrenchCalculatorInterface>> footForceSensors = new SideDependentList<ArrayList<WrenchCalculatorInterface>>();
       packFootForceSensors(footForceSensors);
-      
+
       ArrayList<RobotController> footForceSensorSignalCorruptors = new ArrayList<RobotController>();
-      
+
       for(RobotSide robotSide : RobotSide.values)
-      {  
+      {
          for(int i = 0; i<footForceSensors.get(robotSide).size(); i++)
          {
-            ForceSensorHysteresisCreator forceSensorSignalCorruptor = new ForceSensorHysteresisCreator(sdfRobot.computeCenterOfMass(new Point3d()), 
+            ForceSensorHysteresisCreator forceSensorSignalCorruptor = new ForceSensorHysteresisCreator(sdfRobot.computeCenterOfMass(new Point3d()),
                   footForceSensors.get(robotSide).get(i).getName(), footForceSensors.get(robotSide).get(i));
-            
+
             footForceSensorSignalCorruptors.add(forceSensorSignalCorruptor);
          }
       }
-      
+
       return footForceSensorSignalCorruptors;
    }
-   
+
    public void packFootForceSensors(SideDependentList<ArrayList<WrenchCalculatorInterface>> footForceSensors)
-   {  
+   {
       ArrayList<WrenchCalculatorInterface> forceSensors = new ArrayList<WrenchCalculatorInterface>();
       sdfRobot.getForceSensors(forceSensors);
-      
+
       SideDependentList<String> jointNamesBeforeFeet = sdfRobot.getJointNamesBeforeFeet();
-      
+
       for(RobotSide robotSide : RobotSide.values)
-      {  
+      {
          footForceSensors.put(robotSide,new ArrayList<WrenchCalculatorInterface>());
          for(int i = 0; i<forceSensors.size(); i++)
          {

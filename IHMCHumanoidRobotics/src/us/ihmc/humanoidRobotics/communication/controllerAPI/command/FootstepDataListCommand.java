@@ -91,6 +91,11 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       return footsteps;
    }
 
+   public void removeFootstep(int footstepIndex)
+   {
+      footsteps.remove(footstepIndex);
+   }
+
    public FootstepDataControllerCommand getFootstep(int footstepIndex)
    {
       return footsteps.get(footstepIndex);
