@@ -142,7 +142,7 @@ public class PDController
 
    public double compute(double currentPosition, double desiredPosition, double currentRate, double desiredRate)
    {
-      applyDeadband(desiredPosition - currentPosition);
+      positionError.set(applyDeadband(desiredPosition - currentPosition));
       rateError.set(desiredRate - currentRate);
       
       actionP.set(proportionalGain.getDoubleValue() * positionError.getDoubleValue());
@@ -154,7 +154,7 @@ public class PDController
    public double computeForAngles(double currentPosition, double desiredPosition, double currentRate, double desiredRate)
    {
 //      System.out.println("PGain: " + proportionalGain.getDoubleValue() + "DGain: " + derivativeGain.getDoubleValue());
-      applyDeadband(AngleTools.computeAngleDifferenceMinusPiToPi(desiredPosition, currentPosition));
+      this.positionError.set(applyDeadband(AngleTools.computeAngleDifferenceMinusPiToPi(desiredPosition, currentPosition)));
       rateError.set(desiredRate - currentRate);
       
       actionP.set(proportionalGain.getDoubleValue() * positionError.getDoubleValue());
@@ -163,7 +163,7 @@ public class PDController
       return actionP.getDoubleValue() + actionD.getDoubleValue();
    }
 
-   private void applyDeadband(double positionError)
+   private double applyDeadband(double positionError)
    {
       if (positionError >= positionDeadband.getDoubleValue())
          positionError -= positionDeadband.getDoubleValue();
@@ -172,6 +172,6 @@ public class PDController
       else
          positionError = 0.0;
 
-      this.positionError.set(positionError);
+      return positionError;
    }
 }
