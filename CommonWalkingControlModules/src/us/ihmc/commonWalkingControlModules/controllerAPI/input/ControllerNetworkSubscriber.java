@@ -15,6 +15,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.util.PeriodicThreadScheduler;
 
@@ -50,6 +51,13 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       this.scheduler = scheduler;
       this.packetCommunicator = packetCommunicator;
       listOfSupportedStatusMessages = controllerStatusOutputManager.getListOfSupportedMessages();
+
+      if (packetCommunicator == null)
+      {
+         PrintTools.error(this, "No packet communicator, " + getClass().getSimpleName() + " cannot be created.");
+         return;
+      }
+
       listOfSupportedStatusMessages.add(InvalidPacketNotificationPacket.class);
 
       createAllSubscribersForSupportedMessages();

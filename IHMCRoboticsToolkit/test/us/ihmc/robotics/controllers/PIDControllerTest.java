@@ -66,6 +66,7 @@ public class PIDControllerTest
       double maxError = random.nextDouble();
       double deadband = random.nextDouble();
       double leakRate = random.nextDouble();
+      double maxOutput = 100 * random.nextDouble();
 
       YoPIDGains pidGains = new YoPIDGains("", registry);
       pidGains.setKp(proportional);
@@ -74,6 +75,7 @@ public class PIDControllerTest
       pidGains.setMaximumIntegralError(maxError);
       pidGains.setPositionDeadband(deadband);
       pidGains.setIntegralLeakRatio(leakRate);
+      pidGains.setMaximumOutput(maxOutput);
 
       PIDController pid = new PIDController(pidGains, "", registry);
       assertEquals(proportional, pid.getProportionalGain(), 0.001);
@@ -82,6 +84,7 @@ public class PIDControllerTest
       assertEquals(maxError, pid.getMaxIntegralError(), 0.001);
       assertEquals(deadband, pid.getPositionDeadband(), 0.001);
       assertEquals(leakRate, pid.getIntegralLeakRatio(), 0.001);
+      assertEquals(maxOutput, pid.getMaximumOutputLimit(), 1e-5);
    }
 
    @DeployableTestMethod
@@ -95,6 +98,7 @@ public class PIDControllerTest
       double derivative = random.nextDouble();
       double maxError = random.nextDouble();
       double deadband = random.nextDouble();
+      double maxOutput = random.nextDouble() * 100;
 
       YoPIDGains pidGains = new YoPIDGains("", registry);
       pidGains.setKp(proportional);
@@ -102,6 +106,7 @@ public class PIDControllerTest
       pidGains.setKd(derivative);
       pidGains.setMaximumIntegralError(maxError);
       pidGains.setPositionDeadband(deadband);
+      pidGains.setMaximumOutput(maxOutput);
 
       PIDController pid = new PIDController(pidGains, "", registry);
       assertEquals(proportional, pid.getProportionalGain(), 0.001);
@@ -109,6 +114,7 @@ public class PIDControllerTest
       assertEquals(derivative, pid.getDerivativeGain(), 0.001);
       assertEquals(maxError, pid.getMaxIntegralError(), 0.001);
       assertEquals(deadband, pid.getPositionDeadband(), 0.001);
+      assertEquals(maxOutput, pid.getMaximumOutputLimit(), 0.001);
       assertEquals(1.0, pid.getIntegralLeakRatio(), 0.001);
    }
 
@@ -121,19 +127,49 @@ public class PIDControllerTest
       double proportional = random.nextDouble();
       double integral = random.nextDouble();
       double derivative = random.nextDouble();
-      double maxError = random.nextDouble();
+      double maxIntegralError = random.nextDouble();
+      double maxOutput = random.nextDouble() * 100;
 
       YoPIDGains pidGains = new YoPIDGains("", registry);
       pidGains.setKp(proportional);
       pidGains.setKi(integral);
       pidGains.setKd(derivative);
-      pidGains.setMaximumIntegralError(maxError);
+      pidGains.setMaximumIntegralError(maxIntegralError);
+      pidGains.setMaximumOutput(maxOutput);
 
       PIDController pid = new PIDController(pidGains, "", registry);
       assertEquals(proportional, pid.getProportionalGain(), 0.001);
       assertEquals(integral, pid.getIntegralGain(), 0.001);
       assertEquals(derivative, pid.getDerivativeGain(), 0.001);
-      assertEquals(maxError, pid.getMaxIntegralError(), 0.001);
+      assertEquals(maxIntegralError, pid.getMaxIntegralError(), 0.001);
+      assertEquals(maxOutput, pid.getMaximumOutputLimit(), 1e-5);
+      assertEquals(0.0, pid.getPositionDeadband(), 0.001);
+      assertEquals(1.0, pid.getIntegralLeakRatio(), 0.001);
+   }
+
+   @DeployableTestMethod
+   @Test(timeout=300000)
+   public void testPIDControllerConstructorFromGains4()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+
+      double proportional = random.nextDouble();
+      double integral = random.nextDouble();
+      double derivative = random.nextDouble();
+      double maxIntegralError = random.nextDouble();
+
+      YoPIDGains pidGains = new YoPIDGains("", registry);
+      pidGains.setKp(proportional);
+      pidGains.setKi(integral);
+      pidGains.setKd(derivative);
+      pidGains.setMaximumIntegralError(maxIntegralError);
+
+      PIDController pid = new PIDController(pidGains, "", registry);
+      assertEquals(proportional, pid.getProportionalGain(), 0.001);
+      assertEquals(integral, pid.getIntegralGain(), 0.001);
+      assertEquals(derivative, pid.getDerivativeGain(), 0.001);
+      assertEquals(maxIntegralError, pid.getMaxIntegralError(), 0.001);
+      assertEquals(Double.POSITIVE_INFINITY, pid.getMaximumOutputLimit(), 0.001);
       assertEquals(0.0, pid.getPositionDeadband(), 0.001);
       assertEquals(1.0, pid.getIntegralLeakRatio(), 0.001);
    }

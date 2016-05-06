@@ -45,8 +45,8 @@ public class FootControlHelper
       String namePrefix = foot.getName();
       double controlDT = momentumBasedController.getControlDT();
 
-      partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controlDT, contactableFoot, twistCalculator, walkingControllerParameters,
-            registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
+      partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controlDT, contactableFoot, twistCalculator,
+            walkingControllerParameters, registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
 
       isDesiredCoPOnEdge = new BooleanYoVariable(namePrefix + "IsDesiredCoPOnEdge", registry);
 

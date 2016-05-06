@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
@@ -25,6 +26,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePoint2dReadOnly;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -40,6 +42,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class LogDataProcessorHelper
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final FullHumanoidRobotModel fullRobotModel;
    private final FullInverseDynamicsStructure inverseDynamicsStructure;
    private final HumanoidReferenceFrames referenceFrames;
@@ -47,6 +51,8 @@ public class LogDataProcessorHelper
    private final LogDataRawSensorMap rawSensorMap;
    private final TwistCalculator twistCalculator;
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
+   private final YoFramePoint capturePoint;
+   private final FramePoint2d capturePoint2d;
 
    private final SideDependentList<YoFramePoint2d> cops = new SideDependentList<>();
    private final SideDependentList<YoFramePoint2d> desiredCoPs = new SideDependentList<>();
@@ -108,6 +114,14 @@ public class LogDataProcessorHelper
          EnumYoVariable<?> footState = (EnumYoVariable<ConstraintType>) scs.getVariable(footStateNameSpace, footStateName);
          footStates.put(robotSide, footState);
       }
+
+      String capturePointNameSpace = BalanceManager.class.getSimpleName();
+      DoubleYoVariable capturePointX = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointX");
+      DoubleYoVariable capturePointY = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointY");
+      DoubleYoVariable capturePointZ = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointZ");
+      capturePoint = new YoFramePoint(capturePointX, capturePointY, capturePointZ, worldFrame);
+      capturePoint2d = new FramePoint2d(worldFrame);
+      capturePoint2d.setByProjectionOntoXYPlane(capturePoint.getFrameTuple());
 
       stateEstimatorFootSwitches = createStateEstimatorFootSwitches(scs);
    }
@@ -184,6 +198,7 @@ public class LogDataProcessorHelper
    {
       sensorReader.read();
       twistCalculator.compute();
+      capturePoint2d.setByProjectionOntoXYPlane(capturePoint.getFrameTuple());
    }
 
    public FullHumanoidRobotModel getFullRobotModel()
@@ -249,6 +264,11 @@ public class LogDataProcessorHelper
    public YoVariableHolder getLogYoVariableHolder()
    {
       return scs;
+   }
+
+   public FramePoint2dReadOnly getCapturePoint()
+   {
+      return (FramePoint2dReadOnly) capturePoint2d;
    }
 
    public YoFramePoint findYoFramePoint(String pointPrefix, ReferenceFrame pointFrame)
