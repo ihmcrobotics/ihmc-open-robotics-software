@@ -11,7 +11,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class FootControlHelper
 {
@@ -20,7 +20,6 @@ public class FootControlHelper
    private final RobotSide robotSide;
    private final ContactableFoot contactableFoot;
    private final HighLevelHumanoidControllerToolbox momentumBasedController;
-   private final TwistCalculator twistCalculator;
    private final WalkingControllerParameters walkingControllerParameters;
    private final PartialFootholdControlModule partialFootholdControlModule;
 
@@ -39,14 +38,12 @@ public class FootControlHelper
       this.walkingControllerParameters = walkingControllerParameters;
 
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
-      twistCalculator = momentumBasedController.getTwistCalculator();
-
       RigidBody foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName();
-      double controlDT = momentumBasedController.getControlDT();
 
-      partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controlDT, contactableFoot, twistCalculator,
-            walkingControllerParameters, registry, momentumBasedController.getDynamicGraphicObjectsListRegistry());
+      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      partialFootholdControlModule = new PartialFootholdControlModule(robotSide, momentumBasedController,
+            walkingControllerParameters, registry, yoGraphicsListRegistry);
 
       isDesiredCoPOnEdge = new BooleanYoVariable(namePrefix + "IsDesiredCoPOnEdge", registry);
 

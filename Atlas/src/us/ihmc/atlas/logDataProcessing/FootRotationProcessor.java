@@ -3,14 +3,13 @@ package us.ihmc.atlas.logDataProcessing;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.PartialFootholdControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorFunction;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorHelper;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class FootRotationProcessor implements LogDataProcessorFunction
@@ -25,16 +24,13 @@ public class FootRotationProcessor implements LogDataProcessorFunction
    public FootRotationProcessor(LogDataProcessorHelper logDataProcessorHelper)
    {
       this.logDataProcessorHelper = logDataProcessorHelper;
-      SideDependentList<? extends ContactablePlaneBody> contactableFeet = logDataProcessorHelper.getContactableFeet();
-      double controllerDT = logDataProcessorHelper.getControllerDT();
-      TwistCalculator twistCalculator = logDataProcessorHelper.getTwistCalculator();
       WalkingControllerParameters walkingControllerParameters = logDataProcessorHelper.getWalkingControllerParameters();
+      HighLevelHumanoidControllerToolbox momentumBasedController = logDataProcessorHelper.getMomentumBasedController();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         String namePrefix = contactableFeet.get(robotSide).getName();
-         PartialFootholdControlModule partialFootholdControlModule = new PartialFootholdControlModule(namePrefix, controllerDT, contactableFeet.get(robotSide),
-               twistCalculator, walkingControllerParameters, registry, yoGraphicsListRegistry);
+         PartialFootholdControlModule partialFootholdControlModule = new PartialFootholdControlModule(robotSide, momentumBasedController,
+               walkingControllerParameters, registry, yoGraphicsListRegistry);
          partialFootholdControlModules.put(robotSide, partialFootholdControlModule);
       }
    }

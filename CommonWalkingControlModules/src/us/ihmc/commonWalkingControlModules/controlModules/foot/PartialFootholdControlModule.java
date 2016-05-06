@@ -9,7 +9,8 @@ import javax.vecmath.Point2d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -56,6 +57,8 @@ public class PartialFootholdControlModule
 
    private final FootCoPOccupancyGrid footCoPOccupancyGrid;
 
+//   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+//   private final RobotSide robotSide;
    private final ReferenceFrame soleFrame;
 
    private final FrameConvexPolygon2d defaultFootPolygon;
@@ -92,9 +95,14 @@ public class PartialFootholdControlModule
    private static final double defaultMinAreaToConsider = 0.0;
    private final BooleanYoVariable unsafeAreaAboveThreshold;
 
-   public PartialFootholdControlModule(String namePrefix, double dt, ContactablePlaneBody contactableFoot, TwistCalculator twistCalculator,
+   public PartialFootholdControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      ContactableFoot contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
+      String namePrefix = contactableFoot.getRigidBody().getName();
+//      this.momentumBasedController = momentumBasedController;
+//      this.robotSide = robotSide;
+
       footCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
       soleFrame = contactableFoot.getSoleFrame();
       defaultFootPolygon = new FrameConvexPolygon2d(contactableFoot.getContactPoints2d());
@@ -139,6 +147,9 @@ public class PartialFootholdControlModule
 
       useCoPOccupancyGrid = new BooleanYoVariable(namePrefix + "UseCoPOccupancyGrid", registry);
       useCoPOccupancyGrid.set(true);
+
+      double dt = momentumBasedController.getControlDT();
+      TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
 
       FootRotationCalculator velocityFootRotationCalculator =
             new VelocityFootRotationCalculator(namePrefix, dt, contactableFoot, twistCalculator, yoGraphicsListRegistry, registry);
