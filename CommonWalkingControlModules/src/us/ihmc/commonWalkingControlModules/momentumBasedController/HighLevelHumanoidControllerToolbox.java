@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Blue;
 import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArrayList;
+import static us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType.ROTATED_CROSS;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +35,7 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -56,9 +59,10 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class MomentumBasedController
+public class HighLevelHumanoidControllerToolbox
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -110,13 +114,11 @@ public class MomentumBasedController
    private final SideDependentList<AlphaFilteredYoFrameVector2d> desiredTorquesForCoPControl;
 
    private final SideDependentList<Double> xSignsForCoPControl, ySignsForCoPControl;
-   private final double minZForceForCoPControlScaling, maxZForceForCoPControlScaling;
+   private final double minZForceForCoPControlScaling;
 
    private final SideDependentList<YoFrameVector2d> yoCoPError;
    private final SideDependentList<DoubleYoVariable> yoCoPErrorMagnitude = new SideDependentList<DoubleYoVariable>(
          new DoubleYoVariable("leftFootCoPErrorMagnitude", registry), new DoubleYoVariable("rightFootCoPErrorMagnitude", registry));
-   private final DoubleYoVariable gainCoPX = new DoubleYoVariable("gainCoPX", registry);
-   private final DoubleYoVariable gainCoPY = new DoubleYoVariable("gainCoPY", registry);
    private final SideDependentList<DoubleYoVariable> copControlScales;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -133,9 +135,12 @@ public class MomentumBasedController
 
    private final SideDependentList<FrameTuple2dArrayList<FramePoint2d>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(), createFramePoint2dArrayList());
 
-   public MomentumBasedController(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
+   private final YoFramePoint yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
+   private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
+
+   public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
-         SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ,
+         SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ, double omega0,
          TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT,
          ArrayList<Updatable> updatables, YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
@@ -160,6 +165,7 @@ public class MomentumBasedController
       this.controlDT = controlDT;
       this.gravity = gravityZ;
       this.yoTime = yoTime;
+      this.omega0.set(omega0);
 
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry);
@@ -259,8 +265,7 @@ public class MomentumBasedController
          copControlScales.put(robotSide, new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "CoPControlScale", registry));
       }
 
-      minZForceForCoPControlScaling = 0.20 * totalMass * 9.81;
-      maxZForceForCoPControlScaling = 0.45 * totalMass * 9.81;
+      minZForceForCoPControlScaling = 0.20 * totalMass * gravityZ;
 
       alphaCoPControl.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, controlDT));
       maxAnkleTorqueCoPControl.set(10.0);
@@ -323,6 +328,13 @@ public class MomentumBasedController
             handMass.set(TotalMassCalculator.computeSubTreeMass(measurementLink));
          }
       }
+
+      String graphicListName = "HumanoidControllerToolbox";
+      if (yoGraphicsListRegistry != null)
+      {
+         YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), ROTATED_CROSS);
+         yoGraphicsListRegistry.registerArtifact(graphicListName, capturePointViz.createArtifact());
+      }
    }
 
    public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
@@ -369,6 +381,7 @@ public class MomentumBasedController
       centerOfMassJacobian.compute();
       referenceFramesVisualizer.update();
 
+      computeCapturePoint();
       updateBipedSupportPolygons();
       readWristSensorData();
 
@@ -383,70 +396,44 @@ public class MomentumBasedController
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
    }
 
+   private final FramePoint2d capturePoint2d = new FramePoint2d();
+   private final FramePoint centerOfMassPosition = new FramePoint();
+   private final FrameVector centerOfMassVelocity = new FrameVector();
+   private final FramePoint2d centerOfMassPosition2d = new FramePoint2d();
+   private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
+
+   private void computeCapturePoint()
+   {
+      centerOfMassPosition.setToZero(centerOfMassFrame);
+      centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
+
+      centerOfMassPosition.changeFrame(worldFrame);
+      centerOfMassVelocity.changeFrame(worldFrame);
+
+      centerOfMassPosition2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassPosition);
+      centerOfMassVelocity2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassVelocity);
+
+      CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMassPosition2d, centerOfMassVelocity2d, omega0.getDoubleValue());
+
+      capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
+      yoCapturePoint.setXY(capturePoint2d);
+   }
+
+   public void getCapturePoint(FramePoint2d capturePointToPack)
+   {
+      yoCapturePoint.getFrameTuple2dIncludingFrame(capturePointToPack);
+   }
+
+   public void getCapturePoint(FramePoint capturePointToPack)
+   {
+      yoCapturePoint.getFrameTuple(capturePointToPack);
+   }
+
    private final FramePoint2d copDesired = new FramePoint2d();
    private final FramePoint2d copActual = new FramePoint2d();
    private final FrameVector2d copError = new FrameVector2d();
    private final Wrench footWrench = new Wrench();
    private final FrameVector footForceVector = new FrameVector();
-
-   public final void doProportionalControlOnCoP(SideDependentList<FramePoint2d> desiredCoPs)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ContactablePlaneBody contactablePlaneBody = feet.get(robotSide);
-         ReferenceFrame planeFrame = contactablePlaneBody.getSoleFrame();
-         AlphaFilteredYoFrameVector2d desiredTorqueForCoPControl = desiredTorquesForCoPControl.get(robotSide);
-         copDesired.setIncludingFrame(desiredCoPs.get(robotSide));
-
-         if (copDesired.containsNaN())
-         {
-            desiredTorqueForCoPControl.setToZero();
-            return;
-         }
-
-         FootSwitchInterface footSwitch = footSwitches.get(robotSide);
-         footSwitch.computeAndPackCoP(copActual);
-
-         if (copActual.containsNaN())
-         {
-            desiredTorqueForCoPControl.setToZero();
-
-            return;
-         }
-
-         copError.setToZero(planeFrame);
-         copError.sub(copDesired, copActual);
-         yoCoPError.get(robotSide).set(copError);
-         yoCoPErrorMagnitude.get(robotSide).set(copError.length());
-
-         double xSignForCoPControl = xSignsForCoPControl.get(robotSide);
-         double ySignForCoPControl = ySignsForCoPControl.get(robotSide);
-
-         footSwitch.computeAndPackFootWrench(footWrench);
-         footForceVector.setToZero(footWrench.getExpressedInFrame());
-         footWrench.getLinearPart(footForceVector);
-         footForceVector.changeFrame(ReferenceFrame.getWorldFrame());
-
-         double zForce = footForceVector.getZ();
-         double scale = (zForce - minZForceForCoPControlScaling) / (maxZForceForCoPControlScaling - minZForceForCoPControlScaling);
-         scale = MathTools.clipToMinMax(scale, 0.0, 1.0);
-
-         copControlScales.get(robotSide).set(scale);
-
-         copError.scale(scale * xSignForCoPControl * gainCoPX.getDoubleValue(), scale * ySignForCoPControl * gainCoPY.getDoubleValue());
-         copError.clipMaxLength(maxAnkleTorqueCoPControl.getDoubleValue());
-
-         desiredTorqueForCoPControl.update(copError);
-
-         OneDoFJoint anklePitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
-         if (anklePitchJoint != null)
-            anklePitchJoint.setTau(anklePitchJoint.getTau() + desiredTorqueForCoPControl.getX());
-
-         OneDoFJoint ankleRollJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
-         if (ankleRollJoint != null)
-            ankleRollJoint.setTau(ankleRollJoint.getTau() + desiredTorqueForCoPControl.getY());
-      }
-   }
 
    private final BooleanYoVariable enableHighCoPDampingForShakies = new BooleanYoVariable("enableHighCoPDampingForShakies", registry);
    private final BooleanYoVariable isCoPTrackingBad = new BooleanYoVariable("isCoPTrackingBad", registry);
@@ -732,10 +719,10 @@ public class MomentumBasedController
       return centerOfMassJacobian;
    }
 
-   public void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
-   {
-      centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocityToPack);
-   }
+//   public void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
+//   {
+//      centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocityToPack);
+//   }
 
    public SideDependentList<ContactableFoot> getContactableFeet()
    {
@@ -916,5 +903,10 @@ public class MomentumBasedController
          contactPoints.get(i).setPosition(tempPosition);
       }
       contactState.notifyContactStateHasChanged();
+   }
+
+   public double getOmega0()
+   {
+      return omega0.getDoubleValue();
    }
 }

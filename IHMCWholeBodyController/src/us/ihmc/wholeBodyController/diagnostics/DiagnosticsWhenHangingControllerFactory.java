@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
 public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehaviorFactory
@@ -52,7 +52,7 @@ public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehavio
    }
 
    @Override
-   public HighLevelBehavior createHighLevelBehavior(HighLevelControlManagerFactory variousWalkingManagers, MomentumBasedController momentumBasedController)
+   public HighLevelBehavior createHighLevelBehavior(HighLevelControlManagerFactory variousWalkingManagers, HighLevelHumanoidControllerToolbox momentumBasedController)
    {
       controller = new DiagnosticsWhenHangingController(humanoidJointPoseList, useArms, robotIsHanging, momentumBasedController, this.torqueOffsetPrinter);
 

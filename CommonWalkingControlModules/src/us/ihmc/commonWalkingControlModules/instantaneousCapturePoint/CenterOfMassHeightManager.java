@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
@@ -68,7 +68,7 @@ public class CenterOfMassHeightManager
    private final RigidBody pelvis;
    private final TwistCalculator twistCalculator;
 
-   public CenterOfMassHeightManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
+   public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
@@ -99,7 +99,7 @@ public class CenterOfMassHeightManager
       parentRegistry.addChild(registry);
    }
 
-   public LookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(MomentumBasedController momentumBasedController,
+   public LookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames)
    {
       double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();
