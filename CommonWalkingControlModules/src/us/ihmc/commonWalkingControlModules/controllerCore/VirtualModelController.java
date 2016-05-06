@@ -177,7 +177,7 @@ public class VirtualModelController
          // check and set frames
          GeometricJacobian jacobian = geometricJacobianHolder.getJacobian(endEffectorJacobians.get(endEffector));
          Wrench endEffectorWrench = endEffectorWrenches.get(endEffector);
-         endEffectorWrench.changeFrame(jacobian.getBaseFrame());
+         endEffectorWrench.changeFrame(jacobian.getJacobianFrame());
 
          if (VISUALIZE_DESIRED_WRENCHES && registry != null && yoGraphicsListRegistry != null)
          {
@@ -187,6 +187,10 @@ public class VirtualModelController
             yoForceVectors.get(endEffector).set(endEffectorWrench.getLinearPart());
          }
 
+         DenseMatrix64F jointEffortMatrix = jointEffortMatrices.get(endEffector);
+         jointEffortMatrix.zero();
+         jointEffortMatrix = jacobian.computeJointTorques(endEffectorWrench);
+         /*
          DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
          endEffectorWrench.getMatrix(wrenchMatrix);
          DenseMatrix64F jointEffortMatrix = jointEffortMatrices.get(endEffector);
@@ -200,6 +204,7 @@ public class VirtualModelController
 
          // Compute desired joint torques
          CommonOps.multTransA(tmpJacobianMatrix, tmpEndEffectorWrench, jointEffortMatrix);
+         */
 
          // Write torques to map
          int index = 0;
