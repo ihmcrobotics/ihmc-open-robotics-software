@@ -1,5 +1,6 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -36,7 +37,7 @@ public class YoPIDGains extends YoPDGains
 
    public void setIntegralLeakRatio(double integralLeakRatio)
    {
-      this.integralLeakRatio.set(integralLeakRatio);
+      this.integralLeakRatio.set(MathTools.clipToMinMax(integralLeakRatio, 0.0, 1.0));
    }
 
    public DoubleYoVariable getYoKi()

@@ -57,8 +57,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private final HashMap<String, ReferenceFrame> cameraFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, ReferenceFrame> lidarBaseFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, RigidBodyTransform> lidarBaseToSensorTransform = new HashMap<String, RigidBodyTransform>();
-   private final HashMap<String, FrameVector> lidarAxis = new HashMap<String, FrameVector>();
-   private final HashMap<String, OneDoFJoint> lidarJoints = new HashMap<>();
+   private final HashMap<String, InverseDynamicsJoint> lidarJoints = new HashMap<>();
    private final HashMap<String, ReferenceFrame> sensorFrames = new HashMap<String, ReferenceFrame>();
    private double totalMass = 0.0;
 
@@ -157,12 +156,18 @@ public class SDFFullRobotModel implements FullRobotModel
                   ReferenceFrame lidarFrame = joint.getFrameBeforeJoint();
                   lidarBaseFrames.put(sensor.getName(), lidarFrame);
                   lidarBaseToSensorTransform.put(sensor.getName(), linkToSensorInZUp);
-                  lidarAxis.put(sensor.getName(), ((RevoluteJoint) joint).getJointAxis());
-                  lidarJoints.put(sensor.getName(), (OneDoFJoint) joint);
+                  lidarJoints.put(sensor.getName(), joint);
+               }
+               else if (sensor.getPose() != null)
+               {
+                  ReferenceFrame lidarFrame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent(sensor.getName(), joint.getFrameAfterJoint(), linkToSensorInZUp);
+                  lidarBaseFrames.put(sensor.getName(), lidarFrame);
+                  lidarBaseToSensorTransform.put(sensor.getName(), new RigidBodyTransform());
+                  lidarJoints.put(sensor.getName(), joint);
                }
                else
                {
-                  System.err.println("Not supporting lidar not connected to a revolute joint");
+                  System.err.println("Not supporting lidar not connected to a revolute joint or without a <pose> tag");
                }
             }
    
@@ -321,11 +326,6 @@ public class SDFFullRobotModel implements FullRobotModel
    public RigidBodyTransform getLidarBaseToSensorTransform(String name)
    {
       return lidarBaseToSensorTransform.get(name);
-   }
-
-   public FrameVector getLidarJointAxis(String name)
-   {
-      return lidarAxis.get(name);
    }
 
    public ReferenceFrame getHeadBaseFrame()

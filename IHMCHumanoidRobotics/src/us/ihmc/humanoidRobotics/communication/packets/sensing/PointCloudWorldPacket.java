@@ -136,8 +136,19 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
    @Override
    public String toString()
    {
-      return "PointCloudWorldPacket [timestamp=" + timestamp + ", groundQuadTreeSupport=" + groundQuadTreeSupport.length/3 + " points, decayingWorldScan="
-            + decayingWorldScan.length/3 + " points, defaultGroundHeight=" + defaultGroundHeight + "]";
+      String ret;
+
+      try
+      {
+         ret = "PointCloudWorldPacket [timestamp=" + timestamp + ", groundQuadTreeSupport=" + groundQuadTreeSupport.length/3 + " points, decayingWorldScan="
+               + decayingWorldScan.length/3 + " points, defaultGroundHeight=" + defaultGroundHeight + "]";
+      }
+      catch (NullPointerException e)
+      {
+         ret = getClass().getSimpleName();
+      }
+
+      return ret;
    }
 
    public long getTimestamp()

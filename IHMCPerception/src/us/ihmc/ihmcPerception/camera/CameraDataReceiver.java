@@ -128,7 +128,7 @@ public class CameraDataReceiver extends Thread
       this.useTimestamps = useTimestamps;
    }
    
-   protected void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
+   public void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
    {
       dataQueue.offer(new CameraData(robotSide, bufferedImage, timeStamp, intrinsicParameters));
    }

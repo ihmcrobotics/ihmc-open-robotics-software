@@ -101,11 +101,19 @@ public class SDFSensor
        * <min>0.100000</min> <max>30.000000</max>
        * <resolution>0.010000</resolution> </range> </ray>
        */
+      private String pose;
+
       private Range range;
 
       private Scan scan;
 
       private Noise noise;
+
+      @XmlElement(name = "pose")
+      public void setPose(String pose)
+      {
+         this.pose = pose;
+      }
 
       @XmlElement(name = "range")
       public void setRange(Range range)
@@ -117,6 +125,11 @@ public class SDFSensor
       public void setScan(Scan scan)
       {
          this.scan = scan;
+      }
+
+      public String getPose()
+      {
+         return pose;
       }
 
       public Range getRange()

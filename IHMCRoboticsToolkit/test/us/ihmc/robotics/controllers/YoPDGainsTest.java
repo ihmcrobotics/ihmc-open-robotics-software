@@ -25,12 +25,15 @@ public class YoPDGainsTest
           double maxAcc = rand.nextDouble() * 100;
           double maxJerk = rand.nextDouble() * 100;
           double zeta = rand.nextDouble()*100;
+          double deadband = rand.nextDouble() * 100;
+
 
           gains.setKd(kd);
           gains.setKp(kp);
           gains.setMaximumAcceleration(maxAcc);
           gains.setMaximumJerk(maxJerk);
           gains.setZeta(zeta);
+          gains.setPositionDeadband(deadband);
 
           assertEquals(kp, gains.getKp(), 1e-6);
           assertEquals(kp, gains.getYoKp().getDoubleValue(), 1e-6);
@@ -42,6 +45,7 @@ public class YoPDGainsTest
           assertEquals(maxJerk, gains.getYoMaximumJerk().getDoubleValue(), 1e-6);
           assertEquals(zeta, gains.getZeta(), 1e-6);
           assertEquals(zeta, gains.getYoZeta().getDoubleValue(), 1e-6);
+          assertEquals(deadband, gains.getPositionDeadband().getDoubleValue(), 1e-6);
       }
    }
    
@@ -67,6 +71,7 @@ public class YoPDGainsTest
           assertEquals(maxAcc, gains.getMaximumAcceleration(), 1e-6);
           assertEquals(maxJerk, gains.getMaximumJerk(), 1e-6);
           assertEquals(zeta, gains.getZeta(), 1e-6);
+          assertEquals(0.0, gains.getPositionDeadband().getDoubleValue(), 1e-6);
       }
    }
 

@@ -55,16 +55,16 @@ public class QuadrupedTestTeleopMode implements QuadrupedTeleopMode
       RobotQuadrant quadrantToStep = null;
       switch (e.getChannel())
       {
-      case BUTTON_Y:
+      case BUTTON_X:
          quadrantToStep = RobotQuadrant.FRONT_LEFT;
          break;
-      case BUTTON_B:
+      case BUTTON_Y:
          quadrantToStep = RobotQuadrant.FRONT_RIGHT;
          break;
-      case BUTTON_A:
+      case BUTTON_B:
          quadrantToStep = RobotQuadrant.HIND_RIGHT;
          break;
-      case BUTTON_X:
+      case BUTTON_A:
          quadrantToStep = RobotQuadrant.HIND_LEFT;
          break;
       }

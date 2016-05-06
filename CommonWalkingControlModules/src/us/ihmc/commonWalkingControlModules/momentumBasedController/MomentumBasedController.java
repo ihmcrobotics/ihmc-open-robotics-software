@@ -13,6 +13,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
@@ -24,6 +25,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -74,6 +76,7 @@ public class MomentumBasedController
    private final SideDependentList<ContactablePlaneBody> hands;
 
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
+   private final SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
 
    private final List<ContactablePlaneBody> contactablePlaneBodyList;
    private final List<YoPlaneContactState> yoPlaneContactStateList = new ArrayList<YoPlaneContactState>();
@@ -210,6 +213,9 @@ public class MomentumBasedController
       {
          footContactStates.put(robotSide, yoPlaneContactStates.get(feet.get(robotSide)));
          previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(feet.get(robotSide).getContactPoints2d());
+
+         FrameConvexPolygon2d defaultFootPolygon = new FrameConvexPolygon2d(feet.get(robotSide).getContactPoints2d());
+         defaultFootPolygons.put(robotSide, defaultFootPolygon);
       }
 
       controlledJoints = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
@@ -890,5 +896,25 @@ public class MomentumBasedController
       wrenchToPack.setToZero(measurementFrames, measurementFrames);
       wrenchToPack.setLinearPart(tempWristForce);
       wrenchToPack.setAngularPart(tempWristTorque);
+   }
+
+   public void getDefaultFootPolygon(RobotSide robotSide, FrameConvexPolygon2d polygonToPack)
+   {
+      polygonToPack.set(defaultFootPolygons.get(robotSide));
+   }
+
+   private final FramePoint tempPosition = new FramePoint();
+   public void resetFootSupportPolygon(RobotSide robotSide)
+   {
+      YoPlaneContactState contactState = footContactStates.get(robotSide);
+      List<YoContactPoint> contactPoints = contactState.getContactPoints();
+      FrameConvexPolygon2d defaultSupportPolygon = defaultFootPolygons.get(robotSide);
+
+      for (int i = 0; i < defaultSupportPolygon.getNumberOfVertices(); i++)
+      {
+         defaultSupportPolygon.getFrameVertexXY(i, tempPosition);
+         contactPoints.get(i).setPosition(tempPosition);
+      }
+      contactState.notifyContactStateHasChanged();
    }
 }
