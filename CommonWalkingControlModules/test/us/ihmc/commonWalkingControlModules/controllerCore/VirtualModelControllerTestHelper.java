@@ -473,6 +473,11 @@ public class VirtualModelControllerTestHelper
       return new RobotArm();
    }
 
+   public ForkedRobotArm createForkedRobotArm()
+   {
+      return new ForkedRobotArm();
+   }
+
    public PlanarRobotArm createPlanarArm()
    {
       return new PlanarRobotArm();
@@ -994,6 +999,313 @@ public class VirtualModelControllerTestHelper
       }
    }
 
+   public class ForkedRobotArm implements FullRobotModel
+   {
+      private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
+
+      private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      private final ReferenceFrame elevatorFrame;
+
+      private final RigidBody elevator;
+      private final RigidBody hand1;
+      private final RigidBody hand2;
+      private final RigidBody shoulderDifferentialYaw;
+      private final SideDependentList<RigidBody> hands = new SideDependentList<>();
+
+      private ExternalForcePoint externalForcePoint1;
+      private ExternalForcePoint externalForcePoint2;
+
+      private final OneDoFJoint[] oneDoFJoints;
+
+      public ForkedRobotArm()
+      {
+         elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
+         elevator = new RigidBody("elevator", elevatorFrame);
+
+         shoulderDifferentialYaw = createDifferential("shoulderDifferential", elevator, new Vector3d(), Z);
+
+         RigidBody upperArm = createUpperArm(shoulderDifferentialYaw);
+
+         RigidBody elbowDifferentialYaw1 = createDifferential("elbowDifferentialYaw1", upperArm, new Vector3d(0.0, 0.0, THIGH_LENGTH), Z);
+         RigidBody elbowDifferentialYaw2 = createDifferential("elbowDifferentialYaw2", upperArm, new Vector3d(0.0, 0.0, THIGH_LENGTH), Z);
+
+         RigidBody lowerArm1 = createLowerArm("1", elbowDifferentialYaw1);
+         RigidBody lowerArm2 = createLowerArm("2", elbowDifferentialYaw2);
+
+         RigidBody wristDifferentialRoll1 = createDifferential("wristDifferential1", lowerArm1, new Vector3d(0.0, 0.0, SHIN_LENGTH), X);
+         RigidBody wristDifferentialRoll2 = createDifferential("wristDifferential2", lowerArm2, new Vector3d(0.0, 0.0, SHIN_LENGTH), X);
+
+         hand1 = createHand("1", wristDifferentialRoll1);
+         hand2 = createHand("2", wristDifferentialRoll2);
+         hands.put(RobotSide.LEFT, hand1);
+         hands.put(RobotSide.RIGHT, hand2);
+
+         scsRobotArm = new SCSRobotFromInverseDynamicsRobotModel("robotArm", elevator.getChildrenJoints().get(0));
+         scsRobotArm.setGravity(0);
+         scsRobotArm.updateJointPositions_ID_to_SCS();
+         scsRobotArm.update();
+
+         addLinkGraphics();
+         addForcePoint();
+
+         OneDoFJoint[] oneDoFJoints1 = ScrewTools.createOneDoFJointPath(elevator, hand1);
+         OneDoFJoint[] oneDoFJoints2 = ScrewTools.createOneDoFJointPath(upperArm, hand2);
+
+         oneDoFJoints = new OneDoFJoint[oneDoFJoints1.length + oneDoFJoints2.length];
+         for (int i = 0; i < oneDoFJoints1.length; i++)
+            oneDoFJoints[i] = oneDoFJoints1[i];
+         int start = oneDoFJoints1.length;
+         for (int i = 0; i < oneDoFJoints2.length; i++)
+            oneDoFJoints[start + i] = oneDoFJoints1[i];
+      }
+
+      private void addLinkGraphics()
+      {
+         AppearanceDefinition upperArmAppearance = YoAppearance.Red();
+         AppearanceDefinition lowerArmAppearance = YoAppearance.Red();
+         AppearanceDefinition handAppearance = YoAppearance.Red();
+
+         Link upperArmLink = scsRobotArm.getLink("upperArm");
+         Link lowerArmLink1 = scsRobotArm.getLink("lowerArm1");
+         Link lowerArmLink2 = scsRobotArm.getLink("lowerArm2");
+         Link handLink1 = scsRobotArm.getLink("hand1");
+         Link handLink2 = scsRobotArm.getLink("hand2");
+
+         Graphics3DObject upperArmGraphics = new Graphics3DObject();
+         Graphics3DObject lowerArmGraphics1 = new Graphics3DObject();
+         Graphics3DObject lowerArmGraphics2 = new Graphics3DObject();
+         Graphics3DObject handGraphics1 = new Graphics3DObject();
+         Graphics3DObject handGraphics2 = new Graphics3DObject();
+
+         upperArmGraphics.addCylinder(THIGH_LENGTH, THIGH_RAD, upperArmAppearance);
+         lowerArmGraphics1.addCylinder(SHIN_LENGTH, SHIN_RAD, lowerArmAppearance);
+         lowerArmGraphics2.addCylinder(SHIN_LENGTH, SHIN_RAD, lowerArmAppearance);
+         handGraphics1.addCylinder(SHIN_LENGTH / 2.0, FOOT_RAD, handAppearance);
+         handGraphics2.addCylinder(SHIN_LENGTH / 2.0, FOOT_RAD, handAppearance);
+
+         upperArmLink.setLinkGraphics(upperArmGraphics);
+         lowerArmLink1.setLinkGraphics(lowerArmGraphics1);
+         lowerArmLink2.setLinkGraphics(lowerArmGraphics2);
+         handLink1.setLinkGraphics(handGraphics1);
+         handLink2.setLinkGraphics(handGraphics2);
+      }
+
+      private void addForcePoint()
+      {
+         externalForcePoint1 = new ExternalForcePoint("hand1ForcePoint", scsRobotArm.getLink("hand1").getComOffset(), scsRobotArm);
+         externalForcePoint2 = new ExternalForcePoint("hand2ForcePoint", scsRobotArm.getLink("hand2").getComOffset(), scsRobotArm);
+
+         scsRobotArm.getLink("hand1").getParentJoint().addExternalForcePoint(externalForcePoint1);
+         scsRobotArm.getLink("hand2").getParentJoint().addExternalForcePoint(externalForcePoint2);
+      }
+
+      public SideDependentList<ExternalForcePoint> getExternalForcePoints()
+      {
+         SideDependentList<ExternalForcePoint> externalForcePoints = new SideDependentList<>(externalForcePoint1, externalForcePoint2);
+
+         return externalForcePoints;
+      }
+
+      public SCSRobotFromInverseDynamicsRobotModel getSCSRobotArm()
+      {
+         return scsRobotArm;
+      }
+
+      public RobotSpecificJointNames getRobotSpecificJointNames()
+      {
+         return null;
+      }
+
+      public void updateFrames()
+      {
+         worldFrame.update();
+         elevator.updateFramesRecursively();
+      }
+
+      public ReferenceFrame getWorldFrame()
+      {
+         return worldFrame;
+      }
+
+      public ReferenceFrame getElevatorFrame()
+      {
+         return elevatorFrame;
+      }
+
+      public ReferenceFrame getHandFrame(RobotSide robotSide)
+      {
+         return hands.get(robotSide).getBodyFixedFrame();
+      }
+
+      public InverseDynamicsJoint getBaseJoint()
+      {
+         return shoulderDifferentialYaw.getParentJoint();
+      }
+
+      public SixDoFJoint getRootJoint()
+      {
+         return null;
+      }
+
+      public RigidBody getElevator()
+      {
+         return elevator;
+      }
+
+      public RigidBody getHand(RobotSide robotSide)
+      {
+         return hands.get(robotSide);
+      }
+
+      public SideDependentList<RigidBody> getHands()
+      {
+         return hands;
+      }
+      public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
+      {
+         return null;
+      }
+
+      public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
+      {
+         return null;
+      }
+
+      public InverseDynamicsJoint getLidarJoint(String lidarName)
+      {
+         return null;
+      }
+
+      public RigidBody getPelvis()
+      {
+         return null;
+      }
+
+      public RigidBody getChest()
+      {
+         return null;
+      }
+
+      public RigidBody getHead()
+      {
+         return null;
+      }
+
+      public OneDoFJoint[] getOneDoFJoints()
+      {
+         return oneDoFJoints;
+      }
+
+      public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+         List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
+
+         for (int i = 0; i < list.size(); i++)
+            oneDoFJointsToPack.set(i, list.get(i));
+      }
+
+      public IMUDefinition[] getIMUDefinitions()
+      {
+         return null;
+      }
+
+      public ForceSensorDefinition[] getForceSensorDefinitions()
+      {
+         return null;
+      }
+
+      public ContactSensorDefinition[] getContactSensorDefinitions()
+      {
+         return null;
+      }
+
+      private RigidBody createDifferential(String name, RigidBody parentBody, Vector3d jointOffset, Vector3d jointAxis)
+      {
+         String jointName;
+         if (jointAxis == X)
+            jointName = name + "_x";
+         else if (jointAxis == Y)
+            jointName = name + "_y";
+         else
+            jointName = name + "_z";
+         RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
+         joint.setQ(random.nextDouble());
+
+         Vector3d comOffset = new Vector3d();
+         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, name + "Frame");
+         nextFrame.update();
+
+         Matrix3d momentOfInertia = new Matrix3d();
+         momentOfInertia.setElement(0, 0, 0.005);
+         momentOfInertia.setElement(1, 1, 0.005);
+         momentOfInertia.setElement(2, 2, 0.005);
+
+         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, 0.1);
+         RigidBody rigidBody = new RigidBody(name, inertia, joint);
+
+         return rigidBody;
+      }
+
+      private RigidBody createUpperArm(RigidBody parentBody)
+      {
+         RevoluteJoint joint = ScrewTools.addRevoluteJoint("shoulderPitch_y", parentBody, new Vector3d(0.0, 0.0, 0.0), Y);
+         joint.setQ(random.nextDouble());
+
+         Vector3d comOffset = new Vector3d(0.0, 0.0, THIGH_LENGTH / 2.0);
+         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "upperArmFrame");
+         nextFrame.update();
+
+         Matrix3d momentOfInertia = new Matrix3d();
+         momentOfInertia.setElement(0, 0, 0.0437);
+         momentOfInertia.setElement(1, 1, 0.0437);
+         momentOfInertia.setElement(2, 2, 0.0054);
+
+         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, THIGH_MASS);
+         RigidBody rigidBody = new RigidBody("upperArm", inertia, joint);
+
+         return rigidBody;
+      }
+
+      private RigidBody createLowerArm(String suffix, RigidBody parentBody)
+      {
+         RevoluteJoint joint = ScrewTools.addRevoluteJoint("elbow_y_" + suffix, parentBody, new Vector3d(0.0, 0.0, 0.0), Y);
+         joint.setQ(random.nextDouble());
+
+         Vector3d comOffset = new Vector3d(0.0, 0.0, SHIN_LENGTH / 2.0);
+         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "lowerArmFrame" + suffix);
+         nextFrame.update();
+
+         Matrix3d momentOfInertia = new Matrix3d();
+         momentOfInertia.setElement(0, 0, 0.0437);
+         momentOfInertia.setElement(1, 1, 0.0437);
+         momentOfInertia.setElement(2, 2, 0.0054);
+
+         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, SHIN_MASS);
+         RigidBody rigidBody = new RigidBody("lowerArm" + suffix, inertia, joint);
+
+         return rigidBody;
+      }
+
+      private RigidBody createHand(String suffix, RigidBody parentBody)
+      {
+         RevoluteJoint joint = ScrewTools.addRevoluteJoint("wristPitch_y_" + suffix, parentBody, new Vector3d(0.0, 0.0, 0.0), Y);
+         joint.setQ(random.nextDouble());
+
+         Vector3d comOffset = new Vector3d(0.0, 0.0, SHIN_LENGTH / 4.0);
+         ReferenceFrame nextFrame = createOffsetFrame(joint, comOffset, "handFrame" + suffix);
+         nextFrame.update();
+
+         Matrix3d momentOfInertia = new Matrix3d();
+         momentOfInertia.setElement(0, 0, 0.0437);
+         momentOfInertia.setElement(1, 1, 0.0437);
+         momentOfInertia.setElement(2, 2, 0.0054);
+
+         RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, FOOT_MASS);
+         RigidBody rigidBody = new RigidBody("hand" + suffix, inertia, joint);
+
+         return rigidBody;
+      }
+   }
 
    public class RobotLegs extends Robot implements FullRobotModel
    {

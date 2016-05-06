@@ -24,6 +24,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -46,6 +47,8 @@ import us.ihmc.tools.thread.ThreadTools;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -58,6 +61,7 @@ public class VirtualModelControllerTest
 
    private boolean hasSCSSimulation = false;
 
+   /*
    @DeployableTestMethod
    @Test(timeout = 1500)
    public void testJacobianCalculation()
@@ -622,8 +626,10 @@ public class VirtualModelControllerTest
       VirtualModelControllerTestHelper.RobotArm robotArm = testHelper.createRobotArm();
       SCSRobotFromInverseDynamicsRobotModel scsRobotArm = robotArm.getSCSRobotArm();
 
+      List<RigidBody> endEffectors = new ArrayList<>();
       RigidBody hand = robotArm.getHand();
       ReferenceFrame handFrame = robotArm.getHandFrame();
+      endEffectors.add(hand);
 
       FramePose desiredHandPose = new FramePose(handFrame);
       desiredHandPose.setToZero();
@@ -649,8 +655,10 @@ public class VirtualModelControllerTest
       desiredWrench.set(forceFrameVector, torqueFrameVector);
       desiredWrench.changeFrame(worldFrame);
 
+      List<YoWrench> desiredWrenches = new ArrayList<>();
       YoWrench yoDesiredWrench = new YoWrench("desiredWrench", handFrame, ReferenceFrame.getWorldFrame(), registry);
       yoDesiredWrench.set(desiredWrench);
+      desiredWrenches.add(yoDesiredWrench);
 
       Vector3d contactForce = new Vector3d();
       Vector3d contactTorque = new Vector3d();
@@ -659,12 +667,14 @@ public class VirtualModelControllerTest
       contactForce.scale(-1.0);
       contactTorque.scale(-1.0);
 
+      List<ForcePointController> forcePointControllers = new ArrayList<>();
       ForcePointController forcePointController = new ForcePointController(robotArm.getExternalForcePoint(), handFrame, desiredHandPose);
       forcePointController.setInitialForce(contactForce, contactTorque);
       forcePointController.setAngularGains(0.0, 0.0, 5.0);
+      forcePointControllers.add(forcePointController);
 
-      DummyArmController armController = new DummyArmController(scsRobotArm, robotArm, robotArm.getOneDoFJoints(), forcePointController, virtualModelController,
-            geometricJacobianHolder, hand, yoDesiredWrench);
+      DummyArmController armController = new DummyArmController(scsRobotArm, robotArm, robotArm.getOneDoFJoints(), forcePointControllers, virtualModelController,
+            geometricJacobianHolder, endEffectors, desiredWrenches);
 
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
       SimulationConstructionSet scs = new SimulationConstructionSet(scsRobotArm, scsParameters);
@@ -680,18 +690,18 @@ public class VirtualModelControllerTest
       Quat4d currentOrientation = new Quat4d();
       Vector3d currentForce = new Vector3d();
       Vector3d currentTorque = new Vector3d();
-      Vector3d desiredPosition = armController.getDesiredPosition();
-      Quat4d desiredOrientation = armController.getDesiredOrientation();
+      Vector3d desiredPosition = armController.getDesiredPosition(0);
+      Quat4d desiredOrientation = armController.getDesiredOrientation(0);
 
       // check that the end effector doesn't move, and that the desired force is very close to what we want
       double timeIncrement = 1.0;
       while (scs.getTime() < simulationDuration)
       {
          blockingSimulationRunner.simulateAndBlock(timeIncrement);
-         currentPosition.set(armController.getCurrentPosition());
-         currentOrientation.set(armController.getCurrentOrientation());
-         currentForce.set(armController.getCurrentForce());
-         currentTorque.set(armController.getCurrentTorque());
+         currentPosition.set(armController.getCurrentPosition(0));
+         currentOrientation.set(armController.getCurrentOrientation(0));
+         currentForce.set(armController.getCurrentForce(0));
+         currentTorque.set(armController.getCurrentTorque(0));
 
          JUnitTools.assertVector3dEquals("", currentPosition, desiredPosition, 0.05);
          JUnitTools.assertQuaternionsEqual(currentOrientation, desiredOrientation, 0.05);
@@ -719,8 +729,10 @@ public class VirtualModelControllerTest
       VirtualModelControllerTestHelper.PlanarRobotArm robotArm = testHelper.createPlanarArm();
       SCSRobotFromInverseDynamicsRobotModel scsRobotArm = robotArm.getSCSRobotArm();
 
+      List<RigidBody> endEffectors = new ArrayList<>();
       RigidBody hand = robotArm.getHand();
       ReferenceFrame handFrame = robotArm.getHandFrame();
+      endEffectors.add(hand);
 
       FramePose desiredHandPose = new FramePose(handFrame);
       desiredHandPose.setToZero();
@@ -743,8 +755,10 @@ public class VirtualModelControllerTest
       desiredWrench.set(forceFrameVector, torqueFrameVector);
       desiredWrench.changeFrame(worldFrame);
 
+      List<YoWrench> desiredWrenches = new ArrayList<>();
       YoWrench yoDesiredWrench = new YoWrench("desiredWrench", handFrame, ReferenceFrame.getWorldFrame(), registry);
       yoDesiredWrench.set(desiredWrench);
+      desiredWrenches.add(yoDesiredWrench);
 
       Vector3d contactForce = new Vector3d();
       Vector3d contactTorque = new Vector3d();
@@ -753,11 +767,13 @@ public class VirtualModelControllerTest
       contactForce.scale(-1.0);
       contactTorque.scale(-1.0);
 
+      List<ForcePointController> forcePointControllers = new ArrayList<>();
       ForcePointController forcePointController = new ForcePointController(robotArm.getExternalForcePoint(), handFrame, desiredHandPose);
       forcePointController.setInitialForce(contactForce, contactTorque);
+      forcePointControllers.add(forcePointController);
 
-      DummyArmController armController = new DummyArmController(scsRobotArm, robotArm, robotArm.getOneDoFJoints(), forcePointController, virtualModelController,
-            geometricJacobianHolder, hand, yoDesiredWrench);
+      DummyArmController armController = new DummyArmController(scsRobotArm, robotArm, robotArm.getOneDoFJoints(), forcePointControllers, virtualModelController,
+            geometricJacobianHolder, endEffectors, desiredWrenches);
 
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
       //scsParameters.setDataBufferSize((int)1e5);
@@ -774,18 +790,18 @@ public class VirtualModelControllerTest
       Quat4d currentOrientation = new Quat4d();
       Vector3d currentForce = new Vector3d();
       Vector3d currentTorque = new Vector3d();
-      Vector3d desiredPosition = armController.getDesiredPosition();
-      Quat4d desiredOrientation = armController.getDesiredOrientation();
+      Vector3d desiredPosition = armController.getDesiredPosition(0);
+      Quat4d desiredOrientation = armController.getDesiredOrientation(0);
 
       // check that the end effector doesn't move, and that the desired force is very close to what we want
       double timeIncrement = 1.0;
       while (scs.getTime() < simulationDuration)
       {
          blockingSimulationRunner.simulateAndBlock(timeIncrement);
-         currentPosition.set(armController.getCurrentPosition());
-         currentOrientation.set(armController.getCurrentOrientation());
-         currentForce.set(armController.getCurrentForce());
-         currentTorque.set(armController.getCurrentTorque());
+         currentPosition.set(armController.getCurrentPosition(0));
+         currentOrientation.set(armController.getCurrentOrientation(0));
+         currentForce.set(armController.getCurrentForce(0));
+         currentTorque.set(armController.getCurrentTorque(0));
 
          JUnitTools.assertVector3dEquals("", currentPosition, desiredPosition, 0.01);
          JUnitTools.assertQuaternionsEqual(currentOrientation, desiredOrientation, 0.01);
@@ -794,6 +810,141 @@ public class VirtualModelControllerTest
       }
 
       simulationTestingParameters.setKeepSCSUp(false);
+   }
+   */
+
+   public static void testVMCWithForkedArm() throws Exception
+   {
+      double simulationDuration = 20.0;
+
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      Random random = new Random();
+      //simulationTestingParameters.setKeepSCSUp(true);
+      //hasSCSSimulation = true;
+
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
+      VirtualModelControllerTestHelper.ForkedRobotArm robotArm = testHelper.createForkedRobotArm();
+      SCSRobotFromInverseDynamicsRobotModel scsRobotArm = robotArm.getSCSRobotArm();
+
+      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
+      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, robotArm.getElevator(), registry, yoGraphicsListRegistry);
+
+      SideDependentList<RigidBody> hands = robotArm.getHands();
+      SideDependentList<ReferenceFrame> handFrames = new SideDependentList<>();
+      SideDependentList<FramePose> desiredHandPoses = new SideDependentList<>();
+
+      List<Vector3d> desiredForces = new ArrayList<>();
+      List<Vector3d> desiredTorques = new ArrayList<>();
+      ArrayList<YoWrench> desiredHandWrenches = new ArrayList<>();
+      ArrayList<ForcePointController> forcePointControllers = new ArrayList<>();
+      ArrayList<RigidBody> endEffectors = new ArrayList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody hand = hands.get(robotSide);
+         ReferenceFrame handFrame = hand.getBodyFixedFrame();
+         endEffectors.add(hand);
+
+         FramePose desiredHandPose = new FramePose(handFrame);
+         desiredHandPose.setToZero();
+         desiredHandPose.changeFrame(worldFrame);
+
+         handFrames.put(robotSide, handFrame);
+         desiredHandPoses.put(robotSide, desiredHandPose);
+
+         virtualModelController.registerEndEffector(robotArm.getElevator(), hand);
+
+         double forceX = random.nextDouble() * 10.0;
+         double forceZ = random.nextDouble() * 10.0;
+         double torqueY = random.nextDouble() * 10.0;
+         Wrench desiredWrench = new Wrench(handFrame, handFrame);
+         Vector3d desiredForce = new Vector3d(forceX, 0.0, forceZ);
+         Vector3d desiredTorque = new Vector3d(0.0, torqueY, 0.0);
+         FrameVector forceFrameVector = new FrameVector(worldFrame, desiredForce);
+         FrameVector torqueFrameVector = new FrameVector(worldFrame, desiredTorque);
+         forceFrameVector.changeFrame(handFrame);
+         torqueFrameVector.changeFrame(handFrame);
+         desiredWrench.set(forceFrameVector, torqueFrameVector);
+         desiredWrench.changeFrame(worldFrame);
+
+         desiredForces.add(desiredForce);
+         desiredTorques.add(desiredTorque);
+
+         YoWrench yoDesiredWrench = new YoWrench("desiredWrench" + robotSide.getShortLowerCaseName(), handFrame, ReferenceFrame.getWorldFrame(), registry);
+         yoDesiredWrench.set(desiredWrench);
+
+         desiredHandWrenches.add(yoDesiredWrench);
+
+         Vector3d contactForce = new Vector3d();
+         Vector3d contactTorque = new Vector3d();
+         contactForce.set(desiredForce);
+         contactTorque.set(desiredTorque);
+         contactForce.scale(-1.0);
+         contactTorque.scale(-1.0);
+
+         String suffix;
+         if (robotSide == RobotSide.LEFT)
+            suffix = "1";
+         else
+            suffix = "2";
+
+         ForcePointController forcePointController = new ForcePointController(suffix, robotArm.getExternalForcePoints().get(robotSide), handFrame, desiredHandPose);
+         forcePointController.setInitialForce(contactForce, contactTorque);
+         forcePointControllers.add(forcePointController);
+      }
+
+      DummyArmController armController = new DummyArmController(scsRobotArm, robotArm, robotArm.getOneDoFJoints(), forcePointControllers, virtualModelController,
+            geometricJacobianHolder, endEffectors, desiredHandWrenches);
+
+      SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
+      //scsParameters.setDataBufferSize((int)1e5);
+      SimulationConstructionSet scs = new SimulationConstructionSet(scsRobotArm, scsParameters);
+      scsRobotArm.setController(armController);
+      scs.getRootRegistry().addChild(registry);
+      for (ForcePointController forcePointController : forcePointControllers)
+         yoGraphicsListRegistry.registerYoGraphicsList(forcePointController.getYoGraphicsList());
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+
+      BlockingSimulationRunner blockingSimulationRunner = new BlockingSimulationRunner(scs, 1500.0);
+      scs.startOnAThread();
+
+      Vector3d currentPosition = new Vector3d();
+      Quat4d currentOrientation = new Quat4d();
+      Vector3d currentForce = new Vector3d();
+      Vector3d currentTorque = new Vector3d();
+
+      List<Vector3d> desiredPositions = new ArrayList<>();
+      List<Quat4d> desiredOrientations = new ArrayList<>();
+
+      for (int i = 0; i < endEffectors.size(); i++)
+      {
+         desiredPositions.add(armController.getDesiredPosition(i));
+         desiredOrientations.add(armController.getDesiredOrientation(i));
+      }
+
+      // check that the end effector doesn't move, and that the desired force is very close to what we want
+      double timeIncrement = 1.0;
+      while (scs.getTime() < simulationDuration)
+      {
+         blockingSimulationRunner.simulateAndBlock(timeIncrement);
+         for (int i = 0; i < endEffectors.size(); i++)
+         {
+            currentPosition.set(armController.getCurrentPosition(i));
+            currentOrientation.set(armController.getCurrentOrientation(i));
+            currentForce.set(armController.getCurrentForce(i));
+            currentTorque.set(armController.getCurrentTorque(i));
+
+            JUnitTools.assertVector3dEquals("", currentPosition, desiredPositions.get(i), 0.01);
+            JUnitTools.assertQuaternionsEqual(currentOrientation, desiredOrientations.get(i), 0.01);
+            JUnitTools.assertVector3dEquals("", desiredForces.get(i), currentForce, 0.5);
+            JUnitTools.assertVector3dEquals("", desiredTorques.get(i), currentTorque, 0.5);
+         }
+      }
+
+      //simulationTestingParameters.setKeepSCSUp(false);
    }
 
    @After
@@ -818,7 +969,7 @@ public class VirtualModelControllerTest
       private static final double linearMaxIntegral = 50.0;
       private static final double angularMaxIntegral = 50.0;
 
-      private final YoVariableRegistry registry = new YoVariableRegistry("forcePointController");
+      private final YoVariableRegistry registry;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -834,19 +985,19 @@ public class VirtualModelControllerTest
 
       private final ExternalForcePoint forcePoint;
 
-      private final DoubleYoVariable desiredLinearX = new DoubleYoVariable("desiredLinearX", registry);
-      private final DoubleYoVariable desiredLinearY = new DoubleYoVariable("desiredLinearY", registry);
-      private final DoubleYoVariable desiredLinearZ = new DoubleYoVariable("desiredLinearZ", registry);
-      private final DoubleYoVariable currentLinearX = new DoubleYoVariable("currentLinearX", registry);
-      private final DoubleYoVariable currentLinearY = new DoubleYoVariable("currentLinearY", registry);
-      private final DoubleYoVariable currentLinearZ = new DoubleYoVariable("currentLinearZ", registry);
+      private final DoubleYoVariable desiredLinearX;
+      private final DoubleYoVariable desiredLinearY;
+      private final DoubleYoVariable desiredLinearZ;
+      private final DoubleYoVariable currentLinearX;
+      private final DoubleYoVariable currentLinearY;
+      private final DoubleYoVariable currentLinearZ;
 
-      private final DoubleYoVariable desiredAngularX = new DoubleYoVariable("desiredAngularX", registry);
-      private final DoubleYoVariable desiredAngularY = new DoubleYoVariable("desiredAngularY", registry);
-      private final DoubleYoVariable desiredAngularZ = new DoubleYoVariable("desiredAngularZ", registry);
-      private final DoubleYoVariable currentAngularX = new DoubleYoVariable("currentAngularX", registry);
-      private final DoubleYoVariable currentAngularY = new DoubleYoVariable("currentAngularY", registry);
-      private final DoubleYoVariable currentAngularZ = new DoubleYoVariable("currentAngularZ", registry);
+      private final DoubleYoVariable desiredAngularX;
+      private final DoubleYoVariable desiredAngularY;
+      private final DoubleYoVariable desiredAngularZ;
+      private final DoubleYoVariable currentAngularX;
+      private final DoubleYoVariable currentAngularY;
+      private final DoubleYoVariable currentAngularZ;
 
       private final ReferenceFrame handFrame;
       private final FramePose currentPose = new FramePose();
@@ -857,15 +1008,20 @@ public class VirtualModelControllerTest
       private final Vector3d initialForce = new Vector3d();
       private final Vector3d initialTorque = new Vector3d();
 
-      private final YoFrameVector contactForce = new YoFrameVector("contactForce", worldFrame, registry);
-      private final YoFrameVector contactTorque = new YoFrameVector("contactTorque", worldFrame, registry);
+      private final YoFrameVector contactForce;
+      private final YoFrameVector contactTorque;
 
       private final YoGraphicVector forceVisualizer;
-      private final YoGraphicsList yoGraphicsList = new YoGraphicsList("forceGraphicsList");
+      private final YoGraphicsList yoGraphicsList;
 
       private boolean hasInitialForce = false;
 
       public ForcePointController(ExternalForcePoint forcePoint, ReferenceFrame handFrame, FramePose desiredPose)
+      {
+         this("", forcePoint, handFrame, desiredPose);
+      }
+
+      public ForcePointController(String suffix, ExternalForcePoint forcePoint, ReferenceFrame handFrame, FramePose desiredPose)
       {
          this.forcePoint = forcePoint;
          this.handFrame = handFrame;
@@ -873,31 +1029,52 @@ public class VirtualModelControllerTest
          desiredPose.getPosition(desiredPosition);
          desiredPose.getOrientation(desiredOrientation);
 
-         linearPidGains = new YoPIDGains(forcePoint.getName() + "_linear_", registry);
+         registry = new YoVariableRegistry("forcePointController" + suffix);
+
+         desiredLinearX = new DoubleYoVariable("desiredLinearX" + suffix, registry);
+         desiredLinearY = new DoubleYoVariable("desiredLinearY" + suffix, registry);
+         desiredLinearZ = new DoubleYoVariable("desiredLinearZ" + suffix, registry);
+         currentLinearX = new DoubleYoVariable("currentLinearX" + suffix, registry);
+         currentLinearY = new DoubleYoVariable("currentLinearY" + suffix, registry);
+         currentLinearZ = new DoubleYoVariable("currentLinearZ" + suffix, registry);
+
+         desiredAngularX = new DoubleYoVariable("desiredAngularX" + suffix, registry);
+         desiredAngularY = new DoubleYoVariable("desiredAngularY" + suffix, registry);
+         desiredAngularZ = new DoubleYoVariable("desiredAngularZ" + suffix, registry);
+         currentAngularX = new DoubleYoVariable("currentAngularX" + suffix, registry);
+         currentAngularY = new DoubleYoVariable("currentAngularY" + suffix, registry);
+         currentAngularZ = new DoubleYoVariable("currentAngularZ" + suffix, registry);
+
+         contactForce = new YoFrameVector("contactForce" + suffix, worldFrame, registry);
+         contactTorque = new YoFrameVector("contactTorque" + suffix, worldFrame, registry);
+
+         yoGraphicsList = new YoGraphicsList("forceGraphicsList" + suffix);
+
+         linearPidGains = new YoPIDGains(forcePoint.getName() + "_linear" + suffix, registry);
          linearPidGains.setKp(linearKp);
          linearPidGains.setKi(linearKi);
          linearPidGains.setKd(linearKd);
          linearPidGains.setMaximumIntegralError(linearMaxIntegral);
          linearPidGains.setPositionDeadband(linearDeadband);
 
-         angularPidGains = new YoPIDGains(forcePoint.getName() + "_angular_", registry);
+         angularPidGains = new YoPIDGains(forcePoint.getName() + "_angular" + suffix, registry);
          angularPidGains.setKp(angularKp);
          angularPidGains.setKi(angularKi);
          angularPidGains.setKd(angularKd);
          angularPidGains.setMaximumIntegralError(angularMaxIntegral);
          angularPidGains.setPositionDeadband(angularDeadband);
 
-         pidControllerAngularX = new PIDController(angularPidGains, "angular_X", registry);
-         pidControllerAngularY = new PIDController(angularPidGains, "angular_Y", registry);
-         pidControllerAngularZ = new PIDController(angularPidGains, "angular_Z", registry);
+         pidControllerAngularX = new PIDController(angularPidGains, "angular_X" + suffix, registry);
+         pidControllerAngularY = new PIDController(angularPidGains, "angular_Y" + suffix, registry);
+         pidControllerAngularZ = new PIDController(angularPidGains, "angular_Z" + suffix, registry);
 
-         pidControllerLinearX = new PIDController(linearPidGains, "linear_X", registry);
-         pidControllerLinearY = new PIDController(linearPidGains, "linear_Y", registry);
-         pidControllerLinearZ = new PIDController(linearPidGains, "linear_Z", registry);
+         pidControllerLinearX = new PIDController(linearPidGains, "linear_X" + suffix, registry);
+         pidControllerLinearY = new PIDController(linearPidGains, "linear_Y" + suffix, registry);
+         pidControllerLinearZ = new PIDController(linearPidGains, "linear_Z" + suffix, registry);
 
          AppearanceDefinition forceAppearance = YoAppearance.Red();
          forcePoint.getYoPosition().getFramePointCopy();
-         forceVisualizer = new YoGraphicVector("contactForceVisualizer", forcePoint.getYoPosition(), contactForce, 0.05, forceAppearance);
+         forceVisualizer = new YoGraphicVector("contactForceVisualizer" + suffix, forcePoint.getYoPosition(), contactForce, 0.05, forceAppearance);
 
          yoGraphicsList.add(forceVisualizer);
       }
@@ -1061,36 +1238,38 @@ public class VirtualModelControllerTest
       private final FullRobotModel controllerModel;
       private final OneDoFJoint[] controlledJoints;
 
-      private final ForcePointController forcePointController;
       private final VirtualModelController virtualModelController;
       private final GeometricJacobianHolder geometricJacobianHolder;
-      private final YoWrench yoDesiredWrench;
 
       private Wrench desiredWrench = new Wrench();
 
-      private final RigidBody hand;
+      private List<ForcePointController> forcePointControllers = new ArrayList<>();
+      private List<YoWrench> yoDesiredWrenches = new ArrayList<>();
+      private List<RigidBody> endEffectors = new ArrayList<>();
 
       private boolean firstTick = true;
 
       public DummyArmController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJoint[] controlledJoints,
-            ForcePointController forcePointController, VirtualModelController virtualModelController, GeometricJacobianHolder geometricJacobianHolder,
-            RigidBody hand, YoWrench yoDesiredWrench)
+            List<ForcePointController> forcePointControllers, VirtualModelController virtualModelController, GeometricJacobianHolder geometricJacobianHolder,
+            List<RigidBody> endEffectors, List<YoWrench> yoDesiredWrenches)
       {
          this.scsRobot = scsRobot;
          this.controllerModel = controllerModel;
          this.controlledJoints = controlledJoints;
-         this.forcePointController = forcePointController;
+         this.forcePointControllers = forcePointControllers;
          this.virtualModelController = virtualModelController;
          this.geometricJacobianHolder = geometricJacobianHolder;
-         this.hand = hand;
-         this.yoDesiredWrench = yoDesiredWrench;
+         this.endEffectors = endEffectors;
+         this.yoDesiredWrenches = yoDesiredWrenches;
 
-         registry.addChild(forcePointController.getYoVariableRegistry());
+         for (ForcePointController forcePointController : forcePointControllers)
+            registry.addChild(forcePointController.getYoVariableRegistry());
       }
 
       public void initialize()
       {
-         forcePointController.initialize();
+         for (ForcePointController forcePointController : forcePointControllers)
+            forcePointController.initialize();
       }
 
       public void doControl()
@@ -1101,13 +1280,18 @@ public class VirtualModelControllerTest
          scsRobot.update();
          controllerModel.updateFrames();
 
-         forcePointController.doControl();
+         for (ForcePointController forcePointController : forcePointControllers)
+            forcePointController.doControl();
          geometricJacobianHolder.compute();
 
          // compute forces
          VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
-         desiredWrench = yoDesiredWrench.getWrench();
-         virtualModelController.submitEndEffectorVirtualWrench(hand, desiredWrench);
+
+         for (int i = 0; i < endEffectors.size(); i++)
+         {
+            desiredWrench.set(yoDesiredWrenches.get(i).getWrench());
+            virtualModelController.submitEndEffectorVirtualWrench(endEffectors.get(i), desiredWrench);
+         }
          virtualModelController.compute(virtualModelControlSolution);
 
          Map<InverseDynamicsJoint, Double> jointTorques = virtualModelControlSolution.getJointTorques();
@@ -1129,34 +1313,34 @@ public class VirtualModelControllerTest
          scsRobot.updateJointTorques_ID_to_SCS();
       }
 
-      public Vector3d getDesiredPosition()
+      public Vector3d getDesiredPosition(int index)
       {
-         return forcePointController.getDesiredPosition();
+         return forcePointControllers.get(index).getDesiredPosition();
       }
 
-      public Quat4d getDesiredOrientation()
+      public Quat4d getDesiredOrientation(int index)
       {
-         return forcePointController.getDesiredOrientation();
+         return forcePointControllers.get(index).getDesiredOrientation();
       }
 
-      public Vector3d getCurrentPosition()
+      public Vector3d getCurrentPosition(int index)
       {
-         return forcePointController.getCurrentPosition();
+         return forcePointControllers.get(index).getCurrentPosition();
       }
 
-      public Quat4d getCurrentOrientation()
+      public Quat4d getCurrentOrientation(int index)
       {
-         return forcePointController.getCurrentOrientation();
+         return forcePointControllers.get(index).getCurrentOrientation();
       }
 
-      public Vector3d getCurrentForce()
+      public Vector3d getCurrentForce(int index)
       {
-         return forcePointController.getCurrentForce();
+         return forcePointControllers.get(index).getCurrentForce();
       }
 
-      public Vector3d getCurrentTorque()
+      public Vector3d getCurrentTorque(int index)
       {
-         return forcePointController.getCurrentTorque();
+         return forcePointControllers.get(index).getCurrentTorque();
       }
 
       public String getName()
@@ -1221,10 +1405,8 @@ public class VirtualModelControllerTest
          VirtualModelControllerTestHelper.compareWrenches(desiredWrench, appliedWrench, selectionMatrix);
    }
 
-   /*
    public static void main(String[] args) throws Exception
    {
-      testVMCWithPlanarArm();
+      testVMCWithForkedArm();
    }
-   */
 }
