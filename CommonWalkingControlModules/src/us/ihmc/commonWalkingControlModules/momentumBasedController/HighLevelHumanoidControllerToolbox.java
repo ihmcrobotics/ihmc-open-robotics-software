@@ -64,7 +64,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class HighLevelHumanoidControllerToolbox
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -76,7 +76,7 @@ public class HighLevelHumanoidControllerToolbox
    private final CommonHumanoidReferenceFramesVisualizer referenceFramesVisualizer;
    private final TwistCalculator twistCalculator;
 
-   private final SideDependentList<ContactableFoot> feet;
+   protected final SideDependentList<ContactableFoot> feet;
    private final SideDependentList<ContactablePlaneBody> hands;
 
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
@@ -84,7 +84,7 @@ public class HighLevelHumanoidControllerToolbox
 
    private final List<ContactablePlaneBody> contactablePlaneBodyList;
    private final List<YoPlaneContactState> yoPlaneContactStateList = new ArrayList<YoPlaneContactState>();
-   private final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> footDesiredCenterOfPressures = new LinkedHashMap<>();
+   protected final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> footDesiredCenterOfPressures = new LinkedHashMap<>();
    private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> yoPlaneContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
@@ -135,7 +135,7 @@ public class HighLevelHumanoidControllerToolbox
 
    private final SideDependentList<FrameTuple2dArrayList<FramePoint2d>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(), createFramePoint2dArrayList());
 
-   private final YoFramePoint yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
+   protected final YoFramePoint yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
@@ -168,7 +168,14 @@ public class HighLevelHumanoidControllerToolbox
       this.omega0.set(omega0);
 
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
-      referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry);
+      if (yoGraphicsListRegistry != null)
+      {
+         referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry);
+      }
+      else
+      {
+         referenceFramesVisualizer = null;
+      }
 
       // Initialize the contactable bodies
       this.feet = feet;
@@ -226,9 +233,12 @@ public class HighLevelHumanoidControllerToolbox
 
       controlledJoints = computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
 
-      ContactPointVisualizer contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList),
-            yoGraphicsListRegistry, registry);
-      addUpdatable(contactPointVisualizer);
+      if (yoGraphicsListRegistry != null)
+      {
+         ContactPointVisualizer contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList),
+               yoGraphicsListRegistry, registry);
+         addUpdatable(contactPointVisualizer);
+      }
 
       desiredTorquesForCoPControl = new SideDependentList<AlphaFilteredYoFrameVector2d>();
       yoCoPError = new SideDependentList<YoFrameVector2d>();
@@ -379,7 +389,8 @@ public class HighLevelHumanoidControllerToolbox
       referenceFrames.updateFrames();
       twistCalculator.compute();
       centerOfMassJacobian.compute();
-      referenceFramesVisualizer.update();
+      if (referenceFramesVisualizer != null)
+         referenceFramesVisualizer.update();
 
       computeCapturePoint();
       updateBipedSupportPolygons();
@@ -718,11 +729,6 @@ public class HighLevelHumanoidControllerToolbox
    {
       return centerOfMassJacobian;
    }
-
-//   public void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
-//   {
-//      centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocityToPack);
-//   }
 
    public SideDependentList<ContactableFoot> getContactableFeet()
    {
