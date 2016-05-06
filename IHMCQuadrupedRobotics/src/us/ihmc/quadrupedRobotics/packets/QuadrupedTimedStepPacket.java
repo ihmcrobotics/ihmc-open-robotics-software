@@ -65,7 +65,7 @@ public class QuadrupedTimedStepPacket extends Packet<QuadrupedTimedStepPacket>
 
       for (int i = 0; i < this.steps.size(); i++)
       {
-         if (!this.steps.get(i).epsilonEquals(other.steps.get(i), epsilon));
+         if (!this.steps.get(i).epsilonEquals(other.steps.get(i), epsilon))
             return false;
       }
       return true;

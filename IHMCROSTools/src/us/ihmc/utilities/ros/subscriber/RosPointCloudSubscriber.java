@@ -162,6 +162,10 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
          float x = byteBuffer.getFloat();
          float y = byteBuffer.getFloat();
          float z = byteBuffer.getFloat();
+
+         if(x == Float.NaN || y == Float.NaN || z == Float.NaN)
+            continue;
+
          packet.points[i] = new Point3d(x, y, z);
 
          switch (packet.pointType)

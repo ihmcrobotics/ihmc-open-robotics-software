@@ -352,7 +352,7 @@ public class BalanceManager
       update();
       yoFinalDesiredICP.set(Double.NaN, Double.NaN);
       yoDesiredCapturePoint.setByProjectionOntoXYPlane(yoCapturePoint);
-      
+
       yoCapturePoint.getFrameTupleIncludingFrame(tempCapturePoint);
       icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), tempCapturePoint);
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
