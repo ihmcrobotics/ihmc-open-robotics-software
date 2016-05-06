@@ -524,8 +524,6 @@ public class BalanceManager
 
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
       yoCapturePoint.setXY(capturePoint2d);
-
-      momentumBasedController.setCapturePoint(capturePoint2d);
    }
 
    public void computeAchievedCMP(FrameVector achievedLinearMomentumRate)

@@ -54,6 +54,7 @@ public class FootControlModule
    private final EnumMap<ConstraintType, boolean[]> contactStatesMap = new EnumMap<ConstraintType, boolean[]>(ConstraintType.class);
 
    private final MomentumBasedController momentumBasedController;
+   private final RobotSide robotSide;
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
@@ -73,6 +74,9 @@ public class FootControlModule
 
    private final FootControlHelper footControlHelper;
 
+   private final BooleanYoVariable requestExploration;
+   private final BooleanYoVariable resetFootPolygon;
+
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
          YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
          YoSE3PIDGainsInterface edgeTouchdownFootControlGains, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
@@ -88,6 +92,7 @@ public class FootControlModule
       footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, momentumBasedController, registry);
 
       this.momentumBasedController = momentumBasedController;
+      this.robotSide = robotSide;
 
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
       footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
@@ -135,6 +140,9 @@ public class FootControlModule
       states.add(moveViaWaypointsState);
 
       setupStateMachine(states);
+
+      requestExploration = new BooleanYoVariable(namePrefix + "RequestExploration", registry);
+      resetFootPolygon = new BooleanYoVariable(namePrefix + "ResetFootPolygon", registry);
    }
 
    private void setupContactStatesMap()
@@ -287,6 +295,16 @@ public class FootControlModule
       legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
       footControlHelper.update();
 
+      if (resetFootPolygon.getBooleanValue())
+      {
+         resetFootPolygon();
+      }
+
+      if (requestExploration.getBooleanValue())
+      {
+         requestExploration();
+      }
+
       stateMachine.checkTransitionConditions();
 
       if (!isInFlatSupportState())
@@ -430,5 +448,20 @@ public class FootControlModule
    public void setAllowFootholdAdjustments(boolean allow)
    {
       holdPositionState.doFootholdAdjustments(allow);
+   }
+
+   private void requestExploration()
+   {
+      if (!isInFlatSupportState()) return;
+      requestExploration.set(false);
+      initializeFootExploration();
+   }
+
+   private void resetFootPolygon()
+   {
+      if (!isInFlatSupportState()) return;
+      resetFootPolygon.set(false);
+      footControlHelper.getPartialFootholdControlModule().reset();
+      momentumBasedController.resetFootSupportPolygon(robotSide);
    }
 }
