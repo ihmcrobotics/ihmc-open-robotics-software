@@ -168,9 +168,22 @@ public class QuadrupedTimedStepController
       return stepQueue.capacity();
    }
 
-   public QuadrupedTimedStep getCurrentStep(RobotQuadrant robotQuadrant)
+   public QuadrupedTimedStep getEarliestStep(RobotQuadrant robotQuadrant)
    {
       for (int i = 0; i < stepQueue.size(); i++)
+      {
+         QuadrupedTimedStep step = stepQueue.get(i);
+         if (step.getRobotQuadrant() == robotQuadrant)
+         {
+            return step;
+         }
+      }
+      return null;
+   }
+
+   public QuadrupedTimedStep getLatestStep(RobotQuadrant robotQuadrant)
+   {
+      for (int i = stepQueue.size() - 1; i >= 0; i--)
       {
          QuadrupedTimedStep step = stepQueue.get(i);
          if (step.getRobotQuadrant() == robotQuadrant)
@@ -265,7 +278,7 @@ public class QuadrupedTimedStepController
 
       @Override public StepEvent process()
       {
-         QuadrupedTimedStep timedStep = getCurrentStep(robotQuadrant);
+         QuadrupedTimedStep timedStep = getEarliestStep(robotQuadrant);
          if (timedStep != null)
          {
             double currentTime = timestamp.getDoubleValue();
@@ -307,7 +320,7 @@ public class QuadrupedTimedStepController
       @Override public void onEntry()
       {
          // initialize swing trajectory
-         QuadrupedTimedStep timedStep = getCurrentStep(robotQuadrant);
+         QuadrupedTimedStep timedStep = getEarliestStep(robotQuadrant);
          double groundClearance = timedStep.getGroundClearance();
          TimeInterval timeInterval = timedStep.getTimeInterval();
          timedStep.getGoalPosition(goalPosition);
@@ -323,7 +336,7 @@ public class QuadrupedTimedStepController
 
       @Override public StepEvent process()
       {
-         QuadrupedTimedStep timedStep = getCurrentStep(robotQuadrant);
+         QuadrupedTimedStep timedStep = getEarliestStep(robotQuadrant);
          double currentTime = timestamp.getDoubleValue();
          double liftOffTime = timedStep.getTimeInterval().getStartTime();
          double touchDownTime = timedStep.getTimeInterval().getEndTime();
