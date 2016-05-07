@@ -278,6 +278,8 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
 
    @Override public void onExit()
    {
+      paceStateMachine.reset();
+      timedStepController.removeSteps();
    }
 
    private void computeNominalCmpPositions(RobotQuadrant hindQuadrant, RobotQuadrant frontQuadrant, FramePoint[] nominalCmpPositionAtSoS, FramePoint nominalCmpPositionAtEoS)

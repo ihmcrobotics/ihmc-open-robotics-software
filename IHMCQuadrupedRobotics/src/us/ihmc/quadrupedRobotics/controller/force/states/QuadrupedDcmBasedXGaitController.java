@@ -279,6 +279,8 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
    @Override public void onExit()
    {
+      xGaitStateMachine.reset();
+      timedStepController.removeSteps();
    }
 
    private class InitialTransitionState implements FiniteStateMachineState<XGaitEvent>
@@ -338,17 +340,17 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    {
       private final PiecewiseForwardDcmTrajectory forwardDcmTrajectory;
       private final PiecewiseReverseDcmTrajectory reverseDcmTrajectory;
-      private final FramePoint forwardDcmPositionAtEoS;
-      private final FramePoint reverseDcmPositionAtEoS;
-      private final FramePoint nominalDcmOffsetAtEoS;
+      private final FramePoint forwardDcmPositionAtEoTS;
+      private final FramePoint reverseDcmPositionAtEoNS;
+      private final FramePoint nominalDcmOffsetAtEoNS;
 
       public ForwardXGaitState()
       {
          forwardDcmTrajectory = new PiecewiseForwardDcmTrajectory(2 * xGaitPreviewSteps.size() + 1, gravity, dcmPositionController.getComHeight());
          reverseDcmTrajectory = new PiecewiseReverseDcmTrajectory(2 * xGaitPreviewSteps.size() + 1, gravity, dcmPositionController.getComHeight());
-         forwardDcmPositionAtEoS = new FramePoint();
-         reverseDcmPositionAtEoS = new FramePoint();
-         nominalDcmOffsetAtEoS = new FramePoint();
+         forwardDcmPositionAtEoTS = new FramePoint();
+         reverseDcmPositionAtEoNS = new FramePoint();
+         nominalDcmOffsetAtEoNS = new FramePoint();
       }
 
       @Override public void onEntry()
@@ -405,16 +407,15 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          // adjust current step goal position to compensate for dcm error
          forwardDcmTrajectory.computeTrajectory(thisStep.getTimeInterval().getEndTime());
          reverseDcmTrajectory.computeTrajectory(nextStep.getTimeInterval().getEndTime());
-         forwardDcmTrajectory.getPosition(forwardDcmPositionAtEoS);
-         reverseDcmTrajectory.getPosition(reverseDcmPositionAtEoS);
-         forwardDcmPositionAtEoS.changeFrame(ReferenceFrame.getWorldFrame());
-         reverseDcmPositionAtEoS.changeFrame(ReferenceFrame.getWorldFrame());
-         nominalDcmOffsetAtEoS.setIncludingFrame(reverseDcmPositionAtEoS);
-         nominalDcmOffsetAtEoS.sub(thisStep.getGoalPosition());
-         reverseDcmPositionAtEoS.sub(forwardDcmPositionAtEoS);
+         forwardDcmTrajectory.getPosition(forwardDcmPositionAtEoTS);
+         reverseDcmTrajectory.getPosition(reverseDcmPositionAtEoNS);
+         forwardDcmPositionAtEoTS.changeFrame(ReferenceFrame.getWorldFrame());
+         reverseDcmPositionAtEoNS.changeFrame(ReferenceFrame.getWorldFrame());
+         nominalDcmOffsetAtEoNS.setIncludingFrame(reverseDcmPositionAtEoNS);
+         nominalDcmOffsetAtEoNS.sub(thisStep.getGoalPosition());
 
          double supportTime = nextStep.getTimeInterval().getEndTime() - thisStep.getTimeInterval().getEndTime();
-         computeStepGoalPosition(thisStep.getGoalPosition(), lastStep.getGoalPosition(), forwardDcmPositionAtEoS, nominalDcmOffsetAtEoS, supportTime, dcmPositionController.getNaturalFrequency());
+         computeStepGoalPosition(thisStep.getGoalPosition(), lastStep.getGoalPosition(), forwardDcmPositionAtEoTS, nominalDcmOffsetAtEoNS, supportTime, dcmPositionController.getNaturalFrequency());
          groundPlaneEstimator.projectZ(thisStep.getGoalPosition());
       }
 
@@ -433,6 +434,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
       @Override public void onExit()
       {
+         timedStepController.registerStepTransitionCallback(null);
       }
    }
 
@@ -467,7 +469,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    private void computeStepGoalPosition(Point3d thisGoalPosition, Point3d lastGoalPosition, FramePoint dcmPositionAtEoTS, FramePoint dcmOffsetAtEoNS, double supportTime, double naturalFrequency)
    {
       double exp = Math.exp(naturalFrequency * supportTime);
-
       dcmPositionAtEoTS.scale(exp);
       dcmPositionAtEoTS.sub(dcmOffsetAtEoNS);
       dcmPositionAtEoTS.scale(2 / (1 + exp));

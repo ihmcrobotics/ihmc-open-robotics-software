@@ -274,6 +274,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
 
    @Override public void onExit()
    {
+      trotStateMachine.reset();
+      timedStepController.removeSteps();
    }
 
    private void computeNominalCmpPositions(RobotQuadrant hindSupportQuadrant, RobotQuadrant frontSupportQuadrant, FramePoint nominalCmpPositionAtSoS, FramePoint nominalCmpPositionAtEoS)
