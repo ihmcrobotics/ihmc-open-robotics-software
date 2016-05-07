@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseForwardDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajectory;
+import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
@@ -79,10 +80,10 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    private double bodyYawSetpoint;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrantDependentList<FramePoint> groundPlanePositions;
-   private final QuadrupedTimedStepCopPlanner copPlanner;
    private final QuadrupedXGaitSettings xGaitSettings;
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final ArrayList<QuadrupedTimedStep> xGaitPreviewSteps;
+   private final QuadrupedTimedStepCopPlanner timedStepCopPlanner;
 
    // state machine
    public enum XGaitState
@@ -134,7 +135,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       {
          groundPlanePositions.set(robotQuadrant, new FramePoint());
       }
-      copPlanner = new QuadrupedTimedStepCopPlanner(32);
       xGaitStepPlanner = new QuadrupedXGaitPlanner();
       xGaitPreviewSteps = new ArrayList<>(32);
       for (int i = 0; i < 32; i++)
@@ -142,6 +142,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          xGaitPreviewSteps.add(new QuadrupedTimedStep());
       }
       xGaitSettings = new QuadrupedXGaitSettings();
+      timedStepCopPlanner = new QuadrupedTimedStepCopPlanner(32);
 
       // state machine
       FiniteStateMachineBuilder<XGaitState, XGaitEvent> ambleStateMachineBuilder = new FiniteStateMachineBuilder<>(XGaitState.class, XGaitEvent.class, "XGaitState", registry);
@@ -288,22 +289,28 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       double initialTransitionTime;
       private RobotQuadrant initialQuadrant;
       private final FramePoint initialSupportCentroid;
+      private final ThreeDoFMinimumJerkTrajectory transitionDcmTrajectory;
+      private final PiecewiseReverseDcmTrajectory reverseDcmTrajectory;
+      private final FramePoint reverseDcmPositionAtSoS;
 
       public InitialTransitionState()
       {
          initialSupportCentroid = new FramePoint();
+         transitionDcmTrajectory = new ThreeDoFMinimumJerkTrajectory();
+         reverseDcmTrajectory = new PiecewiseReverseDcmTrajectory(2 * xGaitPreviewSteps.size() + 1, gravity, dcmPositionController.getComHeight());
+         reverseDcmPositionAtSoS = new FramePoint();
       }
 
       @Override public void onEntry()
       {
+         double currentTime = robotTimestamp.getDoubleValue();
          initialSupportCentroid.setToZero(supportFrame);
          initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
-         initialTransitionTime = robotTimestamp.getDoubleValue() + initialTransitionDurationParameter.get();
+         initialTransitionTime = currentTime + initialTransitionDurationParameter.get();
 
-         // compute initial step plan
+         // compute initial xGait step plan
          xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, inputProvider.getPlanarVelocityInput(),
                initialQuadrant, initialSupportCentroid, initialTransitionTime, bodyYawSetpoint, xGaitSettings);
-
          for (int i = 0; i < xGaitPreviewSteps.size(); i++)
          {
             xGaitPreviewSteps.get(i).getTimeInterval().shiftInterval(controlDT * i);
@@ -315,6 +322,18 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          // update dcm height
          dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
 
+         // compute reverse dcm trajectory
+         int nIntervals = timedStepCopPlanner.compute(xGaitPreviewSteps, taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), currentTime);
+         reverseDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
+         reverseDcmTrajectory.initializeTrajectory(nIntervals, timedStepCopPlanner.getTimeAtStartOfInterval(), timedStepCopPlanner.getCopAtStartOfInterval(), timedStepCopPlanner.getTimeAtStartOfInterval(nIntervals - 1),
+               timedStepCopPlanner.getCopAtStartOfInterval(nIntervals - 1));
+         reverseDcmTrajectory.computeTrajectory(initialTransitionTime);
+         reverseDcmTrajectory.getPosition(reverseDcmPositionAtSoS);
+         reverseDcmPositionAtSoS.changeFrame(worldFrame);
+
+         // compute transition dcm trajectory
+         transitionDcmTrajectory.initializeTrajectory(dcmPositionEstimate, reverseDcmPositionAtSoS, currentTime, initialTransitionTime);
+
          // initialize ground plane points
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
@@ -325,6 +344,11 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
       @Override public XGaitEvent process()
       {
+         // compute nominal dcm trajectory
+         transitionDcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
+         transitionDcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
+         transitionDcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
+
          if (robotTimestamp.getDoubleValue() > initialTransitionTime - controlDT)
             return XGaitEvent.TIMEOUT;
          else
@@ -362,9 +386,9 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
 
          // compute nominal dcm trajectory
-         int nIntervals = copPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), currentTime);
+         int nIntervals = timedStepCopPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), currentTime);
          forwardDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
-         forwardDcmTrajectory.initializeTrajectory(nIntervals, copPlanner.getTimeAtStartOfInterval(), copPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
+         forwardDcmTrajectory.initializeTrajectory(nIntervals, timedStepCopPlanner.getTimeAtStartOfInterval(), timedStepCopPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
       }
 
       @Override public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> contactState)
@@ -375,12 +399,25 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          QuadrupedTimedStep lastStep = timedStepController.getLatestStep(lastStepQuadrant);
          QuadrupedTimedStep thisStep = timedStepController.getLatestStep(thisStepQuadrant);
          QuadrupedTimedStep nextStep = timedStepController.getLatestStep(nextStepQuadrant);
+         int nIntervals;
+
+         // update dcm height
+         dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
+
+         // compute forward dcm trajectory
+         nIntervals = timedStepCopPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), contactState, currentTime);
+         forwardDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
+         forwardDcmTrajectory.initializeTrajectory(nIntervals, timedStepCopPlanner.getTimeAtStartOfInterval(), timedStepCopPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
+         forwardDcmTrajectory.computeTrajectory(thisStep.getTimeInterval().getEndTime());
+         forwardDcmTrajectory.getPosition(forwardDcmPositionAtEoTS);
+         forwardDcmPositionAtEoTS.changeFrame(worldFrame);
 
          if (lastStep == null)
          {
             return;
          }
 
+         // compute nominal xGait step plan based on last step
          xGaitStepPlanner.computeMidStepPlan(xGaitPreviewSteps, lastStep, inputProvider.getPlanarVelocityInput(), currentTime, bodyYawSetpoint, xGaitSettings);
          for (int i = 0; i < xGaitPreviewSteps.size(); i++)
          {
@@ -390,31 +427,19 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          nextStep.set(xGaitPreviewSteps.get(1));
          timedStepController.addStep(xGaitPreviewSteps.get(2));
 
-         // update dcm height
-         int nIntervals;
-         dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
-
-         // compute forward dcm trajectory
-         nIntervals = copPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), contactState, currentTime);
-         forwardDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
-         forwardDcmTrajectory.initializeTrajectory(nIntervals, copPlanner.getTimeAtStartOfInterval(), copPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
-
          // compute reverse dcm trajectory
-         nIntervals = copPlanner.compute(xGaitPreviewSteps, taskSpaceEstimates.getSolePosition(), contactState, currentTime);
+         nIntervals = timedStepCopPlanner.compute(xGaitPreviewSteps, taskSpaceEstimates.getSolePosition(), contactState, currentTime);
          reverseDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
-         reverseDcmTrajectory.initializeTrajectory(nIntervals, copPlanner.getTimeAtStartOfInterval(), copPlanner.getCopAtStartOfInterval(), copPlanner.getTimeAtStartOfInterval(nIntervals - 1), copPlanner.getCopAtStartOfInterval(nIntervals - 1));
+         reverseDcmTrajectory.initializeTrajectory(nIntervals, timedStepCopPlanner.getTimeAtStartOfInterval(), timedStepCopPlanner.getCopAtStartOfInterval(), timedStepCopPlanner.getTimeAtStartOfInterval(nIntervals - 1),
+               timedStepCopPlanner.getCopAtStartOfInterval(nIntervals - 1));
+         reverseDcmTrajectory.computeTrajectory(nextStep.getTimeInterval().getEndTime());
+         reverseDcmTrajectory.getPosition(reverseDcmPositionAtEoNS);
+         reverseDcmPositionAtEoNS.changeFrame(worldFrame);
 
          // adjust current step goal position to compensate for dcm error
-         forwardDcmTrajectory.computeTrajectory(thisStep.getTimeInterval().getEndTime());
-         reverseDcmTrajectory.computeTrajectory(nextStep.getTimeInterval().getEndTime());
-         forwardDcmTrajectory.getPosition(forwardDcmPositionAtEoTS);
-         reverseDcmTrajectory.getPosition(reverseDcmPositionAtEoNS);
-         forwardDcmPositionAtEoTS.changeFrame(ReferenceFrame.getWorldFrame());
-         reverseDcmPositionAtEoNS.changeFrame(ReferenceFrame.getWorldFrame());
+         double supportTime = nextStep.getTimeInterval().getEndTime() - thisStep.getTimeInterval().getEndTime();
          nominalDcmOffsetAtEoNS.setIncludingFrame(reverseDcmPositionAtEoNS);
          nominalDcmOffsetAtEoNS.sub(thisStep.getGoalPosition());
-
-         double supportTime = nextStep.getTimeInterval().getEndTime() - thisStep.getTimeInterval().getEndTime();
          computeStepGoalPosition(thisStep.getGoalPosition(), lastStep.getGoalPosition(), forwardDcmPositionAtEoTS, nominalDcmOffsetAtEoNS, supportTime, dcmPositionController.getNaturalFrequency());
          groundPlaneEstimator.projectZ(thisStep.getGoalPosition());
       }
