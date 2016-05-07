@@ -35,11 +35,11 @@ public class QuadrupedXGaitSettings
    public QuadrupedXGaitSettings()
    {
       stanceLength = 1.1;
-      stanceWidth = 0.25;
+      stanceWidth = 0.2;
       stepGroundClearance = 0.1;
       stepDuration = 0.33;
       endDoubleSupportDuration = 0.0;
-      endPhaseShift = 180;
+      endPhaseShift = 90;
    }
 
    public double getStanceLength()

@@ -83,7 +83,7 @@ public class QuadrupedXGaitPlanner
          // compute step ground clearance
          step.setGroundClearance(xGaitSettings.getStepGroundClearance());
 
-         // update book-keeping
+         // update state for next step
          lastStepStartTime = thisStepStartTime;
          lastStepQuadrant = thisStepQuadrant;
       }
@@ -93,7 +93,7 @@ public class QuadrupedXGaitPlanner
    {
       if (timeAtSoS < ongoingStep.getTimeInterval().getStartTime())
       {
-         throw new RuntimeException("Time at start of next step must be greater than the last step");
+         throw new RuntimeException("Time at start of step must be greater than or equal to last step");
       }
 
       // initialize nominal support rectangle
@@ -117,13 +117,15 @@ public class QuadrupedXGaitPlanner
          {
             // compute step quadrant
             plannedSteps.get(i).setRobotQuadrant(thisStepQuadrant);
-            thisStepQuadrant = thisStepQuadrant.getNextRegularGaitSwingQuadrant();
 
             // compute step timing
             double thisStepEndTime = computeStepEndTime(thisStepQuadrant, thisStepStartTime, lastStepEndTime, xGaitSettings);
             plannedSteps.get(i).getTimeInterval().setStartTime(thisStepStartTime);
             plannedSteps.get(i).getTimeInterval().setEndTime(thisStepEndTime);
-            thisStepStartTime = lastStepEndTime + xGaitSettings.getEndDoubleSupportDuration();
+
+            // update state for next step
+            thisStepQuadrant = thisStepQuadrant.getNextRegularGaitSwingQuadrant();
+            thisStepStartTime = Math.max(thisStepStartTime, lastStepEndTime + xGaitSettings.getEndDoubleSupportDuration());
             lastStepEndTime = thisStepEndTime;
          }
       }
