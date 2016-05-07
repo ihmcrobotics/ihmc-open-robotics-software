@@ -35,7 +35,7 @@ public class QuadrupedXGaitSettings
    public QuadrupedXGaitSettings()
    {
       stanceLength = 1.1;
-      stanceWidth = 0.2;
+      stanceWidth = 0.25;
       stepGroundClearance = 0.1;
       stepDuration = 0.33;
       endDoubleSupportDuration = 0.0;
