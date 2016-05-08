@@ -3,12 +3,12 @@ package us.ihmc.quadrupedRobotics.planning;
 public class QuadrupedXGaitSettings
 {
    /**
-    * Nominal x offset between front and hind feet.
+    * Nominal x offset between front and hind feet (in meters).
     */
    private double stanceLength;
 
    /**
-    * Nominal y offset between left and right feet.
+    * Nominal y offset between left and right feet (in meters).
     */
    private double stanceWidth;
 
@@ -18,7 +18,7 @@ public class QuadrupedXGaitSettings
    private double stepGroundClearance;
 
    /**
-    * Time duration of each swing phase.
+    * Time duration of each swing phase (in seconds).
     */
    private double stepDuration;
 
@@ -28,7 +28,7 @@ public class QuadrupedXGaitSettings
    private double endDoubleSupportDuration;
 
    /**
-    * Nominal phase shift between front and hind steps in degrees. (0: pace, 90: amble, 180: trot)
+    * Nominal phase shift between front and hind steps (in degrees, 0: pace, 90: amble, 180: trot).
     */
    private double endPhaseShift;
 
