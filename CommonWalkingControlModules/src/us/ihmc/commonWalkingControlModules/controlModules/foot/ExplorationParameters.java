@@ -39,14 +39,14 @@ public class ExplorationParameters
    private static final int defaultThresholdForCoPRegionOccupancy = 2;
    private static final double defaultDistanceFromLineOfRotationToComputeCoPOccupancy = 0.02;
    private static final int defaultShrinkMaxLimit = 6;
-   private static final RotationCalculatorType defaultRotationCalculatorType = RotationCalculatorType.GEOMETRY;
+   private static final RotationCalculatorType defaultRotationCalculatorType = RotationCalculatorType.BOTH;
    private static final double defaultMinAreaToConsider = 0.0;
 
    /** Parameters for the cop based rotation verification */
    private final DoubleYoVariable perpendicluarCopErrorThreshold;
    private final DoubleYoVariable copAllowedAreaOpeningAngle;
-   private static final double defaultPerpendicluarCopErrorThreshold = 0.01;
-   private static final double defaultCopAllowedAreaOpeningAngle = 30.0 * Math.PI/180.0;
+   private static final double defaultPerpendicluarCopErrorThreshold = 0.005;
+   private static final double defaultCopAllowedAreaOpeningAngle = 22.5 * Math.PI/180.0;
 
    /** Parameters for the velocity based foothold detection */
    private final DoubleYoVariable stableLoRAngularVelocityThreshold;
@@ -57,7 +57,7 @@ public class ExplorationParameters
    private static final double defaultStableLoRAngularVelocityThreshold = 10.0;
    private static final double defaultStableCoRLinearVelocityThreshold = 0.1;
    private static final double defaultAngularVelocityAroundLoRThreshold = 0.5;
-   private static final double defaultFootDropThreshold = -0.015;
+   private static final double defaultFootDropThreshold = -0.025;
    private static final double defaultAngularVelocityFilterBreakFrequency = 16.0;
 
    public ExplorationParameters(YoVariableRegistry parentRegistry)
