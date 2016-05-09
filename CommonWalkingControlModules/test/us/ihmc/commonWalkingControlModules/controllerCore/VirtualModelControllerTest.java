@@ -14,7 +14,6 @@ import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -23,16 +22,13 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.*;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
-import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -46,7 +42,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import java.util.*;
 
-//@DeployableTestClass(targets = TestPlanTarget.Fast)
+@DeployableTestClass(targets = TestPlanTarget.Fast)
 public class VirtualModelControllerTest
 {
    private final Random bigRandom = new Random(1000L);
@@ -602,16 +598,16 @@ public class VirtualModelControllerTest
       VirtualModelControllerTestHelper.compareWrenches(desiredWrench, appliedWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 300000000)
-   public void testVMCWithArm() throws Exception
+   //@DeployableTestMethod
+   //@Test(timeout = 300000000)
+   public static void testVMCWithArm() throws Exception
    {
       double simulationDuration = 20.0;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("robert");
-      simulationTestingParameters.setKeepSCSUp(true);
-      hasSCSSimulation = true;
+      //simulationTestingParameters.setKeepSCSUp(true);
+      //hasSCSSimulation = true;
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -632,6 +628,7 @@ public class VirtualModelControllerTest
       VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, robotArm.getElevator(), registry, yoGraphicsListRegistry);
       virtualModelController.registerEndEffector(robotArm.getElevator(), hand);
 
+      Random random = new Random();
       double forceX = random.nextDouble() * 10.0;
       double forceY = random.nextDouble() * 10.0;
       double forceZ = random.nextDouble() * 10.0;
@@ -704,7 +701,7 @@ public class VirtualModelControllerTest
          JUnitTools.assertVector3dEquals("", currentForce, desiredForce, 0.5);
       }
 
-      simulationTestingParameters.setKeepSCSUp(false);
+      //simulationTestingParameters.setKeepSCSUp(false);
    }
 
    @DeployableTestMethod
@@ -951,15 +948,16 @@ public class VirtualModelControllerTest
       simulationTestingParameters.setKeepSCSUp(false);
    }
 
-   public static void testVMCWithForkedArm() throws Exception
+   @DeployableTestMethod
+   @Test(timeout = 3000000)
+   public void testVMCWithForkedArm() throws Exception
    {
       double simulationDuration = 20.0;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("robert");
-      Random random = new Random();
-      //simulationTestingParameters.setKeepSCSUp(true);
-      //hasSCSSimulation = true;
+      simulationTestingParameters.setKeepSCSUp(true);
+      hasSCSSimulation = true;
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -995,7 +993,7 @@ public class VirtualModelControllerTest
 
          virtualModelController.registerEndEffector(robotArm.getElevator(), hand);
 
-         double forceX = 5.0;
+         double forceX = 0.0;
          double forceZ = 7.0;
          double torqueY = 0.0;
          Wrench desiredWrench = new Wrench(handFrame, handFrame);
@@ -1031,6 +1029,7 @@ public class VirtualModelControllerTest
 
          ForcePointController forcePointController = new ForcePointController(suffix, robotArm.getExternalForcePoints().get(robotSide), handFrame, desiredHandPose);
          forcePointController.setInitialForce(contactForce, contactTorque);
+         forcePointController.setLinearGains(250, 10, 0);
          forcePointControllers.add(forcePointController);
       }
 
@@ -1077,17 +1076,16 @@ public class VirtualModelControllerTest
             currentForce.set(armController.getCurrentForce(i));
             currentTorque.set(armController.getCurrentTorque(i));
 
-            /*
             JUnitTools.assertVector3dEquals("", currentPosition, desiredPositions.get(i), 0.01);
             JUnitTools.assertQuaternionsEqual(currentOrientation, desiredOrientations.get(i), 0.01);
             JUnitTools.assertVector3dEquals("", desiredForces.get(i), currentForce, 0.5);
             JUnitTools.assertVector3dEquals("", desiredTorques.get(i), currentTorque, 0.5);
-            */
          }
       }
 
-      //simulationTestingParameters.setKeepSCSUp(false);
+      simulationTestingParameters.setKeepSCSUp(false);
    }
+
    @After
    public void destroySimulationAndRecycleMemory()
    {
@@ -1540,10 +1538,5 @@ public class VirtualModelControllerTest
          VirtualModelControllerTestHelper.compareWrenches(desiredWrench, appliedWrench);
       else
          VirtualModelControllerTestHelper.compareWrenches(desiredWrench, appliedWrench, selectionMatrix);
-   }
-
-   public static void main(String[] args) throws Exception
-   {
-      testVMCWithForkedArm();
    }
 }
