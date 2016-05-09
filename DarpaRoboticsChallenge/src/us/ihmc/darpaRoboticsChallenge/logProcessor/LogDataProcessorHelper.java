@@ -190,6 +190,11 @@ public class LogDataProcessorHelper
             }
 
             @Override
+            public void updateCoP()
+            {
+            }
+
+            @Override
             @Deprecated
             public void setFootContactState(boolean hasFootHitGround)
             {

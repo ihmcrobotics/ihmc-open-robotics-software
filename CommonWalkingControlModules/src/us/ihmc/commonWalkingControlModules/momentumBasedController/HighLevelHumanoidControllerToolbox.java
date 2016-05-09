@@ -400,6 +400,9 @@ public class HighLevelHumanoidControllerToolbox
 
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(yoTime.getDoubleValue());
+
+      for (RobotSide robotSide : RobotSide.values)
+         footSwitches.get(robotSide).updateCoP();
    }
 
    public void updateBipedSupportPolygons()
