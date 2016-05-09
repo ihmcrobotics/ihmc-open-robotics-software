@@ -23,7 +23,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
@@ -80,7 +80,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    private final HighLevelState initialBehavior;
 
-   private MomentumBasedController momentumBasedController = null;
+   private HighLevelHumanoidControllerToolbox momentumBasedController = null;
 
    private boolean isListeningToHighLevelStatePackets = true;
    private HighLevelHumanoidControllerManager highLevelHumanoidControllerManager = null;
@@ -256,8 +256,9 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
-      momentumBasedController = new MomentumBasedController(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches, wristForceSensors, yoTime,
-            gravityZ, twistCalculator, feet, handContactableBodies, controlDT, updatables, yoGraphicsListRegistry, jointsToIgnore);
+      double omega0 = walkingControllerParameters.getOmega0();
+      momentumBasedController = new HighLevelHumanoidControllerToolbox(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches, wristForceSensors, yoTime,
+            gravityZ, omega0, twistCalculator, feet, handContactableBodies, controlDT, updatables, yoGraphicsListRegistry, jointsToIgnore);
       momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)
@@ -284,7 +285,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
-      InverseDynamicsJoint[] jointsToOptimizeFor = MomentumBasedController.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
       List<? extends ContactablePlaneBody> contactablePlaneBodies = momentumBasedController.getContactablePlaneBodyList();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, fullRobotModel.getEndEffectors(), jointsToOptimizeFor,
             momentumOptimizationSettings, referenceFrames, controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies,
@@ -468,10 +469,10 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       return commandInputManager;
    }
 
-   public MomentumBasedController getMomentumBasedController() {
+   public HighLevelHumanoidControllerToolbox getMomentumBasedController() {
       if (momentumBasedController == null)
          throw new RuntimeException("momentumBasedController was not created yet.");
-      
+
       return momentumBasedController;
    }
 }
