@@ -638,12 +638,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper);
 
       // Since the foot support points change while standing, the parts of the support polygon that need to be cut off might have had the CoP in them.
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         String footName = drcSimulationTestHelper.getControllerFullRobotModel().getFoot(robotSide).getName();
-         BooleanYoVariable useCoPOccupancyGrid = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable(footName + "UseCoPOccupancyGrid");
-         useCoPOccupancyGrid.set(false);
-      }
+      BooleanYoVariable useCoPOccupancyGrid = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("ExplorationFoothold_UseCopOccupancyGrid");
+      useCoPOccupancyGrid.set(false);
       BooleanYoVariable doFootExplorationInTransferToStanding = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
       doFootExplorationInTransferToStanding.set(false);
 

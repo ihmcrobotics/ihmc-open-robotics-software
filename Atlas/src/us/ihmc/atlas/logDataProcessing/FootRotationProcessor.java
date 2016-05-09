@@ -1,5 +1,6 @@
 package us.ihmc.atlas.logDataProcessing;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.PartialFootholdControlModule;
@@ -18,6 +19,7 @@ public class FootRotationProcessor implements LogDataProcessorFunction
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final SideDependentList<PartialFootholdControlModule> partialFootholdControlModules = new SideDependentList<>();
+   private final HighLevelHumanoidControllerToolbox momentumBasedController;
 
    private final LogDataProcessorHelper logDataProcessorHelper;
 
@@ -25,7 +27,7 @@ public class FootRotationProcessor implements LogDataProcessorFunction
    {
       this.logDataProcessorHelper = logDataProcessorHelper;
       WalkingControllerParameters walkingControllerParameters = logDataProcessorHelper.getWalkingControllerParameters();
-      HighLevelHumanoidControllerToolbox momentumBasedController = logDataProcessorHelper.getMomentumBasedController();
+      momentumBasedController = logDataProcessorHelper.getMomentumBasedController();
 
       walkingControllerParameters.getOrCreateExplorationParameters(registry);
       for (RobotSide robotSide : RobotSide.values)
@@ -46,17 +48,26 @@ public class FootRotationProcessor implements LogDataProcessorFunction
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         PartialFootholdControlModule partialFootholdControlModule = partialFootholdControlModules.get(robotSide);
+
          if (logDataProcessorHelper.getCurrenFootState(robotSide) == ConstraintType.FULL
                || logDataProcessorHelper.getCurrenFootState(robotSide) == ConstraintType.EXPLORE_POLYGON
                || logDataProcessorHelper.getCurrenFootState(robotSide) == ConstraintType.HOLD_POSITION)
          {
             logDataProcessorHelper.getMeasuredCoP(robotSide, measuredCoP2d);
             logDataProcessorHelper.getDesiredCoP(robotSide, desiredCoP2d);
-            partialFootholdControlModules.get(robotSide).compute(desiredCoP2d, measuredCoP2d);
+            partialFootholdControlModule.compute(desiredCoP2d, measuredCoP2d);
+
+            YoPlaneContactState contactState = momentumBasedController.getFootContactStates().get(robotSide);
+            boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
+            if (contactStateHasChanged)
+            {
+               contactState.notifyContactStateHasChanged();
+            }
          }
          else
          {
-            partialFootholdControlModules.get(robotSide).reset();
+            partialFootholdControlModule.reset();
          }
       }
    }

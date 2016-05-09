@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
@@ -40,7 +39,7 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
       super(fullRobotModel, robotJacobianHolder, referenceFrames, footSwitches, wristForceSensors, yoTime, gravityZ, omega0, twistCalculator, feet, hands, controlDT,
             updatables, yoGraphicsListRegistry, jointsToIgnore);
 
-      String capturePointNameSpace = BalanceManager.class.getSimpleName();
+      String capturePointNameSpace = HighLevelHumanoidControllerToolbox.class.getSimpleName();
       DoubleYoVariable capturePointX = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointX");
       DoubleYoVariable capturePointY = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointY");
       DoubleYoVariable capturePointZ = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointZ");
