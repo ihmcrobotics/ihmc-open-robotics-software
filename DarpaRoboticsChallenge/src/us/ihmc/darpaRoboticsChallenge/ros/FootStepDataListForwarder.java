@@ -6,6 +6,7 @@ import java.util.List;
 import ihmc_msgs.FootstepDataListRosMessage;
 import ihmc_msgs.FootstepDataRosMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class FootStepDataListForwarder extends AbstractRosTopicSubscriber<ihmc_msgs.FootstepDataListRosMessage>
@@ -23,8 +24,9 @@ public class FootStepDataListForwarder extends AbstractRosTopicSubscriber<ihmc_m
    {
       ArrayList<us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage> footStepDataArrayList = new ArrayList<us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>();
       List<FootstepDataRosMessage> footStepDataList = message.getFootstepDataList();
-      FootStepDataMessageConverter.convertFootStepDataList(footStepDataList, footStepDataArrayList);;
+      FootStepDataMessageConverter.convertFootStepDataList(footStepDataList, footStepDataArrayList);
+      ExecutionMode executionMode = ExecutionMode.values[(int) message.getExecutionMode()];
       
-      controllerCommunicator.send(new us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage(footStepDataArrayList,message.getSwingTime(),message.getTransferTime()));
+      controllerCommunicator.send(new us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage(footStepDataArrayList,message.getSwingTime(),message.getTransferTime(),executionMode));
    }
 }
