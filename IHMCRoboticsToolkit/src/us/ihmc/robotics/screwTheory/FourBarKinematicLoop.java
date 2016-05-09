@@ -37,7 +37,6 @@ public class FourBarKinematicLoop
 
    private final RevoluteJoint masterJointA;
    private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD, fourBarOutputJoint;
-   private final InverseDynamicsJoint[] joints = new InverseDynamicsJoint[3] ;
    private final Vector3d closurePointFromLastPassiveJointVect;
 
    private final FourBarCalculatorWithDerivatives fourBarCalculator;
@@ -59,10 +58,6 @@ public class FourBarKinematicLoop
       this.passiveJointD = passiveJointD;
       this.closurePointFromLastPassiveJointVect = new Vector3d(closurePointFromLastPassiveJointInJointDFrame);
       
-      joints[0] = masterJointA;
-      joints[1] = passiveJointB;
-      joints[2] = passiveJointC;
-
       // Rotation axis
       FrameVector masterJointAxis = masterJointA.getJointAxis();
       masterJointAxis.changeFrame(masterJointA.getFrameBeforeJoint());
@@ -93,19 +88,20 @@ public class FourBarKinematicLoop
       // Calculator
       fourBarCalculator = createFourBarCalculator(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected);
 
-      // Jacobian solver
-      fourBarJacobianSolver = new FourBarKinematicLoopJacobianSolver(fourBarCalculator, joints);
-      
+      // Set output joint     
       if(DEFAULT_OUTPUT_jOINT)
       {
          fourBarOutputJoint = passiveJointD;
-         jacobian = fourBarJacobianSolver.computeJacobian(fourBarOutputJoint);
+         System.out.println("Output joint set to default: " + fourBarOutputJoint.name);
       }
       else
       {
          fourBarOutputJoint = FourBarKinematicLoopTools.setFourBarOutputJoint(passiveJointB, passiveJointC, passiveJointD);
-         jacobian = fourBarJacobianSolver.computeJacobian(fourBarOutputJoint);         
       }
+      
+      // Jacobian        
+      fourBarJacobianSolver = new FourBarKinematicLoopJacobianSolver(fourBarCalculator, getJointsForJacobianCalculation(fourBarOutputJoint));
+      jacobian = fourBarJacobianSolver.computeJacobian(fourBarOutputJoint);      
       
       // Initialize interior angle offsets and signs
       initializeInteriorAnglesAtZeroConfigurationAndJointSigns(vectorDAProjected, vectorABProjected, vectorBCProjected, vectorCDProjected);
@@ -385,7 +381,7 @@ public class FourBarKinematicLoop
      
 //      if(DEBUG)
 //      {
-         System.out.println("\nLinear velocity output joint: \n" + outputJointLinearVelocities);      
+         System.out.println("\nVelocity output (J*qd): \n" + outputJointLinearVelocities);      
 //      }
       
       passiveJointB.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleABC(), 0));
@@ -421,6 +417,32 @@ public class FourBarKinematicLoop
       return passiveInteriorAnglesAtZeroConfiguration[passiveJointIndex] + passiveJointSigns[passiveJointIndex] * jointAngle;
    }
 
+   private InverseDynamicsJoint[] getJointsForJacobianCalculation(PassiveRevoluteJoint outputJoint)
+   {
+      InverseDynamicsJoint[] joints;
+      
+      if (fourBarOutputJoint == passiveJointD)
+      {      
+         joints = new InverseDynamicsJoint[3] ;
+         joints[0] = masterJointA;
+         joints[1] = passiveJointB;
+         joints[2] = passiveJointC;
+      }      
+      else if (fourBarOutputJoint == passiveJointC)
+      {      
+         joints = new InverseDynamicsJoint[2] ;
+         joints[0] = masterJointA;
+         joints[1] = passiveJointB;
+      }    
+      else
+      {
+         joints = new InverseDynamicsJoint[1] ;
+         joints[0] = masterJointA;
+      }
+      
+      return joints;
+   }
+   
    public PassiveRevoluteJoint getPassiveRevoluteJointB()
    {
       return passiveJointB;
