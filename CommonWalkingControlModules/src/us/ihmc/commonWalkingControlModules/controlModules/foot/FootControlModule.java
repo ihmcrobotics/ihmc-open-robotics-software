@@ -307,7 +307,7 @@ public class FootControlModule
 
       stateMachine.checkTransitionConditions();
 
-      if (!isInFlatSupportState())
+      if (!isInFlatSupportState() && footControlHelper.getPartialFootholdControlModule() != null)
          footControlHelper.getPartialFootholdControlModule().reset();
 
       stateMachine.doAction();
@@ -461,7 +461,10 @@ public class FootControlModule
    {
       if (!isInFlatSupportState()) return;
       resetFootPolygon.set(false);
-      footControlHelper.getPartialFootholdControlModule().reset();
+      if (footControlHelper.getPartialFootholdControlModule() != null)
+      {
+         footControlHelper.getPartialFootholdControlModule().reset();
+      }
       momentumBasedController.resetFootSupportPolygon(robotSide);
    }
 }
