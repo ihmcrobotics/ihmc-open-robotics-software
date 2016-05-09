@@ -42,8 +42,15 @@ public class FootControlHelper
       String namePrefix = foot.getName();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
-      partialFootholdControlModule = new PartialFootholdControlModule(robotSide, momentumBasedController,
-            walkingControllerParameters, registry, yoGraphicsListRegistry);
+      if (walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
+      {
+         partialFootholdControlModule = new PartialFootholdControlModule(robotSide, momentumBasedController,
+               walkingControllerParameters, registry, yoGraphicsListRegistry);
+      }
+      else
+      {
+         partialFootholdControlModule = null;
+      }
 
       isDesiredCoPOnEdge = new BooleanYoVariable(namePrefix + "IsDesiredCoPOnEdge", registry);
 
