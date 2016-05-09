@@ -45,10 +45,11 @@ public class PartialFootholdControlModule
 
    public enum RotationCalculatorType
    {
-      VELOCITY, GEOMETRY;
+      VELOCITY, GEOMETRY, BOTH;
       public static RotationCalculatorType[] values = values();
    }
    private final EnumMap<RotationCalculatorType, FootRotationCalculator> rotationCalculators = new EnumMap<>(RotationCalculatorType.class);
+   private final EnumMap<RotationCalculatorType, FrameLine2d> lineOfRotations = new EnumMap<>(RotationCalculatorType.class);
    private final EnumYoVariable<RotationCalculatorType> rotationCalculatorType;
 
    private final RotationVerificator rotationVerificator;
@@ -121,7 +122,7 @@ public class PartialFootholdControlModule
       yoUnsafePolygon = new YoFrameConvexPolygon2d(namePrefix + "UnsafeFootPolygon", "", worldFrame, 10, registry);
       yoShrunkFootPolygon = new YoFrameConvexPolygon2d(namePrefix + "ShrunkFootPolygon", "", worldFrame, 20, registry);
 
-      shrinkCounter = new IntegerYoVariable(namePrefix + "FootShrinkCounter", registry);
+      shrinkCounter = new IntegerYoVariable(namePrefix + "ShrinkCounter", registry);
 
       confusingCutIndex = new IntegerYoVariable(namePrefix + "ConfusingCutIndex", registry);
 
@@ -158,6 +159,8 @@ public class PartialFootholdControlModule
             new GeometricFootRotationCalculator(namePrefix, contactableFoot, explorationParameters, yoGraphicsListRegistry, registry);
       rotationCalculators.put(RotationCalculatorType.VELOCITY, velocityFootRotationCalculator);
       rotationCalculators.put(RotationCalculatorType.GEOMETRY, geometricFootRotationCalculator);
+      lineOfRotations.put(RotationCalculatorType.VELOCITY, new FrameLine2d(soleFrame));
+      lineOfRotations.put(RotationCalculatorType.GEOMETRY, new FrameLine2d(soleFrame));
 
       rotationVerificator = new RotationVerificator(namePrefix, contactableFoot, explorationParameters, registry);
 
@@ -178,17 +181,38 @@ public class PartialFootholdControlModule
       unsafePolygon.setIncludingFrameAndUpdate(shrunkFootPolygon);
       footCoPOccupancyGrid.registerCenterOfPressureLocation(centerOfPressure);
 
+      boolean atLeastOneTriggered = false;
       for (RotationCalculatorType calculatorType : RotationCalculatorType.values)
       {
          if (!rotationCalculators.containsKey(calculatorType)) continue;
          rotationCalculators.get(calculatorType).compute(desiredCenterOfPressure, centerOfPressure);
+         rotationCalculators.get(calculatorType).getLineOfRotation(lineOfRotations.get(calculatorType));
+
+         if (rotationCalculators.get(calculatorType).isFootRotating())
+         {
+            boolean verified = rotationVerificator.isRotating(centerOfPressure, desiredCenterOfPressure, lineOfRotations.get(calculatorType));
+            atLeastOneTriggered = atLeastOneTriggered || verified;
+            if (verified)
+            {
+               lineOfRotation.setIncludingFrame(lineOfRotations.get(calculatorType));
+            }
+         }
       }
-      FootRotationCalculator activeCalculator = rotationCalculators.get(rotationCalculatorType.getEnumValue());
 
-      activeCalculator.getLineOfRotation(lineOfRotation);
-      boolean verified = rotationVerificator.isRotating(centerOfPressure, desiredCenterOfPressure, lineOfRotation);
+      boolean triggerCutting;
+      if (rotationCalculatorType.getEnumValue() == RotationCalculatorType.BOTH)
+      {
+         triggerCutting = atLeastOneTriggered;
+      }
+      else
+      {
+         FootRotationCalculator activeCalculator = rotationCalculators.get(rotationCalculatorType.getEnumValue());
+         activeCalculator.getLineOfRotation(lineOfRotation);
+         boolean verified = rotationVerificator.isRotating(centerOfPressure, desiredCenterOfPressure, lineOfRotation);
+         triggerCutting = activeCalculator.isFootRotating() && verified;
+      }
 
-      if (activeCalculator.isFootRotating() && verified)
+      if (triggerCutting)
       {
          numberOfVerticesRemoved.set(ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, unsafePolygon, RobotSide.LEFT));
 
