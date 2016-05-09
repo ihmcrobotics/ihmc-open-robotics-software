@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -24,6 +26,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.*;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 
 import javax.vecmath.Point3d;
 import java.util.ArrayList;
@@ -84,6 +87,12 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final ArrayList<QuadrupedTimedStep> xGaitPreviewSteps;
    private final QuadrupedTimedStepCopPlanner timedStepCopPlanner;
+
+   // graphics
+   private final BagOfBalls xGaitPreviewStepVisualization;
+   private final FramePoint xGaitPreviewStepVisualizationPosition;
+   private static final QuadrantDependentList<AppearanceDefinition> xGaitPreviewStepAppearance = new QuadrantDependentList<>(
+         YoAppearance.Red(), YoAppearance.Blue(), YoAppearance.RGBColor(1, 0.5, 0.0), YoAppearance.RGBColor(0.0, 0.5, 1.0));
 
    // state machine
    public enum XGaitState
@@ -154,6 +163,11 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       ambleStateMachineBuilder.addTransition(XGaitEvent.FORWARD, XGaitState.REVERSE_XGAIT, XGaitState.FORWARD_XGAIT);
       xGaitStateMachine = ambleStateMachineBuilder.build(XGaitState.INITIAL_TRANSITION);
       runtimeEnvironment.getParentRegistry().addChild(registry);
+
+      // graphics
+      xGaitPreviewStepVisualization = BagOfBalls.createRainbowBag(xGaitPreviewSteps.size(), 0.015, "xGaitPreviewSteps", registry, runtimeEnvironment.getGraphicsListRegistry());
+      xGaitPreviewStepVisualization.setVisible(true);
+      xGaitPreviewStepVisualizationPosition = new FramePoint();
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -226,10 +240,20 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 
+   private void updateGraphics()
+   {
+      for (int i = 0; i < xGaitPreviewSteps.size(); i++)
+      {
+         xGaitPreviewSteps.get(i).getGoalPosition(xGaitPreviewStepVisualizationPosition);
+         xGaitPreviewStepVisualization.setBallLoop(xGaitPreviewStepVisualizationPosition, xGaitPreviewStepAppearance.get(xGaitPreviewSteps.get(i).getRobotQuadrant()));
+      }
+   }
+
    @Override public ControllerEvent process()
    {
       updateEstimates();
       updateSetpoints();
+      updateGraphics();
       return null;
    }
 
