@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
@@ -10,8 +12,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 
 public class FullyConstrainedState extends AbstractFootControlState
 {
@@ -62,13 +62,16 @@ public class FullyConstrainedState extends AbstractFootControlState
    @Override
    public void doSpecificAction()
    {
-      footSwitch.computeAndPackCoP(cop);
-      momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
-      partialFootholdControlModule.compute(desiredCoP, cop);
-      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
-      boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
-      if (contactStateHasChanged)
-         contactState.notifyContactStateHasChanged();
+      if (partialFootholdControlModule != null)
+      {
+         footSwitch.computeAndPackCoP(cop);
+         momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
+         partialFootholdControlModule.compute(desiredCoP, cop);
+         YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+         boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
+         if (contactStateHasChanged)
+            contactState.notifyContactStateHasChanged();
+      }
 
       footAcceleration.setToZero(contactableFoot.getFrameAfterParentJoint(), rootBody.getBodyFixedFrame(), contactableFoot.getFrameAfterParentJoint());
 

@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -38,7 +38,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private final GenericStateMachine<HighLevelState, HighLevelBehavior> stateMachine;
    private final HighLevelState initialBehavior;
-   private final MomentumBasedController momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox momentumBasedController;
 
    private final EnumYoVariable<HighLevelState> requestedHighLevelState = new EnumYoVariable<HighLevelState>("requestedHighLevelState", registry,
          HighLevelState.class, true);
@@ -57,7 +57,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public HighLevelHumanoidControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
          WholeBodyControllerCore controllerCore, HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
-         MomentumBasedController momentumBasedController, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+         HighLevelHumanoidControllerToolbox momentumBasedController, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
          ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       this.commandInputManager = commandInputManager;

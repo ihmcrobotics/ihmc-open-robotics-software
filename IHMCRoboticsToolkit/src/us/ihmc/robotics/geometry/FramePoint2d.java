@@ -21,7 +21,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FramePoint2d extends FrameTuple2d<FramePoint2d, TransformablePoint2d>
+public class FramePoint2d extends FrameTuple2d<FramePoint2d, TransformablePoint2d> implements FramePoint2dReadOnly
 {
    private static final long serialVersionUID = -1287148635726098768L;
 
@@ -156,7 +156,7 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, TransformablePoint2
       ret.changeFrameAndProjectToXYPlane(desiredFrame);
       return ret;
    }
-   
+
    public void applyTransform(RigidBodyTransform transform, boolean requireTransformInXYPlane)
    {
       this.getGeometryObject().applyTransform(transform, requireTransformInXYPlane);
@@ -175,7 +175,7 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, TransformablePoint2
          temporaryPointForYawing = new FrameVector2d(this);
       else
          temporaryPointForYawing.setIncludingFrame(this);
-      
+
       temporaryPointForYawing.sub(pointToYawAbout);
 
       temporaryTransformToDesiredFrame.setIdentity();
@@ -186,5 +186,5 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, TransformablePoint2
       pointToPack.setIncludingFrame(pointToYawAbout);
       pointToPack.add(temporaryPointForYawing);
    }
-   
+
 }

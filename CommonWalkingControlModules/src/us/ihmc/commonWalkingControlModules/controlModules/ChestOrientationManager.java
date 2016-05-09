@@ -6,7 +6,7 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
@@ -65,7 +65,7 @@ public class ChestOrientationManager
    private final LongYoVariable numberOfQueuedCommands;
    private final CommandArrayDeque<ChestTrajectoryCommand> commandQueue = new CommandArrayDeque<>(ChestTrajectoryCommand.class);
 
-   public ChestOrientationManager(MomentumBasedController momentumBasedController, YoOrientationPIDGainsInterface gains, Vector3d angularWeight,
+   public ChestOrientationManager(HighLevelHumanoidControllerToolbox momentumBasedController, YoOrientationPIDGainsInterface gains, Vector3d angularWeight,
          double trajectoryTime, YoVariableRegistry parentRegistry)
    {
       this.gains = gains;
