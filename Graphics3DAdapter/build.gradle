@@ -61,8 +61,6 @@ dependencies {
         exclude group: 'net.java.jinput', module: 'jinput'
     }
 
-    //Explicitly include our version of jinput
-    compile "us.ihmc.thirdparty.jinput:jinput:160414"
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
     compile group: 'com.google.guava', name: 'guava', version: '17.0'
     compile group: 'org.boofcv', name: 'geo', version: '0.19'
