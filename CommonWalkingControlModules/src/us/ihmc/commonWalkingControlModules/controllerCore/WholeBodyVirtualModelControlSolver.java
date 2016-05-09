@@ -79,7 +79,6 @@ public class WholeBodyVirtualModelControlSolver
 
       controllerModel = toolbox.getFullRobotModel();
       rootJoint = toolbox.getRobotRootJoint();
-      virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), rootJoint.getSuccessor(), registry, toolbox.getYoGraphicsListRegistry());
       optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, rootJoint, registry);
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
@@ -87,6 +86,9 @@ public class WholeBodyVirtualModelControlSolver
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
+
+      virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), rootJoint.getSuccessor(), registry,
+            toolbox.getYoGraphicsListRegistry());
 
       for (OneDoFJoint joint : controlledOneDoFJoints)
       {
