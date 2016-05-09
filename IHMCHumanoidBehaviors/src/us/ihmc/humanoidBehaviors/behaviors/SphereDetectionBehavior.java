@@ -31,7 +31,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.io.printing.PrintTools;
 
-public class LocalizeBallBehavior extends BehaviorInterface
+public class SphereDetectionBehavior extends BehaviorInterface
 {
 
    private BooleanYoVariable ballFound = new BooleanYoVariable("ballFound", registry);
@@ -52,7 +52,7 @@ public class LocalizeBallBehavior extends BehaviorInterface
 
    private final HumanoidReferenceFrames humanoidReferenceFrames;
 
-   public LocalizeBallBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames)
+   public SphereDetectionBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames)
    {
       super(outgoingCommunicationBridge);
       this.attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
