@@ -272,12 +272,17 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
             public void computeAndPackFootWrench(Wrench footWrenchToPack)
             {
             }
-            
+
             @Override
             public void computeAndPackCoP(FramePoint2d copToPack)
             {
                logDataProcessorHelper.getMeasuredCoP(robotSide, copToPack);
                copToPack.setIncludingFrame(contactableFoot.getSoleFrame(), copToPack.getPointCopy());
+            }
+
+            @Override
+            public void updateCoP()
+            {
             }
 
             @Override

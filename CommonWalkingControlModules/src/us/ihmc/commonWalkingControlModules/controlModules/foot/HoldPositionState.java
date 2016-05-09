@@ -212,7 +212,7 @@ public class HoldPositionState extends AbstractFootControlState
 
       correctDesiredOrientationForSmartHoldPosition();
 
-      if (doFootholdAdjustments.getBooleanValue())
+      if (doFootholdAdjustments.getBooleanValue() && partialFootholdControlModule != null)
       {
          partialFootholdControlModule.compute(desiredCoP, cop);
          YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);

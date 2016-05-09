@@ -445,6 +445,30 @@ public class MathTools
       }
    }
 
+   public static void checkIfPositive(double argument)
+   {
+      if (argument < 0.0)
+         throw new RuntimeException("Argument " + argument + " not positive.");
+   }
+
+   public static void checkIfGreaterOrEqual(double argument, double desired)
+   {
+      if (argument < desired)
+         throw new RuntimeException("Argument " + argument + " less than: " + desired);
+   }
+
+   public static void checkIfNegative(double argument)
+   {
+      if (argument > 0.0)
+         throw new RuntimeException("Argument " + argument + " not negative.");
+   }
+   
+   public static void checkIfLessOrEqual(double argument, double desired)
+   {
+      if (argument > desired)
+         throw new RuntimeException("Argument " + argument + " greater than: " + desired);
+   }
+
    public static double square(double x)
    {
       return x * x;

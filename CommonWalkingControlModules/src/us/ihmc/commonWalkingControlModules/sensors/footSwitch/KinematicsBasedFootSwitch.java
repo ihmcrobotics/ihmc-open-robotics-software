@@ -8,6 +8,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -27,6 +28,8 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    private final ContactablePlaneBody foot;
    private final ContactablePlaneBody[] otherFeet;
 
+   private final YoFramePoint2d yoResolvedCoP;
+
    public KinematicsBasedFootSwitch(String footName, SideDependentList<? extends ContactablePlaneBody> bipedFeet, double switchZThreshold, double totalRobotWeight, RobotSide side, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(footName + getClass().getSimpleName());
@@ -40,6 +43,9 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       ankleZ = new DoubleYoVariable(footName + "ankleZ", registry);
       this.switchZThreshold = new DoubleYoVariable(footName + "footSwitchZThreshold", registry);
       this.switchZThreshold.set(switchZThreshold);
+
+      yoResolvedCoP = new YoFramePoint2d(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
+
       parentRegistry.addChild(registry);
    }
 
@@ -69,6 +75,9 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       ankleZ = new DoubleYoVariable(footName + "ankleZ", registry);
       this.switchZThreshold = new DoubleYoVariable(footName + "footSwitchZThreshold", registry);
       this.switchZThreshold.set(switchZThreshold);
+
+      yoResolvedCoP = new YoFramePoint2d(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
+
       parentRegistry.addChild(registry);
    }
 
@@ -120,6 +129,12 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    public void computeAndPackCoP(FramePoint2d copToPack)
    {
       copToPack.setToNaN(getMeasurementFrame());
+   }
+
+   @Override
+   public void updateCoP()
+   {
+      yoResolvedCoP.setToZero();
    }
 
    @Override

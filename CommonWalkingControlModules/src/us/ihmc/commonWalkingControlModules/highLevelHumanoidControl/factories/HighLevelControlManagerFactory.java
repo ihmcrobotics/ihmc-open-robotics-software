@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
@@ -37,7 +37,7 @@ public class HighLevelControlManagerFactory
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
 
-   private MomentumBasedController momentumBasedController;
+   private HighLevelHumanoidControllerToolbox momentumBasedController;
    private WalkingControllerParameters walkingControllerParameters;
    private CapturePointPlannerParameters capturePointPlannerParameters;
    private ArmControllerParameters armControllerParameters;
@@ -49,7 +49,7 @@ public class HighLevelControlManagerFactory
       parentRegistry.addChild(registry);
    }
 
-   public void setMomentumBasedController(MomentumBasedController momentumBasedController)
+   public void setMomentumBasedController(HighLevelHumanoidControllerToolbox momentumBasedController)
    {
       this.momentumBasedController = momentumBasedController;
    }
@@ -237,7 +237,7 @@ public class HighLevelControlManagerFactory
    {
       if (momentumBasedController != null)
          return true;
-      missingObjectWarning(MomentumBasedController.class, managerClass);
+      missingObjectWarning(HighLevelHumanoidControllerToolbox.class, managerClass);
       return false;
    }
 
