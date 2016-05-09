@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -82,18 +82,18 @@ public class TaskspaceToJointspaceHandPositionControlState extends State<HandCon
    private final DoubleYoVariable currentTimeInState;
 
    public static TaskspaceToJointspaceHandPositionControlState createControlStateForForceControlledJoints(String namePrefix, RobotSide robotSide,
-         MomentumBasedController momentumBasedController, RigidBody base, RigidBody endEffector, YoPIDGains gains, YoVariableRegistry parentRegistry)
+         HighLevelHumanoidControllerToolbox momentumBasedController, RigidBody base, RigidBody endEffector, YoPIDGains gains, YoVariableRegistry parentRegistry)
    {
       return new TaskspaceToJointspaceHandPositionControlState(namePrefix, robotSide, momentumBasedController, base, endEffector, false, gains, parentRegistry);
    }
 
    public static TaskspaceToJointspaceHandPositionControlState createControlStateForPositionControlledJoints(String namePrefix, RobotSide robotSide,
-         MomentumBasedController momentumBasedController, RigidBody base, RigidBody endEffector, YoVariableRegistry parentRegistry)
+         HighLevelHumanoidControllerToolbox momentumBasedController, RigidBody base, RigidBody endEffector, YoVariableRegistry parentRegistry)
    {
       return new TaskspaceToJointspaceHandPositionControlState(namePrefix, robotSide, momentumBasedController, base, endEffector, true, null, parentRegistry);
    }
 
-   private TaskspaceToJointspaceHandPositionControlState(String namePrefix, RobotSide robotSide, MomentumBasedController momentumBasedController,
+   private TaskspaceToJointspaceHandPositionControlState(String namePrefix, RobotSide robotSide, HighLevelHumanoidControllerToolbox momentumBasedController,
          RigidBody base, RigidBody endEffector, boolean doPositionControl, YoPIDGains gains, YoVariableRegistry parentRegistry)
    {
       super(HandControlMode.TASKSPACE);

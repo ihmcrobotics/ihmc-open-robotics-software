@@ -267,7 +267,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       copToPack.setIncludingFrame(resolvedCoP);
    }
 
-   private void updateCoP()
+   public void updateCoP()
    {
       readSensorData(footWrench);
       copResolver.resolveCenterOfPressureAndNormalTorque(resolvedCoP, footWrench, contactablePlaneBody.getSoleFrame());

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -25,7 +25,7 @@ public class LoadBearingHandControlState extends HandControlState
    private final YoVariableRegistry registry;
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
-   private final MomentumBasedController momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox momentumBasedController;
 
    private final DoubleYoVariable coefficientOfFriction;
    private final SpatialAccelerationVector handAcceleration;
@@ -37,7 +37,7 @@ public class LoadBearingHandControlState extends HandControlState
    private final ReferenceFrame elevatorFrame;
 
 
-   public LoadBearingHandControlState(String namePrefix, HandControlMode stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
+   public LoadBearingHandControlState(String namePrefix, HandControlMode stateEnum, RobotSide robotSide, HighLevelHumanoidControllerToolbox momentumBasedController,
          RigidBody elevator, RigidBody endEffector, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);

@@ -66,7 +66,6 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    private final ReferenceFrame midFeetZUpFrame;
    private final SideDependentList<ReferenceFrame> soleZUpFrames;
-   private final FrameConvexPolygon2d supportPolygon;
    private final FrameConvexPolygon2d predictedSupportPolygon = new FrameConvexPolygon2d();
    private final SideDependentList<FrameConvexPolygon2d> supportFootPolygonsInSoleZUpFrame = new SideDependentList<>();
 
@@ -127,8 +126,6 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       stepLengthToCMPOffsetFactor = new DoubleYoVariable(namePrefix + "StepLengthToCMPOffsetFactor", registry);
 
       numberOfUpcomingFootsteps = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
-
-      supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -514,7 +511,11 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
                centroidOfFootstepToConsider.set(previousExitCMP2d);
          }
 
-         centroidOfCurrentFootstep.setIncludingFrame(supportFootPolygonsInSoleZUpFrame.get(robotSide).getCentroid());
+         FrameConvexPolygon2d footPolygonInSoleZUpFrame = supportFootPolygonsInSoleZUpFrame.get(robotSide);
+         if (footPolygonInSoleZUpFrame.isEmpty())
+            centroidOfCurrentFootstep.setToZero(soleZUpFrames.get(robotSide));
+         else
+            centroidOfCurrentFootstep.setIncludingFrame(footPolygonInSoleZUpFrame.getCentroid());
          centroidOfCurrentFootstep.changeFrameAndProjectToXYPlane(soleFrame);
          constrainCMPAccordingToSupportPolygonAndUserOffsets(cmp2d, centroidOfCurrentFootstep, centroidOfFootstepToConsider, entryCMPUserOffsets.get(robotSide),
                minForwardEntryCMPOffset.getDoubleValue(), maxForwardEntryCMPOffset.getDoubleValue());
@@ -599,7 +600,11 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          putExitCMPOnToes(cmp2d);
       else
       {
-         centroidOfCurrentFootstep.setIncludingFrame(supportFootPolygonsInSoleZUpFrame.get(robotSide).getCentroid());
+         FrameConvexPolygon2d footPolygonInSoleZUpFrame = supportFootPolygonsInSoleZUpFrame.get(robotSide);
+         if (footPolygonInSoleZUpFrame.isEmpty())
+            centroidOfCurrentFootstep.setToZero(soleZUpFrames.get(robotSide));
+         else
+            centroidOfCurrentFootstep.setIncludingFrame(footPolygonInSoleZUpFrame.getCentroid());
          centroidOfCurrentFootstep.changeFrameAndProjectToXYPlane(soleFrame);
          constrainCMPAccordingToSupportPolygonAndUserOffsets(cmp2d, centroidOfCurrentFootstep, centroidOfFootstepToConsider, exitCMPUserOffsets.get(robotSide),
                minForwardExitCMPOffset.getDoubleValue(), maxForwardExitCMPOffset.getDoubleValue());

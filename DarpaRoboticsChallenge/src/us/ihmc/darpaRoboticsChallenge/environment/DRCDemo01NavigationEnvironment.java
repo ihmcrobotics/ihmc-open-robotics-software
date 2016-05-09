@@ -68,6 +68,8 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    private static final double cinderBlockTiltDegrees = 15;
    private static final double cinderBlockTiltRadians = Math.toRadians(cinderBlockTiltDegrees);
 
+   public static final double SOCCER_BALL_RADIUS = 0.127;
+
    private static final boolean VISUALIZE_BOUNDING_BOXES = false;
 
    private static final boolean SHOW_FULL_TESTBED = false;
@@ -105,7 +107,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject3D.addTerrainObject(setUpGround("Ground"));
 
       //Soccer Ball
-      combinedTerrainObject3D.addSphere(1, 1, 0.127 / 2, 0.127, YoAppearance.AliceBlue());
+      combinedTerrainObject3D.addSphere(1, 1, SOCCER_BALL_RADIUS, SOCCER_BALL_RADIUS, YoAppearance.AliceBlue());
 
       if (addLimboBar)
          addLimboBar(combinedTerrainObject3D);

@@ -14,6 +14,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -30,6 +31,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class WalkingMessageHandler
 {
@@ -94,12 +96,24 @@ public class WalkingMessageHandler
    {
       if (command.getNumberOfFootsteps() > 0)
       {
-         upcomingFootsteps.clear();
-         currentFootstepIndex.set(0);
-         isWalkingPaused.set(false);
-         clearFootTrajectory();
+         switch(command.getExecutionMode())
+         {
+         case OVERRIDE:
+            upcomingFootsteps.clear();
+            currentFootstepIndex.set(0);
+            clearFootTrajectory();
+            currentNumberOfFootsteps.set(command.getNumberOfFootsteps());
+            break;
+         case QUEUE:
+            currentNumberOfFootsteps.add(command.getNumberOfFootsteps());
+            break;
+         default:
+            PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
+            return;
+         }
       }
 
+      isWalkingPaused.set(false);
       double commandTransferTime = command.getTransferTime();
       double commandSwingTime = command.getSwingTime();
       if (!Double.isNaN(commandSwingTime) && commandSwingTime > 1.0e-2 && !Double.isNaN(commandTransferTime) && commandTransferTime > 1.0e-2)
@@ -107,8 +121,6 @@ public class WalkingMessageHandler
          transferTime.set(commandTransferTime);
          swingTime.set(commandSwingTime);
       }
-
-      currentNumberOfFootsteps.set(command.getNumberOfFootsteps());
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
