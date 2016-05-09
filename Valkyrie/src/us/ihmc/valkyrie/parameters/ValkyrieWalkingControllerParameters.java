@@ -29,7 +29,7 @@ import us.ihmc.valkyrie.fingers.ValkyrieFingerJointLimits;
 import us.ihmc.valkyrie.fingers.ValkyrieRealRobotFingerJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class ValkyrieWalkingControllerParameters implements WalkingControllerParameters
+public class ValkyrieWalkingControllerParameters extends WalkingControllerParameters
 {
    private final DRCRobotModel.RobotTarget target;
 
@@ -66,7 +66,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
       handPosesWithRespectToChestFrame.put(RobotSide.LEFT, leftHandLocation);
       handPosesWithRespectToChestFrame.put(RobotSide.RIGHT, rightHandLocation);
-      
+
       for(RobotSide side : RobotSide.values())
       {
          sliderBoardControlledFingerJointNamesWithLimits.put(side, new LinkedHashMap<String, ImmutablePair<Double,Double>>());
@@ -76,13 +76,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
                   new ImmutablePair<Double,Double>(ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(side, fingerJoint), ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(side, fingerJoint)));
          }
       }
-      
+
       NeckJointName[] sliderBoardControlledNeckJointNames = ValkyrieSliderBoardControlledNeckJoints.getNeckJointsControlledBySliderBoard();
-      
+
       for (int i = 0; i < sliderBoardControlledNeckJointNames.length; i++)
       {
          NeckJointName joint = sliderBoardControlledNeckJointNames[i];
-         
+
          sliderBoardControlledNeckJointNamesWithLimits.put(
                joint,
                new ImmutablePair<Double, Double>(ValkyrieSliderBoardControlledNeckJoints.getFullyExtendedPositionLimit(joint), ValkyrieSliderBoardControlledNeckJoints
@@ -213,7 +213,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       return sliderBoardControlledNeckJointNamesWithLimits;
    }
-   
+
    @Override
    public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
    {
@@ -228,7 +228,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
          // For sliders, return none of them, to make sure that the QP whole body controller doesn't control the neck.
          return new String[]{};
       }
-      
+
       else if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
       {
          // On the real robot, return all 3 so it knows to use them all. The real robot will use position control.
@@ -236,7 +236,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
          // For now the neck is not controllable
          return new String[] {};
       }
-      
+
       // For sims using the QP and whole body controller, only allow one neck joint for now since the QP and inverse dynamics
       // don't do well with redundant joints yet. We'll have to fix that later some how.
       else return new String[] {jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
@@ -561,7 +561,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       gains.setMaximumAcceleration(maxAccel);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
-      
+
       return gains;
    }
 
@@ -884,7 +884,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getSecondContactThresholdForceIgnoringCoP()
    {
       return 75.0;
-   }   
+   }
 
    @Override
    public double getCoPThresholdFraction()
@@ -924,7 +924,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
             jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch]);
          }
       }
-      
+
       return jointToIgnoreList.toArray(new String[0]);
    }
 
