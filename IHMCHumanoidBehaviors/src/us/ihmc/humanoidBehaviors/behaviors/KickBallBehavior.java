@@ -35,7 +35,7 @@ public class KickBallBehavior extends BehaviorInterface
 
    private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
 
-   private final LocalizeBallBehavior localizeBallBehavior;
+   private final SphereDetectionBehavior sphereDetectionBehavior;
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final KickBehavior kickBehavior;
 
@@ -58,8 +58,8 @@ public class KickBallBehavior extends BehaviorInterface
 
       // create sub-behaviors:
 
-      localizeBallBehavior = new LocalizeBallBehavior(outgoingCommunicationBridge, referenceFrames);
-      behaviors.add(localizeBallBehavior);
+      sphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+      behaviors.add(sphereDetectionBehavior);
 
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters());
@@ -103,7 +103,7 @@ public class KickBallBehavior extends BehaviorInterface
    private void setupPipelineForKick()
    {
 	   
-      BehaviorTask findBallTask = new BehaviorTask(localizeBallBehavior, yoTime, 0)
+      BehaviorTask findBallTask = new BehaviorTask(sphereDetectionBehavior, yoTime, 0)
       {
 
          @Override
@@ -148,9 +148,9 @@ public class KickBallBehavior extends BehaviorInterface
    private FramePose2d getoffsetPoint()
    {
       
-      System.out.println("BALL LOCATION IN GET OFFSET POINT METHOD "+localizeBallBehavior.getBallLocation());
-      FramePoint2d ballPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), localizeBallBehavior.getBallLocation().x,
-            localizeBallBehavior.getBallLocation().y);
+      System.out.println("BALL LOCATION IN GET OFFSET POINT METHOD "+ sphereDetectionBehavior.getBallLocation());
+      FramePoint2d ballPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), sphereDetectionBehavior.getBallLocation().x,
+            sphereDetectionBehavior.getBallLocation().y);
       FramePoint2d robotPosition = new FramePoint2d(midZupFrame, 0.0, 0.0);
       robotPosition.changeFrame(worldFrame);
       FrameVector2d walkingDirection = new FrameVector2d(worldFrame);
