@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -53,7 +53,7 @@ public class FootControlModule
    private final EnumYoVariable<ConstraintType> requestedState;
    private final EnumMap<ConstraintType, boolean[]> contactStatesMap = new EnumMap<ConstraintType, boolean[]>(ConstraintType.class);
 
-   private final MomentumBasedController momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox momentumBasedController;
    private final RobotSide robotSide;
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
@@ -79,7 +79,7 @@ public class FootControlModule
 
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
          YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
-         YoSE3PIDGainsInterface edgeTouchdownFootControlGains, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+         YoSE3PIDGainsInterface edgeTouchdownFootControlGains, HighLevelHumanoidControllerToolbox momentumBasedController, YoVariableRegistry parentRegistry)
    {
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
@@ -307,7 +307,7 @@ public class FootControlModule
 
       stateMachine.checkTransitionConditions();
 
-      if (!isInFlatSupportState())
+      if (!isInFlatSupportState() && footControlHelper.getPartialFootholdControlModule() != null)
          footControlHelper.getPartialFootholdControlModule().reset();
 
       stateMachine.doAction();
@@ -461,7 +461,10 @@ public class FootControlModule
    {
       if (!isInFlatSupportState()) return;
       resetFootPolygon.set(false);
-      footControlHelper.getPartialFootholdControlModule().reset();
+      if (footControlHelper.getPartialFootholdControlModule() != null)
+      {
+         footControlHelper.getPartialFootholdControlModule().reset();
+      }
       momentumBasedController.resetFootSupportPolygon(robotSide);
    }
 }

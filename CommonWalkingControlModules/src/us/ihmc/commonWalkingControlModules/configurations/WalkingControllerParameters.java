@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
@@ -15,7 +16,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
-public interface WalkingControllerParameters extends HeadOrientationControllerParameters, SteppingParameters
+public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
 {
    public abstract SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame();
 
@@ -160,12 +161,12 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract boolean finishSingleSupportWhenICPPlannerIsDone();
 
-   /** 
+   /**
     * This is the duration for which the desired foot center of pressure will be
     * drastically dampened to calm shakies. This particularly useful when
     * dealing with bad footholds.
     * Set to -1.0 to deactivate this feature.
-    */ 
+    */
    public abstract double getHighCoPDampingDurationToPreventFootShakies();
 
    /**
@@ -174,4 +175,13 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
     * Set to {@link Double#POSITIVE_INFINITY} to deactivate this feature.
     */
    public abstract double getCoPErrorThresholdForHighCoPDamping();
+
+   /**
+    * Get the parameters for foothold exploration. The parameters should be created the first time this
+    * method is called.
+    */
+   public ExplorationParameters getOrCreateExplorationParameters(YoVariableRegistry registry)
+   {
+      return null;
+   }
 }
