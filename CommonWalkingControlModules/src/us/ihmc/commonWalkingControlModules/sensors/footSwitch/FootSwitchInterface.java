@@ -10,7 +10,10 @@ public interface FootSwitchInterface
    public abstract boolean hasFootHitGround();
    
    public abstract double computeFootLoadPercentage();
+
    public abstract void computeAndPackCoP(FramePoint2d copToPack);
+
+   public abstract void updateCoP();
 
    public abstract void computeAndPackFootWrench(Wrench footWrenchToPack);
 
