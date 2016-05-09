@@ -27,6 +27,7 @@ public class FootRotationProcessor implements LogDataProcessorFunction
       WalkingControllerParameters walkingControllerParameters = logDataProcessorHelper.getWalkingControllerParameters();
       HighLevelHumanoidControllerToolbox momentumBasedController = logDataProcessorHelper.getMomentumBasedController();
 
+      walkingControllerParameters.getOrCreateExplorationParameters(registry);
       for (RobotSide robotSide : RobotSide.values)
       {
          PartialFootholdControlModule partialFootholdControlModule = new PartialFootholdControlModule(robotSide, momentumBasedController,

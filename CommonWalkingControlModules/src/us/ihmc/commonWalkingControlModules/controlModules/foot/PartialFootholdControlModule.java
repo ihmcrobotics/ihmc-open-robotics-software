@@ -113,6 +113,7 @@ public class PartialFootholdControlModule
 
       registry = new YoVariableRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
+      ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
 
       footholdState = new EnumYoVariable<>(namePrefix + "PartialFootHoldState", registry, PartialFootholdState.class, true);
       yoUnsafePolygon = new YoFrameConvexPolygon2d(namePrefix + "UnsafeFootPolygon", "", ReferenceFrame.getWorldFrame(), 10, registry);
@@ -154,7 +155,7 @@ public class PartialFootholdControlModule
       FootRotationCalculator velocityFootRotationCalculator =
             new VelocityFootRotationCalculator(namePrefix, dt, contactableFoot, twistCalculator, yoGraphicsListRegistry, registry);
       FootRotationCalculator geometricFootRotationCalculator =
-            new GeometricFootRotationCalculator(namePrefix, contactableFoot, yoGraphicsListRegistry, registry);
+            new GeometricFootRotationCalculator(namePrefix, contactableFoot, explorationParameters, yoGraphicsListRegistry, registry);
       rotationCalculators.put(RotationCalculatorType.VELOCITY, velocityFootRotationCalculator);
       rotationCalculators.put(RotationCalculatorType.GEOMETRY, geometricFootRotationCalculator);
 
