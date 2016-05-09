@@ -183,7 +183,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       yoFootDropThreshold = explorationParameters.getFootDropThreshold();
       yoIsFootDropPastThreshold = new BooleanYoVariable(namePrefix + "IsFootDropPastThreshold", generalDescription, registry);
 
-      yoIsFootRotating = new BooleanYoVariable(namePrefix + "Rotating", generalDescription, registry);
+      yoIsFootRotating = new BooleanYoVariable(namePrefix + "RotatingVelocity", generalDescription, registry);
 
       hasBeenInitialized = new BooleanYoVariable(namePrefix + "HasBeenInitialized", registry);
 

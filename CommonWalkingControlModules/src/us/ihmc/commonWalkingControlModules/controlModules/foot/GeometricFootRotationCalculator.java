@@ -83,7 +83,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
 
       angleFootGround = new DoubleYoVariable(namePrefix + "AngleToGround", registry);
       angleTreshold = explorationParameters.getGeometricDetectionAngleThreshold();
-      footRotating = new BooleanYoVariable(namePrefix + "Rotating", registry);
+      footRotating = new BooleanYoVariable(namePrefix + "RotatingGeometry", registry);
 
       copAlpha = explorationParameters.getGeometricDetectionPlanePointAlpha();
       copFiltered = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint(namePrefix + "CoPFiltered",
