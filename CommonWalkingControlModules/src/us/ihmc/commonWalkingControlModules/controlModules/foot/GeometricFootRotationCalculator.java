@@ -45,7 +45,6 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private static final Vector3d zero = new Vector3d(0.0, 0.0, 0.0);
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final static double defaultCopAlpha = 0.99;
-   private final static double defaultAngleThreshold = 10.0 * Math.PI/180.0;
 
    private final ReferenceFrame soleFrame;
    private final FrameConvexPolygon2d defaultFootPolygon;
@@ -73,6 +72,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
 
    public GeometricFootRotationCalculator(String namePrefix,
          ContactablePlaneBody contactableFoot,
+         ExplorationParameters explorationParameters,
          YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
@@ -83,8 +83,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       defaultFootPolygon = new FrameConvexPolygon2d(contactableFoot.getContactPoints2d());
 
       angleFootGround = new DoubleYoVariable(namePrefix + "AngleToGround", registry);
-      angleTreshold = new DoubleYoVariable(namePrefix + "AngleTresholdForRotation", registry);
-      angleTreshold.set(defaultAngleThreshold);
+      angleTreshold = explorationParameters.getGeometricDetectionAngleThreshold();
       footRotating = new BooleanYoVariable(namePrefix + "Rotating", registry);
 
       copAlpha = new DoubleYoVariable(namePrefix + "copAlpha", registry);
