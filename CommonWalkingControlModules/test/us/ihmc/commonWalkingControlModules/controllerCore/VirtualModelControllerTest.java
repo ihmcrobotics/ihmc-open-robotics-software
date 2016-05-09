@@ -61,7 +61,6 @@ public class VirtualModelControllerTest
 
    private boolean hasSCSSimulation = false;
 
-   /*
    @DeployableTestMethod
    @Test(timeout = 1500)
    public void testJacobianCalculation()
@@ -811,8 +810,8 @@ public class VirtualModelControllerTest
 
       simulationTestingParameters.setKeepSCSUp(false);
    }
-   */
 
+   /*
    public static void testVMCWithForkedArm() throws Exception
    {
       double simulationDuration = 20.0;
@@ -946,6 +945,7 @@ public class VirtualModelControllerTest
 
       //simulationTestingParameters.setKeepSCSUp(false);
    }
+   */
 
    @After
    public void destroySimulationAndRecycleMemory()
@@ -1359,12 +1359,11 @@ public class VirtualModelControllerTest
       }
    }
 
-
    private void submitAndCheckVMC(RigidBody base, RigidBody endEffector, Wrench desiredWrench, DenseMatrix64F selectionMatrix)
    {
       simulationTestingParameters.setKeepSCSUp(false);
 
-      InverseDynamicsJoint[] controlledJoints = ScrewTools.createJointPath(base, endEffector);
+      OneDoFJoint[] controlledJoints = ScrewTools.createOneDoFJointPath(base, endEffector);
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, base.getBodyFixedFrame());
       jacobian.compute();
 
@@ -1407,6 +1406,6 @@ public class VirtualModelControllerTest
 
    public static void main(String[] args) throws Exception
    {
-      testVMCWithForkedArm();
+      //testVMCWithForkedArm();
    }
 }
