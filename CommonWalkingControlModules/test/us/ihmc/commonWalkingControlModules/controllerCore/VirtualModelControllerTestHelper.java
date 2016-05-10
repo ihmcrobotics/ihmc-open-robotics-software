@@ -1,19 +1,30 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
+import com.sun.tools.doclets.internal.toolkit.util.Extern;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.controllers.PIDController;
+import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -25,17 +36,26 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.testing.JUnitTools;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import java.util.*;
 
 public class VirtualModelControllerTestHelper
 {
+
+   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+
    private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
@@ -106,6 +126,113 @@ public class VirtualModelControllerTestHelper
       {
          System.err.println("Caught exception in " + getClass().getSimpleName() + ".simulateAndBlockAndCatchExceptions. Exception = /n" + e);
          return false;
+      }
+   }
+
+   public static void createVirtualModelControlTest(SCSRobotFromInverseDynamicsRobotModel robotModel, FullRobotModel controllerModel, List<RigidBody> endEffectors,
+         List<Vector3d> desiredForces, List<Vector3d> desiredTorques, List<ExternalForcePoint> externalForcePoints, DenseMatrix64F selectionMatrix) throws Exception
+   {
+      double simulationDuration = 20.0;
+
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+
+      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
+      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, controllerModel.getElevator(), registry, yoGraphicsListRegistry);
+
+      List<ReferenceFrame> endEffectorFrames = new ArrayList<>();
+      List<FramePose> desiredEndEffectorPoses = new ArrayList<>();
+
+      List<YoWrench> desiredWrenches = new ArrayList<>();
+      List<ForcePointController> forcePointControllers = new ArrayList<>();
+
+      for (int i = 0; i < endEffectors.size(); i++)
+      {
+         RigidBody endEffector = endEffectors.get(i);
+         ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
+
+         FramePose desiredEndEffectorPose = new FramePose(endEffectorFrame);
+         desiredEndEffectorPose.setToZero();
+         desiredEndEffectorPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         endEffectorFrames.add(endEffectorFrame);
+         desiredEndEffectorPoses.add(desiredEndEffectorPose);
+
+         virtualModelController.registerEndEffector(controllerModel.getElevator(), endEffector);
+
+         Wrench desiredWrench = new Wrench(endEffectorFrame, endEffectorFrame);
+         Vector3d desiredForce = desiredForces.get(i);
+         Vector3d desiredTorque = desiredTorques.get(i);
+         FrameVector forceFrameVector = new FrameVector(ReferenceFrame.getWorldFrame(), desiredForce);
+         FrameVector torqueFrameVector = new FrameVector(ReferenceFrame.getWorldFrame(), desiredTorque);
+         forceFrameVector.changeFrame(endEffectorFrame);
+         torqueFrameVector.changeFrame(endEffectorFrame);
+         desiredWrench.set(forceFrameVector, torqueFrameVector);
+         desiredWrench.changeFrame(ReferenceFrame.getWorldFrame());
+
+         YoWrench yoDesiredWrench = new YoWrench("desiredWrench" + i, endEffectorFrame, ReferenceFrame.getWorldFrame(), registry);
+         yoDesiredWrench.set(desiredWrench);
+
+         desiredWrenches.add(yoDesiredWrench);
+
+         Vector3d contactForce = new Vector3d();
+         Vector3d contactTorque = new Vector3d();
+         contactForce.set(desiredForce);
+         contactTorque.set(desiredTorque);
+         contactForce.scale(-1.0);
+         contactTorque.scale(-1.0);
+
+         ForcePointController forcePointController = new ForcePointController("" + i, externalForcePoints.get(i), endEffectorFrame, desiredEndEffectorPose);
+         forcePointController.setInitialForce(contactForce, contactTorque);
+         forcePointController.setLinearGains(250, 10, 0);
+         forcePointControllers.add(forcePointController);
+      }
+
+      DummyArmController armController = new DummyArmController(robotModel, controllerModel, controllerModel.getOneDoFJoints(), forcePointControllers, virtualModelController,
+            geometricJacobianHolder, endEffectors, desiredWrenches, selectionMatrix);
+
+      SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotModel, scsParameters);
+      robotModel.setController(armController);
+      scs.getRootRegistry().addChild(registry);
+      for (ForcePointController forcePointController : forcePointControllers)
+         yoGraphicsListRegistry.registerYoGraphicsList(forcePointController.getYoGraphicsList());
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+
+      BlockingSimulationRunner blockingSimulationRunner = new BlockingSimulationRunner(scs, 1500.0);
+      scs.startOnAThread();
+
+      Vector3d currentPosition = new Vector3d();
+      Quat4d currentOrientation = new Quat4d();
+      Vector3d currentForce = new Vector3d();
+      Vector3d currentTorque = new Vector3d();
+
+      List<Vector3d> desiredPositions = new ArrayList<>();
+      List<Quat4d> desiredOrientations = new ArrayList<>();
+
+      for (int i = 0; i < endEffectors.size(); i++)
+      {
+         desiredPositions.add(armController.getDesiredPosition(i));
+         desiredOrientations.add(armController.getDesiredOrientation(i));
+      }
+
+      // check that the end effector doesn't move, and that the desired force is very close to what we want
+      double timeIncrement = 1.0;
+      while (scs.getTime() < simulationDuration)
+      {
+         blockingSimulationRunner.simulateAndBlock(timeIncrement);
+         for (int i = 0; i < endEffectors.size(); i++)
+         {
+            currentPosition.set(armController.getCurrentPosition(i));
+            currentOrientation.set(armController.getCurrentOrientation(i));
+            currentForce.set(armController.getCurrentForce(i));
+            currentTorque.set(armController.getCurrentTorque(i));
+
+            JUnitTools.assertVector3dEquals("", currentPosition, desiredPositions.get(i), 0.01);
+            JUnitTools.assertQuaternionsEqual(currentOrientation, desiredOrientations.get(i), 0.01);
+            JUnitTools.assertVector3dEquals("", desiredForces.get(i), currentForce, 0.5);
+            JUnitTools.assertVector3dEquals("", desiredTorques.get(i), currentTorque, 0.5);
+         }
       }
    }
 
@@ -1891,6 +2018,406 @@ public class VirtualModelControllerTestHelper
       public SideDependentList<ReferenceFrame> getSoleZUpFrames()
       {
          return null;
+      }
+   }
+
+   private static class ForcePointController implements RobotController
+   {
+      private static final double linearKp = 50.0;
+      private static final double linearKi = 0.0;
+      private static final double linearKd = 50.0;
+      private static final double linearDeadband = 0.00;
+      private static final double angularKp = 0.0;
+      private static final double angularKi = 0.0;
+      private static final double angularKd = 10.0;
+      private static final double angularDeadband = 0.00;
+      private static final double linearMaxIntegral = 50.0;
+      private static final double angularMaxIntegral = 50.0;
+
+      private final YoVariableRegistry registry;
+
+      private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      private final YoPIDGains linearPidGains;
+      private final YoPIDGains angularPidGains;
+
+      private final PIDController pidControllerLinearX;
+      private final PIDController pidControllerLinearY;
+      private final PIDController pidControllerLinearZ;
+      private final PIDController pidControllerAngularX;
+      private final PIDController pidControllerAngularY;
+      private final PIDController pidControllerAngularZ;
+
+      private final ExternalForcePoint forcePoint;
+
+      private final DoubleYoVariable desiredLinearX;
+      private final DoubleYoVariable desiredLinearY;
+      private final DoubleYoVariable desiredLinearZ;
+      private final DoubleYoVariable currentLinearX;
+      private final DoubleYoVariable currentLinearY;
+      private final DoubleYoVariable currentLinearZ;
+
+      private final DoubleYoVariable desiredAngularX;
+      private final DoubleYoVariable desiredAngularY;
+      private final DoubleYoVariable desiredAngularZ;
+      private final DoubleYoVariable currentAngularX;
+      private final DoubleYoVariable currentAngularY;
+      private final DoubleYoVariable currentAngularZ;
+
+      private final ReferenceFrame handFrame;
+      private final FramePose currentPose = new FramePose();
+      private final Vector3d desiredPosition = new Vector3d();
+      private final Vector3d currentPosition = new Vector3d();
+      private final Quat4d desiredOrientation = new Quat4d();
+      private final Quat4d currentOrientation = new Quat4d();
+      private final Vector3d initialForce = new Vector3d();
+      private final Vector3d initialTorque = new Vector3d();
+
+      private final YoFrameVector contactForce;
+      private final YoFrameVector contactTorque;
+
+      private final YoGraphicVector forceVisualizer;
+      private final YoGraphicsList yoGraphicsList;
+
+      private boolean hasInitialForce = false;
+
+      public ForcePointController(ExternalForcePoint forcePoint, ReferenceFrame handFrame, FramePose desiredPose)
+      {
+         this("", forcePoint, handFrame, desiredPose);
+      }
+
+      public ForcePointController(String suffix, ExternalForcePoint forcePoint, ReferenceFrame handFrame, FramePose desiredPose)
+      {
+         this.forcePoint = forcePoint;
+         this.handFrame = handFrame;
+         this.currentPose.setToZero(handFrame);
+         desiredPose.getPosition(desiredPosition);
+         desiredPose.getOrientation(desiredOrientation);
+
+         registry = new YoVariableRegistry("forcePointController" + suffix);
+
+         desiredLinearX = new DoubleYoVariable("desiredLinearX" + suffix, registry);
+         desiredLinearY = new DoubleYoVariable("desiredLinearY" + suffix, registry);
+         desiredLinearZ = new DoubleYoVariable("desiredLinearZ" + suffix, registry);
+         currentLinearX = new DoubleYoVariable("currentLinearX" + suffix, registry);
+         currentLinearY = new DoubleYoVariable("currentLinearY" + suffix, registry);
+         currentLinearZ = new DoubleYoVariable("currentLinearZ" + suffix, registry);
+
+         desiredAngularX = new DoubleYoVariable("desiredAngularX" + suffix, registry);
+         desiredAngularY = new DoubleYoVariable("desiredAngularY" + suffix, registry);
+         desiredAngularZ = new DoubleYoVariable("desiredAngularZ" + suffix, registry);
+         currentAngularX = new DoubleYoVariable("currentAngularX" + suffix, registry);
+         currentAngularY = new DoubleYoVariable("currentAngularY" + suffix, registry);
+         currentAngularZ = new DoubleYoVariable("currentAngularZ" + suffix, registry);
+
+         contactForce = new YoFrameVector("contactForce" + suffix, worldFrame, registry);
+         contactTorque = new YoFrameVector("contactTorque" + suffix, worldFrame, registry);
+
+         yoGraphicsList = new YoGraphicsList("forceGraphicsList" + suffix);
+
+         linearPidGains = new YoPIDGains(forcePoint.getName() + "_linear" + suffix, registry);
+         linearPidGains.setKp(linearKp);
+         linearPidGains.setKi(linearKi);
+         linearPidGains.setKd(linearKd);
+         linearPidGains.setMaximumIntegralError(linearMaxIntegral);
+         linearPidGains.setPositionDeadband(linearDeadband);
+
+         angularPidGains = new YoPIDGains(forcePoint.getName() + "_angular" + suffix, registry);
+         angularPidGains.setKp(angularKp);
+         angularPidGains.setKi(angularKi);
+         angularPidGains.setKd(angularKd);
+         angularPidGains.setMaximumIntegralError(angularMaxIntegral);
+         angularPidGains.setPositionDeadband(angularDeadband);
+
+         pidControllerAngularX = new PIDController(angularPidGains, "angular_X" + suffix, registry);
+         pidControllerAngularY = new PIDController(angularPidGains, "angular_Y" + suffix, registry);
+         pidControllerAngularZ = new PIDController(angularPidGains, "angular_Z" + suffix, registry);
+
+         pidControllerLinearX = new PIDController(linearPidGains, "linear_X" + suffix, registry);
+         pidControllerLinearY = new PIDController(linearPidGains, "linear_Y" + suffix, registry);
+         pidControllerLinearZ = new PIDController(linearPidGains, "linear_Z" + suffix, registry);
+
+         AppearanceDefinition forceAppearance = YoAppearance.Red();
+         forcePoint.getYoPosition().getFramePointCopy();
+         forceVisualizer = new YoGraphicVector("contactForceVisualizer" + suffix, forcePoint.getYoPosition(), contactForce, 0.05, forceAppearance);
+
+         yoGraphicsList.add(forceVisualizer);
+      }
+
+      public YoGraphicsList getYoGraphicsList()
+      {
+         return yoGraphicsList;
+      }
+
+      public void setLinearGains(double kp, double ki, double kd)
+      {
+         linearPidGains.setKp(kp);
+         linearPidGains.setKi(ki);
+         linearPidGains.setKd(kd);
+      }
+
+      public void setAngularGains(double kp, double ki, double kd)
+      {
+         angularPidGains.setKp(kp);
+         angularPidGains.setKi(ki);
+         angularPidGains.setKd(kd);
+      }
+
+      public void setInitialForce(Vector3d initialForce, Vector3d initialTorque)
+      {
+         forcePoint.setForce(initialForce);
+         forcePoint.setMoment(initialTorque);
+         this.initialForce.set(initialForce);
+         this.initialTorque.set(initialTorque);
+         hasInitialForce = true;
+      }
+
+      public void initialize()
+      {
+         if (!hasInitialForce)
+            forcePoint.setForce(0.0, 0.0, 0.0);
+
+         pidControllerAngularX.resetIntegrator();
+         pidControllerAngularY.resetIntegrator();
+         pidControllerAngularZ.resetIntegrator();
+
+         pidControllerLinearX.resetIntegrator();
+         pidControllerLinearY.resetIntegrator();
+         pidControllerLinearZ.resetIntegrator();
+      }
+
+      public void doControl()
+      {
+         currentPose.setToZero(handFrame);
+         currentPose.changeFrame(worldFrame);
+         currentPose.getPosition(currentPosition);
+         currentPose.getOrientation(currentOrientation);
+
+         desiredLinearX.set(desiredPosition.getX());
+         desiredLinearY.set(desiredPosition.getY());
+         desiredLinearZ.set(desiredPosition.getZ());
+
+         desiredAngularX.set(desiredOrientation.getX());
+         desiredAngularY.set(desiredOrientation.getY());
+         desiredAngularZ.set(desiredOrientation.getZ());
+
+         currentLinearX.set(currentPosition.getX());
+         currentLinearY.set(currentPosition.getY());
+         currentLinearZ.set(currentPosition.getZ());
+
+         currentAngularX.set(currentOrientation.getX());
+         currentAngularY.set(currentOrientation.getY());
+         currentAngularZ.set(currentOrientation.getZ());
+
+         double linearForceX = pidControllerLinearX.compute(currentPosition.getX(), desiredPosition.getX(), 0.0, 0.0, 0.0);
+         double linearForceY = pidControllerLinearY.compute(currentPosition.getY(), desiredPosition.getY(), 0.0, 0.0, 0.0);
+         double linearForceZ = pidControllerLinearZ.compute(currentPosition.getZ(), desiredPosition.getZ(), 0.0, 0.0, 0.0);
+
+         linearForceX += initialForce.getX();
+         linearForceY += initialForce.getY();
+         linearForceZ += initialForce.getZ();
+
+         contactForce.setX(linearForceX);
+         contactForce.setY(linearForceY);
+         contactForce.setZ(linearForceZ);
+
+         double torqueX = pidControllerAngularX.computeForAngles(currentOrientation.getX(), desiredOrientation.getX(), 0.0, 0.0, 0.0);
+         double torqueY = pidControllerAngularY.computeForAngles(currentOrientation.getY(), desiredOrientation.getY(), 0.0, 0.0, 0.0);
+         double torqueZ = pidControllerAngularZ.computeForAngles(currentOrientation.getZ(), desiredOrientation.getZ(), 0.0, 0.0, 0.0);
+
+         torqueX += initialTorque.getX();
+         torqueY += initialTorque.getY();
+         torqueZ += initialTorque.getZ();
+
+         contactTorque.setX(torqueX);
+         contactTorque.setY(torqueY);
+         contactTorque.setZ(torqueZ);
+
+         forcePoint.setForce(linearForceX, linearForceY, linearForceZ);
+         forcePoint.setMoment(torqueX, torqueY, torqueZ);
+
+         forceVisualizer.update();
+      }
+
+      public Vector3d getDesiredPosition()
+      {
+         return desiredPosition;
+      }
+
+      public Quat4d getDesiredOrientation()
+      {
+         return desiredOrientation;
+      }
+
+      public Vector3d getCurrentPosition()
+      {
+         return currentPosition;
+      }
+
+      public Vector3d getCurrentTorque()
+      {
+         Vector3d contactTorque = new Vector3d();
+         this.contactTorque.get(contactTorque);
+         contactTorque.negate();
+         return contactTorque;
+      }
+
+      public Vector3d getCurrentForce()
+      {
+         Vector3d contactForce = new Vector3d();
+         this.contactForce.get(contactForce);
+         contactForce.negate();
+         return contactForce;
+      }
+
+      public Quat4d getCurrentOrientation()
+      {
+         return currentOrientation;
+      }
+
+      public String getName()
+      {
+         return "robotArmController";
+      }
+
+      public String getDescription()
+      {
+         return getName();
+      }
+
+      public YoVariableRegistry getYoVariableRegistry()
+      {
+         return registry;
+      }
+   }
+
+   private static class DummyArmController implements RobotController
+   {
+      private final YoVariableRegistry registry = new YoVariableRegistry("controller");
+
+      private final Map<InverseDynamicsJoint, DoubleYoVariable> yoJointTorques = new HashMap<>();
+
+      private final SCSRobotFromInverseDynamicsRobotModel scsRobot;
+      private final FullRobotModel controllerModel;
+      private final OneDoFJoint[] controlledJoints;
+
+      private final VirtualModelController virtualModelController;
+      private final GeometricJacobianHolder geometricJacobianHolder;
+
+      private Wrench desiredWrench = new Wrench();
+
+      private List<ForcePointController> forcePointControllers = new ArrayList<>();
+      private List<YoWrench> yoDesiredWrenches = new ArrayList<>();
+      private List<RigidBody> endEffectors = new ArrayList<>();
+      private final DenseMatrix64F selectionMatrix;
+
+      private boolean firstTick = true;
+
+      public DummyArmController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJoint[] controlledJoints,
+            List<ForcePointController> forcePointControllers, VirtualModelController virtualModelController, GeometricJacobianHolder geometricJacobianHolder,
+            List<RigidBody> endEffectors, List<YoWrench> yoDesiredWrenches, DenseMatrix64F selectionMatrix)
+      {
+         this.scsRobot = scsRobot;
+         this.controllerModel = controllerModel;
+         this.controlledJoints = controlledJoints;
+         this.forcePointControllers = forcePointControllers;
+         this.virtualModelController = virtualModelController;
+         this.geometricJacobianHolder = geometricJacobianHolder;
+         this.endEffectors = endEffectors;
+         this.selectionMatrix = selectionMatrix;
+         this.yoDesiredWrenches = yoDesiredWrenches;
+
+         for (InverseDynamicsJoint joint : controlledJoints)
+            yoJointTorques.put(joint, new DoubleYoVariable(joint.getName() + "solutionTorque", registry));
+
+         for (ForcePointController forcePointController : forcePointControllers)
+            registry.addChild(forcePointController.getYoVariableRegistry());
+      }
+
+      public void initialize()
+      {
+         for (ForcePointController forcePointController : forcePointControllers)
+            forcePointController.initialize();
+      }
+
+      public void doControl()
+      {
+         // copy from scs
+         scsRobot.updateJointPositions_SCS_to_ID();
+         scsRobot.updateJointVelocities_SCS_to_ID();
+         scsRobot.update();
+         controllerModel.updateFrames();
+
+         for (ForcePointController forcePointController : forcePointControllers)
+            forcePointController.doControl();
+         geometricJacobianHolder.compute();
+
+         // compute forces
+         VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
+
+         for (int i = 0; i < endEffectors.size(); i++)
+         {
+            desiredWrench = yoDesiredWrenches.get(i).getWrench();
+            virtualModelController.submitEndEffectorVirtualWrench(endEffectors.get(i), desiredWrench, selectionMatrix);
+         }
+         virtualModelController.compute(virtualModelControlSolution);
+
+         Map<InverseDynamicsJoint, Double> jointTorques = virtualModelControlSolution.getJointTorques();
+         for (OneDoFJoint joint : controlledJoints)
+         {
+            yoJointTorques.get(joint).set(jointTorques.get(joint));
+            joint.setTau(jointTorques.get(joint));
+         }
+
+         // write to scs
+         scsRobot.updateJointPositions_ID_to_SCS();
+         scsRobot.updateJointVelocities_ID_to_SCS();
+         scsRobot.updateJointTorques_ID_to_SCS();
+      }
+
+      public Vector3d getDesiredPosition(int index)
+      {
+         return forcePointControllers.get(index).getDesiredPosition();
+      }
+
+      public Quat4d getDesiredOrientation(int index)
+      {
+         return forcePointControllers.get(index).getDesiredOrientation();
+      }
+
+      public Vector3d getCurrentPosition(int index)
+      {
+         return forcePointControllers.get(index).getCurrentPosition();
+      }
+
+      public Quat4d getCurrentOrientation(int index)
+      {
+         return forcePointControllers.get(index).getCurrentOrientation();
+      }
+
+      public Vector3d getCurrentForce(int index)
+      {
+         return forcePointControllers.get(index).getCurrentForce();
+      }
+
+      public Vector3d getCurrentTorque(int index)
+      {
+         return forcePointControllers.get(index).getCurrentTorque();
+      }
+
+      public String getName()
+      {
+         return "robotArmController";
+      }
+
+      public String getDescription()
+      {
+         return getName();
+      }
+
+      public YoVariableRegistry getYoVariableRegistry()
+      {
+         return registry;
       }
    }
 }
