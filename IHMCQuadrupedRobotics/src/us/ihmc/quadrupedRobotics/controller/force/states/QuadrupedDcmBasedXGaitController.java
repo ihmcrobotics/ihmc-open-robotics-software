@@ -17,6 +17,7 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseForwardDcmTrajecto
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsProvider;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 {
    private final QuadrupedControllerInputProviderInterface inputProvider;
+   private final QuadrupedXGaitSettingsProvider settingsProvider;
    private final DoubleYoVariable robotTimestamp;
    private final double controlDT;
    private final double gravity;
@@ -106,9 +108,10 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    private final FiniteStateMachine<XGaitState, XGaitEvent> xGaitStateMachine;
 
    public QuadrupedDcmBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
-         QuadrupedControllerInputProviderInterface inputProvider)
+         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedXGaitSettingsProvider settingsProvider)
    {
       this.inputProvider = inputProvider;
+      this.settingsProvider = settingsProvider;
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
@@ -166,7 +169,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
       // graphics
       xGaitPreviewStepVisualization = BagOfBalls.createRainbowBag(xGaitPreviewSteps.size(), 0.015, "xGaitPreviewSteps", registry, runtimeEnvironment.getGraphicsListRegistry());
-      xGaitPreviewStepVisualization.setVisible(true);
       xGaitPreviewStepVisualizationPosition = new FramePoint();
    }
 
@@ -251,6 +253,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
    @Override public ControllerEvent process()
    {
+      settingsProvider.getXGaitSettings(xGaitSettings);
       updateEstimates();
       updateSetpoints();
       updateGraphics();
@@ -306,6 +309,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    {
       xGaitStateMachine.reset();
       timedStepController.removeSteps();
+      xGaitPreviewStepVisualization.setVisible(false);
    }
 
    private class InitialTransitionState implements FiniteStateMachineState<XGaitEvent>
@@ -364,6 +368,9 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
             groundPlanePositions.get(robotQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
             groundPlanePositions.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
          }
+
+         // enable graphics
+         xGaitPreviewStepVisualization.setVisible(true);
       }
 
       @Override public XGaitEvent process()
