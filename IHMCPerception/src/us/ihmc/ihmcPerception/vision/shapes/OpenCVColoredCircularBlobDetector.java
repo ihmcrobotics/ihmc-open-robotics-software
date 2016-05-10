@@ -163,6 +163,7 @@ public class OpenCVColoredCircularBlobDetector
          {
             Core.addWeighted(tmpMat, 1.0, mat, 1.0, 0.0, tmpMat);
          }
+         count++;
       }
 
       Imgproc.GaussianBlur(tmpMat, tmpMat, new Size(13, 13), 2, 2);
