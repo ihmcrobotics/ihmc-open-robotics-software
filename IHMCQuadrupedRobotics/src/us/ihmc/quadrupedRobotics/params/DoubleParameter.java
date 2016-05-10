@@ -4,6 +4,12 @@ public class DoubleParameter extends Parameter
 {
    private double value;
 
+   private DoubleParameter() // no-arg for serialization
+   {
+      super(null);
+      this.value =  0.0;
+   }
+
    DoubleParameter(String path, double defaultValue)
    {
       super(path);
