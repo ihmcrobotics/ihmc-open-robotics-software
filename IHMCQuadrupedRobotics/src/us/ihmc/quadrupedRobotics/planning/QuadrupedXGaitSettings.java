@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import us.ihmc.robotics.MathTools;
+
 public class QuadrupedXGaitSettings
 {
    /**
@@ -100,5 +102,26 @@ public class QuadrupedXGaitSettings
    public void setEndPhaseShift(double xGaitPhase)
    {
       this.endPhaseShift = xGaitPhase;
+   }
+
+   public void set(QuadrupedXGaitSettings other)
+   {
+      this.stanceLength = other.stanceLength;
+      this.stanceWidth = other.stanceWidth;
+      this.stepGroundClearance = other.stepGroundClearance;
+      this.stepDuration = other.stepDuration;
+      this.endDoubleSupportDuration = other.endDoubleSupportDuration;
+      this.endPhaseShift = other.endPhaseShift;
+   }
+
+   public boolean epsilonEquals(QuadrupedXGaitSettings other, double epsilon)
+   {
+      boolean equals = MathTools.epsilonEquals(this.stanceLength, other.stanceLength, epsilon);
+      equals &= MathTools.epsilonEquals(this.stanceWidth, other.stanceWidth, epsilon);
+      equals &= MathTools.epsilonEquals(this.stepGroundClearance, other.stepGroundClearance, epsilon);
+      equals &= MathTools.epsilonEquals(this.stepDuration, other.stepDuration, epsilon);
+      equals &= MathTools.epsilonEquals(this.endDoubleSupportDuration, other.endDoubleSupportDuration, epsilon);
+      equals &= MathTools.epsilonEquals(this.endPhaseShift, other.endPhaseShift, epsilon);
+      return equals;
    }
 }
