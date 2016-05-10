@@ -6,8 +6,18 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 public class ParameterPacketListener
 {
    // TODO: Make this a packet communicator, not a global data producer?
-   public ParameterPacketListener(GlobalDataProducer communicator)
+   public ParameterPacketListener(final GlobalDataProducer communicator)
    {
+      communicator.attachListener(RequestParameterListPacket.class, new PacketConsumer<RequestParameterListPacket>()
+      {
+         @Override
+         public void receivedPacket(RequestParameterListPacket packet)
+         {
+            ParameterListPacket response = new ParameterListPacket(ParameterRegistry.getInstance().getParameters());
+            communicator.queueDataToSend(response);
+         }
+      });
+
       communicator.attachListener(SetBooleanParameterPacket.class, new PacketConsumer<SetBooleanParameterPacket>()
       {
          @Override

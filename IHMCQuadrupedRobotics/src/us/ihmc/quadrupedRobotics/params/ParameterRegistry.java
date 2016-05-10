@@ -145,6 +145,11 @@ public class ParameterRegistry
       parameters.add(parameter);
    }
 
+   List<Parameter> getParameters()
+   {
+      return parameters;
+   }
+
    Parameter getParameter(String path)
    {
       for (int i = 0; i < parameters.size(); i++)
