@@ -91,7 +91,7 @@ public class FourBarKinematicLoop
       // Set output joint     
       if(DEFAULT_OUTPUT_jOINT)
       {
-         fourBarOutputJoint = passiveJointD;
+         fourBarOutputJoint = passiveJointC;
          System.out.println("Output joint set to default: " + fourBarOutputJoint.name);
       }
       else
@@ -100,7 +100,7 @@ public class FourBarKinematicLoop
       }
       
       // Jacobian        
-      fourBarJacobianSolver = new FourBarKinematicLoopJacobianSolver(fourBarCalculator, getJointsForJacobianCalculation(fourBarOutputJoint));
+      fourBarJacobianSolver = new FourBarKinematicLoopJacobianSolver(fourBarCalculator, getJointsForJacobianCalculation(fourBarOutputJoint), fourBarOutputJoint);
       jacobian = fourBarJacobianSolver.computeJacobian(fourBarOutputJoint);      
       
       // Initialize interior angle offsets and signs
