@@ -58,6 +58,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
    private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDuration", 1.00);
+   private final DoubleParameter footholdDistanceLowerLimitParameter = parameterFactory.createDouble("footholdDistanceLowerLimit", 0.15);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -99,11 +100,11 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    // state machine
    public enum XGaitState
    {
-      INITIAL_TRANSITION, FORWARD_XGAIT, REVERSE_XGAIT
+      INITIAL_TRANSITION, FORWARD_XGAIT
    }
    public enum XGaitEvent
    {
-      TIMEOUT, FORWARD, REVERSE
+      TIMEOUT, FORWARD
    }
    private final FiniteStateMachine<XGaitState, XGaitEvent> xGaitStateMachine;
 
@@ -160,10 +161,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       FiniteStateMachineBuilder<XGaitState, XGaitEvent> ambleStateMachineBuilder = new FiniteStateMachineBuilder<>(XGaitState.class, XGaitEvent.class, "XGaitState", registry);
       ambleStateMachineBuilder.addState(XGaitState.INITIAL_TRANSITION, new InitialTransitionState());
       ambleStateMachineBuilder.addState(XGaitState.FORWARD_XGAIT, new ForwardXGaitState());
-      ambleStateMachineBuilder.addState(XGaitState.REVERSE_XGAIT, new ReverseXGaitState());
       ambleStateMachineBuilder.addTransition(XGaitEvent.TIMEOUT, XGaitState.INITIAL_TRANSITION, XGaitState.FORWARD_XGAIT);
-      ambleStateMachineBuilder.addTransition(XGaitEvent.REVERSE, XGaitState.FORWARD_XGAIT, XGaitState.REVERSE_XGAIT);
-      ambleStateMachineBuilder.addTransition(XGaitEvent.FORWARD, XGaitState.REVERSE_XGAIT, XGaitState.FORWARD_XGAIT);
       xGaitStateMachine = ambleStateMachineBuilder.build(XGaitState.INITIAL_TRANSITION);
       runtimeEnvironment.getParentRegistry().addChild(registry);
 
@@ -417,18 +415,17 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          double currentTime = robotTimestamp.getDoubleValue();
          timedStepController.registerStepTransitionCallback(this);
 
-         // update dcm height
+         // initialize settings
+         lastEndPhaseShift = xGaitSettings.getEndPhaseShift();
+         thisEndPhaseShift = xGaitSettings.getEndPhaseShift();
+
+         // initialize dcm height
          dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
 
          // compute nominal dcm trajectory
          int nIntervals = timedStepCopPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), currentTime);
          forwardDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
          forwardDcmTrajectory.initializeTrajectory(nIntervals, timedStepCopPlanner.getTimeAtStartOfInterval(), timedStepCopPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
-
-         // update settings
-         settingsProvider.getXGaitSettings(xGaitSettings);
-         lastEndPhaseShift = xGaitSettings.getEndPhaseShift();
-         thisEndPhaseShift = xGaitSettings.getEndPhaseShift();
       }
 
       @Override public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> contactState)
@@ -457,16 +454,8 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
             return;
          }
 
-         // update settings (delay end phase shift to avoid large step adjustments)
-         settingsProvider.getXGaitSettings(xGaitSettings);
-         thisEndPhaseShift = xGaitSettings.getEndPhaseShift();
-         if (thisEndPhaseShift - lastEndPhaseShift < 0 && thisStep.getRobotQuadrant().getEnd() == RobotEnd.HIND)
-            xGaitSettings.setEndPhaseShift(lastEndPhaseShift);
-         if (thisEndPhaseShift - lastEndPhaseShift > 0 && thisStep.getRobotQuadrant().getEnd() == RobotEnd.FRONT)
-            xGaitSettings.setEndPhaseShift(lastEndPhaseShift);
-         lastEndPhaseShift = xGaitSettings.getEndPhaseShift();
-
          // compute preview steps
+         computeXGaitSettings(thisStepQuadrant);
          xGaitStepPlanner.computeMidStepPlan(xGaitPreviewSteps, lastStep, inputProvider.getPlanarVelocityInput(), currentTime, bodyYawSetpoint, xGaitSettings);
          for (int i = 0; i < xGaitPreviewSteps.size(); i++)
          {
@@ -510,44 +499,37 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       {
          timedStepController.registerStepTransitionCallback(null);
       }
-   }
 
-   private class ReverseXGaitState implements FiniteStateMachineState<XGaitEvent>, QuadrupedTimedStepTransitionCallback
-   {
-      public ReverseXGaitState()
+      private void computeXGaitSettings(RobotQuadrant stepQuadrant)
       {
+         settingsProvider.getXGaitSettings(xGaitSettings);
+
+         // delay end phase shift to prevent large step adjustments
+         thisEndPhaseShift = xGaitSettings.getEndPhaseShift();
+         if (thisEndPhaseShift - lastEndPhaseShift < 0 && stepQuadrant.getEnd() == RobotEnd.HIND)
+            xGaitSettings.setEndPhaseShift(lastEndPhaseShift);
+         if (thisEndPhaseShift - lastEndPhaseShift > 0 && stepQuadrant.getEnd() == RobotEnd.FRONT)
+            xGaitSettings.setEndPhaseShift(lastEndPhaseShift);
+         lastEndPhaseShift = xGaitSettings.getEndPhaseShift();
+
+         // increase stance dimensions to prevent self collisions
+         double strideLength = Math.abs(inputProvider.getPlanarVelocityInput().getX() * xGaitSettings.getStepDuration());
+         double strideWidth = Math.abs(inputProvider.getPlanarVelocityInput().getY() * xGaitSettings.getStepDuration());
+         strideLength += 0.5 * Math.abs(xGaitSettings.getStanceWidth() * Math.sin(inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration()));
+         strideWidth += 0.5 * Math.abs(xGaitSettings.getStanceLength()* Math.sin(inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration()));
+         xGaitSettings.setStanceLength(Math.max(xGaitSettings.getStanceLength(), strideLength + footholdDistanceLowerLimitParameter.get()));
+         xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth + footholdDistanceLowerLimitParameter.get()));
       }
 
-      @Override public void onEntry()
+      private void computeStepGoalPosition(Point3d thisGoalPosition, Point3d lastGoalPosition, FramePoint dcmPositionAtEoTS, FramePoint dcmOffsetAtEoNS, double supportTime, double naturalFrequency)
       {
+         double exp = Math.exp(naturalFrequency * supportTime);
+         dcmPositionAtEoTS.scale(exp);
+         dcmPositionAtEoTS.sub(dcmOffsetAtEoNS);
+         dcmPositionAtEoTS.scale(2 / (1 + exp));
+         thisGoalPosition.set(lastGoalPosition);
+         thisGoalPosition.scale((1 - exp) / (1 + exp));
+         thisGoalPosition.add(dcmPositionAtEoTS.getPoint());
       }
-
-      @Override public void onLiftOff(RobotQuadrant robotQuadrant, QuadrantDependentList<ContactState> contactState)
-      {
-      }
-
-      @Override public void onTouchDown(RobotQuadrant robotQuadrant, QuadrantDependentList<ContactState> contactState)
-      {
-      }
-
-      @Override public XGaitEvent process()
-      {
-         return null;
-      }
-
-      @Override public void onExit()
-      {
-      }
-   }
-
-   private void computeStepGoalPosition(Point3d thisGoalPosition, Point3d lastGoalPosition, FramePoint dcmPositionAtEoTS, FramePoint dcmOffsetAtEoNS, double supportTime, double naturalFrequency)
-   {
-      double exp = Math.exp(naturalFrequency * supportTime);
-      dcmPositionAtEoTS.scale(exp);
-      dcmPositionAtEoTS.sub(dcmOffsetAtEoNS);
-      dcmPositionAtEoTS.scale(2 / (1 + exp));
-      thisGoalPosition.set(lastGoalPosition);
-      thisGoalPosition.scale((1 - exp) / (1 + exp));
-      thisGoalPosition.add(dcmPositionAtEoTS.getPoint());
    }
 }
