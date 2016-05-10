@@ -253,7 +253,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
    @Override public ControllerEvent process()
    {
-      settingsProvider.getXGaitSettings(xGaitSettings);
       updateEstimates();
       updateSetpoints();
       updateGraphics();
@@ -303,6 +302,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
       // initialize state machine
       xGaitStateMachine.reset();
+      settingsProvider.getXGaitSettings(xGaitSettings);
    }
 
    @Override public void onExit()
@@ -332,11 +332,13 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       @Override public void onEntry()
       {
          double currentTime = robotTimestamp.getDoubleValue();
+
          initialSupportCentroid.setToZero(supportFrame);
          initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
          initialTransitionTime = currentTime + initialTransitionDurationParameter.get();
 
          // compute initial xGait step plan
+         settingsProvider.getXGaitSettings(xGaitSettings);
          xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, inputProvider.getPlanarVelocityInput(),
                initialQuadrant, initialSupportCentroid, initialTransitionTime, bodyYawSetpoint, xGaitSettings);
          for (int i = 0; i < xGaitPreviewSteps.size(); i++)
@@ -398,6 +400,8 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       private final FramePoint forwardDcmPositionAtEoTS;
       private final FramePoint reverseDcmPositionAtEoNS;
       private final FramePoint nominalDcmOffsetAtEoNS;
+      private double lastEndPhaseShift;
+      private double thisEndPhaseShift;
 
       public ForwardXGaitState()
       {
@@ -420,6 +424,11 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          int nIntervals = timedStepCopPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), currentTime);
          forwardDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
          forwardDcmTrajectory.initializeTrajectory(nIntervals, timedStepCopPlanner.getTimeAtStartOfInterval(), timedStepCopPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
+
+         // update settings
+         settingsProvider.getXGaitSettings(xGaitSettings);
+         lastEndPhaseShift = xGaitSettings.getEndPhaseShift();
+         thisEndPhaseShift = xGaitSettings.getEndPhaseShift();
       }
 
       @Override public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> contactState)
@@ -448,7 +457,16 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
             return;
          }
 
-         // compute nominal xGait step plan based on last step
+         // update settings (delay end phase shift to avoid large step adjustments)
+         settingsProvider.getXGaitSettings(xGaitSettings);
+         thisEndPhaseShift = xGaitSettings.getEndPhaseShift();
+         if (thisEndPhaseShift - lastEndPhaseShift < 0 && thisStep.getRobotQuadrant().getEnd() == RobotEnd.HIND)
+            xGaitSettings.setEndPhaseShift(lastEndPhaseShift);
+         if (thisEndPhaseShift - lastEndPhaseShift > 0 && thisStep.getRobotQuadrant().getEnd() == RobotEnd.FRONT)
+            xGaitSettings.setEndPhaseShift(lastEndPhaseShift);
+         lastEndPhaseShift = xGaitSettings.getEndPhaseShift();
+
+         // compute preview steps
          xGaitStepPlanner.computeMidStepPlan(xGaitPreviewSteps, lastStep, inputProvider.getPlanarVelocityInput(), currentTime, bodyYawSetpoint, xGaitSettings);
          for (int i = 0; i < xGaitPreviewSteps.size(); i++)
          {

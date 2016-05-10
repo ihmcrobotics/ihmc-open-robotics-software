@@ -50,8 +50,8 @@ public class QuadrupedXGaitPlanner
 
       // plan steps
       double lastStepStartTime = timeAtSoS;
+      double lastStepEndTime = timeAtSoS + xGaitSettings.getStanceLength();
       RobotQuadrant lastStepQuadrant = initialStepQuadrant.getNextReversedRegularGaitSwingQuadrant();
-
       for (int i = 0; i < plannedSteps.size(); i++)
       {
          QuadrupedTimedStep step = plannedSteps.get(i);
@@ -62,11 +62,17 @@ public class QuadrupedXGaitPlanner
 
          // compute step timing
          double thisStepStartTime;
+         double thisStepEndTime;
          if (i == 0)
+         {
             thisStepStartTime = timeAtSoS;
+            thisStepEndTime = timeAtSoS + xGaitSettings.getStepDuration();
+         }
          else
+         {
             thisStepStartTime = computeStepStartTime(thisStepQuadrant, lastStepStartTime, xGaitSettings);
-         double thisStepEndTime = computeStepEndTime(thisStepQuadrant, thisStepStartTime, lastStepStartTime, xGaitSettings);
+            thisStepEndTime = computeStepEndTime(thisStepQuadrant, thisStepStartTime, lastStepEndTime, xGaitSettings);
+         }
          step.getTimeInterval().setStartTime(thisStepStartTime);
          step.getTimeInterval().setEndTime(thisStepEndTime);
 
@@ -85,6 +91,7 @@ public class QuadrupedXGaitPlanner
 
          // update state for next step
          lastStepStartTime = thisStepStartTime;
+         lastStepEndTime = thisStepEndTime;
          lastStepQuadrant = thisStepQuadrant;
       }
    }
@@ -211,9 +218,9 @@ public class QuadrupedXGaitPlanner
       double endDoubleSupportDuration = xGaitSettings.getEndDoubleSupportDuration();
       double endPhaseShift = stepQuadrant.isQuadrantInHind() ? 180.0 - xGaitSettings.getEndPhaseShift() : xGaitSettings.getEndPhaseShift();
 
-      // compute step end time assuming the nominal duration can only be scaled in the range (1.0, 1.5)
+      // compute step end time assuming the nominal duration can only be scaled in the range (1.0, 1.25)
       double currentStepEndTime = lastStepEndTime + Math.max((stepDuration + endDoubleSupportDuration) * endPhaseShift / 180.0, 0.0);
-      double currentStepDuration = MathTools.clipToMinMax(currentStepEndTime - stepStartTime, stepDuration, 1.5 * stepDuration);
+      double currentStepDuration = MathTools.clipToMinMax(currentStepEndTime - stepStartTime, stepDuration, 1.25 * stepDuration);
       return stepStartTime + currentStepDuration;
    }
 
