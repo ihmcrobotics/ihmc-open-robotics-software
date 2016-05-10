@@ -1,3 +1,5 @@
+import org.ajoberstar.grgit.Grgit
+
 buildscript {
     repositories {
         jcenter()
@@ -245,7 +247,16 @@ task deploy(dependsOn: ['jar']) {
 }
 
 task createRosJar(type: Jar) {
-    version = project.parent.repo.head().abbreviatedId;
+    def gitRepo;
+    if(!project.parent.hasProperty("repo"))
+    {
+        gitRepo = Grgit.open(project.parent.projectDir)
+    }
+    else
+    {
+        gitRepo = project.parent.repo
+    }
+    version = gitRepo.head().abbreviatedId;
     manifest
             {
                 attributes 'Implementation-Title': 'ROSAPI',
