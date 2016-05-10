@@ -251,7 +251,7 @@ task createRosJar(type: Jar) {
     def gitRepo;
     if(!project.parent.hasProperty("repo"))
     {
-        gitRepo = Grgit.open(project.parent.projectDir)
+        gitRepo = Grgit.open(projectDir.parent)
     }
     else
     {
