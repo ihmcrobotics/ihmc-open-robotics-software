@@ -22,7 +22,9 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedForceBasedStandPrepController implements QuadrupedController
 {
-   private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
+   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedStandPrepController.class.getSimpleName());
+
+   private final ParameterFactory parameterFactory = new ParameterFactory(getClass(), registry);
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
    private final DoubleParameter stanceLengthParameter = parameterFactory.createDouble("stanceLength", 1.0);
@@ -37,7 +39,6 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
 
    private final DoubleYoVariable robotTime;
    private final QuadrupedReferenceFrames referenceFrames;
-   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedStandPrepController.class.getSimpleName());
 
    // Sole trajectories
    private final TimeInterval trajectoryTimeInterval = new TimeInterval();

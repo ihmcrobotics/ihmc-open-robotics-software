@@ -17,14 +17,14 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedForceBasedStandReadyController implements QuadrupedController
 {
-   private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
+   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedStandReadyController.class.getSimpleName());
+
+   private final ParameterFactory parameterFactory = new ParameterFactory(getClass(), registry);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
    private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 20000, 20000, 20000);
    private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedStandReadyController.class.getSimpleName());
 
    // Reference frames
    private final ReferenceFrame bodyFrame;
