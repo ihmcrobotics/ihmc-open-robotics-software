@@ -4,6 +4,7 @@ import javax.vecmath.Point2d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -58,11 +59,12 @@ public class FootCoPOccupancyGrid
 
    private final DoubleYoVariable decayRate;
 
-   public FootCoPOccupancyGrid(String namePrefix, ReferenceFrame soleFrame, double footLength, double footWidth, int nLengthSubdivisions,
-         int nWidthSubdivisions, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public FootCoPOccupancyGrid(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions,
+         int nWidthSubdivisions, WalkingControllerParameters walkingControllerParameters,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.footLength = footLength;
-      this.footWidth = footWidth;
+      this.footLength = walkingControllerParameters.getFootLength();
+      this.footWidth = walkingControllerParameters.getFootWidth();
       this.soleFrame = soleFrame;
       gridOrigin.setIncludingFrame(soleFrame, -footLength, -footWidth);
       gridOrigin.scale(0.5);
@@ -80,11 +82,20 @@ public class FootCoPOccupancyGrid
       this.nLengthSubdivisions.set(nLengthSubdivisions);
       this.nWidthSubdivisions = new IntegerYoVariable(namePrefix + "NWidthSubdivisions", registry);
       this.nWidthSubdivisions.set(nLengthSubdivisions);
-      thresholdForCellActivation = new DoubleYoVariable(namePrefix + "ThresholdForCellActivation", registry);
-      thresholdForCellActivation.set(defaultThresholdForCellActivation);
 
-      decayRate = new DoubleYoVariable(namePrefix + "DecayRate", registry);
-      decayRate.set(defaultDecayRate);
+      ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
+      if (explorationParameters != null)
+      {
+         thresholdForCellActivation = explorationParameters.getCopGridThresholdForOccupancy();
+         decayRate = explorationParameters.getCopGridDecayAlpha();
+      }
+      else
+      {
+         thresholdForCellActivation = new DoubleYoVariable(namePrefix + "ThresholdForCellActivation", registry);
+         thresholdForCellActivation.set(defaultThresholdForCellActivation);
+         decayRate = new DoubleYoVariable(namePrefix + "DecayRate", registry);
+         decayRate.set(defaultDecayRate);
+      }
 
       currentXIndex = new IntegerYoVariable(namePrefix + "CurrentXIndex", registry);
       currentYIndex = new IntegerYoVariable(namePrefix + "CurrentYIndex", registry);
@@ -159,11 +170,6 @@ public class FootCoPOccupancyGrid
 
       thresholdForCellActivation.addVariableChangedListener(changedThresholdForCellActivationListener);
       changedThresholdForCellActivationListener.variableChanged(null);
-   }
-
-   public void setThresholdForCellActivation(double newThreshold)
-   {
-      thresholdForCellActivation.set(newThreshold);
    }
 
    private final FramePoint cellPosition = new FramePoint();
@@ -457,11 +463,6 @@ public class FootCoPOccupancyGrid
             }
          }
       }
-   }
-
-   public void setDecayRate(double rate)
-   {
-      decayRate.set(rate);
    }
 
    public void update()
