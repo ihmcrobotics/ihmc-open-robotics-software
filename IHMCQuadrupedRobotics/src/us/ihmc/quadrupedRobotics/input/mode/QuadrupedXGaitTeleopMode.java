@@ -33,7 +33,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
    private final DoubleParameter vyScaleParameter = parameterFactory.createDouble("vyScale", 0.5);
    private final DoubleParameter vzScaleParameter = parameterFactory.createDouble("vzScale", 0.25);
    private final DoubleParameter wzScaleParameter = parameterFactory.createDouble("wzScale", 1.0);
-   private final DoubleParameter deltaPhaseShiftParameter = parameterFactory.createDouble("deltaPhaseShiftParameter", 30.0);
+   private final DoubleParameter deltaPhaseShiftParameter = parameterFactory.createDouble("deltaPhaseShiftParameter", 22.5);
    private final DoubleParameter deltaStanceWidthParameter = parameterFactory.createDouble("deltaStanceWidthParameter", 0.05);
    private final DoubleParameter deltaStanceLengthParameter = parameterFactory.createDouble("deltaStanceLengthParameter", 0.05);
    private final DoubleParameter defaultComHeightParameter = parameterFactory.createDouble("defaultComHeight", 0.55);
@@ -158,7 +158,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       case LEFT_TRIGGER:
          if (channels.get(InputChannel.LEFT_TRIGGER) == 1.0)
          {
-            xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() - deltaPhaseShiftParameter.get(), 0, 180));
+            xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() + deltaPhaseShiftParameter.get(), 0, 180));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
             packetCommunicator.send(settingsPacket);
          }
@@ -166,7 +166,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       case RIGHT_TRIGGER:
          if (channels.get(InputChannel.RIGHT_TRIGGER) == 1.0)
          {
-            xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() + deltaPhaseShiftParameter.get(), 0, 180));
+            xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() - deltaPhaseShiftParameter.get(), 0, 180));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
             packetCommunicator.send(settingsPacket);
          }
