@@ -9,7 +9,6 @@ import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.producers.CompressedVideoDataClient;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.VideoStreamer;
@@ -21,10 +20,17 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
+import us.ihmc.ihmcPerception.vision.HSVValue;
+import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
+import us.ihmc.ihmcPerception.vision.shapes.HoughCircleResult;
+import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetector;
+import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetectorFactory;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.thread.ThreadTools;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
@@ -43,12 +49,12 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
 
    private final SDFFullHumanoidRobotModel fullRobotModel;
 
-   private final double defaultSwingTime;
-   private final double defaultTranferTime;
+   private final double swingTime = 0.6;
+   private final double tranferTime = 0.5;
 
    private BufferedImage lastBufferedImage;
    private final CompressedVideoDataClient videoDataClient;
-   private boolean detectBall = false;
+   private final BooleanYoVariable detectBall = new BooleanYoVariable("detectBall", registry);
    private BallDetectionThread computerVisionThread = new BallDetectionThread();
    private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>();
 
@@ -70,29 +76,36 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
 
    private final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
-   private final Point3d latestBallPosition = new Point3d();
+   private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
+   private final Point2d latestBallPosition2d = new Point2d();
+   private final Point3d latestBallPosition3d = new Point3d();
 
-   public FollowBallBehavior(BehaviorCommunicationBridge communicationBridge, WalkingControllerParameters walkingControllerParameters,
-         SDFFullHumanoidRobotModel fullRobotModel)
+   public FollowBallBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, SDFFullHumanoidRobotModel fullRobotModel)
    {
-      super(communicationBridge);
+      super(behaviorCommunicationBridge);
 
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>();
       attachControllerListeningQueue(footstepStatusQueue, FootstepStatus.class);
       walkingStatusQueue = new ConcurrentListeningQueue<>();
       attachControllerListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
 
-      defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
-      defaultTranferTime = walkingControllerParameters.getDefaultTransferTime();
-
       videoDataClient = CompressedVideoDataFactory.createCompressedVideoDataClient(this);
       computerVisionThread.start();
-      communicationBridge.attachGlobalListener(getNetworkProcessorGlobalObjectConsumer());
+      behaviorCommunicationBridge.attachGlobalListener(getNetworkProcessorGlobalObjectConsumer());
       attachNetworkProcessorListeningQueue(videoPacketQueue, VideoPacket.class);
       attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
 
       this.fullRobotModel = fullRobotModel;
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
+
+      OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
+      factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);
+      openCVColoredCircularBlobDetector = factory.buildBlobDetector();
+
+      HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
+      openCVColoredCircularBlobDetector.addHSVRange(greenRange);
+
+      detectBall.set(false);
    }
 
    private class BallDetectionThread extends Thread
@@ -101,7 +114,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       {
          while (true)
          {
-            if (detectBall)
+            if (detectBall.getBooleanValue())
             {
                if (videoPacketQueue.isNewPacketAvailable())
                {
@@ -118,6 +131,10 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
                   ThreadTools.sleep(10);
                }
             }
+            else
+            {
+               ThreadTools.sleep(10);
+            }
          }
       }
    }
@@ -125,7 +142,11 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    @Override public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParamaters)
    {
       this.lastBufferedImage = bufferedImage;
-      // set ball center from image
+      openCVColoredCircularBlobDetector.updateFromBufferedImage(bufferedImage);
+      ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
+
+      if(circles.size() > 0)
+         latestBallPosition2d.set(circles.get(0).getCenter());
    }
 
    @Override public void doControl()
@@ -163,18 +184,28 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       if (fullPointCloud != null)
       {
          fullRobotModel.getHead();
-         List<Point3f> filteredPointCloud = filterPointsNearBall(fullPointCloud, headFrame);
+         List<Point3f> filteredPointCloud = filterPointsNearBall(fullPointCloud);
          List<Sphere3D_F64> detectedSpheres = detectBalls(filteredPointCloud);
+
+         System.out.println("Ball center: " + detectedSpheres.get(0).getCenter());
       }
    }
 
-   private static List<Point3f> filterPointsNearBall(Point3f[] fullPointCloud, ReferenceFrame cameraFrame)
+   private List<Point3f> filterPointsNearBall(Point3f[] fullPointCloud)
    {
       List<Point3f> filteredPoints = new ArrayList<Point3f>();
-      RigidBodyTransform worldToCameraTransform = cameraFrame.getTransformToWorldFrame();
+      RigidBodyTransform worldToCameraTransform = headFrame.getTransformToWorldFrame();
+
+      int cameraPixelWidth = lastBufferedImage.getWidth();
+      int cameraPixelHeight = lastBufferedImage.getHeight();
+
+      double ballCenterX = latestBallPosition2d.x - lastBufferedImage.getMinX();
+      double ballCenterY = latestBallPosition2d.y - lastBufferedImage.getMinY();
+
+      double desiredRayAngleX = 0.5 * VERTICAL_FOV * (ballCenterY / cameraPixelHeight - 0.5);
+      double desiredRayAngleY = 0.5 * HORIZONTAL_FOV * (ballCenterX / cameraPixelWidth - 0.5);
+
       Point3f tempPoint = new Point3f();
-      double desiredRayAngleX = 0.0; // TODO determine ray from 2d point
-      double desiredRayAngleY = 0.0; // TODO determine ray from 2d point
 
       for (int i = 0; i < fullPointCloud.length; i++)
       {
@@ -249,25 +280,26 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
 
    @Override public void initialize()
    {
-      detectBall = true;
+      System.out.println("initializing " + getClass().getSimpleName());
+      detectBall.set(true);
    }
 
    @Override public void pause()
    {
       sendPacketToController(new PauseWalkingMessage(true));
-      detectBall = false;
+      detectBall.set(false);
    }
 
    @Override public void stop()
    {
       sendPacketToController(new PauseWalkingMessage(true));
-      detectBall = false;
+      detectBall.set(false);
    }
 
    @Override public void resume()
    {
       sendPacketToController(new PauseWalkingMessage(false));
-      detectBall = true;
+      detectBall.set(false);
    }
 
    @Override public boolean isDone()
