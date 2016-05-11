@@ -10,6 +10,7 @@ import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.ihmcPerception.vision.HSVValue;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
+import javax.swing.*;
 import javax.vecmath.Point2d;
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -210,10 +211,18 @@ public class OpenCVColoredCircularBlobDetector
 
       ImagePanel imagePanel = ShowImages.showWindow(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR()), "Circle Detector");
 
+      JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(imagePanel);
+
       Scalar circleColor = new Scalar(160, 0, 0);
 
       while (true)
       {
+         if(!frame.isVisible() && openCVColoredCircularBlobDetector.videoCapture != null)
+         {
+            openCVColoredCircularBlobDetector.videoCapture.release();
+            break;
+         }
+
          openCVColoredCircularBlobDetector.updateFromVideo();
 
          ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
@@ -226,5 +235,7 @@ public class OpenCVColoredCircularBlobDetector
 
          imagePanel.setBufferedImage(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR()));
       }
+
+      System.exit(0);
    }
 }
