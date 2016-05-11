@@ -12,7 +12,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
 {
    private double swingTime;
    private double transferTime = 0.0;
-   private ExecutionMode executionMode;
+   private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    private final RecyclingArrayList<FootstepDataControllerCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataControllerCommand.class);
 
    public FootstepDataListCommand()

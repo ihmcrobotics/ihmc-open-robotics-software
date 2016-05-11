@@ -4,6 +4,7 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -54,6 +55,8 @@ public class SmartCMPProjectorTwo extends CMPProjector
       capturePoint.changeFrame(returnFrame);
    }
 
+   private final BoundingBox2d tempBoundingBox = new BoundingBox2d();
+
    private void projectCMPIntoSupportPolygonIfOutsideLocal(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon,
          FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
    {
@@ -61,7 +64,10 @@ public class SmartCMPProjectorTwo extends CMPProjector
       cmpProjectedToPushTowardFinalDesiredICP.set(false);
       cmpProjectedToVertex.set(false);
 
-      if (supportPolygon.getArea() < 1.0e-3)
+      supportPolygon.getBoundingBox(tempBoundingBox);
+      double diagonalLengthSquared = tempBoundingBox.getDiagonalLengthSquared();
+
+      if (diagonalLengthSquared < 0.01 * 0.01)
       {
          supportPolygon.getCentroid(desiredCMP);
          return;
