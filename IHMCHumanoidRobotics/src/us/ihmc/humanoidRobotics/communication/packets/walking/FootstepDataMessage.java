@@ -334,16 +334,13 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.location = RandomTools.generateRandomPointWithEdgeCases(random, 0.05);
       this.orientation = RandomTools.generateRandomQuaternion(random);
       int numberOfPredictedContactPoints = random.nextInt(10);
-      if (numberOfPredictedContactPoints == 0)
-         predictedContactPoints = null;
-      else
+      this.predictedContactPoints = new ArrayList<>();
+
+      for (int i = 0; i < numberOfPredictedContactPoints; i++)
       {
-         this.predictedContactPoints = new ArrayList<>();
-         for (int i = 0; i < numberOfPredictedContactPoints; i++)
-         {
-            predictedContactPoints.add(new Point2d(random.nextDouble(), random.nextDouble()));
-         }
+         predictedContactPoints.add(new Point2d(random.nextDouble(), random.nextDouble()));
       }
+
       this.trajectoryType = trajectoryTypes[randomOrdinal];
       this.swingHeight = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.05);
    }
