@@ -7,7 +7,6 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -67,6 +66,7 @@ public class OnToesState extends AbstractFootControlState
    private final TwistCalculator twistCalculator;
 
    private final ReferenceFrame soleFrame;
+   private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
 
    public OnToesState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
@@ -200,26 +200,26 @@ public class OnToesState extends AbstractFootControlState
    {
       super.doTransitionIntoAction();
 
-      if (exitCMP2d.containsNaN())
+      footPolygon.clear(soleFrame);
+
+      for (int i = 0; i < contactPoints.size(); i++)
       {
-         contactableFoot.getToeOffContactPoint(toeOffContactPoint2d);
+         contactPoints.get(i).getPosition2d(toeOffContactPoint2d);
+         footPolygon.addVertex(toeOffContactPoint2d);
       }
+
+      footPolygon.update();
+
+      FramePoint2d rayOrigin;
+
+      if (!exitCMP2d.containsNaN() && footPolygon.isPointInside(exitCMP2d))
+         rayOrigin = exitCMP2d;
       else
-      {
-         BipedSupportPolygons bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
-         FrameConvexPolygon2d footPolygonInSoleFrame = bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide);
+         rayOrigin = footPolygon.getCentroid();
 
-         FramePoint2d rayOrigin;
-
-         if (footPolygonInSoleFrame.isPointInside(exitCMP2d))
-            rayOrigin = exitCMP2d;
-         else
-            rayOrigin = footPolygonInSoleFrame.getCentroid();
-
-         rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
-         FramePoint2d[] intersectionWithRay = footPolygonInSoleFrame.intersectionWithRay(rayThroughExitCMP);
-         toeOffContactPoint2d.set(intersectionWithRay[0]);
-      }
+      rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
+      FramePoint2d[] intersectionWithRay = footPolygon.intersectionWithRay(rayThroughExitCMP);
+      toeOffContactPoint2d.set(intersectionWithRay[0]);
 
       contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());

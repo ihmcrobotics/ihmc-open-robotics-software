@@ -60,6 +60,14 @@ public class WholeBodyControlCoreToolbox
       this.spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
    }
 
+   public static WholeBodyControlCoreToolbox createForInverseKinematicsOnly(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints,
+         CommonHumanoidReferenceFrames referenceFrames, double controlDT, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator)
+   {
+      WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, controlledJoints, null, referenceFrames, controlDT, Double.NaN,
+            geometricJacobianHolder, twistCalculator, null, null);
+      return ret;
+   }
+
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       return momentumOptimizationSettings;
