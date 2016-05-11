@@ -197,7 +197,11 @@ public class RobotTools
          }
          
       }
-      
+           
+      public Joint findSCSJoint(InverseDynamicsJoint joint)
+      {
+         return idToSCSJointMap.get(joint);
+      }
    }
 
    public static Joint addSCSJointUsingIDJoint(InverseDynamicsJoint idJoint, Robot scsRobot, boolean isRootJoint)
