@@ -42,7 +42,7 @@ public class FourBarKinematicLoop
    private final FourBarCalculatorWithDerivatives fourBarCalculator;
 
    private final FourBarKinematicLoopJacobianSolver fourBarJacobianSolver;
-   private DenseMatrix64F jacobian, outputJointLinearVelocities;
+   private DenseMatrix64F jacobian, outputJointVelocitiesToPack;
 
    private final double[] passiveInteriorAnglesAtZeroConfiguration = new double[3];
    private final double[] passiveJointSigns = new double[3];
@@ -92,7 +92,7 @@ public class FourBarKinematicLoop
       if(DEFAULT_OUTPUT_jOINT)
       {
          fourBarOutputJoint = passiveJointC;
-         System.out.println("Output joint set to default: " + fourBarOutputJoint.name);
+         System.out.println("\nNote! Output joint set to default: " + fourBarOutputJoint.name + "\n");
       }
       else
       {
@@ -376,12 +376,12 @@ public class FourBarKinematicLoop
          System.out.println("\nJacobian: \n" + jacobian);
 //      }
       
-      fourBarJacobianSolver.solveLinearVelFromAngularVel(jacobian, masterJointA.getQd());
-      outputJointLinearVelocities = jacobian;
+      outputJointVelocitiesToPack = jacobian;
+      fourBarJacobianSolver.solveLinearVelFromAngularVel(outputJointVelocitiesToPack, masterJointA.getQd());
      
 //      if(DEBUG)
 //      {
-         System.out.println("\nVelocity output (J*qd): \n" + outputJointLinearVelocities);      
+         System.out.println("\nVelocity output (J*qd): \n" + outputJointVelocitiesToPack);      
 //      }
       
       passiveJointB.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleABC(), 0));
@@ -460,6 +460,11 @@ public class FourBarKinematicLoop
    
    public DenseMatrix64F getOutputJointLinearVelocities()
    {
-      return outputJointLinearVelocities;
+      return outputJointVelocitiesToPack;
+   }
+   
+   public DenseMatrix64F getFourBarJacobian()
+   {
+      return jacobian;
    }
 }

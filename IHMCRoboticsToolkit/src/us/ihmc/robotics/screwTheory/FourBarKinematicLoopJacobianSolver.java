@@ -8,7 +8,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FourBarKinematicLoopJacobianSolver
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private final FourBarCalculatorWithDerivatives fourBarCalculator;
   
@@ -30,7 +30,7 @@ public class FourBarKinematicLoopJacobianSolver
       columnJacobian = new DenseMatrix64F(6, 1);  
       geometricJacobianToColumnJacobian = new DenseMatrix64F();
       //      jacobianFrame = jointsForJacobianCalculation[jointsForJacobianCalculation.length - 1].getFrameAfterJoint();
-      geometricJacobianFrame = outputJoint.getFrameAfterJoint();     
+      geometricJacobianFrame = outputJoint.getFrameAfterJoint();  
       geometricJacobian = new GeometricJacobian(jointsForJacobianCalculation, geometricJacobianFrame);
    }
 
@@ -49,7 +49,8 @@ public class FourBarKinematicLoopJacobianSolver
       if (DEBUG)
       {
          System.out.println("Geometric jacobian size: " + geometricJacobian.getJacobianMatrix().getNumRows() + " , " + geometricJacobian.getJacobianMatrix().getNumCols());
-         System.out.println("Column jacobian size: " + columnJacobian.getNumRows() + " , " + columnJacobian.getNumCols());
+         System.out.println("Column vector open to closed loop jacobian size: " + geometricJacobianToColumnJacobian.getNumRows() + " , " + geometricJacobianToColumnJacobian.getNumCols());
+         System.out.println("Jacobian size: " + columnJacobian.getNumRows() + " , " + columnJacobian.getNumCols());
       }
 
       return columnJacobian;
