@@ -33,6 +33,7 @@ public class OpenCVColoredCircularBlobDetector
    private final Map<HSVRange, Mat> rangeOutputMaterials = new HashMap<>();
 
    private final Mat tmpMat = new Mat();
+   private final Mat thresholdMat = new Mat();
    private final Mat currentCameraFrameMatInBGR = new Mat();
    private final Mat currentCameraFrameMatInHSV = new Mat();
    private final Mat medianBlurredMat = new Mat();
@@ -65,6 +66,11 @@ public class OpenCVColoredCircularBlobDetector
       }
    }
 
+   public void resetRanges()
+   {
+      rangeOutputMaterials.clear();
+   }
+
    public void addHSVRange(HSVRange range)
    {
       if(!rangeOutputMaterials.containsKey(range))
@@ -81,6 +87,11 @@ public class OpenCVColoredCircularBlobDetector
    public Mat getCurrentCameraFrameMatInBGR()
    {
       return currentCameraFrameMatInBGR;
+   }
+
+   public Mat getThresholdMat()
+   {
+      return thresholdMat;
    }
 
    public void updateFromVideo()
@@ -165,18 +176,18 @@ public class OpenCVColoredCircularBlobDetector
 
          if(count == 0)
          {
-            mat.copyTo(tmpMat);
+            mat.copyTo(thresholdMat);
          }
          else
          {
-            Core.addWeighted(tmpMat, 1.0, mat, 1.0, 0.0, tmpMat);
+            Core.addWeighted(thresholdMat, 1.0, mat, 1.0, 0.0, thresholdMat);
          }
          count++;
       }
 
-      Imgproc.GaussianBlur(tmpMat, tmpMat, new Size(13, 13), 2, 2);
+      Imgproc.GaussianBlur(thresholdMat, thresholdMat, new Size(13, 13), 2, 2);
 
-      Imgproc.HoughCircles(tmpMat, houghCirclesOutputMat, Imgproc.CV_HOUGH_GRADIENT, 1, tmpMat.rows() / 8, 100, 15, 0, 0);
+      Imgproc.HoughCircles(thresholdMat, houghCirclesOutputMat, Imgproc.CV_HOUGH_GRADIENT, 1, thresholdMat.rows() / 8, 100, 15, 0, 0);
 
       circles.clear();
       for (int i = 0; i < houghCirclesOutputMat.cols(); i++)
@@ -200,7 +211,7 @@ public class OpenCVColoredCircularBlobDetector
       HSVRange greenRange = new HSVRange(new HSVValue(55, 80, 80), new HSVValue(139, 255, 255));
 //      HSVRange brightRedRange = new HSVRange(new HSVValue(120, 80, 80), new HSVValue(179, 255, 255));
 //      HSVRange dullRedRange = new HSVRange(new HSVValue(3, 80, 80), new HSVValue(10, 255, 255));
-      HSVRange yellowRange = new HSVRange(new HSVValue(20, 100, 100), new HSVValue(30, 255, 255));
+      HSVRange yellowRange = new HSVRange(new HSVValue(25, 100, 100), new HSVValue(40, 255, 255));
 
       openCVColoredCircularBlobDetector.addHSVRange(greenRange);
 //      openCVColoredCircularBlobDetector.addHSVRange(brightRedRange);
