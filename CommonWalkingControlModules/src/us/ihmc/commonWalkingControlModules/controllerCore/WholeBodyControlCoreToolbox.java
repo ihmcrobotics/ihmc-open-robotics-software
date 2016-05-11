@@ -12,6 +12,7 @@ import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -61,7 +62,10 @@ public class WholeBodyControlCoreToolbox
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
       this.spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
 
-      totalRobotMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      if (fullRobotModel != null)
+         totalRobotMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      else
+         totalRobotMass = TotalMassCalculator.computeSubTreeMass(ScrewTools.getRootBody(controlledJoints[0].getSuccessor()));
    }
 
    public static WholeBodyControlCoreToolbox createForInverseKinematicsOnly(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints,
