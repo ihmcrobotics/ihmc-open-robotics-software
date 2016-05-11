@@ -328,6 +328,10 @@ public class QuadrupedTimedStepController
          solePosition.changeFrame(goalPosition.getReferenceFrame());
          swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval);
 
+         // initialize goal position
+         timedStep.getGoalPosition(goalPosition);
+         goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
          // initialize contact state and feedback gains
          solePositionController.getGains(robotQuadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
          solePositionController.getGains(robotQuadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
@@ -351,6 +355,10 @@ public class QuadrupedTimedStepController
          stepAdjustmentSetpoint.get(robotQuadrant).scale(envelope);
          solePositionControllerSetpoints.getSolePosition(robotQuadrant).changeFrame(stepAdjustmentSetpoint.get(robotQuadrant).getReferenceFrame());
          solePositionControllerSetpoints.getSolePosition(robotQuadrant).add(stepAdjustmentSetpoint.get(robotQuadrant));
+
+         // compute new goal position
+         timedStep.setGoalPosition(goalPosition);
+         timedStep.getGoalPosition().add(stepAdjustmentSetpoint.get(robotQuadrant).getVector());
 
          // trigger touch down event
          if (currentTime >= touchDownTime)
