@@ -24,7 +24,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedStandPrepController.class.getSimpleName());
 
-   private final ParameterFactory parameterFactory = new ParameterFactory(getClass(), registry);
+   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
    private final DoubleParameter stanceLengthParameter = parameterFactory.createDouble("stanceLength", 1.0);

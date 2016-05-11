@@ -13,7 +13,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
  * Example usage:
  * <pre>
  * class MyClass {
- *    ParameterFactory parameterFactory = new ParameterFactory(getClass());
+ *    ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
  *    DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 2);
  * }
  * </pre>
@@ -28,16 +28,40 @@ public class ParameterFactory
     *
     * @param namespace
     */
-   public ParameterFactory(Class<?> namespace)
+   private ParameterFactory(Class<?> namespace)
    {
       this.namespace = namespace.getName();
       this.registry = null;
    }
 
-   public ParameterFactory(Class<?> namespace, YoVariableRegistry registry)
+   private ParameterFactory(Class<?> namespace, YoVariableRegistry registry)
    {
       this.namespace = namespace.getName();
       this.registry = registry;
+   }
+
+   /**
+    * Creates a new ParameterFactory without a {@link YoVariableRegistry}. Without a registry, {@link YoVariable}s will not be registered at all. If you would
+    * like to access parameter values as {@link YoVariable}s, then use {@link #createWithRegistry(Class, YoVariableRegistry)} instead.
+    *
+    * @param namespace the namespace in which to register parameters
+    * @return a new parameter factory
+    */
+   public static ParameterFactory createWithoutRegistry(Class<?> namespace)
+   {
+      return new ParameterFactory(namespace);
+   }
+
+   /**
+    * Creates a new ParameterFactory with a {@link YoVariableRegistry}. For {@link Parameter} types that are supported, {@link YoVariable}s will be created and
+    * values will be mirrored.
+    *
+    * @param namespace the namespace in which to register parameters
+    * @return a new parameter factory
+    */
+   public static ParameterFactory createWithRegistry(Class<?> namespace, YoVariableRegistry registry)
+   {
+      return new ParameterFactory(namespace, registry);
    }
 
    public BooleanParameter createBoolean(String name, boolean defaultValue)
