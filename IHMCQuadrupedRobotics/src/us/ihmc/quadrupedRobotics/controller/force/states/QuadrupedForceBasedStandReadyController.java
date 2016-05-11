@@ -19,7 +19,7 @@ public class QuadrupedForceBasedStandReadyController implements QuadrupedControl
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedStandReadyController.class.getSimpleName());
 
-   private final ParameterFactory parameterFactory = new ParameterFactory(getClass(), registry);
+   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
    private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 20000, 20000, 20000);
    private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
