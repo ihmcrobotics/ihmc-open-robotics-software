@@ -247,8 +247,22 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       }
    }
 
+   private void updateSettings()
+   {
+      settingsProvider.getXGaitSettings(xGaitSettings);
+
+      // increase stance dimensions to prevent self collisions
+      double strideLength = Math.abs(inputProvider.getPlanarVelocityInput().getX() * xGaitSettings.getStepDuration());
+      double strideWidth = Math.abs(inputProvider.getPlanarVelocityInput().getY() * xGaitSettings.getStepDuration());
+      strideLength += 0.5 * Math.abs(xGaitSettings.getStanceWidth() * Math.sin(inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration()));
+      strideWidth += 0.5 * Math.abs(xGaitSettings.getStanceLength()* Math.sin(inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration()));
+      xGaitSettings.setStanceLength(Math.max(xGaitSettings.getStanceLength(), strideLength + footholdDistanceLowerLimitParameter.get()));
+      xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth + footholdDistanceLowerLimitParameter.get()));
+   }
+
    @Override public ControllerEvent process()
    {
+      updateSettings();
       updateEstimates();
       updateSetpoints();
       updateGraphics();
@@ -297,8 +311,8 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       bodyYawSetpoint = taskSpaceEstimates.getBodyOrientation().getYaw();
 
       // initialize state machine
+      updateSettings();
       xGaitStateMachine.reset();
-      settingsProvider.getXGaitSettings(xGaitSettings);
 
       // initialize graphics
       xGaitPreviewStepVisualization.setVisible(true);
@@ -345,7 +359,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          groundPlaneEstimator.compute(groundPlanePositions);
 
          // initialize xGait step plan
-         settingsProvider.getXGaitSettings(xGaitSettings);
          xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, inputProvider.getPlanarVelocityInput(),
                initialQuadrant, initialSupportCentroid, initialTransitionTime, bodyYawSetpoint, xGaitSettings);
          for (int i = 0; i < xGaitPreviewSteps.size(); i++)
@@ -398,8 +411,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       private final FramePoint reverseDcmPositionAtEoNS;
       private final FramePoint nominalDcmOffsetAtEoNS;
       private final FrameVector goalPositionAdjustment;
-      private double lastEndPhaseShift;
-      private double thisEndPhaseShift;
 
       public ForwardXGaitState()
       {
@@ -411,16 +422,23 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          goalPositionAdjustment = new FrameVector();
       }
 
+      private void computeStepGoalPosition(Point3d thisGoalPosition, Point3d lastGoalPosition, FramePoint dcmPositionAtEoTS, FramePoint dcmOffsetAtEoNS, double supportTime, double naturalFrequency)
+      {
+         double exp = Math.exp(naturalFrequency * supportTime);
+         dcmPositionAtEoTS.scale(exp);
+         dcmPositionAtEoTS.sub(dcmOffsetAtEoNS);
+         dcmPositionAtEoTS.scale(2 / (1 + exp));
+         thisGoalPosition.set(lastGoalPosition);
+         thisGoalPosition.scale((1 - exp) / (1 + exp));
+         thisGoalPosition.add(dcmPositionAtEoTS.getPoint());
+      }
+
       @Override public void onEntry()
       {
          double currentTime = robotTimestamp.getDoubleValue();
          timedStepController.registerStepTransitionCallback(this);
 
-         // initialize settings
-         lastEndPhaseShift = xGaitSettings.getEndPhaseShift();
-         thisEndPhaseShift = xGaitSettings.getEndPhaseShift();
-
-         // initialize dcm height
+         // update dcm height
          dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
 
          // compute nominal dcm trajectory
@@ -462,7 +480,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          }
 
          // compute preview steps
-         computeXGaitSettings(thisStepQuadrant);
          xGaitStepPlanner.computeMidStepPlan(xGaitPreviewSteps, lastStep, inputProvider.getPlanarVelocityInput(), currentTime, bodyYawSetpoint, xGaitSettings);
          for (int i = 0; i < xGaitPreviewSteps.size(); i++)
          {
@@ -515,38 +532,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       @Override public void onExit()
       {
          timedStepController.registerStepTransitionCallback(null);
-      }
-
-      private void computeXGaitSettings(RobotQuadrant stepQuadrant)
-      {
-         settingsProvider.getXGaitSettings(xGaitSettings);
-
-         // delay end phase shift to prevent large step adjustments
-         thisEndPhaseShift = xGaitSettings.getEndPhaseShift();
-         if (thisEndPhaseShift - lastEndPhaseShift < 0 && stepQuadrant.getEnd() == RobotEnd.HIND)
-            xGaitSettings.setEndPhaseShift(lastEndPhaseShift);
-         if (thisEndPhaseShift - lastEndPhaseShift > 0 && stepQuadrant.getEnd() == RobotEnd.FRONT)
-            xGaitSettings.setEndPhaseShift(lastEndPhaseShift);
-         lastEndPhaseShift = xGaitSettings.getEndPhaseShift();
-
-         // increase stance dimensions to prevent self collisions
-         double strideLength = Math.abs(inputProvider.getPlanarVelocityInput().getX() * xGaitSettings.getStepDuration());
-         double strideWidth = Math.abs(inputProvider.getPlanarVelocityInput().getY() * xGaitSettings.getStepDuration());
-         strideLength += 0.5 * Math.abs(xGaitSettings.getStanceWidth() * Math.sin(inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration()));
-         strideWidth += 0.5 * Math.abs(xGaitSettings.getStanceLength()* Math.sin(inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration()));
-         xGaitSettings.setStanceLength(Math.max(xGaitSettings.getStanceLength(), strideLength + footholdDistanceLowerLimitParameter.get()));
-         xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth + footholdDistanceLowerLimitParameter.get()));
-      }
-
-      private void computeStepGoalPosition(Point3d thisGoalPosition, Point3d lastGoalPosition, FramePoint dcmPositionAtEoTS, FramePoint dcmOffsetAtEoNS, double supportTime, double naturalFrequency)
-      {
-         double exp = Math.exp(naturalFrequency * supportTime);
-         dcmPositionAtEoTS.scale(exp);
-         dcmPositionAtEoTS.sub(dcmOffsetAtEoNS);
-         dcmPositionAtEoTS.scale(2 / (1 + exp));
-         thisGoalPosition.set(lastGoalPosition);
-         thisGoalPosition.scale((1 - exp) / (1 + exp));
-         thisGoalPosition.add(dcmPositionAtEoTS.getPoint());
       }
    }
 }
