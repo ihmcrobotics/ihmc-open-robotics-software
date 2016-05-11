@@ -1,12 +1,14 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -23,8 +25,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-
-import javax.vecmath.Vector3d;
 
 public class FeetManager
 {
@@ -45,10 +45,10 @@ public class FeetManager
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
-   private final MomentumBasedController momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox momentumBasedController;
 
    // TODO Needs to be cleaned up someday... (Sylvain)
-   public FeetManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
+   public FeetManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
       this.momentumBasedController = momentumBasedController;
@@ -65,6 +65,7 @@ public class FeetManager
       YoSE3PIDGainsInterface toeOffFootControlGains = walkingControllerParameters.createToeOffFootControlGains(registry);
       YoSE3PIDGainsInterface edgeTouchdownFootControlGains = walkingControllerParameters.createEdgeTouchdownFootControlGains(registry);
 
+      walkingControllerParameters.getOrCreateExplorationParameters(registry);
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingFootControlGains,
@@ -245,12 +246,18 @@ public class FeetManager
 
       if (footControlModules.get(robotSide).getCurrentConstraintType() == ConstraintType.TOES)
          momentumBasedController.restorePreviousFootContactPoints(robotSide);
+
+      FootControlModule supportFootControlModule = footControlModules.get(robotSide.getOppositeSide());
+      supportFootControlModule.setAllowFootholdAdjustments(true);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)
    {
       FootControlModule footControlModule = footControlModules.get(robotSide);
       footControlModule.setContactState(ConstraintType.SWING);
+
+      FootControlModule supportFootControlModule = footControlModules.get(robotSide.getOppositeSide());
+      supportFootControlModule.setAllowFootholdAdjustments(false);
    }
 
    private void setContactStateForMoveViaWaypoints(RobotSide robotSide)

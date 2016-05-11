@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -82,7 +82,7 @@ public class PelvisOrientationManager
 
    private final YoOrientationPIDGainsInterface gains;
 
-   public PelvisOrientationManager(WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
+   public PelvisOrientationManager(WalkingControllerParameters walkingControllerParameters, HighLevelHumanoidControllerToolbox momentumBasedController,
          YoVariableRegistry parentRegistry)
    {
       yoTime = momentumBasedController.getYoTime();

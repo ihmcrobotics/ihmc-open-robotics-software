@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -53,7 +53,8 @@ public class FootControlModule
    private final EnumYoVariable<ConstraintType> requestedState;
    private final EnumMap<ConstraintType, boolean[]> contactStatesMap = new EnumMap<ConstraintType, boolean[]>(ConstraintType.class);
 
-   private final MomentumBasedController momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final RobotSide robotSide;
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
@@ -73,9 +74,12 @@ public class FootControlModule
 
    private final FootControlHelper footControlHelper;
 
+   private final BooleanYoVariable requestExploration;
+   private final BooleanYoVariable resetFootPolygon;
+
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
          YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
-         YoSE3PIDGainsInterface edgeTouchdownFootControlGains, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+         YoSE3PIDGainsInterface edgeTouchdownFootControlGains, HighLevelHumanoidControllerToolbox momentumBasedController, YoVariableRegistry parentRegistry)
    {
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
@@ -88,6 +92,7 @@ public class FootControlModule
       footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, momentumBasedController, registry);
 
       this.momentumBasedController = momentumBasedController;
+      this.robotSide = robotSide;
 
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
       footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
@@ -121,8 +126,8 @@ public class FootControlModule
 
       supportState = new FullyConstrainedState(footControlHelper, registry);
       states.add(supportState);
-      
-      exploreFootPolygonState = new ExploreFootPolygonState(footControlHelper, holdPositionFootControlGains.getOrientationGains(), registry);
+
+      exploreFootPolygonState = new ExploreFootPolygonState(footControlHelper, holdPositionFootControlGains, registry);
       states.add(exploreFootPolygonState);
 
       holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
@@ -135,6 +140,9 @@ public class FootControlModule
       states.add(moveViaWaypointsState);
 
       setupStateMachine(states);
+
+      requestExploration = new BooleanYoVariable(namePrefix + "RequestExploration", registry);
+      resetFootPolygon = new BooleanYoVariable(namePrefix + "ResetFootPolygon", registry);
    }
 
    private void setupContactStatesMap()
@@ -191,6 +199,15 @@ public class FootControlModule
          }
       }));
 
+      exploreFootPolygonState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.FULL, new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return exploreFootPolygonState.isDoneExploring();
+         }
+      }));
+
       for (AbstractFootControlState state : states)
       {
          stateMachine.addState(state);
@@ -204,7 +221,7 @@ public class FootControlModule
       moveViaWaypointsState.setWeight(defaultFootWeight);
       onToesState.setWeight(highFootWeight);
       supportState.setWeight(highFootWeight);
-      exploreFootPolygonState.setWeight(highFootWeight);
+      exploreFootPolygonState.setWeight(defaultFootWeight);
       holdPositionState.setWeight(defaultFootWeight);
    }
 
@@ -214,8 +231,8 @@ public class FootControlModule
       moveViaWaypointsState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       onToesState.setWeights(highAngularFootWeight, highLinearFootWeight);
       supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
-      exploreFootPolygonState.setWeights(highAngularFootWeight, highLinearFootWeight);
-      holdPositionState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
+      exploreFootPolygonState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
+      holdPositionState.setWeights(highAngularFootWeight, highLinearFootWeight);
    }
 
    public void replanTrajectory(Footstep footstep, double swingTime)
@@ -278,9 +295,19 @@ public class FootControlModule
       legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
       footControlHelper.update();
 
+      if (resetFootPolygon.getBooleanValue())
+      {
+         resetFootPolygon();
+      }
+
+      if (requestExploration.getBooleanValue())
+      {
+         requestExploration();
+      }
+
       stateMachine.checkTransitionConditions();
 
-      if (!isInFlatSupportState())
+      if (!isInFlatSupportState() && footControlHelper.getPartialFootholdControlModule() != null)
          footControlHelper.getPartialFootholdControlModule().reset();
 
       stateMachine.doAction();
@@ -416,5 +443,28 @@ public class FootControlModule
    public void initializeFootExploration()
    {
       setContactState(ConstraintType.EXPLORE_POLYGON);
+   }
+
+   public void setAllowFootholdAdjustments(boolean allow)
+   {
+      holdPositionState.doFootholdAdjustments(allow);
+   }
+
+   private void requestExploration()
+   {
+      if (!isInFlatSupportState()) return;
+      requestExploration.set(false);
+      initializeFootExploration();
+   }
+
+   private void resetFootPolygon()
+   {
+      if (!isInFlatSupportState()) return;
+      resetFootPolygon.set(false);
+      if (footControlHelper.getPartialFootholdControlModule() != null)
+      {
+         footControlHelper.getPartialFootholdControlModule().reset();
+      }
+      momentumBasedController.resetFootSupportPolygon(robotSide);
    }
 }

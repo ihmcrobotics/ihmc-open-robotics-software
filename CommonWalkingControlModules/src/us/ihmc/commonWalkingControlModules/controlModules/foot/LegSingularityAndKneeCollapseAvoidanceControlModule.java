@@ -7,7 +7,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -155,7 +155,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final OneDoFJoint hipPitchJoint;
 
    public LegSingularityAndKneeCollapseAvoidanceControlModule(String namePrefix, ContactablePlaneBody contactablePlaneBody, final RobotSide robotSide,
-         WalkingControllerParameters walkingControllerParameters, final MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+         WalkingControllerParameters walkingControllerParameters, final HighLevelHumanoidControllerToolbox momentumBasedController, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);

@@ -58,6 +58,12 @@ public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterfac
    }
 
    @Override
+   public void updateCoP()
+   {
+      wrenchBasedFootSwitch.updateCoP();
+   }
+
+   @Override
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
       wrenchBasedFootSwitch.computeAndPackFootWrench(footWrenchToPack);

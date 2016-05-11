@@ -4,6 +4,7 @@ import javax.vecmath.Point2d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -26,6 +27,8 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 public class FootCoPOccupancyGrid
 {
    private static final boolean VISUALIZE = false;
+   private static final double defaultThresholdForCellActivation = 1.0;
+   private static final double defaultDecayRate = 1.0;
 
    private final String name = getClass().getSimpleName();
 
@@ -33,7 +36,7 @@ public class FootCoPOccupancyGrid
 
    private final IntegerYoVariable nLengthSubdivisions;
    private final IntegerYoVariable nWidthSubdivisions;
-   private final IntegerYoVariable thresholdForCellActivation;
+   private final DoubleYoVariable thresholdForCellActivation;
 
    private final IntegerYoVariable currentXIndex;
    private final IntegerYoVariable currentYIndex;
@@ -54,11 +57,14 @@ public class FootCoPOccupancyGrid
    private final DenseMatrix64F counterGrid = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F occupancyGrid = new DenseMatrix64F(1, 1);
 
-   public FootCoPOccupancyGrid(String namePrefix, ReferenceFrame soleFrame, double footLength, double footWidth, int nLengthSubdivisions,
-         int nWidthSubdivisions, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   private final DoubleYoVariable decayRate;
+
+   public FootCoPOccupancyGrid(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions,
+         int nWidthSubdivisions, WalkingControllerParameters walkingControllerParameters,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.footLength = footLength;
-      this.footWidth = footWidth;
+      this.footLength = walkingControllerParameters.getFootLength();
+      this.footWidth = walkingControllerParameters.getFootWidth();
       this.soleFrame = soleFrame;
       gridOrigin.setIncludingFrame(soleFrame, -footLength, -footWidth);
       gridOrigin.scale(0.5);
@@ -76,8 +82,20 @@ public class FootCoPOccupancyGrid
       this.nLengthSubdivisions.set(nLengthSubdivisions);
       this.nWidthSubdivisions = new IntegerYoVariable(namePrefix + "NWidthSubdivisions", registry);
       this.nWidthSubdivisions.set(nLengthSubdivisions);
-      thresholdForCellActivation = new IntegerYoVariable(namePrefix + "ThresholdForCellActivation", registry);
-      thresholdForCellActivation.set(1);
+
+      ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
+      if (explorationParameters != null)
+      {
+         thresholdForCellActivation = explorationParameters.getCopGridThresholdForOccupancy();
+         decayRate = explorationParameters.getCopGridDecayAlpha();
+      }
+      else
+      {
+         thresholdForCellActivation = new DoubleYoVariable(namePrefix + "ThresholdForCellActivation", registry);
+         thresholdForCellActivation.set(defaultThresholdForCellActivation);
+         decayRate = new DoubleYoVariable(namePrefix + "DecayRate", registry);
+         decayRate.set(defaultDecayRate);
+      }
 
       currentXIndex = new IntegerYoVariable(namePrefix + "CurrentXIndex", registry);
       currentYIndex = new IntegerYoVariable(namePrefix + "CurrentYIndex", registry);
@@ -109,7 +127,7 @@ public class FootCoPOccupancyGrid
       {
          cellViz = null;
       }
-      
+
       parentRegistry.addChild(registry);
    }
 
@@ -141,7 +159,7 @@ public class FootCoPOccupancyGrid
             {
                for (int j = 0; j < nWidthSubdivisions.getIntegerValue(); j++)
                {
-                  if (counterGrid.get(i, j) >= thresholdForCellActivation.getIntegerValue())
+                  if (counterGrid.get(i, j) >= thresholdForCellActivation.getDoubleValue())
                      occupancyGrid.set(i, j, 1.0);
                   else
                      occupancyGrid.set(i, j, 0.0);
@@ -152,11 +170,6 @@ public class FootCoPOccupancyGrid
 
       thresholdForCellActivation.addVariableChangedListener(changedThresholdForCellActivationListener);
       changedThresholdForCellActivationListener.variableChanged(null);
-   }
-
-   public void setThresholdForCellActivation(int newThreshold)
-   {
-      thresholdForCellActivation.set(newThreshold);
    }
 
    private final FramePoint cellPosition = new FramePoint();
@@ -181,7 +194,7 @@ public class FootCoPOccupancyGrid
       {
          counterGrid.add(xIndex, yIndex, 1.0);
 
-         if (counterGrid.get(xIndex, yIndex) >= thresholdForCellActivation.getIntegerValue())
+         if (counterGrid.get(xIndex, yIndex) >= thresholdForCellActivation.getDoubleValue())
          {
             occupancyGrid.set(xIndex, yIndex, 1.0);
             if (VISUALIZE)
@@ -447,6 +460,44 @@ public class FootCoPOccupancyGrid
             for (int j = 0; j < cellViz[0].length; j++)
             {
                cellViz[i][j].setToNaN();
+            }
+         }
+      }
+   }
+
+   public void update()
+   {
+      double decay = decayRate.getDoubleValue();
+      if (decay == 1.0) return;
+
+      for (int xIndex = 0; xIndex < nLengthSubdivisions.getIntegerValue(); xIndex++)
+      {
+         for (int yIndex = 0; yIndex < nWidthSubdivisions.getIntegerValue(); yIndex++)
+         {
+            double value = counterGrid.get(xIndex, yIndex);
+            counterGrid.set(xIndex, yIndex, value * decay);
+
+            if (value >= thresholdForCellActivation.getDoubleValue())
+            {
+               occupancyGrid.set(xIndex, yIndex, 1.0);
+            }
+            else
+            {
+               occupancyGrid.set(xIndex, yIndex, 0.0);
+            }
+
+            if (VISUALIZE)
+            {
+               if (isCellOccupied(xIndex, yIndex))
+               {
+                  getCellCenter(cellCenter, xIndex, yIndex);
+                  cellPosition.setXYIncludingFrame(cellCenter);
+                  cellViz[xIndex][yIndex].setAndMatchFrame(cellPosition);
+               }
+               else
+               {
+                  cellViz[xIndex][yIndex].setToNaN();
+               }
             }
          }
       }

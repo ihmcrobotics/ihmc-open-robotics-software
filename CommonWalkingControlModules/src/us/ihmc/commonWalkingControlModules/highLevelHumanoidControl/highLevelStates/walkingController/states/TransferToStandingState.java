@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -21,7 +21,7 @@ public class TransferToStandingState extends WalkingState
    private final BooleanYoVariable doFootExplorationInTransferToStanding = new BooleanYoVariable("doFootExplorationInTransferToStanding", registry);
 
    private final WalkingMessageHandler walkingMessageHandler;
-   private final MomentumBasedController momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox momentumBasedController;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final CenterOfMassHeightManager comHeightManager;
@@ -29,7 +29,7 @@ public class TransferToStandingState extends WalkingState
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 
-   public TransferToStandingState(WalkingMessageHandler walkingMessageHandler, MomentumBasedController momentumBasedController,
+   public TransferToStandingState(WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox momentumBasedController,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
       super(WalkingStateEnum.TO_STANDING, parentRegistry);
@@ -71,11 +71,11 @@ public class TransferToStandingState extends WalkingState
 
       feetManager.initializeContactStatesForDoubleSupport(null);
 
+      WalkingState previousState = (WalkingState) getPreviousState();
+      RobotSide previousSupportSide = previousState.getSupportSide();
+
       if (doFootExplorationInTransferToStanding.getBooleanValue())
       {
-         WalkingState previousState = (WalkingState) getPreviousState();
-         RobotSide previousSupportSide = previousState.getSupportSide();
-               
          if (previousSupportSide != null)
          {
             feetManager.initializeFootExploration(previousSupportSide.getOppositeSide());
@@ -93,6 +93,7 @@ public class TransferToStandingState extends WalkingState
 
       // Just standing in double support, do nothing
       pelvisOrientationManager.setToHoldCurrentDesiredInMidFeetZUpFrame();
+      balanceManager.setICPPlanTransferFromSide(previousSupportSide);
       balanceManager.initializeICPPlanForStanding();
    }
 

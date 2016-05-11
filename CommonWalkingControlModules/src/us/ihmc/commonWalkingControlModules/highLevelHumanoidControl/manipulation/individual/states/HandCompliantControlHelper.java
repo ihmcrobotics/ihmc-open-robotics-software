@@ -4,7 +4,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -67,9 +67,9 @@ public class HandCompliantControlHelper
    private final FrameVector errorTorque = new FrameVector();
 
    private final RobotSide robotSide;
-   private final MomentumBasedController momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox momentumBasedController;
 
-   public HandCompliantControlHelper(String namePrefix, RobotSide robotSide, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+   public HandCompliantControlHelper(String namePrefix, RobotSide robotSide, HighLevelHumanoidControllerToolbox momentumBasedController, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + "CompliantControl");
       parentRegistry.addChild(registry);

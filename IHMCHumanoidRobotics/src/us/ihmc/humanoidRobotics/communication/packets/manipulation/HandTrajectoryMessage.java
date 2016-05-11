@@ -4,53 +4,41 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
+import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.DocumentedEnum;
 
-@ClassDocumentation("This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified trajectory points."
+import java.util.Random;
+
+@RosMessagePacket(documentation =
+      "This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified trajectory points."
       + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations."
       + " To excute a single straight line trajectory to reach a desired hand pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time."
-      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.")
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
+      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
+      topic = "/control/hand_trajectory")
 public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTrajectoryMessage> implements VisualizablePacket
 {
-   public enum BaseForControl implements DocumentedEnum<BaseForControl>
+   public enum BaseForControl
    {
-      CHEST, WORLD, WALKING_PATH;
-
-      @Override
-      public String getDocumentation(BaseForControl var)
-      {
-         switch (var)
-         {
-         case CHEST:
-            return "The hand is controlled with respect to the chest. In other words, the controlled hand moves along with the chest.";
-         case WORLD:
-            return "The hand is controlled with respect to the estimated world. In other words, the controlled hand will remain fixed in world even if the robot starts moving.";
-         case WALKING_PATH:
-            return "The hand is controlled with respect to the middle of the feet. In other words, the controlled hand moves along with the robot when walking but is not affected by swaying.";
-
-         default:
-            return "No documentation available.";
-         }
-      }
-
-      @Override
-      public BaseForControl[] getDocumentedValues()
-      {
-         return values();
-      }
+      @RosEnumValueDocumentation(documentation = "The hand is controlled with respect to the chest. In other words, the controlled hand moves along with the chest.")
+      CHEST,
+      @RosEnumValueDocumentation(documentation = "The hand is controlled with respect to the estimated world. In other words, the controlled hand will remain fixed in world even if the robot starts moving.")
+      WORLD,
+      @RosEnumValueDocumentation(documentation = "The hand is controlled with respect to the middle of the feet. In other words, the controlled hand moves along with the robot when walking but is not affected by swaying.")
+      WALKING_PATH
    }
 
-   @FieldDocumentation("Specifies which hand will execute the trajectory.")
+   @RosExportedField(documentation = "Specifies which hand will execute the trajectory.")
    public RobotSide robotSide;
-   @FieldDocumentation("Specifies whether the pose should be held with respect to the world or the chest. Note that in any case the desired hand pose must be expressed in world frame.")
+   @RosExportedField(documentation = "Specifies whether the pose should be held with respect to the world or the chest. Note that in any case the desired hand pose must be expressed in world frame.")
    public BaseForControl baseForControl;
 
    /**
@@ -60,6 +48,14 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    public HandTrajectoryMessage()
    {
       super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public HandTrajectoryMessage(Random random)
+   {
+      super(random);
+      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
+      baseForControl = RandomTools.generateRandomEnum(random, BaseForControl.class);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.ArrayList;
 
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -11,6 +12,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
 {
    private double swingTime;
    private double transferTime = 0.0;
+   private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    private final RecyclingArrayList<FootstepDataControllerCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataControllerCommand.class);
 
    public FootstepDataListCommand()
@@ -33,6 +35,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
 
       swingTime = message.swingTime;
       transferTime = message.transferTime;
+      executionMode = message.executionMode;
       ArrayList<FootstepDataMessage> dataList = message.getDataList();
       if (dataList != null)
       {
@@ -48,6 +51,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
 
       swingTime = other.swingTime;
       transferTime = other.transferTime;
+      executionMode = other.executionMode;
       RecyclingArrayList<FootstepDataControllerCommand> otherFootsteps = other.getFootsteps();
       if (otherFootsteps != null)
       {
@@ -76,6 +80,11 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       this.transferTime = transferTime;
    }
 
+   public void setExecutionMode(ExecutionMode executionMode)
+   {
+      this.executionMode = executionMode;
+   }
+
    public double getSwingTime()
    {
       return swingTime;
@@ -86,9 +95,19 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       return transferTime;
    }
 
+   public ExecutionMode getExecutionMode()
+   {
+      return executionMode;
+   }
+
    public RecyclingArrayList<FootstepDataControllerCommand> getFootsteps()
    {
       return footsteps;
+   }
+
+   public void removeFootstep(int footstepIndex)
+   {
+      footsteps.remove(footstepIndex);
    }
 
    public FootstepDataControllerCommand getFootstep(int footstepIndex)
