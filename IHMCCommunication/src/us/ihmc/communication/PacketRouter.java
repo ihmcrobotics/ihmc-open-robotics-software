@@ -3,6 +3,7 @@ package us.ihmc.communication;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.tools.io.printing.PrintTools;
 
 import java.util.EnumMap;
@@ -82,28 +83,33 @@ public class PacketRouter<T extends Enum<T>>
     * If a the redirect happens to be set to the senders id it will assume 
     * the sender new about the redirect and send to the original destination,  
     * ignoring the redirect
-    * @param source the source communicator that sent the packet
+    * @param sourceCommunicator the source communicator that sent the packet
     * @param packet
     */
-   private void processPacketRouting(PacketCommunicator source, Packet<?> packet)
+   private void processPacketRouting(PacketCommunicator sourceCommunicator, Packet<?> packet)
    {
-      if (shouldPrintDebugStatement(source, packet.getDestination(), packet.getClass()))
+      T source = communicatorDestinations.get(sourceCommunicator);
+
+      if (shouldPrintDebugStatement(sourceCommunicator, packet.getDestination(), packet.getClass()))
       {
-         PrintTools.debug(this, "NP received " + packet.getClass().getSimpleName() + " heading for " + destinationConstants[packet.destination] + " from " + communicatorDestinations.get(source) + " at " + System.nanoTime());
+         PrintTools.debug(this, "NP received " + packet.getClass().getSimpleName() + " heading for " + destinationConstants[packet.destination] + " from " + source + " at " + System.nanoTime());
       }
       
-      T destination = getPacketDestination(source, packet);
-      
+      T destination = getPacketDestination(sourceCommunicator, packet);
+
+      if (packet instanceof TrackablePacket)
+         ((TrackablePacket<?>) packet).setSource(source.ordinal());
+
       PacketCommunicator destinationCommunicator = communicators.get(destination);
       if(isBroadcast(destination))
       {
-         broadcastPacket(source, packet);
+         broadcastPacket(sourceCommunicator, packet);
       }
       else if (destinationCommunicator != null && destinationCommunicator.isConnected())
       {
-         if(shouldPrintDebugStatement(source, destination.ordinal(), packet.getClass()))
+         if(shouldPrintDebugStatement(sourceCommunicator, destination.ordinal(), packet.getClass()))
          {
-            PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination + " at " + System.nanoTime());
+            PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + source + " to " + destination + " at " + System.nanoTime());
          }
          
          forwardPacket(packet, destinationCommunicator);
@@ -121,7 +127,7 @@ public class PacketRouter<T extends Enum<T>>
       destinationCommunicator.send(packet);
    }
    
-   private T getPacketDestination(PacketCommunicator source, Packet<?> packet)
+   private T getPacketDestination(PacketCommunicator sourceCommunicator, Packet<?> packet)
    {
       if(packet.getDestination() < 0 || packet.getDestination() >= destinationConstants.length)
       {
@@ -133,7 +139,7 @@ public class PacketRouter<T extends Enum<T>>
       if (redirects.containsKey(destination))
       {
          destination = getRedirectDestination(destination);
-         if(destination != communicatorDestinations.get(source))
+         if(destination != communicatorDestinations.get(sourceCommunicator))
          {
             packet.setDestination(destination.ordinal());
          }
@@ -145,7 +151,7 @@ public class PacketRouter<T extends Enum<T>>
     * sends the packet to every communicator once, except the sender or any
     * communicators with redirects
    **/
-   private void broadcastPacket(PacketCommunicator source, Packet<?> packet)
+   private void broadcastPacket(PacketCommunicator sourceCommunicator, Packet<?> packet)
    {
       for(T destination : destinationConstants)
       {
@@ -155,13 +161,13 @@ public class PacketRouter<T extends Enum<T>>
          }
          
          PacketCommunicator destinationCommunicator = communicators.get(destination);
-         if(source != destinationCommunicator && !redirects.containsKey(destination))
+         if(sourceCommunicator != destinationCommunicator && !redirects.containsKey(destination))
          {
             if (destinationCommunicator != null && destinationCommunicator.isConnected())
             {
-               if(shouldPrintDebugStatement(source, destination.ordinal(), packet.getClass()))
+               if(shouldPrintDebugStatement(sourceCommunicator, destination.ordinal(), packet.getClass()))
                {
-                  PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination + " at " + System.nanoTime());
+                  PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(sourceCommunicator) + " to " + destination + " at " + System.nanoTime());
                }
                forwardPacket(packet, destinationCommunicator);
             }
@@ -216,12 +222,12 @@ public class PacketRouter<T extends Enum<T>>
       redirects.remove(redirectFrom);
    }
    
-   private boolean shouldPrintDebugStatement(PacketCommunicator source, int destinationCommunicatorId, Class<?> packetType)
+   private boolean shouldPrintDebugStatement(PacketCommunicator sourceCommunicator, int destinationCommunicatorId, Class<?> packetType)
    {
       if (!DEBUG)
          return false;
       
-      if(sourceCommunicatorIdToDebug != Integer.MIN_VALUE && sourceCommunicatorIdToDebug != communicatorDestinations.get(source).ordinal())
+      if(sourceCommunicatorIdToDebug != Integer.MIN_VALUE && sourceCommunicatorIdToDebug != communicatorDestinations.get(sourceCommunicator).ordinal())
       {
          return false;
       }
