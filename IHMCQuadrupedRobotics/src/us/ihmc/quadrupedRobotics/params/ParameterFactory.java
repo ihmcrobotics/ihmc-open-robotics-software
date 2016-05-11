@@ -95,7 +95,27 @@ public class ParameterFactory
 
    public DoubleArrayParameter createDoubleArray(String name, double... defaultValue)
    {
-      DoubleArrayParameter parameter = new DoubleArrayParameter(namespace + "." + name, defaultValue);
+      final DoubleArrayParameter parameter = new DoubleArrayParameter(namespace + "." + name, defaultValue);
+
+      if (registry != null)
+      {
+         for (int i = 0; i < parameter.get().length; i++)
+         {
+            final int count = i;
+
+            DoubleYoVariable variable = new DoubleYoVariable("param__" + parameter.getShortPath() + count, registry);
+            variable.set(parameter.get(i));
+            variable.addVariableChangedListener(new VariableChangedListener()
+            {
+               @Override
+               public void variableChanged(YoVariable<?> v)
+               {
+                  parameter.set(count, ((DoubleYoVariable) v).getDoubleValue());
+               }
+            });
+         }
+      }
+
       register(parameter);
       return parameter;
    }
