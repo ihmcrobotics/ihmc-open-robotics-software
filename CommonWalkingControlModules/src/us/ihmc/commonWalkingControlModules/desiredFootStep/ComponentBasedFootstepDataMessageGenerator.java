@@ -18,6 +18,7 @@ import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
@@ -154,6 +155,7 @@ public class ComponentBasedFootstepDataMessageGenerator
       footsteps.addFootstep(nextNextFootstep);
       footsteps.setSwingTime(Double.NaN);
       footsteps.setTransferTime(Double.NaN);
+      footsteps.setExecutionMode(ExecutionMode.OVERRIDE);
 
       return footsteps;
    }

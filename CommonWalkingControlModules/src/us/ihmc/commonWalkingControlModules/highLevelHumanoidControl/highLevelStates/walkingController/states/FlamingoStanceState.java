@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EndEffectorLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
@@ -33,7 +33,7 @@ public class FlamingoStanceState extends SingleSupportState
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 
-   public FlamingoStanceState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, MomentumBasedController momentumBasedController,
+   public FlamingoStanceState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox momentumBasedController,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
       super(supportSide, WalkingStateEnum.getFlamingoSingleSupportState(supportSide), walkingMessageHandler, momentumBasedController, managerFactory,
@@ -143,7 +143,8 @@ public class FlamingoStanceState extends SingleSupportState
       balanceManager.setDoubleSupportTime(loadFootTransferDuration.getDoubleValue());
       balanceManager.clearICPPlan();
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
-      balanceManager.initializeICPPlanForSingleSupport(swingSide.getOppositeSide());
+      balanceManager.setICPPlanSupportSide(supportSide);
+      balanceManager.initializeICPPlanForSingleSupport();
       
       balanceManager.freezePelvisXYControl();
    }

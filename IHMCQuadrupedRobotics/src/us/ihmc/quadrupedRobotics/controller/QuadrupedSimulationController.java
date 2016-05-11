@@ -37,6 +37,7 @@ public class QuadrupedSimulationController implements RobotController
       this.stateEstimator = stateEstimator;
       this.headController = headController;
       registry.addChild(gaitControlManager.getYoVariableRegistry());
+      registry.addChild(headController.getYoVariableRegistry());
    }
 
    @Override

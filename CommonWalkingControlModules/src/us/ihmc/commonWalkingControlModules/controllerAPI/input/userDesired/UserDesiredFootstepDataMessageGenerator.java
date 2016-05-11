@@ -6,6 +6,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -151,6 +152,7 @@ public class UserDesiredFootstepDataMessageGenerator
          supportSide = swingSide.getOppositeSide();
       }
 
+      footstepCommandList.setExecutionMode(ExecutionMode.OVERRIDE);
       footstepCommandList.setSwingTime(swingTime.getDoubleValue());
       footstepCommandList.setTransferTime(transferTime.getDoubleValue());
 

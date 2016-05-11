@@ -1,12 +1,16 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.awt.Color;
+import java.util.EnumMap;
 import java.util.List;
+
+import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -26,24 +30,41 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 
 public class PartialFootholdControlModule
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final String name = getClass().getSimpleName();
 
    public enum PartialFootholdState
    {
-      FULL, UNSAFE_CORNER, PARTIAL, SAFE_PARTIAL
+      FULL, PARTIAL
    };
 
    private final YoVariableRegistry registry;
 
    private final EnumYoVariable<PartialFootholdState> footholdState;
 
-   private final FootRotationCalculator footRotationCalculator;
+   public enum RotationCalculatorType
+   {
+      VELOCITY, GEOMETRY, BOTH;
+      public static RotationCalculatorType[] values = values();
+   }
+   private final EnumMap<RotationCalculatorType, FootRotationCalculator> rotationCalculators = new EnumMap<>(RotationCalculatorType.class);
+   private final EnumMap<RotationCalculatorType, FrameLine2d> lineOfRotations = new EnumMap<>(RotationCalculatorType.class);
+   private final EnumYoVariable<RotationCalculatorType> rotationCalculatorType;
+
+   private final RotationVerificator rotationVerificator;
+
    private final FootCoPOccupancyGrid footCoPOccupancyGrid;
 
+//   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+//   private final RobotSide robotSide;
    private final ReferenceFrame soleFrame;
 
    private final FrameConvexPolygon2d defaultFootPolygon;
    private final FrameConvexPolygon2d shrunkFootPolygon;
+   private final FrameConvexPolygon2d shrunkFootPolygonInWorld;
+   private final YoFrameConvexPolygon2d yoShrunkFootPolygon;
+   private final FrameConvexPolygon2d controllerFootPolygon;
    private final FrameConvexPolygon2d backupFootPolygon;
    private final FrameConvexPolygon2d unsafePolygon;
    private final YoFrameConvexPolygon2d yoUnsafePolygon;
@@ -54,7 +75,6 @@ public class PartialFootholdControlModule
    private final IntegerYoVariable numberOfVerticesRemoved;
    private final IntegerYoVariable numberOfCellsOccupiedOnSideOfLine;
 
-   private final IntegerYoVariable thresholdForCoPCellOccupancy;
    private final IntegerYoVariable thresholdForCoPRegionOccupancy;
    private final DoubleYoVariable distanceFromLineOfRotationToComputeCoPOccupancy;
 
@@ -64,25 +84,45 @@ public class PartialFootholdControlModule
 
    private final FrameLine2d lineOfRotation;
 
-   public PartialFootholdControlModule(String namePrefix, double dt, ContactablePlaneBody contactableFoot, TwistCalculator twistCalculator,
+   private final BooleanYoVariable useCoPOccupancyGrid;
+
+   private final int footCornerPoints;
+   private Point2d newVertex = new Point2d();
+
+   /**
+    * Variables for checking the area of the unsafe part of the foothold.
+    */
+   private final DoubleYoVariable unsafeArea;
+   private final DoubleYoVariable minAreaToConsider;
+   private final BooleanYoVariable unsafeAreaAboveThreshold;
+
+   public PartialFootholdControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      ContactableFoot contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
+      String namePrefix = contactableFoot.getRigidBody().getName();
+//      this.momentumBasedController = momentumBasedController;
+//      this.robotSide = robotSide;
+
+      footCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
       soleFrame = contactableFoot.getSoleFrame();
       defaultFootPolygon = new FrameConvexPolygon2d(contactableFoot.getContactPoints2d());
       shrunkFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
+      shrunkFootPolygonInWorld = new FrameConvexPolygon2d(defaultFootPolygon);
+      controllerFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
       backupFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
       unsafePolygon = new FrameConvexPolygon2d(defaultFootPolygon);
       lineOfRotation = new FrameLine2d(soleFrame);
 
       registry = new YoVariableRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
+      ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
 
       footholdState = new EnumYoVariable<>(namePrefix + "PartialFootHoldState", registry, PartialFootholdState.class, true);
-      yoUnsafePolygon = new YoFrameConvexPolygon2d(namePrefix + "UnsafeFootPolygon", "", ReferenceFrame.getWorldFrame(), 10, registry);
+      yoUnsafePolygon = new YoFrameConvexPolygon2d(namePrefix + "UnsafeFootPolygon", "", worldFrame, 10, registry);
+      yoShrunkFootPolygon = new YoFrameConvexPolygon2d(namePrefix + "ShrunkFootPolygon", "", worldFrame, 20, registry);
 
-      shrinkMaxLimit = new IntegerYoVariable(namePrefix + "MaximumNumberOfFootShrink", registry);
-      shrinkMaxLimit.set(6);
-      shrinkCounter = new IntegerYoVariable(namePrefix + "FootShrinkCounter", registry);
+      shrinkCounter = new IntegerYoVariable(namePrefix + "ShrinkCounter", registry);
 
       confusingCutIndex = new IntegerYoVariable(namePrefix + "ConfusingCutIndex", registry);
 
@@ -93,27 +133,45 @@ public class PartialFootholdControlModule
       {
          YoArtifactPolygon yoGraphicPolygon = new YoArtifactPolygon(namePrefix + "UnsafeRegion", yoUnsafePolygon, Color.RED, false);
          yoGraphicsListRegistry.registerArtifact("Partial Foothold", yoGraphicPolygon);
+
+         YoArtifactPolygon yoShrunkPolygon = new YoArtifactPolygon(namePrefix + "ShrunkPolygon", yoShrunkFootPolygon, Color.CYAN, false);
+         yoGraphicsListRegistry.registerArtifact("Shrunk Polygon", yoShrunkPolygon);
       }
 
-      footRotationCalculator = new FootRotationCalculator(namePrefix, dt, contactableFoot, twistCalculator, yoGraphicsListRegistry, registry);
-      footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, walkingControllerParameters.getFootLength(),
-            walkingControllerParameters.getFootWidth(), 20, 10, yoGraphicsListRegistry, registry);
+      footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, 20, 10, walkingControllerParameters, yoGraphicsListRegistry, registry);
 
-      thresholdForCoPCellOccupancy = new IntegerYoVariable(namePrefix + "ThresholdForCoPCellOccupancy", registry);
-      thresholdForCoPCellOccupancy.set(3);
-      footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy.getIntegerValue());
-
-      thresholdForCoPRegionOccupancy = new IntegerYoVariable(namePrefix + "ThresholdForCoPRegionOccupancy", registry);
-      thresholdForCoPRegionOccupancy.set(2);
-      distanceFromLineOfRotationToComputeCoPOccupancy = new DoubleYoVariable(namePrefix + "DistanceFromLineOfRotationToComputeCoPOccupancy", registry);
-      distanceFromLineOfRotationToComputeCoPOccupancy.set(0.02);
+      shrinkMaxLimit = explorationParameters.getShrinkMaxLimit();
+      thresholdForCoPRegionOccupancy = explorationParameters.getThresholdForCoPRegionOccupancy();
+      distanceFromLineOfRotationToComputeCoPOccupancy = explorationParameters.getDistanceFromLineOfRotationToComputeCoPOccupancy();
+      useCoPOccupancyGrid = explorationParameters.getUseCopOccupancyGrid();
+      rotationCalculatorType = explorationParameters.getRotationCalculatorType();
+      minAreaToConsider = explorationParameters.getMinAreaToConsider();
 
       doPartialFootholdDetection = new BooleanYoVariable(namePrefix + "DoPartialFootholdDetection", registry);
       doPartialFootholdDetection.set(false);
+
+      double dt = momentumBasedController.getControlDT();
+      TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
+
+      FootRotationCalculator velocityFootRotationCalculator =
+            new VelocityFootRotationCalculator(namePrefix, dt, contactableFoot, twistCalculator, explorationParameters, yoGraphicsListRegistry, registry);
+      FootRotationCalculator geometricFootRotationCalculator =
+            new GeometricFootRotationCalculator(namePrefix, contactableFoot, explorationParameters, yoGraphicsListRegistry, registry);
+      rotationCalculators.put(RotationCalculatorType.VELOCITY, velocityFootRotationCalculator);
+      rotationCalculators.put(RotationCalculatorType.GEOMETRY, geometricFootRotationCalculator);
+      lineOfRotations.put(RotationCalculatorType.VELOCITY, new FrameLine2d(soleFrame));
+      lineOfRotations.put(RotationCalculatorType.GEOMETRY, new FrameLine2d(soleFrame));
+
+      rotationVerificator = new RotationVerificator(namePrefix, contactableFoot, explorationParameters, registry);
+
+      unsafeArea = new DoubleYoVariable(namePrefix + "UnsafeArea", registry);
+      unsafeAreaAboveThreshold = new BooleanYoVariable(namePrefix + "UnsafeAreaAboveThreshold", registry);
    }
 
    public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
    {
+      footCoPOccupancyGrid.update();
+
       if (desiredCenterOfPressure.containsNaN() || centerOfPressure.containsNaN())
       {
          doNothing();
@@ -123,30 +181,52 @@ public class PartialFootholdControlModule
       unsafePolygon.setIncludingFrameAndUpdate(shrunkFootPolygon);
       footCoPOccupancyGrid.registerCenterOfPressureLocation(centerOfPressure);
 
-      footRotationCalculator.compute(desiredCenterOfPressure, centerOfPressure);
-
-      if (footRotationCalculator.isFootRotating())
+      boolean atLeastOneTriggered = false;
+      for (RotationCalculatorType calculatorType : RotationCalculatorType.values)
       {
-         footRotationCalculator.getLineOfRotation(lineOfRotation);
+         if (!rotationCalculators.containsKey(calculatorType)) continue;
+         rotationCalculators.get(calculatorType).compute(desiredCenterOfPressure, centerOfPressure);
+         rotationCalculators.get(calculatorType).getLineOfRotation(lineOfRotations.get(calculatorType));
 
+         if (rotationCalculators.get(calculatorType).isFootRotating())
+         {
+            boolean verified = rotationVerificator.isRotating(centerOfPressure, desiredCenterOfPressure, lineOfRotations.get(calculatorType));
+            atLeastOneTriggered = atLeastOneTriggered || verified;
+            if (verified)
+            {
+               lineOfRotation.setIncludingFrame(lineOfRotations.get(calculatorType));
+            }
+         }
+      }
+
+      boolean triggerCutting;
+      if (rotationCalculatorType.getEnumValue() == RotationCalculatorType.BOTH)
+      {
+         triggerCutting = atLeastOneTriggered;
+      }
+      else
+      {
+         FootRotationCalculator activeCalculator = rotationCalculators.get(rotationCalculatorType.getEnumValue());
+         activeCalculator.getLineOfRotation(lineOfRotation);
+         boolean verified = rotationVerificator.isRotating(centerOfPressure, desiredCenterOfPressure, lineOfRotation);
+         triggerCutting = activeCalculator.isFootRotating() && verified;
+      }
+
+      if (triggerCutting)
+      {
          numberOfVerticesRemoved.set(ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, unsafePolygon, RobotSide.LEFT));
 
          if (numberOfVerticesRemoved.getIntegerValue() <= 0)
          {
             confusingCutIndex.increment();
-            
+
 //            System.out.println("\nCutting polygon but no vertices removed?");
 //            System.out.println("confusingCutIndex = " + confusingCutIndex.getIntegerValue());
 //            System.out.println("lineOfRotation = " + lineOfRotation);
 //            System.out.println("unsafePolygon = " + unsafePolygon);
 //            System.out.println("shrunkFootPolygon = " + shrunkFootPolygon);
-            
+
             doNothing();
-         }
-         else if (numberOfVerticesRemoved.getIntegerValue() == 1)
-         {
-            footholdState.set(PartialFootholdState.UNSAFE_CORNER);
-            computeShrunkFoothold(desiredCenterOfPressure);
          }
          else
          {
@@ -169,19 +249,35 @@ public class PartialFootholdControlModule
    {
       footholdState.set(PartialFootholdState.FULL);
       yoUnsafePolygon.hide();
+      shrunkFootPolygonInWorld.setIncludingFrame(shrunkFootPolygon);
+      shrunkFootPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
+      yoShrunkFootPolygon.setFrameConvexPolygon2d(shrunkFootPolygonInWorld);
+      unsafeArea.set(0.0);
    }
 
    private void computeShrunkFoothold(FramePoint2d desiredCenterOfPressure)
    {
-      numberOfCellsOccupiedOnSideOfLine.set(footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT,
-            distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue()));
-      boolean wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine.getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
-      if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3) && !wasCoPInThatRegion)
+      boolean wasCoPInThatRegion = false;
+      if (useCoPOccupancyGrid.getBooleanValue()) {
+         numberOfCellsOccupiedOnSideOfLine.set(footCoPOccupancyGrid.computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, RobotSide.RIGHT,
+               distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue()));
+         wasCoPInThatRegion = numberOfCellsOccupiedOnSideOfLine.getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
+      }
+
+      unsafeArea.set(unsafePolygon.getArea());
+      boolean areaBigEnough = unsafeArea.getDoubleValue() >= minAreaToConsider.getDoubleValue();
+      unsafeAreaAboveThreshold.set(areaBigEnough);
+
+      if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3) && !wasCoPInThatRegion && areaBigEnough)
       {
          backupFootPolygon.set(shrunkFootPolygon);
          ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkFootPolygon, RobotSide.RIGHT);
-         unsafePolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+         unsafePolygon.changeFrameAndProjectToXYPlane(worldFrame);
          yoUnsafePolygon.setFrameConvexPolygon2d(unsafePolygon);
+
+         shrunkFootPolygonInWorld.setIncludingFrame(shrunkFootPolygon);
+         shrunkFootPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
+         yoShrunkFootPolygon.setFrameConvexPolygon2d(shrunkFootPolygonInWorld);
       }
       else
       {
@@ -193,37 +289,161 @@ public class PartialFootholdControlModule
 
    public boolean applyShrunkPolygon(YoPlaneContactState contactStateToModify)
    {
+      // if we are not doing partial foothold detection exit
       if (!doPartialFootholdDetection.getBooleanValue())
       {
          shrunkFootPolygon.set(backupFootPolygon);
          return false;
       }
 
-      //TODO: Do something when a corner case (literally!)
-      if (footholdState.getEnumValue() != PartialFootholdState.PARTIAL)
+      // if the module did not find a partial foothold exit
+      if (footholdState.getEnumValue() == PartialFootholdState.FULL)
       {
          shrunkFootPolygon.set(backupFootPolygon);
          return false;
       }
 
+      // if we shrunk the foothold too many times exit
       if (shrinkCounter.getIntegerValue() >= shrinkMaxLimit.getIntegerValue())
       {
          shrunkFootPolygon.set(backupFootPolygon);
          return false;
       }
 
-      List<YoContactPoint> contactPoints = contactStateToModify.getContactPoints();
+      controllerFootPolygon.setIncludingFrame(shrunkFootPolygon);
+      int newFootCornerPoints = controllerFootPolygon.getNumberOfVertices();
+      if (newFootCornerPoints == footCornerPoints)
+      {
+         // everything is well
+      }
+      else if (newFootCornerPoints == footCornerPoints + 1)
+      {
+         // we cut off a corner
+         // remove one corner by merging the two closest vertices
+         int removeVertex = -1;
+         double shortestEdgeLength = Double.POSITIVE_INFINITY;
+         Point2d lastVertex = controllerFootPolygon.getVertex(0);
+         for (int i = 1; i < newFootCornerPoints+1; i++)
+         {
+            Point2d nextVertex = null;
+            if (i == newFootCornerPoints)
+            {
+               nextVertex = controllerFootPolygon.getVertex(0);
+            }
+            else
+            {
+               nextVertex = controllerFootPolygon.getVertex(i);
+            }
+            double edgeLength = lastVertex.distance(nextVertex);
+            if (edgeLength < shortestEdgeLength)
+            {
+               shortestEdgeLength = edgeLength;
+               removeVertex = i;
+            }
+            lastVertex = nextVertex;
+         }
 
-      // TODO: Do something when add or subtract a vertex! Need contact state to allow for shifting number of vertices
-      if (contactPoints.size() != shrunkFootPolygon.getNumberOfVertices())
+         if (removeVertex < 1)
+         {
+            throw new RuntimeException("Did not find an edge in support polygon.");
+         }
+
+         int idx1 = -1;
+         int idx2 = -1;
+         if (removeVertex == newFootCornerPoints)
+         {
+            idx1 = newFootCornerPoints-1;
+            idx2 = 0;
+         }
+         else
+         {
+            idx1 = removeVertex;
+            idx2 = removeVertex-1;
+         }
+
+         Point2d vertexA = controllerFootPolygon.getVertex(idx1);
+         Point2d vertexB = controllerFootPolygon.getVertex(idx2);
+         newVertex.interpolate(vertexA, vertexB, 0.5);
+
+         controllerFootPolygon.removeVertex(idx1);
+         controllerFootPolygon.removeVertex(idx2);
+         controllerFootPolygon.addVertex(newVertex);
+         controllerFootPolygon.update();
+      }
+      else if (newFootCornerPoints < footCornerPoints)
+      {
+         // we cut off too many corners
+         // add vertices in the longest edges of the polygon
+         int pointsToAdd = footCornerPoints - newFootCornerPoints;
+         while (pointsToAdd > 0) {
+            int index = -1;
+            double longestEdgeLength = Double.NEGATIVE_INFINITY;
+            Point2d lastVertex = controllerFootPolygon.getVertex(0);
+            for (int i = 1; i < newFootCornerPoints+1; i++)
+            {
+               Point2d nextVertex = null;
+               if (i == newFootCornerPoints)
+               {
+                  nextVertex = controllerFootPolygon.getVertex(0);
+               }
+               else
+               {
+                  nextVertex = controllerFootPolygon.getVertex(i);
+               }
+
+               double edgeLength = lastVertex.distance(nextVertex);
+               if (edgeLength > longestEdgeLength)
+               {
+                  longestEdgeLength = edgeLength;
+                  index = i;
+               }
+               lastVertex = nextVertex;
+            }
+
+            if (index < 1)
+            {
+               throw new RuntimeException("Did not find an edge in support polygon.");
+            }
+
+            int idx1 = -1;
+            int idx2 = -1;
+            if (index == newFootCornerPoints)
+            {
+               idx1 = newFootCornerPoints-1;
+               idx2 = 0;
+            }
+            else
+            {
+               idx1 = index;
+               idx2 = index-1;
+            }
+
+            Point2d vertexA = controllerFootPolygon.getVertex(idx1);
+            Point2d vertexB = controllerFootPolygon.getVertex(idx2);
+            newVertex.interpolate(vertexA, vertexB, 0.5);
+
+            controllerFootPolygon.addVertex(newVertex);
+            controllerFootPolygon.update();
+
+            pointsToAdd--;
+         }
+      }
+      else
+      {
+         // cutting a convex polygon with a line should never result in the number of vertices increasing by more then one.
+         throw new RuntimeException("This is not possible.");
+      }
+
+      List<YoContactPoint> contactPoints = contactStateToModify.getContactPoints();
+      if (contactPoints.size() != controllerFootPolygon.getNumberOfVertices())
       {
          shrunkFootPolygon.set(backupFootPolygon);
          return false;
       }
 
-      for (int i = 0; i < shrunkFootPolygon.getNumberOfVertices(); i++)
+      for (int i = 0; i < controllerFootPolygon.getNumberOfVertices(); i++)
       {
-         shrunkFootPolygon.getFrameVertexXY(i, tempPosition);
+         controllerFootPolygon.getFrameVertexXY(i, tempPosition);
          contactPoints.get(i).setPosition(tempPosition);
       }
 
@@ -237,9 +457,13 @@ public class PartialFootholdControlModule
       shrinkCounter.set(0);
       footholdState.set(null);
       yoUnsafePolygon.hide();
-      footRotationCalculator.reset();
+      yoShrunkFootPolygon.hide();
+      for (RotationCalculatorType calculatorType : RotationCalculatorType.values)
+      {
+         if (!rotationCalculators.containsKey(calculatorType)) continue;
+         rotationCalculators.get(calculatorType).reset();
+      }
       footCoPOccupancyGrid.reset();
-      footCoPOccupancyGrid.setThresholdForCellActivation(thresholdForCoPCellOccupancy.getIntegerValue());
       shrunkFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
       backupFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
    }
@@ -247,6 +471,10 @@ public class PartialFootholdControlModule
    public void projectOntoShrunkenPolygon(FramePoint2d pointToProject)
    {
       shrunkFootPolygon.orthogonalProjection(pointToProject);
-      
+   }
+
+   public void getSupportPolygon(FrameConvexPolygon2d polygonToPack)
+   {
+      polygonToPack.setIncludingFrame(shrunkFootPolygon);
    }
 }

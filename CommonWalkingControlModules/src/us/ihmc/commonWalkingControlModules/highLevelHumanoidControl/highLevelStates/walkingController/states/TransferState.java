@@ -8,8 +8,9 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -17,9 +18,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public abstract class TransferState extends WalkingState
 {
    protected final RobotSide transferToSide;
-   
+
    protected final WalkingMessageHandler walkingMessageHandler;
-   protected final MomentumBasedController momentumBasedController;
+   protected final HighLevelHumanoidControllerToolbox momentumBasedController;
    protected final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    protected final CenterOfMassHeightManager comHeightManager;
@@ -33,7 +34,7 @@ public abstract class TransferState extends WalkingState
    private final FramePoint nextExitCMP = new FramePoint();
 
    public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler,
-         MomentumBasedController momentumBasedController, HighLevelControlManagerFactory managerFactory,
+         HighLevelHumanoidControllerToolbox momentumBasedController, HighLevelControlManagerFactory managerFactory,
          WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
       super(transferStateEnum, parentRegistry);
@@ -69,8 +70,14 @@ public abstract class TransferState extends WalkingState
    {
       if (!balanceManager.isICPPlanDone())
          return false;
+      balanceManager.getCapturePoint(capturePoint2d);
+      FrameConvexPolygon2d supportPolygonInWorld = momentumBasedController.getBipedSupportPolygons().getSupportPolygonInWorld();
+      boolean isICPInsideSupportPolygon = supportPolygonInWorld.isPointInside(capturePoint2d);
 
-      return balanceManager.isTransitionToSingleSupportSafe(transferToSide);
+      if (!isICPInsideSupportPolygon)
+         return true;
+      else
+         return balanceManager.isTransitionToSingleSupportSafe(transferToSide);
    }
 
    public boolean isStopWalkingSafe()

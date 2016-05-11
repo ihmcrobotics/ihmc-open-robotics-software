@@ -8,12 +8,15 @@ buildscript {
     }
     dependencies {
         classpath group: 'gradle.plugin.us.ihmc.gradle', name: 'ihmc-build', version:'0.0.16'
+        classpath 'org.ajoberstar:gradle-git:1.4.0-rc.1'
         classpath group: 'org.hidetake', name: 'gradle-ssh-plugin', version: '0.3.12'
     }
 }
 
 apply plugin: "us.ihmc.gradle.ihmc-build"
 apply plugin: "org.hidetake.ssh"
+import org.ajoberstar.grgit.Grgit
+
 
 if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
     evaluationDependsOn(':IHMCOpenRoboticsSoftware')
@@ -244,26 +247,17 @@ task deploy(dependsOn: ['jar']) {
     }
 }
 
-def getCheckedOutGitCommitHash() {
-    def gitFolder = "$projectDir/../.git/"
-    def takeFromHash = 12
-    /*
-     * '.git/HEAD' contains either
-     *      in case of detached head: the currently checked out commit hash
-     *      otherwise: a reference to a file containing the current commit hash
-     */
-    def head = new File(gitFolder + "HEAD").text.split(":") // .git/HEAD
-    def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
-    // def isRef = head.length > 1     // ref: refs/heads/master
-
-    if (isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
-
-    def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
-    refHead.text.trim().take takeFromHash
-}
-
 task createRosJar(type: Jar) {
-    version = getCheckedOutGitCommitHash()
+    def gitRepo;
+    if(!project.parent.hasProperty("repo"))
+    {
+        gitRepo = Grgit.open(projectDir.canonicalFile.parent)
+    }
+    else
+    {
+        gitRepo = project.parent.repo
+    }
+    version = gitRepo.head().abbreviatedId;
     manifest
             {
                 attributes 'Implementation-Title': 'ROSAPI',

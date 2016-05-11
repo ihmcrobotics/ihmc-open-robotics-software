@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -33,7 +33,7 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
    protected final SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
 
-   protected final MomentumBasedController momentumBasedController;
+   protected final HighLevelHumanoidControllerToolbox momentumBasedController;
 
    public AbstractFootControlState(ConstraintType stateEnum, FootControlHelper footControlHelper, YoVariableRegistry registry)
    {

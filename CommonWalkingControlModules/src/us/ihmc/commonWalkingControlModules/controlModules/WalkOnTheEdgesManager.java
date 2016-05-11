@@ -7,7 +7,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -67,7 +67,7 @@ public class WalkOnTheEdgesManager
    private final double inPlaceWidth;
    private final double footLength;
 
-   public WalkOnTheEdgesManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
+   public WalkOnTheEdgesManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          SideDependentList<? extends ContactablePlaneBody> feet, YoVariableRegistry parentRegistry)
    {
       this(momentumBasedController.getFullRobotModel(), walkingControllerParameters, feet, createFootContactStates(momentumBasedController), parentRegistry);
@@ -108,7 +108,7 @@ public class WalkOnTheEdgesManager
       parentRegistry.addChild(registry);
    }
 
-   private static SideDependentList<YoPlaneContactState> createFootContactStates(MomentumBasedController momentumBasedController)
+   private static SideDependentList<YoPlaneContactState> createFootContactStates(HighLevelHumanoidControllerToolbox momentumBasedController)
    {
       SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
@@ -127,16 +127,6 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-      if (walkingControllerParameters.checkECMPLocationToTriggerToeOff())
-      {
-         updateOnToesSupportPolygon(trailingLeg);
-         isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
-      }
-      else
-      {
-         isDesiredECMPOKForToeOff.set(true);
-      }
-
       RobotSide leadingLeg = trailingLeg.getOppositeSide();
       if (footContactStates != null && footContactStates.get(leadingLeg).getTotalNumberOfContactPoints() > 0)
       {
@@ -147,6 +137,16 @@ public class WalkOnTheEdgesManager
       {
          leadingFootSupportPolygon.setIncludingFrameAndUpdate(footDefaultPolygons.get(leadingLeg));
          leadingFootSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
+      }
+
+      if (walkingControllerParameters.checkECMPLocationToTriggerToeOff())
+      {
+         updateOnToesSupportPolygon(trailingLeg, leadingFootSupportPolygon);
+         isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
+      }
+      else
+      {
+         isDesiredECMPOKForToeOff.set(true);
       }
 
       isDesiredICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(desiredICP));
@@ -305,7 +305,7 @@ public class WalkOnTheEdgesManager
    private final FramePoint[] toePoints = new FramePoint[] {new FramePoint(), new FramePoint()};
    private final FramePoint middleToePoint = new FramePoint();
    private final FramePoint2d footPoint = new FramePoint2d();
-   
+
    private void computeToePoints(RobotSide supportSide)
    {
       FrameConvexPolygon2d footDefaultPolygon = footDefaultPolygons.get(supportSide);
@@ -332,12 +332,12 @@ public class WalkOnTheEdgesManager
 
    private final FrameConvexPolygon2d onToesSupportPolygon = new FrameConvexPolygon2d();
 
-   private void updateOnToesSupportPolygon(RobotSide trailingSide)
+   private void updateOnToesSupportPolygon(RobotSide trailingSide, FrameConvexPolygon2d leadingFootSupportPolygon)
    {
       computeToePoints(trailingSide);
       middleToePoint.changeFrame(worldFrame);
 
-      onToesSupportPolygon.setIncludingFrameAndUpdate(footDefaultPolygons.get(trailingSide.getOppositeSide()));
+      onToesSupportPolygon.setIncludingFrameAndUpdate(leadingFootSupportPolygon);
       onToesSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       onToesSupportPolygon.addVertexByProjectionOntoXYPlane(middleToePoint);
       onToesSupportPolygon.update();

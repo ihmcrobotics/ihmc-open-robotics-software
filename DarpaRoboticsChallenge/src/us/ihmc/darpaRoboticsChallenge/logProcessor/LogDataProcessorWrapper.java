@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -24,27 +24,19 @@ public class LogDataProcessorWrapper implements DataProcessingFunction, Script
    private final boolean haveFoundControllerTimerVariable;
    private boolean isControllerTick = true;
 
+   private long lastControllerTimerCount = -1l;
+   private final LongYoVariable controllerTimerCount;
+
    public LogDataProcessorWrapper(SimulationConstructionSet scs)
    {
       scs.addYoVariableRegistry(logDataProcessorRegistry);
       scs.addScript(this);
-      
-      YoVariable<?> controllerTimerCount = scs.getVariable(DRCControllerThread.class.getSimpleName(), "controllerTimerCount");
+
+      controllerTimerCount = (LongYoVariable) scs.getVariable(DRCControllerThread.class.getSimpleName(), "controllerTimerCount");
       haveFoundControllerTimerVariable = controllerTimerCount != null;
       if (!haveFoundControllerTimerVariable)
       {
          System.err.println("Could not find controller timer variable, running processors at log data rate");
-      }
-      else
-      {
-         controllerTimerCount.addVariableChangedListener(new VariableChangedListener()
-         {
-            @Override
-            public void variableChanged(YoVariable<?> v)
-            {
-               isControllerTick = true;
-            }
-         });
       }
    }
 
@@ -57,6 +49,7 @@ public class LogDataProcessorWrapper implements DataProcessingFunction, Script
    @Override
    public void processData()
    {
+      updateIsControllerTick();
       retrieveYoVariablesFromDoubles();
       if (isControllerTick || !haveFoundControllerTimerVariable)
       {
@@ -70,12 +63,25 @@ public class LogDataProcessorWrapper implements DataProcessingFunction, Script
    @Override
    public void doScript(double t)
    {
+      updateIsControllerTick();
       if (isControllerTick || !haveFoundControllerTimerVariable)
       {
          isControllerTick = false;
          processDataAtControllerRate();
       }
       processDataAtStateEstimatorRate();
+   }
+
+   private void updateIsControllerTick()
+   {
+      if (controllerTimerCount == null)
+      {
+         isControllerTick = true;
+         return;
+      }
+
+      isControllerTick = controllerTimerCount.getLongValue() != lastControllerTimerCount;
+      lastControllerTimerCount = controllerTimerCount.getLongValue();
    }
 
    private void processDataAtControllerRate()

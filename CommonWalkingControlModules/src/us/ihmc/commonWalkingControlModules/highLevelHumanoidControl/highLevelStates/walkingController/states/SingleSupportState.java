@@ -5,7 +5,7 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -28,7 +28,7 @@ public abstract class SingleSupportState extends WalkingState
    protected final BalanceManager balanceManager;
 
    public SingleSupportState(RobotSide supportSide, WalkingStateEnum singleSupportStateEnum, WalkingMessageHandler walkingMessageHandler,
-         MomentumBasedController momentumBasedController, HighLevelControlManagerFactory managerFactory, YoVariableRegistry parentRegistry)
+         HighLevelHumanoidControllerToolbox momentumBasedController, HighLevelControlManagerFactory managerFactory, YoVariableRegistry parentRegistry)
    {
       super(singleSupportStateEnum, parentRegistry);
 
