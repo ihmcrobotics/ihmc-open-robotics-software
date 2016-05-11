@@ -8,7 +8,7 @@ public class ParameterListPacket extends Packet<ParameterListPacket>
 {
    private List<Parameter> parameters;
 
-   public ParameterListPacket()
+   public ParameterListPacket() // no-arg for serialization
    {
    }
 
@@ -25,6 +25,19 @@ public class ParameterListPacket extends Packet<ParameterListPacket>
    @Override
    public boolean epsilonEquals(ParameterListPacket other, double epsilon)
    {
-      return false;
+      if (parameters.size() != other.parameters.size())
+      {
+         return false;
+      }
+
+      for(int i = 0; i < parameters.size(); i++)
+      {
+         if (!parameters.get(i).equals(other.parameters.get(i)))
+         {
+            return false;
+         }
+      }
+
+      return true;
    }
 }
