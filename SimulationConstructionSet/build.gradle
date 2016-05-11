@@ -66,7 +66,7 @@ dependencies {
 	compile group: 'xml-apis', name: 'xml-apis', version: '2.0.2'
 	compile group: 'com.badlogicgames.gdx', name: 'gdx-bullet', version: '1.0.1'
 	compile group: 'com.badlogicgames.gdx', name: 'gdx', version: '1.0.1'
-	compile group: 'com.google.guava', name: 'guava', version: '17.0'
+	compile group: 'com.google.guava', name: 'guava', version: '18.0'
 
 	compile group: 'org.easytesting', name: 'fest', version: '1.0.3'
 	compile('org.easytesting:fest-swing:1.2.1' )
