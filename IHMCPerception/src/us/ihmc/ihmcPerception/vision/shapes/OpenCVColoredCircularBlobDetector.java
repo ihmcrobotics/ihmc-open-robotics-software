@@ -10,6 +10,7 @@ import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.ihmcPerception.vision.HSVValue;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
+import javax.swing.*;
 import javax.vecmath.Point2d;
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -155,6 +156,13 @@ public class OpenCVColoredCircularBlobDetector
          Mat mat = hsvRangeMatEntry.getValue();
 
          Core.inRange(medianBlurredMat, hsvRange.getLowerBoundOpenCVScalar(), hsvRange.getUpperBoundOpenCVScalar(), mat);
+
+         Imgproc.erode(mat, mat, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(20, 20)));
+         Imgproc.dilate(mat, mat, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(20, 20)));
+
+         Imgproc.dilate(mat, mat, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(20, 20)));
+         Imgproc.erode(mat, mat, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(20, 20)));
+
          if(count == 0)
          {
             mat.copyTo(tmpMat);
@@ -189,18 +197,32 @@ public class OpenCVColoredCircularBlobDetector
       factory.setCaptureSource(CaptureSource.CAMERA);
       OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector = factory.buildBlobDetector();
 
-      HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
+      HSVRange greenRange = new HSVRange(new HSVValue(55, 80, 80), new HSVValue(139, 255, 255));
+//      HSVRange brightRedRange = new HSVRange(new HSVValue(120, 80, 80), new HSVValue(179, 255, 255));
+//      HSVRange dullRedRange = new HSVRange(new HSVValue(3, 80, 80), new HSVValue(10, 255, 255));
+      HSVRange yellowRange = new HSVRange(new HSVValue(20, 100, 100), new HSVValue(30, 255, 255));
 
       openCVColoredCircularBlobDetector.addHSVRange(greenRange);
+//      openCVColoredCircularBlobDetector.addHSVRange(brightRedRange);
+//      openCVColoredCircularBlobDetector.addHSVRange(dullRedRange);
+      openCVColoredCircularBlobDetector.addHSVRange(yellowRange);
 
       openCVColoredCircularBlobDetector.updateFromVideo();
 
       ImagePanel imagePanel = ShowImages.showWindow(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR()), "Circle Detector");
 
+      JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(imagePanel);
+
       Scalar circleColor = new Scalar(160, 0, 0);
 
       while (true)
       {
+         if(!frame.isVisible() && openCVColoredCircularBlobDetector.videoCapture != null)
+         {
+            openCVColoredCircularBlobDetector.videoCapture.release();
+            break;
+         }
+
          openCVColoredCircularBlobDetector.updateFromVideo();
 
          ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
@@ -213,5 +235,7 @@ public class OpenCVColoredCircularBlobDetector
 
          imagePanel.setBufferedImage(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR()));
       }
+
+      System.exit(0);
    }
 }
