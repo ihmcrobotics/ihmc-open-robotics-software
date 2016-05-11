@@ -61,6 +61,9 @@ public class CommandInputManager
    /** Exhaustive list of all the supported messages that this API can process. */
    private final List<Class<? extends Packet<?>>> listOfSupportedMessages = new ArrayList<>();
 
+   /** List of the listeners that should get notified when receiving a new valid command. */
+   private final List<HasReceivedInputListener> hasReceivedInputListeners = new ArrayList<>();
+
    /**
     * Only constructor to build a new API. No new constructors will be tolerated.
     * 
@@ -103,6 +106,11 @@ public class CommandInputManager
       listOfSupportedMessages.add(messageClass);
    }
 
+   public void registerHasReceivedInputListener(HasReceivedInputListener hasReceivedInputListener)
+   {
+      hasReceivedInputListeners.add(hasReceivedInputListener);
+   }
+
    /**
     * Submit a new {@link Packet} to be processed by the controller.
     * This method can be called from any thread.
@@ -137,6 +145,9 @@ public class CommandInputManager
       }
       nextCommand.set(message);
       buffer.commit();
+
+      for (int i = 0; i < hasReceivedInputListeners.size(); i++)
+         hasReceivedInputListeners.get(i).hasReceivedInput();
    }
 
    /**
@@ -185,6 +196,9 @@ public class CommandInputManager
       }
       nextModifiableMessage.set(command);
       buffer.commit();
+
+      for (int i = 0; i < hasReceivedInputListeners.size(); i++)
+         hasReceivedInputListeners.get(i).hasReceivedInput();
    }
 
    /**
@@ -200,6 +214,16 @@ public class CommandInputManager
    {
       for (int i = 0; i < commands.size(); i++)
          submitCommand((C) commands.get(i));
+   }
+
+   public boolean isNewCommandAvailable()
+   {
+      for (int i = 0; i < allBuffers.size(); i++)
+      {
+         if (allBuffers.get(i).poll())
+            return true;
+      }
+      return false;
    }
 
    /**
@@ -354,5 +378,13 @@ public class CommandInputManager
    public List<Class<? extends Packet<?>>> getListOfSupportedMessages()
    {
       return listOfSupportedMessages;
+   }
+
+   /**
+    * Use this interface to get notified when this API has received a new valid command.
+    */
+   public static interface HasReceivedInputListener
+   {
+      public void hasReceivedInput();
    }
 }
