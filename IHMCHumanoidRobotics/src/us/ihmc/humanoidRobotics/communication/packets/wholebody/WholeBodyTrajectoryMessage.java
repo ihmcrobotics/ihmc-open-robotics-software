@@ -316,27 +316,6 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
    }
 
    @Override
-   public void parseMessageIdToChildren()
-   {
-      if (leftHandTrajectoryMessage != null)
-         leftHandTrajectoryMessage.setUniqueId(uniqueId);
-      if (rightHandTrajectoryMessage != null)
-         rightHandTrajectoryMessage.setUniqueId(uniqueId);
-      if (leftArmTrajectoryMessage != null)
-         leftArmTrajectoryMessage.setUniqueId(uniqueId);
-      if (rightArmTrajectoryMessage != null)
-         rightArmTrajectoryMessage.setUniqueId(uniqueId);
-      if (chestTrajectoryMessage != null)
-         chestTrajectoryMessage.setUniqueId(uniqueId);
-      if (pelvisTrajectoryMessage != null)
-         pelvisTrajectoryMessage.setUniqueId(uniqueId);
-      if (leftFootTrajectoryMessage != null)
-         leftFootTrajectoryMessage.setUniqueId(uniqueId);
-      if (rightFootTrajectoryMessage != null)
-         rightFootTrajectoryMessage.setUniqueId(uniqueId);
-   }
-
-   @Override
    public List<Packet<?>> getPackets()
    {
       ArrayList<Packet<?>> wholeBodyPackets = new ArrayList<>();
