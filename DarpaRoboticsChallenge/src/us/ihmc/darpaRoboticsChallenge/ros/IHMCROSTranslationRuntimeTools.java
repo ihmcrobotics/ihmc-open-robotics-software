@@ -5,6 +5,7 @@ import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.*;
@@ -76,6 +77,7 @@ public class IHMCROSTranslationRuntimeTools
       footsteps.swingTime = message.getSwingTime();
       footsteps.transferTime = message.getTransferTime();
       footsteps.setUniqueId(message.getUniqueId());
+      footsteps.executionMode = ExecutionMode.values[message.getExecutionMode()];
 
       ArrayList<FootstepDataMessage> stepData = new ArrayList<>();
       for (FootstepDataRosMessage footstepDataRosMessage : message.getFootstepDataList())
@@ -249,6 +251,7 @@ public class IHMCROSTranslationRuntimeTools
       message.setSwingTime(footstepList.swingTime);
       message.setTransferTime(footstepList.transferTime);
       message.setUniqueId(footstepList.getUniqueId());
+      message.setExecutionMode((byte) footstepList.executionMode.ordinal());
 
       List<FootstepDataRosMessage> convertedFootsteps = new ArrayList<>();
       for (FootstepDataMessage footstepDataMessage : footstepList.footstepDataList)
