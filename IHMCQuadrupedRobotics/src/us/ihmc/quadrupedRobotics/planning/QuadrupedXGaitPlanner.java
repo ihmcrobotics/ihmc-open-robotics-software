@@ -71,7 +71,7 @@ public class QuadrupedXGaitPlanner
          else
          {
             thisStepStartTime = computeStepStartTime(thisStepQuadrant, lastStepStartTime, xGaitSettings);
-            thisStepEndTime = computeStepEndTime(thisStepQuadrant, thisStepStartTime, lastStepEndTime, xGaitSettings);
+            thisStepEndTime = thisStepStartTime + xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration();
          }
          step.getTimeInterval().setStartTime(thisStepStartTime);
          step.getTimeInterval().setEndTime(thisStepEndTime);
@@ -218,9 +218,9 @@ public class QuadrupedXGaitPlanner
       double endDoubleSupportDuration = xGaitSettings.getEndDoubleSupportDuration();
       double endPhaseShift = stepQuadrant.isQuadrantInHind() ? 180.0 - xGaitSettings.getEndPhaseShift() : xGaitSettings.getEndPhaseShift();
 
-      // compute step end time assuming the nominal duration can only be scaled in the range (1.0, 1.25)
+      // compute step end time assuming the nominal duration can only be scaled in the range (1.0, 1.1667)
       double currentStepEndTime = lastStepEndTime + Math.max((stepDuration + endDoubleSupportDuration) * endPhaseShift / 180.0, 0.0);
-      double currentStepDuration = MathTools.clipToMinMax(currentStepEndTime - stepStartTime, stepDuration, 1.25 * stepDuration);
+      double currentStepDuration = MathTools.clipToMinMax(currentStepEndTime - stepStartTime, stepDuration, 1.1667 * stepDuration);
       return stepStartTime + currentStepDuration;
    }
 
