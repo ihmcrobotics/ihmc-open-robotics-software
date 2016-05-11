@@ -542,6 +542,11 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       return ret;
    }
+   
+   public void getBoundingBox(BoundingBox2d boundingBoxToPack)
+   {
+      boundingBoxToPack.set(boundingBox);
+   }
 
    /** Return the vertex from a clockwise ordered list */
    public Point2d getVertex(int vertexIndex)
