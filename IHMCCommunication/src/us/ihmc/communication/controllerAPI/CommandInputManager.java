@@ -118,7 +118,6 @@ public class CommandInputManager
 
       if (message instanceof MultiplePacketHolder)
       {
-         ((MultiplePacketHolder) message).parseMessageIdToChildren();
          submitMessages(((MultiplePacketHolder) message).getPackets());
          return;
       }
