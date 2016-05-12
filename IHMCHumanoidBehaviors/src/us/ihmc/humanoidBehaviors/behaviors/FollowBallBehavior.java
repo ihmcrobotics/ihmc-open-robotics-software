@@ -42,6 +42,8 @@ import java.util.List;
 
 public class FollowBallBehavior extends BehaviorInterface implements VideoStreamer
 {
+   private static final boolean DEBUG = true;
+
    private FootstepDataListMessage outgoingFootstepDataList;
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
    private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue;
@@ -145,6 +147,9 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       openCVColoredCircularBlobDetector.updateFromBufferedImage(bufferedImage);
       ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
 
+      if(DEBUG)
+         System.out.println("blob detection found " + circles.size() + " circles");
+
       if(circles.size() > 0)
          latestBallPosition2d.set(circles.get(0).getCenter());
    }
@@ -187,7 +192,8 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
          List<Point3f> filteredPointCloud = filterPointsNearBall(fullPointCloud);
          List<Sphere3D_F64> detectedSpheres = detectBalls(filteredPointCloud);
 
-         System.out.println("Ball center: " + detectedSpheres.get(0).getCenter());
+         if(DEBUG)
+            System.out.println("sphere detection found: " + detectedSpheres.size() + " spheres");
       }
    }
 
@@ -280,7 +286,8 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
 
    @Override public void initialize()
    {
-      System.out.println("initializing " + getClass().getSimpleName());
+      if(DEBUG)
+         System.out.println("initializing " + getClass().getSimpleName());
       detectBall.set(true);
    }
 
