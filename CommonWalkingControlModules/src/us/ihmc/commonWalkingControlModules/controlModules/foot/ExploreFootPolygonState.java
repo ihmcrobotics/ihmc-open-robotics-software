@@ -77,7 +77,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
       YoVariableRegistry childRegistry = new YoVariableRegistry("ExploreFootPolygon");
       registry.addChild(childRegistry);
-      internalHoldPositionState = new HoldPositionState(footControlHelper, gains, childRegistry);
+      internalHoldPositionState = new HoldPositionState(footControlHelper, null, gains, childRegistry);
       internalHoldPositionState.setDoSmartHoldPosition(false);
       internalHoldPositionState.doFootholdAdjustments(false);
 
@@ -163,11 +163,12 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    {
       double timeInState = getTimeInCurrentState();
 
+      footSwitch.computeAndPackCoP(cop);
+      momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
+      partialFootholdControlModule.compute(desiredCoP, cop);
+
       if (timeInState > recoverTime.getDoubleValue() && !done)
       {
-         footSwitch.computeAndPackCoP(cop);
-         momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
-         partialFootholdControlModule.compute(desiredCoP, cop);
          YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
          boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
          if (contactStateHasChanged)
