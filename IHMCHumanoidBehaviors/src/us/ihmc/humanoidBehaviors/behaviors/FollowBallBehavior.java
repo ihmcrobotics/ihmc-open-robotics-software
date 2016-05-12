@@ -81,6 +81,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    private final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
    private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
+   private final PointCloudShapeFinder pointCloudSphereFinder;
    private final Point2d latestBallPosition2d = new Point2d();
    private final Point3d latestBallPosition3d = new Point3d();
 
@@ -108,6 +109,12 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
 
       HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
       openCVColoredCircularBlobDetector.addHSVRange(greenRange);
+
+      ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac
+            .createDefault(SPHERE_DECECTION_ITERATIONS, SPHERE_DETECTION_ANGLE_TOLERANCE, SPHERE_DETECTION_RANSAC_DISTANCE_THRESHOLD, CloudShapeTypes.SPHERE);
+      configRansac.minimumPoints = SPHERE_DETECTION_MIN_PTS;
+      pointCloudSphereFinder = FactoryPointCloudShape
+            .ransacSingleAll(new ConfigSurfaceNormals(SPHERE_DETECTION_NUM_NEIGHBORS, SPHERE_DETECTION_MAX_NEIGHBOR_DIST), configRansac);
 
       detectBall.set(false);
    }
@@ -213,7 +220,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
             System.out.println("starting sphere detection");
 
          long startTime = System.currentTimeMillis();
-         List<Sphere3D_F64> detectedSpheres = detectSpheres(filteredPointCloud);
+         List<Sphere3D_F64> detectedSpheres = detectSpheres(filteredPointCloud, pointCloudSphereFinder);
          long stopTime = System.currentTimeMillis();
          long detectionTime = stopTime - startTime;
 
@@ -272,27 +279,21 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       return filteredPoints;
    }
 
-   private static ArrayList<Sphere3D_F64> detectSpheres(List<Point3f> pointCloud)
+   private static ArrayList<Sphere3D_F64> detectSpheres(List<Point3f> pointCloud, PointCloudShapeFinder pointCloudSphereFinder)
    {
       ArrayList<Sphere3D_F64> foundBalls = new ArrayList<Sphere3D_F64>();
       ArrayList<Point3D_F64> pointsNearBy = new ArrayList<Point3D_F64>();
 
-      for (Point3f tmpPoint : pointCloud)
+      for (int i = 0; i < pointCloud.size(); i++)
       {
+         Point3f tmpPoint = pointCloud.get(i);
          pointsNearBy.add(new Point3D_F64(tmpPoint.x, tmpPoint.y, tmpPoint.z));
       }
 
-      // find plane
-      ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac
-            .createDefault(SPHERE_DECECTION_ITERATIONS, SPHERE_DETECTION_ANGLE_TOLERANCE, SPHERE_DETECTION_RANSAC_DISTANCE_THRESHOLD, CloudShapeTypes.SPHERE);
-      configRansac.minimumPoints = SPHERE_DETECTION_MIN_PTS;
-      PointCloudShapeFinder findSpheres = FactoryPointCloudShape
-            .ransacSingleAll(new ConfigSurfaceNormals(SPHERE_DETECTION_NUM_NEIGHBORS, SPHERE_DETECTION_MAX_NEIGHBOR_DIST), configRansac);
-
-      findSpheres.process(pointsNearBy, null);
+      pointCloudSphereFinder.process(pointsNearBy, null);
 
       // sort large to small
-      List<PointCloudShapeFinder.Shape> spheres = findSpheres.getFound();
+      List<PointCloudShapeFinder.Shape> spheres = pointCloudSphereFinder.getFound();
       Collections.sort(spheres, new Comparator<PointCloudShapeFinder.Shape>()
       {
          @Override public int compare(PointCloudShapeFinder.Shape o1, PointCloudShapeFinder.Shape o2)
@@ -301,8 +302,9 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
          }
       });
 
-      for (PointCloudShapeFinder.Shape sphere : spheres)
+      for (int i = 0; i < spheres.size(); i++)
       {
+         PointCloudShapeFinder.Shape sphere = spheres.get(i);
          Sphere3D_F64 sphereParams = sphere.getParameters();
 
          if ((sphereParams.getRadius() < MAX_BALL_RADIUS) && (sphereParams.getRadius() > MIN_BALL_RADIUS))
