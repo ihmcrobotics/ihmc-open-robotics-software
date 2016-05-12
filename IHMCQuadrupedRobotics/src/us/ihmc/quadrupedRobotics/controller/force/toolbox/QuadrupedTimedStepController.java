@@ -356,6 +356,11 @@ public class QuadrupedTimedStepController
          solePositionControllerSetpoints.getSolePosition(robotQuadrant).changeFrame(stepAdjustmentSetpoint.get(robotQuadrant).getReferenceFrame());
          solePositionControllerSetpoints.getSolePosition(robotQuadrant).add(stepAdjustmentSetpoint.get(robotQuadrant));
 
+         // compute step goal position
+         goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         timedStep.setGoalPosition(goalPosition);
+         timedStep.getGoalPosition().add(stepAdjustmentSetpoint.get(robotQuadrant).getVector());
+
          // trigger touch down event
          if (currentTime >= touchDownTime)
             return StepEvent.TOUCH_DOWN;
