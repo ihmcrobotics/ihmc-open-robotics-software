@@ -14,6 +14,7 @@ import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.VideoStreamer;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -35,10 +36,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class FollowBallBehavior extends BehaviorInterface implements VideoStreamer
 {
@@ -61,7 +59,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>();
 
    private final ReferenceFrame headFrame;
-   private static final double FILTERING_ANGLE = Math.toRadians(3.0);
+   private static final double FILTERING_ANGLE = Math.toRadians(4.0);
    private static final double FILTERING_DISTANCE = 0.08;
 
    // http://www.bostondynamics.com/img/MultiSense_SL.pdf
@@ -81,6 +79,9 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
    private final Point2d latestBallPosition2d = new Point2d();
    private final Point3d latestBallPosition3d = new Point3d();
+
+   private static final double MIN_BALL_RADIUS = 0.05;
+   private static final double MAX_BALL_RADIUS = 0.15;
 
    public FollowBallBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, SDFFullHumanoidRobotModel fullRobotModel)
    {
@@ -148,7 +149,19 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
 
       if(DEBUG)
-         System.out.println("blob detection found " + circles.size() + " circles");
+      {
+         if(counter++ % 30 == 0)
+         {
+            System.out.println("blob detection found " + circles.size() + " circles");
+
+            for(int i = 0; i < circles.size(); i++)
+            {
+               HoughCircleResult result = circles.get(i);
+               System.out.println("\t center: " + result.getCenter());
+               System.out.println("\t bf img - width=" + lastBufferedImage.getWidth() + ", height=" + lastBufferedImage.getHeight() + ", minX=" + lastBufferedImage.getMinX() + ", minY=" + lastBufferedImage.getMinY());
+            }
+         }
+      }
 
       if(circles.size() > 0)
          latestBallPosition2d.set(circles.get(0).getCenter());
@@ -156,14 +169,16 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
 
    @Override public void doControl()
    {
-      if (checkForNewFootstepStatusPacket())
-      {
-         generateAndSendPathToBall();
-      }
-      else
-      {
-         ThreadTools.sleep(10);
-      }
+      generateAndSendPathToBall();
+
+      //      if (checkForNewFootstepStatusPacket())
+//      {
+//         generateAndSendPathToBall();
+//      }
+//      else
+//      {
+//         ThreadTools.sleep(10);
+//      }
    }
 
    private boolean checkForNewFootstepStatusPacket()
@@ -179,6 +194,9 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       }
    }
 
+   private static int counter = 0;
+   private static int id = 0;
+
    private void generateAndSendPathToBall()
    {
       Point3f[] fullPointCloud = null;
@@ -189,11 +207,37 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       if (fullPointCloud != null)
       {
          fullRobotModel.getHead();
-         List<Point3f> filteredPointCloud = filterPointsNearBall(fullPointCloud);
-         List<Sphere3D_F64> detectedSpheres = detectBalls(filteredPointCloud);
+
+         System.out.println("full pts count: " + fullPointCloud.length);
+
+         List<Point3f> filteredPointCloud = filterPointsNearBall(fullPointCloud); // Arrays.asList(fullPointCloud); //
+
+         System.out.println("filtered pts count: " + filteredPointCloud.size());
+
+         if (DEBUG)
+            System.out.println("starting sphere detection");
+
+         long startTime = System.currentTimeMillis();
+         List<Sphere3D_F64> detectedSpheres = detectSpheres(filteredPointCloud);
+         long stopTime = System.currentTimeMillis();
+         long detectionTime = stopTime - startTime;
 
          if(DEBUG)
+            System.out.println("sphere detection time: " + detectionTime);
+
+         if (DEBUG)
+         {
             System.out.println("sphere detection found: " + detectedSpheres.size() + " spheres");
+            for (int i = 0; i < detectedSpheres.size(); i++)
+               System.out.println("\t center: " + detectedSpheres.get(i).getCenter());
+         }
+
+         for (Sphere3D_F64 ball : detectedSpheres)
+         {
+            RigidBodyTransform ballTransform = new RigidBodyTransform();
+            ballTransform.setTranslation(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
+            sendPacketToNetworkProcessor(new DetectedObjectPacket(ballTransform, id++));
+         }
       }
    }
 
@@ -201,6 +245,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    {
       List<Point3f> filteredPoints = new ArrayList<Point3f>();
       RigidBodyTransform worldToCameraTransform = headFrame.getTransformToWorldFrame();
+      worldToCameraTransform.invert();
 
       int cameraPixelWidth = lastBufferedImage.getWidth();
       int cameraPixelHeight = lastBufferedImage.getHeight();
@@ -208,8 +253,17 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       double ballCenterX = latestBallPosition2d.x - lastBufferedImage.getMinX();
       double ballCenterY = latestBallPosition2d.y - lastBufferedImage.getMinY();
 
-      double desiredRayAngleX = 0.5 * VERTICAL_FOV * (ballCenterY / cameraPixelHeight - 0.5);
-      double desiredRayAngleY = 0.5 * HORIZONTAL_FOV * (ballCenterX / cameraPixelWidth - 0.5);
+      double desiredRayAngleX = VERTICAL_FOV * (- ballCenterY / cameraPixelHeight + 0.5);
+      double desiredRayAngleY = HORIZONTAL_FOV * (ballCenterX / cameraPixelWidth - 0.5);
+
+      System.out.println("desired ray angle x: " + desiredRayAngleX);
+      System.out.println("desired ray angle y: " + desiredRayAngleY);
+
+      if (DEBUG)
+      {
+         System.out.println("desired ray angle x: " + desiredRayAngleX);
+         System.out.println("desired ray angle y: " + desiredRayAngleY);
+      }
 
       Point3f tempPoint = new Point3f();
 
@@ -218,10 +272,10 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
          tempPoint.set(fullPointCloud[i]);
          worldToCameraTransform.transform(tempPoint);
 
-         if (tempPoint.z > FILTERING_DISTANCE)
+         if (tempPoint.x > FILTERING_DISTANCE)
          {
-            double rayAngleX = Math.atan2(tempPoint.y, tempPoint.z);
-            double rayAngleY = Math.atan2(tempPoint.x, tempPoint.z);
+            double rayAngleX = Math.atan2(tempPoint.z, tempPoint.x);
+            double rayAngleY = Math.atan2(tempPoint.y, tempPoint.x);
             if (Math.abs(rayAngleX - desiredRayAngleX) < FILTERING_ANGLE && Math.abs(rayAngleY - desiredRayAngleY) < FILTERING_ANGLE)
             {
                filteredPoints.add(fullPointCloud[i]);
@@ -232,7 +286,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       return filteredPoints;
    }
 
-   private static ArrayList<Sphere3D_F64> detectBalls(List<Point3f> pointCloud)
+   private static ArrayList<Sphere3D_F64> detectSpheres(List<Point3f> pointCloud)
    {
       ArrayList<Sphere3D_F64> foundBalls = new ArrayList<Sphere3D_F64>();
       ArrayList<Point3D_F64> pointsNearBy = new ArrayList<Point3D_F64>();
@@ -249,6 +303,8 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       PointCloudShapeFinder findSpheres = FactoryPointCloudShape
             .ransacSingleAll(new ConfigSurfaceNormals(SPHERE_DETECTION_NUM_NEIGHBORS, SPHERE_DETECTION_MAX_NEIGHBOR_DIST), configRansac);
 
+      findSpheres.process(pointsNearBy, null);
+
       // sort large to small
       List<PointCloudShapeFinder.Shape> spheres = findSpheres.getFound();
       Collections.sort(spheres, new Comparator<PointCloudShapeFinder.Shape>()
@@ -259,26 +315,13 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
          }
       });
 
-      if (spheres.size() > 0)
-      {
-//         ballsFound = spheres.size();
-//         smallestRadius = ((Sphere3D_F64) spheres.get(0).getParameters()).getRadius();
-      }
-
       for (PointCloudShapeFinder.Shape sphere : spheres)
       {
-//         Sphere3D_F64 sphereParams = (Sphere3D_F64) sphere.getParameters();
-//         PrintTools.debug(DEBUG, this, "sphere radius" + sphereParams.getRadius() + " center " + sphereParams.getCenter());
+         Sphere3D_F64 sphereParams = sphere.getParameters();
+         System.out.println("found sphere of radius " + sphereParams.getRadius());
 
-//         if ((sphereParams.getRadius() < BALL_RADIUS + 0.025f) && (sphereParams.getRadius() > BALL_RADIUS - 0.025f))// soccer ball -
-//         {
-//            foundBalls.add(sphereParams);
-//            PrintTools.debug(DEBUG, this, "------Found Soccer Ball radius" + sphereParams.getRadius() + " center " + sphereParams.getCenter());
-//
-//            RigidBodyTransform t = new RigidBodyTransform();
-//            t.setTranslation(sphereParams.getCenter().x, sphereParams.getCenter().y, sphereParams.getCenter().z);
-//         }
-
+         if ((sphereParams.getRadius() < MAX_BALL_RADIUS) && (sphereParams.getRadius() > MIN_BALL_RADIUS))
+            foundBalls.add(sphereParams);
       }
 
       return foundBalls;

@@ -46,7 +46,7 @@ public class SphereDetectionBehavior extends BehaviorInterface
    //   final int pointDropFactor = 4;
    private final static boolean DEBUG = false;
 
-   private final float BALL_RADIUS = 0.127f;
+   private final float BALL_RADIUS = 0.1f; // 0.127f;
 
    private final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
