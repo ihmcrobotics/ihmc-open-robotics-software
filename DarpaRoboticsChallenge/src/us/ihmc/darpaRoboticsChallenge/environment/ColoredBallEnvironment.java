@@ -8,6 +8,7 @@ import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListe
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
+import java.awt.*;
 import java.util.List;
 
 public class ColoredBallEnvironment implements CommonAvatarEnvironmentInterface
@@ -20,7 +21,9 @@ public class ColoredBallEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject = new CombinedTerrainObject3D("Colored balls");
       YoAppearanceTexture texture = new YoAppearanceTexture("Textures/gridGroundProfile.png");
       combinedTerrainObject.addBox(-10.0, -10.0, 10.0, 10.0, -0.05, 0.0, texture);
-      combinedTerrainObject.addSphere(1.0, 0.0, 1.0, BALL_RADIUS, YoAppearance.RGBColorFromHex(0x83B324));
+
+      int color = Color.HSBtoRGB(80.0f / 180.0f, 200.0f / 256.0f, 200.0f / 256.0f);
+      combinedTerrainObject.addSphere(1.0, 0.0, 1.0, BALL_RADIUS, YoAppearance.RGBColorFromHex(color));
    }
 
    @Override public TerrainObject3D getTerrainObject3D()
