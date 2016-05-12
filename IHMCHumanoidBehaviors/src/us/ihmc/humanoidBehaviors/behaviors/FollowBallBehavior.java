@@ -40,7 +40,7 @@ import java.util.*;
 
 public class FollowBallBehavior extends BehaviorInterface implements VideoStreamer
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private FootstepDataListMessage outgoingFootstepDataList;
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
@@ -59,8 +59,9 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>();
 
    private final ReferenceFrame headFrame;
-   private static final double FILTERING_ANGLE = Math.toRadians(4.0);
-   private static final double FILTERING_DISTANCE = 0.08;
+   private static final double FILTERING_ANGLE = Math.toRadians(5.0);
+   private static final double FILTERING_MIN_DISTANCE = 0.1;
+   private static final double FILTERING_MAX_DISTANCE = 7.0;
 
    // http://www.bostondynamics.com/img/MultiSense_SL.pdf
    private static final double HORIZONTAL_FOV = Math.toRadians(80.0);
@@ -74,14 +75,14 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    private static final int SPHERE_DETECTION_NUM_NEIGHBORS = 41;
    private static final double SPHERE_DETECTION_MAX_NEIGHBOR_DIST = 0.098158;
 
+   private static final double MIN_BALL_RADIUS = 0.05;
+   private static final double MAX_BALL_RADIUS = 0.15;
+
    private final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
    private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
    private final Point2d latestBallPosition2d = new Point2d();
    private final Point3d latestBallPosition3d = new Point3d();
-
-   private static final double MIN_BALL_RADIUS = 0.05;
-   private static final double MAX_BALL_RADIUS = 0.15;
 
    public FollowBallBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, SDFFullHumanoidRobotModel fullRobotModel)
    {
@@ -256,7 +257,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
          tempPoint.set(fullPointCloud[i]);
          worldToCameraTransform.transform(tempPoint);
 
-         if (tempPoint.x > FILTERING_DISTANCE)
+         if (tempPoint.x > FILTERING_MIN_DISTANCE && tempPoint.x < FILTERING_MAX_DISTANCE)
          {
             // rayAngle axes are in terms of the buffered image (y-down), temp pnt axes are in terms of camera frame (z-up)
             double rayAngleX = Math.atan2(tempPoint.z, tempPoint.x);
