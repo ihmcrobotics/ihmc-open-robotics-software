@@ -106,11 +106,22 @@ public abstract class GeneralizedRigidBodyInertia
 
    public FramePoint getCenterOfMassOffset()
    {
-      Vector3d comOffsetVector = new Vector3d(crossPart);
-      comOffsetVector.negate(); // comOffset = -c
-      comOffsetVector.scale(1.0 / mass); // comOffset = -1/m * c
-      FramePoint centerOfMassOffset = new FramePoint(expressedInframe, comOffsetVector);
+      FramePoint centerOfMassOffset = new FramePoint();
+      getCenterOfMassOffset(centerOfMassOffset);
       return centerOfMassOffset;
+   }
+
+   public void getCenterOfMassOffset(FramePoint centerOfMassOffsetToPack)
+   {
+      centerOfMassOffsetToPack.setIncludingFrame(expressedInframe, crossPart);
+      centerOfMassOffsetToPack.scale(-1.0 / mass); // comOffset = -1/m * c
+   }
+
+   public void setCenterOfMassOffset(FramePoint centerOfMassOffset)
+   {
+      expressedInframe.checkReferenceFrameMatch(centerOfMassOffset);
+      centerOfMassOffset.get(crossPart);
+      crossPart.scale(-mass); // c = - m * comOffset
    }
 
    public void setMomentOfInertia(double Ixx, double Iyy, double Izz)
@@ -158,7 +169,7 @@ public abstract class GeneralizedRigidBodyInertia
          matrixToPack.set(i, i, mass);
       }
    }
-   
+
    /**
     * @return a 6 x 6 matrix representing this generalized inertia in matrix form [massMomentOfInertia, crossTranspose; cross, mI] 
     */
