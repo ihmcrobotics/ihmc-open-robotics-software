@@ -23,7 +23,7 @@ public class ColoredBallEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject.addBox(-10.0, -10.0, 10.0, 10.0, -0.05, 0.0, texture);
 
       int color = Color.HSBtoRGB(80.0f / 180.0f, 200.0f / 256.0f, 200.0f / 256.0f);
-      combinedTerrainObject.addSphere(1.0, 0.0, 1.0, BALL_RADIUS, YoAppearance.RGBColorFromHex(color));
+      combinedTerrainObject.addSphere(1.5, 0.0, 1.0, BALL_RADIUS, YoAppearance.RGBColorFromHex(color));
    }
 
    @Override public TerrainObject3D getTerrainObject3D()
