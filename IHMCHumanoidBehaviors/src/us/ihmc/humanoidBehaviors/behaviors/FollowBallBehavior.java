@@ -40,7 +40,7 @@ import java.util.*;
 
 public class FollowBallBehavior extends BehaviorInterface implements VideoStreamer
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private FootstepDataListMessage outgoingFootstepDataList;
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
@@ -158,7 +158,6 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
             {
                HoughCircleResult result = circles.get(i);
                System.out.println("\t center: " + result.getCenter());
-               System.out.println("\t bf img - width=" + lastBufferedImage.getWidth() + ", height=" + lastBufferedImage.getHeight() + ", minX=" + lastBufferedImage.getMinX() + ", minY=" + lastBufferedImage.getMinY());
             }
          }
       }
@@ -207,12 +206,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       if (fullPointCloud != null)
       {
          fullRobotModel.getHead();
-
-         System.out.println("full pts count: " + fullPointCloud.length);
-
-         List<Point3f> filteredPointCloud = filterPointsNearBall(fullPointCloud); // Arrays.asList(fullPointCloud); //
-
-         System.out.println("filtered pts count: " + filteredPointCloud.size());
+         List<Point3f> filteredPointCloud = filterPointsNearBall(fullPointCloud);
 
          if (DEBUG)
             System.out.println("starting sphere detection");
@@ -223,11 +217,10 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
          long detectionTime = stopTime - startTime;
 
          if(DEBUG)
-            System.out.println("sphere detection time: " + detectionTime);
-
-         if (DEBUG)
          {
             System.out.println("sphere detection found: " + detectedSpheres.size() + " spheres");
+            System.out.println("\t detection time: " + detectionTime);
+
             for (int i = 0; i < detectedSpheres.size(); i++)
                System.out.println("\t center: " + detectedSpheres.get(i).getCenter());
          }
@@ -256,15 +249,6 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       double desiredRayAngleX = VERTICAL_FOV * (- ballCenterY / cameraPixelHeight + 0.5);
       double desiredRayAngleY = HORIZONTAL_FOV * (ballCenterX / cameraPixelWidth - 0.5);
 
-      System.out.println("desired ray angle x: " + desiredRayAngleX);
-      System.out.println("desired ray angle y: " + desiredRayAngleY);
-
-      if (DEBUG)
-      {
-         System.out.println("desired ray angle x: " + desiredRayAngleX);
-         System.out.println("desired ray angle y: " + desiredRayAngleY);
-      }
-
       Point3f tempPoint = new Point3f();
 
       for (int i = 0; i < fullPointCloud.length; i++)
@@ -274,6 +258,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
 
          if (tempPoint.x > FILTERING_DISTANCE)
          {
+            // rayAngle axes are in terms of the buffered image (y-down), temp pnt axes are in terms of camera frame (z-up)
             double rayAngleX = Math.atan2(tempPoint.z, tempPoint.x);
             double rayAngleY = Math.atan2(tempPoint.y, tempPoint.x);
             if (Math.abs(rayAngleX - desiredRayAngleX) < FILTERING_ANGLE && Math.abs(rayAngleY - desiredRayAngleY) < FILTERING_ANGLE)
@@ -318,7 +303,6 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       for (PointCloudShapeFinder.Shape sphere : spheres)
       {
          Sphere3D_F64 sphereParams = sphere.getParameters();
-         System.out.println("found sphere of radius " + sphereParams.getRadius());
 
          if ((sphereParams.getRadius() < MAX_BALL_RADIUS) && (sphereParams.getRadius() > MIN_BALL_RADIUS))
             foundBalls.add(sphereParams);
@@ -329,8 +313,6 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
 
    @Override public void initialize()
    {
-      if(DEBUG)
-         System.out.println("initializing " + getClass().getSimpleName());
       detectBall.set(true);
    }
 
