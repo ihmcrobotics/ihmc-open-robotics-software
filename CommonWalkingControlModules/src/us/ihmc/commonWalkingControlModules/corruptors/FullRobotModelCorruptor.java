@@ -170,8 +170,8 @@ public class FullRobotModelCorruptor
 
       FramePoint originalCoMOffset = new FramePoint();
       rigidBody.getCoMOffset(originalCoMOffset);
-      final YoFramePoint rigidBodyCoMOffset = new YoFramePoint(name + "CoMOffset", originalCoMOffset.getReferenceFrame(), registry);
-      rigidBodyCoMOffset.set(originalCoMOffset);
+      final YoFramePoint rigidBodyCoMOffset = new YoFramePoint(name + "CoMOffset", rigidBody.getParentJoint().getFrameAfterJoint(), registry);
+      rigidBodyCoMOffset.setAndMatchFrame(originalCoMOffset);
 
       VariableChangedListener rigidBodyCoMOffsetChangedListener = new VariableChangedListener()
       {
@@ -181,6 +181,7 @@ public class FullRobotModelCorruptor
          public void variableChanged(YoVariable<?> v)
          {
             rigidBodyCoMOffset.getFrameTupleIncludingFrame(tempFramePoint);
+            tempFramePoint.changeFrame(rigidBody.getBodyFixedFrame());
             rigidBody.setCoMOffset(tempFramePoint);
          }
       };
