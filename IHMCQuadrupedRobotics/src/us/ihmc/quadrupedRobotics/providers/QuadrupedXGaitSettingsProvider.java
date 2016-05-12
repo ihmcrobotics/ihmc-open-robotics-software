@@ -25,7 +25,7 @@ public class QuadrupedXGaitSettingsProvider
    private final DoubleParameter stanceWidthUpperLimitParameter = parameterFactory.createDouble("stanceWidthUpperLimit", 0.6);
    private final DoubleParameter stepGroundClearanceLowerLimitParameter = parameterFactory.createDouble("stepGroundClearanceLowerLimit", 0.0);
    private final DoubleParameter stepGroundClearanceUpperLimitParameter = parameterFactory.createDouble("stepGroundClearanceUpperLimit", 0.25);
-   private final DoubleParameter stepDurationLowerLimitParameter = parameterFactory.createDouble("stepDurationLowerLimit", 0.2);
+   private final DoubleParameter stepDurationLowerLimitParameter = parameterFactory.createDouble("stepDurationLowerLimit", 0.15);
    private final DoubleParameter stepDurationUpperLimitParameter = parameterFactory.createDouble("stepDurationUpperLimit", 0.6);
    private final DoubleParameter endDoubleSupportDurationLowerLimitParameter = parameterFactory.createDouble("endDoubleSupportDurationLowerLimit", 0.0);
    private final DoubleParameter endDoubleSupportDurationUpperLimitParameter = parameterFactory.createDouble("endDoubleSupportDurationUpperLimit", Double.MAX_VALUE);
