@@ -346,7 +346,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
    @Override
    public boolean hasDataForJoint(OneDoFJoint joint)
    {
-      return lowLevelJointDataMap.containsKey(joint);
+      return lowLevelJointDataMap.containsKey(joint.getName());
    }
 
    @Override
