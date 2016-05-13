@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.16"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.17"
   }
 }
 
@@ -23,19 +23,15 @@ project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
 project.ext.licenseName = "Apache License, Version 2.0"
 project.ext.bintrayLicenseName = "Apache-2.0"
 
-
 repositories ihmc.ihmcDefaultArtifactProxies()
-
-repositories {
-    maven {
-        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
-    }
-}
 
 repositories {
     mavenLocal()
     jcenter()
     mavenCentral()
+    maven {
+        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty"
+    }
 }
 
 def strings = ['ihmc', 'robotics']

@@ -5,15 +5,15 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.16"
-    classpath "org.ajoberstar:gradle-git:1.5.0-milestone.2"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.17"
+    classpath "org.ajoberstar:gradle-git:1.4.0-rc.1"
     classpath "org.hidetake:gradle-ssh-plugin:2.1.0"
   }
 }
 
 apply plugin: "us.ihmc.gradle.ihmc-build"
-apply plugin: "org.ajoberstar.grgit"
 apply plugin: "org.hidetake.ssh"
+import org.ajoberstar.grgit.Grgit
 
 if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
     evaluationDependsOn(':IHMCOpenRoboticsSoftware')
