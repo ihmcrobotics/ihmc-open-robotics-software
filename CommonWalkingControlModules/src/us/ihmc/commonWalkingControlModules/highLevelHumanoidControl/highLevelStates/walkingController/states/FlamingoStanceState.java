@@ -21,10 +21,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class FlamingoStanceState extends SingleSupportState
 {
    private final FramePoint2d capturePoint2d = new FramePoint2d();
-   private final BooleanYoVariable loadFoot = new BooleanYoVariable("loadFoot", registry);
-   private final DoubleYoVariable loadFootStartTime = new DoubleYoVariable("loadFootStartTime", registry);
-   private final DoubleYoVariable loadFootDuration = new DoubleYoVariable("loadFootDuration", registry);
-   private final DoubleYoVariable loadFootTransferDuration = new DoubleYoVariable("loadFootTransferDuration", registry);
+   private final BooleanYoVariable loadFoot;
+   private final DoubleYoVariable loadFootStartTime;
+   private final DoubleYoVariable loadFootDuration;
+   private final DoubleYoVariable loadFootTransferDuration;
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
@@ -45,6 +45,12 @@ public class FlamingoStanceState extends SingleSupportState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
+
+      String namePrefix = supportSide.getOppositeSide().getLowerCaseName();
+      loadFoot = new BooleanYoVariable(namePrefix + "LoadFoot", registry);
+      loadFootStartTime = new DoubleYoVariable(namePrefix + "LoadFootStartTime", registry);
+      loadFootDuration = new DoubleYoVariable(namePrefix + "LoadFootDuration", registry);
+      loadFootTransferDuration = new DoubleYoVariable(namePrefix + "LoadFootTransferDuration", registry);
 
       loadFoot.set(false);
       loadFootDuration.set(1.2);
