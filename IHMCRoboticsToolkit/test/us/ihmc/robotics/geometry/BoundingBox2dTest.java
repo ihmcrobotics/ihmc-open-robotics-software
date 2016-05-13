@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import org.junit.Test;
 
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point2d;
@@ -64,7 +65,7 @@ public class BoundingBox2dTest
       boundingBox2d.getMinPoint(minPoint);
       assertEquals(minPoint, lowerLeftPoint);
    }
-   
+
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected=RuntimeException.class)
    public void testGetMinPoint_4()
@@ -74,7 +75,7 @@ public class BoundingBox2dTest
       BoundingBox2d boundingBox2d = new BoundingBox2d();
       boundingBox2d.set(4.0, lowerLeftPoint.y, upperRightPoint.x, upperRightPoint.y);
    }
-   
+
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected=RuntimeException.class)
    public void testGetMinPoint_5()
@@ -348,5 +349,45 @@ public class BoundingBox2dTest
       average.interpolate(lowerLeftPoint, upperRightPoint, 0.5);
       boundingBox2d.getPointGivenParameters(point, 0.5, 0.5);
       assertTrue(average.epsilonEquals(point, 0.0));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSet()
+   {
+      Point2d lowerLeftPoint = new Point2d(0.0123, 0.0456);
+      Point2d upperRightPoint = new Point2d(2.0, 2.0);
+      BoundingBox2d boundingBox2d = new BoundingBox2d();
+      boundingBox2d.set(lowerLeftPoint.x, lowerLeftPoint.y, upperRightPoint.x, upperRightPoint.y);
+
+      BoundingBox2d boundingBoxCopy = new BoundingBox2d();
+      boundingBoxCopy.set(boundingBox2d);
+
+      Point2d minPoint = new Point2d();
+      boundingBoxCopy.getMinPoint(minPoint);
+      assertEquals(minPoint, lowerLeftPoint);
+
+      Point2d maxPoint = new Point2d();
+      boundingBoxCopy.getMaxPoint(maxPoint);
+      assertEquals(maxPoint, upperRightPoint);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetDiagonalDistanceSquared()
+   {
+      Point2d lowerLeftPoint = new Point2d(1.0, 7.0);
+      Point2d upperRightPoint = new Point2d(4.0, 11.0);
+      BoundingBox2d boundingBox2d = new BoundingBox2d();
+      boundingBox2d.set(lowerLeftPoint.x, lowerLeftPoint.y, upperRightPoint.x, upperRightPoint.y);
+
+      assertEquals(25.0, boundingBox2d.getDiagonalLengthSquared(), 1e-7);
+   }
+
+   public static void main(String[] args)
+   {
+      String targetTests = "us.ihmc.robotics.geometry.BoundingBox2dTest";
+      String targetClasses = "us.ihmc.robotics.geometry.BoundingBox2d";
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
    }
 }
