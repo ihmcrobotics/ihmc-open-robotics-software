@@ -1,7 +1,17 @@
-plugins {
-  id "us.ihmc.gradle.ihmc-build" version "0.0.16"
-  id "org.hidetake.ssh" version "2.1.0"
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.16"
+    classpath "org.hidetake:gradle-ssh-plugin:2.1.0"
+  }
 }
+
+apply plugin: "us.ihmc.gradle.ihmc-build"
+apply plugin: "org.hidetake.ssh"
 
 if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
    evaluationDependsOn(':IHMCOpenRoboticsSoftware')
