@@ -12,8 +12,10 @@ import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -35,6 +37,7 @@ public class WholeBodyControlCoreToolbox
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final double gravityZ;
+   private final double totalRobotMass;
 
    private final MomentumOptimizationSettings momentumOptimizationSettings;
 
@@ -58,6 +61,11 @@ public class WholeBodyControlCoreToolbox
       this.jointIndexHandler = new JointIndexHandler(controlledJoints);
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
       this.spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
+
+      if (fullRobotModel != null)
+         totalRobotMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      else
+         totalRobotMass = TotalMassCalculator.computeSubTreeMass(ScrewTools.getRootBody(controlledJoints[0].getSuccessor()));
    }
 
    public static WholeBodyControlCoreToolbox createForInverseKinematicsOnly(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints,
@@ -116,6 +124,11 @@ public class WholeBodyControlCoreToolbox
    public double getGravityZ()
    {
       return gravityZ;
+   }
+
+   public double getTotalRobotMass()
+   {
+      return totalRobotMass;
    }
 
    public GeometricJacobianHolder getGeometricJacobianHolder()

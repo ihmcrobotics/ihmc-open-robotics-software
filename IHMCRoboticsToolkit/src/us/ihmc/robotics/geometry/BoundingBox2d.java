@@ -54,6 +54,13 @@ public class BoundingBox2d
       checkPoint();
    }
 
+   public void set(BoundingBox2d boundingBox)
+   {
+      this.minPoint.set(boundingBox.minPoint);
+      this.maxPoint.set(boundingBox.maxPoint);
+      checkPoint();
+   }
+
    public void getMinPoint(Point2d min)
    {
       min.set(this.minPoint);
@@ -77,6 +84,11 @@ public class BoundingBox2d
    public void getCenterPointCopy(Point2d center)
    {
       center.set((minPoint.getX() + maxPoint.getX()) / 2.0, (minPoint.getY() + maxPoint.getY()) / 2.0);
+   }
+
+   public double getDiagonalLengthSquared()
+   {
+      return minPoint.distanceSquared(maxPoint);
    }
 
    /**
@@ -148,12 +160,10 @@ public class BoundingBox2d
       point.setY(minPoint.y + yParameter * (maxPoint.y - minPoint.y));
    }
 
-   // /CLOVER:OFF
    @Override
    public String toString()
    {
       return "BoundingBox2d{" + "minPoint=" + minPoint + " , maxPoint=" + maxPoint + '}';
    }
 
-   // /CLOVER:ON
 }

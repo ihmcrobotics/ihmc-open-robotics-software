@@ -64,7 +64,8 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       createGlobalStatusMessageListener();
       createAllStatusMessageBuffers();
 
-      scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
+      if (scheduler != null)
+         scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
    }
 
    @SuppressWarnings("unchecked")
@@ -170,6 +171,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    @Override
    public void closeAndDispose()
    {
-      scheduler.shutdown();
+      if (scheduler != null)
+         scheduler.shutdown();
    }
 }

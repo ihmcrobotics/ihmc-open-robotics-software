@@ -9,6 +9,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
@@ -296,6 +297,14 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       return orientationCopy;
    }
 
+   public void getPose(FramePose poseToPack)
+   {
+      checkReferenceFrameMatch(poseToPack);
+      SE3Waypoint waypointData = geometryObject.waypointData;
+      poseToPack.setPosition(waypointData.getEuclideanWaypoint().getPosition());
+      poseToPack.setOrientation(waypointData.getSO3Waypoint().getOrientation());
+   }
+
    public void getLinearVelocity(FrameVector linearVelocityToPack)
    {
       checkReferenceFrameMatch(linearVelocityToPack);
@@ -332,6 +341,12 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    {
       orientationToPack.setToZero(getReferenceFrame());
       geometryObject.getOrientation(orientationToPack.getQuaternion());
+   }
+
+   public void getPoseIncludingFrame(FramePose poseToPack)
+   {
+      poseToPack.setToZero(getReferenceFrame());
+      getPose(poseToPack);
    }
 
    public void getLinearVelocityIncludingFrame(FrameVector linearVelocityToPack)
