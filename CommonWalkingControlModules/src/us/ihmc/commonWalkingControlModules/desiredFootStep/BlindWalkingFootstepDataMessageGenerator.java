@@ -5,8 +5,8 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -69,8 +69,8 @@ public class BlindWalkingFootstepDataMessageGenerator
       RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
       blindWalkingDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
 
-      FootstepDataListCommand footsteps = computeNextFootsteps(supportLeg);
-      commandInputManager.submitCommand(footsteps);
+      FootstepDataListMessage footsteps = computeNextFootsteps(supportLeg);
+      commandInputManager.submitMessage(footsteps);
 
       nextSwingLeg.set(supportLeg);
    }
@@ -110,20 +110,18 @@ public class BlindWalkingFootstepDataMessageGenerator
       statusOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, walkingStatusListener);
    }
 
-   private FootstepDataListCommand computeNextFootsteps(RobotSide supportLeg)
+   private FootstepDataListMessage computeNextFootsteps(RobotSide supportLeg)
    {
       double stepTime = 0.0; //TODO get the time right.
-      FootstepDataListCommand footsteps = new FootstepDataListCommand();
-      FootstepDataControllerCommand footstep = blindWalkingDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-      FootstepDataControllerCommand nextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime);
-      FootstepDataControllerCommand nextNextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(),
+      FootstepDataMessage footstep = blindWalkingDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
+      FootstepDataMessage nextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime);
+      FootstepDataMessage nextNextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(),
             nextFootstep, 2.0 * stepTime);
 
-      footsteps.addFootstep(footstep);
-      footsteps.addFootstep(nextFootstep);
-      footsteps.addFootstep(nextNextFootstep);
-      footsteps.setSwingTime(Double.NaN);
-      footsteps.setTransferTime(Double.NaN);
+      FootstepDataListMessage footsteps = new FootstepDataListMessage(Double.NaN, Double.NaN);
+      footsteps.add(footstep);
+      footsteps.add(nextFootstep);
+      footsteps.add(nextNextFootstep);
 
       return footsteps;
    }
