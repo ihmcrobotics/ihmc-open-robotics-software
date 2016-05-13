@@ -26,23 +26,16 @@ project.ext.bintrayLicenseName = "Apache-2.0"
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
     maven {
         url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
     }
 }
 
-repositories {
-    mavenLocal()
-    jcenter()
-    mavenCentral()
-}
-
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
-
-
-
-
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
