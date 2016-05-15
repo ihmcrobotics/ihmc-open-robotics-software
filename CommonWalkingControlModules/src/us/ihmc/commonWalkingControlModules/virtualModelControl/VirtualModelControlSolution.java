@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controllerCore;
+package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;

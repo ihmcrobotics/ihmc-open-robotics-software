@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.VirtualModelControlSolution;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class VirtualModelControlModuleException extends NoConvergenceException
