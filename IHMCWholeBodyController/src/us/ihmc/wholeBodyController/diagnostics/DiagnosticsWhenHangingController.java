@@ -110,7 +110,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
 
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
-   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging,
          HighLevelHumanoidControllerToolbox momentumBasedController, TorqueOffsetPrinter torqueOffsetPrinter)
@@ -147,7 +147,6 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       this.fullRobotModel = momentumBasedController.getFullRobotModel();
       fullRobotModel.getOneDoFJoints(oneDoFJoints);
 
-      lowLevelOneDoFJointDesiredDataHolder = controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder();
       OneDoFJoint[] jointArray = fullRobotModel.getOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(jointArray, LowLevelJointControlMode.FORCE_CONTROL);
@@ -318,6 +317,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
       OneDoFJoint[] jointArray = fullRobotModel.getOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(jointArray);
+      controllerCoreCommand.completeLowLevelJointData(lowLevelOneDoFJointDesiredDataHolder);
    }
 
    private void callUpdatables()

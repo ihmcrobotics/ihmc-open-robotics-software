@@ -46,17 +46,12 @@ if (buildType.equals("RELEASE")) {
 }
 
 repositories {
-   mavenLocal()
-
-   jcenter()
-
-   mavenCentral()
-}
-
-repositories {
-   maven {
-      url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty"
-   }
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven {
+        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+    }
 }
 
 task performRelease(type: GradleBuild) {

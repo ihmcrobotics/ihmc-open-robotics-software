@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelo
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -43,11 +44,11 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
    private final DoubleYoVariable velocityMagnitudeInHeading = new DoubleYoVariable("velocityMagnitudeInHeading", registry);
    private final DoubleYoVariable velocityMagnitudeToLeftOfHeading = new DoubleYoVariable("velocityMagnitudeToLeftOfHeading", registry);
 
+   private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final ReferenceFrame pelvisZUpFrame;
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
    private final SideDependentList<ZUpFrame> soleZUpFrames = new SideDependentList<>();
 
-   private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
 
    private HeightMap heightMap;
@@ -107,11 +108,11 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
    }
 
    @Override
-   public FootstepDataControllerCommand predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataControllerCommand desiredFootstep, double timeFromNow)
+   public FootstepDataMessage predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataMessage desiredFootstep, double timeFromNow)
    {
       RobotSide futureSwingLegSide = supportLegSide;
       PoseReferenceFrame futureSupportFrame = new PoseReferenceFrame("futureSupportFrame", worldFrame);
-      futureSupportFrame.setPoseAndUpdate(desiredFootstep.getPosition(), desiredFootstep.getOrientation());
+      futureSupportFrame.setPoseAndUpdate(desiredFootstep.getLocation(), desiredFootstep.getOrientation());
       ZUpFrame futureSupportZUpFrame = new ZUpFrame(worldFrame, futureSupportFrame, "futureSupportZUpFrame");
       futureSupportZUpFrame.update();
 
@@ -121,10 +122,11 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
       FramePoint footstepPosition = getDesiredFootstepPosition(futureSupportZUpFrame, futureSwingLegSide, desiredHeadingFrame, footToWorldRotation, timeFromNow);
       footstepPosition.changeFrame(worldFrame);
 
-      FootstepDataControllerCommand predictedFootstep = new FootstepDataControllerCommand();
+      FootstepDataMessage predictedFootstep = new FootstepDataMessage();
       predictedFootstep.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
       predictedFootstep.setRobotSide(futureSwingLegSide);
-      predictedFootstep.setPose(footstepPosition.getPoint(), footstepOrientation.getQuaternion());
+      predictedFootstep.setLocation(footstepPosition.getPoint());
+      predictedFootstep.setOrientation(footstepOrientation.getQuaternion());
       return predictedFootstep;
    }
 

@@ -12,6 +12,12 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
+   us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrixTest.class,
+   us.ihmc.robotics.math.filters.AlphaBetaFilteredYoVariableTest.class,
+   us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariableTest.class,
+   us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternionTest.class,
+   us.ihmc.robotics.math.filters.AlphaFilteredYoVariableTest.class,
+   us.ihmc.robotics.math.filters.AlphaFusedYoVariableTest.class,
    us.ihmc.robotics.math.filters.BacklashCompensatingVelocityYoVariableTest.class,
    us.ihmc.robotics.math.filters.BacklashProcessingYoVariableTest.class,
    us.ihmc.robotics.math.filters.BetaFilteredYoVariableTest.class,
