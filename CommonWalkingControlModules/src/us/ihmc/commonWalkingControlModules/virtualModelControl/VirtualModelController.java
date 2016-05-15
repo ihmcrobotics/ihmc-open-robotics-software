@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controllerCore;
+package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -42,7 +42,7 @@ public class VirtualModelController
    private final List<OneDoFJoint> controlledJoints = new ArrayList <>();
 
    private final List<RigidBody> endEffectors = new ArrayList<>();
-   private final Map<RigidBody, RigidBody> baseOfEndEffector = new HashMap<>();
+   private final Map<RigidBody, OneDoFJoint[]> jointsToUse = new HashMap<>();
    private final Map<RigidBody, Wrench> endEffectorWrenches = new HashMap<>();
    private final Map<RigidBody, DenseMatrix64F> endEffectorSelectionMatrices = new HashMap<>();
 
@@ -69,20 +69,25 @@ public class VirtualModelController
 
    public void registerEndEffector(RigidBody base, RigidBody endEffector)
    {
+      OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(base, endEffector);
+      registerEndEffector(endEffector, base, joints);
+   }
+
+   public void registerEndEffector(RigidBody endEffector, RigidBody baseOfControl, OneDoFJoint[] jointsToUse)
+   {
       if (!endEffectors.contains(endEffector) && endEffector != null)
       {
          endEffectors.add(endEffector);
-         baseOfEndEffector.put(endEffector, base);
+         this.jointsToUse.put(endEffector, jointsToUse);
 
-         OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(base, endEffector);
-         for (int i = 0; i < joints.length; i++)
+         for (int i = 0; i < jointsToUse.length; i++)
          {
-            if (!controlledJoints.contains(joints[i]))
+            if (!controlledJoints.contains(jointsToUse[i]))
             {
-               controlledJoints.add(joints[i]);
+               controlledJoints.add(jointsToUse[i]);
 
                if (DEBUG)
-                  yoJointTorques.put(joints[i], new DoubleYoVariable(joints[i].getName() + "_torqueSolution", registry));
+                  yoJointTorques.put(jointsToUse[i], new DoubleYoVariable(jointsToUse[i].getName() + "_torqueSolution", registry));
             }
          }
 
@@ -95,7 +100,7 @@ public class VirtualModelController
 
             forceBase.set(endEffectorPoint);
 
-            YoFrameVector forceVector = new YoFrameVector(endEffector.getName() + "DesiredForce", base.getBodyFixedFrame(), registry);
+            YoFrameVector forceVector = new YoFrameVector(endEffector.getName() + "DesiredForce", baseOfControl.getBodyFixedFrame(), registry);
 
             yoForcePoints.put(endEffector, forceBase);
             yoForceVectors.put(endEffector, forceVector);
@@ -161,14 +166,13 @@ public class VirtualModelController
          int taskSize = endEffectorSelectionMatrix.getNumRows();
 
          // get jacobian
-         OneDoFJoint[] jointsInChain = ScrewTools.createOneDoFJointPath(baseOfEndEffector.get(endEffector), endEffector);
-         long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(jointsInChain, baseOfEndEffector.get(endEffector).getBodyFixedFrame());
+         long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(jointsToUse.get(endEffector), defaultRootBody.getBodyFixedFrame());
 
          // check and set frames
          Wrench endEffectorWrench = endEffectorWrenches.get(endEffector);
-         endEffectorWrench.changeFrame(baseOfEndEffector.get(endEffector).getBodyFixedFrame());
+         endEffectorWrench.changeFrame(geometricJacobianHolder.getJacobian(jacobianID).getJacobianFrame());
 
-         if (VISUALIZE_DESIRED_WRENCHES && registry != null && yoGraphicsListRegistry != null)
+         if (VISUALIZE_DESIRED_WRENCHES && (registry != null) && (yoGraphicsListRegistry != null))
          {
             endEffectorPoints.get(endEffector).setToZero(endEffector.getBodyFixedFrame());
             endEffectorPoints.get(endEffector).changeFrame(ReferenceFrame.getWorldFrame());
@@ -177,9 +181,10 @@ public class VirtualModelController
          }
 
          // Apply selection matrix
+         int numberOfJoints = jointsToUse.get(endEffector).length;
          tmpWrench.reshape(taskSize, 1);
-         tmpJMatrix.reshape(taskSize, jointsInChain.length);
-         tmpJTMatrix.reshape(jointsInChain.length, taskSize);
+         tmpJMatrix.reshape(taskSize, numberOfJoints);
+         tmpJTMatrix.reshape(numberOfJoints, taskSize);
          endEffectorWrench.getMatrix(wrenchMatrix);
          CommonOps.mult(endEffectorSelectionMatrix, wrenchMatrix, tmpWrench);
          CommonOps.mult(endEffectorSelectionMatrix, geometricJacobianHolder.getJacobian(jacobianID).getJacobianMatrix(), tmpJMatrix);
@@ -196,9 +201,9 @@ public class VirtualModelController
          fullJTMatrix.reshape(controlledJoints.size(), newSize);
          fullJTMatrix.zero();
          CommonOps.extract(matrixToCopy, 0, matrixToCopy.getNumRows(), 0, matrixToCopy.getNumCols(), fullJTMatrix, 0, 0);
-         for (int i = 0; i < jointsInChain.length; i++)
+         for (int i = 0; i < numberOfJoints; i++)
          {
-            CommonOps.extract(tmpJTMatrix, i, i+1, 0, taskSize, fullJTMatrix, controlledJoints.indexOf(jointsInChain[i]), previousSize);
+            CommonOps.extract(tmpJTMatrix, i, i+1, 0, taskSize, fullJTMatrix, controlledJoints.indexOf(jointsToUse.get(endEffector)[i]), previousSize);
          }
       }
 
