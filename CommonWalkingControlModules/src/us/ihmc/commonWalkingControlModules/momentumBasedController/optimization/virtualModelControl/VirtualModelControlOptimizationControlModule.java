@@ -13,18 +13,23 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.io.printing.PrintTools;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class VirtualModelControlOptimizationControlModule
 {
+   private static final boolean DEBUG = true;
+
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
-   private static final boolean SETUP_RHO_TASKS = true;
+   private static final boolean SETUP_RHO_TASKS = false; // FIXME
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -41,6 +46,10 @@ public class VirtualModelControlOptimizationControlModule
    private final JointIndexHandler jointIndexHandler;
    private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMinVMC", registry);
 
+   private YoFrameVector desiredLinearMomentumRate = null;
+   private YoFrameVector achievedLinearMomentumRate = null;
+   private final Map<RigidBody, YoWrench> contactWrenchSolutions = new HashMap<>();
+
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
 
@@ -54,6 +63,20 @@ public class VirtualModelControlOptimizationControlModule
       double gravityZ = toolbox.getGravityZ();
 
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
+
+      if (DEBUG)
+      {
+         desiredLinearMomentumRate = new YoFrameVector("desiredLinearMomentumRateToQP", null, registry);
+         achievedLinearMomentumRate = new YoFrameVector("achievedLinearMomentumRateFromQP", null, registry);
+
+         for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
+         {
+            RigidBody rigidBody = contactablePlaneBody.getRigidBody();
+            contactWrenchSolutions.put(rigidBody, new YoWrench(rigidBody.getName() + "_wrenchSolution", rigidBody.getBodyFixedFrame(),
+                  rigidBody.getBodyFixedFrame(), registry));
+         }
+      }
+
 
       MomentumOptimizationSettings momentumOptimizationSettings = toolbox.getMomentumOptimizationSettings();
 
@@ -136,6 +159,14 @@ public class VirtualModelControlOptimizationControlModule
       CommonOps.add(contactWrench, gravityWrench, totalWrench);
       centroidalMomentumRateSolution.set(null, totalWrench);
 
+      if (DEBUG)
+      {
+         achievedLinearMomentumRate.set(totalWrench.get(3), totalWrench.get(4), totalWrench.get(5));
+         for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
+            contactWrenchSolutions.get(rigidBody).set(externalWrenchSolution.get(rigidBody));
+
+      }
+
       VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
       virtualModelControlSolution.setJointsToCompute(jointsToOptimizeFor);
       virtualModelControlSolution.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
@@ -208,6 +239,9 @@ public class VirtualModelControlOptimizationControlModule
       CommonOps.subtract(momentumRate, additionalExternalWrench, tempTaskObjective);
       CommonOps.subtract(tempTaskObjective, gravityWrench, tempTaskObjective);
       CommonOps.mult(selectionMatrix, tempTaskObjective, taskObjective);
+
+      if (DEBUG)
+         desiredLinearMomentumRate.set(taskObjective.get(3), taskObjective.get(4), taskObjective.get(5));
 
       qpSolver.addMomentumTask(taskJacobian, taskObjective, taskWeightMatrix);
    }

@@ -30,11 +30,9 @@ import java.util.Map;
 
 public class WholeBodyVirtualModelControlSolver
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean DEBUG = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private final FullRobotModel controllerModel;
 
    private final VirtualModelControlOptimizationControlModule optimizationControlModule;
    private final VirtualModelController virtualModelController;
@@ -59,7 +57,7 @@ public class WholeBodyVirtualModelControlSolver
    private final YoFrameVector yoDesiredMomentumRateLinear;
    private final YoFrameVector yoAchievedMomentumRateLinear;
    private final FrameVector achievedMomentumRateLinear = new FrameVector();
-   private final Map<OneDoFJoint, DoubleYoVariable> jointTorqueSolution = new HashMap<>();
+   private final Map<OneDoFJoint, DoubleYoVariable> jointTorqueSolutions = new HashMap<>();
 
    private final Wrench residualRootJointWrench = new Wrench();
    private final FrameVector residualRootJointForce = new FrameVector();
@@ -68,16 +66,10 @@ public class WholeBodyVirtualModelControlSolver
    private final YoFrameVector yoResidualRootJointForce;
    private final YoFrameVector yoResidualRootJointTorque;
 
-   private final double controlDT;
-
    public WholeBodyVirtualModelControlSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
-      controlDT = toolbox.getControlDT();
       twistCalculator = toolbox.getTwistCalculator();
-      List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
-      YoGraphicsListRegistry yoGraphicsListRegistry = toolbox.getYoGraphicsListRegistry();
 
-      controllerModel = toolbox.getFullRobotModel();
       rootJoint = toolbox.getRobotRootJoint();
       optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, rootJoint, registry);
 
@@ -90,10 +82,13 @@ public class WholeBodyVirtualModelControlSolver
       virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), rootJoint.getSuccessor(), registry,
             toolbox.getYoGraphicsListRegistry());
 
-      for (OneDoFJoint joint : controlledOneDoFJoints)
+      if (DEBUG)
       {
-         DoubleYoVariable jointAccelerationSolution = new DoubleYoVariable("tau_vmc_" + joint.getName(), registry);
-         jointTorqueSolution.put(joint, jointAccelerationSolution);
+         for (OneDoFJoint joint : controlledOneDoFJoints)
+         {
+            DoubleYoVariable jointTorqueSolution = new DoubleYoVariable("tau_vmc_" + joint.getName(), registry);
+            jointTorqueSolutions.put(joint, jointTorqueSolution);
+         }
       }
 
       RigidBody[] endEffectors = toolbox.getEndEffectors();
@@ -180,8 +175,11 @@ public class WholeBodyVirtualModelControlSolver
       yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
       yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
 
-      for (OneDoFJoint joint : controlledOneDoFJoints)
-         jointTorqueSolution.get(joint).set(joint.getTau());
+      if (DEBUG)
+      {
+         for (OneDoFJoint joint : controlledOneDoFJoints)
+            jointTorqueSolutions.get(joint).set(joint.getTau());
+      }
 
       planeContactWrenchProcessor.compute(externalWrenchSolution);
       wrenchVisualizer.visualize(externalWrenchSolution);

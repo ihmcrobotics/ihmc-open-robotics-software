@@ -92,6 +92,7 @@ public class WholeBodyControllerCore
       case VIRTUAL_MODEL:
          feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
          virtualModelControlSolver.submitVirtualModelControlCommandList(controllerCoreCommand.getVirtualModelCommandList());
+         break;
       case OFF:
          break;
       default:
@@ -162,7 +163,7 @@ public class WholeBodyControllerCore
       numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
       virtualModelControlSolver.submitVirtualModelControlCommandList(feedbackControllerOutput);
       virtualModelControlSolver.compute();
-      feedbackController.computeAchievedAccelerations();
+      feedbackController.computeAchievedAccelerations(); // FIXME
       LowLevelOneDoFJointDesiredDataHolder virtualModelControlOutput = virtualModelControlSolver.getOutput();
       RootJointDesiredConfigurationDataReadOnly virtualModelControlOutputForRootJoint = virtualModelControlSolver.getOutputForRootJoint();
       yoLowLevelOneDoFJointDesiredDataHolder.completeWith(virtualModelControlOutput);
