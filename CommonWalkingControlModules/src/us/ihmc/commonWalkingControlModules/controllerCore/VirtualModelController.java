@@ -24,9 +24,8 @@ import java.util.Map;
 
 public class VirtualModelController
 {
-   private final static boolean VISUALIZE_DESIRED_WRENCHES = true;
-
    private static final boolean DEBUG = true;
+   private final static boolean VISUALIZE_DESIRED_WRENCHES = false;
 
    private final Map<InverseDynamicsJoint, DoubleYoVariable> yoJointTorques = new HashMap<>();
 
