@@ -11,7 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class VirtualModelControlData
+public class VirtualModelControlDataHandler
 {
    public final List<RigidBody> controlledBodies = new ArrayList<RigidBody>();
    public int numberOfControlledJoints = 0;
@@ -22,7 +22,7 @@ public class VirtualModelControlData
    private final Map<RigidBody, Wrench> desiredWrenches = new LinkedHashMap<>();
    private final Map<RigidBody, DenseMatrix64F> desiredSelectionMatrices = new LinkedHashMap<>();
 
-   public VirtualModelControlData()
+   public VirtualModelControlDataHandler()
    {
    }
 

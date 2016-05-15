@@ -24,10 +24,7 @@ import java.util.Map;
 
 public class VirtualModelController
 {
-   private static final boolean DEBUG = true;
    private final static boolean VISUALIZE_DESIRED_WRENCHES = false;
-
-   private final Map<InverseDynamicsJoint, DoubleYoVariable> yoJointTorques = new HashMap<>();
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final YoVariableRegistry registry;
@@ -39,12 +36,8 @@ public class VirtualModelController
    private final RigidBody defaultRootBody;
 
    private final Map<InverseDynamicsJoint, Double> jointTorques = new HashMap<>();
-   private final List<OneDoFJoint> controlledJoints = new ArrayList <>();
 
-   private final List<RigidBody> endEffectors = new ArrayList<>();
-   private final Map<RigidBody, OneDoFJoint[]> jointsToUse = new HashMap<>();
-   private final Map<RigidBody, Wrench> endEffectorWrenches = new HashMap<>();
-   private final Map<RigidBody, DenseMatrix64F> endEffectorSelectionMatrices = new HashMap<>();
+   private final VirtualModelControlDataHandler vmcDataHandler = new VirtualModelControlDataHandler();
 
    private final DenseMatrix64F fullJTMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F fullObjectiveWrench = new DenseMatrix64F(0, 0, true); // make it row major
@@ -75,21 +68,10 @@ public class VirtualModelController
 
    public void registerEndEffector(RigidBody endEffector, RigidBody baseOfControl, OneDoFJoint[] jointsToUse)
    {
-      if (!endEffectors.contains(endEffector) && endEffector != null)
+      if (!vmcDataHandler.hasBody(endEffector))
       {
-         endEffectors.add(endEffector);
-         this.jointsToUse.put(endEffector, jointsToUse);
-
-         for (int i = 0; i < jointsToUse.length; i++)
-         {
-            if (!controlledJoints.contains(jointsToUse[i]))
-            {
-               controlledJoints.add(jointsToUse[i]);
-
-               if (DEBUG)
-                  yoJointTorques.put(jointsToUse[i], new DoubleYoVariable(jointsToUse[i].getName() + "_torqueSolution", registry));
-            }
-         }
+         vmcDataHandler.addBodyForControl(endEffector);
+         vmcDataHandler.addJointsForControl(endEffector, jointsToUse);
 
          if (VISUALIZE_DESIRED_WRENCHES && registry != null && yoGraphicsListRegistry != null)
          {
@@ -126,14 +108,13 @@ public class VirtualModelController
    {
       wrench.changeBodyFrameAttachedToSameBody(endEffector.getBodyFixedFrame());
 
-      endEffectorWrenches.put(endEffector, wrench);
-      endEffectorSelectionMatrices.put(endEffector, selectionMatrix);
+      vmcDataHandler.addDesiredWrench(endEffector, wrench);
+      vmcDataHandler.addDesiredSelectionMatrix(endEffector, selectionMatrix);
    }
 
    public void reset()
    {
-      endEffectorWrenches.clear();
-      endEffectorSelectionMatrices.clear();
+      vmcDataHandler.reset();
       jointTorques.clear();
    }
 
@@ -145,31 +126,25 @@ public class VirtualModelController
 
    public void compute(VirtualModelControlSolution virtualModelControlSolutionToPack)
    {
-      for (RigidBody endEffector : endEffectors)
-      {
-         if (!endEffectorWrenches.containsKey(endEffector) || !endEffectorSelectionMatrices.containsKey(endEffector))
-            throw new RuntimeException("Not all registered end effectors have required forces to compute desired joint torques.");
-      }
-
       matrixToCopy.reshape(0, 0);
       fullJTMatrix.reshape(0, 0);
       fullObjectiveWrench.reshape(0, 0);
-      fullEffortMatrix.reshape(controlledJoints.size(), 1);
+      fullEffortMatrix.reshape(vmcDataHandler.numberOfControlledJoints, 1);
       matrixToCopy.zero();
       fullJTMatrix.zero();
       fullObjectiveWrench.zero();
       fullEffortMatrix.zero();
 
-      for (RigidBody endEffector : endEffectors)
+      for (RigidBody endEffector : vmcDataHandler.getControlledBodies())
       {
-         DenseMatrix64F endEffectorSelectionMatrix = endEffectorSelectionMatrices.get(endEffector);
+         DenseMatrix64F endEffectorSelectionMatrix = vmcDataHandler.getDesiredSelectionMatrix(endEffector);
          int taskSize = endEffectorSelectionMatrix.getNumRows();
 
          // get jacobian
-         long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(jointsToUse.get(endEffector), defaultRootBody.getBodyFixedFrame());
+         long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(vmcDataHandler.getJointsForControl(endEffector), defaultRootBody.getBodyFixedFrame());
 
          // check and set frames
-         Wrench endEffectorWrench = endEffectorWrenches.get(endEffector);
+         Wrench endEffectorWrench = vmcDataHandler.getDesiredWrench(endEffector);
          endEffectorWrench.changeFrame(geometricJacobianHolder.getJacobian(jacobianID).getJacobianFrame());
 
          if (VISUALIZE_DESIRED_WRENCHES && (registry != null) && (yoGraphicsListRegistry != null))
@@ -181,7 +156,7 @@ public class VirtualModelController
          }
 
          // Apply selection matrix
-         int numberOfJoints = jointsToUse.get(endEffector).length;
+         int numberOfJoints = vmcDataHandler.jointsInChain(endEffector);
          tmpWrench.reshape(taskSize, 1);
          tmpJMatrix.reshape(taskSize, numberOfJoints);
          tmpJTMatrix.reshape(numberOfJoints, taskSize);
@@ -198,12 +173,12 @@ public class VirtualModelController
 
          // insert new jacobian into full objective jacobian
          matrixToCopy.set(fullJTMatrix);
-         fullJTMatrix.reshape(controlledJoints.size(), newSize);
+         fullJTMatrix.reshape(vmcDataHandler.numberOfControlledJoints, newSize);
          fullJTMatrix.zero();
          CommonOps.extract(matrixToCopy, 0, matrixToCopy.getNumRows(), 0, matrixToCopy.getNumCols(), fullJTMatrix, 0, 0);
          for (int i = 0; i < numberOfJoints; i++)
          {
-            CommonOps.extract(tmpJTMatrix, i, i+1, 0, taskSize, fullJTMatrix, controlledJoints.indexOf(jointsToUse.get(endEffector)[i]), previousSize);
+            CommonOps.extract(tmpJTMatrix, i, i+1, 0, taskSize, fullJTMatrix, vmcDataHandler.indexOfInTree(endEffector, i), previousSize);
          }
       }
 
@@ -212,10 +187,9 @@ public class VirtualModelController
 
       // Write torques to map
       int index = 0;
-      for (InverseDynamicsJoint joint : controlledJoints)
+      for (InverseDynamicsJoint joint : vmcDataHandler.getControlledJoints())
       {
          jointTorques.put(joint, fullEffortMatrix.get(index));
-         yoJointTorques.get(joint).set(fullEffortMatrix.get(index));
          index++;
       }
 
