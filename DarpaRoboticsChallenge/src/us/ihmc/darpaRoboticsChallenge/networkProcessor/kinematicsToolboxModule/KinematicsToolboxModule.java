@@ -49,7 +49,7 @@ import us.ihmc.util.PeriodicThreadScheduler;
 
 public class KinematicsToolboxModule
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    private static final double YO_VARIABLE_SERVER_DT = 0.01;
    private static final int IK_UPDATE_PERIOD_MILLISECONDS = 1;
    private static final int THIS_DESTINATION = PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal();
