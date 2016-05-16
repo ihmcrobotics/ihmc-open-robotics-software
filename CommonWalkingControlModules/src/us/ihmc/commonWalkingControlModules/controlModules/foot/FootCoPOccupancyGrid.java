@@ -26,7 +26,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class FootCoPOccupancyGrid
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    private static final double defaultThresholdForCellActivation = 1.0;
    private static final double defaultDecayRate = 1.0;
 
@@ -501,5 +501,26 @@ public class FootCoPOccupancyGrid
             }
          }
       }
+   }
+   
+   private final FramePoint2d tempCellCenter = new FramePoint2d();
+   public void computeConvexHull(FrameConvexPolygon2d convexHullToPack)
+   {
+      convexHullToPack.clear(soleFrame);
+      tempCellCenter.setToZero(soleFrame);
+      
+      for (int xIndex = 0; xIndex < nLengthSubdivisions.getIntegerValue(); xIndex++)
+      {
+         for (int yIndex = 0; yIndex < nWidthSubdivisions.getIntegerValue(); yIndex++)
+         {
+            if (isCellOccupied(xIndex, yIndex))
+            {
+               getCellCenter(tempCellCenter, xIndex, yIndex);
+               convexHullToPack.addVertex(tempCellCenter);
+            }
+         }
+      }
+      
+      convexHullToPack.update();
    }
 }
