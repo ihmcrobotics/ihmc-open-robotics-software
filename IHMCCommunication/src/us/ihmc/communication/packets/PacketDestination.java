@@ -22,7 +22,8 @@ public enum PacketDestination
    ZERO_POSE_PRODUCER,
    SPEECH_TO_TEXT,
    DRILL_DETECTOR,
-   AUDIO_MODULE;
+   AUDIO_MODULE,
+   KINEMATICS_TOOLBOX_MODULE;
 
    public static final PacketDestination[] values = values();
    
