@@ -37,6 +37,7 @@ public class WholeBodyControlCoreToolbox
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final double controlDT;
    private final FullRobotModel fullRobotModel;
+   private final RigidBody[] controlledBodies;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final CommonHumanoidReferenceFrames referenceFrames;
@@ -56,12 +57,13 @@ public class WholeBodyControlCoreToolbox
 
    private final JointIndexHandler jointIndexHandler;
 
-   public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints, MomentumOptimizationSettings momentumOptimizationSettings,
+   public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, RigidBody[] controlledBodies, InverseDynamicsJoint[] controlledJoints, MomentumOptimizationSettings momentumOptimizationSettings,
          CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder,
          TwistCalculator twistCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry registry)
    {
       this.fullRobotModel = fullRobotModel;
+      this.controlledBodies = controlledBodies;
       this.momentumOptimizationSettings = momentumOptimizationSettings;
       this.referenceFrames = referenceFrames;
       this.controlDT = controlDT;
@@ -110,7 +112,7 @@ public class WholeBodyControlCoreToolbox
    public static WholeBodyControlCoreToolbox createForInverseKinematicsOnly(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints,
          CommonHumanoidReferenceFrames referenceFrames, double controlDT, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator)
    {
-      WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, controlledJoints, null, referenceFrames, controlDT, Double.NaN,
+      WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, null, controlledJoints, null, referenceFrames, controlDT, Double.NaN,
             geometricJacobianHolder, twistCalculator, null, null, null);
       return ret;
    }
@@ -143,6 +145,11 @@ public class WholeBodyControlCoreToolbox
    public FullRobotModel getFullRobotModel()
    {
       return fullRobotModel;
+   }
+
+   public RigidBody[] getControlledBodies()
+   {
+      return controlledBodies;
    }
 
    public double getControlDT()
