@@ -20,7 +20,7 @@ public class VirtualWrenchCommandList
       if (command != null)
       {
          commandList.add(command);
-         commandBodies.add(command.getRigidBody());
+         commandBodies.add(command.getControlledBody());
       }
    }
 

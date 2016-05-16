@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.ControlledBodiesCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
@@ -89,9 +90,11 @@ public class WholeBodyVirtualModelControlSolver
          }
       }
 
+      /*
       RigidBody[] endEffectors = toolbox.getEndEffectors();
       for (int i = 0; i < endEffectors.length; i++)
          virtualModelController.registerEndEffector(endEffectors[i]);
+         */
 
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
       wrenchVisualizer = toolbox.getWrenchVisualizer();
@@ -109,6 +112,13 @@ public class WholeBodyVirtualModelControlSolver
    {
       optimizationControlModule.initialize();
       virtualModelController.reset();
+      virtualWrenchCommandList.clear();
+   }
+
+   public void clear()
+   {
+      optimizationControlModule.initialize();
+      virtualModelController.clear();
       virtualWrenchCommandList.clear();
    }
 
@@ -152,7 +162,7 @@ public class WholeBodyVirtualModelControlSolver
       for (int i = 0; i < virtualWrenchCommandList.getNumberOfCommands(); i++)
       {
          virtualWrenchCommand.set(virtualWrenchCommandList.getCommand(i));
-         if (!rigidBodiesWithExternalWrench.contains(virtualWrenchCommand.getRigidBody()))
+         if (!rigidBodiesWithExternalWrench.contains(virtualWrenchCommand.getControlledBody()))
             virtualModelController.submitEndEffectorVirtualWrench(virtualWrenchCommand);
       }
 
@@ -212,6 +222,12 @@ public class WholeBodyVirtualModelControlSolver
          case JOINT_ACCELERATION_INTEGRATION:
             submitJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) command);
             break;
+         case VIRTUAL_WRENCH:
+            virtualWrenchCommandList.addCommand((VirtualWrenchCommand) command);
+            break;
+         case CONTROLLED_BODIES:
+            registerAllControlledBodies((ControlledBodiesCommand) command);
+            break;
          case COMMAND_LIST:
             submitVirtualModelControlCommandList((InverseDynamicsCommandList) command);
             break;
@@ -252,6 +268,23 @@ public class WholeBodyVirtualModelControlSolver
          OneDoFJoint jointToComputeDesiedPositionFor = command.getJointToComputeDesiredPositionFor(i);
          if (!jointsToComputeDesiredPositionFor.contains(jointToComputeDesiedPositionFor))
             jointsToComputeDesiredPositionFor.add(jointToComputeDesiedPositionFor);
+      }
+   }
+
+   private void registerAllControlledBodies(ControlledBodiesCommand command)
+   {
+      // clear list of all bodies currently being used
+      virtualModelController.reset();
+
+      // add bodies desired to be used
+      for (int i = 0; i < command.getNumberOfControlledBodies(); i++)
+      {
+         if (command.hasJointsToUse(i))
+            virtualModelController.registerEndEffector(command.getControlledBody(i), command.getBaseForControl(i), command.getJointsToUse(i));
+         else if (command.hasBaseForControl(i))
+            virtualModelController.registerEndEffector(command.getControlledBody(i), command.getBaseForControl(i));
+         else
+            virtualModelController.registerEndEffector(command.getControlledBody(i));
       }
    }
 

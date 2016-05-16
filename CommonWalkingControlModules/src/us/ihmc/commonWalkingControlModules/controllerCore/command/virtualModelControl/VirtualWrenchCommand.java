@@ -9,7 +9,7 @@ import us.ihmc.robotics.screwTheory.Wrench;
 
 public class VirtualWrenchCommand implements InverseDynamicsCommand<VirtualWrenchCommand>
 {
-   private RigidBody rigidBody;
+   private RigidBody controlledBody;
    private String rigidBodyName;
    private final Wrench virtualWrenchAppliedByRigidBody = new Wrench();
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
@@ -18,31 +18,31 @@ public class VirtualWrenchCommand implements InverseDynamicsCommand<VirtualWrenc
    {
    }
 
-   public void setRigidBody(RigidBody rigidBody)
+   public void setRigidBody(RigidBody controlledBody)
    {
-      this.rigidBody = rigidBody;
-      rigidBodyName = rigidBody.getName();
+      this.controlledBody = controlledBody;
+      rigidBodyName = controlledBody.getName();
    }
 
-   public void set(RigidBody rigidBody, Wrench virtualWrench)
+   public void set(RigidBody controlledBody, Wrench virtualWrench)
    {
-      setRigidBody(rigidBody);
+      setRigidBody(controlledBody);
       virtualWrenchAppliedByRigidBody.set(virtualWrench);
-      virtualWrenchAppliedByRigidBody.changeFrame(rigidBody.getBodyFixedFrame());
+      virtualWrenchAppliedByRigidBody.changeFrame(controlledBody.getBodyFixedFrame());
    }
 
-   public void set(RigidBody rigidBody, Wrench virtualWrench, DenseMatrix64F selectionMatrix)
+   public void set(RigidBody controlledBody, Wrench virtualWrench, DenseMatrix64F selectionMatrix)
    {
-      set(rigidBody, virtualWrench);
+      set(controlledBody, virtualWrench);
       this.selectionMatrix.set(selectionMatrix);
    }
 
-   public RigidBody getRigidBody()
+   public RigidBody getControlledBody()
    {
-      return rigidBody;
+      return controlledBody;
    }
 
-   public String getRigidBodyName()
+   public String getControlledBodyName()
    {
       return rigidBodyName;
    }
@@ -60,7 +60,7 @@ public class VirtualWrenchCommand implements InverseDynamicsCommand<VirtualWrenc
    @Override
    public void set(VirtualWrenchCommand other)
    {
-      rigidBody = other.rigidBody;
+      controlledBody = other.controlledBody;
       rigidBodyName = other.rigidBodyName;
       virtualWrenchAppliedByRigidBody.set(other.virtualWrenchAppliedByRigidBody);
    }

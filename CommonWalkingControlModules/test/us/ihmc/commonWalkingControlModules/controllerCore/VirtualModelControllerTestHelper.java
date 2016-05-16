@@ -2353,7 +2353,7 @@ public class VirtualModelControllerTestHelper
          // compute forces
          VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
 
-         virtualModelController.reset();
+         virtualModelController.clear();
          for (int i = 0; i < endEffectors.size(); i++)
          {
             desiredWrench = yoDesiredWrenches.get(i).getWrench();
