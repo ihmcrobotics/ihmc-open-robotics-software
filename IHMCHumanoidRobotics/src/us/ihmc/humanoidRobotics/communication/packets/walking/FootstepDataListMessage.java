@@ -134,7 +134,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
          return false;
       }
 
-      if (!executionMode.equals(otherList.executionMode))
+      if (this.executionMode != otherList.executionMode)
       {
          return false;
       }
@@ -166,7 +166,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       }
       else
       {
-         return (this.size() + " Footsteps");
+         return ("Starting Footstep: " + startingFootstep + "\n\tExecution Mode: " + this.executionMode + "\n\tTransfer Time: " + transferTime + "\n\tSwing Time: " + swingTime + "\n\tSize: " + this.size() + " Footsteps");
       }
    }
 
@@ -188,6 +188,21 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       return ret;
    }
 
+   public void setSwingTime(double swingTime)
+   {
+      this.swingTime = swingTime;
+   }
+
+   public void setTransferTime(double transferTime)
+   {
+      this.transferTime = transferTime;
+   }
+
+   public void setExecutionMode(ExecutionMode executionMode)
+   {
+      this.executionMode = executionMode;
+   }
+
    public FootstepDataListMessage(Random random)
    {
       setUniqueId(1L);
@@ -199,7 +214,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       this.swingTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
       this.transferTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
-      this.executionMode = ExecutionMode.values[random.nextInt(ExecutionMode.values.length)];
+      this.executionMode = RandomTools.generateRandomEnum(random, ExecutionMode.class);
    }
 
    /** {@inheritDoc} */

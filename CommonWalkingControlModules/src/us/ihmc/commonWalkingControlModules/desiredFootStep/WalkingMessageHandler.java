@@ -116,7 +116,7 @@ public class WalkingMessageHandler
       isWalkingPaused.set(false);
       double commandTransferTime = command.getTransferTime();
       double commandSwingTime = command.getSwingTime();
-      if (!Double.isNaN(commandSwingTime) && commandSwingTime > 1.0e-2 && !Double.isNaN(commandTransferTime) && commandTransferTime > 1.0e-2)
+      if (!Double.isNaN(commandSwingTime) && commandSwingTime > 1.0e-2 && !Double.isNaN(commandTransferTime) && commandTransferTime >= 0.0)
       {
          transferTime.set(commandTransferTime);
          swingTime.set(commandSwingTime);
@@ -283,6 +283,16 @@ public class WalkingMessageHandler
       Footstep footstep = footstepsAtCurrentLocation.get(robotSide);
       footstep.setPose(tempPose);
       return footstep;
+   }
+
+   public void setDefaultTransferTime(double transferTime)
+   {
+      this.transferTime.set(transferTime);
+   }
+
+   public void setDefaultSwingTime(double swingTime)
+   {
+      this.swingTime.set(swingTime);
    }
 
    public double getTransferTime()

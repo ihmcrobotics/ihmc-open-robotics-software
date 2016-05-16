@@ -60,6 +60,16 @@ public class ExplorationParameters
    private static final double defaultFootDropThreshold = -0.025;
    private static final double defaultAngularVelocityFilterBreakFrequency = 16.0;
 
+   /** Parameters for foothold exploration state */
+   private final DoubleYoVariable recoverTime;
+   private final DoubleYoVariable timeToGoToCorner;
+   private final DoubleYoVariable timeToStayInCorner;
+   private final DoubleYoVariable copCommandWeight;
+   private static final double defaultRecoverTime = 0.05;
+   private static final double defaultTimeToGoToCorner = 0.3;
+   private static final double defaultTimeToStayInCorner = 0.2;
+   private static final double defaultCopCommandWeight = 2000.0;
+
    public ExplorationParameters(YoVariableRegistry parentRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry(this.getClass().getSimpleName());
@@ -108,6 +118,16 @@ public class ExplorationParameters
       footDropThreshold.set(defaultFootDropThreshold);
       angularVelocityFilterBreakFrequency = new DoubleYoVariable(namePrefix + "AngularVelocityFilterBreakFrequency", registry);
       angularVelocityFilterBreakFrequency.set(defaultAngularVelocityFilterBreakFrequency);
+
+      namePrefix = "ExplorationState_";
+      recoverTime = new DoubleYoVariable(namePrefix + "RecoverTime", registry);
+      recoverTime.set(defaultRecoverTime);
+      timeToGoToCorner = new DoubleYoVariable(namePrefix + "TimeToGoToCorner", registry);
+      timeToGoToCorner.set(defaultTimeToGoToCorner);
+      timeToStayInCorner = new DoubleYoVariable(namePrefix + "TimeToStayInCorner", registry);
+      timeToStayInCorner.set(defaultTimeToStayInCorner);
+      copCommandWeight = new DoubleYoVariable(namePrefix + "CopCommandWeight", registry);
+      copCommandWeight.set(defaultCopCommandWeight);
    }
 
    public DoubleYoVariable getGeometricDetectionAngleThreshold()
@@ -193,6 +213,26 @@ public class ExplorationParameters
    public DoubleYoVariable getAngularVelocityFilterBreakFrequency()
    {
       return angularVelocityFilterBreakFrequency;
+   }
+
+   public DoubleYoVariable getRecoverTime()
+   {
+      return recoverTime;
+   }
+
+   public DoubleYoVariable getTimeToGoToCorner()
+   {
+      return timeToGoToCorner;
+   }
+
+   public DoubleYoVariable getTimeToStayInCorner()
+   {
+      return timeToStayInCorner;
+   }
+
+   public DoubleYoVariable getCopCommandWeight()
+   {
+      return copCommandWeight;
    }
 
 }

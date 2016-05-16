@@ -35,7 +35,7 @@ public abstract class ScriptTransformer
     		  System.err.println("File should not be a director!?");
     		  continue;
     	  }
-    	  
+
     	  File parentDirectory = scriptFileToTransform.getParentFile();
     	  if (parentDirectory.isDirectory())
     	  {
@@ -45,13 +45,13 @@ public abstract class ScriptTransformer
     	     File scriptFileToTransformBackup = new File(subDirectoryToMoveOriginals, scriptFileToTransform.getName());
     	     Files.copy(scriptFileToTransform.toPath(), scriptFileToTransformBackup.toPath(), StandardCopyOption.REPLACE_EXISTING);
     	  }
-    	  
+
          ArrayList<ScriptObject> scriptObjects = new ArrayList<>();
          ArrayList<Object> newScriptObjects = new ArrayList<>();
          ScriptFileLoader scriptFileLoader = null;
-         
+
          String scriptName = scriptFileToTransform.getName();
-         
+
          try
          {
             scriptFileLoader = new ScriptFileLoader(scriptFileToTransform);
@@ -111,7 +111,7 @@ public abstract class ScriptTransformer
             ScriptObject newScriptObject = new ScriptObject(System.currentTimeMillis(), newObject);
             scriptFileSaver.recordObject(newScriptObject.getTimeStamp(), newScriptObject.getScriptObject());
          }
-         
+
          scriptFileSaver.close();
          System.out.println("Done transforming script: " + newScript);
       }
@@ -124,11 +124,14 @@ public abstract class ScriptTransformer
    {
 	   final List<String> potentialSubDirectories = new ArrayList<String>();
 
-
 	   File directory = new File(scriptDirectoryPath);
 	   if (!directory.isDirectory())
 	   {
-		   System.err.println(directory.getAbsolutePath() + " is not a directory!"); 
+	      if (directory.getName().endsWith(".xml"))
+         {
+            System.out.println("Found script file: " + directory.getName());
+            foundScriptFilesToPack.add(directory);
+         }
 		   return;
 	   }
 
@@ -166,5 +169,5 @@ public abstract class ScriptTransformer
    {
       return listOfDirectoriesToCreate;
    }
-  
+
 }
