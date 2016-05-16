@@ -158,6 +158,34 @@ public class MathTools
    }
 
    /**
+    * True if value |(v1-v2)| <= |epsilon|
+    * True if v1 and v2 are Float.NaN
+    * True if v1 and v2 are Positive Infinity
+    * True if v1 and v2 are Negative Infinity
+    * false if not
+    *
+    * @param v1 float
+    * @param v2 float
+    * @param epsilon float
+    * @return boolean
+    */
+   public static boolean epsilonEquals(float v1, float v2, float epsilon)
+   {
+      if(Float.isNaN(v1) && Float.isNaN(v2))
+      {
+         return true;
+      }
+      
+      //catches infinites
+      if(v1 == v2)
+      {
+         return true;
+      }
+      
+      return Math.abs(v1 - v2) <= Math.abs(epsilon);
+   }
+
+   /**
     * True if v2 is within given percent of v1
     * False otherwise
     *
