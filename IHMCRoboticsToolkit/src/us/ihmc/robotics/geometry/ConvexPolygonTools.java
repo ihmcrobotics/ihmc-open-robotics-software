@@ -1,11 +1,12 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
+import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
-import java.util.ArrayList;
+
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ConvexPolygonTools
 {
@@ -718,7 +719,7 @@ public class ConvexPolygonTools
       ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays = new ConvexPolygonConstructorFromInteriorOfRays();
 
       ConvexPolygon2d polygonToReturn = new ConvexPolygon2d();
-      
+
       boolean foundPolygon = convexPolygonConstructorFromInteriorOfRays.constructFromInteriorOfRays(rays, polygonToReturn);
       if (foundPolygon) return polygonToReturn;
       return null;
@@ -795,7 +796,7 @@ public class ConvexPolygonTools
       cuttingLine.checkReferenceFrameMatch(polygonToCut);
       return cutPolygonWithLine(cuttingLine.getLine2d(), polygonToCut.getConvexPolygon2d(), sideOfLineToCut);
    }
-   
+
    public static int cutPolygonWithLine(Line2d cuttingLine, ConvexPolygon2d polygonToCut, RobotSide sideOfLineToCut)
    {
       Point2d[] intersectionPoints = polygonToCut.intersectionWith(cuttingLine);
@@ -824,6 +825,123 @@ public class ConvexPolygonTools
          polygonToCut.addVertices(intersectionPoints, intersectionPoints.length);
          polygonToCut.update();
          return numberOfVerticesRemoved;
+      }
+   }
+
+   private static final Point2d newVertex = new Point2d();
+   /**
+    * This function changes the polygon given, such that it has the desired number of vertices. It is conservative in
+    * the sense, that the modified polygon will be contained in the original polygon completely.
+    *
+    * @param polygon: modified to have the desired number of vertices
+    * @param desiredVertices: number of vertices that the polygon should have
+    */
+   public static void limitVerticesConservative(ConvexPolygon2d polygon, int desiredVertices)
+   {
+      int vertices = polygon.getNumberOfVertices();
+
+      while (vertices > desiredVertices)
+      {
+         int removeVertex = -1;
+         double shortestEdgeLength = Double.POSITIVE_INFINITY;
+         Point2d lastVertex = polygon.getVertex(0);
+         for (int i = 1; i < vertices+1; i++)
+         {
+            Point2d nextVertex = null;
+            if (i == vertices)
+            {
+               nextVertex = polygon.getVertex(0);
+            }
+            else
+            {
+               nextVertex = polygon.getVertex(i);
+            }
+            double edgeLength = lastVertex.distance(nextVertex);
+            if (edgeLength < shortestEdgeLength)
+            {
+               shortestEdgeLength = edgeLength;
+               removeVertex = i;
+            }
+            lastVertex = nextVertex;
+         }
+
+         int idx1 = -1;
+         int idx2 = -1;
+         if (removeVertex == vertices)
+         {
+            idx1 = vertices-1;
+            idx2 = 0;
+         }
+         else
+         {
+            idx1 = removeVertex;
+            idx2 = removeVertex-1;
+         }
+
+         Point2d newVertex = new Point2d();
+
+         Point2d vertexA = polygon.getVertex(idx1);
+         Point2d vertexB = polygon.getVertex(idx2);
+         newVertex.interpolate(vertexA, vertexB, 0.5);
+
+         polygon.removeVertex(idx1);
+         polygon.removeVertex(idx2);
+         polygon.addVertex(newVertex);
+         polygon.update();
+
+         vertices = polygon.getNumberOfVertices();
+      }
+
+      while (vertices < desiredVertices)
+      {
+         int index = -1;
+         double longestEdgeLength = Double.NEGATIVE_INFINITY;
+         Point2d lastVertex = polygon.getVertex(0);
+         for (int i = 1; i < vertices+1; i++)
+         {
+            Point2d nextVertex = null;
+            if (i == vertices)
+            {
+               nextVertex = polygon.getVertex(0);
+            }
+            else
+            {
+               nextVertex = polygon.getVertex(i);
+            }
+
+            double edgeLength = lastVertex.distance(nextVertex);
+            if (edgeLength > longestEdgeLength)
+            {
+               longestEdgeLength = edgeLength;
+               index = i;
+            }
+            lastVertex = nextVertex;
+         }
+
+         int idx1 = -1;
+         int idx2 = -1;
+         if (index == vertices)
+         {
+            idx1 = vertices-1;
+            idx2 = 0;
+         }
+         else
+         {
+            idx1 = index;
+            idx2 = index-1;
+         }
+
+         Point2d newVertex = new Point2d();
+
+         Point2d vertexA = polygon.getVertex(idx1);
+         Point2d vertexB = polygon.getVertex(idx2);
+         newVertex.interpolate(vertexA, vertexB, 0.5);
+
+         polygon.scale(0.99); // FIXME
+         polygon.addVertex(newVertex);
+         polygon.update();
+
+         vertices = polygon.getNumberOfVertices();
       }
    }
 }
