@@ -20,6 +20,9 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.KinematicsToolboxStateMessage;
+import us.ihmc.communication.packets.KinematicsToolboxStateMessage.KinematicsToolboxState;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -272,6 +275,11 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Spigot pose
       registerPacketClass(SpigotPosePacket.class);
+
+      // Kinematics toolbox module
+      registerPacketClass(KinematicsToolboxOutputStatus.class);
+      registerPacketClass(KinematicsToolboxStateMessage.class);
+      registerPacketField(KinematicsToolboxState.class);
 
       // Joint data
       registerPacketClass(RobotConfigurationData.class);
