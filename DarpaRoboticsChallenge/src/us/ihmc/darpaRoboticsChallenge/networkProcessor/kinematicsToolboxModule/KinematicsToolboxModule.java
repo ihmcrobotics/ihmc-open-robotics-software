@@ -19,12 +19,12 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.KinematicsToolboxStateMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.packets.TrackablePacket;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.KinematicsToolboxStateMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
@@ -129,12 +129,19 @@ public class KinematicsToolboxModule
       return new PacketConsumer<KinematicsToolboxStateMessage>()
       {
          @Override
-         public void receivedPacket(KinematicsToolboxStateMessage packet)
+         public void receivedPacket(KinematicsToolboxStateMessage message)
          {
-            switch (packet.getRequestedState())
+            if (scheduled != null && activeMessageSource.getOrdinal() != message.getSource())
+            {
+               if (DEBUG)
+                  PrintTools.error(this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: " + PacketDestination.values[message.getDestination()]);
+               return;
+            }
+
+            switch (message.getRequestedState())
             {
             case WAKE_UP:
-               wakeUp(PacketDestination.values[packet.getSource()]);
+               wakeUp(message.getSource());
                break;
             case REINITIALIZE:
                reinitialize();
@@ -159,28 +166,33 @@ public class KinematicsToolboxModule
 
             if (message instanceof TrackablePacket)
             {
-               if (activeMessageSource.getEnumValue() == null)
+               TrackablePacket<?> trackableMessage = (TrackablePacket<?>) message;
+               if (scheduled == null)
                {
-                  activeMessageSource.set(((TrackablePacket<?>) message).getSource());
-                  wakeUp(activeMessageSource.getEnumValue());
+                  wakeUp(trackableMessage.getSource());
                }
-               else if (((TrackablePacket<?>) message).getSource() != activeMessageSource.getOrdinal())
+               else if (activeMessageSource.getOrdinal() != trackableMessage.getSource())
                {
                   if (DEBUG)
-                     PrintTools.error(this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: " + PacketDestination.values[message.getDestination()]);
+                     PrintTools.error(KinematicsToolboxModule.this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: " + PacketDestination.values[trackableMessage.getSource()]);
                   return false;
                }
             }
             else
             {
                if (DEBUG)
-                  PrintTools.error(this, "Received a message from unknow source. Needs to implement: " + TrackablePacket.class.getSimpleName());
+                  PrintTools.error(KinematicsToolboxModule.this, "Received a message from unknow source. Needs to implement: " + TrackablePacket.class.getSimpleName());
                return false;
             }
 
             return true;
          }
       };
+   }
+
+   public void wakeUp(int packetDestination)
+   {
+      wakeUp(PacketDestination.values[packetDestination]);
    }
 
    public void wakeUp(PacketDestination packetDestination)
@@ -194,6 +206,7 @@ public class KinematicsToolboxModule
       createInverseKinematicsRunnable();
       scheduled = executorService.scheduleAtFixedRate(inverseKinematicsRunnable, 0, IK_UPDATE_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       reinitialize();
+      activeMessageSource.set(packetDestination);
       kinematicsToolBoxController.setPacketDestination(packetDestination);
       receivedInput.set(true);
    }
@@ -206,6 +219,7 @@ public class KinematicsToolboxModule
    public void sleep()
    {
       destroyInverseKinematicsRunnable();
+      activeMessageSource.set(null);
 
       if (scheduled == null)
       {
@@ -216,7 +230,6 @@ public class KinematicsToolboxModule
 
       scheduled.cancel(true);
       scheduled = null;
-      activeMessageSource.set(null);
    }
 
    public void destroy()
