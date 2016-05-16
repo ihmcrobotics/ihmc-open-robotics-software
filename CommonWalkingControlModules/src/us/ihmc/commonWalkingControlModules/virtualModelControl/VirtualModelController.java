@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJaco
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -17,9 +16,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class VirtualModelController
@@ -73,6 +70,7 @@ public class VirtualModelController
          vmcDataHandler.addBodyForControl(endEffector);
          vmcDataHandler.addJointsForControl(endEffector, jointsToUse);
 
+         /*
          if (VISUALIZE_DESIRED_WRENCHES && registry != null && yoGraphicsListRegistry != null)
          {
             YoFramePoint forceBase = new YoFramePoint(endEffector.getName() + "ForceBase", ReferenceFrame.getWorldFrame(), registry);
@@ -91,6 +89,7 @@ public class VirtualModelController
             YoGraphic forceVisualizer = new YoGraphicVector(endEffector.getName() + "DesiredForce", forceBase, forceVector, 0.05, forceAppearance);
             yoGraphicsListRegistry.registerYoGraphic("forcePointVisualizer", forceVisualizer);
          }
+         */
       }
    }
 
@@ -101,7 +100,7 @@ public class VirtualModelController
 
    public void submitEndEffectorVirtualWrench(VirtualWrenchCommand virtualWrenchCommand)
    {
-      submitEndEffectorVirtualWrench(virtualWrenchCommand.getRigidBody(), virtualWrenchCommand.getVirtualWrench(), virtualWrenchCommand.getSelectionMatrix());
+      submitEndEffectorVirtualWrench(virtualWrenchCommand.getControlledBody(), virtualWrenchCommand.getVirtualWrench(), virtualWrenchCommand.getSelectionMatrix());
    }
 
    public void submitEndEffectorVirtualWrench(RigidBody endEffector, Wrench wrench, DenseMatrix64F selectionMatrix)
@@ -112,9 +111,16 @@ public class VirtualModelController
       vmcDataHandler.addDesiredSelectionMatrix(endEffector, selectionMatrix);
    }
 
+
    public void reset()
    {
       vmcDataHandler.reset();
+      jointTorques.clear();
+   }
+
+   public void clear()
+   {
+      vmcDataHandler.clear();
       jointTorques.clear();
    }
 
@@ -137,32 +143,33 @@ public class VirtualModelController
 
       for (RigidBody endEffector : vmcDataHandler.getControlledBodies())
       {
-         DenseMatrix64F endEffectorSelectionMatrix = vmcDataHandler.getDesiredSelectionMatrix(endEffector);
-         int taskSize = endEffectorSelectionMatrix.getNumRows();
+         vmcDataHandler.loadBody(endEffector);
+
+         //DenseMatrix64F endEffectorSelectionMatrix = vmcDataHandler.getDesiredSelectionMatrix(endEffector);
+         int taskSize = vmcDataHandler.selectionMatrix.getNumRows();
 
          // get jacobian
          long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(vmcDataHandler.getJointsForControl(endEffector), defaultRootBody.getBodyFixedFrame());
 
          // check and set frames
-         Wrench endEffectorWrench = vmcDataHandler.getDesiredWrench(endEffector);
-         endEffectorWrench.changeFrame(geometricJacobianHolder.getJacobian(jacobianID).getJacobianFrame());
+         vmcDataHandler.wrench.changeFrame(geometricJacobianHolder.getJacobian(jacobianID).getJacobianFrame());
 
          if (VISUALIZE_DESIRED_WRENCHES && (registry != null) && (yoGraphicsListRegistry != null))
          {
             endEffectorPoints.get(endEffector).setToZero(endEffector.getBodyFixedFrame());
             endEffectorPoints.get(endEffector).changeFrame(ReferenceFrame.getWorldFrame());
             yoForcePoints.get(endEffector).set(endEffectorPoints.get(endEffector));
-            yoForceVectors.get(endEffector).set(endEffectorWrench.getLinearPart());
+            yoForceVectors.get(endEffector).set(vmcDataHandler.wrench.getLinearPart());
          }
 
          // Apply selection matrix
-         int numberOfJoints = vmcDataHandler.jointsInChain(endEffector);
+         int numberOfJoints = vmcDataHandler.joints.length;
          tmpWrench.reshape(taskSize, 1);
          tmpJMatrix.reshape(taskSize, numberOfJoints);
          tmpJTMatrix.reshape(numberOfJoints, taskSize);
-         endEffectorWrench.getMatrix(wrenchMatrix);
-         CommonOps.mult(endEffectorSelectionMatrix, wrenchMatrix, tmpWrench);
-         CommonOps.mult(endEffectorSelectionMatrix, geometricJacobianHolder.getJacobian(jacobianID).getJacobianMatrix(), tmpJMatrix);
+         vmcDataHandler.wrench.getMatrix(wrenchMatrix);
+         CommonOps.mult(vmcDataHandler.selectionMatrix, wrenchMatrix, tmpWrench);
+         CommonOps.mult(vmcDataHandler.selectionMatrix, geometricJacobianHolder.getJacobian(jacobianID).getJacobianMatrix(), tmpJMatrix);
          CommonOps.transpose(tmpJMatrix, tmpJTMatrix);
 
          // append wrench to the end of the current objective wrench vector

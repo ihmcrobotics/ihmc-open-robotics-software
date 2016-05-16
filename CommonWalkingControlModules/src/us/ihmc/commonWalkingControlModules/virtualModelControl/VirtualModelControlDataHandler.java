@@ -14,22 +14,41 @@ import java.util.Map;
 public class VirtualModelControlDataHandler
 {
    public final List<RigidBody> controlledBodies = new ArrayList<RigidBody>();
-   public int numberOfControlledJoints = 0;
-
    private final Map<RigidBody, OneDoFJoint[]> jointsForControl = new LinkedHashMap<>();
    private final List<OneDoFJoint> controlledJoints = new ArrayList <>();
+   public int numberOfControlledJoints = 0;
 
    private final Map<RigidBody, Wrench> desiredWrenches = new LinkedHashMap<>();
    private final Map<RigidBody, DenseMatrix64F> desiredSelectionMatrices = new LinkedHashMap<>();
+
+   public OneDoFJoint[] joints;
+   public Wrench wrench = new Wrench();
+   public DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 1);
 
    public VirtualModelControlDataHandler()
    {
    }
 
-   public void reset()
+   public void loadBody(RigidBody controlledBody)
+   {
+      joints = jointsForControl.get(controlledBody);
+      wrench.set(desiredWrenches.get(controlledBody));
+      selectionMatrix.set(desiredSelectionMatrices.get(controlledBody));
+   }
+
+   public void clear()
    {
       desiredWrenches.clear();
       desiredSelectionMatrices.clear();
+   }
+
+   public void reset()
+   {
+      controlledBodies.clear();
+      jointsForControl.clear();
+      numberOfControlledJoints = 0;
+
+      clear();
    }
 
    public void addBodyForControl(RigidBody bodyForControl)
@@ -55,16 +74,22 @@ public class VirtualModelControlDataHandler
 
    public void addDesiredWrench(RigidBody controlledBody, Wrench desiredWrench)
    {
-      if (desiredWrenches.get(controlledBody) != null)
-         PrintTools.warn(this, "Class already contains wrench for body " + controlledBody.getName() + ". It is being overwritten.");
-      desiredWrenches.put(controlledBody, desiredWrench);
+      if (hasBody(controlledBody))
+      {
+         if (desiredWrenches.get(controlledBody) != null)
+            PrintTools.warn(this, "Class already contains wrench for body " + controlledBody.getName() + ". It is being overwritten.");
+         desiredWrenches.put(controlledBody, desiredWrench);
+      }
    }
 
    public void addDesiredSelectionMatrix(RigidBody controlledBody, DenseMatrix64F selectionMatrix)
    {
-      if (desiredSelectionMatrices.get(controlledBody) != null)
-         PrintTools.warn(this, "Class already contains selection matrix for body " + controlledBody.getName() + ". It is being overwritten.");
-      desiredSelectionMatrices.put(controlledBody, selectionMatrix);
+      if (hasBody(controlledBody))
+      {
+         if (desiredSelectionMatrices.get(controlledBody) != null)
+            PrintTools.warn(this, "Class already contains selection matrix for body " + controlledBody.getName() + ". It is being overwritten.");
+         desiredSelectionMatrices.put(controlledBody, selectionMatrix);
+      }
    }
 
    public boolean hasBody(RigidBody controlledBody)

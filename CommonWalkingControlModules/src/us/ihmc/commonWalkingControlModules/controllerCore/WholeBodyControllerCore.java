@@ -70,7 +70,7 @@ public class WholeBodyControllerCore
       feedbackController.reset();
       inverseDynamicsSolver.reset();
       inverseKinematicsSolver.reset();
-      virtualModelControlSolver.reset();
+      virtualModelControlSolver.clear();
       yoLowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
