@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.kinematicsToolboxModule;
+package us.ihmc.humanoidRobotics.communication.packets;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
@@ -90,7 +91,10 @@ public class KinematicsToolboxOutputConverter
       int numberOfArmJoints = armJoints.length;
       double[] desiredJointPositions = new double[numberOfArmJoints];
       for (int i = 0; i < numberOfArmJoints; i++)
-         desiredJointPositions[i] = armJoints[i].getQ();
+      {
+         OneDoFJoint armJoint = armJoints[i];
+         desiredJointPositions[i] = MathTools.clipToMinMax(armJoint.getQ(), armJoint.getJointLimitLower(), armJoint.getJointLimitUpper());
+      }
       ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions);
       output.setArmTrajectoryMessage(armTrajectoryMessage);
    }
@@ -163,7 +167,7 @@ public class KinematicsToolboxOutputConverter
       output.setFootTrajectoryMessage(footTrajectoryMessage);
    }
    
-   public void checkIfDataHasBeenSet()
+   private void checkIfDataHasBeenSet()
    {
       if (output == null)
          throw new RuntimeException("Need to call setMessageToCreate() first.");
