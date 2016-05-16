@@ -285,6 +285,16 @@ public class WalkingMessageHandler
       return footstep;
    }
 
+   public void setDefaultTransferTime(double transferTime)
+   {
+      this.transferTime.set(transferTime);
+   }
+
+   public void setDefaultSwingTime(double swingTime)
+   {
+      this.swingTime.set(swingTime);
+   }
+
    public double getTransferTime()
    {
       return transferTime.getDoubleValue();

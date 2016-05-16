@@ -188,6 +188,21 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       return ret;
    }
 
+   public void setSwingTime(double swingTime)
+   {
+      this.swingTime = swingTime;
+   }
+
+   public void setTransferTime(double transferTime)
+   {
+      this.transferTime = transferTime;
+   }
+
+   public void setExecutionMode(ExecutionMode executionMode)
+   {
+      this.executionMode = executionMode;
+   }
+
    public FootstepDataListMessage(Random random)
    {
       setUniqueId(1L);

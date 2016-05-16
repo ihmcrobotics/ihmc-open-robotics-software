@@ -1,6 +1,15 @@
-plugins {
-  id "us.ihmc.gradle.ihmc-build" version "0.0.16"
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.17"
+  }
 }
+
+apply plugin: "us.ihmc.gradle.ihmc-build"
 
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
