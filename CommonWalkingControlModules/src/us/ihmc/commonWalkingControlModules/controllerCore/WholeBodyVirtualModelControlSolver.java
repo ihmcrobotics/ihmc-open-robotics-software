@@ -78,7 +78,7 @@ public class WholeBodyVirtualModelControlSolver
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
 
-      virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), rootJoint.getSuccessor(), registry,
+      virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), toolbox.getFullRobotModel().getElevator(), registry,
             toolbox.getYoGraphicsListRegistry());
 
       if (DEBUG)
@@ -89,12 +89,6 @@ public class WholeBodyVirtualModelControlSolver
             jointTorqueSolutions.put(joint, jointTorqueSolution);
          }
       }
-
-      /*
-      RigidBody[] endEffectors = toolbox.getEndEffectors();
-      for (int i = 0; i < endEffectors.length; i++)
-         virtualModelController.registerEndEffector(endEffectors[i]);
-         */
 
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
       wrenchVisualizer = toolbox.getWrenchVisualizer();
@@ -156,14 +150,14 @@ public class WholeBodyVirtualModelControlSolver
       for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
       {
          externalWrenchSolution.get(rigidBody).negate();
-         virtualModelController.submitEndEffectorVirtualWrench(rigidBody, externalWrenchSolution.get(rigidBody));
+         virtualModelController.submitControlledBodyVirtualWrench(rigidBody, externalWrenchSolution.get(rigidBody));
       }
       // submit virtual wrenches for tracking
       for (int i = 0; i < virtualWrenchCommandList.getNumberOfCommands(); i++)
       {
          virtualWrenchCommand.set(virtualWrenchCommandList.getCommand(i));
          if (!rigidBodiesWithExternalWrench.contains(virtualWrenchCommand.getControlledBody()))
-            virtualModelController.submitEndEffectorVirtualWrench(virtualWrenchCommand);
+            virtualModelController.submitControlledBodyVirtualWrench(virtualWrenchCommand);
       }
 
       virtualModelController.compute(virtualModelControlSolution);
@@ -245,8 +239,8 @@ public class WholeBodyVirtualModelControlSolver
 
    private void convertAndAddSpatialAccelerationCommand(SpatialAccelerationCommand command)
    {
-      RigidBody endEffector = command.getEndEffector();
-      RigidBodyInertia inertia = endEffector.getInertia();
+      RigidBody controlledBody = command.getEndEffector();
+      RigidBodyInertia inertia = controlledBody.getInertia();
 
       SpatialAccelerationVector accelerationVector = command.getSpatialAcceleration();
       accelerationVector.changeBodyFrameNoRelativeAcceleration(inertia.getBodyFrame());
@@ -254,10 +248,11 @@ public class WholeBodyVirtualModelControlSolver
 
       tmpWrench.setToZero(accelerationVector.getBodyFrame(), accelerationVector.getExpressedInFrame());
 
-      twistCalculator.getTwistOfBody(tmpTwist, endEffector);
+      twistCalculator.getTwistOfBody(tmpTwist, controlledBody);
       inertia.computeDynamicWrenchInBodyCoordinates(tmpWrench, accelerationVector, tmpTwist);
 
-      virtualWrenchCommand.set(endEffector, tmpWrench, command.getSelectionMatrix());
+      VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
+      virtualWrenchCommand.set(controlledBody, tmpWrench, command.getSelectionMatrix());
       virtualWrenchCommandList.addCommand(virtualWrenchCommand);
    }
 
@@ -280,11 +275,11 @@ public class WholeBodyVirtualModelControlSolver
       for (int i = 0; i < command.getNumberOfControlledBodies(); i++)
       {
          if (command.hasJointsToUse(i))
-            virtualModelController.registerEndEffector(command.getControlledBody(i), command.getBaseForControl(i), command.getJointsToUse(i));
+            virtualModelController.registerControlledBody(command.getControlledBody(i), command.getJointsToUse(i));
          else if (command.hasBaseForControl(i))
-            virtualModelController.registerEndEffector(command.getControlledBody(i), command.getBaseForControl(i));
+            virtualModelController.registerControlledBody(command.getControlledBody(i), command.getBaseForControl(i));
          else
-            virtualModelController.registerEndEffector(command.getControlledBody(i));
+            virtualModelController.registerControlledBody(command.getControlledBody(i));
       }
    }
 

@@ -187,13 +187,6 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody[] getEndEffectors()
-   {
-      return endEffectors;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public RigidBody getEndEffector(RobotSide robotSide, LimbName limbName)
    {
       switch (limbName)
