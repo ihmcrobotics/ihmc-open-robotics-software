@@ -15,6 +15,7 @@ import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.io.printing.PrintTools;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +28,7 @@ public class VirtualModelController
    private final YoVariableRegistry registry;
    private final Map<RigidBody, YoFrameVector> yoForceVectors = new HashMap<>();
    private final Map<RigidBody, YoFramePoint> yoForcePoints = new HashMap<>();
-   private final Map<RigidBody, FramePoint> endEffectorPoints = new HashMap<>();
+   private final Map<RigidBody, FramePoint> controlledBodyPoints = new HashMap<>();
 
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final RigidBody defaultRootBody;
@@ -52,63 +53,39 @@ public class VirtualModelController
       fullObjectiveWrench.reshape(0, 0);
    }
 
-   public void registerEndEffector(RigidBody endEffector)
+   public void registerControlledBody(RigidBody controlledBody)
    {
-      registerEndEffector(defaultRootBody, endEffector);
+      registerControlledBody(controlledBody, defaultRootBody);
    }
 
-   public void registerEndEffector(RigidBody base, RigidBody endEffector)
+   public void registerControlledBody(RigidBody controlledBody, RigidBody baseOfControl)
    {
-      OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(base, endEffector);
-      registerEndEffector(endEffector, base, joints);
+      OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(baseOfControl, controlledBody);
+      registerControlledBody(controlledBody, joints);
    }
 
-   public void registerEndEffector(RigidBody endEffector, RigidBody baseOfControl, OneDoFJoint[] jointsToUse)
+   public void registerControlledBody(RigidBody controlledBody, OneDoFJoint[] jointsToUse)
    {
-      if (!vmcDataHandler.hasBody(endEffector))
-      {
-         vmcDataHandler.addBodyForControl(endEffector);
-         vmcDataHandler.addJointsForControl(endEffector, jointsToUse);
-
-         /*
-         if (VISUALIZE_DESIRED_WRENCHES && registry != null && yoGraphicsListRegistry != null)
-         {
-            YoFramePoint forceBase = new YoFramePoint(endEffector.getName() + "ForceBase", ReferenceFrame.getWorldFrame(), registry);
-            FramePoint endEffectorPoint = new FramePoint(endEffector.getBodyFixedFrame());
-            endEffectorPoint.changeFrame(ReferenceFrame.getWorldFrame());
-            endEffectorPoints.put(endEffector, endEffectorPoint);
-
-            forceBase.set(endEffectorPoint);
-
-            YoFrameVector forceVector = new YoFrameVector(endEffector.getName() + "DesiredForce", baseOfControl.getBodyFixedFrame(), registry);
-
-            yoForcePoints.put(endEffector, forceBase);
-            yoForceVectors.put(endEffector, forceVector);
-
-            AppearanceDefinition forceAppearance = YoAppearance.AliceBlue();
-            YoGraphic forceVisualizer = new YoGraphicVector(endEffector.getName() + "DesiredForce", forceBase, forceVector, 0.05, forceAppearance);
-            yoGraphicsListRegistry.registerYoGraphic("forcePointVisualizer", forceVisualizer);
-         }
-         */
-      }
+      vmcDataHandler.addBodyForControl(controlledBody);
+      vmcDataHandler.addJointsForControl(controlledBody, jointsToUse);
    }
 
-   public void submitEndEffectorVirtualWrench(RigidBody endEffector, Wrench wrench)
+   public void submitControlledBodyVirtualWrench(RigidBody controlledBody, Wrench wrench)
    {
-      submitEndEffectorVirtualWrench(endEffector, wrench, new CommonOps().identity(Wrench.SIZE, Wrench.SIZE));
+      submitControlledBodyVirtualWrench(controlledBody, wrench, new CommonOps().identity(Wrench.SIZE, Wrench.SIZE));
    }
 
-   public void submitEndEffectorVirtualWrench(VirtualWrenchCommand virtualWrenchCommand)
+   public void submitControlledBodyVirtualWrench(VirtualWrenchCommand virtualWrenchCommand)
    {
-      submitEndEffectorVirtualWrench(virtualWrenchCommand.getControlledBody(), virtualWrenchCommand.getVirtualWrench(), virtualWrenchCommand.getSelectionMatrix());
+      submitControlledBodyVirtualWrench(virtualWrenchCommand.getControlledBody(), virtualWrenchCommand.getVirtualWrench(), virtualWrenchCommand.getSelectionMatrix());
    }
 
-   public void submitEndEffectorVirtualWrench(RigidBody endEffector, Wrench wrench, DenseMatrix64F selectionMatrix)
+   public void submitControlledBodyVirtualWrench(RigidBody controlledBody, Wrench wrench, DenseMatrix64F selectionMatrix)
    {
-      wrench.changeBodyFrameAttachedToSameBody(endEffector.getBodyFixedFrame());
+      wrench.changeBodyFrameAttachedToSameBody(controlledBody.getBodyFixedFrame());
 
-      vmcDataHandler.addDesiredWrench(endEffector, wrench);
-      vmcDataHandler.addDesiredSelectionMatrix(endEffector, selectionMatrix);
+      vmcDataHandler.addDesiredWrench(controlledBody, wrench);
+      vmcDataHandler.addDesiredSelectionMatrix(controlledBody, selectionMatrix);
    }
 
 
@@ -141,51 +118,64 @@ public class VirtualModelController
       fullObjectiveWrench.zero();
       fullEffortMatrix.zero();
 
-      for (RigidBody endEffector : vmcDataHandler.getControlledBodies())
+      for (RigidBody controlledBody : vmcDataHandler.getControlledBodies())
       {
-         vmcDataHandler.loadBody(endEffector);
-
-         //DenseMatrix64F endEffectorSelectionMatrix = vmcDataHandler.getDesiredSelectionMatrix(endEffector);
-         int taskSize = vmcDataHandler.selectionMatrix.getNumRows();
-
-         // get jacobian
-         long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(vmcDataHandler.getJointsForControl(endEffector), defaultRootBody.getBodyFixedFrame());
-
-         // check and set frames
-         vmcDataHandler.wrench.changeFrame(geometricJacobianHolder.getJacobian(jacobianID).getJacobianFrame());
-
-         if (VISUALIZE_DESIRED_WRENCHES && (registry != null) && (yoGraphicsListRegistry != null))
+         if (vmcDataHandler.hasWrench(controlledBody) && vmcDataHandler.hasSelectionMatrix(controlledBody))
          {
-            endEffectorPoints.get(endEffector).setToZero(endEffector.getBodyFixedFrame());
-            endEffectorPoints.get(endEffector).changeFrame(ReferenceFrame.getWorldFrame());
-            yoForcePoints.get(endEffector).set(endEffectorPoints.get(endEffector));
-            yoForceVectors.get(endEffector).set(vmcDataHandler.wrench.getLinearPart());
+            vmcDataHandler.loadBody(controlledBody);
+
+            int taskSize = vmcDataHandler.selectionMatrix.getNumRows();
+            int numberOfControlChains = vmcDataHandler.numberOfChains(controlledBody);
+
+            // check and set frames
+            vmcDataHandler.wrench.changeFrame(defaultRootBody.getBodyFixedFrame());
+
+            if (VISUALIZE_DESIRED_WRENCHES && (registry != null) && (yoGraphicsListRegistry != null))
+            {
+               controlledBodyPoints.get(controlledBody).setToZero(controlledBody.getBodyFixedFrame());
+               controlledBodyPoints.get(controlledBody).changeFrame(ReferenceFrame.getWorldFrame());
+               yoForcePoints.get(controlledBody).set(controlledBodyPoints.get(controlledBody));
+               yoForceVectors.get(controlledBody).set(vmcDataHandler.wrench.getLinearPart());
+            }
+
+            // apply selection matrix to wrench
+            tmpWrench.reshape(taskSize, 1);
+            vmcDataHandler.wrench.getMatrix(wrenchMatrix);
+            CommonOps.mult(vmcDataHandler.selectionMatrix, wrenchMatrix, tmpWrench);
+
+            // append wrench to the end of the current objective wrench vector
+            int previousSize = fullObjectiveWrench.getNumRows();
+            int newSize = previousSize + taskSize;
+            fullObjectiveWrench.reshape(newSize, 1, true);
+            CommonOps.extract(tmpWrench, 0, taskSize, 0, 1, fullObjectiveWrench, previousSize, 0);
+
+            for (int chainID = 0; chainID < numberOfControlChains; chainID++)
+            {
+               // get jacobian
+               long jacobianID = geometricJacobianHolder .getOrCreateGeometricJacobian(vmcDataHandler.getJointsForControl(controlledBody, chainID), defaultRootBody.getBodyFixedFrame());
+
+               // Apply selection matrix to jacobian
+               int numberOfJoints = vmcDataHandler.jointsInChain(controlledBody, chainID);
+               tmpJMatrix.reshape(taskSize, numberOfJoints);
+               tmpJTMatrix.reshape(numberOfJoints, taskSize);
+               CommonOps.mult(vmcDataHandler.selectionMatrix, geometricJacobianHolder.getJacobian(jacobianID).getJacobianMatrix(), tmpJMatrix);
+               CommonOps.transpose(tmpJMatrix, tmpJTMatrix);
+
+               // insert new jacobian into full objective jacobian
+               matrixToCopy.set(fullJTMatrix);
+               fullJTMatrix.reshape(vmcDataHandler.numberOfControlledJoints, newSize);
+               fullJTMatrix.zero();
+               CommonOps.extract(matrixToCopy, 0, matrixToCopy.getNumRows(), 0, matrixToCopy.getNumCols(), fullJTMatrix, 0, 0);
+               for (int jointID = 0; jointID < numberOfJoints; jointID++)
+               {
+                  CommonOps.extract(tmpJTMatrix, jointID, jointID + 1, 0, taskSize, fullJTMatrix, vmcDataHandler.indexOfInTree(controlledBody, chainID, jointID),
+                        previousSize);
+               }
+            }
          }
-
-         // Apply selection matrix
-         int numberOfJoints = vmcDataHandler.joints.length;
-         tmpWrench.reshape(taskSize, 1);
-         tmpJMatrix.reshape(taskSize, numberOfJoints);
-         tmpJTMatrix.reshape(numberOfJoints, taskSize);
-         vmcDataHandler.wrench.getMatrix(wrenchMatrix);
-         CommonOps.mult(vmcDataHandler.selectionMatrix, wrenchMatrix, tmpWrench);
-         CommonOps.mult(vmcDataHandler.selectionMatrix, geometricJacobianHolder.getJacobian(jacobianID).getJacobianMatrix(), tmpJMatrix);
-         CommonOps.transpose(tmpJMatrix, tmpJTMatrix);
-
-         // append wrench to the end of the current objective wrench vector
-         int previousSize = fullObjectiveWrench.getNumRows();
-         int newSize = previousSize + taskSize;
-         fullObjectiveWrench.reshape(newSize, 1, true);
-         CommonOps.extract(tmpWrench, 0, taskSize, 0, 1, fullObjectiveWrench, previousSize, 0);
-
-         // insert new jacobian into full objective jacobian
-         matrixToCopy.set(fullJTMatrix);
-         fullJTMatrix.reshape(vmcDataHandler.numberOfControlledJoints, newSize);
-         fullJTMatrix.zero();
-         CommonOps.extract(matrixToCopy, 0, matrixToCopy.getNumRows(), 0, matrixToCopy.getNumCols(), fullJTMatrix, 0, 0);
-         for (int i = 0; i < numberOfJoints; i++)
+         else
          {
-            CommonOps.extract(tmpJTMatrix, i, i+1, 0, taskSize, fullJTMatrix, vmcDataHandler.indexOfInTree(endEffector, i), previousSize);
+            PrintTools.warn(this, "Do not have a wrench or selection matrix for body " + controlledBody.getName() + ", skipping this body.");
          }
       }
 

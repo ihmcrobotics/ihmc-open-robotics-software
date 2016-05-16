@@ -552,12 +552,12 @@ public class VirtualModelControllerTest
       CommonOps.invert(transposeJacobianMatrix);
 
       VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), pelvis, null, null);
-      virtualModelController.registerEndEffector(pelvis, endEffector);
+      virtualModelController.registerControlledBody(endEffector, pelvis);
 
       VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
       virtualWrenchCommand.set(foot, desiredWrench, selectionMatrix);
 
-      virtualModelController.submitEndEffectorVirtualWrench(virtualWrenchCommand);
+      virtualModelController.submitControlledBodyVirtualWrench(virtualWrenchCommand);
 
       // find jacobian transpose solution
       VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
@@ -762,14 +762,14 @@ public class VirtualModelControllerTest
       CommonOps.invert(transposeJacobianMatrix);
 
       VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), base, null, null);
-      virtualModelController.registerEndEffector(base, endEffector);
+      virtualModelController.registerControlledBody(endEffector, base);
 
       desiredWrench.changeFrame(base.getBodyFixedFrame());
 
       if (selectionMatrix == null)
-         virtualModelController.submitEndEffectorVirtualWrench(endEffector, desiredWrench);
+         virtualModelController.submitControlledBodyVirtualWrench(endEffector, desiredWrench);
       else
-         virtualModelController.submitEndEffectorVirtualWrench(endEffector, desiredWrench, selectionMatrix);
+         virtualModelController.submitControlledBodyVirtualWrench(endEffector, desiredWrench, selectionMatrix);
 
       // find jacobian transpose solution
       VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();

@@ -156,7 +156,7 @@ public class VirtualModelControllerTestHelper
          endEffectorFrames.add(endEffectorFrame);
          desiredEndEffectorPoses.add(desiredEndEffectorPose);
 
-         virtualModelController.registerEndEffector(controllerModel.getElevator(), endEffector);
+         virtualModelController.registerControlledBody(endEffector, controllerModel.getElevator());
 
          Wrench desiredWrench = new Wrench(endEffectorFrame, endEffectorFrame);
          Vector3d desiredForce = desiredForces.get(i);
@@ -2357,7 +2357,7 @@ public class VirtualModelControllerTestHelper
          for (int i = 0; i < endEffectors.size(); i++)
          {
             desiredWrench = yoDesiredWrenches.get(i).getWrench();
-            virtualModelController.submitEndEffectorVirtualWrench(endEffectors.get(i), desiredWrench, selectionMatrix);
+            virtualModelController.submitControlledBodyVirtualWrench(endEffectors.get(i), desiredWrench, selectionMatrix);
          }
          virtualModelController.compute(virtualModelControlSolution);
 

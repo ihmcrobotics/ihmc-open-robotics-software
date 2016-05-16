@@ -1,9 +1,7 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.tools.io.printing.PrintTools;
 
 import java.util.ArrayList;
@@ -14,14 +12,14 @@ import java.util.Map;
 public class VirtualModelControlDataHandler
 {
    public final List<RigidBody> controlledBodies = new ArrayList<RigidBody>();
-   private final Map<RigidBody, OneDoFJoint[]> jointsForControl = new LinkedHashMap<>();
+   private final Map<RigidBody, List<OneDoFJoint[]>> jointChainsForControl = new LinkedHashMap<>();
    private final List<OneDoFJoint> controlledJoints = new ArrayList <>();
    public int numberOfControlledJoints = 0;
 
    private final Map<RigidBody, Wrench> desiredWrenches = new LinkedHashMap<>();
    private final Map<RigidBody, DenseMatrix64F> desiredSelectionMatrices = new LinkedHashMap<>();
 
-   public OneDoFJoint[] joints;
+   public List<OneDoFJoint[]> joints;
    public Wrench wrench = new Wrench();
    public DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 1);
 
@@ -31,9 +29,12 @@ public class VirtualModelControlDataHandler
 
    public void loadBody(RigidBody controlledBody)
    {
-      joints = jointsForControl.get(controlledBody);
-      wrench.set(desiredWrenches.get(controlledBody));
-      selectionMatrix.set(desiredSelectionMatrices.get(controlledBody));
+      if (hasWrench(controlledBody) && hasSelectionMatrix(controlledBody))
+      {
+         joints = jointChainsForControl.get(controlledBody);
+         wrench.set(desiredWrenches.get(controlledBody));
+         selectionMatrix.set(desiredSelectionMatrices.get(controlledBody));
+      }
    }
 
    public void clear()
@@ -45,7 +46,7 @@ public class VirtualModelControlDataHandler
    public void reset()
    {
       controlledBodies.clear();
-      jointsForControl.clear();
+      jointChainsForControl.clear();
       numberOfControlledJoints = 0;
 
       clear();
@@ -54,20 +55,37 @@ public class VirtualModelControlDataHandler
    public void addBodyForControl(RigidBody bodyForControl)
    {
       if (!controlledBodies.contains(bodyForControl))
+      {
          controlledBodies.add(bodyForControl);
+         jointChainsForControl.put(bodyForControl, new ArrayList<OneDoFJoint[]>());
+      }
       else
-         PrintTools.warn(this, "Class already contains body " + bodyForControl.getName() + " for control!!");
+      {
+         PrintTools.warn(this, "Class has already registered " + bodyForControl.getName() + ".");
+      }
    }
 
    public void addJointsForControl(RigidBody controlledBody, OneDoFJoint[] jointsToUse)
    {
-      if(jointsForControl.get(controlledBody) != null)
-         PrintTools.warn(this, "Class already contains joints for body " + controlledBody.getName() + " to use. These are being overwritten.");
-      jointsForControl.put(controlledBody, jointsToUse);
+      // check joint order
+      boolean rightOrder = ScrewTools.isAncestor(jointsToUse[1].getPredecessor(), jointsToUse[0].getPredecessor());
 
-      for (int i = 0; i < jointsToUse.length; i++)
-         if (!controlledJoints.contains(jointsToUse[i]))
-            controlledJoints.add(jointsToUse[i]);
+      int length = jointsToUse.length;
+      OneDoFJoint[] orderedJointsToUse;
+      if (rightOrder)
+         orderedJointsToUse = jointsToUse;
+      else
+      {
+         orderedJointsToUse = new OneDoFJoint[length];
+         for (int i = 0; i < length; i++)
+            orderedJointsToUse[i] = jointsToUse[length - 1 - i];
+      }
+
+      jointChainsForControl.get(controlledBody).add(orderedJointsToUse);
+
+      for (int i = 0; i < length; i++)
+         if (!controlledJoints.contains(orderedJointsToUse[i]))
+            controlledJoints.add(orderedJointsToUse[i]);
 
       numberOfControlledJoints = controlledJoints.size();
    }
@@ -97,14 +115,29 @@ public class VirtualModelControlDataHandler
       return controlledBodies.contains(controlledBody) || controlledBody == null;
    }
 
-   public int jointsInChain(RigidBody controlledBody)
+   public boolean hasWrench(RigidBody controlledBody)
    {
-      return jointsForControl.get(controlledBody).length;
+      return desiredWrenches.get(controlledBody) != null;
    }
 
-   public int indexOfInTree(RigidBody controlledBody, int jointNumberInChain)
+   public boolean hasSelectionMatrix(RigidBody controlledBody)
    {
-      return controlledJoints.indexOf(jointsForControl.get(controlledBody)[jointNumberInChain]);
+      return desiredSelectionMatrices.get(controlledBody) != null;
+   }
+
+   public int jointsInChain(RigidBody controlledBody, int chainID)
+   {
+      return jointChainsForControl.get(controlledBody).get(chainID).length;
+   }
+
+   public int numberOfChains(RigidBody controlledBody)
+   {
+      return jointChainsForControl.get(controlledBody).size();
+   }
+
+   public int indexOfInTree(RigidBody controlledBody, int chainID, int jointNumberInChain)
+   {
+      return controlledJoints.indexOf(jointChainsForControl.get(controlledBody).get(chainID)[jointNumberInChain]);
    }
 
    public List<OneDoFJoint> getControlledJoints()
@@ -117,9 +150,14 @@ public class VirtualModelControlDataHandler
       return controlledBodies;
    }
 
-   public OneDoFJoint[] getJointsForControl(RigidBody controlledBody)
+   public List<OneDoFJoint[]> getJointChainsForControl(RigidBody controlledBody)
    {
-      return jointsForControl.get(controlledBody);
+      return jointChainsForControl.get(controlledBody);
+   }
+
+   public OneDoFJoint[] getJointsForControl(RigidBody controlledBody, int chainID)
+   {
+      return jointChainsForControl.get(controlledBody).get(chainID);
    }
 
    public Wrench getDesiredWrench(RigidBody controlledBody)

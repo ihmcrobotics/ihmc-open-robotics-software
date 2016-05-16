@@ -27,6 +27,7 @@ public class VirtualWrenchCommandList
    public void clear()
    {
       commandList.clear();
+      commandBodies.clear();
    }
 
    public VirtualWrenchCommand getCommand(int commandIndex)
@@ -36,10 +37,13 @@ public class VirtualWrenchCommandList
 
    public VirtualWrenchCommand pollCommand()
    {
-      if (commandList.isEmpty())
+      if (commandList.isEmpty() || commandBodies.isEmpty())
          return null;
       else
+      {
+         commandBodies.remove(getNumberOfCommands() - 1);
          return commandList.remove(getNumberOfCommands() - 1);
+      }
    }
 
    public int getNumberOfCommands()
