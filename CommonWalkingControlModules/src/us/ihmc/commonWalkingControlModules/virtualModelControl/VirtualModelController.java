@@ -10,6 +10,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
@@ -29,6 +30,8 @@ public class VirtualModelController
    private final Map<RigidBody, YoFrameVector> yoForceVectors = new HashMap<>();
    private final Map<RigidBody, YoFramePoint> yoForcePoints = new HashMap<>();
    private final Map<RigidBody, FramePoint> controlledBodyPoints = new HashMap<>();
+
+   private final Map<RigidBody, YoWrench> yoWrenches = new HashMap<>();
 
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final RigidBody defaultRootBody;
@@ -68,6 +71,13 @@ public class VirtualModelController
    {
       vmcDataHandler.addBodyForControl(controlledBody);
       vmcDataHandler.addJointsForControl(controlledBody, jointsToUse);
+   }
+
+   public void createYoVariable(RigidBody controlledBody)
+   {
+      YoWrench yoWrench = new YoWrench(controlledBody.getName() + "_desiredWrench", controlledBody.getBodyFixedFrame(), defaultRootBody.getBodyFixedFrame(),
+            registry);
+      yoWrenches.put(controlledBody, yoWrench);
    }
 
    public void submitControlledBodyVirtualWrench(RigidBody controlledBody, Wrench wrench)
@@ -129,6 +139,8 @@ public class VirtualModelController
 
             // check and set frames
             vmcDataHandler.wrench.changeFrame(defaultRootBody.getBodyFixedFrame());
+            if (yoWrenches.get(controlledBody) != null)
+               yoWrenches.get(controlledBody).set(vmcDataHandler.wrench);
 
             if (VISUALIZE_DESIRED_WRENCHES && (registry != null) && (yoGraphicsListRegistry != null))
             {

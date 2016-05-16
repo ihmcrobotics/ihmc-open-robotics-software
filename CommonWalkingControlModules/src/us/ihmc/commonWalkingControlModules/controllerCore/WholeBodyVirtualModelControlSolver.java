@@ -81,6 +81,10 @@ public class WholeBodyVirtualModelControlSolver
       virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), toolbox.getFullRobotModel().getElevator(), registry,
             toolbox.getYoGraphicsListRegistry());
 
+      RigidBody[] controlledBodies = toolbox.getControlledBodies();
+      for (RigidBody controlledBody : controlledBodies)
+         virtualModelController.createYoVariable(controlledBody);
+
       if (DEBUG)
       {
          for (OneDoFJoint joint : controlledOneDoFJoints)
