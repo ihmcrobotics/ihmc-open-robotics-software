@@ -57,16 +57,14 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final FramePoint cop = new FramePoint();
    private final DoubleYoVariable copAlpha;
    private final AlphaFilteredYoFramePoint copFiltered;
-
    private final FrameLineSegment2d lineSegmentOfRotation = new FrameLineSegment2d();
-   private YoFrameLineSegment2d yoLineOfRotation = null;
 
-   private YoFramePoint yoPlanePoint = null;
-   private YoFrameVector yoPlaneNormal = null;
+   private final YoFrameLineSegment2d yoLineOfRotation;
+   private final YoFramePoint yoPlanePoint;
+   private final YoFrameVector yoPlaneNormal;
 
    private final DoubleYoVariable angleFootGround;
    private final DoubleYoVariable angleTreshold;
-
    private final BooleanYoVariable footRotating;
 
    public GeometricFootRotationCalculator(String namePrefix,
@@ -110,6 +108,12 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
          YoArtifactLineSegment2d lineOfRotationArtifact =
                new YoArtifactLineSegment2d(caption, yoLineOfRotation, Color.GREEN, 0.01, 0.01);
          yoGraphicsListRegistry.registerArtifact(caption, lineOfRotationArtifact);
+      }
+      else
+      {
+         yoPlanePoint = null;
+         yoPlaneNormal = null;
+         yoLineOfRotation = null;
       }
    }
 
