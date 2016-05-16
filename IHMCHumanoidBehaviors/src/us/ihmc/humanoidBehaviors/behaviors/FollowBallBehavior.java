@@ -121,7 +121,8 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
 
    private class BallDetectionThread extends Thread
    {
-      @Override public void run()
+      @Override
+      public void run()
       {
          while (true)
          {
@@ -150,7 +151,8 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       }
    }
 
-   @Override public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParamaters)
+   @Override
+   public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParamaters)
    {
       this.lastBufferedImage = bufferedImage;
       openCVColoredCircularBlobDetector.updateFromBufferedImage(bufferedImage);
@@ -174,7 +176,8 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
          latestBallPosition2d.set(circles.get(0).getCenter());
    }
 
-   @Override public void doControl()
+   @Override
+   public void doControl()
    {
       generateAndSendPathToBall();
 
@@ -314,51 +317,61 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       return foundBalls;
    }
 
-   @Override public void initialize()
+   @Override
+   public void initialize()
    {
       detectBall.set(true);
    }
 
-   @Override public void pause()
+   @Override
+   public void pause()
    {
       sendPacketToController(new PauseWalkingMessage(true));
       detectBall.set(false);
    }
 
-   @Override public void stop()
+   @Override
+   public void stop()
    {
       sendPacketToController(new PauseWalkingMessage(true));
       detectBall.set(false);
    }
 
-   @Override public void resume()
+   @Override
+   public void resume()
    {
       sendPacketToController(new PauseWalkingMessage(false));
       detectBall.set(false);
    }
 
-   @Override public boolean isDone()
+   @Override
+   public boolean isDone()
    {
       return false;
    }
 
-   @Override protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+   @Override
+   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
    }
 
-   @Override protected void passReceivedControllerObjectToChildBehaviors(Object object)
+   @Override
+   protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
 
-   @Override public void enableActions()
+   @Override
+   public void enableActions()
    {
    }
 
-   @Override public void doPostBehaviorCleanup()
+   @Override
+   public void doPostBehaviorCleanup()
    {
    }
 
-   @Override public boolean hasInputBeenSet()
+   @Override
+   public boolean hasInputBeenSet()
    {
       return true;
    }
