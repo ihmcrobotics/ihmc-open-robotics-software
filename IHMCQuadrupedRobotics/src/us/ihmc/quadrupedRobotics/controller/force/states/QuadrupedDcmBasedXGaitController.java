@@ -465,17 +465,16 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          RobotQuadrant nextStepQuadrant = thisStepQuadrant.getNextRegularGaitSwingQuadrant();
          QuadrupedTimedStep thisStep = timedStepController.getEarliestStep(thisStepQuadrant);
          QuadrupedTimedStep nextStep = timedStepController.getEarliestStep(nextStepQuadrant);
+         int nIntervals;
 
          // initialize dcm height
          dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
 
-         // initialize forward dcm trajectory
-         int nIntervals = timedStepCopPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), contactState, currentTime - controlDT);
-         forwardDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
-         forwardDcmTrajectory.initializeTrajectory(nIntervals, timedStepCopPlanner.getTimeAtStartOfInterval(), timedStepCopPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
-
          if (pastStep == null)
          {
+            nIntervals = timedStepCopPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), contactState, currentTime - controlDT);
+            forwardDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
+            forwardDcmTrajectory.initializeTrajectory(nIntervals, timedStepCopPlanner.getTimeAtStartOfInterval(), timedStepCopPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
             pastStep = thisStep;
             return;
          }
@@ -543,8 +542,14 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          pastStep = thisStep;
       }
 
-      @Override public void onTouchDown(RobotQuadrant robotQuadrant, QuadrantDependentList<ContactState> contactState)
+      @Override public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> contactState)
       {
+         double currentTime = robotTimestamp.getDoubleValue();
+
+         // compute forward dcm trajectory
+         int nIntervals = timedStepCopPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), contactState, currentTime - controlDT);
+         forwardDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
+         forwardDcmTrajectory.initializeTrajectory(nIntervals, timedStepCopPlanner.getTimeAtStartOfInterval(), timedStepCopPlanner.getCopAtStartOfInterval(), dcmPositionEstimate);
       }
 
       @Override public XGaitEvent process()
