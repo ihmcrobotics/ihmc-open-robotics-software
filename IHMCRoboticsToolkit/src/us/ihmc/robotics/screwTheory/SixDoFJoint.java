@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Quat4f;
 import javax.vecmath.Tuple3d;
+import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -198,6 +200,11 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       rotationToPack.set(jointRotation);
    }
 
+   public void getRotation(Quat4f rotationToPack)
+   {
+      rotationToPack.set(jointRotation);
+   }
+
    public void getRotation(Matrix3d rotationToPack)
    {
       rotationToPack.set(jointRotation);
@@ -208,11 +215,16 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
    }
 
-   public void getTranslation(Tuple3d vectorToPack)
+   public void getTranslation(Tuple3d translationToPack)
    {
-      vectorToPack.set(jointTranslation);
+      translationToPack.set(jointTranslation);
    }
-   
+
+   public void getTranslation(Tuple3f translationToPack)
+   {
+      translationToPack.set(jointTranslation);
+   }
+
    public Tuple3d getTranslationForReading()
    {
       return jointTranslation;
