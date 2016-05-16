@@ -85,7 +85,8 @@ public class PartialFootholdControlModule
    private final FrameLine2d lineOfRotation;
 
    private final BooleanYoVariable useCoPOccupancyGrid;
-
+   private final BooleanYoVariable cropToConvexHullOfCoPs;
+   
    private final int footCornerPoints;
    private Point2d newVertex = new Point2d();
 
@@ -149,6 +150,9 @@ public class PartialFootholdControlModule
 
       doPartialFootholdDetection = new BooleanYoVariable(namePrefix + "DoPartialFootholdDetection", registry);
       doPartialFootholdDetection.set(false);
+      
+      cropToConvexHullOfCoPs = new BooleanYoVariable(namePrefix + "CropToConvexHullOfCoPs", registry);
+      cropToConvexHullOfCoPs.set(false);
 
       double dt = momentumBasedController.getControlDT();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
@@ -238,6 +242,7 @@ public class PartialFootholdControlModule
       {
          doNothing();
       }
+
    }
 
    public void getShrunkPolygonCentroid(FramePoint2d centroidToPack)
@@ -289,25 +294,33 @@ public class PartialFootholdControlModule
 
    public boolean applyShrunkPolygon(YoPlaneContactState contactStateToModify)
    {
-      // if we are not doing partial foothold detection exit
-      if (!doPartialFootholdDetection.getBooleanValue())
+      if (cropToConvexHullOfCoPs.getBooleanValue())
       {
-         shrunkFootPolygon.set(backupFootPolygon);
-         return false;
+         footCoPOccupancyGrid.computeConvexHull(shrunkFootPolygon);
+         cropToConvexHullOfCoPs.set(false);
       }
-
-      // if the module did not find a partial foothold exit
-      if (footholdState.getEnumValue() == PartialFootholdState.FULL)
+      else
       {
-         shrunkFootPolygon.set(backupFootPolygon);
-         return false;
-      }
+         // if we are not doing partial foothold detection exit
+         if (!doPartialFootholdDetection.getBooleanValue())
+         {
+            shrunkFootPolygon.set(backupFootPolygon);
+            return false;
+         }
 
-      // if we shrunk the foothold too many times exit
-      if (shrinkCounter.getIntegerValue() >= shrinkMaxLimit.getIntegerValue())
-      {
-         shrunkFootPolygon.set(backupFootPolygon);
-         return false;
+         // if the module did not find a partial foothold exit
+         if (footholdState.getEnumValue() == PartialFootholdState.FULL)
+         {
+            shrunkFootPolygon.set(backupFootPolygon);
+            return false;
+         }
+
+         // if we shrunk the foothold too many times exit
+         if (shrinkCounter.getIntegerValue() >= shrinkMaxLimit.getIntegerValue())
+         {
+            shrunkFootPolygon.set(backupFootPolygon);
+            return false;
+         }
       }
 
       controllerFootPolygon.setIncludingFrame(shrunkFootPolygon);
@@ -316,59 +329,68 @@ public class PartialFootholdControlModule
       {
          // everything is well
       }
-      else if (newFootCornerPoints == footCornerPoints + 1)
+      else if (newFootCornerPoints > footCornerPoints)
       {
-         // we cut off a corner
-         // remove one corner by merging the two closest vertices
-         int removeVertex = -1;
-         double shortestEdgeLength = Double.POSITIVE_INFINITY;
-         Point2d lastVertex = controllerFootPolygon.getVertex(0);
-         for (int i = 1; i < newFootCornerPoints+1; i++)
+         int pointsToRemove = newFootCornerPoints - footCornerPoints;
+
+         while (pointsToRemove > 0)
          {
-            Point2d nextVertex = null;
-            if (i == newFootCornerPoints)
+            newFootCornerPoints = controllerFootPolygon.getNumberOfVertices();
+
+            // we cut off a corner
+            // remove one corner by merging the two closest vertices
+            int removeVertex = -1;
+            double shortestEdgeLength = Double.POSITIVE_INFINITY;
+            Point2d lastVertex = controllerFootPolygon.getVertex(0);
+            for (int i = 1; i < newFootCornerPoints+1; i++)
             {
-               nextVertex = controllerFootPolygon.getVertex(0);
+               Point2d nextVertex = null;
+               if (i == newFootCornerPoints)
+               {
+                  nextVertex = controllerFootPolygon.getVertex(0);
+               }
+               else
+               {
+                  nextVertex = controllerFootPolygon.getVertex(i);
+               }
+               double edgeLength = lastVertex.distance(nextVertex);
+               if (edgeLength < shortestEdgeLength)
+               {
+                  shortestEdgeLength = edgeLength;
+                  removeVertex = i;
+               }
+               lastVertex = nextVertex;
+            }
+
+            if (removeVertex < 1)
+            {
+               throw new RuntimeException("Did not find an edge in support polygon.");
+            }
+
+            int idx1 = -1;
+            int idx2 = -1;
+            if (removeVertex == newFootCornerPoints)
+            {
+               idx1 = newFootCornerPoints-1;
+               idx2 = 0;
             }
             else
             {
-               nextVertex = controllerFootPolygon.getVertex(i);
+               idx1 = removeVertex;
+               idx2 = removeVertex-1;
             }
-            double edgeLength = lastVertex.distance(nextVertex);
-            if (edgeLength < shortestEdgeLength)
-            {
-               shortestEdgeLength = edgeLength;
-               removeVertex = i;
-            }
-            lastVertex = nextVertex;
-         }
 
-         if (removeVertex < 1)
-         {
-            throw new RuntimeException("Did not find an edge in support polygon.");
-         }
+            Point2d vertexA = controllerFootPolygon.getVertex(idx1);
+            Point2d vertexB = controllerFootPolygon.getVertex(idx2);
+            newVertex.interpolate(vertexA, vertexB, 0.5);
 
-         int idx1 = -1;
-         int idx2 = -1;
-         if (removeVertex == newFootCornerPoints)
-         {
-            idx1 = newFootCornerPoints-1;
-            idx2 = 0;
-         }
-         else
-         {
-            idx1 = removeVertex;
-            idx2 = removeVertex-1;
-         }
+            controllerFootPolygon.removeVertex(idx1);
+            controllerFootPolygon.removeVertex(idx2);
+            controllerFootPolygon.addVertex(newVertex);
+            controllerFootPolygon.update();
 
-         Point2d vertexA = controllerFootPolygon.getVertex(idx1);
-         Point2d vertexB = controllerFootPolygon.getVertex(idx2);
-         newVertex.interpolate(vertexA, vertexB, 0.5);
-
-         controllerFootPolygon.removeVertex(idx1);
-         controllerFootPolygon.removeVertex(idx2);
-         controllerFootPolygon.addVertex(newVertex);
-         controllerFootPolygon.update();
+            pointsToRemove--;
+         }
       }
       else if (newFootCornerPoints < footCornerPoints)
       {
