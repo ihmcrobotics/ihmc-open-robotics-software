@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,8 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private final PacketCommunicator packetCommunicator;
    /** Used to schedule status message sending. */
    private final PeriodicThreadScheduler scheduler;
+   /** Used to filter messages coming in. */
+   private final List<MessageFilter> messageFilters = new ArrayList<>();
 
    /** All the possible status message that can be sent to the communicator. */
    private final List<Class<? extends StatusPacket<?>>> listOfSupportedStatusMessages;
@@ -66,6 +69,16 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
       if (scheduler != null)
          scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
+   }
+
+   public void addMessageFilter(MessageFilter newFilter)
+   {
+      messageFilters.add(newFilter);
+   }
+
+   public void removeMessageFilter(MessageFilter filterToRemove)
+   {
+      messageFilters.remove(filterToRemove);
    }
 
    @SuppressWarnings("unchecked")
@@ -173,5 +186,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    {
       if (scheduler != null)
          scheduler.shutdown();
+   }
+
+   public static interface MessageFilter
+   {
+      public boolean isMessageValid(Packet<?> message);
    }
 }
