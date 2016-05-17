@@ -273,14 +273,15 @@ public class BalanceManager
       FrameConvexPolygon2d support = momentumBasedController.getBipedSupportPolygons().getFootPolygonInSoleFrame(supportSide);
 
       support.changeFrameAndProjectToXYPlane(supportSoleFrame);
-      if (supportSide == RobotSide.LEFT)
-      {
-         linePoint.setIncludingFrame(supportSoleFrame, 0.0, support.getMaxY());
-      }
-      else
-      {
-         linePoint.setIncludingFrame(supportSoleFrame, 0.0, support.getMinY());
-      }
+//      if (supportSide == RobotSide.LEFT)
+//      {
+//         linePoint.setIncludingFrame(supportSoleFrame, 0.0, support.getMaxY());
+//      }
+//      else
+//      {
+//         linePoint.setIncludingFrame(supportSoleFrame, 0.0, support.getMinY());
+//      }
+      linePoint.setIncludingFrame(support.getCentroid());
 
       // hysteresis
       if (shouldUseMomentum.getBooleanValue())
@@ -295,14 +296,20 @@ public class BalanceManager
 
       tmpCapturePoint.setIncludingFrame(capturePoint2d);
       tmpCapturePoint.changeFrameAndProjectToXYPlane(supportSoleFrame);
-
-      if (forwardLine.isPointOnSideOfLine(tmpCapturePoint, supportSide))
+      
+      boolean icpInSupport = support.isPointInside(tmpCapturePoint);
+      boolean isICPOutside = forwardLine.isPointOnSideOfLine(tmpCapturePoint, supportSide);
+      
+      if (shouldUseMomentum.getBooleanValue())
+      {
+         if (!isICPOutside)
+         {
+            shouldUseMomentum.set(false);
+         }
+      }
+      else if (isICPOutside && !icpInSupport)
       {
          shouldUseMomentum.set(true);
-      }
-      else
-      {
-         shouldUseMomentum.set(false);
       }
 
 //      double swingTimeRemaining = getTimeRemainingInCurrentState();
