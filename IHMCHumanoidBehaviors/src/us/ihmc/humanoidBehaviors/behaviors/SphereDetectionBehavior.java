@@ -69,6 +69,11 @@ public class SphereDetectionBehavior extends BehaviorInterface
    {
       ballFound.set(false);
    }
+   
+   public double getSpehereRadius()
+   {
+      return ballRadius.getValueAsDouble();
+   }
 
    public Point3d getBallLocation()
    {
