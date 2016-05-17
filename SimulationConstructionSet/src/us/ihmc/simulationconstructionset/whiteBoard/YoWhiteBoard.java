@@ -16,7 +16,8 @@ import us.ihmc.robotics.dataStructures.variable.YoVariableType;
 public abstract class YoWhiteBoard
 {
    private static final boolean VERBOSE = false;
-
+   
+   private final String name;
    private final BooleanYoVariable variablesToReadHaveBeenSet, variablesToWriteHaveBeenSet;
 
    private DoubleYoVariable[] doubleVariablesToRead;
@@ -57,6 +58,7 @@ public abstract class YoWhiteBoard
 
    public YoWhiteBoard(String name, YoVariableRegistry registry)
    {      
+      this.name = name;
       this.variablesToReadHaveBeenSet = new BooleanYoVariable(name + "VariablesToReadHaveBeenSet", registry);
       this.variablesToWriteHaveBeenSet = new BooleanYoVariable(name + "VariableToWriteHaveBeenSet", registry);
       
@@ -471,5 +473,10 @@ public abstract class YoWhiteBoard
    public int getReadIndex()
    {
       return readIndex.getIntegerValue();
+   }
+
+   public String getName()
+   {
+      return name;
    }
 }

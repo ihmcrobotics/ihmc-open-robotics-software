@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.coactiveDesignFramework;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -11,7 +10,6 @@ import us.ihmc.humanoidBehaviors.behaviors.KickBallBehaviorCoactiveElement;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.whiteBoard.TCPYoWhiteBoard;
 
 public class SimpleCoactiveElementUserInterface
 {
@@ -35,40 +33,18 @@ public class SimpleCoactiveElementUserInterface
          scs.startOnAThread();
       }
       coactiveElement.initializeUserInterfaceSide();
-      final TCPYoWhiteBoard userInterfaceSideWhiteBoard = new TCPYoWhiteBoard("UserInterfaceSideWhiteBoard", ipAddress, port);
 
-      CoactiveElementYoWhiteBoardSynchronizer userInterfaceSideSynchronizer = new CoactiveElementYoWhiteBoardSynchronizer(userInterfaceSideWhiteBoard,
-            HumanOrMachine.HUMAN, coactiveElement);
-
-      Thread userInterfaceSideThread = new Thread(userInterfaceSideWhiteBoard);
-      userInterfaceSideThread.start();
+      CoactiveElementYoWhiteBoardSynchronizer synchronizer = new CoactiveElementYoWhiteBoardSynchronizer(PORT_FOR_COACTIVE_ELEMENTS, ipAddress,
+                                                                                                         HumanOrMachine.HUMAN, coactiveElement);
 
       final long millisecondsBetweenDataWrites = 300L;
-      userInterfaceSideSynchronizer.startASynchronizerOnAThread(millisecondsBetweenDataWrites);
+      synchronizer.startASynchronizerOnAThread(millisecondsBetweenDataWrites);
 
       Runnable runnable = new Runnable()
       {
          @Override
          public void run()
          {
-            boolean connected = false;
-
-            while (!connected)
-            {
-               try
-               {
-                  System.out.println("Trying to connect");
-                  userInterfaceSideWhiteBoard.connect();
-                  connected = true;
-                  System.out.println("Connected!!!");
-               }
-               catch (IOException e1)
-               {
-                  System.out.println(e1);
-                  sleep(1000L);
-               }
-            }
-
             while (true)
             {
                coactiveElement.updateUserInterfaceSide();
