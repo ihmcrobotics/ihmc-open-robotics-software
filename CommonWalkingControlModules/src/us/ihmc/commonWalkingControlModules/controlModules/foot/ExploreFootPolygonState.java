@@ -49,25 +49,22 @@ public class ExploreFootPolygonState extends AbstractFootControlState
     * This is the amount of time after touch down during which no foothold exploration is done
     */
    private final DoubleYoVariable recoverTime;
-   private final static double defaultRecoverTime = 0.05;
 
    /**
     * This is the amount of time the line exploration uses to go to a corner
     */
    private final DoubleYoVariable timeToGoToCorner;
-   private final static double defaultTimeToGoToCorner = 0.1;
 
    /**
     * This is the amount of time the line exploration will keep the cop in a corner
     */
    private final DoubleYoVariable timeToStayInCorner;
-   private final static double defaultTimeToStayInCorner = 0.5;
 
    /**
     * The weight the cop command gets for the qp solver
     */
-   private final YoFrameVector2d copCommandWeight;
-   private final static double defaultCopCommandWeight = 2000.0;
+   private final DoubleYoVariable copCommandWeight;
+   private final YoFrameVector2d copCommandWeightVector;
 
    private final IntegerYoVariable yoCurrentCorner;
 
@@ -75,10 +72,12 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    {
       super(ConstraintType.EXPLORE_POLYGON, footControlHelper, registry);
       dt = momentumBasedController.getControlDT();
+      ExplorationParameters explorationParameters =
+            footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry);
 
       YoVariableRegistry childRegistry = new YoVariableRegistry("ExploreFootPolygon");
       registry.addChild(childRegistry);
-      internalHoldPositionState = new HoldPositionState(footControlHelper, gains, childRegistry);
+      internalHoldPositionState = new HoldPositionState(footControlHelper, null, gains, childRegistry);
       internalHoldPositionState.setDoSmartHoldPosition(false);
       internalHoldPositionState.doFootholdAdjustments(false);
 
@@ -90,11 +89,9 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       lastShrunkTime = new DoubleYoVariable(contactableFoot.getName() + "LastShrunkTime", registry);
       spiralAngle = new DoubleYoVariable(contactableFoot.getName() + "SpiralAngle", registry);
 
-      recoverTime = new DoubleYoVariable(contactableFoot.getName() + "RecoverTime", registry);
-      recoverTime.set(defaultRecoverTime);
+      recoverTime = explorationParameters.getRecoverTime();
 
-      timeToGoToCorner = new DoubleYoVariable(contactableFoot.getName() + "TimeToGoToCorner", registry);
-      timeToGoToCorner.set(defaultTimeToGoToCorner);
+      timeToGoToCorner = explorationParameters.getTimeToGoToCorner();
       timeToGoToCorner.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -104,8 +101,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
          }
       });
 
-      timeToStayInCorner = new DoubleYoVariable(contactableFoot.getName() + "TimeToStayInCorner", registry);
-      timeToStayInCorner.set(defaultTimeToStayInCorner);
+      timeToStayInCorner = explorationParameters.getTimeToStayInCorner();
       timeToStayInCorner.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -115,8 +111,9 @@ public class ExploreFootPolygonState extends AbstractFootControlState
          }
       });
 
-      copCommandWeight = new YoFrameVector2d(contactableFoot.getName() + "CopCommandWeight", null, registry);
-      copCommandWeight.set(defaultCopCommandWeight, defaultCopCommandWeight);
+      copCommandWeight = explorationParameters.getCopCommandWeight();
+      copCommandWeightVector = new YoFrameVector2d(contactableFoot.getName() + "CopCommandWeight", null, registry);
+      copCommandWeightVector.set(copCommandWeight.getDoubleValue(), copCommandWeight.getDoubleValue());
 
       desiredOrientation.setToZero();
       desiredAngularVelocity.setToZero(worldFrame);
@@ -166,11 +163,12 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    {
       double timeInState = getTimeInCurrentState();
 
+      footSwitch.computeAndPackCoP(cop);
+      momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
+      partialFootholdControlModule.compute(desiredCoP, cop);
+
       if (timeInState > recoverTime.getDoubleValue() && !done)
       {
-         footSwitch.computeAndPackCoP(cop);
-         momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
-         partialFootholdControlModule.compute(desiredCoP, cop);
          YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
          boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
          if (contactStateHasChanged)
@@ -261,7 +259,8 @@ public class ExploreFootPolygonState extends AbstractFootControlState
          }
 
          centerOfPressureCommand.setDesiredCoP(desiredCenterOfPressure.getPoint());
-         copCommandWeight.get(tempVector2d);
+         copCommandWeightVector.set(copCommandWeight.getDoubleValue(), copCommandWeight.getDoubleValue());
+         copCommandWeightVector.get(tempVector2d);
          centerOfPressureCommand.setWeight(tempVector2d);
       }
       else

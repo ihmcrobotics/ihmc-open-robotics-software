@@ -137,6 +137,15 @@ public class JointPrivilegedConfigurationHandler
          weight.set(command.getWeight());
       }
 
+      if (command.hasNewConfigurationGain())
+         configurationGain.set(command.getConfigurationGain());
+      if (command.hasNewVelocityGain())
+         velocityGain.set(command.getVelocityGain());
+      if (command.hasNewMaxVelocity())
+         maxVelocity.set(command.getMaxVelocity());
+      if (command.hasNewMaxAcceleration())
+         maxAcceleration.set(command.getMaxAcceleration());
+
       if (command.hasNewPrivilegedConfigurationDefaultOption())
       {
          PrivilegedConfigurationOption defaultOption = command.getPrivilegedConfigurationDefaultOption();
