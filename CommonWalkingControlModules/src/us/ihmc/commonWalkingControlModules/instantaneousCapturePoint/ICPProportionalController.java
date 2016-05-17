@@ -5,7 +5,9 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -44,6 +46,11 @@ public class ICPProportionalController
 
    private final CMPProjector cmpProjector;
 
+   private final BooleanYoVariable keepCMPInsideSupportPolygon = new BooleanYoVariable("keepCMPInsideSupportPolygon", registry);
+   private final DoubleYoVariable maxDistanceCMPSupport = new DoubleYoVariable("maxDistanceCMPSupport", registry);
+   private final ConvexPolygonShrinker polygonShrinker = new ConvexPolygonShrinker();
+   private final FrameConvexPolygon2d supportPolygonLocal = new FrameConvexPolygon2d();
+
    public ICPProportionalController(ICPControlGains gains, double controlDT, CMPProjector cmpProjector, YoVariableRegistry parentRegistry)
    {
       this.cmpProjector = cmpProjector;
@@ -59,6 +66,9 @@ public class ICPProportionalController
       captureKpOrthogonalToMotion.set(gains.getKpOrthogonalToMotion());
       captureKi.set(gains.getKi());
       captureKiBleedoff.set(gains.getKiBleedOff());
+
+      keepCMPInsideSupportPolygon.set(false);
+      maxDistanceCMPSupport.set(0.05);
    }
 
    public void reset()
@@ -69,7 +79,7 @@ public class ICPProportionalController
    private final FramePoint2d desiredCMP = new FramePoint2d();
 
    public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FramePoint2d finalDesiredCapturePoint,
-         FrameVector2d desiredCapturePointVelocity, double omega0, boolean projectIntoSupportPolygon, FrameConvexPolygon2d supportPolygon)
+         FrameVector2d desiredCapturePointVelocity, double omega0, /*boolean projectIntoSupportPolygon,*/ FrameConvexPolygon2d supportPolygon)
    {
       capturePoint.changeFrame(worldFrame);
       desiredCapturePoint.changeFrame(worldFrame);
@@ -131,21 +141,24 @@ public class ICPProportionalController
 
       desiredCMPToICP.sub(capturePoint, desiredCMP);
 
-      if (projectIntoSupportPolygon)
+      supportPolygonLocal.setIncludingFrame(supportPolygon);
+      if (!keepCMPInsideSupportPolygon.getBooleanValue())
       {
-         cmpProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, finalDesiredCapturePoint, desiredCMP);
-         capturePoint.changeFrame(worldFrame);
-         desiredCMP.changeFrame(worldFrame);
+         polygonShrinker.shrinkConstantDistanceInto(supportPolygon, -maxDistanceCMPSupport.getDoubleValue(), supportPolygonLocal);
+      }
 
-         if (desiredCMP.containsNaN())
-         {
-            desiredCMP.set(capturePoint);
-            System.err.println("ICPProportionalController: desiredCMP contained NaN. Set it to capturePoint...");
-         }
-         if (cmpProjector.getWasCMPProjected())
-         {
-            icpErrorIntegrated.scale(0.9); //Bleed off quickly when projecting. 0.9 is a pretty arbitrary magic number.
-         }
+      cmpProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygonLocal, finalDesiredCapturePoint, desiredCMP);
+      capturePoint.changeFrame(worldFrame);
+      desiredCMP.changeFrame(worldFrame);
+
+      if (desiredCMP.containsNaN())
+      {
+         desiredCMP.set(capturePoint);
+         System.err.println("ICPProportionalController: desiredCMP contained NaN. Set it to capturePoint...");
+      }
+      if (cmpProjector.getWasCMPProjected())
+      {
+         icpErrorIntegrated.scale(0.9); //Bleed off quickly when projecting. 0.9 is a pretty arbitrary magic number.
       }
 
       desiredCMP.changeFrame(rawCMPOutput.getReferenceFrame());
@@ -190,5 +203,10 @@ public class ICPProportionalController
 
          transformToParent.setRotationAndZeroTranslation(rotation);
       }
+   }
+
+   public void setKeepCMPInsideSupportPolygon(boolean keepCMPInsideSupportPolygon)
+   {
+      this.keepCMPInsideSupportPolygon.set(keepCMPInsideSupportPolygon);
    }
 }
