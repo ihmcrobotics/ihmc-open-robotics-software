@@ -217,7 +217,7 @@ public class ConvexPolygonToolsTest
 
       for (int test = 0; test < tests; test++)
       {
-         ConvexPolygon2d polygon = new ConvexPolygon2d();
+         FrameConvexPolygon2d polygon = new FrameConvexPolygon2d();
          int n = random.nextInt(30)+1;
          for (int i = 0; i < n; i++)
          {
@@ -228,7 +228,7 @@ public class ConvexPolygonToolsTest
          polygon.update();
 
          int desiredNumberOfVertices = random.nextInt(10);
-         ConvexPolygon2d originalPolygon = new ConvexPolygon2d(polygon);
+         FrameConvexPolygon2d originalPolygon = new FrameConvexPolygon2d(polygon);
 
 //         if (desiredNumberOfVertices > polygon.getNumberOfVertices()) increase++;
 //         if (desiredNumberOfVertices < polygon.getNumberOfVertices()) decrease++;
@@ -241,8 +241,8 @@ public class ConvexPolygonToolsTest
             FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
             plotter.setDrawPointsLarge();
 
-            plotter.addPolygon(new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), originalPolygon), Color.BLUE);
-            plotter.addPolygon(new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), polygon), Color.RED);
+            plotter.addPolygon(originalPolygon, Color.BLUE);
+            plotter.addPolygon(polygon, Color.RED);
 
             for (int i = 0; i < originalPolygon.getNumberOfVertices(); i++)
             {
@@ -261,7 +261,7 @@ public class ConvexPolygonToolsTest
          // check if the number of vertices is correct
          Assert.assertEquals(desiredNumberOfVertices, polygon.getNumberOfVertices());
          // check if the new polygon is contained in the old one
-         Assert.assertTrue(polygon.isCompletelyInside(originalPolygon, 10E-10));
+         Assert.assertTrue(polygon.getConvexPolygon2d().isCompletelyInside(originalPolygon.getConvexPolygon2d(), 10E-10));
       }
 
 //      System.out.println("Tested " + increase + " point increases");

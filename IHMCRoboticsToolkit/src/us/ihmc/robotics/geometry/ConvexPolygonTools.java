@@ -949,4 +949,16 @@ public class ConvexPolygonTools
          vertices = polygon.getNumberOfVertices();
       }
    }
+
+   /**
+    * This function changes the polygon given, such that it has the desired number of vertices. It is conservative in
+    * the sense, that the modified polygon will be contained in the original polygon completely.
+    *
+    * @param polygon: modified to have the desired number of vertices
+    * @param desiredVertices: number of vertices that the polygon should have
+    */
+   public static void limitVerticesConservative(FrameConvexPolygon2d polygon, int desiredVertices)
+   {
+      limitVerticesConservative(polygon.getConvexPolygon2d(), desiredVertices);
+   }
 }
