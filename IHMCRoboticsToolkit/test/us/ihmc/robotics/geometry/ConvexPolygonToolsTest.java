@@ -206,7 +206,7 @@ public class ConvexPolygonToolsTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test //(timeout = 30000)
+   @Test (timeout = 30000)
    public void testLimitVerticesConservative()
    {
       Random random = new Random(123821L);
