@@ -175,7 +175,7 @@ public class WholeBodyInverseKinematicsBehavior extends BehaviorInterface
             message.setDestination(PacketDestination.CONTROLLER);
             outputConverter.updateFullRobotModel(newestSolution);
             outputConverter.setMessageToCreate(message);
-            outputConverter.computeArmTrajectoryMessages();
+            outputConverter.computeHandTrajectoryMessages();
             outputConverter.computeChestTrajectoryMessage();
             outputConverter.computePelvisTrajectoryMessage();
             sendPacketToController(message);
