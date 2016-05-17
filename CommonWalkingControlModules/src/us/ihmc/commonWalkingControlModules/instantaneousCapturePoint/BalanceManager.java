@@ -132,8 +132,9 @@ public class BalanceManager
 
       bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
 
+      double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
       icpBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
-            totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
+            totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection, maxAllowedDistanceCMPSupport);
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(minimumSwingTimeForDisturbanceRecovery);

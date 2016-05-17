@@ -54,15 +54,16 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final YoFrameVector linearMomentumRateWeight = new YoFrameVector("linearMomentumRateWeight", null, registry);
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+         double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, double maxAllowedDistanceCMPSupport,
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, parentRegistry, yoGraphicsListRegistry, true);
+      this(referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, parentRegistry, yoGraphicsListRegistry,
+            true, maxAllowedDistanceCMPSupport);
    }
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
+         YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection, double maxAllowedDistanceCMPSupport)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -71,7 +72,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
          smartCMPProjector = new SmartCMPProjectorTwo(registry);
       else
          smartCMPProjector = new SmartCMPPlanarProjector(registry);
-      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, smartCMPProjector, registry);
+      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, smartCMPProjector, maxAllowedDistanceCMPSupport, registry);
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       this.bipedSupportPolygons = bipedSupportPolygons;

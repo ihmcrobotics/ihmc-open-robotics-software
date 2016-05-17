@@ -51,7 +51,8 @@ public class ICPProportionalController
    private final ConvexPolygonShrinker polygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d supportPolygonLocal = new FrameConvexPolygon2d();
 
-   public ICPProportionalController(ICPControlGains gains, double controlDT, CMPProjector cmpProjector, YoVariableRegistry parentRegistry)
+   public ICPProportionalController(ICPControlGains gains, double controlDT, CMPProjector cmpProjector,
+         double maxAllowedDistanceCMPSupport, YoVariableRegistry parentRegistry)
    {
       this.cmpProjector = cmpProjector;
 
@@ -68,7 +69,7 @@ public class ICPProportionalController
       captureKiBleedoff.set(gains.getKiBleedOff());
 
       keepCMPInsideSupportPolygon.set(false);
-      maxDistanceCMPSupport.set(0.05);
+      maxDistanceCMPSupport.set(maxAllowedDistanceCMPSupport);
    }
 
    public void reset()
@@ -79,7 +80,7 @@ public class ICPProportionalController
    private final FramePoint2d desiredCMP = new FramePoint2d();
 
    public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FramePoint2d finalDesiredCapturePoint,
-         FrameVector2d desiredCapturePointVelocity, double omega0, /*boolean projectIntoSupportPolygon,*/ FrameConvexPolygon2d supportPolygon)
+         FrameVector2d desiredCapturePointVelocity, double omega0, FrameConvexPolygon2d supportPolygon)
    {
       capturePoint.changeFrame(worldFrame);
       desiredCapturePoint.changeFrame(worldFrame);
