@@ -29,6 +29,9 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
@@ -115,6 +118,43 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   private static final double[] rightHandStraightSideJointAngles = new double[] {-0.5067668142160446, -0.3659876546358431, 1.7973796317575155, -1.2398714600960365, -0.005510224629709242, 0.6123343067479899, 0.12524505635696856};
+   private static final double[] leftHandStraightSideJointAngles = new double[] {0.61130147334225, 0.22680071472282162, 1.6270339908033258, 1.2703560974484844, 0.10340544060719102, -0.6738299572358809, 0.13264785356924128};
+   private static final SideDependentList<double[]> straightArmConfigs = new SideDependentList<>();
+   static
+   {
+      straightArmConfigs.put(RobotSide.LEFT, leftHandStraightSideJointAngles);
+      straightArmConfigs.put(RobotSide.RIGHT, rightHandStraightSideJointAngles);
+   }
+
+   private void setUpMomentum() throws SimulationExceededMaximumTimeException
+   {
+      // enable the use of body momentum in the controller
+      BooleanYoVariable useMomentumIfFalling = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("useMomentumIfFalling");
+      useMomentumIfFalling.set(false);
+
+      // bring the arms in a stretched position
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
+         armTrajectoryMessage.robotSide = robotSide;
+         double[] armConfig = straightArmConfigs.get(robotSide);
+         armTrajectoryMessage.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
+         for (int i = 0; i < armConfig.length; i++)
+         {
+            TrajectoryPoint1DMessage trajectoryPoint = new TrajectoryPoint1DMessage();
+            trajectoryPoint.position = armConfig[i];
+            trajectoryPoint.time = 1.0;
+            OneDoFJointTrajectoryMessage jointTrajectory = new OneDoFJointTrajectoryMessage();
+            jointTrajectory.trajectoryPoints = new TrajectoryPoint1DMessage[] {trajectoryPoint};
+            armTrajectoryMessage.jointTrajectoryMessages[i] = jointTrajectory;
+         }
+         drcSimulationTestHelper.send(armTrajectoryMessage);
+      }
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1);
+   }
+
    @DeployableTestMethod(estimatedDuration = 45.0)
    @Test(timeout = 300000)
    /**
@@ -129,8 +169,6 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       drcSimulationTestHelper = new DRCSimulationTestHelper("HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, 1.5, 0.0, defaultChickenPercentage);
-      BooleanYoVariable useMomentumIfFalling = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("useMomentumIfFalling");
-      useMomentumIfFalling.set(true);
       BooleanYoVariable doFootExplorationInTransferToStanding = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
       doFootExplorationInTransferToStanding.set(false);
 
@@ -143,14 +181,15 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       DoubleYoVariable damping_l_aky = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_aky");
       DoubleYoVariable damping_r_akx = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_r_leg_akx");
       DoubleYoVariable damping_r_aky = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_r_leg_aky");
-      damping_l_akx.set(2.0);
-      damping_l_aky.set(2.0);
-      damping_r_akx.set(2.0);
-      damping_r_aky.set(2.0);
+      damping_l_akx.set(1.0);
+      damping_l_aky.set(1.0);
+      damping_r_akx.set(1.0);
+      damping_r_aky.set(1.0);
 
       setupCameraForWalkingUpToRamp();
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      setUpMomentum();
 
       SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
@@ -160,7 +199,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       double stepLength = 0.6;
       FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(RobotSide.LEFT), stepLength/2.0, 0.0, 0.0);
       ArrayList<Point2d> contacts = generateContactPointsForRotatedLineOfContact(0.0);
-      success &= takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, RobotSide.LEFT, contacts, stepLocation, jointNames, true);
+      success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, RobotSide.LEFT, contacts, stepLocation, jointNames, true);
 
       FootstepDataListMessage message = new FootstepDataListMessage();
       stepLocation.setIncludingFrame(fullRobotModel.getSoleFrame(RobotSide.RIGHT), stepLength, 0.0, 0.0);
@@ -168,16 +207,17 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FootstepDataMessage footstepData = createFootstepDataMessage(fullRobotModel, RobotSide.RIGHT, contacts, stepLocation, true);
       message.add(footstepData);
       drcSimulationTestHelper.send(message);
-      success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1);
 
       Vector3d rootVelocity = new Vector3d();
       FloatingJoint rootJoint = robot.getRootJoint();
       rootJoint.getVelocity(rootVelocity);
-      rootVelocity.y = rootVelocity.y + 0.025;
+      double push = 0.03;
+      rootVelocity.y = rootVelocity.y + push;
 
       rootJoint.setVelocity(rootVelocity);
 
-      success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       assertTrue(success);
       BambooTools.reportTestFinishedMessage();
    }
