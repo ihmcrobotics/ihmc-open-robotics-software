@@ -5,11 +5,12 @@ import java.util.ArrayList;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.whiteBoard.YoWhiteBoard;
+import us.ihmc.simulationconstructionset.whiteBoard.TCPYoWhiteBoard;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class CoactiveElementYoWhiteBoardSynchronizer
 {
-   private final YoWhiteBoard yoWhiteBoard;
+   private final TCPYoWhiteBoard yoWhiteBoard;
 
    private final HumanOrMachine whichSideIsThisRunningOn;
    private final CoactiveElement coactiveElement;
@@ -17,10 +18,19 @@ public class CoactiveElementYoWhiteBoardSynchronizer
    private final YoVariableRegistry machineWritableYoVariableRegistry;
    private final YoVariableRegistry userInterfaceWritableYoVariableRegistry;
 
-   public CoactiveElementYoWhiteBoardSynchronizer(YoWhiteBoard yoWhiteBoard, HumanOrMachine whichSideIsThisRunningOn, CoactiveElement coactiveElement)
+   /**
+    * Server constructor.
+    */
+   public CoactiveElementYoWhiteBoardSynchronizer(int port, HumanOrMachine whichSideIsThisRunningOn, CoactiveElement coactiveElement)
    {
-      this.yoWhiteBoard = yoWhiteBoard;
-
+      this(port, null, whichSideIsThisRunningOn, coactiveElement);
+   }
+   
+   /**
+    * Client constructor.
+    */
+   public CoactiveElementYoWhiteBoardSynchronizer(int port, String ipAddress, HumanOrMachine whichSideIsThisRunningOn, CoactiveElement coactiveElement)
+   {
       this.whichSideIsThisRunningOn = whichSideIsThisRunningOn;
       this.coactiveElement = coactiveElement;
 
@@ -30,6 +40,15 @@ public class CoactiveElementYoWhiteBoardSynchronizer
       ArrayList<YoVariable<?>> variablesToRead = null;
       ArrayList<YoVariable<?>> variablesToWrite = null;
 
+      if (ipAddress == null)
+      {
+         this.yoWhiteBoard = new TCPYoWhiteBoard(whichSideIsThisRunningOn + "SideCoactiveElementYoWhiteBoard", port);
+      }
+      else
+      {
+         this.yoWhiteBoard = new TCPYoWhiteBoard(whichSideIsThisRunningOn + "SideCoactiveElementYoWhiteBoard", ipAddress, port);
+      }
+      
       switch (whichSideIsThisRunningOn)
       {
       case MACHINE:
@@ -77,9 +96,22 @@ public class CoactiveElementYoWhiteBoardSynchronizer
 
    public void startASynchronizerOnAThread(long millisecondsBetweenDataWrites)
    {
+      yoWhiteBoard.startOnAThread();
+      
       SynchronizerRunnable synchronizerRunnable = new SynchronizerRunnable(this, millisecondsBetweenDataWrites);
-      Thread thread = new Thread(synchronizerRunnable);
-      thread.start();
+      ThreadTools.startAThread(synchronizerRunnable, getClass().getSimpleName());
+   }
+   
+   public void close()
+   {
+      try
+      {
+         yoWhiteBoard.close();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
    }
 
    private class SynchronizerRunnable implements Runnable
@@ -126,6 +158,11 @@ public class CoactiveElementYoWhiteBoardSynchronizer
             }
          }
       }
+   }
+
+   public TCPYoWhiteBoard getYoWhiteBoard()
+   {
+      return yoWhiteBoard;
    }
 
 }

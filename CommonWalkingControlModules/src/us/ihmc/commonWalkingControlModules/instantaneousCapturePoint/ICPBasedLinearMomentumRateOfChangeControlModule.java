@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -39,8 +38,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FramePoint2d centerOfMass2d = new FramePoint2d();
    private final double gravityZ;
 
-   private final BooleanYoVariable keepCMPInsideSupportPolygon = new BooleanYoVariable("keepCMPInsideSupportPolygon", registry);
-
    private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", "", RobotSide.class, registry, true);
 
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -57,24 +54,25 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final YoFrameVector linearMomentumRateWeight = new YoFrameVector("linearMomentumRateWeight", null, registry);
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+         double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, double maxAllowedDistanceCMPSupport,
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, parentRegistry, yoGraphicsListRegistry, true);
+      this(referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, parentRegistry, yoGraphicsListRegistry,
+            true, maxAllowedDistanceCMPSupport);
    }
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
+         YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection, double maxAllowedDistanceCMPSupport)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       CMPProjector smartCMPProjector;
       if (use2DProjection)
-         smartCMPProjector = new SmartCMPProjectorTwo(parentRegistry);
+         smartCMPProjector = new SmartCMPProjectorTwo(registry);
       else
-         smartCMPProjector = new SmartCMPPlanarProjector(parentRegistry);
-      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, smartCMPProjector, registry);
+         smartCMPProjector = new SmartCMPPlanarProjector(registry);
+      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, smartCMPProjector, maxAllowedDistanceCMPSupport, registry);
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       this.bipedSupportPolygons = bipedSupportPolygons;
@@ -103,7 +101,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       supportPolygon.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
 
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint, desiredCapturePoint, finalDesiredCapturePoint,
-            desiredCapturePointVelocity, omega0, keepCMPInsideSupportPolygon.getBooleanValue(), supportPolygon);
+            desiredCapturePointVelocity, omega0, supportPolygon);
 
       desiredCMPToPack.setIncludingFrame(desiredCMP);
       desiredCMPToPack.changeFrame(worldFrame);
@@ -190,7 +188,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
    public void keepCMPInsideSupportPolygon(boolean keepCMPInsideSupportPolygon)
    {
-      this.keepCMPInsideSupportPolygon.set(keepCMPInsideSupportPolygon);
+      icpProportionalController.setKeepCMPInsideSupportPolygon(keepCMPInsideSupportPolygon);
    }
 
    public void setDesiredCenterOfMassHeightAcceleration(double desiredCenterOfMassHeightAcceleration)
