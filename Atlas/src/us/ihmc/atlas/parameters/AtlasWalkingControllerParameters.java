@@ -973,4 +973,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
          explorationParameters = new ExplorationParameters(registry);
       return explorationParameters;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaxAllowedDistanceCMPSupport()
+   {
+      return 0.05;
+   }
 }

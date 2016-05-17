@@ -67,11 +67,13 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
       this.dataOutputStream = dataOutputStream;
    }
 
+   @Override
    public void run()
    {
       setupAndRunHandlingThread();
    }
 
+   @Override
    public void whiteBoardSpecificConnect() throws IOException
    {
       while (dataOutputStream == null)
@@ -114,6 +116,7 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
       }
    }
 
+   @Override
    public void whiteBoardSpecificClose() throws IOException
    {
       setConnected(false);
@@ -385,6 +388,7 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
    }
 
 
+   @Override
    public void whiteBoardSpecificWriteData(double[] doubleVariablesToWriteBuffer, int[] intVariablesToWriteBuffer, boolean[] booleanVariablesToWriteBuffer,
            int[] enumVariablesToWriteBuffer, int writeIndex)
            throws IOException

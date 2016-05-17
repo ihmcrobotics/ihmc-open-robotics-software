@@ -27,6 +27,8 @@ public class DRCNetworkModuleParameters
    private boolean runAutomaticDiagnostic = false;
    private boolean useMultisenseManualTestModule;
    private boolean useDrillDetectionModule;
+   private boolean useKinematicsToolbox = true;
+   private boolean useKinematicsToolboxVisualizer = false;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
    
@@ -53,6 +55,16 @@ public class DRCNetworkModuleParameters
    public boolean isBehaviorVisualizerEnabled()
    {
       return useBehaviorVisualizer;
+   }
+
+   public boolean isKinematicsToolboxEnabled()
+   {
+      return useKinematicsToolbox;
+   }
+
+   public boolean isKinematicsToolboxVisualizerEnabled()
+   {
+      return useKinematicsToolboxVisualizer;
    }
 
    public boolean isHandModuleEnabled()
@@ -107,6 +119,16 @@ public class DRCNetworkModuleParameters
    public void enableBehaviorVisualizer(boolean useBehaviorVisualizer)
    {
       this.useBehaviorVisualizer = useBehaviorVisualizer;
+   }
+
+   public void enableKinematicsToolbox(boolean useKinematicsToolbox)
+   {
+      this.useKinematicsToolbox = useKinematicsToolbox;
+   }
+
+   public void enableKinematicsToolboxVisualizer(boolean useKinematicsToolboxVisualizer)
+   {
+      this.useKinematicsToolboxVisualizer = useKinematicsToolboxVisualizer;
    }
 
    public void enableHandModule(boolean b)
