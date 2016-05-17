@@ -18,7 +18,7 @@ import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
  */
 public class QuadrupedPositionStandPrepController implements QuadrupedController
 {
-   private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
+   private final ParameterFactory parameterFactory = ParameterFactory.createWithoutRegistry(getClass());
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
    private final QuadrupedPositionStandPrepControllerParameters initialPositionParameters;
 
