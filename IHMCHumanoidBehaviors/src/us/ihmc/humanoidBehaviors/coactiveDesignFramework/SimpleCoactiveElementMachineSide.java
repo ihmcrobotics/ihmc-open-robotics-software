@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.coactiveDesignFramework;
 import java.io.IOException;
 
 import us.ihmc.humanoidBehaviors.behaviors.KickBallBehaviorCoactiveElement;
+import us.ihmc.humanoidBehaviors.behaviors.KickBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -87,7 +88,7 @@ public class SimpleCoactiveElementMachineSide
 
    public static void main(String[] args)
    {
-      KickBallBehaviorCoactiveElement coactiveElement = new KickBallBehaviorCoactiveElement();
+      KickBallBehaviorCoactiveElementBehaviorSide coactiveElement = new KickBallBehaviorCoactiveElementBehaviorSide();
 
       SimpleCoactiveElementMachineSide machineSide = new SimpleCoactiveElementMachineSide(coactiveElement);
       machineSide.startOnAThread(PORT_FOR_COACTIVE_ELEMENTS);

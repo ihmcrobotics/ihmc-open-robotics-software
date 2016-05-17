@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector;
 import java.util.HashMap;
 
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
@@ -78,7 +79,8 @@ public class PacketsForwardedToTheUi
       LocalizationPointMapPacket.class,
       BlackFlyParameterPacket.class,
       DrillDetectionPacket.class,
-      ManipulationAbortedStatus.class
+      ManipulationAbortedStatus.class,
+      KinematicsToolboxOutputStatus.class
    };
    
    public static final HashMap<Class<?>, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class<?>, Long>();
