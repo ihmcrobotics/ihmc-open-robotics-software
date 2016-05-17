@@ -71,9 +71,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
       CMPProjector smartCMPProjector;
       if (use2DProjection)
-         smartCMPProjector = new SmartCMPProjectorTwo(parentRegistry);
+         smartCMPProjector = new SmartCMPProjectorTwo(registry);
       else
-         smartCMPProjector = new SmartCMPPlanarProjector(parentRegistry);
+         smartCMPProjector = new SmartCMPPlanarProjector(registry);
       icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, smartCMPProjector, registry);
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
