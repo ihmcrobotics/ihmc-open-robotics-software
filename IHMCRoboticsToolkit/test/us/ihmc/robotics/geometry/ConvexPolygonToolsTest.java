@@ -17,7 +17,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class ConvexPolygonToolsTest
 {
    private static final boolean PLOT_RESULTS = false;
-   private static final boolean WAIT_FOR_BUTTON_PUSH = true;
+   private static final boolean WAIT_FOR_BUTTON_PUSH = false;
    private static final double epsilon = 1e-7;
 
 	@DeployableTestMethod(estimatedDuration = 0.1)
@@ -210,12 +210,15 @@ public class ConvexPolygonToolsTest
    public void testLimitVerticesConservative()
    {
       Random random = new Random(123821L);
-      int tests = 5;
+      int tests = 100;
+
+//      int increase = 0;
+//      int decrease = 0;
 
       for (int test = 0; test < tests; test++)
       {
          ConvexPolygon2d polygon = new ConvexPolygon2d();
-         int n = random.nextInt(200);
+         int n = random.nextInt(30)+1;
          for (int i = 0; i < n; i++)
          {
             double x = random.nextDouble();
@@ -227,18 +230,32 @@ public class ConvexPolygonToolsTest
          int desiredNumberOfVertices = random.nextInt(10);
          ConvexPolygon2d originalPolygon = new ConvexPolygon2d(polygon);
 
+//         if (desiredNumberOfVertices > polygon.getNumberOfVertices()) increase++;
+//         if (desiredNumberOfVertices < polygon.getNumberOfVertices()) decrease++;
+
          ConvexPolygonTools.limitVerticesConservative(polygon, desiredNumberOfVertices);
 
-         if (true)
+         if (PLOT_RESULTS)
          {
             FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-0.1, 1.1, -0.1, 1.1);
             FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
+            plotter.setDrawPointsLarge();
 
             plotter.addPolygon(new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), originalPolygon), Color.BLUE);
             plotter.addPolygon(new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), polygon), Color.RED);
 
+            for (int i = 0; i < originalPolygon.getNumberOfVertices(); i++)
+            {
+               plotter.addFramePoint2d(new FramePoint2d(ReferenceFrame.getWorldFrame(), originalPolygon.getVertex(i)), Color.BLUE);
+            }
+            for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+            {
+               plotter.addFramePoint2d(new FramePoint2d(ReferenceFrame.getWorldFrame(), polygon.getVertex(i)), Color.RED);
+            }
+
             System.out.println("Expecting " + desiredNumberOfVertices + " Vertices.");
             waitForButtonOrPause(testFrame);
+            testFrame.dispose();
          }
 
          // check if the number of vertices is correct
@@ -246,6 +263,9 @@ public class ConvexPolygonToolsTest
          // check if the new polygon is contained in the old one
          Assert.assertTrue(polygon.isCompletelyInside(originalPolygon, 10E-10));
       }
+
+//      System.out.println("Tested " + increase + " point increases");
+//      System.out.println("Tested " + decrease + " point decreases");
    }
 
 }

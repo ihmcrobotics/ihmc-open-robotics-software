@@ -828,7 +828,6 @@ public class ConvexPolygonTools
       }
    }
 
-   private static final Point2d newVertex = new Point2d();
    /**
     * This function changes the polygon given, such that it has the desired number of vertices. It is conservative in
     * the sense, that the modified polygon will be contained in the original polygon completely.
@@ -838,8 +837,16 @@ public class ConvexPolygonTools
     */
    public static void limitVerticesConservative(ConvexPolygon2d polygon, int desiredVertices)
    {
-      int vertices = polygon.getNumberOfVertices();
+      polygon.checkNonEmpty();
 
+      if (desiredVertices == 0)
+      {
+         polygon.clear();
+         polygon.update();
+         return;
+      }
+
+      int vertices = polygon.getNumberOfVertices();
       while (vertices > desiredVertices)
       {
          int removeVertex = -1;
@@ -878,15 +885,14 @@ public class ConvexPolygonTools
             idx2 = removeVertex-1;
          }
 
-         Point2d newVertex = new Point2d();
-
          Point2d vertexA = polygon.getVertex(idx1);
          Point2d vertexB = polygon.getVertex(idx2);
-         newVertex.interpolate(vertexA, vertexB, 0.5);
+         double xNew = (vertexA.x + vertexB.x) / 2.0;
+         double yNew = (vertexA.y + vertexB.y) / 2.0;
 
          polygon.removeVertex(idx1);
          polygon.removeVertex(idx2);
-         polygon.addVertex(newVertex);
+         polygon.addVertex(xNew, yNew);
          polygon.update();
 
          vertices = polygon.getNumberOfVertices();
@@ -931,14 +937,13 @@ public class ConvexPolygonTools
             idx2 = index-1;
          }
 
-         Point2d newVertex = new Point2d();
-
          Point2d vertexA = polygon.getVertex(idx1);
          Point2d vertexB = polygon.getVertex(idx2);
-         newVertex.interpolate(vertexA, vertexB, 0.5);
+         double xNew = (vertexA.x + vertexB.x) / 2.0;
+         double yNew = (vertexA.y + vertexB.y) / 2.0;
 
-         polygon.scale(0.99); // FIXME
-         polygon.addVertex(newVertex);
+         polygon.scale(1.0 - 10E-10);
+         polygon.addVertex(xNew, yNew);
          polygon.update();
 
          vertices = polygon.getNumberOfVertices();
