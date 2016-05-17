@@ -1,12 +1,12 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.*;
 
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ public class QuadrupedXGaitPlanner
    private final FramePose xGaitRectanglePose;
    private final FramePose xGaitRectanglePoseAtSoS;
    private final PoseReferenceFrame xGaitRectangleFrame;
+   private final EndDependentList<QuadrupedTimedStep> pastSteps;
 
    public QuadrupedXGaitPlanner()
    {
@@ -30,6 +31,9 @@ public class QuadrupedXGaitPlanner
       {
          xGaitRectangle.set(robotQuadrant, new FramePoint(xGaitRectangleFrame));
       }
+      pastSteps = new EndDependentList<>();
+      pastSteps.put(RobotEnd.FRONT, new QuadrupedTimedStep());
+      pastSteps.put(RobotEnd.HIND, new QuadrupedTimedStep());
    }
 
    public void computeInitialPlan(ArrayList<QuadrupedTimedStep> plannedSteps, Vector3d planarVelocity, RobotQuadrant initialStepQuadrant, FramePoint supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettings xGaitSettings)
@@ -177,9 +181,88 @@ public class QuadrupedXGaitPlanner
       }
    }
 
+   public void computeOnlinePlan(ArrayList<QuadrupedTimedStep> plannedSteps, EndDependentList<QuadrupedTimedStep> priorSteps, Vector3d planarVelocity, double currentTime, double currentYaw, QuadrupedXGaitSettings xGaitSettings)
+   {
+      // initialize last prior step
+      QuadrupedTimedStep lastPriorStep;
+      if (priorSteps.get(RobotEnd.HIND).getTimeInterval().getEndTime() > priorSteps.get(RobotEnd.FRONT).getTimeInterval().getEndTime())
+         lastPriorStep = priorSteps.get(RobotEnd.HIND);
+      else
+         lastPriorStep = priorSteps.get(RobotEnd.FRONT);
+
+      // initialize nominal support rectangle
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         xGaitRectangle.get(robotQuadrant).changeFrame(xGaitRectangleFrame);
+         xGaitRectangle.get(robotQuadrant).setX(robotQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength() / 2.0));
+         xGaitRectangle.get(robotQuadrant).setY(robotQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth() / 2.0));
+         xGaitRectangle.get(robotQuadrant).setZ(0);
+      }
+      xGaitRectanglePoseAtSoS.setPosition(0, 0, 0);
+      xGaitRectanglePoseAtSoS.setYawPitchRoll(currentYaw, 0, 0);
+
+      // compute step quadrants and time intervals
+      {
+         RobotEnd thisStepRobotEnd = lastPriorStep.getRobotQuadrant().getOppositeEnd();
+         pastSteps.set(RobotEnd.FRONT, priorSteps.get(RobotEnd.FRONT));
+         pastSteps.set(RobotEnd.HIND, priorSteps.get(RobotEnd.HIND));
+
+         for (int i = 0; i < plannedSteps.size(); i++)
+         {
+            QuadrupedTimedStep thisStep = plannedSteps.get(i);
+            thisStep.setRobotQuadrant(pastSteps.get(thisStepRobotEnd).getRobotQuadrant().getAcrossBodyQuadrant());
+            double pastStepEndTimeForSameEnd = pastSteps.get(thisStepRobotEnd).getTimeInterval().getEndTime();
+            double pastStepEndTimeForOppositeEnd = pastSteps.get(thisStepRobotEnd.getOppositeEnd()).getTimeInterval().getEndTime();
+            computeStepTimeInterval(thisStep.getTimeInterval(), thisStepRobotEnd, pastStepEndTimeForSameEnd, pastStepEndTimeForOppositeEnd, xGaitSettings);
+
+            pastSteps.set(thisStepRobotEnd, thisStep);
+            thisStepRobotEnd = thisStepRobotEnd.getOppositeEnd();
+         }
+      }
+
+      // compute step goal positions and ground clearances
+      {
+         for (int i = 0; i < plannedSteps.size(); i++)
+         {
+            // compute xGait rectangle pose at end of step
+            double deltaTime = plannedSteps.get(i).getTimeInterval().getEndTime() - currentTime;
+            extrapolatePose(xGaitRectanglePose, xGaitRectanglePoseAtSoS, planarVelocity, deltaTime);
+            xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
+
+            // compute step goal position by sampling the corner position of the xGait rectangle at touchdown
+            RobotQuadrant stepQuadrant = plannedSteps.get(i).getRobotQuadrant();
+            goalPosition.setIncludingFrame(xGaitRectangle.get(stepQuadrant));
+            plannedSteps.get(i).setGoalPosition(goalPosition);
+
+            // compute step ground clearance
+            plannedSteps.get(i).setGroundClearance(xGaitSettings.getStepGroundClearance());
+         }
+   }
+
+   // translate step goal positions based on last prior step position
+   {
+      // compute xGait rectangle pose at end of step
+      double deltaTime = lastPriorStep.getTimeInterval().getEndTime() - currentTime;
+      extrapolatePose(xGaitRectanglePose, xGaitRectanglePoseAtSoS, planarVelocity, deltaTime);
+      xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
+
+      // compute step goal position
+      RobotQuadrant stepQuadrant = lastPriorStep.getRobotQuadrant();
+      goalPosition.setIncludingFrame(xGaitRectangle.get(stepQuadrant));
+      goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
+      // compensate for position error
+      for (int i = 0; i < plannedSteps.size(); i++)
+      {
+         plannedSteps.get(i).getGoalPosition().add(lastPriorStep.getGoalPosition());
+         plannedSteps.get(i).getGoalPosition().sub(goalPosition.getPoint());
+      }
+   }
+}
+
    private void extrapolatePose(FramePose finalPose, FramePose initialPose, Vector3d planarVelocity, double deltaTime)
    {
-      // initialize planar position and orientation
+
       double a0 = initialPose.getYaw();
       double x0 = initialPose.getX();
       double y0 = initialPose.getY();
@@ -211,6 +294,22 @@ public class QuadrupedXGaitPlanner
       finalPose.setYawPitchRoll(a, initialPose.getPitch(), initialPose.getRoll());
    }
 
+   private void computeStepTimeInterval(TimeInterval thisStepTimeInterval, RobotEnd thisStepRobotEnd, double pastStepEndTimeForSameEnd, double pastStepEndTimeForOppositeEnd, QuadrupedXGaitSettings xGaitSettings)
+   {
+      // Compute support durations and end phase shift.
+      double nominalStepDuration = xGaitSettings.getStepDuration();
+      double endDoubleSupportDuration = xGaitSettings.getEndDoubleSupportDuration();
+      double endPhaseShift = (thisStepRobotEnd == RobotEnd.HIND) ? 180.0 - xGaitSettings.getEndPhaseShift() : xGaitSettings.getEndPhaseShift();
+
+      // Compute step time interval. Step duration is scaled in the range (1.0, 1.1667) to account for end phase shifts.
+      double thisStepStartTime = pastStepEndTimeForSameEnd + endDoubleSupportDuration;
+      double thisStepEndTime = pastStepEndTimeForOppositeEnd + Math.max((nominalStepDuration + endDoubleSupportDuration) * endPhaseShift / 180.0, 0.0);
+      double thisStepDuration = MathTools.clipToMinMax(thisStepEndTime - thisStepStartTime, nominalStepDuration, 1.1667 * nominalStepDuration);
+
+      thisStepTimeInterval.setStartTime(thisStepStartTime);
+      thisStepTimeInterval.setEndTime(thisStepStartTime + thisStepDuration);
+   }
+
    private double computeStepEndTime(RobotQuadrant stepQuadrant, double stepStartTime, double lastStepEndTime, QuadrupedXGaitSettings xGaitSettings)
    {
       // compute support durations and end phase shift
@@ -223,8 +322,7 @@ public class QuadrupedXGaitPlanner
       double currentStepDuration = MathTools.clipToMinMax(currentStepEndTime - stepStartTime, stepDuration, 1.1667 * stepDuration);
       return stepStartTime + currentStepDuration;
    }
-
-   private double computeStepStartTime(RobotQuadrant stepQuadrant, double lastStepStartTime, QuadrupedXGaitSettings xGaitSettings)
+private double computeStepStartTime(RobotQuadrant stepQuadrant, double lastStepStartTime, QuadrupedXGaitSettings xGaitSettings)
    {
       double stepDuration = xGaitSettings.getStepDuration();
       double endDoubleSupportDuration = xGaitSettings.getEndDoubleSupportDuration();
