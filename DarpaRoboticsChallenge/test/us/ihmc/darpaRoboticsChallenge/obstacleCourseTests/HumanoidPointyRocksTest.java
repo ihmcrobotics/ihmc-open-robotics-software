@@ -131,7 +131,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    {
       // enable the use of body momentum in the controller
       BooleanYoVariable useMomentumIfFalling = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("useMomentumIfFalling");
-      useMomentumIfFalling.set(false);
+      useMomentumIfFalling.set(true);
 
       // bring the arms in a stretched position
       for (RobotSide robotSide : RobotSide.values)
@@ -212,9 +212,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       Vector3d rootVelocity = new Vector3d();
       FloatingJoint rootJoint = robot.getRootJoint();
       rootJoint.getVelocity(rootVelocity);
-      double push = 0.03;
+      double push = 0.025;
       rootVelocity.y = rootVelocity.y + push;
-
       rootJoint.setVelocity(rootVelocity);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
