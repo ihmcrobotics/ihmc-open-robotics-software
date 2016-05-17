@@ -91,6 +91,11 @@ public class WalkingSingleSupportState extends SingleSupportState
          requestSwingSpeedUpIfNeeded();
       }
 
+      if (balanceManager.isUseMomentumIfFalling())
+      {
+         balanceManager.checkIfUseMomentum(nextFootstep);
+      }
+
       walkingMessageHandler.clearFootTrajectory();
 
       switchToToeOffIfPossible(supportSide);
