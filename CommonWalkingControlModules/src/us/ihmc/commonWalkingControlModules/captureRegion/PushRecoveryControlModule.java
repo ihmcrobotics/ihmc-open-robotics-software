@@ -112,9 +112,20 @@ public class PushRecoveryControlModule
       reset();
    }
 
+   public void updateCaptureRegion(double swingTimeRemaining, double omega0, RobotSide swingSide, FramePoint2d capturePoint2d)
+   {
+      footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(swingSide.getOppositeSide()));
+      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
+   }
+
+   public FrameConvexPolygon2d getCaptureRegion()
+   {
+      return captureRegionCalculator.getCaptureRegion();
+   }
+
    /**
     * Return null if the robot is not falling.
-    * If the robot is falling, it returns the suggested swingSide to recover. 
+    * If the robot is falling, it returns the suggested swingSide to recover.
     */
    public RobotSide isRobotFallingFromDoubleSupport()
    {

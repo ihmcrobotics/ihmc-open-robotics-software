@@ -22,7 +22,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedTestTeleopMode implements QuadrupedTeleopMode
 {
-   private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
+   private final ParameterFactory parameterFactory = ParameterFactory.createWithoutRegistry(getClass());
    private final DoubleParameter swingHeight = parameterFactory.createDouble("swingHeight", 0.1);
    private final DoubleParameter swingLengthScale = parameterFactory.createDouble("swingLengthScale", 0.2);
 
