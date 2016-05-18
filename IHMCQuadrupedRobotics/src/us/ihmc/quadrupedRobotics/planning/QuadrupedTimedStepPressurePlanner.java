@@ -12,7 +12,7 @@ import java.util.List;
 
 import javax.vecmath.Point3d;
 
-public class QuadrupedTimedStepCopPlanner
+public class QuadrupedTimedStepPressurePlanner
 {
    private enum QuadrupedStepTransitionType
    {
@@ -50,7 +50,7 @@ public class QuadrupedTimedStepCopPlanner
    private final QuadrantDependentList<FramePoint> solePosition;
    private final QuadrantDependentList<ContactState> contactState;
 
-   public QuadrupedTimedStepCopPlanner(int maxSteps)
+   public QuadrupedTimedStepPressurePlanner(int maxSteps)
    {
       int maxIntervals = 2 * maxSteps + 1;
       timeAtStartOfInterval = new double[maxIntervals];
