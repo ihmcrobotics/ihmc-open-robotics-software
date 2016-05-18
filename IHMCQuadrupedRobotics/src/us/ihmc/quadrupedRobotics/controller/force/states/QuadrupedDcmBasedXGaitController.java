@@ -91,7 +91,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    private final QuadrupedXGaitSettings xGaitSettings;
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final ArrayList<QuadrupedTimedStep> xGaitPreviewSteps;
-   private final QuadrupedTimedStepCopPlanner timedStepCopPlanner;
+   private final QuadrupedTimedStepPressurePlanner timedStepCopPlanner;
    private final QuadrantDependentList<FrameVector> timedStepAdjustmentAtContactSwitch;
 
    // graphics
@@ -158,7 +158,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          xGaitPreviewSteps.add(new QuadrupedTimedStep());
       }
       xGaitSettings = new QuadrupedXGaitSettings();
-      timedStepCopPlanner = new QuadrupedTimedStepCopPlanner(NUMBER_OF_PREVIEW_STEPS + 4);
+      timedStepCopPlanner = new QuadrupedTimedStepPressurePlanner(NUMBER_OF_PREVIEW_STEPS + 4);
       timedStepAdjustmentAtContactSwitch = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
