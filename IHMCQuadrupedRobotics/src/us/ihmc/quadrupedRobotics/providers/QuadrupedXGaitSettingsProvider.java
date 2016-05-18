@@ -12,7 +12,9 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class QuadrupedXGaitSettingsProvider
 {
-   private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final DoubleParameter defaultStanceLengthParameter = parameterFactory.createDouble("defaultStanceLength", 1.1);
    private final DoubleParameter defaultStanceWidthParameter = parameterFactory.createDouble("defaultStanceWidth", 0.2);
    private final DoubleParameter defaultStepGroundClearanceParameter = parameterFactory.createDouble("defaultStepGroundClearance", 0.1);
@@ -39,7 +41,7 @@ public class QuadrupedXGaitSettingsProvider
    private final DoubleYoVariable yoEndDoubleSupportDuration;
    private final DoubleYoVariable yoEndPhaseShift;
 
-   public QuadrupedXGaitSettingsProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry registry)
+   public QuadrupedXGaitSettingsProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
    {
       yoStanceLength = new DoubleYoVariable("stanceLengthInput", registry);
       yoStanceWidth = new DoubleYoVariable("stanceWidthInput", registry);
@@ -72,6 +74,8 @@ public class QuadrupedXGaitSettingsProvider
             }
          });
       }
+
+      parentRegistry.addChild(registry);
    }
 
    public void getXGaitSettings(QuadrupedXGaitSettings xGaitSettings)

@@ -11,6 +11,7 @@ import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
@@ -30,7 +31,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 
 
-public class AtlasWalkingControllerParameters implements WalkingControllerParameters
+public class AtlasWalkingControllerParameters extends WalkingControllerParameters
 {
    private final DRCRobotModel.RobotTarget target;
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
@@ -49,6 +50,8 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    private final double min_mechanical_leg_length = 0.420;    // corresponds to a q_kny that is close to knee limit
 
    private final AtlasJointMap jointMap;
+
+   private ExplorationParameters explorationParameters = null;
 
    public AtlasWalkingControllerParameters(AtlasJointMap jointMap)
    {
@@ -222,19 +225,19 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    private final double maximumHeightAboveGround = 0.765;
 
 // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-//   private final double minimumHeightAboveGround = 0.785;                                       
-//   private double nominalHeightAboveGround = 0.865; 
-//   private final double maximumHeightAboveGround = 0.925; 
+//   private final double minimumHeightAboveGround = 0.785;
+//   private double nominalHeightAboveGround = 0.865;
+//   private final double maximumHeightAboveGround = 0.925;
 
 //   // USE THESE FOR VRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-//   private double minimumHeightAboveGround = 0.68;                                       
-//   private double nominalHeightAboveGround = 0.76; 
-//   private double maximumHeightAboveGround = 0.82; 
+//   private double minimumHeightAboveGround = 0.68;
+//   private double nominalHeightAboveGround = 0.76;
+//   private double maximumHeightAboveGround = 0.82;
 
 //   // USE THESE FOR IMPROVING WALKING, BUT DONT CHECK THEM IN UNTIL IT IMPROVED WALKING THROUGH MUD.
-//   private double minimumHeightAboveGround = 0.68;                                       
-//   private double nominalHeightAboveGround = 0.80;  // NOTE: used to be 0.76, jojo        
-//   private double maximumHeightAboveGround = 0.84;  // NOTE: used to be 0.82, jojo        
+//   private double minimumHeightAboveGround = 0.68;
+//   private double nominalHeightAboveGround = 0.80;  // NOTE: used to be 0.76, jojo
+//   private double maximumHeightAboveGround = 0.84;  // NOTE: used to be 0.82, jojo
 
    @Override
    public double minimumHeightAboveAnkle()
@@ -526,7 +529,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       gains.setMaximumAcceleration(maxAccel);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
-      
+
       return gains;
    }
 
@@ -911,7 +914,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return 0.035;
    }
-   
+
    @Override
    public double getMaxICPErrorBeforeSingleSupportY()
    {
@@ -929,7 +932,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return 0.623;
    }
-   
+
    @Override
    public boolean controlHeadAndHandsWithSliders()
    {
@@ -960,5 +963,21 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getCoPErrorThresholdForHighCoPDamping()
    {
       return Double.POSITIVE_INFINITY; //0.075;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public ExplorationParameters getOrCreateExplorationParameters(YoVariableRegistry registry)
+   {
+      if (explorationParameters == null)
+         explorationParameters = new ExplorationParameters(registry);
+      return explorationParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaxAllowedDistanceCMPSupport()
+   {
+      return 0.05;
    }
 }

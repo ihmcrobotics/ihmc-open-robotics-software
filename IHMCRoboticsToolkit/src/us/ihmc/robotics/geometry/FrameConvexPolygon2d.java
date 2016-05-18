@@ -27,12 +27,12 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
 {
    protected final ConvexPolygon2d convexPolygon;
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
-   
+
    private Vector2d[] temporaryVectorArray;
 
    private final FramePoint tempPoint = new FramePoint();
    private final FramePoint2d tempPoint2d = new FramePoint2d();
-   
+
    private final FramePoint2d temporaryCentroid = new FramePoint2d();
 
 
@@ -78,7 +78,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
     * Creates an empty convex polygon attached to a reference frame, adds N new vertices using an array of Point2d, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
     * @param referenceFrame {@code ReferenceFrame} reference frame to which this polygon will be attached.
     * @param vertices {@code double[N][>=2]} the array of points that is used to creates the vertices. Each row contains one point whereas the (at least) two columns contains the coordinates x and y.
-    * The number of vertices of this polygon will be equal to the length of the point array. 
+    * The number of vertices of this polygon will be equal to the length of the point array.
     */
    public FrameConvexPolygon2d(ReferenceFrame referenceFrame, double[][] vertices)
    {
@@ -187,7 +187,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       vertex.checkReferenceFrameMatch(referenceFrame);
       addVertex(vertex.getPoint());
    }
-   
+
    public void addVertex(Point2d vertex)
    {
       convexPolygon.addVertex(vertex);
@@ -358,7 +358,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       addVertices(vertices, numberOfVertices);
       update();
    }
-   
+
    /**
     * This method does:
     * 1- {@code clear()};
@@ -375,7 +375,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       }
       update();
    }
-   
+
    /**
     * This method does:
     * 1- {@code clear()};
@@ -643,34 +643,34 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    {
       return convexPolygon.getVertex(vertexIndex);
    }
-   
+
    public FramePoint2d getFrameVertexCopy(int vertexIndex)
    {
       FramePoint2d frameVertexCopy = new FramePoint2d();
       getFrameVertex(vertexIndex, frameVertexCopy);
       return frameVertexCopy;
    }
-   
+
    public void getFrameVertex(int vertexIndex, FrameTuple2d<?, ?> vertexToPack)
    {
       convexPolygon.checkIfUpToDate();
-      
+
       convexPolygon.checkNonEmpty();
       convexPolygon.checkIndexInBoundaries(vertexIndex);
-      
+
       vertexToPack.setIncludingFrame(referenceFrame, convexPolygon.getVertex(vertexIndex));
    }
-   
+
    public void getFrameVertexXY(int vertexIndex, FramePoint vertexToPack)
    {
       convexPolygon.checkIfUpToDate();
-      
+
       convexPolygon.checkNonEmpty();
       convexPolygon.checkIndexInBoundaries(vertexIndex);
-      
+
       vertexToPack.setXYIncludingFrame(referenceFrame, convexPolygon.getVertex(vertexIndex));
    }
-   
+
 //   public FramePoint2d getFrameVertex(int vertexIndex)
 //   {
 //      convexPolygon.checkIfUpToDate();
@@ -779,12 +779,17 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    {
       return this.convexPolygon.getDistanceInside(point.tuple);
    }
-   
+
    public BoundingBox2d getBoundingBoxCopy()
    {
       BoundingBox2d ret = this.convexPolygon.getBoundingBoxCopy();
 
       return ret;
+   }
+
+   public void getBoundingBox(BoundingBox2d boundingBoxToPack)
+   {
+      this.convexPolygon.getBoundingBox(boundingBoxToPack);
    }
 
    public boolean isPointInside(FramePoint2d framePoint)
@@ -875,7 +880,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
 
    public FramePoint2d[] getLineOfSightVertices(FramePoint2d observerFramePoint)
    {
-     this.checkReferenceFrameMatch(observerFramePoint);  
+     this.checkReferenceFrameMatch(observerFramePoint);
 
       Point2d[] lineOfSightVertices2d = this.convexPolygon.getLineOfSightVerticesCopy(observerFramePoint.getPointCopy());
       if (lineOfSightVertices2d == null)
@@ -884,7 +889,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       FramePoint2d[] ret = new FramePoint2d[] { new FramePoint2d(observerFramePoint.getReferenceFrame(), lineOfSightVertices2d[0]),
             new FramePoint2d(observerFramePoint.getReferenceFrame(), lineOfSightVertices2d[1]) };
 
-      
+
       return ret;
    }
 
@@ -991,10 +996,10 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       line.checkReferenceFrameMatch(referenceFrame);
 
       Point2d closestVertexCopy = convexPolygon.getClosestVertexCopy(line.line);
-      
+
       if (closestVertexCopy == null)
          throw new RuntimeException("Closest vertex could not be found! Has at least one vertex: " + convexPolygon.hasAtLeastOneVertex());
-      
+
       return new FramePoint2d(referenceFrame, closestVertexCopy);
    }
 
@@ -1051,7 +1056,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    public String toString()
    {
       FramePoint2d vertex = new FramePoint2d();
-      
+
       String ret = "";
       for (int i = 0; i < getNumberOfVertices(); i++)
       {
@@ -1097,20 +1102,20 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
 
       return new FramePoint2d(point.getReferenceFrame(), projected);
    }
- 
+
    public void getOutwardEdgeNormals(FrameVector2d[] normalsToPack)
    {
       renewTemporaryVectorArray();
-      
+
       convexPolygon.getOutSideFacingOrthoNormalVectors(temporaryVectorArray);
-      
+
       for (int i = 0; i < normalsToPack.length; i++)
       {
          checkReferenceFrameMatch(normalsToPack[i]);
          normalsToPack[i].set(temporaryVectorArray[i]);
       }
    }
-   
+
    private void renewTemporaryVectorArray()
    {
       if (temporaryVectorArray == null || temporaryVectorArray.length != getNumberOfVertices())

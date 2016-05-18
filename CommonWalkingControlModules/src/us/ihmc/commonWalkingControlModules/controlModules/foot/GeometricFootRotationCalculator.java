@@ -44,8 +44,6 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
 
    private static final Vector3d zero = new Vector3d(0.0, 0.0, 0.0);
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final static double defaultCopAlpha = 0.99;
-   private final static double defaultAngleThreshold = 10.0 * Math.PI/180.0;
 
    private final ReferenceFrame soleFrame;
    private final FrameConvexPolygon2d defaultFootPolygon;
@@ -59,20 +57,19 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final FramePoint cop = new FramePoint();
    private final DoubleYoVariable copAlpha;
    private final AlphaFilteredYoFramePoint copFiltered;
-
    private final FrameLineSegment2d lineSegmentOfRotation = new FrameLineSegment2d();
-   private YoFrameLineSegment2d yoLineOfRotation = null;
 
-   private YoFramePoint yoPlanePoint = null;
-   private YoFrameVector yoPlaneNormal = null;
+   private final YoFrameLineSegment2d yoLineOfRotation;
+   private final YoFramePoint yoPlanePoint;
+   private final YoFrameVector yoPlaneNormal;
 
    private final DoubleYoVariable angleFootGround;
    private final DoubleYoVariable angleTreshold;
-
    private final BooleanYoVariable footRotating;
 
    public GeometricFootRotationCalculator(String namePrefix,
          ContactablePlaneBody contactableFoot,
+         ExplorationParameters explorationParameters,
          YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
@@ -83,12 +80,10 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       defaultFootPolygon = new FrameConvexPolygon2d(contactableFoot.getContactPoints2d());
 
       angleFootGround = new DoubleYoVariable(namePrefix + "AngleToGround", registry);
-      angleTreshold = new DoubleYoVariable(namePrefix + "AngleTresholdForRotation", registry);
-      angleTreshold.set(defaultAngleThreshold);
-      footRotating = new BooleanYoVariable(namePrefix + "Rotating", registry);
+      angleTreshold = explorationParameters.getGeometricDetectionAngleThreshold();
+      footRotating = new BooleanYoVariable(namePrefix + "RotatingGeometry", registry);
 
-      copAlpha = new DoubleYoVariable(namePrefix + "copAlpha", registry);
-      copAlpha.set(defaultCopAlpha);
+      copAlpha = explorationParameters.getGeometricDetectionPlanePointAlpha();
       copFiltered = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint(namePrefix + "CoPFiltered",
             "", registry, copAlpha, worldFrame);
 
@@ -113,6 +108,12 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
          YoArtifactLineSegment2d lineOfRotationArtifact =
                new YoArtifactLineSegment2d(caption, yoLineOfRotation, Color.GREEN, 0.01, 0.01);
          yoGraphicsListRegistry.registerArtifact(caption, lineOfRotationArtifact);
+      }
+      else
+      {
+         yoPlanePoint = null;
+         yoPlaneNormal = null;
+         yoLineOfRotation = null;
       }
    }
 

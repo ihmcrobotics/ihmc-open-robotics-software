@@ -543,6 +543,11 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return ret;
    }
 
+   public void getBoundingBox(BoundingBox2d boundingBoxToPack)
+   {
+      boundingBoxToPack.set(boundingBox);
+   }
+
    /** Return the vertex from a clockwise ordered list */
    public Point2d getVertex(int vertexIndex)
    {
@@ -677,7 +682,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       return ret;
    }
-   
+
    /**
     * Returns distance from the point to the boundary of this polygon.
     * Positive number if inside. Negative number if outside.
@@ -691,38 +696,38 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public double getDistanceInside(Point2d point)
    {
       checkIfUpToDate();
-            
+
       if (numberOfVertices == 1)
       {
          return -point.distance(getVertex(0));
       }
-      
+
       if (numberOfVertices == 2)
       {
          Point2d pointOne = getVertex(0);
          Point2d pointTwo = getVertex(1);
-         
+
          return -Math.abs(computeDistanceToSideOfSegment(point, pointOne, pointTwo));
       }
-      
+
       double closestDistance = Double.POSITIVE_INFINITY;
-      
+
       for (int index = 0; index < numberOfVertices; index++)
       {
          Point2d pointOne = getVertex(index);
          int nextIndex = index+1;
          if (nextIndex == numberOfVertices)
             nextIndex = 0;
-         
+
          Point2d pointTwo = getVertex(nextIndex);
-         
+
          double distance = computeDistanceToSideOfSegment(point, pointOne, pointTwo);
          if (distance < closestDistance)
          {
             closestDistance = distance;
          }
       }
-      
+
       return closestDistance;
    }
 
@@ -730,16 +735,16 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    {
       double x0 = point.getX();
       double y0 = point.getY();
-      
+
       double x1 = pointOne.getX();
       double y1 = pointOne.getY();
-      
+
       double x2 = pointTwo.getX();
       double y2 = pointTwo.getY();
-      
+
       double numerator = (y2 - y1) * x0 - (x2 - x1) * y0 + x2*y1 - y2*x1;
       double denominator = Math.sqrt((y2-y1) * (y2-y1) + (x2-x1) * (x2-x1));
-      
+
       return numerator/denominator;
    }
 
@@ -2336,10 +2341,15 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
    public boolean isCompletelyInside(ConvexPolygon2d polygonQ)
    {
+      return isCompletelyInside(polygonQ, 0.0);
+   }
+
+   public boolean isCompletelyInside(ConvexPolygon2d polygonQ, double epsilon)
+   {
       checkIfUpToDate();
       for (int i = 0; i < numberOfVertices; i++)
       {
-         if (!polygonQ.isPointInside(getVertex(i)))
+         if (!polygonQ.isPointInside(getVertex(i), epsilon))
             return false;
       }
 
@@ -2365,16 +2375,16 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public List<Vector2d> getOutSideFacingOrthoNormalVectorsCopy()
    {
       checkIfUpToDate();
-      
+
       if (numberOfVertices == 1)
          return null;
-      
+
       Vector2d[] outsideFacingOrthogonalVectors = new Vector2d[numberOfVertices];
       for (int i = 0; i < numberOfVertices; i++)
       {
          outsideFacingOrthogonalVectors[i] = new Vector2d();
       }
-      
+
       getOutSideFacingOrthoNormalVectors(outsideFacingOrthogonalVectors);
 
       return Arrays.asList(outsideFacingOrthogonalVectors);
@@ -2383,35 +2393,35 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public void getOutSideFacingOrthoNormalVectors(Vector2d[] orthoNormalVectorsToPack)
    {
       checkIfUpToDate();
-      
+
       if (orthoNormalVectorsToPack == null || orthoNormalVectorsToPack.length != numberOfVertices)
       {
          throw new RuntimeException("orthogonalVectorsToPack is null or wrong length");
       }
-      
+
       if (numberOfVertices == 1)
       {
          throw new UndefinedOperationException("orthoNormal vectors undefined for a point");
       }
-      
+
       for (int i = 0; i < numberOfVertices; i++)
-      {         
+      {
          orthoNormalVectorsToPack[i].set(getNextVertex(i));
          orthoNormalVectorsToPack[i].sub(getVertex(i));
-         
+
          GeometryTools.getPerpendicularVector(orthoNormalVectorsToPack[i], orthoNormalVectorsToPack[i]);
-         
+
          orthoNormalVectorsToPack[i].normalize();
       }
    }
-   
+
    @Override
    public double distance(Point2d point)
    {
       checkIfUpToDate();
       tempPoint2dForDistance.set(point);
       orthogonalProjection(tempPoint2dForDistance);
-      
+
       return point.distance(tempPoint2dForDistance);
    }
 
@@ -2425,7 +2435,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return copy;
    }
 
-   
+
    private final Point2d tempPoint2d = new Point2d();
 
    /**
@@ -2602,7 +2612,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    {
       numberOfVertices = 1;
       if (clockwiseOrderedListOfPoints.isEmpty()) clockwiseOrderedListOfPoints.add(new Point2d());
- 
+
       Point2d point = clockwiseOrderedListOfPoints.get(0);
       point.set(Double.NaN, Double.NaN);
 
@@ -2614,15 +2624,15 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public boolean containsNaN()
    {
       update();
-      
+
       for (int i=0; i<numberOfVertices; i++)
       {
          Point2d point = clockwiseOrderedListOfPoints.get(i);
-         
+
          if (Double.isNaN(point.getX())) return true;
          if (Double.isNaN(point.getY())) return true;
       }
-      
+
       return false;
    }
 

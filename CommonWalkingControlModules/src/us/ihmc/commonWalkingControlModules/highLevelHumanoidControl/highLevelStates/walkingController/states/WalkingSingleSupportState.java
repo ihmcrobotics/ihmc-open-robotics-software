@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -28,7 +28,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FramePose actualFootPoseInWorld = new FramePose(worldFrame);
    private final FramePoint nextExitCMP = new FramePoint();
 
-   private final MomentumBasedController momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox momentumBasedController;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final CenterOfMassHeightManager comHeightManager;
@@ -41,7 +41,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final BooleanYoVariable finishSingleSupportWhenICPPlannerIsDone = new BooleanYoVariable("finishSingleSupportWhenICPPlannerIsDone", registry);
 
-   public WalkingSingleSupportState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, MomentumBasedController momentumBasedController,
+   public WalkingSingleSupportState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox momentumBasedController,
          HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
          WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
@@ -89,6 +89,11 @@ public class WalkingSingleSupportState extends SingleSupportState
       if (icpErrorIsTooLarge || balanceManager.isRecovering())
       {
          requestSwingSpeedUpIfNeeded();
+      }
+
+      if (balanceManager.isUseMomentumIfFalling())
+      {
+         balanceManager.checkIfUseMomentum(nextFootstep);
       }
 
       walkingMessageHandler.clearFootTrajectory();

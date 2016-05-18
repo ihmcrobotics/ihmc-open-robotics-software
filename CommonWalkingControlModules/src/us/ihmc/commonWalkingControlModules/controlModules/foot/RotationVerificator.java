@@ -31,7 +31,6 @@ public class RotationVerificator
     */
    private final DoubleYoVariable perpendicularCopError;
    private final DoubleYoVariable perpendicluarCopErrorThreshold;
-   private static final double defaultPerpendicluarCopErrorThreshold = 0.01;
    private final BooleanYoVariable perpendicularCopErrorAboveThreshold;
 
    /**
@@ -40,7 +39,6 @@ public class RotationVerificator
     */
    private final DoubleYoVariable angleBetweenCopErrorAndLine;
    private final DoubleYoVariable angleThreshold;
-   private static final double defaultAngleThreshold = 30.0 * Math.PI/180.0;
    private final BooleanYoVariable angleOkay;
 
    /**
@@ -50,6 +48,7 @@ public class RotationVerificator
 
    public RotationVerificator(String namePrefix,
          ContactablePlaneBody foot,
+         ExplorationParameters explorationParameters,
          YoVariableRegistry parentRegistry)
    {
       soleFrame = foot.getSoleFrame();
@@ -60,13 +59,11 @@ public class RotationVerificator
       yoCopError = new YoFrameVector2d(namePrefix + "CopError", "", soleFrame, registry);
 
       perpendicularCopError = new DoubleYoVariable(namePrefix + "PerpendicularCopError", registry);
-      perpendicluarCopErrorThreshold = new DoubleYoVariable(namePrefix + "PerpendicularCopErrorThreshold", registry);
-      perpendicluarCopErrorThreshold.set(defaultPerpendicluarCopErrorThreshold);
+      perpendicluarCopErrorThreshold = explorationParameters.getPerpendicluarCopErrorThreshold();
       perpendicularCopErrorAboveThreshold = new BooleanYoVariable(namePrefix + "PerpendicularCopErrorAboveThreshold", registry);
 
       angleBetweenCopErrorAndLine = new DoubleYoVariable(namePrefix + "AngleBetweenCopErrorAndLine", registry);
-      angleThreshold = new DoubleYoVariable(namePrefix + "AngleTreshold", registry);
-      angleThreshold.set(defaultAngleThreshold);
+      angleThreshold = explorationParameters.getCopAllowedAreaOpeningAngle();
       angleOkay = new BooleanYoVariable(namePrefix + "AngleOkay", registry);
 
       desiredCopOnCorrectSide = new BooleanYoVariable(namePrefix + "DesiredCopOnCorrectSide", registry);
