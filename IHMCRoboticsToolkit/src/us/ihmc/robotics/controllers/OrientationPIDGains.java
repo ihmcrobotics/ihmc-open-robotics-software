@@ -9,7 +9,8 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
 
    private double orientationMaximumAcceleration = Double.POSITIVE_INFINITY;
    private double orientationMaximumJerk = Double.POSITIVE_INFINITY;
-
+   private double orientationMaximumVelocityError = Double.POSITIVE_INFINITY;
+   private double orientationMaximumError = Double.POSITIVE_INFINITY;
 
    @Override
    public void set(OrientationPIDGainsInterface gains)
@@ -24,6 +25,8 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
       orientationMaxIntegralError = gains.getMaximumIntegralError();
       orientationMaximumAcceleration = gains.getMaximumAcceleration();
       orientationMaximumJerk = gains.getMaximumJerk();
+      orientationMaximumVelocityError = gains.getMaximumVelocityError();
+      orientationMaximumError = gains.getMaximumError();
    }
 
    public void setGains(double proportionalGain, double derivativeGain)
@@ -66,6 +69,16 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
       orientationMaximumJerk = maxJerk;
    }
 
+   public void setMaximumVelocityError(double maxVelocityError)
+   {
+      orientationMaximumVelocityError = maxVelocityError;
+   }
+
+   public void setMaximumError(double maxError)
+   {
+      orientationMaximumError = maxError;
+   }
+
    @Override
    public double[] getProportionalGains()
    {
@@ -100,5 +113,17 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
    public double getMaximumJerk()
    {
       return orientationMaximumJerk;
+   }
+
+   @Override
+   public double getMaximumVelocityError()
+   {
+      return orientationMaximumVelocityError;
+   }
+
+   @Override
+   public double getMaximumError()
+   {
+      return orientationMaximumError;
    }
 }

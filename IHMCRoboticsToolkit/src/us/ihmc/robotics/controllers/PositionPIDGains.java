@@ -9,6 +9,8 @@ public class PositionPIDGains implements PositionPIDGainsInterface
 
    private double positionMaximumAcceleration = Double.POSITIVE_INFINITY;
    private double positionMaximumJerk = Double.POSITIVE_INFINITY;
+   private double positionMaximumVelocityError = Double.POSITIVE_INFINITY;
+   private double positionMaximumError = Double.POSITIVE_INFINITY;
 
    @Override
    public void set(PositionPIDGainsInterface gains)
@@ -23,6 +25,8 @@ public class PositionPIDGains implements PositionPIDGainsInterface
       positionMaxIntegralError = gains.getMaximumIntegralError();
       positionMaximumAcceleration = gains.getMaximumAcceleration();
       positionMaximumJerk = gains.getMaximumJerk();
+      positionMaximumVelocityError = gains.getMaximumVelocityError();
+      positionMaximumError = gains.getMaximumError();
    }
 
    public void setGains(double proportionalGain, double derivativeGain)
@@ -65,6 +69,16 @@ public class PositionPIDGains implements PositionPIDGainsInterface
       positionMaximumJerk = maxJerk;
    }
 
+   public void setMaximumVelocityError(double maxVelocityError)
+   {
+      positionMaximumVelocityError = maxVelocityError;
+   }
+
+   public void setMaximumError(double maxError)
+   {
+      positionMaximumError = maxError;
+   }
+
    @Override
    public double[] getProportionalGains()
    {
@@ -99,5 +113,17 @@ public class PositionPIDGains implements PositionPIDGainsInterface
    public double getMaximumJerk()
    {
       return positionMaximumJerk;
+   }
+
+   @Override
+   public double getMaximumVelocityError()
+   {
+      return positionMaximumVelocityError;
+   }
+
+   @Override
+   public double getMaximumError()
+   {
+      return positionMaximumError;
    }
 }

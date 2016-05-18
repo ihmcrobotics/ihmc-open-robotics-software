@@ -138,9 +138,29 @@ public class SE3PIDController
       positionController.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 
+   public void setPositionMaxVelocityError(double maxVelocityError)
+   {
+      positionController.setMaxVelocityError(maxVelocityError);
+   }
+
+   public void setPositionMaxError(double maxError)
+   {
+      positionController.setMaxError(maxError);
+   }
+
    public void setOrientationMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       orientationController.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+   }
+
+   public void setOrientationMaxVelocityError(double maxVelocityError)
+   {
+      orientationController.setMaxVelocityError(maxVelocityError);
+   }
+
+   public void setOrientationMaxError(double maxError)
+   {
+      orientationController.setMaxError(maxError);
    }
 
    public void setGains(SE3PIDGainsInterface gains)

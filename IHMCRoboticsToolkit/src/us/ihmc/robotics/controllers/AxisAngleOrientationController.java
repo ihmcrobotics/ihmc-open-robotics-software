@@ -115,6 +115,13 @@ public class AxisAngleOrientationController
       errorAngleAxis.set(errorQuaternion);
       errorAngleAxis.setAngle(AngleTools.trimAngleMinusPiToPi(errorAngleAxis.getAngle()));
 
+      // Limit the maximum position error considered for control action
+      double maximumError = gains.getMaximumError();
+      if (errorAngleAxis.getAngle() > maximumError)
+      {
+         errorAngleAxis.setAngle(Math.signum(errorAngleAxis.getAngle()) * maximumError);
+      }
+
       proportionalTerm.set(errorAngleAxis.getX(), errorAngleAxis.getY(), errorAngleAxis.getZ());
       proportionalTerm.scale(errorAngleAxis.getAngle());
       rotationErrorInBody.set(proportionalTerm);
@@ -128,6 +135,15 @@ public class AxisAngleOrientationController
       currentAngularVelocity.changeFrame(bodyFrame);
 
       derivativeTerm.sub(desiredAngularVelocity, currentAngularVelocity);
+
+      // Limit the maximum velocity error considered for control action
+      double maximumVelocityError = gains.getMaximumVelocityError();
+      double velocityErrorMagnitude = derivativeTerm.length();
+      if (velocityErrorMagnitude > maximumVelocityError)
+      {
+         derivativeTerm.scale(maximumVelocityError / velocityErrorMagnitude);
+      }
+
       velocityError.set(derivativeTerm);
       derivativeGainMatrix.transform(derivativeTerm.getVector());
    }
@@ -189,6 +205,16 @@ public class AxisAngleOrientationController
    public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       gains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+   }
+
+   public void setMaxVelocityError(double maxVelocityError)
+   {
+      gains.setMaxVelocityError(maxVelocityError);
+   }
+
+   public void setMaxError(double maxError)
+   {
+      gains.setMaxError(maxError);
    }
 
    public void setGains(OrientationPIDGainsInterface gains)

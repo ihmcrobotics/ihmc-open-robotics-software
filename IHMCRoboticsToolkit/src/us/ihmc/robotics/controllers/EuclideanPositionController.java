@@ -103,6 +103,14 @@ public class EuclideanPositionController implements PositionController
       desiredPosition.changeFrame(bodyFrame);
       positionError.set(desiredPosition);
 
+      // Limit the maximum position error considered for control action
+      double maximumError = gains.getMaximumError();
+      double errorMagnitude = positionError.length();
+      if (errorMagnitude > maximumError)
+      {
+         derivativeTerm.scale(maximumError / errorMagnitude);
+      }
+
       proportionalTerm.set(desiredPosition);
       proportionalGainMatrix.transform(proportionalTerm.getVector());
    }
@@ -113,6 +121,15 @@ public class EuclideanPositionController implements PositionController
       currentVelocity.changeFrame(bodyFrame);
 
       derivativeTerm.sub(desiredVelocity, currentVelocity);
+
+      // Limit the maximum velocity error considered for control action
+      double maximumVelocityError = gains.getMaximumVelocityError();
+      double velocityErrorMagnitude = derivativeTerm.length();
+      if (velocityErrorMagnitude > maximumVelocityError)
+      {
+         derivativeTerm.scale(maximumVelocityError / velocityErrorMagnitude);
+      }
+
       velocityError.set(derivativeTerm);
       derivativeGainMatrix.transform(derivativeTerm.getVector());
    }
@@ -183,6 +200,16 @@ public class EuclideanPositionController implements PositionController
    public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       gains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+   }
+
+   public void setMaxVelocityError(double maxVelocityError)
+   {
+      gains.setMaxVelocityError(maxVelocityError);
+   }
+
+   public void setMaxError(double maxError)
+   {
+      gains.setMaxError(maxError);
    }
 
    public void setGains(PositionPIDGainsInterface gains)
