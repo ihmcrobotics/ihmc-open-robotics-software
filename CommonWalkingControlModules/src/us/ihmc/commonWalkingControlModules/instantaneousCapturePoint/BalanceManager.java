@@ -102,8 +102,8 @@ public class BalanceManager
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-   private final BooleanYoVariable useMomentumIfFalling = new BooleanYoVariable("useMomentumIfFalling", registry);
-   private final BooleanYoVariable shouldUseMomentum = new BooleanYoVariable("shouldUseMomentum", registry);
+   private final BooleanYoVariable useUpperBodyLinearMomentumIfFalling = new BooleanYoVariable("UseUpperBodyLinearMomentumIfFalling", registry);
+   private final BooleanYoVariable shouldUseUpperBodyLinearMomentum = new BooleanYoVariable("ShouldUseUpperBodyLinearMomentum", registry);
 
    public BalanceManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry)
@@ -152,7 +152,7 @@ public class BalanceManager
       pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, bipedSupportPolygons, pelvisXYControlGains, registry);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
-      useMomentumIfFalling.set(false);
+      useUpperBodyLinearMomentumIfFalling.set(false);
 
       String graphicListName = "BalanceManager";
 
@@ -239,14 +239,14 @@ public class BalanceManager
       // allow the controller to use upper body momentum to control the capture point
       if (supportLeg != null)
       {
-         if (useMomentumIfFalling.getBooleanValue() && shouldUseMomentum.getBooleanValue())
+         if (useUpperBodyLinearMomentumIfFalling.getBooleanValue() && shouldUseUpperBodyLinearMomentum.getBooleanValue())
          {
             keepCMPInsideSupportPolygon = false;
          }
       }
       else
       {
-         shouldUseMomentum.set(false);
+         shouldUseUpperBodyLinearMomentum.set(false);
       }
 
       icpBasedLinearMomentumRateOfChangeControlModule.keepCMPInsideSupportPolygon(keepCMPInsideSupportPolygon);
@@ -271,7 +271,7 @@ public class BalanceManager
    private final FrameLine2d forwardLine = new FrameLine2d();
    private final FramePoint2d tmpCapturePoint = new FramePoint2d();
 
-   public void checkIfUseMomentum(Footstep nextFootstep)
+   public void checkIfUseUpperBodyLinearMomentum(Footstep nextFootstep)
    {
       RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
       ReferenceFrame supportSoleFrame = momentumBasedController.getReferenceFrames().getSoleFrame(supportSide);
@@ -288,7 +288,7 @@ public class BalanceManager
       }
 
       // hysteresis
-      if (shouldUseMomentum.getBooleanValue())
+      if (shouldUseUpperBodyLinearMomentum.getBooleanValue())
       {
          double offset = supportSide.negateIfLeftSide(0.05);
          linePoint.add(0.0, offset);
@@ -303,11 +303,11 @@ public class BalanceManager
 
       if (forwardLine.isPointOnSideOfLine(tmpCapturePoint, supportSide))
       {
-         shouldUseMomentum.set(true);
+         shouldUseUpperBodyLinearMomentum.set(true);
       }
       else
       {
-         shouldUseMomentum.set(false);
+         shouldUseUpperBodyLinearMomentum.set(false);
       }
 
 //      double swingTimeRemaining = getTimeRemainingInCurrentState();
@@ -624,9 +624,9 @@ public class BalanceManager
       momentumBasedController.getCapturePoint(capturePointToPack);
    }
 
-   public boolean isUseMomentumIfFalling()
+   public boolean isUseUpperBodyLinearMomentumIfFalling()
    {
-      return useMomentumIfFalling.getBooleanValue();
+      return useUpperBodyLinearMomentumIfFalling.getBooleanValue();
    }
 
 }

@@ -130,7 +130,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private void setUpMomentum() throws SimulationExceededMaximumTimeException
    {
       // enable the use of body momentum in the controller
-      BooleanYoVariable useMomentumIfFalling = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("useMomentumIfFalling");
+      BooleanYoVariable useMomentumIfFalling = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("UseUpperBodyLinearMomentumIfFalling");
       useMomentumIfFalling.set(true);
 
       // bring the arms in a stretched position
