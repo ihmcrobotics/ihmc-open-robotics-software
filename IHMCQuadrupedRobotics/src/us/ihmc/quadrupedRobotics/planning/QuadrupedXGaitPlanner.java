@@ -181,14 +181,14 @@ public class QuadrupedXGaitPlanner
       }
    }
 
-   public void computeOnlinePlan(ArrayList<QuadrupedTimedStep> plannedSteps, EndDependentList<QuadrupedTimedStep> priorSteps, Vector3d planarVelocity, double currentTime, double currentYaw, QuadrupedXGaitSettings xGaitSettings)
+   public void computeOnlinePlan(ArrayList<QuadrupedTimedStep> plannedSteps, EndDependentList<QuadrupedTimedStep> latestSteps, Vector3d planarVelocity, double currentTime, double currentYaw, QuadrupedXGaitSettings xGaitSettings)
    {
-      // initialize last prior step
-      QuadrupedTimedStep lastPriorStep;
-      if (priorSteps.get(RobotEnd.HIND).getTimeInterval().getEndTime() > priorSteps.get(RobotEnd.FRONT).getTimeInterval().getEndTime())
-         lastPriorStep = priorSteps.get(RobotEnd.HIND);
+      // initialize latest step
+      QuadrupedTimedStep latestStep;
+      if (latestSteps.get(RobotEnd.HIND).getTimeInterval().getEndTime() > latestSteps.get(RobotEnd.FRONT).getTimeInterval().getEndTime())
+         latestStep = latestSteps.get(RobotEnd.HIND);
       else
-         lastPriorStep = priorSteps.get(RobotEnd.FRONT);
+         latestStep = latestSteps.get(RobotEnd.FRONT);
 
       // initialize nominal support rectangle
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -203,9 +203,9 @@ public class QuadrupedXGaitPlanner
 
       // compute step quadrants and time intervals
       {
-         RobotEnd thisStepRobotEnd = lastPriorStep.getRobotQuadrant().getOppositeEnd();
-         pastSteps.set(RobotEnd.FRONT, priorSteps.get(RobotEnd.FRONT));
-         pastSteps.set(RobotEnd.HIND, priorSteps.get(RobotEnd.HIND));
+         RobotEnd thisStepRobotEnd = latestStep.getRobotQuadrant().getOppositeEnd();
+         pastSteps.set(RobotEnd.FRONT, latestSteps.get(RobotEnd.FRONT));
+         pastSteps.set(RobotEnd.HIND, latestSteps.get(RobotEnd.HIND));
 
          for (int i = 0; i < plannedSteps.size(); i++)
          {
@@ -239,22 +239,22 @@ public class QuadrupedXGaitPlanner
          }
    }
 
-   // translate step goal positions based on last prior step position
+   // translate step goal positions based on latest step position
    {
       // compute xGait rectangle pose at end of step
-      double deltaTime = lastPriorStep.getTimeInterval().getEndTime() - currentTime;
+      double deltaTime = latestStep.getTimeInterval().getEndTime() - currentTime;
       extrapolatePose(xGaitRectanglePose, xGaitRectanglePoseAtSoS, planarVelocity, deltaTime);
       xGaitRectangleFrame.setPoseAndUpdate(xGaitRectanglePose);
 
       // compute step goal position
-      RobotQuadrant stepQuadrant = lastPriorStep.getRobotQuadrant();
+      RobotQuadrant stepQuadrant = latestStep.getRobotQuadrant();
       goalPosition.setIncludingFrame(xGaitRectangle.get(stepQuadrant));
       goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       // compensate for position error
       for (int i = 0; i < plannedSteps.size(); i++)
       {
-         plannedSteps.get(i).getGoalPosition().add(lastPriorStep.getGoalPosition());
+         plannedSteps.get(i).getGoalPosition().add(latestStep.getGoalPosition());
          plannedSteps.get(i).getGoalPosition().sub(goalPosition.getPoint());
       }
    }
