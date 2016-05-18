@@ -577,13 +577,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double zetaZ = realRobot ? 0.22 : 0.8;
       double maxAccel = realRobot ? 6.0 : 36.0;
       double maxJerk = realRobot ? 60.0 : 540.0;
-      double maxError = 10.0 * Math.PI/180.0;
+      double maxProportionalError = 10.0 * Math.PI/180.0;
 
       gains.setProportionalGains(kpXY, kpZ);
       gains.setDampingRatios(zetaXY, zetaZ);
       gains.setMaximumAcceleration(maxAccel);
       gains.setMaximumJerk(maxJerk);
-      gains.setMaxError(maxError);
+      gains.setMaxProportionalError(maxProportionalError);
       gains.createDerivativeGainUpdater(true);
 
       return gains;

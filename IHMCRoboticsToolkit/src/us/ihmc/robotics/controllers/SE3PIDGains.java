@@ -84,14 +84,14 @@ public class SE3PIDGains implements SE3PIDGainsInterface
       orientationGains.setMaximumAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 
-   public void setOrientationMaximumVelocityError(double maxVelocityError)
+   public void setOrientationMaximumDerivativeError(double maxDerivativeError)
    {
-      orientationGains.setMaximumVelocityError(maxVelocityError);
+      orientationGains.setMaximumDerivativeError(maxDerivativeError);
    }
 
-   public void setOrientationMaximumError(double maxError)
+   public void setOrientationMaximumProportionalError(double maxProportionalError)
    {
-      orientationGains.setMaximumError(maxError);
+      orientationGains.setMaximumProportionalError(maxProportionalError);
    }
 
    @Override
