@@ -19,8 +19,8 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
 
    private final DoubleYoVariable maximumAcceleration;
    private final DoubleYoVariable maximumJerk;
-   private final DoubleYoVariable maximumVelocityError;
-   private final DoubleYoVariable maximumError;
+   private final DoubleYoVariable maxDerivativeError;
+   private final DoubleYoVariable maxProportionalError;
 
    public YoFootPositionGains(String suffix, YoVariableRegistry registry)
    {
@@ -32,13 +32,13 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
 
       maximumAcceleration = new DoubleYoVariable("maximumLinearAcceleration" + suffix, registry);
       maximumJerk = new DoubleYoVariable("maximumLinearJerk" + suffix, registry);
-      maximumVelocityError = new DoubleYoVariable("maximumVelocityError" + suffix, registry);
-      maximumError = new DoubleYoVariable("maximumError" + suffix, registry);
+      maxDerivativeError = new DoubleYoVariable("maximumLinearDerivativeError" + suffix, registry);
+      maxProportionalError = new DoubleYoVariable("maximumLinearProportionalError" + suffix, registry);
 
       maximumAcceleration.set(Double.POSITIVE_INFINITY);
       maximumJerk.set(Double.POSITIVE_INFINITY);
-      maximumVelocityError.set(Double.POSITIVE_INFINITY);
-      maximumError.set(Double.POSITIVE_INFINITY);
+      maxDerivativeError.set(Double.POSITIVE_INFINITY);
+      maxProportionalError.set(Double.POSITIVE_INFINITY);
    }
 
    @Override
@@ -51,8 +51,8 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       dampingRatio.set(0.0);
       maximumAcceleration.set(Double.POSITIVE_INFINITY);
       maximumJerk.set(Double.POSITIVE_INFINITY);
-      maximumVelocityError.set(Double.POSITIVE_INFINITY);
-      maximumError.set(Double.POSITIVE_INFINITY);
+      maxDerivativeError.set(Double.POSITIVE_INFINITY);
+      maxProportionalError.set(Double.POSITIVE_INFINITY);
    }
 
    @Override
@@ -185,15 +185,15 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public void setMaxVelocityError(double maxVelocityError)
+   public void setMaxDerivativeError(double maxDerivativeError)
    {
-      maximumVelocityError.set(maxVelocityError);
+      this.maxDerivativeError.set(maxDerivativeError);
    }
 
    @Override
-   public void setMaxError(double maxError)
+   public void setMaxProportionalError(double maxProportionalError)
    {
-      maximumError.set(maxError);
+      this.maxProportionalError.set(maxProportionalError);
    }
 
    @Override
@@ -203,8 +203,8 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
       setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
-      setMaxVelocityError(gains.getMaximumVelocityError());
-      setMaxError(gains.getMaximumError());
+      setMaxDerivativeError(gains.getMaximumDerivativeError());
+      setMaxProportionalError(gains.getMaximumProportionalError());
    }
 
    @Override
@@ -220,15 +220,15 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumVelocityError()
+   public DoubleYoVariable getYoMaximumDerivativeError()
    {
-      return maximumVelocityError;
+      return maxDerivativeError;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumError()
+   public DoubleYoVariable getYoMaximumProportionalError()
    {
-      return maximumError;
+      return maxProportionalError;
    }
 
    private double[] tempPropotionalGains = new double[3];
@@ -282,15 +282,15 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public double getMaximumVelocityError()
+   public double getMaximumDerivativeError()
    {
-      return maximumVelocityError.getDoubleValue();
+      return maxDerivativeError.getDoubleValue();
    }
 
    @Override
-   public double getMaximumError()
+   public double getMaximumProportionalError()
    {
-      return maximumError.getDoubleValue();
+      return maxProportionalError.getDoubleValue();
    }
 
 }

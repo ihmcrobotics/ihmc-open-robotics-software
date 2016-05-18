@@ -73,14 +73,14 @@ public class RigidBodyOrientationControlModule
       axisAngleOrientationController.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 
-   public void setMaxVelocityError(double maxVelocityError)
+   public void setMaxDerivativeError(double maxDerivativeError)
    {
-      axisAngleOrientationController.setMaxVelocityError(maxVelocityError);
+      axisAngleOrientationController.setMaxDerivativeError(maxDerivativeError);
    }
 
-   public void setMaxError(double maxError)
+   public void setMaxProportionalError(double maxProportionalError)
    {
-      axisAngleOrientationController.setMaxError(maxError);
+      axisAngleOrientationController.setMaxProportionalError(maxProportionalError);
    }
 
    public void getEndEffectorCurrentAngularVelocity(FrameVector angularVelocityToPack)
