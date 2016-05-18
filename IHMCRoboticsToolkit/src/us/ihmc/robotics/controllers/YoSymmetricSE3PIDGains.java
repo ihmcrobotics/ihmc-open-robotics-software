@@ -17,6 +17,8 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
 
    private final DoubleYoVariable maximumAcceleration;
    private final DoubleYoVariable maximumJerk;
+   private final DoubleYoVariable maximumVelocityError;
+   private final DoubleYoVariable maximumError;
 
    public YoSymmetricSE3PIDGains(String suffix, YoVariableRegistry registry)
    {
@@ -28,9 +30,13 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       maxIntegralError = new DoubleYoVariable("maxIntegralError" + suffix, registry);
       maximumAcceleration = new DoubleYoVariable("maximumAcceleration" + suffix, registry);
       maximumJerk = new DoubleYoVariable("maximumJerk" + suffix, registry);
+      maximumVelocityError = new DoubleYoVariable("maximumVelocityError" + suffix, registry);
+      maximumError = new DoubleYoVariable("maximumError" + suffix, registry);
 
       maximumAcceleration.set(Double.POSITIVE_INFINITY);
       maximumJerk.set(Double.POSITIVE_INFINITY);
+      maximumVelocityError.set(Double.POSITIVE_INFINITY);
+      maximumError.set(Double.POSITIVE_INFINITY);
    }
 
    @Override
@@ -44,6 +50,8 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       maxIntegralError.set(0.0);
       maximumAcceleration.set(Double.POSITIVE_INFINITY);
       maximumJerk.set(Double.POSITIVE_INFINITY);
+      maximumVelocityError.set(Double.POSITIVE_INFINITY);
+      maximumError.set(Double.POSITIVE_INFINITY);
    }
 
    @Override
@@ -100,6 +108,8 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
       setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+      setMaxVelocityError(gains.getMaximumVelocityError());
+      setMaxError(gains.getMaximumError());
    }
 
    @Override
@@ -109,6 +119,8 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
       setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+      setMaxVelocityError(gains.getMaximumVelocityError());
+      setMaxError(gains.getMaximumError());
    }
 
    @Override
@@ -224,6 +236,18 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    }
 
    @Override
+   public void setMaxVelocityError(double maxVelocityError)
+   {
+      maximumVelocityError.set(maxVelocityError);
+   }
+
+   @Override
+   public void setMaxError(double maxError)
+   {
+      maximumError.set(maxError);
+   }
+
+   @Override
    public DoubleYoVariable getYoMaximumAcceleration()
    {
       return maximumAcceleration;
@@ -233,6 +257,18 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    public DoubleYoVariable getYoMaximumJerk()
    {
       return maximumJerk;
+   }
+
+   @Override
+   public DoubleYoVariable getYoMaximumVelocityError()
+   {
+      return maximumVelocityError;
+   }
+
+   @Override
+   public DoubleYoVariable getYoMaximumError()
+   {
+      return maximumError;
    }
 
    private double[] tempPropotionalGains = new double[3];
@@ -282,4 +318,17 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    {
       return maximumJerk.getDoubleValue();
    }
+
+   @Override
+   public double getMaximumVelocityError()
+   {
+      return maximumVelocityError.getDoubleValue();
+   }
+
+   @Override
+   public double getMaximumError()
+   {
+      return maximumError.getDoubleValue();
+   }
+
 }

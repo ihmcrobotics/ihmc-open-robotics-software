@@ -16,6 +16,8 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
 
    private final DoubleYoVariable maxAcceleration;
    private final DoubleYoVariable maxJerk;
+   private final DoubleYoVariable maxVelocityError;
+   private final DoubleYoVariable maxError;
 
    public YoAxisAngleOrientationGains(String prefix, YoVariableRegistry registry)
    {
@@ -34,9 +36,13 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
 
       maxAcceleration = new DoubleYoVariable(prefix + "OrientationMaxAcceleration", registry);
       maxJerk = new DoubleYoVariable(prefix + "OrientationMaxJerk", registry);
+      maxVelocityError = new DoubleYoVariable(prefix + "OrientationMaxVelocityError", registry);
+      maxError = new DoubleYoVariable(prefix + "OrientationMaxError", registry);
 
       maxAcceleration.set(Double.POSITIVE_INFINITY);
       maxJerk.set(Double.POSITIVE_INFINITY);
+      maxVelocityError.set(Double.POSITIVE_INFINITY);
+      maxError.set(Double.POSITIVE_INFINITY);
    }
 
    public void reset()
@@ -51,6 +57,8 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
       maxIntegralError.set(0.0);
       maxAcceleration.set(Double.POSITIVE_INFINITY);
       maxJerk.set(Double.POSITIVE_INFINITY);
+      maxVelocityError.set(Double.POSITIVE_INFINITY);
+      maxError.set(Double.POSITIVE_INFINITY);
    }
 
    @Override
@@ -158,12 +166,26 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
    }
 
    @Override
+   public void setMaxVelocityError(double maxVelocityError)
+   {
+      this.maxVelocityError.set(maxVelocityError);
+   }
+
+   @Override
+   public void setMaxError(double maxError)
+   {
+      this.maxError.set(maxError);
+   }
+
+   @Override
    public void set(OrientationPIDGainsInterface gains)
    {
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
       setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+      setMaxVelocityError(gains.getMaximumVelocityError());
+      setMaxError(gains.getMaximumError());
    }
 
    @Override
@@ -176,6 +198,18 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
    public DoubleYoVariable getYoMaximumJerk()
    {
       return maxJerk;
+   }
+
+   @Override
+   public DoubleYoVariable getYoMaximumVelocityError()
+   {
+      return maxVelocityError;
+   }
+
+   @Override
+   public DoubleYoVariable getYoMaximumError()
+   {
+      return maxError;
    }
 
    private double[] tempPropotionalGains = new double[3];
@@ -225,4 +259,17 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
    {
       return maxJerk.getDoubleValue();
    }
+
+   @Override
+   public double getMaximumVelocityError()
+   {
+      return maxVelocityError.getDoubleValue();
+   }
+
+   @Override
+   public double getMaximumError()
+   {
+      return maxError.getDoubleValue();
+   }
+
 }

@@ -26,7 +26,15 @@ public interface YoOrientationPIDGainsInterface extends OrientationPIDGainsInter
 
    public abstract void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk);
 
+   public abstract void setMaxVelocityError(double maxVelocityError);
+
+   public abstract void setMaxError(double maxError);
+
    public abstract DoubleYoVariable getYoMaximumAcceleration();
 
    public abstract DoubleYoVariable getYoMaximumJerk();
+
+   public abstract DoubleYoVariable getYoMaximumVelocityError();
+
+   public abstract DoubleYoVariable getYoMaximumError();
 }

@@ -19,6 +19,8 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
 
    private final DoubleYoVariable maximumAcceleration;
    private final DoubleYoVariable maximumJerk;
+   private final DoubleYoVariable maximumVelocityError;
+   private final DoubleYoVariable maximumError;
 
    public YoFootPositionGains(String suffix, YoVariableRegistry registry)
    {
@@ -30,9 +32,13 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
 
       maximumAcceleration = new DoubleYoVariable("maximumLinearAcceleration" + suffix, registry);
       maximumJerk = new DoubleYoVariable("maximumLinearJerk" + suffix, registry);
+      maximumVelocityError = new DoubleYoVariable("maximumVelocityError" + suffix, registry);
+      maximumError = new DoubleYoVariable("maximumError" + suffix, registry);
 
       maximumAcceleration.set(Double.POSITIVE_INFINITY);
       maximumJerk.set(Double.POSITIVE_INFINITY);
+      maximumVelocityError.set(Double.POSITIVE_INFINITY);
+      maximumError.set(Double.POSITIVE_INFINITY);
    }
 
    @Override
@@ -45,6 +51,8 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       dampingRatio.set(0.0);
       maximumAcceleration.set(Double.POSITIVE_INFINITY);
       maximumJerk.set(Double.POSITIVE_INFINITY);
+      maximumVelocityError.set(Double.POSITIVE_INFINITY);
+      maximumError.set(Double.POSITIVE_INFINITY);
    }
 
    @Override
@@ -177,12 +185,26 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
+   public void setMaxVelocityError(double maxVelocityError)
+   {
+      maximumVelocityError.set(maxVelocityError);
+   }
+
+   @Override
+   public void setMaxError(double maxError)
+   {
+      maximumError.set(maxError);
+   }
+
+   @Override
    public void set(PositionPIDGainsInterface gains)
    {
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
       setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+      setMaxVelocityError(gains.getMaximumVelocityError());
+      setMaxError(gains.getMaximumError());
    }
 
    @Override
@@ -195,6 +217,18 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    public DoubleYoVariable getYoMaximumJerk()
    {
       return maximumJerk;
+   }
+
+   @Override
+   public DoubleYoVariable getYoMaximumVelocityError()
+   {
+      return maximumVelocityError;
+   }
+
+   @Override
+   public DoubleYoVariable getYoMaximumError()
+   {
+      return maximumError;
    }
 
    private double[] tempPropotionalGains = new double[3];
@@ -246,4 +280,17 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    {
       return maximumJerk.getDoubleValue();
    }
+
+   @Override
+   public double getMaximumVelocityError()
+   {
+      return maximumVelocityError.getDoubleValue();
+   }
+
+   @Override
+   public double getMaximumError()
+   {
+      return maximumError.getDoubleValue();
+   }
+
 }
