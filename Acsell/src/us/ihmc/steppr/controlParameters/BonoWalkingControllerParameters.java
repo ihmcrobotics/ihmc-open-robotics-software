@@ -23,7 +23,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.steppr.parameters.BonoPhysicalProperties;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class BonoWalkingControllerParameters implements WalkingControllerParameters
+public class BonoWalkingControllerParameters extends WalkingControllerParameters
 {
 
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
@@ -816,7 +816,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       return 0;
    }
-   
+
    @Override
    public boolean controlHeadAndHandsWithSliders()
    {

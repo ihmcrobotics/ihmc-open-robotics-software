@@ -14,7 +14,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
-   
+
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -30,7 +30,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
    @Override
    protected DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
-      
+
       return (DoubleYoVariable) scs.getVariable("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAxisAngleOrientationController",
                                                 "pelvisRotationErrorInBodyZ");
    }

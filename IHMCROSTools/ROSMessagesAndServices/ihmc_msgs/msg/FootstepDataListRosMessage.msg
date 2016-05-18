@@ -7,10 +7,19 @@
 # Defines the list of footstep to perform.
 ihmc_msgs/FootstepDataRosMessage[] footstep_data_list
 
-# swingTime is the time spent in single-support when stepping
+# When OVERRIDE is chosen:  - All previously sent footstep lists will be overriden, regardless of
+# their execution mode  - A footstep can be overridden up to end of transfer. Once the swing foot
+# leaves the ground it cannot be overridden  When QUEUE is chosen:  This footstep list will be queued
+# with previously sent footstep lists, regardless of their execution mode  - The trajectory time and
+# swing time of all queued footsteps will be overwritten with this message's values.
+uint8 execution_mode
+
+# swingTime is the time spent in single-support when stepping  - Queueing does not support varying
+# swing times. If execution mode is QUEUE, all queued footsteps' swingTime will be overwritten
 float64 swing_time
 
-# transferTime is the time spent in double-support between steps
+# transferTime is the time spent in double-support between steps  - Queueing does not support varying
+# transfer times. If execution mode is QUEUE, all queued footsteps' transferTime will be overwritten
 float64 transfer_time
 
 # A unique id for the current message. This can be a timestamp or sequence number. Only the unique id
@@ -19,4 +28,10 @@ float64 transfer_time
 # a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.
 int64 unique_id
 
+
+# This message utilizes "enums". Enum value information for this message follows.
+
+# "execution_mode" enum values:
+uint8 OVERRIDE=0 # This message will override the previous.
+uint8 QUEUE=1 # The previous message will first be executed before executing this message. When sending a series of queued messages, the very first has to be declared as OVERRIDE.
 

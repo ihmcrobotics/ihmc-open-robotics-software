@@ -1,12 +1,9 @@
 package us.ihmc.humanoidBehaviors.coactiveDesignFramework;
 
-import java.io.IOException;
-
-import us.ihmc.humanoidBehaviors.behaviors.KickBallBehaviorCoactiveElement;
+import us.ihmc.humanoidBehaviors.behaviors.KickBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.whiteBoard.TCPYoWhiteBoard;
 
 public class SimpleCoactiveElementMachineSide
 {
@@ -27,12 +24,8 @@ public class SimpleCoactiveElementMachineSide
       scs.startOnAThread();
       
       coactiveElement.initializeMachineSide();
-      final TCPYoWhiteBoard machineSideWhiteBoard = new TCPYoWhiteBoard("MachineSideWhiteBoard", port);
 
-      CoactiveElementYoWhiteBoardSynchronizer machineSideSynchronizer = new CoactiveElementYoWhiteBoardSynchronizer(machineSideWhiteBoard, HumanOrMachine.MACHINE, coactiveElement);
-
-      Thread machineSideThread = new Thread(machineSideWhiteBoard);
-      machineSideThread.start();
+      CoactiveElementYoWhiteBoardSynchronizer machineSideSynchronizer = new CoactiveElementYoWhiteBoardSynchronizer(port, HumanOrMachine.MACHINE, coactiveElement);
 
       final long millisecondsBetweenDataWrites = 300L;
       machineSideSynchronizer.startASynchronizerOnAThread(millisecondsBetweenDataWrites);
@@ -41,25 +34,7 @@ public class SimpleCoactiveElementMachineSide
       {
          @Override
          public void run()
-         {
-            boolean connected = false;
-            
-            while(!connected)
-            {
-               try
-               {
-                  System.out.println("Trying to connect");
-                  machineSideWhiteBoard.connect();
-                  connected = true;
-                  System.out.println("Connected!!!");
-               }
-               catch (IOException e1)
-               {
-                  System.out.println(e1);
-                  sleep(1000L);
-               }
-            }
-   
+         {   
             while (true)
             {
                coactiveElement.updateMachineSide();
@@ -87,11 +62,9 @@ public class SimpleCoactiveElementMachineSide
 
    public static void main(String[] args)
    {
-      KickBallBehaviorCoactiveElement coactiveElement = new KickBallBehaviorCoactiveElement();
+      KickBallBehaviorCoactiveElementBehaviorSide coactiveElement = new KickBallBehaviorCoactiveElementBehaviorSide();
 
       SimpleCoactiveElementMachineSide machineSide = new SimpleCoactiveElementMachineSide(coactiveElement);
       machineSide.startOnAThread(PORT_FOR_COACTIVE_ELEMENTS);
    }
-
 }
-

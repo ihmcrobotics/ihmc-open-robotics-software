@@ -1,26 +1,15 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingUpdater;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScript;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesiredVelocityControlModule;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDesiredHeadingControlModule;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.*;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.walking.*;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -32,6 +21,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ComponentBasedFootstepDataMessageGenerator
 {
@@ -98,10 +90,10 @@ public class ComponentBasedFootstepDataMessageGenerator
       RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
       componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
 
-      FootstepDataListCommand footsteps = computeNextFootsteps(supportLeg);
+      FootstepDataListMessage footsteps = computeNextFootsteps(supportLeg);
       footsteps.setSwingTime(swingTime.getDoubleValue());
       footsteps.setTransferTime(transferTime.getDoubleValue());
-      commandInputManager.submitCommand(footsteps);
+      commandInputManager.submitMessage(footsteps);
 
       nextSwingLeg.set(supportLeg);
    }
@@ -141,19 +133,21 @@ public class ComponentBasedFootstepDataMessageGenerator
       statusOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, walkingStatusListener);
    }
 
-   private FootstepDataListCommand computeNextFootsteps(RobotSide supportLeg)
+   private FootstepDataListMessage computeNextFootsteps(RobotSide supportLeg)
    {
       double stepTime = swingTime.getDoubleValue() + transferTime.getDoubleValue();
-      FootstepDataListCommand footsteps = new FootstepDataListCommand();
-      FootstepDataControllerCommand footstep = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-      FootstepDataControllerCommand nextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime);
-      FootstepDataControllerCommand nextNextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep, 2.0 * stepTime);
 
-      footsteps.addFootstep(footstep);
-      footsteps.addFootstep(nextFootstep);
-      footsteps.addFootstep(nextNextFootstep);
-      footsteps.setSwingTime(Double.NaN);
-      footsteps.setTransferTime(Double.NaN);
+      FootstepDataMessage footstepDataMessage = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
+
+      FootstepDataMessage footstep = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
+      FootstepDataMessage nextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime);
+      FootstepDataMessage nextNextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep, 2.0 * stepTime);
+
+      FootstepDataListMessage footsteps = new FootstepDataListMessage(Double.NaN, Double.NaN);
+      footsteps.add(footstep);
+      footsteps.add(nextFootstep);
+      footsteps.add(nextNextFootstep);
+      footsteps.setExecutionMode(ExecutionMode.OVERRIDE);
 
       return footsteps;
    }

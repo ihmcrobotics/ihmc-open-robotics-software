@@ -3,10 +3,9 @@ package us.ihmc.commonWalkingControlModules.inverseKinematics;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -16,8 +15,7 @@ public class InverseKinematicsQPSolver
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BooleanYoVariable seedFromPreviousSolution = new BooleanYoVariable("seedFromPreviousSolution", registry);
-   private final OASESConstrainedQPSolver qpSolver = new OASESConstrainedQPSolver(registry);
+   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
@@ -30,9 +28,12 @@ public class InverseKinematicsQPSolver
    private final DenseMatrix64F solverInput_lb;
    private final DenseMatrix64F solverInput_ub;
 
+   private final DenseMatrix64F solverOutput;
    private final DenseMatrix64F desiredJointVelocities;
 
    private final IntegerYoVariable numberOfIterations = new IntegerYoVariable("numberOfIterations", registry);
+   private final IntegerYoVariable numberOfEqualityConstraints = new IntegerYoVariable("numberOfEqualityConstraints", registry);
+   private final IntegerYoVariable numberOfInequalityConstraints = new IntegerYoVariable("numberOfInequalityConstraints", registry);
    private final IntegerYoVariable numberOfConstraints = new IntegerYoVariable("numberOfConstraints", registry);
    private final DoubleYoVariable jointVelocityRegularization = new DoubleYoVariable("jointVelocityRegularization", registry);
 
@@ -48,13 +49,14 @@ public class InverseKinematicsQPSolver
       solverInput_ub = new DenseMatrix64F(numberOfDoFs, 1);
 
       solverInput_Aeq = new DenseMatrix64F(0, numberOfDoFs);
-      solverInput_beq = new DenseMatrix64F(0, 0);
+      solverInput_beq = new DenseMatrix64F(0, 1);
       solverInput_Ain = new DenseMatrix64F(0, numberOfDoFs);
-      solverInput_bin = new DenseMatrix64F(0, 0);
+      solverInput_bin = new DenseMatrix64F(0, 1);
 
       CommonOps.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
       CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
 
+      solverOutput = new DenseMatrix64F(numberOfDoFs, 1);
       jointVelocityRegularization.set(0.1);
 
       desiredJointVelocities = new DenseMatrix64F(numberOfDoFs, 1);
@@ -71,7 +73,7 @@ public class InverseKinematicsQPSolver
       solverInput_f.zero();
 
       solverInput_Aeq.reshape(0, numberOfDoFs);
-      solverInput_beq.reshape(0, 0);
+      solverInput_beq.reshape(0, 1);
    }
 
    private final DenseMatrix64F tempJtW = new DenseMatrix64F(1, 1);
@@ -138,23 +140,23 @@ public class InverseKinematicsQPSolver
 
    public void solve() throws NoConvergenceException
    {
-      boolean firstCall = !seedFromPreviousSolution.getBooleanValue();
+      numberOfEqualityConstraints.set(solverInput_Aeq.getNumRows());
+      numberOfInequalityConstraints.set(solverInput_Ain.getNumRows());
+      numberOfConstraints.set(solverInput_Aeq.getNumRows() + solverInput_Ain.getNumRows());
 
-      DenseMatrix64F H = solverInput_H;
-      DenseMatrix64F f = solverInput_f;
-      DenseMatrix64F Aeq = solverInput_Aeq;
-      DenseMatrix64F beq = solverInput_beq;
-      DenseMatrix64F Ain = solverInput_Ain;
-      DenseMatrix64F bin = solverInput_bin;
-      DenseMatrix64F lb = solverInput_lb;
-      DenseMatrix64F ub = solverInput_ub;
-      DenseMatrix64F output = desiredJointVelocities;
+      qpSolver.clear();
 
-      numberOfConstraints.set(Aeq.getNumRows() + Ain.getNumRows());
+      qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
+      qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
+      qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+      qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
-      numberOfIterations.set(qpSolver.solve(H, f, Aeq, beq, Ain, bin, lb, ub, output, firstCall));
+      numberOfIterations.set(qpSolver.solve(solverOutput));
 
-      seedFromPreviousSolution.set(true);
+      if (MatrixTools.containsNaN(solverOutput))
+         throw new NoConvergenceException(numberOfIterations.getIntegerValue());
+
+      desiredJointVelocities.set(solverOutput);
    }
 
    public DenseMatrix64F getJointVelocities()

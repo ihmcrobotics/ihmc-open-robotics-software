@@ -1,28 +1,23 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector2d;
-
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingDirection;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector2d;
 
 public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootstepCalculator
 {
@@ -96,11 +91,11 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
    }
 
    @Override
-   public FootstepDataControllerCommand predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataControllerCommand desiredFootstep, double timeFromNow)
+   public FootstepDataMessage predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataMessage desiredFootstep, double timeFromNow)
    {
       RobotSide futureSwingLegSide = supportLegSide;
       PoseReferenceFrame futureSupportFrame = new PoseReferenceFrame("futureSupportFrame", worldFrame);
-      futureSupportFrame.setPoseAndUpdate(desiredFootstep.getPosition(), desiredFootstep.getOrientation());
+      futureSupportFrame.setPoseAndUpdate(desiredFootstep.getLocation(), desiredFootstep.getOrientation());
       ReferenceFrame futureSupportZUpFrame = new ZUpFrame(worldFrame, futureSupportFrame, "supportZUp");
       futureSupportZUpFrame.update();
 
@@ -108,9 +103,10 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
       FrameOrientation footOrientation = computeDesiredFootRotation(angleToDestination.getDoubleValue(), futureSwingLegSide, futureSupportZUpFrame);
       FramePoint footstepPosition = getDesiredFootstepPositionCopy(futureSupportZUpFrame, futureSupportFrame, futureSwingLegSide);
 
-      FootstepDataControllerCommand predictedFootstep = new FootstepDataControllerCommand();
+      FootstepDataMessage predictedFootstep = new FootstepDataMessage();
       predictedFootstep.setRobotSide(futureSwingLegSide);
-      predictedFootstep.setPose(footstepPosition.getPoint(), footOrientation.getQuaternion());
+      predictedFootstep.setLocation(footstepPosition.getPoint());
+      predictedFootstep.setOrientation(footOrientation.getQuaternion());
       return predictedFootstep;
    }
 

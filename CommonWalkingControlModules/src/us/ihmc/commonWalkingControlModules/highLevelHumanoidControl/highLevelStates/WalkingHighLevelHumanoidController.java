@@ -39,7 +39,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -84,7 +84,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final OneDoFJoint[] allOneDoFjoints;
 
    private final FullHumanoidRobotModel fullRobotModel;
-   private final MomentumBasedController momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox momentumBasedController;
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
@@ -116,7 +116,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
          HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-         MomentumBasedController momentumBasedController)
+         HighLevelHumanoidControllerToolbox momentumBasedController)
    {
       super(controllerState);
 
@@ -510,7 +510,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       currentState = stateMachine.getCurrentState();
 
-      updateManagers(currentState);      
+      updateManagers(currentState);
 
       handleChangeInContactState();
 
@@ -521,8 +521,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          controllerCoreOutput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
          momentumBasedController.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
-
-      momentumBasedController.doProportionalControlOnCoP(footDesiredCoPs);
 
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
    }
@@ -572,7 +570,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    {
       balanceManager.getDesiredICPVelocity(desiredICPVelocityAsFrameVector);
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
-      double omega0 = balanceManager.getOmega0();
+      double omega0 = momentumBasedController.getOmega0();
       boolean isRecoveringFromPush = balanceManager.isRecovering();
       controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector, isInDoubleSupport, omega0,
             isRecoveringFromPush, feetManager));

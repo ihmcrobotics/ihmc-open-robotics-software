@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EndEffectorLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
@@ -21,10 +21,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class FlamingoStanceState extends SingleSupportState
 {
    private final FramePoint2d capturePoint2d = new FramePoint2d();
-   private final BooleanYoVariable loadFoot = new BooleanYoVariable("loadFoot", registry);
-   private final DoubleYoVariable loadFootStartTime = new DoubleYoVariable("loadFootStartTime", registry);
-   private final DoubleYoVariable loadFootDuration = new DoubleYoVariable("loadFootDuration", registry);
-   private final DoubleYoVariable loadFootTransferDuration = new DoubleYoVariable("loadFootTransferDuration", registry);
+   private final BooleanYoVariable loadFoot;
+   private final DoubleYoVariable loadFootStartTime;
+   private final DoubleYoVariable loadFootDuration;
+   private final DoubleYoVariable loadFootTransferDuration;
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
@@ -33,7 +33,7 @@ public class FlamingoStanceState extends SingleSupportState
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 
-   public FlamingoStanceState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, MomentumBasedController momentumBasedController,
+   public FlamingoStanceState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox momentumBasedController,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
       super(supportSide, WalkingStateEnum.getFlamingoSingleSupportState(supportSide), walkingMessageHandler, momentumBasedController, managerFactory,
@@ -45,6 +45,12 @@ public class FlamingoStanceState extends SingleSupportState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
+
+      String namePrefix = supportSide.getOppositeSide().getLowerCaseName();
+      loadFoot = new BooleanYoVariable(namePrefix + "LoadFoot", registry);
+      loadFootStartTime = new DoubleYoVariable(namePrefix + "LoadFootStartTime", registry);
+      loadFootDuration = new DoubleYoVariable(namePrefix + "LoadFootDuration", registry);
+      loadFootTransferDuration = new DoubleYoVariable(namePrefix + "LoadFootTransferDuration", registry);
 
       loadFoot.set(false);
       loadFootDuration.set(1.2);

@@ -22,7 +22,7 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 public class KickBallBehavior extends BehaviorInterface
 {
    private static final boolean CREATE_COACTIVE_ELEMENT = false;
-   
+
    private enum KickState
    {
       SEARCH, APPROACH, VERIFY_LOCATION, FINAL_APPROACH, VERIFY_KICK_LOCATION, KICK_BALL
@@ -35,9 +35,10 @@ public class KickBallBehavior extends BehaviorInterface
 
    private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
 
-   private final LocalizeBallBehavior localizeBallBehavior;
+   private final SphereDetectionBehavior sphereDetectionBehavior;
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final KickBehavior kickBehavior;
+   private WaitForUserValidationBehavior waitForUserValidationBehavior;
 
    private BehaviorStateMachine<KickState> stateMachine;
 
@@ -47,8 +48,8 @@ public class KickBallBehavior extends BehaviorInterface
    private final double standingDistance = 0.4;
    private boolean pipelineSetUp = false;
 
-   private final KickBallBehaviorCoactiveElement coactiveElement;
-   
+   private final KickBallBehaviorCoactiveElementBehaviorSide coactiveElement;
+
    public KickBallBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
@@ -58,8 +59,8 @@ public class KickBallBehavior extends BehaviorInterface
 
       // create sub-behaviors:
 
-      localizeBallBehavior = new LocalizeBallBehavior(outgoingCommunicationBridge, referenceFrames);
-      behaviors.add(localizeBallBehavior);
+      sphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+      behaviors.add(sphereDetectionBehavior);
 
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters());
@@ -75,17 +76,22 @@ public class KickBallBehavior extends BehaviorInterface
 
       if (CREATE_COACTIVE_ELEMENT)
       {
-         coactiveElement = new KickBallBehaviorCoactiveElement();
+         coactiveElement = new KickBallBehaviorCoactiveElementBehaviorSide();
          coactiveElement.setKickBallBehavior(this);
          registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
-         registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());    
+         registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
+
+         waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
+               coactiveElement.validAcknowledged);
+         behaviors.add(waitForUserValidationBehavior);
+
       }
       else
       {
          coactiveElement = null;
       }
    }
-   
+
    @Override
    public CoactiveElement getCoactiveElement()
    {
@@ -102,25 +108,63 @@ public class KickBallBehavior extends BehaviorInterface
 
    private void setupPipelineForKick()
    {
-	   
-      BehaviorTask findBallTask = new BehaviorTask(localizeBallBehavior, yoTime, 0)
-      {
 
+      BehaviorTask findBallTask = new BehaviorTask(sphereDetectionBehavior, yoTime, 0)
+      {
          @Override
          protected void setBehaviorInput()
          {
-
+            if (CREATE_COACTIVE_ELEMENT)
+            {
+               coactiveElement.searchingForBall.set(true);
+               coactiveElement.foundBall.set(false);
+               coactiveElement.ballX.set(0);
+               coactiveElement.ballY.set(0);
+               coactiveElement.ballZ.set(0);
+            }
          }
       };
 
       pipeLine.submitSingleTaskStage(findBallTask);
-//
+      //
+
+      BehaviorTask validateBallTask = new BehaviorTask(waitForUserValidationBehavior, yoTime, 0)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            if (CREATE_COACTIVE_ELEMENT)
+            {
+               coactiveElement.searchingForBall.set(false);
+               coactiveElement.waitingForValidation.set(true);
+               coactiveElement.validAcknowledged.set(false);
+               coactiveElement.foundBall.set(false);
+               coactiveElement.ballX.set(sphereDetectionBehavior.getBallLocation().x);
+               coactiveElement.ballY.set(sphereDetectionBehavior.getBallLocation().y);
+               coactiveElement.ballZ.set(sphereDetectionBehavior.getBallLocation().z);
+               coactiveElement.ballRadius.set(sphereDetectionBehavior.getSpehereRadius());
+            }
+         }
+      };
+
+      pipeLine.submitSingleTaskStage(validateBallTask);
+
       BehaviorTask walkToBallTask = new BehaviorTask(walkToLocationBehavior, yoTime, 0)
       {
 
          @Override
          protected void setBehaviorInput()
          {
+            if (CREATE_COACTIVE_ELEMENT)
+            {
+               coactiveElement.searchingForBall.set(false);
+               coactiveElement.waitingForValidation.set(false);
+               coactiveElement.foundBall.set(true);
+               coactiveElement.ballX.set(sphereDetectionBehavior.getBallLocation().x);
+               coactiveElement.ballY.set(sphereDetectionBehavior.getBallLocation().x);
+               coactiveElement.ballZ.set(sphereDetectionBehavior.getBallLocation().x);
+               coactiveElement.ballRadius.set(sphereDetectionBehavior.getSpehereRadius());
+            }
             walkToLocationBehavior.setTarget(getoffsetPoint());
          }
       };
@@ -147,10 +191,9 @@ public class KickBallBehavior extends BehaviorInterface
 
    private FramePose2d getoffsetPoint()
    {
-      
-      System.out.println("BALL LOCATION IN GET OFFSET POINT METHOD "+localizeBallBehavior.getBallLocation());
-      FramePoint2d ballPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), localizeBallBehavior.getBallLocation().x,
-            localizeBallBehavior.getBallLocation().y);
+
+      FramePoint2d ballPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), sphereDetectionBehavior.getBallLocation().x,
+            sphereDetectionBehavior.getBallLocation().y);
       FramePoint2d robotPosition = new FramePoint2d(midZupFrame, 0.0, 0.0);
       robotPosition.changeFrame(worldFrame);
       FrameVector2d walkingDirection = new FrameVector2d(worldFrame);
@@ -164,23 +207,29 @@ public class KickBallBehavior extends BehaviorInterface
       return poseToWalkTo;
    }
 
-
    @Override
    public void initialize()
    {
       defaultInitialize();
       setupPipelineForKick();
 
-
    }
 
    @Override
    public void doPostBehaviorCleanup()
    {
-      
 
       defaultPostBehaviorCleanup();
       pipelineSetUp = false;
+      if (CREATE_COACTIVE_ELEMENT)
+      {
+         coactiveElement.searchingForBall.set(false);
+         coactiveElement.waitingForValidation.set(false);
+         coactiveElement.foundBall.set(false);
+         coactiveElement.ballX.set(0);
+         coactiveElement.ballY.set(0);
+         coactiveElement.ballZ.set(0);
+      }
       for (BehaviorInterface behavior : behaviors)
       {
          behavior.doPostBehaviorCleanup();
@@ -250,6 +299,7 @@ public class KickBallBehavior extends BehaviorInterface
 
    public void abort()
    {
+      doPostBehaviorCleanup();
       this.stop();
       this.pipeLine.clearAll();
    }

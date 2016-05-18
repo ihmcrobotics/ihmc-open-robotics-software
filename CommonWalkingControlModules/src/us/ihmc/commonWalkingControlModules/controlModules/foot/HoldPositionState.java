@@ -83,12 +83,18 @@ public class HoldPositionState extends AbstractFootControlState
 
    public HoldPositionState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
+      this(footControlHelper, footControlHelper.getPartialFootholdControlModule(), gains, registry);
+   }
+
+   public HoldPositionState(FootControlHelper footControlHelper, PartialFootholdControlModule partialFootholdControlModule,
+         YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
+   {
       super(ConstraintType.HOLD_POSITION, footControlHelper, registry);
       this.gains = gains;
 
       soleFrame = contactableFoot.getSoleFrame();
       fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
-      partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
+      this.partialFootholdControlModule = partialFootholdControlModule;
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
       footPolygon.setIncludingFrameAndUpdate(contactableFoot.getContactPoints2d());
       String namePrefix = contactableFoot.getName();
@@ -212,13 +218,17 @@ public class HoldPositionState extends AbstractFootControlState
 
       correctDesiredOrientationForSmartHoldPosition();
 
-      if (doFootholdAdjustments.getBooleanValue())
+      if (partialFootholdControlModule != null)
       {
          partialFootholdControlModule.compute(desiredCoP, cop);
-         YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
-         boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
-         if (contactStateHasChanged)
-            contactState.notifyContactStateHasChanged();
+
+         if (doFootholdAdjustments.getBooleanValue())
+         {
+            YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+            boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
+            if (contactStateHasChanged)
+               contactState.notifyContactStateHasChanged();
+         }
       }
 
       // Update the control frame to be at the desired center of pressure

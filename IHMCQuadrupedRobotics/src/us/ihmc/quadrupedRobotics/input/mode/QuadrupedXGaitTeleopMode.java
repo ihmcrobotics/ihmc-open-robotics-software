@@ -24,7 +24,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       POSITION, VELOCITY, STEP
    }
 
-   private final ParameterFactory parameterFactory = new ParameterFactory(getClass());
+   private final ParameterFactory parameterFactory = ParameterFactory.createWithoutRegistry(getClass());
    private final DoubleParameter rollScaleParameter = parameterFactory.createDouble("rollScale", 0.15);
    private final DoubleParameter pitchScaleParameter = parameterFactory.createDouble("pitchScale", 0.15);
    private final DoubleParameter yawScaleParameter = parameterFactory.createDouble("yawScale", 0.15);
