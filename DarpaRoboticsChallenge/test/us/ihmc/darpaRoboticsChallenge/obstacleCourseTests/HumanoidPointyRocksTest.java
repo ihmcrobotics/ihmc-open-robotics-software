@@ -212,7 +212,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       Vector3d rootVelocity = new Vector3d();
       FloatingJoint rootJoint = robot.getRootJoint();
       rootJoint.getVelocity(rootVelocity);
-      double push = 0.025;
+      double push = 0.04;
       rootVelocity.y = rootVelocity.y + push;
       rootJoint.setVelocity(rootVelocity);
 
