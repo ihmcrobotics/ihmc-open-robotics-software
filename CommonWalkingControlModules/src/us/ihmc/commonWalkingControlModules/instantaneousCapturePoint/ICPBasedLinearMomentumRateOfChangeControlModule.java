@@ -51,7 +51,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FrameVector2d desiredCapturePointVelocity = new FrameVector2d();
    private final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
 
-   private final YoFrameVector linearMomentumRateWeight = new YoFrameVector("linearMomentumRateWeight", null, registry);
+   private final YoFrameVector defaultLinearMomentumRateWeight = new YoFrameVector("defaultLinearMomentumRateWeight", worldFrame, registry);
+   private final YoFrameVector highLinearMomentumRateWeight = new YoFrameVector("highLinearMomentumRateWeight", worldFrame, registry);
+   private final YoFrameVector linearMomentumRateWeight = new YoFrameVector("linearMomentumRateWeight", worldFrame, registry);
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, double maxAllowedDistanceCMPSupport,
@@ -83,12 +85,18 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       parentRegistry.addChild(registry);
 
       controlledCoMAcceleration = new YoFrameVector("controlledCoMAcceleration", "", centerOfMassFrame, registry);
+      linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
    }
 
    public void setMomentumWeight(Vector3d linearWeight)
    {
-      linearMomentumRateWeight.set(linearWeight);
+      defaultLinearMomentumRateWeight.set(linearWeight);
+   }
+
+   public void setHighMomentumWeightForRecovery(Vector3d highLinearWeight)
+   {
+      highLinearMomentumRateWeight.set(highLinearWeight);
    }
 
    public void compute(FramePoint2d desiredCMPToPack)
@@ -189,6 +197,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    public void keepCMPInsideSupportPolygon(boolean keepCMPInsideSupportPolygon)
    {
       icpProportionalController.setKeepCMPInsideSupportPolygon(keepCMPInsideSupportPolygon);
+
+      if (keepCMPInsideSupportPolygon) linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
+      else linearMomentumRateWeight.set(highLinearMomentumRateWeight);
    }
 
    public void setDesiredCenterOfMassHeightAcceleration(double desiredCenterOfMassHeightAcceleration)
