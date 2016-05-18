@@ -181,6 +181,11 @@ public class BalanceManager
       icpBasedLinearMomentumRateOfChangeControlModule.setMomentumWeight(linearWeight);
    }
 
+   public void setHighMomentumWeightForRecovery(Vector3d highLinearWeight)
+   {
+      icpBasedLinearMomentumRateOfChangeControlModule.setHighMomentumWeightForRecovery(highLinearWeight);
+   }
+
    public void addFootstepToPlan(Footstep footstep)
    {
       icpPlanner.addFootstepToPlan(footstep);
