@@ -78,9 +78,11 @@ public class ICPProportionalController
    }
 
    private final FramePoint2d desiredCMP = new FramePoint2d();
+   private final FramePoint2d desiredCmpTemp = new FramePoint2d();
+   private final FramePoint2d finalIcpDesired = new FramePoint2d();
 
    public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FramePoint2d finalDesiredCapturePoint,
-         FrameVector2d desiredCapturePointVelocity, double omega0, FrameConvexPolygon2d supportPolygon)
+         FrameVector2d desiredCapturePointVelocity, double omega0, FrameConvexPolygon2d supportPolygon, ReferenceFrame supportSoleFrame)
    {
       capturePoint.changeFrame(worldFrame);
       desiredCapturePoint.changeFrame(worldFrame);
@@ -143,7 +145,18 @@ public class ICPProportionalController
       desiredCMPToICP.sub(capturePoint, desiredCMP);
 
       supportPolygonLocal.setIncludingFrame(supportPolygon);
-      if (!keepCMPInsideSupportPolygon.getBooleanValue())
+      
+      boolean desiredCmpOnOutside = false;
+      if (supportSoleFrame != null)
+      {
+         desiredCmpTemp.setIncludingFrame(desiredCMP);
+         desiredCmpTemp.changeFrameAndProjectToXYPlane(supportSoleFrame);
+         finalIcpDesired.setIncludingFrame(finalDesiredCapturePoint);
+         finalIcpDesired.changeFrameAndProjectToXYPlane(supportSoleFrame);
+         desiredCmpOnOutside = Math.signum(finalIcpDesired.getY()) != Math.signum(desiredCmpTemp.getY());
+      }
+      
+      if (!keepCMPInsideSupportPolygon.getBooleanValue() && desiredCmpOnOutside)
       {
          polygonShrinker.shrinkConstantDistanceInto(supportPolygon, -maxDistanceCMPSupport.getDoubleValue(), supportPolygonLocal);
       }
