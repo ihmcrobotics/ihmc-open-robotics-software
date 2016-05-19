@@ -2,7 +2,6 @@ package us.ihmc.ihmcPerception.vision.shapes;
 
 import boofcv.gui.image.ImagePanel;
 import org.opencv.core.*;
-import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import us.ihmc.ihmcPerception.OpenCVTools;
@@ -101,6 +100,16 @@ public class OpenCVColoredCircularBlobDetector
    public Mat getThresholdMat()
    {
       return thresholdMat;
+   }
+
+   public Mat getTmpMat()
+   {
+      return tmpMat;
+   }
+
+   public Mat getMedianBlurredMat()
+   {
+      return medianBlurredMat;
    }
 
    public void updateFromVideo()
@@ -408,7 +417,7 @@ public class OpenCVColoredCircularBlobDetector
       filterImagePanel.setPreferredSize(imagePanelDimension);
       filterImagePanel.setMaximumSize(imagePanelDimension);
       filterImagePanel.setMinimumSize(imagePanelDimension);
-      
+
       wrapperPanel.add(colorImagePanel);
       wrapperPanel.add(filterImagePanel);
 
