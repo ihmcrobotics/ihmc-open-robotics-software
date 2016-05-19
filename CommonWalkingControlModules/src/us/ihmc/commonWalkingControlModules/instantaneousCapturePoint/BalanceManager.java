@@ -151,7 +151,7 @@ public class BalanceManager
       pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, bipedSupportPolygons, pelvisXYControlGains, registry);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
-      useUpperBodyLinearMomentumIfFalling.set(true);
+      useUpperBodyLinearMomentumIfFalling.set(false);
 
       String graphicListName = "BalanceManager";
 
@@ -240,8 +240,8 @@ public class BalanceManager
       {
          if (useUpperBodyLinearMomentumIfFalling.getBooleanValue() && shouldUseUpperBodyLinearMomentum.getBooleanValue())
          {
-//            keepCMPInsideSupportPolygon = false;
-            throw new RuntimeException("Using Bamboo to see if we get here during any of our unit tests.");
+            keepCMPInsideSupportPolygon = false;
+//            throw new RuntimeException("Using Bamboo to see if we get here during any of our unit tests.");
          }
       }
       else
