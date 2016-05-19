@@ -3,7 +3,6 @@ package us.ihmc.ihmcPerception.vision.shapes;
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import org.opencv.core.*;
-import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import us.ihmc.ihmcPerception.OpenCVTools;
@@ -92,6 +91,16 @@ public class OpenCVColoredCircularBlobDetector
    public Mat getThresholdMat()
    {
       return thresholdMat;
+   }
+
+   public Mat getTmpMat()
+   {
+      return tmpMat;
+   }
+
+   public Mat getMedianBlurredMat()
+   {
+      return medianBlurredMat;
    }
 
    public void updateFromVideo()
@@ -203,37 +212,33 @@ public class OpenCVColoredCircularBlobDetector
    public static void main(String[] args)
    {
       OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
-
       factory.setCameraIndex(0);
       factory.setCaptureSource(CaptureSource.CAMERA);
+      
+      JFrame frame = null;
+      BufferedImage currentCameraFrameMatInBGR = null;
+      BufferedImage thresholdImage = null;
+      BufferedImage tmpImage = null;
+      BufferedImage medianBlurredImage = null;
+      ImagePanel currentCameraFramePanel = null;
+      ImagePanel thresholdPanel = null;
+      ImagePanel tmpPanel = null;
+      ImagePanel medianBlurredPanel = null;
+      
       OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector = factory.buildBlobDetector();
-
       HSVRange greenRange = new HSVRange(new HSVValue(55, 80, 80), new HSVValue(139, 255, 255));
 //      HSVRange brightRedRange = new HSVRange(new HSVValue(120, 80, 80), new HSVValue(179, 255, 255));
 //      HSVRange dullRedRange = new HSVRange(new HSVValue(3, 80, 80), new HSVValue(10, 255, 255));
       HSVRange yellowRange = new HSVRange(new HSVValue(25, 100, 100), new HSVValue(40, 255, 255));
-
       openCVColoredCircularBlobDetector.addHSVRange(greenRange);
 //      openCVColoredCircularBlobDetector.addHSVRange(brightRedRange);
 //      openCVColoredCircularBlobDetector.addHSVRange(dullRedRange);
       openCVColoredCircularBlobDetector.addHSVRange(yellowRange);
-
-      openCVColoredCircularBlobDetector.updateFromVideo();
-
-      ImagePanel imagePanel = ShowImages.showWindow(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR()), "Circle Detector");
-
-      JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(imagePanel);
-
+      
       Scalar circleColor = new Scalar(160, 0, 0);
 
       while (true)
       {
-         if(!frame.isVisible() && openCVColoredCircularBlobDetector.videoCapture != null)
-         {
-            openCVColoredCircularBlobDetector.videoCapture.release();
-            break;
-         }
-
          openCVColoredCircularBlobDetector.updateFromVideo();
 
          ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
@@ -243,8 +248,50 @@ public class OpenCVColoredCircularBlobDetector
             Point openCVPoint = new Point(circle.getCenter().x, circle.getCenter().y);
             Imgproc.circle(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR(), openCVPoint, (int) circle.getRadius(), circleColor, 1);
          }
-
-         imagePanel.setBufferedImage(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR()));
+         
+         currentCameraFrameMatInBGR = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR());
+         thresholdImage = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
+         tmpImage = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getTmpMat());
+         medianBlurredImage = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getMedianBlurredMat());
+         
+         if (currentCameraFramePanel == null)
+         {
+            currentCameraFramePanel = ShowImages.showWindow(currentCameraFrameMatInBGR, "Circle Detector");
+            frame = (JFrame) SwingUtilities.getWindowAncestor(currentCameraFramePanel);
+         }
+         else if (currentCameraFrameMatInBGR != null)
+         {
+            if (!frame.isVisible() && openCVColoredCircularBlobDetector.videoCapture != null)
+            {
+               openCVColoredCircularBlobDetector.videoCapture.release();
+               break;
+            }
+            currentCameraFramePanel.setBufferedImageSafe(currentCameraFrameMatInBGR);
+         }
+         if (thresholdPanel == null)
+         {
+            thresholdPanel = ShowImages.showWindow(thresholdImage, "Threshold Image");
+         }
+         else if (thresholdImage != null)
+         {
+            thresholdPanel.setBufferedImageSafe(thresholdImage);
+         }
+         if (tmpPanel == null)
+         {
+            tmpPanel = ShowImages.showWindow(tmpImage, "Temp Image");
+         }
+         else if (tmpImage != null)
+         {
+            tmpPanel.setBufferedImageSafe(tmpImage);
+         }
+         if (medianBlurredPanel == null)
+         {
+            medianBlurredPanel = ShowImages.showWindow(medianBlurredImage, "Median Blurred Image");
+         }
+         else if (medianBlurredImage != null)
+         {
+            medianBlurredPanel.setBufferedImageSafe(medianBlurredImage);
+         }
       }
 
       System.exit(0);
