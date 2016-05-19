@@ -37,6 +37,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -103,6 +104,9 @@ public class BalanceManager
 
    private final BooleanYoVariable useUpperBodyLinearMomentumIfFalling = new BooleanYoVariable("UseUpperBodyLinearMomentumIfFalling", registry);
    private final BooleanYoVariable shouldUseUpperBodyLinearMomentum = new BooleanYoVariable("ShouldUseUpperBodyLinearMomentum", registry);
+   private final BooleanYoVariable useHighBodyLinearMomentumWeight = new BooleanYoVariable("UseHighBodyLinearMomentumWeight", registry);
+
+   private final YoFrameConvexPolygon2d yoSafeICPArea = new YoFrameConvexPolygon2d("safeArea", "", worldFrame, 10, registry);
 
    public BalanceManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry)
@@ -170,6 +174,9 @@ public class BalanceManager
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, achievedCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCMPViz.createArtifact());
+
+//         YoArtifactPolygon yoGraphicPolygon = new YoArtifactPolygon("SafeArea", yoSafeICPArea, Color.RED, false);
+//         yoGraphicsListRegistry.registerArtifact("SafeArea", yoGraphicPolygon);
       }
 
       parentRegistry.addChild(registry);
@@ -235,18 +242,45 @@ public class BalanceManager
 
       yoFinalDesiredICP.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
 
-      // allow the controller to use upper body momentum to control the capture point
-      if (supportLeg != null)
+      if (useUpperBodyLinearMomentumIfFalling.getBooleanValue())
       {
-         if (useUpperBodyLinearMomentumIfFalling.getBooleanValue() && shouldUseUpperBodyLinearMomentum.getBooleanValue())
+         // if we are in double support but we were recovering keep the momentum weight high until the icp error is small
+         if (supportLeg == null)
+         {
+            getICPError(icpError2d);
+            boolean icpErrorSmall = icpError2d.lengthSquared() < 0.03 * 0.03;
+            if (icpErrorSmall)
+            {
+               useHighBodyLinearMomentumWeight.set(false);
+            }
+
+            shouldUseUpperBodyLinearMomentum.set(false);
+         }
+
+         // allow the controller to use upper body momentum to control the capture point
+         if (supportLeg != null && shouldUseUpperBodyLinearMomentum.getBooleanValue())
          {
             keepCMPInsideSupportPolygon = false;
-//            throw new RuntimeException("Using Bamboo to see if we get here during any of our unit tests.");
+            useHighBodyLinearMomentumWeight.set(true);
+         }
+
+         if (useHighBodyLinearMomentumWeight.getBooleanValue())
+         {
+            icpBasedLinearMomentumRateOfChangeControlModule.setHighMomentumWeight();
+         }
+         else
+         {
+            icpBasedLinearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
          }
       }
       else
       {
-         shouldUseUpperBodyLinearMomentum.set(false);
+         icpBasedLinearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
+      }
+
+      if (supportLeg == null)
+      {
+         yoSafeICPArea.hide();
       }
 
       icpBasedLinearMomentumRateOfChangeControlModule.keepCMPInsideSupportPolygon(keepCMPInsideSupportPolygon);
@@ -282,7 +316,8 @@ public class BalanceManager
       momentumBasedController.getDefaultFootPolygon(nextFootstep.getRobotSide(), tempPolygon1);
       tempPolygon2.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), tempPolygon1.getConvexPolygon2d());
       tempPolygon2.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
-      safeArea.addVertices(tempPolygon2);
+      polygonShrinker.shrinkConstantDistanceInto(tempPolygon2, -0.05, tempPolygon1);
+      safeArea.addVertices(tempPolygon1);
       safeArea.update();
 
       // hysteresis:
@@ -292,8 +327,11 @@ public class BalanceManager
          polygonShrinker.shrinkConstantDistanceInto(safeArea, 0.05, tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
+      safeArea.changeFrameAndProjectToXYPlane(worldFrame);
+      yoSafeICPArea.setFrameConvexPolygon2d(safeArea);
 
       // check if the icp is in the safe area
+      momentumBasedController.getCapturePoint(capturePoint2d);
       tmpCapturePoint.setIncludingFrame(capturePoint2d);
       tmpCapturePoint.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
       boolean icpInSafeArea = safeArea.isPointInside(tmpCapturePoint);
