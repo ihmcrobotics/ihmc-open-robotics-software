@@ -48,7 +48,7 @@ public class OpenCVTools
    public static BufferedImage convertMatToBufferedImage(Mat image)
    {
       MatOfByte matOfByte = new MatOfByte();
-      Imgcodecs.imencode(".bmp", image, matOfByte);
+      Imgcodecs.imencode(".jpeg", image, matOfByte);
       BufferedImage bufferedImage = null;
       try
       {
