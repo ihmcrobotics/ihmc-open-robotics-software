@@ -197,9 +197,16 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    public void keepCMPInsideSupportPolygon(boolean keepCMPInsideSupportPolygon)
    {
       icpProportionalController.setKeepCMPInsideSupportPolygon(keepCMPInsideSupportPolygon);
+   }
 
-      if (keepCMPInsideSupportPolygon) linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
-      else linearMomentumRateWeight.set(highLinearMomentumRateWeight);
+   public void setHighMomentumWeight()
+   {
+      linearMomentumRateWeight.set(highLinearMomentumRateWeight);
+   }
+
+   public void setDefaultMomentumWeight()
+   {
+      linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
    }
 
    public void setDesiredCenterOfMassHeightAcceleration(double desiredCenterOfMassHeightAcceleration)
