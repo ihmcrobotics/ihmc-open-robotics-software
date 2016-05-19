@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -37,6 +38,8 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private final PacketCommunicator packetCommunicator;
    /** Used to schedule status message sending. */
    private final PeriodicThreadScheduler scheduler;
+   /** Used to filter messages coming in. */
+   private final AtomicReference<MessageFilter> messageFilter = new AtomicReference<>(null);
 
    /** All the possible status message that can be sent to the communicator. */
    private final List<Class<? extends StatusPacket<?>>> listOfSupportedStatusMessages;
@@ -66,6 +69,16 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
       if (scheduler != null)
          scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
+   }
+
+   public void addMessageFilter(MessageFilter newFilter)
+   {
+      messageFilter.set(newFilter);
+   }
+
+   public void removeMessageFilter()
+   {
+      messageFilter.set(null);
    }
 
    @SuppressWarnings("unchecked")
@@ -105,6 +118,9 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
                reportInvalidMessage(messageClass, errorMessage);
                return;
             }
+
+            if (messageFilter.get() != null && !messageFilter.get().isMessageValid(message))
+               return;
 
             controllerCommandInputManager.submitMessage(message);
          }
@@ -173,5 +189,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    {
       if (scheduler != null)
          scheduler.shutdown();
+   }
+
+   public static interface MessageFilter
+   {
+      public boolean isMessageValid(Packet<?> message);
    }
 }

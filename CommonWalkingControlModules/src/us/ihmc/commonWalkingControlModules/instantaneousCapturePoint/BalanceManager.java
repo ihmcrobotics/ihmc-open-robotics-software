@@ -33,6 +33,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -101,6 +102,9 @@ public class BalanceManager
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
+   private final BooleanYoVariable useMomentumIfFalling = new BooleanYoVariable("useMomentumIfFalling", registry);
+   private final BooleanYoVariable shouldUseMomentum = new BooleanYoVariable("shouldUseMomentum", registry);
+
    public BalanceManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry)
    {
@@ -128,8 +132,9 @@ public class BalanceManager
 
       bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
 
+      double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
       icpBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
-            totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
+            totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection, maxAllowedDistanceCMPSupport);
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(minimumSwingTimeForDisturbanceRecovery);
@@ -147,6 +152,7 @@ public class BalanceManager
       pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, bipedSupportPolygons, pelvisXYControlGains, registry);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
+      useMomentumIfFalling.set(false);
 
       String graphicListName = "BalanceManager";
 
@@ -225,6 +231,19 @@ public class BalanceManager
 
       yoFinalDesiredICP.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
 
+      // allow the controller to use upper body momentum to control the capture point
+      if (supportLeg != null)
+      {
+         if (useMomentumIfFalling.getBooleanValue() && shouldUseMomentum.getBooleanValue())
+         {
+            keepCMPInsideSupportPolygon = false;
+         }
+      }
+      else
+      {
+         shouldUseMomentum.set(false);
+      }
+
       icpBasedLinearMomentumRateOfChangeControlModule.keepCMPInsideSupportPolygon(keepCMPInsideSupportPolygon);
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
 
@@ -239,6 +258,69 @@ public class BalanceManager
 
       icpBasedLinearMomentumRateOfChangeControlModule.compute(desiredCMP);
       yoDesiredCMP.set(desiredCMP);
+   }
+
+//   private final FramePoint2d stepPosition = new FramePoint2d();
+   private final FramePoint2d linePoint = new FramePoint2d();
+   private final FrameVector2d direction = new FrameVector2d();
+   private final FrameLine2d forwardLine = new FrameLine2d();
+   private final FramePoint2d tmpCapturePoint = new FramePoint2d();
+
+   public void checkIfUseMomentum(Footstep nextFootstep)
+   {
+      RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
+      ReferenceFrame supportSoleFrame = momentumBasedController.getReferenceFrames().getSoleFrame(supportSide);
+      FrameConvexPolygon2d support = momentumBasedController.getBipedSupportPolygons().getFootPolygonInSoleFrame(supportSide);
+
+      support.changeFrameAndProjectToXYPlane(supportSoleFrame);
+      if (supportSide == RobotSide.LEFT)
+      {
+         linePoint.setIncludingFrame(supportSoleFrame, 0.0, support.getMaxY());
+      }
+      else
+      {
+         linePoint.setIncludingFrame(supportSoleFrame, 0.0, support.getMinY());
+      }
+
+      // hysteresis
+      if (shouldUseMomentum.getBooleanValue())
+      {
+         double offset = supportSide.negateIfLeftSide(0.05);
+         linePoint.add(0.0, offset);
+      }
+
+      direction.setIncludingFrame(supportSoleFrame, 1.0, 0.0);
+      forwardLine.changeFrameAndProjectToXYPlane(supportSoleFrame);
+      forwardLine.set(linePoint, direction);
+
+      tmpCapturePoint.setIncludingFrame(capturePoint2d);
+      tmpCapturePoint.changeFrameAndProjectToXYPlane(supportSoleFrame);
+
+      if (forwardLine.isPointOnSideOfLine(tmpCapturePoint, supportSide))
+      {
+         shouldUseMomentum.set(true);
+      }
+      else
+      {
+         shouldUseMomentum.set(false);
+      }
+
+//      double swingTimeRemaining = getTimeRemainingInCurrentState();
+//      double omega0 = momentumBasedController.getOmega0();
+//      momentumBasedController.getCapturePoint(capturePoint2d);
+//      pushRecoveryControlModule.updateCaptureRegion(swingTimeRemaining, omega0, nextFootstep.getRobotSide(), capturePoint2d);
+//
+//      FrameConvexPolygon2d captureRegion = pushRecoveryControlModule.getCaptureRegion();
+//      nextFootstep.getPosition2d(stepPosition);
+//      stepPosition.changeFrame(captureRegion.getReferenceFrame());
+//
+//      getICPError(icpError2d);
+//      if (shouldUseMomentum.getBooleanValue())
+//      {
+//         return;
+//      }
+//
+//      shouldUseMomentum.set(!captureRegion.isPointInside(stepPosition));
    }
 
    public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
@@ -536,4 +618,10 @@ public class BalanceManager
    {
       momentumBasedController.getCapturePoint(capturePointToPack);
    }
+
+   public boolean isUseMomentumIfFalling()
+   {
+      return useMomentumIfFalling.getBooleanValue();
+   }
+
 }

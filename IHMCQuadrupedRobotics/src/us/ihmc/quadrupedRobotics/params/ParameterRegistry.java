@@ -28,8 +28,6 @@ import com.google.common.io.LineReader;
  */
 public class ParameterRegistry
 {
-   private static final String DEFAULT_PARAMETERS_FILE = "parameters.conf";
-
    private static final class AtomicInstanceHolder
    {
       // Creation of INSTANCE is guaranteed to be thread-safe by the class loader.
@@ -54,18 +52,6 @@ public class ParameterRegistry
     * The list of registered parameters.
     */
    private final List<Parameter> parameters = new ArrayList<>();
-
-   /**
-    * Loads the default parameters file from the class path.
-    * <p/>
-    * NOTE: All of the parameters to be loaded must already be registered.
-    *
-    * @throws IOException if the resource is not found or an I/O error occurs
-    */
-   public void loadFromDefaultParametersResource() throws IOException
-   {
-      loadFromResources(DEFAULT_PARAMETERS_FILE);
-   }
 
    /**
     * Loads the resource with the given filename from the class path. If more than one class path resource exists with the given name then every matching
@@ -143,6 +129,11 @@ public class ParameterRegistry
       Preconditions.checkNotNull(parameter, "Registered parameter cannot be null");
 
       parameters.add(parameter);
+   }
+
+   List<Parameter> getParameters()
+   {
+      return parameters;
    }
 
    Parameter getParameter(String path)

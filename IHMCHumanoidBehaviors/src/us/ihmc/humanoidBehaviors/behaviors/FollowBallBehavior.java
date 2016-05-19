@@ -40,7 +40,7 @@ import java.util.*;
 
 public class FollowBallBehavior extends BehaviorInterface implements VideoStreamer
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private FootstepDataListMessage outgoingFootstepDataList;
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
@@ -59,8 +59,9 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>();
 
    private final ReferenceFrame headFrame;
-   private static final double FILTERING_ANGLE = Math.toRadians(4.0);
-   private static final double FILTERING_DISTANCE = 0.08;
+   private static final double FILTERING_ANGLE = Math.toRadians(5.0);
+   private static final double FILTERING_MIN_DISTANCE = 0.1;
+   private static final double FILTERING_MAX_DISTANCE = 7.0;
 
    // http://www.bostondynamics.com/img/MultiSense_SL.pdf
    private static final double HORIZONTAL_FOV = Math.toRadians(80.0);
@@ -74,14 +75,15 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    private static final int SPHERE_DETECTION_NUM_NEIGHBORS = 41;
    private static final double SPHERE_DETECTION_MAX_NEIGHBOR_DIST = 0.098158;
 
+   private static final double MIN_BALL_RADIUS = 0.05;
+   private static final double MAX_BALL_RADIUS = 0.15;
+
    private final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
    private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
+   private final PointCloudShapeFinder pointCloudSphereFinder;
    private final Point2d latestBallPosition2d = new Point2d();
    private final Point3d latestBallPosition3d = new Point3d();
-
-   private static final double MIN_BALL_RADIUS = 0.05;
-   private static final double MAX_BALL_RADIUS = 0.15;
 
    public FollowBallBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, SDFFullHumanoidRobotModel fullRobotModel)
    {
@@ -108,12 +110,19 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
       openCVColoredCircularBlobDetector.addHSVRange(greenRange);
 
+      ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac
+            .createDefault(SPHERE_DECECTION_ITERATIONS, SPHERE_DETECTION_ANGLE_TOLERANCE, SPHERE_DETECTION_RANSAC_DISTANCE_THRESHOLD, CloudShapeTypes.SPHERE);
+      configRansac.minimumPoints = SPHERE_DETECTION_MIN_PTS;
+      pointCloudSphereFinder = FactoryPointCloudShape
+            .ransacSingleAll(new ConfigSurfaceNormals(SPHERE_DETECTION_NUM_NEIGHBORS, SPHERE_DETECTION_MAX_NEIGHBOR_DIST), configRansac);
+
       detectBall.set(false);
    }
 
    private class BallDetectionThread extends Thread
    {
-      @Override public void run()
+      @Override
+      public void run()
       {
          while (true)
          {
@@ -142,7 +151,8 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       }
    }
 
-   @Override public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParamaters)
+   @Override
+   public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParamaters)
    {
       this.lastBufferedImage = bufferedImage;
       openCVColoredCircularBlobDetector.updateFromBufferedImage(bufferedImage);
@@ -166,7 +176,8 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
          latestBallPosition2d.set(circles.get(0).getCenter());
    }
 
-   @Override public void doControl()
+   @Override
+   public void doControl()
    {
       generateAndSendPathToBall();
 
@@ -212,7 +223,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
             System.out.println("starting sphere detection");
 
          long startTime = System.currentTimeMillis();
-         List<Sphere3D_F64> detectedSpheres = detectSpheres(filteredPointCloud);
+         List<Sphere3D_F64> detectedSpheres = detectSpheres(filteredPointCloud, pointCloudSphereFinder);
          long stopTime = System.currentTimeMillis();
          long detectionTime = stopTime - startTime;
 
@@ -256,7 +267,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
          tempPoint.set(fullPointCloud[i]);
          worldToCameraTransform.transform(tempPoint);
 
-         if (tempPoint.x > FILTERING_DISTANCE)
+         if (tempPoint.x > FILTERING_MIN_DISTANCE && tempPoint.x < FILTERING_MAX_DISTANCE)
          {
             // rayAngle axes are in terms of the buffered image (y-down), temp pnt axes are in terms of camera frame (z-up)
             double rayAngleX = Math.atan2(tempPoint.z, tempPoint.x);
@@ -271,27 +282,21 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       return filteredPoints;
    }
 
-   private static ArrayList<Sphere3D_F64> detectSpheres(List<Point3f> pointCloud)
+   private static ArrayList<Sphere3D_F64> detectSpheres(List<Point3f> pointCloud, PointCloudShapeFinder pointCloudSphereFinder)
    {
       ArrayList<Sphere3D_F64> foundBalls = new ArrayList<Sphere3D_F64>();
       ArrayList<Point3D_F64> pointsNearBy = new ArrayList<Point3D_F64>();
 
-      for (Point3f tmpPoint : pointCloud)
+      for (int i = 0; i < pointCloud.size(); i++)
       {
+         Point3f tmpPoint = pointCloud.get(i);
          pointsNearBy.add(new Point3D_F64(tmpPoint.x, tmpPoint.y, tmpPoint.z));
       }
 
-      // find plane
-      ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac
-            .createDefault(SPHERE_DECECTION_ITERATIONS, SPHERE_DETECTION_ANGLE_TOLERANCE, SPHERE_DETECTION_RANSAC_DISTANCE_THRESHOLD, CloudShapeTypes.SPHERE);
-      configRansac.minimumPoints = SPHERE_DETECTION_MIN_PTS;
-      PointCloudShapeFinder findSpheres = FactoryPointCloudShape
-            .ransacSingleAll(new ConfigSurfaceNormals(SPHERE_DETECTION_NUM_NEIGHBORS, SPHERE_DETECTION_MAX_NEIGHBOR_DIST), configRansac);
-
-      findSpheres.process(pointsNearBy, null);
+      pointCloudSphereFinder.process(pointsNearBy, null);
 
       // sort large to small
-      List<PointCloudShapeFinder.Shape> spheres = findSpheres.getFound();
+      List<PointCloudShapeFinder.Shape> spheres = pointCloudSphereFinder.getFound();
       Collections.sort(spheres, new Comparator<PointCloudShapeFinder.Shape>()
       {
          @Override public int compare(PointCloudShapeFinder.Shape o1, PointCloudShapeFinder.Shape o2)
@@ -300,8 +305,9 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
          }
       });
 
-      for (PointCloudShapeFinder.Shape sphere : spheres)
+      for (int i = 0; i < spheres.size(); i++)
       {
+         PointCloudShapeFinder.Shape sphere = spheres.get(i);
          Sphere3D_F64 sphereParams = sphere.getParameters();
 
          if ((sphereParams.getRadius() < MAX_BALL_RADIUS) && (sphereParams.getRadius() > MIN_BALL_RADIUS))
@@ -311,51 +317,61 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       return foundBalls;
    }
 
-   @Override public void initialize()
+   @Override
+   public void initialize()
    {
       detectBall.set(true);
    }
 
-   @Override public void pause()
+   @Override
+   public void pause()
    {
       sendPacketToController(new PauseWalkingMessage(true));
       detectBall.set(false);
    }
 
-   @Override public void stop()
+   @Override
+   public void stop()
    {
       sendPacketToController(new PauseWalkingMessage(true));
       detectBall.set(false);
    }
 
-   @Override public void resume()
+   @Override
+   public void resume()
    {
       sendPacketToController(new PauseWalkingMessage(false));
       detectBall.set(false);
    }
 
-   @Override public boolean isDone()
+   @Override
+   public boolean isDone()
    {
       return false;
    }
 
-   @Override protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+   @Override
+   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
    }
 
-   @Override protected void passReceivedControllerObjectToChildBehaviors(Object object)
+   @Override
+   protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
 
-   @Override public void enableActions()
+   @Override
+   public void enableActions()
    {
    }
 
-   @Override public void doPostBehaviorCleanup()
+   @Override
+   public void doPostBehaviorCleanup()
    {
    }
 
-   @Override public boolean hasInputBeenSet()
+   @Override
+   public boolean hasInputBeenSet()
    {
       return true;
    }
