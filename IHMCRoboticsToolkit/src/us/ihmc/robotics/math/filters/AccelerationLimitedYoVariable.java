@@ -18,10 +18,21 @@ public class AccelerationLimitedYoVariable extends DoubleYoVariable
    private final DoubleYoVariable positionGain;
    private final DoubleYoVariable velocityGain;
 
-   private final DoubleYoVariable maximumRate;
-   private final DoubleYoVariable maximumAcceleration;
+   private DoubleYoVariable maximumRate;
+   private DoubleYoVariable maximumAcceleration;
 
    private final DoubleYoVariable inputVariable;
+
+   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, double maxRate, double maxAcceleration, DoubleYoVariable inputVariable, double dt)
+   {
+      this(name, registry, null, null, inputVariable, dt);
+
+      maximumRate = new DoubleYoVariable(name + "MaxRate", registry);
+      maximumAcceleration = new DoubleYoVariable(name + "MaxAcceleration", registry);
+
+      maximumRate.set(maxRate);
+      maximumAcceleration.set(maxAcceleration);
+   }
 
    public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable maxRate, DoubleYoVariable maxAcceleration, double dt)
    {
@@ -33,8 +44,11 @@ public class AccelerationLimitedYoVariable extends DoubleYoVariable
    {
       super(name, registry);
 
-      this.maximumRate = maxRate;
-      this.maximumAcceleration = maxAcceleration;
+      if (maxRate != null && maxAcceleration != null)
+      {
+         this.maximumRate = maxRate;
+         this.maximumAcceleration = maxAcceleration;
+      }
 
       this.dt = dt;
 
