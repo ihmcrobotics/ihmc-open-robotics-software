@@ -130,7 +130,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private void setUpMomentum() throws SimulationExceededMaximumTimeException
    {
       // enable the use of body momentum in the controller
-      BooleanYoVariable useMomentumIfFalling = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("useMomentumIfFalling");
+      BooleanYoVariable useMomentumIfFalling = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("UseUpperBodyLinearMomentumIfFalling");
       useMomentumIfFalling.set(true);
 
       // bring the arms in a stretched position
@@ -212,7 +212,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       Vector3d rootVelocity = new Vector3d();
       FloatingJoint rootJoint = robot.getRootJoint();
       rootJoint.getVelocity(rootVelocity);
-      double push = 0.025;
+      double push = 0.04;
       rootVelocity.y = rootVelocity.y + push;
       rootJoint.setVelocity(rootVelocity);
 
