@@ -33,7 +33,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -152,7 +151,7 @@ public class BalanceManager
       pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, bipedSupportPolygons, pelvisXYControlGains, registry);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
-      useUpperBodyLinearMomentumIfFalling.set(false);
+      useUpperBodyLinearMomentumIfFalling.set(true);
 
       String graphicListName = "BalanceManager";
 
@@ -241,7 +240,8 @@ public class BalanceManager
       {
          if (useUpperBodyLinearMomentumIfFalling.getBooleanValue() && shouldUseUpperBodyLinearMomentum.getBooleanValue())
          {
-            keepCMPInsideSupportPolygon = false;
+//            keepCMPInsideSupportPolygon = false;
+            throw new RuntimeException("Using Bamboo to see if we get here during any of our unit tests.");
          }
       }
       else
@@ -265,67 +265,52 @@ public class BalanceManager
       yoDesiredCMP.set(desiredCMP);
    }
 
-//   private final FramePoint2d stepPosition = new FramePoint2d();
-   private final FramePoint2d linePoint = new FramePoint2d();
-   private final FrameVector2d direction = new FrameVector2d();
-   private final FrameLine2d forwardLine = new FrameLine2d();
    private final FramePoint2d tmpCapturePoint = new FramePoint2d();
+   private final ConvexPolygonShrinker polygonShrinker = new ConvexPolygonShrinker();
+   private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d tempPolygon1 = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d tempPolygon2 = new FrameConvexPolygon2d();
 
    public void checkIfUseUpperBodyLinearMomentum(Footstep nextFootstep)
    {
       RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
-      ReferenceFrame supportSoleFrame = momentumBasedController.getReferenceFrames().getSoleFrame(supportSide);
       FrameConvexPolygon2d support = momentumBasedController.getBipedSupportPolygons().getFootPolygonInSoleFrame(supportSide);
 
-      support.changeFrameAndProjectToXYPlane(supportSoleFrame);
-      if (supportSide == RobotSide.LEFT)
-      {
-         linePoint.setIncludingFrame(supportSoleFrame, 0.0, support.getMaxY());
-      }
-      else
-      {
-         linePoint.setIncludingFrame(supportSoleFrame, 0.0, support.getMinY());
-      }
+      // icp based fall detection:
+      // compute the safe area for the capture point as the support polygon after the step completed
+      safeArea.setIncludingFrame(support);
+      momentumBasedController.getDefaultFootPolygon(nextFootstep.getRobotSide(), tempPolygon1);
+      tempPolygon2.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), tempPolygon1.getConvexPolygon2d());
+      tempPolygon2.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
+      safeArea.addVertices(tempPolygon2);
+      safeArea.update();
 
-      // hysteresis
+      // hysteresis:
+      // shrink the safe area if we are already using upper body momentum
       if (shouldUseUpperBodyLinearMomentum.getBooleanValue())
       {
-         double offset = supportSide.negateIfLeftSide(0.05);
-         linePoint.add(0.0, offset);
+         polygonShrinker.shrinkConstantDistanceInto(safeArea, 0.05, tempPolygon1);
+         safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
 
-      direction.setIncludingFrame(supportSoleFrame, 1.0, 0.0);
-      forwardLine.changeFrameAndProjectToXYPlane(supportSoleFrame);
-      forwardLine.set(linePoint, direction);
-
+      // check if the icp is in the safe area
       tmpCapturePoint.setIncludingFrame(capturePoint2d);
-      tmpCapturePoint.changeFrameAndProjectToXYPlane(supportSoleFrame);
+      tmpCapturePoint.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
+      boolean icpInSafeArea = safeArea.isPointInside(tmpCapturePoint);
 
-      if (forwardLine.isPointOnSideOfLine(tmpCapturePoint, supportSide))
+      // check the icp tracking error
+      getICPError(icpError2d);
+      boolean icpErrorSmall = icpError2d.lengthSquared() < 0.03 * 0.03;
+
+      if (!icpInSafeArea)
       {
          shouldUseUpperBodyLinearMomentum.set(true);
       }
-      else
+      else if (icpErrorSmall)
       {
          shouldUseUpperBodyLinearMomentum.set(false);
       }
 
-//      double swingTimeRemaining = getTimeRemainingInCurrentState();
-//      double omega0 = momentumBasedController.getOmega0();
-//      momentumBasedController.getCapturePoint(capturePoint2d);
-//      pushRecoveryControlModule.updateCaptureRegion(swingTimeRemaining, omega0, nextFootstep.getRobotSide(), capturePoint2d);
-//
-//      FrameConvexPolygon2d captureRegion = pushRecoveryControlModule.getCaptureRegion();
-//      nextFootstep.getPosition2d(stepPosition);
-//      stepPosition.changeFrame(captureRegion.getReferenceFrame());
-//
-//      getICPError(icpError2d);
-//      if (shouldUseMomentum.getBooleanValue())
-//      {
-//         return;
-//      }
-//
-//      shouldUseMomentum.set(!captureRegion.isPointInside(stepPosition));
    }
 
    public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
