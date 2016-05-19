@@ -107,9 +107,11 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       }
 
       supportPolygon.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
+      
+      ReferenceFrame supportSoleFrame = bipedSupportPolygons.getSoleZUpFrames().get(supportSide);
 
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint, desiredCapturePoint, finalDesiredCapturePoint,
-            desiredCapturePointVelocity, omega0, supportPolygon);
+            desiredCapturePointVelocity, omega0, supportPolygon, supportSoleFrame);
 
       desiredCMPToPack.setIncludingFrame(desiredCMP);
       desiredCMPToPack.changeFrame(worldFrame);

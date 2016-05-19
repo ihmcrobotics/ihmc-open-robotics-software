@@ -601,7 +601,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double kpXY = 200.0; //150.0;
       double kpZ = 300.0; //200.0;
       double zetaXYZ = realRobot ? 0.7 : 0.7;
-      double kpOrientation = 200.0;
+      double kpXYOrientation = 300.0;
+      double kpZOrientation = 200.0;
       double zetaOrientation = 0.7;
       // Reduce maxPositionAcceleration from 30 to 6 to prevent too high acceleration when hitting joint limits.
       double maxPositionAcceleration = realRobot ? 18.0 : Double.POSITIVE_INFINITY;
@@ -613,7 +614,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
-      gains.setOrientationProportionalGains(kpOrientation, kpOrientation);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
       gains.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
       gains.createDerivativeGainUpdater(true);
@@ -983,6 +984,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxAllowedDistanceCMPSupport()
    {
-      return 0.05;
+      return 0.1;
    }
 }

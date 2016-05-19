@@ -51,6 +51,8 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class BalanceManager
 {
+   private static final double allowedIcpError = 0.015;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -248,7 +250,7 @@ public class BalanceManager
          if (supportLeg == null)
          {
             getICPError(icpError2d);
-            boolean icpErrorSmall = icpError2d.lengthSquared() < 0.03 * 0.03;
+            boolean icpErrorSmall = icpError2d.lengthSquared() < allowedIcpError * allowedIcpError;
             if (icpErrorSmall)
             {
                useHighBodyLinearMomentumWeight.set(false);
@@ -338,7 +340,7 @@ public class BalanceManager
 
       // check the icp tracking error
       getICPError(icpError2d);
-      boolean icpErrorSmall = icpError2d.lengthSquared() < 0.03 * 0.03;
+      boolean icpErrorSmall = icpError2d.lengthSquared() < allowedIcpError * allowedIcpError;
 
       if (!icpInSafeArea)
       {
@@ -349,6 +351,7 @@ public class BalanceManager
          shouldUseUpperBodyLinearMomentum.set(false);
       }
 
+      shouldUseUpperBodyLinearMomentum.set(true);
    }
 
    public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
