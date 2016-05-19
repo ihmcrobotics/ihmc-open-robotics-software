@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.quadrupedRobotics.util.ArraySorter;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
@@ -9,7 +10,6 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.vecmath.Point3d;
@@ -45,24 +45,27 @@ public class QuadrupedTimedStepPressurePlanner
       }
    };
 
+   // step plan
    private final QuadrupedTimedStep[] stepArray;
    private final QuadrupedStepTransition[] stepTransition;
    private final QuadrupedTimedStep[] transitionStep;
 
+   // internal states
    private final QuadrantDependentList<FramePoint> solePosition;
    private final QuadrantDependentList<ContactState> contactState;
    private final QuadrantDependentList<MutableDouble> contactPressure;
-   private final QuadrantDependentList<QuadrupedTimedStep> previousStep;
+   private final QuadrantDependentList<MutableBoolean> isInitialContactState;
 
-   private final HashMap<RobotQuadrant, double[]> contactPressureAtStartOfIntervalByQuadrant;
-   private final HashMap<QuadrupedTimedStep, double[]> contactPressureAtStartOfIntervalByStep;
-   private final double[][] contactPressureAtStartOfIntervalByStepIndex;
+   // pressure plan
    private final double[] timeAtStartOfInterval;
-   private final double[] zeroAtStartOfInterval;
-   private final FramePoint[] copAtStartOfInterval;
+   private final FramePoint[] centerOfPressureAtStartOfInterval;
+   private final double[] normalizedPressureContributedByInitialContacts;
+   private final double[] normalizedPressureContributedByQueuedSteps;
+   private final QuadrantDependentList<double[]> normalizedPressureContributedByQuadrant;
 
    public QuadrupedTimedStepPressurePlanner(int maxSteps)
    {
+      // step plan
       int maxIntervals = 2 * maxSteps + 2;
       stepArray = new QuadrupedTimedStep[maxIntervals];
       stepTransition = new QuadrupedStepTransition[maxIntervals];
@@ -72,32 +75,33 @@ public class QuadrupedTimedStepPressurePlanner
          stepTransition[i] = new QuadrupedStepTransition();
       }
 
+      // internal states
       solePosition = new QuadrantDependentList<>();
       contactState = new QuadrantDependentList<>();
       contactPressure = new QuadrantDependentList<>();
+      isInitialContactState = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePosition.set(robotQuadrant, new FramePoint(ReferenceFrame.getWorldFrame()));
          contactState.set(robotQuadrant, ContactState.IN_CONTACT);
          contactPressure.set(robotQuadrant, new MutableDouble(0.0));
+         isInitialContactState.set(robotQuadrant, new MutableBoolean(true));
       }
-      previousStep = new QuadrantDependentList<>();
 
-      contactPressureAtStartOfIntervalByStep = new HashMap<>(maxSteps);
-      contactPressureAtStartOfIntervalByStepIndex = new double[maxSteps][maxIntervals];
-      contactPressureAtStartOfIntervalByQuadrant = new HashMap<>(4);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         contactPressureAtStartOfIntervalByQuadrant.put(robotQuadrant, new double[maxIntervals]);
-      }
+      // pressure plan
       timeAtStartOfInterval = new double[maxIntervals];
-      zeroAtStartOfInterval = new double[maxIntervals];
-      copAtStartOfInterval = new FramePoint[maxIntervals];
+      centerOfPressureAtStartOfInterval = new FramePoint[maxIntervals];
       for (int i = 0; i < maxIntervals; i++)
       {
+         centerOfPressureAtStartOfInterval[i] = new FramePoint(ReferenceFrame.getWorldFrame());
          timeAtStartOfInterval[i] = 0.0;
-         zeroAtStartOfInterval[i] = 0.0;
-         copAtStartOfInterval[i] = new FramePoint(ReferenceFrame.getWorldFrame());
+      }
+      normalizedPressureContributedByInitialContacts = new double[maxIntervals];
+      normalizedPressureContributedByQueuedSteps = new double[maxIntervals];
+      normalizedPressureContributedByQuadrant = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         normalizedPressureContributedByQuadrant.set(robotQuadrant, new double[maxIntervals]);
       }
    }
 
@@ -111,44 +115,44 @@ public class QuadrupedTimedStepPressurePlanner
       return timeAtStartOfInterval;
    }
 
-   public FramePoint getCopAtStartOfInterval(int interval)
+   public FramePoint getCenterOfPressureAtStartOfInterval(int interval)
    {
-      return copAtStartOfInterval[interval];
+      return centerOfPressureAtStartOfInterval[interval];
    }
 
-   public FramePoint[] getCopAtStartOfInterval()
+   public FramePoint[] getCenterOfPressureAtStartOfInterval()
    {
-      return copAtStartOfInterval;
+      return centerOfPressureAtStartOfInterval;
    }
 
-   public double getNormalizedContactPressureAtStartOfInterval(RobotQuadrant robotQuadrant, int interval)
+   public double getNormalizedPressureContributedByQuadrant(RobotQuadrant robotQuadrant, int interval)
    {
-      return contactPressureAtStartOfIntervalByStep.get(robotQuadrant)[interval];
+      return normalizedPressureContributedByQuadrant.get(robotQuadrant)[interval];
    }
 
-   public double[] getNormalizedContactPressureAtStartOfInterval(RobotQuadrant robotQuadrant)
+   public double[] getNormalizedPressureContributedByQuadrant(RobotQuadrant robotQuadrant)
    {
-      return contactPressureAtStartOfIntervalByStep.get(robotQuadrant);
+      return normalizedPressureContributedByQuadrant.get(robotQuadrant);
    }
 
-   public double getNormalizedContactPressureAtStartOfInterval(QuadrupedTimedStep timedStep, int interval)
+   public double getNormalizedPressureContributedByInitialContacts(int interval)
    {
-      double[] normalizedContactPressure = contactPressureAtStartOfIntervalByStep.get(timedStep);
-      if (normalizedContactPressure != null)
-      {
-         return normalizedContactPressure[interval];
-      }
-      return 0.0;
+      return normalizedPressureContributedByInitialContacts[interval];
    }
 
-   public double[] getNormalizedContactPressureAtStartOfInterval(QuadrupedTimedStep timedStep)
+   public double[] getNormalizedPressureContributedByInitialContacts()
    {
-      double[] normalizedContactPressure = contactPressureAtStartOfIntervalByStep.get(timedStep);
-      if (normalizedContactPressure != null)
-      {
-         return normalizedContactPressure;
-      }
-      return zeroAtStartOfInterval;
+      return normalizedPressureContributedByInitialContacts;
+   }
+
+   public double getNormalizedPressureContributedByQueuedSteps(int interval)
+   {
+      return normalizedPressureContributedByQueuedSteps[interval];
+   }
+
+   public double[] getNormalizedPressureContributedByQueuedSteps()
+   {
+      return normalizedPressureContributedByQueuedSteps;
    }
 
    /**
@@ -204,23 +208,7 @@ public class QuadrupedTimedStepPressurePlanner
          solePosition.get(robotQuadrant).setIncludingFrame(initialSolePosition.get(robotQuadrant));
          solePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
          contactState.set(robotQuadrant, initialContactState.get(robotQuadrant));
-      }
-
-      // initialize contact pressure map for each step
-      contactPressureAtStartOfIntervalByStep.clear();
-      for (int i = 0; i < numberOfSteps; i++)
-      {
-         for (int j = 0; j < contactPressureAtStartOfIntervalByStepIndex[i].length; j++)
-         {
-            contactPressureAtStartOfIntervalByStepIndex[i][j] = 0.0;
-         }
-         contactPressureAtStartOfIntervalByStep.put(stepArray[i], contactPressureAtStartOfIntervalByStepIndex[i]);
-      }
-
-      // initialize previous steps
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         previousStep.set(robotQuadrant, null);
+         isInitialContactState.get(robotQuadrant).setTrue();
       }
 
       // initialize step transitions
@@ -260,15 +248,14 @@ public class QuadrupedTimedStepPressurePlanner
 
       // compute transition time and center of pressure for each time interval
       int numberOfIntervals = 1;
-      timeAtStartOfInterval[0] = initialTime;
-      computeNominalCenterOfPressure(solePosition, contactPressure, copAtStartOfInterval[0]);
+      updatePiecewisePressurePlan(0, initialTime);
       for (int i = 0; i < numberOfStepTransitions; i++)
       {
          switch (stepTransition[i].type)
          {
          case LIFT_OFF:
             contactState.set(stepTransition[i].robotQuadrant, ContactState.NO_CONTACT);
-            previousStep.set(stepTransition[i].robotQuadrant, transitionStep[i]);
+            isInitialContactState.get(stepTransition[i].robotQuadrant).setFalse();
             break;
          case TOUCH_DOWN:
             contactState.set(stepTransition[i].robotQuadrant, ContactState.IN_CONTACT);
@@ -278,34 +265,36 @@ public class QuadrupedTimedStepPressurePlanner
          }
          if ((i + 1 == numberOfStepTransitions) || (stepTransition[i].time != stepTransition[i + 1].time))
          {
-            timeAtStartOfInterval[numberOfIntervals] = stepTransition[i].time;
-            computeNominalContactPressure(contactState, contactPressure);
-            computeNominalCenterOfPressure(solePosition, contactPressure, copAtStartOfInterval[numberOfIntervals]);
-            for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-            {
-               QuadrupedTimedStep stepInQuadrant = previousStep.get(robotQuadrant);
-               if (stepInQuadrant != null)
-                  contactPressureAtStartOfIntervalByStep.get(stepInQuadrant)[numberOfIntervals] = contactPressure.get(robotQuadrant).getValue();
-               contactPressureAtStartOfIntervalByQuadrant.get(robotQuadrant)[numberOfIntervals] = contactPressure.get(robotQuadrant).getValue();
-            }
+            updatePiecewisePressurePlan(numberOfIntervals, stepTransition[i].time);
             numberOfIntervals++;
-         }
-      }
-
-      // pad transition time and center of pressure arrays
-      if (numberOfIntervals > 0)
-      {
-         for (int i = numberOfIntervals; i < timeAtStartOfInterval.length; i++)
-         {
-            timeAtStartOfInterval[i] = timeAtStartOfInterval[numberOfIntervals - 1];
-            copAtStartOfInterval[i].setIncludingFrame(copAtStartOfInterval[numberOfIntervals - 1]);
          }
       }
 
       return numberOfIntervals;
    }
 
-   private void computeNominalContactPressure(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<MutableDouble> contactPressure)
+   private void updatePiecewisePressurePlan(int interval, double intervalStartTime)
+   {
+      timeAtStartOfInterval[interval] = intervalStartTime;
+      computeNormalizedContactPressure(contactState, contactPressure);
+      computeCenterOfPressure(solePosition, contactPressure, centerOfPressureAtStartOfInterval[interval]);
+      normalizedPressureContributedByInitialContacts[interval] = 0.0;
+      normalizedPressureContributedByQueuedSteps[interval] = 0.0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         normalizedPressureContributedByQuadrant.get(robotQuadrant)[interval] = contactPressure.get(robotQuadrant).getValue();
+         if (isInitialContactState.get(robotQuadrant).booleanValue())
+         {
+            normalizedPressureContributedByInitialContacts[interval] += contactPressure.get(robotQuadrant).getValue();
+         }
+         else
+         {
+            normalizedPressureContributedByQueuedSteps[interval] += contactPressure.get(robotQuadrant).getValue();
+         }
+      }
+   }
+
+   private void computeNormalizedContactPressure(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<MutableDouble> contactPressure)
    {
       // Compute vertical force distribution assuming equal loading of hind and front ends.
       int numberOfHindFeetInContact = 0;
@@ -349,7 +338,7 @@ public class QuadrupedTimedStepPressurePlanner
       }
    }
 
-   private void computeNominalCenterOfPressure(QuadrantDependentList<FramePoint> solePosition, QuadrantDependentList<MutableDouble> contactPressure, FramePoint copPosition)
+   private void computeCenterOfPressure(QuadrantDependentList<FramePoint> solePosition, QuadrantDependentList<MutableDouble> contactPressure, FramePoint copPosition)
    {
       // Compute center of pressure given the vertical force at each contact.
       double pressure = 1e-6;
