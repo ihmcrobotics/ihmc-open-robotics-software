@@ -2,6 +2,7 @@ package us.ihmc.ihmcPerception.vision.shapes;
 
 import boofcv.gui.image.ImagePanel;
 import org.opencv.core.*;
+import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import us.ihmc.ihmcPerception.OpenCVTools;
