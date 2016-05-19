@@ -115,7 +115,7 @@ public class FootstepListBehavior extends BehaviorInterface
    {
       if (footstepStatusQueue.isNewPacketAvailable())
       {
-         FootstepStatus newestFootstepStatus = footstepStatusQueue.getNewestPacket();
+         FootstepStatus newestFootstepStatus = footstepStatusQueue.poll();
          if (newestFootstepStatus != null)
          {
             int currentStepIndex = newestFootstepStatus.getFootstepIndex();
@@ -145,7 +145,7 @@ public class FootstepListBehavior extends BehaviorInterface
 
       if (walkingStatusQueue.isNewPacketAvailable())
       {
-         WalkingStatusMessage newestPacket = walkingStatusQueue.getNewestPacket();
+         WalkingStatusMessage newestPacket = walkingStatusQueue.poll();
          if (newestPacket != null)
          {
             switch (newestPacket.getWalkingStatus())

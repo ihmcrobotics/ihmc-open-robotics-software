@@ -4,7 +4,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ConcurrentListeningQueue<T>
 {
-
    private final ConcurrentLinkedQueue<T> packetQueue = new ConcurrentLinkedQueue<T>();
 
    public ConcurrentListeningQueue()
@@ -16,7 +15,7 @@ public class ConcurrentListeningQueue<T>
       return !packetQueue.isEmpty();
    }
 
-   public T getNewestPacket()
+   public T poll()
    {
       return packetQueue.poll();
    }
@@ -31,4 +30,3 @@ public class ConcurrentListeningQueue<T>
       packetQueue.clear();
    }
 }
-
