@@ -12,6 +12,10 @@ public interface OrientationPIDGainsInterface
 
    public abstract double getMaximumIntegralError();
 
+   public abstract double getMaximumDerivativeError();
+
+   public abstract double getMaximumProportionalError();
+
    public abstract double getMaximumAcceleration();
 
    public abstract double getMaximumJerk();
