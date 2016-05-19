@@ -9,9 +9,11 @@ import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.producers.CompressedVideoDataClient;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.VideoStreamer;
+import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
@@ -29,6 +31,8 @@ import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetectorFac
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.tools.thread.ThreadTools;
 
 import javax.vecmath.Point2d;
@@ -57,6 +61,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    private final BooleanYoVariable detectBall = new BooleanYoVariable("detectBall", registry);
    private BallDetectionThread computerVisionThread = new BallDetectionThread();
    private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>();
+   private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue = new ConcurrentListeningQueue<>();
 
    private final ReferenceFrame headFrame;
    private static final double FILTERING_ANGLE = Math.toRadians(5.0);
@@ -99,6 +104,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       behaviorCommunicationBridge.attachGlobalListener(getNetworkProcessorGlobalObjectConsumer());
       attachNetworkProcessorListeningQueue(videoPacketQueue, VideoPacket.class);
       attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
+      attachNetworkProcessorListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
 
       this.fullRobotModel = fullRobotModel;
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
@@ -130,10 +136,10 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
             {
                if (videoPacketQueue.isNewPacketAvailable())
                {
-                  VideoPacket packet = videoPacketQueue.getNewestPacket();
+                  VideoPacket packet = videoPacketQueue.poll();
                   while (videoPacketQueue.isNewPacketAvailable())
                   {
-                     packet = videoPacketQueue.getNewestPacket();
+                     packet = videoPacketQueue.poll();
                   }
 
                   videoDataClient.consumeObject(packet.getData(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
@@ -157,6 +163,11 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       this.lastBufferedImage = bufferedImage;
       openCVColoredCircularBlobDetector.updateFromBufferedImage(bufferedImage);
       ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
+      
+//      RobotConfigurationData newestRobotConfigurationDataPacket = robotConfigurationDataQueue.poll();
+//      long timestamp = newestRobotConfigurationDataPacket.getTimestamp();
+//      VideoPacket circleBlobThresholdImagePacket = new VideoPacket(RobotSide.LEFT, timestamp, data, cameraPosition, cameraOrientation, intrinsicParamaters);
+//      sendPacketToNetworkProcessor(circleBlobThresholdImagePacket );
 
       if(DEBUG)
       {
@@ -195,7 +206,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    {
       if (footstepStatusQueue.isNewPacketAvailable())
       {
-         latestFootstepStatus = footstepStatusQueue.getNewestPacket();
+         latestFootstepStatus = footstepStatusQueue.poll();
          return true;
       }
       else
@@ -212,7 +223,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       Point3f[] fullPointCloud = null;
 
       while (pointCloudQueue.isNewPacketAvailable())
-         fullPointCloud = pointCloudQueue.getNewestPacket().getDecayingWorldScan();
+         fullPointCloud = pointCloudQueue.poll().getDecayingWorldScan();
 
       if (fullPointCloud != null)
       {

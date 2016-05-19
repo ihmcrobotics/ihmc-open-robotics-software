@@ -87,7 +87,7 @@ public class SphereDetectionBehavior extends BehaviorInterface
    public void doControl()
    {
 
-      while ((pointCloudPacket = pointCloudQueue.getNewestPacket()) != null)
+      while ((pointCloudPacket = pointCloudQueue.poll()) != null)
       {
          pointCloudPacketLatest = pointCloudPacket;
       }
