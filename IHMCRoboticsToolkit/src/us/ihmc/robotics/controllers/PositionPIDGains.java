@@ -5,7 +5,10 @@ public class PositionPIDGains implements PositionPIDGainsInterface
    private double[] positionProportionalGains = new double[3];
    private double[] positionDerivativeGains = new double[3];
    private double[] positionIntegralGains = new double[3];
+
    private double positionMaxIntegralError = 0.0;
+   private double positionMaxDerivativeError = Double.POSITIVE_INFINITY;
+   private double positionMaxProportionalError = Double.POSITIVE_INFINITY;
 
    private double positionMaximumAcceleration = Double.POSITIVE_INFINITY;
    private double positionMaximumJerk = Double.POSITIVE_INFINITY;
@@ -21,6 +24,9 @@ public class PositionPIDGains implements PositionPIDGainsInterface
       }
 
       positionMaxIntegralError = gains.getMaximumIntegralError();
+      positionMaxDerivativeError = gains.getMaximumDerivativeError();
+      positionMaxProportionalError = gains.getMaximumProportionalError();
+
       positionMaximumAcceleration = gains.getMaximumAcceleration();
       positionMaximumJerk = gains.getMaximumJerk();
    }
@@ -65,6 +71,16 @@ public class PositionPIDGains implements PositionPIDGainsInterface
       positionMaximumJerk = maxJerk;
    }
 
+   public void setMaximumVelocityError(double maxDerivativeError)
+   {
+      positionMaxDerivativeError = maxDerivativeError;
+   }
+
+   public void setMaximumError(double maxProportionalError)
+   {
+      positionMaxProportionalError = maxProportionalError;
+   }
+
    @Override
    public double[] getProportionalGains()
    {
@@ -99,5 +115,17 @@ public class PositionPIDGains implements PositionPIDGainsInterface
    public double getMaximumJerk()
    {
       return positionMaximumJerk;
+   }
+
+   @Override
+   public double getMaximumDerivativeError()
+   {
+      return positionMaxDerivativeError;
+   }
+
+   @Override
+   public double getMaximumProportionalError()
+   {
+      return positionMaxProportionalError;
    }
 }
