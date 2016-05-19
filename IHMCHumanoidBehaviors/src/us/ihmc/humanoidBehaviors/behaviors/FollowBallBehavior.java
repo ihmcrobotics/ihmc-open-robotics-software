@@ -136,11 +136,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
             {
                if (videoPacketQueue.isNewPacketAvailable())
                {
-                  VideoPacket packet = videoPacketQueue.poll();
-                  while (videoPacketQueue.isNewPacketAvailable())
-                  {
-                     packet = videoPacketQueue.poll();
-                  }
+                  VideoPacket packet = videoPacketQueue.getLatestPacket();
 
                   videoDataClient.consumeObject(packet.getData(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
                }
