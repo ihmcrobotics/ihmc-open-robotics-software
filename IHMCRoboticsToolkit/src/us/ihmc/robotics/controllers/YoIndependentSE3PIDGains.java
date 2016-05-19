@@ -66,6 +66,16 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
       positionGains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 
+   public void setPositionMaxDerivativeError(double maxDerivativeError)
+   {
+      positionGains.setMaxDerivativeError(maxDerivativeError);
+   }
+
+   public void setPositionMaxProportionalError(double maxProportionalError)
+   {
+      positionGains.setMaxProportionalError(maxProportionalError);
+   }
+
    public void setOrientationProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
    {
       orientationGains.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
@@ -99,6 +109,16 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
    public void setOrientationMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       orientationGains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+   }
+
+   public void setOrientationMaxDerivativeError(double maxDerivativeError)
+   {
+      orientationGains.setMaxDerivativeError(maxDerivativeError);
+   }
+
+   public void setOrientationMaxProportionalError(double maxProportionalError)
+   {
+      orientationGains.setMaxProportionalError(maxProportionalError);
    }
 
    @Override

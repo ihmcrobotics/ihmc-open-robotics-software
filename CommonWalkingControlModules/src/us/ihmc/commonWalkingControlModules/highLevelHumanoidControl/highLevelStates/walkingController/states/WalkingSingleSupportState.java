@@ -91,9 +91,9 @@ public class WalkingSingleSupportState extends SingleSupportState
          requestSwingSpeedUpIfNeeded();
       }
 
-      if (balanceManager.isUseMomentumIfFalling())
+      if (balanceManager.isUseUpperBodyLinearMomentumIfFalling())
       {
-         balanceManager.checkIfUseMomentum(nextFootstep);
+         balanceManager.checkIfUseUpperBodyLinearMomentum(nextFootstep);
       }
 
       walkingMessageHandler.clearFootTrajectory();

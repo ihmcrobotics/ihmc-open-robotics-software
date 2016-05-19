@@ -57,4 +57,16 @@ public abstract class Parameter
    {
       return path;
    }
+
+   public String getShortPath()
+   {
+      String[] parts = path.split("\\.");
+
+      if (parts.length == 0)
+      {
+         return path;
+      }
+
+      return parts[parts.length - 1];
+   }
 }
