@@ -313,6 +313,7 @@ public class OpenCVColoredCircularBlobDetector
          {
             Point openCVPoint = new Point(circle.getCenter().x, circle.getCenter().y);
             Imgproc.circle(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR(), openCVPoint, (int) circle.getRadius(), circleColor, 1);
+            Imgproc.circle(openCVColoredCircularBlobDetector.getThresholdMat(), openCVPoint, (int) circle.getRadius(), circleColor, 1);
          }
 
          colorImagePanel.setBufferedImageSafe(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR()));
