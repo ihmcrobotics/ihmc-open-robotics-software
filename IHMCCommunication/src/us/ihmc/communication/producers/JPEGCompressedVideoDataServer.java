@@ -52,8 +52,7 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
    @Override
    public void close()
    {
-      // TODO Auto-generated method stub
-      
+      // TODO
    }
 
    @Override
@@ -65,7 +64,6 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
    @Override
    public void setVideoControlSettings(VideoControlSettings object)
    {
-      // TODO Auto-generated method stub
-      
+      // TODO
    }
 }
