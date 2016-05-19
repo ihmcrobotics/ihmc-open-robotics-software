@@ -4,6 +4,12 @@ public class StringParameter extends Parameter
 {
    private String value;
 
+   private StringParameter() // no-arg for serialization
+   {
+      super(null);
+      this.value = null;
+   }
+
    StringParameter(String path, String defaultValue)
    {
       super(path);
