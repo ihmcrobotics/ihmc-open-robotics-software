@@ -1,5 +1,16 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
+import javax.vecmath.Quat4d;
+
 import boofcv.struct.calib.IntrinsicParameters;
 import bubo.clouds.FactoryPointCloudShape;
 import bubo.clouds.detect.CloudShapeTypes;
@@ -9,11 +20,10 @@ import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.producers.CompressedVideoDataClient;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
+import us.ihmc.communication.producers.JPEGCompressor;
 import us.ihmc.communication.producers.VideoStreamer;
-import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
@@ -23,6 +33,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
+import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.ihmcPerception.vision.HSVValue;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.ihmcPerception.vision.shapes.HoughCircleResult;
@@ -34,13 +45,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4d;
-import java.awt.image.BufferedImage;
-import java.util.*;
 
 public class FollowBallBehavior extends BehaviorInterface implements VideoStreamer
 {
@@ -62,6 +66,9 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    private BallDetectionThread computerVisionThread = new BallDetectionThread();
    private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>();
    private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue = new ConcurrentListeningQueue<>();
+   
+   // CV IMAGE SERVER
+   private final JPEGCompressor jpegCompressor = new JPEGCompressor();
 
    private final ReferenceFrame headFrame;
    private static final double FILTERING_ANGLE = Math.toRadians(5.0);
@@ -87,6 +94,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
 
    private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
    private final PointCloudShapeFinder pointCloudSphereFinder;
+   private long videoTimestamp = -1L;
    private final Point2d latestBallPosition2d = new Point2d();
    private final Point3d latestBallPosition3d = new Point3d();
 
@@ -137,6 +145,8 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
                if (videoPacketQueue.isNewPacketAvailable())
                {
                   VideoPacket packet = videoPacketQueue.getLatestPacket();
+                  RobotConfigurationData robotConfigurationData = robotConfigurationDataQueue.getLatestPacket();
+                  videoTimestamp = robotConfigurationData.getTimestamp();
 
                   videoDataClient.consumeObject(packet.getData(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
                }
@@ -160,10 +170,10 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       openCVColoredCircularBlobDetector.updateFromBufferedImage(bufferedImage);
       ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
       
-//      RobotConfigurationData newestRobotConfigurationDataPacket = robotConfigurationDataQueue.poll();
-//      long timestamp = newestRobotConfigurationDataPacket.getTimestamp();
-//      VideoPacket circleBlobThresholdImagePacket = new VideoPacket(RobotSide.LEFT, timestamp, data, cameraPosition, cameraOrientation, intrinsicParamaters);
-//      sendPacketToNetworkProcessor(circleBlobThresholdImagePacket );
+      BufferedImage thresholdBufferedImage = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
+      byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
+      VideoPacket circleBlobThresholdImagePacket = new VideoPacket(RobotSide.LEFT, videoTimestamp, jpegThresholdImage, cameraPosition, cameraOrientation, intrinsicParamaters);
+      sendPacketToNetworkProcessor(circleBlobThresholdImagePacket);
 
       if(DEBUG)
       {
