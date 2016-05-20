@@ -13,4 +13,6 @@ public enum VideoSource
    IMAGE_PROCESSING_BEHAVIOR,
    AWARE_FACE_TRACKER,
    ;
+   
+   public static final VideoSource[] values = values();
 }
