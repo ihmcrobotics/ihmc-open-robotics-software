@@ -21,6 +21,7 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsProvider;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
+import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -72,7 +73,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    private final QuadrupedComPositionController comPositionController;
    private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
    private final QuadrupedBodyOrientationController bodyOrientationController;
-   private final QuadrupedTimedStepController.Setpoints timedStepControllerSetpoints;
    private final QuadrupedTimedStepController timedStepController;
 
    // task space controller
@@ -133,7 +133,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       comPositionController = controllerToolbox.getComPositionController();
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
-      timedStepControllerSetpoints = new QuadrupedTimedStepController.Setpoints();
       timedStepController = controllerToolbox.getTimedStepController();
 
       // task space controllers
@@ -229,7 +228,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       bodyOrientationController.compute(taskSpaceControllerCommands.getComTorque(), bodyOrientationControllerSetpoints, taskSpaceEstimates);
 
       // update desired contact state and sole forces
-      timedStepController.compute(taskSpaceControllerSettings.getContactState(), taskSpaceControllerCommands.getSoleForce(), timedStepControllerSetpoints, taskSpaceEstimates);
+      timedStepController.compute(taskSpaceControllerSettings.getContactState(), taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
 
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
@@ -288,7 +287,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
       bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
       bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
-      timedStepControllerSetpoints.initialize(taskSpaceEstimates);
       timedStepController.reset();
 
       // initialize task space controller
@@ -442,15 +440,13 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          latestSteps.get(thisStepEnd).set(thisStep);
 
          // update contact state
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-            contactState.set(robotQuadrant, thisContactState.get(robotQuadrant));
+         contactState.set(thisStepQuadrant, thisContactState.get(thisStepQuadrant));
       }
 
       @Override public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
       {
          // update contact state
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-            contactState.set(robotQuadrant, thisContactState.get(robotQuadrant));
+         contactState.set(thisStepQuadrant, thisContactState.get(thisStepQuadrant));
       }
 
       @Override public XGaitEvent process()
@@ -472,8 +468,10 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          }
 
          // compute step adjustment
+         computeStepAdjustmentBasedOnDcm(stepAdjustment, timedStepController.getQueue(), dcmPositionEstimate, currentTime);
          for (int i = 0; i < timedStepController.getQueue().size(); i++)
          {
+            timedStepController.getQueue().get(i).getGoalPosition().add(stepAdjustment.getVector());
             groundPlaneEstimator.projectZ(timedStepController.getQueue().get(i).getGoalPosition());
          }
 
@@ -491,5 +489,10 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       {
          timedStepController.registerStepTransitionCallback(null);
       }
+   }
+
+   private void computeStepAdjustmentBasedOnDcm(FrameVector stepAdjustment, PreallocatedQueue<QuadrupedTimedStep> queuedSteps, FramePoint currentDcmEstimate, double currentTime)
+   {
+      stepAdjustment.set(0, 0, 0);
    }
 }

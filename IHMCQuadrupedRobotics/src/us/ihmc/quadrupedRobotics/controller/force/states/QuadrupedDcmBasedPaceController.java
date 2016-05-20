@@ -28,6 +28,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
+import javax.vecmath.Point3d;
+
 public class QuadrupedDcmBasedPaceController implements QuadrupedController
 {
    private final QuadrupedControllerInputProviderInterface inputProvider;
@@ -71,7 +73,6 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
    private final QuadrupedComPositionController comPositionController;
    private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
    private final QuadrupedBodyOrientationController bodyOrientationController;
-   private final QuadrupedTimedStepController.Setpoints timedStepControllerSetpoints;
    private final QuadrupedTimedStepController timedStepController;
 
    // task space controller
@@ -121,7 +122,6 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
       comPositionController = controllerToolbox.getComPositionController();
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
-      timedStepControllerSetpoints = new QuadrupedTimedStepController.Setpoints();
       timedStepController = controllerToolbox.getTimedStepController();
 
       // task space controllers
@@ -209,16 +209,7 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
       bodyOrientationController.compute(taskSpaceControllerCommands.getComTorque(), bodyOrientationControllerSetpoints, taskSpaceEstimates);
 
       // update desired contact state and sole forces
-      FramePoint dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
-      dcmPositionSetpoint.changeFrame(worldFrame);
-      dcmPositionEstimate.changeFrame(worldFrame);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         timedStepControllerSetpoints.getStepAdjustment(robotQuadrant).changeFrame(worldFrame);
-         timedStepControllerSetpoints.getStepAdjustment(robotQuadrant).set(dcmPositionEstimate.getX(), dcmPositionEstimate.getY(), 0.0);
-         timedStepControllerSetpoints.getStepAdjustment(robotQuadrant).sub(dcmPositionSetpoint.getX(), dcmPositionSetpoint.getY(), 0.0);
-      }
-      timedStepController.compute(taskSpaceControllerSettings.getContactState(), taskSpaceControllerCommands.getSoleForce(), timedStepControllerSetpoints, taskSpaceEstimates);
+      timedStepController.compute(taskSpaceControllerSettings.getContactState(), taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
 
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
@@ -253,7 +244,6 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
       bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
       bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
       bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
-      timedStepControllerSetpoints.initialize(taskSpaceEstimates);
       timedStepController.reset();
 
       // initialize task space controller
@@ -424,6 +414,7 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
       private final FramePoint dcmPositionAtSoS;
       private final FramePoint footholdPosition;
       private final QuadrupedTimedStep timedStep;
+      private final QuadrantDependentList<Point3d> timedStepGoalPositionAtSoS;
 
       public DoubleSupportState(RobotQuadrant hindSupportQuadrant, RobotQuadrant frontSupportQuadrant)
       {
@@ -438,6 +429,11 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
          dcmPositionAtSoS = new FramePoint();
          footholdPosition = new FramePoint();
          timedStep = new QuadrupedTimedStep();
+         timedStepGoalPositionAtSoS = new QuadrantDependentList<>();
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            timedStepGoalPositionAtSoS.set(robotQuadrant, new Point3d());
+         }
       }
 
       @Override public void onEntry()
@@ -479,6 +475,7 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
             timedStep.getTimeInterval().setEndTime(initialTime + doubleSupportDurationParameter.get());
             timedStep.setGoalPosition(footholdPosition);
             timedStepController.addStep(timedStep);
+            timedStepGoalPositionAtSoS.get(swingQuadrants[i]).set(timedStep.getGoalPosition());
 
             // initialize ground plane points
             groundPlanePositions.get(swingQuadrants[i]).setIncludingFrame(taskSpaceEstimates.getSolePosition(swingQuadrants[i]));
@@ -494,6 +491,17 @@ public class QuadrupedDcmBasedPaceController implements QuadrupedController
          dcmTrajectory.computeTrajectory(currentTime);
          dcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
          dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
+
+         // adjust swing foot goal position based on dcm tracking error
+         FramePoint dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
+         dcmPositionSetpoint.changeFrame(worldFrame);
+         dcmPositionEstimate.changeFrame(worldFrame);
+         for (int i = 0; i < 2; i++)
+         {
+            QuadrupedTimedStep step = timedStepController.getEarliestStep(swingQuadrants[i]);
+            step.getGoalPosition().set(dcmPositionEstimate.getX() - dcmPositionSetpoint.getX(), dcmPositionEstimate.getY() - dcmPositionSetpoint.getY(), 0.0);
+            step.getGoalPosition().add(timedStepGoalPositionAtSoS.get(swingQuadrants[i]));
+         }
 
          // trigger touch down event
          if (currentTime > timedStep.getTimeInterval().getEndTime())

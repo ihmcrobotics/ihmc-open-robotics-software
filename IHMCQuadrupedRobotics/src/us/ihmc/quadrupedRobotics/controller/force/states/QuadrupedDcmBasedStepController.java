@@ -63,7 +63,6 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
    private final QuadrupedComPositionController comPositionController;
    private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
    private final QuadrupedBodyOrientationController bodyOrientationController;
-   private final QuadrupedTimedStepController.Setpoints timedStepControllerSetpoints;
    private final QuadrupedTimedStepController timedStepController;
 
    // task space controller
@@ -104,7 +103,6 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       comPositionController = controllerToolbox.getComPositionController();
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
-      timedStepControllerSetpoints = new QuadrupedTimedStepController.Setpoints();
       timedStepController = controllerToolbox.getTimedStepController();
 
       // task space controllers
@@ -177,17 +175,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       bodyOrientationController.compute(taskSpaceControllerCommands.getComTorque(), bodyOrientationControllerSetpoints, taskSpaceEstimates);
 
       // update desired contact state and sole forces
-      FramePoint dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
-      dcmPositionSetpoint.changeFrame(worldFrame);
-      dcmPositionEstimate.changeFrame(worldFrame);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         timedStepControllerSetpoints.getStepAdjustment(robotQuadrant).changeFrame(worldFrame);
-         timedStepControllerSetpoints.getStepAdjustment(robotQuadrant).set(dcmPositionEstimate.getX(), dcmPositionEstimate.getY(), 0.0);
-         timedStepControllerSetpoints.getStepAdjustment(robotQuadrant).sub(dcmPositionSetpoint.getX(), dcmPositionSetpoint.getY(), 0.0);
-         timedStepControllerSetpoints.getStepAdjustment(robotQuadrant).scale(1.5);
-      }
-      timedStepController.compute(taskSpaceControllerSettings.getContactState(), taskSpaceControllerCommands.getSoleForce(), timedStepControllerSetpoints, taskSpaceEstimates);
+      timedStepController.compute(taskSpaceControllerSettings.getContactState(), taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
 
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
@@ -242,7 +230,6 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
       bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
       bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
-      timedStepControllerSetpoints.initialize(taskSpaceEstimates);
       timedStepController.reset();
 
       // initialize task space controller
