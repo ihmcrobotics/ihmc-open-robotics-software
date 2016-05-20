@@ -23,32 +23,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedTimedStepController
 {
-   public static class Setpoints
-   {
-      QuadrantDependentList<FrameVector> stepAdjustment = new QuadrantDependentList<>();
-
-      public Setpoints()
-      {
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         {
-            stepAdjustment.set(robotQuadrant, new FrameVector());
-         }
-      }
-
-      public void initialize(QuadrupedTaskSpaceEstimator.Estimates estimates)
-      {
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         {
-            stepAdjustment.get(robotQuadrant).setToZero(ReferenceFrame.getWorldFrame());
-         }
-      }
-
-      public FrameVector getStepAdjustment(RobotQuadrant robotQuadrant)
-      {
-         return stepAdjustment.get(robotQuadrant);
-      }
-   }
-
    // parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithoutRegistry(getClass());
    private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 20000, 20000, 20000);
@@ -56,8 +30,8 @@ public class QuadrupedTimedStepController
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
    private final DoubleParameter solePressureUpperLimitParameter = parameterFactory.createDouble("solePressureUpperLimit", 75);
-   private final DoubleParameter soleCoefficientOfFrictionParameter = parameterFactory.createDouble("soleCoefficientOfFrictionParameter", 75);
-   private final DoubleParameter stepAdjustmentEnvelopeAttackParameter = parameterFactory.createDouble("stepAdjustmentEnvelopeAttack", 0.5);
+   private final DoubleParameter soleCoefficientOfFrictionParameter = parameterFactory.createDouble("soleCoefficientOfFriction", 75);
+   private final DoubleParameter minimumStepAdjustmentTimeParameter = parameterFactory.createDouble("minimumStepAdjustmentTime", 0.1);
 
    // control variables
    private final DoubleYoVariable timestamp;
@@ -66,7 +40,6 @@ public class QuadrupedTimedStepController
    private final PreallocatedQueue<QuadrupedTimedStep> stepQueue;
    private final QuadrantDependentList<ContactState> contactState;
    private final QuadrantDependentList<FramePoint> solePositionEstimate;
-   private final QuadrantDependentList<FrameVector> stepAdjustmentSetpoint;
 
    // state machine
    public enum StepState
@@ -89,12 +62,10 @@ public class QuadrupedTimedStepController
       stepQueue = new PreallocatedQueue<>(QuadrupedTimedStep.class, 100);
       contactState = new QuadrantDependentList<>();
       solePositionEstimate = new QuadrantDependentList<>();
-      stepAdjustmentSetpoint = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactState.set(robotQuadrant, ContactState.IN_CONTACT);
          solePositionEstimate.set(robotQuadrant, new FramePoint());
-         stepAdjustmentSetpoint.set(robotQuadrant, new FrameVector());
       }
 
       // state machine
@@ -234,11 +205,10 @@ public class QuadrupedTimedStepController
       solePositionController.reset();
    }
 
-   public void compute(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FrameVector> soleForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
+   public void compute(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FrameVector> soleForceCommand, QuadrupedTaskSpaceEstimator.Estimates estimates)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         stepAdjustmentSetpoint.get(robotQuadrant).setIncludingFrame(setpoints.getStepAdjustment(robotQuadrant));
          solePositionEstimate.get(robotQuadrant).setIncludingFrame(estimates.getSolePosition(robotQuadrant));
          stepStateMachine.get(robotQuadrant).process();
          contactState.set(robotQuadrant, this.contactState.get(robotQuadrant));
@@ -355,10 +325,6 @@ public class QuadrupedTimedStepController
          solePosition.changeFrame(goalPosition.getReferenceFrame());
          swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval);
 
-         // initialize goal position
-         timedStep.getGoalPosition(goalPosition);
-         goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
-
          // initialize contact state and feedback gains
          solePositionController.getGains(robotQuadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
          solePositionController.getGains(robotQuadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
@@ -369,24 +335,19 @@ public class QuadrupedTimedStepController
       {
          QuadrupedTimedStep timedStep = getEarliestStep(robotQuadrant);
          double currentTime = timestamp.getDoubleValue();
-         double liftOffTime = timedStep.getTimeInterval().getStartTime();
          double touchDownTime = timedStep.getTimeInterval().getEndTime();
 
+         // current goal position
+         timedStep.getGoalPosition(goalPosition);
+         goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
          // compute swing trajectory
+         if (touchDownTime - currentTime > minimumStepAdjustmentTimeParameter.get())
+         {
+            swingTrajectory.adjustTrajectory(goalPosition, currentTime);
+         }
          swingTrajectory.computeTrajectory(currentTime);
          swingTrajectory.getPosition(solePositionControllerSetpoints.getSolePosition(robotQuadrant));
-
-         // compute step adjustment envelope as a function of normalized step time
-         double stepTime = (currentTime - liftOffTime) / (touchDownTime - liftOffTime);
-         double envelope = Math.min(stepTime / Math.max(stepAdjustmentEnvelopeAttackParameter.get(), 0.001), 1.0);
-         stepAdjustmentSetpoint.get(robotQuadrant).scale(envelope);
-         solePositionControllerSetpoints.getSolePosition(robotQuadrant).changeFrame(stepAdjustmentSetpoint.get(robotQuadrant).getReferenceFrame());
-         solePositionControllerSetpoints.getSolePosition(robotQuadrant).add(stepAdjustmentSetpoint.get(robotQuadrant));
-
-         // compute step goal position
-         goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         timedStep.setGoalPosition(goalPosition);
-         timedStep.getGoalPosition().add(stepAdjustmentSetpoint.get(robotQuadrant).getVector());
 
          // trigger touch down event
          if (currentTime >= touchDownTime)
