@@ -51,7 +51,7 @@ public class ReceiveImageBehavior extends BehaviorInterface implements VideoStre
 	@Override
 	public void doControl() {
 	   VideoPacket packet;
-	   while((packet=inputListeningQueue.getNewestPacket())!= null)
+	   while((packet=inputListeningQueue.poll())!= null)
 	   {
 	      if(!isPaused())
 	         compressedVideoDataClient.consumeObject(packet.data, packet.position, packet.orientation, packet.getIntrinsicParameters());
