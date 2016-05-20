@@ -5,8 +5,13 @@ import boofcv.gui.image.ShowImages;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotModelFactory;
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.ihmcPerception.vision.HSVValue;
@@ -16,8 +21,7 @@ import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetector;
 import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetectorFactory;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.publisher.RosImagePublisher;
-import us.ihmc.utilities.ros.subscriber.RosImageSubscriber;
+import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -32,9 +36,10 @@ public class MultiSenseBlobDetectionTestModule
          .createTCPPacketCommunicatorServer(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
    private final String stereoTopic = "/multisense/image_points2_color";
    private final String lidarTopic = "/assembled_cloud";
-   private final String leftImageColorTopic = "/multisense/left/image_rect_color";
+   private final String leftImageColorTopic = "/multisense/left/image_rect_color/compressed"; //  "/multisense/left/image_rect_color";
 
    private BufferedImage latestBufferedImage;
+   private BufferedImage convertedImageToDisplay;
 
    public MultiSenseBlobDetectionTestModule(URI rosMasterURI)
    {
@@ -43,9 +48,9 @@ public class MultiSenseBlobDetectionTestModule
       MultisenseBlobDetectionPointCloudReceiver stereoReceiver = new MultisenseBlobDetectionPointCloudReceiver(packetCommunicator);
       MultisenseBlobDetectionPointCloudReceiver lidarReceiver = new MultisenseBlobDetectionPointCloudReceiver(packetCommunicator);
 
-      rosMainNode.attachSubscriber(stereoTopic, stereoReceiver);
+//      rosMainNode.attachSubscriber(stereoTopic, stereoReceiver);
       rosMainNode.attachSubscriber(lidarTopic, lidarReceiver);
-      new BlobDetectionImageProvider(rosMainNode);
+      new BlobDetectionCompressedImageSubscriber(rosMainNode);
 
       rosMainNode.execute();
       connect();
@@ -94,7 +99,9 @@ public class MultiSenseBlobDetectionTestModule
                   Imgproc.circle(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR(), openCVPoint, (int) circle.getRadius(), circleColor, 1);
                }
 
-               imagePanel.setBufferedImage(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR()));
+               BufferedImage unconvertedImageToDisplay = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR());
+               convertedImageToDisplay.getGraphics().drawImage(unconvertedImageToDisplay, 0, 0, null);
+               imagePanel.setBufferedImage(convertedImageToDisplay);
             }
          }
       };
@@ -119,18 +126,23 @@ public class MultiSenseBlobDetectionTestModule
       new MultiSenseBlobDetectionTestModule(new URI("http://localhost:11311"));
    }
 
-   private class BlobDetectionImageProvider extends RosImageSubscriber
+   private class BlobDetectionCompressedImageSubscriber extends RosCompressedImageSubscriber
    {
-      public BlobDetectionImageProvider(RosMainNode rosNode)
+      public BlobDetectionCompressedImageSubscriber(RosMainNode rosNode)
       {
          super();
-
          rosNode.attachSubscriber(leftImageColorTopic, this);
       }
 
       @Override protected void imageReceived(long timeStamp, BufferedImage image)
       {
-         latestBufferedImage = image;
+         if(latestBufferedImage == null)
+         {
+            latestBufferedImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+            convertedImageToDisplay = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+         }
+
+         latestBufferedImage.getGraphics().drawImage(image, 0, 0, null);
       }
    }
 }
