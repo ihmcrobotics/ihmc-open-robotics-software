@@ -157,7 +157,7 @@ public class WholeBodyInverseKinematicsBehavior extends BehaviorInterface
 
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable() && !hasSentMessageToController.getBooleanValue())
       {
-         KinematicsToolboxOutputStatus newestSolution = kinematicsToolboxOutputQueue.getNewestPacket();
+         KinematicsToolboxOutputStatus newestSolution = kinematicsToolboxOutputQueue.poll();
 
          boolean isSolutionStable = currentSolutionQuality.getDoubleValue() - newestSolution.getSolutionQuality() < 1.0e-6;
          boolean isSolutionGoodEnough = newestSolution.getSolutionQuality() < solutionQualityThreshold.getDoubleValue();

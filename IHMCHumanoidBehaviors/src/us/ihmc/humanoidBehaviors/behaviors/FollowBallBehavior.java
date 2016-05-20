@@ -105,10 +105,10 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
             {
                if (videoPacketQueue.isNewPacketAvailable())
                {
-                  VideoPacket packet = videoPacketQueue.getNewestPacket();
+                  VideoPacket packet = videoPacketQueue.poll();
                   while (videoPacketQueue.isNewPacketAvailable())
                   {
-                     packet = videoPacketQueue.getNewestPacket();
+                     packet = videoPacketQueue.poll();
                   }
 
                   videoDataClient.consumeObject(packet.getData(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
@@ -144,7 +144,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    {
       if (footstepStatusQueue.isNewPacketAvailable())
       {
-         latestFootstepStatus = footstepStatusQueue.getNewestPacket();
+         latestFootstepStatus = footstepStatusQueue.poll();
          return true;
       }
       else
@@ -158,7 +158,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       Point3f[] fullPointCloud = null;
 
       while (pointCloudQueue.isNewPacketAvailable())
-         fullPointCloud = pointCloudQueue.getNewestPacket().getDecayingWorldScan();
+         fullPointCloud = pointCloudQueue.poll().getDecayingWorldScan();
 
       if (fullPointCloud != null)
       {
