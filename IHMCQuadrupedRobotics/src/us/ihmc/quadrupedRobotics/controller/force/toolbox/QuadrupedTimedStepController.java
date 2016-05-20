@@ -18,6 +18,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedTimedStepController
@@ -168,12 +169,38 @@ public class QuadrupedTimedStepController
       return stepQueue.capacity();
    }
 
+   public QuadrupedTimedStep getEarliestStep(RobotEnd robotEnd)
+   {
+      for (int i = 0; i < stepQueue.size(); i++)
+      {
+         QuadrupedTimedStep step = stepQueue.get(i);
+         if (step.getRobotQuadrant().getEnd() == robotEnd)
+         {
+            return step;
+         }
+      }
+      return null;
+   }
+
    public QuadrupedTimedStep getEarliestStep(RobotQuadrant robotQuadrant)
    {
       for (int i = 0; i < stepQueue.size(); i++)
       {
          QuadrupedTimedStep step = stepQueue.get(i);
          if (step.getRobotQuadrant() == robotQuadrant)
+         {
+            return step;
+         }
+      }
+      return null;
+   }
+
+   public QuadrupedTimedStep getLatestStep(RobotEnd robotEnd)
+   {
+      for (int i = stepQueue.size() - 1; i >= 0; i--)
+      {
+         QuadrupedTimedStep step = stepQueue.get(i);
+         if (step.getRobotQuadrant().getEnd() == robotEnd)
          {
             return step;
          }
