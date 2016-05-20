@@ -16,6 +16,21 @@ public class HSVValue
       values[2] = brightnessValue;
    }
 
+   public void setHue(double hueValue)
+   {
+      values[0] = hueValue;
+   }
+
+   public void setSaturation(double saturationValue)
+   {
+      values[1] = saturationValue;
+   }
+
+   public void setBrightnessValue(double brightnessValue)
+   {
+      values[2] = brightnessValue;
+   }
+
    public double getHue()
    {
       return values[0];

@@ -224,7 +224,7 @@ public class ScriptBehavior extends BehaviorInterface
    {
       if (scriptBehaviorInputPacketListener.isNewPacketAvailable())
       {
-         ScriptBehaviorInputPacket receivedPacket = scriptBehaviorInputPacketListener.getNewestPacket();
+         ScriptBehaviorInputPacket receivedPacket = scriptBehaviorInputPacketListener.poll();
          importScriptInputPacket(receivedPacket);
       }
 
