@@ -23,6 +23,7 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.producers.CompressedVideoDataClient;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.JPEGCompressor;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.producers.VideoStreamer;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -171,8 +172,11 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
       
       BufferedImage thresholdBufferedImage = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
-      byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
-      VideoPacket circleBlobThresholdImagePacket = new VideoPacket(RobotSide.LEFT, videoTimestamp, jpegThresholdImage, cameraPosition, cameraOrientation, intrinsicParamaters);
+      BufferedImage convertedBufferedImage = new BufferedImage(thresholdBufferedImage.getWidth(), thresholdBufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+      convertedBufferedImage.getGraphics().drawImage(thresholdBufferedImage, 0, 0, null);
+      
+      byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(convertedBufferedImage);
+      VideoPacket circleBlobThresholdImagePacket = new VideoPacket(RobotSide.LEFT, VideoSource.CV_THRESHOLD, videoTimestamp, jpegThresholdImage, cameraPosition, cameraOrientation, intrinsicParamaters);
       sendPacketToNetworkProcessor(circleBlobThresholdImagePacket);
 
       if(DEBUG)
