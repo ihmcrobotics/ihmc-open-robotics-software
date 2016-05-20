@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.util.EnumMap;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -56,8 +54,6 @@ public class PartialFootholdControlModule
 
    private final FootCoPOccupancyGrid footCoPOccupancyGrid;
 
-//   private final HighLevelHumanoidControllerToolbox momentumBasedController;
-//   private final RobotSide robotSide;
    private final ReferenceFrame soleFrame;
 
    private final FrameConvexPolygon2d defaultFootPolygon;
@@ -65,9 +61,13 @@ public class PartialFootholdControlModule
    private final FrameConvexPolygon2d shrunkFootPolygonInWorld;
    private final YoFrameConvexPolygon2d yoShrunkFootPolygon;
    private final FrameConvexPolygon2d controllerFootPolygon;
+   private final FrameConvexPolygon2d controllerFootPolygonInWorld;
    private final FrameConvexPolygon2d backupFootPolygon;
    private final FrameConvexPolygon2d unsafePolygon;
    private final YoFrameConvexPolygon2d yoUnsafePolygon;
+
+   private final FrameConvexPolygon2d fullSupportAfterShrinking = new FrameConvexPolygon2d();
+   private final YoFrameConvexPolygon2d yoFullSupportAfterShrinking;
 
    private final IntegerYoVariable shrinkMaxLimit;
    private final IntegerYoVariable shrinkCounter;
@@ -88,7 +88,10 @@ public class PartialFootholdControlModule
    private final BooleanYoVariable cropToConvexHullOfCoPs;
    
    private final int footCornerPoints;
-   private Point2d newVertex = new Point2d();
+
+   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final FramePoint2d capturePoint = new FramePoint2d();
+   private RobotSide robotSide;
 
    /**
     * Variables for checking the area of the unsafe part of the foothold.
@@ -102,8 +105,8 @@ public class PartialFootholdControlModule
    {
       ContactableFoot contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       String namePrefix = contactableFoot.getRigidBody().getName();
-//      this.momentumBasedController = momentumBasedController;
-//      this.robotSide = robotSide;
+      this.momentumBasedController = momentumBasedController;
+      this.robotSide = robotSide;
 
       footCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
       soleFrame = contactableFoot.getSoleFrame();
@@ -111,6 +114,7 @@ public class PartialFootholdControlModule
       shrunkFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
       shrunkFootPolygonInWorld = new FrameConvexPolygon2d(defaultFootPolygon);
       controllerFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
+      controllerFootPolygonInWorld = new FrameConvexPolygon2d(defaultFootPolygon);
       backupFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
       unsafePolygon = new FrameConvexPolygon2d(defaultFootPolygon);
       lineOfRotation = new FrameLine2d(soleFrame);
@@ -122,6 +126,7 @@ public class PartialFootholdControlModule
       footholdState = new EnumYoVariable<>(namePrefix + "PartialFootHoldState", registry, PartialFootholdState.class, true);
       yoUnsafePolygon = new YoFrameConvexPolygon2d(namePrefix + "UnsafeFootPolygon", "", worldFrame, 10, registry);
       yoShrunkFootPolygon = new YoFrameConvexPolygon2d(namePrefix + "ShrunkFootPolygon", "", worldFrame, 20, registry);
+      yoFullSupportAfterShrinking = new YoFrameConvexPolygon2d(namePrefix + "FullSupportAfterShrinking", "", worldFrame, 20, registry);
 
       shrinkCounter = new IntegerYoVariable(namePrefix + "ShrinkCounter", registry);
 
@@ -137,6 +142,9 @@ public class PartialFootholdControlModule
 
          YoArtifactPolygon yoShrunkPolygon = new YoArtifactPolygon(namePrefix + "ShrunkPolygon", yoShrunkFootPolygon, Color.CYAN, false);
          yoGraphicsListRegistry.registerArtifact("Shrunk Polygon", yoShrunkPolygon);
+
+//         YoArtifactPolygon yoFullSupportGraphic = new YoArtifactPolygon(namePrefix + "FullSupportAfterShrinking", yoFullSupportAfterShrinking, Color.GREEN, false);
+//         yoGraphicsListRegistry.registerArtifact("FullSupportAfterShrinking", yoFullSupportGraphic);
       }
 
       footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, 20, 10, walkingControllerParameters, yoGraphicsListRegistry, registry);
@@ -273,7 +281,9 @@ public class PartialFootholdControlModule
       boolean areaBigEnough = unsafeArea.getDoubleValue() >= minAreaToConsider.getDoubleValue();
       unsafeAreaAboveThreshold.set(areaBigEnough);
 
-      if (unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3) && !wasCoPInThatRegion && areaBigEnough)
+      boolean desiredCopInPolygon = unsafePolygon.isPointInside(desiredCenterOfPressure, 0.0e-3);
+
+      if (desiredCopInPolygon && !wasCoPInThatRegion && areaBigEnough)
       {
          backupFootPolygon.set(shrunkFootPolygon);
          ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkFootPolygon, RobotSide.RIGHT);
@@ -323,8 +333,26 @@ public class PartialFootholdControlModule
          }
       }
 
+      // make sure the foot has the right number of contact points
       controllerFootPolygon.setIncludingFrame(shrunkFootPolygon);
       ConvexPolygonTools.limitVerticesConservative(controllerFootPolygon, footCornerPoints);
+      controllerFootPolygonInWorld.setIncludingFrameAndUpdate(controllerFootPolygon);
+      controllerFootPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
+
+      // if the icp is in the area that would be cut off exit
+      FrameConvexPolygon2d oppositeFootPolygon = momentumBasedController.getBipedSupportPolygons().getFootPolygonInWorldFrame(robotSide.getOppositeSide());
+      fullSupportAfterShrinking.setIncludingFrameAndUpdate(oppositeFootPolygon);
+      fullSupportAfterShrinking.changeFrameAndProjectToXYPlane(worldFrame);
+      fullSupportAfterShrinking.addVertices(controllerFootPolygonInWorld);
+      fullSupportAfterShrinking.update();
+      momentumBasedController.getCapturePoint(capturePoint);
+      yoFullSupportAfterShrinking.setFrameConvexPolygon2d(fullSupportAfterShrinking);
+      boolean icpInPolygon = fullSupportAfterShrinking.isPointInside(capturePoint);
+      if (!icpInPolygon)
+      {
+         shrunkFootPolygon.set(backupFootPolygon);
+         return false;
+      }
 
       List<YoContactPoint> contactPoints = contactStateToModify.getContactPoints();
       for (int i = 0; i < controllerFootPolygon.getNumberOfVertices(); i++)
@@ -344,6 +372,7 @@ public class PartialFootholdControlModule
       footholdState.set(null);
       yoUnsafePolygon.hide();
       yoShrunkFootPolygon.hide();
+      yoFullSupportAfterShrinking.hide();
       for (RotationCalculatorType calculatorType : RotationCalculatorType.values)
       {
          if (!rotationCalculators.containsKey(calculatorType)) continue;
