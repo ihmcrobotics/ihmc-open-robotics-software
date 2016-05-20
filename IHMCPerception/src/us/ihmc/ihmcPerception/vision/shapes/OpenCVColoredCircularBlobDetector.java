@@ -1,7 +1,6 @@
 package us.ihmc.ihmcPerception.vision.shapes;
 
 import boofcv.gui.image.ImagePanel;
-import boofcv.gui.image.ShowImages;
 import org.opencv.core.*;
 import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
@@ -11,9 +10,14 @@ import us.ihmc.ihmcPerception.vision.HSVValue;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.vecmath.Point2d;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -40,6 +44,11 @@ public class OpenCVColoredCircularBlobDetector
    private final Mat houghCirclesOutputMat = new Mat();
 
    private final ArrayList<HoughCircleResult> circles = new ArrayList<>();
+   private static Dimension imagePanelDimension;
+   private static ImagePanel colorImagePanel;
+   private static ImagePanel filterImagePanel;
+
+   private static volatile boolean dirty = true;
 
    public enum CaptureSource
    {
@@ -92,6 +101,16 @@ public class OpenCVColoredCircularBlobDetector
    public Mat getThresholdMat()
    {
       return thresholdMat;
+   }
+
+   public Mat getTmpMat()
+   {
+      return tmpMat;
+   }
+
+   public Mat getMedianBlurredMat()
+   {
+      return medianBlurredMat;
    }
 
    public void updateFromVideo()
@@ -220,9 +239,40 @@ public class OpenCVColoredCircularBlobDetector
 
       openCVColoredCircularBlobDetector.updateFromVideo();
 
-      ImagePanel imagePanel = ShowImages.showWindow(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR()), "Circle Detector");
+      JFrame frame = new JFrame("OpenCV Colored Circular Blob Detector");
+      frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-      JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(imagePanel);
+      final Container rootPane = frame.getContentPane();
+      rootPane.setLayout(new BoxLayout(rootPane, BoxLayout.PAGE_AXIS));
+
+      setupImagePanels(openCVColoredCircularBlobDetector, rootPane);
+
+      JPanel slidersPanel = new JPanel();
+      slidersPanel.setLayout(new BoxLayout(slidersPanel, BoxLayout.LINE_AXIS));
+
+      final HSVValue lowerBound = new HSVValue(0, 0, 0);
+      final HSVValue upperBound = new HSVValue(0, 0, 0);
+
+      final Dimension colorDimension = new Dimension(100, 100);
+
+      final JPanel lowerBoundColorIndicationPanel = new JPanel();
+      lowerBoundColorIndicationPanel.setBackground(Color.red);
+      lowerBoundColorIndicationPanel.setPreferredSize(colorDimension);
+
+      final JPanel upperBoundColorIndicationPanel = new JPanel();
+      upperBoundColorIndicationPanel.setBackground(Color.red);
+      upperBoundColorIndicationPanel.setPreferredSize(colorDimension);
+
+      JPanel lowerBoundPanel = setupHSVPanel("HSV Lower Bound", lowerBound, lowerBoundColorIndicationPanel);
+      JPanel upperBoundPanel = setupHSVPanel("HSV Upper Bound", upperBound, upperBoundColorIndicationPanel);
+
+      slidersPanel.add(lowerBoundPanel);
+      slidersPanel.add(upperBoundPanel);
+
+      rootPane.add(slidersPanel);
+
+      frame.pack();
+      frame.setVisible(true);
 
       Scalar circleColor = new Scalar(160, 0, 0);
 
@@ -234,6 +284,27 @@ public class OpenCVColoredCircularBlobDetector
             break;
          }
 
+         if(dirty)
+         {
+            openCVColoredCircularBlobDetector.rangeOutputMaterials.clear();
+            openCVColoredCircularBlobDetector.rangeOutputMaterials.put(new HSVRange(lowerBound, upperBound), new Mat());
+            dirty = false;
+         }
+
+         final Color lowerBoundBackgroundColor = convertHSVtoRGB(lowerBound);
+         final Color upperBoundBackgroundColor = convertHSVtoRGB(upperBound);
+
+         SwingUtilities.invokeLater(new Runnable()
+         {
+            @Override
+            public void run()
+            {
+               lowerBoundColorIndicationPanel.setBackground(lowerBoundBackgroundColor);
+               upperBoundColorIndicationPanel.setBackground(upperBoundBackgroundColor);
+               rootPane.repaint();
+            }
+         });
+
          openCVColoredCircularBlobDetector.updateFromVideo();
 
          ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
@@ -242,11 +313,116 @@ public class OpenCVColoredCircularBlobDetector
          {
             Point openCVPoint = new Point(circle.getCenter().x, circle.getCenter().y);
             Imgproc.circle(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR(), openCVPoint, (int) circle.getRadius(), circleColor, 1);
+            Imgproc.circle(openCVColoredCircularBlobDetector.getThresholdMat(), openCVPoint, (int) circle.getRadius(), circleColor, 1);
          }
 
-         imagePanel.setBufferedImage(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR()));
+         colorImagePanel.setBufferedImageSafe(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR()));
+         filterImagePanel.setBufferedImageSafe(OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat()));
       }
 
       System.exit(0);
+   }
+
+   private static Color convertHSVtoRGB(HSVValue upperBound)
+   {
+      int rgb = Color.HSBtoRGB((float) upperBound.getHue() / 180.0f, (float) upperBound.getSaturation() / 255.0f, (float) upperBound.getBrightnessValue() / 255.0f);
+      int red = (rgb >> 16) & 0xFF;
+      int green = (rgb >> 8) & 0xFF;
+      int blue = (rgb) & 0xFF;
+      return new Color(red, green, blue);
+   }
+
+   private static JPanel setupHSVPanel(String panelTitle, final HSVValue hsvValue, JPanel colorIndicationPanel)
+   {
+      JPanel boundPanel = new JPanel();
+      boundPanel.setLayout(new FlowLayout());
+      boundPanel.setBorder(BorderFactory.createTitledBorder(panelTitle));
+
+      JPanel slidersPanel = new JPanel();
+      slidersPanel.setLayout(new BoxLayout(slidersPanel, BoxLayout.PAGE_AXIS));
+
+      final JSlider hueSlider = new JSlider(JSlider.HORIZONTAL, 0, 180, 0);
+      final JLabel hueLabel = new JLabel("Hue: " + hueSlider.getValue());
+      hueSlider.setMajorTickSpacing(85);
+      hueSlider.setPaintTicks(true);
+      hueSlider.setPaintLabels(true);
+      hueSlider.addChangeListener(new ChangeListener()
+      {
+         @Override
+         public void stateChanged(ChangeEvent e)
+         {
+            hueLabel.setText("Hue: " + hueSlider.getValue());
+            hsvValue.setHue(hueSlider.getValue());
+            dirty = true;
+         }
+      });
+
+      final JSlider saturationSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
+      final JLabel saturationLabel = new JLabel("Sat: " + saturationSlider.getValue());
+      saturationSlider.setMajorTickSpacing(85);
+      saturationSlider.setPaintTicks(true);
+      saturationSlider.setPaintLabels(true);
+      saturationSlider.addChangeListener(new ChangeListener()
+      {
+         @Override
+         public void stateChanged(ChangeEvent e)
+         {
+            saturationLabel.setText("Sat: " + saturationSlider.getValue());
+            hsvValue.setSaturation(saturationSlider.getValue());
+            dirty = true;
+         }
+      });
+
+      final JSlider valueSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
+      final JLabel valueLabel = new JLabel("Val: " + valueSlider.getValue());
+      valueSlider.setMajorTickSpacing(85);
+      valueSlider.setPaintTicks(true);
+      valueSlider.setPaintLabels(true);
+      valueSlider.addChangeListener(new ChangeListener()
+      {
+         @Override
+         public void stateChanged(ChangeEvent e)
+         {
+            valueLabel.setText("Val: " + valueSlider.getValue());
+            hsvValue.setBrightnessValue(valueSlider.getValue());
+            dirty = true;
+         }
+      });
+
+      slidersPanel.add(hueLabel);
+      slidersPanel.add(hueSlider);
+
+      slidersPanel.add(saturationLabel);
+      slidersPanel.add(saturationSlider);
+
+      slidersPanel.add(valueLabel);
+      slidersPanel.add(valueSlider);
+
+      boundPanel.add(slidersPanel);
+      boundPanel.add(colorIndicationPanel);
+
+      return boundPanel;
+   }
+
+   private static void setupImagePanels(OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector, Container rootPane)
+   {
+      JPanel wrapperPanel = new JPanel();
+      wrapperPanel.setLayout(new BoxLayout(wrapperPanel, BoxLayout.LINE_AXIS));
+      imagePanelDimension = new Dimension(openCVColoredCircularBlobDetector.currentCameraFrameMatInBGR.width() / 2, openCVColoredCircularBlobDetector.currentCameraFrameMatInBGR.height() / 2);
+      colorImagePanel = new ImagePanel();
+      filterImagePanel = new ImagePanel();
+
+      colorImagePanel.setPreferredSize(imagePanelDimension);
+      colorImagePanel.setMaximumSize(imagePanelDimension);
+      colorImagePanel.setMinimumSize(imagePanelDimension);
+
+      filterImagePanel.setPreferredSize(imagePanelDimension);
+      filterImagePanel.setMaximumSize(imagePanelDimension);
+      filterImagePanel.setMinimumSize(imagePanelDimension);
+
+      wrapperPanel.add(colorImagePanel);
+      wrapperPanel.add(filterImagePanel);
+
+      rootPane.add(wrapperPanel);
    }
 }

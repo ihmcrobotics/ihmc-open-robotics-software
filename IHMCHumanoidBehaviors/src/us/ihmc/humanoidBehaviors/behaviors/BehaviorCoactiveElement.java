@@ -8,6 +8,7 @@ public class BehaviorCoactiveElement implements CoactiveElement
    protected final YoVariableRegistry userInterfaceWritableRegistry = new YoVariableRegistry("UserInterfaceSide");
    protected final YoVariableRegistry machineWritableRegistry = new YoVariableRegistry("MachineSide");
 
+   @Override
    public void initializeUserInterfaceSide()
    {
       System.err.println("BehaviorCoactiveElement - initializeUserInterfaceSide not implemented");

@@ -36,6 +36,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
          timer = new Timer().start();
    }
    
+   @Override
    public void newVideoPacketAvailable(RobotSide robotSide, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
    {
       if (DEBUG)
@@ -47,14 +48,15 @@ public class VideoPacketHandler implements CompressedVideoHandler
       packetCommunicator.send(new VideoPacket(robotSide, timeStamp, data, position, orientation, intrinsicParameters, packetDestination));
    }
 
+   @Override
    public void addNetStateListener(NetStateListener compressedVideoDataServer)
    {
       packetCommunicator.attachStateListener(compressedVideoDataServer);
    }
 
+   @Override
    public boolean isConnected()
    {
       return packetCommunicator.isConnected();
    }
-
 }
