@@ -325,7 +325,7 @@ public class OpenCVColoredCircularBlobDetector
 
    private static Color convertHSVtoRGB(HSVValue upperBound)
    {
-      int rgb = Color.HSBtoRGB((float) upperBound.getHue() / 180.0f * 2.0f, (float) upperBound.getSaturation() / 255.0f, (float) upperBound.getBrightnessValue() / 255.0f);
+      int rgb = Color.HSBtoRGB((float) upperBound.getHue() / 180.0f, (float) upperBound.getSaturation() / 255.0f, (float) upperBound.getBrightnessValue() / 255.0f);
       int red = (rgb >> 16) & 0xFF;
       int green = (rgb >> 8) & 0xFF;
       int blue = (rgb) & 0xFF;
