@@ -222,7 +222,7 @@ public class QuadrupedXGaitPlanner
       // Compute step time interval. Step duration is scaled in the range (1.0, 1.1667) to account for end phase shifts.
       double thisStepStartTime = pastStepEndTimeForSameEnd + endDoubleSupportDuration;
       double thisStepEndTime = pastStepEndTimeForOppositeEnd + Math.max((nominalStepDuration + endDoubleSupportDuration) * endPhaseShift / 180.0, 0.0);
-      double thisStepDuration = MathTools.clipToMinMax(thisStepEndTime - thisStepStartTime, nominalStepDuration, 1.1667 * nominalStepDuration);
+      double thisStepDuration = MathTools.clipToMinMax(thisStepEndTime - thisStepStartTime, nominalStepDuration, 1.25 * nominalStepDuration);
 
       thisStepTimeInterval.setStartTime(thisStepStartTime);
       thisStepTimeInterval.setEndTime(thisStepStartTime + thisStepDuration);

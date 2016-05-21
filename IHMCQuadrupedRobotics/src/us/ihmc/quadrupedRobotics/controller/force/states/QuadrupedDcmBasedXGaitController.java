@@ -86,7 +86,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    private final QuadrupedTaskSpaceController taskSpaceController;
 
    // planning
-   private static int NUMBER_OF_PREVIEW_STEPS = 32;
+   private static int NUMBER_OF_PREVIEW_STEPS = 16;
    private double bodyYawSetpoint;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrantDependentList<FramePoint> groundPlanePositions;
@@ -454,13 +454,12 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
       @Override public XGaitEvent process()
       {
-         System.out.println(timedStepController.getQueue().getTail());
+         double currentTime = robotTimestamp.getDoubleValue();
 
          // initialize dcm height
          dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
 
          // compute step plan
-         double currentTime = robotTimestamp.getDoubleValue();
          xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, latestSteps, inputProvider.getPlanarVelocityInput(), currentTime, bodyYawSetpoint, xGaitSettings);
          timedStepController.removeSteps();
          for (RobotEnd robotEnd : RobotEnd.values)
@@ -481,7 +480,8 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          }
          for (RobotEnd robotEnd : RobotEnd.values)
          {
-            latestSteps.get(robotEnd).set(timedStepController.getEarliestStep(robotEnd));
+            if (latestSteps.get(robotEnd).getTimeInterval().getEndTime() > currentTime)
+               latestSteps.get(robotEnd).setGoalPosition(timedStepController.getEarliestStep(robotEnd).getGoalPosition());
          }
 
          // compute nominal dcm trajectory
@@ -507,7 +507,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
       private void computeStepAdjustmentBasedOnDcm(FrameVector stepAdjustment, PreallocatedQueue<QuadrupedTimedStep> queuedSteps, QuadrantDependentList<FramePoint> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint currentDcmEstimate, double currentTime, double naturalFrequency)
       {
-         double stepAdjustmentGain = 0.25;
+         double stepAdjustmentGain = 0.1;
          stepAdjustment.changeFrame(worldFrame);
          currentDcmEstimate.changeFrame(worldFrame);
 
@@ -528,8 +528,8 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
             for (int i = nIntervals - 2; i >= 0; i--)
             {
                double expn = Math.exp(naturalFrequency * (timedStepPressurePlanner.getTimeAtStartOfInterval(nIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1)));
-               double exp1 = Math.exp(naturalFrequency * (timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i)));
-               c.set(i, 0, expn * (1 - exp1));
+               double expi = Math.exp(naturalFrequency * (timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i)));
+               c.set(i, 0, expn * (1 - expi));
             }
             CommonOps.scale(-1, c);
             c.set(nIntervals - 1, 0, 1);
