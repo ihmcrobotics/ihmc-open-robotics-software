@@ -28,6 +28,26 @@ public class GainCalculatorTest
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testComputeDampingRatio()
+   {
+      Random random = new Random();
+      for (int i = 0; i < 1000; i++)
+      {
+         double dampingRatio = GainCalculator.computeDampingRatio(random.nextDouble() * 100 * -1, random.nextDouble() * 100);
+         assertTrue(Double.isNaN(dampingRatio));
+
+         dampingRatio = GainCalculator.computeDerivativeGain(random.nextDouble() * 100, random.nextDouble() * 100 * -1);
+         assertTrue(dampingRatio < 0.0);
+
+         double proportionalGain = random.nextDouble() * 100;
+         double derivativeGain = random.nextDouble() * 10;
+         dampingRatio = GainCalculator.computeDampingRatio(proportionalGain, derivativeGain);
+         assertEquals(derivativeGain / (2 * Math.sqrt(proportionalGain)), dampingRatio, 1e-4);
+      }
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testComputeDampingForSecondOrderSystem()
    {
       double dampingCoeff = GainCalculator.computeDampingForSecondOrderSystem(1, 1, 1);
