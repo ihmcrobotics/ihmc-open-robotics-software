@@ -10,6 +10,8 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.ihmcPerception.vision.HSVValue;
+import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -21,7 +23,8 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class KickBallBehavior extends BehaviorInterface
 {
-   private static final boolean CREATE_COACTIVE_ELEMENT = false;
+   private static final boolean CREATE_COACTIVE_ELEMENT = true;
+   private static final boolean USE_BLOB_FILTERING = true;
 
    private enum KickState
    {
@@ -58,8 +61,17 @@ public class KickBallBehavior extends BehaviorInterface
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
 
       // create sub-behaviors:
+      if(USE_BLOB_FILTERING)
+      {
+         BlobFilteredSphereDetectionBehavior sphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames, fullRobotModel); // new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+         sphereDetectionBehavior.addHSVRange(new HSVRange(new HSVValue(55, 80, 80), new HSVValue(139, 255, 255)));
+         this.sphereDetectionBehavior = sphereDetectionBehavior;
+      }
+      else
+      {
+         sphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+      }
 
-      sphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
       behaviors.add(sphereDetectionBehavior);
 
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
@@ -302,5 +314,34 @@ public class KickBallBehavior extends BehaviorInterface
       doPostBehaviorCleanup();
       this.stop();
       this.pipeLine.clearAll();
+   }
+
+   public boolean isUseBlobFiltering()
+   {
+      return USE_BLOB_FILTERING;
+   }
+
+   public Point2d getBlobLocation()
+   {
+      if(USE_BLOB_FILTERING)
+      {
+         return ((BlobFilteredSphereDetectionBehavior) sphereDetectionBehavior).getLatestBallPosition();
+      }
+      else
+      {
+         return null;
+      }
+   }
+
+   public int getNumBlobsDetected()
+   {
+      if(USE_BLOB_FILTERING)
+      {
+         return ((BlobFilteredSphereDetectionBehavior) sphereDetectionBehavior).getNumBallsDetected();
+      }
+      else
+      {
+         return 0;
+      }
    }
 }
