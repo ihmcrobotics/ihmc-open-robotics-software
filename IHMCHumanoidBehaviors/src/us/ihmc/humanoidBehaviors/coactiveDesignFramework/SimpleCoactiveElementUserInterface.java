@@ -22,7 +22,7 @@ public class SimpleCoactiveElementUserInterface
       this.coactiveElement = coactiveElement;
    }
 
-   public void startOnAThread(String ipAddress, int port, final boolean showSCS)
+   public void startOnAThread(String ipAddress, final boolean showSCS)
    {
       if (showSCS)
       {
@@ -111,13 +111,21 @@ public class SimpleCoactiveElementUserInterface
                abortClicked.set(false);
             }
          }
+
+         @Override public void initializeMachineSide()
+         {
+         }
+
+         @Override public void updateMachineSide()
+         {
+         }
       };
 
       //      SimpleCoactiveElementMachineSide machineSide = new SimpleCoactiveElementMachineSide(coactiveElement);
       //      machineSide.startOnAThread(PORT_FOR_COACTIVE_ELEMENTS);
 
       SimpleCoactiveElementUserInterface userInterface = new SimpleCoactiveElementUserInterface(UISide);
-      userInterface.startOnAThread("localhost", PORT_FOR_COACTIVE_ELEMENTS, true);
+      userInterface.startOnAThread("localhost", true);
    }
 
 }

@@ -190,8 +190,6 @@ public class IHMCHumanoidBehaviorManager
       
       dispatcher.addBehavior(HumanoidBehaviorType.KICK, new KickBallBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport,fullRobotModel,referenceFrames, wholeBodyControllerParameters));
 
-      dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_BALL, new FollowBallBehavior(behaviorCommunicationBridge, fullRobotModel));
-
       // TODO: Fix or remove this behavior
 //      PushButtonBehavior pushButtonBehavior = new PushButtonBehavior(outgoingCommunicationBridge, referenceFrames, yoTime, wristSensors);
 //      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.PUSH_BUTTON, pushButtonBehavior);

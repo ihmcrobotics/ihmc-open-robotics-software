@@ -48,7 +48,7 @@ public class SphereDetectionBehavior extends BehaviorInterface
 
    private final float BALL_RADIUS = 0.1f; // 0.127f;
 
-   private final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
+   protected final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
    private final HumanoidReferenceFrames humanoidReferenceFrames;
 
@@ -100,7 +100,7 @@ public class SphereDetectionBehavior extends BehaviorInterface
 
    }
 
-   private void findBallsAndSaveResult(Point3f[] points)
+   protected void findBallsAndSaveResult(Point3f[] points)
    {
       ArrayList<Sphere3D_F64> balls = detectBalls(points);
 
