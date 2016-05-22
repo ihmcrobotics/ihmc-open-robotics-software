@@ -52,7 +52,7 @@ public class LocalizeDrillBehavior extends BehaviorInterface implements VideoStr
    {
       VideoPacket videoPacket;
 
-      while ((videoPacket = videoQueue.getNewestPacket()) != null)
+      while ((videoPacket = videoQueue.poll()) != null)
       {
          //still empty the incoming queue
          if (!isPaused())
@@ -62,7 +62,7 @@ public class LocalizeDrillBehavior extends BehaviorInterface implements VideoStr
       }
 
       PointCloudWorldPacket pointCloudPacket;
-      while ((pointCloudPacket = pointCloudQueue.getNewestPacket()) != null)
+      while ((pointCloudPacket = pointCloudQueue.poll()) != null)
       {
          //still empty the incoming queue
          if (!isPaused())
