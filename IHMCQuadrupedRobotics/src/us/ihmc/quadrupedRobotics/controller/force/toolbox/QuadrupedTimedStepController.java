@@ -25,11 +25,11 @@ public class QuadrupedTimedStepController
 {
    // parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithoutRegistry(getClass());
-   private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 20000, 20000, 20000);
+   private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 10000, 10000, 5000);
    private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
-   private final DoubleParameter solePressureUpperLimitParameter = parameterFactory.createDouble("solePressureUpperLimit", 75);
+   private final DoubleParameter solePressureUpperLimitParameter = parameterFactory.createDouble("solePressureUpperLimit", 50);
    private final DoubleParameter soleCoefficientOfFrictionParameter = parameterFactory.createDouble("soleCoefficientOfFriction", 75);
    private final DoubleParameter minimumStepAdjustmentTimeParameter = parameterFactory.createDouble("minimumStepAdjustmentTime", 0.1);
 

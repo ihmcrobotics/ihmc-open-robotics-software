@@ -37,10 +37,10 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
    private final DoubleParameter deltaStanceWidthParameter = parameterFactory.createDouble("deltaStanceWidthParameter", 0.05);
    private final DoubleParameter deltaStanceLengthParameter = parameterFactory.createDouble("deltaStanceLengthParameter", 0.05);
    private final DoubleParameter defaultComHeightParameter = parameterFactory.createDouble("defaultComHeight", 0.55);
-   private final DoubleParameter defaultStanceLengthParameter = parameterFactory.createDouble("defaultStanceLength", 1.1);
+   private final DoubleParameter defaultStanceLengthParameter = parameterFactory.createDouble("defaultStanceLength", 1.2);
    private final DoubleParameter defaultStanceWidthParameter = parameterFactory.createDouble("defaultStanceWidth", 0.2);
    private final DoubleParameter defaultStepGroundClearanceParameter = parameterFactory.createDouble("defaultStepGroundClearance", 0.1);
-   private final DoubleParameter defaultStepDurationParameter = parameterFactory.createDouble("defaultStepDurationParameter", 0.3);
+   private final DoubleParameter defaultStepDurationParameter = parameterFactory.createDouble("defaultStepDurationParameter", 0.375);
    private final DoubleParameter defaultEndDoubleSupportDurationParameter = parameterFactory.createDouble("defaultEndDoubleSupportDuration", 0.0);
    private final DoubleParameter defaultEndPhaseShiftParameter = parameterFactory.createDouble("defaultEndPhaseShift", 90);
 
