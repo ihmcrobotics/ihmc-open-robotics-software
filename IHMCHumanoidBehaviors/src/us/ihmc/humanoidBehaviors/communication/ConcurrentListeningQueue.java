@@ -16,7 +16,7 @@ public class ConcurrentListeningQueue<T>
       return !packetQueue.isEmpty();
    }
 
-   public T getNewestPacket()
+   public T poll()
    {
       return packetQueue.poll();
    }
