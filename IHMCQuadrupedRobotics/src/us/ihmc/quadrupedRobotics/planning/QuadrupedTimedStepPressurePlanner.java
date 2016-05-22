@@ -261,6 +261,7 @@ public class QuadrupedTimedStepPressurePlanner
             contactState.set(stepTransition[i].robotQuadrant, ContactState.IN_CONTACT);
             solePosition.get(stepTransition[i].robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
             solePosition.get(stepTransition[i].robotQuadrant).setPoint(stepTransition[i].solePosition);
+            isInitialContactState.get(stepTransition[i].robotQuadrant).setFalse();
             break;
          }
          if ((i + 1 == numberOfStepTransitions) || (stepTransition[i].time != stepTransition[i + 1].time))
