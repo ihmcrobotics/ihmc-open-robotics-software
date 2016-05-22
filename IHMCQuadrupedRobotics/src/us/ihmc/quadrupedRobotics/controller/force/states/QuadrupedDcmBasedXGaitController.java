@@ -473,15 +473,15 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
          // compute step adjustment
          computeStepAdjustmentBasedOnDcm(stepAdjustment, timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), contactState, dcmPositionEstimate, currentTime, dcmPositionController.getNaturalFrequency());
+         for (RobotEnd robotEnd : RobotEnd.values)
+         {
+            latestSteps.get(robotEnd).getGoalPosition().add(stepAdjustment.getVector());
+            groundPlaneEstimator.projectZ(latestSteps.get(robotEnd).getGoalPosition());
+         }
          for (int i = 0; i < timedStepController.getQueue().size(); i++)
          {
             timedStepController.getQueue().get(i).getGoalPosition().add(stepAdjustment.getVector());
             groundPlaneEstimator.projectZ(timedStepController.getQueue().get(i).getGoalPosition());
-         }
-         for (RobotEnd robotEnd : RobotEnd.values)
-         {
-            if (latestSteps.get(robotEnd).getTimeInterval().getEndTime() > currentTime)
-               latestSteps.get(robotEnd).setGoalPosition(timedStepController.getEarliestStep(robotEnd).getGoalPosition());
          }
 
          // compute nominal dcm trajectory
@@ -507,7 +507,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
       private void computeStepAdjustmentBasedOnDcm(FrameVector stepAdjustment, PreallocatedQueue<QuadrupedTimedStep> queuedSteps, QuadrantDependentList<FramePoint> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint currentDcmEstimate, double currentTime, double naturalFrequency)
       {
-         double stepAdjustmentGain = 0.1;
          stepAdjustment.changeFrame(worldFrame);
          currentDcmEstimate.changeFrame(worldFrame);
 
@@ -535,15 +534,15 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
             c.set(nIntervals - 1, 0, 1);
 
             CommonOps.multTransA(c, x0, temp);
-            double mtx0 = temp.get(0, 0);
+            double ctx0 = temp.get(0, 0);
 
             CommonOps.multTransA(c, b, temp);
-            double mtb = temp.get(0, 0);
+            double ctb = temp.get(0, 0);
 
             double previewTime = timedStepPressurePlanner.getTimeAtStartOfInterval(nIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(0);
             double y0 = Math.exp(naturalFrequency * previewTime) * currentDcmEstimate.get(direction);
 
-            double u = stepAdjustmentGain * (-mtx0 + y0) / mtb;
+            double u = (-ctx0 + y0) / ctb;
             stepAdjustment.set(direction, u);
          }
       }
