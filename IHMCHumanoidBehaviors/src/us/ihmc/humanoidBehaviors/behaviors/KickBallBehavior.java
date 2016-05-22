@@ -130,9 +130,7 @@ public class KickBallBehavior extends BehaviorInterface
             {
                coactiveElement.searchingForBall.set(true);
                coactiveElement.foundBall.set(false);
-               coactiveElement.ballX.set(0);
-               coactiveElement.ballY.set(0);
-               coactiveElement.ballZ.set(0);
+               coactiveElement.ballPositions.get(0).setToZero();
             }
          }
       };
@@ -151,10 +149,8 @@ public class KickBallBehavior extends BehaviorInterface
                coactiveElement.waitingForValidation.set(true);
                coactiveElement.validAcknowledged.set(false);
                coactiveElement.foundBall.set(false);
-               coactiveElement.ballX.set(sphereDetectionBehavior.getBallLocation().x);
-               coactiveElement.ballY.set(sphereDetectionBehavior.getBallLocation().y);
-               coactiveElement.ballZ.set(sphereDetectionBehavior.getBallLocation().z);
-               coactiveElement.ballRadius.set(sphereDetectionBehavior.getSpehereRadius());
+               coactiveElement.ballPositions.get(0).set(sphereDetectionBehavior.getBallLocation());
+               coactiveElement.ballRadii[0].set(sphereDetectionBehavior.getSpehereRadius());
             }
          }
       };
@@ -172,10 +168,8 @@ public class KickBallBehavior extends BehaviorInterface
                coactiveElement.searchingForBall.set(false);
                coactiveElement.waitingForValidation.set(false);
                coactiveElement.foundBall.set(true);
-               coactiveElement.ballX.set(sphereDetectionBehavior.getBallLocation().x);
-               coactiveElement.ballY.set(sphereDetectionBehavior.getBallLocation().x);
-               coactiveElement.ballZ.set(sphereDetectionBehavior.getBallLocation().x);
-               coactiveElement.ballRadius.set(sphereDetectionBehavior.getSpehereRadius());
+               coactiveElement.ballPositions.get(0).set(sphereDetectionBehavior.getBallLocation());
+               coactiveElement.ballRadii[0].set(sphereDetectionBehavior.getSpehereRadius());
             }
             walkToLocationBehavior.setTarget(getoffsetPoint());
          }
@@ -238,9 +232,7 @@ public class KickBallBehavior extends BehaviorInterface
          coactiveElement.searchingForBall.set(false);
          coactiveElement.waitingForValidation.set(false);
          coactiveElement.foundBall.set(false);
-         coactiveElement.ballX.set(0);
-         coactiveElement.ballY.set(0);
-         coactiveElement.ballZ.set(0);
+         coactiveElement.ballPositions.get(0).setToZero();
       }
       for (BehaviorInterface behavior : behaviors)
       {

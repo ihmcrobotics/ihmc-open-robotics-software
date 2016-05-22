@@ -28,7 +28,7 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
    }
 
    @Override
-   public void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParameters)
+   public void updateImage(RobotSide robotSide, VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParameters)
    {
       YUVPicture picture = converter.fromBufferedImage(bufferedImage, YUVSubsamplingType.YUV420);
       try
@@ -40,7 +40,7 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
          }
          byte[] data =  new byte[buffer.remaining()];
          buffer.get(data);
-         handler.newVideoPacketAvailable(robotSide, timeStamp, data, cameraPosition, cameraOrientation, intrinsicParameters);
+         handler.newVideoPacketAvailable(robotSide, videoSource, timeStamp, data, cameraPosition, cameraOrientation, intrinsicParameters);
       }
       catch (IOException e)
       {
