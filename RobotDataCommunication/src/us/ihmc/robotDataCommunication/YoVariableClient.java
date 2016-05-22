@@ -82,6 +82,16 @@ public class YoVariableClient
 
       state = ClientState.RUNNING;
    }
+   
+   public void pause()
+   {
+      yoVariableConsumer.pause();
+   }
+   
+   public void resume()
+   {
+      yoVariableConsumer.resume();
+   }
 
    public void requestStop()
    {
