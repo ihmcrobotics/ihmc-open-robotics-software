@@ -5,11 +5,13 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
    private double[] orientationProportionalGains = new double[3];
    private double[] orientationDerivativeGains = new double[3];
    private double[] orientationIntegralGains = new double[3];
+
    private double orientationMaxIntegralError = 0.0;
+   private double orientationMaxDerivativeError = Double.POSITIVE_INFINITY;
+   private double orientationMaxProportionalError = Double.POSITIVE_INFINITY;
 
    private double orientationMaximumAcceleration = Double.POSITIVE_INFINITY;
    private double orientationMaximumJerk = Double.POSITIVE_INFINITY;
-
 
    @Override
    public void set(OrientationPIDGainsInterface gains)
@@ -22,6 +24,9 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
       }
 
       orientationMaxIntegralError = gains.getMaximumIntegralError();
+      orientationMaxDerivativeError = gains.getMaximumDerivativeError();
+      orientationMaxProportionalError = gains.getMaximumProportionalError();
+
       orientationMaximumAcceleration = gains.getMaximumAcceleration();
       orientationMaximumJerk = gains.getMaximumJerk();
    }
@@ -66,6 +71,16 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
       orientationMaximumJerk = maxJerk;
    }
 
+   public void setMaximumDerivativeError(double maxDerivativeError)
+   {
+      orientationMaxDerivativeError = maxDerivativeError;
+   }
+
+   public void setMaximumProportionalError(double maxProportionalError)
+   {
+      orientationMaxProportionalError = maxProportionalError;
+   }
+
    @Override
    public double[] getProportionalGains()
    {
@@ -100,5 +115,17 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
    public double getMaximumJerk()
    {
       return orientationMaximumJerk;
+   }
+
+   @Override
+   public double getMaximumDerivativeError()
+   {
+      return orientationMaxDerivativeError;
+   }
+
+   @Override
+   public double getMaximumProportionalError()
+   {
+      return orientationMaxProportionalError;
    }
 }

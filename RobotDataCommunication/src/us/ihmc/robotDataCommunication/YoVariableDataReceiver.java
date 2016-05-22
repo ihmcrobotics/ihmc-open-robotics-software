@@ -49,6 +49,16 @@ public abstract class YoVariableDataReceiver implements LogPacketHandler
       updateHandler.start();
       client.start();
    }
+   
+   public void pause()
+   {
+      client.setPaused(true);
+   }
+   
+   public void resume()
+   {
+      client.setPaused(false);
+   }
 
    public void stop()
    {
