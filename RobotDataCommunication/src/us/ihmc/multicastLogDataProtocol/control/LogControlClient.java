@@ -3,6 +3,7 @@ package us.ihmc.multicastLogDataProtocol.control;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.communication.net.KryoObjectClient;
@@ -15,9 +16,10 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public class LogControlClient implements NetStateListener
 {
-   private final KryoObjectClient client;
+   private final KryoObjectClient kryoObjectClient;
 
-   private YoVariablesUpdatedListener listener = null;
+   private YoVariablesUpdatedListener yoVariablesUpdatedListener = null;
+   private final List<LogControlVariableChangeListener> logControlVariableChangeListeners = new ArrayList<>();
 
    public LogControlClient(byte[] host, int port, int writeBufferSize, int readBufferSize)
    {
@@ -25,7 +27,7 @@ public class LogControlClient implements NetStateListener
       {
          InetAddress address = InetAddress.getByAddress(host);
          NetClassList list = new LogControlClassList();
-         client = new KryoObjectClient(address, port, list, writeBufferSize, readBufferSize);
+         kryoObjectClient = new KryoObjectClient(address, port, list, writeBufferSize, readBufferSize);
       }
       catch (UnknownHostException e)
       {
@@ -36,10 +38,10 @@ public class LogControlClient implements NetStateListener
    public LogControlClient(byte[] host, int port, YoVariablesUpdatedListener listener)
    {
       this(host, port, 2097152, 2097152);
-      this.listener = listener;
+      this.yoVariablesUpdatedListener = listener;
 
-      client.attachStateListener(this);
-      client.attachListener(ClearLogRequest.class, new ClearLogRequestListener());
+      kryoObjectClient.attachStateListener(this);
+      kryoObjectClient.attachListener(ClearLogRequest.class, new ClearLogRequestListener());
    }
 
    @Override
@@ -54,9 +56,9 @@ public class LogControlClient implements NetStateListener
 
    public void close()
    {
-      if (client.isConnected())
+      if (kryoObjectClient.isConnected())
       {
-         client.close();
+         kryoObjectClient.close();
       }
    }
 
@@ -64,11 +66,19 @@ public class LogControlClient implements NetStateListener
    {
       try
       {
-         client.connect();
+         kryoObjectClient.connect();
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
+      }
+   }
+   
+   public void setSendingChangesEnabled(boolean sendingChangesEnabled)
+   {
+      for (int i = 0; i < logControlVariableChangeListeners.size(); i++)
+      {
+         logControlVariableChangeListeners.get(i).setSendingChangesEnabled(sendingChangesEnabled);
       }
    }
 
@@ -76,28 +86,21 @@ public class LogControlClient implements NetStateListener
    {
       for (int i = 0; i < variables.size(); i++)
       {
-         LogControlVariableChangeListener variableChangedListener = new LogControlVariableChangeListener(i, sendChangedValues);
-         variables.get(i).addVariableChangedListener(variableChangedListener);
+         LogControlVariableChangeListener logControlVariableChangeListener = new LogControlVariableChangeListener(i, sendChangedValues);
+         variables.get(i).addVariableChangedListener(logControlVariableChangeListener);
+         logControlVariableChangeListeners.add(logControlVariableChangeListener);
       }
    }
 
    public void sendClearLogRequest()
    {
-      client.consumeObject(new ClearLogRequest());
-   }
-
-   public void sendVariableChangeRequest(int id, double value)
-   {
-      VariableChangeRequest request = new VariableChangeRequest();
-      request.variableID = id;
-      request.requestedValue = value;
-      client.consumeObject(request);
+      kryoObjectClient.consumeObject(new ClearLogRequest());
    }
 
    public class LogControlVariableChangeListener implements VariableChangedListener
    {
       private final int id;
-      private final boolean sendChangedValue;
+      private boolean sendChangedValue;
 
       public LogControlVariableChangeListener(int id, boolean sendChangedValue)
       {
@@ -105,12 +108,21 @@ public class LogControlClient implements NetStateListener
          this.sendChangedValue = sendChangedValue;
       }
 
+      @Override
       public void variableChanged(YoVariable<?> v)
       {
          if (sendChangedValue)
          {
-            sendVariableChangeRequest(id, v.getValueAsDouble());
+            VariableChangeRequest request = new VariableChangeRequest();
+            request.variableID = id;
+            request.requestedValue = v.getValueAsDouble();
+            kryoObjectClient.consumeObject(request);
          }
+      }
+      
+      public void setSendingChangesEnabled(boolean sendingChangesEnabled)
+      {
+         sendChangedValue = sendingChangesEnabled;
       }
    }
 
@@ -119,7 +131,7 @@ public class LogControlClient implements NetStateListener
       @Override
       public void consumeObject(ClearLogRequest object)
       {
-         listener.clearLog();
+         yoVariablesUpdatedListener.clearLog();
       }
    }
 }

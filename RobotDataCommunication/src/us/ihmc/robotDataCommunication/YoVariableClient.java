@@ -226,6 +226,11 @@ public class YoVariableClient implements LogPacketHandler
       }
    }
    
+   public void setSendingVariableChanges(boolean sendVariableChanges)
+   {
+      logControlClient.setSendingChangesEnabled(sendVariableChanges);
+   }
+   
    public synchronized void disconnected()
    {
       if (state == ClientState.RUNNING)
