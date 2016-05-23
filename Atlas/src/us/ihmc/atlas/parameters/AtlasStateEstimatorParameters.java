@@ -85,14 +85,14 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
 
       String[] armJointNames = createArmJointNames();
       DoubleYoVariable jointVelocityAlphaFilterOne = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilterOne", defaultFilterBreakFrequency);
-//      DoubleYoVariable jointVelocityAlphaFilterTwo = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilterTwo", defaultFilterBreakFrequency);
+      
+      //+++JEP 160513: Turn off second filter. Might help pointy rocks and not sure it was necessary.
+      DoubleYoVariable jointVelocityAlphaFilterTwo = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilterTwo", defaultFilterBreakFrequency);
       DoubleYoVariable wristForceAlphaFilter = sensorProcessing.createAlphaFilter("wristForceAlphaFilter", defaultFilterBreakFrequency);
       DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
       jointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
 
       DoubleYoVariable armJointVelocityAlphaFilter1 = sensorProcessing.createAlphaFilter("armJointVelocityAlphaFilter1", defaultFilterBreakFrequencyArm);
-      
-      //+++JEP 160513: Turn off second filter. Might help pointy rocks and not sure it was necessary.
 //      DoubleYoVariable armJointVelocityAlphaFilter2 = sensorProcessing.createAlphaFilter("armJointVelocityAlphaFilter2", defaultFilterBreakFrequencyArm);
       DoubleYoVariable armJointVelocitySlopTime = new DoubleYoVariable("armJointBacklashSlopTime", registry);
       armJointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
@@ -109,7 +109,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       }
 
       sensorProcessing.computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(jointVelocityAlphaFilterOne, jointVelocitySlopTime, false, armJointNames);
-//      sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(jointVelocityAlphaFilterTwo, false, JOINT_VELOCITY, armJointNames);
+      sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(jointVelocityAlphaFilterTwo, false, JOINT_VELOCITY, armJointNames);
 
       sensorProcessing.computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(armJointVelocityAlphaFilter1, armJointVelocitySlopTime, false, armJointNames);
 //      sensorProcessing.addJointVelocityAlphaFilterOnlyForSpecifiedJoints(armJointVelocityAlphaFilter2, false, armJointNames);
