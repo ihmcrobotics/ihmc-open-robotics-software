@@ -3,8 +3,10 @@ package us.ihmc.humanoidBehaviors.behaviors;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.producers.*;
+import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.OpenCVTools;
@@ -53,10 +55,15 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 
    private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
 
-   public BlobFilteredSphereDetectionBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames,
+   public BlobFilteredSphereDetectionBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, HumanoidReferenceFrames referenceFrames,
          SDFFullHumanoidRobotModel fullRobotModel)
    {
-      super(outgoingCommunicationBridge, referenceFrames);
+      super(behaviorCommunicationBridge, referenceFrames);
+
+      behaviorCommunicationBridge.attachGlobalListener(getNetworkProcessorGlobalObjectConsumer());
+      attachNetworkProcessorListeningQueue(videoPacketQueue, VideoPacket.class);
+      attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
+      attachNetworkProcessorListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
 
       OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
       factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);
@@ -65,8 +72,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       videoDataClient = CompressedVideoDataFactory.createCompressedVideoDataClient(this);
       runBlobFilter.set(false);
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
-      blobDetectionThread.run();
-
+      ThreadTools.startAThread(blobDetectionThread, "blobDetectionThread");
    }
 
    public void addHSVRange(HSVRange hsvRange)
@@ -89,10 +95,18 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
          ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
 
          BufferedImage thresholdBufferedImage = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
-         byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
-         VideoPacket circleBlobThresholdImagePacket = new VideoPacket(RobotSide.LEFT, VideoSource.MULTISENSE, videoTimestamp, jpegThresholdImage, cameraPosition, cameraOrientation,
-               intrinsicParamaters);
-         sendPacketToNetworkProcessor(circleBlobThresholdImagePacket);
+
+         try
+         {
+            byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
+            VideoPacket circleBlobThresholdImagePacket = new VideoPacket(RobotSide.LEFT, VideoSource.MULTISENSE, videoTimestamp, jpegThresholdImage, cameraPosition, cameraOrientation,
+                  intrinsicParamaters);
+            sendPacketToNetworkProcessor(circleBlobThresholdImagePacket);
+         }
+         catch (RuntimeException e)
+         {
+            e.printStackTrace();
+         }
 
          if (DEBUG)
          {
