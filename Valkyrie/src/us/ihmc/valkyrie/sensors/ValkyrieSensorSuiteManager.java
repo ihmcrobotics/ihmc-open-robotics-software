@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.sensors;
 import java.io.IOException;
 import java.net.URI;
 
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -16,6 +17,7 @@ import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.ihmcPerception.depthData.SCSPointCloudLidarReceiver;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
@@ -63,8 +65,13 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(sensorInformation.getCameraParameters(0).getRobotSide(), fullRobotModelFactory, sensorInformation.getCameraParameters(0).getSensorNameInSdf(), robotConfigurationDataBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider);
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         ReferenceFrame lidarFrame = fullRobotModelFactory.createFullRobotModel().getLidarBaseFrame(sensorInformation.getLidarParameters(0).getSensorNameInSdf());
-         new SCSPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, lidarFrame, pointCloudDataReceiver);
+         SDFFullHumanoidRobotModel fullRobotModel = fullRobotModelFactory.createFullRobotModel();
+         String lidarName = sensorInformation.getLidarParameters(0).getSensorNameInSdf();
+         ReferenceFrame lidarFrame = fullRobotModel.getLidarBaseFrame(lidarName);
+         RigidBodyTransform lidarBaseToSensorTransform = fullRobotModel.getLidarBaseToSensorTransform(lidarName);
+         ReferenceFrame lidarAfterJointFrame = fullRobotModel.getLidarJoint(lidarName).getFrameAfterJoint();
+         ReferenceFrame lidarScanFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("lidarScanFrame", lidarAfterJointFrame, lidarBaseToSensorTransform);
+         new SCSPointCloudLidarReceiver(lidarName, scsSensorsCommunicator, lidarFrame, lidarScanFrame, pointCloudDataReceiver);
       }
       cameraDataReceiver.start();
    }
