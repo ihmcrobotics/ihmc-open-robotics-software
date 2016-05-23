@@ -78,7 +78,7 @@ public class HoldPositionState extends AbstractFootControlState
    private final YoFramePoint desiredHoldPosition;
 
    private final BooleanYoVariable doHoldFootFlatOrientation;
- 
+
    private final YoSE3PIDGainsInterface gains;
    private final YoFrameVector yoAngularWeight;
    private final YoFrameVector yoLinearWeight;
@@ -120,7 +120,7 @@ public class HoldPositionState extends AbstractFootControlState
       doSmartHoldPosition = new BooleanYoVariable(namePrefix + "DoSmartHoldPosition", registry);
 
       doHoldFootFlatOrientation = new BooleanYoVariable(namePrefix + "DoHoldFootFlatOrientation", registry);
-      
+
       doFootholdAdjustments = new BooleanYoVariable(namePrefix + "DoFootholdAdjustments", registry);
       doFootholdAdjustments.set(defaultDoFootholdAsjustments);
 
@@ -143,7 +143,7 @@ public class HoldPositionState extends AbstractFootControlState
 
       RigidBody shin = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE).getSuccessor();
       angularXY.set(shin, contactableFoot.getRigidBody());
-      
+
       angularZ.set(rootBody, contactableFoot.getRigidBody());
       linear.set(rootBody, contactableFoot.getRigidBody());
 
@@ -224,12 +224,12 @@ public class HoldPositionState extends AbstractFootControlState
 
       desiredOrientation.setToZero(soleFrame);
       desiredOrientation.changeFrame(worldFrame);
-      
+
       if (doHoldFootFlatOrientation.getBooleanValue())
       {
          desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), 0.0, 0.0);
       }
-      
+
       desiredHoldOrientation.set(desiredOrientation);
 
       desiredLinearVelocity.setToZero(worldFrame);
@@ -281,7 +281,7 @@ public class HoldPositionState extends AbstractFootControlState
       }
 
       // Update the control frame to be at the desired center of pressure
-      desiredCoP3d.setXYIncludingFrame(desiredCoP);
+      desiredCoP3d.setXYIncludingFrame(cop); // used to be desiredCoP
       desiredCoP3d.changeFrame(bodyFixedControlledPose.getReferenceFrame());
       bodyFixedControlledPose.setPosition(desiredCoP3d);
       desiredCoP3d.changeFrame(bodyFixedControlledPoint.getReferenceFrame());
@@ -297,8 +297,8 @@ public class HoldPositionState extends AbstractFootControlState
 
       yoAngularWeight.get(tempAngularWeightVector);
       yoLinearWeight.get(tempLinearWeightVector);
-      
-      
+
+
       spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       spatialFeedbackControlCommand.setGains(gains);
@@ -308,16 +308,16 @@ public class HoldPositionState extends AbstractFootControlState
       angularXY.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       angularXY.setGains(gains.getOrientationGains());
       angularXY.setWeightsForSolver(tempAngularWeightVector);
-      
+
       angularZ.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       angularZ.setGains(gains.getOrientationGains());
       angularZ.setWeightsForSolver(tempAngularWeightVector);
-      
+
       linear.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       linear.setGains(gains.getPositionGains());
       linear.setWeightsForSolver(tempLinearWeightVector);
       linear.setBodyFixedPointToControl(bodyFixedControlledPoint);
-      
+
    }
 
    /**
