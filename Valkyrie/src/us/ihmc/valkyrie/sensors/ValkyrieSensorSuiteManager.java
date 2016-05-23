@@ -71,7 +71,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          RigidBodyTransform lidarBaseToSensorTransform = fullRobotModel.getLidarBaseToSensorTransform(lidarName);
          ReferenceFrame lidarAfterJointFrame = fullRobotModel.getLidarJoint(lidarName).getFrameAfterJoint();
          ReferenceFrame lidarScanFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("lidarScanFrame", lidarAfterJointFrame, lidarBaseToSensorTransform);
-         new SCSPointCloudLidarReceiver(lidarName, scsSensorsCommunicator, lidarFrame, lidarScanFrame, pointCloudDataReceiver);
+         new SCSPointCloudLidarReceiver(scsSensorsCommunicator, lidarFrame, lidarScanFrame, pointCloudDataReceiver);
       }
       cameraDataReceiver.start();
    }
