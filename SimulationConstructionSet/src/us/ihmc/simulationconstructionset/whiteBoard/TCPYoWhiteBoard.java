@@ -5,9 +5,12 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
+
+import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
 {
@@ -18,6 +21,8 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
 
    private ServerSocket serverSocket;
    private Socket clientSocket;
+   
+   private boolean closed = false;
    
    public TCPYoWhiteBoard(String name, final int port)
    {      
@@ -34,84 +39,124 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
       this.ipAddress = ipAddress;
       this.port = port;
    }
-
-   public void run()
+   
+   public void startOnAThread()
    {
-      if (ipAddress == null)
+      ThreadTools.startAThread(this, getName() + "TCPThread");
+      
+      ThreadTools.startAThread(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            try
+            {
+               PrintTools.info(getName() + ": Connecting");
+               connect();
+            }
+            catch (IOException e)
+            {
+               PrintTools.error(getName() + ": Failed to connect");
+               e.printStackTrace();
+            }
+         }
+      }, getName() + "ConnectThread");
+   }
+
+   @Override
+   public void run()
+   {      
+      if (isAServer())
          runServer();
       else
          runClient();
    }
 
-   public int getPort()
+   @Override
+   public void whiteBoardSpecificConnect() throws IOException
    {
-      return port;
+      super.whiteBoardSpecificConnect();
    }
 
    private void runServer()
    {
-      try
+      while (!closed)
       {
-         serverSocket = new ServerSocket(port);
-         
-         // Get the port since if you use 0, Java will find one that is free
-         this.port = serverSocket.getLocalPort();
+         try
+         {
+            if (VERBOSE)
+            {
+               System.out.println("Waiting for server socket to accept");
+            }
+            
+            serverSocket = new ServerSocket(port);
+            // Get the port since if you use 0, Java will find one that is free
+            this.port = serverSocket.getLocalPort();
+            Socket socket = serverSocket.accept();
+            socket.setTcpNoDelay(true);
+            if (VERBOSE)
+               System.out.println("Server socket accepted. Creating dataInputStream and dataOutputStream");
 
-         if (VERBOSE)
-            System.out.println("Waiting for server socket to accept");
+            DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+            DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 
-         Socket socket = serverSocket.accept();
-         socket.setTcpNoDelay(true);
-         if (VERBOSE)
-            System.out.println("Server socket accepted. Creating dataInputStream and dataOutputStream");
+            if (VERBOSE)
+               System.out.println("Server all connected and running.");
 
-         DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-         DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-
-         if (VERBOSE)
-            System.out.println("Server all connected and running.");
-
-         super.setDataStreams(dataInputStream, dataOutputStream);
-         super.run();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
+            super.setDataStreams(dataInputStream, dataOutputStream);
+            super.run();
+            
+            serverSocket.close();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
       }
    }
 
    private void runClient()
    {
-      if (VERBOSE)
-         System.out.println("Trying to connect to server at " + ipAddress + " : " + port);
-
-      try
+      while (!closed)
       {
-         clientSocket = new Socket(ipAddress, port);
+         try
+         {
+            if (VERBOSE)
+            {
+               System.out.println("Trying to connect to server at " + ipAddress + " : " + port);
+            }
 
-         clientSocket.setTcpNoDelay(true);
+            clientSocket = new Socket(ipAddress, port);
+            clientSocket.setTcpNoDelay(true);
 
-         DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
-         DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream()));
+            DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
+            DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream()));
 
-         if (VERBOSE)
-            System.out.println("Connected to server at " + ipAddress + " : " + port);
+            if (VERBOSE)
+               System.out.println("Connected to server at " + ipAddress + " : " + port);
 
-         super.setDataStreams(dataInputStream, dataOutputStream);
-         super.run();
-      }
-      catch (UnknownHostException e)
-      {
-         e.printStackTrace();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
+            super.setDataStreams(dataInputStream, dataOutputStream);
+            super.run();
+            
+            clientSocket.close();
+         }
+         catch (ConnectException e)
+         {
+            PrintTools.error("Failed to connect");
+            ThreadTools.sleep(500);
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
       }
    }
    
+   @Override
    public void whiteBoardSpecificClose() throws IOException
    {
+      closed = true;
+      
       if (serverSocket != null) serverSocket.close();
       if (clientSocket != null) clientSocket.close();
       
@@ -121,8 +166,19 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
       super.whiteBoardSpecificClose();
    }
 
+   @Override
    protected void allowThrowOutStalePacketsIfYouWish()
    {
       // Do nothing. TCP won't through out stale packets. Just UDP.
+   }
+
+   public boolean isAServer()
+   {
+      return ipAddress == null;
+   }
+
+   public int getPort()
+   {
+      return port;
    }
 }

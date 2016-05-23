@@ -12,6 +12,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.MultisenseMocapManualCalibrationTestModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.RosModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
@@ -47,6 +48,7 @@ public class DRCNetworkProcessor
          setupZeroPoseRobotConfigurationPublisherModule(robotModel, params);
          setupMultisenseManualTestModule(robotModel, params);
          setupDrillDetectionModule(params);
+         setupKinematicsToolboxModule(robotModel, params);
          addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts());
 //         addTextToSpeechEngine();
       }
@@ -131,6 +133,21 @@ public class DRCNetworkProcessor
          String methodName = "setupDrillDetectionModule";
          printModuleConnectedDebugStatement(PacketDestination.DRILL_DETECTOR, methodName);
       }
+   }
+
+   private void setupKinematicsToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   {
+      if (!params.isKinematicsToolboxEnabled())
+         return;
+
+      new KinematicsToolboxModule(robotModel, robotModel.getLogModelProvider(), params.isKinematicsToolboxVisualizerEnabled());
+
+      PacketCommunicator kinematicsToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
+      packetRouter.attachPacketCommunicator(PacketDestination.KINEMATICS_TOOLBOX_MODULE, kinematicsToolboxCommunicator);
+      kinematicsToolboxCommunicator.connect();
+
+      String methodName = "setupWholeBodyInverseKinematicsModule";
+      printModuleConnectedDebugStatement(PacketDestination.KINEMATICS_TOOLBOX_MODULE, methodName);
    }
 
    private void setupMultisenseManualTestModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)

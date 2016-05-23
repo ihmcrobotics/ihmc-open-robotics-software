@@ -4,6 +4,12 @@ public class BooleanParameter extends Parameter
 {
    private boolean value;
 
+   private BooleanParameter() // no-arg for serialization
+   {
+      super(null);
+      this.value = false;
+   }
+
    BooleanParameter(String path, boolean defaultValue)
    {
       super(path);

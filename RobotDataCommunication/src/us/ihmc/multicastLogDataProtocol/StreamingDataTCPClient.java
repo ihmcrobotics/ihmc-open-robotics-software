@@ -17,6 +17,7 @@ public class StreamingDataTCPClient extends Thread
 {
    public static final int TIMEOUT = 45000;
    private volatile boolean running = false;
+   private volatile boolean paused = false;
 
    private final InetSocketAddress address;
    private final LogPacketHandler updateHandler;
@@ -116,8 +117,11 @@ public class StreamingDataTCPClient extends Thread
             }
 
             dataBuffer.flip();
-            updateHandler.newDataAvailable(header, dataBuffer);
-
+            
+            if (!paused)
+            {
+               updateHandler.newDataAvailable(header, dataBuffer);
+            }
          }
          catch (ClosedByInterruptException e)
          {
@@ -134,7 +138,6 @@ public class StreamingDataTCPClient extends Thread
             System.out.println(e.getMessage());
             break DATALOOP;
          }
-
       }
       try
       {
@@ -174,6 +177,16 @@ public class StreamingDataTCPClient extends Thread
    public boolean isRunning()
    {
       return running;
+   }
+   
+   public boolean isPaused()
+   {
+      return paused;
+   }
+   
+   public void setPaused(boolean paused)
+   {
+      this.paused = paused;
    }
 
    public void requestStop()

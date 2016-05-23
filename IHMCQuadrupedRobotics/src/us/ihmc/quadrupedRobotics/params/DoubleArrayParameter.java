@@ -7,6 +7,12 @@ public class DoubleArrayParameter extends Parameter
 {
    private double[] value;
 
+   private DoubleArrayParameter() // no-arg for serialization
+   {
+      super(null);
+      this.value =  new double[0];
+   }
+
    DoubleArrayParameter(String path, double... defaultValue)
    {
       super(path);

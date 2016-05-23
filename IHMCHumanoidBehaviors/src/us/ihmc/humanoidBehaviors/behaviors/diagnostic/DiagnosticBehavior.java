@@ -2304,7 +2304,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       if (!hasControllerWakenUp.getBooleanValue())
       {
-         boolean justReceivedAPacketFromController = inputListeningQueue.getNewestPacket() != null;
+         boolean justReceivedAPacketFromController = inputListeningQueue.poll() != null;
          if (justReceivedAPacketFromController)
          {
             timeWhenControllerWokeUp.set(yoTime.getDoubleValue());

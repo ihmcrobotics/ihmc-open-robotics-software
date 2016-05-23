@@ -15,7 +15,8 @@ public class InverseKinematicsCommandList implements InverseKinematicsCommand<In
 
    public void addCommand(InverseKinematicsCommand<?> command)
    {
-      commandList.add(command);
+      if (command != null)
+         commandList.add(command);
    }
 
    public void clear()

@@ -158,6 +158,34 @@ public class MathTools
    }
 
    /**
+    * True if value |(v1-v2)| <= |epsilon|
+    * True if v1 and v2 are Float.NaN
+    * True if v1 and v2 are Positive Infinity
+    * True if v1 and v2 are Negative Infinity
+    * false if not
+    *
+    * @param v1 float
+    * @param v2 float
+    * @param epsilon float
+    * @return boolean
+    */
+   public static boolean epsilonEquals(float v1, float v2, float epsilon)
+   {
+      if(Float.isNaN(v1) && Float.isNaN(v2))
+      {
+         return true;
+      }
+      
+      //catches infinites
+      if(v1 == v2)
+      {
+         return true;
+      }
+      
+      return Math.abs(v1 - v2) <= Math.abs(epsilon);
+   }
+
+   /**
     * True if v2 is within given percent of v1
     * False otherwise
     *
@@ -225,6 +253,7 @@ public class MathTools
       return (Math.min(max, Math.max(val, min)));
    }
 
+
    /**
     * Checks to see if val is Inside Bounds of max and min
     *
@@ -242,6 +271,16 @@ public class MathTools
       }
 
       return ((val > min) && (val < max));
+   }
+
+   public static boolean isInsideBoundsInclusive(double val, double max)
+   {
+      return isInsideBoundsInclusive(val, -max, max);
+   }
+
+   public static boolean isInsideBoundsExclusive(double val, double max)
+   {
+      return isInsideBoundsExclusive(val, -max, max);
    }
 
    public static boolean isInsideBoundsInclusive(double val, double min, double max)

@@ -46,9 +46,9 @@ public class SphereDetectionBehavior extends BehaviorInterface
    //   final int pointDropFactor = 4;
    private final static boolean DEBUG = false;
 
-   private final float BALL_RADIUS = 0.127f;
+   private final float BALL_RADIUS = 0.1f; // 0.127f;
 
-   private final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
+   protected final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
    private final HumanoidReferenceFrames humanoidReferenceFrames;
 
@@ -69,6 +69,11 @@ public class SphereDetectionBehavior extends BehaviorInterface
    {
       ballFound.set(false);
    }
+   
+   public double getSpehereRadius()
+   {
+      return ballRadius.getValueAsDouble();
+   }
 
    public Point3d getBallLocation()
    {
@@ -82,7 +87,7 @@ public class SphereDetectionBehavior extends BehaviorInterface
    public void doControl()
    {
 
-      while ((pointCloudPacket = pointCloudQueue.getNewestPacket()) != null)
+      while ((pointCloudPacket = pointCloudQueue.poll()) != null)
       {
          pointCloudPacketLatest = pointCloudPacket;
       }
@@ -95,7 +100,7 @@ public class SphereDetectionBehavior extends BehaviorInterface
 
    }
 
-   private void findBallsAndSaveResult(Point3f[] points)
+   protected void findBallsAndSaveResult(Point3f[] points)
    {
       ArrayList<Sphere3D_F64> balls = detectBalls(points);
 

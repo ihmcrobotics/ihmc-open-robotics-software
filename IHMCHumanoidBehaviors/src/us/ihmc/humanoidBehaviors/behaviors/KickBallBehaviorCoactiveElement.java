@@ -1,110 +1,38 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-
-import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.math.frames.YoFramePointArray;
 
-public class KickBallBehaviorCoactiveElement implements CoactiveElement
+public abstract class KickBallBehaviorCoactiveElement extends BehaviorCoactiveElement
 {
-   private final YoVariableRegistry userInterfaceWritableRegistry = new YoVariableRegistry("UserInterfaceSide");
-   private final YoVariableRegistry machineWritableRegistry = new YoVariableRegistry("MachineSide");
+   private static final int MAX_DETECTED_BALLS = 50;
+   
+   //UI SIDE YOVARS
+   public final IntegerYoVariable userInterfaceSideCount = new IntegerYoVariable("userInterfaceSideCount", userInterfaceWritableRegistry);
+   public final BooleanYoVariable abortClicked = new BooleanYoVariable("abortClicked", userInterfaceWritableRegistry);
+   public final BooleanYoVariable validClicked = new BooleanYoVariable("validClicked", userInterfaceWritableRegistry);
 
-   private final IntegerYoVariable userInterfaceSideCount = new IntegerYoVariable("userInterfaceSideCount", userInterfaceWritableRegistry);
-   private final BooleanYoVariable abortClicked = new BooleanYoVariable("abortClicked", userInterfaceWritableRegistry);
+   //BEHAVIOR SIDE YOVARS
+   public final IntegerYoVariable machineSideCount = new IntegerYoVariable("machineSideCount", machineWritableRegistry);
+   public final IntegerYoVariable abortCount = new IntegerYoVariable("abortCount", machineWritableRegistry);
+   public final BooleanYoVariable abortAcknowledged = new BooleanYoVariable("abortAcknowledged", machineWritableRegistry);
+   public final BooleanYoVariable searchingForBall = new BooleanYoVariable("searchingForBall", machineWritableRegistry);
+   public final BooleanYoVariable foundBall = new BooleanYoVariable("foundBall", machineWritableRegistry);
 
-   private final IntegerYoVariable machineSideCount = new IntegerYoVariable("machineSideCount", machineWritableRegistry);
-   private final IntegerYoVariable abortCount = new IntegerYoVariable("abortCount", machineWritableRegistry);
-   private final BooleanYoVariable abortAcknowledged = new BooleanYoVariable("abortAcknowledged", machineWritableRegistry);
+   public final IntegerYoVariable numBlobsDetected = new IntegerYoVariable("numBlobsDetected", machineWritableRegistry);
+   public final DoubleYoVariable blobX = new DoubleYoVariable("blobX", machineWritableRegistry);
+   public final DoubleYoVariable blobY = new DoubleYoVariable("blobY", machineWritableRegistry);
 
-   private KickBallBehavior kickBallBehavior;
-
-   private JFrame jFrame;
-   private JButton jButton;
-
-   public void setKickBallBehavior(KickBallBehavior kickBallBehavior)
+   protected final YoFramePointArray ballPositions = new YoFramePointArray(MAX_DETECTED_BALLS, "detectedBall", machineWritableRegistry);
+   protected final DoubleYoVariable[] ballRadii = new DoubleYoVariable[MAX_DETECTED_BALLS];
    {
-      this.kickBallBehavior = kickBallBehavior;
-   }
-
-   @Override
-   public void initializeUserInterfaceSide()
-   {
-      if (jFrame == null)
+      for (int index = 0; index < MAX_DETECTED_BALLS; index++)
       {
-         jFrame = new JFrame();
-         jFrame.setSize(600, 600);
-
-         jButton = new JButton("Abort");
-         jFrame.getContentPane().add(jButton);
-
-         jButton.addActionListener(new ActionListener()
-         {
-            @Override
-            public void actionPerformed(ActionEvent arg0)
-            {
-               abortClicked.set(true);
-            }
-         });
-
-         jFrame.setVisible(true);
-      }
-      userInterfaceSideCount.set(10);
-   }
-
-   @Override
-   public void updateUserInterfaceSide()
-   {
-      userInterfaceSideCount.increment();
-
-      if ((abortClicked.getBooleanValue()) && (abortAcknowledged.getBooleanValue()))
-      {
-         abortClicked.set(false);
+         ballRadii[index] = new DoubleYoVariable("ballRadius" + index, machineWritableRegistry);
       }
    }
-
-   @Override
-   public YoVariableRegistry getUserInterfaceWritableYoVariableRegistry()
-   {
-      return userInterfaceWritableRegistry;
-   }
-
-   @Override
-   public void initializeMachineSide()
-   {
-      machineSideCount.set(100);
-   }
-
-   @Override
-   public void updateMachineSide()
-   {
-      if (abortAcknowledged.getBooleanValue() && (!abortClicked.getBooleanValue()))
-      {
-         abortAcknowledged.set(false);
-      }
-
-      if ((abortClicked.getBooleanValue()) && (!abortAcknowledged.getBooleanValue()))
-      {
-         if (kickBallBehavior != null)
-         {
-            kickBallBehavior.abort();
-         }
-         abortCount.increment();
-         abortAcknowledged.set(true);
-      }
-
-      machineSideCount.increment();
-   }
-
-   @Override
-   public YoVariableRegistry getMachineWritableYoVariableRegistry()
-   {
-      return machineWritableRegistry;
-   }
+   protected final BooleanYoVariable validAcknowledged = new BooleanYoVariable("validAcknowledged", machineWritableRegistry);
+   protected final BooleanYoVariable waitingForValidation = new BooleanYoVariable("waitingForValidation", machineWritableRegistry);
 }

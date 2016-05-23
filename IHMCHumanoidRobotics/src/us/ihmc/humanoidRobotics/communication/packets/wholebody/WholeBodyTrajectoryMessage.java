@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import us.ihmc.communication.packets.MultiplePacketHolder;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.TrackablePacket;
+import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.MultiplePacketHolder;
-import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
@@ -24,7 +25,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " If setting a field to null is not an option (going through IHMC ROS API), the user can use the latter rule to select the messages to be processed by the controller.",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/whole_body_trajectory")
-public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessage>
+public class WholeBodyTrajectoryMessage extends TrackablePacket<WholeBodyTrajectoryMessage>
       implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryMessage>, MultiplePacketHolder
 {
    @RosExportedField(documentation = "Trajectory for the left hand")
@@ -216,6 +217,88 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
          return false;
 
       return true;
+   }
+
+   public void clear()
+   {
+      clearHandTrajectoryMessages();
+      clearArmTrajectoryMessages();
+      clearChestTrajectoryMessage();
+      clearPelvisTrajectoryMessage();
+      clearFootTrajectoryMessages();
+   }
+
+   public void clearHandTrajectoryMessages()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         clearHandTrajectoryMessage(robotSide);
+   }
+
+   public void clearHandTrajectoryMessage(RobotSide robotSide)
+   {
+      switch (robotSide)
+      {
+      case LEFT:
+         leftHandTrajectoryMessage = null;
+         return;
+      case RIGHT:
+         rightHandTrajectoryMessage = null;
+         return;
+      default:
+         throw new RuntimeException("Should not get there.");
+      }
+   }
+
+   public void clearArmTrajectoryMessages()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         clearArmTrajectoryMessage(robotSide);
+   }
+
+   public void clearArmTrajectoryMessage(RobotSide robotSide)
+   {
+      switch (robotSide)
+      {
+      case LEFT:
+         leftArmTrajectoryMessage = null;
+         return;
+      case RIGHT:
+         rightArmTrajectoryMessage = null;
+         return;
+      default:
+         throw new RuntimeException("Should not get there.");
+      }
+   }
+
+   public void clearChestTrajectoryMessage()
+   {
+      chestTrajectoryMessage = null;
+   }
+
+   public void clearPelvisTrajectoryMessage()
+   {
+      pelvisTrajectoryMessage = null;
+   }
+
+   public void clearFootTrajectoryMessages()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         clearFootTrajectoryMessage(robotSide);
+   }
+
+   public void clearFootTrajectoryMessage(RobotSide robotSide)
+   {
+      switch (robotSide)
+      {
+      case LEFT:
+         leftFootTrajectoryMessage = null;
+         return;
+      case RIGHT:
+         rightFootTrajectoryMessage = null;
+         return;
+      default:
+         throw new RuntimeException("Should not get there.");
+      }
    }
 
    @Override

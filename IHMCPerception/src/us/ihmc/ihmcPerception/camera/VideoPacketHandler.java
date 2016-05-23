@@ -8,6 +8,7 @@ import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.CompressedVideoHandler;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -36,7 +37,8 @@ public class VideoPacketHandler implements CompressedVideoHandler
          timer = new Timer().start();
    }
    
-   public void newVideoPacketAvailable(RobotSide robotSide, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
+   @Override
+   public void newVideoPacketAvailable(RobotSide robotSide, VideoSource videoSource, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
    {
       if (DEBUG)
       {
@@ -44,17 +46,18 @@ public class VideoPacketHandler implements CompressedVideoHandler
          timer.lap();
       }
          
-      packetCommunicator.send(new VideoPacket(robotSide, timeStamp, data, position, orientation, intrinsicParameters, packetDestination));
+      packetCommunicator.send(new VideoPacket(robotSide, videoSource, timeStamp, data, position, orientation, intrinsicParameters, packetDestination));
    }
 
+   @Override
    public void addNetStateListener(NetStateListener compressedVideoDataServer)
    {
       packetCommunicator.attachStateListener(compressedVideoDataServer);
    }
 
+   @Override
    public boolean isConnected()
    {
       return packetCommunicator.isConnected();
    }
-
 }
