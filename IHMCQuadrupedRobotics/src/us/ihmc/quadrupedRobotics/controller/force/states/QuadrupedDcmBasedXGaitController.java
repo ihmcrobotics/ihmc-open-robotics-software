@@ -96,12 +96,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    private final QuadrupedTimedStepPressurePlanner timedStepPressurePlanner;
    private final QuadrantDependentList<FrameVector> timedStepAdjustmentAtContactSwitch;
 
-   // graphics
-   private final BagOfBalls xGaitPreviewStepVisualization;
-   private final FramePoint xGaitPreviewStepVisualizationPosition;
-   private static final QuadrantDependentList<AppearanceDefinition> xGaitPreviewStepAppearance = new QuadrantDependentList<>(
-         YoAppearance.Red(), YoAppearance.Blue(), YoAppearance.RGBColor(1, 0.5, 0.0), YoAppearance.RGBColor(0.0, 0.5, 1.0));
-
    // state machine
    public enum XGaitState
    {
@@ -173,10 +167,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       xgaitStateMachineBuilder.addTransition(XGaitEvent.TIMEOUT, XGaitState.INITIAL, XGaitState.ACTIVE);
       xGaitStateMachine = xgaitStateMachineBuilder.build(XGaitState.INITIAL);
       runtimeEnvironment.getParentRegistry().addChild(registry);
-
-      // graphics
-      xGaitPreviewStepVisualization = BagOfBalls.createRainbowBag(xGaitPreviewSteps.size(), 0.015, "xGaitPreviewSteps", registry, runtimeEnvironment.getGraphicsListRegistry());
-      xGaitPreviewStepVisualizationPosition = new FramePoint();
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -237,15 +227,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 
-   private void updateGraphics()
-   {
-      for (int i = 0; i < xGaitPreviewSteps.size(); i++)
-      {
-         xGaitPreviewSteps.get(i).getGoalPosition(xGaitPreviewStepVisualizationPosition);
-         xGaitPreviewStepVisualization.setBallLoop(xGaitPreviewStepVisualizationPosition, xGaitPreviewStepAppearance.get(xGaitPreviewSteps.get(i).getRobotQuadrant()));
-      }
-   }
-
    private void updateSettings()
    {
       settingsProvider.getXGaitSettings(xGaitSettings);
@@ -264,7 +245,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       updateSettings();
       updateEstimates();
       updateSetpoints();
-      updateGraphics();
       return null;
    }
 
@@ -311,16 +291,12 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       // initialize state machine
       updateSettings();
       xGaitStateMachine.reset();
-
-      // initialize graphics
-      xGaitPreviewStepVisualization.setVisible(true);
    }
 
    @Override public void onExit()
    {
       xGaitStateMachine.reset();
       timedStepController.removeSteps();
-      xGaitPreviewStepVisualization.setVisible(false);
    }
 
    private class InitialXGaitState implements FiniteStateMachineState<XGaitEvent>
@@ -362,6 +338,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          for (int i = 0; i < xGaitPreviewSteps.size(); i++)
          {
             timedStepController.addStep(xGaitPreviewSteps.get(i));
+            groundPlaneEstimator.projectZ(timedStepController.getQueue().get(i).getGoalPosition());
          }
 
          // initialize dcm height

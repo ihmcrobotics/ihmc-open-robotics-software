@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
@@ -20,6 +22,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedTimedStepController
 {
@@ -41,6 +45,12 @@ public class QuadrupedTimedStepController
    private final QuadrantDependentList<ContactState> contactState;
    private final QuadrantDependentList<FramePoint> solePositionEstimate;
 
+   // graphics
+   private final BagOfBalls stepQueueVisualization;
+   private final FramePoint stepQueueVisualizationPosition;
+   private static final QuadrantDependentList<AppearanceDefinition> stepQueueAppearance = new QuadrantDependentList<>(
+         YoAppearance.Red(), YoAppearance.Blue(), YoAppearance.RGBColor(1, 0.5, 0.0), YoAppearance.RGBColor(0.0, 0.5, 1.0));
+
    // state machine
    public enum StepState
    {
@@ -53,7 +63,7 @@ public class QuadrupedTimedStepController
    private final QuadrantDependentList<FiniteStateMachine<StepState, StepEvent>> stepStateMachine;
    private QuadrupedTimedStepTransitionCallback stepTransitionCallback;
 
-   public QuadrupedTimedStepController(QuadrupedSolePositionController solePositionController, DoubleYoVariable timestamp, YoVariableRegistry registry)
+   public QuadrupedTimedStepController(QuadrupedSolePositionController solePositionController, DoubleYoVariable timestamp, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       // control variables
       this.timestamp = timestamp;
@@ -81,6 +91,10 @@ public class QuadrupedTimedStepController
          stepStateMachine.set(robotQuadrant, stateMachineBuilder.build(StepState.SUPPORT));
       }
       stepTransitionCallback = null;
+
+      // graphics
+      stepQueueVisualization = BagOfBalls.createRainbowBag(stepQueue.capacity(), 0.015, "xGaitSteps", registry, graphicsListRegistry);
+      stepQueueVisualizationPosition = new FramePoint();
    }
 
    public void registerStepTransitionCallback(QuadrupedTimedStepTransitionCallback stepTransitionCallback)
@@ -216,6 +230,7 @@ public class QuadrupedTimedStepController
       solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, estimates);
       limitSoleForceCommand(soleForceCommand);
       handleStepEvents();
+      updateGraphics();
    }
 
    private void handleStepEvents()
@@ -234,6 +249,20 @@ public class QuadrupedTimedStepController
          {
             stepStateMachine.get(step.getRobotQuadrant()).trigger(StepEvent.LIFT_OFF);
          }
+      }
+   }
+
+   private void updateGraphics()
+   {
+      for (int i = 0; i < stepQueue.size(); i++)
+      {
+         stepQueue.get(i).getGoalPosition(stepQueueVisualizationPosition);
+         stepQueueVisualization.setBallLoop(stepQueueVisualizationPosition, stepQueueAppearance.get(stepQueue.get(i).getRobotQuadrant()));
+      }
+      stepQueueVisualizationPosition.setToZero();
+      for (int i = stepQueue.size(); i < stepQueue.capacity(); i++)
+      {
+         stepQueueVisualization.setBallLoop(stepQueueVisualizationPosition);
       }
    }
 
