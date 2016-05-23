@@ -21,8 +21,8 @@ public abstract class YoVariableDataReceiver implements LogPacketHandler
    private int displayOneInNPackets;
 
    private CRC32 crc32 = new CRC32();
-   private final StreamingDataTCPClient client;
-   private final ThreadedLogPacketHandler updateHandler;
+   private final StreamingDataTCPClient streamingDataTCPClient;
+   private final ThreadedLogPacketHandler threadedLogPacketHandler;
 
    public YoVariableDataReceiver(byte[] dataIP, int port, int displayOneInNPackets)
    {
@@ -38,33 +38,33 @@ public abstract class YoVariableDataReceiver implements LogPacketHandler
          throw new RuntimeException(e);
       }
 
-      updateHandler = new ThreadedLogPacketHandler(this, RECEIVE_BUFFER_SIZE);
-      client = new StreamingDataTCPClient(inetAddress, port, updateHandler, displayOneInNPackets);
+      threadedLogPacketHandler = new ThreadedLogPacketHandler(this, RECEIVE_BUFFER_SIZE);
+      streamingDataTCPClient = new StreamingDataTCPClient(inetAddress, port, threadedLogPacketHandler, displayOneInNPackets);
    }
 
    public void start(int bufferSize)
    {
       decompressed = ByteBuffer.allocate(bufferSize);
 
-      updateHandler.start();
-      client.start();
+      threadedLogPacketHandler.start();
+      streamingDataTCPClient.start();
    }
    
    public void pause()
    {
-      client.setPaused(true);
+      streamingDataTCPClient.setPaused(true);
    }
    
    public void resume()
    {
-      client.setPaused(false);
+      streamingDataTCPClient.setPaused(false);
    }
 
    public void stop()
    {
-      if (client.isRunning())
+      if (streamingDataTCPClient.isRunning())
       {
-         client.requestStop();
+         streamingDataTCPClient.requestStop();
       }
    }
 
@@ -72,7 +72,7 @@ public abstract class YoVariableDataReceiver implements LogPacketHandler
    {
       try
       {
-         return client.getHandshake();
+         return streamingDataTCPClient.getHandshake();
       }
       catch (IOException e)
       {
@@ -129,7 +129,7 @@ public abstract class YoVariableDataReceiver implements LogPacketHandler
    @Override
    public void timeout()
    {
-      updateHandler.shutdown();
+      threadedLogPacketHandler.shutdown();
       onTimeout();
    }
 
