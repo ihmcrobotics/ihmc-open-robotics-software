@@ -21,7 +21,7 @@ public class SCSPointCloudLidarReceiver implements ObjectConsumer<SimulatedLidar
    private final ReferenceFrame lidarScanFrame;
    private final RigidBodyTransform identityTransform = new RigidBodyTransform();
 
-   public SCSPointCloudLidarReceiver(String lidarName, ObjectCommunicator scsSensorsCommunicator, ReferenceFrame lidarFrame, ReferenceFrame lidarScanFrame,
+   public SCSPointCloudLidarReceiver(ObjectCommunicator scsSensorsCommunicator, ReferenceFrame lidarFrame, ReferenceFrame lidarScanFrame,
          PointCloudDataReceiver pointCloudDataReceiver)
    {
       this.pointCloudDataReceiver = pointCloudDataReceiver;
