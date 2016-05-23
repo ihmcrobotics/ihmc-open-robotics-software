@@ -16,10 +16,14 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.KinematicsToolboxStateMessage;
+import us.ihmc.communication.packets.KinematicsToolboxStateMessage.KinematicsToolboxState;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -273,6 +277,11 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Spigot pose
       registerPacketClass(SpigotPosePacket.class);
 
+      // Kinematics toolbox module
+      registerPacketClass(KinematicsToolboxOutputStatus.class);
+      registerPacketClass(KinematicsToolboxStateMessage.class);
+      registerPacketField(KinematicsToolboxState.class);
+
       // Joint data
       registerPacketClass(RobotConfigurationData.class);
       registerPacketFields(double[].class, Vector3d.class);
@@ -459,5 +468,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       
       registerPacketClass(BatchedDesiredSteeringAngleAndSingleJointAnglePacket.class);
       registerPacketClass(TextToSpeechPacket.class);
+      registerPacketField(VideoSource.class);
    }
 }

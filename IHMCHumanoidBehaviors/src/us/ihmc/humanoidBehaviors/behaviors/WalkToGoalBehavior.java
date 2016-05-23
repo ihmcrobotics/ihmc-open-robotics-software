@@ -127,7 +127,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	
 	private boolean checkForNewPlan(){
 		//return true if new packet, else return false.
-		FootstepPathPlanPacket newestPacket = plannedPathListeningQueue.getNewestPacket();
+		FootstepPathPlanPacket newestPacket = plannedPathListeningQueue.poll();
 		if (newestPacket != null){
 			System.out.println("New plan received. Checking validity...");
 			if (planValid(newestPacket)){
@@ -181,7 +181,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	
 	private boolean checkForStepCompleted(){
 		//return true if there was a new packet, otherwise return false.
-		FootstepStatus newestPacket = footstepStatusQueue.getNewestPacket();
+		FootstepStatus newestPacket = footstepStatusQueue.poll();
 		if (newestPacket != null){
 			//TODO: update current location and predicted location from the feedback
 			if (newestPacket.status == Status.STARTED){ 
@@ -316,7 +316,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	
 	private void checkForNewInputs()
 	{
-		WalkToGoalBehaviorPacket newestPacket = inputListeningQueue.getNewestPacket();
+		WalkToGoalBehaviorPacket newestPacket = inputListeningQueue.poll();
 		if (newestPacket != null)
 		{
          if (newestPacket.action == WalkToGoalBehaviorPacket.WalkToGoalAction.FIND_PATH){

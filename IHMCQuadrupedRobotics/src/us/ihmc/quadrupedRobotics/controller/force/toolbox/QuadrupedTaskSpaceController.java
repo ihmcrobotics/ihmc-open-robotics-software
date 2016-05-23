@@ -133,7 +133,7 @@ public class QuadrupedTaskSpaceController
    private final FrameVector contactForceStorage;
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceController");
 
-   public QuadrupedTaskSpaceController(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT, YoVariableRegistry parentRegistry)
+   public QuadrupedTaskSpaceController(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       // virtual model controller
       virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, controlDT, registry);
@@ -141,6 +141,7 @@ public class QuadrupedTaskSpaceController
       contactForceStorage = new FrameVector();
 
       parentRegistry.addChild(registry);
+      virtualModelController.registerGraphics(graphicsListRegistry);
       reset();
    }
 
@@ -148,11 +149,6 @@ public class QuadrupedTaskSpaceController
    {
       virtualModelController.reset();
       contactForceOptimization.reset();
-   }
-
-   public void registerGraphics(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      virtualModelController.registerGraphics(yoGraphicsListRegistry);
    }
 
    public void compute(Settings settings, Commands commands)

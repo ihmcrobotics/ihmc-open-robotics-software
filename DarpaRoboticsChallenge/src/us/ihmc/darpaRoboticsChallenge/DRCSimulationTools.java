@@ -66,6 +66,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.enablePerceptionModule(true);
          networkProcessorParameters.enableRosModule(modulesToStart.contains(Modules.ROS_MODULE));
          networkProcessorParameters.enableLocalControllerCommunicator(true);
+         networkProcessorParameters.enableKinematicsToolbox(true);
       }
       else
       {

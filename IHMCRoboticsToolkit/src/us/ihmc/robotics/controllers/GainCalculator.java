@@ -15,6 +15,14 @@ public class GainCalculator
       return 2.0 * dampingRatio * Math.sqrt(proportionalGain);
    }
 
+   /**
+    * Assumes unit mass.
+    */
+   public static double computeDampingRatio(double proportionalGain, double dampingGain)
+   {
+      return dampingGain / (2 * Math.sqrt(proportionalGain));
+   }
+
    public static double computeDampingForSecondOrderSystem(double mass, double stiffness, double dampingRatio)
    {
       double criticalDamping = 2.0 * Math.sqrt(stiffness * mass);
