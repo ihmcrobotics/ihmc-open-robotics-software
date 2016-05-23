@@ -70,6 +70,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       addSCSVisualizerStateListener(this);
    }
 
+   @Override
    public void receivedTimestampAndData(long timestamp, ByteBuffer buffer)
    {
       if (recording)
@@ -83,12 +84,14 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       }
    }
 
+   @Override
    public void disconnected()
    {
       System.out.println("DISCONNECTED. SLIDERS NOW ENABLED");
       scs.setScrollGraphsEnabled(true);
    }
 
+   @Override
    public void setYoVariableClient(final YoVariableClient client)
    {
 
@@ -106,17 +109,20 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       buttons.put(yoVariableName, newValue);
    }
 
+   @Override
    public boolean changesVariables()
    {
       return true;
    }
 
+   @Override
    public void receiveTimedOut()
    {
       System.out.println("Connection lost, closing client.");
       client.disconnected();
    }
 
+   @Override
    public boolean populateRegistry()
    {
       return true;
@@ -195,6 +201,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       scs.addButton(disconnectButton);
       disconnectButton.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             disconnect(disconnectButton);
@@ -279,6 +286,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       new Thread(scs).start();
    }
 
+   @Override
    public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
    }
