@@ -21,6 +21,7 @@ import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.ihmcPerception.depthData.SCSPointCloudLidarReceiver;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
@@ -74,7 +75,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         new SCSPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, pointCloudDataReceiver);
+         ReferenceFrame lidarBaseFrame = modelFactory.createFullRobotModel().getLidarBaseFrame(sensorInformation.getLidarParameters(0).getSensorNameInSdf());
+         new SCSPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, lidarBaseFrame, pointCloudDataReceiver);
       }
 
       //      if (DRCConfigParameters.CALIBRATE_ARM_MODE)

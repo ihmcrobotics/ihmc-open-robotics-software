@@ -1,6 +1,5 @@
 package us.ihmc.ihmcPerception.depthData;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.time.Timer;
@@ -13,16 +12,9 @@ public class AsyncPointCloudReceiver implements PointCloudDataReceiverInterface
    private final boolean DEBUG = false;
    private Timer timer = DEBUG ? new Timer().start() : null;
 
-   private final SDFFullRobotModel fullRobotModel;
-
    private volatile ArrayList<Point3d> pointsInWorldFrame;
    private volatile double groundHeight;
    private volatile long timestamp;
-
-   public AsyncPointCloudReceiver(SDFFullRobotModel fullRobotModel)
-   {
-      this.fullRobotModel = fullRobotModel;
-   }
 
    @Override
    public void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points,
@@ -54,12 +46,6 @@ public class AsyncPointCloudReceiver implements PointCloudDataReceiverInterface
             timestamp = timestamps[0];
          }
       }
-   }
-
-   @Override
-   public ReferenceFrame getLidarFrame(String sensorNameInSdf)
-   {
-      return ReferenceFrame.constructFrameWithUnchangingTransformFromParent(sensorNameInSdf, fullRobotModel.getLidarBaseFrame(sensorNameInSdf), fullRobotModel.getLidarBaseToSensorTransform(sensorNameInSdf));
    }
 
    public synchronized ArrayList<Point3d> getPointsInWorldFrame()
