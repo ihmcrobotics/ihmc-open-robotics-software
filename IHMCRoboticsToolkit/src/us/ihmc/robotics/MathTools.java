@@ -253,6 +253,7 @@ public class MathTools
       return (Math.min(max, Math.max(val, min)));
    }
 
+
    /**
     * Checks to see if val is Inside Bounds of max and min
     *
@@ -270,6 +271,16 @@ public class MathTools
       }
 
       return ((val > min) && (val < max));
+   }
+
+   public static boolean isInsideBoundsInclusive(double val, double max)
+   {
+      return isInsideBoundsInclusive(val, -max, max);
+   }
+
+   public static boolean isInsideBoundsExclusive(double val, double max)
+   {
+      return isInsideBoundsExclusive(val, -max, max);
    }
 
    public static boolean isInsideBoundsInclusive(double val, double min, double max)
