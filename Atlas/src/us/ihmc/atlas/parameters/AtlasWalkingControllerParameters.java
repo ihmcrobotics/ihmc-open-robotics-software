@@ -984,6 +984,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxAllowedDistanceCMPSupport()
    {
-      return 0.1;
+      return 0.075;
    }
 }
