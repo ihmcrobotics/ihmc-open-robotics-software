@@ -86,7 +86,8 @@ public class PartialFootholdControlModule
 
    private final BooleanYoVariable useCoPOccupancyGrid;
    private final BooleanYoVariable cropToConvexHullOfCoPs;
-   
+   private final BooleanYoVariable fitLineToCoPs;
+
    private final int footCornerPoints;
 
    private final HighLevelHumanoidControllerToolbox momentumBasedController;
@@ -158,9 +159,12 @@ public class PartialFootholdControlModule
 
       doPartialFootholdDetection = new BooleanYoVariable(namePrefix + "DoPartialFootholdDetection", registry);
       doPartialFootholdDetection.set(false);
-      
+
       cropToConvexHullOfCoPs = new BooleanYoVariable(namePrefix + "CropToConvexHullOfCoPs", registry);
       cropToConvexHullOfCoPs.set(false);
+
+      fitLineToCoPs = new BooleanYoVariable(namePrefix + "FitLineToCoPs", registry);
+      fitLineToCoPs.set(false);
 
       double dt = momentumBasedController.getControlDT();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
@@ -309,6 +313,11 @@ public class PartialFootholdControlModule
          footCoPOccupancyGrid.computeConvexHull(shrunkFootPolygon);
          cropToConvexHullOfCoPs.set(false);
       }
+      else if (fitLineToCoPs.getBooleanValue())
+      {
+         fitLine();
+         fitLineToCoPs.set(false);
+      }
       else
       {
          // if we are not doing partial foothold detection exit
@@ -364,6 +373,27 @@ public class PartialFootholdControlModule
       backupFootPolygon.set(shrunkFootPolygon);
       shrinkCounter.increment();
       return true;
+   }
+
+   private final FrameLine2d line = new FrameLine2d();
+   private final FrameLine2d lineL = new FrameLine2d();
+   private final FrameLine2d lineR = new FrameLine2d();
+   private static final double width = 0.01;
+   private void fitLine()
+   {
+      footCoPOccupancyGrid.fitLineToData(line);
+
+      lineL.setIncludingFrame(line);
+      lineL.shiftToLeft(width/2.0);
+
+      lineR.setIncludingFrame(line);
+      lineR.shiftToRight(width/2.0);
+
+      backupFootPolygon.set(shrunkFootPolygon);
+      shrunkFootPolygon.clear();
+      shrunkFootPolygon.addVertices(defaultFootPolygon.intersectionWith(lineL));
+      shrunkFootPolygon.addVertices(defaultFootPolygon.intersectionWith(lineR));
+      shrunkFootPolygon.update();
    }
 
    public void reset()
