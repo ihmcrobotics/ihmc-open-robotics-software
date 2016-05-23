@@ -37,7 +37,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<>();
    private volatile boolean recording = true;
-   private YoVariableClient client;
+   private YoVariableClient yoVariableClient;
    private ArrayList<SCSVisualizerStateListener> stateListeners = new ArrayList<>();
 
    private int displayOneInNPackets = DISPLAY_ONE_IN_N_PACKETS;
@@ -95,13 +95,13 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    public void setYoVariableClient(final YoVariableClient client)
    {
 
-      this.client = client;
+      this.yoVariableClient = client;
    }
 
    private void disconnect(final JButton disconnectButton)
    {
       disconnectButton.setEnabled(false);
-      client.requestStop();
+      yoVariableClient.requestStop();
    }
 
    public void addButton(String yoVariableName, double newValue)
@@ -119,7 +119,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    public void receiveTimedOut()
    {
       System.out.println("Connection lost, closing client.");
-      client.disconnected();
+      yoVariableClient.disconnected();
    }
 
    @Override
@@ -142,9 +142,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    public void exitActionPerformed()
    {
       recording = false;
-      if (client != null)
+      if (yoVariableClient != null)
       {
-         client.requestStop();
+         yoVariableClient.requestStop();
       }
    }
 
@@ -215,9 +215,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            if (client != null)
+            if (yoVariableClient != null)
             {
-               client.sendClearLogRequest();
+               yoVariableClient.sendClearLogRequest();
             }
          }
       });
@@ -249,6 +249,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             {
                synchronized (this)
                {
+                  yoVariableClient.setSendingVariableChanges(false);
                   recording = false;
                   record.setText("Resume recording");
                   scs.setScrollGraphsEnabled(true);                  
@@ -262,6 +263,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
                   recording = true;
                   record.setText("Pause recording");
                   scs.setScrollGraphsEnabled(false);
+                  yoVariableClient.setSendingVariableChanges(true);
                }
             }
          }
