@@ -242,7 +242,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             {
                synchronized (this)
                {
-                  client.pause();
                   recording = false;
                   record.setText("Resume recording");
                   scs.setScrollGraphsEnabled(true);                  
@@ -256,7 +255,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
                   recording = true;
                   record.setText("Pause recording");
                   scs.setScrollGraphsEnabled(false);
-                  client.resume();
                }
             }
          }
