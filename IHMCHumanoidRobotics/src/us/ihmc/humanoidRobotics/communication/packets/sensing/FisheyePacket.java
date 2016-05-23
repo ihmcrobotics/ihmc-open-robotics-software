@@ -5,6 +5,7 @@ import javax.vecmath.Quat4d;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.packets.HighBandwidthPacket;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @HighBandwidthPacket
@@ -17,6 +18,6 @@ public class FisheyePacket extends VideoPacket
 
    public FisheyePacket(RobotSide robotSide, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
    {
-      super(robotSide, timeStamp, data, position, orientation, intrinsicParameters);
+      super(robotSide, VideoSource.MULTISENSE_FISHEYE, timeStamp, data, position, orientation, intrinsicParameters);
    }
 }

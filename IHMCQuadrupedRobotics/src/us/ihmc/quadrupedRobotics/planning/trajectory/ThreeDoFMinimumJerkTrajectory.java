@@ -32,9 +32,13 @@ public class ThreeDoFMinimumJerkTrajectory
    }
 
    public double getStartTime()
-
    {
       return timeInterval.getStartTime();
+   }
+
+   public double getEndTime()
+   {
+      return timeInterval.getEndTime();
    }
 
    public void getPosition(FramePoint position)

@@ -58,7 +58,7 @@ public class LocalizationBehavior extends BehaviorInterface {
 		{
 			firstRun = true;
 			System.out.println("New packet available. Loading inputs...");
-			receivedScriptBehavior = scriptBehaviorInputPacketListener.getNewestPacket();
+			receivedScriptBehavior = scriptBehaviorInputPacketListener.poll();
 			scriptObjectTransformToWorld = (receivedScriptBehavior.getReferenceTransform());
 			scriptResourceStream = getClass().getClassLoader().getResourceAsStream(receivedScriptBehavior.getScriptName());
 			
