@@ -35,10 +35,7 @@ public class XboxControllerInputDevice extends PollingInputDevice
       AXES.put(Component.Identifier.Button.B, new InputChannelConfig(InputChannel.BUTTON_B, false));
       AXES.put(Component.Identifier.Button.X, new InputChannelConfig(InputChannel.BUTTON_X, false));
       AXES.put(Component.Identifier.Button.Y, new InputChannelConfig(InputChannel.BUTTON_Y, false));
-      // AXES.put(Component.Identifier, D_PAD_UP);
-      // AXES.put(Component.Identifier, D_PAD_RIGHT);
-      // AXES.put(Component.Identifier, D_PAD_DOWN);
-      // AXES.put(Component.Identifier, D_PAD_LEFT);
+      AXES.put(Component.Identifier.Axis.POV, new InputChannelConfig(InputChannel.D_PAD, false));
    }
 
    private final Controller controller;

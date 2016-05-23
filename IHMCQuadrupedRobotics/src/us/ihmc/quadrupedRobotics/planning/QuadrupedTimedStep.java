@@ -92,5 +92,13 @@ public class QuadrupedTimedStep extends QuadrupedStep
    {
       return super.epsilonEquals(other, epsilon) && this.timeInterval.epsilonEquals(other.timeInterval, epsilon);
    }
+
+   @Override public String toString()
+   {
+      String string = super.toString();
+      string += "\nstartTime: " + timeInterval.getStartTime();
+      string += "\nendTime: " + timeInterval.getEndTime();
+      return string;
+   }
 }
 
