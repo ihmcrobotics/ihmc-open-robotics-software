@@ -57,6 +57,7 @@ public class KickBallBehavior extends BehaviorInterface
          SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);
+
       this.yoTime = yoTime;
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
 
@@ -136,7 +137,6 @@ public class KickBallBehavior extends BehaviorInterface
       };
 
       pipeLine.submitSingleTaskStage(findBallTask);
-      //
 
       BehaviorTask validateBallTask = new BehaviorTask(waitForUserValidationBehavior, yoTime, 0)
       {

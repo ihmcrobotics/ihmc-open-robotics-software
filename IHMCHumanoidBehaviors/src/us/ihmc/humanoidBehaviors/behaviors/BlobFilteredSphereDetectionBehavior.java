@@ -2,10 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.communication.producers.CompressedVideoDataClient;
-import us.ihmc.communication.producers.CompressedVideoDataFactory;
-import us.ihmc.communication.producers.JPEGCompressor;
-import us.ihmc.communication.producers.VideoStreamer;
+import us.ihmc.communication.producers.*;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
@@ -68,6 +65,8 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       videoDataClient = CompressedVideoDataFactory.createCompressedVideoDataClient(this);
       runBlobFilter.set(false);
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
+      blobDetectionThread.run();
+
    }
 
    public void addHSVRange(HSVRange hsvRange)
@@ -83,30 +82,34 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    @Override public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParamaters)
    {
       this.lastBufferedImage = bufferedImage;
-      openCVColoredCircularBlobDetector.updateFromBufferedImage(bufferedImage);
-      ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
 
-      BufferedImage thresholdBufferedImage = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
-      byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
-      VideoPacket circleBlobThresholdImagePacket = new VideoPacket(RobotSide.LEFT, videoTimestamp, jpegThresholdImage, cameraPosition, cameraOrientation,
-            intrinsicParamaters);
-      sendPacketToNetworkProcessor(circleBlobThresholdImagePacket);
-
-      if (DEBUG)
+      if(runBlobFilter.getBooleanValue())
       {
-         System.out.println("blob detection found " + circles.size() + " circles");
+         openCVColoredCircularBlobDetector.updateFromBufferedImage(bufferedImage);
+         ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
 
-         for (int i = 0; i < circles.size(); i++)
+         BufferedImage thresholdBufferedImage = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
+         byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
+         VideoPacket circleBlobThresholdImagePacket = new VideoPacket(RobotSide.LEFT, VideoSource.MULTISENSE, videoTimestamp, jpegThresholdImage, cameraPosition, cameraOrientation,
+               intrinsicParamaters);
+         sendPacketToNetworkProcessor(circleBlobThresholdImagePacket);
+
+         if (DEBUG)
          {
-            HoughCircleResult result = circles.get(i);
-            System.out.println("\t center: " + result.getCenter());
+            System.out.println("blob detection found " + circles.size() + " circles");
+
+            for (int i = 0; i < circles.size(); i++)
+            {
+               HoughCircleResult result = circles.get(i);
+               System.out.println("\t center: " + result.getCenter());
+            }
          }
+
+         this.numBallsDetected = circles.size();
+
+         if (numBallsDetected > 0)
+            latestBallPosition2d.set(circles.get(0).getCenter());
       }
-
-      this.numBallsDetected = circles.size();
-
-      if (numBallsDetected > 0)
-         latestBallPosition2d.set(circles.get(0).getCenter());
    }
 
    private class VideoClientThread extends Thread
@@ -115,20 +118,13 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       {
          while (true)
          {
-            if (runBlobFilter.getBooleanValue())
+            if (videoPacketQueue.isNewPacketAvailable())
             {
-               if (videoPacketQueue.isNewPacketAvailable())
-               {
-                  VideoPacket packet = videoPacketQueue.getLatestPacket();
-                  RobotConfigurationData robotConfigurationData = robotConfigurationDataQueue.getLatestPacket();
-                  videoTimestamp = robotConfigurationData.getTimestamp();
+               VideoPacket packet = videoPacketQueue.getLatestPacket();
+               RobotConfigurationData robotConfigurationData = robotConfigurationDataQueue.getLatestPacket();
+               videoTimestamp = robotConfigurationData.getTimestamp();
 
-                  videoDataClient.consumeObject(packet.getData(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
-               }
-               else
-               {
-                  ThreadTools.sleep(10);
-               }
+               videoDataClient.consumeObject(packet.getData(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
             }
             else
             {
@@ -201,11 +197,17 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       return filteredPointArray;
    }
 
+
    @Override public void initialize()
    {
       super.initialize();
-      blobDetectionThread.run();
       runBlobFilter.set(true);
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      return super.isDone();
    }
 
    @Override public void pause()
@@ -223,7 +225,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    @Override public void resume()
    {
       super.resume();
-      runBlobFilter.set(false);
+      runBlobFilter.set(true);
    }
 
    public Point2d getLatestBallPosition()
