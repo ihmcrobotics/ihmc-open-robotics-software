@@ -3,6 +3,7 @@ package us.ihmc.atlas.sensors;
 import java.io.IOException;
 import java.net.URI;
 
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
@@ -21,6 +22,7 @@ import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.ihmcPerception.depthData.SCSPointCloudLidarReceiver;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -75,8 +77,13 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         ReferenceFrame lidarBaseFrame = modelFactory.createFullRobotModel().getLidarBaseFrame(sensorInformation.getLidarParameters(0).getSensorNameInSdf());
-         new SCSPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, lidarBaseFrame, pointCloudDataReceiver);
+         String lidarName = sensorInformation.getLidarParameters(0).getSensorNameInSdf();
+         SDFFullHumanoidRobotModel fullRobotModel = modelFactory.createFullRobotModel();
+         ReferenceFrame lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarName);
+         RigidBodyTransform lidarBaseToSensorTransform = fullRobotModel.getLidarBaseToSensorTransform(lidarName);
+         ReferenceFrame lidarAfterJointFrame = fullRobotModel.getLidarJoint(lidarName).getFrameAfterJoint();
+         ReferenceFrame lidarScanFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("lidarScanFrame", lidarAfterJointFrame, lidarBaseToSensorTransform);
+         new SCSPointCloudLidarReceiver(lidarName, scsSensorsCommunicator, lidarBaseFrame, lidarScanFrame, pointCloudDataReceiver);
       }
 
       //      if (DRCConfigParameters.CALIBRATE_ARM_MODE)
