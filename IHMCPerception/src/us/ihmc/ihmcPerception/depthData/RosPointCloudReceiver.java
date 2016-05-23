@@ -26,18 +26,6 @@ public class RosPointCloudReceiver extends RosPointCloudSubscriber
    private final ReferenceFrame sensorframe;
    private final PointCloudSource[] pointCloudSource;
 
-   public RosPointCloudReceiver(String sensorNameInSdf, String rosTopic, RosMainNode rosMainNode, ReferenceFrame cloudFrame,
-         PointCloudDataReceiverInterface pointCloudDataReceiver, PointCloudSource... pointCloudSource)
-   {
-      this(rosTopic, rosMainNode, cloudFrame, pointCloudDataReceiver.getLidarFrame(sensorNameInSdf), pointCloudDataReceiver, pointCloudSource);
-   }
-
-   public RosPointCloudReceiver(DRCRobotPointCloudParameters pointCloudParameters, RosMainNode rosMainNode, ReferenceFrame cloudFrame,
-         PointCloudDataReceiverInterface pointCloudDataReceiver, PointCloudSource... pointCloudSource)
-   {
-      this(pointCloudParameters.getRosTopic(), rosMainNode, cloudFrame, pointCloudDataReceiver.getLidarFrame(pointCloudParameters.getSensorNameInSdf()), pointCloudDataReceiver, pointCloudSource);
-   }
-
    public RosPointCloudReceiver(String rosTopic, RosMainNode rosMainNode, ReferenceFrame cloudFrame, ReferenceFrame sensorframe,
          PointCloudDataReceiverInterface pointCloudDataReceiver, PointCloudSource... pointCloudSource)
    {

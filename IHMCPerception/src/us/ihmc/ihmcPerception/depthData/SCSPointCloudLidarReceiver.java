@@ -21,15 +21,12 @@ public class SCSPointCloudLidarReceiver implements ObjectConsumer<SimulatedLidar
    private final ReferenceFrame lidarScanFrame;
    private final RigidBodyTransform identityTransform = new RigidBodyTransform();
 
-   public SCSPointCloudLidarReceiver(String lidarName, ObjectCommunicator scsSensorsCommunicator, PointCloudDataReceiver pointCloudDataReceiver)
+   public SCSPointCloudLidarReceiver(String lidarName, ObjectCommunicator scsSensorsCommunicator, ReferenceFrame lidarFrame, ReferenceFrame lidarScanFrame,
+         PointCloudDataReceiver pointCloudDataReceiver)
    {
       this.pointCloudDataReceiver = pointCloudDataReceiver;
-      this.lidarFrame = pointCloudDataReceiver.getLidarFrame(lidarName);
-
-      RigidBodyTransform lidarBaseToSensorTransform = pointCloudDataReceiver.getLidarToSensorTransform(lidarName);
-      ReferenceFrame lidarAfterJointFrame = pointCloudDataReceiver.getLidarJoint(lidarName).getFrameAfterJoint();
-      this.lidarScanFrame = ReferenceFrame
-            .constructBodyFrameWithUnchangingTransformToParent("lidarScanFrame", lidarAfterJointFrame, lidarBaseToSensorTransform);
+      this.lidarFrame = lidarFrame;
+      this.lidarScanFrame = lidarScanFrame;
 
       scsSensorsCommunicator.attachListener(SimulatedLidarScanPacket.class, this);
    }

@@ -65,7 +65,7 @@ public class PointCloudDataReceiverSimulation implements Runnable, PacketConsume
             robotModel.getJointMap(), robotConfigurationDataBuffer, sensorSuitePacketCommunicatorServer);
       pointCloudDataReceiver.start();
       pointCloudDataReceiver.setLidarState(LidarState.ENABLE);
-      lidarFrame = pointCloudDataReceiver.getLidarFrame(robotModel.getSensorInformation().getLidarParameters(0).getSensorNameInSdf());
+      lidarFrame = fullRobotModel.getLidarBaseFrame(robotModel.getSensorInformation().getLidarParameters()[0].getSensorNameInSdf());
 
       executor.scheduleAtFixedRate(this, 0, 25000000, TimeUnit.NANOSECONDS);
    }
