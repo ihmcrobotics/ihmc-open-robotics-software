@@ -109,7 +109,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    }
    public enum XGaitEvent
    {
-      TIMEOUT, FORWARD
+      TIMEOUT
    }
    private final FiniteStateMachine<XGaitState, XGaitEvent> xGaitStateMachine;
 
@@ -402,13 +402,11 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    {
       private final PiecewiseForwardDcmTrajectory forwardDcmTrajectory;
       private EndDependentList<QuadrupedTimedStep> latestSteps;
-      private final QuadrantDependentList<ContactState> contactState;
       private final FrameVector stepAdjustment;
 
       public ActiveXGaitState()
       {
          forwardDcmTrajectory = new PiecewiseForwardDcmTrajectory(2 * (xGaitPreviewSteps.size() + 4) + 1, gravity, dcmPositionController.getComHeight());
-         contactState = new QuadrantDependentList<>();
          latestSteps = new EndDependentList<>();
          for (RobotEnd robotEnd : RobotEnd.values)
          {
@@ -423,11 +421,9 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
          // initialize latest steps
          for (RobotEnd robotEnd : RobotEnd.values)
+         {
             latestSteps.get(robotEnd).set(timedStepController.getEarliestStep(robotEnd));
-
-         // initialize contact state
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-            contactState.set(robotQuadrant, taskSpaceController.getContactState(robotQuadrant));
+         }
       }
 
       @Override public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
@@ -441,15 +437,10 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
          QuadrupedTimedStep thisStep = timedStepController.getEarliestStep(thisStepQuadrant);
          latestSteps.get(thisStepEnd).set(thisStep);
-
-         // update contact state
-         contactState.set(thisStepQuadrant, thisContactState.get(thisStepQuadrant));
       }
 
       @Override public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
       {
-         // update contact state
-         contactState.set(thisStepQuadrant, thisContactState.get(thisStepQuadrant));
       }
 
       @Override public XGaitEvent process()
@@ -472,7 +463,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          }
 
          // compute step adjustment
-         computeStepAdjustmentBasedOnDcm(stepAdjustment, timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), contactState, dcmPositionEstimate, currentTime, dcmPositionController.getNaturalFrequency());
+         computeStepAdjustmentBasedOnDcm(stepAdjustment, timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), dcmPositionEstimate, currentTime, dcmPositionController.getNaturalFrequency());
          for (RobotEnd robotEnd : RobotEnd.values)
          {
             latestSteps.get(robotEnd).getGoalPosition().add(stepAdjustment.getVector());
@@ -485,7 +476,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
          }
 
          // compute nominal dcm trajectory
-         int nIntervals = timedStepPressurePlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), contactState, currentTime);
+         int nIntervals = timedStepPressurePlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), currentTime);
          forwardDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
          forwardDcmTrajectory.initializeTrajectory(nIntervals, timedStepPressurePlanner.getTimeAtStartOfInterval(), timedStepPressurePlanner.getCenterOfPressureAtStartOfInterval(), dcmPositionEstimate);
          forwardDcmTrajectory.computeTrajectory(currentTime);
