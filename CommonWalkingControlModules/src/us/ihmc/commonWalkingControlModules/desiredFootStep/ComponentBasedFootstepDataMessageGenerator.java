@@ -137,8 +137,6 @@ public class ComponentBasedFootstepDataMessageGenerator
    {
       double stepTime = swingTime.getDoubleValue() + transferTime.getDoubleValue();
 
-      FootstepDataMessage footstepDataMessage = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-
       FootstepDataMessage footstep = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
       FootstepDataMessage nextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime);
       FootstepDataMessage nextNextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep, 2.0 * stepTime);

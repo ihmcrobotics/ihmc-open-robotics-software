@@ -19,6 +19,14 @@ public class KickBallBehaviorCoactiveElementBehaviorSide extends KickBallBehavio
       this.kickBallBehavior = kickBallBehavior;
    }
 
+   @Override public void initializeUserInterfaceSide()
+   {
+   }
+
+   @Override public void updateUserInterfaceSide()
+   {
+   }
+
    @Override
    public void initializeMachineSide()
    {
@@ -44,5 +52,12 @@ public class KickBallBehaviorCoactiveElementBehaviorSide extends KickBallBehavio
       }
 
       machineSideCount.increment();
+
+      numBlobsDetected.set(kickBallBehavior.getNumBlobsDetected());
+      if (numBlobsDetected.getIntegerValue() > 0)
+      {
+         blobX.set(kickBallBehavior.getBlobLocation().x);
+         blobY.set(kickBallBehavior.getBlobLocation().y);
+      }
    }
 }

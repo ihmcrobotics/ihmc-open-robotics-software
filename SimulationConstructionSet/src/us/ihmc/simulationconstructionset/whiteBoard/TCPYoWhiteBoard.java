@@ -90,10 +90,8 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
             }
             
             serverSocket = new ServerSocket(port);
-            
             // Get the port since if you use 0, Java will find one that is free
             this.port = serverSocket.getLocalPort();
-
             Socket socket = serverSocket.accept();
             socket.setTcpNoDelay(true);
             if (VERBOSE)
@@ -107,6 +105,8 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
 
             super.setDataStreams(dataInputStream, dataOutputStream);
             super.run();
+            
+            serverSocket.close();
          }
          catch (IOException e)
          {
@@ -127,7 +127,6 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
             }
 
             clientSocket = new Socket(ipAddress, port);
-
             clientSocket.setTcpNoDelay(true);
 
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
@@ -138,10 +137,13 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
 
             super.setDataStreams(dataInputStream, dataOutputStream);
             super.run();
+            
+            clientSocket.close();
          }
          catch (ConnectException e)
          {
             PrintTools.error("Failed to connect");
+            ThreadTools.sleep(500);
          }
          catch (IOException e)
          {
