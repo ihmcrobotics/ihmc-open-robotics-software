@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -121,20 +120,21 @@ public class QuadrupedXGaitPlanner
 
       // compute step quadrants and time intervals
       {
-         RobotEnd thisStepRobotEnd = latestStep.getRobotQuadrant().getOppositeEnd();
+         RobotEnd thisStepEnd = latestStep.getRobotQuadrant().getOppositeEnd();
          pastSteps.set(RobotEnd.FRONT, latestSteps.get(RobotEnd.FRONT));
          pastSteps.set(RobotEnd.HIND, latestSteps.get(RobotEnd.HIND));
 
          for (int i = 0; i < plannedSteps.size(); i++)
          {
             QuadrupedTimedStep thisStep = plannedSteps.get(i);
-            thisStep.setRobotQuadrant(pastSteps.get(thisStepRobotEnd).getRobotQuadrant().getAcrossBodyQuadrant());
-            double pastStepEndTimeForSameEnd = pastSteps.get(thisStepRobotEnd).getTimeInterval().getEndTime();
-            double pastStepEndTimeForOppositeEnd = pastSteps.get(thisStepRobotEnd.getOppositeEnd()).getTimeInterval().getEndTime();
-            computeStepTimeInterval(thisStep.getTimeInterval(), thisStepRobotEnd, pastStepEndTimeForSameEnd, pastStepEndTimeForOppositeEnd, xGaitSettings);
+            QuadrupedTimedStep pastStepOnSameEnd = pastSteps.get(thisStepEnd);
+            QuadrupedTimedStep pastStepOnOppositeEnd = pastSteps.get(thisStepEnd.getOppositeEnd());
 
-            pastSteps.set(thisStepRobotEnd, thisStep);
-            thisStepRobotEnd = thisStepRobotEnd.getOppositeEnd();
+            thisStep.setRobotQuadrant(pastStepOnSameEnd.getRobotQuadrant().getAcrossBodyQuadrant());
+            computeStepTimeInterval(thisStep, pastStepOnSameEnd, pastStepOnOppositeEnd, xGaitSettings);
+
+            pastSteps.set(thisStepEnd, thisStep);
+            thisStepEnd = thisStepEnd.getOppositeEnd();
          }
       }
 
@@ -212,19 +212,30 @@ public class QuadrupedXGaitPlanner
       finalPose.setYawPitchRoll(a, initialPose.getPitch(), initialPose.getRoll());
    }
 
-   private void computeStepTimeInterval(TimeInterval thisStepTimeInterval, RobotEnd thisStepRobotEnd, double pastStepEndTimeForSameEnd, double pastStepEndTimeForOppositeEnd, QuadrupedXGaitSettings xGaitSettings)
+   private void computeStepTimeInterval(QuadrupedTimedStep thisStep, QuadrupedTimedStep pastStepOnSameEnd, QuadrupedTimedStep pastStepOnOppositeEnd, QuadrupedXGaitSettings xGaitSettings)
    {
+      RobotEnd thisStepEnd = thisStep.getRobotQuadrant().getEnd();
+      RobotSide thisStepSide = thisStep.getRobotQuadrant().getSide();
+      RobotSide pastStepSide = pastStepOnOppositeEnd.getRobotQuadrant().getSide();
+
+      double pastStepEndTimeForSameEnd = pastStepOnSameEnd.getTimeInterval().getEndTime();
+      double pastStepEndTimeForOppositeEnd = pastStepOnOppositeEnd.getTimeInterval().getEndTime();
+
       // Compute support durations and end phase shift.
       double nominalStepDuration = xGaitSettings.getStepDuration();
       double endDoubleSupportDuration = xGaitSettings.getEndDoubleSupportDuration();
-      double endPhaseShift = (thisStepRobotEnd == RobotEnd.HIND) ? 180.0 - xGaitSettings.getEndPhaseShift() : xGaitSettings.getEndPhaseShift();
+      double endPhaseShift = xGaitSettings.getEndPhaseShift();
+      if (thisStepEnd == RobotEnd.HIND)
+         endPhaseShift = 360 - endPhaseShift;
+      if (pastStepSide != thisStepSide)
+         endPhaseShift = endPhaseShift - 180;
 
       // Compute step time interval. Step duration is scaled in the range (1.0, 1.1667) to account for end phase shifts.
       double thisStepStartTime = pastStepEndTimeForSameEnd + endDoubleSupportDuration;
-      double thisStepEndTime = pastStepEndTimeForOppositeEnd + Math.max((nominalStepDuration + endDoubleSupportDuration) * endPhaseShift / 180.0, 0.0);
-      double thisStepDuration = MathTools.clipToMinMax(thisStepEndTime - thisStepStartTime, nominalStepDuration, 1.25 * nominalStepDuration);
+      double thisStepEndTime = pastStepEndTimeForOppositeEnd + (nominalStepDuration + endDoubleSupportDuration) * endPhaseShift / 180.0;
+      double thisStepDuration = MathTools.clipToMinMax(thisStepEndTime - thisStepStartTime, nominalStepDuration, 1.5 * nominalStepDuration);
 
-      thisStepTimeInterval.setStartTime(thisStepStartTime);
-      thisStepTimeInterval.setEndTime(thisStepStartTime + thisStepDuration);
+      thisStep.getTimeInterval().setStartTime(thisStepStartTime);
+      thisStep.getTimeInterval().setEndTime(thisStepStartTime + thisStepDuration);
    }
 }
