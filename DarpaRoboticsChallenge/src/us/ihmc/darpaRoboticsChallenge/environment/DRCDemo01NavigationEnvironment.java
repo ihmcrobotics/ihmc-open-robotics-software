@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.environment;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -68,7 +69,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    private static final double cinderBlockTiltDegrees = 15;
    private static final double cinderBlockTiltRadians = Math.toRadians(cinderBlockTiltDegrees);
 
-   public static final double SOCCER_BALL_RADIUS = 0.127;
+   public static final double SOCCER_BALL_RADIUS = 0.1; // 0.127;
 
    private static final boolean VISUALIZE_BOUNDING_BOXES = false;
 
@@ -107,7 +108,8 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject3D.addTerrainObject(setUpGround("Ground"));
 
       //Soccer Ball
-      combinedTerrainObject3D.addSphere(1, 1, SOCCER_BALL_RADIUS, SOCCER_BALL_RADIUS, YoAppearance.AliceBlue());
+      int color = Color.HSBtoRGB(80.0f / 180.0f, 200.0f / 256.0f, 200.0f / 256.0f);
+      combinedTerrainObject3D.addSphere(1, 0.0, 1.0, SOCCER_BALL_RADIUS, YoAppearance.RGBColorFromHex(color));
 
       if (addLimboBar)
          addLimboBar(combinedTerrainObject3D);

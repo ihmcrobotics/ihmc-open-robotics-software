@@ -13,5 +13,4 @@ public interface CoactiveElement
    public abstract void initializeMachineSide();
    public abstract void updateMachineSide();
    public abstract YoVariableRegistry getMachineWritableYoVariableRegistry();
-
 }
