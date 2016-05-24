@@ -14,7 +14,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
 {
-   private static final boolean VERBOSE = false;
+   private static final boolean VERBOSE = true;
 
    private final String ipAddress;
    private int port;
