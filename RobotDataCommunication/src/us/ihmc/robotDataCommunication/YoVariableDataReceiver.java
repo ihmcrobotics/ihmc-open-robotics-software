@@ -14,7 +14,7 @@ import us.ihmc.tools.compression.SnappyUtils;
 
 public abstract class YoVariableDataReceiver implements LogPacketHandler
 {
-   private static final int RECEIVE_BUFFER_SIZE = 1024;
+   private static final int RECEIVE_BUFFER_SIZE = 8192; //1024;
 
    private ByteBuffer decompressed;
    private long previous;
