@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.coactiveDesignFramework;
 
-import us.ihmc.humanoidBehaviors.behaviors.KickBallBehaviorCoactiveElementBehaviorSide;
+import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.KickBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
