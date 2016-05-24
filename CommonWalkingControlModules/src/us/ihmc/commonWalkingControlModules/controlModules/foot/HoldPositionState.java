@@ -263,6 +263,11 @@ public class HoldPositionState extends AbstractFootControlState
          }
       }
 
+      if (cop.containsNaN())
+      {
+         cop.setToZero(soleFrame);
+      }
+
       desiredCoP.changeFrame(soleFrame);
 
       correctDesiredOrientationForSmartHoldPosition();
