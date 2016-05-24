@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.coactiveDesignFramework;
 
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.KickBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
@@ -7,7 +8,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class SimpleCoactiveElementMachineSide
 {
-   private static final int PORT_FOR_COACTIVE_ELEMENTS = 56122;
    private final CoactiveElement coactiveElement;
 
    public SimpleCoactiveElementMachineSide(CoactiveElement coactiveElement)
@@ -65,6 +65,6 @@ public class SimpleCoactiveElementMachineSide
       KickBallBehaviorCoactiveElementBehaviorSide coactiveElement = new KickBallBehaviorCoactiveElementBehaviorSide();
 
       SimpleCoactiveElementMachineSide machineSide = new SimpleCoactiveElementMachineSide(coactiveElement);
-      machineSide.startOnAThread(PORT_FOR_COACTIVE_ELEMENTS);
+      machineSide.startOnAThread(NetworkPorts.COACTIVE_ELEMENTS_PORT.getPort());
    }
 }
