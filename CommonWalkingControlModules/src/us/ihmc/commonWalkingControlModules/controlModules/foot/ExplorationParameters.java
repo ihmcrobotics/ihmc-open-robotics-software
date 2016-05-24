@@ -65,9 +65,9 @@ public class ExplorationParameters
    private final DoubleYoVariable timeToGoToCorner;
    private final DoubleYoVariable timeToStayInCorner;
    private final DoubleYoVariable copCommandWeight;
-   private static final double defaultRecoverTime = 0.05;
+   private static final double defaultRecoverTime = 1.0;
    private static final double defaultTimeToGoToCorner = 0.3;
-   private static final double defaultTimeToStayInCorner = 0.2;
+   private static final double defaultTimeToStayInCorner = 0.25;
    private static final double defaultCopCommandWeight = 2000.0;
 
    public ExplorationParameters(YoVariableRegistry parentRegistry)
