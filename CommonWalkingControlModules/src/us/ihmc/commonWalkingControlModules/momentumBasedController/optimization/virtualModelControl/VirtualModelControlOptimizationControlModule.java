@@ -47,7 +47,9 @@ public class VirtualModelControlOptimizationControlModule
    private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMinVMC", registry);
 
    private YoFrameVector desiredLinearMomentumRate = null;
+   private YoFrameVector desiredAngularMomentumRate = null;
    private YoFrameVector achievedLinearMomentumRate = null;
+   private YoFrameVector achievedAngularMomentumRate = null;
    private final Map<RigidBody, YoWrench> contactWrenchSolutions = new HashMap<>();
 
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
@@ -67,7 +69,9 @@ public class VirtualModelControlOptimizationControlModule
       if (DEBUG)
       {
          desiredLinearMomentumRate = new YoFrameVector("desiredLinearMomentumRateToQP", null, registry);
+         desiredAngularMomentumRate = new YoFrameVector("desiredAngularMomentumRateToQP", null, registry);
          achievedLinearMomentumRate = new YoFrameVector("achievedLinearMomentumRateFromQP", null, registry);
+         achievedAngularMomentumRate = new YoFrameVector("achievedAngularMomentumRateFromQP", null, registry);
 
          for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
          {
@@ -103,19 +107,26 @@ public class VirtualModelControlOptimizationControlModule
       externalWrenchHandler.reset();
    }
 
+   public ExternalWrenchHandler getExternalWrenchHandler()
+   {
+      return externalWrenchHandler;
+   }
+
    private final DenseMatrix64F contactWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F totalWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F tmpWrench = new DenseMatrix64F(Wrench.SIZE, 1);
 
-   public VirtualModelControlSolution compute() throws VirtualModelControlModuleException
+   public void compute(VirtualModelControlSolution virtualModelControlSolutionToPack) throws VirtualModelControlModuleException
    {
       wrenchMatrixCalculator.computeMatrices();
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
       qpSolver.addRegularization();
+
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
+
       qpSolver.setMinRho(rhoMin.getDoubleValue());
 
       processMomentumRateCommand();
@@ -162,22 +173,20 @@ public class VirtualModelControlOptimizationControlModule
       if (DEBUG)
       {
          achievedLinearMomentumRate.set(totalWrench.get(3), totalWrench.get(4), totalWrench.get(5));
+         achievedAngularMomentumRate.set(totalWrench.get(0), totalWrench.get(1), totalWrench.get(2));
+
          for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
             contactWrenchSolutions.get(rigidBody).set(externalWrenchSolution.get(rigidBody));
-
       }
 
-      VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
-      virtualModelControlSolution.setJointsToCompute(jointsToOptimizeFor);
-      virtualModelControlSolution.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
-      virtualModelControlSolution.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
+      virtualModelControlSolutionToPack.setJointsToCompute(jointsToOptimizeFor);
+      virtualModelControlSolutionToPack.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
+      virtualModelControlSolutionToPack.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
 
       if (noConvergenceException != null)
       {
-         throw new VirtualModelControlModuleException(noConvergenceException, virtualModelControlSolution);
+         throw new VirtualModelControlModuleException(noConvergenceException, virtualModelControlSolutionToPack);
       }
-
-      return virtualModelControlSolution;
    }
 
    private void setupRhoTasks()
@@ -241,7 +250,10 @@ public class VirtualModelControlOptimizationControlModule
       CommonOps.mult(selectionMatrix, tempTaskObjective, taskObjective);
 
       if (DEBUG)
+      {
          desiredLinearMomentumRate.set(taskObjective.get(3), taskObjective.get(4), taskObjective.get(5));
+         desiredLinearMomentumRate.set(taskObjective.get(0), taskObjective.get(1), taskObjective.get(2));
+      }
 
       qpSolver.addMomentumTask(taskJacobian, taskObjective, taskWeightMatrix);
    }

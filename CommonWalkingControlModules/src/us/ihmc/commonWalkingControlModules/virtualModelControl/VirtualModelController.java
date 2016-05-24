@@ -19,6 +19,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 import us.ihmc.tools.io.printing.PrintTools;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class VirtualModelController
@@ -98,6 +99,10 @@ public class VirtualModelController
       vmcDataHandler.addDesiredSelectionMatrix(controlledBody, selectionMatrix);
    }
 
+   public List<RigidBody> getControlledBodies()
+   {
+      return vmcDataHandler.getControlledBodies();
+   }
 
    public void reset()
    {
@@ -132,28 +137,30 @@ public class VirtualModelController
       {
          if (vmcDataHandler.hasWrench(controlledBody) && vmcDataHandler.hasSelectionMatrix(controlledBody))
          {
-            vmcDataHandler.loadBody(controlledBody);
+            //vmcDataHandler.loadBody(controlledBody);
 
-            int taskSize = vmcDataHandler.selectionMatrix.getNumRows();
             int numberOfControlChains = vmcDataHandler.numberOfChains(controlledBody);
 
+            Wrench wrench = vmcDataHandler.getDesiredWrench(controlledBody);
+            DenseMatrix64F selectionMatrix = vmcDataHandler.getDesiredSelectionMatrix(controlledBody);
+            int taskSize = selectionMatrix.getNumRows();
             // check and set frames
-            vmcDataHandler.wrench.changeFrame(defaultRootBody.getBodyFixedFrame());
+            wrench.changeFrame(defaultRootBody.getBodyFixedFrame());
             if (yoWrenches.get(controlledBody) != null)
-               yoWrenches.get(controlledBody).set(vmcDataHandler.wrench);
+               yoWrenches.get(controlledBody).set(wrench);
 
             if (VISUALIZE_DESIRED_WRENCHES && (registry != null) && (yoGraphicsListRegistry != null))
             {
                controlledBodyPoints.get(controlledBody).setToZero(controlledBody.getBodyFixedFrame());
                controlledBodyPoints.get(controlledBody).changeFrame(ReferenceFrame.getWorldFrame());
                yoForcePoints.get(controlledBody).set(controlledBodyPoints.get(controlledBody));
-               yoForceVectors.get(controlledBody).set(vmcDataHandler.wrench.getLinearPart());
+               yoForceVectors.get(controlledBody).set(wrench.getLinearPart());
             }
 
             // apply selection matrix to wrench
             tmpWrench.reshape(taskSize, 1);
-            vmcDataHandler.wrench.getMatrix(wrenchMatrix);
-            CommonOps.mult(vmcDataHandler.selectionMatrix, wrenchMatrix, tmpWrench);
+            wrench.getMatrix(wrenchMatrix);
+            CommonOps.mult(selectionMatrix, wrenchMatrix, tmpWrench);
 
             // append wrench to the end of the current objective wrench vector
             int previousSize = fullObjectiveWrench.getNumRows();
@@ -170,7 +177,7 @@ public class VirtualModelController
                int numberOfJoints = vmcDataHandler.jointsInChain(controlledBody, chainID);
                tmpJMatrix.reshape(taskSize, numberOfJoints);
                tmpJTMatrix.reshape(numberOfJoints, taskSize);
-               CommonOps.mult(vmcDataHandler.selectionMatrix, geometricJacobianHolder.getJacobian(jacobianID).getJacobianMatrix(), tmpJMatrix);
+               CommonOps.mult(selectionMatrix, geometricJacobianHolder.getJacobian(jacobianID).getJacobianMatrix(), tmpJMatrix);
                CommonOps.transpose(tmpJMatrix, tmpJTMatrix);
 
                // insert new jacobian into full objective jacobian
