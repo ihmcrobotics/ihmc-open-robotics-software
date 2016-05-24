@@ -19,22 +19,8 @@ public class VirtualModelControlDataHandler
    private final Map<RigidBody, Wrench> desiredWrenches = new LinkedHashMap<>();
    private final Map<RigidBody, DenseMatrix64F> desiredSelectionMatrices = new LinkedHashMap<>();
 
-   public List<OneDoFJoint[]> joints;
-   public Wrench wrench = new Wrench();
-   public DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 1);
-
    public VirtualModelControlDataHandler()
    {
-   }
-
-   public void loadBody(RigidBody controlledBody)
-   {
-      if (hasWrench(controlledBody) && hasSelectionMatrix(controlledBody))
-      {
-         joints = jointChainsForControl.get(controlledBody);
-         wrench.set(desiredWrenches.get(controlledBody));
-         selectionMatrix.set(desiredSelectionMatrices.get(controlledBody));
-      }
    }
 
    public void clear()
@@ -68,9 +54,11 @@ public class VirtualModelControlDataHandler
    public void addJointsForControl(RigidBody controlledBody, OneDoFJoint[] jointsToUse)
    {
       // check joint order
-      boolean rightOrder = ScrewTools.isAncestor(jointsToUse[1].getPredecessor(), jointsToUse[0].getPredecessor());
-
       int length = jointsToUse.length;
+      boolean rightOrder = true;
+      if (length > 1)
+         ScrewTools.isAncestor(jointsToUse[1].getPredecessor(), jointsToUse[0].getPredecessor());
+
       OneDoFJoint[] orderedJointsToUse;
       if (rightOrder)
          orderedJointsToUse = jointsToUse;
