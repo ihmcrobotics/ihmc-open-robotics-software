@@ -142,7 +142,7 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
          }
          catch (ConnectException e)
          {
-            PrintTools.error("Failed to connect");
+            PrintTools.error("Failed to connect to " + ipAddress + ":" + port);
             ThreadTools.sleep(500);
          }
          catch (IOException e)
