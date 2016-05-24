@@ -20,7 +20,7 @@ import us.ihmc.robotiq.data.RobotiqHandSensorDizzata;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class RobotiqControlThrizzead extends HandControlThread
+public class RobotiqControlThread extends HandControlThread
 {
    private final boolean CALIBRATE_ON_CONNECT = false;
    
@@ -31,7 +31,7 @@ public class RobotiqControlThrizzead extends HandControlThread
    private final HandJointAngleCommunicator jointAngleCommunicator;
    private RobotiqHandSensorDizzata handStatus;
 
-   public RobotiqControlThrizzead(RobotSide robotSide, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public RobotiqControlThread(RobotSide robotSide, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       super(robotSide);
       this.robotSide = robotSide;
@@ -155,7 +155,7 @@ public class RobotiqControlThrizzead extends HandControlThread
          
          if(config.success())
          {
-            RobotiqControlThrizzead controlThread = new RobotiqControlThrizzead(RobotSide.valueOf(config.getString("robotSide").toUpperCase()), closeableAndDisposableRegistry);
+            RobotiqControlThread controlThread = new RobotiqControlThread(RobotSide.valueOf(config.getString("robotSide").toUpperCase()), closeableAndDisposableRegistry);
             controlThread.connect();
             controlThread.run();
          }
