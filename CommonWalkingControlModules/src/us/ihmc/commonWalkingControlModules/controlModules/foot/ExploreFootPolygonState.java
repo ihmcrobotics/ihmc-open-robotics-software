@@ -13,6 +13,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -68,6 +69,8 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
    private final IntegerYoVariable yoCurrentCorner;
 
+   private final BooleanYoVariable autoCropToLineAfterExploration;
+
    public ExploreFootPolygonState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.EXPLORE_POLYGON, footControlHelper, registry);
@@ -90,6 +93,9 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       spiralAngle = new DoubleYoVariable(contactableFoot.getName() + "SpiralAngle", registry);
 
       recoverTime = explorationParameters.getRecoverTime();
+
+      autoCropToLineAfterExploration = new BooleanYoVariable(contactableFoot.getName() + "AutoCropToLineAfterExploration", registry);
+      autoCropToLineAfterExploration.set(false);
 
       timeToGoToCorner = explorationParameters.getTimeToGoToCorner();
       timeToGoToCorner.addVariableChangedListener(new VariableChangedListener()
@@ -141,6 +147,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       lastCornerCropped = 0;
       internalHoldPositionState.doTransitionIntoAction();
       done = false;
+      partialFootholdControlModule.turnOnCropping();
    }
 
    @Override
@@ -149,6 +156,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       super.doTransitionOutOfAction();
       internalHoldPositionState.doTransitionOutOfAction();
       yoCurrentCorner.set(0);
+      partialFootholdControlModule.turnOffCropping();
    }
 
    private final Vector2d tempVector2d = new Vector2d();
@@ -166,6 +174,11 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       footSwitch.computeAndPackCoP(cop);
       momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
       partialFootholdControlModule.compute(desiredCoP, cop);
+
+      if (timeInState < recoverTime.getDoubleValue())
+      {
+         partialFootholdControlModule.clearCoPGrid();
+      }
 
       if (timeInState > recoverTime.getDoubleValue() && !done)
       {
@@ -279,6 +292,12 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             {
                done = true;
             }
+         }
+
+         if (autoCropToLineAfterExploration.getBooleanValue() && done)
+         {
+            partialFootholdControlModule.requestLineFit();
+            partialFootholdControlModule.turnOffCropping();
          }
 
          centerOfPressureCommand.setDesiredCoP(desiredCenterOfPressure.getPoint());
