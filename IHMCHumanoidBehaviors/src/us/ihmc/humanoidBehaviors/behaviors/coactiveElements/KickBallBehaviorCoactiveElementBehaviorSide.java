@@ -12,12 +12,19 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class KickBallBehaviorCoactiveElementBehaviorSide extends KickBallBehaviorCoactiveElement
 {
-  
    private KickBallBehavior kickBallBehavior;
 
    public void setKickBallBehavior(KickBallBehavior kickBallBehavior)
    {
       this.kickBallBehavior = kickBallBehavior;
+   }
+
+   @Override public void initializeUserInterfaceSide()
+   {
+   }
+
+   @Override public void updateUserInterfaceSide()
+   {
    }
 
    @Override
@@ -45,5 +52,12 @@ public class KickBallBehaviorCoactiveElementBehaviorSide extends KickBallBehavio
       }
 
       machineSideCount.increment();
+
+      numBlobsDetected.set(kickBallBehavior.getNumBlobsDetected());
+      if (numBlobsDetected.getIntegerValue() > 0)
+      {
+         blobX.set(kickBallBehavior.getBlobLocation().x);
+         blobY.set(kickBallBehavior.getBlobLocation().y);
+      }
    }
 }
