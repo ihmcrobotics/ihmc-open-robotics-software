@@ -100,7 +100,15 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
 
       double comX = 0.0;
       double comY = 0.0;
-      double comZdot = (channels.get(InputChannel.RIGHT_BUTTON) - channels.get(InputChannel.LEFT_BUTTON)) * vzScaleParameter.get();
+      double comZdot = 0.0;
+      if (channels.get(InputChannel.D_PAD) == 0.25)
+      {
+         comZdot += vzScaleParameter.get();
+      }
+      if (channels.get(InputChannel.D_PAD) == 0.75)
+      {
+         comZdot -= vzScaleParameter.get();
+      }
       if (mode == XGaitInputMode.POSITION)
       {
          comX = channels.get(InputChannel.LEFT_STICK_Y) * xScaleParameter.get();
@@ -156,7 +164,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case LEFT_TRIGGER:
-         if (channels.get(InputChannel.LEFT_TRIGGER) == 1.0)
+         if (channels.get(InputChannel.LEFT_BUTTON) == 1.0)
          {
             xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() + deltaPhaseShiftParameter.get(), 0, 180));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -164,7 +172,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case RIGHT_TRIGGER:
-         if (channels.get(InputChannel.RIGHT_TRIGGER) == 1.0)
+         if (channels.get(InputChannel.RIGHT_BUTTON) == 1.0)
          {
             xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() - deltaPhaseShiftParameter.get(), 0, 180));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -172,17 +180,9 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case D_PAD:
-         if (channels.get(InputChannel.D_PAD) == 0.25)
-         {
-            xGaitSettings.setStanceLength(xGaitSettings.getStanceLength() + deltaStanceLengthParameter.get());
-         }
          if (channels.get(InputChannel.D_PAD) == 0.5)
          {
             xGaitSettings.setStanceWidth(xGaitSettings.getStanceWidth() + deltaStanceWidthParameter.get());
-         }
-         if (channels.get(InputChannel.D_PAD) == 0.75)
-         {
-            xGaitSettings.setStanceLength(xGaitSettings.getStanceLength() - deltaStanceLengthParameter.get());
          }
          if (channels.get(InputChannel.D_PAD) == 1.0)
          {
