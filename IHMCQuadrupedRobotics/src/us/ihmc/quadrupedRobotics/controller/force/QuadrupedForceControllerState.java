@@ -7,7 +7,5 @@ public enum QuadrupedForceControllerState
    STAND_READY,
    STAND,
    STEP,
-   TROT,
-   PACE,
    XGAIT
 }
