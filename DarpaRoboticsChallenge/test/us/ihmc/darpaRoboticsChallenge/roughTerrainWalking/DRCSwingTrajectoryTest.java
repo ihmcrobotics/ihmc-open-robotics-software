@@ -15,6 +15,7 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -147,7 +148,8 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
          simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
          simulationTestingParameters.setRunMultiThreaded(false);
-         drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
+         FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
+         drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
                  getRobotModel());
          FullHumanoidRobotModel estimatorRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
          TestController testController = new TestController(estimatorRobotModel);
@@ -195,7 +197,8 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       simulationTestingParameters.setRunMultiThreaded(false);
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
+      FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
               getRobotModel());
 
       ThreadTools.sleep(1000);
@@ -225,7 +228,8 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       simulationTestingParameters.setRunMultiThreaded(false);
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
+      FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
             getRobotModel());
 
       ThreadTools.sleep(1000);
