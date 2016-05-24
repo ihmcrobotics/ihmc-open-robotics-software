@@ -31,6 +31,8 @@ public class FourBarKinematicLoop
     *            | /    \ |
     *            |/      \|
     *            D--------C
+    *            
+    * Note: zero configuration corresponds to vertical links. Positive angles clockwise.             
     */
    private static final boolean DEBUG = false;
    private static final boolean DEFAULT_OUTPUT_jOINT = true; //temporary variable to test loop while it's not part of a larger kinematic chain
@@ -62,7 +64,7 @@ public class FourBarKinematicLoop
       FrameVector masterJointAxis = masterJointA.getJointAxis();
       masterJointAxis.changeFrame(masterJointA.getFrameBeforeJoint());
       frameBeforeFourBarWithZAlongJointAxis = ReferenceFrame.constructReferenceFrameFromPointAndAxis(name + "FrameWithZAlongJointAxis", new FramePoint(masterJointA.getFrameBeforeJoint()), Axis.Z, masterJointAxis);
-
+   
       FrameVector masterAxis = masterJointA.getJointAxis();
       FrameVector jointBAxis = passiveJointB.getJointAxis();
       FrameVector jointCAxis = passiveJointC.getJointAxis();
@@ -222,7 +224,7 @@ public class FourBarKinematicLoop
       vectorCDProjected.get(tempVectorCD);
       vectorDAProjected.get(tempVectorDA);
 
-      passiveInteriorAnglesAtZeroConfiguration[0] = Math.PI - jointBAxis.getZ() * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC); //TODO check +pi and sign
+      passiveInteriorAnglesAtZeroConfiguration[0] = Math.PI - jointBAxis.getZ() * AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC); 
       passiveInteriorAnglesAtZeroConfiguration[1] = Math.PI - jointCAxis.getZ() * AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD);
       passiveInteriorAnglesAtZeroConfiguration[2] = Math.PI - jointDAxis.getZ() * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
       passiveJointSigns[0] = - jointBAxis.getZ();
