@@ -258,10 +258,17 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             {
                Class<?> packetClass = netClassList.getClass(robotConfigurationData.getLastReceivedPacketTypeID());
 
-               String messageType = IHMCROSTranslationRuntimeTools.getROSMessageTypeStringFromIHMCMessageClass(packetClass);
-               if(messageType != null)
+               if(packetClass == null)
                {
-                  lastReceivedMessagePublisher.publish(messageType, robotConfigurationData.getLastReceivedPacketUniqueId(), robotConfigurationData.getTimestamp(), robotConfigurationData.getLastReceivedPacketRobotTimestamp());
+                  System.err.println("Could not get packet class for ID " + robotConfigurationData.getLastReceivedPacketTypeID());
+               }
+               else
+               {
+                  String messageType = IHMCROSTranslationRuntimeTools.getROSMessageTypeStringFromIHMCMessageClass(packetClass);
+                  if(messageType != null)
+                  {
+                     lastReceivedMessagePublisher.publish(messageType, robotConfigurationData.getLastReceivedPacketUniqueId(), robotConfigurationData.getTimestamp(), robotConfigurationData.getLastReceivedPacketRobotTimestamp());
+                  }  
                }
             }
             

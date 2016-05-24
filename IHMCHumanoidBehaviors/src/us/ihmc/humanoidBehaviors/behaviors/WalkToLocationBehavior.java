@@ -326,9 +326,13 @@ public class WalkToLocationBehavior extends BehaviorInterface
    public boolean isDone()
    {
       if (!haveFootstepsBeenGenerated.getBooleanValue() || !hasTargetBeenProvided.getBooleanValue())
+      {
          return false;
+      }
       if (haveFootstepsBeenGenerated.getBooleanValue() && footsteps.size() == 0)
+      {
          return true;
+      }
       return footstepListBehavior.isDone();
    }
 
