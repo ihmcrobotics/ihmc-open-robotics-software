@@ -55,6 +55,8 @@ public class WholeBodyVirtualModelControlSolver
 
    private final YoFrameVector yoDesiredMomentumRateLinear;
    private final YoFrameVector yoAchievedMomentumRateLinear;
+   private final YoFrameVector yoDesiredAngularRateLinear;
+   private final YoFrameVector yoAchievedAngularRateLinear;
    private final FrameVector achievedMomentumRateLinear = new FrameVector();
    private final Map<OneDoFJoint, DoubleYoVariable> jointTorqueSolutions = new HashMap<>();
 
@@ -80,6 +82,9 @@ public class WholeBodyVirtualModelControlSolver
 
       virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), toolbox.getFullRobotModel().getElevator(), registry,
             toolbox.getYoGraphicsListRegistry());
+
+      yoDesiredAngularRateLinear = new YoFrameVector("desiredAngularRateLinear", toolbox.getCenterOfMassFrame(), registry);
+      yoAchievedAngularRateLinear = new YoFrameVector("achievedAngularRateLinear", toolbox.getCenterOfMassFrame(), registry);
 
       RigidBody[] controlledBodies = toolbox.getControlledBodies();
       for (RigidBody controlledBody : controlledBodies)
@@ -148,6 +153,7 @@ public class WholeBodyVirtualModelControlSolver
       SpatialForceVector centroidalMomentumRateSolution = virtualModelControlSolution.getCentroidalMomentumRateSolution();
 
       yoAchievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
+      yoAchievedAngularRateLinear.set(centroidalMomentumRateSolution.getAngularPart());
       yoAchievedMomentumRateLinear.getFrameTupleIncludingFrame(achievedMomentumRateLinear);
 
       // submit forces for stability
@@ -239,6 +245,7 @@ public class WholeBodyVirtualModelControlSolver
    {
       DenseMatrix64F momentumRate = command.getMomentumRate();
       MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredMomentumRateLinear, momentumRate, 3);
+      MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredAngularRateLinear, momentumRate, 0);
    }
 
    private void convertAndAddSpatialAccelerationCommand(SpatialAccelerationCommand command)
