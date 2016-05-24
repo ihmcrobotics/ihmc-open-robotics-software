@@ -13,6 +13,14 @@ public class PickUpBallBehaviorCoactiveElementBehaviorSide extends PickUpBallBeh
       this.pickUpBallBehavior = pickUpBallBehavior;
    }
 
+   @Override public void initializeUserInterfaceSide()
+   {
+   }
+
+   @Override public void updateUserInterfaceSide()
+   {
+   }
+
    @Override
    public void initializeMachineSide()
    {
