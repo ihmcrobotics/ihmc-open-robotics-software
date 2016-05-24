@@ -156,7 +156,6 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       super.doTransitionOutOfAction();
       internalHoldPositionState.doTransitionOutOfAction();
       yoCurrentCorner.set(0);
-      partialFootholdControlModule.turnOffCropping();
    }
 
    private final Vector2d tempVector2d = new Vector2d();
