@@ -5,6 +5,8 @@ import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameOrientation;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class QuadrupedBodyOrientationController
@@ -42,12 +44,18 @@ public class QuadrupedBodyOrientationController
    private final ReferenceFrame bodyFrame;
    private final AxisAngleOrientationController bodyOrientationController;
    private final YoAxisAngleOrientationGains bodyOrientationControllerGains;
+   private final YoFrameOrientation yoBodyOrientationSetpoint;
+   private final YoFrameVector yoBodyAngularVelocitySetpoint;
+   private final YoFrameVector yoComTorqueFeedforwardSetpoint;
 
    public QuadrupedBodyOrientationController(ReferenceFrame bodyFrame, double controlDT, YoVariableRegistry registry)
    {
       this.bodyFrame = bodyFrame;
       bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, controlDT, registry);
       bodyOrientationControllerGains = new YoAxisAngleOrientationGains("bodyOrientation", registry);
+      yoBodyOrientationSetpoint = new YoFrameOrientation("bodyOrientationSetpoint", ReferenceFrame.getWorldFrame(), registry);
+      yoBodyAngularVelocitySetpoint = new YoFrameVector("bodyAngularVelocitySetpoint", ReferenceFrame.getWorldFrame(), registry);
+      yoComTorqueFeedforwardSetpoint = new YoFrameVector("comTorqueFeedforwardSetpoint", ReferenceFrame.getWorldFrame(), registry);
    }
 
    public YoAxisAngleOrientationGains getGains()
@@ -80,6 +88,11 @@ public class QuadrupedBodyOrientationController
       comTorqueFeedforwardSetpoint.changeFrame(bodyFrame);
       bodyOrientationController.setGains(bodyOrientationControllerGains);
       bodyOrientationController.compute(comTorqueCommand, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate, comTorqueFeedforwardSetpoint);
+
+      // update log variables
+      yoBodyOrientationSetpoint.setAndMatchFrame(bodyOrientationSetpoint);
+      yoBodyAngularVelocitySetpoint.setAndMatchFrame(bodyAngularVelocitySetpoint);
+      yoComTorqueFeedforwardSetpoint.setAndMatchFrame(comTorqueFeedforwardSetpoint);
 
       bodyOrientationSetpoint.changeFrame(bodyOrientationSetpointFrame);
       bodyAngularVelocitySetpoint.changeFrame(bodyAngularVelocitySetpointFrame);
