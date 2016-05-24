@@ -396,6 +396,11 @@ public class PartialFootholdControlModule
       shrunkFootPolygon.update();
    }
 
+   public void requestLineFit()
+   {
+      fitLineToCoPs.set(true);
+   }
+
    public void reset()
    {
       shrinkCounter.set(0);
@@ -421,5 +426,20 @@ public class PartialFootholdControlModule
    public void getSupportPolygon(FrameConvexPolygon2d polygonToPack)
    {
       polygonToPack.setIncludingFrame(shrunkFootPolygon);
+   }
+
+   public void clearCoPGrid()
+   {
+      footCoPOccupancyGrid.reset();
+   }
+
+   public void turnOffCropping()
+   {
+      doPartialFootholdDetection.set(false);
+   }
+
+   public void turnOnCropping()
+   {
+      doPartialFootholdDetection.set(true);
    }
 }
