@@ -26,9 +26,9 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    private boolean done = true;
    private enum ExplorationMethod
    {
-      SPRIAL, LINES
+      SPRIAL, LINES, FAST_LINE
    };
-   private final ExplorationMethod method = ExplorationMethod.LINES;
+   private final ExplorationMethod method = ExplorationMethod.FAST_LINE;
 
    private final HoldPositionState internalHoldPositionState;
 
@@ -255,7 +255,30 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             {
                done = true;
             }
+         }
+         else if (method == ExplorationMethod.FAST_LINE)
+         {
+            // quickly go forward and backward with the cop to get data for line fitting in the cop occupancy grid
+            ReferenceFrame soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
 
+            double timeExploring = timeInState - lastShrunkTime.getDoubleValue();
+            double timeToStay = this.timeToStayInCorner.getDoubleValue();
+            double distanceToMove = 0.1;
+
+            if (timeExploring < timeToStay)
+            {
+               desiredCenterOfPressure.setIncludingFrame(soleFrame, distanceToMove, 0.0);
+               partialFootholdControlModule.projectOntoShrunkenPolygon(desiredCenterOfPressure);
+            }
+            else if (timeExploring < 2.0 * timeToStay)
+            {
+               desiredCenterOfPressure.setIncludingFrame(soleFrame, -distanceToMove, 0.0);
+               partialFootholdControlModule.projectOntoShrunkenPolygon(desiredCenterOfPressure);
+            }
+            else
+            {
+               done = true;
+            }
          }
 
          centerOfPressureCommand.setDesiredCoP(desiredCenterOfPressure.getPoint());
