@@ -84,6 +84,7 @@ public class GoHomeBehavior extends BehaviorInterface
 
    private void sendOutgoingPacketToControllerAndNetworkProcessor()
    {
+      
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
          outgoingMessage.setDestination(PacketDestination.UI);
