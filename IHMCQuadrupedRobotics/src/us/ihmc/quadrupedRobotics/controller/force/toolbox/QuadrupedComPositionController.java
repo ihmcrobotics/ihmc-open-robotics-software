@@ -5,6 +5,8 @@ import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class QuadrupedComPositionController
@@ -42,12 +44,18 @@ public class QuadrupedComPositionController
    private final ReferenceFrame comZUpFrame;
    private final EuclideanPositionController comPositionController;
    private final YoEuclideanPositionGains comPositionControllerGains;
+   private final YoFramePoint yoComPositionSetpoint;
+   private final YoFrameVector yoComVelocitySetpoint;
+   private final YoFrameVector yoComForceFeedforwardSetpoint;
 
    public QuadrupedComPositionController(ReferenceFrame comZUpFrame, double controlDT, YoVariableRegistry registry)
    {
       this.comZUpFrame = comZUpFrame;
       comPositionController = new EuclideanPositionController("comPosition", comZUpFrame, controlDT, registry);
       comPositionControllerGains = new YoEuclideanPositionGains("comPosition", registry);
+      yoComPositionSetpoint = new YoFramePoint("comPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
+      yoComVelocitySetpoint = new YoFrameVector("comVelocitySetpoint", ReferenceFrame.getWorldFrame(), registry);
+      yoComForceFeedforwardSetpoint = new YoFrameVector("comForceFeedforwardSetpoint", ReferenceFrame.getWorldFrame(), registry);
    }
 
    public YoEuclideanPositionGains getGains()
@@ -81,6 +89,11 @@ public class QuadrupedComPositionController
       comForceFeedforwardSetpoint.changeFrame(comZUpFrame);
       comPositionController.setGains(comPositionControllerGains);
       comPositionController.compute(comForceCommand, comPositionSetpoint, comVelocitySetpoint, comVelocityEstimate, comForceFeedforwardSetpoint);
+
+      // update log variables
+      yoComPositionSetpoint.setAndMatchFrame(comPositionSetpoint);
+      yoComVelocitySetpoint.setAndMatchFrame(comVelocitySetpoint);
+      yoComForceFeedforwardSetpoint.setAndMatchFrame(comForceFeedforwardSetpoint);
 
       comPositionSetpoint.changeFrame(comPositionSetpointFrame);
       comVelocitySetpoint.changeFrame(comVelocitySetpointFrame);
