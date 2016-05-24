@@ -103,7 +103,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean doToeOffIfPossible()
    {
-      return true;
+      return !true;
    }
 
    @Override
@@ -984,6 +984,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxAllowedDistanceCMPSupport()
    {
-      return 0.075;
+      return 0.06; //0.075;
    }
 }
