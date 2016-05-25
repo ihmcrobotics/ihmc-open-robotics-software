@@ -8,10 +8,7 @@ import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
@@ -114,8 +111,6 @@ public class VirtualModelController
 
    public void submitControlledBodyVirtualWrench(RigidBody controlledBody, Wrench wrench, DenseMatrix64F selectionMatrix)
    {
-      //wrench.changeBodyFrameAttachedToSameBody(controlledBody.getBodyFixedFrame());
-
       vmcDataHandler.addDesiredWrench(controlledBody, wrench);
       vmcDataHandler.addDesiredSelectionMatrix(controlledBody, selectionMatrix);
    }
@@ -219,6 +214,7 @@ public class VirtualModelController
 
          // compute forces
          CommonOps.mult(fullJTMatrix, fullObjectiveWrench, fullEffortMatrix);
+
       }
       else
       {
@@ -245,12 +241,6 @@ public class VirtualModelController
                // put into full thing
                for (int j = 0; j < vmcDataHandler.jointsInChain(controlledBody, 0); j++)
                   CommonOps.extract(jointTorques, j, j+1, 0, 1, fullEffortMatrix, vmcDataHandler.indexOfInTree(controlledBody, 0, j), 0);
-
-               if (DEBUG)
-               {
-                  for (int j = 0; j < vmcDataHandler.jointsInChain(controlledBody, 0); j++)
-                     vmcTorques.get(vmcDataHandler.getJointsForControl(controlledBody, 0)[j]).set(jointTorques.get(j, 0));
-               }
             }
          }
       }
@@ -261,7 +251,10 @@ public class VirtualModelController
       for (InverseDynamicsJoint joint : vmcDataHandler.getControlledJoints())
       {
          jointTorques.put(joint, fullEffortMatrix.get(index));
+         if (DEBUG)
+            vmcTorques.get(joint).set(fullEffortMatrix.get(index));
          index++;
+
       }
 
       if (DISPLAY_GRAVITY_WRENCHES)

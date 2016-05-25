@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import org.apache.regexp.RE;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.SdfLoader.models.FullRobotModel;
@@ -19,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
@@ -31,8 +29,8 @@ import java.util.*;
 
 public class WholeBodyVirtualModelControlSolver
 {
-   private static final boolean DEBUG = true;
    private static final boolean USE_MOMENTUM_QP = false;
+   private static final boolean USE_LIMITED_JOINT_TORQUES = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -74,6 +72,8 @@ public class WholeBodyVirtualModelControlSolver
    private final YoFrameVector yoResidualRootJointForce;
    private final YoFrameVector yoResidualRootJointTorque;
 
+   private boolean firstTick = true;
+
    public WholeBodyVirtualModelControlSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       twistCalculator = toolbox.getTwistCalculator();
@@ -99,10 +99,13 @@ public class WholeBodyVirtualModelControlSolver
       for (RigidBody controlledBody : controlledBodies)
          virtualModelController.createYoVariable(controlledBody);
 
-      for (OneDoFJoint joint : controlledOneDoFJoints)
+      if (USE_LIMITED_JOINT_TORQUES)
       {
-         RateLimitedYoVariable jointTorqueSolution = new RateLimitedYoVariable("limited_tau_vmc_" + joint.getName(), registry, 50.0, toolbox.getControlDT());
-         jointTorqueSolutions.put(joint, jointTorqueSolution);
+         for (OneDoFJoint joint : controlledOneDoFJoints)
+         {
+            RateLimitedYoVariable jointTorqueSolution = new RateLimitedYoVariable("limited_tau_vmc_" + joint.getName(), registry, 10.0, toolbox.getControlDT());
+            jointTorqueSolutions.put(joint, jointTorqueSolution);
+         }
       }
 
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
@@ -124,6 +127,7 @@ public class WholeBodyVirtualModelControlSolver
       virtualModelController.reset();
       virtualWrenchCommandList.clear();
       bodiesInContact.clear();
+      firstTick = true;
    }
 
    public void clear()
@@ -141,6 +145,7 @@ public class WholeBodyVirtualModelControlSolver
       optimizationControlModule.initialize();
       virtualModelController.reset();
       planeContactWrenchProcessor.initialize();
+      firstTick = true;
    }
 
    public void compute()
@@ -182,7 +187,6 @@ public class WholeBodyVirtualModelControlSolver
       }
       planeContactWrenchProcessor.compute(externalWrenchSolution);
 
-
       // submit virtual wrenches for tracking
       for (int i = 0; i < virtualWrenchCommandList.getNumberOfCommands(); i++)
       {
@@ -219,9 +223,18 @@ public class WholeBodyVirtualModelControlSolver
       {
          if (jointTorquesSolution.containsKey(joint))
          {
-            jointTorqueSolutions.get(joint).update(jointTorquesSolution.get(joint));
-            //lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorqueSolutions.get(joint).getDoubleValue());
-            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorquesSolution.get(joint));
+            if (USE_LIMITED_JOINT_TORQUES)
+            {
+               if (firstTick)
+                  jointTorqueSolutions.get(joint).set(jointTorquesSolution.get(joint));
+               else
+                  jointTorqueSolutions.get(joint).update(jointTorquesSolution.get(joint));
+               lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorqueSolutions.get(joint).getDoubleValue());
+            }
+            else
+            {
+               lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorquesSolution.get(joint));
+            }
          }
       }
    }
