@@ -173,7 +173,7 @@ public class PickUpBallBehavior extends BehaviorInterface
 
             coactiveElement.currentState.set(BehaviorState.SETTING_LIDAR_PARAMS);
             DepthDataFilterParameters param = new DepthDataFilterParameters();
-            param.nearScanRadius = 2.0f;
+            param.nearScanRadius = 1.75f;
             setLidarParametersBehavior.setInput(param);
          }
       };
@@ -311,7 +311,7 @@ public class PickUpBallBehavior extends BehaviorInterface
          {
             coactiveElement.currentState.set(BehaviorState.SETTING_LIDAR_PARAMS);
             DepthDataFilterParameters param = new DepthDataFilterParameters();
-            param.nearScanRadius = 1.0f;
+            param.nearScanRadius = 0.6f;
             setLidarParametersBehavior.setInput(param);
          }
       };
