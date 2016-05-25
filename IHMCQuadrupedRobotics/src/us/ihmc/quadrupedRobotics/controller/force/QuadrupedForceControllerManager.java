@@ -10,6 +10,8 @@ import us.ihmc.quadrupedRobotics.controller.force.states.*;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.packets.QuadrupedForceControllerEventPacket;
+import us.ihmc.quadrupedRobotics.params.BooleanParameter;
+import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.params.ParameterPacketListener;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProvider;
@@ -34,6 +36,9 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 public class QuadrupedForceControllerManager implements QuadrupedControllerManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
+   private final BooleanParameter bypassDoNothingStateParameter = parameterFactory.createBoolean("bypassDoNothingState", true);
+
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
    private final QuadrupedControllerInputProviderInterface inputProvider;
    private final QuadrupedTimedStepInputProvider timedStepProvider;
@@ -129,6 +134,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    {
       // Initialize controllers.
       QuadrupedController jointInitializationController = new QuadrupedForceBasedJointInitializationController(runtimeEnvironment);
+      QuadrupedController doNothingController = new QuadrupedForceBasedDoNothingController(runtimeEnvironment);
       QuadrupedController standPrepController = new QuadrupedForceBasedStandPrepController(runtimeEnvironment, controllerToolbox);
       QuadrupedController standReadyController = new QuadrupedForceBasedStandReadyController(runtimeEnvironment, controllerToolbox);
       QuadrupedController standController = new QuadrupedDcmBasedStandController(runtimeEnvironment, controllerToolbox, inputProvider);
@@ -139,6 +145,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             QuadrupedForceControllerState.class, ControllerEvent.class, "forceControllerState", registry);
 
       builder.addState(QuadrupedForceControllerState.JOINT_INITIALIZATION, jointInitializationController);
+      builder.addState(QuadrupedForceControllerState.DO_NOTHING, doNothingController);
       builder.addState(QuadrupedForceControllerState.STAND_PREP, standPrepController);
       builder.addState(QuadrupedForceControllerState.STAND_READY, standReadyController);
       builder.addState(QuadrupedForceControllerState.STAND, standController);
@@ -146,7 +153,14 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       builder.addState(QuadrupedForceControllerState.XGAIT, xGaitController);
 
       // Add automatic transitions that lead into the stand state.
-      builder.addTransition(ControllerEvent.DONE, QuadrupedForceControllerState.JOINT_INITIALIZATION, QuadrupedForceControllerState.STAND_PREP);
+      if (bypassDoNothingStateParameter.get())
+      {
+         builder.addTransition(ControllerEvent.DONE, QuadrupedForceControllerState.JOINT_INITIALIZATION, QuadrupedForceControllerState.STAND_PREP);
+      }
+      else
+      {
+         builder.addTransition(ControllerEvent.DONE, QuadrupedForceControllerState.JOINT_INITIALIZATION, QuadrupedForceControllerState.DO_NOTHING);
+      }
       builder.addTransition(ControllerEvent.DONE, QuadrupedForceControllerState.STAND_PREP, QuadrupedForceControllerState.STAND_READY);
       builder.addTransition(ControllerEvent.DONE, QuadrupedForceControllerState.STEP, QuadrupedForceControllerState.STAND);
 
@@ -158,6 +172,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.XGAIT);
 
       // Transitions from controllers back to stand prep.
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedForceControllerState.DO_NOTHING, QuadrupedForceControllerState.STAND_PREP);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.STAND_PREP);
 
       return builder.build(QuadrupedForceControllerState.JOINT_INITIALIZATION);
