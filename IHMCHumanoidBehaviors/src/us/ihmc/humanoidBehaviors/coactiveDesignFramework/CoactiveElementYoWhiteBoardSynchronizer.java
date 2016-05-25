@@ -6,11 +6,12 @@ import java.util.ArrayList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.whiteBoard.TCPYoWhiteBoard;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class CoactiveElementYoWhiteBoardSynchronizer
 {
-   private final TCPYoWhiteBoard yoWhiteBoard;
+   private final TCPYoWhiteBoard tcpYoWhiteBoard;
 
    private final HumanOrMachine whichSideIsThisRunningOn;
    private final CoactiveElement coactiveElement;
@@ -42,11 +43,11 @@ public class CoactiveElementYoWhiteBoardSynchronizer
 
       if (ipAddress == null)
       {
-         this.yoWhiteBoard = new TCPYoWhiteBoard(whichSideIsThisRunningOn + "SideCoactiveElementYoWhiteBoard", port);
+         this.tcpYoWhiteBoard = new TCPYoWhiteBoard(whichSideIsThisRunningOn + "SideCoactiveElementYoWhiteBoard", port);
       }
       else
       {
-         this.yoWhiteBoard = new TCPYoWhiteBoard(whichSideIsThisRunningOn + "SideCoactiveElementYoWhiteBoard", ipAddress, port);
+         this.tcpYoWhiteBoard = new TCPYoWhiteBoard(whichSideIsThisRunningOn + "SideCoactiveElementYoWhiteBoard", ipAddress, port);
       }
       
       switch (whichSideIsThisRunningOn)
@@ -65,8 +66,8 @@ public class CoactiveElementYoWhiteBoardSynchronizer
       }
       }
 
-      yoWhiteBoard.setVariablesToRead(variablesToRead);
-      yoWhiteBoard.setVariablesToWrite(variablesToWrite);
+      tcpYoWhiteBoard.setVariablesToRead(variablesToRead);
+      tcpYoWhiteBoard.setVariablesToWrite(variablesToWrite);
    }
 
    public CoactiveElement getCoactiveElement()
@@ -81,22 +82,22 @@ public class CoactiveElementYoWhiteBoardSynchronizer
 
    public void writeData() throws IOException
    {
-      yoWhiteBoard.writeData();
+      tcpYoWhiteBoard.writeData();
    }
 
    public boolean isNewDataAvailable()
    {
-      return yoWhiteBoard.isNewDataAvailable();
+      return tcpYoWhiteBoard.isNewDataAvailable();
    }
 
    public void readData() throws IOException
    {
-      yoWhiteBoard.readData();
+      tcpYoWhiteBoard.readData();
    }
 
    public void startASynchronizerOnAThread(long millisecondsBetweenDataWrites)
    {
-      yoWhiteBoard.startOnAThread();
+      tcpYoWhiteBoard.startOnAThread();
       
       SynchronizerRunnable synchronizerRunnable = new SynchronizerRunnable(this, millisecondsBetweenDataWrites);
       ThreadTools.startAThread(synchronizerRunnable, getClass().getSimpleName());
@@ -106,7 +107,8 @@ public class CoactiveElementYoWhiteBoardSynchronizer
    {
       try
       {
-         yoWhiteBoard.close();
+         PrintTools.info(this, "Closed.");
+         tcpYoWhiteBoard.close();
       }
       catch (IOException e)
       {
@@ -118,12 +120,12 @@ public class CoactiveElementYoWhiteBoardSynchronizer
    {
       private static final boolean DEBUG = false;
 
-      private final CoactiveElementYoWhiteBoardSynchronizer synchronizer;
+      private final CoactiveElementYoWhiteBoardSynchronizer coactiveElementYoWhiteBoardSynchronizer;
       private final long millisecondsBetweenDataWrites;
 
-      SynchronizerRunnable(CoactiveElementYoWhiteBoardSynchronizer synchronizer, long millisecondsBetweenDataWrites)
+      SynchronizerRunnable(CoactiveElementYoWhiteBoardSynchronizer coactiveElementYoWhiteBoardSynchronizer, long millisecondsBetweenDataWrites)
       {
-         this.synchronizer = synchronizer;
+         this.coactiveElementYoWhiteBoardSynchronizer = coactiveElementYoWhiteBoardSynchronizer;
          this.millisecondsBetweenDataWrites = millisecondsBetweenDataWrites;
       }
 
@@ -134,19 +136,16 @@ public class CoactiveElementYoWhiteBoardSynchronizer
          {
             try
             {
-               if (DEBUG)
-                  System.out.println("Writing Data");
-               synchronizer.writeData();
+               PrintTools.debug(DEBUG, this, "coactiveElementYoWhiteBoardSynchronizer.writeData()");
+               coactiveElementYoWhiteBoardSynchronizer.writeData();
                {
-                  if (DEBUG)
-                     System.out.println("Reading Data");
-                  synchronizer.readData();
+                  PrintTools.debug(DEBUG, this, "coactiveElementYoWhiteBoardSynchronizer.readData()");
+                  coactiveElementYoWhiteBoardSynchronizer.readData();
                }
             }
             catch (Exception e)
             {
-               if (DEBUG)
-                  System.out.println("Exception: " + e);
+               PrintTools.debug(DEBUG, this, e.getMessage());
             }
 
             try
@@ -162,7 +161,7 @@ public class CoactiveElementYoWhiteBoardSynchronizer
 
    public TCPYoWhiteBoard getYoWhiteBoard()
    {
-      return yoWhiteBoard;
+      return tcpYoWhiteBoard;
    }
 
 }
