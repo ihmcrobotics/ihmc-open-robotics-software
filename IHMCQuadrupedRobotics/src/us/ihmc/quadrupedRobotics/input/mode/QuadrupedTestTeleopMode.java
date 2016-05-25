@@ -31,7 +31,6 @@ public class QuadrupedTestTeleopMode implements QuadrupedTeleopMode
    private final DoubleParameter rollScaleParameter = parameterFactory.createDouble("rollScale", 0.15);
    private final DoubleParameter pitchScaleParameter = parameterFactory.createDouble("pitchScale", 0.15);
    private final DoubleParameter yawScaleParameter = parameterFactory.createDouble("yawScale", 0.15);
-   private final DoubleParameter xScaleParameter = parameterFactory.createDouble("xScale", 0.20);
    private final DoubleParameter vzScaleParameter = parameterFactory.createDouble("vzScale", 0.25);
    private final DoubleParameter defaultComHeightParameter = parameterFactory.createDouble("defaultComHeight", 0.55);
    private final DoubleParameter swingHeight = parameterFactory.createDouble("swingHeight", 0.1);
@@ -77,8 +76,7 @@ public class QuadrupedTestTeleopMode implements QuadrupedTeleopMode
       {
          comZdot -= vzScaleParameter.get();
       }
-      double comX = channels.get(InputChannel.LEFT_STICK_Y) * xScaleParameter.get();
-      ComPositionPacket comPositionPacket = new ComPositionPacket(comX, 0.0, comZ.update(comZdot));
+      ComPositionPacket comPositionPacket = new ComPositionPacket(0.0, 0.0, comZ.update(comZdot));
       packetCommunicator.send(comPositionPacket);
    }
 
