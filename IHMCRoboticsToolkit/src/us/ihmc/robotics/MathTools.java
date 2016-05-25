@@ -501,8 +501,14 @@ public class MathTools
       if (argument > 0.0)
          throw new RuntimeException("Argument " + argument + " not negative.");
    }
-   
+
    public static void checkIfLessOrEqual(double argument, double desired)
+   {
+      if (argument > desired)
+         throw new RuntimeException("Argument " + argument + " greater than: " + desired);
+   }
+
+   public static void checkIfLessOrEqual(int argument, int desired)
    {
       if (argument > desired)
          throw new RuntimeException("Argument " + argument + " greater than: " + desired);

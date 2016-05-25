@@ -44,7 +44,7 @@ public class HeadTrajectoryBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      if (!packetHasBeenSent.getBooleanValue() && (outgoingHeadTrajectoryMessage != null))
+            if (!packetHasBeenSent.getBooleanValue() && (outgoingHeadTrajectoryMessage != null))
       {
          sendHeadOrientationPacketToController();
       }

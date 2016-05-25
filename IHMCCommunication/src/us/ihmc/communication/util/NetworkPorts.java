@@ -39,6 +39,7 @@ public class NetworkPorts
    public static final NetworkPorts AUDIO_MODULE_PORT = new NetworkPorts(6015);
    public static final NetworkPorts TOUCH_MODULE_PORT = new NetworkPorts(6016);
    public static final NetworkPorts KINEMATICS_TOOLBOX_MODULE_PORT = new NetworkPorts(6017); 
+   public static final NetworkPorts COACTIVE_ELEMENTS_PORT = new NetworkPorts(6018); 
 
    // Mission control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046);

@@ -149,6 +149,12 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract MomentumOptimizationSettings getMomentumOptimizationSettings();
 
+   /**
+    * Boolean that determines if the foot state switch to hold position if the desired cop is close
+    * to the edge of the support polygon.
+    *
+    * @return holdPositionIfCopOnEdge
+    */
    public abstract boolean doFancyOnToesControl();
 
    public abstract FootSwitchType getFootSwitchType();
