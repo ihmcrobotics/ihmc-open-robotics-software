@@ -35,7 +35,7 @@ import us.ihmc.tools.io.printing.PrintTools;
  */
 public class CommandInputManager
 {
-   private final int buffersCapacity = 8;
+   private final int buffersCapacity = 16;
 
    /**
     * List of all the buffers that allows the user to easily flush all new commands using {@link #flushAllCommands()}.
