@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import us.ihmc.communication.net.NetClassList;
@@ -14,14 +17,14 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class ParameterSaver
 {
-   private final String fileName;
+   private final Path path;
    private final PacketCommunicator packetCommunicator;
 
    private boolean writeFinished = false;
 
-   public ParameterSaver(String fileName, NetClassList netClassList) throws IOException
+   public ParameterSaver(Path path, NetClassList netClassList) throws IOException
    {
-      this.fileName = fileName;
+      this.path = path;
       this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("localhost", NetworkPorts.CONTROLLER_PORT, netClassList);
       this.packetCommunicator.attachListener(ParameterListPacket.class, new PacketConsumer<ParameterListPacket>()
       {
@@ -49,7 +52,7 @@ public class ParameterSaver
    private void writeParameters(List<Parameter> parameters)
    {
       System.out.println("Got parameter list of length " + parameters.size());
-      File file = new File(fileName);
+      File file = path.toFile();
       try (PrintWriter writer = new PrintWriter(new FileOutputStream(file)))
       {
          for (Parameter parameter : parameters)
@@ -63,7 +66,7 @@ public class ParameterSaver
          e.printStackTrace();
       }
 
-      System.out.println("Parameters written to " + fileName);
+      System.out.println("Parameters written to " + path);
       writeFinished = true;
    }
 
@@ -75,7 +78,7 @@ public class ParameterSaver
       }
    }
 
-   public static void run(String[] args, NetClassList netClassList) throws IOException
+   public static void run(String[] args, Path defaultParametersPath, NetClassList netClassList) throws IOException
    {
       if (args.length != 1)
       {
@@ -83,9 +86,34 @@ public class ParameterSaver
          System.exit(1);
       }
 
-      String fileName = args[0];
+      Path path = Paths.get(args[0]);
 
-      ParameterSaver saver = new ParameterSaver(fileName, netClassList);
+      // If an absolute path is specified, use it as-is. If not, try to locate the robot-specific resources directory.
+      if (!path.isAbsolute())
+      {
+         Path pathFromCwd = Paths.get("").toAbsolutePath().getParent().resolve(defaultParametersPath);
+
+         // If $IHMC_WORKSPACE is defined, use it.
+         if (System.getenv("IHMC_WORKSPACE") != null)
+         {
+            Path workspacePath = Paths.get(System.getenv("IHMC_WORKSPACE"));
+            path = workspacePath.resolve(defaultParametersPath).resolve(path);
+         }
+         // If ../<defaultParametersPath> exists, use that.
+         else if (Files.exists(pathFromCwd))
+         {
+            path = pathFromCwd.resolve(path);
+         }
+         else
+         {
+            System.err.println("If a relative path is supplied then either $IHMC_WORKSPACE must be defined or cwd must be your _IHMCWorkspace");
+            System.exit(1);
+         }
+      }
+
+      System.out.println("Saving parameters to: " + path);
+
+      ParameterSaver saver = new ParameterSaver(path, netClassList);
       saver.requestParameters();
       saver.waitForWriteToFinish();
 
