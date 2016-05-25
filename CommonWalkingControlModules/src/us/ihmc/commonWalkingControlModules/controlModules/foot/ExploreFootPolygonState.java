@@ -21,6 +21,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ExploreFootPolygonState extends AbstractFootControlState
 {
@@ -29,7 +30,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    {
       SPRIAL, LINES, FAST_LINE
    };
-   private final ExplorationMethod method = ExplorationMethod.FAST_LINE;
+   private final ExplorationMethod method;
 
    private final HoldPositionState internalHoldPositionState;
 
@@ -74,6 +75,10 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    public ExploreFootPolygonState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.EXPLORE_POLYGON, footControlHelper, registry);
+      
+      if (robotSide == RobotSide.LEFT) method = ExplorationMethod.FAST_LINE;
+      else method = ExplorationMethod.LINES;
+
       dt = momentumBasedController.getControlDT();
       ExplorationParameters explorationParameters =
             footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry);
@@ -95,7 +100,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       recoverTime = explorationParameters.getRecoverTime();
 
       autoCropToLineAfterExploration = new BooleanYoVariable(contactableFoot.getName() + "AutoCropToLineAfterExploration", registry);
-      autoCropToLineAfterExploration.set(false);
+      autoCropToLineAfterExploration.set(!false);
 
       timeToGoToCorner = explorationParameters.getTimeToGoToCorner();
       timeToGoToCorner.addVariableChangedListener(new VariableChangedListener()
@@ -179,18 +184,18 @@ public class ExploreFootPolygonState extends AbstractFootControlState
          partialFootholdControlModule.clearCoPGrid();
       }
 
+      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+      boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
+      if (contactStateHasChanged)
+      {
+         contactState.notifyContactStateHasChanged();
+         lastShrunkTime.set(timeInState);
+         spiralAngle.add(Math.PI/2.0);
+         done = false;
+      }
+      
       if (timeInState > recoverTime.getDoubleValue() && !done)
       {
-         YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
-         boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
-         if (contactStateHasChanged)
-         {
-            contactState.notifyContactStateHasChanged();
-            lastShrunkTime.set(timeInState);
-            spiralAngle.add(Math.PI/2.0);
-            done = false;
-         }
-
          // Foot exploration through CoP shifting...
          if (method == ExplorationMethod.SPRIAL)
          {
@@ -275,17 +280,36 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
             double timeExploring = timeInState - lastShrunkTime.getDoubleValue();
             double timeToStay = this.timeToStayInCorner.getDoubleValue();
-            double distanceToMove = 0.1;
+            double distanceToMoveFrontBack = 0.1;
+            double distanceToMoveSideSide = 0.08;
 
             if (timeExploring < timeToStay)
             {
-               desiredCenterOfPressure.setIncludingFrame(soleFrame, distanceToMove, 0.0);
+               if (robotSide == RobotSide.LEFT)
+               {
+                  desiredCenterOfPressure.setIncludingFrame(soleFrame, distanceToMoveFrontBack, 0.0);
+               }
+               else
+               {
+                  desiredCenterOfPressure.setIncludingFrame(soleFrame, 0.02, distanceToMoveSideSide);
+               }
                partialFootholdControlModule.projectOntoShrunkenPolygon(desiredCenterOfPressure);
             }
             else if (timeExploring < 2.0 * timeToStay)
             {
-               desiredCenterOfPressure.setIncludingFrame(soleFrame, -distanceToMove, 0.0);
+               if (robotSide == RobotSide.LEFT)
+               {
+                  desiredCenterOfPressure.setIncludingFrame(soleFrame, -distanceToMoveFrontBack, 0.0);
+               }
+               else
+               {
+                  desiredCenterOfPressure.setIncludingFrame(soleFrame, -0.02, -distanceToMoveSideSide);
+               }
                partialFootholdControlModule.projectOntoShrunkenPolygon(desiredCenterOfPressure);
+            }
+            else if (timeExploring < 2.0 * timeToStay + 1.0)
+            {
+               desiredCenterOfPressure.setIncludingFrame(soleFrame, 0.0, 0.0);
             }
             else
             {

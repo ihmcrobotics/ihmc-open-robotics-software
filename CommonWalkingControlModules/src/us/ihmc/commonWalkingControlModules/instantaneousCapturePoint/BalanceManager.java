@@ -157,7 +157,7 @@ public class BalanceManager
       pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, bipedSupportPolygons, pelvisXYControlGains, registry);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
-      useUpperBodyLinearMomentumIfFalling.set(false);
+      useUpperBodyLinearMomentumIfFalling.set(!false);
 
       String graphicListName = "BalanceManager";
 
@@ -329,6 +329,12 @@ public class BalanceManager
          polygonShrinker.shrinkConstantDistanceInto(safeArea, 0.05, tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
+      else
+      {
+         polygonShrinker.shrinkConstantDistanceInto(safeArea, 0.02, tempPolygon1);
+         safeArea.setIncludingFrameAndUpdate(tempPolygon1);
+      }
+      
       safeArea.changeFrameAndProjectToXYPlane(worldFrame);
       yoSafeICPArea.setFrameConvexPolygon2d(safeArea);
 
@@ -346,12 +352,12 @@ public class BalanceManager
       {
          shouldUseUpperBodyLinearMomentum.set(true);
       }
-      else if (icpErrorSmall)
+      else //if (icpErrorSmall)
       {
          shouldUseUpperBodyLinearMomentum.set(false);
       }
 
-      shouldUseUpperBodyLinearMomentum.set(true);
+//      shouldUseUpperBodyLinearMomentum.set(true);
    }
 
    public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
