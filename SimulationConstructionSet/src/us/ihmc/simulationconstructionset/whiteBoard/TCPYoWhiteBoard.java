@@ -22,7 +22,7 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
    private ServerSocket serverSocket;
    private Socket clientSocket;
    
-   private boolean closed = false;
+   private boolean closed = true;
    
    public TCPYoWhiteBoard(String name, final int port)
    {      
@@ -40,27 +40,14 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
       this.port = port;
    }
    
-   public void startOnAThread()
+   public void startTCPThread()
    {
-      ThreadTools.startAThread(this, getName() + "TCPThread");
+      if (!closed)
+         throw new RuntimeException("Already started");
       
-      ThreadTools.startAThread(new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            try
-            {
-               PrintTools.info(getName() + ": Connecting");
-               connect();
-            }
-            catch (IOException e)
-            {
-               PrintTools.error(getName() + ": Failed to connect");
-               e.printStackTrace();
-            }
-         }
-      }, getName() + "ConnectThread");
+      closed = false;
+      
+      ThreadTools.startAThread(this, getName() + "TCPThread");
    }
 
    @Override
