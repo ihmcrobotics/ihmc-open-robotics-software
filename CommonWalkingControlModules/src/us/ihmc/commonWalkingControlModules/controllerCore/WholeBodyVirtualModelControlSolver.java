@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
+import org.apache.regexp.RE;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.SdfLoader.models.FullRobotModel;
@@ -15,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelController;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -25,10 +27,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class WholeBodyVirtualModelControlSolver
 {
@@ -62,8 +61,8 @@ public class WholeBodyVirtualModelControlSolver
 
    private final YoFrameVector yoDesiredMomentumRateLinear;
    private final YoFrameVector yoAchievedMomentumRateLinear;
-   private final YoFrameVector yoDesiredAngularRateLinear;
-   private final YoFrameVector yoAchievedAngularRateLinear;
+   private final YoFrameVector yoDesiredMomentumRateAngular;
+   private final YoFrameVector yoAchievedMomentumRateAngular;
    private final FrameVector achievedMomentumRateLinear = new FrameVector();
    private final Map<OneDoFJoint, RateLimitedYoVariable> jointTorqueSolutions = new HashMap<>();
    private final List<RigidBody> bodiesInContact = new ArrayList<>();
@@ -90,11 +89,11 @@ public class WholeBodyVirtualModelControlSolver
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
 
-      virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), controllerModel.getPelvis(), controlledOneDoFJoints,
-            toolbox.getCenterOfMassFrame(), registry, toolbox.getYoGraphicsListRegistry());
+      virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), controllerModel.getPelvis(), controlledOneDoFJoints, registry,
+            toolbox.getYoGraphicsListRegistry());
 
-      yoDesiredAngularRateLinear = new YoFrameVector("desiredAngularRateLinear", toolbox.getCenterOfMassFrame(), registry);
-      yoAchievedAngularRateLinear = new YoFrameVector("achievedAngularRateLinear", toolbox.getCenterOfMassFrame(), registry);
+      yoDesiredMomentumRateAngular = new YoFrameVector("desiredMomentumRateAngular", toolbox.getCenterOfMassFrame(), registry);
+      yoAchievedMomentumRateAngular = new YoFrameVector("achievedMomentumRateAngular", toolbox.getCenterOfMassFrame(), registry);
 
       RigidBody[] controlledBodies = toolbox.getControlledBodies();
       for (RigidBody controlledBody : controlledBodies)
@@ -107,7 +106,8 @@ public class WholeBodyVirtualModelControlSolver
       }
 
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
-      wrenchVisualizer = toolbox.getWrenchVisualizer();
+      wrenchVisualizer = new WrenchVisualizer("VMCDesiredExternalWrench", Arrays.asList(controlledBodies), 1.0, toolbox.getYoGraphicsListRegistry(),
+         registry, YoAppearance.Red(), YoAppearance.Blue());
 
       yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
       yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
@@ -170,19 +170,18 @@ public class WholeBodyVirtualModelControlSolver
       SpatialForceVector centroidalMomentumRateSolution = virtualModelControlSolution.getCentroidalMomentumRateSolution();
 
       yoAchievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
-      yoAchievedAngularRateLinear.set(centroidalMomentumRateSolution.getAngularPart());
+      yoAchievedMomentumRateAngular.set(centroidalMomentumRateSolution.getAngularPart());
       yoAchievedMomentumRateLinear.getFrameTupleIncludingFrame(achievedMomentumRateLinear);
 
       // submit forces for stability
       for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
       {
-         externalWrenchSolution.get(rigidBody).changeFrame(centerOfMassFrame);
+         //externalWrenchSolution.get(rigidBody).changeFrame(centerOfMassFrame);
          externalWrenchSolution.get(rigidBody).negate();
          virtualModelController.submitControlledBodyVirtualWrench(rigidBody, externalWrenchSolution.get(rigidBody));
       }
-
       planeContactWrenchProcessor.compute(externalWrenchSolution);
-      wrenchVisualizer.visualize(externalWrenchSolution);
+
 
       // submit virtual wrenches for tracking
       for (int i = 0; i < virtualWrenchCommandList.getNumberOfCommands(); i++)
@@ -194,6 +193,14 @@ public class WholeBodyVirtualModelControlSolver
 
       virtualModelController.compute(virtualModelControlSolution);
       Map<InverseDynamicsJoint, Double> jointTorquesSolution = virtualModelControlSolution.getJointTorques();
+
+
+      for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
+      {
+         externalWrenchSolution.get(rigidBody).changeBodyFrameAttachedToSameBody(rigidBody.getBodyFixedFrame());
+         externalWrenchSolution.get(rigidBody).negate();
+      }
+      wrenchVisualizer.visualize(externalWrenchSolution);
 
       updateLowLevelData(jointTorquesSolution);
 
@@ -265,7 +272,7 @@ public class WholeBodyVirtualModelControlSolver
       momentumRateCommand.set(command);
       DenseMatrix64F momentumRate = command.getMomentumRate();
       MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredMomentumRateLinear, momentumRate, 3);
-      MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredAngularRateLinear, momentumRate, 0);
+      MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredMomentumRateAngular, momentumRate, 0);
    }
 
    private void convertAndAddSpatialAccelerationCommand(SpatialAccelerationCommand command)
