@@ -179,7 +179,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean allowAutomaticManipulationAbort()
    {
-      return true;
+      return !true;
    }
 
    @Override
@@ -900,7 +900,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean doFancyOnToesControl()
    {
-      return target != DRCRobotModel.RobotTarget.REAL_ROBOT;
+      return true;
+//      return target != DRCRobotModel.RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -984,6 +985,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxAllowedDistanceCMPSupport()
    {
-      return 0.06; //0.075;
+      return 0.05; //0.075;
    }
 }
