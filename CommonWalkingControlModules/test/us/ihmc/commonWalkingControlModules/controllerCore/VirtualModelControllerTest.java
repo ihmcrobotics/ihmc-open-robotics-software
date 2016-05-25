@@ -551,7 +551,7 @@ public class VirtualModelControllerTest
       CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
       CommonOps.invert(transposeJacobianMatrix);
 
-      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), pelvis, null, null);
+      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), pelvis, null, null, null, null);
       virtualModelController.registerControlledBody(endEffector, pelvis);
 
       VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
@@ -613,7 +613,8 @@ public class VirtualModelControllerTest
       externalForcePoints.add(robotArm.getExternalForcePoint());
 
       DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
-      VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, endEffectors, desiredForces, desiredTorques, externalForcePoints, selectionMatrix);
+      VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, robotArm.getCenterOfMassFrame(), endEffectors, desiredForces,
+            desiredTorques, externalForcePoints, selectionMatrix);
 
       simulationTestingParameters.setKeepSCSUp(false);
    }
@@ -648,7 +649,7 @@ public class VirtualModelControllerTest
       externalForcePoints.add(robotArm.getExternalForcePoint());
 
       DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
-      VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, endEffectors, desiredForces, desiredTorques, externalForcePoints, selectionMatrix);
+      VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, robotArm.getCenterOfMassFrame(), endEffectors, desiredForces, desiredTorques, externalForcePoints, selectionMatrix);
 
       simulationTestingParameters.setKeepSCSUp(false);
    }
@@ -692,7 +693,8 @@ public class VirtualModelControllerTest
 
       DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
 
-      VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, endEffectors, desiredForces, desiredTorques, externalForcePoints, selectionMatrix);
+      VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, robotArm.getCenterOfMassFrame(), endEffectors, desiredForces,
+            desiredTorques, externalForcePoints, selectionMatrix);
 
       simulationTestingParameters.setKeepSCSUp(false);
    }
@@ -734,7 +736,8 @@ public class VirtualModelControllerTest
 
       DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
 
-      VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, endEffectors, desiredForces, desiredTorques, externalForcePoints, selectionMatrix);
+      VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, robotArm.getCenterOfMassFrame(), endEffectors, desiredForces,
+            desiredTorques, externalForcePoints, selectionMatrix);
 
       simulationTestingParameters.setKeepSCSUp(false);
    }
@@ -761,7 +764,7 @@ public class VirtualModelControllerTest
       CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
       CommonOps.invert(transposeJacobianMatrix);
 
-      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), base, null, null);
+      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), base, null, null, null, null);
       virtualModelController.registerControlledBody(endEffector, base);
 
       desiredWrench.changeFrame(base.getBodyFixedFrame());

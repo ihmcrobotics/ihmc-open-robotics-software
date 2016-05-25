@@ -120,6 +120,12 @@ public class CenterOfMassHeightManager
       return centerOfMassTrajectoryGenerator;
    }
 
+   public void setCoMHeightGains(double kp, double kd)
+   {
+      centerOfMassHeightController.setProportionalGain(kp);
+      centerOfMassHeightController.setDerivativeGain(kd);
+   }
+
    public void initialize()
    {
 
