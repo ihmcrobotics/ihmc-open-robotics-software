@@ -66,6 +66,7 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
       checkRobotSide(bodyPart);
       this.bodyPart = bodyPart;
       this.trajectoryTime = trajectoryTime;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public GoHomeMessage(BodyPart bodyPart, RobotSide robotSide, double trajectoryTime)
@@ -75,6 +76,7 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
       this.bodyPart = bodyPart;
       this.robotSide = robotSide;
       this.trajectoryTime = trajectoryTime;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    private void checkRobotSide(BodyPart bodyPart)

@@ -50,14 +50,16 @@ public class PickUpBallBehavior extends BehaviorInterface
    private final SetLidarParametersBehavior setLidarParametersBehavior;
    private final ClearLidarBehavior clearLidarBehavior;
    private final SphereDetectionBehavior initialSphereDetectionBehavior;
-   private final WaitForUserValidationBehavior waitForUserValidationBehavior; 
+   private final WaitForUserValidationBehavior waitForUserValidationBehavior;
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final ChestTrajectoryBehavior chestTrajectoryBehavior;
    private final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
    private final WholeBodyInverseKinematicsBehavior pickUpBehavior;
    private final GoHomeBehavior chestGoHomeBehavior;
    private final GoHomeBehavior pelvisGoHomeBehavior;
-   
+   private final GoHomeBehavior armGoHomeLeftBehavior;
+   private final GoHomeBehavior armGoHomeRightBehavior;
+
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -66,7 +68,7 @@ public class PickUpBallBehavior extends BehaviorInterface
    private final double standingDistance = 0.5;
 
    private HumanoidReferenceFrames referenceFrames;
-   
+
    public PickUpBallBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
@@ -106,15 +108,19 @@ public class PickUpBallBehavior extends BehaviorInterface
       pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", outgoingCommunicationBridge, yoTime);
       behaviors.add(pelvisGoHomeBehavior);
 
+      armGoHomeLeftBehavior = new GoHomeBehavior("leftArm", outgoingCommunicationBridge, yoTime);
+      behaviors.add(armGoHomeLeftBehavior);
+      armGoHomeRightBehavior = new GoHomeBehavior("rightArm", outgoingCommunicationBridge, yoTime);
+      behaviors.add(armGoHomeRightBehavior);
+
       handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
       behaviors.add(handDesiredConfigurationBehavior);
-      
-      
+
       coactiveElement = new PickUpBallBehaviorCoactiveElementBehaviorSide();
       coactiveElement.setPickUpBallBehavior(this);
       registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
       registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
-      
+
       waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
             coactiveElement.validAcknowledged);
       behaviors.add(waitForUserValidationBehavior);
@@ -122,10 +128,6 @@ public class PickUpBallBehavior extends BehaviorInterface
       {
          registry.addChild(behavior.getYoVariableRegistry());
       }
-
-     
-
-      
 
    }
 
@@ -151,8 +153,6 @@ public class PickUpBallBehavior extends BehaviorInterface
       HandDesiredConfigurationTask openHand = new HandDesiredConfigurationTask(RobotSide.LEFT, HandConfiguration.OPEN, handDesiredConfigurationBehavior,
             yoTime);
 
-    
-
       //ENABLE LIDAR
       BehaviorTask enableLidarTask = new BehaviorTask(enableLidarBehavior, yoTime, 1)
       {
@@ -162,7 +162,6 @@ public class PickUpBallBehavior extends BehaviorInterface
             coactiveElement.currentState.set(BehaviorState.ENABLING_LIDAR);
          }
       };
-     
 
       //REDUCE LIDAR RANGE *******************************************
 
@@ -178,7 +177,6 @@ public class PickUpBallBehavior extends BehaviorInterface
             setLidarParametersBehavior.setInput(param);
          }
       };
-     
 
       //CLEAR LIDAR POINTS FOR CLEAN SCAN *******************************************
       BehaviorTask clearLidarTask = new BehaviorTask(clearLidarBehavior, yoTime, 1)
@@ -189,7 +187,6 @@ public class PickUpBallBehavior extends BehaviorInterface
             coactiveElement.currentState.set(BehaviorState.CLEARING_LIDAR);
          }
       };
-    
 
       //SEARCH FOR BALL *******************************************
 
@@ -207,7 +204,7 @@ public class PickUpBallBehavior extends BehaviorInterface
 
          }
       };
-      
+
       //
 
       // Confirm from the user that this is the correct ball *******************************************
@@ -229,7 +226,6 @@ public class PickUpBallBehavior extends BehaviorInterface
 
          }
       };
-     
 
       // WALK TO THE BALL *******************************************
 
@@ -251,15 +247,14 @@ public class PickUpBallBehavior extends BehaviorInterface
             walkToLocationBehavior.setTarget(getoffsetPoint());
          }
       };
-      
 
       //LOOK DOWN *******************************************
 
       Vector3d axis = new Vector3d(0, 1, 0);
-      double rotationAngle = 1.4;
+      double rotationDownAngle = 1.4;
 
       AxisAngle4d desiredAxisAngle = new AxisAngle4d();
-      desiredAxisAngle.set(axis, rotationAngle);
+      desiredAxisAngle.set(axis, rotationDownAngle);
       Quat4d desiredHeadQuat = new Quat4d();
       desiredHeadQuat.set(desiredAxisAngle);
 
@@ -278,14 +273,34 @@ public class PickUpBallBehavior extends BehaviorInterface
             coactiveElement.currentState.set(BehaviorState.BENDING_OVER);
          }
       };
-      
+
+      double rotationUpAngle = 0;
+
+      AxisAngle4d desiredAxisUpAngle = new AxisAngle4d();
+      desiredAxisUpAngle.set(axis, rotationUpAngle);
+      Quat4d desiredHeadUpQuat = new Quat4d();
+      desiredHeadUpQuat.set(desiredAxisUpAngle);
+
+      HeadTrajectoryMessage messageHeadUp = new HeadTrajectoryMessage(2, desiredHeadUpQuat);
+
+      HeadTrajectoryBehavior headTrajectoryUpBehavior = new HeadTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+
+      headTrajectoryUpBehavior.initialize();
+      headTrajectoryUpBehavior.setInput(messageHeadUp);
+
+      BehaviorTask lookUp = new BehaviorTask(headTrajectoryUpBehavior, yoTime, 0)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            coactiveElement.currentState.set(BehaviorState.STOPPED);
+         }
+      };
 
       // BEND OVER *******************************************
       FrameOrientation desiredChestOrientation = new FrameOrientation(referenceFrames.getPelvisZUpFrame(), Math.toRadians(30), Math.toRadians(20), 0);
       desiredChestOrientation.changeFrame(worldFrame);
       ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, yoTime, chestTrajectoryBehavior, 4, 0);
-      
-     
 
       //REDUCE LIDAR RANGE *******************************************
 
@@ -300,7 +315,6 @@ public class PickUpBallBehavior extends BehaviorInterface
             setLidarParametersBehavior.setInput(param);
          }
       };
-     
 
       //CLEAR LIDAR POINTS FOR CLEAN SCAN *******************************************
       BehaviorTask clearLidarTask2 = new BehaviorTask(clearLidarBehavior, yoTime, 1)
@@ -311,7 +325,7 @@ public class PickUpBallBehavior extends BehaviorInterface
             coactiveElement.currentState.set(BehaviorState.CLEARING_LIDAR);
          }
       };
-      
+
       //SEARCH FOR BALL AGAIN FOR FINAL LOCATION *******************************************
       BehaviorTask finalFindBallTask = new BehaviorTask(initialSphereDetectionBehavior, yoTime, 0)
       {
@@ -327,7 +341,7 @@ public class PickUpBallBehavior extends BehaviorInterface
 
          }
       };
-      
+
       // re-validat ball with user *******************************************
       BehaviorTask validateBallTask2 = new BehaviorTask(waitForUserValidationBehavior, yoTime, 0)
       {
@@ -346,7 +360,6 @@ public class PickUpBallBehavior extends BehaviorInterface
 
          }
       };
-     
 
       // GO TO INITIAL POICKUP LOCATION *******************************************
       BehaviorTask goToPickUpBallInitialLocationTask = new BehaviorTask(pickUpBehavior, yoTime, 0)
@@ -363,15 +376,13 @@ public class PickUpBallBehavior extends BehaviorInterface
             FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), Math.toRadians(90), 0);
             pickUpBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
 
-            FramePoint rhPoint = new FramePoint(referenceFrames.getChestFrame(), 0.5, -0.5, 0);
+            FramePoint rhPoint = new FramePoint(referenceFrames.getChestFrame(), 0.5, -0.25, 0);
             FrameOrientation rhOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), 0, 0);
 
             pickUpBehavior.setDesiredHandPose(RobotSide.RIGHT, rhPoint, rhOr);
 
          }
       };
-
-
 
       //REACH FOR THE BALL *******************************************
       BehaviorTask pickUpBallTask = new BehaviorTask(pickUpBehavior, yoTime, 0)
@@ -389,7 +400,6 @@ public class PickUpBallBehavior extends BehaviorInterface
 
          }
       };
-
 
       //PICK UP THE BALL *******************************************
 
@@ -410,7 +420,6 @@ public class PickUpBallBehavior extends BehaviorInterface
 
          }
       };
-     
 
       //RESET BODY POSITIONS *******************************************
       GoHomeMessage goHomeChestMessage = new GoHomeMessage(BodyPart.CHEST, 3);
@@ -421,9 +430,17 @@ public class PickUpBallBehavior extends BehaviorInterface
       pelvisGoHomeBehavior.setInput(goHomepelvisMessage);
       GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, pelvisGoHomeBehavior, yoTime, 0);
 
+      GoHomeMessage goHomeLeftArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 3);
+      armGoHomeLeftBehavior.setInput(goHomeLeftArmMessage);
+      GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior, yoTime, 0);
+
+      GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 3);
+      armGoHomeRightBehavior.setInput(goHomeRightArmMessage);
+      GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior, yoTime, 0);
+
       //PUT BALL IN BUCKET *******************************************
 
-      
+      //      
       pipeLine.submitSingleTaskStage(closeHand);
       pipeLine.submitSingleTaskStage(enableLidarTask);
       pipeLine.submitSingleTaskStage(setLidarMediumRangeTask);
@@ -442,9 +459,12 @@ public class PickUpBallBehavior extends BehaviorInterface
       pipeLine.submitSingleTaskStage(pickUpBallTask);
       pipeLine.submitSingleTaskStage(closeHand);
       pipeLine.submitSingleTaskStage(goToFinalPickUpBallLocationTask);
+
       pipeLine.submitSingleTaskStage(goHomeChestTask);
       pipeLine.submitSingleTaskStage(goHomePelvisTask);
-      pipeLine.requestNewStage();
+      pipeLine.submitSingleTaskStage(goHomeLeftArmTask);
+      pipeLine.submitSingleTaskStage(goHomeRightArmTask);
+      pipeLine.submitSingleTaskStage(lookUp);
 
    }
 
