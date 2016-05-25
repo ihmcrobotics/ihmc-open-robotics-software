@@ -551,7 +551,7 @@ public class VirtualModelControllerTest
       CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
       CommonOps.invert(transposeJacobianMatrix);
 
-      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), pelvis, null, null, null, null);
+      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), pelvis, null, null, null);
       virtualModelController.registerControlledBody(endEffector, pelvis);
 
       VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
@@ -764,7 +764,7 @@ public class VirtualModelControllerTest
       CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
       CommonOps.invert(transposeJacobianMatrix);
 
-      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), base, null, null, null, null);
+      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), base, null, null, null);
       virtualModelController.registerControlledBody(endEffector, base);
 
       desiredWrench.changeFrame(base.getBodyFixedFrame());
