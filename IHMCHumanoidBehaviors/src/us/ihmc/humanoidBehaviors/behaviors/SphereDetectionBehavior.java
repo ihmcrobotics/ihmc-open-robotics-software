@@ -52,12 +52,14 @@ public class SphereDetectionBehavior extends BehaviorInterface
 
    private final HumanoidReferenceFrames humanoidReferenceFrames;
 
+   // temp vars
+   private final Point3d chestPosition = new Point3d();
+
    public SphereDetectionBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames)
    {
       super(outgoingCommunicationBridge);
       this.attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
       this.humanoidReferenceFrames = referenceFrames;
-
    }
 
    public boolean foundBall()
@@ -170,15 +172,24 @@ public class SphereDetectionBehavior extends BehaviorInterface
       }
 
       // sort large to small
-      List<Shape> spheres = findSpheres.getFound();
+      humanoidReferenceFrames.getChestFrame().getTransformToWorldFrame().getTranslation(chestPosition);
+
+      final List<Shape> spheres = findSpheres.getFound();
       Collections.sort(spheres, new Comparator<Shape>()
       {
-
-         @Override
-         public int compare(Shape o1, Shape o2)
+         @Override public int compare(Shape shape0, Shape shape1)
          {
-            return Integer.compare(o1.points.size(), o2.points.size());
-         };
+            Sphere3D_F64 sphereParams0 = (Sphere3D_F64) shape0.getParameters();
+            Sphere3D_F64 sphereParams1 = (Sphere3D_F64) shape1.getParameters();
+
+            Point3D_F64 center0 = sphereParams0.getCenter();
+            Point3D_F64 center1 = sphereParams1.getCenter();
+
+            double distSq0 = (center0.x - chestPosition.x) * (center0.x - chestPosition.x) + (center0.y - chestPosition.y) * (center0.y - chestPosition.y);
+            double distSq1 = (center1.x - chestPosition.x) * (center1.x - chestPosition.x) + (center1.y - chestPosition.y) * (center1.y - chestPosition.y);
+
+            return distSq0 < distSq1 ? 1 : -1;
+         }
       });
 
       if (spheres.size() > 0)
