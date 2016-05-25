@@ -121,7 +121,7 @@ public abstract class BehaviorInterface implements RobotController
       }
    }
 
-   protected void attachNetworkProcessorListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
+   public void attachNetworkProcessorListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
    {
       if (!listeningNetworkProcessorQueues.containsKey(key))
       {
@@ -130,7 +130,7 @@ public abstract class BehaviorInterface implements RobotController
       listeningNetworkProcessorQueues.get(key).add(queue);
    }
    
-   protected void attachControllerListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
+   public void attachControllerListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
    {
       if (!listeningControllerQueues.containsKey(key))
       {
@@ -231,6 +231,7 @@ public abstract class BehaviorInterface implements RobotController
    /**
     * Initialization method called when switching to this behavior.
     */
+   @Override
    public abstract void initialize();
    public void defaultInitialize()
    {
