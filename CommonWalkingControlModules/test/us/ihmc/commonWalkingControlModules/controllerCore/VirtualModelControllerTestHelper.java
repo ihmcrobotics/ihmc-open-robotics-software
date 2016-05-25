@@ -127,8 +127,8 @@ public class VirtualModelControllerTestHelper
       }
    }
 
-   public static void createVirtualModelControlTest(SCSRobotFromInverseDynamicsRobotModel robotModel, FullRobotModel controllerModel, List<RigidBody> endEffectors,
-         List<Vector3d> desiredForces, List<Vector3d> desiredTorques, List<ExternalForcePoint> externalForcePoints, DenseMatrix64F selectionMatrix) throws Exception
+   public static void createVirtualModelControlTest(SCSRobotFromInverseDynamicsRobotModel robotModel, FullRobotModel controllerModel, ReferenceFrame centerOfMassFrame,
+         List<RigidBody> endEffectors, List<Vector3d> desiredForces, List<Vector3d> desiredTorques, List<ExternalForcePoint> externalForcePoints, DenseMatrix64F selectionMatrix) throws Exception
    {
       double simulationDuration = 20.0;
 
@@ -136,7 +136,7 @@ public class VirtualModelControllerTestHelper
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
-      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, controllerModel.getElevator(), registry, yoGraphicsListRegistry);
+      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, controllerModel.getElevator(), null, centerOfMassFrame, registry, yoGraphicsListRegistry);
 
       List<ReferenceFrame> endEffectorFrames = new ArrayList<>();
       List<FramePose> desiredEndEffectorPoses = new ArrayList<>();
@@ -620,6 +620,7 @@ public class VirtualModelControllerTestHelper
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       private final ReferenceFrame elevatorFrame;
+      private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
       private final RigidBody upperArm;
@@ -634,6 +635,7 @@ public class VirtualModelControllerTestHelper
       {
          elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
          elevator = new RigidBody("elevator", elevatorFrame);
+         centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), elevator);
 
          upperArm = createUpperArm(elevator);
          lowerArm = createLowerArm(upperArm);
@@ -709,6 +711,11 @@ public class VirtualModelControllerTestHelper
       public ReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
+      }
+
+      public ReferenceFrame getCenterOfMassFrame()
+      {
+         return centerOfMassFrame;
       }
 
       public ReferenceFrame getHandFrame()
@@ -861,6 +868,7 @@ public class VirtualModelControllerTestHelper
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       private final ReferenceFrame elevatorFrame;
+      private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
       private final RigidBody hand;
@@ -874,6 +882,7 @@ public class VirtualModelControllerTestHelper
       {
          elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
          elevator = new RigidBody("elevator", elevatorFrame);
+         centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), elevator);
 
          shoulderDifferentialYaw = createDifferential("shoulderDifferential", elevator, new Vector3d(), Z);
          RigidBody shoulderDifferentialRoll = createDifferential("shoulderDifferential", shoulderDifferentialYaw, new Vector3d(), X);
@@ -957,6 +966,11 @@ public class VirtualModelControllerTestHelper
       public ReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
+      }
+
+      public ReferenceFrame getCenterOfMassFrame()
+      {
+         return centerOfMassFrame;
       }
 
       public ReferenceFrame getHandFrame()
@@ -1136,6 +1150,7 @@ public class VirtualModelControllerTestHelper
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       private final ReferenceFrame elevatorFrame;
+      private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
       private final RigidBody hand1;
@@ -1153,6 +1168,7 @@ public class VirtualModelControllerTestHelper
       {
          elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
          elevator = new RigidBody("elevator", elevatorFrame);
+         centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), elevator);
 
          shoulderDifferentialYaw = createDifferential("shoulderDifferential", elevator, new Vector3d(), Z);
 
@@ -1269,6 +1285,11 @@ public class VirtualModelControllerTestHelper
       public ReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
+      }
+
+      public ReferenceFrame getCenterOfMassFrame()
+      {
+         return centerOfMassFrame;
       }
 
       public ReferenceFrame getHandFrame(RobotSide robotSide)
@@ -1452,6 +1473,7 @@ public class VirtualModelControllerTestHelper
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       private final ReferenceFrame elevatorFrame;
+      private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBody elevator;
       private final RigidBody upperArm;
@@ -1468,6 +1490,7 @@ public class VirtualModelControllerTestHelper
       {
          elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
          elevator = new RigidBody("elevator", elevatorFrame);
+         centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), elevator);
 
          List<InverseDynamicsJoint> joints = new ArrayList<>();
 
@@ -1574,6 +1597,11 @@ public class VirtualModelControllerTestHelper
       public ReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
+      }
+
+      public ReferenceFrame getCenterOfMassFrame()
+      {
+         return centerOfMassFrame;
       }
 
       public ReferenceFrame getHandFrame(RobotSide robotSide)
