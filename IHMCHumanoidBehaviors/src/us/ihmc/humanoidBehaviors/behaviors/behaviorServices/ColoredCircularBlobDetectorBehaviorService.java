@@ -5,6 +5,9 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 import us.ihmc.communication.producers.JPEGCompressor;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.producers.VideoSource;
@@ -31,7 +34,9 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
    private final Point2d latestBallPosition2d = new Point2d();
    private BufferedImage latestUnmodifiedCameraImage;
-   
+
+   private static final Scalar circleColor = new Scalar(160, 0, 0);
+
    public ColoredCircularBlobDetectorBehaviorService(BehaviorInterface behaviorInterface)
    {
       super(ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), behaviorInterface);
@@ -57,6 +62,15 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
 
          openCVColoredCircularBlobDetector.updateFromBufferedImage(latestUnmodifiedCameraImage);
          ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
+
+         for(int i = 0; i < circles.size(); i++)
+         {
+            Point2d vecCenter = circles.get(i).getCenter();
+            Point openCvCenter = new Point(vecCenter.x, vecCenter.y);
+            int circleRadius = (int) circles.get(i).getRadius();
+            Imgproc.circle(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR(), openCvCenter, circleRadius, circleColor, 1);
+            Imgproc.circle(openCVColoredCircularBlobDetector.getThresholdMat(), openCvCenter, circleRadius, circleColor, 1);
+         }
 
          BufferedImage thresholdBufferedImageOpenCVEncoded = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
          BufferedImage thresholdBufferedImage = OpenCVTools.convertToCompressableBufferedImage(thresholdBufferedImageOpenCVEncoded);
