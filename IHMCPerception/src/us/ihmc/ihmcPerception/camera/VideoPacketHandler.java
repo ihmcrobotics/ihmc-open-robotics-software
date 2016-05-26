@@ -10,7 +10,6 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.time.Timer;
 
@@ -38,7 +37,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
    }
    
    @Override
-   public void newVideoPacketAvailable(RobotSide robotSide, VideoSource videoSource, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
+   public void newVideoPacketAvailable(VideoSource videoSource, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
    {
       if (DEBUG)
       {
@@ -46,7 +45,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
          timer.lap();
       }
          
-      packetCommunicator.send(new VideoPacket(robotSide, videoSource, timeStamp, data, position, orientation, intrinsicParameters, packetDestination));
+      packetCommunicator.send(new VideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters, packetDestination));
    }
 
    @Override
