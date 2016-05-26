@@ -25,6 +25,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
+import us.ihmc.ihmcPerception.vision.HSVValue;
+import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -80,6 +82,8 @@ public class FollowBallBehavior extends BehaviorInterface
       attachControllerListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
 
       coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(this);
+      HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
+      coloredCircularBlobDetectorBehaviorService.addHSVRange(greenRange);
       
       behaviorCommunicationBridge.attachGlobalListener(getNetworkProcessorGlobalObjectConsumer());
       attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);

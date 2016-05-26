@@ -16,17 +16,16 @@ public abstract class ThreadedBehaviorService extends BehaviorService implements
       this.threadName = threadName;
    }
    
-   public void start()
+   @Override
+   public void initialize()
    {
-      if (running = true)
+      if (!running)
       {
-         throw new RuntimeException("Thread already running.");
+         running = true;
+         paused = false;
+         
+         ThreadTools.startAThread(this, threadName);
       }
-      
-      running = true;
-      paused = false;
-      
-      ThreadTools.startAThread(this, threadName);
    }
    
    @Override

@@ -12,7 +12,6 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.ihmcPerception.OpenCVTools;
-import us.ihmc.ihmcPerception.vision.HSVValue;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.ihmcPerception.vision.shapes.HoughCircleResult;
 import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetector;
@@ -23,8 +22,6 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehaviorService
 {
-   private static final boolean DEBUG = true;
-   
    private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>();
    private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue = new ConcurrentListeningQueue<>();
    private long videoTimestamp = -1L;
@@ -33,7 +30,6 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    private final JPEGCompressor jpegCompressor = new JPEGCompressor();
    
    private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
-   private static int counter = 0;
    private final Point2d latestBallPosition2d = new Point2d();
    
    public ColoredCircularBlobDetectorBehaviorService(BehaviorInterface behaviorInterface)
@@ -46,15 +42,6 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
       OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
       factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);
       openCVColoredCircularBlobDetector = factory.buildBlobDetector();
-
-      HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
-      openCVColoredCircularBlobDetector.addHSVRange(greenRange);
-   }
-
-   @Override
-   public void initialize()
-   {
-      start();
    }
 
    @Override
@@ -62,11 +49,11 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    {
       if (videoPacketQueue.isNewPacketAvailable())
       {
-         VideoPacket packet = videoPacketQueue.getLatestPacket();
+         VideoPacket videoPacket = videoPacketQueue.getLatestPacket();
          RobotConfigurationData robotConfigurationData = robotConfigurationDataQueue.getLatestPacket();
          videoTimestamp = robotConfigurationData.getTimestamp();
 
-         BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(packet.getData());
+         BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData());
 
          openCVColoredCircularBlobDetector.updateFromBufferedImage(bufferedImage);
          ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
@@ -78,22 +65,8 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
 
          byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(convertedBufferedImage);
          VideoPacket circleBlobThresholdImagePacket = new VideoPacket(RobotSide.LEFT, VideoSource.CV_THRESHOLD, videoTimestamp, jpegThresholdImage,
-                                                                      packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
+                                                                      videoPacket.getPosition(), videoPacket.getOrientation(), videoPacket.getIntrinsicParameters());
          getBehaviorInterface().sendPacketToNetworkProcessor(circleBlobThresholdImagePacket);
-
-         if (DEBUG)
-         {
-            if (counter++ % 30 == 0)
-            {
-               System.out.println("blob detection found " + circles.size() + " circles");
-
-               for (int i = 0; i < circles.size(); i++)
-               {
-                  HoughCircleResult result = circles.get(i);
-                  System.out.println("\t center: " + result.getCenter());
-               }
-            }
-         }
 
          if (circles.size() > 0)
             latestBallPosition2d.set(circles.get(0).getCenter());
@@ -102,6 +75,11 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
       {
          ThreadTools.sleep(10);
       }
+   }
+   
+   public void addHSVRange(HSVRange hsvRange)
+   {
+      openCVColoredCircularBlobDetector.addHSVRange(hsvRange);
    }
 
    public Point2d getLatestBallPosition2d()
