@@ -1,11 +1,23 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
+import javax.vecmath.Quat4d;
+
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.communication.producers.*;
+import us.ihmc.communication.producers.CompressedVideoDataClient;
+import us.ihmc.communication.producers.CompressedVideoDataFactory;
+import us.ihmc.communication.producers.JPEGCompressor;
+import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.communication.producers.VideoStreamer;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -20,14 +32,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4d;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
 
 public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior implements VideoStreamer
 {

@@ -469,5 +469,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BatchedDesiredSteeringAngleAndSingleJointAnglePacket.class);
       registerPacketClass(TextToSpeechPacket.class);
       registerPacketField(VideoSource.class);
+      
    }
 }
