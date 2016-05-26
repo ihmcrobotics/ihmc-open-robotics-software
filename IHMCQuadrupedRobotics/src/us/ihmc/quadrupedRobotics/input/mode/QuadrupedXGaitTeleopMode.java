@@ -163,18 +163,18 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             mode = XGaitInputMode.VELOCITY;
          }
          break;
-      case LEFT_TRIGGER:
-         if (channels.get(InputChannel.LEFT_BUTTON) == 1.0)
+      case LEFT_BUTTON:
+         if (channels.get(InputChannel.LEFT_BUTTON) > 0.5)
          {
-            xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() + deltaPhaseShiftParameter.get(), 0, 180));
+            xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() + deltaPhaseShiftParameter.get(), 0, 359));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
             packetCommunicator.send(settingsPacket);
          }
          break;
-      case RIGHT_TRIGGER:
-         if (channels.get(InputChannel.RIGHT_BUTTON) == 1.0)
+      case RIGHT_BUTTON:
+         if (channels.get(InputChannel.RIGHT_BUTTON) > 0.5)
          {
-            xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() - deltaPhaseShiftParameter.get(), 0, 180));
+            xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() - deltaPhaseShiftParameter.get(), 0, 359));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
             packetCommunicator.send(settingsPacket);
          }
