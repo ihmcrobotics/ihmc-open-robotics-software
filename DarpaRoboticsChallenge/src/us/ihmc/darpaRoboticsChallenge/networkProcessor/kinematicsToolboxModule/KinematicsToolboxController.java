@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.kinematicsToolboxModule;
 
 import static us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox.createForInverseKinematicsOnly;
 
+import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -17,9 +18,11 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.SdfLoader.models.FullRobotModelUtils;
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseKinematicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
@@ -92,6 +95,8 @@ public class KinematicsToolboxController
 
    private final DoubleYoVariable solutionQuality = new DoubleYoVariable("solutionQuality", registry);
 
+   private final EnumMap<LegJointName, DoubleYoVariable> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
+
    private PacketDestination packetDestination = null;
 
    private final AtomicReference<PrivilegedConfigurationCommand> privilegedConfigurationCommandReference = new AtomicReference<PrivilegedConfigurationCommand>(null);
@@ -133,6 +138,18 @@ public class KinematicsToolboxController
       privilegedWeight.set(1.0);
       privilegedConfigurationGain.set(50.0);
       privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
+
+      DoubleYoVariable hipReductionFactor = new DoubleYoVariable("hipLimitReductionFactor", registry);
+      hipReductionFactor.set(0.05);
+      DoubleYoVariable kneeReductionFactor = new DoubleYoVariable("kneeLimitReductionFactor", registry);
+      DoubleYoVariable ankleReductionFactor = new DoubleYoVariable("ankleLimitReductionFactor", registry);
+
+      legJointLimitReductionFactors.put(LegJointName.HIP_PITCH, hipReductionFactor);
+      legJointLimitReductionFactors.put(LegJointName.HIP_ROLL, hipReductionFactor);
+      legJointLimitReductionFactors.put(LegJointName.HIP_YAW, hipReductionFactor);
+      legJointLimitReductionFactors.put(LegJointName.KNEE, kneeReductionFactor);
+      legJointLimitReductionFactors.put(LegJointName.ANKLE_PITCH, ankleReductionFactor);
+      legJointLimitReductionFactors.put(LegJointName.ANKLE_ROLL, ankleReductionFactor);
 
       parentRegistry.addChild(registry);
    }
@@ -271,6 +288,19 @@ public class KinematicsToolboxController
       }
 
       ret.addCommand(privilegedConfigurationCommandReference.getAndSet(null));
+
+      JointLimitReductionCommand jointLimitReductionCommand = new JointLimitReductionCommand();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (LegJointName legJointName : desiredFullRobotModel.getRobotSpecificJointNames().getLegJointNames())
+         {
+            OneDoFJoint joint = desiredFullRobotModel.getLegJoint(robotSide, legJointName);
+            double reductionFactor = legJointLimitReductionFactors.get(legJointName).getDoubleValue();
+            jointLimitReductionCommand.addReductionFactor(joint, reductionFactor);
+         }
+      }
+
+      ret.addCommand(jointLimitReductionCommand);
 
       return ret;
    }

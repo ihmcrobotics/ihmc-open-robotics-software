@@ -107,7 +107,7 @@ public class KinematicsToolboxModule
       if (startYoVariableServer)
       {
          PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("WholeBodyIKScheduler");
-         yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.BEHAVIOR, YO_VARIABLE_SERVER_DT);
+         yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.KINEMATICS_TOOLBOX, YO_VARIABLE_SERVER_DT);
          yoVariableServer.setMainRegistry(registry, kinematicsToolBoxController.getDesiredFullRobotModel(), yoGraphicsListRegistry);
          new Thread(new Runnable()
          {
