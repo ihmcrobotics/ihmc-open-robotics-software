@@ -12,6 +12,7 @@ import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobD
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.ihmcPerception.vision.HSVValue;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -42,6 +43,8 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
 
       coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(this);
+      HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
+      coloredCircularBlobDetectorBehaviorService.addHSVRange(greenRange);
 
       runBlobFilter.set(false);
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
@@ -88,37 +91,44 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       worldToCameraTransform.invert();
 
       BufferedImage latestCameraImage = coloredCircularBlobDetectorBehaviorService.getLatestUnmodifiedCameraImage();
-      int cameraPixelWidth = latestCameraImage.getWidth();
-      int cameraPixelHeight = latestCameraImage.getHeight();
-
-      double ballCenterX = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().x - latestCameraImage.getMinX();
-      double ballCenterY = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().y - latestCameraImage.getMinY();
-
-      double desiredRayAngleX = VERTICAL_FOV * (-ballCenterY / cameraPixelHeight + 0.5);
-      double desiredRayAngleY = HORIZONTAL_FOV * (ballCenterX / cameraPixelWidth - 0.5);
-
-      Point3f tempPoint = new Point3f();
-
-      for (int i = 0; i < fullPointCloud.length; i++)
+      if (latestCameraImage != null)
       {
-         tempPoint.set(fullPointCloud[i]);
-         worldToCameraTransform.transform(tempPoint);
-
-         if (tempPoint.x > FILTERING_MIN_DISTANCE && tempPoint.x < FILTERING_MAX_DISTANCE)
+         int cameraPixelWidth = latestCameraImage.getWidth();
+         int cameraPixelHeight = latestCameraImage.getHeight();
+   
+         double ballCenterX = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().x - latestCameraImage.getMinX();
+         double ballCenterY = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().y - latestCameraImage.getMinY();
+   
+         double desiredRayAngleX = VERTICAL_FOV * (-ballCenterY / cameraPixelHeight + 0.5);
+         double desiredRayAngleY = HORIZONTAL_FOV * (ballCenterX / cameraPixelWidth - 0.5);
+   
+         Point3f tempPoint = new Point3f();
+   
+         for (int i = 0; i < fullPointCloud.length; i++)
          {
-            // rayAngle axes are in terms of the buffered image (y-down), temp pnt axes are in terms of camera frame (z-up)
-            double rayAngleX = Math.atan2(tempPoint.z, tempPoint.x);
-            double rayAngleY = Math.atan2(tempPoint.y, tempPoint.x);
-            if (Math.abs(rayAngleX - desiredRayAngleX) < FILTERING_ANGLE && Math.abs(rayAngleY - desiredRayAngleY) < FILTERING_ANGLE)
+            tempPoint.set(fullPointCloud[i]);
+            worldToCameraTransform.transform(tempPoint);
+   
+            if (tempPoint.x > FILTERING_MIN_DISTANCE && tempPoint.x < FILTERING_MAX_DISTANCE)
             {
-               filteredPoints.add(fullPointCloud[i]);
+               // rayAngle axes are in terms of the buffered image (y-down), temp pnt axes are in terms of camera frame (z-up)
+               double rayAngleX = Math.atan2(tempPoint.z, tempPoint.x);
+               double rayAngleY = Math.atan2(tempPoint.y, tempPoint.x);
+               if (Math.abs(rayAngleX - desiredRayAngleX) < FILTERING_ANGLE && Math.abs(rayAngleY - desiredRayAngleY) < FILTERING_ANGLE)
+               {
+                  filteredPoints.add(fullPointCloud[i]);
+               }
             }
          }
+   
+         Point3f[] filteredPointArray = new Point3f[filteredPoints.size()];
+         filteredPoints.toArray(filteredPointArray);
+         return filteredPointArray;
       }
-
-      Point3f[] filteredPointArray = new Point3f[filteredPoints.size()];
-      filteredPoints.toArray(filteredPointArray);
-      return filteredPointArray;
+      else
+      {
+         return fullPointCloud;
+      }
    }
 
 
