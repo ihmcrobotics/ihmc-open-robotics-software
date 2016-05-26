@@ -10,9 +10,9 @@ import javax.imageio.ImageIO;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.CalibrateArmPacket;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
@@ -67,7 +67,7 @@ public class ArmCalibrationHelper implements DRCStereoListener, PacketConsumer<C
    @Override
    public void newImageAvailable(CameraData data, RigidBodyTransform transformToCamera)
    {
-      if(data.robotSide == RobotSide.LEFT)
+      if(data.videoSource == VideoSource.MULTISENSE_LEFT_EYE)
       {
          lock.lock();
          lastLeftEyeImage = data.image;
