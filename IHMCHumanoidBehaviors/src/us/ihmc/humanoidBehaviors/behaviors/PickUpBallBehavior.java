@@ -10,20 +10,24 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.BehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ClearLidarBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.EnableLidarBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.SetLidarParametersBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
@@ -59,6 +63,7 @@ public class PickUpBallBehavior extends BehaviorInterface
    private final GoHomeBehavior pelvisGoHomeBehavior;
    private final GoHomeBehavior armGoHomeLeftBehavior;
    private final GoHomeBehavior armGoHomeRightBehavior;
+   private final ArmTrajectoryBehavior armTrajectoryBehavior;
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
@@ -112,6 +117,8 @@ public class PickUpBallBehavior extends BehaviorInterface
       behaviors.add(armGoHomeLeftBehavior);
       armGoHomeRightBehavior = new GoHomeBehavior("rightArm", outgoingCommunicationBridge, yoTime);
       behaviors.add(armGoHomeRightBehavior);
+      armTrajectoryBehavior = new ArmTrajectoryBehavior("handTrajectory", outgoingCommunicationBridge, yoTime);
+      behaviors.add(armTrajectoryBehavior);
 
       handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
       behaviors.add(handDesiredConfigurationBehavior);
@@ -432,12 +439,12 @@ public class PickUpBallBehavior extends BehaviorInterface
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(BehaviorState.REACHING_FOR_BALL);
-            FramePoint point = new FramePoint(referenceFrames.getChestFrame(), 0.5, -0.1, 0);
+            coactiveElement.currentState.set(BehaviorState.PUTTING_BALL_IN_BASKET);
+            FramePoint point = new FramePoint(referenceFrames.getChestFrame(), 0.5, 0.1, 0);
 
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);
             wholeBodyBehavior.setTrajectoryTime(6);
-            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(-90), 0, Math.toRadians(-90));
+            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(-90), Math.toRadians(45), Math.toRadians(-90));
             wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
 
             FramePoint rhPoint = new FramePoint(referenceFrames.getChestFrame(), 0.5, -0.25, 0);
@@ -452,13 +459,12 @@ public class PickUpBallBehavior extends BehaviorInterface
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(BehaviorState.REACHING_FOR_BALL);
-            FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().x,
-                  initialSphereDetectionBehavior.getBallLocation().y,
-                  initialSphereDetectionBehavior.getBallLocation().z + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
+            coactiveElement.currentState.set(BehaviorState.PUTTING_BALL_IN_BASKET);
+            FramePoint point = new FramePoint(referenceFrames.getChestFrame(), 0.5, -0.1, 0);
+
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);
             wholeBodyBehavior.setTrajectoryTime(6);
-            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), Math.toRadians(90), 0);
+            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(-90),  Math.toRadians(20), Math.toRadians(-90));
             wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
 
             FramePoint rhPoint = new FramePoint(referenceFrames.getChestFrame(), 0.5, -0.25, 0);
@@ -476,12 +482,21 @@ public class PickUpBallBehavior extends BehaviorInterface
       armGoHomeLeftBehavior.setInput(goHomeLeftArmMessage);
       GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior, yoTime, 0);
 
-      GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 3);
-      armGoHomeRightBehavior.setInput(goHomeRightArmMessage);
-      GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior, yoTime, 0);
+//      GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 3);
+//      armGoHomeRightBehavior.setInput(goHomeRightArmMessage);
+//      GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior, yoTime, 0);
 
+      double[] rightHandWiderHomeJointAngles = new double[] {-0.785398, 0.5143374964757462, 2.2503094898479272, -2.132492022530739, -0.22447272781774874, -0.4780687104960028, -0.24919417978503655};
+
+      ArmTrajectoryMessage widerHome = new ArmTrajectoryMessage(RobotSide.RIGHT, 3,rightHandWiderHomeJointAngles);
+      armTrajectoryBehavior.setInput(widerHome);
+      ArmTrajectoryTask rightArmHomeTask = new ArmTrajectoryTask(widerHome, armTrajectoryBehavior, yoTime);
+      
+      
       //PUT BALL IN BUCKET *******************************************
 
+      
+//      pipeLine.submitSingleTaskStage(rightArmHomeTask);
       //      
       //      pipeLine.submitSingleTaskStage(closeHand);
       //      pipeLine.submitSingleTaskStage(enableLidarTask);
@@ -506,19 +521,26 @@ public class PickUpBallBehavior extends BehaviorInterface
       //      pipeLine.submitSingleTaskStage(goHomePelvisTask);
       
       //PUT BALL IN BUCKET
-      
+//      pipeLine.submitSingleTaskStage(rightArmHomeTask);
+
       pipeLine.submitSingleTaskStage(goToDropBallInitialLocationTask);
-//      pipeLine.submitSingleTaskStage(goToDropBallFinalLocationTask);
+      pipeLine.submitSingleTaskStage(goToDropBallFinalLocationTask);
       pipeLine.submitSingleTaskStage(openHand);
-//      pipeLine.submitSingleTaskStage(goToDropBallInitialLocationTask);
-      
+      pipeLine.submitSingleTaskStage(closeHand);
+      pipeLine.submitSingleTaskStage(openHand);
+
+
+      pipeLine.submitSingleTaskStage(goToDropBallInitialLocationTask);
+      pipeLine.submitSingleTaskStage(closeHand);
+      pipeLine.submitSingleTaskStage(rightArmHomeTask);
+
       pipeLine.submitSingleTaskStage(goHomeLeftArmTask);
       
       pipeLine.submitSingleTaskStage(goHomeChestTask);
       pipeLine.submitSingleTaskStage(goHomePelvisTask);
       
       
-      pipeLine.submitSingleTaskStage(goHomeRightArmTask);
+      pipeLine.submitSingleTaskStage(rightArmHomeTask);
 //      pipeLine.submitSingleTaskStage(lookUp);
 
    }
