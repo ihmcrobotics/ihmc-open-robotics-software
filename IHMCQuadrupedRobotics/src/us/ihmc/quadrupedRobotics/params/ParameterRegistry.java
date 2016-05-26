@@ -54,6 +54,12 @@ public class ParameterRegistry
    private final List<Parameter> parameters = new ArrayList<>();
 
    /**
+    * The list of loaded parameter lines to which no registered parameter exists. This is maintained in case a parameter is added after loading a file, in which
+    * case the value will be pulled from this list (if it exists).
+    */
+   private final List<String> unregistered = new ArrayList<>();
+
+   /**
     * Loads the resource with the given filename from the class path. If more than one class path resource exists with the given name then every matching
     * resource will be loaded in an undefined order.
     * <p/>
@@ -95,6 +101,7 @@ public class ParameterRegistry
       String line;
       while ((line = reader.readLine()) != null)
       {
+         // Check if any registered parameter matches, and pack the value one does.
          boolean found = false;
          for (Parameter parameter : parameters)
          {
@@ -107,7 +114,8 @@ public class ParameterRegistry
 
          if (!found)
          {
-            System.out.println("Tried to load parameter not present in registry: " + line);
+//            System.out.println("Tried to load parameter not present in registry: " + line);
+            unregistered.add(line);
          }
       }
    }
@@ -127,6 +135,16 @@ public class ParameterRegistry
    void register(Parameter parameter)
    {
       Preconditions.checkNotNull(parameter, "Registered parameter cannot be null");
+
+      // Check if any unregistered values match this new parameter, and pack the value if it does.
+      for (String line : unregistered)
+      {
+         if (parameter.tryLoad(line))
+         {
+            unregistered.remove(line);
+            break;
+         }
+      }
 
       parameters.add(parameter);
    }
