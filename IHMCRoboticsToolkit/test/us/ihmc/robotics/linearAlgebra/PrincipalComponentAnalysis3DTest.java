@@ -1,26 +1,29 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import org.junit.Test;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class PrincipalComponentAnalysis3DTest
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
    private static final double EPSILON_HIGH_PRECISION = 1.0e-12;
    private static final double EPSILON_LOW_PRECISION = 2.0e-3;
 
@@ -543,4 +546,66 @@ public class PrincipalComponentAnalysis3DTest
          assertTrue(estimatedThirdAxis.epsilonEquals(estimatedScaledThirdVector, EPSILON_HIGH_PRECISION));
       }
    }
+
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
+	@Test(timeout = 30000)
+	/**
+	 * Make sure PCA does not crap out if it gets an empty list of data points.
+	 */
+	public void testNoData()
+	{
+	   PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
+	   ArrayList<Point3d> listOfPoints = new ArrayList<>();
+	   pca.setPointCloud(listOfPoints);
+	   pca.compute();
+	}
+
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
+	@Test(timeout = 30000)
+	/**
+	 * Make sure PCA does not crap out if a single data point is passed to it.
+	 */
+	public void testSingleDataPoint()
+	{
+	   Random random = new Random(1298490387L);
+
+	   PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
+	   ArrayList<Point3d> listOfPoints = new ArrayList<>();
+	   listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
+	   pca.setPointCloud(listOfPoints);
+	   pca.compute();
+	}
+
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
+	@Test(timeout = 30000)
+	/**
+	 * Edge case:
+	 * PCA used to fail if all data points are on the y axis. Make sure it returns the correct principal
+	 * direction.
+	 */
+	public void testAllignedDataPointsOnY()
+	{
+	   Random random = new Random(129849038127L);
+	   Vector3d direction = new Vector3d(0.0, 1.0, 0.0);
+	   direction.normalize();
+
+	   PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
+	   ArrayList<Point3d> listOfPoints = new ArrayList<>();
+
+	   for (int i = 0; i < 100; i++)
+	   {
+	      Point3d point = new Point3d(direction);
+	      point.scale(5.0 * random.nextGaussian());
+	      listOfPoints.add(point);
+	   }
+
+	   Vector3d estimatedPrincipalAxis = new Vector3d();
+	   pca.setPointCloud(listOfPoints);
+	   pca.compute();
+	   pca.getPrincipalVector(estimatedPrincipalAxis);
+
+	   assertEquals(estimatedPrincipalAxis.length(), 1.0, EPSILON_HIGH_PRECISION);
+	   double dotProduct = Math.abs(estimatedPrincipalAxis.dot(direction));
+	   assertEquals(1.0, dotProduct, EPSILON_HIGH_PRECISION);
+	}
 }

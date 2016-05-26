@@ -542,7 +542,6 @@ public class PickUpBallBehavior extends BehaviorInterface
       
       pipeLine.submitSingleTaskStage(rightArmHomeTask);
 //      pipeLine.submitSingleTaskStage(lookUp);
-
    }
 
    private FramePose2d getoffsetPoint()
