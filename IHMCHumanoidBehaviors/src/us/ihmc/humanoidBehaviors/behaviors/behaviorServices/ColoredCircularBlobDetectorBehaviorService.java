@@ -59,12 +59,10 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
          openCVColoredCircularBlobDetector.updateFromBufferedImage(latestUnmodifiedCameraImage);
          ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
 
-         BufferedImage thresholdBufferedImage = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
-         BufferedImage convertedBufferedImage = new BufferedImage(thresholdBufferedImage.getWidth(), thresholdBufferedImage.getHeight(),
-                                                                  BufferedImage.TYPE_INT_RGB);
-         convertedBufferedImage.getGraphics().drawImage(thresholdBufferedImage, 0, 0, null);
+         BufferedImage thresholdBufferedImageOpenCVEncoded = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
+         BufferedImage thresholdBufferedImage = OpenCVTools.convertToCompressableBufferedImage(thresholdBufferedImageOpenCVEncoded);
 
-         byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(convertedBufferedImage);
+         byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
          VideoPacket circleBlobThresholdImagePacket = new VideoPacket(RobotSide.LEFT, VideoSource.CV_THRESHOLD, videoTimestamp, jpegThresholdImage,
                                                                       videoPacket.getPosition(), videoPacket.getOrientation(), videoPacket.getIntrinsicParameters());
          getBehaviorInterface().sendPacketToNetworkProcessor(circleBlobThresholdImagePacket);

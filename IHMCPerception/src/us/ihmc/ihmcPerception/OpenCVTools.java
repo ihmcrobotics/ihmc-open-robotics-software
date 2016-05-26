@@ -45,6 +45,16 @@ public class OpenCVTools
       return imageMat;
    }
 
+   public static BufferedImage convertToCompressableBufferedImage(BufferedImage openCVEncodedImage)
+   {
+      BufferedImage convertedBufferedImage = new BufferedImage(openCVEncodedImage.getWidth(),
+                                                               openCVEncodedImage.getHeight(),
+                                                               BufferedImage.TYPE_INT_RGB);
+      convertedBufferedImage.getGraphics().drawImage(openCVEncodedImage, 0, 0, null);
+
+      return convertedBufferedImage;
+   }
+   
    public static BufferedImage convertMatToBufferedImage(Mat image)
    {
       MatOfByte matOfByte = new MatOfByte();
