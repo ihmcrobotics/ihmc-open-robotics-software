@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -48,6 +49,10 @@ public class MotionQPInputCalculator
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final OneDoFJoint[] oneDoFJoints;
+
+   private final DenseMatrix64F jointsRangeOfMotion;
+   private final DenseMatrix64F jointLowerLimits;
+   private final DenseMatrix64F jointUpperLimits;
 
    private final FramePoint tempBodyFixedPoint = new FramePoint();
    private final FrameVector pPointVelocity = new FrameVector();
@@ -95,6 +100,22 @@ public class MotionQPInputCalculator
       nullspaceProjectionAlpha.set(0.005);
       nullspaceCalculator = new DampedLeastSquaresNullspaceCalculator(numberOfDoFs, nullspaceProjectionAlpha.getDoubleValue());
 
+      jointsRangeOfMotion = new DenseMatrix64F(numberOfDoFs, 1);
+      jointLowerLimits = new DenseMatrix64F(numberOfDoFs, 1);
+      jointUpperLimits = new DenseMatrix64F(numberOfDoFs, 1);
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = oneDoFJoints[i];
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         double jointLimitLower = joint.getJointLimitLower();
+         double jointLimitUpper = joint.getJointLimitUpper();
+
+         jointsRangeOfMotion.set(jointIndex, 0, jointLimitUpper - jointLimitLower);
+         jointLowerLimits.set(jointIndex, 0, jointLimitLower);
+         jointUpperLimits.set(jointIndex, 0, jointLimitUpper);
+      }
+
       parentRegistry.addChild(registry);
    }
 
@@ -108,6 +129,20 @@ public class MotionQPInputCalculator
    public void updatePrivilegedConfiguration(PrivilegedConfigurationCommand command)
    {
       privilegedConfigurationHandler.submitPrivilegedConfigurationCommand(command);
+   }
+
+   public void submitJointLimitReductionCommand(JointLimitReductionCommand command)
+   {
+      for (int commandJointIndex = 0; commandJointIndex < command.getNumberOfJoints(); commandJointIndex++)
+      {
+         OneDoFJoint joint = command.getJoint(commandJointIndex);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         double originalJointLimitLower = joint.getJointLimitLower();
+         double originalJointLimitUpper = joint.getJointLimitUpper();
+         double limitReduction = command.getJointLimitReductionFactor(commandJointIndex) * jointsRangeOfMotion.get(jointIndex, 0);
+         jointLowerLimits.set(jointIndex, 0, originalJointLimitLower + limitReduction);
+         jointUpperLimits.set(jointIndex, 0, originalJointLimitUpper - limitReduction);
+      }
    }
 
    public boolean computePrivilegedJointAccelerations(MotionQPInput motionQPInputToPack)
@@ -588,8 +623,8 @@ public class MotionQPInputCalculator
       {
          OneDoFJoint joint = oneDoFJoints[i];
          int index = jointIndexHandler.getOneDoFJointIndex(joint);
-         double jointLimitLower = joint.getJointLimitLower();
-         double jointLimitUpper = joint.getJointLimitUpper();
+         double jointLimitLower = jointLowerLimits.get(index, 0);
+         double jointLimitUpper = jointUpperLimits.get(index, 0);
 
          double qDDotMin = Double.NEGATIVE_INFINITY;
          double qDDotMax = Double.POSITIVE_INFINITY;
@@ -620,10 +655,10 @@ public class MotionQPInputCalculator
       {
          OneDoFJoint joint = oneDoFJoints[i];
          int index = jointIndexHandler.getOneDoFJointIndex(joint);
-         double jointLimitLower = joint.getJointLimitLower();
+         double jointLimitLower = jointLowerLimits.get(index, 0);
          if (!Double.isInfinite(jointLimitLower))
             qDotMinToPack.set(index, 0, (jointLimitLower - joint.getQ()) / controlDT);
-         double jointLimitUpper = joint.getJointLimitUpper();
+         double jointLimitUpper = jointUpperLimits.get(index, 0);
          if (!Double.isInfinite(jointLimitUpper))
             qDotMaxToPack.set(index, 0, (jointLimitUpper - joint.getQ()) / controlDT);
       }
