@@ -206,7 +206,7 @@ public class PrincipalComponentAnalysis3D
 
    public void getPrincipalVector(Vector3d principalVectorToPack)
    {
-      principalVectorToPack.set(principalVectorToPack);
+      principalVectorToPack.set(principalAxis);
    }
 
    /**

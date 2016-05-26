@@ -99,6 +99,12 @@ public class WholeBodyInverseKinematicsBehavior extends BehaviorInterface
       }
    }
 
+   /** Change the threshold at which a solution is considered to be good enough */
+   public void setSolutionQualityThreshold(double newThreshold)
+   {
+      solutionQualityThreshold.set(newThreshold);
+   }
+
    public void setTrajectoryTime(double trajectoryTime)
    {
       this.trajectoryTime.set(trajectoryTime);
@@ -195,7 +201,9 @@ public class WholeBodyInverseKinematicsBehavior extends BehaviorInterface
             sendPacketToNetworkProcessor(solutionSentToController);
 
          if (yoTime.getDoubleValue() - timeSolutionSentToController.getDoubleValue() > trajectoryTime.getDoubleValue())
+         {
             isDone.set(true);
+         }
       }
    }
 

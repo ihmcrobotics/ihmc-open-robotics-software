@@ -14,7 +14,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
 {
-   private static final boolean VERBOSE = false;
+   private static final boolean VERBOSE = true;
 
    private final String ipAddress;
    private int port;
@@ -22,7 +22,7 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
    private ServerSocket serverSocket;
    private Socket clientSocket;
    
-   private boolean closed = false;
+   private boolean closed = true;
    
    public TCPYoWhiteBoard(String name, final int port)
    {      
@@ -40,27 +40,14 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
       this.port = port;
    }
    
-   public void startOnAThread()
+   public void startTCPThread()
    {
-      ThreadTools.startAThread(this, getName() + "TCPThread");
+      if (!closed)
+         throw new RuntimeException("Already started");
       
-      ThreadTools.startAThread(new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            try
-            {
-               PrintTools.info(getName() + ": Connecting");
-               connect();
-            }
-            catch (IOException e)
-            {
-               PrintTools.error(getName() + ": Failed to connect");
-               e.printStackTrace();
-            }
-         }
-      }, getName() + "ConnectThread");
+      closed = false;
+      
+      ThreadTools.startAThread(this, getName() + "TCPThread");
    }
 
    @Override
@@ -84,24 +71,19 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
       {
          try
          {
-            if (VERBOSE)
-            {
-               System.out.println("Waiting for server socket to accept");
-            }
+            PrintTools.debug(VERBOSE, this, "runServer(): Waiting for server socket to accept");
             
             serverSocket = new ServerSocket(port);
             // Get the port since if you use 0, Java will find one that is free
             this.port = serverSocket.getLocalPort();
             Socket socket = serverSocket.accept();
             socket.setTcpNoDelay(true);
-            if (VERBOSE)
-               System.out.println("Server socket accepted. Creating dataInputStream and dataOutputStream");
+            PrintTools.debug(VERBOSE, this, "runServer(): Socket accepted. Creating dataInputStream and dataOutputStream");
 
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 
-            if (VERBOSE)
-               System.out.println("Server all connected and running.");
+            PrintTools.debug(VERBOSE, this, "runServer(): DataInputStream and dataOutputStream created");
 
             super.setDataStreams(dataInputStream, dataOutputStream);
             super.run();
@@ -121,10 +103,7 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
       {
          try
          {
-            if (VERBOSE)
-            {
-               System.out.println("Trying to connect to server at " + ipAddress + " : " + port);
-            }
+            PrintTools.debug(VERBOSE, this, "runClient(): Connecting to " + ipAddress + " : " + port);
 
             clientSocket = new Socket(ipAddress, port);
             clientSocket.setTcpNoDelay(true);
@@ -132,8 +111,7 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
             DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream()));
 
-            if (VERBOSE)
-               System.out.println("Connected to server at " + ipAddress + " : " + port);
+            PrintTools.debug(VERBOSE, this, "runClient(): Connected to " + ipAddress + " : " + port);
 
             super.setDataStreams(dataInputStream, dataOutputStream);
             super.run();
@@ -142,7 +120,7 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
          }
          catch (ConnectException e)
          {
-            PrintTools.error("Failed to connect");
+            PrintTools.error("Failed to connect to " + ipAddress + ":" + port);
             ThreadTools.sleep(500);
          }
          catch (IOException e)

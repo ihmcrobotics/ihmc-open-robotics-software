@@ -49,7 +49,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
             {
                PrintTools.debug(this, "Received new fisheye image on " + cameraParameters.getRosTopic() + " " + image);
             }
-            updateImage(robotSide, VideoSource.MULTISENSE_FISHEYE, image, timeStamp, intrinsicParameters);
+            updateImage(VideoSource.getFisheyeSourceFromRobotSide(robotSide), image, timeStamp, intrinsicParameters);
 
          }
       };
@@ -68,14 +68,14 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
       }
 
       @Override
-      public void newVideoPacketAvailable(RobotSide robotSide, VideoSource videoSource, long timeStamp, byte[] data, Point3d position, Quat4d orientation,
+      public void newVideoPacketAvailable(VideoSource videoSource, long timeStamp, byte[] data, Point3d position, Quat4d orientation,
             IntrinsicParameters intrinsicParameters)
       {
          if(DEBUG)
          {
-            PrintTools.debug(this, robotSide.getCamelCaseNameForStartOfExpression() + " fisheye data size size is " + data.length);
+            PrintTools.debug(this, videoSource.name() + " fisheye data size size is " + data.length);
          }
-         packetCommunicator.send(new FisheyePacket(robotSide, timeStamp, data, position, orientation, intrinsicParameters));
+         packetCommunicator.send(new FisheyePacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
       }
 
       @Override
