@@ -43,8 +43,8 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
 
       coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(this);
-      HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
-      coloredCircularBlobDetectorBehaviorService.addHSVRange(greenRange);
+//      HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
+//      coloredCircularBlobDetectorBehaviorService.addHSVRange(greenRange);
 
       runBlobFilter.set(false);
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
