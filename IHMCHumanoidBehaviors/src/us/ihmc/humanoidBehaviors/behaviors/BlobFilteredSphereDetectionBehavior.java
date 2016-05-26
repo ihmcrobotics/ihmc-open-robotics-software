@@ -28,7 +28,6 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    private static final double HORIZONTAL_FOV = Math.toRadians(80.0);
    private static final double VERTICAL_FOV = Math.toRadians(45.0);
 
-   private BufferedImage lastBufferedImage;
    private final BooleanYoVariable runBlobFilter = new BooleanYoVariable("runBlobFilter", registry);
    private int numBallsDetected;
    
@@ -88,11 +87,12 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       RigidBodyTransform worldToCameraTransform = headFrame.getTransformToWorldFrame();
       worldToCameraTransform.invert();
 
-      int cameraPixelWidth = lastBufferedImage.getWidth();
-      int cameraPixelHeight = lastBufferedImage.getHeight();
+      BufferedImage latestCameraImage = coloredCircularBlobDetectorBehaviorService.getLatestUnmodifiedCameraImage();
+      int cameraPixelWidth = latestCameraImage.getWidth();
+      int cameraPixelHeight = latestCameraImage.getHeight();
 
-      double ballCenterX = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().x - lastBufferedImage.getMinX();
-      double ballCenterY = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().y - lastBufferedImage.getMinY();
+      double ballCenterX = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().x - latestCameraImage.getMinX();
+      double ballCenterY = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().y - latestCameraImage.getMinY();
 
       double desiredRayAngleX = VERTICAL_FOV * (-ballCenterY / cameraPixelHeight + 0.5);
       double desiredRayAngleY = HORIZONTAL_FOV * (ballCenterX / cameraPixelWidth - 0.5);

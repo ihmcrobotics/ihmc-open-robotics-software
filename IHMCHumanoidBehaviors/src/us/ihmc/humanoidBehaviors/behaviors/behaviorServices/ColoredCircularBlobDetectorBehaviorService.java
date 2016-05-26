@@ -31,6 +31,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    
    private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
    private final Point2d latestBallPosition2d = new Point2d();
+   private BufferedImage latestUnmodifiedCameraImage;
    
    public ColoredCircularBlobDetectorBehaviorService(BehaviorInterface behaviorInterface)
    {
@@ -53,9 +54,9 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
          RobotConfigurationData robotConfigurationData = robotConfigurationDataQueue.getLatestPacket();
          videoTimestamp = robotConfigurationData.getTimestamp();
 
-         BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData());
+         latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData());
 
-         openCVColoredCircularBlobDetector.updateFromBufferedImage(bufferedImage);
+         openCVColoredCircularBlobDetector.updateFromBufferedImage(latestUnmodifiedCameraImage);
          ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
 
          BufferedImage thresholdBufferedImage = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
@@ -85,6 +86,11 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    public Point2d getLatestBallPosition2d()
    {
       return latestBallPosition2d;
+   }
+   
+   public BufferedImage getLatestUnmodifiedCameraImage()
+   {
+      return latestUnmodifiedCameraImage;
    }
 
    public void clearHSVRanges()
