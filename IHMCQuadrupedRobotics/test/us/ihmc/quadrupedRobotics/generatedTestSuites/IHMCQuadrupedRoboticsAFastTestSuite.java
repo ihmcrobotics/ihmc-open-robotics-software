@@ -13,8 +13,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.quadrupedRobotics.gait.QuadrupedGaitTypeTest.class,
-   us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygonTest.class,
    us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlannerTest.class,
+   us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygonTest.class
 })
 
 public class IHMCQuadrupedRoboticsAFastTestSuite
