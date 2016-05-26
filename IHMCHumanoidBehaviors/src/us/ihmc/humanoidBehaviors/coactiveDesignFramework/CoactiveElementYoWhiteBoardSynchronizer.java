@@ -9,8 +9,12 @@ import us.ihmc.simulationconstructionset.whiteBoard.TCPYoWhiteBoard;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class CoactiveElementYoWhiteBoardSynchronizer
+public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
 {
+   private static final boolean DEBUG = false;
+   private long millisecondsBetweenDataWrites = 300L;
+   private boolean closed = true;
+   
    private final TCPYoWhiteBoard tcpYoWhiteBoard;
 
    private final HumanOrMachine whichSideIsThisRunningOn;
@@ -82,6 +86,7 @@ public class CoactiveElementYoWhiteBoardSynchronizer
 
    public void writeData() throws IOException
    {
+      PrintTools.debug(DEBUG, this, "writeData()");
       tcpYoWhiteBoard.writeData();
    }
 
@@ -92,22 +97,64 @@ public class CoactiveElementYoWhiteBoardSynchronizer
 
    public void readData() throws IOException
    {
+      PrintTools.debug(DEBUG, this, "readData()");
       tcpYoWhiteBoard.readData();
    }
 
    public void startASynchronizerOnAThread(long millisecondsBetweenDataWrites)
    {
-      tcpYoWhiteBoard.startOnAThread();
+      if (!closed)
+         throw new RuntimeException("Synchronizer already started");
       
-      SynchronizerRunnable synchronizerRunnable = new SynchronizerRunnable(this, millisecondsBetweenDataWrites);
-      ThreadTools.startAThread(synchronizerRunnable, getClass().getSimpleName());
+      closed = false;
+      
+      this.millisecondsBetweenDataWrites = millisecondsBetweenDataWrites;
+      
+      tcpYoWhiteBoard.startTCPThread();
+      startSynchronizerThread();
    }
    
+   private void startSynchronizerThread()
+   {
+      ThreadTools.startAThread(this, getClass().getSimpleName());
+   }
+
+   @Override
+   public void run()
+   {
+      while (!closed)
+      {
+         try
+         {
+            writeData();
+            readData();
+         }
+         catch (Exception e)
+         {
+            PrintTools.debug(DEBUG, this, e.getMessage());
+            try
+            {
+               PrintTools.info(this, "Connecting");
+               tcpYoWhiteBoard.connect();
+            }
+            catch (IOException ioException)
+            {
+               PrintTools.error(this, "Failed to connect");
+               ioException.printStackTrace();
+               ThreadTools.sleep(500);
+            }
+         }
+
+         ThreadTools.sleep(millisecondsBetweenDataWrites);
+      }
+   }
+
    public void close()
    {
       try
       {
          PrintTools.info(this, "Closed.");
+         closed = true;
          tcpYoWhiteBoard.close();
       }
       catch (IOException e)
@@ -116,52 +163,8 @@ public class CoactiveElementYoWhiteBoardSynchronizer
       }
    }
 
-   private class SynchronizerRunnable implements Runnable
-   {
-      private static final boolean DEBUG = false;
-
-      private final CoactiveElementYoWhiteBoardSynchronizer coactiveElementYoWhiteBoardSynchronizer;
-      private final long millisecondsBetweenDataWrites;
-
-      SynchronizerRunnable(CoactiveElementYoWhiteBoardSynchronizer coactiveElementYoWhiteBoardSynchronizer, long millisecondsBetweenDataWrites)
-      {
-         this.coactiveElementYoWhiteBoardSynchronizer = coactiveElementYoWhiteBoardSynchronizer;
-         this.millisecondsBetweenDataWrites = millisecondsBetweenDataWrites;
-      }
-
-      @Override
-      public void run()
-      {
-         while (true)
-         {
-            try
-            {
-               PrintTools.debug(DEBUG, this, "coactiveElementYoWhiteBoardSynchronizer.writeData()");
-               coactiveElementYoWhiteBoardSynchronizer.writeData();
-               {
-                  PrintTools.debug(DEBUG, this, "coactiveElementYoWhiteBoardSynchronizer.readData()");
-                  coactiveElementYoWhiteBoardSynchronizer.readData();
-               }
-            }
-            catch (Exception e)
-            {
-               PrintTools.debug(DEBUG, this, e.getMessage());
-            }
-
-            try
-            {
-               Thread.sleep(millisecondsBetweenDataWrites);
-            }
-            catch (InterruptedException e)
-            {
-            }
-         }
-      }
-   }
-
    public TCPYoWhiteBoard getYoWhiteBoard()
    {
       return tcpYoWhiteBoard;
    }
-
 }
