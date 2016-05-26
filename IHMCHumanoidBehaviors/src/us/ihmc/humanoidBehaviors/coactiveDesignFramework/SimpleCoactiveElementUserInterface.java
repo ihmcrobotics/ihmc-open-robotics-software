@@ -6,14 +6,14 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
-import us.ihmc.humanoidBehaviors.behaviors.KickBallBehaviorCoactiveElement;
+import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.KickBallBehaviorCoactiveElement;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class SimpleCoactiveElementUserInterface
 {
-   private static final int PORT_FOR_COACTIVE_ELEMENTS = 56122;
    private final CoactiveElement coactiveElement;
    private SimulationConstructionSet scs;
 
@@ -34,7 +34,7 @@ public class SimpleCoactiveElementUserInterface
       }
       coactiveElement.initializeUserInterfaceSide();
 
-      CoactiveElementYoWhiteBoardSynchronizer synchronizer = new CoactiveElementYoWhiteBoardSynchronizer(PORT_FOR_COACTIVE_ELEMENTS, ipAddress,
+      CoactiveElementYoWhiteBoardSynchronizer synchronizer = new CoactiveElementYoWhiteBoardSynchronizer(NetworkPorts.COACTIVE_ELEMENTS_PORT.getPort(), ipAddress,
                                                                                                          HumanOrMachine.HUMAN, coactiveElement);
 
       final long millisecondsBetweenDataWrites = 300L;

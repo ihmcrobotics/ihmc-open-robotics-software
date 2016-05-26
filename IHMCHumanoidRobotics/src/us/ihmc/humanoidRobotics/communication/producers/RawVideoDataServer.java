@@ -10,7 +10,6 @@ import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RawVideoDataServer implements VideoDataServer
 {
@@ -22,9 +21,8 @@ public class RawVideoDataServer implements VideoDataServer
    }
    
    @Override
-   public void updateImage(RobotSide robotSide, VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParameters)
+   public void updateImage(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParameters)
    {
-      
       LocalVideoPacket videoPacket = new LocalVideoPacket(timeStamp, bufferedImage, intrinsicParameters);
       objectCommunicator.consumeObject(videoPacket);
    }

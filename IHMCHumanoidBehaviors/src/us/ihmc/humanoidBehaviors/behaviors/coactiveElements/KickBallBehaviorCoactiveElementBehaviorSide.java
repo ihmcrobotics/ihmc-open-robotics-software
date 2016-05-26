@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors;
+package us.ihmc.humanoidBehaviors.behaviors.coactiveElements;
 
 
 import java.awt.event.ActionEvent;
@@ -7,11 +7,11 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
+import us.ihmc.humanoidBehaviors.behaviors.KickBallBehavior;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class KickBallBehaviorCoactiveElementBehaviorSide extends KickBallBehaviorCoactiveElement
 {
-  
    private KickBallBehavior kickBallBehavior;
 
    public void setKickBallBehavior(KickBallBehavior kickBallBehavior)
