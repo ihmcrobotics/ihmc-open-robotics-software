@@ -74,7 +74,9 @@ public class WaitForUserValidationBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      return validAcknoledged.getBooleanValue();
+      return true;
+      
+//      return validAcknoledged.getBooleanValue();
    }
 
    @Override

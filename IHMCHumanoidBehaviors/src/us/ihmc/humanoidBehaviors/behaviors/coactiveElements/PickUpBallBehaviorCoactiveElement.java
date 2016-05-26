@@ -19,7 +19,8 @@ public abstract class PickUpBallBehaviorCoactiveElement extends BehaviorCoactive
       BENDING_OVER,
       REACHING_FOR_BALL,
       CLOSING_HAND,
-      PICKING_UP_BALL
+      PICKING_UP_BALL,
+      PUTTING_BALL_IN_BASKET
    }
 
    //UI SIDE YOVARS
