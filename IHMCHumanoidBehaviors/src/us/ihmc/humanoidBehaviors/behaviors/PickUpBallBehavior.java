@@ -416,8 +416,6 @@ public class PickUpBallBehavior extends BehaviorInterface
       pelvisGoHomeBehavior.setInput(goHomepelvisMessage);
       GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, pelvisGoHomeBehavior, yoTime, 0);
 
-      
-      
       BehaviorTask goToDropBallInitialLocationTask = new BehaviorTask(wholeBodyBehavior, yoTime, 0)
       {
          @Override
@@ -448,7 +446,7 @@ public class PickUpBallBehavior extends BehaviorInterface
 
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);
             wholeBodyBehavior.setTrajectoryTime(6);
-            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(-90),  Math.toRadians(20), Math.toRadians(-90));
+            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(-90), Math.toRadians(20), Math.toRadians(-90));
             wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
 
             FramePoint rhPoint = new FramePoint(referenceFrames.getChestFrame(), 0.5, -0.25, 0);
@@ -458,74 +456,108 @@ public class PickUpBallBehavior extends BehaviorInterface
 
          }
       };
-      
-      
-      
-      
+
       GoHomeMessage goHomeLeftArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 3);
       armGoHomeLeftBehavior.setInput(goHomeLeftArmMessage);
       GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior, yoTime, 0);
 
-//      GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 3);
-//      armGoHomeRightBehavior.setInput(goHomeRightArmMessage);
-//      GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior, yoTime, 0);
+      //      GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 3);
+      //      armGoHomeRightBehavior.setInput(goHomeRightArmMessage);
+      //      GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior, yoTime, 0);
 
-      double[] rightHandWiderHomeJointAngles = new double[] {-0.785398, 0.5143374964757462, 2.2503094898479272, -2.132492022530739, -0.22447272781774874, -0.4780687104960028, -0.24919417978503655};
+      double[] rightHandWiderHomeJointAngles = new double[] {-0.785398, 0.5143374964757462, 2.2503094898479272, -2.132492022530739, -0.22447272781774874,
+            -0.4780687104960028, -0.24919417978503655};
 
-      ArmTrajectoryMessage widerHome = new ArmTrajectoryMessage(RobotSide.RIGHT, 3,rightHandWiderHomeJointAngles);
-      armTrajectoryBehavior.setInput(widerHome);
+      ArmTrajectoryMessage widerHome = new ArmTrajectoryMessage(RobotSide.RIGHT, 3, rightHandWiderHomeJointAngles);
+
       ArmTrajectoryTask rightArmHomeTask = new ArmTrajectoryTask(widerHome, armTrajectoryBehavior, yoTime);
-      
-      
+
+      double[] rightHandBucketLocation1 = new double[] {0.5489321822438367, 0.2899665391571677, 2.096340823983413, -1.2225333451166707, 0.1256161514011733,
+            -1.3433026185064938, -1.1994258903111514};
+
+      ArmTrajectoryMessage rightHandBucketLocation1Message = new ArmTrajectoryMessage(RobotSide.RIGHT, 3, rightHandBucketLocation1);
+
+      ArmTrajectoryTask rightHandBucketLocation1Task = new ArmTrajectoryTask(rightHandBucketLocation1Message, armTrajectoryBehavior, yoTime);
+
+      double[] leftHandBucketLocation1 = new double[] {-0.5609186812662719, -0.39273790125704305, 1.89931104400202, 1.8345084796174007, -1.9173410679363112,
+            -0.7657081703756509, -0.7098631227127279};
+
+      ArmTrajectoryMessage leftHandBucketLocation1Message = new ArmTrajectoryMessage(RobotSide.LEFT, 3, leftHandBucketLocation1);
+
+      ArmTrajectoryTask leftHandBucketLocation1Task = new ArmTrajectoryTask(leftHandBucketLocation1Message, armTrajectoryBehavior, yoTime);
+
+      double[] rightHandBucketLocation2 = new double[] {0.4765048070153984, 0.305694742754363, 2.173812006625049, -1.4970540590789951, 0.10321456673940527,
+            -1.2120648871681976, -1.1591439074587626};
+
+      ArmTrajectoryMessage rightHandBucketLocation2Message = new ArmTrajectoryMessage(RobotSide.RIGHT, 3, rightHandBucketLocation2);
+
+      ArmTrajectoryTask rightHandBucketLocation2Task = new ArmTrajectoryTask(rightHandBucketLocation2Message, armTrajectoryBehavior, yoTime);
+
+      double[] leftHandBucketLocation2 = new double[] {-0.6312858675745908, -0.6560594198655715, 2.026449179186367, 2.0325182474649997, -1.4129369066719957,
+            -0.33189990885720594, -1.1435699210219243};
+
+      ArmTrajectoryMessage leftHandBucketLocation2Message = new ArmTrajectoryMessage(RobotSide.LEFT, 3, leftHandBucketLocation2);
+
+      ArmTrajectoryTask leftHandBucketLocation2Task = new ArmTrajectoryTask(leftHandBucketLocation2Message, armTrajectoryBehavior, yoTime);
+
       //PUT BALL IN BUCKET *******************************************
 
-      
-//      pipeLine.submitSingleTaskStage(rightArmHomeTask);
-      //      
-      //      pipeLine.submitSingleTaskStage(closeHand);
-      //      pipeLine.submitSingleTaskStage(enableLidarTask);
-      //      pipeLine.submitSingleTaskStage(setLidarMediumRangeTask);
-      //      pipeLine.submitSingleTaskStage(clearLidarTask);
-      //      pipeLine.submitSingleTaskStage(findBallTask);
-      //      pipeLine.submitSingleT`askStage(validateBallTask);
-      //      pipeLine.submitSingleTaskStage(walkToBallTask);
-      //      pipeLine.submitSingleTaskStage(lookDown);
-      //      pipeLine.submitSingleTaskStage(chestOrientationTask);
-      //      pipeLine.submitSingleTaskStage(setLidarShortRangeTask);
-      //      pipeLine.submitSingleTaskStage(clearLidarTask2);
-      //      pipeLine.submitSingleTaskStage(finalFindBallTask);
-      //      pipeLine.submitSingleTaskStage(validateBallTask2);
-      //      pipeLine.submitSingleTaskStage(goToPickUpBallInitialLocationTask);
-      //      pipeLine.submitSingleTaskStage(openHand);
-      //      pipeLine.submitSingleTaskStage(pickUpBallTask);
-      //      pipeLine.submitSingleTaskStage(closeHand);
-      //      pipeLine.submitSingleTaskStage(goToFinalPickUpBallLocationTask);
-      //
-      //      pipeLine.submitSingleTaskStage(goHomeChestTask);
-      //      pipeLine.submitSingleTaskStage(goHomePelvisTask);
-      
-      //PUT BALL IN BUCKET
-//      pipeLine.submitSingleTaskStage(rightArmHomeTask);
-
-      pipeLine.submitSingleTaskStage(goToDropBallInitialLocationTask);
-      pipeLine.submitSingleTaskStage(goToDropBallFinalLocationTask);
-      pipeLine.submitSingleTaskStage(openHand);
-      pipeLine.submitSingleTaskStage(closeHand);
-      pipeLine.submitSingleTaskStage(openHand);
-
-
-      pipeLine.submitSingleTaskStage(goToDropBallInitialLocationTask);
-      pipeLine.submitSingleTaskStage(closeHand);
       pipeLine.submitSingleTaskStage(rightArmHomeTask);
-
-      pipeLine.submitSingleTaskStage(goHomeLeftArmTask);
-      
+      //      
+      pipeLine.submitSingleTaskStage(closeHand);
+      pipeLine.submitSingleTaskStage(enableLidarTask);
+      pipeLine.submitSingleTaskStage(setLidarMediumRangeTask);
+      pipeLine.submitSingleTaskStage(clearLidarTask);
+      pipeLine.submitSingleTaskStage(findBallTask);
+      pipeLine.submitSingleTaskStage(validateBallTask);
+      pipeLine.submitSingleTaskStage(walkToBallTask);
+      pipeLine.submitSingleTaskStage(lookDown);
+      pipeLine.submitSingleTaskStage(chestOrientationTask);
+      pipeLine.submitSingleTaskStage(setLidarShortRangeTask);
+      pipeLine.submitSingleTaskStage(clearLidarTask2);
+      pipeLine.submitSingleTaskStage(finalFindBallTask);
+      pipeLine.submitSingleTaskStage(validateBallTask2);
+      pipeLine.submitSingleTaskStage(goToPickUpBallInitialLocationTask);
+      pipeLine.submitSingleTaskStage(openHand);
+      pipeLine.submitSingleTaskStage(pickUpBallTask);
+      pipeLine.submitSingleTaskStage(closeHand);
+      //            pipeLine.submitSingleTaskStage(goToFinalPickUpBallLocationTask);
+      //
       pipeLine.submitSingleTaskStage(goHomeChestTask);
       pipeLine.submitSingleTaskStage(goHomePelvisTask);
-      
-      
+
+      //PUT BALL IN BUCKET
       pipeLine.submitSingleTaskStage(rightArmHomeTask);
-//      pipeLine.submitSingleTaskStage(lookUp);
+
+      pipeLine.submitSingleTaskStage(rightHandBucketLocation1Task);
+      pipeLine.submitSingleTaskStage(leftHandBucketLocation1Task);
+
+      pipeLine.submitSingleTaskStage(rightHandBucketLocation2Task);
+      pipeLine.submitSingleTaskStage(leftHandBucketLocation2Task);
+
+      pipeLine.submitSingleTaskStage(openHand);
+      pipeLine.submitSingleTaskStage(closeHand);
+      pipeLine.submitSingleTaskStage(openHand);
+
+      pipeLine.submitSingleTaskStage(leftHandBucketLocation1Task);
+
+      //      pipeLine.submitSingleTaskStage(goToDropBallInitialLocationTask);
+      //      pipeLine.submitSingleTaskStage(goToDropBallFinalLocationTask);
+
+      //
+      //
+      //      pipeLine.submitSingleTaskStage(goToDropBallInitialLocationTask);
+      //      pipeLine.submitSingleTaskStage(closeHand);
+      pipeLine.submitSingleTaskStage(rightArmHomeTask);
+      //
+      pipeLine.submitSingleTaskStage(goHomeLeftArmTask);
+      //      
+      pipeLine.submitSingleTaskStage(goHomeChestTask);
+      pipeLine.submitSingleTaskStage(goHomePelvisTask);
+      //      
+      //      
+      //      pipeLine.submitSingleTaskStage(rightArmHomeTask);
+      //      pipeLine.submitSingleTaskStage(lookUp);
    }
 
    private FramePose2d getoffsetPoint()
