@@ -71,24 +71,19 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
       {
          try
          {
-            if (VERBOSE)
-            {
-               System.out.println("Waiting for server socket to accept");
-            }
+            PrintTools.debug(VERBOSE, this, "runServer(): Waiting for server socket to accept");
             
             serverSocket = new ServerSocket(port);
             // Get the port since if you use 0, Java will find one that is free
             this.port = serverSocket.getLocalPort();
             Socket socket = serverSocket.accept();
             socket.setTcpNoDelay(true);
-            if (VERBOSE)
-               System.out.println("Server socket accepted. Creating dataInputStream and dataOutputStream");
+            PrintTools.debug(VERBOSE, this, "runServer(): Socket accepted. Creating dataInputStream and dataOutputStream");
 
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 
-            if (VERBOSE)
-               System.out.println("Server all connected and running.");
+            PrintTools.debug(VERBOSE, this, "runServer(): DataInputStream and dataOutputStream created");
 
             super.setDataStreams(dataInputStream, dataOutputStream);
             super.run();
@@ -108,10 +103,7 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
       {
          try
          {
-            if (VERBOSE)
-            {
-               System.out.println("Trying to connect to server at " + ipAddress + " : " + port);
-            }
+            PrintTools.debug(VERBOSE, this, "runClient(): Connecting to " + ipAddress + " : " + port);
 
             clientSocket = new Socket(ipAddress, port);
             clientSocket.setTcpNoDelay(true);
@@ -119,8 +111,7 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
             DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream()));
 
-            if (VERBOSE)
-               System.out.println("Connected to server at " + ipAddress + " : " + port);
+            PrintTools.debug(VERBOSE, this, "runClient(): Connected to " + ipAddress + " : " + port);
 
             super.setDataStreams(dataInputStream, dataOutputStream);
             super.run();
