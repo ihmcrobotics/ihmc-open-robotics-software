@@ -100,6 +100,21 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
 
    }
 
+   public RigidBodyTransform getLidarToSensorTransform(String lidarName)
+   {
+      return fullRobotModel.getLidarBaseToSensorTransform(lidarName);
+   }
+
+   public ReferenceFrame getLidarFrame(String lidarName)
+   {
+      return fullRobotModel.getLidarBaseFrame(lidarName);
+   }
+
+   public InverseDynamicsJoint getLidarJoint(String lidarName)
+   {
+      return fullRobotModel.getLidarJoint(lidarName);
+   }
+
    @Override
    public void run()
    {

@@ -77,13 +77,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         String lidarName = sensorInformation.getLidarParameters(0).getSensorNameInSdf();
-         SDFFullHumanoidRobotModel fullRobotModel = modelFactory.createFullRobotModel();
-         ReferenceFrame lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarName);
-         RigidBodyTransform lidarBaseToSensorTransform = fullRobotModel.getLidarBaseToSensorTransform(lidarName);
-         ReferenceFrame lidarAfterJointFrame = fullRobotModel.getLidarJoint(lidarName).getFrameAfterJoint();
-         ReferenceFrame lidarScanFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("lidarScanFrame", lidarAfterJointFrame, lidarBaseToSensorTransform);
-         new SCSPointCloudLidarReceiver(scsSensorsCommunicator, lidarBaseFrame, lidarScanFrame, pointCloudDataReceiver);
+         new SCSPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, pointCloudDataReceiver);
       }
 
       //      if (DRCConfigParameters.CALIBRATE_ARM_MODE)

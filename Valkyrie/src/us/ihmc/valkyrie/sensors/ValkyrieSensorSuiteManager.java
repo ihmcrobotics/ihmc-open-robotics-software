@@ -65,13 +65,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(sensorInformation.getCameraParameters(0).getRobotSide(), fullRobotModelFactory, sensorInformation.getCameraParameters(0).getSensorNameInSdf(), robotConfigurationDataBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider);
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         SDFFullHumanoidRobotModel fullRobotModel = fullRobotModelFactory.createFullRobotModel();
-         String lidarName = sensorInformation.getLidarParameters(0).getSensorNameInSdf();
-         ReferenceFrame lidarFrame = fullRobotModel.getLidarBaseFrame(lidarName);
-         RigidBodyTransform lidarBaseToSensorTransform = fullRobotModel.getLidarBaseToSensorTransform(lidarName);
-         ReferenceFrame lidarAfterJointFrame = fullRobotModel.getLidarJoint(lidarName).getFrameAfterJoint();
-         ReferenceFrame lidarScanFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("lidarScanFrame", lidarAfterJointFrame, lidarBaseToSensorTransform);
-         new SCSPointCloudLidarReceiver(scsSensorsCommunicator, lidarFrame, lidarScanFrame, pointCloudDataReceiver);
+         new SCSPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, pointCloudDataReceiver);
       }
       cameraDataReceiver.start();
    }
