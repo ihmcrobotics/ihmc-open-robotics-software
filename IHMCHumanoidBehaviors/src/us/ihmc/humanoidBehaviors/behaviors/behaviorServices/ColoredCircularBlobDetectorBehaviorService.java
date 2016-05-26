@@ -86,4 +86,9 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    {
       return latestBallPosition2d;
    }
+
+   public void clearHSVRanges()
+   {
+      openCVColoredCircularBlobDetector.resetRanges();
+   }
 }
