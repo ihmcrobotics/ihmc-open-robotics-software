@@ -1,5 +1,10 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
+import java.awt.image.BufferedImage;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packets.PacketDestination;
@@ -10,10 +15,6 @@ import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import java.awt.image.BufferedImage;
 
 public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavior
 {

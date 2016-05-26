@@ -6,12 +6,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
-import javax.vecmath.Quat4d;
 
-import boofcv.struct.calib.IntrinsicParameters;
 import bubo.clouds.FactoryPointCloudShape;
 import bubo.clouds.detect.CloudShapeTypes;
 import bubo.clouds.detect.PointCloudShapeFinder;
@@ -20,34 +16,21 @@ import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.communication.producers.CompressedVideoDataClient;
-import us.ihmc.communication.producers.CompressedVideoDataFactory;
-import us.ihmc.communication.producers.JPEGCompressor;
-import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.communication.producers.VideoStreamer;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
-import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.ihmcPerception.vision.HSVValue;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
-import us.ihmc.ihmcPerception.vision.shapes.HoughCircleResult;
-import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetector;
-import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetectorFactory;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.tools.thread.ThreadTools;
 
-public class FollowBallBehavior extends BehaviorInterface implements VideoStreamer
+public class FollowBallBehavior extends BehaviorInterface
 {
    private static final boolean DEBUG = true;
 
@@ -61,16 +44,10 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    private final double swingTime = 0.6;
    private final double tranferTime = 0.5;
 
-   private BufferedImage lastBufferedImage;
-   private final CompressedVideoDataClient videoDataClient;
-   private final BooleanYoVariable detectBall = new BooleanYoVariable("detectBall", registry);
-   private BallDetectionThread computerVisionThread = new BallDetectionThread();
-   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>();
-   private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue = new ConcurrentListeningQueue<>();
+   private final ColoredCircularBlobDetectorBehaviorService coloredCircularBlobDetectorBehaviorService;
    
-   // CV IMAGE SERVER
-   private final JPEGCompressor jpegCompressor = new JPEGCompressor();
-
+   private BufferedImage lastBufferedImage;
+   
    private final ReferenceFrame headFrame;
    private static final double FILTERING_ANGLE = Math.toRadians(5.0);
    private static final double FILTERING_MIN_DISTANCE = 0.1;
@@ -93,11 +70,7 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
 
    private final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
-   private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
    private final PointCloudShapeFinder pointCloudSphereFinder;
-   private long videoTimestamp = -1L;
-   private final Point2d latestBallPosition2d = new Point2d();
-   private final Point3d latestBallPosition3d = new Point3d();
 
    public FollowBallBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, SDFFullHumanoidRobotModel fullRobotModel)
    {
@@ -108,93 +81,21 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       walkingStatusQueue = new ConcurrentListeningQueue<>();
       attachControllerListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
 
-      videoDataClient = CompressedVideoDataFactory.createCompressedVideoDataClient(this);
-      computerVisionThread.start();
+      coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(this);
+      HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
+      coloredCircularBlobDetectorBehaviorService.addHSVRange(greenRange);
+      
       behaviorCommunicationBridge.attachGlobalListener(getNetworkProcessorGlobalObjectConsumer());
-      attachNetworkProcessorListeningQueue(videoPacketQueue, VideoPacket.class);
       attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
-      attachNetworkProcessorListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
 
       this.fullRobotModel = fullRobotModel;
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
-
-      OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
-      factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);
-      openCVColoredCircularBlobDetector = factory.buildBlobDetector();
-
-      HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
-      openCVColoredCircularBlobDetector.addHSVRange(greenRange);
 
       ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac
             .createDefault(SPHERE_DECECTION_ITERATIONS, SPHERE_DETECTION_ANGLE_TOLERANCE, SPHERE_DETECTION_RANSAC_DISTANCE_THRESHOLD, CloudShapeTypes.SPHERE);
       configRansac.minimumPoints = SPHERE_DETECTION_MIN_PTS;
       pointCloudSphereFinder = FactoryPointCloudShape
             .ransacSingleAll(new ConfigSurfaceNormals(SPHERE_DETECTION_NUM_NEIGHBORS, SPHERE_DETECTION_MAX_NEIGHBOR_DIST), configRansac);
-
-      detectBall.set(false);
-   }
-
-   private class BallDetectionThread extends Thread
-   {
-      @Override
-      public void run()
-      {
-         while (true)
-         {
-            if (detectBall.getBooleanValue())
-            {
-               if (videoPacketQueue.isNewPacketAvailable())
-               {
-                  VideoPacket packet = videoPacketQueue.getLatestPacket();
-                  RobotConfigurationData robotConfigurationData = robotConfigurationDataQueue.getLatestPacket();
-                  videoTimestamp = robotConfigurationData.getTimestamp();
-
-                  videoDataClient.consumeObject(packet.getData(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
-               }
-               else
-               {
-                  ThreadTools.sleep(10);
-               }
-            }
-            else
-            {
-               ThreadTools.sleep(10);
-            }
-         }
-      }
-   }
-
-   @Override
-   public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParamaters)
-   {
-      this.lastBufferedImage = bufferedImage;
-      openCVColoredCircularBlobDetector.updateFromBufferedImage(bufferedImage);
-      ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
-      
-      BufferedImage thresholdBufferedImage = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
-      BufferedImage convertedBufferedImage = new BufferedImage(thresholdBufferedImage.getWidth(), thresholdBufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
-      convertedBufferedImage.getGraphics().drawImage(thresholdBufferedImage, 0, 0, null);
-      
-      byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(convertedBufferedImage);
-      VideoPacket circleBlobThresholdImagePacket = new VideoPacket(RobotSide.LEFT, VideoSource.CV_THRESHOLD, videoTimestamp, jpegThresholdImage, cameraPosition, cameraOrientation, intrinsicParamaters);
-      sendPacketToNetworkProcessor(circleBlobThresholdImagePacket);
-
-      if(DEBUG)
-      {
-         if(counter++ % 30 == 0)
-         {
-            System.out.println("blob detection found " + circles.size() + " circles");
-
-            for(int i = 0; i < circles.size(); i++)
-            {
-               HoughCircleResult result = circles.get(i);
-               System.out.println("\t center: " + result.getCenter());
-            }
-         }
-      }
-
-      if(circles.size() > 0)
-         latestBallPosition2d.set(circles.get(0).getCenter());
    }
 
    @Override
@@ -275,8 +176,8 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       int cameraPixelWidth = lastBufferedImage.getWidth();
       int cameraPixelHeight = lastBufferedImage.getHeight();
 
-      double ballCenterX = latestBallPosition2d.x - lastBufferedImage.getMinX();
-      double ballCenterY = latestBallPosition2d.y - lastBufferedImage.getMinY();
+      double ballCenterX = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().getX() - lastBufferedImage.getMinX();
+      double ballCenterY = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().getY() - lastBufferedImage.getMinY();
 
       double desiredRayAngleX = VERTICAL_FOV * (- ballCenterY / cameraPixelHeight + 0.5);
       double desiredRayAngleY = HORIZONTAL_FOV * (ballCenterX / cameraPixelWidth - 0.5);
@@ -341,28 +242,28 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    @Override
    public void initialize()
    {
-      detectBall.set(true);
+      coloredCircularBlobDetectorBehaviorService.initialize();
    }
 
    @Override
    public void pause()
    {
       sendPacketToController(new PauseWalkingMessage(true));
-      detectBall.set(false);
+      coloredCircularBlobDetectorBehaviorService.pause();
    }
 
    @Override
    public void stop()
    {
       sendPacketToController(new PauseWalkingMessage(true));
-      detectBall.set(false);
+      coloredCircularBlobDetectorBehaviorService.stop();
    }
 
    @Override
    public void resume()
    {
       sendPacketToController(new PauseWalkingMessage(false));
-      detectBall.set(false);
+      coloredCircularBlobDetectorBehaviorService.resume();
    }
 
    @Override

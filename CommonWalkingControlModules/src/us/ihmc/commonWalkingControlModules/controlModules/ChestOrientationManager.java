@@ -284,6 +284,7 @@ public class ChestOrientationManager
       orientationTrajectoryGenerator.getOrientation(desiredOrientation);
 
       desiredOrientation.changeFrame(pelvisZUpFrame);
+      desiredAngularVelocity.setToZero(pelvisZUpFrame);
       orientationTrajectoryGenerator.clear(pelvisZUpFrame);
       orientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, desiredAngularVelocity);
 
