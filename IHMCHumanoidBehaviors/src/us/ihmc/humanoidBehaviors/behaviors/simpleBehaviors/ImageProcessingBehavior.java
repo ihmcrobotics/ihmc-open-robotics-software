@@ -14,7 +14,6 @@ import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavior
 {
@@ -40,16 +39,16 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
    {
       processImageToSend(bufferedImage, cameraPosition, cameraOrientation, intrinsicParameters);
 
-      videoDataServer.updateImage(null, VideoSource.IMAGE_PROCESSING_BEHAVIOR, bufferedImage, 0, cameraPosition, cameraOrientation, intrinsicParameters);
+      videoDataServer.updateImage(VideoSource.IMAGE_PROCESSING_BEHAVIOR, bufferedImage, 0, cameraPosition, cameraOrientation, intrinsicParameters);
    }
 
    class UIVideoHandler implements CompressedVideoHandler
    {
       @Override
-      public void newVideoPacketAvailable(RobotSide robotSide, VideoSource videoSource, long timeStamp, byte[] data, Point3d position, Quat4d orientation,
+      public void newVideoPacketAvailable(VideoSource videoSource, long timeStamp, byte[] data, Point3d position, Quat4d orientation,
             IntrinsicParameters intrinsicParameters)
       {
-         VideoPacket videoPacket = new VideoPacket(robotSide, videoSource, timeStamp, data, position, orientation, intrinsicParameters, videoPacketDestination);
+         VideoPacket videoPacket = new VideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters, videoPacketDestination);
 
          if(videoPacketDestination.equals(PacketDestination.CONTROLLER))
             sendPacketToController(videoPacket);

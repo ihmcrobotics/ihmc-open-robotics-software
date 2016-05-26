@@ -15,12 +15,10 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 @HighBandwidthPacket
 public class VideoPacket extends Packet<VideoPacket> implements TransformableDataObject<VideoPacket>
 {
-   public RobotSide robotSide;
    public VideoSource videoSource;
    public long timeStamp;
    public byte[] data;
@@ -33,14 +31,32 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
       
    }
 
+   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
+   {
+      this(videoSource, timeStamp, data, position, orientation, intrinsicParameters, null);
+   }
+
+   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters,
+         PacketDestination packetDestination)
+   {
+      if(packetDestination != null)
+         setDestination(packetDestination);
+      this.videoSource = videoSource;
+      this.timeStamp = timeStamp;
+      this.data = data;
+      this.position = position;
+      this.orientation = orientation;
+      this.intrinsicParameters = intrinsicParameters;
+   }
+
+   public VideoSource getVideoSource()
+   {
+      return videoSource;
+   }
+
    public long getTimeStamp()
    {
       return timeStamp;
-   }
-
-   public RobotSide getRobotSide()
-   {
-      return robotSide;
    }
 
    public byte[] getData()
@@ -61,30 +77,6 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
    public Quat4d getOrientation()
    {
       return orientation;
-   }
-
-   public VideoSource getVideoSource()
-   {
-      return videoSource;
-   }
-
-   public VideoPacket(RobotSide robotSide, VideoSource videoSource, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
-   {
-      this(robotSide, videoSource, timeStamp, data, position, orientation, intrinsicParameters, null);
-   }
-
-   public VideoPacket(RobotSide robotSide, VideoSource videoSource, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters,
-         PacketDestination packetDestination)
-   {
-      if(packetDestination != null)
-         setDestination(packetDestination);
-      this.robotSide = robotSide;
-      this.videoSource = videoSource;
-      this.timeStamp = timeStamp;
-      this.data = data;
-      this.position = position;
-      this.orientation = orientation;
-      this.intrinsicParameters = intrinsicParameters;
    }
 
    @Override
@@ -133,7 +125,7 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
       Point3d newPoint = TransformTools.getTransformedPoint(getPosition(), transform);
       Quat4d newOrientation = TransformTools.getTransformedQuat(getOrientation(), transform);
 
-      return new VideoPacket(getRobotSide(), getVideoSource(), getTimeStamp(), getData(), newPoint, newOrientation, getIntrinsicParameters());
+      return new VideoPacket(getVideoSource(), getTimeStamp(), getData(), newPoint, newOrientation, getIntrinsicParameters());
    }
 
    @Override
@@ -162,7 +154,7 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
       Quat4d orientation = RandomTools.generateRandomQuaternion(random);
 
       this.timeStamp = 0;
-      this.videoSource = VideoSource.MULTISENSE;
+      this.videoSource = VideoSource.MULTISENSE_LEFT_EYE;
       this.data = data;
       this.position = position;
       this.orientation = orientation;
