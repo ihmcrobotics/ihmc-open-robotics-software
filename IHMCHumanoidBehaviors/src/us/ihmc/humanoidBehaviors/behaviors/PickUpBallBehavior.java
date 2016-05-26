@@ -1,31 +1,12 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
-import java.util.ArrayList;
-
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.BehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ClearLidarBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.EnableLidarBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.SetLidarParametersBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.*;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.*;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
@@ -33,17 +14,20 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Point2d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
 
 public class PickUpBallBehavior extends BehaviorInterface
 {
@@ -663,5 +647,15 @@ public class PickUpBallBehavior extends BehaviorInterface
       doPostBehaviorCleanup();
       this.stop();
       this.pipeLine.clearAll();
+   }
+
+   public void setHSVRange(HSVRange hsvRange)
+   {
+      if(initialSphereDetectionBehavior instanceof BlobFilteredSphereDetectionBehavior)
+      {
+         BlobFilteredSphereDetectionBehavior blobFilteredSphereDetectionBehavior = (BlobFilteredSphereDetectionBehavior) initialSphereDetectionBehavior;
+         blobFilteredSphereDetectionBehavior.resetHSVRanges();
+         blobFilteredSphereDetectionBehavior.addHSVRange(hsvRange);
+      }
    }
 }
