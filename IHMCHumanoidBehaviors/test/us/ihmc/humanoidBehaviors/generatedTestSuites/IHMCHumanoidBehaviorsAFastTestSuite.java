@@ -12,8 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElementYoWhiteBoardSynchronizerTest.class,
-   us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehaviorTest.class
+   us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehaviorTest.class,
+   us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElementYoWhiteBoardSynchronizerTest.class
 })
 
 public class IHMCHumanoidBehaviorsAFastTestSuite

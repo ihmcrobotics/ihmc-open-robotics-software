@@ -12,7 +12,9 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasWalkToLocationBehaviorTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasPointyRocksTest.class,
+   us.ihmc.atlas.packets.AtlasRobotConfigurationDataTest.class,
+   us.ihmc.atlas.posePlayback.AtlasPlaybackPoseSequenceTest.class
 })
 
 public class AtlasPFastTestSuite

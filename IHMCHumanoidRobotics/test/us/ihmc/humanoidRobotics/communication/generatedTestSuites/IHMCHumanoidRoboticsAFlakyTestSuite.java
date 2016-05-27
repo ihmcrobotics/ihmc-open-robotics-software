@@ -12,8 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Flaky)
 @SuiteClasses
 ({
-   us.ihmc.humanoidRobotics.communication.remote.serialization.JointConfigurationDataSenderTest.class,
-   us.ihmc.humanoidRobotics.communication.networkProcessor.NetworkProcessorTest.class
+   us.ihmc.humanoidRobotics.communication.networkProcessor.NetworkProcessorTest.class,
+   us.ihmc.humanoidRobotics.communication.remote.serialization.JointConfigurationDataSenderTest.class
 })
 
 public class IHMCHumanoidRoboticsAFlakyTestSuite

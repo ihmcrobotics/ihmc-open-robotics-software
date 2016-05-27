@@ -12,6 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
+   us.ihmc.atlas.AtlasIHMCROSAPIPacketTest.class,
    us.ihmc.atlas.behaviorTests.AtlasBehaviorDispatcherTest.class
 })
 

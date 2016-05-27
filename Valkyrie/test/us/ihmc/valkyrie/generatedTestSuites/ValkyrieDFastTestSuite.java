@@ -12,7 +12,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.roughTerrainWalking.ValkyrieEndToEndCinderBlockFieldTest.class,
    us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndEndEffectorLoadBearingMessageTest.class
 })
 
