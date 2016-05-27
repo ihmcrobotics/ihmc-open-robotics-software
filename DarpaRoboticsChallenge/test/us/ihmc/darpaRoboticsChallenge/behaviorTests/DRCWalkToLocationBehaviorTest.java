@@ -37,6 +37,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInterface
@@ -370,7 +371,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(estimatedDuration = 57.8)
+   @DeployableTestMethod(estimatedDuration = 57.8, targets = {TestPlanTarget.InDevelopment})
    @Test(timeout = 290000)
    public void testWalkPauseAndResumeBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -409,7 +410,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(estimatedDuration = 45.7)
+   @DeployableTestMethod(estimatedDuration = 45.7, targets = {TestPlanTarget.InDevelopment})
    @Test(timeout = 230000)
    public void testWalkPauseAndResumeOnLastStepBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -447,7 +448,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(estimatedDuration = 67.6)
+   @DeployableTestMethod(estimatedDuration = 67.6, targets = {TestPlanTarget.InDevelopment})
    @Test(timeout = 340000)
    public void testWalkStopAndWalkToDifferentLocation() throws SimulationExceededMaximumTimeException
    {
