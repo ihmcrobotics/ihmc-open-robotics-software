@@ -32,7 +32,7 @@ public class QuadrupedXGaitSettingsProvider
    private final DoubleParameter endDoubleSupportDurationLowerLimitParameter = parameterFactory.createDouble("endDoubleSupportDurationLowerLimit", 0.0);
    private final DoubleParameter endDoubleSupportDurationUpperLimitParameter = parameterFactory.createDouble("endDoubleSupportDurationUpperLimit", Double.MAX_VALUE);
    private final DoubleParameter endPhaseShiftLowerLimitParameter = parameterFactory.createDouble("endPhaseShiftLowerLimit", 0);
-   private final DoubleParameter endPhaseShiftUpperLimitParameter = parameterFactory.createDouble("endPhaseShiftUpperLimit", 180);
+   private final DoubleParameter endPhaseShiftUpperLimitParameter = parameterFactory.createDouble("endPhaseShiftUpperLimit", 359);
 
    private final DoubleYoVariable yoStanceLength;
    private final DoubleYoVariable yoStanceWidth;
