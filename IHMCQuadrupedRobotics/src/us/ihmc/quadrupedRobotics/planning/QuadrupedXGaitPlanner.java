@@ -224,7 +224,7 @@ public class QuadrupedXGaitPlanner
       // Compute support durations and end phase shift.
       double nominalStepDuration = xGaitSettings.getStepDuration();
       double endDoubleSupportDuration = xGaitSettings.getEndDoubleSupportDuration();
-      double endPhaseShift = xGaitSettings.getEndPhaseShift();
+      double endPhaseShift = MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift(), 0, 359);
       if (thisStepEnd == RobotEnd.HIND)
          endPhaseShift = 360 - endPhaseShift;
       if (pastStepSide != thisStepSide)
