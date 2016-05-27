@@ -36,7 +36,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 
 import java.util.ArrayList;
 
-public class QuadrupedDcmBasedXGaitController implements QuadrupedController
+public class QuadrupedMpcBasedXGaitController implements QuadrupedController
 {
    private final QuadrupedControllerInputProviderInterface inputProvider;
    private final QuadrupedXGaitSettingsProvider settingsProvider;
@@ -107,7 +107,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    }
    private final FiniteStateMachine<XGaitState, XGaitEvent> xGaitStateMachine;
 
-   public QuadrupedDcmBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
+   public QuadrupedMpcBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedControllerInputProviderInterface inputProvider, QuadrupedXGaitSettingsProvider settingsProvider)
    {
       this.inputProvider = inputProvider;
