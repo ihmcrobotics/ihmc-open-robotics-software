@@ -67,8 +67,9 @@ public class KinematicsToolboxModule
    private final EnumYoVariable<PacketDestination> activeMessageSource = new EnumYoVariable<>("activeMessageSource", registry, PacketDestination.class, true);
 
    private final ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(name);
-   private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1, threadFactory);
-   private ScheduledFuture<?> scheduled = null;
+   private final ScheduledExecutorService executorService;
+   private ScheduledFuture<?> ikScheduled = null;
+   private ScheduledFuture<?> yoVariableServerScheduled = null;
    private Runnable inverseKinematicsRunnable = null;
 
    private final PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
@@ -106,6 +107,8 @@ public class KinematicsToolboxModule
 
       if (startYoVariableServer)
       {
+         executorService = Executors.newScheduledThreadPool(2, threadFactory);
+
          PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("WholeBodyIKScheduler");
          yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.KINEMATICS_TOOLBOX, YO_VARIABLE_SERVER_DT);
          yoVariableServer.setMainRegistry(registry, kinematicsToolBoxController.getDesiredFullRobotModel(), yoGraphicsListRegistry);
@@ -117,9 +120,12 @@ public class KinematicsToolboxModule
                yoVariableServer.start();
             }
          }).start();
+
+         yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(), 0, IK_UPDATE_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       }
       else
       {
+         executorService = Executors.newScheduledThreadPool(1, threadFactory);
          yoVariableServer = null;
       }
    }
@@ -131,7 +137,7 @@ public class KinematicsToolboxModule
          @Override
          public void receivedPacket(KinematicsToolboxStateMessage message)
          {
-            if (scheduled != null && activeMessageSource.getOrdinal() != message.getSource())
+            if (ikScheduled != null && activeMessageSource.getOrdinal() != message.getSource())
             {
                if (DEBUG)
                   PrintTools.error(this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: " + PacketDestination.values[message.getDestination()]);
@@ -167,7 +173,7 @@ public class KinematicsToolboxModule
             if (message instanceof TrackablePacket)
             {
                TrackablePacket<?> trackableMessage = (TrackablePacket<?>) message;
-               if (scheduled == null)
+               if (ikScheduled == null)
                {
                   wakeUp(trackableMessage.getSource());
                }
@@ -197,14 +203,14 @@ public class KinematicsToolboxModule
 
    public void wakeUp(PacketDestination packetDestination)
    {
-      if (scheduled != null)
+      if (ikScheduled != null)
       {
          if (DEBUG)
             PrintTools.error(this, "The IK controller is already running.");
          return;
       }
       createInverseKinematicsRunnable();
-      scheduled = executorService.scheduleAtFixedRate(inverseKinematicsRunnable, 0, IK_UPDATE_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+      ikScheduled = executorService.scheduleAtFixedRate(inverseKinematicsRunnable, 0, IK_UPDATE_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       reinitialize();
       activeMessageSource.set(packetDestination);
       kinematicsToolBoxController.setPacketDestination(packetDestination);
@@ -221,20 +227,22 @@ public class KinematicsToolboxModule
       destroyInverseKinematicsRunnable();
       activeMessageSource.set(null);
 
-      if (scheduled == null)
+      if (ikScheduled == null)
       {
          if (DEBUG)
             PrintTools.error(this, "There is no task running.");
          return;
       }
 
-      scheduled.cancel(true);
-      scheduled = null;
+      ikScheduled.cancel(true);
+      ikScheduled = null;
    }
 
    public void destroy()
    {
       sleep();
+      yoVariableServerScheduled.cancel(true);
+      yoVariableServerScheduled = null;
       executorService.shutdownNow();
    }
 
@@ -260,8 +268,6 @@ public class KinematicsToolboxModule
                kinematicsToolBoxController.update();
                controllerNetworkSubscriber.run();
                yoTime.add(TimeTools.milliSecondsToSeconds(IK_UPDATE_PERIOD_MILLISECONDS));
-               if (yoVariableServer != null)
-                  yoVariableServer.update(TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue()));
 
                if (receivedInput.getAndSet(false))
                   timeOfLastInput.set(yoTime.getDoubleValue());
@@ -274,6 +280,23 @@ public class KinematicsToolboxModule
                sleep();
                throw e;
             }
+         }
+      };
+   }
+
+   private Runnable createYoVariableServerRunnable()
+   {
+      return new Runnable()
+      {
+         double serverTime = 0.0;
+         @Override
+         public void run()
+         {
+            if (Thread.interrupted())
+               return;
+
+            serverTime += IK_UPDATE_PERIOD_MILLISECONDS;
+            yoVariableServer.update(TimeTools.secondsToNanoSeconds(serverTime));
          }
       };
    }
