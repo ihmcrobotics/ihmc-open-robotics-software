@@ -1,4 +1,4 @@
-package com.yobotics.unicycle;
+package us.ihmc.exampleSimulations.unicycle;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
