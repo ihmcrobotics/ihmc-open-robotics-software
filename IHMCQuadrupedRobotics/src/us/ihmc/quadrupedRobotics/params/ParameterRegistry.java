@@ -101,7 +101,7 @@ public class ParameterRegistry
       String line;
       while ((line = reader.readLine()) != null)
       {
-         // Check if any registered parameter matches, and pack the value one does.
+         // Check if any registered parameter matches, and pack the value if one does.
          boolean found = false;
          for (Parameter parameter : parameters)
          {
@@ -120,23 +120,11 @@ public class ParameterRegistry
       }
    }
 
-   /**
-    * Save all registered parameters to the given {@link Writer}.
-    */
-   public void save(Writer writer)
-   {
-      PrintWriter pw = new PrintWriter(writer);
-      for (Parameter parameter : parameters)
-      {
-         pw.println(parameter.dump());
-      }
-   }
-
    void register(Parameter parameter)
    {
       Preconditions.checkNotNull(parameter, "Registered parameter cannot be null");
 
-      // Check if any unregistered values match this new parameter, and pack the value if it does.
+      // Check if any unregistered values match this new parameter, and pack the value if one does.
       for (String line : unregistered)
       {
          if (parameter.tryLoad(line))
