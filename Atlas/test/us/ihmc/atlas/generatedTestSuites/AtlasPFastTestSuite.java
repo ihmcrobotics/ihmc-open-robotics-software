@@ -9,13 +9,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Video)
+@TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.roughTerrainWalking.AtlasEndToEndCinderBlockFieldTest.class
+   us.ihmc.atlas.behaviorTests.AtlasWalkToLocationBehaviorTest.class
 })
 
-public class AtlasMVideoTestSuite
+public class AtlasPFastTestSuite
 {
    public static void main(String[] args)
    {

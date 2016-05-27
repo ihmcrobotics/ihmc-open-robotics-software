@@ -14,15 +14,15 @@ import us.ihmc.tools.testing.TestPlanTarget;
 ({
    us.ihmc.graphics3DAdapter.Graphics3DTextTest.class,
    us.ihmc.graphics3DAdapter.Graphics3DWorldTest.class,
+   us.ihmc.graphics3DAdapter.utils.GraphicsDemoToolsTest.class,
    us.ihmc.graphics3DAdapter.jme.JMEGPULidarParallelSceneGraphTest.class,
+   us.ihmc.graphics3DAdapter.jme.lidar.JMEGPULidarTest.class,
    us.ihmc.graphics3DAdapter.jme.JMEGraphics3dAdapterTest.class,
    us.ihmc.graphics3DAdapter.jme.JMEGraphics3DWorldTest.class,
    us.ihmc.graphics3DAdapter.jme.JMEMeshDataInterpreterTest.class,
-   us.ihmc.graphics3DAdapter.jme.JMERendererTest.class,
-   us.ihmc.graphics3DAdapter.jme.lidar.JMEGPULidarTest.class,
    us.ihmc.graphics3DAdapter.jme.util.JMEPointCloudVisualizerTest.class,
-   us.ihmc.graphics3DAdapter.stlLoader.NormalCalculatorTest.class,
-   us.ihmc.graphics3DAdapter.utils.GraphicsDemoToolsTest.class
+   us.ihmc.graphics3DAdapter.jme.JMERendererTest.class,
+   us.ihmc.graphics3DAdapter.stlLoader.NormalCalculatorTest.class
 })
 
 public class Graphics3DAdapterAUITestSuite

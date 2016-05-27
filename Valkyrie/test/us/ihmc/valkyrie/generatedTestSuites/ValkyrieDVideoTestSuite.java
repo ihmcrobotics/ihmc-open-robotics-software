@@ -12,7 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Video)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.roughTerrainWalking.ValkyrieEndToEndCinderBlockFieldTest.class
+   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseRampFootstepSnapperTest.class,
+   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseRampsTest.class
 })
 
 public class ValkyrieDVideoTestSuite
