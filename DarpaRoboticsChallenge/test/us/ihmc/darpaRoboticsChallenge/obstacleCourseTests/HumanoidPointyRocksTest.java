@@ -63,6 +63,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
@@ -155,7 +156,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1);
    }
 
-   @DeployableTestMethod(estimatedDuration = 45.0)
+   @DeployableTestMethod(estimatedDuration = 45.0, targets = {TestPlanTarget.Fast})
    @Test(timeout = 300000)
    /**
     * The real robot often falls to the outside when taking a step with only line contact on the support foot. To avoid falling to the outside
@@ -221,7 +222,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(estimatedDuration = 45.9)
+   @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.Fast})
    @Test(timeout = 230000)
    /**
     * This test takes one step at a time (throw-catch). For each step, the predicted contact points are randomly changed to be a
@@ -265,7 +266,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(estimatedDuration = 45.9)
+   @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.Fast})
    @Test(timeout = 230000)
    /**
     * This test steps in place with the actual and the predicted foot polygons changing to be the given foot shrinkage percentage.
@@ -387,7 +388,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @DeployableTestMethod(estimatedDuration = 45.9)
+   @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.Fast})
    @Test(timeout = 230000)
    /**
     * In this test, the robot is standing, but then the floor is dropped out from underneath it. So the robot has to detect the rotation
@@ -669,7 +670,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       percentageChickenSupport.set(chickenPercentage);
    }
 
-   @DeployableTestMethod(estimatedDuration = 45.9)
+   @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.Fast})
    @Test(timeout = 230000)
    /**
     * In this test, the robot walks forward. On each step a half of the foot is cut out. The steps are continuous with no stopping in between steps.
@@ -729,7 +730,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 45.9)
+   @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.Fast})
    @Test(timeout = 230000)
    /**
     * This test will drop the floor out from underneath the sim randomly while standing. Tests if detection and hold position are working well.

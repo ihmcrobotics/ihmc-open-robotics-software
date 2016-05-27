@@ -207,9 +207,11 @@ public class YoVariableValueDataCheckerTest
       robot.addYoVariableRegistry(registry);
 
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromEnvironmentVariables();
+      simulationConstructionSetParameters.setCreateGUI(false);
+      simulationConstructionSetParameters.setShowSplashScreen(false);
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationConstructionSetParameters);
 
-      scs.hideViewport();
+//      scs.hideViewport();
       scs.startOnAThread();
 
       double deltaT = 0.001;

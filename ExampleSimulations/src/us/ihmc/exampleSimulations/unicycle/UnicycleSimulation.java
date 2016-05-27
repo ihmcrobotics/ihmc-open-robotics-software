@@ -1,4 +1,4 @@
-package com.yobotics.unicycle;
+package us.ihmc.exampleSimulations.unicycle;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
