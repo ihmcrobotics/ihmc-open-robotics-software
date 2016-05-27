@@ -56,7 +56,8 @@ dependencies {
    compile group: 'us.ihmc', name: 'IHMCJavaDecklinkCapture', version: '0.1.7'
    compile group: 'commons-io', name: 'commons-io', version: '2.4'
    compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
-
+   compile group: 'org.tukaani', name: 'xz', version: '1.5'
+   
    compile ihmc.getProjectDependency(":Graphics3DAdapter")
    compile ihmc.getProjectDependency(":Plotting")
    compile ihmc.getProjectDependency(":SDFLoader")
