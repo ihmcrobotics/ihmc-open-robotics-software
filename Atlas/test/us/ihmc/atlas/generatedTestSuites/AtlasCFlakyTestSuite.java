@@ -12,10 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Flaky)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasChestTrajectoryBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class,
-   us.ihmc.atlas.communication.producers.AtlasRobotConfigurationDataBufferTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCoursePlatformTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseTrialsTerrainTest.class
 })
 
 public class AtlasCFlakyTestSuite

@@ -12,10 +12,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
+   us.ihmc.imageProcessing.sfm.EstimateGroundPlaneFromFeaturesTest.class,
    us.ihmc.imageProcessing.segmentation.FitNoisyGaussian2DTest.class,
    us.ihmc.imageProcessing.segmentation.Gaussian2D_F64Test.class,
-   us.ihmc.imageProcessing.segmentation.LabeledPixelCodecTest.class,
-   us.ihmc.imageProcessing.sfm.EstimateGroundPlaneFromFeaturesTest.class
+   us.ihmc.imageProcessing.segmentation.LabeledPixelCodecTest.class
 })
 
 public class ImageProcessingAFastTestSuite

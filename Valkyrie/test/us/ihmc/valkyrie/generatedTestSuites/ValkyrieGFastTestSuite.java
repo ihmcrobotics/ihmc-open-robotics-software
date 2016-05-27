@@ -17,11 +17,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndNeckTrajectoryMessageTest.class,
    us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndPelvisHeightTrajectoryMessageTest.class,
    us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndPelvisTrajectoryMessageTest.class,
-   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToWholeBodyTrajectoryMessageTest.class,
-   us.ihmc.valkyrie.kinematics.transmissions.ComparePushRodTransmissionsTest.class,
-   us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobianTest.class,
-   us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmissionTest.class,
-   us.ihmc.valkyrie.kinematics.util.ClosedFormJacobianTest.class
+   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToWholeBodyTrajectoryMessageTest.class
 })
 
 public class ValkyrieGFastTestSuite
