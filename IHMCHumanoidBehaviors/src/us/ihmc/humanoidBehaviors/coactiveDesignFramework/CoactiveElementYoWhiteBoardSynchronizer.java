@@ -131,7 +131,7 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
          }
          catch (Exception e)
          {
-            PrintTools.debug(DEBUG, this, e.getMessage());
+            PrintTools.error(this, e.getMessage());
             try
             {
                PrintTools.info(this, "Connecting");
@@ -141,8 +141,8 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
             {
                PrintTools.error(this, "Failed to connect");
                ioException.printStackTrace();
-               ThreadTools.sleep(500);
             }
+            ThreadTools.sleep(500);
          }
 
          ThreadTools.sleep(millisecondsBetweenDataWrites);
