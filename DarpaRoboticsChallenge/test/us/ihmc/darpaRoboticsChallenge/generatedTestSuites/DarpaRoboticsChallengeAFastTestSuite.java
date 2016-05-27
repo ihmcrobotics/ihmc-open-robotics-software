@@ -12,16 +12,16 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.darpaRoboticsChallenge.footstepGenerator.BasicFootstepValidityMetricTest.class,
    us.ihmc.darpaRoboticsChallenge.DRCConfigParametersTest.class,
+   us.ihmc.darpaRoboticsChallenge.footstepGenerator.BasicFootstepValidityMetricTest.class,
+   us.ihmc.darpaRoboticsChallenge.footstepGenerator.PathToFootstepGeneratorTest.class,
+   us.ihmc.darpaRoboticsChallenge.footstepGenerator.SwingHeightTrajectoryCalculatorTest.class,
+   us.ihmc.darpaRoboticsChallenge.frictionCompensation.JointFrictionModelsHolderTest.class,
+   us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.WheelRotationEstimatorTest.class,
    us.ihmc.darpaRoboticsChallenge.odometry.IcpCloud3DTest.class,
    us.ihmc.darpaRoboticsChallenge.ros.IHMCROSTranslationRuntimeToolsTest.class,
-   us.ihmc.darpaRoboticsChallenge.frictionCompensation.JointFrictionModelsHolderTest.class,
-   us.ihmc.darpaRoboticsChallenge.footstepGenerator.PathToFootstepGeneratorTest.class,
    us.ihmc.darpaRoboticsChallenge.stateEstimationEndToEndTests.PelvisPoseHistoryCorrectionUsingSimpleRobotTest.class,
-   us.ihmc.utilities.ros.ROSMessageFileCreatorTest.class,
-   us.ihmc.darpaRoboticsChallenge.footstepGenerator.SwingHeightTrajectoryCalculatorTest.class,
-   us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.WheelRotationEstimatorTest.class
+   us.ihmc.utilities.ros.ROSMessageFileCreatorTest.class
 })
 
 public class DarpaRoboticsChallengeAFastTestSuite
