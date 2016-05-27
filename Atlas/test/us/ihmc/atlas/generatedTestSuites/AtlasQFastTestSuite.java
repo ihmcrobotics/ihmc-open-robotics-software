@@ -9,14 +9,15 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.InDevelopment)
+@TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
-   us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class
+   us.ihmc.atlas.pushRecovery.AtlasPushRecoveryMultiStepTest.class,
+   us.ihmc.atlas.roughTerrainWalking.AtlasEndToEndCinderBlockFieldTest.class,
+   us.ihmc.atlas.roughTerrainWalking.AtlasFootstepSnapperTest.class
 })
 
-public class AtlasFInDevelopmentTestSuite
+public class AtlasQFastTestSuite
 {
    public static void main(String[] args)
    {

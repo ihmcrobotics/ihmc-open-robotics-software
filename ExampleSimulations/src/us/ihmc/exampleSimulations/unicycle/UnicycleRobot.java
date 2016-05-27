@@ -1,4 +1,4 @@
-package com.yobotics.unicycle;
+package us.ihmc.exampleSimulations.unicycle;
 
 import javax.vecmath.Vector3d;
 

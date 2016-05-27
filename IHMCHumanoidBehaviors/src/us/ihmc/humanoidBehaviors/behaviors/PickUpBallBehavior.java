@@ -363,10 +363,10 @@ public class PickUpBallBehavior extends BehaviorInterface
             FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), Math.toRadians(90), 0);
             wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
 
-            FramePoint rhPoint = new FramePoint(referenceFrames.getChestFrame(), 0.5, -0.25, 0);
-            FrameOrientation rhOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), 0, 0);
+//            FramePoint rhPoint = new FramePoint(referenceFrames.getChestFrame(), 0.5, -0.25, 0);
+//            FrameOrientation rhOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), 0, 0);
 
-            wholeBodyBehavior.setDesiredHandPose(RobotSide.RIGHT, rhPoint, rhOr);
+//            wholeBodyBehavior.setDesiredHandPose(RobotSide.RIGHT, rhPoint, rhOr);
 
          }
       };
@@ -522,7 +522,7 @@ public class PickUpBallBehavior extends BehaviorInterface
       pipeLine.submitSingleTaskStage(openHand);
       pipeLine.submitSingleTaskStage(pickUpBallTask);
       pipeLine.submitSingleTaskStage(closeHand);
-      //            pipeLine.submitSingleTaskStage(goToFinalPickUpBallLocationTask);
+                  pipeLine.submitSingleTaskStage(goToFinalPickUpBallLocationTask);
       //
       pipeLine.submitSingleTaskStage(goHomeChestTask);
       pipeLine.submitSingleTaskStage(goHomePelvisTask);
