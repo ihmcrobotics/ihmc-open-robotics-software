@@ -108,10 +108,10 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject3D.addTerrainObject(setUpGround("Ground"));
 
       //Soccer Ball
-//      int ballColor = Color.HSBtoRGB(80.0f / 180.0f, 200.0f / 256.0f, 200.0f / 256.0f);
-//      combinedTerrainObject3D.addSphere(1.5, 0.0, 1.0, BALL_RADIUS, YoAppearance.RGBColorFromHex(ballColor));
+      int ballColor = Color.HSBtoRGB(80.0f / 180.0f, 200.0f / 256.0f, 200.0f / 256.0f);
+      combinedTerrainObject3D.addSphere(1.5, 0.0, 1.0, BALL_RADIUS, YoAppearance.RGBColorFromHex(ballColor));
 //      combinedTerrainObject3D.addSphere(1.5, 0.0, 1.0, 1.2 * BALL_RADIUS, YoAppearance.RGBColorFromHex(ballColor));
-      combinedTerrainObject3D.addSphere(1, 0.2, BALL_RADIUS, BALL_RADIUS, YoAppearance.AliceBlue());
+//      combinedTerrainObject3D.addSphere(1, 0.2, 0.3, BALL_RADIUS, YoAppearance.AliceBlue());
 
       if (addLimboBar)
          addLimboBar(combinedTerrainObject3D);
