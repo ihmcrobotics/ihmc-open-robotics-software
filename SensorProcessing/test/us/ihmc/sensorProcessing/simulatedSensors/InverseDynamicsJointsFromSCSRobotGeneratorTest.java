@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -54,10 +54,12 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
    private BlockingSimulationRunner blockingSimulationRunner;
+   private AssertionError assertionError;
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
+      assertionError = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
@@ -117,7 +119,9 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       scs.startOnAThread();
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      blockingSimulationRunner.simulateAndBlock(2.0);
+      boolean success = blockingSimulationRunner.simulateAndBlockAndCatchExceptions(2.0);
+      if (assertionError != null) throw assertionError;
+      assertTrue(success);
    }
 
 	@DeployableTestMethod(estimatedDuration = 1.6)
@@ -170,7 +174,9 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       scs.startOnAThread();
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      blockingSimulationRunner.simulateAndBlock(2.0);
+      boolean success = blockingSimulationRunner.simulateAndBlockAndCatchExceptions(2.0);
+      if (assertionError != null) throw assertionError;
+      assertTrue(success);
    }
 
 	@DeployableTestMethod(estimatedDuration = 1.7)
@@ -208,7 +214,9 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       scs.startOnAThread();
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      blockingSimulationRunner.simulateAndBlock(2.0);
+      boolean success = blockingSimulationRunner.simulateAndBlockAndCatchExceptions(2.0);
+      if (assertionError != null) throw assertionError;
+      assertTrue(success);
    }
 
 	@DeployableTestMethod(estimatedDuration = 4.1)
@@ -337,6 +345,21 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
       public void doControl()
       {
+         if (assertionError != null)
+            return;
+
+         try
+         {
+            test();
+         }
+         catch(AssertionError e)
+         {
+            assertionError = e;
+         }
+      }
+
+      private void test()
+      {
          // First randomly generate torques:
          for (int i = 0; i < pinJoints.size(); i++)
          {
@@ -392,6 +415,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
                   FramePoint comOffsetCheck = new FramePoint();
                   revoluteJoint.getSuccessor().getCoMOffset(comOffsetCheck);
+                  comOffsetCheck.changeFrame(revoluteJoint.getFrameAfterJoint());
                   JUnitTools.assertTuple3dEquals(comOffset, comOffsetCheck.getVectorCopy(), 1e-7);
 
                   Twist revoluteJointTwist = new Twist();
@@ -451,7 +475,6 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          assertEquals(0.0, yawPitchRoll[0], 1e-7);
          assertEquals(0.0, yawPitchRoll[1], 1e-7);
          assertEquals(0.0, yawPitchRoll[2], 1e-7);
-         
       }
    }
 

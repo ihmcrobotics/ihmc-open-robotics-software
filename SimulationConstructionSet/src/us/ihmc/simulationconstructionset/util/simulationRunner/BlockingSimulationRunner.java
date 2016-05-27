@@ -3,9 +3,9 @@ package us.ihmc.simulationconstructionset.util.simulationRunner;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.geometry.FrameVector2d;
 
 /**
  * <p>Title: </p>
@@ -87,6 +87,20 @@ public class BlockingSimulationRunner
       
 //    System.out.println("Done Simulation for " + simulateTime);
 
+   }
+
+   public boolean simulateAndBlockAndCatchExceptions(double simulationTime) throws SimulationExceededMaximumTimeException
+   {
+      try
+      {
+         simulateAndBlock(simulationTime);
+         return true;
+      }
+      catch (Exception e)
+      {
+         System.err.println("Caught exception in " + getClass().getSimpleName() + ".simulateAndBlockAndCatchExceptions. Exception = /n" + e);
+         return false;
+      }
    }
 
    public boolean doOneShotRewindTest(double t0, double t1, double t2) throws SimulationExceededMaximumTimeException, ControllerFailureException
