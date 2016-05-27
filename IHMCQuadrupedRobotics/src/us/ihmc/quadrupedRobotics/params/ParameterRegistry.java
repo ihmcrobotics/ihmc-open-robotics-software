@@ -62,8 +62,6 @@ public class ParameterRegistry
    /**
     * Loads the resource with the given filename from the class path. If more than one class path resource exists with the given name then every matching
     * resource will be loaded in an undefined order.
-    * <p/>
-    * NOTE: All of the parameters to be loaded must already be registered.
     *
     * @param name the full parameters file name, i.e. "parameters_testing_123.conf"
     * @throws IOException if the resource is not found or an I/O error occurs
@@ -88,8 +86,6 @@ public class ParameterRegistry
 
    /**
     * Load parameters from the given {@link Readable} source.
-    * <p/>
-    * NOTE: All of the parameters to be loaded must already be registered.
     *
     * @param readable
     * @throws IOException
