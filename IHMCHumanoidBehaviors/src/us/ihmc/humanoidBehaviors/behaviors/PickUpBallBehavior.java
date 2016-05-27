@@ -399,7 +399,7 @@ public class PickUpBallBehavior extends BehaviorInterface
 
             FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().x,
                   initialSphereDetectionBehavior.getBallLocation().y,
-                  initialSphereDetectionBehavior.getBallLocation().z + initialSphereDetectionBehavior.getSpehereRadius() + 0.02);
+                  initialSphereDetectionBehavior.getBallLocation().z + initialSphereDetectionBehavior.getSpehereRadius() + 0.03);
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);
             wholeBodyBehavior.setTrajectoryTime(6);
             FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), Math.toRadians(90), 0);
@@ -521,8 +521,8 @@ public class PickUpBallBehavior extends BehaviorInterface
       pipeLine.submitSingleTaskStage(goToPickUpBallInitialLocationTask);
       pipeLine.submitSingleTaskStage(openHand);
       pipeLine.submitSingleTaskStage(pickUpBallTask);
+      pipeLine.submitSingleTaskStage(goToFinalPickUpBallLocationTask);
       pipeLine.submitSingleTaskStage(closeHand);
-                  pipeLine.submitSingleTaskStage(goToFinalPickUpBallLocationTask);
       //
       pipeLine.submitSingleTaskStage(goHomeChestTask);
       pipeLine.submitSingleTaskStage(goHomePelvisTask);

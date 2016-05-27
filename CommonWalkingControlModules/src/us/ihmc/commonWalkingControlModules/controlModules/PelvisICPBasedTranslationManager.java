@@ -167,8 +167,7 @@ public class PelvisICPBasedTranslationManager
 
    public void goToHome()
    {
-      disable();
-      enable();
+      freeze();
    }
 
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
