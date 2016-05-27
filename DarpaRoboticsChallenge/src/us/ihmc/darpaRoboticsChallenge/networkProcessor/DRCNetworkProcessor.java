@@ -140,7 +140,7 @@ public class DRCNetworkProcessor
       if (!params.isKinematicsToolboxEnabled())
          return;
 
-      new KinematicsToolboxModule(robotModel, robotModel.getLogModelProvider(), true);
+      new KinematicsToolboxModule(robotModel, robotModel.getLogModelProvider(), params.isKinematicsToolboxVisualizerEnabled());
 
       PacketCommunicator kinematicsToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.KINEMATICS_TOOLBOX_MODULE, kinematicsToolboxCommunicator);

@@ -41,8 +41,10 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -69,6 +71,8 @@ public class KinematicsToolboxController
    private final TwistCalculator twistCalculator;
    private final GeometricJacobianHolder geometricJacobianHolder;
 
+   private final ReferenceFrame elevatorFrame;
+
    private final WholeBodyInverseKinematicsSolver wholeBodyInverseKinematicsSolver;
 
    private final WholeBodyControlCoreToolbox toolbox;
@@ -80,6 +84,7 @@ public class KinematicsToolboxController
    private final OneDoFJoint[] oneDoFJoints;
 
    private final AtomicReference<FramePoint2d> desiredCenterOfMassXYReference = new AtomicReference<>(null);
+   private final AtomicReference<FrameOrientation> desiredChestOrientationReference = new AtomicReference<FrameOrientation>(null);
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<>();
    private final SideDependentList<FramePose> desiredFootPoses = new SideDependentList<>();
 
@@ -92,6 +97,7 @@ public class KinematicsToolboxController
    private final DoubleYoVariable handWeight = new DoubleYoVariable("handWeight", registry);
    private final DoubleYoVariable footWeight = new DoubleYoVariable("footWeight", registry);
    private final DoubleYoVariable momentumWeight = new DoubleYoVariable("momentumWeight", registry);
+   private final DoubleYoVariable chestWeight = new DoubleYoVariable("chestWeight", registry);
 
    private final DoubleYoVariable solutionQuality = new DoubleYoVariable("solutionQuality", registry);
 
@@ -109,7 +115,10 @@ public class KinematicsToolboxController
       desiredFullRobotModel = fullRobotModelFactory.createFullRobotModel();
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
       referenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
-      twistCalculator = new TwistCalculator(worldFrame, desiredFullRobotModel.getElevator());
+      RigidBody elevator = desiredFullRobotModel.getElevator();
+      twistCalculator = new TwistCalculator(worldFrame, elevator);
+
+      elevatorFrame = elevator.getBodyFixedFrame();
 
       geometricJacobianHolder = new GeometricJacobianHolder();
       toolbox = createForInverseKinematicsOnly(desiredFullRobotModel, controlledJoints, referenceFrames, updateDT, geometricJacobianHolder, twistCalculator);
@@ -135,6 +144,7 @@ public class KinematicsToolboxController
       handWeight.set(20.0);
       footWeight.set(200.0);
       momentumWeight.set(1.0);
+      chestWeight.set(0.02);
       privilegedWeight.set(1.0);
       privilegedConfigurationGain.set(50.0);
       privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
@@ -287,6 +297,19 @@ public class KinematicsToolboxController
          ret.addCommand(momentumCommand);
       }
 
+      FrameOrientation desiredChestOrientation = desiredChestOrientationReference.get();
+      if (desiredChestOrientation != null)
+      {
+         RigidBody chest = desiredFullRobotModel.getChest();
+         ReferenceFrame chestFrame = chest.getBodyFixedFrame();
+         FrameVector desiredChestAngularVelocity = computeDesiredAngularVelocity(desiredChestOrientation, chestFrame);
+         SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
+         spatialVelocityCommand.set(elevator, chest);
+         spatialVelocityCommand.setAngularVelocity(chestFrame, elevatorFrame, desiredChestAngularVelocity);
+         spatialVelocityCommand.setWeight(chestWeight.getDoubleValue());
+         ret.addCommand(spatialVelocityCommand);
+      }
+
       ret.addCommand(privilegedConfigurationCommandReference.getAndSet(null));
 
       JointLimitReductionCommand jointLimitReductionCommand = new JointLimitReductionCommand();
@@ -305,7 +328,8 @@ public class KinematicsToolboxController
       return ret;
    }
 
-   private final FramePose errorPose = new FramePose();
+   private final FramePose errorFramePose = new FramePose();
+   private final FrameOrientation errorFrameOrientation = new FrameOrientation();
    private final AxisAngle4d errorAxisAngle = new AxisAngle4d();
    private final Vector3d errorRotation = new Vector3d();
    private final Vector3d errorPosition = new Vector3d();
@@ -319,10 +343,10 @@ public class KinematicsToolboxController
    {
       Twist ret = new Twist();
 
-      errorPose.setIncludingFrame(desiredPose);
-      errorPose.changeFrame(controlFrame);
-      errorPose.getPosition(errorPosition);
-      errorPose.getOrientation(errorAxisAngle);
+      errorFramePose.setIncludingFrame(desiredPose);
+      errorFramePose.changeFrame(controlFrame);
+      errorFramePose.getPosition(errorPosition);
+      errorFramePose.getOrientation(errorAxisAngle);
 
       errorRotation.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
       errorRotation.scale(errorAxisAngle.getAngle());
@@ -333,7 +357,32 @@ public class KinematicsToolboxController
       errorRotation.scale(1.0 / updateDT);
       errorPosition.scale(1.0 / updateDT);
       ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
-      ret.set(endEffectorFrame, endEffectorFrame, controlFrame, errorPosition, errorRotation);
+      ret.set(endEffectorFrame, elevatorFrame, controlFrame, errorPosition, errorRotation);
+
+      return ret;
+   }
+
+   public FrameVector computeDesiredAngularVelocity(FrameOrientation desiredOrientation, ReferenceFrame controlFrame)
+   {
+      return computeDesiredAngularVelocity(desiredOrientation, controlFrame, null);
+   }
+
+   public FrameVector computeDesiredAngularVelocity(FrameOrientation desiredOrientation, ReferenceFrame controlFrame, MutableDouble errorMagnitude)
+   {
+      FrameVector ret = new FrameVector();
+
+      errorFrameOrientation.setIncludingFrame(desiredOrientation);
+      errorFrameOrientation.changeFrame(controlFrame);
+      errorFrameOrientation.getAxisAngle(errorAxisAngle);
+
+      errorRotation.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
+      errorRotation.scale(errorAxisAngle.getAngle());
+
+      if (errorMagnitude != null)
+         errorMagnitude.setValue(errorRotation.length());
+
+      errorRotation.scale(1.0 / updateDT);
+      ret.setIncludingFrame(controlFrame, errorRotation);
 
       return ret;
    }
@@ -404,6 +453,10 @@ public class KinematicsToolboxController
       FramePoint2d initialCoMXY = new FramePoint2d(referenceFrames.getCenterOfMassFrame());
       initialCoMXY.changeFrameAndProjectToXYPlane(worldFrame);
       desiredCenterOfMassXYReference.set(initialCoMXY);
+
+      FrameOrientation initialChestOrientation = new FrameOrientation(desiredFullRobotModel.getChest().getBodyFixedFrame());
+      initialChestOrientation.changeFrame(worldFrame);
+      desiredChestOrientationReference.set(initialChestOrientation);
 
       for (RobotSide robotSide : RobotSide.values)
       {
