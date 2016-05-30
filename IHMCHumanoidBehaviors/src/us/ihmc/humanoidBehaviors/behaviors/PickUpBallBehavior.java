@@ -55,7 +55,7 @@ public class PickUpBallBehavior extends BehaviorInterface
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final DoubleYoVariable yoTime;
    private final ReferenceFrame midZupFrame;
-   private final double standingDistance = 0.5;
+   private final double standingDistance = 0.4; // 0.5;
 
    private HumanoidReferenceFrames referenceFrames;
 
@@ -360,13 +360,13 @@ public class PickUpBallBehavior extends BehaviorInterface
                   initialSphereDetectionBehavior.getBallLocation().z + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);
             wholeBodyBehavior.setTrajectoryTime(6);
-            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), Math.toRadians(90), 0);
+            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
             wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
 
-//            FramePoint rhPoint = new FramePoint(referenceFrames.getChestFrame(), 0.5, -0.25, 0);
-//            FrameOrientation rhOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), 0, 0);
+            FramePoint rhPoint = new FramePoint(referenceFrames.getChestFrame(), 0.6, -0.25, 0);
+            FrameOrientation rhOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), 0, 0);
 
-//            wholeBodyBehavior.setDesiredHandPose(RobotSide.RIGHT, rhPoint, rhOr);
+            //            wholeBodyBehavior.setDesiredHandPose(RobotSide.RIGHT, rhPoint, rhOr);
 
          }
       };
@@ -382,7 +382,7 @@ public class PickUpBallBehavior extends BehaviorInterface
                   initialSphereDetectionBehavior.getBallLocation().z + initialSphereDetectionBehavior.getSpehereRadius());
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);
             wholeBodyBehavior.setTrajectoryTime(6);
-            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), Math.toRadians(90), 0);
+            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
             wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
 
          }
@@ -390,23 +390,23 @@ public class PickUpBallBehavior extends BehaviorInterface
 
       //PICK UP THE BALL *******************************************
 
-      BehaviorTask goToFinalPickUpBallLocationTask = new BehaviorTask(wholeBodyBehavior, yoTime, 0)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            coactiveElement.currentState.set(BehaviorState.PICKING_UP_BALL);
-
-            FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().x,
-                  initialSphereDetectionBehavior.getBallLocation().y,
-                  initialSphereDetectionBehavior.getBallLocation().z + initialSphereDetectionBehavior.getSpehereRadius() + 0.03);
-            wholeBodyBehavior.setSolutionQualityThreshold(2.01);
-            wholeBodyBehavior.setTrajectoryTime(6);
-            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), Math.toRadians(90), 0);
-            wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
-
-         }
-      };
+//      BehaviorTask goToFinalPickUpBallLocationTask = new BehaviorTask(wholeBodyBehavior, yoTime, 0)
+//      {
+//         @Override
+//         protected void setBehaviorInput()
+//         {
+//            coactiveElement.currentState.set(BehaviorState.PICKING_UP_BALL);
+//
+//            FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().x,
+//                  initialSphereDetectionBehavior.getBallLocation().y,
+//                  initialSphereDetectionBehavior.getBallLocation().z + initialSphereDetectionBehavior.getSpehereRadius() + 0.03);
+//            wholeBodyBehavior.setSolutionQualityThreshold(2.01);
+//            wholeBodyBehavior.setTrajectoryTime(6);
+//            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), Math.toRadians(90), 0);
+//            wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
+//
+//         }
+//      };
 
       //RESET BODY POSITIONS *******************************************
       GoHomeMessage goHomeChestMessage = new GoHomeMessage(BodyPart.CHEST, 3);
@@ -501,6 +501,19 @@ public class PickUpBallBehavior extends BehaviorInterface
 
       ArmTrajectoryTask leftHandBucketLocation2Task = new ArmTrajectoryTask(leftHandBucketLocation2Message, armTrajectoryBehavior, yoTime);
 
+      double[] leftHandAfterGrabLocation = new double[] {-0.799566492522621, -0.8850712601496326, 1.1978163314288173, 0.9978871050058826, -0.22593401111949774, -0.2153318563363089, -1.2957848304397805};
+
+      ArmTrajectoryMessage leftHandAfterGrabMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 3, leftHandAfterGrabLocation);
+
+      ArmTrajectoryTask leftHandAfterGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior, yoTime);
+      
+      double[] leftHandBeforeGrabLocation = new double[] {-0.4157909673929138, -0.33973574728338696, 1.687124827585988, 1.8776226987048135, -0.39801575126789734, -1.4444576032955683, -1.9387386907009923};
+
+      ArmTrajectoryMessage leftHandBeforeGrabMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 3, leftHandAfterGrabLocation);
+
+      ArmTrajectoryTask leftHandBeforeGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior, yoTime);
+
+
       //PUT BALL IN BUCKET *******************************************
 
       pipeLine.submitSingleTaskStage(rightArmHomeTask);
@@ -518,11 +531,15 @@ public class PickUpBallBehavior extends BehaviorInterface
       pipeLine.submitSingleTaskStage(clearLidarTask2);
       pipeLine.submitSingleTaskStage(finalFindBallTask);
       pipeLine.submitSingleTaskStage(validateBallTask2);
+      pipeLine.submitSingleTaskStage(leftHandBeforeGrab);
+
       pipeLine.submitSingleTaskStage(goToPickUpBallInitialLocationTask);
       pipeLine.submitSingleTaskStage(openHand);
       pipeLine.submitSingleTaskStage(pickUpBallTask);
-      pipeLine.submitSingleTaskStage(goToFinalPickUpBallLocationTask);
+//      pipeLine.submitSingleTaskStage(goToFinalPickUpBallLocationTask);
       pipeLine.submitSingleTaskStage(closeHand);
+
+      pipeLine.submitSingleTaskStage(leftHandAfterGrab);
       //
       pipeLine.submitSingleTaskStage(goHomeChestTask);
       pipeLine.submitSingleTaskStage(goHomePelvisTask);
@@ -577,7 +594,7 @@ public class PickUpBallBehavior extends BehaviorInterface
       //get a point offset from the ball
       double x = ballPosition2d.getX() - walkingDirection.getX() * standingDistance;
       double y = ballPosition2d.getY() - walkingDirection.getY() * standingDistance;
-      double rotationAngle = Math.toRadians(45);
+      double rotationAngle = Math.toRadians(55);
       //rotate that point around the ball so that the robot stands to the side.
 
       double newX = ballPosition2d.getX() + (x - ballPosition2d.getX()) * Math.cos(rotationAngle) - (y - ballPosition2d.getY()) * Math.sin(rotationAngle);
@@ -684,7 +701,7 @@ public class PickUpBallBehavior extends BehaviorInterface
 
    public void setHSVRange(HSVRange hsvRange)
    {
-      if(initialSphereDetectionBehavior instanceof BlobFilteredSphereDetectionBehavior)
+      if (initialSphereDetectionBehavior instanceof BlobFilteredSphereDetectionBehavior)
       {
          BlobFilteredSphereDetectionBehavior blobFilteredSphereDetectionBehavior = (BlobFilteredSphereDetectionBehavior) initialSphereDetectionBehavior;
          blobFilteredSphereDetectionBehavior.resetHSVRanges();
