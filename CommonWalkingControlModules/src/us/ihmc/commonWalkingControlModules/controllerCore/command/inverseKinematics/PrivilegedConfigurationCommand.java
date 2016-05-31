@@ -17,7 +17,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
    private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
    private final TDoubleArrayList privilegedOneDoFJointConfigurations = new TDoubleArrayList(initialCapacity);
-   private final Map<OneDoFJoint, PrivilegedConfigurationOption> privilegedOneDoFJointConfigurationOptions = new HashMap<>(initialCapacity);
+   private final Map<String, PrivilegedConfigurationOption> privilegedOneDoFJointConfigurationOptions = new HashMap<>(initialCapacity);
 
    private final List<RigidBody> bases = new ArrayList<>();
    private final List<RigidBody> endEffectors = new ArrayList<>();
@@ -106,7 +106,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       joints.add(joint);
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add(privilegedConfiguration);
-      privilegedOneDoFJointConfigurationOptions.put(joint, null);
+      privilegedOneDoFJointConfigurationOptions.put(joint.getName(), null);
    }
 
    public void addJoint(OneDoFJoint joint, PrivilegedConfigurationOption privilegedConfiguration)
@@ -115,7 +115,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       joints.add(joint);
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add(Double.NaN);
-      privilegedOneDoFJointConfigurationOptions.put(joint, privilegedConfiguration);
+      privilegedOneDoFJointConfigurationOptions.put(joint.getName(), privilegedConfiguration);
    }
 
    public void applyPrivilegedConfigurationToSubChain(RigidBody base, RigidBody endEffector)
@@ -138,7 +138,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
          joints.add(joint);
          jointNames.add(other.jointNames.get(i));
          privilegedOneDoFJointConfigurations.add(other.privilegedOneDoFJointConfigurations.get(i));
-         privilegedOneDoFJointConfigurationOptions.put(joint, other.privilegedOneDoFJointConfigurationOptions.get(joint));
+         privilegedOneDoFJointConfigurationOptions.put(joint.getName(), other.privilegedOneDoFJointConfigurationOptions.get(joint));
       }
    }
 
@@ -224,7 +224,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
 
    public PrivilegedConfigurationOption getPrivilegedConfigurationOption(int jointIndex)
    {
-      return privilegedOneDoFJointConfigurationOptions.get(joints.get(jointIndex));
+      return privilegedOneDoFJointConfigurationOptions.get(joints.get(jointIndex).getName());
    }
 
    public int getNumberOfJoints()

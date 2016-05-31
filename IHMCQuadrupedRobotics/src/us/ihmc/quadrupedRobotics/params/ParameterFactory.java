@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.params;
 
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
@@ -66,7 +67,22 @@ public class ParameterFactory
 
    public BooleanParameter createBoolean(String name, boolean defaultValue)
    {
-      BooleanParameter parameter = new BooleanParameter(namespace + "." + name, defaultValue);
+      final BooleanParameter parameter = new BooleanParameter(namespace + "." + name, defaultValue);
+
+      if (registry != null)
+      {
+         BooleanYoVariable variable = new BooleanYoVariable("param__" + parameter.getShortPath(), registry);
+         variable.set(parameter.get());
+         variable.addVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               parameter.set(((BooleanYoVariable) v).getBooleanValue());
+            }
+         });
+      }
+
       register(parameter);
       return parameter;
    }

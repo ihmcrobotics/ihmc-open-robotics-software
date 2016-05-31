@@ -6,43 +6,21 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import com.google.common.io.Files;
-
 import us.ihmc.robotDataCommunication.logger.util.CustomProgressMonitor;
 
 public class YoVariableLogCropper extends YoVariableLogReader
 {
    private final MultiVideoDataPlayer player;
 
-   private final File model;
-   private final File resourceBundle;
+
    
-   protected final File properties;
 
    public YoVariableLogCropper(MultiVideoDataPlayer player, File logDirectory, LogProperties logProperties)
    {
       super(logDirectory, logProperties);
       this.player = player;
       
-      properties = new File(logDirectory, YoVariableLoggerListener.propertyFile);
-
-      if (logProperties.getModelPath() != null)
-      {
-         model = new File(logDirectory, logProperties.getModelPath());
-      }
-      else
-      {
-         model = null;
-      }
-
-      if (logProperties.getModelResourceBundlePath() != null)
-      {
-         resourceBundle = new File(logDirectory, logProperties.getModelResourceBundlePath());
-      }
-      else
-      {
-         resourceBundle = null;
-      }
+      
    }
 
    public synchronized void crop(File destination, long inStamp, long outStamp)
@@ -82,22 +60,7 @@ public class YoVariableLogCropper extends YoVariableLogReader
 
          monitor.setNote("Copying description files");
          monitor.setProgress(4);
-         File propertiesDestination = new File(destination, YoVariableLoggerListener.propertyFile);
-         Files.copy(properties, propertiesDestination);
-
-         File handShakeDestination = new File(destination, logProperties.getHandshakeFile());
-         Files.copy(handshake, handShakeDestination);
-
-         if (model != null)
-         {
-            File modelDesitination = new File(destination, logProperties.getModelPath());
-            Files.copy(model, modelDesitination);
-         }
-         if (resourceBundle != null)
-         {
-            File resourceDestination = new File(destination, logProperties.getModelResourceBundlePath());
-            Files.copy(resourceBundle, resourceDestination);
-         }
+         copyMetaData(destination);
 
          monitor.setNote("Seeking variable data");
          monitor.setProgress(10);

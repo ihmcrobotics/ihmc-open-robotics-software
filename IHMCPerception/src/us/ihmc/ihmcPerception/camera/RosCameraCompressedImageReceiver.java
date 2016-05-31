@@ -36,7 +36,7 @@ public class RosCameraCompressedImageReceiver extends RosCameraReceiver
                PrintTools.debug(this, "Sending intrinsicParameters");
                intrinsicParameters.print();
             }
-            cameraDataReceiver.updateImage(robotSide, VideoSource.MULTISENSE, image, timeStamp, intrinsicParameters);
+            cameraDataReceiver.updateImage(VideoSource.getMultisenseSourceFromRobotSide(robotSide), image, timeStamp, intrinsicParameters);
 
          }
       };

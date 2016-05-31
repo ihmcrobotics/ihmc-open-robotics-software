@@ -55,7 +55,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
    {
       this.device = device;
 
-      this.server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName()), null, LogSettings.BABY_BEAST, DT);
+      this.server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName()), null, LogSettings.BEHAVIOR, DT);
       this.server.setMainRegistry(registry, fullRobotModel, new YoGraphicsListRegistry());
       this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, NetworkPorts.CONTROLLER_PORT, netClassList);
       this.robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);

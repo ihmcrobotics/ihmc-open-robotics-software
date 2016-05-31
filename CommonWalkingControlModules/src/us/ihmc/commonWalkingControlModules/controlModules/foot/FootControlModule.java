@@ -58,7 +58,7 @@ public class FootControlModule
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
-   private final BooleanYoVariable doFancyOnToesControl;
+   private final BooleanYoVariable holdPositionIfCopOnEdge;
    /** For testing purpose only. */
    private final BooleanYoVariable alwaysHoldPosition;
 
@@ -98,8 +98,8 @@ public class FootControlModule
       footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
 
-      doFancyOnToesControl = new BooleanYoVariable(namePrefix + "DoFancyOnToesControl", registry);
-      doFancyOnToesControl.set(walkingControllerParameters.doFancyOnToesControl());
+      holdPositionIfCopOnEdge = new BooleanYoVariable(namePrefix + "HoldPositionIfCopOnEdge", registry);
+      holdPositionIfCopOnEdge.set(walkingControllerParameters.doFancyOnToesControl());
       alwaysHoldPosition = new BooleanYoVariable(namePrefix + "AlwaysHoldPosition", registry);
       alwaysHoldPosition.set(false);
 
@@ -187,9 +187,9 @@ public class FootControlModule
                return true;
             if (isFootBarelyLoaded())
                return true;
-            if (!doFancyOnToesControl.getBooleanValue())
-               return false;
-            return footControlHelper.isCoPOnEdge();
+            if (holdPositionIfCopOnEdge.getBooleanValue())
+               return footControlHelper.isCoPOnEdge();
+            return false;
          }
       }));
 
