@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
+import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
@@ -13,6 +14,7 @@ public class VirtualModelControlSolution
    private InverseDynamicsJoint[] jointsToCompute;
    private Map<InverseDynamicsJoint, Double> jointTorques;
    private SpatialForceVector centroidalMomentumRateSolution;
+   private DenseMatrix64F centroidalMomentumSelectionMatrix;
    private Map<RigidBody, Wrench> externalWrenchSolution;
    private List<RigidBody> rigidBodiesWithExternalWrench;
 
@@ -41,6 +43,11 @@ public class VirtualModelControlSolution
       this.externalWrenchSolution = externalWrenchSolution;
    }
 
+   public void setCentroidalMomentumSelectionMatrix(DenseMatrix64F selectionMatrix)
+   {
+      this.centroidalMomentumSelectionMatrix = selectionMatrix;
+   }
+
    public List<RigidBody> getRigidBodiesWithExternalWrench()
    {
       return rigidBodiesWithExternalWrench;
@@ -64,5 +71,10 @@ public class VirtualModelControlSolution
    public SpatialForceVector getCentroidalMomentumRateSolution()
    {
       return centroidalMomentumRateSolution;
+   }
+
+   public DenseMatrix64F getCentroidalMomentumSelectionMatrix()
+   {
+      return centroidalMomentumSelectionMatrix;
    }
 }

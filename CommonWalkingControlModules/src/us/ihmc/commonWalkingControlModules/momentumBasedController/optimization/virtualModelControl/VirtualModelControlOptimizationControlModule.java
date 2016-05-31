@@ -119,10 +119,12 @@ public class VirtualModelControlOptimizationControlModule
    public void compute(VirtualModelControlSolution virtualModelControlSolutionToPack) throws VirtualModelControlModuleException
    {
       wrenchMatrixCalculator.computeMatrices();
-      if (VISUALIZE_RHO_BASIS_VECTORS)
-         basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
+
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
       qpSolver.addRegularization();
+
+      if (VISUALIZE_RHO_BASIS_VECTORS)
+         basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
 
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
@@ -182,6 +184,7 @@ public class VirtualModelControlOptimizationControlModule
       virtualModelControlSolutionToPack.setJointsToCompute(jointsToOptimizeFor);
       virtualModelControlSolutionToPack.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
       virtualModelControlSolutionToPack.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
+      virtualModelControlSolutionToPack.setCentroidalMomentumSelectionMatrix(momentumRateCommand.getSelectionMatrix());
 
       if (noConvergenceException != null)
       {
