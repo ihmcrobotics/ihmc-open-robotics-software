@@ -63,7 +63,7 @@ public class LocalYoWhiteBoard extends YoWhiteBoard
    }
 
 
-   public void whiteBoardSpecificClose() throws IOException
+   public void closeYoWhiteBoard() throws IOException
    {
       setConnected(false);       
    }

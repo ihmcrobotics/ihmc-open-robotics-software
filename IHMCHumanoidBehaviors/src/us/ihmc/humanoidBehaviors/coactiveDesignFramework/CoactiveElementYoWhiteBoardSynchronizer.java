@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.coactiveDesignFramework;
 
 import java.io.IOException;
-import java.net.SocketException;
 import java.util.ArrayList;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -127,8 +126,11 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
       {
          try
          {
-            writeData();
-            readData();
+            synchronized (tcpYoWhiteBoard.getConnectionConch())
+            {
+               writeData();
+               readData();
+            }
          }
          catch (Exception exception)
          {
@@ -141,14 +143,17 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
             
             try
             {
-               PrintTools.info(this, "Connecting");
-               tcpYoWhiteBoard.connect();
+               synchronized (tcpYoWhiteBoard.getConnectionConch())
+               {
+                  PrintTools.info(this, "Connecting White Board");
+                  tcpYoWhiteBoard.connect();
+               }
             }
-            catch (IOException ioException)
+            catch (IOException | NullPointerException ioException)
             {
-               PrintTools.error(this, "Failed to connect");
-               ioException.printStackTrace();
+               PrintTools.error(this, ioException.getMessage());
             }
+            
             ThreadTools.sleep(500);
          }
 
