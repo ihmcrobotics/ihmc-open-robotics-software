@@ -300,9 +300,7 @@ public class WholeBodyVirtualModelControlSolver
 
       tmpExternalWrench.set(tmpWrench);
       tmpExternalWrench.negate();
-      ExternalWrenchCommand externalWrenchCommand = new ExternalWrenchCommand();
-      externalWrenchCommand.set(controlledBody, tmpExternalWrench);
-      optimizationControlModule.submitExternalWrenchCommand(externalWrenchCommand);
+      optimizationControlModule.submitExternalWrench(controlledBody, tmpExternalWrench);
 
       optimizationControlModule.addSelection(command.getSelectionMatrix());
    }
@@ -311,11 +309,9 @@ public class WholeBodyVirtualModelControlSolver
    {
       virtualWrenchCommandList.addCommand(command);
 
-      ExternalWrenchCommand externalWrenchCommand = new ExternalWrenchCommand();
-      tmpWrench.set(command.getVirtualWrench());
-      tmpWrench.negate();
-      externalWrenchCommand.set(command.getControlledBody(), tmpWrench);
-      optimizationControlModule.submitExternalWrenchCommand(externalWrenchCommand);
+      tmpExternalWrench.set(command.getVirtualWrench());
+      tmpExternalWrench.negate();
+      optimizationControlModule.submitExternalWrench(command.getControlledBody(), tmpExternalWrench);
 
       optimizationControlModule.addSelection(command.getSelectionMatrix());
    }
