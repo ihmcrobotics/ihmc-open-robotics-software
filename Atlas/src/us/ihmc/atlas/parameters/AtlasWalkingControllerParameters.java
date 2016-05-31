@@ -472,20 +472,17 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
-      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
+      YoFootOrientationGains gains = new YoFootOrientationGains("PelvisOrientation", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kp = 80.0;
+      double kpXY = 80.0;
+      double kpZ = 40.0;
       double zeta = realRobot ? 0.5 : 0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
       double maxAccel = realRobot ? 12.0 : 36.0;
       double maxJerk = realRobot ? 180.0 : 540.0;
 
-      gains.setProportionalGain(kp);
+      gains.setProportionalGains(kpXY, kpZ);
       gains.setDampingRatio(zeta);
-      gains.setIntegralGain(ki);
-      gains.setMaximumIntegralError(maxIntegralError);
       gains.setMaximumAcceleration(maxAccel);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);

@@ -165,7 +165,7 @@ public class PickUpBallBehavior extends BehaviorInterface
 
             coactiveElement.currentState.set(BehaviorState.SETTING_LIDAR_PARAMS);
             DepthDataFilterParameters param = new DepthDataFilterParameters();
-            param.nearScanRadius = 1.75f;
+            param.nearScanRadius = 1.4f;
             setLidarParametersBehavior.setInput(param);
          }
       };
@@ -514,39 +514,70 @@ public class PickUpBallBehavior extends BehaviorInterface
       ArmTrajectoryTask leftHandBeforeGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior, yoTime);
 
 
-      //PUT BALL IN BUCKET *******************************************
+      // TASK SETUP
+      pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior,closeHand);
+      pipeLine.submitTaskForPallelPipesStage(enableLidarBehavior,enableLidarTask);
+      pipeLine.submitTaskForPallelPipesStage(setLidarParametersBehavior,setLidarMediumRangeTask);
 
-      pipeLine.submitSingleTaskStage(rightArmHomeTask);
-      //      
-      pipeLine.submitSingleTaskStage(closeHand);
-      pipeLine.submitSingleTaskStage(enableLidarTask);
-      pipeLine.submitSingleTaskStage(setLidarMediumRangeTask);
+
+      
+      
       pipeLine.submitSingleTaskStage(clearLidarTask);
-      pipeLine.submitSingleTaskStage(findBallTask);
+      
+      pipeLine.requestNewStage();
+      
+      pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior, rightArmHomeTask);
+
+      pipeLine.submitTaskForPallelPipesStage(initialSphereDetectionBehavior, findBallTask);
+      
+      //LOOK AROUND
+      
       pipeLine.submitSingleTaskStage(validateBallTask);
+      
+      //RECENTER BODY      
       pipeLine.submitSingleTaskStage(walkToBallTask);
-      pipeLine.submitSingleTaskStage(lookDown);
-      pipeLine.submitSingleTaskStage(chestOrientationTask);
-      pipeLine.submitSingleTaskStage(setLidarShortRangeTask);
+      
+      pipeLine.requestNewStage();
+
+      pipeLine.submitTaskForPallelPipesStage(headTrajectoryBehavior, lookDown);
+      pipeLine.submitTaskForPallelPipesStage(chestTrajectoryBehavior, chestOrientationTask);
+      pipeLine.submitTaskForPallelPipesStage(setLidarParametersBehavior, setLidarShortRangeTask);
+
+      pipeLine.requestNewStage();
+
+      
       pipeLine.submitSingleTaskStage(clearLidarTask2);
       pipeLine.submitSingleTaskStage(finalFindBallTask);
       pipeLine.submitSingleTaskStage(validateBallTask2);
+      
+      
       pipeLine.submitSingleTaskStage(leftHandBeforeGrab);
 
-      pipeLine.submitSingleTaskStage(goToPickUpBallInitialLocationTask);
-      pipeLine.submitSingleTaskStage(openHand);
+      pipeLine.requestNewStage();
+
+      
+      pipeLine.submitTaskForPallelPipesStage(wholeBodyBehavior, goToPickUpBallInitialLocationTask);
+      pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, openHand);
+
+      pipeLine.requestNewStage();
+
       pipeLine.submitSingleTaskStage(pickUpBallTask);
 //      pipeLine.submitSingleTaskStage(goToFinalPickUpBallLocationTask);
       pipeLine.submitSingleTaskStage(closeHand);
 
       pipeLine.submitSingleTaskStage(leftHandAfterGrab);
       //
+      
+      
+      
       pipeLine.submitSingleTaskStage(goHomeChestTask);
       pipeLine.submitSingleTaskStage(goHomePelvisTask);
 
       //PUT BALL IN BUCKET
-      pipeLine.submitSingleTaskStage(rightArmHomeTask);
+//      pipeLine.submitSingleTaskStage(rightArmHomeTask);
 
+      
+      
       pipeLine.submitSingleTaskStage(rightHandBucketLocation1Task);
       pipeLine.submitSingleTaskStage(leftHandBucketLocation1Task);
 
