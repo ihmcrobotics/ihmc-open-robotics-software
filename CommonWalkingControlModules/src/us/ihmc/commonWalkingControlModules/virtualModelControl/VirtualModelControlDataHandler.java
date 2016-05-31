@@ -55,27 +55,30 @@ public class VirtualModelControlDataHandler
    {
       // check joint order
       int length = jointsToUse.length;
-      boolean rightOrder = true;
-      if (length > 1)
-         ScrewTools.isAncestor(jointsToUse[1].getPredecessor(), jointsToUse[0].getPredecessor());
-
-      OneDoFJoint[] orderedJointsToUse;
-      if (rightOrder)
-         orderedJointsToUse = jointsToUse;
-      else
+      if (length > 0)
       {
-         orderedJointsToUse = new OneDoFJoint[length];
+         boolean rightOrder = true;
+         if (length > 1)
+            ScrewTools.isAncestor(jointsToUse[1].getPredecessor(), jointsToUse[0].getPredecessor());
+
+         OneDoFJoint[] orderedJointsToUse;
+         if (rightOrder)
+            orderedJointsToUse = jointsToUse;
+         else
+         {
+            orderedJointsToUse = new OneDoFJoint[length];
+            for (int i = 0; i < length; i++)
+               orderedJointsToUse[i] = jointsToUse[length - 1 - i];
+         }
+
+         jointChainsForControl.get(controlledBody).add(orderedJointsToUse);
+
          for (int i = 0; i < length; i++)
-            orderedJointsToUse[i] = jointsToUse[length - 1 - i];
+            if (!controlledJoints.contains(orderedJointsToUse[i]))
+               controlledJoints.add(orderedJointsToUse[i]);
+
+         numberOfControlledJoints = controlledJoints.size();
       }
-
-      jointChainsForControl.get(controlledBody).add(orderedJointsToUse);
-
-      for (int i = 0; i < length; i++)
-         if (!controlledJoints.contains(orderedJointsToUse[i]))
-            controlledJoints.add(orderedJointsToUse[i]);
-
-      numberOfControlledJoints = controlledJoints.size();
    }
 
    public void addDesiredWrench(RigidBody controlledBody, Wrench desiredWrench)
