@@ -360,4 +360,9 @@ public class VirtualModelControlOptimizationControlModule
       Wrench wrench = command.getExternalWrench();
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
+
+   public void submitExternalWrench(RigidBody rigidBody, Wrench wrench)
+   {
+      externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
+   }
 }
