@@ -6,7 +6,13 @@ import java.util.Arrays;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidBehaviors.behaviors.*;
+import us.ihmc.humanoidBehaviors.behaviors.BlobFilteredSphereDetectionBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.LocalizeDrillBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.PickUpBallBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.ReceiveImageBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.TalkAndMoveHandsBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -94,8 +100,9 @@ public class IHMCHumanoidBehaviorManager
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
 
-      BehaviorDispatcher<HumanoidBehaviorType> dispatcher = new BehaviorDispatcher<>(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
-            communicationBridge, yoVariableServer, HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry, yoGraphicsListRegistry);
+      BehaviorDispatcher<HumanoidBehaviorType> dispatcher = new BehaviorDispatcher<>(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber,
+            desiredBehaviorSubscriber, communicationBridge, yoVariableServer, HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry,
+            yoGraphicsListRegistry);
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
       behaviorPacketCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
@@ -179,25 +186,30 @@ public class IHMCHumanoidBehaviorManager
             wholeBodyControllerParameters.getWalkingControllerParameters());
       dispatcher.addBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
 
-      WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(behaviorCommunicationBridge, fullRobotModel, yoTime, wholeBodyControllerParameters
-            .getWalkingControllerParameters().getAnkleHeight());
+      WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(behaviorCommunicationBridge, fullRobotModel, yoTime,
+            wholeBodyControllerParameters.getWalkingControllerParameters().getAnkleHeight());
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
 
       dispatcher.addBehavior(HumanoidBehaviorType.RECEIVE_IMAGE, new ReceiveImageBehavior(behaviorCommunicationBridge));
       dispatcher.addBehavior(HumanoidBehaviorType.LOCALIZE_DRILL, new LocalizeDrillBehavior(behaviorCommunicationBridge, referenceFrames));
 
       dispatcher.addBehavior(HumanoidBehaviorType.TALK_AND_MOVE_HANDS, new TalkAndMoveHandsBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
+
+      dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
+            new PickUpBallBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters));
       
-      dispatcher.addBehavior(HumanoidBehaviorType.KICK, new KickBallBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport,fullRobotModel,referenceFrames, wholeBodyControllerParameters));
+      dispatcher.addBehavior(HumanoidBehaviorType.BALL_DETECTION,
+            new BlobFilteredSphereDetectionBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel));
 
       // TODO: Fix or remove this behavior
-//      PushButtonBehavior pushButtonBehavior = new PushButtonBehavior(outgoingCommunicationBridge, referenceFrames, yoTime, wristSensors);
-//      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.PUSH_BUTTON, pushButtonBehavior);
+      //      PushButtonBehavior pushButtonBehavior = new PushButtonBehavior(outgoingCommunicationBridge, referenceFrames, yoTime, wristSensors);
+      //      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.PUSH_BUTTON, pushButtonBehavior);
    }
 
-   private void createAndRegisterAutomaticDiagnostic(BehaviorDispatcher<HumanoidBehaviorType> dispatcher, SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, CapturePointUpdatable capturePointUpdatable,
-         WholeBodyControllerParameters wholeBodyControllerParameters, double timeToWait, YoGraphicsListRegistry yoGraphicsListRegistry)
+   private void createAndRegisterAutomaticDiagnostic(BehaviorDispatcher<HumanoidBehaviorType> dispatcher, SDFFullHumanoidRobotModel fullRobotModel,
+         HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
+         CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters, double timeToWait,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
       EnumYoVariable<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();

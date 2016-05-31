@@ -60,6 +60,12 @@ public class HSVRange
       return upperBoundHSV.equals(that.upperBoundHSV);
 
    }
+   
+   @Override
+   public String toString()
+   {
+      return HSVRange.class.getSimpleName() + ": Lower: " + lowerBoundHSV + " Upper: " + upperBoundHSV;
+   }
 
    @Override
    public int hashCode()
