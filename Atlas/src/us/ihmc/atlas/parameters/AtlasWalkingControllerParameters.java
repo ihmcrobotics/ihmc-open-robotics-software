@@ -191,7 +191,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
       if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
-         return 0.4;
+         return 0.6;
       else
          return 0.3;
    }
