@@ -1,13 +1,30 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
+import java.util.ArrayList;
+
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Point2d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.BehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.*;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ClearLidarBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.EnableBehaviorOnlyLidarBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.SetLidarParametersBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.taskExecutor.*;
+import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
@@ -15,30 +32,30 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePose2d;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-
 public class PickUpBallBehavior extends BehaviorInterface
 {
+   private static final boolean FILTER_KNOWN_COLORS_TO_SPEED_UP = false;
+   
    private final PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement;
 
    private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
-   private final EnableLidarBehavior enableLidarBehavior;
+   private final EnableBehaviorOnlyLidarBehavior enableBehaviorOnlyLidarBehavior;
    private final SetLidarParametersBehavior setLidarParametersBehavior;
    private final ClearLidarBehavior clearLidarBehavior;
    private final SphereDetectionBehavior initialSphereDetectionBehavior;
+   private final BlobFilteredSphereDetectionBehavior blobFilteredSphereDetectionBehavior;
    private final WaitForUserValidationBehavior waitForUserValidationBehavior;
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final ChestTrajectoryBehavior chestTrajectoryBehavior;
@@ -71,16 +88,15 @@ public class PickUpBallBehavior extends BehaviorInterface
       setLidarParametersBehavior = new SetLidarParametersBehavior(outgoingCommunicationBridge);
       behaviors.add(setLidarParametersBehavior);
 
-      enableLidarBehavior = new EnableLidarBehavior(outgoingCommunicationBridge);
-      behaviors.add(enableLidarBehavior);
+      enableBehaviorOnlyLidarBehavior = new EnableBehaviorOnlyLidarBehavior(outgoingCommunicationBridge);
+      behaviors.add(enableBehaviorOnlyLidarBehavior);
 
       clearLidarBehavior = new ClearLidarBehavior(outgoingCommunicationBridge);
       behaviors.add(clearLidarBehavior);
 
-      initialSphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames); //  new BlobFilteredSphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames, fullRobotModel);
-      behaviors.add(initialSphereDetectionBehavior);
-      //      finalSphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
-      //      behaviors.add(finalSphereDetectionBehavior);
+      blobFilteredSphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames, fullRobotModel);
+      initialSphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+      behaviors.add(FILTER_KNOWN_COLORS_TO_SPEED_UP ? blobFilteredSphereDetectionBehavior : initialSphereDetectionBehavior);
 
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters());
@@ -116,11 +132,11 @@ public class PickUpBallBehavior extends BehaviorInterface
       waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
             coactiveElement.validAcknowledged);
       behaviors.add(waitForUserValidationBehavior);
+      
       for (BehaviorInterface behavior : behaviors)
       {
          registry.addChild(behavior.getYoVariableRegistry());
       }
-
    }
 
    @Override
@@ -146,7 +162,7 @@ public class PickUpBallBehavior extends BehaviorInterface
             yoTime);
 
       //ENABLE LIDAR
-      BehaviorTask enableLidarTask = new BehaviorTask(enableLidarBehavior, yoTime, 1)
+      BehaviorTask enableLidarTask = new BehaviorTask(enableBehaviorOnlyLidarBehavior, yoTime, 1)
       {
          @Override
          protected void setBehaviorInput()
@@ -516,7 +532,7 @@ public class PickUpBallBehavior extends BehaviorInterface
 
       // TASK SETUP
       pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior,closeHand);
-      pipeLine.submitTaskForPallelPipesStage(enableLidarBehavior,enableLidarTask);
+      pipeLine.submitTaskForPallelPipesStage(enableBehaviorOnlyLidarBehavior,enableLidarTask);
       pipeLine.submitTaskForPallelPipesStage(setLidarParametersBehavior,setLidarMediumRangeTask);
 
 
@@ -730,13 +746,13 @@ public class PickUpBallBehavior extends BehaviorInterface
       this.pipeLine.clearAll();
    }
 
-   public void setHSVRange(HSVRange hsvRange)
-   {
-      if (initialSphereDetectionBehavior instanceof BlobFilteredSphereDetectionBehavior)
-      {
-         BlobFilteredSphereDetectionBehavior blobFilteredSphereDetectionBehavior = (BlobFilteredSphereDetectionBehavior) initialSphereDetectionBehavior;
-         blobFilteredSphereDetectionBehavior.resetHSVRanges();
-         blobFilteredSphereDetectionBehavior.addHSVRange(hsvRange);
-      }
-   }
+//   public void setHSVRange(HSVRange hsvRange)
+//   {
+//      if (initialSphereDetectionBehavior instanceof BlobFilteredSphereDetectionBehavior)
+//      {
+//         BlobFilteredSphereDetectionBehavior blobFilteredSphereDetectionBehavior = (BlobFilteredSphereDetectionBehavior) initialSphereDetectionBehavior;
+//         blobFilteredSphereDetectionBehavior.resetHSVRanges();
+//         blobFilteredSphereDetectionBehavior.addHSVRange(hsvRange);
+//      }
+//   }
 }

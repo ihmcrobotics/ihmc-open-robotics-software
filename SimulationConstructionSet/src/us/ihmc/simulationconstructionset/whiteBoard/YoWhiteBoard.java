@@ -50,7 +50,7 @@ public abstract class YoWhiteBoard
 
    public abstract void whiteBoardSpecificConnect() throws IOException;
 
-   public abstract void whiteBoardSpecificClose() throws IOException;
+   public abstract void closeYoWhiteBoard() throws IOException;
 
    public abstract void whiteBoardSpecificWriteData(double[] doubleVariablesToWriteBuffer, int[] intVariablesToWriteBuffer,
            boolean[] booleanVariablesToWriteBuffer, int[] enumVariablesToWriteBuffer, int writeIndex)
@@ -134,11 +134,6 @@ public abstract class YoWhiteBoard
       enumVariablesToWriteBuffer = new int[enumVariablesToWrite.length];
 
       whiteBoardSpecificConnect();
-   }
-
-   public void close() throws IOException
-   {
-      whiteBoardSpecificClose();
    }
 
    public void writeData() throws IOException
