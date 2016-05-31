@@ -63,6 +63,7 @@ public class VirtualWrenchCommand implements InverseDynamicsCommand<VirtualWrenc
       controlledBody = other.controlledBody;
       rigidBodyName = other.rigidBodyName;
       virtualWrenchAppliedByRigidBody = other.virtualWrenchAppliedByRigidBody;
+      selectionMatrix.set(other.selectionMatrix);
    }
 
    @Override

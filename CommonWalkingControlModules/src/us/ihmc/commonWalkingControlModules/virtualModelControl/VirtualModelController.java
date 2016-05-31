@@ -83,7 +83,25 @@ public class VirtualModelController
    public void registerControlledBody(RigidBody controlledBody, RigidBody baseOfControl)
    {
       OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(baseOfControl, controlledBody);
-      registerControlledBody(controlledBody, joints);
+      if (joints.length > 1)
+      {
+         if (ScrewTools.isAncestor(joints[1].getPredecessor(), joints[0].getPredecessor()))
+            registerControlledBody(controlledBody, joints);
+         else // need to reorder them
+         {
+            int size = joints.length;
+            OneDoFJoint[] newJoints = new OneDoFJoint[size];
+            for (int i = 0; i < size; i++)
+            {
+               newJoints[i] = joints[size - i - 1];
+            }
+            registerControlledBody(controlledBody, newJoints);
+         }
+      }
+      else
+      {
+         registerControlledBody(controlledBody, joints);
+      }
    }
 
    public void registerControlledBody(RigidBody controlledBody, OneDoFJoint[] jointsToUse)
@@ -94,7 +112,7 @@ public class VirtualModelController
 
    public void createYoVariable(RigidBody controlledBody)
    {
-      YoWrench yoWrench = new YoWrench(controlledBody.getName() + "_desiredWrench", controlledBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(),
+      YoWrench yoWrench = new YoWrench(controlledBody.getName() + "_VMCDesiredWrench", controlledBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(),
             registry);
       yoWrenches.put(controlledBody, yoWrench);
    }
@@ -155,8 +173,6 @@ public class VirtualModelController
          {
             if (vmcDataHandler.hasWrench(controlledBody) && vmcDataHandler.hasSelectionMatrix(controlledBody))
             {
-               //vmcDataHandler.loadBody(controlledBody);
-
                int numberOfControlChains = vmcDataHandler.numberOfChains(controlledBody);
 
                Wrench wrench = vmcDataHandler.getDesiredWrench(controlledBody);
