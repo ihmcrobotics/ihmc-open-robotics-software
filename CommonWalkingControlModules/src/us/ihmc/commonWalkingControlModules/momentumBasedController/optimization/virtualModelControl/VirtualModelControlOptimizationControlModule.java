@@ -15,11 +15,13 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoWrench;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.io.printing.PrintTools;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,11 @@ public class VirtualModelControlOptimizationControlModule
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
    private static final boolean SETUP_RHO_TASKS = false; // FIXME
 
+   private static final boolean USE_MOMENTUM_QP = false;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final ReferenceFrame centerOfMassFrame;
 
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
    private final BasisVectorVisualizer basisVectorVisualizer;
@@ -55,10 +61,13 @@ public class VirtualModelControlOptimizationControlModule
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
 
+   private final List<RigidBody> bodiesInContact = new ArrayList<>();
+
    public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, InverseDynamicsJoint rootJoint, YoVariableRegistry parentRegistry)
    {
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
+      centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
       int rhoSize = WholeBodyControlCoreToolbox.rhoSize;
 
@@ -105,6 +114,7 @@ public class VirtualModelControlOptimizationControlModule
    {
       qpSolver.reset();
       externalWrenchHandler.reset();
+      bodiesInContact.clear();
    }
 
    public ExternalWrenchHandler getExternalWrenchHandler()
@@ -115,9 +125,11 @@ public class VirtualModelControlOptimizationControlModule
    private final DenseMatrix64F contactWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F totalWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F tmpWrench = new DenseMatrix64F(Wrench.SIZE, 1);
+   private Map<RigidBody, Wrench> groundReactionWrenches = new HashMap<>();
 
    public void compute(VirtualModelControlSolution virtualModelControlSolutionToPack) throws VirtualModelControlModuleException
    {
+      groundReactionWrenches.clear();
       wrenchMatrixCalculator.computeMatrices();
 
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
@@ -135,28 +147,44 @@ public class VirtualModelControlOptimizationControlModule
 
       NoConvergenceException noConvergenceException = null;
 
-      try
+      if (USE_MOMENTUM_QP)
       {
-         qpSolver.solve();
-      }
-      catch (NoConvergenceException e)
-      {
-
-         if (!hasNotConvergedInPast.getBooleanValue())
+         try
          {
-            e.printStackTrace();
-            PrintTools.warn(this, "Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+            qpSolver.solve();
+         }
+         catch (NoConvergenceException e)
+         {
+
+            if (!hasNotConvergedInPast.getBooleanValue())
+            {
+               e.printStackTrace();
+               PrintTools.warn(this, "Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+            }
+
+            hasNotConvergedInPast.set(true);
+            hasNotConvergedCounts.increment();
+
+            noConvergenceException = e;
          }
 
-         hasNotConvergedInPast.set(true);
-         hasNotConvergedCounts.increment();
+         DenseMatrix64F rhoSolution = qpSolver.getRhos();
 
-         noConvergenceException = e;
+         groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       }
+      else
+      {
+         double loadFraction = 1.0 / (double) bodiesInContact.size();
+         CommonOps.scale(loadFraction, tempTaskObjective);
 
-      DenseMatrix64F rhoSolution = qpSolver.getRhos();
-
-      Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
+         for (RigidBody controlledBody : bodiesInContact)
+         {
+            Wrench wrench = new Wrench(centerOfMassFrame, centerOfMassFrame, tempTaskObjective);
+            wrench.changeFrame(controlledBody.getBodyFixedFrame());
+            wrench.changeBodyFrameAttachedToSameBody(controlledBody.getBodyFixedFrame());
+            groundReactionWrenches.put(controlledBody, wrench);
+         }
+      }
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
       Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
@@ -264,6 +292,9 @@ public class VirtualModelControlOptimizationControlModule
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)
    {
       wrenchMatrixCalculator.submitPlaneContactStateCommand(command);
+
+      if (command.getNumberOfContactPoints() > 0)
+         bodiesInContact.add(command.getContactingRigidBody());
    }
 
    public void submitExternalWrenchCommand(ExternalWrenchCommand command)

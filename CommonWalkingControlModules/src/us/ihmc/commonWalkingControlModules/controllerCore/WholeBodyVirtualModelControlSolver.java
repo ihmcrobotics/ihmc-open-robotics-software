@@ -30,7 +30,6 @@ import java.util.*;
 
 public class WholeBodyVirtualModelControlSolver
 {
-   private static final boolean USE_MOMENTUM_QP = false;
    private static final boolean USE_LIMITED_JOINT_TORQUES = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -67,7 +66,6 @@ public class WholeBodyVirtualModelControlSolver
    private final YoFrameVector yoAchievedMomentumRateAngular;
    private final FrameVector achievedMomentumRateLinear = new FrameVector();
    private final Map<OneDoFJoint, RateLimitedYoVariable> jointTorqueSolutions = new HashMap<>();
-   private final List<RigidBody> bodiesInContact = new ArrayList<>();
 
    private final Wrench residualRootJointWrench = new Wrench();
    private final FrameVector residualRootJointForce = new FrameVector();
@@ -135,7 +133,6 @@ public class WholeBodyVirtualModelControlSolver
       optimizationControlModule.initialize();
       virtualModelController.reset();
       virtualWrenchCommandList.clear();
-      bodiesInContact.clear();
       firstTick = true;
    }
 
@@ -144,7 +141,6 @@ public class WholeBodyVirtualModelControlSolver
       optimizationControlModule.initialize();
       virtualModelController.clear();
       virtualWrenchCommandList.clear();
-      bodiesInContact.clear();
    }
 
    public void initialize()
@@ -160,23 +156,15 @@ public class WholeBodyVirtualModelControlSolver
    public void compute()
    {
       VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();
-      if (USE_MOMENTUM_QP)
+      try
       {
-         try
-         {
-            optimizationControlModule.compute(virtualModelControlSolution);
-         }
-         catch (VirtualModelControlModuleException virtualModelControlModuleException)
-         {
-            // Don't crash and burn. Instead do the best you can with what you have.
-            // Or maybe just use the previous ticks solution.
-            virtualModelControlSolution = virtualModelControlModuleException.getVirtualModelControlSolution();
-         }
+         optimizationControlModule.compute(virtualModelControlSolution);
       }
-      else
+      catch (VirtualModelControlModuleException virtualModelControlModuleException)
       {
-         if (CommonOps.elementSum(momentumRateCommand.getSelectionMatrix()) != 0.0)
-            submitMomentumRateAsVirtualWrench(virtualModelControlSolution, momentumRateCommand);
+         // Don't crash and burn. Instead do the best you can with what you have.
+         // Or maybe just use the previous ticks solution.
+         virtualModelControlSolution = virtualModelControlModuleException.getVirtualModelControlSolution();
       }
 
       Map<RigidBody, Wrench> externalWrenchSolution = virtualModelControlSolution.getExternalWrenchSolution();
@@ -263,8 +251,7 @@ public class WholeBodyVirtualModelControlSolver
             convertAndAddSpatialAccelerationCommand((SpatialAccelerationCommand) command);
             break;
          case MOMENTUM:
-            if (USE_MOMENTUM_QP)
-               optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
+            optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
             recordMomentumRate((MomentumRateCommand) command);
             break;
          case EXTERNAL_WRENCH:
@@ -272,8 +259,6 @@ public class WholeBodyVirtualModelControlSolver
             break;
          case PLANE_CONTACT_STATE:
             optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
-            if (((PlaneContactStateCommand) command).getNumberOfContactPoints() > 0)
-               bodiesInContact.add(((PlaneContactStateCommand) command).getContactingRigidBody());
             break;
          case JOINT_ACCELERATION_INTEGRATION:
             submitJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) command);
@@ -316,34 +301,6 @@ public class WholeBodyVirtualModelControlSolver
       VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
       virtualWrenchCommand.set(controlledBody, tmpWrench, command.getSelectionMatrix());
       virtualWrenchCommandList.addCommand(virtualWrenchCommand);
-   }
-
-   private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
-   private final Map<RigidBody, Wrench> wrenchSolution = new HashMap<>();
-   private final SpatialForceVector centroidalMomentumRateSolution = new SpatialForceVector();
-   private void submitMomentumRateAsVirtualWrench(VirtualModelControlSolution virtualModelControlSolutionToPack, MomentumRateCommand command)
-   {
-      wrenchSolution.clear();
-
-      DenseMatrix64F additionalExternalWrench = optimizationControlModule.getExternalWrenchHandler().getSumOfExternalWrenches();
-      DenseMatrix64F gravityWrench = optimizationControlModule.getExternalWrenchHandler().getGravitationalWrench();
-      DenseMatrix64F momentumRate = command.getMomentumRate();
-
-      CommonOps.subtract(momentumRate, additionalExternalWrench, tempTaskObjective);
-      CommonOps.subtract(tempTaskObjective, gravityWrench, tempTaskObjective);
-
-      centroidalMomentumRateSolution.set(null, momentumRate);
-
-      double loadFraction = 1.0 / (double) bodiesInContact.size();
-      CommonOps.scale(loadFraction, tempTaskObjective);
-
-      for (RigidBody controlledBody : bodiesInContact)
-      {
-         wrenchSolution.put(controlledBody, new Wrench(centerOfMassFrame, centerOfMassFrame, tempTaskObjective));
-      }
-      virtualModelControlSolutionToPack.setExternalWrenchSolution(bodiesInContact, wrenchSolution);
-      virtualModelControlSolutionToPack.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
-      virtualModelControlSolutionToPack.setCentroidalMomentumSelectionMatrix(momentumRateCommand.getSelectionMatrix());
    }
 
    private void submitJointAccelerationIntegrationCommand(JointAccelerationIntegrationCommand command)
