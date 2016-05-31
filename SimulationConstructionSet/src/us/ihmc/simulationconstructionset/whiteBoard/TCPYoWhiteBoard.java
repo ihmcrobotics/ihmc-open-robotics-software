@@ -20,6 +20,7 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
    private int port;
 
    private ServerSocket serverSocket;
+   private Socket socketToRemoteClient;
    private Socket clientSocket;
    
    private boolean closed = true;
@@ -76,12 +77,12 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
             serverSocket = new ServerSocket(port);
             // Get the port since if you use 0, Java will find one that is free
             this.port = serverSocket.getLocalPort();
-            Socket socket = serverSocket.accept();
-            socket.setTcpNoDelay(true);
+            socketToRemoteClient = serverSocket.accept();
+            socketToRemoteClient.setTcpNoDelay(true);
             PrintTools.debug(VERBOSE, this, "runServer(): Socket accepted. Creating dataInputStream and dataOutputStream");
 
-            DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-            DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+            DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(socketToRemoteClient.getInputStream()));
+            DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(socketToRemoteClient.getOutputStream()));
 
             PrintTools.debug(VERBOSE, this, "runServer(): DataInputStream and dataOutputStream created");
 
@@ -127,6 +128,19 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
          {
             e.printStackTrace();
          }
+      }
+   }
+   
+   public boolean isTCPSocketConnected()
+   
+   {
+      if (isAServer())
+      {
+         return socketToRemoteClient != null && socketToRemoteClient.isConnected();
+      }
+      else
+      {
+         return clientSocket.isConnected();
       }
    }
    

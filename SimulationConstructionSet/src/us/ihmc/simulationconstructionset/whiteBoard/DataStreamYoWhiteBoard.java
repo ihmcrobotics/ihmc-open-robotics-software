@@ -12,6 +12,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableType;
+import us.ihmc.tools.thread.ThreadTools;
 
 
 public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Runnable
@@ -78,13 +79,7 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
    {
       while (dataOutputStream == null)
       {
-         try
-         {
-            Thread.sleep(10);
-         }
-         catch (InterruptedException e)
-         {
-         }
+         ThreadTools.sleep(10);
       }
 
       if (writeOutConnect)

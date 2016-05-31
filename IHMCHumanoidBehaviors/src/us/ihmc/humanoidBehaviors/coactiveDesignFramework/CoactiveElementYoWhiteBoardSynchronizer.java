@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.coactiveDesignFramework;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -129,9 +130,15 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
             writeData();
             readData();
          }
-         catch (Exception e)
+         catch (Exception exception)
          {
-            PrintTools.error(this, e.getMessage());
+            PrintTools.error(this, exception.getMessage());
+            while (!tcpYoWhiteBoard.isTCPSocketConnected())
+            {
+               PrintTools.debug(true, this, "Waiting for TCP socket to connect.");
+               ThreadTools.sleepSeconds(2.0);
+            }
+            
             try
             {
                PrintTools.info(this, "Connecting");
