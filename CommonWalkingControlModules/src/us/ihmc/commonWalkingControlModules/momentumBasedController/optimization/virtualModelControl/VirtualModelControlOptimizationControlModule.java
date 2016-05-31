@@ -40,15 +40,13 @@ public class VirtualModelControlOptimizationControlModule
    private final ReferenceFrame centerOfMassFrame;
 
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
-   private final BasisVectorVisualizer basisVectorVisualizer;
-   private final VirtualModelControlQPSolver qpSolver;
    private final ExternalWrenchHandler externalWrenchHandler;
    private final SpatialForceVector centroidalMomentumRateSolution = new SpatialForceVector();
 
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
+   private final DenseMatrix64F momentumSelectionMatrix = new DenseMatrix64F(0, 0);
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
-
    private final JointIndexHandler jointIndexHandler;
    private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMinVMC", registry);
 
@@ -57,11 +55,14 @@ public class VirtualModelControlOptimizationControlModule
    private YoFrameVector achievedLinearMomentumRate = null;
    private YoFrameVector achievedAngularMomentumRate = null;
    private final Map<RigidBody, YoWrench> contactWrenchSolutions = new HashMap<>();
+   private final BasisVectorVisualizer basisVectorVisualizer;
 
+   private final VirtualModelControlQPSolver qpSolver;
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
 
    private final List<RigidBody> bodiesInContact = new ArrayList<>();
+   private final List<DenseMatrix64F> selectionMatrices = new ArrayList<>();
 
    public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, InverseDynamicsJoint rootJoint, YoVariableRegistry parentRegistry)
    {
@@ -115,11 +116,7 @@ public class VirtualModelControlOptimizationControlModule
       qpSolver.reset();
       externalWrenchHandler.reset();
       bodiesInContact.clear();
-   }
-
-   public ExternalWrenchHandler getExternalWrenchHandler()
-   {
-      return externalWrenchHandler;
+      selectionMatrices.clear();
    }
 
    private final DenseMatrix64F contactWrench = new DenseMatrix64F(Wrench.SIZE, 1);
@@ -206,7 +203,10 @@ public class VirtualModelControlOptimizationControlModule
          achievedAngularMomentumRate.set(totalWrench.get(0), totalWrench.get(1), totalWrench.get(2));
 
          for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
-            contactWrenchSolutions.get(rigidBody).set(externalWrenchSolution.get(rigidBody));
+         {
+            if (contactWrenchSolutions.containsKey(rigidBody))
+               contactWrenchSolutions.get(rigidBody).set(externalWrenchSolution.get(rigidBody));
+         }
       }
 
       virtualModelControlSolutionToPack.setJointsToCompute(jointsToOptimizeFor);
@@ -248,12 +248,68 @@ public class VirtualModelControlOptimizationControlModule
    {
       momentumRateCommand.set(command);
       momentumRateCommand.setWeights(command.getWeightVector());
+      momentumSelectionMatrix.set(command.getSelectionMatrix());
+   }
+
+   private final DenseMatrix64F currentColSum = new DenseMatrix64F(1, SpatialForceVector.SIZE);
+   private final DenseMatrix64F inputColSum = new DenseMatrix64F(1, SpatialForceVector.SIZE);
+   private final DenseMatrix64F tmpSelectionMatrix = new DenseMatrix64F(1, 1);
+
+   public void addSelection(DenseMatrix64F selectionMatrix)
+   {
+      selectionMatrices.add(selectionMatrix);
+   }
+
+   // creates the selection matrix for the full problem, compiling all virtual, external, and balancing wrenches
+   private void processSelectionMatrices()
+   {
+      momentumSelectionMatrix.set(momentumRateCommand.getSelectionMatrix());
+
+      for (int input = 0; input < selectionMatrices.size(); input++)
+      {
+         DenseMatrix64F selectionMatrix = selectionMatrices.get(input);
+
+         CommonOps.sumCols(momentumSelectionMatrix, currentColSum);
+         CommonOps.sumCols(selectionMatrix, inputColSum);
+
+         int currentRow = 0;
+         int inputRow = 0;
+         for (int col = 0; col < SpatialForceVector.SIZE; col++)
+         {
+            // if this column has value, we want to insert the next row below it
+            if (currentColSum.get(col) == 1)
+               currentRow++;
+
+            if (inputColSum.get(col) == 1 && currentColSum.get(col) == 0)
+            {
+               tmpSelectionMatrix.set(momentumSelectionMatrix);
+               momentumSelectionMatrix.reshape(momentumSelectionMatrix.getNumRows()+1, SpatialForceVector.SIZE);
+
+               // copy rows above
+               if (currentRow > 0)
+               {
+                  CommonOps.extract(tmpSelectionMatrix, 0, currentRow, 0, SpatialForceVector.SIZE, momentumSelectionMatrix, 0, 0);
+               }
+
+               // insert new row
+               CommonOps.extract(selectionMatrix, inputRow, inputRow + 1, 0, SpatialForceVector.SIZE, momentumSelectionMatrix, currentRow, 0);
+
+               // copy rows below
+               CommonOps.extract(tmpSelectionMatrix, currentRow, tmpSelectionMatrix.getNumRows(), 0, SpatialForceVector.SIZE, momentumSelectionMatrix,
+                     currentRow+1, 0);
+
+               currentRow++;
+               inputRow++;
+            }
+         }
+      }
    }
 
    private void processMomentumRateCommand()
    {
-      DenseMatrix64F selectionMatrix = momentumRateCommand.getSelectionMatrix();
-      int taskSize = selectionMatrix.getNumRows();
+      processSelectionMatrices();
+
+      int taskSize = momentumSelectionMatrix.getNumRows();
       taskObjective.reshape(taskSize, 1);
       taskWeightMatrix.reshape(taskSize, taskSize);
 
@@ -264,13 +320,13 @@ public class VirtualModelControlOptimizationControlModule
       tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
       tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
       momentumRateCommand.getWeightMatrix(tempTaskWeight);
-      CommonOps.mult(selectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, taskWeightMatrix);
+      CommonOps.mult(momentumSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
+      CommonOps.multTransB(tempTaskWeightSubspace, momentumSelectionMatrix, taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
       DenseMatrix64F rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
       taskJacobian.reshape(taskSize, rhoJacobian.numCols);
-      CommonOps.mult(selectionMatrix, rhoJacobian, taskJacobian);
+      CommonOps.mult(momentumSelectionMatrix, rhoJacobian, taskJacobian);
 
       // Compute the task objective: p = S * (hDot - sum W_user - W_g)
       DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
@@ -278,15 +334,16 @@ public class VirtualModelControlOptimizationControlModule
       DenseMatrix64F momentumRate = momentumRateCommand.getMomentumRate();
       CommonOps.subtract(momentumRate, additionalExternalWrench, tempTaskObjective);
       CommonOps.subtract(tempTaskObjective, gravityWrench, tempTaskObjective);
-      CommonOps.mult(selectionMatrix, tempTaskObjective, taskObjective);
+      CommonOps.mult(momentumSelectionMatrix, tempTaskObjective, taskObjective);
 
       if (DEBUG)
       {
-         desiredLinearMomentumRate.set(taskObjective.get(3), taskObjective.get(4), taskObjective.get(5));
-         desiredLinearMomentumRate.set(taskObjective.get(0), taskObjective.get(1), taskObjective.get(2));
+         desiredLinearMomentumRate.set(tempTaskObjective.get(3), tempTaskObjective.get(4), tempTaskObjective.get(5));
+         desiredAngularMomentumRate.set(tempTaskObjective.get(0), tempTaskObjective.get(1), tempTaskObjective.get(2));
       }
 
-      qpSolver.addMomentumTask(taskJacobian, taskObjective, taskWeightMatrix);
+      if (USE_MOMENTUM_QP)
+         qpSolver.addMomentumTask(taskJacobian, taskObjective, taskWeightMatrix);
    }
 
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)

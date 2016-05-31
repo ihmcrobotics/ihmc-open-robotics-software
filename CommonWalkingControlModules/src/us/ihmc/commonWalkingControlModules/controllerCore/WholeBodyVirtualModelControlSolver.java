@@ -35,7 +35,6 @@ public class WholeBodyVirtualModelControlSolver
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final VirtualModelControlOptimizationControlModule optimizationControlModule;
-   private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final VirtualModelController virtualModelController;
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
@@ -52,7 +51,6 @@ public class WholeBodyVirtualModelControlSolver
    private final Twist tmpTwist = new Twist();
 
    private final FullRobotModel controllerModel;
-   private final ReferenceFrame centerOfMassFrame;
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>();
@@ -80,7 +78,6 @@ public class WholeBodyVirtualModelControlSolver
    {
       twistCalculator = toolbox.getTwistCalculator();
 
-      centerOfMassFrame = toolbox.getCenterOfMassFrame();
       controllerModel = toolbox.getFullRobotModel();
       rootJoint = toolbox.getRobotRootJoint();
       optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, rootJoint, registry);
@@ -104,7 +101,6 @@ public class WholeBodyVirtualModelControlSolver
          RigidBodyInertia conversionInertia = new RigidBodyInertia(controlledBody.getBodyFixedFrame(), 1.0, 1.0, 1.0, 1.0);
          conversionInertias.put(controlledBody, conversionInertia);
       }
-
 
       if (USE_LIMITED_JOINT_TORQUES)
       {
@@ -175,7 +171,7 @@ public class WholeBodyVirtualModelControlSolver
       yoAchievedMomentumRateAngular.set(centroidalMomentumRateSolution.getAngularPart());
       yoAchievedMomentumRateLinear.getFrameTupleIncludingFrame(achievedMomentumRateLinear);
 
-      // submit forces for stability
+      // submit forces for contact forces
       for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
       {
          externalWrenchSolution.get(rigidBody).negate();
@@ -183,7 +179,7 @@ public class WholeBodyVirtualModelControlSolver
       }
       planeContactWrenchProcessor.compute(externalWrenchSolution);
 
-      // submit virtual wrenches for tracking
+      // submit virtual wrenches for bodies not in contact
       for (int i = 0; i < virtualWrenchCommandList.getNumberOfCommands(); i++)
       {
          virtualWrenchCommand.set(virtualWrenchCommandList.getCommand(i));
@@ -248,7 +244,7 @@ public class WholeBodyVirtualModelControlSolver
          switch (command.getCommandType())
          {
          case TASKSPACE:
-            convertAndAddSpatialAccelerationCommand((SpatialAccelerationCommand) command);
+            handleSpatialAccelerationCommand((SpatialAccelerationCommand) command);
             break;
          case MOMENTUM:
             optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
@@ -264,7 +260,7 @@ public class WholeBodyVirtualModelControlSolver
             submitJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) command);
             break;
          case VIRTUAL_WRENCH:
-            virtualWrenchCommandList.addCommand((VirtualWrenchCommand) command);
+            handleVirtualWrenchCommand((VirtualWrenchCommand) command);
             break;
          case CONTROLLED_BODIES:
             registerAllControlledBodies((ControlledBodiesCommand) command);
@@ -280,13 +276,13 @@ public class WholeBodyVirtualModelControlSolver
 
    private void recordMomentumRate(MomentumRateCommand command)
    {
-      momentumRateCommand.set(command);
       DenseMatrix64F momentumRate = command.getMomentumRate();
       MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredMomentumRateLinear, momentumRate, 3);
       MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredMomentumRateAngular, momentumRate, 0);
    }
 
-   private void convertAndAddSpatialAccelerationCommand(SpatialAccelerationCommand command)
+   private final Wrench tmpExternalWrench = new Wrench();
+   private void handleSpatialAccelerationCommand(SpatialAccelerationCommand command)
    {
       RigidBody controlledBody = command.getEndEffector();
       SpatialAccelerationVector accelerationVector = command.getSpatialAcceleration();
@@ -301,6 +297,27 @@ public class WholeBodyVirtualModelControlSolver
       VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
       virtualWrenchCommand.set(controlledBody, tmpWrench, command.getSelectionMatrix());
       virtualWrenchCommandList.addCommand(virtualWrenchCommand);
+
+      tmpExternalWrench.set(tmpWrench);
+      tmpExternalWrench.negate();
+      ExternalWrenchCommand externalWrenchCommand = new ExternalWrenchCommand();
+      externalWrenchCommand.set(controlledBody, tmpExternalWrench);
+      optimizationControlModule.submitExternalWrenchCommand(externalWrenchCommand);
+
+      optimizationControlModule.addSelection(command.getSelectionMatrix());
+   }
+
+   private void handleVirtualWrenchCommand(VirtualWrenchCommand command)
+   {
+      virtualWrenchCommandList.addCommand(command);
+
+      ExternalWrenchCommand externalWrenchCommand = new ExternalWrenchCommand();
+      tmpWrench.set(command.getVirtualWrench());
+      tmpWrench.negate();
+      externalWrenchCommand.set(command.getControlledBody(), tmpWrench);
+      optimizationControlModule.submitExternalWrenchCommand(externalWrenchCommand);
+
+      optimizationControlModule.addSelection(command.getSelectionMatrix());
    }
 
    private void submitJointAccelerationIntegrationCommand(JointAccelerationIntegrationCommand command)
