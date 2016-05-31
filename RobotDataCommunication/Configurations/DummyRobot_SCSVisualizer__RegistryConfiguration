@@ -1,5 +1,7 @@
 root*false*false
 root.DummyRobot*false*false
 root.remotemain*false*false
-root.remotemain.BeastLLAVisualizer*false*false
-root.remotemain.BeastLLAVisualizer.TestBeastLLA*false*false
+root.remotemain.ActuatorTestBed*false*false
+root.remotemain.ActuatorTestBed.TestActuator*false*false
+root.remotemain.ActuatorTestBed.TestActuator.testBedBeastTwitterDescription*false*false
+root.remotemain.ActuatorTestBed.ActuatorForcePositionController*false*false

@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.analogInput1</Variables>
+		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorRawTargetVelocity</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.positionActualValue</Variables>
+		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorPositionActualValue,root.remotemain.ActuatorTestBed.TestActuator.TestActuatorActuatorPositionActualValue</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.auxiliaryPositionActualValue</Variables>
+		<Variables>root.remotemain.ActuatorTestBed.TestActuatorActualActuatorForce,root.remotemain.ActuatorTestBed.TestActuatorActualJointForce</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.digitalInputs</Variables>
+		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorDesiredActuatorAmps</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.velocityActualValue</Variables>
+		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorDesiredJointTorque,root.remotemain.ActuatorTestBed.TestActuatorActualJointForce</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.TestBeastLLAModeOfOperation</Variables>
+		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorTorqueActualValue,root.remotemain.ActuatorTestBed.TestActuator.TestActuatorDesiredActuatorAmps</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.statusWord,root.remotemain.BeastLLAVisualizer.TestBeastLLA.TestBeastLLAControlWord</Variables>
+		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorTorqueActualValue</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -97,7 +97,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.torqueActaulValue</Variables>
+		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorActualFilteredJointVelocity</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -109,7 +109,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.positionFollowingError</Variables>
+		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorDesiredJointTorque</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -121,10 +121,10 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.elmoStatusRegister</Variables>
+		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorRawPositionActualValue,root.remotemain.ActuatorTestBed.TestActuator.TestActuatorActualFilteredJointVelocity</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
-			<ScalingMethod>1</ScalingMethod>
+			<ScalingMethod>0</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
@@ -133,21 +133,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.analogInput2</Variables>
+		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorDesiredActuatorAmps</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.BeastLLAVisualizer.TestBeastLLA.twitterTemperature</Variables>
-		<GraphConfiguration>
-			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -174,7 +162,7 @@ Tab1
 <Title>
 Tab2
 </Title>
-<Entry Boxes>TestBeastLLAModeOfOperation,TestBeastLLAEnableDrive,maxTorque,targetPosition</Entry Boxes>
+<Entry Boxes>TestActuatorDesiredJointTorque,desiredPosition,kp_TestActuatorPositionController,kd_TestActuatorPositionController,TestActuatorControlMode,actualVelocityFilterBreakFrequency,useImpedanceControl,kp_ImpedanceController,kd_ImpedanceController,kp_TestActuatorOffboardPositionController,kd_TestActuatorOffboardPositionController,forceDerivativeFilterBreakFrequency</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
