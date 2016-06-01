@@ -4,17 +4,10 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
-import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
@@ -31,24 +24,19 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class HoldPositionState extends AbstractFootControlState
 {
+   // During the partial foothold walking this command was split up to control the roll and pitch of
+   // the foot separately using only the ankle joints.
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
-
-   private final FeedbackControlCommandList output = new FeedbackControlCommandList();
-   private final OrientationFeedbackControlCommand angularXY = new OrientationFeedbackControlCommand();
-   private final OrientationFeedbackControlCommand angularZ = new OrientationFeedbackControlCommand();
-   private final PointFeedbackControlCommand linear = new PointFeedbackControlCommand();
 
    private static final boolean VISUALIZE = false;
    private static final double EPSILON = 0.010;
@@ -87,7 +75,6 @@ public class HoldPositionState extends AbstractFootControlState
    private final Vector3d tempLinearWeightVector = new Vector3d();
 
    private final FramePose bodyFixedControlledPose = new FramePose();
-   private final FramePoint bodyFixedControlledPoint = new FramePoint();
    private final ReferenceFrame soleFrame;
    private final ReferenceFrame desiredSoleFrame;
 
@@ -137,29 +124,7 @@ public class HoldPositionState extends AbstractFootControlState
       spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       bodyFixedControlledPose.setToZero(soleFrame);
       bodyFixedControlledPose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
-      bodyFixedControlledPoint.setToZero(soleFrame);
-      bodyFixedControlledPoint.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
-
-      RigidBody shin = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE).getSuccessor();
-      angularXY.set(shin, contactableFoot.getRigidBody());
-
-      angularZ.set(rootBody, contactableFoot.getRigidBody());
-      linear.set(rootBody, contactableFoot.getRigidBody());
-
-      linear.setBodyFixedPointToControl(bodyFixedControlledPoint);
-
-      DenseMatrix64F xySelectionMatrix = CommonOps.identity(6);
-      while (xySelectionMatrix.getNumRows() > 2)
-         MatrixTools.removeRow(xySelectionMatrix, 2);
-      angularXY.setSelectionMatrix(xySelectionMatrix);
-
-      DenseMatrix64F zSelectionMatrix = CommonOps.identity(6);
-      while (zSelectionMatrix.getNumRows() > 3)
-         MatrixTools.removeRow(zSelectionMatrix, 3);
-      MatrixTools.removeRow(zSelectionMatrix, 0);
-      MatrixTools.removeRow(zSelectionMatrix, 0);
-      angularZ.setSelectionMatrix(zSelectionMatrix);
 
       desiredSoleFrame = new ReferenceFrame(namePrefix + "DesiredSoleFrame", worldFrame)
       {
@@ -289,8 +254,6 @@ public class HoldPositionState extends AbstractFootControlState
       desiredCoP3d.setXYIncludingFrame(cop); // used to be desiredCoP
       desiredCoP3d.changeFrame(bodyFixedControlledPose.getReferenceFrame());
       bodyFixedControlledPose.setPosition(desiredCoP3d);
-      desiredCoP3d.changeFrame(bodyFixedControlledPoint.getReferenceFrame());
-      bodyFixedControlledPoint.set(desiredCoP3d);
 
       // Compute the desired position
       desiredSoleFrame.update();
@@ -303,26 +266,11 @@ public class HoldPositionState extends AbstractFootControlState
       yoAngularWeight.get(tempAngularWeightVector);
       yoLinearWeight.get(tempLinearWeightVector);
 
-
       spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
-
-      angularXY.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      angularXY.setGains(gains.getOrientationGains());
-      angularXY.setWeightsForSolver(tempAngularWeightVector);
-
-      angularZ.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      angularZ.setGains(gains.getOrientationGains());
-      angularZ.setWeightsForSolver(tempAngularWeightVector);
-
-      linear.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      linear.setGains(gains.getPositionGains());
-      linear.setWeightsForSolver(tempLinearWeightVector);
-      linear.setBodyFixedPointToControl(bodyFixedControlledPoint);
-
    }
 
    /**
@@ -390,13 +338,6 @@ public class HoldPositionState extends AbstractFootControlState
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-//      return spatialFeedbackControlCommand;
-
-      output.clear();
-      output.addCommand(angularXY);
-      output.addCommand(angularZ);
-      output.addCommand(linear);
-
-      return output;
+      return spatialFeedbackControlCommand;
    }
 }
