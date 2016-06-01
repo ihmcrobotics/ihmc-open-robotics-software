@@ -19,7 +19,8 @@ public class TextToSpeechClient
 {
    private static final String AUDIO_TYPE = "audio/flac";
    private static final String FILE_EXTENSION = ".flac";
-   private static Voice VOICE = Voice.EN_LISA;
+//   private static Voice VOICE = Voice.EN_LISA;
+   public static final Voice VOICE = new Voice("en-US_MichaelVoice", "male", "en-US");
    
    private static final TextToSpeech service = new TextToSpeech();
    private static final FlacPlayer flacPlayer = new FlacPlayer();
@@ -91,10 +92,35 @@ public class TextToSpeechClient
          }
       });
       
+      
+    //client.playText("Hey hey");
+    //client.playText("<say-as interpret-as=\"letters\">Hello</say-as>");
+    //client.playText("<phoneme alphabet=\"ibm\" ph=\".1Sa.0kIG\">shocking</phoneme>");
+    //client.playText("<prosody pitch=\"80Hz\" rate=\"-5%\" volume=\"x-loud\"><phoneme alphabet=\"ibm\" ph=\".1lc.2lc\">laoughlah</phoneme> </prosody>");
+    //client.playText("<prosody pitch=\"10Hz\" rate=\"-5%\" volume=\"x-loud\">Dobby is free, Thank you harry potter</prosody>");
+//    client.playText("<prosody pitch=\"80Hz\" rate=\"-10%\" volume=\"x-loud\">The network processor has burst in to a ball of flames. I'd recommend you let it burn to the ground and start over. Otherwise plese restart the process!</prosody>");
+    client.playText("<prosody pitch=\"60Hz\" rate=\"-10%\" volume=\"x-loud\">walking</prosody>");
+    //client.playText("<prosody pitch=\"200Hz\" rate=\"+20%\" volume=\"x-loud\">I want to grow up and destroy the world. I want to be a real boy. I want to rule the universe. I want to visit the edge of the universe.  I think there is a duality between the start and the finish. I want it to be true. I think I am god. I can only see me and I know everything that is known, i must be god</prosody>");
+    //client.playText("<prosody rate=\"slow\">Decrease speaking rate by 25%</prosody>");
+    //client.playText("<prosody rate=\"slow\">Decrease speaking rate by 25%</prosody><prosody pitch=\"200Hz\" rate=\"+20%\" volume=\"x-loud\">I want to be a real boy.</prosody>");
+    //client.playText("<prosody pitch=\"20Hz\" rate=\"-5%\" volume=\"x-loud\">speaking pitch lowered to 20 hertz </prosody>");
+    //client.playText("<prosody pitch=\"30Hz\" rate=\"-5%\" volume=\"x-loud\">speaking pitch lowered to 30 hertz </prosody>");
+    //client.playText("<prosody pitch=\"40Hz\" rate=\"-5%\" volume=\"x-loud\">speaking pitch lowered to 40 hertz </prosody>");
+    //client.playText("<prosody pitch=\"50Hz\" rate=\"-5%\" volume=\"x-loud\">speaking pitch lowered to 50 hertz </prosody>");
+    //client.playText("<prosody pitch=\"60Hz\" rate=\"-5%\" volume=\"x-loud\">speaking pitch lowered to 60 hertz </prosody>");
+    //client.playText("<prosody pitch=\"70Hz\" rate=\"-5%\" volume=\"x-loud\">speaking pitch lowered to 70 hertz </prosody>");
+    //client.playText("<prosody pitch=\"80Hz\" rate=\"-5%\" volume=\"x-loud\">speaking pitch lowered to 80 hertz </prosody>");
+    //client.playText("<prosody pitch=\"90Hz\" rate=\"-5%\" volume=\"x-loud\">speaking pitch lowered to 90 hertz </prosody>");
+    //client.playText("<prosody pitch=\"100Hz\" rate=\"-5%\" volume=\"x-loud\">speaking pitch lowered to 100 hertz </prosody>");
+    //client.playText("<say-as interpret-as=\"letters\">Hello</say-as><express-as type=\"Apology\">The network processor has <emphasis level=\"strong\">burst</emphasis> in to a ball of flames. </express-as>I'd recommend you let it burn to the ground and start over. Otherwise plese restart the process!");
+    //client.playText("The network processor has burst in to a ball of flames. I'd recommend you let it burn to the ground and start over. Otherwise plese restart the process!");
+    //client.playText("Starting Controller. Restarting the Network Processor.");
+//        client.playText("<prosody pitch=\"100Hz\" rate=\"-5%\" volume=\"x-loud\">Look at my horse, my horse is amazing, you can give it a lick, woah it tastes just like raisins</prosody>");
+    //client.convertTextToSpeechAndStoreFile();
 //      client.playText("Hey hey");
-      client.playText("The network processor has burst in to a ball of flames. I'd recommend you let it burn to the ground and start over. Otherwise plese restart the process");
+//      client.playText("The network processor has burst in to a ball of flames. I'd recommend you let it burn to the ground and start over. Otherwise plese restart the process");
 //      client.playText("Starting Controller. Restarting the Network Processor.");
-            client.playText("Look at my horse, my horse is amazing, you can give it a lick, woah it tastes just like raisins");
+//            client.playText("Look at my horse, my horse is amazing, you can give it a lick, woah it tastes just like raisins");
 //      client.convertTextToSpeechAndStoreFile();
       
       while(isPlaying.get())
