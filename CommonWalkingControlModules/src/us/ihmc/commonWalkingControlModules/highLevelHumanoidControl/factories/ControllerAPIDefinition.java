@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
@@ -72,6 +73,7 @@ public abstract class ControllerAPIDefinition
       statusMessages.add(WalkingStatusMessage.class);
       statusMessages.add(ManipulationAbortedStatus.class);
       statusMessages.add(HighLevelStateChangeStatusMessage.class);
+      statusMessages.add(TextToSpeechPacket.class);
 
       supportedStatusMessages = Collections.unmodifiableList(statusMessages);
    }
