@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorRawTargetVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorPositionActualValue,root.remotemain.ActuatorTestBed.TestActuator.TestActuatorActuatorPositionActualValue</Variables>
+		<Variables>root.remotemain.tester.var1</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ActuatorTestBed.TestActuatorActualActuatorForce,root.remotemain.ActuatorTestBed.TestActuatorActualJointForce</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorDesiredActuatorAmps</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorDesiredJointTorque,root.remotemain.ActuatorTestBed.TestActuatorActualJointForce</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorTorqueActualValue,root.remotemain.ActuatorTestBed.TestActuator.TestActuatorDesiredActuatorAmps</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorTorqueActualValue</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -97,7 +97,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorActualFilteredJointVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -109,7 +109,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorDesiredJointTorque</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -121,7 +121,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorRawPositionActualValue,root.remotemain.ActuatorTestBed.TestActuator.TestActuatorActualFilteredJointVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>0</ScalingMethod>
@@ -133,7 +133,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.ActuatorTestBed.TestActuator.TestActuatorDesiredActuatorAmps</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -162,7 +162,7 @@ Tab1
 <Title>
 Tab2
 </Title>
-<Entry Boxes>TestActuatorDesiredJointTorque,desiredPosition,kp_TestActuatorPositionController,kd_TestActuatorPositionController,TestActuatorControlMode,actualVelocityFilterBreakFrequency,useImpedanceControl,kp_ImpedanceController,kd_ImpedanceController,kp_TestActuatorOffboardPositionController,kd_TestActuatorOffboardPositionController,forceDerivativeFilterBreakFrequency</Entry Boxes>
+<Entry Boxes></Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
