@@ -102,7 +102,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       timeBeforeExploring = explorationParameters.getTimeBeforeExploring();
 
       autoCropToLineAfterExploration = new BooleanYoVariable(contactableFoot.getName() + "AutoCropToLineAfterExploration", registry);
-      autoCropToLineAfterExploration.set(!false);
+      autoCropToLineAfterExploration.set(false);
 
       timeToGoToCorner = explorationParameters.getTimeToGoToCorner();
       timeToGoToCorner.addVariableChangedListener(new VariableChangedListener()
