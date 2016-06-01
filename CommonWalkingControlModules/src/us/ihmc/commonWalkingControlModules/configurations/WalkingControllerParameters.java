@@ -74,7 +74,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getICPErrorThresholdToSpeedUpSwing();
 
-   public abstract ICPControlGains getICPControlGains();
+   public abstract ICPControlGains createICPControlGains(YoVariableRegistry registry);
 
    public abstract YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry);
 

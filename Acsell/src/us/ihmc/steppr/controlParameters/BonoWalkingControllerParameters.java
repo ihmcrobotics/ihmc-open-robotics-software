@@ -359,9 +359,9 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    }
 
    @Override
-   public ICPControlGains getICPControlGains()
+   public ICPControlGains createICPControlGains(YoVariableRegistry registry)
    {
-      ICPControlGains gains = new ICPControlGains();
+      ICPControlGains gains = new ICPControlGains("", registry);
 
       double kpParallel = 1.5;
       double kpOrthogonal = 1.8;
