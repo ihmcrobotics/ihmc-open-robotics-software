@@ -61,6 +61,7 @@ public class VirtualModelControlOptimizationControlModule
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
 
+   private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final List<RigidBody> bodiesInContact = new ArrayList<>();
    private final List<DenseMatrix64F> selectionMatrices = new ArrayList<>();
 
@@ -69,12 +70,11 @@ public class VirtualModelControlOptimizationControlModule
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
+      contactablePlaneBodies = toolbox.getContactablePlaneBodies();
 
       int rhoSize = WholeBodyControlCoreToolbox.rhoSize;
 
       double gravityZ = toolbox.getGravityZ();
-
-      List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
 
       if (DEBUG)
       {
@@ -144,6 +144,7 @@ public class VirtualModelControlOptimizationControlModule
 
       NoConvergenceException noConvergenceException = null;
 
+      // use the force optimization algorithm
       if (USE_MOMENTUM_QP)
       {
          try
@@ -169,14 +170,22 @@ public class VirtualModelControlOptimizationControlModule
 
          groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       }
+      // divide the load evenly among all contacting bodies
       else
       {
          double loadFraction = 1.0 / (double) bodiesInContact.size();
          CommonOps.scale(loadFraction, tempTaskObjective);
 
-         for (RigidBody controlledBody : bodiesInContact)
+         for (int i = 0; i < contactablePlaneBodies.size(); i++)
          {
-            Wrench wrench = new Wrench(centerOfMassFrame, centerOfMassFrame, tempTaskObjective);
+            RigidBody controlledBody = contactablePlaneBodies.get(i).getRigidBody();
+
+            Wrench wrench;
+            if (bodiesInContact.contains(controlledBody))
+               wrench = new Wrench(centerOfMassFrame, centerOfMassFrame, tempTaskObjective);
+            else
+               wrench = new Wrench(centerOfMassFrame, centerOfMassFrame, new DenseMatrix64F(Wrench.SIZE, 1));
+
             wrench.changeFrame(controlledBody.getBodyFixedFrame());
             wrench.changeBodyFrameAttachedToSameBody(controlledBody.getBodyFixedFrame());
             groundReactionWrenches.put(controlledBody, wrench);
@@ -184,9 +193,11 @@ public class VirtualModelControlOptimizationControlModule
       }
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
+      // get all forces for all contactable bodies
       Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
       List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
 
+      // record the momentum rate solution coming from the contact forces, minus gravity fixme we don't currently include external forces
       DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
       contactWrench.zero();
       for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
@@ -197,6 +208,7 @@ public class VirtualModelControlOptimizationControlModule
       CommonOps.add(contactWrench, gravityWrench, totalWrench);
       centroidalMomentumRateSolution.set(null, totalWrench);
 
+      // we don't nominally want this stuff
       if (DEBUG)
       {
          achievedLinearMomentumRate.set(totalWrench.get(3), totalWrench.get(4), totalWrench.get(5));
@@ -211,8 +223,9 @@ public class VirtualModelControlOptimizationControlModule
 
       virtualModelControlSolutionToPack.setJointsToCompute(jointsToOptimizeFor);
       virtualModelControlSolutionToPack.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
+      virtualModelControlSolutionToPack.setBodiesInContact(bodiesInContact);
       virtualModelControlSolutionToPack.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
-      virtualModelControlSolutionToPack.setCentroidalMomentumSelectionMatrix(momentumRateCommand.getSelectionMatrix());
+      virtualModelControlSolutionToPack.setCentroidalMomentumSelectionMatrix(momentumSelectionMatrix);
 
       if (noConvergenceException != null)
       {
@@ -335,6 +348,9 @@ public class VirtualModelControlOptimizationControlModule
       CommonOps.subtract(momentumRate, additionalExternalWrench, tempTaskObjective);
       CommonOps.subtract(tempTaskObjective, gravityWrench, tempTaskObjective);
       CommonOps.mult(momentumSelectionMatrix, tempTaskObjective, taskObjective);
+
+      // get the selected objective back out
+      CommonOps.multTransA(momentumSelectionMatrix, taskObjective, tempTaskObjective);
 
       if (DEBUG)
       {
