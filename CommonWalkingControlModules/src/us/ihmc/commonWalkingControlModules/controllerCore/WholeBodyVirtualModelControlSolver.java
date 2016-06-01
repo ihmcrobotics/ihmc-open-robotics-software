@@ -163,8 +163,10 @@ public class WholeBodyVirtualModelControlSolver
          virtualModelControlSolution = virtualModelControlModuleException.getVirtualModelControlSolution();
       }
 
+      // get output for contact forces
       Map<RigidBody, Wrench> externalWrenchSolution = virtualModelControlSolution.getExternalWrenchSolution();
       List<RigidBody> rigidBodiesWithExternalWrench = virtualModelControlSolution.getRigidBodiesWithExternalWrench();
+      List<RigidBody> bodiesInContact = virtualModelControlSolution.getBodiesInContact();
       SpatialForceVector centroidalMomentumRateSolution = virtualModelControlSolution.getCentroidalMomentumRateSolution();
 
       yoAchievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
@@ -172,7 +174,7 @@ public class WholeBodyVirtualModelControlSolver
       yoAchievedMomentumRateLinear.getFrameTupleIncludingFrame(achievedMomentumRateLinear);
 
       // submit forces for contact forces
-      for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
+      for (RigidBody rigidBody : bodiesInContact)
       {
          externalWrenchSolution.get(rigidBody).negate();
          virtualModelController.submitControlledBodyVirtualWrench(rigidBody, externalWrenchSolution.get(rigidBody), virtualModelControlSolution.getCentroidalMomentumSelectionMatrix());
@@ -183,7 +185,7 @@ public class WholeBodyVirtualModelControlSolver
       for (int i = 0; i < virtualWrenchCommandList.getNumberOfCommands(); i++)
       {
          virtualWrenchCommand.set(virtualWrenchCommandList.getCommand(i));
-         if (!rigidBodiesWithExternalWrench.contains(virtualWrenchCommand.getControlledBody()))
+         if (!bodiesInContact.contains(virtualWrenchCommand.getControlledBody()))
          {
             if (controlledBodies.contains(virtualWrenchCommand.getControlledBody()))
                virtualModelController.submitControlledBodyVirtualWrench(virtualWrenchCommand);
@@ -194,7 +196,6 @@ public class WholeBodyVirtualModelControlSolver
 
       virtualModelController.compute(virtualModelControlSolution);
       Map<InverseDynamicsJoint, Double> jointTorquesSolution = virtualModelControlSolution.getJointTorques();
-
 
       for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
       {
