@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.whiteBoard;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
@@ -124,12 +125,26 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
       setConnected(false);
       if (dataOutputStream != null)
       {
-         dataOutputStream.close();
+         try
+         {
+            dataOutputStream.close();
+         }
+         catch (SocketException socketException)
+         {
+            PrintTools.error(this, socketException.getMessage());
+         }
          dataOutputStream = null;
       }
       if (dataInputStream != null)
       {
-         dataInputStream.close();
+         try
+         {
+            dataInputStream.close();
+         }
+         catch (SocketException socketException)
+         {
+            PrintTools.error(this, socketException.getMessage());
+         }
          dataInputStream = null;
       }
    }
