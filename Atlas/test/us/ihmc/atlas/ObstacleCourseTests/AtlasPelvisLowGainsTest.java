@@ -40,7 +40,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
    @Override
    protected DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
-      
+
       return (DoubleYoVariable) scs.getVariable("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAxisAngleOrientationController",
                                                 "pelvisRotationErrorInBodyZ");
    }
@@ -48,13 +48,13 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
    @Override
    public String getKpPelvisOrientationName()
    {
-      return "kpPelvisOrientation";
+      return "kpXYAngularPelvisOrientation";
    }
 
    @Override
    public String getZetaPelvisOrientationName()
    {
-      return "zetaPelvisOrientation";
+      return "zetaXYAngularPelvisOrientation";
    }
 
 
@@ -65,7 +65,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
 //      InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener = new FancyInverseDynamicsCalculatorListener(controllersFullRobotModel, robot);
 //      return inverseDynamicsCalculatorListener;
    }
-   
+
    private class FancyInverseDynamicsCalculatorListener implements InverseDynamicsCalculatorListener
    {
       private final boolean visualize = true;
@@ -80,40 +80,40 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
       {
          this.controllersFullRobotModel = controllersFullRobotModel;
          this.simulatedRobot = simulatedRobot;
-         
+
          boolean headless = false;
          AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, headless);
 //         SDFFullRobotModel fullRobotModel = atlasRobotModel.createFullRobotModel();
-         
+
          boolean createCollisionMeshes = false;
          atlasRobotModel.setEnableJointDamping(false);
          robot = atlasRobotModel.createSdfRobot(createCollisionMeshes);
          robot.setGravity(gravityZ);
-         
+
          atlasInverseDynamicsCalculatorTestHelper = new DRCInverseDynamicsCalculatorTestHelper(controllersFullRobotModel, robot, visualize, gravityZ);
-         
+
 //         atlasInverseDynamicsCalculatorTestHelper =  AtlasInverseDynamicsCalculatorTestHelper.createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
          scs = atlasInverseDynamicsCalculatorTestHelper.getSimulationConstructionSet();
-         
+
          atlasInverseDynamicsCalculatorTestHelper.startSimulationOnAThread();
       }
-      
+
       @Override
       public void inverseDynamicsCalculatorIsDone(InverseDynamicsCalculator inverseDynamicsCalculator)
       {
          SDFFullRobotModel fullRobotModelInAtlasInverseDynamicsCalculatorTestHelper = atlasInverseDynamicsCalculatorTestHelper.getFullRobotModel();
          fullRobotModelInAtlasInverseDynamicsCalculatorTestHelper.updateFrames();
-         
+
          // Either of these two seem to work. Matching full robot model gives near exact results. Matching robot state gives really close results.
 //         atlasInverseDynamicsCalculatorTestHelper.setRobotStateToMatchOtherRobot(simulatedRobot);
          atlasInverseDynamicsCalculatorTestHelper.setRobotStateToMatchFullRobotModel();
-         
+
          atlasInverseDynamicsCalculatorTestHelper.setRobotsExternalForcesToMatchOtherRobot(simulatedRobot);
 //         atlasInverseDynamicsCalculatorTestHelper.setRobotsExternalForcesToMatchFullRobotModel(inverseDynamicsCalculator);
-         
+
          atlasInverseDynamicsCalculatorTestHelper.setRobotTorquesToMatchFullRobotModel();
 //       atlasInverseDynamicsCalculatorTestHelper.setRobotTorquesToMatchOtherRobot(simulatedRobot);
-         
+
          double epsilon = 1e-7;
 
 //       atlasInverseDynamicsCalculatorTestHelper.setRobotTorquesToMatchFullRobotModelButCheckAgainstOtherRobot(simulatedRobot, 0.1);
@@ -151,9 +151,9 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
             scs.setTime(scs.getTime() + 0.006);
             scs.tickAndUpdate();
          }
-         
+
          firstTick = false;
       }
-      
+
    }
 }
