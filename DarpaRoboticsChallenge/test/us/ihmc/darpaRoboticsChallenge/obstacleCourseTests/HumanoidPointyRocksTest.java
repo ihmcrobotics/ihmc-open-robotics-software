@@ -670,6 +670,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       DoubleYoVariable percentageChickenSupport = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("PercentageChickenSupport");
       percentageChickenSupport.set(chickenPercentage);
+
+      DoubleYoVariable timeBeforeExploring = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("ExplorationState_TimeBeforeExploring");
+      timeBeforeExploring.set(0.0);
    }
 
    @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.Fast})

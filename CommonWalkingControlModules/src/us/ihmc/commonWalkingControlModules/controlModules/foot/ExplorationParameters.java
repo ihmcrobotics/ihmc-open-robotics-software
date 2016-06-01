@@ -65,10 +65,12 @@ public class ExplorationParameters
    private final DoubleYoVariable timeToGoToCorner;
    private final DoubleYoVariable timeToStayInCorner;
    private final DoubleYoVariable copCommandWeight;
+   private final DoubleYoVariable timeBeforeExploring;
    private static final double defaultRecoverTime = 0.05;
    private static final double defaultTimeToGoToCorner = 0.3;
    private static final double defaultTimeToStayInCorner = 0.2;
    private static final double defaultCopCommandWeight = 2000.0;
+   private static final double defaultTimeBeforeExploring = 2.5;
 
    public ExplorationParameters(YoVariableRegistry parentRegistry)
    {
@@ -128,6 +130,8 @@ public class ExplorationParameters
       timeToStayInCorner.set(defaultTimeToStayInCorner);
       copCommandWeight = new DoubleYoVariable(namePrefix + "CopCommandWeight", registry);
       copCommandWeight.set(defaultCopCommandWeight);
+      timeBeforeExploring = new DoubleYoVariable(namePrefix + "TimeBeforeExploring", registry);
+      timeBeforeExploring.set(defaultTimeBeforeExploring);
    }
 
    public DoubleYoVariable getGeometricDetectionAngleThreshold()
@@ -235,4 +239,8 @@ public class ExplorationParameters
       return copCommandWeight;
    }
 
+   public DoubleYoVariable getTimeBeforeExploring()
+   {
+      return timeBeforeExploring;
+   }
 }

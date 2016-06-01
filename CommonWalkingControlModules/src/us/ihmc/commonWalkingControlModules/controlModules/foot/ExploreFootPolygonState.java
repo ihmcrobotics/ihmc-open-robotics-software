@@ -72,6 +72,8 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
    private final BooleanYoVariable autoCropToLineAfterExploration;
 
+   private final DoubleYoVariable timeBeforeExploring;
+
    public ExploreFootPolygonState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.EXPLORE_POLYGON, footControlHelper, registry);
@@ -97,6 +99,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       spiralAngle = new DoubleYoVariable(contactableFoot.getName() + "SpiralAngle", registry);
 
       recoverTime = explorationParameters.getRecoverTime();
+      timeBeforeExploring = explorationParameters.getTimeBeforeExploring();
 
       autoCropToLineAfterExploration = new BooleanYoVariable(contactableFoot.getName() + "AutoCropToLineAfterExploration", registry);
       autoCropToLineAfterExploration.set(!false);
@@ -183,17 +186,21 @@ public class ExploreFootPolygonState extends AbstractFootControlState
          partialFootholdControlModule.clearCoPGrid();
       }
 
-      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
-      boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
-      if (contactStateHasChanged)
+      boolean contactStateHasChanged = false;
+      if (timeInState > recoverTime.getDoubleValue() && !done)
       {
-         contactState.notifyContactStateHasChanged();
-         lastShrunkTime.set(timeInState);
-         spiralAngle.add(Math.PI/2.0);
-         done = false;
+         YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+         contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
+         if (contactStateHasChanged)
+         {
+            contactState.notifyContactStateHasChanged();
+            lastShrunkTime.set(timeInState);
+            spiralAngle.add(Math.PI/2.0);
+            done = false;
+         }
       }
 
-      if (timeInState > recoverTime.getDoubleValue() && !done)
+      if (timeInState > timeBeforeExploring.getDoubleValue() && timeInState > recoverTime.getDoubleValue() && !done)
       {
          // Foot exploration through CoP shifting...
          if (method == ExplorationMethod.SPRIAL)
