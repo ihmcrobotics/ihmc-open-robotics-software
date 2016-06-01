@@ -90,7 +90,7 @@ public class YoVariableServer implements RobotVisualizer
       skippedMainRegistryTicksDueFullBuffer = new IntegerYoVariable("skippedMainRegistryTicksDueFullBuffer", mainRegistry);
       for(ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry> registry : variableData)
       {
-         skippedRegistryTicksDueFullBuffer.put(registry.getLeft(), new IntegerYoVariable("skipped" + registry.getLeft().getName() +" RegistryTicksDueFullBuffer", mainRegistry));
+         skippedRegistryTicksDueFullBuffer.put(registry.getLeft(), new IntegerYoVariable("skipped" + registry.getLeft().getName() +"RegistryTicksDueFullBuffer", mainRegistry));
       }
       
       handshakeBuilder = new YoVariableHandShakeBuilder(mainBodies, dt);
@@ -233,6 +233,7 @@ public class YoVariableServer implements RobotVisualizer
       {
          skippedMainRegistryTicksDueFullBuffer.increment();
       }
+      producer.publishTimestampRealtime(timestamp);
       uid++;
    }
    
