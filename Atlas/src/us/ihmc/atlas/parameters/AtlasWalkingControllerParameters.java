@@ -598,8 +598,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double kpXY = 150.0;
       double kpZ = 200.0;
       double zetaXYZ = realRobot ? 0.7 : 0.7;
-      double kpOrientation = 200.0;
+
+      double kpXYOrientation = 200.0;
+      double kpZOrientation = 200.0;
       double zetaOrientation = 0.7;
+
       // Reduce maxPositionAcceleration from 30 to 6 to prevent too high acceleration when hitting joint limits.
       double maxPositionAcceleration = realRobot ? 6.0 : Double.POSITIVE_INFINITY;
 //      double maxPositionAcceleration = realRobot ? 30.0 : Double.POSITIVE_INFINITY;
@@ -610,7 +613,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
-      gains.setOrientationProportionalGains(kpOrientation, kpOrientation);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
       gains.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
       gains.createDerivativeGainUpdater(true);
@@ -624,7 +627,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootSE3Gains gains = new YoFootSE3Gains("HoldFoot", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 100.0;
+      double kpXY = 0.0; //100.0;
       double kpZ = 0.0;
       double zetaXYZ = realRobot ? 0.2 : 1.0;
       double kpXYOrientation = realRobot ? 100.0 : 200.0;
@@ -980,6 +983,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxAllowedDistanceCMPSupport()
    {
-      return 0.05;
+      return 0.06;
    }
 }

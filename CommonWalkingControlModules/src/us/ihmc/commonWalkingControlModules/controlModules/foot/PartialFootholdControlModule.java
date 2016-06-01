@@ -85,6 +85,8 @@ public class PartialFootholdControlModule
    private final FrameLine2d lineOfRotation;
 
    private final BooleanYoVariable useCoPOccupancyGrid;
+   private final BooleanYoVariable cropToConvexHullOfCoPs;
+   private final BooleanYoVariable fitLineToCoPs;
 
    private final int footCornerPoints;
 
@@ -157,6 +159,12 @@ public class PartialFootholdControlModule
 
       doPartialFootholdDetection = new BooleanYoVariable(namePrefix + "DoPartialFootholdDetection", registry);
       doPartialFootholdDetection.set(false);
+
+      cropToConvexHullOfCoPs = new BooleanYoVariable(namePrefix + "CropToConvexHullOfCoPs", registry);
+      cropToConvexHullOfCoPs.set(false);
+
+      fitLineToCoPs = new BooleanYoVariable(namePrefix + "FitLineToCoPs", registry);
+      fitLineToCoPs.set(false);
 
       double dt = momentumBasedController.getControlDT();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
@@ -246,6 +254,7 @@ public class PartialFootholdControlModule
       {
          doNothing();
       }
+
    }
 
    public void getShrunkPolygonCentroid(FramePoint2d centroidToPack)
@@ -299,25 +308,38 @@ public class PartialFootholdControlModule
 
    public boolean applyShrunkPolygon(YoPlaneContactState contactStateToModify)
    {
-      // if we are not doing partial foothold detection exit
-      if (!doPartialFootholdDetection.getBooleanValue())
+      if (cropToConvexHullOfCoPs.getBooleanValue())
       {
-         shrunkFootPolygon.set(backupFootPolygon);
-         return false;
+         footCoPOccupancyGrid.computeConvexHull(shrunkFootPolygon);
+         cropToConvexHullOfCoPs.set(false);
       }
-
-      // if the module did not find a partial foothold exit
-      if (footholdState.getEnumValue() == PartialFootholdState.FULL)
+      else if (fitLineToCoPs.getBooleanValue())
       {
-         shrunkFootPolygon.set(backupFootPolygon);
-         return false;
+         fitLine();
+         fitLineToCoPs.set(false);
       }
-
-      // if we shrunk the foothold too many times exit
-      if (shrinkCounter.getIntegerValue() >= shrinkMaxLimit.getIntegerValue())
+      else
       {
-         shrunkFootPolygon.set(backupFootPolygon);
-         return false;
+         // if we are not doing partial foothold detection exit
+         if (!doPartialFootholdDetection.getBooleanValue())
+         {
+            shrunkFootPolygon.set(backupFootPolygon);
+            return false;
+         }
+
+         // if the module did not find a partial foothold exit
+         if (footholdState.getEnumValue() == PartialFootholdState.FULL)
+         {
+            shrunkFootPolygon.set(backupFootPolygon);
+            return false;
+         }
+
+         // if we shrunk the foothold too many times exit
+         if (shrinkCounter.getIntegerValue() >= shrinkMaxLimit.getIntegerValue())
+         {
+            shrunkFootPolygon.set(backupFootPolygon);
+            return false;
+         }
       }
 
       // make sure the foot has the right number of contact points
@@ -353,6 +375,32 @@ public class PartialFootholdControlModule
       return true;
    }
 
+   private final FrameLine2d line = new FrameLine2d();
+   private final FrameLine2d lineL = new FrameLine2d();
+   private final FrameLine2d lineR = new FrameLine2d();
+   private static final double width = 0.01;
+   private void fitLine()
+   {
+      footCoPOccupancyGrid.fitLineToData(line);
+
+      lineL.setIncludingFrame(line);
+      lineL.shiftToLeft(width/2.0);
+
+      lineR.setIncludingFrame(line);
+      lineR.shiftToRight(width/2.0);
+
+      backupFootPolygon.set(shrunkFootPolygon);
+      shrunkFootPolygon.clear();
+      shrunkFootPolygon.addVertices(defaultFootPolygon.intersectionWith(lineL));
+      shrunkFootPolygon.addVertices(defaultFootPolygon.intersectionWith(lineR));
+      shrunkFootPolygon.update();
+   }
+
+   public void requestLineFit()
+   {
+      fitLineToCoPs.set(true);
+   }
+
    public void reset()
    {
       shrinkCounter.set(0);
@@ -378,5 +426,20 @@ public class PartialFootholdControlModule
    public void getSupportPolygon(FrameConvexPolygon2d polygonToPack)
    {
       polygonToPack.setIncludingFrame(shrunkFootPolygon);
+   }
+
+   public void clearCoPGrid()
+   {
+      footCoPOccupancyGrid.reset();
+   }
+
+   public void turnOffCropping()
+   {
+      doPartialFootholdDetection.set(false);
+   }
+
+   public void turnOnCropping()
+   {
+      doPartialFootholdDetection.set(true);
    }
 }

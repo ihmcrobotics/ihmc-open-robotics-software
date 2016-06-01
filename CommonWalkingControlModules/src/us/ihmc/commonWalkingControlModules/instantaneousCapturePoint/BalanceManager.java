@@ -51,6 +51,8 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class BalanceManager
 {
+   private static final double allowedIcpError = 0.015;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -248,7 +250,7 @@ public class BalanceManager
          if (supportLeg == null)
          {
             getICPError(icpError2d);
-            boolean icpErrorSmall = icpError2d.lengthSquared() < 0.03 * 0.03;
+            boolean icpErrorSmall = icpError2d.lengthSquared() < allowedIcpError * allowedIcpError;
             if (icpErrorSmall)
             {
                useHighBodyLinearMomentumWeight.set(false);
@@ -327,6 +329,12 @@ public class BalanceManager
          polygonShrinker.shrinkConstantDistanceInto(safeArea, 0.05, tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
+      else
+      {
+         polygonShrinker.shrinkConstantDistanceInto(safeArea, 0.02, tempPolygon1);
+         safeArea.setIncludingFrameAndUpdate(tempPolygon1);
+      }
+
       safeArea.changeFrameAndProjectToXYPlane(worldFrame);
       yoSafeICPArea.setFrameConvexPolygon2d(safeArea);
 
@@ -337,18 +345,17 @@ public class BalanceManager
       boolean icpInSafeArea = safeArea.isPointInside(tmpCapturePoint);
 
       // check the icp tracking error
-      getICPError(icpError2d);
-      boolean icpErrorSmall = icpError2d.lengthSquared() < 0.03 * 0.03;
+//      getICPError(icpError2d);
+//      boolean icpErrorSmall = icpError2d.lengthSquared() < allowedIcpError * allowedIcpError;
 
       if (!icpInSafeArea)
       {
          shouldUseUpperBodyLinearMomentum.set(true);
       }
-      else if (icpErrorSmall)
+      else
       {
          shouldUseUpperBodyLinearMomentum.set(false);
       }
-
    }
 
    public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
