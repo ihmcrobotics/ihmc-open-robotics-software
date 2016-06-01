@@ -12,7 +12,6 @@ import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobD
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.ihmcPerception.vision.HSVValue;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

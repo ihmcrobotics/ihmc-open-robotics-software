@@ -6,12 +6,12 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateComm
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
-public class EnableLidarBehavior extends BehaviorInterface
+public class EnableBehaviorOnlyLidarBehavior extends BehaviorInterface
 {
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private DepthDataStateCommand enableLidarPacket;
 
-   public EnableLidarBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public EnableBehaviorOnlyLidarBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
 
@@ -20,7 +20,7 @@ public class EnableLidarBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      enableLidarPacket = new DepthDataStateCommand(LidarState.ENABLE);
+      enableLidarPacket = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
 
       if (!packetHasBeenSent.getBooleanValue() && (enableLidarPacket != null))
       {

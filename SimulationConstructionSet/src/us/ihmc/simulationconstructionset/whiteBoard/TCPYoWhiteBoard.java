@@ -20,128 +20,170 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
    private int port;
 
    private ServerSocket serverSocket;
-   private Socket clientSocket;
-   
-   private boolean closed = true;
-   
+   private Socket tcpSocket;
+
+   private boolean tcpThreadRunning = true;
+
+   /**
+    * Server constructor.
+    */
    public TCPYoWhiteBoard(String name, final int port)
-   {      
+   {
       super(name, true, true);
-      
+
       this.port = port;
       this.ipAddress = null;
    }
 
+   /**
+    * Client constructor.
+    */
    public TCPYoWhiteBoard(String name, String ipAddress, int port)
-   {      
+   {
       super(name, true, true);
-      
+
       this.ipAddress = ipAddress;
       this.port = port;
    }
-   
+
    public void startTCPThread()
    {
-      if (!closed)
-         throw new RuntimeException("Already started");
-      
-      closed = false;
-      
-      ThreadTools.startAThread(this, getName() + "TCPThread");
-   }
+      if (!tcpThreadRunning)
+         throw new RuntimeException("Already running");
 
-   @Override
-   public void run()
-   {      
-      if (isAServer())
-         runServer();
-      else
-         runClient();
-   }
+      tcpThreadRunning = false;
 
-   @Override
-   public void whiteBoardSpecificConnect() throws IOException
-   {
-      super.whiteBoardSpecificConnect();
+      ThreadTools.startAThread(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            if (isAServer())
+               runServer();
+            else
+               runClient();
+         }
+      }, getName() + "TCPThread");
    }
 
    private void runServer()
    {
-      while (!closed)
+      while (!tcpThreadRunning)
       {
          try
          {
-            PrintTools.debug(VERBOSE, this, "runServer(): Waiting for server socket to accept");
-            
-            serverSocket = new ServerSocket(port);
-            // Get the port since if you use 0, Java will find one that is free
-            this.port = serverSocket.getLocalPort();
-            Socket socket = serverSocket.accept();
-            socket.setTcpNoDelay(true);
-            PrintTools.debug(VERBOSE, this, "runServer(): Socket accepted. Creating dataInputStream and dataOutputStream");
+            synchronized (getConnectionConch())
+            {
+               PrintTools.debug(VERBOSE, this, "runServer(): Accepting on port " + port);
 
-            DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-            DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+               serverSocket = new ServerSocket(port);
+               tcpSocket = serverSocket.accept();
 
-            PrintTools.debug(VERBOSE, this, "runServer(): DataInputStream and dataOutputStream created");
+               setupSocket();
+            }
 
-            super.setDataStreams(dataInputStream, dataOutputStream);
-            super.run();
-            
-            serverSocket.close();
+            setupAndConnect();
+            runHandlingThread();
+
+            closeYoWhiteBoard();
          }
-         catch (IOException e)
+         catch (IOException connectIOException)
          {
-            e.printStackTrace();
+            PrintTools.error(this, connectIOException.getMessage());
+
+            try
+            {
+               closeYoWhiteBoard();
+            }
+            catch (IOException closeIOException)
+            {
+               closeIOException.printStackTrace();
+            }
          }
+
+         ThreadTools.sleepSeconds(1.0);
       }
    }
 
    private void runClient()
    {
-      while (!closed)
+      while (!tcpThreadRunning)
       {
          try
          {
-            PrintTools.debug(VERBOSE, this, "runClient(): Connecting to " + ipAddress + " : " + port);
+            synchronized (getConnectionConch())
+            {
+               PrintTools.debug(VERBOSE, this, "runClient(): Connecting to " + ipAddress + ":" + port);
 
-            clientSocket = new Socket(ipAddress, port);
-            clientSocket.setTcpNoDelay(true);
+               tcpSocket = new Socket(ipAddress, port);
 
-            DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
-            DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream()));
-
-            PrintTools.debug(VERBOSE, this, "runClient(): Connected to " + ipAddress + " : " + port);
-
-            super.setDataStreams(dataInputStream, dataOutputStream);
-            super.run();
+               setupSocket();
+            }
             
-            clientSocket.close();
+            setupAndConnect();
+            runHandlingThread();
+
+            closeYoWhiteBoard();
          }
-         catch (ConnectException e)
+         catch (ConnectException connectException)
          {
-            PrintTools.error("Failed to connect to " + ipAddress + ":" + port);
-            ThreadTools.sleep(500);
+            PrintTools.error(this, "Failed to connect to " + ipAddress + ":" + port);
+            PrintTools.error(this, connectException.getMessage());
          }
-         catch (IOException e)
+         catch (IOException connectIOException)
          {
-            e.printStackTrace();
+            connectIOException.printStackTrace();
+
+            try
+            {
+               closeYoWhiteBoard();
+            }
+            catch (IOException closeIOException)
+            {
+               closeIOException.printStackTrace();
+            }
          }
+
+         ThreadTools.sleepSeconds(1.0);
       }
    }
-   
-   @Override
-   public void whiteBoardSpecificClose() throws IOException
+
+   private void setupSocket() throws IOException
    {
-      closed = true;
-      
-      if (serverSocket != null) serverSocket.close();
-      if (clientSocket != null) clientSocket.close();
-      
+      tcpSocket.setTcpNoDelay(true);
+
+      DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(tcpSocket.getInputStream()));
+      DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(tcpSocket.getOutputStream()));
+
+      PrintTools.debug(VERBOSE, this, "Connected to " + tcpSocket.getRemoteSocketAddress());
+
+      super.setDataStreams(dataInputStream, dataOutputStream);
+   }
+
+   public boolean isTCPSocketConnected()
+   {
+      return tcpSocket != null && tcpSocket.isConnected();
+   }
+
+   @Override
+   public void closeYoWhiteBoard() throws IOException
+   {
+      super.closeYoWhiteBoard();
+
+      if (serverSocket != null)
+         serverSocket.close();
+      if (tcpSocket != null)
+         tcpSocket.close();
+
       serverSocket = null;
-      clientSocket = null;
-      
-      super.whiteBoardSpecificClose();
+      tcpSocket = null;
+   }
+
+   public void close() throws IOException
+   {
+      tcpThreadRunning = false;
+
+      closeYoWhiteBoard();
    }
 
    @Override
