@@ -75,9 +75,8 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    public ExploreFootPolygonState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.EXPLORE_POLYGON, footControlHelper, registry);
-      
-      if (robotSide == RobotSide.LEFT) method = ExplorationMethod.FAST_LINE;
-      else method = ExplorationMethod.LINES;
+
+      method = ExplorationMethod.LINES;
 
       dt = momentumBasedController.getControlDT();
       ExplorationParameters explorationParameters =
@@ -193,7 +192,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
          spiralAngle.add(Math.PI/2.0);
          done = false;
       }
-      
+
       if (timeInState > recoverTime.getDoubleValue() && !done)
       {
          // Foot exploration through CoP shifting...

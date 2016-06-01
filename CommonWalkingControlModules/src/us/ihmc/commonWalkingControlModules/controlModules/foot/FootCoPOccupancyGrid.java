@@ -29,7 +29,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class FootCoPOccupancyGrid
 {
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    private static final double defaultThresholdForCellActivation = 1.0;
    private static final double defaultDecayRate = 1.0;
 

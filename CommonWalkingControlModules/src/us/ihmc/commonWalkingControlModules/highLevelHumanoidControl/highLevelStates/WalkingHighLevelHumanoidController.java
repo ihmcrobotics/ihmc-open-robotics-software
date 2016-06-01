@@ -585,7 +585,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       if (pelvisOrientationManager != null)
          pelvisOrientationManager.compute();
 
-      boolean keepCMPInsideSupportPolygon =   true;
+      boolean keepCMPInsideSupportPolygon = true;
       if (manipulationControlModule != null && manipulationControlModule.isAtLeastOneHandLoadBearing())
          keepCMPInsideSupportPolygon = false;
 
