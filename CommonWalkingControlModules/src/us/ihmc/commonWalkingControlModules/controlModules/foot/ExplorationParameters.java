@@ -46,7 +46,7 @@ public class ExplorationParameters
    private final DoubleYoVariable perpendicluarCopErrorThreshold;
    private final DoubleYoVariable copAllowedAreaOpeningAngle;
    private static final double defaultPerpendicluarCopErrorThreshold = 0.005;
-   private static final double defaultCopAllowedAreaOpeningAngle = 22.5 * Math.PI/180.0;
+   private static final double defaultCopAllowedAreaOpeningAngle = 45.0 * Math.PI/180.0;
 
    /** Parameters for the velocity based foothold detection */
    private final DoubleYoVariable stableLoRAngularVelocityThreshold;
