@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.robotics.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -173,7 +172,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
    {
-      return !true; // TODO Seems to work well but still need to be heavily tested on the robot.
+      return true; // TODO Seems to work well but still need to be heavily tested on the robot.
    }
 
    @Override
@@ -596,18 +595,20 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-//      new YoIndependentSE3PIDGains(prefix, registry)
-
-      double kpXY = 200.0; //150.0;
-      double kpZ = 300.0; //200.0;
+      double kpXY = 200.0;  // 150.0;
+      double kpZ = 300.0;   // 200.0;
       double zetaXYZ = realRobot ? 0.7 : 0.7;
+
       double kpXYOrientation = 300.0;
       double kpZOrientation = 200.0;
       double zetaOrientation = 0.7;
+
       // Reduce maxPositionAcceleration from 30 to 6 to prevent too high acceleration when hitting joint limits.
-      double maxPositionAcceleration = realRobot ? 18.0 : Double.POSITIVE_INFINITY;
+      // Increase maxPositionAcceleration from 6 to 12 for better swing foot tracking during fast swings
+      double maxPositionAcceleration = realRobot ? 12.0 : Double.POSITIVE_INFINITY;
 //      double maxPositionAcceleration = realRobot ? 30.0 : Double.POSITIVE_INFINITY;
-      double maxPositionJerk = realRobot ? 450.0 : Double.POSITIVE_INFINITY;
+      // Increase maxPositionAcceleration from 150 to 300 for better swing foot tracking during fast swings
+      double maxPositionJerk = realRobot ? 300.0 : Double.POSITIVE_INFINITY;
       double maxOrientationAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxOrientationJerk = realRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
@@ -985,6 +986,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxAllowedDistanceCMPSupport()
    {
-      return 0.05; //0.075;
+      return 0.06;
    }
 }
