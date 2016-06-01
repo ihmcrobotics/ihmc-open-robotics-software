@@ -102,7 +102,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean doToeOffIfPossible()
    {
-      return !true;
+      return true;
    }
 
    @Override
@@ -178,7 +178,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean allowAutomaticManipulationAbort()
    {
-      return !true;
+      return true;
    }
 
    @Override
@@ -595,20 +595,18 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 200.0;  // 150.0;
-      double kpZ = 300.0;   // 200.0;
+      double kpXY = 150.0;
+      double kpZ = 200.0;
       double zetaXYZ = realRobot ? 0.7 : 0.7;
 
-      double kpXYOrientation = 300.0;
+      double kpXYOrientation = 200.0;
       double kpZOrientation = 200.0;
       double zetaOrientation = 0.7;
 
       // Reduce maxPositionAcceleration from 30 to 6 to prevent too high acceleration when hitting joint limits.
-      // Increase maxPositionAcceleration from 6 to 12 for better swing foot tracking during fast swings
-      double maxPositionAcceleration = realRobot ? 12.0 : Double.POSITIVE_INFINITY;
+      double maxPositionAcceleration = realRobot ? 6.0 : Double.POSITIVE_INFINITY;
 //      double maxPositionAcceleration = realRobot ? 30.0 : Double.POSITIVE_INFINITY;
-      // Increase maxPositionAcceleration from 150 to 300 for better swing foot tracking during fast swings
-      double maxPositionJerk = realRobot ? 300.0 : Double.POSITIVE_INFINITY;
+      double maxPositionJerk = realRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxOrientationAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxOrientationJerk = realRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
@@ -901,8 +899,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean doFancyOnToesControl()
    {
-      return true;
-//      return target != DRCRobotModel.RobotTarget.REAL_ROBOT;
+      return target != DRCRobotModel.RobotTarget.REAL_ROBOT;
    }
 
    @Override
