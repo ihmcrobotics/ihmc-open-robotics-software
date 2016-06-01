@@ -34,11 +34,11 @@ public class ICPProportionalController
    private final FrameVector2d icpIntegral = new FrameVector2d(worldFrame);
 
    private final double controlDT;
-   private final DoubleYoVariable captureKpParallelToMotion = new DoubleYoVariable("captureKpParallel", registry);
-   private final DoubleYoVariable captureKpOrthogonalToMotion = new DoubleYoVariable("captureKpOrthogonal", registry);
+   private final DoubleYoVariable captureKpParallelToMotion;
+   private final DoubleYoVariable captureKpOrthogonalToMotion;
 
-   private final DoubleYoVariable captureKi = new DoubleYoVariable("captureKi", registry);
-   private final DoubleYoVariable captureKiBleedoff = new DoubleYoVariable("captureKiBleedoff", registry);
+   private final DoubleYoVariable captureKi;
+   private final DoubleYoVariable captureKiBleedoff;
 
    private final Vector2dZUpFrame icpVelocityDirectionFrame;
 
@@ -63,10 +63,10 @@ public class ICPProportionalController
       icpPosition = new YoFramePoint("icpPosition", ReferenceFrame.getWorldFrame(), registry);
       parentRegistry.addChild(registry);
 
-      captureKpParallelToMotion.set(gains.getKpParallelToMotion());
-      captureKpOrthogonalToMotion.set(gains.getKpOrthogonalToMotion());
-      captureKi.set(gains.getKi());
-      captureKiBleedoff.set(gains.getKiBleedOff());
+      captureKpParallelToMotion = gains.getYoKpParallelToMotion();
+      captureKpOrthogonalToMotion = gains.getYoKpOrthogonalToMotion();
+      captureKi = gains.getYoKi();
+      captureKiBleedoff = gains.getYoKiBleedOff();
 
       keepCMPInsideSupportPolygon.set(false);
       maxDistanceCMPSupport.set(maxAllowedDistanceCMPSupport);
