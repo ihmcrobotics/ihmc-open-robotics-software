@@ -84,7 +84,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
       String[] armJointNames = createArmJointNames();
-      DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilterOne", defaultFilterBreakFrequency);
+      DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", defaultFilterBreakFrequency);
       DoubleYoVariable wristForceAlphaFilter = sensorProcessing.createAlphaFilter("wristForceAlphaFilter", defaultFilterBreakFrequency);
       DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
       jointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
