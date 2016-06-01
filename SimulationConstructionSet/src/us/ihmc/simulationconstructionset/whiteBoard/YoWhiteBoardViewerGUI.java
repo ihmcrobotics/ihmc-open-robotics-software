@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class YoWhiteBoardViewerGUI
 {
-   private final DataStreamYoWhiteBoard whiteBoard;
+   private final UDPYoWhiteBoard whiteBoard;
    
    public YoWhiteBoardViewerGUI(String ipAddress, int sendPort, int receivePort) throws IOException
    {
@@ -21,8 +21,7 @@ public class YoWhiteBoardViewerGUI
             
       whiteBoard = new UDPYoWhiteBoard("whiteBoardViewer", runThisOneFirst, ipAddress, sendPort, receivePort, false, createYoVariablesOnConnect, registry);
             
-      Thread thread = new Thread(whiteBoard);
-      thread.start();
+      whiteBoard.startUDPThread();
       
       while(!whiteBoard.haveVariablesToReadAndWriteBeenSet())
       {
