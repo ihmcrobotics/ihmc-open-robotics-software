@@ -32,6 +32,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.ihmcPerception.vision.HSVValue;
+import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -47,6 +49,8 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 public class PickUpBallBehavior extends BehaviorInterface
 {
    private static final boolean FILTER_KNOWN_COLORS_TO_SPEED_UP = false;
+   
+   private static final HSVRange YELLOW_BALL = new HSVRange(new HSVValue(24.08, 82.65, 189.0), new HSVValue(35.28, 100.6, 255.0));
    
    private final PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement;
 
@@ -433,46 +437,6 @@ public class PickUpBallBehavior extends BehaviorInterface
       pelvisGoHomeBehavior.setInput(goHomepelvisMessage);
       GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, pelvisGoHomeBehavior, yoTime, 0);
 
-      BehaviorTask goToDropBallInitialLocationTask = new BehaviorTask(wholeBodyBehavior, yoTime, 0)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            coactiveElement.currentState.set(BehaviorState.PUTTING_BALL_IN_BASKET);
-            FramePoint point = new FramePoint(referenceFrames.getChestFrame(), 0.5, 0.1, 0);
-
-            wholeBodyBehavior.setSolutionQualityThreshold(2.01);
-            wholeBodyBehavior.setTrajectoryTime(6);
-            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(-90), Math.toRadians(45), Math.toRadians(-90));
-            wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
-
-            FramePoint rhPoint = new FramePoint(referenceFrames.getChestFrame(), 0.5, -0.25, 0);
-            FrameOrientation rhOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), 0, 0);
-
-            wholeBodyBehavior.setDesiredHandPose(RobotSide.RIGHT, rhPoint, rhOr);
-
-         }
-      };
-      BehaviorTask goToDropBallFinalLocationTask = new BehaviorTask(wholeBodyBehavior, yoTime, 0)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            coactiveElement.currentState.set(BehaviorState.PUTTING_BALL_IN_BASKET);
-            FramePoint point = new FramePoint(referenceFrames.getChestFrame(), 0.5, -0.1, 0);
-
-            wholeBodyBehavior.setSolutionQualityThreshold(2.01);
-            wholeBodyBehavior.setTrajectoryTime(6);
-            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(-90), Math.toRadians(20), Math.toRadians(-90));
-            wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
-
-            FramePoint rhPoint = new FramePoint(referenceFrames.getChestFrame(), 0.5, -0.25, 0);
-            FrameOrientation rhOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(90), 0, 0);
-
-            wholeBodyBehavior.setDesiredHandPose(RobotSide.RIGHT, rhPoint, rhOr);
-
-         }
-      };
 
       GoHomeMessage goHomeLeftArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 3);
       armGoHomeLeftBehavior.setInput(goHomeLeftArmMessage);
@@ -494,7 +458,14 @@ public class PickUpBallBehavior extends BehaviorInterface
 
       ArmTrajectoryMessage rightHandBucketLocation1Message = new ArmTrajectoryMessage(RobotSide.RIGHT, 3, rightHandBucketLocation1);
 
-      ArmTrajectoryTask rightHandBucketLocation1Task = new ArmTrajectoryTask(rightHandBucketLocation1Message, armTrajectoryBehavior, yoTime);
+      ArmTrajectoryTask rightHandBucketLocation1Task = new ArmTrajectoryTask(rightHandBucketLocation1Message, armTrajectoryBehavior, yoTime)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            coactiveElement.currentState.set(BehaviorState.PUTTING_BALL_IN_BASKET);
+         }
+      };
 
       double[] leftHandBucketLocation1 = new double[] {-0.5609186812662719, -0.39273790125704305, 1.89931104400202, 1.8345084796174007, -1.9173410679363112,
             -0.7657081703756509, -0.7098631227127279};
