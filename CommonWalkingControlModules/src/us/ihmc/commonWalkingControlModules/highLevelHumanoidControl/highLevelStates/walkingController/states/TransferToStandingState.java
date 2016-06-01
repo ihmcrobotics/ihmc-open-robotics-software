@@ -44,7 +44,7 @@ public class TransferToStandingState extends WalkingState
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
 
-      doFootExplorationInTransferToStanding.set(false);
+      doFootExplorationInTransferToStanding.set(true);
    }
 
    @Override

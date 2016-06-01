@@ -157,7 +157,7 @@ public class BalanceManager
       pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, bipedSupportPolygons, pelvisXYControlGains, registry);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
-      useUpperBodyLinearMomentumIfFalling.set(false);
+      useUpperBodyLinearMomentumIfFalling.set(true);
 
       String graphicListName = "BalanceManager";
 

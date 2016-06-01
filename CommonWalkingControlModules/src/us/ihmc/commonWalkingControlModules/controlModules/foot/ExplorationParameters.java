@@ -19,14 +19,14 @@ public class ExplorationParameters
    /** Parameters for the geometric foothold detection */
    private final DoubleYoVariable geometricDetectionAngleThreshold;
    private final DoubleYoVariable geometricDetectionPlanePointAlpha;
-   private final static double defaultGeometricDetectionAngleThreshold = 10.0 * Math.PI/180.0;
+   private final static double defaultGeometricDetectionAngleThreshold = 15.0 * Math.PI/180.0;
    private final static double defaultGeometricDetectionPlanePointAlpha = 0.99;
 
    /** Parameters for the cop occupancy grid */
    private final DoubleYoVariable copGridThresholdForOccupancy;
    private final DoubleYoVariable copGridDecayAlpha;
    private static final double defaultCopGridThresholdForOccupancy = 3.0;
-   private static final double defaultCopGridDecayAlpha = 0.997;
+   private static final double defaultCopGridDecayAlpha = 1.0;
 
    /** Parameters for the partial foothold control module */
    private final BooleanYoVariable useCopOccupancyGrid;

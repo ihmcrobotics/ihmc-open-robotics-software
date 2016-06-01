@@ -102,7 +102,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean doToeOffIfPossible()
    {
-      return true;
+      return false;
    }
 
    @Override
@@ -178,7 +178,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean allowAutomaticManipulationAbort()
    {
-      return true;
+      return false;
    }
 
    @Override
@@ -592,18 +592,17 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 150.0;
-      double kpZ = 200.0;
+      double kpXY = 200.0;
+      double kpZ = 300.0;
       double zetaXYZ = realRobot ? 0.7 : 0.7;
 
-      double kpXYOrientation = 200.0;
+      double kpXYOrientation = 300.0;
       double kpZOrientation = 200.0;
       double zetaOrientation = 0.7;
 
-      // Reduce maxPositionAcceleration from 30 to 6 to prevent too high acceleration when hitting joint limits.
-      double maxPositionAcceleration = realRobot ? 6.0 : Double.POSITIVE_INFINITY;
-//      double maxPositionAcceleration = realRobot ? 30.0 : Double.POSITIVE_INFINITY;
-      double maxPositionJerk = realRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      // increased from 6->18 and 150->450 for better tracking during fast swings
+      double maxPositionAcceleration = realRobot ? 18.0 : Double.POSITIVE_INFINITY;
+      double maxPositionJerk = realRobot ? 450.0 : Double.POSITIVE_INFINITY;
       double maxOrientationAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxOrientationJerk = realRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
@@ -896,7 +895,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean doFancyOnToesControl()
    {
-      return target != DRCRobotModel.RobotTarget.REAL_ROBOT;
+      return true;
    }
 
    @Override
