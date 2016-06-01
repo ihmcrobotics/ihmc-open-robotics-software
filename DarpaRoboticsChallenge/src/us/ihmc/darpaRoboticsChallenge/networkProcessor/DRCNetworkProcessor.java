@@ -34,7 +34,6 @@ public class DRCNetworkProcessor
    public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       packetRouter = new PacketRouter<>(PacketDestination.class);
-      packetRouter.setPacketTypeToDebug(TextToSpeechPacket.class);
       try
       {
          setupControllerCommunicator(params);

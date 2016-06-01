@@ -22,6 +22,8 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
 
    private final YoVariableRegistry machineWritableYoVariableRegistry;
    private final YoVariableRegistry userInterfaceWritableYoVariableRegistry;
+   
+   private int connectionVerificationCounter = 0;
 
    /**
     * Server constructor.
@@ -130,15 +132,27 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
             {
                writeData();
                readData();
+               
+               if (connectionVerificationCounter < 5)
+               {
+                  connectionVerificationCounter++;
+                  
+                  if (connectionVerificationCounter == 5)
+                  {
+                     PrintTools.info(this, "Connected! Syncing data.");
+                  }
+               }
             }
          }
          catch (Exception exception)
          {
+            connectionVerificationCounter = 0;
+            
             PrintTools.error(this, exception.getMessage());
             while (!tcpYoWhiteBoard.isTCPSocketConnected())
             {
                PrintTools.debug(true, this, "Waiting for TCP socket to connect.");
-               ThreadTools.sleepSeconds(2.0);
+               ThreadTools.sleepSeconds(3.0);
             }
             
             try
