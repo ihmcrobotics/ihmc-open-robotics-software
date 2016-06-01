@@ -19,14 +19,14 @@ public class ExplorationParameters
    /** Parameters for the geometric foothold detection */
    private final DoubleYoVariable geometricDetectionAngleThreshold;
    private final DoubleYoVariable geometricDetectionPlanePointAlpha;
-   private final static double defaultGeometricDetectionAngleThreshold = 15.0 * Math.PI/180.0;
+   private final static double defaultGeometricDetectionAngleThreshold = 10.0 * Math.PI/180.0;
    private final static double defaultGeometricDetectionPlanePointAlpha = 0.99;
 
    /** Parameters for the cop occupancy grid */
    private final DoubleYoVariable copGridThresholdForOccupancy;
    private final DoubleYoVariable copGridDecayAlpha;
    private static final double defaultCopGridThresholdForOccupancy = 3.0;
-   private static final double defaultCopGridDecayAlpha = 1.0; //0.997;
+   private static final double defaultCopGridDecayAlpha = 0.997;
 
    /** Parameters for the partial foothold control module */
    private final BooleanYoVariable useCopOccupancyGrid;
@@ -65,9 +65,9 @@ public class ExplorationParameters
    private final DoubleYoVariable timeToGoToCorner;
    private final DoubleYoVariable timeToStayInCorner;
    private final DoubleYoVariable copCommandWeight;
-   private static final double defaultRecoverTime = 2.5;
+   private static final double defaultRecoverTime = 0.05;
    private static final double defaultTimeToGoToCorner = 0.3;
-   private static final double defaultTimeToStayInCorner = 0.25;
+   private static final double defaultTimeToStayInCorner = 0.2;
    private static final double defaultCopCommandWeight = 2000.0;
 
    public ExplorationParameters(YoVariableRegistry parentRegistry)

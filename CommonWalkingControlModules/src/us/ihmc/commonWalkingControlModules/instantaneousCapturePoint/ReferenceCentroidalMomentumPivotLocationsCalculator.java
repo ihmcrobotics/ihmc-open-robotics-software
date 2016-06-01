@@ -159,7 +159,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       }
 
       percentageChickenSupport = new DoubleYoVariable("PercentageChickenSupport", registry);
-      percentageChickenSupport.set(0.4);
+      percentageChickenSupport.set(0.5);
 
       parentRegistry.addChild(registry);
    }

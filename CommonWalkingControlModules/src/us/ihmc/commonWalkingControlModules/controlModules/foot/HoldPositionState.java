@@ -131,8 +131,8 @@ public class HoldPositionState extends AbstractFootControlState
       yoLinearWeight.set(1.0, 1.0, 1.0);
       yoLinearWeight.scale(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
 
-      doSmartHoldPosition.set(!true);
-      doHoldFootFlatOrientation.set(true);
+      doSmartHoldPosition.set(true);
+      doHoldFootFlatOrientation.set(false);
 
       spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       bodyFixedControlledPose.setToZero(soleFrame);
