@@ -1,38 +1,25 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
-import boofcv.struct.calib.IntrinsicParameters;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.communication.producers.*;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.ihmcPerception.OpenCVTools;
-import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
-import us.ihmc.ihmcPerception.vision.shapes.HoughCircleResult;
-import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetector;
-import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetectorFactory;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4d;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior implements VideoStreamer
-{
-   private static final boolean DEBUG = true;
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3f;
 
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobDetectorBehaviorService;
+import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.ihmcPerception.vision.HSVValue;
+import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+
+public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
+{
    private final ReferenceFrame headFrame;
    private static final double FILTERING_ANGLE = Math.toRadians(5.0);
    private static final double FILTERING_MIN_DISTANCE = 0.1;
@@ -42,110 +29,35 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    private static final double HORIZONTAL_FOV = Math.toRadians(80.0);
    private static final double VERTICAL_FOV = Math.toRadians(45.0);
 
-   private final VideoClientThread blobDetectionThread = new VideoClientThread();
-   private BufferedImage lastBufferedImage;
-   private final JPEGCompressor jpegCompressor = new JPEGCompressor();
-   private final Point2d latestBallPosition2d = new Point2d();
-   private long videoTimestamp = -1L;
    private final BooleanYoVariable runBlobFilter = new BooleanYoVariable("runBlobFilter", registry);
-   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>();
-   private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue = new ConcurrentListeningQueue<>();
-   private final CompressedVideoDataClient videoDataClient;
    private int numBallsDetected;
-
-   private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
-
+   
+   private final ColoredCircularBlobDetectorBehaviorService coloredCircularBlobDetectorBehaviorService;
+   
    public BlobFilteredSphereDetectionBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, HumanoidReferenceFrames referenceFrames,
          SDFFullHumanoidRobotModel fullRobotModel)
    {
       super(behaviorCommunicationBridge, referenceFrames);
 
       behaviorCommunicationBridge.attachGlobalListener(getNetworkProcessorGlobalObjectConsumer());
-      attachNetworkProcessorListeningQueue(videoPacketQueue, VideoPacket.class);
       attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
-      attachNetworkProcessorListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
 
-      OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
-      factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);
-      openCVColoredCircularBlobDetector = factory.buildBlobDetector();
+      coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(this);
+//      HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
+//      coloredCircularBlobDetectorBehaviorService.addHSVRange(greenRange);
 
-      videoDataClient = CompressedVideoDataFactory.createCompressedVideoDataClient(this);
       runBlobFilter.set(false);
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
-      ThreadTools.startAThread(blobDetectionThread, "blobDetectionThread");
    }
 
    public void addHSVRange(HSVRange hsvRange)
    {
-      openCVColoredCircularBlobDetector.addHSVRange(hsvRange);
+      coloredCircularBlobDetectorBehaviorService.addHSVRange(hsvRange);
    }
 
    public void resetHSVRanges()
    {
-      openCVColoredCircularBlobDetector.resetRanges();
-   }
-
-   @Override public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParamaters)
-   {
-      this.lastBufferedImage = bufferedImage;
-
-      if(runBlobFilter.getBooleanValue())
-      {
-         openCVColoredCircularBlobDetector.updateFromBufferedImage(bufferedImage);
-         ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
-
-         BufferedImage thresholdBufferedImage = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
-
-         try
-         {
-            byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
-            VideoPacket circleBlobThresholdImagePacket = new VideoPacket(RobotSide.LEFT, VideoSource.MULTISENSE, videoTimestamp, jpegThresholdImage, cameraPosition, cameraOrientation,
-                  intrinsicParamaters);
-            sendPacketToNetworkProcessor(circleBlobThresholdImagePacket);
-         }
-         catch (RuntimeException e)
-         {
-            e.printStackTrace();
-         }
-
-         if (DEBUG)
-         {
-            System.out.println("blob detection found " + circles.size() + " circles");
-
-            for (int i = 0; i < circles.size(); i++)
-            {
-               HoughCircleResult result = circles.get(i);
-               System.out.println("\t center: " + result.getCenter());
-            }
-         }
-
-         this.numBallsDetected = circles.size();
-
-         if (numBallsDetected > 0)
-            latestBallPosition2d.set(circles.get(0).getCenter());
-      }
-   }
-
-   private class VideoClientThread extends Thread
-   {
-      @Override public void run()
-      {
-         while (true)
-         {
-            if (videoPacketQueue.isNewPacketAvailable())
-            {
-               VideoPacket packet = videoPacketQueue.getLatestPacket();
-               RobotConfigurationData robotConfigurationData = robotConfigurationDataQueue.getLatestPacket();
-               videoTimestamp = robotConfigurationData.getTimestamp();
-
-               videoDataClient.consumeObject(packet.getData(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
-            }
-            else
-            {
-               ThreadTools.sleep(10);
-            }
-         }
-      }
+      coloredCircularBlobDetectorBehaviorService.clearHSVRanges();
    }
 
    @Override
@@ -178,37 +90,45 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       RigidBodyTransform worldToCameraTransform = headFrame.getTransformToWorldFrame();
       worldToCameraTransform.invert();
 
-      int cameraPixelWidth = lastBufferedImage.getWidth();
-      int cameraPixelHeight = lastBufferedImage.getHeight();
-
-      double ballCenterX = latestBallPosition2d.x - lastBufferedImage.getMinX();
-      double ballCenterY = latestBallPosition2d.y - lastBufferedImage.getMinY();
-
-      double desiredRayAngleX = VERTICAL_FOV * (-ballCenterY / cameraPixelHeight + 0.5);
-      double desiredRayAngleY = HORIZONTAL_FOV * (ballCenterX / cameraPixelWidth - 0.5);
-
-      Point3f tempPoint = new Point3f();
-
-      for (int i = 0; i < fullPointCloud.length; i++)
+      BufferedImage latestCameraImage = coloredCircularBlobDetectorBehaviorService.getLatestUnmodifiedCameraImage();
+      if (latestCameraImage != null)
       {
-         tempPoint.set(fullPointCloud[i]);
-         worldToCameraTransform.transform(tempPoint);
-
-         if (tempPoint.x > FILTERING_MIN_DISTANCE && tempPoint.x < FILTERING_MAX_DISTANCE)
+         int cameraPixelWidth = latestCameraImage.getWidth();
+         int cameraPixelHeight = latestCameraImage.getHeight();
+   
+         double ballCenterX = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().x - latestCameraImage.getMinX();
+         double ballCenterY = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().y - latestCameraImage.getMinY();
+   
+         double desiredRayAngleX = VERTICAL_FOV * (-ballCenterY / cameraPixelHeight + 0.5);
+         double desiredRayAngleY = HORIZONTAL_FOV * (ballCenterX / cameraPixelWidth - 0.5);
+   
+         Point3f tempPoint = new Point3f();
+   
+         for (int i = 0; i < fullPointCloud.length; i++)
          {
-            // rayAngle axes are in terms of the buffered image (y-down), temp pnt axes are in terms of camera frame (z-up)
-            double rayAngleX = Math.atan2(tempPoint.z, tempPoint.x);
-            double rayAngleY = Math.atan2(tempPoint.y, tempPoint.x);
-            if (Math.abs(rayAngleX - desiredRayAngleX) < FILTERING_ANGLE && Math.abs(rayAngleY - desiredRayAngleY) < FILTERING_ANGLE)
+            tempPoint.set(fullPointCloud[i]);
+            worldToCameraTransform.transform(tempPoint);
+   
+            if (tempPoint.x > FILTERING_MIN_DISTANCE && tempPoint.x < FILTERING_MAX_DISTANCE)
             {
-               filteredPoints.add(fullPointCloud[i]);
+               // rayAngle axes are in terms of the buffered image (y-down), temp pnt axes are in terms of camera frame (z-up)
+               double rayAngleX = Math.atan2(tempPoint.z, tempPoint.x);
+               double rayAngleY = Math.atan2(tempPoint.y, tempPoint.x);
+               if (Math.abs(rayAngleX - desiredRayAngleX) < FILTERING_ANGLE && Math.abs(rayAngleY - desiredRayAngleY) < FILTERING_ANGLE)
+               {
+                  filteredPoints.add(fullPointCloud[i]);
+               }
             }
          }
+   
+         Point3f[] filteredPointArray = new Point3f[filteredPoints.size()];
+         filteredPoints.toArray(filteredPointArray);
+         return filteredPointArray;
       }
-
-      Point3f[] filteredPointArray = new Point3f[filteredPoints.size()];
-      filteredPoints.toArray(filteredPointArray);
-      return filteredPointArray;
+      else
+      {
+         return fullPointCloud;
+      }
    }
 
 
@@ -216,6 +136,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    {
       super.initialize();
       runBlobFilter.set(true);
+      coloredCircularBlobDetectorBehaviorService.initialize();
    }
 
    @Override
@@ -228,23 +149,26 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    {
       super.pause();
       runBlobFilter.set(false);
+      coloredCircularBlobDetectorBehaviorService.pause();
    }
 
    @Override public void stop()
    {
       super.stop();
       runBlobFilter.set(false);
+      coloredCircularBlobDetectorBehaviorService.stop();
    }
 
    @Override public void resume()
    {
       super.resume();
       runBlobFilter.set(true);
+      coloredCircularBlobDetectorBehaviorService.resume();
    }
 
    public Point2d getLatestBallPosition()
    {
-      return latestBallPosition2d;
+      return coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d();
    }
 
    public int getNumBallsDetected()

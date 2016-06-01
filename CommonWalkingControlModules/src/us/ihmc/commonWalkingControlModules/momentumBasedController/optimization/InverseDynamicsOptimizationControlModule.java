@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
@@ -273,6 +274,11 @@ public class InverseDynamicsOptimizationControlModule
    public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
    {
       motionQPInputCalculator.updatePrivilegedConfiguration(command);
+   }
+
+   public void submitJointLimitReductionCommand(JointLimitReductionCommand command)
+   {
+      motionQPInputCalculator.submitJointLimitReductionCommand(command);
    }
 
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)
