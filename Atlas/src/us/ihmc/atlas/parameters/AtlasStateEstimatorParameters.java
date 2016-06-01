@@ -210,7 +210,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public double getPelvisLinearVelocityFusingFrequency()
    {
-      return 0.3; // 0.4261; // alpha = 0.992 with dt = 0.003
+      return 0.4261; // alpha = 0.992 with dt = 0.003
    }
 
    @Override
