@@ -52,7 +52,7 @@ public class MomentumRecoveryControlModule
       this.momentumBasedController = momentumBasedController;
       maxIcpError.set(0.015);
 
-      allowUpperBodyMomentumInSingleSupport.set(false);
+      allowUpperBodyMomentumInSingleSupport.set(true);
       allowUpperBodyMomentumInDoubleSupport.set(false);
 
       parentRegistry.addChild(registry);
