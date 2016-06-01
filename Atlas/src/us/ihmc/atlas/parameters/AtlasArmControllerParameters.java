@@ -49,7 +49,7 @@ public class AtlasArmControllerParameters extends ArmControllerParameters
       jointspaceControlGains.setMaximumAcceleration(maxAccel);
       jointspaceControlGains.setMaximumJerk(maxJerk);
       jointspaceControlGains.createDerivativeGainUpdater(true);
-      
+
       return jointspaceControlGains;
    }
 
@@ -93,7 +93,7 @@ public class AtlasArmControllerParameters extends ArmControllerParameters
       taskspaceControlGains.setOrientationDerivativeGains(kd, kd, kd);
       taskspaceControlGains.setOrientationMaxAccelerationAndJerk(maxAccel, maxJerk);
       taskspaceControlGains.setPositionMaxAccelerationAndJerk(maxAccel, maxJerk);
-      
+
       return taskspaceControlGains;
    }
 
@@ -143,7 +143,7 @@ public class AtlasArmControllerParameters extends ArmControllerParameters
       jointAccelerationIntegrationAlphaPosition.put(ArmJointName.FIRST_WRIST_PITCH, wrist);
       jointAccelerationIntegrationAlphaPosition.put(ArmJointName.WRIST_ROLL, wrist);
       jointAccelerationIntegrationAlphaPosition.put(ArmJointName.SECOND_WRIST_PITCH, wrist);
-      
+
       return jointAccelerationIntegrationAlphaPosition;
    }
 
@@ -239,13 +239,13 @@ public class AtlasArmControllerParameters extends ArmControllerParameters
    {
       Map<OneDoFJoint, Double> jointPositions = new LinkedHashMap<OneDoFJoint, Double>();
 
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW), robotSide.negateIfRightSide(0.61130147334225));
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(0.22680071472282162));
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH), 1.6270339908033258);
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), robotSide.negateIfRightSide(1.2703560974484844));
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.FIRST_WRIST_PITCH), 0.10340544060719102);
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), robotSide.negateIfRightSide(-0.6738299572358809));
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SECOND_WRIST_PITCH), 0.13264785356924128);
+      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW), robotSide.negateIfRightSide(0.785398));
+      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(-0.1));
+      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH), 3.00);
+      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), robotSide.negateIfRightSide(1.8));
+      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.FIRST_WRIST_PITCH), -0.30);
+      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), robotSide.negateIfRightSide(0.70));
+      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SECOND_WRIST_PITCH), 0.15);
 
       return jointPositions;
    }
