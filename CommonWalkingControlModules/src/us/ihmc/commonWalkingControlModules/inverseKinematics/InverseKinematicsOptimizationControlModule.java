@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -112,6 +113,9 @@ public class InverseKinematicsOptimizationControlModule
       case PRIVILEGED_CONFIGURATION:
          submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
          break;
+      case LIMIT_REDUCTION:
+         submitJointLimitReductionCommand((JointLimitReductionCommand) command);
+         break;
       case COMMAND_LIST:
          submitInverseKinematicsCommandList((InverseKinematicsCommandList) command);
          return;
@@ -150,5 +154,10 @@ public class InverseKinematicsOptimizationControlModule
    private void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
    {
       motionQPInputCalculator.updatePrivilegedConfiguration(command);
+   }
+
+   private void submitJointLimitReductionCommand(JointLimitReductionCommand command)
+   {
+      motionQPInputCalculator.submitJointLimitReductionCommand(command);
    }
 }

@@ -124,7 +124,7 @@ public class BalanceManager
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       SideDependentList<? extends ContactablePlaneBody> contactableFeet = momentumBasedController.getContactableFeet();
-      ICPControlGains icpControlGains = walkingControllerParameters.getICPControlGains();
+      ICPControlGains icpControlGains = walkingControllerParameters.createICPControlGains(registry);
       double controlDT = momentumBasedController.getControlDT();
       double gravityZ = momentumBasedController.getGravityZ();
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());

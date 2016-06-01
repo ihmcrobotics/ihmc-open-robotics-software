@@ -37,6 +37,6 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
       {
          System.out.println(getClass().getName() + ": received local video packet!");
       }
-      updateImage(robotSide, VideoSource.MULTISENSE, object.getImage(), object.getTimeStamp(), object.getIntrinsicParameters());
+      updateImage(VideoSource.getMultisenseSourceFromRobotSide(robotSide), object.getImage(), object.getTimeStamp(), object.getIntrinsicParameters());
    }
 }

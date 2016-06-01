@@ -14,9 +14,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 ({
    us.ihmc.atlas.behaviorTests.AtlasFootstepListBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasHeadTrajectoryBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasObjectWeightBehaviorTest.class,
-   us.ihmc.atlas.commonWalkingControlModules.sensors.AtlasProvidedMassMatrixToolRigidBodyTest.class,
-   us.ihmc.atlas.controllerAPI.AtlasEndToEndArmDesiredAccelerationsMessageTest.class
+   us.ihmc.atlas.behaviorTests.AtlasObjectWeightBehaviorTest.class
 })
 
 public class AtlasCFastTestSuite
