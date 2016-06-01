@@ -40,7 +40,6 @@ public class MomentumRecoveryControlModule
 
    private boolean icpErrorUpToDate = false;
    private boolean robotSideUpToDate = false;
-   private boolean nextFootstepUpToDate = false;
 
    private final FrameVector2d icpError = new FrameVector2d();
    private RobotSide supportSide;
@@ -117,12 +116,16 @@ public class MomentumRecoveryControlModule
       // icp based fall detection:
       // compute the safe area for the capture point as the support polygon after the step completed
       safeArea.setIncludingFrame(support);
-      momentumBasedController.getDefaultFootPolygon(nextFootstep.getRobotSide(), tempPolygon1);
-      tempPolygon2.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), tempPolygon1.getConvexPolygon2d());
-      tempPolygon2.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
-      polygonShrinker.shrinkConstantDistanceInto(tempPolygon2, -0.05, tempPolygon1);
-      safeArea.addVertices(tempPolygon1);
-      safeArea.update();
+
+      if (nextFootstep != null)
+      {
+         momentumBasedController.getDefaultFootPolygon(nextFootstep.getRobotSide(), tempPolygon1);
+         tempPolygon2.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), tempPolygon1.getConvexPolygon2d());
+         tempPolygon2.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
+         polygonShrinker.shrinkConstantDistanceInto(tempPolygon2, -0.05, tempPolygon1);
+         safeArea.addVertices(tempPolygon1);
+         safeArea.update();
+      }
 
       // hysteresis:
       // shrink the safe area if we are already using upper body momentum
@@ -176,7 +179,6 @@ public class MomentumRecoveryControlModule
    public void setNextFootstep(Footstep nextFootstep)
    {
       this.nextFootstep = nextFootstep;
-      nextFootstepUpToDate = true;
    }
 
    private void checkIfUpToDate()
@@ -188,15 +190,6 @@ public class MomentumRecoveryControlModule
       if (!robotSideUpToDate)
          throw new RuntimeException("Support side not up to date.");
       robotSideUpToDate = false;
-
-      if (supportSide != null)
-      {
-         if (!nextFootstepUpToDate)
-            throw new RuntimeException("Next footstep not up to date.");
-      }
-      else
-         nextFootstepUpToDate = false;
-
    }
 
    public void updateIcpControlModule(ICPBasedLinearMomentumRateOfChangeControlModule icpBasedLinearMomentumRateOfChangeControlModule)
