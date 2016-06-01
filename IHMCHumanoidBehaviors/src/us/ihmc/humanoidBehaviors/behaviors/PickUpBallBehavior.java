@@ -166,7 +166,7 @@ public class PickUpBallBehavior extends BehaviorInterface
             yoTime);
 
       //ENABLE LIDAR
-      BehaviorTask enableLidarTask = new BehaviorTask(enableBehaviorOnlyLidarBehavior, yoTime, 1)
+      BehaviorTask enableLidarTask = new BehaviorTask(enableBehaviorOnlyLidarBehavior, yoTime, 0)
       {
          @Override
          protected void setBehaviorInput()
@@ -177,7 +177,7 @@ public class PickUpBallBehavior extends BehaviorInterface
 
       //REDUCE LIDAR RANGE *******************************************
 
-      BehaviorTask setLidarMediumRangeTask = new BehaviorTask(setLidarParametersBehavior, yoTime, 1)
+      BehaviorTask setLidarMediumRangeTask = new BehaviorTask(setLidarParametersBehavior, yoTime, 0)
       {
          @Override
          protected void setBehaviorInput()
@@ -191,7 +191,7 @@ public class PickUpBallBehavior extends BehaviorInterface
       };
 
       //CLEAR LIDAR POINTS FOR CLEAN SCAN *******************************************
-      BehaviorTask clearLidarTask = new BehaviorTask(clearLidarBehavior, yoTime, 1)
+      BehaviorTask clearLidarTask = new BehaviorTask(clearLidarBehavior, yoTime,0)
       {
          @Override
          protected void setBehaviorInput()
@@ -265,7 +265,7 @@ public class PickUpBallBehavior extends BehaviorInterface
       Quat4d desiredHeadQuat = new Quat4d();
       desiredHeadQuat.set(desiredAxisAngle);
 
-      HeadTrajectoryMessage message = new HeadTrajectoryMessage(2, desiredHeadQuat);
+      HeadTrajectoryMessage message = new HeadTrajectoryMessage(1, desiredHeadQuat);
 
       HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
 
@@ -288,7 +288,7 @@ public class PickUpBallBehavior extends BehaviorInterface
       Quat4d desiredHeadUpQuat = new Quat4d();
       desiredHeadUpQuat.set(desiredAxisUpAngle);
 
-      HeadTrajectoryMessage messageHeadUp = new HeadTrajectoryMessage(2, desiredHeadUpQuat);
+      HeadTrajectoryMessage messageHeadUp = new HeadTrajectoryMessage(1, desiredHeadUpQuat);
 
       HeadTrajectoryBehavior headTrajectoryUpBehavior = new HeadTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
 
@@ -311,7 +311,7 @@ public class PickUpBallBehavior extends BehaviorInterface
 
       //REDUCE LIDAR RANGE *******************************************
 
-      BehaviorTask setLidarShortRangeTask = new BehaviorTask(setLidarParametersBehavior, yoTime, 1)
+      BehaviorTask setLidarShortRangeTask = new BehaviorTask(setLidarParametersBehavior, yoTime, 0)
       {
          @Override
          protected void setBehaviorInput()
@@ -324,7 +324,7 @@ public class PickUpBallBehavior extends BehaviorInterface
       };
 
       //CLEAR LIDAR POINTS FOR CLEAN SCAN *******************************************
-      BehaviorTask clearLidarTask2 = new BehaviorTask(clearLidarBehavior, yoTime, 1)
+      BehaviorTask clearLidarTask2 = new BehaviorTask(clearLidarBehavior, yoTime, 0)
       {
          @Override
          protected void setBehaviorInput()
@@ -379,7 +379,7 @@ public class PickUpBallBehavior extends BehaviorInterface
                   initialSphereDetectionBehavior.getBallLocation().y,
                   initialSphereDetectionBehavior.getBallLocation().z + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);
-            wholeBodyBehavior.setTrajectoryTime(6);
+            wholeBodyBehavior.setTrajectoryTime(3);
             FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
             wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
 
@@ -401,7 +401,7 @@ public class PickUpBallBehavior extends BehaviorInterface
                   initialSphereDetectionBehavior.getBallLocation().y,
                   initialSphereDetectionBehavior.getBallLocation().z + initialSphereDetectionBehavior.getSpehereRadius());
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);
-            wholeBodyBehavior.setTrajectoryTime(6);
+            wholeBodyBehavior.setTrajectoryTime(3);
             FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
             wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
 
@@ -429,40 +429,41 @@ public class PickUpBallBehavior extends BehaviorInterface
 //      };
 
       //RESET BODY POSITIONS *******************************************
-      GoHomeMessage goHomeChestMessage = new GoHomeMessage(BodyPart.CHEST, 3);
+      GoHomeMessage goHomeChestMessage = new GoHomeMessage(BodyPart.CHEST, 2);
       chestGoHomeBehavior.setInput(goHomeChestMessage);
       GoHomeTask goHomeChestTask = new GoHomeTask(goHomeChestMessage, chestGoHomeBehavior, yoTime, 0);
 
-      GoHomeMessage goHomepelvisMessage = new GoHomeMessage(BodyPart.PELVIS, 3);
+      GoHomeMessage goHomepelvisMessage = new GoHomeMessage(BodyPart.PELVIS, 2);
       pelvisGoHomeBehavior.setInput(goHomepelvisMessage);
       GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, pelvisGoHomeBehavior, yoTime, 0);
 
 
-      GoHomeMessage goHomeLeftArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 3);
+      GoHomeMessage goHomeLeftArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 2);
       armGoHomeLeftBehavior.setInput(goHomeLeftArmMessage);
       GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior, yoTime, 0);
 
-      //      GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 3);
-      //      armGoHomeRightBehavior.setInput(goHomeRightArmMessage);
-      //      GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior, yoTime, 0);
+            GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
+            armGoHomeRightBehavior.setInput(goHomeRightArmMessage);
+            GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior, yoTime, 0);
 
       double[] rightHandWiderHomeJointAngles = new double[] {-0.785398, 0.5143374964757462, 2.2503094898479272, -2.132492022530739, -0.22447272781774874,
             -0.4780687104960028, -0.24919417978503655};
 
-      ArmTrajectoryMessage widerHome = new ArmTrajectoryMessage(RobotSide.RIGHT, 3, rightHandWiderHomeJointAngles);
+      ArmTrajectoryMessage widerHome = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandWiderHomeJointAngles);
 
       ArmTrajectoryTask rightArmHomeTask = new ArmTrajectoryTask(widerHome, armTrajectoryBehavior, yoTime);
 
       double[] rightHandBucketLocation1 = new double[] {0.5489321822438367, 0.2899665391571677, 2.096340823983413, -1.2225333451166707, 0.1256161514011733,
             -1.3433026185064938, -1.1994258903111514};
 
-      ArmTrajectoryMessage rightHandBucketLocation1Message = new ArmTrajectoryMessage(RobotSide.RIGHT, 3, rightHandBucketLocation1);
+      ArmTrajectoryMessage rightHandBucketLocation1Message = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandBucketLocation1);
 
       ArmTrajectoryTask rightHandBucketLocation1Task = new ArmTrajectoryTask(rightHandBucketLocation1Message, armTrajectoryBehavior, yoTime)
       {
          @Override
          protected void setBehaviorInput()
          {
+            super.setBehaviorInput();
             coactiveElement.currentState.set(BehaviorState.PUTTING_BALL_IN_BASKET);
          }
       };
@@ -470,33 +471,33 @@ public class PickUpBallBehavior extends BehaviorInterface
       double[] leftHandBucketLocation1 = new double[] {-0.5609186812662719, -0.39273790125704305, 1.89931104400202, 1.8345084796174007, -1.9173410679363112,
             -0.7657081703756509, -0.7098631227127279};
 
-      ArmTrajectoryMessage leftHandBucketLocation1Message = new ArmTrajectoryMessage(RobotSide.LEFT, 3, leftHandBucketLocation1);
+      ArmTrajectoryMessage leftHandBucketLocation1Message = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBucketLocation1);
 
       ArmTrajectoryTask leftHandBucketLocation1Task = new ArmTrajectoryTask(leftHandBucketLocation1Message, armTrajectoryBehavior, yoTime);
 
       double[] rightHandBucketLocation2 = new double[] {0.4765048070153984, 0.305694742754363, 2.173812006625049, -1.4970540590789951, 0.10321456673940527,
             -1.2120648871681976, -1.1591439074587626};
 
-      ArmTrajectoryMessage rightHandBucketLocation2Message = new ArmTrajectoryMessage(RobotSide.RIGHT, 3, rightHandBucketLocation2);
+      ArmTrajectoryMessage rightHandBucketLocation2Message = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandBucketLocation2);
 
       ArmTrajectoryTask rightHandBucketLocation2Task = new ArmTrajectoryTask(rightHandBucketLocation2Message, armTrajectoryBehavior, yoTime);
 
       double[] leftHandBucketLocation2 = new double[] {-0.6312858675745908, -0.6560594198655715, 2.026449179186367, 2.0325182474649997, -1.4129369066719957,
             -0.33189990885720594, -1.1435699210219243};
 
-      ArmTrajectoryMessage leftHandBucketLocation2Message = new ArmTrajectoryMessage(RobotSide.LEFT, 3, leftHandBucketLocation2);
+      ArmTrajectoryMessage leftHandBucketLocation2Message = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBucketLocation2);
 
       ArmTrajectoryTask leftHandBucketLocation2Task = new ArmTrajectoryTask(leftHandBucketLocation2Message, armTrajectoryBehavior, yoTime);
 
       double[] leftHandAfterGrabLocation = new double[] {-0.799566492522621, -0.8850712601496326, 1.1978163314288173, 0.9978871050058826, -0.22593401111949774, -0.2153318563363089, -1.2957848304397805};
 
-      ArmTrajectoryMessage leftHandAfterGrabMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 3, leftHandAfterGrabLocation);
+      ArmTrajectoryMessage leftHandAfterGrabMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandAfterGrabLocation);
 
       ArmTrajectoryTask leftHandAfterGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior, yoTime);
       
       double[] leftHandBeforeGrabLocation = new double[] {-0.4157909673929138, -0.33973574728338696, 1.687124827585988, 1.8776226987048135, -0.39801575126789734, -1.4444576032955683, -1.9387386907009923};
 
-      ArmTrajectoryMessage leftHandBeforeGrabMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 3, leftHandAfterGrabLocation);
+      ArmTrajectoryMessage leftHandBeforeGrabMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBeforeGrabLocation);
 
       ArmTrajectoryTask leftHandBeforeGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior, yoTime);
 
@@ -513,14 +514,14 @@ public class PickUpBallBehavior extends BehaviorInterface
       
       pipeLine.requestNewStage();
       
-      pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior, rightArmHomeTask);
+      pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior, goHomeRightArmTask);
 
       pipeLine.submitTaskForPallelPipesStage(initialSphereDetectionBehavior, findBallTask);
       
       //LOOK AROUND
       
       pipeLine.submitSingleTaskStage(validateBallTask);
-      
+      pipeLine.submitSingleTaskStage(rightArmHomeTask);
       //RECENTER BODY      
       pipeLine.submitSingleTaskStage(walkToBallTask);
       
@@ -633,7 +634,7 @@ public class PickUpBallBehavior extends BehaviorInterface
    @Override
    public void doPostBehaviorCleanup()
    {
-
+      System.out.println("IM DONE");
       defaultPostBehaviorCleanup();
       coactiveElement.currentState.set(BehaviorState.STOPPED);
 
