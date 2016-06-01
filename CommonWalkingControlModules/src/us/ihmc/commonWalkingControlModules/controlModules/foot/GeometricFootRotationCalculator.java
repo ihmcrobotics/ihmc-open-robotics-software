@@ -38,7 +38,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
  */
 public class GeometricFootRotationCalculator implements FootRotationCalculator
 {
-   private final static boolean VISUALIZE = true;
+   private final static boolean VISUALIZE = false;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry;
 
