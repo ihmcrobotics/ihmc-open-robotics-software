@@ -46,7 +46,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.stl</uri>
+            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -88,7 +88,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.stl</uri>
+            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -171,7 +171,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.stl</uri>
+            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -213,7 +213,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.stl</uri>
+            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -296,7 +296,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.stl</uri>
+            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -338,7 +338,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.stl</uri>
+            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -421,7 +421,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.stl</uri>
+            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -463,7 +463,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.stl</uri>
+            <uri>model://lla_quadruped_description/model/meshes/lla_5A0-binary.obj</uri>
           </mesh>
         </geometry>
       </visual>
