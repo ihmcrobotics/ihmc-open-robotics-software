@@ -8,6 +8,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.BehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
@@ -50,7 +51,11 @@ public class PickUpBallBehavior extends BehaviorInterface
 {
    private static final boolean FILTER_KNOWN_COLORS_TO_SPEED_UP = false;
    
-   private static final HSVRange YELLOW_BALL = new HSVRange(new HSVValue(24.08, 82.65, 189.0), new HSVValue(35.28, 100.6, 255.0));
+   public static final HSVRange YELLOW_BALL = new HSVRange(new HSVValue(22.84, 81.19, 140.0), new HSVValue(35.0, 136.2, 250.0));
+   public static final HSVRange ORANGE_BALL = new HSVRange(new HSVValue(6.5, 124.0, 108.0), new HSVValue(12.05, 168.9, 250.0));
+   public static final HSVRange RED_BALL = new HSVRange(new HSVValue(0.2913, 96.09, 69.0), new HSVValue(179.7, 149.6, 190.0));
+   public static final HSVRange GREEN_BALL = new HSVRange(new HSVValue(81.29, 103.0, 52.0), new HSVValue(91.15, 153.0, 130.0));
+   public static final HSVRange BLUE_BALL = new HSVRange(new HSVValue(79.5, 109.3, 28.0), new HSVValue(105.0, 175.9, 170.0));
    
    private final PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement;
 
@@ -100,6 +105,11 @@ public class PickUpBallBehavior extends BehaviorInterface
 
       blobFilteredSphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames, fullRobotModel);
       initialSphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+      blobFilteredSphereDetectionBehavior.addHSVRange(ORANGE_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(BLUE_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(RED_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(YELLOW_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(GREEN_BALL);
       behaviors.add(FILTER_KNOWN_COLORS_TO_SPEED_UP ? blobFilteredSphereDetectionBehavior : initialSphereDetectionBehavior);
 
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
@@ -207,6 +217,8 @@ public class PickUpBallBehavior extends BehaviorInterface
          @Override
          protected void setBehaviorInput()
          {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("LOOKING FOR BALL");
+            sendPacketToNetworkProcessor(p1);
             coactiveElement.currentState.set(BehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
@@ -247,6 +259,8 @@ public class PickUpBallBehavior extends BehaviorInterface
          @Override
          protected void setBehaviorInput()
          {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To The Ball");
+            sendPacketToNetworkProcessor(p1);
             coactiveElement.currentState.set(BehaviorState.WALKING_TO_BALL);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(false);
@@ -339,6 +353,8 @@ public class PickUpBallBehavior extends BehaviorInterface
          @Override
          protected void setBehaviorInput()
          {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Looking for the ball");
+            sendPacketToNetworkProcessor(p1);
             coactiveElement.currentState.set(BehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
@@ -374,6 +390,8 @@ public class PickUpBallBehavior extends BehaviorInterface
          @Override
          protected void setBehaviorInput()
          {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("I think i found the ball");
+            sendPacketToNetworkProcessor(p1);
             coactiveElement.currentState.set(BehaviorState.REACHING_FOR_BALL);
             FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().x,
                   initialSphereDetectionBehavior.getBallLocation().y,
@@ -464,6 +482,8 @@ public class PickUpBallBehavior extends BehaviorInterface
          protected void setBehaviorInput()
          {
             super.setBehaviorInput();
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Putting The Ball In The Bucket");
+            sendPacketToNetworkProcessor(p1);
             coactiveElement.currentState.set(BehaviorState.PUTTING_BALL_IN_BASKET);
          }
       };
@@ -634,7 +654,8 @@ public class PickUpBallBehavior extends BehaviorInterface
    @Override
    public void doPostBehaviorCleanup()
    {
-      System.out.println("IM DONE");
+      TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
+      sendPacketToNetworkProcessor(p1);
       defaultPostBehaviorCleanup();
       coactiveElement.currentState.set(BehaviorState.STOPPED);
 

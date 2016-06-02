@@ -145,6 +145,9 @@ public class SphereDetectionBehavior extends BehaviorInterface
          points3d[i] = new Point3d(points[i]);
       }
       pointCloudWorldPacket.setDecayingWorldScan(points3d);
+      Point3d[] groundQuadTree = new Point3d[1];
+      groundQuadTree[0] = new Point3d();
+      pointCloudWorldPacket.setGroundQuadTreeSupport(groundQuadTree);
       
       sendPacketToNetworkProcessor(pointCloudWorldPacket);
    }

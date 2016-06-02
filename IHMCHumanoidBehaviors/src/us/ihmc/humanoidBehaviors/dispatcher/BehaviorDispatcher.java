@@ -25,6 +25,7 @@ import us.ihmc.robotics.stateMachines.StateTransitionAction;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -139,6 +140,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private void initialize()
    {
+      PrintTools.debug(DEBUG, this, "Initializing " + stateMachine.getCurrentStateEnum().name());
       stateMachine.initialize();
    }
 
@@ -195,20 +197,24 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
          switch (desiredBehaviorControlSubscriber.getRequestedBehaviorControl())
          {
          case STOP:
+            PrintTools.debug(DEBUG, this, "Stopping " + stateMachine.getCurrentStateEnum().name());
             stateMachine.stop();
             communicationBridge.sendPacketToNetworkProcessor(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
             break;
          case PAUSE:
+            PrintTools.debug(DEBUG, this, "Pausing " + stateMachine.getCurrentStateEnum().name());
             stateMachine.pause();
             communicationBridge.setPacketPassThrough(true);
             communicationBridge.sendPacketToNetworkProcessor(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
             break;
          case RESUME:
+            PrintTools.debug(DEBUG, this, "Resuming " + stateMachine.getCurrentStateEnum().name());
             stateMachine.resume();
             communicationBridge.setPacketPassThrough(false);
             communicationBridge.sendPacketToNetworkProcessor(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
             break;
          case ENABLE_ACTIONS:
+            PrintTools.debug(DEBUG, this, "Enabling " + stateMachine.getCurrentStateEnum().name());
             stateMachine.enableActions();
             communicationBridge.sendPacketToNetworkProcessor(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.ENABLE_ACTIONS));
             break;
@@ -267,6 +273,8 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       {
          detachListeners(fromBehaviorState.getBehavior());
          attachListeners(toBehaviorState.getBehavior());
+         
+         hasBeenInitialized.set(false);
       }
    }
 
