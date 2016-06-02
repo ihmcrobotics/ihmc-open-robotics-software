@@ -83,24 +83,13 @@ public class SphereDetectionBehavior extends BehaviorInterface
       return new Point3d(ballX.getDoubleValue(), ballY.getDoubleValue(), ballZ.getDoubleValue());
    }
 
-   PointCloudWorldPacket pointCloudPacket;
-   PointCloudWorldPacket pointCloudPacketLatest = null;
-
    @Override
    public void doControl()
    {
-
-      while ((pointCloudPacket = pointCloudQueue.poll()) != null)
+      if (pointCloudQueue.isNewPacketAvailable())
       {
-         pointCloudPacketLatest = pointCloudPacket;
+         findBallsAndSaveResult(pointCloudQueue.getLatestPacket().getDecayingWorldScan());
       }
-
-      if (pointCloudPacketLatest != null)
-      {
-         Point3f[] points = pointCloudPacketLatest.getDecayingWorldScan();
-         findBallsAndSaveResult(points);
-      }
-
    }
 
    protected void findBallsAndSaveResult(Point3f[] points)
@@ -295,7 +284,6 @@ public class SphereDetectionBehavior extends BehaviorInterface
    @Override
    public boolean hasInputBeenSet()
    {
-      // TODO Auto-generated method stub
       return true;
    }
 
