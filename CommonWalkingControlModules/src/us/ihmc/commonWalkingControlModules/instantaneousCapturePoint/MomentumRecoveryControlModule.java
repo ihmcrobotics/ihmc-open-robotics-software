@@ -36,6 +36,8 @@ public class MomentumRecoveryControlModule
    private final BooleanYoVariable allowUpperBodyMomentumInDoubleSupport = new BooleanYoVariable("allowUpperBodyMomentumInDoubleSupport", registry);
    private final BooleanYoVariable allowUsingHighMomentumWeight = new BooleanYoVariable("allowUsingHighMomentumWeight", registry);
 
+   private final DoubleYoVariable maxDistanceCMPSupport = new DoubleYoVariable("maxDistanceCMPSupport", registry);
+
    private final HighLevelHumanoidControllerToolbox momentumBasedController;
 
    private boolean icpErrorUpToDate = false;
@@ -46,13 +48,18 @@ public class MomentumRecoveryControlModule
    private Footstep nextFootstep;
    private final DoubleYoVariable maxIcpError = new DoubleYoVariable("maxIcpError", registry);
 
-   public MomentumRecoveryControlModule(HighLevelHumanoidControllerToolbox momentumBasedController, YoVariableRegistry parentRegistry)
+   private final ConvexPolygonShrinker polygonShrinker = new ConvexPolygonShrinker();
+   private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d extendedSupportPolygon = new FrameConvexPolygon2d();
+
+   public MomentumRecoveryControlModule(HighLevelHumanoidControllerToolbox momentumBasedController, double maxAllowedDistanceCMPSupport, YoVariableRegistry parentRegistry)
    {
       this.momentumBasedController = momentumBasedController;
       maxIcpError.set(0.015);
 
       allowUpperBodyMomentumInSingleSupport.set(false);
       allowUpperBodyMomentumInDoubleSupport.set(false);
+      maxDistanceCMPSupport.set(maxAllowedDistanceCMPSupport);
 
       parentRegistry.addChild(registry);
    }
@@ -103,11 +110,14 @@ public class MomentumRecoveryControlModule
    }
 
    private final FramePoint2d tmpCapturePoint = new FramePoint2d();
-   private final ConvexPolygonShrinker polygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d tempPolygon1 = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d tempPolygon2 = new FrameConvexPolygon2d();
    private final FramePoint2d capturePoint2d = new FramePoint2d();
+
+   private static final double distanceToExtendUpcomingFoothold = 0.05;
+   private static final double distanceToShrinkSafeArea = 0.02;
+   private static final double distanceToShrinkSafeAreaIfRecovering = 0.05;
 
    private void checkIfUseUpperBodyMomentumSingleSupport()
    {
@@ -119,10 +129,11 @@ public class MomentumRecoveryControlModule
 
       if (nextFootstep != null)
       {
+         // TODO: check if the next footstep has expected contact points and use them instead of the default polygon
          momentumBasedController.getDefaultFootPolygon(nextFootstep.getRobotSide(), tempPolygon1);
          tempPolygon2.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), tempPolygon1.getConvexPolygon2d());
          tempPolygon2.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
-         polygonShrinker.shrinkConstantDistanceInto(tempPolygon2, -0.05, tempPolygon1);
+         polygonShrinker.shrinkConstantDistanceInto(tempPolygon2, -distanceToExtendUpcomingFoothold, tempPolygon1);
          safeArea.addVertices(tempPolygon1);
          safeArea.update();
       }
@@ -131,12 +142,12 @@ public class MomentumRecoveryControlModule
       // shrink the safe area if we are already using upper body momentum
       if (usingUpperBodyMomentum.getBooleanValue())
       {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, 0.05, tempPolygon1);
+         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaIfRecovering, tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
       else
       {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, 0.02, tempPolygon1);
+         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeArea, tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
 
@@ -164,6 +175,17 @@ public class MomentumRecoveryControlModule
       // TODO Auto-generated method stub
    }
 
+   private void checkIfUpToDate()
+   {
+      if (!icpErrorUpToDate)
+         throw new RuntimeException("ICP error not up to date.");
+      icpErrorUpToDate = false;
+
+      if (!robotSideUpToDate)
+         throw new RuntimeException("Support side not up to date.");
+      robotSideUpToDate = false;
+   }
+
    public void setICPError(FrameVector2d icpError)
    {
       this.icpError.setIncludingFrame(icpError);
@@ -181,36 +203,26 @@ public class MomentumRecoveryControlModule
       this.nextFootstep = nextFootstep;
    }
 
-   private void checkIfUpToDate()
+   public void getCMPProjectionArea(FrameConvexPolygon2d areaToProjectInto, FrameConvexPolygon2d safeArea)
    {
-      if (!icpErrorUpToDate)
-         throw new RuntimeException("ICP error not up to date.");
-      icpErrorUpToDate = false;
-
-      if (!robotSideUpToDate)
-         throw new RuntimeException("Support side not up to date.");
-      robotSideUpToDate = false;
-   }
-
-   public void updateIcpControlModule(ICPBasedLinearMomentumRateOfChangeControlModule icpBasedLinearMomentumRateOfChangeControlModule)
-   {
-      if (usingHighMomentumWeight.getBooleanValue())
-      {
-         icpBasedLinearMomentumRateOfChangeControlModule.setHighMomentumWeight();
-      }
-      else
-      {
-         icpBasedLinearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
-      }
+      supportPolygon.set(momentumBasedController.getBipedSupportPolygons().getSupportPolygonInWorld());
 
       if (usingUpperBodyMomentum.getBooleanValue())
       {
-         icpBasedLinearMomentumRateOfChangeControlModule.keepCMPInsideSupportPolygon(false);
+         polygonShrinker.shrinkConstantDistanceInto(supportPolygon, -maxDistanceCMPSupport.getDoubleValue(), extendedSupportPolygon);
+         areaToProjectInto.setIncludingFrameAndUpdate(extendedSupportPolygon);
+         safeArea.setIncludingFrameAndUpdate(this.safeArea);
       }
       else
       {
-         icpBasedLinearMomentumRateOfChangeControlModule.keepCMPInsideSupportPolygon(true);
+         areaToProjectInto.setIncludingFrameAndUpdate(supportPolygon);
+         safeArea.clearAndUpdate(worldFrame);
       }
+   }
+
+   public boolean getUseHighMomentumWeight()
+   {
+      return usingHighMomentumWeight.getBooleanValue();
    }
 
 }
