@@ -204,7 +204,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       // update desired body orientation, angular velocity, and torque
       bodyYawSetpoint += inputProvider.getPlanarVelocityInput().getZ() * controlDT;
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(worldFrame);
-      bodyOrientationControllerSetpoints.getBodyOrientation().setYawPitchRoll(bodyYawSetpoint,
+      bodyOrientationControllerSetpoints.getBodyOrientation().setYawPitchRoll(
+            RotationTools.computeYaw(inputProvider.getBodyOrientationInput()) + bodyYawSetpoint,
             RotationTools.computePitch(inputProvider.getBodyOrientationInput()) + groundPlaneEstimator.getPitch(bodyYawSetpoint),
             RotationTools.computeRoll(inputProvider.getBodyOrientationInput()));
       bodyOrientationControllerSetpoints.getBodyAngularVelocity().setToZero();
