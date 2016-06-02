@@ -7,6 +7,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class TextToSpeechNetworkModule implements PacketConsumer<TextToSpeechPacket>
 {
@@ -32,6 +33,7 @@ public class TextToSpeechNetworkModule implements PacketConsumer<TextToSpeechPac
    @Override
    public void receivedPacket(TextToSpeechPacket packet)
    {
+      PrintTools.debug(this, "Received TextToSpeechPacket: " + packet.getTextToSpeak());
       String textToSpeak = packet.getTextToSpeak();
       textToSpeak = "<prosody pitch=\"60Hz\" rate=\"-10%\" volume=\"x-loud\">" + textToSpeak + "</prosody>";
       ttsClient.playText(textToSpeak);
