@@ -56,7 +56,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
    private final ReferenceFrame worldFrame;
 
    // feedback controllers
+   private final LinearInvertedPendulumModel lipModel;
    private final FramePoint dcmPositionEstimate;
+   private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final DivergentComponentOfMotionController.Setpoints dcmPositionControllerSetpoints;
    private final DivergentComponentOfMotionController dcmPositionController;
    private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
@@ -96,7 +98,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       worldFrame = ReferenceFrame.getWorldFrame();
 
       // feedback controllers
+      lipModel = controllerToolbox.getLinearInvertedPendulumModel();
       dcmPositionEstimate = new FramePoint();
+      dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
       dcmPositionControllerSetpoints = new DivergentComponentOfMotionController.Setpoints();
       dcmPositionController = controllerToolbox.getDcmPositionController();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
@@ -142,12 +146,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       taskSpaceEstimator.compute(taskSpaceEstimates);
 
       // update dcm estimate
-      taskSpaceEstimates.getComPosition().changeFrame(worldFrame);
-      taskSpaceEstimates.getComVelocity().changeFrame(worldFrame);
-      dcmPositionEstimate.changeFrame(worldFrame);
-      dcmPositionEstimate.set(taskSpaceEstimates.getComVelocity());
-      dcmPositionEstimate.scale(1.0 / dcmPositionController.getNaturalFrequency());
-      dcmPositionEstimate.add(taskSpaceEstimates.getComPosition());
+      dcmPositionEstimator.compute(dcmPositionEstimate, taskSpaceEstimates.getComVelocity());
    }
 
    private void updateSetpoints()
@@ -211,7 +210,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
    @Override public void onEntry()
    {
       // initialize estimates
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
+      lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
       updateEstimates();
 
       // initialize feedback controllers
@@ -268,11 +267,11 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
 
       // compute dcm trajectory for desired step plan
       double initialTime = robotTimestamp.getDoubleValue();
-      int nIntervals = copPlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), initialTime);
+      int nIntervals = copPlanner.compute(timedStepController.getQueueSize(), timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), initialTime);
       dcmPositionWaypoint.setIncludingFrame(copPlanner.getCenterOfPressureAtStartOfInterval(nIntervals - 1));
       dcmPositionWaypoint.changeFrame(ReferenceFrame.getWorldFrame());
-      dcmPositionWaypoint.add(0, 0, dcmPositionController.getComHeight());
-      dcmTrajectory.setComHeight(dcmPositionController.getComHeight());
+      dcmPositionWaypoint.add(0, 0, lipModel.getComHeight());
+      dcmTrajectory.setComHeight(lipModel.getComHeight());
       dcmTrajectory.initializeTrajectory(nIntervals, copPlanner.getTimeAtStartOfInterval(), copPlanner.getCenterOfPressureAtStartOfInterval(),
             copPlanner.getTimeAtStartOfInterval(nIntervals - 1), dcmPositionWaypoint);
 

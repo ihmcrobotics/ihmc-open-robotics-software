@@ -47,8 +47,10 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    private final ReferenceFrame supportFrame;
    private final ReferenceFrame worldFrame;
 
-   // feedback controller
+   // feedback controllers
+   private final LinearInvertedPendulumModel lipModel;
    private final FramePoint dcmPositionEstimate;
+   private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final DivergentComponentOfMotionController.Setpoints dcmPositionControllerSetpoints;
    private final DivergentComponentOfMotionController dcmPositionController;
    private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
@@ -82,7 +84,9 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       worldFrame = ReferenceFrame.getWorldFrame();
 
       // feedback controllers
+      lipModel = controllerToolbox.getLinearInvertedPendulumModel();
       dcmPositionEstimate = new FramePoint();
+      dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
       dcmPositionControllerSetpoints = new DivergentComponentOfMotionController.Setpoints();
       dcmPositionController = controllerToolbox.getDcmPositionController();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
@@ -114,12 +118,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       taskSpaceEstimator.compute(taskSpaceEstimates);
 
       // update dcm estimate
-      taskSpaceEstimates.getComPosition().changeFrame(worldFrame);
-      taskSpaceEstimates.getComVelocity().changeFrame(worldFrame);
-      dcmPositionEstimate.changeFrame(worldFrame);
-      dcmPositionEstimate.set(taskSpaceEstimates.getComVelocity());
-      dcmPositionEstimate.scale(1.0 / dcmPositionController.getNaturalFrequency());
-      dcmPositionEstimate.add(taskSpaceEstimates.getComPosition());
+      dcmPositionEstimator.compute(dcmPositionEstimate, taskSpaceEstimates.getComVelocity());
 
       // update ground plane estimate
       groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
@@ -130,7 +129,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       // update desired dcm position
       dcmPositionControllerSetpoints.getDcmPosition().changeFrame(supportFrame);
       dcmPositionControllerSetpoints.getDcmPosition().set(inputProvider.getComVelocityInput());
-      dcmPositionControllerSetpoints.getDcmPosition().scale(1.0 / dcmPositionController.getNaturalFrequency());
+      dcmPositionControllerSetpoints.getDcmPosition().scale(1.0 / lipModel.getNaturalFrequency());
       dcmPositionControllerSetpoints.getDcmPosition().add(inputProvider.getComPositionInput());
       dcmPositionControllerSetpoints.getDcmVelocity().setToZero(supportFrame);
       dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
@@ -163,7 +162,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
 
    @Override public ControllerEvent process()
    {
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
+      lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
       updateEstimates();
       updateSetpoints();
       return null;
@@ -172,13 +171,12 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    @Override public void onEntry()
    {
       // initialize estimates
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
+      lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
       updateEstimates();
 
       // initialize feedback controllers
       dcmPositionControllerSetpoints.initialize(dcmPositionEstimate);
       dcmPositionController.reset();
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
       dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
       dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
       dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
