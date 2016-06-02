@@ -378,6 +378,9 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       // u0, u1, u2, u3 are the normalized contact pressures for each quadrant and
       // u4, u5 are the x and y step adjustment in meters
 
+      double copRegularization = 1;
+      double stepAdjustmentRegularization = 100000;
+
       int rowOffset, columnOffset;
       stepAdjustment.changeFrame(worldFrame);
       currentDcmEstimate.changeFrame(worldFrame);
@@ -485,13 +488,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       }
 
       // Initialize cost terms. (min_u u'Au + b'u)
-      b.reshape(nContacts + 2, 1);
-      b.zero();
       A.reshape(nContacts + 2, nContacts + 2);
       A.zero();
-
-      double copRegularization = 1;
-      double stepAdjustmentRegularization = 10000;
       for (int i = 0; i < nContacts; i++)
       {
          A.set(i, i, copRegularization);
@@ -500,6 +498,18 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       {
          A.set(i, i, stepAdjustmentRegularization);
       }
+
+      b.reshape(nContacts + 2, 1);
+      b.zero();
+      rowOffset = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
+         {
+            b.set(rowOffset++, 0, timedStepPressurePlanner.getNormalizedPressureContributedByQuadrant(robotQuadrant, 0));
+         }
+      }
+      CommonOps.multTransA(A, b, b);
 
       // Solve constrained quadratic program.
       try
