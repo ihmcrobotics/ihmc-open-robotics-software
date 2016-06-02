@@ -387,12 +387,12 @@ public class QuadrupedContactForceOptimization
       int m = u.getNumRows();
 
       // equality constraints:
-      // Aeq u + beq = 0
+      // Aeq u = beq
       beq.reshape(0, 1);
       Aeq.reshape(0, m);
 
       // inequality constraints:
-      // Ain u + bin >= 0
+      // Ain u <= bin
       bin.reshape(2 * m, 1);
       Ain.reshape(2 * m, m);
       bin.zero();
