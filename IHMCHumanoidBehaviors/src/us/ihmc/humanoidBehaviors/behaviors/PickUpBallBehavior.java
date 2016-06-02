@@ -56,6 +56,7 @@ public class PickUpBallBehavior extends BehaviorInterface
    public static final HSVRange RED_BALL = new HSVRange(new HSVValue(0.2913, 96.09, 69.0), new HSVValue(179.7, 149.6, 190.0));
    public static final HSVRange GREEN_BALL = new HSVRange(new HSVValue(81.29, 103.0, 52.0), new HSVValue(91.15, 153.0, 130.0));
    public static final HSVRange BLUE_BALL = new HSVRange(new HSVValue(79.5, 109.3, 28.0), new HSVValue(105.0, 175.9, 170.0));
+   public static final HSVRange SIMULATED_BALL = new HSVRange(new HSVValue(20.0, 50.0, 0.0), new HSVValue(150.0, 255.0, 255.0));
    
    private final PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement;
 

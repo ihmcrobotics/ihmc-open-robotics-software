@@ -20,6 +20,8 @@ import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 {
@@ -89,6 +91,17 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 
    private Point3f[] filterPointsNearBall(Point3f[] fullPointCloud)
    {
+      if (fullPointCloud.length == 0)
+      {
+         DepthDataStateCommand enableBehaviorLidar = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
+         enableBehaviorLidar.setDestination(PacketDestination.SENSOR_MANAGER);
+         sendPacketToNetworkProcessor(enableBehaviorLidar);
+         
+         ThreadTools.sleep(100);
+         
+         return new Point3f[0];
+      }
+      
       List<Point3f> filteredPoints = new ArrayList<Point3f>();
       RigidBodyTransform worldToCameraTransform = headFrame.getTransformToWorldFrame();
       worldToCameraTransform.invert();
@@ -133,6 +146,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       }
       else
       {
+         PrintTools.debug(this, "LatestCameraImage is null. Returning empty");
          return new Point3f[0];
       }
    }
@@ -145,12 +159,12 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       coloredCircularBlobDetectorBehaviorService.initialize();
       
       DepthDataStateCommand depthDataStateCommand = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
-      depthDataStateCommand.setDestination(PacketDestination.NETWORK_PROCESSOR);
+      depthDataStateCommand.setDestination(PacketDestination.SENSOR_MANAGER);
       
       sendPacketToNetworkProcessor(depthDataStateCommand);
       
       TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket("<prosody pitch=\"90Hz\" rate=\"-20%\" volume=\"x-loud\">I am looking for balls.</prosody>");
-      textToSpeechPacket.setDestination(PacketDestination.BROADCAST);
+      textToSpeechPacket.setDestination(PacketDestination.TEXT_TO_SPEECH);
       sendPacketToNetworkProcessor(textToSpeechPacket);
    }
 
