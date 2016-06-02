@@ -174,32 +174,39 @@ public class IHMCHumanoidBehaviorManager
 
       dispatcher.addBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(behaviorCommunicationBridge));
 
-      ScriptBehavior scriptBehavior = new ScriptBehavior(behaviorCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport,
-            wholeBodyControllerParameters.getWalkingControllerParameters());
-      dispatcher.addBehavior(HumanoidBehaviorType.SCRIPT, scriptBehavior);
-
-      DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
-            behaviorCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
-      dispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
-
-      LocalizationBehavior localizationBehavior = new LocalizationBehavior(behaviorCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport,
-            wholeBodyControllerParameters.getWalkingControllerParameters());
-      dispatcher.addBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
-
-      WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(behaviorCommunicationBridge, fullRobotModel, yoTime,
-            wholeBodyControllerParameters.getWalkingControllerParameters().getAnkleHeight());
-      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
-
-      dispatcher.addBehavior(HumanoidBehaviorType.RECEIVE_IMAGE, new ReceiveImageBehavior(behaviorCommunicationBridge));
-      dispatcher.addBehavior(HumanoidBehaviorType.LOCALIZE_DRILL, new LocalizeDrillBehavior(behaviorCommunicationBridge, referenceFrames));
-
-      dispatcher.addBehavior(HumanoidBehaviorType.TALK_AND_MOVE_HANDS, new TalkAndMoveHandsBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
-
       dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
             new PickUpBallBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters));
       
-      dispatcher.addBehavior(HumanoidBehaviorType.BALL_DETECTION,
-            new BlobFilteredSphereDetectionBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel));
+      BlobFilteredSphereDetectionBehavior blobFilteredSphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(behaviorCommunicationBridge,
+            referenceFrames, fullRobotModel);
+      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.ORANGE_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.BLUE_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.RED_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.YELLOW_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.GREEN_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.SIMULATED_BALL);
+      dispatcher.addBehavior(HumanoidBehaviorType.BALL_DETECTION, blobFilteredSphereDetectionBehavior);
+      
+      dispatcher.addBehavior(HumanoidBehaviorType.TALK_AND_MOVE_HANDS, new TalkAndMoveHandsBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
+      
+      ScriptBehavior scriptBehavior = new ScriptBehavior(behaviorCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport,
+                                                         wholeBodyControllerParameters.getWalkingControllerParameters());
+      dispatcher.addBehavior(HumanoidBehaviorType.SCRIPT, scriptBehavior);
+      
+      DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
+                                                                     behaviorCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
+      dispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
+      
+      LocalizationBehavior localizationBehavior = new LocalizationBehavior(behaviorCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport,
+                                                                           wholeBodyControllerParameters.getWalkingControllerParameters());
+      dispatcher.addBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
+      
+      WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(behaviorCommunicationBridge, fullRobotModel, yoTime,
+                                                                     wholeBodyControllerParameters.getWalkingControllerParameters().getAnkleHeight());
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
+      
+      dispatcher.addBehavior(HumanoidBehaviorType.RECEIVE_IMAGE, new ReceiveImageBehavior(behaviorCommunicationBridge));
+      dispatcher.addBehavior(HumanoidBehaviorType.LOCALIZE_DRILL, new LocalizeDrillBehavior(behaviorCommunicationBridge, referenceFrames));
 
       // TODO: Fix or remove this behavior
       //      PushButtonBehavior pushButtonBehavior = new PushButtonBehavior(outgoingCommunicationBridge, referenceFrames, yoTime, wristSensors);

@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point2d;
 
@@ -33,7 +34,9 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    
    private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
    private final Point2d latestBallPosition2d = new Point2d();
+   private final List<Point2d> latestBallPositionSet = new ArrayList<>();
    private BufferedImage latestUnmodifiedCameraImage;
+   private final Object ballListConch = new Object();
 
    private static final Scalar circleColor = new Scalar(160, 0, 0);
 
@@ -82,6 +85,15 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
 
          if (circles.size() > 0)
             latestBallPosition2d.set(circles.get(0).getCenter());
+         
+         synchronized (ballListConch)
+         {
+            latestBallPositionSet.clear();
+            for (HoughCircleResult houghCircleResult : circles)
+            {
+               latestBallPositionSet.add(new Point2d(houghCircleResult.getCenter()));
+            }
+         }
       }
       else
       {
@@ -92,6 +104,11 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    public void addHSVRange(HSVRange hsvRange)
    {
       openCVColoredCircularBlobDetector.addHSVRange(hsvRange);
+   }
+   
+   public List<Point2d> getLatestBallPositionSet()
+   {
+      return latestBallPositionSet;
    }
 
    public Point2d getLatestBallPosition2d()
@@ -107,5 +124,10 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    public void clearHSVRanges()
    {
       openCVColoredCircularBlobDetector.resetRanges();
+   }
+
+   public Object getBallListConch()
+   {
+      return ballListConch;
    }
 }

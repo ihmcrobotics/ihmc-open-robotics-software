@@ -7,14 +7,17 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class TextToSpeechNetworkModule implements PacketConsumer<TextToSpeechPacket>
 {
-   private final PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.TEXT_TO_SPEECH, 2048, 16384, new IHMCCommunicationKryoNetClassList());
+   private final PacketCommunicator packetCommunicator;
    private final TextToSpeechClient ttsClient = new TextToSpeechClient();
    
    public TextToSpeechNetworkModule()
    {
+//      packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.TEXT_TO_SPEECH, 2048, 16384, new IHMCCommunicationKryoNetClassList());
+      packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.TEXT_TO_SPEECH, new IHMCCommunicationKryoNetClassList());
       try
       {
          packetCommunicator.connect();
@@ -26,12 +29,14 @@ public class TextToSpeechNetworkModule implements PacketConsumer<TextToSpeechPac
       }
       packetCommunicator.attachListener(TextToSpeechPacket.class, this);
    }
-
+   
    @Override
    public void receivedPacket(TextToSpeechPacket packet)
    {
-      System.out.println(packet.getTextToSpeak());
-      ttsClient.playText(packet.getTextToSpeak());
+      PrintTools.debug(this, "Received TextToSpeechPacket: " + packet.getTextToSpeak());
+      String textToSpeak = packet.getTextToSpeak();
+      textToSpeak = "<prosody pitch=\"60Hz\" rate=\"-10%\" volume=\"x-loud\">" + textToSpeak + "</prosody>";
+      ttsClient.playText(textToSpeak);
    }
    
    public static void main(String[] args)

@@ -2,13 +2,11 @@ package us.ihmc.humanoidBehaviors.behaviors.coactiveElements;
 
 
 import us.ihmc.humanoidBehaviors.behaviors.PickUpBallBehavior;
-import us.ihmc.ihmcPerception.vision.HSVValue;
-import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 
 public class PickUpBallBehaviorCoactiveElementBehaviorSide extends PickUpBallBehaviorCoactiveElement
 {
    private PickUpBallBehavior pickUpBallBehavior;
-   private HSVRange currentHSVRange = null;
+//   private HSVRange currentHSVRange = null;
 
    public void setPickUpBallBehavior(PickUpBallBehavior pickUpBallBehavior)
    {
@@ -47,9 +45,9 @@ public class PickUpBallBehaviorCoactiveElementBehaviorSide extends PickUpBallBeh
          abortAcknowledged.set(true);
       }
 
-      HSVRange newHSVRange = new HSVRange(new HSVValue(minHue.getIntegerValue(), minSat.getIntegerValue(), minVal.getIntegerValue()),
-            new HSVValue(maxHue.getIntegerValue(), maxSat.getIntegerValue(), maxVal.getIntegerValue()));
-      pickUpBallBehavior.setHSVRange(newHSVRange);
+//      HSVRange newHSVRange = new HSVRange(new HSVValue(minHue.getIntegerValue(), minSat.getIntegerValue(), minVal.getIntegerValue()),
+//            new HSVValue(maxHue.getIntegerValue(), maxSat.getIntegerValue(), maxVal.getIntegerValue()));
+//      pickUpBallBehavior.setHSVRange(newHSVRange);
 
       machineSideCount.increment();
    }

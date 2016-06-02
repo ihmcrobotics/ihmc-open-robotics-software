@@ -1,0 +1,36 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="hip">
+  <!-- if you edit the mass or dimensions please recompute the ineria! -->
+  <xacro:property name="hipMass" value="2.0" /> 
+
+  <xacro:macro name="createHip" params="end side reflectEnd reflectSide parentLinkName hipGraphicYaw hipRollXInBodyFrame hipRollYInBodyFrame hipRollZInBodyFrame" >
+    
+  <joint name="${end}_${side}_hip_roll" type="revolute">
+      <axis xyz="1 0 0"/>
+      <parent link="${parentLinkName}"/>
+      <child link="${end}_${side}_hip"/>
+      <origin xyz="${hipRollXInBodyFrame} ${hipRollYInBodyFrame} ${hipRollZInBodyFrame}"/>
+      <limit effort="1000" velocity="100.0" lower="${reflectSide * -3.141592}" upper="${reflectSide * 3.141592}" />
+    </joint>
+    
+    <link name="${end}_${side}_hip">
+      <visual>    
+	
+	<origin rpy="0 1.57075 ${hipGraphicYaw}" xyz="0 0 0.04"/>
+	
+	
+	<geometry>
+	  <mesh filename="package://lla_quadruped_description/model/meshes/lla_5A0-binary.stl"/>
+	  <!--box size="0.196 0.1 0.1"/-->
+	</geometry>
+	 <material name="blue">
+           <color rgba="0 0 .8 1"/>
+         </material>
+      </visual>	
+      <inertial>
+	  <origin xyz="${reflectEnd * 0.098} 0.0 0.0" />
+	  <mass value="${hipMass}" />
+	  <inertia ixx="0.006" ixy="-0.00004" ixz="0.004" iyy="0.025" iyz="-0.000004" izz="0.02" />
+      </inertial>
+    </link>
+  </xacro:macro>
+</robot>
