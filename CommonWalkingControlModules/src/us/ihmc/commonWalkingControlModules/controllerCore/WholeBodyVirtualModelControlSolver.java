@@ -54,6 +54,7 @@ public class WholeBodyVirtualModelControlSolver
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>();
+   private final RigidBody controlRootBody;
 
    private final List<RigidBody> controlledBodies;
    private final Map<RigidBody, RigidBodyInertia> conversionInertias = new HashMap<>();
@@ -88,7 +89,8 @@ public class WholeBodyVirtualModelControlSolver
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
 
-      virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), controllerModel.getPelvis(), controlledOneDoFJoints, registry,
+      controlRootBody = controllerModel.getPelvis();
+      virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), controlRootBody, controlledOneDoFJoints, registry,
             toolbox.getYoGraphicsListRegistry());
 
       yoDesiredMomentumRateAngular = new YoFrameVector("desiredMomentumRateAngular", toolbox.getCenterOfMassFrame(), registry);
@@ -252,7 +254,7 @@ public class WholeBodyVirtualModelControlSolver
             recordMomentumRate((MomentumRateCommand) command);
             break;
          case EXTERNAL_WRENCH:
-            optimizationControlModule.submitExternalWrenchCommand((ExternalWrenchCommand) command);
+            handleExternalWrenchCommand((ExternalWrenchCommand) command);
             break;
          case PLANE_CONTACT_STATE:
             optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
@@ -299,9 +301,12 @@ public class WholeBodyVirtualModelControlSolver
       virtualWrenchCommand.set(controlledBody, tmpWrench, command.getSelectionMatrix());
       virtualWrenchCommandList.addCommand(virtualWrenchCommand);
 
-      tmpExternalWrench.set(tmpWrench);
-      tmpExternalWrench.negate();
-      optimizationControlModule.submitExternalWrench(controlledBody, tmpExternalWrench);
+      if (controlledBody == controlRootBody)
+      {
+         tmpExternalWrench.set(tmpWrench);
+         tmpExternalWrench.negate();
+         optimizationControlModule.submitExternalWrench(controlledBody, tmpExternalWrench);
+      }
 
       optimizationControlModule.addSelection(command.getSelectionMatrix());
    }
@@ -310,11 +315,26 @@ public class WholeBodyVirtualModelControlSolver
    {
       virtualWrenchCommandList.addCommand(command);
 
-      tmpExternalWrench.set(command.getVirtualWrench());
-      tmpExternalWrench.negate();
-      optimizationControlModule.submitExternalWrench(command.getControlledBody(), tmpExternalWrench);
+      if (command.getControlledBody() == controlRootBody)
+      {
+         tmpExternalWrench.set(command.getVirtualWrench());
+         tmpExternalWrench.negate();
+         optimizationControlModule.submitExternalWrench(command.getControlledBody(), tmpExternalWrench);
+      }
 
       optimizationControlModule.addSelection(command.getSelectionMatrix());
+   }
+
+   private void handleExternalWrenchCommand(ExternalWrenchCommand command)
+   {
+      optimizationControlModule.submitExternalWrench(command.getRigidBody(), tmpExternalWrench);
+
+      tmpWrench.set(command.getExternalWrench());
+      tmpWrench.negate();
+
+      VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
+      virtualWrenchCommand.set(command.getRigidBody(), tmpWrench);
+      virtualWrenchCommandList.addCommand(virtualWrenchCommand);
    }
 
    private void submitJointAccelerationIntegrationCommand(JointAccelerationIntegrationCommand command)
