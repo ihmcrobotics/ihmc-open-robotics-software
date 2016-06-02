@@ -102,6 +102,9 @@ public class BalanceManager
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
+   private final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+
    public BalanceManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry)
    {
@@ -129,9 +132,8 @@ public class BalanceManager
 
       bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
 
-      double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
       icpBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
-            totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection, maxAllowedDistanceCMPSupport);
+            totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(minimumSwingTimeForDisturbanceRecovery);
@@ -150,7 +152,8 @@ public class BalanceManager
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
 
-      momentumRecoveryControlModule = new MomentumRecoveryControlModule(momentumBasedController, registry);
+      double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
+      momentumRecoveryControlModule = new MomentumRecoveryControlModule(momentumBasedController, maxAllowedDistanceCMPSupport, registry);
 
       String graphicListName = "BalanceManager";
 
@@ -243,22 +246,24 @@ public class BalanceManager
       momentumRecoveryControlModule.setICPError(icpError2d);
       momentumRecoveryControlModule.setSupportSide(supportLeg);
       momentumRecoveryControlModule.compute();
-      momentumRecoveryControlModule.updateIcpControlModule(icpBasedLinearMomentumRateOfChangeControlModule);
 
+      momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);
       if (!keepCMPInsideSupportPolygon)
-         icpBasedLinearMomentumRateOfChangeControlModule.keepCMPInsideSupportPolygon(keepCMPInsideSupportPolygon);
+         areaToProjectInto.clearAndUpdate(worldFrame);
+      icpBasedLinearMomentumRateOfChangeControlModule.setCMPProjectionArea(areaToProjectInto, safeArea);
+
+      if (momentumRecoveryControlModule.getUseHighMomentumWeight())
+         icpBasedLinearMomentumRateOfChangeControlModule.setHighMomentumWeight();
+      else
+         icpBasedLinearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
 
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
-
       icpBasedLinearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setOmega0(omega0);
-
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCapturePoint(desiredCapturePoint2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
-
       icpBasedLinearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
-
       icpBasedLinearMomentumRateOfChangeControlModule.compute(desiredCMP);
       yoDesiredCMP.set(desiredCMP);
    }
