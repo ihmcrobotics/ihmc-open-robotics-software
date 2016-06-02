@@ -136,7 +136,8 @@ public class VirtualModelControllerTestHelper
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
-      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, controllerModel.getElevator(), null, registry, yoGraphicsListRegistry);
+      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, controllerModel.getPelvis(),
+            controllerModel.getOneDoFJoints(), registry, yoGraphicsListRegistry);
 
       List<ReferenceFrame> endEffectorFrames = new ArrayList<>();
       List<FramePose> desiredEndEffectorPoses = new ArrayList<>();
