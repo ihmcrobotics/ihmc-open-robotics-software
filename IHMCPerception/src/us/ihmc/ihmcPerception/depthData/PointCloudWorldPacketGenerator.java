@@ -41,8 +41,7 @@ public class PointCloudWorldPacketGenerator implements Runnable
          @Override
          public void receivedPacket(DepthDataStateCommand depthDataStateCommand)
          {
-            if (depthDataStateCommand.getLidarState() == DepthDataStateCommand.LidarState.ENABLE
-             || depthDataStateCommand.getLidarState() == DepthDataStateCommand.LidarState.DISABLE)
+            if (depthDataStateCommand.getLidarState() == DepthDataStateCommand.LidarState.ENABLE)
             {
                if (packetDestination != PacketDestination.BROADCAST)
                {
