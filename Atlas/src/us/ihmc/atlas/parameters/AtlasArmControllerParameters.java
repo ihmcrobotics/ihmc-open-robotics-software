@@ -49,7 +49,7 @@ public class AtlasArmControllerParameters extends ArmControllerParameters
       jointspaceControlGains.setMaximumAcceleration(maxAccel);
       jointspaceControlGains.setMaximumJerk(maxJerk);
       jointspaceControlGains.createDerivativeGainUpdater(true);
-      
+
       return jointspaceControlGains;
    }
 
@@ -93,7 +93,7 @@ public class AtlasArmControllerParameters extends ArmControllerParameters
       taskspaceControlGains.setOrientationDerivativeGains(kd, kd, kd);
       taskspaceControlGains.setOrientationMaxAccelerationAndJerk(maxAccel, maxJerk);
       taskspaceControlGains.setPositionMaxAccelerationAndJerk(maxAccel, maxJerk);
-      
+
       return taskspaceControlGains;
    }
 
@@ -143,7 +143,7 @@ public class AtlasArmControllerParameters extends ArmControllerParameters
       jointAccelerationIntegrationAlphaPosition.put(ArmJointName.FIRST_WRIST_PITCH, wrist);
       jointAccelerationIntegrationAlphaPosition.put(ArmJointName.WRIST_ROLL, wrist);
       jointAccelerationIntegrationAlphaPosition.put(ArmJointName.SECOND_WRIST_PITCH, wrist);
-      
+
       return jointAccelerationIntegrationAlphaPosition;
    }
 

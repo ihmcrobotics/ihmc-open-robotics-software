@@ -21,6 +21,7 @@ import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
 import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
@@ -82,24 +83,13 @@ public class SphereDetectionBehavior extends BehaviorInterface
       return new Point3d(ballX.getDoubleValue(), ballY.getDoubleValue(), ballZ.getDoubleValue());
    }
 
-   PointCloudWorldPacket pointCloudPacket;
-   PointCloudWorldPacket pointCloudPacketLatest = null;
-
    @Override
    public void doControl()
    {
-
-      while ((pointCloudPacket = pointCloudQueue.poll()) != null)
+      if (pointCloudQueue.isNewPacketAvailable())
       {
-         pointCloudPacketLatest = pointCloudPacket;
+         findBallsAndSaveResult(pointCloudQueue.getLatestPacket().getDecayingWorldScan());
       }
-
-      if (pointCloudPacketLatest != null)
-      {
-         Point3f[] points = pointCloudPacketLatest.getDecayingWorldScan();
-         findBallsAndSaveResult(points);
-      }
-
    }
 
    protected void findBallsAndSaveResult(Point3f[] points)
@@ -134,7 +124,21 @@ public class SphereDetectionBehavior extends BehaviorInterface
          ballY.set(0);
          ballZ.set(0);
       }
-
+      
+      PointCloudWorldPacket pointCloudWorldPacket = new PointCloudWorldPacket();
+      pointCloudWorldPacket.setDestination(PacketDestination.UI);
+      pointCloudWorldPacket.setTimestamp(-1L);
+      Point3d[] points3d = new Point3d[points.length];
+      for (int i = 0; i < points.length; i++)
+      {
+         points3d[i] = new Point3d(points[i]);
+      }
+      pointCloudWorldPacket.setDecayingWorldScan(points3d);
+      Point3d[] groundQuadTree = new Point3d[1];
+      groundQuadTree[0] = new Point3d();
+      pointCloudWorldPacket.setGroundQuadTreeSupport(groundQuadTree);
+      
+      sendPacketToNetworkProcessor(pointCloudWorldPacket);
    }
 
    public ArrayList<Sphere3D_F64> detectBalls(Point3f[] fullPoints)
@@ -280,7 +284,6 @@ public class SphereDetectionBehavior extends BehaviorInterface
    @Override
    public boolean hasInputBeenSet()
    {
-      // TODO Auto-generated method stub
       return true;
    }
 

@@ -71,8 +71,6 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private final static double defaultSwingTime = 0.6;
    private final static double defaultTransferTime = 2.5;
    private final static double defaultChickenPercentage = 0.5;
-   private final static boolean keepSCSup = false;
-   private final static boolean usePefectSensors = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -80,23 +78,13 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private SideDependentList<YoFrameConvexPolygon2d> supportPolygons = null;
    private SideDependentList<ArrayList<Point2d>> footContactsInAnkleFrame = null;
 
-   private SimulationTestingParameters simulationTestingParameters;
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-      if (System.getProperty("keep.scs.up") == null)
-      {
-         simulationTestingParameters.setKeepSCSUp(keepSCSup);
-      }
-      if (System.getProperty("use.perfect.sensors") == null)
-      {
-         simulationTestingParameters.setUsePefectSensors(usePefectSensors);
-      }
-
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
@@ -131,8 +119,10 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private void setUpMomentum() throws SimulationExceededMaximumTimeException
    {
       // enable the use of body momentum in the controller
-      BooleanYoVariable useMomentumIfFalling = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("UseUpperBodyLinearMomentumIfFalling");
-      useMomentumIfFalling.set(true);
+      BooleanYoVariable allowUpperBodyMomentumInSingleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
+      allowUpperBodyMomentumInSingleSupport.set(true);
+      BooleanYoVariable allowUsingHighMomentumWeight = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUsingHighMomentumWeight");
+      allowUsingHighMomentumWeight.set(true);
 
       // bring the arms in a stretched position
       for (RobotSide robotSide : RobotSide.values)
@@ -670,6 +660,9 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       DoubleYoVariable percentageChickenSupport = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("PercentageChickenSupport");
       percentageChickenSupport.set(chickenPercentage);
+
+      DoubleYoVariable timeBeforeExploring = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("ExplorationState_TimeBeforeExploring");
+      timeBeforeExploring.set(0.0);
    }
 
    @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.Fast})

@@ -10,9 +10,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.robotics.dataStructures.TimestampedPoint;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class PointCloudWorldPacketGenerator implements Runnable
@@ -23,6 +27,7 @@ public class PointCloudWorldPacketGenerator implements Runnable
    private final ReadLock readLock;
    private final DepthDataStore depthDataFilter;
    private final PacketCommunicator packetCommunicator;
+   private PacketDestination packetDestination = PacketDestination.BROADCAST;
    private ScheduledFuture<?> scheduled = null;
 
    public PointCloudWorldPacketGenerator(PacketCommunicator sensorSuitePacketCommunicator, ReadLock readLock, DepthDataStore depthDataFilter)
@@ -30,6 +35,30 @@ public class PointCloudWorldPacketGenerator implements Runnable
       this.packetCommunicator = sensorSuitePacketCommunicator;
       this.readLock = readLock;
       this.depthDataFilter = depthDataFilter;
+      
+      packetCommunicator.attachListener(DepthDataStateCommand.class, new PacketConsumer<DepthDataStateCommand>()
+      {
+         @Override
+         public void receivedPacket(DepthDataStateCommand depthDataStateCommand)
+         {
+            if (depthDataStateCommand.getLidarState() == DepthDataStateCommand.LidarState.ENABLE)
+            {
+               if (packetDestination != PacketDestination.BROADCAST)
+               {
+                  PrintTools.info("Mutlisense scan destination = " + PacketDestination.BROADCAST.name());
+                  packetDestination = PacketDestination.BROADCAST;
+               }
+            }
+            else if (depthDataStateCommand.getLidarState() == DepthDataStateCommand.LidarState.ENABLE_BEHAVIOR_ONLY)
+            {
+               if (packetDestination != PacketDestination.BEHAVIOR_MODULE)
+               {
+                  PrintTools.info("Mutlisense scan destination = " + PacketDestination.BEHAVIOR_MODULE.name());
+                  packetDestination = PacketDestination.BEHAVIOR_MODULE;
+               }
+            }
+         }
+      });
    }
 
    PointCloudWorldPacketGenerator(DepthDataStore depthDataFilter)
@@ -83,6 +112,7 @@ public class PointCloudWorldPacketGenerator implements Runnable
       try
       {
          PointCloudWorldPacket pointCloudWorldPacket = getPointCloudWorldPacket();
+         pointCloudWorldPacket.setDestination(packetDestination);
          packetCommunicator.send(pointCloudWorldPacket);
       }
       catch(Exception e)

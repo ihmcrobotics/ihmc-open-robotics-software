@@ -25,6 +25,7 @@ import us.ihmc.robotics.stateMachines.StateTransitionAction;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**

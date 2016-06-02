@@ -14,7 +14,7 @@ public class MomentumOptimizationSettings
    private Vector3d highAngularFootWeight = new Vector3d(5.0, 5.0, 5.0);
    private Vector3d highLinearFootWeight = new Vector3d(50.0, 50.0, 50.0);
 
-   private Vector3d chestAngularWeight = new Vector3d(15.0, 10.0, 5.0); //10.0;
+   private Vector3d chestAngularWeight = new Vector3d(15.0, 10.0, 5.0);
    private Vector3d pelvisAngularWeight = new Vector3d(5.0, 5.0, 5.0);
 
    private double jointAccelerationWeight = 0.005;

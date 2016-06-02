@@ -103,7 +103,7 @@ public abstract class YoVariable<T extends YoVariable<T>>
       }
       else if (warnAboutNullRegistries)
       {
-         System.err.println("Warning! " + variable.getName() + " is getting created with a null registry");
+         System.err.println("[WARN] " + YoVariable.class.getSimpleName() + ": " + variable.getName() + " is getting created with a null registry");
       }
    }
 

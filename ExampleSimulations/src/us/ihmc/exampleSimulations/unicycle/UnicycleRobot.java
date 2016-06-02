@@ -100,7 +100,7 @@ public class UnicycleRobot extends Robot
       Link link = new Link("Fork");
       link.setMass(fork_mass);
       link.setComOffset(new Vector3d(0.0, 0.0, -fork_l/2.0));
-      double ixx = fork_mass/12.0 * (3.0 * fork_r*fork_r + fork_l*fork_l) + fork_mass*fork_l*fork_l/4.0;
+      double ixx = fork_mass/12.0 * (3.0 * fork_r*fork_r + fork_l*fork_l); // + fork_mass*fork_l*fork_l/4.0;
       double iyy = ixx;
       double izz = fork_mass/2.0 * fork_r*fork_r;
       link.setMomentOfInertia(ixx, iyy, izz);
@@ -118,8 +118,8 @@ public class UnicycleRobot extends Robot
       link.setMass(body_mass);
 
       link.setComOffset(new Vector3d(0.0, 0.0, body_z/2.0));
-      double ixx = body_mass/12.0 * (body_y*body_y + body_z*body_z) + body_mass*body_z*body_z/4.0;
-      double iyy = body_mass/12.0 * (body_x*body_x + body_z*body_z) + body_mass*body_z*body_z/4.0;
+      double ixx = body_mass/12.0 * (body_y*body_y + body_z*body_z); // + body_mass*body_z*body_z/4.0;
+      double iyy = body_mass/12.0 * (body_x*body_x + body_z*body_z); // + body_mass*body_z*body_z/4.0;
       double izz = body_mass/12.0 * (body_x*body_x + body_y*body_y);
       link.setMomentOfInertia(ixx, iyy, izz);
 
