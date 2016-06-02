@@ -198,8 +198,14 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
             new PickUpBallBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters));
       
-      dispatcher.addBehavior(HumanoidBehaviorType.BALL_DETECTION,
-            new BlobFilteredSphereDetectionBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel));
+      BlobFilteredSphereDetectionBehavior blobFilteredSphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(behaviorCommunicationBridge,
+            referenceFrames, fullRobotModel);
+      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.ORANGE_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.BLUE_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.RED_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.YELLOW_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.GREEN_BALL);
+      dispatcher.addBehavior(HumanoidBehaviorType.BALL_DETECTION, blobFilteredSphereDetectionBehavior);
 
       // TODO: Fix or remove this behavior
       //      PushButtonBehavior pushButtonBehavior = new PushButtonBehavior(outgoingCommunicationBridge, referenceFrames, yoTime, wristSensors);
