@@ -1,0 +1,39 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="leg">
+
+  <xacro:include filename="hip.xacro" />
+  <xacro:include filename="thigh.xacro" />
+  <xacro:include filename="shin.xacro" />
+  
+  <xacro:macro name="createLeg" params="end side reflectEnd reflectSide parentLinkName hipRollXInBodyFrame hipRollYInBodyFrame hipRollZInBodyFrame hipGraphicYaw hipPitchXInHipRollFrame hipPitchYinHipRollFrame hipPitchZInHipRollFrame kneePitchXinHipPitchFrame kneePitchZinHipPitchFrame">
+    
+    <xacro:createHip 
+      end="${end}" 
+      side="${side}" 
+      reflectEnd="${reflectEnd}"
+      reflectSide="${reflectSide}"  
+      parentLinkName="${parentLinkName}"
+      hipGraphicYaw="${hipGraphicYaw}"
+      hipRollXInBodyFrame="${hipRollXInBodyFrame}"
+      hipRollYInBodyFrame="${hipRollYInBodyFrame}"
+      hipRollZInBodyFrame="${hipRollZInBodyFrame}"
+      />
+    
+    <xacro:createThigh 
+      end="${end}" 
+      side="${side}" 
+      reflectEnd="${reflectEnd}"
+      reflectSide="${reflectSide}" 
+      hipPitchXInHipRollFrame="${hipPitchXInHipRollFrame}"
+      hipPitchYinHipRollFrame="${hipPitchYinHipRollFrame}"
+      hipPitchZInHipRollFrame="${hipPitchZInHipRollFrame}"
+      />
+    
+    <xacro:createShin 
+      end="${end}" 
+      side="${side}" 
+      kneePitchXinHipPitchFrame="${kneePitchXinHipPitchFrame}"  
+      kneePitchZinHipPitchFrame="${kneePitchZinHipPitchFrame}"
+      />
+
+  </xacro:macro>
+</robot>
