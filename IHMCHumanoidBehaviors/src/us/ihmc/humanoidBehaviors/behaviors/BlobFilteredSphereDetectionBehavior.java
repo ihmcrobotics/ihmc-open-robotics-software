@@ -117,8 +117,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
                      double rayAngleY = Math.atan2(candidateLidarPoint.y, candidateLidarPoint.x);
                      if (Math.abs(rayAngleX - desiredRayAngleX) < FILTERING_ANGLE && Math.abs(rayAngleY - desiredRayAngleY) < FILTERING_ANGLE)
                      {
-                        candidateLidarPoint.setZ(1.0f);
-                        filteredPoints.add(candidateLidarPoint);
+                        filteredPoints.add(fullPointCloud[i]);
                      }
                   }
                }
