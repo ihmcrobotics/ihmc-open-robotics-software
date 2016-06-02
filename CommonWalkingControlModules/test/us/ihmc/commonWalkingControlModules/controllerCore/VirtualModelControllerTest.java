@@ -15,6 +15,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
@@ -697,6 +698,7 @@ public class VirtualModelControllerTest
             desiredTorques, externalForcePoints, selectionMatrix);
 
       simulationTestingParameters.setKeepSCSUp(false);
+      BambooTools.reportTestFinishedMessage();
    }
 
    @DeployableTestMethod
