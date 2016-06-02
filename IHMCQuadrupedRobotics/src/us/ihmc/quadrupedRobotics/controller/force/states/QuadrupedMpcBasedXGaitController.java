@@ -2,8 +2,8 @@ package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolver;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -15,15 +15,10 @@ import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.*;
-import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseForwardDcmTrajectory;
-import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajectory;
-import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsProvider;
-import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
-import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
-import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.Direction;
@@ -32,11 +27,11 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.*;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 import java.util.ArrayList;
 
-public class QuadrupedMpcBasedXGaitController implements QuadrupedController
+public class QuadrupedMpcBasedXGaitController implements QuadrupedController, QuadrupedTimedStepTransitionCallback
 {
    private final QuadrupedControllerInputProviderInterface inputProvider;
    private final QuadrupedXGaitSettingsProvider settingsProvider;
@@ -57,21 +52,20 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController
    private final DoubleArrayParameter comPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("comPositionDerivativeGains", 0, 0, 750);
    private final DoubleArrayParameter comPositionIntegralGainsParameter = parameterFactory.createDoubleArray("comPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter comPositionMaxIntegralErrorParameter = parameterFactory.createDouble("comPositionMaxIntegralError", 0);
-   private final DoubleArrayParameter dcmPositionProportionalGainsParameter = parameterFactory.createDoubleArray("dcmPositionProportionalGains", 1, 1, 0);
-   private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
-   private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
-   private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
-   private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDuration", 1.00);
+   private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDuration", 0.25);
    private final DoubleParameter footholdDistanceLowerLimitParameter = parameterFactory.createDouble("footholdDistanceLowerLimit", 0.15);
 
    // frames
    private final ReferenceFrame supportFrame;
    private final ReferenceFrame worldFrame;
 
+   // model
+   private final LinearInvertedPendulumModel lipModel;
+
    // feedback controllers
+   private final FramePoint cmpPositionSetpoint;
    private final FramePoint dcmPositionEstimate;
-   private final DivergentComponentOfMotionController.Setpoints dcmPositionControllerSetpoints;
-   private final DivergentComponentOfMotionController dcmPositionController;
+   private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
    private final QuadrupedComPositionController comPositionController;
    private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
@@ -94,18 +88,10 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final ArrayList<QuadrupedTimedStep> xGaitPreviewSteps;
    private final QuadrupedTimedStepPressurePlanner timedStepPressurePlanner;
-   private final QuadrantDependentList<FrameVector> timedStepAdjustmentAtContactSwitch;
+   private final FramePoint supportCentroid;
+   private EndDependentList<QuadrupedTimedStep> latestSteps;
+   private final FrameVector stepAdjustment;
 
-   // state machine
-   public enum XGaitState
-   {
-      INITIAL, ACTIVE
-   }
-   public enum XGaitEvent
-   {
-      TIMEOUT
-   }
-   private final FiniteStateMachine<XGaitState, XGaitEvent> xGaitStateMachine;
 
    public QuadrupedMpcBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedControllerInputProviderInterface inputProvider, QuadrupedXGaitSettingsProvider settingsProvider)
@@ -122,10 +108,13 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       worldFrame = ReferenceFrame.getWorldFrame();
 
+      // model
+      lipModel = controllerToolbox.getLinearInvertedPendulumModel();
+
       // feedback controllers
+      cmpPositionSetpoint = new FramePoint();
       dcmPositionEstimate = new FramePoint();
-      dcmPositionControllerSetpoints = new DivergentComponentOfMotionController.Setpoints();
-      dcmPositionController = controllerToolbox.getDcmPositionController();
+      dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
       comPositionController = controllerToolbox.getComPositionController();
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
@@ -154,18 +143,14 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController
       }
       xGaitSettings = new QuadrupedXGaitSettings();
       timedStepPressurePlanner = new QuadrupedTimedStepPressurePlanner(NUMBER_OF_PREVIEW_STEPS + 4);
-      timedStepAdjustmentAtContactSwitch = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      supportCentroid = new FramePoint();
+      stepAdjustment = new FrameVector();
+      latestSteps = new EndDependentList<>();
+      for (RobotEnd robotEnd : RobotEnd.values)
       {
-         timedStepAdjustmentAtContactSwitch.set(robotQuadrant, new FrameVector());
+         latestSteps.set(robotEnd, new QuadrupedTimedStep());
       }
 
-      // state machine
-      FiniteStateMachineBuilder<XGaitState, XGaitEvent> xgaitStateMachineBuilder = new FiniteStateMachineBuilder<>(XGaitState.class, XGaitEvent.class, "XGaitState", registry);
-      xgaitStateMachineBuilder.addState(XGaitState.INITIAL, new InitialXGaitState());
-      xgaitStateMachineBuilder.addState(XGaitState.ACTIVE, new ActiveXGaitState());
-      xgaitStateMachineBuilder.addTransition(XGaitEvent.TIMEOUT, XGaitState.INITIAL, XGaitState.ACTIVE);
-      xGaitStateMachine = xgaitStateMachineBuilder.build(XGaitState.INITIAL);
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
 
@@ -176,25 +161,34 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController
 
    private void updateEstimates()
    {
+      // update model
+      lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
+
       // update task space estimates
       taskSpaceEstimator.compute(taskSpaceEstimates);
 
       // update dcm estimate
-      taskSpaceEstimates.getComPosition().changeFrame(worldFrame);
-      taskSpaceEstimates.getComVelocity().changeFrame(worldFrame);
-      dcmPositionEstimate.changeFrame(worldFrame);
-      dcmPositionEstimate.set(taskSpaceEstimates.getComVelocity());
-      dcmPositionEstimate.scale(1.0 / dcmPositionController.getNaturalFrequency());
-      dcmPositionEstimate.add(taskSpaceEstimates.getComPosition());
+      dcmPositionEstimator.compute(dcmPositionEstimate, taskSpaceEstimates.getComVelocity());
    }
 
    private void updateSetpoints()
    {
-      // update state machines
-      xGaitStateMachine.process();
+      double currentTime = robotTimestamp.getDoubleValue();
+
+      // update step plan
+      xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, latestSteps, inputProvider.getPlanarVelocityInput(), currentTime, bodyYawSetpoint, xGaitSettings);
+      timedStepController.removeSteps();
+      for (RobotEnd robotEnd : RobotEnd.values)
+      {
+         timedStepController.addStep(latestSteps.get(robotEnd));
+      }
+      for (int i = 0; i < xGaitPreviewSteps.size(); i++)
+      {
+         timedStepController.addStep(xGaitPreviewSteps.get(i));
+      }
 
       // update desired horizontal com forces
-      dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
+      lipModel.computeComForce(taskSpaceControllerCommands.getComForce(), cmpPositionSetpoint);
       taskSpaceControllerCommands.getComForce().changeFrame(supportFrame);
 
       // update desired com position, velocity, and vertical force
@@ -208,10 +202,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController
       comPositionController.compute(taskSpaceControllerCommands.getComForce(), comPositionControllerSetpoints, taskSpaceEstimates);
 
       // update desired body orientation, angular velocity, and torque
-      if (xGaitStateMachine.getState() != XGaitState.INITIAL)
-      {
-         bodyYawSetpoint += inputProvider.getPlanarVelocityInput().getZ() * controlDT;
-      }
+      bodyYawSetpoint += inputProvider.getPlanarVelocityInput().getZ() * controlDT;
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(worldFrame);
       bodyOrientationControllerSetpoints.getBodyOrientation().setYawPitchRoll(bodyYawSetpoint,
             RotationTools.computePitch(inputProvider.getBodyOrientationInput()) + groundPlaneEstimator.getPitch(bodyYawSetpoint),
@@ -225,6 +216,19 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController
 
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
+
+      // update step plan
+      computeStepAdjustmentAndCopSetpoint(stepAdjustment, cmpPositionSetpoint, timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), dcmPositionEstimate, currentTime, lipModel.getNaturalFrequency());
+      for (RobotEnd robotEnd : RobotEnd.values)
+      {
+         latestSteps.get(robotEnd).getGoalPosition().add(stepAdjustment.getVector());
+         groundPlaneEstimator.projectZ(latestSteps.get(robotEnd).getGoalPosition());
+      }
+      for (int i = 0; i < timedStepController.getQueue().size(); i++)
+      {
+         timedStepController.getQueue().get(i).getGoalPosition().add(stepAdjustment.getVector());
+         groundPlaneEstimator.projectZ(timedStepController.getQueue().get(i).getGoalPosition());
+      }
    }
 
    private void updateSettings()
@@ -240,26 +244,30 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController
       xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth / 2 + footholdDistanceLowerLimitParameter.get()));
    }
 
-   @Override public ControllerEvent process()
+   @Override public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
    {
-      updateSettings();
-      updateEstimates();
-      updateSetpoints();
-      return null;
+      // update ground plane estimate
+      groundPlanePositions.get(thisStepQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
+      groundPlanePositions.get(thisStepQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+      groundPlaneEstimator.compute(groundPlanePositions);
+
+      // update latest step
+      RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
+      QuadrupedTimedStep thisStep = timedStepController.getLatestStep(thisStepQuadrant);
+      latestSteps.get(thisStepEnd).set(thisStep);
+   }
+
+   @Override public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
+   {
+      latestSteps.getClass();
    }
 
    @Override public void onEntry()
    {
-      // initialize estimates
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
+      updateSettings();
       updateEstimates();
 
       // initialize feedback controllers
-      dcmPositionControllerSetpoints.initialize(dcmPositionEstimate);
-      dcmPositionController.reset();
-      dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
-      dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
-      dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
       comPositionControllerSetpoints.initialize(taskSpaceEstimates);
       comPositionController.reset();
       comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
@@ -271,6 +279,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController
       bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
       bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
       timedStepController.reset();
+      timedStepController.registerStepTransitionCallback(this);
 
       // initialize task space controller
       taskSpaceControllerSettings.initialize();
@@ -288,231 +297,240 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController
       taskSpaceEstimates.getBodyOrientation().changeFrame(worldFrame);
       bodyYawSetpoint = taskSpaceEstimates.getBodyOrientation().getYaw();
 
-      // initialize state machine
+      // initialize ground plane
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         groundPlanePositions.get(robotQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
+         groundPlanePositions.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+      }
+      groundPlaneEstimator.compute(groundPlanePositions);
+
+      // initialize step plan
+      supportCentroid.setToZero(supportFrame);
+      double initialStepStartTime = robotTimestamp.getDoubleValue() + initialTransitionDurationParameter.get();
+      RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
+      xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, inputProvider.getPlanarVelocityInput(), initialQuadrant, supportCentroid, initialStepStartTime, bodyYawSetpoint, xGaitSettings);
+      for (int i = 0; i < xGaitPreviewSteps.size(); i++)
+      {
+         timedStepController.addStep(xGaitPreviewSteps.get(i));
+      }
+      for (RobotEnd robotEnd : RobotEnd.values)
+      {
+         latestSteps.get(robotEnd).set(timedStepController.getLatestStep(robotEnd));
+      }
+   }
+
+   @Override public ControllerEvent process()
+   {
       updateSettings();
-      xGaitStateMachine.reset();
+      updateEstimates();
+      updateSetpoints();
+      return null;
    }
 
    @Override public void onExit()
    {
-      xGaitStateMachine.reset();
       timedStepController.removeSteps();
+      timedStepController.registerStepTransitionCallback(null);
    }
 
-   private class InitialXGaitState implements FiniteStateMachineState<XGaitEvent>
-   {
-      double initialTransitionTime;
-      private RobotQuadrant initialQuadrant;
-      private final FramePoint initialSupportCentroid;
-      private final ThreeDoFMinimumJerkTrajectory transitionDcmTrajectory;
-      private final PiecewiseReverseDcmTrajectory reverseDcmTrajectory;
-      private final FramePoint reverseDcmPositionAtSoS;
+   private final DenseMatrix64F x0 = new DenseMatrix64F(100, 1);
+   private final DenseMatrix64F y0 = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F B = new DenseMatrix64F(100, 6);
+   private final DenseMatrix64F C = new DenseMatrix64F(2, 100);
+   private final DenseMatrix64F S = new DenseMatrix64F(2, 100);
+   private final DenseMatrix64F CmS = new DenseMatrix64F(2, 100);
+   private final DenseMatrix64F CmSB = new DenseMatrix64F(2, 6);
+   private final DenseMatrix64F CmSx0py0 = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F qpSolutionVector = new DenseMatrix64F(6, 1);
+   private final DenseMatrix64F qpCostVector = new DenseMatrix64F(100, 1);
+   private final DenseMatrix64F qpCostMatrix = new DenseMatrix64F(100, 100);
+   private final DenseMatrix64F qpEqualityVector = new DenseMatrix64F(100, 1);
+   private final DenseMatrix64F qpEqualityMatrix = new DenseMatrix64F(100, 100);
+   private final DenseMatrix64F qpInequalityVector = new DenseMatrix64F(100, 1);
+   private final DenseMatrix64F qpInequalityMatrix = new DenseMatrix64F(100, 100);
+   private final ConstrainedQPSolver qpSolver = new OASESConstrainedQPSolver(null);
 
-      public InitialXGaitState()
+   /**
+    * Compute optimal step adjustment and center of pressure setpoint using model predictive control.
+    * @param stepAdjustment output step adjustment vector
+    * @param copPositionSetpoint output center of pressure setpoint
+    * @param queuedSteps queue of ongoing and upcoming steps
+    * @param currentSolePosition current sole position for each quadrant
+    * @param currentContactState current contact state for each quadrant
+    * @param currentDcmEstimate current divergent component of motion estimate
+    * @param currentTime current time in seconds
+    * @param naturalFrequency natural frequency of the divergent component of motion
+    */
+   private void computeStepAdjustmentAndCopSetpoint(FrameVector stepAdjustment, FramePoint copPositionSetpoint, PreallocatedQueue<QuadrupedTimedStep> queuedSteps, QuadrantDependentList<FramePoint> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint currentDcmEstimate, double currentTime, double naturalFrequency)
+   {
+      // Compute step adjustment and contact pressure by solving the following QP:
+      // min_u u'Au
+      // s.t
+      // (C - S)Bu + (C - S)x0 + y0 = 0
+      // u0 + u1 + u2 + u3 - 1 = 0
+      // u0 >= 0
+      // u1 >=0
+      // u2 >= 0
+      // u3 >= 0
+      // where u = [u0, u1, u2, u3, u4, u5]',
+      // u0, u1, u2, u3 are the normalized contact pressures for each quadrant and
+      // u4, u5 are the x and y step adjustment in meters
+
+      int rowOffset, columnOffset;
+      stepAdjustment.changeFrame(worldFrame);
+      currentDcmEstimate.changeFrame(worldFrame);
+
+      int nContacts  = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         initialSupportCentroid = new FramePoint();
-         transitionDcmTrajectory = new ThreeDoFMinimumJerkTrajectory();
-         reverseDcmTrajectory = new PiecewiseReverseDcmTrajectory(2 * xGaitPreviewSteps.size() + 1, gravity, dcmPositionController.getComHeight());
-         reverseDcmPositionAtSoS = new FramePoint();
+         if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
+         {
+            nContacts++;
+         }
       }
 
-      @Override public void onEntry()
+      int nPreviewSteps = MathTools.clipToMinMax((int) (10 /xGaitSettings.getEndDoubleSupportDuration() + xGaitSettings.getStepDuration()), 1, queuedSteps.size());
+      int nIntervals = timedStepPressurePlanner.compute(nPreviewSteps, queuedSteps, currentSolePosition, currentContactState, currentTime);
+      x0.reshape(2 * nIntervals, 1);             // center of pressure offset
+      y0.reshape(2, 1);                          // final divergent component of motion offset
+      B.reshape(2 * nIntervals, nContacts + 2);  // center of pressure map
+      C.reshape(2, 2 * nIntervals);              // final divergent component of motion map
+      S.reshape(2, 2 * nIntervals);              // final interval selection matrix
+      B.zero();
+      C.zero();
+      S.zero();
+      rowOffset = 0;
+      for (Direction direction : Direction.values2D())
       {
-         double currentTime = robotTimestamp.getDoubleValue();
-
-         initialSupportCentroid.setToZero(supportFrame);
-         initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
-         initialTransitionTime = currentTime + initialTransitionDurationParameter.get();
-
-         // initialize ground plane
+         columnOffset = 0;
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            groundPlanePositions.get(robotQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
-            groundPlanePositions.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+            if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
+            {
+               currentSolePosition.get(robotQuadrant).changeFrame(worldFrame);
+               B.set(rowOffset, columnOffset, currentSolePosition.get(robotQuadrant).get(direction));
+               columnOffset++;
+            }
          }
-         groundPlaneEstimator.compute(groundPlanePositions);
 
-         // initialize step plan
-         xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, inputProvider.getPlanarVelocityInput(),
-               initialQuadrant, initialSupportCentroid, initialTransitionTime, bodyYawSetpoint, xGaitSettings);
-         for (int i = 0; i < xGaitPreviewSteps.size(); i++)
+         for (int i = 0; i < nIntervals; i++)
          {
-            timedStepController.addStep(xGaitPreviewSteps.get(i));
-            groundPlaneEstimator.projectZ(timedStepController.getQueue().get(i).getGoalPosition());
+            timedStepPressurePlanner.getCenterOfPressureAtStartOfInterval(i).changeFrame(worldFrame);
+            x0.set(i * 2 + rowOffset, 0, timedStepPressurePlanner.getCenterOfPressureAtStartOfInterval(i).get(direction));
+            B.set(i * 2 + rowOffset, nContacts + rowOffset, timedStepPressurePlanner.getNormalizedPressureContributedByQueuedSteps(i));
          }
+         x0.set(rowOffset, 0, 0);
 
-         // initialize dcm height
-         dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
+         for (int i = nIntervals - 2; i >= 0; i--)
+         {
+            double expn = Math.exp(naturalFrequency * (timedStepPressurePlanner.getTimeAtStartOfInterval(nIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1)));
+            double expi = Math.exp(naturalFrequency * (timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i)));
+            C.set(rowOffset, i * 2 + rowOffset, expn * (1 - expi));
+         }
+         C.set(rowOffset, 2 * nIntervals - 2 + rowOffset, 0);
+         S.set(rowOffset, 2 * nIntervals - 2 + rowOffset, 1);
 
-         // compute reverse dcm trajectory
-         int nIntervals = timedStepPressurePlanner.compute(xGaitPreviewSteps, taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), currentTime);
-         reverseDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
-         reverseDcmTrajectory.initializeTrajectory(nIntervals, timedStepPressurePlanner.getTimeAtStartOfInterval(), timedStepPressurePlanner.getCenterOfPressureAtStartOfInterval(), timedStepPressurePlanner.getTimeAtStartOfInterval(nIntervals - 1),
-               timedStepPressurePlanner.getCenterOfPressureAtStartOfInterval(nIntervals - 1));
-         reverseDcmTrajectory.computeTrajectory(initialTransitionTime);
-         reverseDcmTrajectory.getPosition(reverseDcmPositionAtSoS);
-         reverseDcmPositionAtSoS.changeFrame(worldFrame);
-
-         // compute transition dcm trajectory
-         transitionDcmTrajectory.initializeTrajectory(dcmPositionEstimate, reverseDcmPositionAtSoS, currentTime, initialTransitionTime);
+         double previewTime = timedStepPressurePlanner.getTimeAtStartOfInterval(nIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(0);
+         y0.set(rowOffset, 0, Math.exp(naturalFrequency * previewTime) * currentDcmEstimate.get(direction));
+         rowOffset++;
       }
 
-      @Override public XGaitEvent process()
-      {
-         // compute nominal dcm trajectory
-         transitionDcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
-         transitionDcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
-         transitionDcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
+      CmS.reshape(2, 2 * nIntervals);
+      CmSB.reshape(2, nContacts + 2);
+      CmSx0py0.reshape(2, 1);
+      CommonOps.subtract(C, S, CmS);
+      CommonOps.mult(CmS, B, CmSB);
+      CmSx0py0.set(y0);
+      CommonOps.multAdd(CmS, x0, CmSx0py0);
 
-         if (robotTimestamp.getDoubleValue() > initialTransitionTime + controlDT)
-            return XGaitEvent.TIMEOUT;
-         else
-            return null;
+      DenseMatrix64F u = qpSolutionVector;
+      DenseMatrix64F beq = qpEqualityVector;
+      DenseMatrix64F Aeq = qpEqualityMatrix;
+      DenseMatrix64F bin = qpInequalityVector;
+      DenseMatrix64F Ain = qpInequalityMatrix;
+      DenseMatrix64F b = qpCostVector;
+      DenseMatrix64F A = qpCostMatrix;
+
+      // Initialize solution vector.
+      u.reshape(nContacts + 2, 1);
+
+      // Initialize equality constraints. (Aeq u = beq)
+      beq.reshape(3, 1);
+      beq.zero();
+      beq.set(0, 0, -CmSx0py0.get(0, 0));
+      beq.set(1, 0, -CmSx0py0.get(1, 0));
+      beq.set(2, 0, 1);
+      Aeq.reshape(3, nContacts + 2);
+      Aeq.zero();
+      for (int i = 0; i < nContacts + 2; i++)
+      {
+         Aeq.set(0, i, CmSB.get(0, i));
+         Aeq.set(1, i, CmSB.get(1, i));
+      }
+      for (int i = 0; i < nContacts; i++)
+      {
+         Aeq.set(2, i, 1);
       }
 
-      @Override public void onExit()
+      // Initialize inequality constraints. (Ain u <= bin)
+      bin.reshape(nContacts, 1);
+      bin.zero();
+      Ain.reshape(nContacts, nContacts + 2);
+      Ain.zero();
+      for (int i = 0; i < nContacts; i++)
       {
+         Ain.set(i, i, -1);
+      }
+
+      // Initialize cost terms. (min_u u'Au + b'u)
+      b.reshape(nContacts + 2, 1);
+      b.zero();
+      A.reshape(nContacts + 2, nContacts + 2);
+      A.zero();
+
+      double copRegularization = 1;
+      double stepAdjustmentRegularization = 10000;
+      for (int i = 0; i < nContacts; i++)
+      {
+         A.set(i, i, copRegularization);
+      }
+      for (int i = nContacts; i < nContacts + 2; i++)
+      {
+         A.set(i, i, stepAdjustmentRegularization);
+      }
+
+      // Solve constrained quadratic program.
+      try
+      {
+         qpSolver.solve(A, b, Aeq, beq, Ain, bin, u, false);
+      }
+      catch (NoConvergenceException e)
+      {
+         System.err.println("NoConvergenceException: " + e.getMessage());
+      }
+
+      rowOffset = 0;
+      copPositionSetpoint.setToZero(worldFrame);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
+         {
+            double normalizedContactPressure = u.get(rowOffset++, 0);
+            currentSolePosition.get(robotQuadrant).changeFrame(worldFrame);
+            addPointWithScaleFactor(copPositionSetpoint, currentSolePosition.get(robotQuadrant), normalizedContactPressure);
+         }
+      }
+
+      for (Direction direction : Direction.values2D())
+      {
+         stepAdjustment.set(direction, u.get(rowOffset++, 0));
       }
    }
 
-   private class ActiveXGaitState implements FiniteStateMachineState<XGaitEvent>, QuadrupedTimedStepTransitionCallback
+   private void addPointWithScaleFactor(FramePoint point, FramePoint pointToAdd, double scaleFactor)
    {
-      private final PiecewiseForwardDcmTrajectory forwardDcmTrajectory;
-      private EndDependentList<QuadrupedTimedStep> latestSteps;
-      private final FrameVector stepAdjustment;
-
-      public ActiveXGaitState()
-      {
-         forwardDcmTrajectory = new PiecewiseForwardDcmTrajectory(2 * (xGaitPreviewSteps.size() + 4) + 1, gravity, dcmPositionController.getComHeight());
-         latestSteps = new EndDependentList<>();
-         for (RobotEnd robotEnd : RobotEnd.values)
-         {
-            latestSteps.set(robotEnd, new QuadrupedTimedStep());
-         }
-         stepAdjustment = new FrameVector();
-      }
-
-      @Override public void onEntry()
-      {
-         timedStepController.registerStepTransitionCallback(this);
-
-         // initialize latest steps
-         for (RobotEnd robotEnd : RobotEnd.values)
-         {
-            latestSteps.get(robotEnd).set(timedStepController.getEarliestStep(robotEnd));
-         }
-      }
-
-      @Override public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
-      {
-         // update ground plane estimate
-         groundPlanePositions.get(thisStepQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
-         groundPlanePositions.get(thisStepQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-         groundPlaneEstimator.compute(groundPlanePositions);
-
-         // update latest step
-         RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
-         QuadrupedTimedStep thisStep = timedStepController.getEarliestStep(thisStepQuadrant);
-         latestSteps.get(thisStepEnd).set(thisStep);
-      }
-
-      @Override public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
-      {
-      }
-
-      @Override public XGaitEvent process()
-      {
-         double currentTime = robotTimestamp.getDoubleValue();
-
-         // initialize dcm height
-         dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
-
-         // compute step plan
-         xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, latestSteps, inputProvider.getPlanarVelocityInput(), currentTime, bodyYawSetpoint, xGaitSettings);
-         timedStepController.removeSteps();
-         for (RobotEnd robotEnd : RobotEnd.values)
-         {
-            timedStepController.addStep(latestSteps.get(robotEnd));
-         }
-         for (int i = 0; i < xGaitPreviewSteps.size(); i++)
-         {
-            timedStepController.addStep(xGaitPreviewSteps.get(i));
-         }
-
-         // compute step adjustment
-         computeStepAdjustmentBasedOnDcm(stepAdjustment, timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), dcmPositionEstimate, currentTime, dcmPositionController.getNaturalFrequency());
-         for (RobotEnd robotEnd : RobotEnd.values)
-         {
-            latestSteps.get(robotEnd).getGoalPosition().add(stepAdjustment.getVector());
-            groundPlaneEstimator.projectZ(latestSteps.get(robotEnd).getGoalPosition());
-         }
-         for (int i = 0; i < timedStepController.getQueue().size(); i++)
-         {
-            timedStepController.getQueue().get(i).getGoalPosition().add(stepAdjustment.getVector());
-            groundPlaneEstimator.projectZ(timedStepController.getQueue().get(i).getGoalPosition());
-         }
-
-         // compute nominal dcm trajectory
-         int nIntervals = timedStepPressurePlanner.compute(timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), currentTime);
-         forwardDcmTrajectory.setComHeight(dcmPositionController.getComHeight());
-         forwardDcmTrajectory.initializeTrajectory(nIntervals, timedStepPressurePlanner.getTimeAtStartOfInterval(), timedStepPressurePlanner.getCenterOfPressureAtStartOfInterval(), dcmPositionEstimate);
-         forwardDcmTrajectory.computeTrajectory(currentTime);
-         forwardDcmTrajectory.getPosition(dcmPositionControllerSetpoints.getDcmPosition());
-         forwardDcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
-
-         return null;
-      }
-
-      @Override public void onExit()
-      {
-         timedStepController.registerStepTransitionCallback(null);
-      }
-
-      private DenseMatrix64F x0 = new DenseMatrix64F(100, 1);
-      private DenseMatrix64F b = new DenseMatrix64F(100, 1);
-      private DenseMatrix64F c = new DenseMatrix64F(100, 1);
-      private DenseMatrix64F temp = new DenseMatrix64F(1, 1);
-
-      private void computeStepAdjustmentBasedOnDcm(FrameVector stepAdjustment, PreallocatedQueue<QuadrupedTimedStep> queuedSteps, QuadrantDependentList<FramePoint> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint currentDcmEstimate, double currentTime, double naturalFrequency)
-      {
-         stepAdjustment.changeFrame(worldFrame);
-         currentDcmEstimate.changeFrame(worldFrame);
-
-         int nIntervals = timedStepPressurePlanner.compute(queuedSteps, currentSolePosition, currentContactState, currentTime);
-         x0.reshape(nIntervals, 1);
-         b.reshape(nIntervals, 1);
-         c.reshape(nIntervals, 1);
-
-         for (Direction direction : Direction.values2D())
-         {
-            for (int i = 0; i < nIntervals; i++)
-            {
-               timedStepPressurePlanner.getCenterOfPressureAtStartOfInterval(i).changeFrame(worldFrame);
-               x0.set(i, 0, timedStepPressurePlanner.getCenterOfPressureAtStartOfInterval(i).get(direction));
-               b.set(i, 0, timedStepPressurePlanner.getNormalizedPressureContributedByQueuedSteps(i));
-            }
-
-            for (int i = nIntervals - 2; i >= 0; i--)
-            {
-               double expn = Math.exp(naturalFrequency * (timedStepPressurePlanner.getTimeAtStartOfInterval(nIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1)));
-               double expi = Math.exp(naturalFrequency * (timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i)));
-               c.set(i, 0, expn * (1 - expi));
-            }
-            CommonOps.scale(-1, c);
-            c.set(nIntervals - 1, 0, 1);
-
-            CommonOps.multTransA(c, x0, temp);
-            double ctx0 = temp.get(0, 0);
-
-            CommonOps.multTransA(c, b, temp);
-            double ctb = temp.get(0, 0);
-
-            double previewTime = timedStepPressurePlanner.getTimeAtStartOfInterval(nIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(0);
-            double y0 = Math.exp(naturalFrequency * previewTime) * currentDcmEstimate.get(direction);
-
-            double u = (-ctx0 + y0) / ctb;
-            stepAdjustment.set(direction, u);
-         }
-      }
+      point.checkReferenceFrameMatch(pointToAdd);
+      point.add(scaleFactor * pointToAdd.getX(), scaleFactor * pointToAdd.getY(), scaleFactor * pointToAdd.getZ());
    }
 }
