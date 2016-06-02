@@ -17,7 +17,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateComm
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -33,9 +32,6 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    // http://www.bostondynamics.com/img/MultiSense_SL.pdf
    private static final double MUTLISENSE_HORIZONTAL_FOV = Math.toRadians(80.0);
    private static final double MULTISENSE_VERTICAL_FOV = Math.toRadians(45.0);
-
-   private final BooleanYoVariable runBlobFilter = new BooleanYoVariable("runBlobFilter", registry);
-   private int numBallsDetected;
    
    private final ColoredCircularBlobDetectorBehaviorService coloredCircularBlobDetectorBehaviorService;
    
@@ -48,10 +44,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
 
       coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(this);
-//      HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
-//      coloredCircularBlobDetectorBehaviorService.addHSVRange(greenRange);
 
-      runBlobFilter.set(false);
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
    }
 
@@ -68,24 +61,12 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    @Override
    public void doControl()
    {
-      while ((pointCloudPacket = pointCloudQueue.poll()) != null)
+      if (pointCloudQueue.isNewPacketAvailable())
       {
-         pointCloudPacketLatest = pointCloudPacket;
-      }
-
-      if (pointCloudPacketLatest != null)
-      {
-         Point3f[] fullPointCloud = pointCloudPacketLatest.getDecayingWorldScan();
-
-         if(runBlobFilter.getBooleanValue())
-         {
-            Point3f[] filteredPointCloud = filterPointsNearBall(fullPointCloud);
-            findBallsAndSaveResult(filteredPointCloud);
-         }
-         else
-         {
-            findBallsAndSaveResult(fullPointCloud);
-         }
+         PointCloudWorldPacket latestPointCloudWorldPacket = pointCloudQueue.getLatestPacket();
+         Point3f[] fullPointCloud = latestPointCloudWorldPacket.getDecayingWorldScan();
+         Point3f[] filteredPointCloud = filterPointsNearBall(fullPointCloud);
+         findBallsAndSaveResult(filteredPointCloud);
       }
    }
 
@@ -111,30 +92,34 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       {
          int cameraPixelWidth = latestCameraImage.getWidth();
          int cameraPixelHeight = latestCameraImage.getHeight();
-   
-         for (Point2d latestBallPosition2d : coloredCircularBlobDetectorBehaviorService.getLatestBallPositionSet())
+         
+         synchronized (coloredCircularBlobDetectorBehaviorService.getBallListConch())
          {
-            double ballCenterX = latestBallPosition2d.getX() - latestCameraImage.getMinX();
-            double ballCenterY = latestBallPosition2d.getY() - latestCameraImage.getMinY();
-      
-            double desiredRayAngleX = MULTISENSE_VERTICAL_FOV * (-ballCenterY / cameraPixelHeight + 0.5);
-            double desiredRayAngleY = MUTLISENSE_HORIZONTAL_FOV * (-ballCenterX / cameraPixelWidth - 0.5);
-      
-            Point3f candidateLidarPoint = new Point3f();
-      
-            for (int i = 0; i < fullPointCloud.length; i++)
+            for (Point2d latestBallPosition2d : coloredCircularBlobDetectorBehaviorService.getLatestBallPositionSet())
             {
-               candidateLidarPoint.set(fullPointCloud[i]);
-               worldToCameraTransform.transform(candidateLidarPoint);
-      
-               if (candidateLidarPoint.x > FILTERING_MIN_DISTANCE && candidateLidarPoint.x < FILTERING_MAX_DISTANCE)
+               double ballCenterX = latestBallPosition2d.getX() - latestCameraImage.getMinX();
+               double ballCenterY = latestBallPosition2d.getY() - latestCameraImage.getMinY();
+
+               double desiredRayAngleX = MULTISENSE_VERTICAL_FOV * (-ballCenterY / cameraPixelHeight + 0.5);
+               double desiredRayAngleY = MUTLISENSE_HORIZONTAL_FOV * (ballCenterX / cameraPixelWidth - 0.5);
+
+               Point3f candidateLidarPoint = new Point3f();
+
+               for (int i = 0; i < fullPointCloud.length; i++)
                {
-                  // rayAngle axes are in terms of the buffered image (y-down), temp pnt axes are in terms of camera frame (z-up)
-                  double rayAngleX = Math.atan2(candidateLidarPoint.z, candidateLidarPoint.x);
-                  double rayAngleY = Math.atan2(candidateLidarPoint.y, candidateLidarPoint.x);
-                  if (Math.abs(rayAngleX - desiredRayAngleX) < FILTERING_ANGLE && Math.abs(rayAngleY - desiredRayAngleY) < FILTERING_ANGLE)
+                  candidateLidarPoint.set(fullPointCloud[i]);
+                  worldToCameraTransform.transform(candidateLidarPoint);
+
+                  if (candidateLidarPoint.x > FILTERING_MIN_DISTANCE && candidateLidarPoint.x < FILTERING_MAX_DISTANCE)
                   {
-                     filteredPoints.add(candidateLidarPoint);
+                     // rayAngle axes are in terms of the buffered image (y-down), temp pnt axes are in terms of camera frame (z-up)
+                     double rayAngleX = Math.atan2(candidateLidarPoint.z, candidateLidarPoint.x);
+                     double rayAngleY = Math.atan2(candidateLidarPoint.y, candidateLidarPoint.x);
+                     if (Math.abs(rayAngleX - desiredRayAngleX) < FILTERING_ANGLE && Math.abs(rayAngleY - desiredRayAngleY) < FILTERING_ANGLE)
+                     {
+                        candidateLidarPoint.setZ(1.0f);
+                        filteredPoints.add(candidateLidarPoint);
+                     }
                   }
                }
             }
@@ -155,7 +140,6 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    public void initialize()
    {
       super.initialize();
-      runBlobFilter.set(true);
       coloredCircularBlobDetectorBehaviorService.initialize();
       
       DepthDataStateCommand depthDataStateCommand = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
@@ -177,21 +161,18 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    @Override public void pause()
    {
       super.pause();
-      runBlobFilter.set(false);
       coloredCircularBlobDetectorBehaviorService.pause();
    }
 
    @Override public void stop()
    {
       super.stop();
-      runBlobFilter.set(false);
       coloredCircularBlobDetectorBehaviorService.stop();
    }
 
    @Override public void resume()
    {
       super.resume();
-      runBlobFilter.set(true);
       coloredCircularBlobDetectorBehaviorService.resume();
    }
 
@@ -202,6 +183,6 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 
    public int getNumBallsDetected()
    {
-      return numBallsDetected;
+      return coloredCircularBlobDetectorBehaviorService.getLatestBallPositionSet().size();
    }
 }
