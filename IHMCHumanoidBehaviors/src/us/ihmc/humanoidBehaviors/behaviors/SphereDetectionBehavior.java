@@ -127,7 +127,7 @@ public class SphereDetectionBehavior extends BehaviorInterface
       
       PointCloudWorldPacket pointCloudWorldPacket = new PointCloudWorldPacket();
       pointCloudWorldPacket.setDestination(PacketDestination.UI);
-      pointCloudWorldPacket.setTimestamp(-1L);
+      pointCloudWorldPacket.setTimestamp(System.nanoTime());
       Point3d[] points3d = new Point3d[points.length];
       for (int i = 0; i < points.length; i++)
       {

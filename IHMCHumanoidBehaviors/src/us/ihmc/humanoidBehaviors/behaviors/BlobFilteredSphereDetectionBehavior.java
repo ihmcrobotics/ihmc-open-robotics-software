@@ -65,7 +65,10 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       {
          PointCloudWorldPacket latestPointCloudWorldPacket = pointCloudQueue.getLatestPacket();
          Point3f[] fullPointCloud = latestPointCloudWorldPacket.getDecayingWorldScan();
+
          Point3f[] filteredPointCloud = filterPointsNearBall(fullPointCloud);
+
+         
          findBallsAndSaveResult(filteredPointCloud);
       }
    }
@@ -83,6 +86,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
          return new Point3f[0];
       }
       
+
       List<Point3f> filteredPoints = new ArrayList<Point3f>();
       RigidBodyTransform worldToCameraTransform = headFrame.getTransformToWorldFrame();
       worldToCameraTransform.invert();
@@ -107,6 +111,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 
                for (int i = 0; i < fullPointCloud.length; i++)
                {
+
                   candidateLidarPoint.set(fullPointCloud[i]);
                   worldToCameraTransform.transform(candidateLidarPoint);
 
@@ -117,8 +122,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
                      double rayAngleY = Math.atan2(candidateLidarPoint.y, candidateLidarPoint.x);
                      if (Math.abs(rayAngleX - desiredRayAngleX) < FILTERING_ANGLE && Math.abs(rayAngleY - desiredRayAngleY) < FILTERING_ANGLE)
                      {
-                        candidateLidarPoint.setZ(1.0f);
-                        filteredPoints.add(candidateLidarPoint);
+                        filteredPoints.add(fullPointCloud[i]);
                      }
                   }
                }
@@ -127,6 +131,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    
          Point3f[] filteredPointArray = new Point3f[filteredPoints.size()];
          filteredPoints.toArray(filteredPointArray);
+
          return filteredPointArray;
       }
       else
