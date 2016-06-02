@@ -623,7 +623,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, defaultSwingTime, defaultTransferTime, 0.15);
 
       setupCameraForWalkingUpToRamp();
-      setupSupportViz();
+//      setupSupportViz();
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -690,7 +690,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       doFootExplorationInTransferToStanding.set(false);
 
       setupCameraForWalkingUpToRamp();
-      setupSupportViz();
+//      setupSupportViz();
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
