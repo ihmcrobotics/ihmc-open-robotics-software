@@ -19,7 +19,7 @@ import java.util.*;
 
 public class VirtualModelController
 {
-   private final static boolean DEBUG = true;
+   private final static boolean DEBUG = false;
    private final static boolean USE_SUPER_JACOBIAN = true;
    private final static boolean DISPLAY_GRAVITY_WRENCHES = false;
 
