@@ -15,7 +15,6 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    private final InverseDynamicsCommandList inverseDynamicsCommandList;
    private final FeedbackControlCommandList feedbackControlCommandList;
    private final InverseKinematicsCommandList inverseKinematicsCommandList;
-   private final InverseDynamicsCommandList virtualModelCommandList;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
    private WholeBodyControllerCoreMode controllerCoreMode;
 
@@ -26,7 +25,6 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       inverseDynamicsCommandList = new InverseDynamicsCommandList();
       feedbackControlCommandList = new FeedbackControlCommandList();
       inverseKinematicsCommandList = new InverseKinematicsCommandList();
-      virtualModelCommandList = new InverseDynamicsCommandList();
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
    }
 
@@ -35,7 +33,6 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       inverseDynamicsCommandList.clear();
       feedbackControlCommandList.clear();
       inverseKinematicsCommandList.clear();
-      virtualModelCommandList.clear();
       lowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
@@ -57,12 +54,6 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
          inverseKinematicsCommandList.addCommand(inverseKinematicsCommand);
    }
 
-   public void addVirtualModelCommand(InverseDynamicsCommand<?> virtualModelCommand)
-   {
-      if (virtualModelCommand != null)
-         virtualModelCommandList.addCommand(virtualModelCommand);
-   }
-
    public void completeLowLevelJointData(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelJointData)
    {
       if (lowLevelJointData != null)
@@ -71,7 +62,11 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
 
    public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
    {
-      this.controllerCoreMode = controllerCoreMode;
+      if (this.controllerCoreMode != controllerCoreMode)
+      {
+         clear();
+         this.controllerCoreMode = controllerCoreMode;
+      }
    }
 
    @Override
@@ -93,12 +88,6 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    }
 
    @Override
-   public InverseDynamicsCommandList getVirtualModelCommandList()
-   {
-      return virtualModelCommandList;
-   }
-
-   @Override
    public LowLevelOneDoFJointDesiredDataHolder getLowLevelOneDoFJointDesiredDataHolder()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
@@ -110,7 +99,6 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       inverseDynamicsCommandList.set(other.inverseDynamicsCommandList);
       feedbackControlCommandList.set(other.feedbackControlCommandList);
       inverseKinematicsCommandList.set(other.inverseKinematicsCommandList);
-      virtualModelCommandList.set(other.virtualModelCommandList);
       lowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
    }
 

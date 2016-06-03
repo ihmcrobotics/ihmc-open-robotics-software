@@ -17,7 +17,6 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
    private final InverseDynamicsCommandDataCopier inverseDynamicsCommandDataCopier = new InverseDynamicsCommandDataCopier();
    private final FeedbackControlCommandDataCopier feedbackControlCommandDataCopier = new FeedbackControlCommandDataCopier();
    private final InverseKinematicsCommandDataCopier inverseKinematicsCommandDataCopier = new InverseKinematicsCommandDataCopier();
-   private final InverseDynamicsCommandDataCopier jacobianTransposeCommandDataCopier = new InverseDynamicsCommandDataCopier();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private WholeBodyControllerCoreMode wholeBodyControllerCoreMode;
@@ -32,7 +31,6 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
       inverseDynamicsCommandDataCopier.copyFromOther(controllerCoreCommand.getInverseDynamicsCommandList());
       feedbackControlCommandDataCopier.copyFromOther(controllerCoreCommand.getFeedbackControlCommandList());
       inverseKinematicsCommandDataCopier.copyFromOther(controllerCoreCommand.getInverseKinematicsCommandList());
-      jacobianTransposeCommandDataCopier.copyFromOther(controllerCoreCommand.getVirtualModelCommandList());
       lowLevelOneDoFJointDesiredDataHolder.overwriteWith(controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder());
    }
 
@@ -41,7 +39,6 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
       inverseDynamicsCommandDataCopier.retrieveRigidBodiesFromName(nameToRigidBodyMap);
       feedbackControlCommandDataCopier.retrieveRigidBodiesFromName(nameToRigidBodyMap);
       inverseKinematicsCommandDataCopier.retrieveRigidBodiesFromName(nameToRigidBodyMap);
-      jacobianTransposeCommandDataCopier.retrieveRigidBodiesFromName(nameToRigidBodyMap);
    }
 
    public void retrieveJointsFromName(Map<String, OneDoFJoint> nameToJointMap)
@@ -49,7 +46,6 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
       inverseDynamicsCommandDataCopier.retrieveJointsFromName(nameToJointMap);
       feedbackControlCommandDataCopier.retrieveJointsFromName(nameToJointMap);
       inverseKinematicsCommandDataCopier.retrieveJointsFromName(nameToJointMap);
-      jacobianTransposeCommandDataCopier.retrieveJointsFromName(nameToJointMap);
       lowLevelOneDoFJointDesiredDataHolder.retrieveJointsFromName(nameToJointMap);
    }
 
@@ -69,12 +65,6 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
    public InverseKinematicsCommandList getInverseKinematicsCommandList()
    {
       return inverseKinematicsCommandDataCopier.getInverseKinematicsCommandList();
-   }
-
-   @Override
-   public InverseDynamicsCommandList getVirtualModelCommandList()
-   {
-      return jacobianTransposeCommandDataCopier.getInverseDynamicsCommandList();
    }
 
    @Override
