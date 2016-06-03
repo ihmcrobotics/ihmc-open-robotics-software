@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 public interface ControllerCoreCommandInterface
 {
    public abstract InverseDynamicsCommandList getInverseDynamicsCommandList();
+   public abstract InverseDynamicsCommandList getVirtualModelControlCommandList();
    public abstract FeedbackControlCommandList getFeedbackControlCommandList();
    public abstract InverseKinematicsCommandList getInverseKinematicsCommandList();
    public abstract LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelOneDoFJointDesiredDataHolder();
