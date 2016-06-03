@@ -96,12 +96,23 @@ public class WholeBodyVirtualModelControlSolver
       yoDesiredMomentumRateAngular = new YoFrameVector("desiredMomentumRateAngular", toolbox.getCenterOfMassFrame(), registry);
       yoAchievedMomentumRateAngular = new YoFrameVector("achievedMomentumRateAngular", toolbox.getCenterOfMassFrame(), registry);
 
-      controlledBodies = Arrays.asList(toolbox.getControlledBodies());
-      for (RigidBody controlledBody : controlledBodies)
+      if (toolbox.getControlledBodies() != null)
       {
-         virtualModelController.createYoVariable(controlledBody);
-         RigidBodyInertia conversionInertia = new RigidBodyInertia(controlledBody.getBodyFixedFrame(), 1.0, 1.0, 1.0, 1.0);
-         conversionInertias.put(controlledBody, conversionInertia);
+         controlledBodies = Arrays.asList(toolbox.getControlledBodies());
+         for (RigidBody controlledBody : controlledBodies)
+         {
+            virtualModelController.createYoVariable(controlledBody);
+            RigidBodyInertia conversionInertia = new RigidBodyInertia(controlledBody.getBodyFixedFrame(), 1.0, 1.0, 1.0, 1.0);
+            conversionInertias.put(controlledBody, conversionInertia);
+         }
+
+         wrenchVisualizer = new WrenchVisualizer("VMCDesiredExternalWrench", controlledBodies, 1.0, toolbox.getYoGraphicsListRegistry(),
+               registry, YoAppearance.Red(), YoAppearance.Blue());
+      }
+      else
+      {
+         controlledBodies = null;
+         wrenchVisualizer = null;
       }
 
       if (USE_LIMITED_JOINT_TORQUES)
@@ -114,8 +125,6 @@ public class WholeBodyVirtualModelControlSolver
       }
 
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
-      wrenchVisualizer = new WrenchVisualizer("VMCDesiredExternalWrench", controlledBodies, 1.0, toolbox.getYoGraphicsListRegistry(),
-         registry, YoAppearance.Red(), YoAppearance.Blue());
 
       yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
       yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
@@ -204,7 +213,9 @@ public class WholeBodyVirtualModelControlSolver
          externalWrenchSolution.get(rigidBody).changeBodyFrameAttachedToSameBody(rigidBody.getBodyFixedFrame());
          externalWrenchSolution.get(rigidBody).negate();
       }
-      wrenchVisualizer.visualize(externalWrenchSolution);
+
+      if (wrenchVisualizer != null)
+         wrenchVisualizer.visualize(externalWrenchSolution);
 
       updateLowLevelData(jointTorquesSolution);
 
