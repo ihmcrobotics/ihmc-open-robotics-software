@@ -167,6 +167,10 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract boolean finishSingleSupportWhenICPPlannerIsDone();
 
+   public abstract void useInverseDynamicsControlCore();
+
+   public abstract void useVirtualModelControlCore();
+
    /**
     * This is the duration for which the desired foot center of pressure will be
     * drastically dampened to calm shakies. This particularly useful when

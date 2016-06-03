@@ -60,6 +60,15 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
          lowLevelOneDoFJointDesiredDataHolder.completeWith(lowLevelJointData);
    }
 
+   public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
+   {
+      if (this.controllerCoreMode != controllerCoreMode)
+      {
+         clear();
+         this.controllerCoreMode = controllerCoreMode;
+      }
+   }
+
    @Override
    public InverseDynamicsCommandList getInverseDynamicsCommandList()
    {

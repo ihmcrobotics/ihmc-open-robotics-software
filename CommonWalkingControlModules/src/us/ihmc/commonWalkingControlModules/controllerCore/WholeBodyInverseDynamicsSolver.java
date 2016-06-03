@@ -75,8 +75,9 @@ public class WholeBodyInverseDynamicsSolver
    private final Wrench residualRootJointWrench = new Wrench();
    private final FrameVector residualRootJointForce = new FrameVector();
    private final FrameVector residualRootJointTorque = new FrameVector();
-   private final YoFrameVector yoResidualRootJointForce = new YoFrameVector("residualRootJointForce", worldFrame, registry);
-   private final YoFrameVector yoResidualRootJointTorque = new YoFrameVector("residualRootJointTorque", worldFrame, registry);
+
+   private final YoFrameVector yoResidualRootJointForce;
+   private final YoFrameVector yoResidualRootJointTorque;
 
    private final double controlDT;
 
@@ -103,16 +104,16 @@ public class WholeBodyInverseDynamicsSolver
          jointAccelerationsSolution.put(joint, jointAccelerationSolution);
       }
 
-      planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, yoGraphicsListRegistry, registry);
-
-      wrenchVisualizer = WrenchVisualizer.createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0,
-            yoGraphicsListRegistry, registry);
+      planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
+      wrenchVisualizer = toolbox.getWrenchVisualizer();
 
       jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(controlDT, registry);
 
-      ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
-      yoDesiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", centerOfMassFrame, registry);
-      yoAchievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", centerOfMassFrame, registry);
+      yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
+      yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
+
+      yoResidualRootJointForce = toolbox.getYoResidualRootJointForce();
+      yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
 
       parentRegistry.addChild(registry);
    }
