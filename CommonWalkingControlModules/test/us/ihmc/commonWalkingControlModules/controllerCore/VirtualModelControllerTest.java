@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelController;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -755,6 +756,8 @@ public class VirtualModelControllerTest
 
    private void submitAndCheckVMC(RigidBody base, RigidBody endEffector, Wrench desiredWrench, DenseMatrix64F selectionMatrix)
    {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+
       simulationTestingParameters.setKeepSCSUp(false);
 
       OneDoFJoint[] controlledJoints = ScrewTools.createOneDoFJointPath(base, endEffector);
@@ -766,7 +769,7 @@ public class VirtualModelControllerTest
       CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
       CommonOps.invert(transposeJacobianMatrix);
 
-      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), base, null, null, null);
+      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), base, null, registry, null);
       virtualModelController.registerControlledBody(endEffector, base);
 
       desiredWrench.changeFrame(base.getBodyFixedFrame());

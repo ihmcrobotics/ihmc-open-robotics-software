@@ -136,7 +136,7 @@ public class VirtualModelControllerTestHelper
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
-      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, controllerModel.getPelvis(),
+      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, controllerModel.getElevator(),
             controllerModel.getOneDoFJoints(), registry, yoGraphicsListRegistry);
 
       List<ReferenceFrame> endEffectorFrames = new ArrayList<>();
@@ -560,6 +560,7 @@ public class VirtualModelControllerTestHelper
    public static void compareWrenches(Wrench inputWrench, Wrench outputWrench, DenseMatrix64F selectionMatrix)
    {
       inputWrench.getBodyFrame().checkReferenceFrameMatch(outputWrench.getBodyFrame());
+      outputWrench.changeFrame(inputWrench.getExpressedInFrame());
       inputWrench.getExpressedInFrame().checkReferenceFrameMatch(outputWrench.getExpressedInFrame());
 
       DenseMatrix64F inputWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
@@ -588,6 +589,7 @@ public class VirtualModelControllerTestHelper
    public static void compareWrenches(Wrench inputWrench, Wrench outputWrench)
    {
       inputWrench.getBodyFrame().checkReferenceFrameMatch(outputWrench.getBodyFrame());
+      outputWrench.changeFrame(inputWrench.getExpressedInFrame());
       inputWrench.getExpressedInFrame().checkReferenceFrameMatch(outputWrench.getExpressedInFrame());
 
       double epsilon = 1e-4;
