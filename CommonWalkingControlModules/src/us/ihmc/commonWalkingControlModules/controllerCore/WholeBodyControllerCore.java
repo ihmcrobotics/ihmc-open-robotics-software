@@ -91,7 +91,7 @@ public class WholeBodyControllerCore
          break;
       case VIRTUAL_MODEL:
          feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
-         virtualModelControlSolver.submitVirtualModelControlCommandList(controllerCoreCommand.getInverseDynamicsCommandList());
+         virtualModelControlSolver.submitVirtualModelControlCommandList(controllerCoreCommand.getVirtualModelControlCommandList());
          break;
       case OFF:
          break;

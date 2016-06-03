@@ -285,9 +285,10 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
+      RigidBody[] controlledBodies = {fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.LEFT), fullRobotModel.getFoot(RobotSide.RIGHT)};
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
       List<? extends ContactablePlaneBody> contactablePlaneBodies = momentumBasedController.getContactablePlaneBodyList();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, null, jointsToOptimizeFor, momentumOptimizationSettings, referenceFrames,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, controlledBodies, jointsToOptimizeFor, momentumOptimizationSettings, referenceFrames,
             controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies, yoGraphicsListRegistry, registry);
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
       WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, registry);
