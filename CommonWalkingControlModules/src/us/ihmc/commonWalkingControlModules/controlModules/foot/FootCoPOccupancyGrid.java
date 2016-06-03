@@ -591,6 +591,10 @@ public class FootCoPOccupancyGrid
 
       lineOrigin.setIncludingFrame(soleFrame, tempPoint3d.getX(), tempPoint3d.getY());
       lineDirection.setIncludingFrame(soleFrame, tempVector3d.getX(), tempVector3d.getY());
+
+      if (lineDirection.containsNaN())
+         lineDirection.set(1.0, 0.0);
+
       lineToPack.setToZero(soleFrame);
       lineToPack.setOrigin(lineOrigin);
       lineToPack.setDirection(lineDirection);
