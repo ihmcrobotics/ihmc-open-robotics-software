@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -324,7 +325,7 @@ public class BalanceManager
       return icpPlanner.getInitialTransferDuration();
    }
 
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   public MomentumRateCommand getInverseDynamicsCommand()
    {
       return icpBasedLinearMomentumRateOfChangeControlModule.getMomentumRateCommand();
    }

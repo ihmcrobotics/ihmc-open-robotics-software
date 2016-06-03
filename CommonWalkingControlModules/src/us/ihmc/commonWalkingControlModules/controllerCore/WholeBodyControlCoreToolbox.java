@@ -4,9 +4,13 @@ import java.util.List;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
@@ -33,6 +37,7 @@ public class WholeBodyControlCoreToolbox
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final double controlDT;
    private final FullRobotModel fullRobotModel;
+   private final RigidBody[] controlledBodies;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final CommonHumanoidReferenceFrames referenceFrames;
@@ -41,14 +46,24 @@ public class WholeBodyControlCoreToolbox
 
    private final MomentumOptimizationSettings momentumOptimizationSettings;
 
+   private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
+   private final WrenchVisualizer wrenchVisualizer;
+
+   private final YoFrameVector yoDesiredMomentumRateLinear;
+   private final YoFrameVector yoAchievedMomentumRateLinear;
+
+   private final YoFrameVector yoResidualRootJointForce;
+   private final YoFrameVector yoResidualRootJointTorque;
+
    private final JointIndexHandler jointIndexHandler;
 
-   public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints,
-         MomentumOptimizationSettings momentumOptimizationSettings, CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravityZ,
-         GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+   public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, RigidBody[] controlledBodies, InverseDynamicsJoint[] controlledJoints, MomentumOptimizationSettings momentumOptimizationSettings,
+         CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder,
+         TwistCalculator twistCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
+         YoVariableRegistry registry)
    {
       this.fullRobotModel = fullRobotModel;
+      this.controlledBodies = controlledBodies;
       this.momentumOptimizationSettings = momentumOptimizationSettings;
       this.referenceFrames = referenceFrames;
       this.controlDT = controlDT;
@@ -57,6 +72,32 @@ public class WholeBodyControlCoreToolbox
       this.geometricJacobianHolder = geometricJacobianHolder;
       this.contactablePlaneBodies = contactablePlaneBodies;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+
+      if (contactablePlaneBodies != null)
+      {
+         this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, yoGraphicsListRegistry, registry);
+         this.wrenchVisualizer = WrenchVisualizer
+               .createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
+      }
+      else
+      {
+         this.planeContactWrenchProcessor = null;
+         this.wrenchVisualizer = null;
+      }
+
+      if (referenceFrames != null)
+      {
+         this.yoDesiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", referenceFrames.getCenterOfMassFrame(), registry);
+         this.yoAchievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", referenceFrames.getCenterOfMassFrame(), registry);
+      }
+      else
+      {
+         yoDesiredMomentumRateLinear = null;
+         yoAchievedMomentumRateLinear = null;
+      }
+
+      this.yoResidualRootJointForce = new YoFrameVector("residualRootJointForce", ReferenceFrame.getWorldFrame(), registry);
+      this.yoResidualRootJointTorque = new YoFrameVector("residualRootJointTorque", ReferenceFrame.getWorldFrame(), registry);
 
       this.jointIndexHandler = new JointIndexHandler(controlledJoints);
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
@@ -71,8 +112,8 @@ public class WholeBodyControlCoreToolbox
    public static WholeBodyControlCoreToolbox createForInverseKinematicsOnly(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints,
          CommonHumanoidReferenceFrames referenceFrames, double controlDT, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator)
    {
-      WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, controlledJoints, null, referenceFrames, controlDT, Double.NaN,
-            geometricJacobianHolder, twistCalculator, null, null);
+      WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, null, controlledJoints, null, referenceFrames, controlDT, Double.NaN,
+            geometricJacobianHolder, twistCalculator, null, null, null);
       return ret;
    }
 
@@ -104,6 +145,11 @@ public class WholeBodyControlCoreToolbox
    public FullRobotModel getFullRobotModel()
    {
       return fullRobotModel;
+   }
+
+   public RigidBody[] getControlledBodies()
+   {
+      return controlledBodies;
    }
 
    public double getControlDT()
@@ -164,6 +210,36 @@ public class WholeBodyControlCoreToolbox
    public List<? extends ContactablePlaneBody> getContactablePlaneBodies()
    {
       return contactablePlaneBodies;
+   }
+
+   public PlaneContactWrenchProcessor getPlaneContactWrenchProcessor()
+   {
+      return planeContactWrenchProcessor;
+   }
+
+   public WrenchVisualizer getWrenchVisualizer()
+   {
+      return wrenchVisualizer;
+   }
+
+   public YoFrameVector getYoDesiredMomentumRateLinear()
+   {
+      return yoDesiredMomentumRateLinear;
+   }
+
+   public YoFrameVector getYoAchievedMomentumRateLinear()
+   {
+      return yoAchievedMomentumRateLinear;
+   }
+
+   public YoFrameVector getYoResidualRootJointForce()
+   {
+      return yoResidualRootJointForce;
+   }
+
+   public YoFrameVector getYoResidualRootJointTorque()
+   {
+      return yoResidualRootJointTorque;
    }
 
    public JointIndexHandler getJointIndexHandler()
