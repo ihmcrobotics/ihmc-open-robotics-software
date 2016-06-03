@@ -547,7 +547,7 @@ public class PrincipalComponentAnalysis3DTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Fast)
 	@Test(timeout = 30000)
 	/**
 	 * Make sure PCA does not crap out if it gets an empty list of data points.
@@ -560,7 +560,7 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	}
 
-	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Fast)
 	@Test(timeout = 30000)
 	/**
 	 * Make sure PCA does not crap out if a single data point is passed to it.
@@ -576,7 +576,7 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	}
 
-	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Fast)
 	@Test(timeout = 30000)
 	/**
 	 * Edge case:
