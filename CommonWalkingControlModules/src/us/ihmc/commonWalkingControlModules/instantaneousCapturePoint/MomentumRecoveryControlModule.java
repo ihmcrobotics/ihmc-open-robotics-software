@@ -51,6 +51,7 @@ public class MomentumRecoveryControlModule
    private final ConvexPolygonShrinker polygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d extendedSupportPolygon = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d safeCMPArea = new FrameConvexPolygon2d();
 
    public MomentumRecoveryControlModule(HighLevelHumanoidControllerToolbox momentumBasedController, double maxAllowedDistanceCMPSupport, YoVariableRegistry parentRegistry)
    {
@@ -138,6 +139,8 @@ public class MomentumRecoveryControlModule
          safeArea.update();
       }
 
+      safeCMPArea.setIncludingFrameAndUpdate(safeArea);
+
       // hysteresis:
       // shrink the safe area if we are already using upper body momentum
       if (usingUpperBodyMomentum.getBooleanValue())
@@ -171,8 +174,33 @@ public class MomentumRecoveryControlModule
 
    private void checkIfUseUpperBodyMomentumDoubleSupport()
    {
-      usingUpperBodyMomentum.set(false);
-      // TODO Auto-generated method stub
+      momentumBasedController.getCapturePoint(capturePoint2d);
+      capturePoint2d.changeFrameAndProjectToXYPlane(worldFrame);
+      FrameConvexPolygon2d support = momentumBasedController.getBipedSupportPolygons().getSupportPolygonInWorld();
+      safeArea.setIncludingFrameAndUpdate(support);
+
+      safeCMPArea.setIncludingFrameAndUpdate(safeArea);
+
+      // hysteresis:
+      // shrink the safe area if we are already using upper body momentum
+      if (usingUpperBodyMomentum.getBooleanValue())
+      {
+         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaIfRecovering, tempPolygon1);
+         safeArea.setIncludingFrameAndUpdate(tempPolygon1);
+      }
+
+      tmpCapturePoint.setIncludingFrame(capturePoint2d);
+      tmpCapturePoint.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
+      boolean icpInSafeArea = safeArea.isPointInside(tmpCapturePoint);
+
+      if (!icpInSafeArea)
+      {
+         usingUpperBodyMomentum.set(true);
+      }
+      else
+      {
+         usingUpperBodyMomentum.set(false);
+      }
    }
 
    private void checkIfUpToDate()
@@ -211,7 +239,8 @@ public class MomentumRecoveryControlModule
       {
          polygonShrinker.shrinkConstantDistanceInto(supportPolygon, -maxDistanceCMPSupport.getDoubleValue(), extendedSupportPolygon);
          areaToProjectInto.setIncludingFrameAndUpdate(extendedSupportPolygon);
-         safeArea.setIncludingFrameAndUpdate(this.safeArea);
+         safeCMPArea.changeFrameAndProjectToXYPlane(worldFrame);
+         safeArea.setIncludingFrameAndUpdate(safeCMPArea);
       }
       else
       {
