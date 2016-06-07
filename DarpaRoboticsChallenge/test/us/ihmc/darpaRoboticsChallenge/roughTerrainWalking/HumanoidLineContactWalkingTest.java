@@ -92,8 +92,9 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    private BooleanYoVariable allowUpperBodyMomentumInSingleSupport;
    private BooleanYoVariable allowUpperBodyMomentumInDoubleSupport;
    private BooleanYoVariable allowUsingHighMomentumWeight;
+   private BooleanYoVariable doToeOffIfPossible;
 
-   @DeployableTestMethod(estimatedDuration = 40.0, targets = {TestPlanTarget.InDevelopment})
+   @DeployableTestMethod(estimatedDuration = 100.0, targets = {TestPlanTarget.InDevelopment})
    @Test(timeout = 300000)
    public void testWalkingOnStraightSidewayLines() throws SimulationExceededMaximumTimeException
    {
@@ -120,6 +121,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       timeBeforeExploring.set(1.0);
       transferTime.set(0.15);
       swingTime.set(0.8);
+      doToeOffIfPossible.set(false);
 
       for (int i = 0; i < 5; i++)
       {
@@ -147,7 +149,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 40.0, targets = {TestPlanTarget.InDevelopment})
+   @DeployableTestMethod(estimatedDuration = 100.0, targets = {TestPlanTarget.InDevelopment})
    @Test(timeout = 300000)
    public void testWalkingOnStraightForwardLines() throws SimulationExceededMaximumTimeException
    {
@@ -174,6 +176,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       timeBeforeExploring.set(1.0);
       transferTime.set(0.15);
       swingTime.set(0.8);
+      doToeOffIfPossible.set(false);
 
       for (int i = 0; i < 5; i++)
       {
@@ -201,7 +204,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 40.0, targets = {TestPlanTarget.InDevelopment})
+   @DeployableTestMethod(estimatedDuration = 100.0, targets = {TestPlanTarget.InDevelopment})
    @Test(timeout = 300000)
    public void testWalkingOnLines() throws SimulationExceededMaximumTimeException
    {
@@ -230,8 +233,9 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       timeBeforeExploring.set(1.0);
       transferTime.set(0.15);
       swingTime.set(0.8);
+      doToeOffIfPossible.set(false);
 
-      for (int i = 0; i < 5; i++)
+      for (int i = 0; i < 15; i++)
       {
          RobotSide robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          ArrayList<Point2d> newContactPoints = generateContactPointsForRandomRotatedLineOfContact(random);
@@ -262,8 +266,8 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       double angle = RandomTools.generateRandomDouble(random, Math.PI);
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      double footLengthForLineOrigin = 0.9 * walkingControllerParameters.getFootLength();
-      double footWidthForLineOrigin = 0.9 * walkingControllerParameters.getFootWidth();
+      double footLengthForLineOrigin = 0.5 * walkingControllerParameters.getFootLength();
+      double footWidthForLineOrigin = 0.5 * walkingControllerParameters.getFootWidth();
 
       double x = RandomTools.generateRandomDouble(random, footLengthForLineOrigin) - footLengthForLineOrigin/2.0;
       double y = RandomTools.generateRandomDouble(random, footWidthForLineOrigin) - footWidthForLineOrigin/2.0;
@@ -405,6 +409,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       allowUpperBodyMomentumInSingleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
       allowUpperBodyMomentumInDoubleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");
       allowUsingHighMomentumWeight = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUsingHighMomentumWeight");
+      doToeOffIfPossible = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doToeOffIfPossible");
 
       // setup camera
       Point3d cameraFix = new Point3d(0.0, 0.0, 1.0);
