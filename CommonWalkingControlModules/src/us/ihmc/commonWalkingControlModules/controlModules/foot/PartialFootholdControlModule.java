@@ -381,7 +381,8 @@ public class PartialFootholdControlModule
    private static final double width = 0.01;
    private void fitLine()
    {
-      footCoPOccupancyGrid.fitLineToData(line);
+      if (!footCoPOccupancyGrid.fitLineToData(line))
+         return;
 
       lineL.setIncludingFrame(line);
       lineL.shiftToLeft(width/2.0);

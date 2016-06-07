@@ -554,7 +554,7 @@ public class FootCoPOccupancyGrid
    private final FramePoint2d pointA = new FramePoint2d();
    private final FramePoint2d pointB = new FramePoint2d();
 
-   public void fitLineToData(FrameLine2d lineToPack)
+   public boolean fitLineToData(FrameLine2d lineToPack)
    {
       // TODO: instead of counting keep track of number of occupied positions
       int numberOfPoints = 0;
@@ -568,6 +568,9 @@ public class FootCoPOccupancyGrid
             }
          }
       }
+
+      if (numberOfPoints < 2)
+         return false;
 
       if (numberOfPoints == 2)
       {
@@ -584,7 +587,7 @@ public class FootCoPOccupancyGrid
             }
          }
          lineToPack.set(pointA, pointB);
-         return;
+         return true;
       }
 
       pointCloud.reshape(3, numberOfPoints);
@@ -615,10 +618,11 @@ public class FootCoPOccupancyGrid
       lineDirection.setIncludingFrame(soleFrame, tempVector3d.getX(), tempVector3d.getY());
 
       if (lineDirection.containsNaN())
-         lineDirection.set(1.0, 0.0);
+         return false;
 
       lineToPack.setToZero(soleFrame);
       lineToPack.setOrigin(lineOrigin);
       lineToPack.setDirection(lineDirection);
+      return true;
    }
 }
