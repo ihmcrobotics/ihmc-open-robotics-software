@@ -85,7 +85,7 @@ public class FootCoPOccupancyGrid
       this.nLengthSubdivisions = new IntegerYoVariable(namePrefix + "NLengthSubdivisions", registry);
       this.nLengthSubdivisions.set(nLengthSubdivisions);
       this.nWidthSubdivisions = new IntegerYoVariable(namePrefix + "NWidthSubdivisions", registry);
-      this.nWidthSubdivisions.set(nLengthSubdivisions);
+      this.nWidthSubdivisions.set(nWidthSubdivisions);
 
       ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
       if (explorationParameters != null)
@@ -115,7 +115,7 @@ public class FootCoPOccupancyGrid
 
       if (VISUALIZE)
       {
-         cellViz = new YoFramePoint[20][20];
+         cellViz = new YoFramePoint[nLengthSubdivisions][nWidthSubdivisions];
          for (int i = 0; i < cellViz.length; i++)
          {
             for (int j = 0; j < cellViz[0].length; j++)
