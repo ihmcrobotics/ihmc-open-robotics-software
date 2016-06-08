@@ -153,11 +153,11 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       builder.addState(QuadrupedForceControllerState.XGAIT, xGaitController);
 
       // Add automatic transitions that lead into the stand state.
-//      if (bypassDoNothingStateParameter.get())
-//      {
-//         builder.addTransition(ControllerEvent.DONE, QuadrupedForceControllerState.JOINT_INITIALIZATION, QuadrupedForceControllerState.STAND_PREP);
-//      }
-//      else
+      if (bypassDoNothingStateParameter.get())
+      {
+         builder.addTransition(ControllerEvent.DONE, QuadrupedForceControllerState.JOINT_INITIALIZATION, QuadrupedForceControllerState.STAND_PREP);
+      }
+      else
       {
          builder.addTransition(ControllerEvent.DONE, QuadrupedForceControllerState.JOINT_INITIALIZATION, QuadrupedForceControllerState.DO_NOTHING);
       }
