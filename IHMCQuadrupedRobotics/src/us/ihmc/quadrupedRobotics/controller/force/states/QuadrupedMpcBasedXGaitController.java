@@ -461,16 +461,16 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 
       // Initialize equality constraints. (Aeq u = beq)
       beq.reshape(3, 1);
-      beq.zero();
-      beq.set(0, 0, -CmSx0py0.get(0, 0));
-      beq.set(1, 0, -CmSx0py0.get(1, 0));
-      beq.set(2, 0, 1);
+      for (int i = 0; i < 3; i++)
+      {
+         beq.set(i, 0, 1);
+      }
       Aeq.reshape(3, nContacts + 2);
       Aeq.zero();
       for (int i = 0; i < nContacts + 2; i++)
       {
-         Aeq.set(0, i, CmSB.get(0, i));
-         Aeq.set(1, i, CmSB.get(1, i));
+         Aeq.set(0, i, -CmSB.get(0, i) / CmSx0py0.get(0, 0));
+         Aeq.set(1, i, -CmSB.get(1, i) / CmSx0py0.get(1, 0));
       }
       for (int i = 0; i < nContacts; i++)
       {
