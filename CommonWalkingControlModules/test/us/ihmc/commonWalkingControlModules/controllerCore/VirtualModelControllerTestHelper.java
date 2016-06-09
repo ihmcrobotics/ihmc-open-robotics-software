@@ -7,12 +7,15 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelController;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -37,6 +40,7 @@ import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
@@ -45,6 +49,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 import us.ihmc.tools.testing.JUnitTools;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Point2d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import java.util.*;
@@ -1795,6 +1800,12 @@ public class VirtualModelControllerTestHelper
       private CommonHumanoidReferenceFrames referenceFrames;
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+      private final SideDependentList<ArrayList<Point2d>> controllerFootGroundContactPoints = new SideDependentList<>();
+      private final SideDependentList<Point2d> controllerToeContactPoints = new SideDependentList<>();
+
+      private final ContactableBodiesFactory contactableBodiesFactory = new ContactableBodiesFactory();
+      private final SideDependentList<ContactableFoot> footContactableBodies = new SideDependentList<>();
+
       public RobotLegs(String name)
       {
          super(name);
@@ -1804,6 +1815,30 @@ public class VirtualModelControllerTestHelper
       {
          worldFrame.update();
          referenceFrames.updateFrames();
+      }
+
+      public void createContactPoints()
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            controllerFootGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
+            controllerFootGroundContactPoints.get(robotSide).add(new Point2d(-footLength / 2.0, -footWidth / 2.0));
+            controllerFootGroundContactPoints.get(robotSide).add(new Point2d(-footLength / 2.0, footWidth / 2.0));
+            controllerFootGroundContactPoints.get(robotSide).add(new Point2d(footLength / 2.0, -toeWidth / 2.0));
+            controllerFootGroundContactPoints.get(robotSide).add(new Point2d(footLength / 2.0, toeWidth / 2.0));
+            controllerToeContactPoints.put(robotSide, new Point2d(footLength / 2.0, 0.0));
+         }
+
+         contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints);
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            RigidBody foot = feet.get(robotSide);
+            ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
+            List<Point2d> contactPointsInSoleFrame = controllerFootGroundContactPoints.get(robotSide);
+            ListOfPointsContactableFoot footContactableBody = new ListOfPointsContactableFoot(foot, soleFrame, contactPointsInSoleFrame, controllerToeContactPoints.get(robotSide));
+            footContactableBodies.put(robotSide, footContactableBody);
+         }
       }
 
       public void setRootJoint(SixDoFJoint rootJoint)
@@ -1937,6 +1972,21 @@ public class VirtualModelControllerTestHelper
       {
          return referenceFrames;
       }
+
+      public SideDependentList<ArrayList<Point2d>> getControllerFootGroundContactPoints()
+      {
+         return controllerFootGroundContactPoints;
+      }
+
+      public ContactableBodiesFactory getContactableBodiesFactory()
+      {
+         return contactableBodiesFactory;
+      }
+
+      public SideDependentList<ContactableFoot> getFootContactableBodies()
+      {
+         return footContactableBodies;
+      }
    }
 
    private class LegReferenceFrames implements CommonHumanoidReferenceFrames
@@ -1961,6 +2011,12 @@ public class VirtualModelControllerTestHelper
 
       public void updateFrames()
       {
+         centerOfMassFrame.update();
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            footReferenceFrames.get(robotSide).update();
+            soleReferenceFrames.get(robotSide).update();
+         }
       }
 
       public ReferenceFrame getABodyAttachedZUpFrame()
