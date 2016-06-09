@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.controller.forcedev.states;
+package us.ihmc.quadrupedRobotics.controller.forceDevelopment.states;
 
 import java.awt.Color;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.controller.positiondev.states;
+package us.ihmc.quadrupedRobotics.controller.positionDevelopment.states;
 
 import java.awt.Color;
 
