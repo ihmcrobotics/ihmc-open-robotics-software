@@ -51,13 +51,11 @@ public class PickUpBallBehavior extends BehaviorInterface
 {
    private static final boolean FILTER_KNOWN_COLORS_TO_SPEED_UP = false;
    
-//   public static final HSVRange YELLOW_BALL = new HSVRange(new HSVValue(22.84, 81.19, 140.0), new HSVValue(35.0, 136.2, 250.0));
-   public static final HSVRange YELLOW_BALL = new HSVRange(new HSVValue(19.76, 83.67, 47.0), new HSVValue(30.94, 142.8, 176.0));
+   public static final HSVRange YELLOW_BALL = new HSVRange(new HSVValue(22.84, 81.19, 140.0), new HSVValue(35.0, 136.2, 250.0));
    public static final HSVRange ORANGE_BALL = new HSVRange(new HSVValue(6.5, 124.0, 108.0), new HSVValue(12.05, 168.9, 250.0));
    public static final HSVRange RED_BALL = new HSVRange(new HSVValue(0.2913, 96.09, 69.0), new HSVValue(179.7, 149.6, 190.0));
    public static final HSVRange GREEN_BALL = new HSVRange(new HSVValue(81.29, 103.0, 52.0), new HSVValue(91.15, 153.0, 130.0));
-//   public static final HSVRange BLUE_BALL = new HSVRange(new HSVValue(79.5, 109.3, 28.0), new HSVValue(105.0, 175.9, 170.0));
-   public static final HSVRange BLUE_BALL = new HSVRange(new HSVValue(71.25, 65.81, 28.0), new HSVValue(108.1, 185.8, 94.0));
+   public static final HSVRange BLUE_BALL = new HSVRange(new HSVValue(79.5, 109.3, 28.0), new HSVValue(105.0, 175.9, 170.0));
    public static final HSVRange SIMULATED_BALL = new HSVRange(new HSVValue(20.0, 50.0, 0.0), new HSVValue(150.0, 255.0, 255.0));
    
    private final PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement;
