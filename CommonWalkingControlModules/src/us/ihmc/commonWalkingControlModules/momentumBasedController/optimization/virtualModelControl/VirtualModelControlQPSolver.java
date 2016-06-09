@@ -162,12 +162,9 @@ public class VirtualModelControlQPSolver
       numberOfIterations.set(qpSolver.solve(solverOutput_rhos));
 
       qpSolverTimer.stopMeasurement();
-      
 
       if (MatrixTools.containsNaN(solverOutput_rhos))
          throw new NoConvergenceException(numberOfIterations.getIntegerValue());
-
-      CommonOps.extract(solverOutput_rhos, 0, rhoSize, 0, 1, solverOutput_rhos, 0, 0);
 
       firstCall.set(false);
    }
