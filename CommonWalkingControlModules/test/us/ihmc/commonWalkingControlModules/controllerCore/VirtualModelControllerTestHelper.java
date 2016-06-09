@@ -2011,6 +2011,12 @@ public class VirtualModelControllerTestHelper
 
       public void updateFrames()
       {
+         centerOfMassFrame.update();
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            footReferenceFrames.get(robotSide).update();
+            soleReferenceFrames.get(robotSide).update();
+         }
       }
 
       public ReferenceFrame getABodyAttachedZUpFrame()
