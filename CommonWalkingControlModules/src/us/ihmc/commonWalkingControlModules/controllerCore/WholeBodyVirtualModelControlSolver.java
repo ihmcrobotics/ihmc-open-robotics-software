@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.*;

@@ -28,10 +28,10 @@ import java.util.Map;
 
 public class VirtualModelControlOptimizationControlModule
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
-   private static final boolean SETUP_RHO_TASKS = false; // FIXME
+   private static final boolean SETUP_RHO_TASKS = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
