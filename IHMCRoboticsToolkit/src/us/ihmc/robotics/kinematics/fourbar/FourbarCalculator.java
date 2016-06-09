@@ -39,7 +39,7 @@ public class FourbarCalculator
    public double calculateInputAngleFromOutputAngle(double beta)
    {
       double alpha = calculateInputAngleFromOutputAngle(beta, L1, L2, L3, L4);
-      ratioBasedOnCalculatedOutputAngle = tempRatio;
+      ratioBasedOnCalculatedInputAngle = tempRatio;
       return alpha;
    }
 
