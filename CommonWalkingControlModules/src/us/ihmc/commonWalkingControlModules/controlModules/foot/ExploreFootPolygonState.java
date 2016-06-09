@@ -15,22 +15,23 @@ import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ExploreFootPolygonState extends AbstractFootControlState
 {
    private boolean done = true;
-   private enum ExplorationMethod
+   public enum ExplorationMethod
    {
       SPRIAL, LINES, FAST_LINE
    };
-   private final ExplorationMethod method;
+
+   private final EnumYoVariable<ExplorationMethod> explorationMethod;
 
    private final HoldPositionState internalHoldPositionState;
 
@@ -77,8 +78,10 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    public ExploreFootPolygonState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.EXPLORE_POLYGON, footControlHelper, registry);
+      String footName = contactableFoot.getName();
 
-      method = ExplorationMethod.LINES;
+      explorationMethod = new EnumYoVariable<ExplorationMethod>(footName + "ExplorationMethod", registry, ExplorationMethod.class);
+      explorationMethod.set(ExplorationMethod.LINES);
 
       dt = momentumBasedController.getControlDT();
       ExplorationParameters explorationParameters =
@@ -95,13 +98,13 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
       centerOfPressureCommand.setContactingRigidBody(contactableFoot.getRigidBody());
 
-      lastShrunkTime = new DoubleYoVariable(contactableFoot.getName() + "LastShrunkTime", registry);
-      spiralAngle = new DoubleYoVariable(contactableFoot.getName() + "SpiralAngle", registry);
+      lastShrunkTime = new DoubleYoVariable(footName + "LastShrunkTime", registry);
+      spiralAngle = new DoubleYoVariable(footName + "SpiralAngle", registry);
 
       recoverTime = explorationParameters.getRecoverTime();
       timeBeforeExploring = explorationParameters.getTimeBeforeExploring();
 
-      autoCropToLineAfterExploration = new BooleanYoVariable(contactableFoot.getName() + "AutoCropToLineAfterExploration", registry);
+      autoCropToLineAfterExploration = new BooleanYoVariable(footName + "AutoCropToLineAfterExploration", registry);
       autoCropToLineAfterExploration.set(false);
 
       timeToGoToCorner = explorationParameters.getTimeToGoToCorner();
@@ -125,14 +128,14 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       });
 
       copCommandWeight = explorationParameters.getCopCommandWeight();
-      copCommandWeightVector = new YoFrameVector2d(contactableFoot.getName() + "CopCommandWeight", null, registry);
+      copCommandWeightVector = new YoFrameVector2d(footName + "CopCommandWeight", null, registry);
       copCommandWeightVector.set(copCommandWeight.getDoubleValue(), copCommandWeight.getDoubleValue());
 
       desiredOrientation.setToZero();
       desiredAngularVelocity.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
 
-      yoCurrentCorner = new IntegerYoVariable(contactableFoot.getName() + "CurrentCornerExplored", registry);
+      yoCurrentCorner = new IntegerYoVariable(footName + "CurrentCornerExplored", registry);
    }
 
    public void setWeight(double weight)
@@ -181,7 +184,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
       partialFootholdControlModule.compute(desiredCoP, cop);
 
-      if (timeInState < recoverTime.getDoubleValue())
+      if (timeInState < timeBeforeExploring.getDoubleValue())
       {
          partialFootholdControlModule.clearCoPGrid();
       }
@@ -203,7 +206,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       if (timeInState > timeBeforeExploring.getDoubleValue() && timeInState > recoverTime.getDoubleValue() && !done)
       {
          // Foot exploration through CoP shifting...
-         if (method == ExplorationMethod.SPRIAL)
+         if (explorationMethod.getEnumValue() == ExplorationMethod.SPRIAL)
          {
             double freq = 0.6;
             double rampOutDuration = 0.3;
@@ -235,7 +238,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             partialFootholdControlModule.projectOntoShrunkenPolygon(desiredCenterOfPressure);
             desiredCenterOfPressure.scale(0.9);
          }
-         else if (method == ExplorationMethod.LINES)
+         else if (explorationMethod.getEnumValue() == ExplorationMethod.LINES)
          {
             if (contactStateHasChanged)
             {
@@ -279,7 +282,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
                done = true;
             }
          }
-         else if (method == ExplorationMethod.FAST_LINE)
+         else if (explorationMethod.getEnumValue() == ExplorationMethod.FAST_LINE)
          {
             // quickly go forward and backward with the cop to get data for line fitting in the cop occupancy grid
             ReferenceFrame soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
@@ -291,29 +294,25 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
             if (timeExploring < timeToStay)
             {
-               if (robotSide == RobotSide.LEFT)
-               {
-                  desiredCenterOfPressure.setIncludingFrame(soleFrame, distanceToMoveFrontBack, 0.0);
-               }
-               else
-               {
-                  desiredCenterOfPressure.setIncludingFrame(soleFrame, 0.02, distanceToMoveSideSide);
-               }
+               desiredCenterOfPressure.setIncludingFrame(soleFrame, distanceToMoveFrontBack, 0.0);
                partialFootholdControlModule.projectOntoShrunkenPolygon(desiredCenterOfPressure);
             }
             else if (timeExploring < 2.0 * timeToStay)
             {
-               if (robotSide == RobotSide.LEFT)
-               {
-                  desiredCenterOfPressure.setIncludingFrame(soleFrame, -distanceToMoveFrontBack, 0.0);
-               }
-               else
-               {
-                  desiredCenterOfPressure.setIncludingFrame(soleFrame, -0.02, -distanceToMoveSideSide);
-               }
+               desiredCenterOfPressure.setIncludingFrame(soleFrame, 0.0, distanceToMoveSideSide);
                partialFootholdControlModule.projectOntoShrunkenPolygon(desiredCenterOfPressure);
             }
-            else if (timeExploring < 2.0 * timeToStay + 1.0)
+            else if (timeExploring < 3.0 * timeToStay)
+            {
+               desiredCenterOfPressure.setIncludingFrame(soleFrame, -distanceToMoveFrontBack, 0.0);
+               partialFootholdControlModule.projectOntoShrunkenPolygon(desiredCenterOfPressure);
+            }
+            else if (timeExploring < 4.0 * timeToStay)
+            {
+               desiredCenterOfPressure.setIncludingFrame(soleFrame, 0.0, -distanceToMoveSideSide);
+               partialFootholdControlModule.projectOntoShrunkenPolygon(desiredCenterOfPressure);
+            }
+            else if (timeExploring < 4.0 * timeToStay + 0.5)
             {
                desiredCenterOfPressure.setIncludingFrame(soleFrame, 0.0, 0.0);
             }

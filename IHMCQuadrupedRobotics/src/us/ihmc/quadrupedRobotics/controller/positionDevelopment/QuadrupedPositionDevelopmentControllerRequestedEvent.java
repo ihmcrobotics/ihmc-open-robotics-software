@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.controller.positiondev;
+package us.ihmc.quadrupedRobotics.controller.positionDevelopment;
 
 public enum QuadrupedPositionDevelopmentControllerRequestedEvent
 {

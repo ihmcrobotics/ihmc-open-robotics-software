@@ -128,7 +128,7 @@ public class PrincipalComponentAnalysis3D
     */
    public void compute()
    {
-      if (pointCloud.getNumRows() < 2)
+      if (pointCloud.getNumRows() < 3)
       {
          principalAxis.set(Double.NaN, Double.NaN, Double.NaN);
          secondaryAxis.set(Double.NaN, Double.NaN, Double.NaN);
@@ -139,7 +139,7 @@ public class PrincipalComponentAnalysis3D
 
       svd.decompose(pointCloud);
 
-      svd.getV(U, false);
+      U.zero(); // do not need U
       svd.getW(W);
       svd.getV(V, false);
       SingularOps.descendingOrder(U, false, W, V, false);

@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -16,6 +17,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -68,6 +70,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
    private final YoFramePoint2d yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", worldFrame, registry);
+   private final YoFrameConvexPolygon2d yoSafeAreaPolygon = new YoFrameConvexPolygon2d("yoSafeAreaPolygon", worldFrame, 10, registry);
+   private final YoFrameConvexPolygon2d yoProjectionPolygon = new YoFrameConvexPolygon2d("yoProjectionPolygon", worldFrame, 10, registry);
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
@@ -108,6 +112,12 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
          String graphicListName = getClass().getSimpleName();
          YoGraphicPosition unprojectedDesiredCMPViz = new YoGraphicPosition("Unprojected Desired CMP", yoUnprojectedDesiredCMP, 0.008, Purple(), GraphicType.ROTATED_CROSS);
          yoGraphicsListRegistry.registerArtifact(graphicListName, unprojectedDesiredCMPViz.createArtifact());
+
+//         YoArtifactPolygon yoSafeArea = new YoArtifactPolygon("SafeArea", yoSafeAreaPolygon, Color.GREEN, false);
+//         yoGraphicsListRegistry.registerArtifact(graphicListName, yoSafeArea);
+//
+//         YoArtifactPolygon yoProjectionArea = new YoArtifactPolygon("ProjectionArea", yoProjectionPolygon, Color.RED, false);
+//         yoGraphicsListRegistry.registerArtifact(graphicListName, yoProjectionArea);
       }
    }
 
@@ -132,6 +142,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       highLinearMomentumRateWeight.set(highLinearWeight);
    }
 
+   private final BooleanYoVariable desiredCMPinSafeArea = new BooleanYoVariable("DesiredCMPinSafeArea", registry);
+
    public void compute(FramePoint2d desiredCMPToPack)
    {
       if (supportSide != supportLegPreviousTick.getEnumValue())
@@ -147,6 +159,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       // do projection here:
       if (!areaToProjectInto.isEmpty())
       {
+         desiredCMPinSafeArea.set(safeArea.isPointInside(desiredCMP));
          if (safeArea.isPointInside(desiredCMP))
          {
             supportPolygon.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
@@ -275,5 +288,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    {
       this.areaToProjectInto.setIncludingFrameAndUpdate(areaToProjectInto);
       this.safeArea.setIncludingFrameAndUpdate(safeArea);
+
+      yoSafeAreaPolygon.setFrameConvexPolygon2d(safeArea);
+      yoProjectionPolygon.setFrameConvexPolygon2d(areaToProjectInto);
    }
 }
