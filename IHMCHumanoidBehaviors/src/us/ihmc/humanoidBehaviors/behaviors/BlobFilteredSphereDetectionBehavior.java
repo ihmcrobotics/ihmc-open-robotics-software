@@ -25,9 +25,9 @@ import us.ihmc.tools.thread.ThreadTools;
 public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 {
    private final ReferenceFrame headFrame;
-   private static final double FILTERING_ANGLE = Math.toRadians(5.0);
+   private static final double FILTERING_ANGLE = Math.toRadians(20.0);
    private static final double FILTERING_MIN_DISTANCE = 0.1;
-   private static final double FILTERING_MAX_DISTANCE = 7.0;
+   private static final double FILTERING_MAX_DISTANCE = 10.0;
 
    // http://www.bostondynamics.com/img/MultiSense_SL.pdf
    private static final double MUTLISENSE_HORIZONTAL_FOV = Math.toRadians(80.0);
@@ -73,6 +73,8 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       }
    }
 
+   int debugCounter = 0;
+   
    private Point3f[] filterPointsNearBall(Point3f[] fullPointCloud)
    {
       if (fullPointCloud.length == 0)
@@ -96,6 +98,8 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       {
          int cameraPixelWidth = latestCameraImage.getWidth();
          int cameraPixelHeight = latestCameraImage.getHeight();
+
+         ++debugCounter;
          
          synchronized (coloredCircularBlobDetectorBehaviorService.getBallListConch())
          {
@@ -126,7 +130,19 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
                      }
                   }
                }
+               
+               if (debugCounter == 25)
+               {
+                  PrintTools.debug(this, "Filtering ball at " + latestBallPosition2d + " Points: " + filteredPoints.size());
+                  if (filteredPoints != null && !filteredPoints.isEmpty())
+                  PrintTools.debug(this, "Point 0 at " + filteredPoints.get(0));
+               }
             }
+         }
+         
+         if (debugCounter == 25)
+         {
+            debugCounter = 0;
          }
    
          Point3f[] filteredPointArray = new Point3f[filteredPoints.size()];
