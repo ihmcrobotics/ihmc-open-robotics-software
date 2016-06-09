@@ -82,6 +82,11 @@ public class DivergentComponentOfMotionController
       graphicsListRegistry.registerArtifactList(artifactList);
    }
 
+   public LinearInvertedPendulumModel getLinearInvertedPendulumModel()
+   {
+      return lipModel;
+   }
+
    public void reset()
    {
       for (int i = 0; i < 3; i++)

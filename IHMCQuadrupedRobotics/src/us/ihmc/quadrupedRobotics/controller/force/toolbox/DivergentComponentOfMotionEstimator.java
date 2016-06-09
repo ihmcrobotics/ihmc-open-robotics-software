@@ -5,6 +5,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.trajectories.ParabolicCartesianTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
@@ -34,6 +35,11 @@ public class DivergentComponentOfMotionEstimator
       parentRegistry.addChild(registry);
       graphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       graphicsListRegistry.registerArtifactList(artifactList);
+   }
+
+   public LinearInvertedPendulumModel getLinearInvertedPendulumModel()
+   {
+      return lipModel;
    }
 
    public void compute(FramePoint dcmPositionEstimate, FrameVector comVelocityEstimate)
