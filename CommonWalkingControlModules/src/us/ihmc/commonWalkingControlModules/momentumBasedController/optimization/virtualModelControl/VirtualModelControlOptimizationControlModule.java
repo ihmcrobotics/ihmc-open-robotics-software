@@ -28,12 +28,10 @@ import java.util.Map;
 
 public class VirtualModelControlOptimizationControlModule
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
-   private static final boolean SETUP_RHO_TASKS = false; // FIXME
-
-   private static final boolean USE_MOMENTUM_QP = false;
+   private static final boolean SETUP_RHO_TASKS = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -65,8 +63,12 @@ public class VirtualModelControlOptimizationControlModule
    private final List<RigidBody> bodiesInContact = new ArrayList<>();
    private final List<DenseMatrix64F> selectionMatrices = new ArrayList<>();
 
-   public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, InverseDynamicsJoint rootJoint, YoVariableRegistry parentRegistry)
+   private final boolean useMomentumQP;
+
+   public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, InverseDynamicsJoint rootJoint, boolean useMomentumQP,
+         YoVariableRegistry parentRegistry)
    {
+      this.useMomentumQP = useMomentumQP;
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
@@ -122,7 +124,7 @@ public class VirtualModelControlOptimizationControlModule
    private final DenseMatrix64F contactWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F totalWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F tmpWrench = new DenseMatrix64F(Wrench.SIZE, 1);
-   private Map<RigidBody, Wrench> groundReactionWrenches = new HashMap<>();
+   private final Map<RigidBody, Wrench> groundReactionWrenches = new HashMap<>();
 
    public void compute(VirtualModelControlSolution virtualModelControlSolutionToPack) throws VirtualModelControlModuleException
    {
@@ -145,7 +147,7 @@ public class VirtualModelControlOptimizationControlModule
       NoConvergenceException noConvergenceException = null;
 
       // use the force optimization algorithm
-      if (USE_MOMENTUM_QP)
+      if (useMomentumQP)
       {
          try
          {
@@ -168,7 +170,7 @@ public class VirtualModelControlOptimizationControlModule
 
          DenseMatrix64F rhoSolution = qpSolver.getRhos();
 
-         groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
+         groundReactionWrenches.putAll(wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution));
       }
       // divide the load evenly among all contacting bodies
       else
@@ -202,11 +204,13 @@ public class VirtualModelControlOptimizationControlModule
       contactWrench.zero();
       for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
       {
+         externalWrenchSolution.get(rigidBody).changeFrame(centerOfMassFrame);
          externalWrenchSolution.get(rigidBody).getMatrix(tmpWrench);
          CommonOps.add(contactWrench, tmpWrench, contactWrench);
+         externalWrenchSolution.get(rigidBody).changeFrame(rigidBody.getBodyFixedFrame());
       }
       CommonOps.add(contactWrench, gravityWrench, totalWrench);
-      centroidalMomentumRateSolution.set(null, totalWrench);
+      centroidalMomentumRateSolution.set(centerOfMassFrame, totalWrench);
 
       // we don't nominally want this stuff
       if (DEBUG)
@@ -358,7 +362,7 @@ public class VirtualModelControlOptimizationControlModule
          desiredAngularMomentumRate.set(tempTaskObjective.get(0), tempTaskObjective.get(1), tempTaskObjective.get(2));
       }
 
-      if (USE_MOMENTUM_QP)
+      if (useMomentumQP)
          qpSolver.addMomentumTask(taskJacobian, taskObjective, taskWeightMatrix);
    }
 

@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.*;
@@ -31,6 +30,7 @@ import java.util.*;
 public class WholeBodyVirtualModelControlSolver
 {
    private static final boolean USE_LIMITED_JOINT_TORQUES = true;
+   private static final boolean USE_CONTACT_FORCE_QP = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -81,7 +81,7 @@ public class WholeBodyVirtualModelControlSolver
 
       controllerModel = toolbox.getFullRobotModel();
       rootJoint = toolbox.getRobotRootJoint();
-      optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, rootJoint, registry);
+      optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, rootJoint, USE_CONTACT_FORCE_QP, registry);
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
