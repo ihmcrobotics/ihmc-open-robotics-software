@@ -1,11 +1,11 @@
-package us.ihmc.quadrupedRobotics.controller.positiondev;
+package us.ihmc.quadrupedRobotics.controller.positionDevelopment;
 
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.position.states.*;
-import us.ihmc.quadrupedRobotics.controller.positiondev.states.QuadrupedPositionBasedCenterOfMassVerificationController;
-import us.ihmc.quadrupedRobotics.controller.positiondev.states.QuadrupedPositionBasedLegJointSliderBoardController;
+import us.ihmc.quadrupedRobotics.controller.positionDevelopment.states.QuadrupedPositionBasedCenterOfMassVerificationController;
+import us.ihmc.quadrupedRobotics.controller.positionDevelopment.states.QuadrupedPositionBasedLegJointSliderBoardController;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
