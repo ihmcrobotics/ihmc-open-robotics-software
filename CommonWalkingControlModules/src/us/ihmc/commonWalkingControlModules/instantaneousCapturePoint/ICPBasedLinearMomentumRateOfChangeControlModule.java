@@ -15,6 +15,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -57,7 +58,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
 
    private final YoFrameVector defaultLinearMomentumRateWeight = new YoFrameVector("defaultLinearMomentumRateWeight", worldFrame, registry);
+   private final YoFrameVector defaultAngularMomentumRateWeight = new YoFrameVector("defaultAngularMomentumRateWeight", worldFrame, registry);
    private final YoFrameVector highLinearMomentumRateWeight = new YoFrameVector("highLinearMomentumRateWeight", worldFrame, registry);
+   private final YoFrameVector angularMomentumRateWeight = new YoFrameVector("angularMomentumRateWeigth", worldFrame, registry);
    private final YoFrameVector linearMomentumRateWeight = new YoFrameVector("linearMomentumRateWeight", worldFrame, registry);
 
    private final CMPProjector cmpProjector;
@@ -96,6 +99,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       parentRegistry.addChild(registry);
 
       controlledCoMAcceleration = new YoFrameVector("controlledCoMAcceleration", "", centerOfMassFrame, registry);
+      angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
       linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
 
@@ -107,9 +111,20 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       }
    }
 
+   public void setMomentumWeight(Vector3d angularWeight, Vector3d linearWeight)
+   {
+      defaultLinearMomentumRateWeight.set(linearWeight);
+      defaultAngularMomentumRateWeight.set(angularWeight);
+   }
+
    public void setMomentumWeight(Vector3d linearWeight)
    {
       defaultLinearMomentumRateWeight.set(linearWeight);
+   }
+
+   public void setAngularMomentumWeight(Vector3d angularWeight)
+   {
+      defaultAngularMomentumRateWeight.set(angularWeight);
    }
 
    public void setHighMomentumWeightForRecovery(Vector3d highLinearWeight)
@@ -167,7 +182,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       controlledCoMAcceleration.set(linearMomentumRateOfChange);
       controlledCoMAcceleration.scale(1.0 / totalMass);
       momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
-      momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
+      momentumRateCommand.setWeights(angularMomentumRateWeight.getX(), angularMomentumRateWeight.getY(), angularMomentumRateWeight.getZ(),
+            linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
    }
 
    public void computeAchievedCMP(FrameVector achievedLinearMomentumRate, FramePoint2d achievedCMPToPack)
@@ -242,6 +258,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    public void setDefaultMomentumWeight()
    {
       linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
+      angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
    }
 
    public void setDesiredCenterOfMassHeightAcceleration(double desiredCenterOfMassHeightAcceleration)
