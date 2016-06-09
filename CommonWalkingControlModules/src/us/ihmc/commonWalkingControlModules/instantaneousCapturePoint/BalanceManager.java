@@ -183,6 +183,11 @@ public class BalanceManager
       icpBasedLinearMomentumRateOfChangeControlModule.setMomentumWeight(linearWeight);
    }
 
+   public void setMomentumWeight(Vector3d angularWeight, Vector3d linearWeight)
+   {
+      icpBasedLinearMomentumRateOfChangeControlModule.setMomentumWeight(angularWeight, linearWeight);
+   }
+
    public void setHighMomentumWeightForRecovery(Vector3d highLinearWeight)
    {
       icpBasedLinearMomentumRateOfChangeControlModule.setHighMomentumWeightForRecovery(highLinearWeight);

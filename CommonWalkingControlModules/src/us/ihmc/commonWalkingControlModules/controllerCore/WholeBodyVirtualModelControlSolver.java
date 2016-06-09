@@ -82,7 +82,7 @@ public class WholeBodyVirtualModelControlSolver
 
       controllerModel = toolbox.getFullRobotModel();
       rootJoint = toolbox.getRobotRootJoint();
-      optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, rootJoint, true, registry);
+      optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, rootJoint, USE_CONTACT_FORCE_QP, registry);
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
