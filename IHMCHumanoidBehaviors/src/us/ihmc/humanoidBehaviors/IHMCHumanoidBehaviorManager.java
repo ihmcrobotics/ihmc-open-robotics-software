@@ -184,7 +184,7 @@ public class IHMCHumanoidBehaviorManager
       blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.RED_BALL);
       blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.YELLOW_BALL);
       blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.GREEN_BALL);
-      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.SIMULATED_BALL);
+//      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.SIMULATED_BALL);
       dispatcher.addBehavior(HumanoidBehaviorType.BALL_DETECTION, blobFilteredSphereDetectionBehavior);
       
       dispatcher.addBehavior(HumanoidBehaviorType.TALK_AND_MOVE_HANDS, new TalkAndMoveHandsBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
