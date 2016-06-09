@@ -31,6 +31,7 @@ import java.util.*;
 public class WholeBodyVirtualModelControlSolver
 {
    private static final boolean USE_LIMITED_JOINT_TORQUES = true;
+   private static final boolean USE_CONTACT_FORCE_QP = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -81,7 +82,7 @@ public class WholeBodyVirtualModelControlSolver
 
       controllerModel = toolbox.getFullRobotModel();
       rootJoint = toolbox.getRobotRootJoint();
-      optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, rootJoint, registry);
+      optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, rootJoint, true, registry);
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
