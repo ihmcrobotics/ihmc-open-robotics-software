@@ -124,7 +124,7 @@ public class VirtualModelControlOptimizationControlModule
    private final DenseMatrix64F contactWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F totalWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F tmpWrench = new DenseMatrix64F(Wrench.SIZE, 1);
-   private Map<RigidBody, Wrench> groundReactionWrenches = new HashMap<>();
+   private final Map<RigidBody, Wrench> groundReactionWrenches = new HashMap<>();
 
    public void compute(VirtualModelControlSolution virtualModelControlSolutionToPack) throws VirtualModelControlModuleException
    {
@@ -170,7 +170,7 @@ public class VirtualModelControlOptimizationControlModule
 
          DenseMatrix64F rhoSolution = qpSolver.getRhos();
 
-         groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
+         groundReactionWrenches.putAll(wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution));
       }
       // divide the load evenly among all contacting bodies
       else
