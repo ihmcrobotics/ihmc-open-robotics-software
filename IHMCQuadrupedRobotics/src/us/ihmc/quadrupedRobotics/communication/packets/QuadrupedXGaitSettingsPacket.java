@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.packets;
+package us.ihmc.quadrupedRobotics.communication.packets;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;

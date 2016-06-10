@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.packets;
+package us.ihmc.quadrupedRobotics.communication.packets;
 
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
 import us.ihmc.communication.packets.Packet;

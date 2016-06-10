@@ -7,9 +7,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedJointInitializationController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandReadyController;
-import us.ihmc.quadrupedRobotics.controller.forceDevelopment.states.QuadrupedTrotWalkController;
+import us.ihmc.quadrupedRobotics.controller.forceDevelopment.states.QuadrupedVMCForceMultiGaitController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -98,9 +96,9 @@ public class QuadrupedForceDevelopmentControllerManager implements QuadrupedCont
    {
       // Initialize controllers.
       QuadrupedController jointInitializationController = new QuadrupedForceBasedJointInitializationController(runtimeEnvironment);
-      QuadrupedController standPrepController = new QuadrupedForceBasedStandPrepController(runtimeEnvironment, controllerToolbox);
-      QuadrupedController standReadyController = new QuadrupedForceBasedStandReadyController(runtimeEnvironment, controllerToolbox);
-      QuadrupedController trotWalkController = new QuadrupedTrotWalkController(physicalProperties, runtimeEnvironment.getFullRobotModel(),
+//      QuadrupedController standPrepController = new QuadrupedForceBasedStandPrepController(runtimeEnvironment, controllerToolbox);
+//      QuadrupedController standReadyController = new QuadrupedForceBasedStandReadyController(runtimeEnvironment, controllerToolbox);
+      QuadrupedController trotWalkController = new QuadrupedVMCForceMultiGaitController(physicalProperties, runtimeEnvironment.getFullRobotModel(),
             runtimeEnvironment.getFootSwitches(), runtimeEnvironment.getControlDT(), runtimeEnvironment.getRobotTimestamp(), registry,
             runtimeEnvironment.getGraphicsListRegistry());
 
@@ -108,13 +106,12 @@ public class QuadrupedForceDevelopmentControllerManager implements QuadrupedCont
             QuadrupedForceDevelopmentControllerState.class, ControllerEvent.class, "forceDevelopmentControllerState", registry);
 
       builder.addState(QuadrupedForceDevelopmentControllerState.JOINT_INITIALIZATION, jointInitializationController);
-      builder.addState(QuadrupedForceDevelopmentControllerState.STAND_PREP, standPrepController);
-      builder.addState(QuadrupedForceDevelopmentControllerState.STAND_READY, standReadyController);
+//      builder.addState(QuadrupedForceDevelopmentControllerState.STAND_PREP, standPrepController);
+//      builder.addState(QuadrupedForceDevelopmentControllerState.STAND_READY, standReadyController);
       builder.addState(QuadrupedForceDevelopmentControllerState.TROT_WALK, trotWalkController);
 
       // Add automatic transitions that lead into the stand state.
-      builder.addTransition(ControllerEvent.DONE, QuadrupedForceDevelopmentControllerState.JOINT_INITIALIZATION,
-            QuadrupedForceDevelopmentControllerState.STAND_PREP);
+      builder.addTransition(ControllerEvent.DONE, QuadrupedForceDevelopmentControllerState.JOINT_INITIALIZATION, QuadrupedForceDevelopmentControllerState.TROT_WALK);
       builder.addTransition(ControllerEvent.DONE, QuadrupedForceDevelopmentControllerState.STAND_PREP, QuadrupedForceDevelopmentControllerState.STAND_READY);
 
       // Manually triggered events to transition to main controllers.
