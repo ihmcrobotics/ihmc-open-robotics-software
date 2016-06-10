@@ -26,8 +26,22 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class MomentumRecoveryControlModule
 {
+   private static final double defaultDistanceToExtendUpcomingFoothold = 0.05;
+   private static final double defaultDistanceToShrinkSafeAreaSS = 0.02;
+   private static final double defaultDistanceToShrinkSafeAreaIfRecoveringSS = 0.05;
+   private static final double defaultDistanceToShrinkSafeAreaDS = 0.01;
+   private static final double defaultDistanceToShrinkSafeAreaIfRecoveringDS = 0.05;
+   private static final double defaultMaxIcpError = 0.015;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final DoubleYoVariable distanceToExtendUpcomingFoothold = new DoubleYoVariable("DistanceToExtendUpcomingFoothold", registry);
+   private final DoubleYoVariable distanceToShrinkSafeAreaSS = new DoubleYoVariable("DistanceToShrinkSafeAreaSS", registry);
+   private final DoubleYoVariable distanceToShrinkSafeAreaIfRecoveringSS = new DoubleYoVariable("DistanceToShrinkSafeAreaIfRecoveringSS", registry);
+   private final DoubleYoVariable distanceToShrinkSafeAreaDS = new DoubleYoVariable("DistanceToShrinkSafeAreaDS", registry);
+   private final DoubleYoVariable distanceToShrinkSafeAreaIfRecoveringDS = new DoubleYoVariable("DistanceToShrinkSafeAreaIfRecoveringDS", registry);
+   private final DoubleYoVariable maxIcpError = new DoubleYoVariable("maxIcpError", registry);
 
    private final BooleanYoVariable usingUpperBodyMomentum = new BooleanYoVariable("usingUpperBodyMomentum", registry);
    private final BooleanYoVariable usingHighMomentumWeight = new BooleanYoVariable("usingHighMomentumWeight", registry);
@@ -46,7 +60,6 @@ public class MomentumRecoveryControlModule
    private final FrameVector2d icpError = new FrameVector2d();
    private RobotSide supportSide;
    private Footstep nextFootstep;
-   private final DoubleYoVariable maxIcpError = new DoubleYoVariable("maxIcpError", registry);
 
    private final ConvexPolygonShrinker polygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
@@ -56,7 +69,13 @@ public class MomentumRecoveryControlModule
    public MomentumRecoveryControlModule(HighLevelHumanoidControllerToolbox momentumBasedController, double maxAllowedDistanceCMPSupport, YoVariableRegistry parentRegistry)
    {
       this.momentumBasedController = momentumBasedController;
-      maxIcpError.set(0.015);
+
+      distanceToExtendUpcomingFoothold.set(defaultDistanceToExtendUpcomingFoothold);
+      distanceToShrinkSafeAreaSS.set(defaultDistanceToShrinkSafeAreaSS);
+      distanceToShrinkSafeAreaIfRecoveringSS.set(defaultDistanceToShrinkSafeAreaIfRecoveringSS);
+      distanceToShrinkSafeAreaDS.set(defaultDistanceToShrinkSafeAreaDS);
+      distanceToShrinkSafeAreaIfRecoveringDS.set(defaultDistanceToShrinkSafeAreaIfRecoveringDS);
+      maxIcpError.set(defaultMaxIcpError);
 
       allowUpperBodyMomentumInSingleSupport.set(false);
       allowUpperBodyMomentumInDoubleSupport.set(false);
@@ -116,10 +135,6 @@ public class MomentumRecoveryControlModule
    private final FrameConvexPolygon2d tempPolygon2 = new FrameConvexPolygon2d();
    private final FramePoint2d capturePoint2d = new FramePoint2d();
 
-   private static final double distanceToExtendUpcomingFoothold = 0.05;
-   private static final double distanceToShrinkSafeArea = 0.02;
-   private static final double distanceToShrinkSafeAreaIfRecovering = 0.05;
-
    private void checkIfUseUpperBodyMomentumSingleSupport()
    {
       FrameConvexPolygon2d support = momentumBasedController.getBipedSupportPolygons().getFootPolygonInSoleFrame(supportSide);
@@ -134,7 +149,7 @@ public class MomentumRecoveryControlModule
          momentumBasedController.getDefaultFootPolygon(nextFootstep.getRobotSide(), tempPolygon1);
          tempPolygon2.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), tempPolygon1.getConvexPolygon2d());
          tempPolygon2.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
-         polygonShrinker.shrinkConstantDistanceInto(tempPolygon2, -distanceToExtendUpcomingFoothold, tempPolygon1);
+         polygonShrinker.shrinkConstantDistanceInto(tempPolygon2, -distanceToExtendUpcomingFoothold.getDoubleValue(), tempPolygon1);
          safeArea.addVertices(tempPolygon1);
          safeArea.update();
       }
@@ -145,12 +160,12 @@ public class MomentumRecoveryControlModule
       // shrink the safe area if we are already using upper body momentum
       if (usingUpperBodyMomentum.getBooleanValue())
       {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaIfRecovering, tempPolygon1);
+         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaIfRecoveringSS.getDoubleValue(), tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
       else
       {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeArea, tempPolygon1);
+         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaSS.getDoubleValue(), tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
 
@@ -185,7 +200,12 @@ public class MomentumRecoveryControlModule
       // shrink the safe area if we are already using upper body momentum
       if (usingUpperBodyMomentum.getBooleanValue())
       {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaIfRecovering, tempPolygon1);
+         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaIfRecoveringDS.getDoubleValue(), tempPolygon1);
+         safeArea.setIncludingFrameAndUpdate(tempPolygon1);
+      }
+      else
+      {
+         polygonShrinker.shrinkConstantDistanceInto(safeArea, distanceToShrinkSafeAreaDS.getDoubleValue(), tempPolygon1);
          safeArea.setIncludingFrameAndUpdate(tempPolygon1);
       }
 
