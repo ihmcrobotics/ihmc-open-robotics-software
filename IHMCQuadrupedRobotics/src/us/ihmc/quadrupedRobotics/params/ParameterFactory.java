@@ -71,7 +71,7 @@ public class ParameterFactory
 
       if (registry != null)
       {
-         BooleanYoVariable variable = new BooleanYoVariable("param__" + parameter.getShortPath(), registry);
+         final BooleanYoVariable variable = new BooleanYoVariable("param__" + parameter.getShortPath(), registry);
          variable.set(parameter.get());
          variable.addVariableChangedListener(new VariableChangedListener()
          {
@@ -79,6 +79,15 @@ public class ParameterFactory
             public void variableChanged(YoVariable<?> v)
             {
                parameter.set(((BooleanYoVariable) v).getBooleanValue());
+            }
+         });
+
+         parameter.addChangeListener(new ParameterChangeListener()
+         {
+            @Override
+            public void onChange(Parameter parameter)
+            {
+               variable.set(((BooleanParameter) parameter).get());
             }
          });
       }
@@ -93,7 +102,7 @@ public class ParameterFactory
 
       if (registry != null)
       {
-         DoubleYoVariable variable = new DoubleYoVariable("param__" + parameter.getShortPath(), registry);
+         final DoubleYoVariable variable = new DoubleYoVariable("param__" + parameter.getShortPath(), registry);
          variable.set(parameter.get());
          variable.addVariableChangedListener(new VariableChangedListener()
          {
@@ -101,6 +110,15 @@ public class ParameterFactory
             public void variableChanged(YoVariable<?> v)
             {
                parameter.set(((DoubleYoVariable) v).getDoubleValue());
+            }
+         });
+
+         parameter.addChangeListener(new ParameterChangeListener()
+         {
+            @Override
+            public void onChange(Parameter parameter)
+            {
+               variable.set(((DoubleParameter) parameter).get());
             }
          });
       }
@@ -119,7 +137,7 @@ public class ParameterFactory
          {
             final int count = i;
 
-            DoubleYoVariable variable = new DoubleYoVariable("param__" + parameter.getShortPath() + count, registry);
+            final DoubleYoVariable variable = new DoubleYoVariable("param__" + parameter.getShortPath() + count, registry);
             variable.set(parameter.get(i));
             variable.addVariableChangedListener(new VariableChangedListener()
             {
@@ -127,6 +145,15 @@ public class ParameterFactory
                public void variableChanged(YoVariable<?> v)
                {
                   parameter.set(count, ((DoubleYoVariable) v).getDoubleValue());
+               }
+            });
+
+            parameter.addChangeListener(new ParameterChangeListener()
+            {
+               @Override
+               public void onChange(Parameter parameter)
+               {
+                  variable.set(((DoubleArrayParameter) parameter).get()[count]);
                }
             });
          }
