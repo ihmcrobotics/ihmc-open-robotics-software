@@ -1,0 +1,18 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="Body">
+<xacro:macro name="create_body">
+ <link name="body">
+  <visual>  
+   <origin xyz="0 0 0"/>
+   <geometry>
+    <box size="0.6 0.2 0.01"/>
+   </geometry>
+  </visual>
+  <inertial>
+   <origin xyz="0.3 0.1 0.1" rpy="0 0 0"/>
+   <mass value="20.0"/>
+    <inertia ixx="1.0" ixy="0.006" ixz="0.003" iyy="2.0" iyz="-0.0006" izz="2.0"/>
+  </inertial>
+ </link>
+
+</xacro:macro>
+</robot>
