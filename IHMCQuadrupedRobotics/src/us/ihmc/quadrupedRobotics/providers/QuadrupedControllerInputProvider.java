@@ -2,12 +2,12 @@ package us.ihmc.quadrupedRobotics.providers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.quadrupedRobotics.communication.packets.*;
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.quadrupedRobotics.packets.*;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;

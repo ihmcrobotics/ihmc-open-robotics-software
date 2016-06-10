@@ -31,6 +31,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStat
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
@@ -179,12 +180,12 @@ public class IHMCHumanoidBehaviorManager
       
       BlobFilteredSphereDetectionBehavior blobFilteredSphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(behaviorCommunicationBridge,
             referenceFrames, fullRobotModel);
-      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.ORANGE_BALL);
-      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.BLUE_BALL);
-      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.RED_BALL);
-      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.YELLOW_BALL);
-      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.GREEN_BALL);
-      blobFilteredSphereDetectionBehavior.addHSVRange(PickUpBallBehavior.SIMULATED_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_ORANGE_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_BLUE_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_RED_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_YELLOW_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_GREEN_BALL);
+      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.SIMULATED_BALL);
       dispatcher.addBehavior(HumanoidBehaviorType.BALL_DETECTION, blobFilteredSphereDetectionBehavior);
       
       dispatcher.addBehavior(HumanoidBehaviorType.TALK_AND_MOVE_HANDS, new TalkAndMoveHandsBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
