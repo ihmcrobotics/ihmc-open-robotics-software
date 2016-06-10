@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterLegendPanel;
+import us.ihmc.plotting.PlotterShowHideMenu;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 
@@ -19,18 +20,22 @@ public class SimulationOverheadPlotter implements PlaybackListener
 {
    private final Plotter plotter = new Plotter();
    private final PlotterLegendPanel legendPanel = plotter.createPlotterLegendPanel();
+   private final PlotterShowHideMenu plotterShowHideMenu;
 
    private JMenuBar menuBar;
    private JCheckBoxMenuItem trackBodyCB;
 
    private DoubleYoVariable xVariableToTrack, yVariableToTrack;
-   
+
    public SimulationOverheadPlotter()
    {
       plotter.setRange(1.0);
       buildMenuBar();
+
+      plotterShowHideMenu = new PlotterShowHideMenu();
+      plotter.addArtifactsChangedListener(plotterShowHideMenu);
    }
-   
+
    public JFrame createAndDisplayJFrame()
    {
       JFrame jFrame = new JFrame("Simulation Overhead Plotter");
@@ -51,25 +56,25 @@ public class SimulationOverheadPlotter implements PlaybackListener
 
       jFrame.pack();
       jFrame.setVisible(true);
-      
+
       return jFrame;
    }
-   
+
    public void setXVariableToTrack(DoubleYoVariable xVariableToTrack)
    {
       this.xVariableToTrack = xVariableToTrack;
    }
-   
+
    public void setYVariableToTrack(DoubleYoVariable yVariableToTrack)
    {
       this.yVariableToTrack = yVariableToTrack;
-   } 
-   
+   }
+
    public void setDrawHistory(boolean drawHistory)
    {
       plotter.setDrawHistory(drawHistory);
    }
-   
+
    private JMenuBar buildMenuBar()
    {
       // Create the menu bar.
@@ -87,7 +92,7 @@ public class SimulationOverheadPlotter implements PlaybackListener
 
       return menuBar;
    }
-   
+
    public JMenuBar getJMenuBar()
    {
       return menuBar;
@@ -97,12 +102,12 @@ public class SimulationOverheadPlotter implements PlaybackListener
    {
       return plotter;
    }
-   
+
    public JPanel getJPanel()
    {
       return plotter;
    }
-   
+
    public JPanel getJPanelWithCheckBoxes()
    {
       JPanel jPanel = new JPanel(new BorderLayout());
@@ -142,5 +147,10 @@ public class SimulationOverheadPlotter implements PlaybackListener
 
    public void stop()
    {
+   }
+
+   public PlotterShowHideMenu getMenuPanel()
+   {
+      return plotterShowHideMenu;
    }
 }
