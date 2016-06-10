@@ -55,7 +55,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
-public class QuadrupedTrotWalkController implements QuadrupedController
+public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 {
    // Constants
    private static final double GRAVITY = 9.81;
@@ -228,7 +228,7 @@ public class QuadrupedTrotWalkController implements QuadrupedController
       gaitCyclePeriodMap.put(QuadrupedGaitCycle.WALKING_TROT, 1.0); // 0.30);
    }
 
-   public QuadrupedTrotWalkController(QuadrupedPhysicalProperties physicalProperties, SDFFullQuadrupedRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
+   public QuadrupedVMCForceMultiGaitController(QuadrupedPhysicalProperties physicalProperties, SDFFullQuadrupedRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
          DoubleYoVariable yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.fullRobotModel = fullRobotModel;
