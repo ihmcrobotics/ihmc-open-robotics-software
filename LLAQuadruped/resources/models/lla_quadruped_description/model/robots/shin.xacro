@@ -1,0 +1,31 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="shin">
+  <!-- if you edit the mass or dimensions please recompute the ineria! -->
+  <xacro:property name="shinMass"  value="0.5" />
+  
+  <xacro:macro name="createShin" params="end side kneePitchXinHipPitchFrame kneePitchZinHipPitchFrame" >
+
+      <joint name="${end}_${side}_knee_pitch" type="revolute">
+        <axis xyz="0 1 0"/>
+        <parent link="${end}_${side}_thigh"/>
+        <child link="${end}_${side}_shin"/>
+        <origin xyz="${kneePitchXinHipPitchFrame} 0 ${kneePitchZinHipPitchFrame}" />
+        <limit effort="1000" velocity="100.0" lower="-3.141592" upper="3.141592" />
+    </joint>
+
+    <link name="${end}_${side}_shin">
+      <visual>
+	<origin xyz="0 0 -0.095"/>
+	<geometry>
+	  <!--box size="0.196 0.1 0.1"/-->
+	  <box size="0.01 0.01 0.19"/>
+	</geometry>
+      </visual>
+      <inertial>
+	  <origin xyz="0.0 0.0 -0.098" rpy="0 0 0" />
+	  <mass value="${shinMass}" />
+	  <inertia ixx="0.005" ixy="-0.000001" ixz="0.0006" iyy="0.005" iyz="-0.000001" izz="0.0005" />
+      </inertial>
+    </link>
+    
+  </xacro:macro>
+</robot>
