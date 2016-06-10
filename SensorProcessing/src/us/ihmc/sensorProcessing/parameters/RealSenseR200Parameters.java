@@ -14,7 +14,7 @@ public class RealSenseR200Parameters implements RGBDCameraParameters
 
    public RealSenseR200Parameters(String topicNamespace, String cameraName)
    {
-      String rosTopic = "/" + topicNamespace + "/rgb/image_rect_color";
+      String rosTopic = "/" + topicNamespace + "/rgb/image_raw";
       String rosCameraInfoTopic = "/" + topicNamespace + "/rgb/camera_info";
       String pointCloudTopic = "/" + topicNamespace + "/depth/points";
 
