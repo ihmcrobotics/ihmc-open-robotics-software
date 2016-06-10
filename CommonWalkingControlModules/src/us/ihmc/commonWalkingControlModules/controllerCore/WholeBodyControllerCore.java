@@ -212,6 +212,11 @@ public class WholeBodyControllerCore
       }
    }
 
+   public ControllerCoreOutput getControllerCoreOutput()
+   {
+      return controllerCoreOutput;
+   }
+
    public ControllerCoreOutputReadOnly getOutputForHighLevelController()
    {
       return controllerCoreOutput;
