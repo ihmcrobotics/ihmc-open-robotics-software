@@ -1,26 +1,26 @@
-package us.ihmc.quadrupedRobotics.packets;
+package us.ihmc.quadrupedRobotics.communication.packets;
 
 import us.ihmc.communication.packets.Packet;
 
 import javax.vecmath.Vector3d;
 
-public class BodyAngularRatePacket extends Packet<BodyAngularRatePacket>
+public class PlanarVelocityPacket extends Packet<PlanarVelocityPacket>
 {
    private final Vector3d velocity;
 
-   public BodyAngularRatePacket()
+   public PlanarVelocityPacket()
    {
       this.velocity = new Vector3d();
    }
 
-   public BodyAngularRatePacket(Vector3d velocity)
+   public PlanarVelocityPacket(Vector3d velocity)
    {
       this.velocity = new Vector3d(velocity);
    }
 
-   public BodyAngularRatePacket(double wx, double wy, double wz)
+   public PlanarVelocityPacket(double vx, double vy, double wz)
    {
-      this.velocity = new Vector3d(wx, wy, wz);
+      this.velocity = new Vector3d(vx, vy, wz);
    }
 
    public void get(Vector3d velocity)
@@ -43,7 +43,7 @@ public class BodyAngularRatePacket extends Packet<BodyAngularRatePacket>
       return velocity.getZ();
    }
 
-   @Override public boolean epsilonEquals(BodyAngularRatePacket other, double epsilon)
+   @Override public boolean epsilonEquals(PlanarVelocityPacket other, double epsilon)
    {
       return this.velocity.epsilonEquals(other.velocity, epsilon);
    }
