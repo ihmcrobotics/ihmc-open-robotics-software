@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.providers;
 
-import us.ihmc.quadrupedRobotics.packets.QuadrupedTimedStepPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
