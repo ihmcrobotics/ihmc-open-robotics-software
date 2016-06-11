@@ -87,7 +87,7 @@ public class ParameterFactory
             @Override
             public void onChange(Parameter parameter)
             {
-               variable.set(((BooleanParameter) parameter).get());
+               variable.set(((BooleanParameter) parameter).get(),false);
             }
          });
       }
@@ -118,7 +118,7 @@ public class ParameterFactory
             @Override
             public void onChange(Parameter parameter)
             {
-               variable.set(((DoubleParameter) parameter).get());
+               variable.set(((DoubleParameter) parameter).get(), false);
             }
          });
       }
@@ -153,7 +153,7 @@ public class ParameterFactory
                @Override
                public void onChange(Parameter parameter)
                {
-                  variable.set(((DoubleArrayParameter) parameter).get()[count]);
+                  variable.set(((DoubleArrayParameter) parameter).get()[count], false);
                }
             });
          }

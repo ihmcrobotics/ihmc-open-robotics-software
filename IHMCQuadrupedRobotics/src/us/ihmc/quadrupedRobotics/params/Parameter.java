@@ -81,9 +81,9 @@ public abstract class Parameter
 
    protected void notifyChangeListeners()
    {
-      for (ParameterChangeListener listener : changeListeners)
+      for(int i = 0; i < changeListeners.size(); i++)
       {
-         listener.onChange(this);
+         changeListeners.get(i).onChange(this);
       }
    }
 }

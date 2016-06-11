@@ -96,6 +96,8 @@ public class QuadrupedForceBasedStandReadyController implements QuadrupedControl
    {
       updateEstimates();
       updateSetpoints();
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
+
       return null;
    }
 
