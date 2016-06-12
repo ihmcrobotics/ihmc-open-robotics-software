@@ -65,7 +65,7 @@ public class QuadrupedModelPredictiveControllerWithLaneChange implements Quadrup
       // u4, u5 are the x and y step adjustment in meters
 
       double copRegularization = 1;
-      double stepAdjustmentRegularization = 100000;
+      double stepAdjustmentRegularization = 1000000;
       double maxPreviewTime = 10;
 
       int rowOffset, columnOffset;

@@ -45,7 +45,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final DoubleArrayParameter comPositionIntegralGainsParameter = parameterFactory.createDoubleArray("comPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter comPositionMaxIntegralErrorParameter = parameterFactory.createDouble("comPositionMaxIntegralError", 0);
    private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDuration", 0.25);
-   private final DoubleParameter footholdDistanceLowerLimitParameter = parameterFactory.createDouble("footholdDistanceLowerLimit", 0.15);
+   private final DoubleParameter minimumStepClearanceParameter = parameterFactory.createDouble("minimumStepClearance", 0.1);
+   private final DoubleParameter maximumStepStrideParameter = parameterFactory.createDouble("maximumStepStride", 0.5);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -81,6 +82,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final FramePoint supportCentroid;
    private EndDependentList<QuadrupedTimedStep> latestSteps;
    private final FrameVector stepAdjustmentVector;
+   private final QuadrupedStepCrossoverProjection stepProjection;
 
 
    public QuadrupedMpcBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
@@ -133,6 +135,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       xGaitSettings = new QuadrupedXGaitSettings();
       supportCentroid = new FramePoint();
       stepAdjustmentVector = new FrameVector();
+      stepProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getFootReferenceFrames(), minimumStepClearanceParameter.get(), maximumStepStrideParameter
+            .get());
       latestSteps = new EndDependentList<>();
       for (RobotEnd robotEnd : RobotEnd.values)
       {
@@ -159,18 +163,6 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private void updateSetpoints()
    {
       double currentTime = robotTimestamp.getDoubleValue();
-
-      // update step plan
-      xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, latestSteps, inputProvider.getPlanarVelocityInput(), currentTime, bodyYawSetpoint, xGaitSettings);
-      timedStepController.removeSteps();
-      for (RobotEnd robotEnd : RobotEnd.values)
-      {
-         timedStepController.addStep(latestSteps.get(robotEnd));
-      }
-      for (int i = 0; i < xGaitPreviewSteps.size(); i++)
-      {
-         timedStepController.addStep(xGaitPreviewSteps.get(i));
-      }
 
       // update desired horizontal com forces
       lipModel.computeComForce(taskSpaceControllerCommands.getComForce(), cmpPositionSetpoint);
@@ -204,17 +196,32 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
 
       // update step plan
-      modelPredictiveController.compute(stepAdjustmentVector, cmpPositionSetpoint, timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), taskSpaceEstimates.getComPosition(),
-            taskSpaceEstimates.getComVelocity(), currentTime);
+      xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, latestSteps, inputProvider.getPlanarVelocityInput(), currentTime, bodyYawSetpoint, xGaitSettings);
+      timedStepController.removeSteps();
       for (RobotEnd robotEnd : RobotEnd.values)
       {
-         latestSteps.get(robotEnd).getGoalPosition().add(stepAdjustmentVector.getVector());
-         groundPlaneEstimator.projectZ(latestSteps.get(robotEnd).getGoalPosition());
+         timedStepController.addStep(latestSteps.get(robotEnd));
       }
+      for (int i = 0; i < xGaitPreviewSteps.size(); i++)
+      {
+         timedStepController.addStep(xGaitPreviewSteps.get(i));
+      }
+      modelPredictiveController.compute(stepAdjustmentVector, cmpPositionSetpoint, timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), taskSpaceEstimates.getComPosition(),
+            taskSpaceEstimates.getComVelocity(), currentTime);
       for (int i = 0; i < timedStepController.getQueue().size(); i++)
       {
          timedStepController.getQueue().get(i).getGoalPosition().add(stepAdjustmentVector.getVector());
          groundPlaneEstimator.projectZ(timedStepController.getQueue().get(i).getGoalPosition());
+      }
+      for (RobotEnd robotEnd : RobotEnd.values)
+      {
+         if (timedStepController.getLatestStep(robotEnd) != null)
+            stepProjection.project(timedStepController.getLatestStep(robotEnd));
+      }
+      for (RobotEnd robotEnd : RobotEnd.values)
+      {
+         if (latestSteps.get(robotEnd).getTimeInterval().getEndTime() > currentTime)
+            latestSteps.get(robotEnd).set(timedStepController.getLatestStep(robotEnd));
       }
    }
 
@@ -227,9 +234,10 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       double strideWidth = Math.abs(2 * inputProvider.getPlanarVelocityInput().getY() * xGaitSettings.getStepDuration());
       strideLength += Math.abs(xGaitSettings.getStanceWidth() / 2 * Math.sin(2 * inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration()));
       strideWidth += Math.abs(xGaitSettings.getStanceLength() / 2 * Math.sin(2 * inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration()));
-      xGaitSettings.setStanceLength(Math.max(xGaitSettings.getStanceLength(), strideLength / 2 + footholdDistanceLowerLimitParameter.get()));
-      xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth / 2 + footholdDistanceLowerLimitParameter.get()));
+      xGaitSettings.setStanceLength(Math.max(xGaitSettings.getStanceLength(), strideLength / 2 + minimumStepClearanceParameter.get()));
+      xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth / 2 + minimumStepClearanceParameter.get()));
    }
+
 
    @Override public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
    {
