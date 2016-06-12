@@ -14,6 +14,7 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
@@ -67,6 +68,7 @@ public class LLAQuadrupedSimulationFactory
    private DRCKinematicsBasedStateEstimator stateEstimator;
    private DRCPoseCommunicator poseCommunicator;
    private LLAQuadrupedStandPrepParameters standPrepParameters;
+   private LLAQuadrupedGroundContactParameters groundContactParameters;
    private Point3d initialCoMPosition;
    private SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
    private LLAQuadrupedNetClassList netClassList;
@@ -115,6 +117,7 @@ public class LLAQuadrupedSimulationFactory
       physicalProperties = new LLAQuadrupedPhysicalProperties();
       standPrepParameters = new LLAQuadrupedStandPrepParameters();
       initialCoMPosition = new Point3d();
+      groundContactParameters = new LLAQuadrupedGroundContactParameters();
    }
    
    private void createSecondStage()
@@ -156,10 +159,10 @@ public class LLAQuadrupedSimulationFactory
       sdfQuadrupedPerfectSimulatedSensor = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot, fullRobotModel, referenceFrames);
       
       groundContactModel = new LinearGroundContactModel(sdfRobot, robotsYoVariableRegistry);
-      groundContactModel.setZStiffness(1000.0);
-      groundContactModel.setZDamping(400.0);
-      groundContactModel.setXYStiffness(4000.0);
-      groundContactModel.setXYDamping(500.0);
+      groundContactModel.setZStiffness(groundContactParameters.getZStiffness());
+      groundContactModel.setZDamping(groundContactParameters.getZDamping());
+      groundContactModel.setXYStiffness(groundContactParameters.getXYStiffness());
+      groundContactModel.setXYDamping(groundContactParameters.getXYDamping());
       groundContactModel.setGroundProfile3D(groundProfile3D);
    }
    
