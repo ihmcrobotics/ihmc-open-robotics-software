@@ -123,6 +123,16 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       taskSpaceController.reset();
    }
 
+   private void computeFinalSolePosition(RobotQuadrant quadrant, FramePoint finalSolePosition)
+   {
+      finalSolePosition.setToZero(referenceFrames.getBodyFrame());
+   
+      finalSolePosition.add(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.get() / 2.0), 0.0, 0.0);
+      finalSolePosition.add(0.0, quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
+   
+      finalSolePosition.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(), -stanceHeightParameter.get());
+   }
+
    @Override
    public ControllerEvent process()
    {
@@ -130,11 +140,6 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       updateSetpoints();
 
       return isMotionExpired() ? ControllerEvent.DONE : null;
-   }
-
-   @Override
-   public void onExit()
-   {
    }
 
    private void updateEstimates()
@@ -159,19 +164,14 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 
-   private void computeFinalSolePosition(RobotQuadrant quadrant, FramePoint finalSolePosition)
-   {
-      finalSolePosition.setToZero(referenceFrames.getBodyFrame());
-
-      finalSolePosition.add(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.get() / 2.0), 0.0, 0.0);
-      finalSolePosition.add(0.0, quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
-
-      finalSolePosition.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(), -stanceHeightParameter.get());
-   }
-
    private boolean isMotionExpired()
    {
       double currentTime = robotTime.getDoubleValue();
       return currentTime > trajectoryTimeInterval.getEndTime();
+   }
+
+   @Override
+   public void onExit()
+   {
    }
 }
