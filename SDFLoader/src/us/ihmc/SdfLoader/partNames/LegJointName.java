@@ -31,6 +31,8 @@ public enum LegJointName
 // HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL;
 
    FUTURE_EXPANSION_TEST1, HIP_PITCH, HIP_ROLL, FUTURE_EXPANSION_TEST2, HIP_YAW, KNEE, ANKLE_ROLL, ANKLE_PITCH, FUTURE_EXPANSION_TEST3;
+   
+   public static final LegJointName[] values = values();
 
    public String getShortUnderBarName()
    {
@@ -120,7 +122,7 @@ public enum LegJointName
       }
    }
 
-
+   @Override
    public String toString()
    {
       return getCamelCaseNameForMiddleOfExpression();

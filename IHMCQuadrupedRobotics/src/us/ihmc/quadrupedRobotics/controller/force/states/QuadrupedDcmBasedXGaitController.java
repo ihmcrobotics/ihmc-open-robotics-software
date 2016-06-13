@@ -48,7 +48,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
    // parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 2);
    private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory.createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
    private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory.createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);
    private final DoubleArrayParameter bodyOrientationIntegralGainsParameter = parameterFactory.createDoubleArray("bodyOrientationIntegralGains", 0, 0, 0);
@@ -61,6 +60,9 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
    private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
    private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
+   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 2);
+   private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
+   private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
    private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDuration", 1.00);
    private final DoubleParameter footholdDistanceLowerLimitParameter = parameterFactory.createDouble("footholdDistanceLowerLimit", 0.15);
 
@@ -174,6 +176,22 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       return registry;
    }
 
+   private void updateGains()
+   {
+      dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
+      dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
+      dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
+      comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
+      comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
+      comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
+      bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
+      bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
+      bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
+   }
+
    private void updateEstimates()
    {
       // update task space estimates
@@ -242,6 +260,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
 
    @Override public ControllerEvent process()
    {
+      updateGains();
       updateSettings();
       updateEstimates();
       updateSetpoints();
@@ -257,19 +276,10 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController
       // initialize feedback controllers
       dcmPositionControllerSetpoints.initialize(dcmPositionEstimate);
       dcmPositionController.reset();
-      dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
-      dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
-      dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
       comPositionControllerSetpoints.initialize(taskSpaceEstimates);
       comPositionController.reset();
-      comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
-      comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
-      comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
       bodyOrientationControllerSetpoints.initialize(taskSpaceEstimates);
       bodyOrientationController.reset();
-      bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
-      bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
-      bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
       timedStepController.reset();
 
       // initialize task space controller

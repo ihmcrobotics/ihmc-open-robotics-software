@@ -33,7 +33,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -111,7 +110,6 @@ public class HighLevelHumanoidControllerToolbox
    private final SideDependentList<ForceSensorDataReadOnly> wristForceSensors;
    private final DoubleYoVariable alphaCoPControl = new DoubleYoVariable("alphaCoPControl", registry);
    private final DoubleYoVariable maxAnkleTorqueCoPControl = new DoubleYoVariable("maxAnkleTorqueCoPControl", registry);
-   private final SideDependentList<AlphaFilteredYoFrameVector2d> desiredTorquesForCoPControl;
 
    private final SideDependentList<Double> xSignsForCoPControl, ySignsForCoPControl;
    private final double minZForceForCoPControlScaling;
@@ -240,7 +238,6 @@ public class HighLevelHumanoidControllerToolbox
          addUpdatable(contactPointVisualizer);
       }
 
-      desiredTorquesForCoPControl = new SideDependentList<AlphaFilteredYoFrameVector2d>();
       yoCoPError = new SideDependentList<YoFrameVector2d>();
       xSignsForCoPControl = new SideDependentList<Double>();
       ySignsForCoPControl = new SideDependentList<Double>();
@@ -282,10 +279,6 @@ public class HighLevelHumanoidControllerToolbox
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         desiredTorquesForCoPControl.put(robotSide,
-               AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d(
-                     "desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "AnkleTorqueForCoPControl", "", registry, alphaCoPControl,
-                     feet.get(robotSide).getSoleFrame()));
          yoCoPError.put(robotSide,
                new YoFrameVector2d(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getSoleFrame(), registry));
 

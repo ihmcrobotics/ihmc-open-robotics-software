@@ -14,12 +14,14 @@ public class ArtifactList
    {
       // TODO: should a defensive copy be made of artifacts?
       this.label = label;
+      updateLabels(artifacts);
       this.artifacts = artifacts;
    }
 
    public ArtifactList(String label, Artifact[] artifactArray)
    {
       this.label = label;
+      updateLabels(artifacts);
 
       ArrayList<Artifact> artifacts = new ArrayList<Artifact>(artifactArray.length);
 
@@ -34,6 +36,7 @@ public class ArtifactList
    public ArtifactList(String label, Artifact artifact)
    {
       this.label = label;
+      updateLabel(artifact);
 
       ArrayList<Artifact> artifacts = new ArrayList<Artifact>(1);
 
@@ -48,6 +51,19 @@ public class ArtifactList
       this.artifacts = new ArrayList<Artifact>();
    }
 
+   private void updateLabels(ArrayList<Artifact> artifacts)
+   {
+      for (Artifact artifact : artifacts)
+      {
+         updateLabel(artifact);
+      }
+   }
+
+   private void updateLabel(Artifact artifact)
+   {
+      artifact.setLabel(label);
+   }
+
    public String getLabel()
    {
       return label;
@@ -60,11 +76,13 @@ public class ArtifactList
 
    public void add(Artifact artifact)
    {
+      updateLabel(artifact);
       this.artifacts.add(artifact);
    }
 
    public void addAll(ArrayList<Artifact> artifacts)
    {
+      updateLabels(artifacts);
       this.artifacts.addAll(artifacts);
    }
 
