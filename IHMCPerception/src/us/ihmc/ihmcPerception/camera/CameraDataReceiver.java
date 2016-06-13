@@ -14,9 +14,9 @@ import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoDataServer;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
@@ -112,7 +112,7 @@ public class CameraDataReceiver extends Thread
                   stereoListeners.get(i).newImageAvailable(data, cameraFrame.getTransformToWorldFrame());
                }
                
-               compressedVideoDataServer.updateImage(data.robotSide, data.image, robotTimestamp, cameraPosition, cameraOrientation, data.intrinsicParameters);
+               compressedVideoDataServer.updateImage(data.videoSource, data.image, robotTimestamp, cameraPosition, cameraOrientation, data.intrinsicParameters);
                readWriteLock.writeLock().unlock();
             }
          }
@@ -128,9 +128,9 @@ public class CameraDataReceiver extends Thread
       this.useTimestamps = useTimestamps;
    }
    
-   public void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
+   public void updateImage(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
    {
-      dataQueue.offer(new CameraData(robotSide, bufferedImage, timeStamp, intrinsicParameters));
+      dataQueue.offer(new CameraData(videoSource, bufferedImage, timeStamp, intrinsicParameters));
    }
 
    public void registerCameraListener(DRCStereoListener drcStereoListener)

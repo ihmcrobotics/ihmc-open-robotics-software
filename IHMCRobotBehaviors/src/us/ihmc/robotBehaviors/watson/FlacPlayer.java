@@ -98,7 +98,7 @@ public class FlacPlayer implements PCMProcessor
          // skip
       }
 
-      line.drain();
+//      line.drain();
       line.close();
 
       //  We're going to clear out the list of listeners as well, so that everytime through

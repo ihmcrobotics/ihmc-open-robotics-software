@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 public class ControllerCoreCommand implements ControllerCoreCommandInterface
 {
    private final InverseDynamicsCommandList inverseDynamicsCommandList;
+   private final InverseDynamicsCommandList virtualModelControlCommandList;
    private final FeedbackControlCommandList feedbackControlCommandList;
    private final InverseKinematicsCommandList inverseKinematicsCommandList;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
@@ -23,6 +24,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       this.controllerCoreMode = controllerCoreMode;
 
       inverseDynamicsCommandList = new InverseDynamicsCommandList();
+      virtualModelControlCommandList = new InverseDynamicsCommandList();
       feedbackControlCommandList = new FeedbackControlCommandList();
       inverseKinematicsCommandList = new InverseKinematicsCommandList();
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
@@ -40,6 +42,12 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    {
       if (inverseDynamicsCommand != null)
          inverseDynamicsCommandList.addCommand(inverseDynamicsCommand);
+   }
+
+   public void addVirtualModelControlCommand(InverseDynamicsCommand<?> inverseDynamicsCommand)
+   {
+      if (inverseDynamicsCommand != null)
+         virtualModelControlCommandList.addCommand(inverseDynamicsCommand);
    }
 
    public void addFeedbackControlCommand(FeedbackControlCommand<?> feedbackControlCommand)
@@ -60,10 +68,25 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
          lowLevelOneDoFJointDesiredDataHolder.completeWith(lowLevelJointData);
    }
 
+   public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
+   {
+      if (this.controllerCoreMode != controllerCoreMode)
+      {
+         clear();
+         this.controllerCoreMode = controllerCoreMode;
+      }
+   }
+
    @Override
    public InverseDynamicsCommandList getInverseDynamicsCommandList()
    {
       return inverseDynamicsCommandList;
+   }
+
+   @Override
+   public InverseDynamicsCommandList getVirtualModelControlCommandList()
+   {
+      return virtualModelControlCommandList;
    }
 
    @Override

@@ -11,7 +11,7 @@ public class TwoWaypointTrajectoryGeneratorParameters
    private static final double maxHorizontalOffsetForWaypoints = 0.04;
 
    // Specific to push recovery
-   private static final double[] PUSH_RECOVERY_GROUND_CLEARANCES = new double[] {0.04, 0.06};
+   private static final double[] PUSH_RECOVERY_GROUND_CLEARANCES = new double[] {0.05, 0.06};
    private static final double[] PUSH_RECOVERY_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE = new double[] {0.05, 1.0 - 0.15};
 
    public TwoWaypointTrajectoryGeneratorParameters()

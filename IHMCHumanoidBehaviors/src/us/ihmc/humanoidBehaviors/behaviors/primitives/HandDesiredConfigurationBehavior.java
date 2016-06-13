@@ -20,8 +20,8 @@ public class HandDesiredConfigurationBehavior extends BehaviorInterface
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime; // hardcoded, to be determined
    private final BooleanYoVariable trajectoryTimeElapsed;
-   
-   private final boolean DEBUG = false;
+
+   private final boolean DEBUG = true;
 
    public HandDesiredConfigurationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridgeInterface, DoubleYoVariable yoTime)
    {
@@ -43,7 +43,7 @@ public class HandDesiredConfigurationBehavior extends BehaviorInterface
    {
       this.outgoingHandDesiredConfigurationMessage = handDesiredConfigurationMessage;
       hasInputBeenSet.set(true);
-      
+
       if (DEBUG)
          PrintTools.debug(this, "Input has been set: " + outgoingHandDesiredConfigurationMessage);
    }
@@ -59,13 +59,15 @@ public class HandDesiredConfigurationBehavior extends BehaviorInterface
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
-         outgoingHandDesiredConfigurationMessage.setDestination(PacketDestination.CONTROLLER);
 
-         sendPacketToController(outgoingHandDesiredConfigurationMessage);
+//         sendPacketToController(outgoingHandDesiredConfigurationMessage);
+         
+         outgoingHandDesiredConfigurationMessage.setDestination(PacketDestination.BROADCAST);
+         
          sendPacketToNetworkProcessor(outgoingHandDesiredConfigurationMessage);
          hasPacketBeenSet.set(true);
          startTime.set(yoTime.getDoubleValue());
-         
+
          if (DEBUG)
             PrintTools.debug(this, "Sending HandDesiredConfigurationMessage to Controller: " + outgoingHandDesiredConfigurationMessage);
       }
@@ -110,7 +112,7 @@ public class HandDesiredConfigurationBehavior extends BehaviorInterface
          sendPacketToNetworkProcessor(stopMessage);
       }
       isPaused.set(true);
-      
+
       if (DEBUG)
          PrintTools.debug(this, "Pausing Behavior");
    }
@@ -148,11 +150,11 @@ public class HandDesiredConfigurationBehavior extends BehaviorInterface
       }
       hasInputBeenSet.set(false);
       hasPacketBeenSet.set(false);
-      
+
       isPaused.set(false);
       isStopped.set(false);
       trajectoryTime.set(1.0); //TODO hardCoded to be determined
-      
+
       trajectoryTimeElapsed.set(false);
    }
 

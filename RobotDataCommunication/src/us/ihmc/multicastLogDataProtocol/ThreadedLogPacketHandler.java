@@ -2,6 +2,7 @@ package us.ihmc.multicastLogDataProtocol;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -9,6 +10,7 @@ import us.ihmc.robotDataCommunication.LogDataHeader;
 
 public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
 {
+   private static final AtomicInteger threadNumber = new AtomicInteger(1);
    private final LogPacketHandler handler;
    private final ArrayBlockingQueue<ImmutablePair<LogDataHeader, ByteBuffer>> dataBuffer;
    
@@ -16,6 +18,8 @@ public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
    
    public ThreadedLogPacketHandler(LogPacketHandler handler, int capacity)
    {
+      super(ThreadedLogPacketHandler.class.getSimpleName() + "-" + threadNumber.getAndIncrement());
+      
       this.handler = handler;
       this.dataBuffer = new ArrayBlockingQueue<>(capacity);
    }
@@ -43,7 +47,6 @@ public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
       stopped = true;
       interrupt();
    }
-   
 
    @Override
    public void timestampReceived(long timestamp)
@@ -63,5 +66,4 @@ public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
    {
       handler.timeout();
    }
-   
 }

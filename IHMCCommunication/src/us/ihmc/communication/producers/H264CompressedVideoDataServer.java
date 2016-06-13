@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.codecs.generated.EUsageType;
 import us.ihmc.codecs.generated.FilterModeEnum;
 import us.ihmc.codecs.generated.RC_MODES;
@@ -17,9 +18,7 @@ import us.ihmc.codecs.h264.OpenH264Encoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.TimeTools;
-import boofcv.struct.calib.IntrinsicParameters;
 
 public class H264CompressedVideoDataServer implements NetStateListener, CompressedVideoDataServer
 {
@@ -66,7 +65,7 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
    }
 
    @Override
-   public synchronized void updateImage(RobotSide robotSide, BufferedImage bufferedImage, final long timeStamp, final Point3d cameraPosition, final Quat4d cameraOrientation,
+   public synchronized void updateImage(VideoSource videoSource, BufferedImage bufferedImage, final long timeStamp, final Point3d cameraPosition, final Quat4d cameraOrientation,
          IntrinsicParameters intrinsicParameters)
    {
       if (!handler.isConnected() || !videoEnabled)
@@ -134,7 +133,7 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
             ByteBuffer nal = encoder.getNAL();
             byte[] data = new byte[nal.remaining()];
             nal.get(data);
-            handler.newVideoPacketAvailable(robotSide, timeStamp, data, cameraPosition, cameraOrientation, intrinsicParameters);
+            handler.newVideoPacketAvailable(videoSource, timeStamp, data, cameraPosition, cameraOrientation, intrinsicParameters);
          }
       }
       catch (IOException e)

@@ -12,6 +12,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
 {
    private static final double epsilon = 1e-7;
 
+   @Override
    public GroundProfile3D getGroundProfile()
    {
       double[][] xSlopePairs = new double[][]{{-5.0, 1.0}, {0.0, -1.0}, {5.0, 1.0}};
@@ -19,22 +20,33 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       return groundProfile;
    }
    
+   @Override
    public double getMaxPercentageOfAllowableValleyPoints()
    {
       return 0.05;
    }
 
+   @Override
    public double getMaxPercentageOfAllowablePeakPoints()
    {
       return 0.05;
    }
    
+   @Override
    public double getMaxPercentageOfAllowableDropOffs()
    {
       return 0.0;
    }
+   
+   @Override
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout=300000)
+   public void testSurfaceNormalGridForSmoothTerrainUsingHeightMap()
+   {
+      super.testSurfaceNormalGridForSmoothTerrainUsingHeightMap();
+   }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testAllFlat()
    {
@@ -51,7 +63,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(0.0, height, epsilon);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testOne()
    {
@@ -87,7 +99,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(0.0, height, epsilon);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testTwo()
    {
@@ -111,7 +123,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(1.0, height, epsilon);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testThree()
    {
@@ -140,7 +152,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(1.0, height, epsilon);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testFour()
    {
@@ -171,7 +183,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(1.0, height, epsilon);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(expected = RuntimeException.class,timeout=300000)
    public void testBadOrderingOne()
    {
@@ -179,12 +191,11 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       new AlternatingSlopesGroundProfile(xSlopePairs);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(expected = RuntimeException.class, timeout=300000)
    public void testBadOrderingTwo()
    {
       double[][] xSlopePairs = new double[][]{{0.0, -1.0}, {1.0, 1.0}, {3.5, 1.0}, {3.0, 1.0}, {4.0, 1.0}};
       new AlternatingSlopesGroundProfile(xSlopePairs);
    }
-
 }

@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="llaQuadruped">
+  <xacro:property name="frontHipRollXInBodyFrame" value="-0.04" />
+  <xacro:property name="hindHipRollXInBodyFrame"  value="0.04" />
+  
+  <xacro:property name="hipRollYInBodyFrame" value="0.206" />
+  <xacro:property name="hipRollZInBodyFrame" value="0.0" />
+  
+  <xacro:property name="hipPitchXInHipRollFrame" value="0.196" />
+  <xacro:property name="hipPitchYinHipRollFrame" value="0.064" />
+  <xacro:property name="hipPitchZInHipRollFrame" value="0.0" />
+  
+  <xacro:property name="kneePitchXinHipPitchFrame" value="0.0" />
+  <xacro:property name="kneePitchZinHipPitchFrame" value="-0.196" />
+
+  <xacro:property name="frontShinLength" value="0.196" />
+  <xacro:property name="rearShinLength" value="0.196" />
+  
+  <xacro:include filename="body.xacro" />
+  <xacro:include filename="leg.xacro" />
+
+  <xacro:create_body/>
+  
+  <!-- Front Left Leg -->
+  <xacro:createLeg 
+    end="front" 
+    side="left" 
+    reflectEnd="-1"
+    reflectSide="1"  
+    parentLinkName="body" 
+    hipRollXInBodyFrame="${frontHipRollXInBodyFrame}"
+    hipRollYInBodyFrame="${hipRollYInBodyFrame}"
+    hipRollZInBodyFrame="${hipRollZInBodyFrame}"
+    hipGraphicYaw="0"
+    hipPitchXInHipRollFrame="${hipPitchXInHipRollFrame}"
+    hipPitchYinHipRollFrame="${hipPitchYinHipRollFrame}"
+    hipPitchZInHipRollFrame="${hipPitchZInHipRollFrame}"
+    kneePitchXinHipPitchFrame="${kneePitchXinHipPitchFrame}"
+    kneePitchZinHipPitchFrame="${kneePitchZinHipPitchFrame}"
+    />  
+    
+  <!-- Front Right Leg -->
+  <xacro:createLeg 
+    end="front" 
+    side="right" 
+    reflectEnd="-1"
+    reflectSide="-1"   
+    parentLinkName="body" 
+    hipRollXInBodyFrame="${frontHipRollXInBodyFrame}"
+    hipRollYInBodyFrame="-${hipRollYInBodyFrame}"
+    hipRollZInBodyFrame="${hipRollZInBodyFrame}"
+    hipGraphicYaw="0"
+    hipPitchXInHipRollFrame="${hipPitchXInHipRollFrame}"
+    hipPitchYinHipRollFrame="${hipPitchYinHipRollFrame}"
+    hipPitchZInHipRollFrame="${hipPitchZInHipRollFrame}"
+    kneePitchXinHipPitchFrame="${kneePitchXinHipPitchFrame}"
+    kneePitchZinHipPitchFrame="${kneePitchZinHipPitchFrame}"
+    />
+
+  <!-- Hind Left Leg -->
+  <xacro:createLeg 
+    end="hind" 
+    side="left" 
+    reflectEnd="1"
+    reflectSide="1"  
+    parentLinkName="body" 
+    hipRollXInBodyFrame="${hindHipRollXInBodyFrame}"
+    hipRollYInBodyFrame="${hipRollYInBodyFrame}"
+    hipRollZInBodyFrame="${hipRollZInBodyFrame}"
+    hipGraphicYaw="3.141592"
+    hipPitchXInHipRollFrame="${hipPitchXInHipRollFrame}"
+    hipPitchYinHipRollFrame="${hipPitchYinHipRollFrame}"
+    hipPitchZInHipRollFrame="${hipPitchZInHipRollFrame}"
+    kneePitchXinHipPitchFrame="${kneePitchXinHipPitchFrame}"
+    kneePitchZinHipPitchFrame="${kneePitchZinHipPitchFrame}"
+    /> 
+
+  <!-- Hind Right Leg -->
+  <xacro:createLeg 
+    end="hind" 
+    side="right" 
+    reflectEnd="1"
+    reflectSide="-1"  
+    parentLinkName="body" 
+    hipRollXInBodyFrame="${hindHipRollXInBodyFrame}"
+    hipRollYInBodyFrame="-${hipRollYInBodyFrame}"
+    hipRollZInBodyFrame="${hipRollZInBodyFrame}"
+    hipGraphicYaw="3.141592"
+    hipPitchXInHipRollFrame="${hipPitchXInHipRollFrame}"
+    hipPitchYinHipRollFrame="${hipPitchYinHipRollFrame}"
+    hipPitchZInHipRollFrame="${hipPitchZInHipRollFrame}"
+    kneePitchXinHipPitchFrame="${kneePitchXinHipPitchFrame}"
+    kneePitchZinHipPitchFrame="${kneePitchZinHipPitchFrame}"
+    />
+
+</robot>
