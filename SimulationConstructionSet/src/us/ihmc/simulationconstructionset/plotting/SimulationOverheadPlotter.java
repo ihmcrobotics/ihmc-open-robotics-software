@@ -32,7 +32,7 @@ public class SimulationOverheadPlotter implements PlaybackListener
       plotter.setRange(1.0);
       buildMenuBar();
 
-      plotterShowHideMenu = new PlotterShowHideMenu();
+      plotterShowHideMenu = new PlotterShowHideMenu(plotter);
       plotter.addArtifactsChangedListener(plotterShowHideMenu);
    }
 
