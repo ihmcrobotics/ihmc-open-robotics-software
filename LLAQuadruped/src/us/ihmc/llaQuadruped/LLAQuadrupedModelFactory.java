@@ -40,6 +40,11 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory implements S
       }
    }
    
+   public LLAQuadrupedJointNameMap getJointNameMap()
+   {
+      return jointMap;
+   }
+   
    @Override
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
    {
