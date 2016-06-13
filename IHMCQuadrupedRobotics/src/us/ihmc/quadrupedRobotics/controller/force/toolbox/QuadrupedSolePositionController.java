@@ -82,6 +82,16 @@ public class QuadrupedSolePositionController
       }
    }
 
+   public QuadrantDependentList<ReferenceFrame> getReferenceFrame()
+   {
+      return soleFrame;
+   }
+
+   public ReferenceFrame getReferenceFrame(RobotQuadrant robotQuadrant)
+   {
+      return soleFrame.get(robotQuadrant);
+   }
+
    public QuadrantDependentList<YoEuclideanPositionGains> getGains()
    {
       return solePositionControllerGains;

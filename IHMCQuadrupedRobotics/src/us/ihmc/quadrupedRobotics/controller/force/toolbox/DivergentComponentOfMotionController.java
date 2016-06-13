@@ -82,6 +82,11 @@ public class DivergentComponentOfMotionController
       graphicsListRegistry.registerArtifactList(artifactList);
    }
 
+   public ReferenceFrame getReferenceFrame()
+   {
+      return comZUpFrame;
+   }
+
    public LinearInvertedPendulumModel getLinearInvertedPendulumModel()
    {
       return lipModel;

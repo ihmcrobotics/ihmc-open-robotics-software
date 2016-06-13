@@ -58,6 +58,11 @@ public class QuadrupedBodyOrientationController
       yoComTorqueFeedforwardSetpoint = new YoFrameVector("comTorqueFeedforwardSetpoint", ReferenceFrame.getWorldFrame(), registry);
    }
 
+   public ReferenceFrame getReferenceFrame()
+   {
+      return bodyFrame;
+   }
+
    public YoAxisAngleOrientationGains getGains()
    {
       return bodyOrientationControllerGains;

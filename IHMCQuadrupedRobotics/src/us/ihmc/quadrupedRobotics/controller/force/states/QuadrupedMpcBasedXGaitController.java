@@ -45,8 +45,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final DoubleArrayParameter comPositionIntegralGainsParameter = parameterFactory.createDoubleArray("comPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter comPositionMaxIntegralErrorParameter = parameterFactory.createDouble("comPositionMaxIntegralError", 0);
    private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDuration", 0.25);
-   private final DoubleParameter minimumStepClearanceParameter = parameterFactory.createDouble("minimumStepClearance", 0.1);
-   private final DoubleParameter maximumStepStrideParameter = parameterFactory.createDouble("maximumStepStride", 0.5);
+   private final DoubleParameter minimumStepClearanceParameter = parameterFactory.createDouble("minimumStepClearance", 0.075);
+   private final DoubleParameter maximumStepStrideParameter = parameterFactory.createDouble("maximumStepStride", 1.0);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -82,7 +82,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final FramePoint supportCentroid;
    private EndDependentList<QuadrupedTimedStep> latestSteps;
    private final FrameVector stepAdjustmentVector;
-   private final QuadrupedStepCrossoverProjection stepProjection;
+   private final QuadrupedStepCrossoverProjection crossoverProjection;
 
 
    public QuadrupedMpcBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
@@ -135,8 +135,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       xGaitSettings = new QuadrupedXGaitSettings();
       supportCentroid = new FramePoint();
       stepAdjustmentVector = new FrameVector();
-      stepProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getFootReferenceFrames(), minimumStepClearanceParameter.get(), maximumStepStrideParameter
-            .get());
+      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getFootReferenceFrames(), minimumStepClearanceParameter.get(), maximumStepStrideParameter.get());
       latestSteps = new EndDependentList<>();
       for (RobotEnd robotEnd : RobotEnd.values)
       {
@@ -216,7 +215,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       for (RobotEnd robotEnd : RobotEnd.values)
       {
          if (timedStepController.getLatestStep(robotEnd) != null)
-            stepProjection.project(timedStepController.getLatestStep(robotEnd));
+            crossoverProjection.project(timedStepController.getLatestStep(robotEnd));
       }
       for (RobotEnd robotEnd : RobotEnd.values)
       {
