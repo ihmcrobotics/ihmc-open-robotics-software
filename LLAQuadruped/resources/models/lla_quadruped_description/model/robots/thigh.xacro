@@ -1,0 +1,33 @@
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="thigh">
+  <!-- if you edit the mass or dimensions please recompute the ineria! -->
+  <xacro:property name="thighMass"  value="2.0" />
+  
+  <xacro:macro name="createThigh" params="end side reflectSide reflectEnd hipPitchXInHipRollFrame hipPitchYinHipRollFrame hipPitchZInHipRollFrame" >
+      
+    <joint name="${end}_${side}_hip_pitch" type="revolute">
+      <axis xyz="0 1 0"/>
+      <parent link="${end}_${side}_hip"/>
+      <child link="${end}_${side}_thigh"/>
+      <origin xyz="${hipPitchXInHipRollFrame * reflectEnd} ${hipPitchYinHipRollFrame * reflectSide} ${hipPitchZInHipRollFrame}" />
+      <limit effort="1000" velocity="100.0" lower="-3.141592" upper="3.141592" />
+    </joint>
+
+    <link name="${end}_${side}_thigh">
+      <visual>
+	<origin xyz="0 0 0"/>
+	<material name="blue">
+           <color rgba="0 0 .8 1"/>
+        </material>
+	<geometry>
+	   <mesh filename="package://lla_quadruped_description/model/meshes/lla_5A0-binary.stl"/>
+	   <!--box size="0.196 0.1 0.1"/-->
+	</geometry>
+      </visual>
+      <inertial>
+	<origin xyz="0.098 0.0 0.0" />
+	<mass value="${thighMass}" />
+	<inertia ixx="0.006" ixy="-0.00004" ixz="0.004" iyy="0.025" iyz="-0.000004" izz="0.02" />
+      </inertial>
+    </link>
+  </xacro:macro>
+</robot>

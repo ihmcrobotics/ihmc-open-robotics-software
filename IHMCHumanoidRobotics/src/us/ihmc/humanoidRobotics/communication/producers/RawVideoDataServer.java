@@ -8,32 +8,33 @@ import javax.vecmath.Quat4d;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.producers.VideoDataServer;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RawVideoDataServer implements VideoDataServer
 {
-   private final ObjectCommunicator objectCommunicator;
+   protected final ObjectCommunicator objectCommunicator;
    
    public RawVideoDataServer(ObjectCommunicator objectCommunicator)
    {
       this.objectCommunicator = objectCommunicator;
    }
    
-   public void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParameters)
+   @Override
+   public void updateImage(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParameters)
    {
-      
       LocalVideoPacket videoPacket = new LocalVideoPacket(timeStamp, bufferedImage, intrinsicParameters);
       objectCommunicator.consumeObject(videoPacket);
    }
 
+   @Override
    public void close()
    {
    }
 
+   @Override
    public boolean isConnected()
    {
       return objectCommunicator.isConnected();
    }
-
 }

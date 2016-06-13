@@ -4,6 +4,7 @@ import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -29,12 +30,13 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
 //      CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
    }
 
+   @Override
    public void consumeObject(LocalVideoPacket object)
    {
       if (DEBUG)
       {
          System.out.println(getClass().getName() + ": received local video packet!");
       }
-      updateImage(robotSide, object.getImage(), object.getTimeStamp(), object.getIntrinsicParameters());
+      updateImage(VideoSource.getMultisenseSourceFromRobotSide(robotSide), object.getImage(), object.getTimeStamp(), object.getIntrinsicParameters());
    }
 }

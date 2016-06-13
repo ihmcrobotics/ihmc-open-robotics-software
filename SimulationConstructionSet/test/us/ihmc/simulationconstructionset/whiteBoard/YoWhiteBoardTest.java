@@ -118,8 +118,8 @@ public class YoWhiteBoardTest
       if (VERBOSE)
          System.out.println("Time per test = " + timePerTest);
 
-      leftWhiteBoard.close();
-      rightWhiteBoard.close();
+      leftWhiteBoard.closeYoWhiteBoard();
+      rightWhiteBoard.closeYoWhiteBoard();
    }
 
 
@@ -205,8 +205,8 @@ public class YoWhiteBoardTest
       if (VERBOSE)
          System.out.println("Time per test = " + timePerTest);
 
-      leftWhiteBoard.close();
-      rightWhiteBoard.close();
+      leftWhiteBoard.closeYoWhiteBoard();
+      rightWhiteBoard.closeYoWhiteBoard();
    }
 
    private void sleep(long sleepMillis)
@@ -310,29 +310,30 @@ public class YoWhiteBoardTest
          super("DoNothing", new YoVariableRegistry("DoNothingWhiteBoard"));
       }
       
+      @Override
       public void whiteBoardSpecificWriteData(double[] doubleVariablesToWriteBuffer, int[] intVariablesToWriteBuffer, boolean[] booleanVariablesToWriteBuffer,
               int[] enumVariablesToWriteBuffer, int writeIndex)
               throws IOException
       {
       }
 
+      @Override
       public void whiteBoardSpecificConnect() throws IOException
       {
       }
 
-      public void whiteBoardSpecificClose() throws IOException
+      @Override
+      public void closeYoWhiteBoard() throws IOException
       {
       }
-
-
    }
-
 
    private class YoWhiteBoardListenerForTest implements YoWhiteBoardListener
    {
       private boolean newDataReady = false;
       private boolean hasReceivedNewDataBeforeReset = false;
 
+      @Override
       public void receivedWhiteBoardData()
       {
          if (newDataReady)

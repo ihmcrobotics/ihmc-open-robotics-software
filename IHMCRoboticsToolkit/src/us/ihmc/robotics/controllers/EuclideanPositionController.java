@@ -73,6 +73,7 @@ public class EuclideanPositionController implements PositionController
       rateLimitedFeedbackLinearAcceleration.reset();
    }
 
+   @Override
    public void compute(FrameVector output, FramePoint desiredPosition, FrameVector desiredVelocity, FrameVector currentVelocity, FrameVector feedForward)
    {
       computeProportionalTerm(desiredPosition);
@@ -192,6 +193,7 @@ public class EuclideanPositionController implements PositionController
       positionError.getFrameTuple(positionErrorToPack);
    }
 
+   @Override
    public ReferenceFrame getBodyFrame()
    {
       return bodyFrame;

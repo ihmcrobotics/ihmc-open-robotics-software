@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Purple;
+
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -7,16 +9,22 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.math.frames.YoFrameOrientation;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class ICPBasedLinearMomentumRateOfChangeControlModule
@@ -26,7 +34,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ICPProportionalController icpProportionalController;
 
-   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame centerOfMassFrame;
 
    private final YoFrameVector controlledCoMAcceleration;
@@ -52,29 +60,39 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
 
    private final YoFrameVector defaultLinearMomentumRateWeight = new YoFrameVector("defaultLinearMomentumRateWeight", worldFrame, registry);
+   private final YoFrameVector defaultAngularMomentumRateWeight = new YoFrameVector("defaultAngularMomentumRateWeight", worldFrame, registry);
    private final YoFrameVector highLinearMomentumRateWeight = new YoFrameVector("highLinearMomentumRateWeight", worldFrame, registry);
+   private final YoFrameVector angularMomentumRateWeight = new YoFrameVector("angularMomentumRateWeigth", worldFrame, registry);
    private final YoFrameVector linearMomentumRateWeight = new YoFrameVector("linearMomentumRateWeight", worldFrame, registry);
 
+   private final CMPProjector cmpProjector;
+   private final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+
+   private final YoFramePoint2d yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", worldFrame, registry);
+   private final YoFrameConvexPolygon2d yoSafeAreaPolygon = new YoFrameConvexPolygon2d("yoSafeAreaPolygon", worldFrame, 10, registry);
+   private final YoFrameConvexPolygon2d yoProjectionPolygon = new YoFrameConvexPolygon2d("yoProjectionPolygon", worldFrame, 10, registry);
+
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, double maxAllowedDistanceCMPSupport,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, parentRegistry, yoGraphicsListRegistry,
-            true, maxAllowedDistanceCMPSupport);
+            true);
    }
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection, double maxAllowedDistanceCMPSupport)
+         YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      CMPProjector smartCMPProjector;
       if (use2DProjection)
-         smartCMPProjector = new SmartCMPProjectorTwo(registry);
+         cmpProjector = new SmartCMPProjectorTwo(registry);
       else
-         smartCMPProjector = new SmartCMPPlanarProjector(registry);
-      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, smartCMPProjector, maxAllowedDistanceCMPSupport, registry);
+         cmpProjector = new SmartCMPPlanarProjector(registry);
+
+      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, registry);
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       this.bipedSupportPolygons = bipedSupportPolygons;
@@ -85,8 +103,28 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       parentRegistry.addChild(registry);
 
       controlledCoMAcceleration = new YoFrameVector("controlledCoMAcceleration", "", centerOfMassFrame, registry);
+      angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
       linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
+
+      if (yoGraphicsListRegistry != null)
+      {
+         String graphicListName = getClass().getSimpleName();
+         YoGraphicPosition unprojectedDesiredCMPViz = new YoGraphicPosition("Unprojected Desired CMP", yoUnprojectedDesiredCMP, 0.008, Purple(), GraphicType.ROTATED_CROSS);
+         yoGraphicsListRegistry.registerArtifact(graphicListName, unprojectedDesiredCMPViz.createArtifact());
+
+//         YoArtifactPolygon yoSafeArea = new YoArtifactPolygon("SafeArea", yoSafeAreaPolygon, Color.GREEN, false);
+//         yoGraphicsListRegistry.registerArtifact(graphicListName, yoSafeArea);
+//
+//         YoArtifactPolygon yoProjectionArea = new YoArtifactPolygon("ProjectionArea", yoProjectionPolygon, Color.RED, false);
+//         yoGraphicsListRegistry.registerArtifact(graphicListName, yoProjectionArea);
+      }
+   }
+
+   public void setMomentumWeight(Vector3d angularWeight, Vector3d linearWeight)
+   {
+      defaultLinearMomentumRateWeight.set(linearWeight);
+      defaultAngularMomentumRateWeight.set(angularWeight);
    }
 
    public void setMomentumWeight(Vector3d linearWeight)
@@ -94,10 +132,17 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       defaultLinearMomentumRateWeight.set(linearWeight);
    }
 
+   public void setAngularMomentumWeight(Vector3d angularWeight)
+   {
+      defaultAngularMomentumRateWeight.set(angularWeight);
+   }
+
    public void setHighMomentumWeightForRecovery(Vector3d highLinearWeight)
    {
       highLinearMomentumRateWeight.set(highLinearWeight);
    }
+
+   private final BooleanYoVariable desiredCMPinSafeArea = new BooleanYoVariable("DesiredCMPinSafeArea", registry);
 
    public void compute(FramePoint2d desiredCMPToPack)
    {
@@ -106,10 +151,33 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
          icpProportionalController.reset();
       }
 
-      supportPolygon.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
-
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint, desiredCapturePoint, finalDesiredCapturePoint,
-            desiredCapturePointVelocity, omega0, supportPolygon);
+            desiredCapturePointVelocity, omega0);
+
+      yoUnprojectedDesiredCMP.set(desiredCMP);
+
+      // do projection here:
+      if (!areaToProjectInto.isEmpty())
+      {
+         desiredCMPinSafeArea.set(safeArea.isPointInside(desiredCMP));
+         if (safeArea.isPointInside(desiredCMP))
+         {
+            supportPolygon.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
+            areaToProjectInto.setIncludingFrameAndUpdate(supportPolygon);
+         }
+
+         cmpProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, areaToProjectInto, finalDesiredCapturePoint, desiredCMP);
+         if (cmpProjector.getWasCMPProjected())
+            icpProportionalController.bleedOffIntegralTerm();
+      }
+
+      capturePoint.changeFrame(worldFrame);
+      desiredCMP.changeFrame(worldFrame);
+      if (desiredCMP.containsNaN())
+      {
+         desiredCMP.set(capturePoint);
+         System.err.println(getClass().getSimpleName() + ": desiredCMP contained NaN. Set it to capturePoint.");
+      }
 
       desiredCMPToPack.setIncludingFrame(desiredCMP);
       desiredCMPToPack.changeFrame(worldFrame);
@@ -127,7 +195,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       controlledCoMAcceleration.set(linearMomentumRateOfChange);
       controlledCoMAcceleration.scale(1.0 / totalMass);
       momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
-      momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
+      momentumRateCommand.setWeights(angularMomentumRateWeight.getX(), angularMomentumRateWeight.getY(), angularMomentumRateWeight.getZ(),
+            linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
    }
 
    public void computeAchievedCMP(FrameVector achievedLinearMomentumRate, FramePoint2d achievedCMPToPack)
@@ -194,11 +263,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       this.finalDesiredCapturePoint.setIncludingFrame(finalDesiredCapturePoint);
    }
 
-   public void keepCMPInsideSupportPolygon(boolean keepCMPInsideSupportPolygon)
-   {
-      icpProportionalController.setKeepCMPInsideSupportPolygon(keepCMPInsideSupportPolygon);
-   }
-
    public void setHighMomentumWeight()
    {
       linearMomentumRateWeight.set(highLinearMomentumRateWeight);
@@ -207,6 +271,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    public void setDefaultMomentumWeight()
    {
       linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
+      angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
    }
 
    public void setDesiredCenterOfMassHeightAcceleration(double desiredCenterOfMassHeightAcceleration)
@@ -217,5 +282,14 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    public MomentumRateCommand getMomentumRateCommand()
    {
       return momentumRateCommand;
+   }
+
+   public void setCMPProjectionArea(FrameConvexPolygon2d areaToProjectInto, FrameConvexPolygon2d safeArea)
+   {
+      this.areaToProjectInto.setIncludingFrameAndUpdate(areaToProjectInto);
+      this.safeArea.setIncludingFrameAndUpdate(safeArea);
+
+      yoSafeAreaPolygon.setFrameConvexPolygon2d(safeArea);
+      yoProjectionPolygon.setFrameConvexPolygon2d(areaToProjectInto);
    }
 }

@@ -2,8 +2,6 @@ package us.ihmc.quadrupedRobotics.params;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -54,10 +52,14 @@ public class ParameterRegistry
    private final List<Parameter> parameters = new ArrayList<>();
 
    /**
+    * The list of loaded parameter lines to which no registered parameter exists. This is maintained in case a parameter is added after loading a file, in which
+    * case the value will be pulled from this list (if it exists).
+    */
+   private final List<String> unregistered = new ArrayList<>();
+
+   /**
     * Loads the resource with the given filename from the class path. If more than one class path resource exists with the given name then every matching
     * resource will be loaded in an undefined order.
-    * <p/>
-    * NOTE: All of the parameters to be loaded must already be registered.
     *
     * @param name the full parameters file name, i.e. "parameters_testing_123.conf"
     * @throws IOException if the resource is not found or an I/O error occurs
@@ -82,8 +84,6 @@ public class ParameterRegistry
 
    /**
     * Load parameters from the given {@link Readable} source.
-    * <p/>
-    * NOTE: All of the parameters to be loaded must already be registered.
     *
     * @param readable
     * @throws IOException
@@ -95,6 +95,7 @@ public class ParameterRegistry
       String line;
       while ((line = reader.readLine()) != null)
       {
+         // Check if any registered parameter matches, and pack the value if one does.
          boolean found = false;
          for (Parameter parameter : parameters)
          {
@@ -107,26 +108,25 @@ public class ParameterRegistry
 
          if (!found)
          {
-            System.out.println("Tried to load parameter not present in registry: " + line);
+//            System.out.println("Tried to load parameter not present in registry: " + line);
+            unregistered.add(line);
          }
-      }
-   }
-
-   /**
-    * Save all registered parameters to the given {@link Writer}.
-    */
-   public void save(Writer writer)
-   {
-      PrintWriter pw = new PrintWriter(writer);
-      for (Parameter parameter : parameters)
-      {
-         pw.println(parameter.dump());
       }
    }
 
    void register(Parameter parameter)
    {
       Preconditions.checkNotNull(parameter, "Registered parameter cannot be null");
+
+      // Check if any unregistered values match this new parameter, and pack the value if one does.
+      for (String line : unregistered)
+      {
+         if (parameter.tryLoad(line))
+         {
+            unregistered.remove(line);
+            break;
+         }
+      }
 
       parameters.add(parameter);
    }

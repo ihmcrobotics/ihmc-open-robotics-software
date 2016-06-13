@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.whiteBoard;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
@@ -12,14 +13,20 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableType;
+import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.tools.time.Timer;
 
 
-public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Runnable
+public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
 {
-   private static final boolean VERBOSE = false;
-
    protected static final int SYNC_IN = 107;
    protected static final int SYNC_OUT = 393;
+   
+   private static final double CONNECTION_TIME_LIMIT = 5.0;
+   
+   private final Object connectionConch = new Object();
+   private final Timer connectionTimeoutTimer = new Timer();
 
    private DataInputStream dataInputStream = null;
    private DataOutputStream dataOutputStream = null;
@@ -68,35 +75,33 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
    }
 
    @Override
-   public void run()
-   {
-      setupAndRunHandlingThread();
-   }
-
-   @Override
    public void whiteBoardSpecificConnect() throws IOException
    {
+      connectionTimeoutTimer.start();
       while (dataOutputStream == null)
       {
-         try
+         if (connectionTimeoutTimer.lapElapsed() > CONNECTION_TIME_LIMIT)
          {
-            Thread.sleep(10);
+            throw new IOException("White board connect timed out after " + CONNECTION_TIME_LIMIT + " s");
          }
-         catch (InterruptedException e)
-         {
-         }
+         
+         ThreadTools.sleep(10);
       }
 
       if (writeOutConnect)
       {
-         if (VERBOSE)
-            System.out.println("Writing out connect on the DataOutputStream");
          dataOutputStream.writeUTF("Connect");
          dataOutputStream.flush();
 
+         connectionTimeoutTimer.lap();
          while (!this.haveVariablesToReadAndWriteBeenSet())
          {
-            Thread.yield();
+            if (connectionTimeoutTimer.lapElapsed() > CONNECTION_TIME_LIMIT)
+            {
+               throw new IOException("White board connect timed out after " + CONNECTION_TIME_LIMIT + " s");
+            }
+             
+            ThreadTools.sleep(100);
          }
          
          ArrayList<YoVariable<?>> allVariablesToWrite = new ArrayList<YoVariable<?>>();
@@ -109,21 +114,39 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
 
          writeVariableNamesToBeVerified(allVariablesToRead);
          
-         if (VERBOSE)
-            System.out.println("Writing out DoneConnect on the DataOutputStream");
          dataOutputStream.writeUTF("DoneConnect");
          dataOutputStream.flush();
       }
    }
 
    @Override
-   public void whiteBoardSpecificClose() throws IOException
+   public void closeYoWhiteBoard() throws IOException
    {
       setConnected(false);
       if (dataOutputStream != null)
-         dataOutputStream.close();
+      {
+         try
+         {
+            dataOutputStream.close();
+         }
+         catch (SocketException socketException)
+         {
+            PrintTools.error(this, socketException.getMessage());
+         }
+         dataOutputStream = null;
+      }
       if (dataInputStream != null)
-         dataInputStream.close();
+      {
+         try
+         {
+            dataInputStream.close();
+         }
+         catch (SocketException socketException)
+         {
+            PrintTools.error(this, socketException.getMessage());
+         }
+         dataInputStream = null;
+      }
    }
 
    private void writeVariableNamesToBeVerified(ArrayList<YoVariable<?>> variables) throws IOException
@@ -148,7 +171,14 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
    }
 
 
-   private void setupAndRunHandlingThread()
+   protected void setupAndRunHandlingThread()
+   {
+      setupAndConnect();
+
+      runHandlingThread();
+   }
+
+   protected void setupAndConnect()
    {
       int tries = 0;
       while (!createYoVariablesOnConnect && !this.haveVariablesToReadAndWriteBeenSet())
@@ -170,8 +200,6 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
       {
          try
          {
-            if (VERBOSE)
-               System.out.println("Reading for connect on the DataInputStream");
             String string = dataInputStream.readUTF();
             
             if (!string.equals("Connect"))
@@ -184,9 +212,6 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
 
                ArrayList<YoVariable<?>> variablesToWrite = this.readAndCreateVariables(rootRegistryToAddVariablesTo);               
                this.setVariablesToWrite(variablesToWrite);
-               
-               if (VERBOSE)
-                  System.out.println("DataStreamYoWhiteBoard: Created " + variablesToRead.size() + " variablesToRead and " + variablesToWrite.size() + " variablesToWrite");
             }
             
             else
@@ -200,25 +225,16 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
                this.getAllVariablesToWrite(allVariablesToWrite);
 
                readAndVerifyVariableNames(allVariablesToWrite);
-               
-               if (VERBOSE)
-                  System.out.println("DataStreamYoWhiteBoard: Read And Verified " + allVariablesToRead.size() + " variablesToRead and " + allVariablesToWrite.size() + " variablesToWrite");
             }
 
-            if (VERBOSE)
-               System.out.println("Reading for DoneConnect on the DataInputStream");
             string = dataInputStream.readUTF();
 
             if (!string.equals("DoneConnect"))
                throw new IOException("Didn't receive DoneConnect back!");
-
-            if (VERBOSE)
-               System.out.println("DataStreamYoWhiteBoard: Connected!");
-            
          }
          catch (IOException e)
          {
-            e.printStackTrace();
+            PrintTools.error(this, e.getMessage());
 
             return;
          }
@@ -231,7 +247,10 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
       
       setConnected(true);
       allowThrowOutStalePacketsIfYouWish();
+   }
 
+   protected void runHandlingThread()
+   {
       double[] doubleVariablesToRead = new double[this.getNumberOfDoublesToRead()];
       int[] intVariablesToRead = new int[this.getNumberOfIntsToRead()];
       boolean[] booleanVariablesToRead = new boolean[this.getNumberOfBooleansToRead()];
@@ -284,8 +303,7 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
          }
          catch (IOException e1)
          {
-            e1.printStackTrace();
-
+            PrintTools.error(this, e1.getMessage());
             return;
          }
       }
@@ -313,9 +331,6 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
          }
          verifyNamesAreConsistent(yoVariable.getFullNameWithNameSpace(), fullName);
       }
-
-      if (VERBOSE)
-         System.out.println("Found " + numberOfVariables + " variables and they all match names!");
    }
    
    
@@ -334,20 +349,12 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
          String variableName = NameSpace.stripOffNameSpaceToGetVariableName(fullName);
          NameSpace fullNameSpace = NameSpace.createNameSpaceFromAFullVariableName(fullName);
          YoVariableRegistry registry = rootRegistry.getOrCreateAndAddRegistry(fullNameSpace);
-
-         if (VERBOSE)
-         {
-            System.out.println("readAndCreateVariables: fullName = " + fullName);
-         }
          
          YoVariable<?> yoVariable = createNewYoVariable(variableName, yoVariableType, registry);
          ret.add(yoVariable);
          
          verifyNamesAreConsistent(yoVariable.getFullNameWithNameSpace(), fullName);
       }
-
-      if (VERBOSE)
-         System.out.println("Found " + numberOfVariablesFromStream + " variable names and created them!");
       
       return ret;
    }
@@ -419,5 +426,10 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard implements Run
       dataOutputStream.writeInt(SYNC_OUT);
       dataOutputStream.flush();
 
+   }
+
+   public Object getConnectionConch()
+   {
+      return connectionConch;
    }
 }

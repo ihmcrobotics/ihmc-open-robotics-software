@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.params;
 
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
@@ -66,18 +67,43 @@ public class ParameterFactory
 
    public BooleanParameter createBoolean(String name, boolean defaultValue)
    {
-      BooleanParameter parameter = new BooleanParameter(namespace + "." + name, defaultValue);
+      final BooleanParameter parameter = new BooleanParameter(namespace + "." + name, defaultValue);
       register(parameter);
+
+      if (registry != null)
+      {
+         final BooleanYoVariable variable = new BooleanYoVariable("param__" + parameter.getShortPath(), registry);
+         variable.set(parameter.get());
+         variable.addVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               parameter.set(((BooleanYoVariable) v).getBooleanValue());
+            }
+         });
+
+         parameter.addChangeListener(new ParameterChangeListener()
+         {
+            @Override
+            public void onChange(Parameter parameter)
+            {
+               variable.set(((BooleanParameter) parameter).get(),false);
+            }
+         });
+      }
+
       return parameter;
    }
 
    public DoubleParameter createDouble(String name, double defaultValue)
    {
       final DoubleParameter parameter = new DoubleParameter(namespace + "." + name, defaultValue);
+      register(parameter);
 
       if (registry != null)
       {
-         DoubleYoVariable variable = new DoubleYoVariable("param__" + parameter.getShortPath(), registry);
+         final DoubleYoVariable variable = new DoubleYoVariable("param__" + parameter.getShortPath(), registry);
          variable.set(parameter.get());
          variable.addVariableChangedListener(new VariableChangedListener()
          {
@@ -87,15 +113,23 @@ public class ParameterFactory
                parameter.set(((DoubleYoVariable) v).getDoubleValue());
             }
          });
-      }
 
-      register(parameter);
+         parameter.addChangeListener(new ParameterChangeListener()
+         {
+            @Override
+            public void onChange(Parameter parameter)
+            {
+               variable.set(((DoubleParameter) parameter).get(), false);
+            }
+         });
+      }
       return parameter;
    }
 
    public DoubleArrayParameter createDoubleArray(String name, double... defaultValue)
    {
       final DoubleArrayParameter parameter = new DoubleArrayParameter(namespace + "." + name, defaultValue);
+      register(parameter);
 
       if (registry != null)
       {
@@ -103,7 +137,7 @@ public class ParameterFactory
          {
             final int count = i;
 
-            DoubleYoVariable variable = new DoubleYoVariable("param__" + parameter.getShortPath() + count, registry);
+            final DoubleYoVariable variable = new DoubleYoVariable("param__" + parameter.getShortPath() + count, registry);
             variable.set(parameter.get(i));
             variable.addVariableChangedListener(new VariableChangedListener()
             {
@@ -113,10 +147,18 @@ public class ParameterFactory
                   parameter.set(count, ((DoubleYoVariable) v).getDoubleValue());
                }
             });
+
+            parameter.addChangeListener(new ParameterChangeListener()
+            {
+               @Override
+               public void onChange(Parameter parameter)
+               {
+                  variable.set(((DoubleArrayParameter) parameter).get()[count], false);
+               }
+            });
          }
       }
 
-      register(parameter);
       return parameter;
    }
 
@@ -124,6 +166,7 @@ public class ParameterFactory
    {
       StringParameter parameter = new StringParameter(namespace + "." + name, defaultValue);
       register(parameter);
+
       return parameter;
    }
 

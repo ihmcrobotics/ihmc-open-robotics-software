@@ -38,7 +38,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 public class VelocityFootRotationCalculator implements FootRotationCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
 
    private final String name = getClass().getSimpleName();
 

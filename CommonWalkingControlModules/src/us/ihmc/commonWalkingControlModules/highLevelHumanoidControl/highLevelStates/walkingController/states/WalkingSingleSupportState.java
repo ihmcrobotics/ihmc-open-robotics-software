@@ -91,11 +91,6 @@ public class WalkingSingleSupportState extends SingleSupportState
          requestSwingSpeedUpIfNeeded();
       }
 
-      if (balanceManager.isUseUpperBodyLinearMomentumIfFalling())
-      {
-         balanceManager.checkIfUseUpperBodyLinearMomentum(nextFootstep);
-      }
-
       walkingMessageHandler.clearFootTrajectory();
 
       switchToToeOffIfPossible(supportSide);
@@ -128,6 +123,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
 
       updateFootstepParameters();
+
+      balanceManager.setNextFootstep(nextFootstep);
 
       balanceManager.addFootstepToPlan(nextFootstep);
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0));

@@ -23,6 +23,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 public class AtlasNetworkProcessor
 {
    private static final boolean ENABLE_BEHAVIOR_MODULE = true;
+   private static final boolean ENABLE_KINEMATICS_TOOLBOX_SERVER = true;
    private static String defaultRosNameSpace = "/ihmc_ros/atlas";
    
    public static void main(String[] args) throws URISyntaxException, JSAPException
@@ -58,6 +59,7 @@ public class AtlasNetworkProcessor
         networkModuleParams.enableSensorModule(true);
         networkModuleParams.enableBehaviorVisualizer(true);
         networkModuleParams.setDrillDetectionModuleEnabled(true);
+        networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);
 
         URI rosuri = NetworkParameters.getROSURI();
         if(rosuri != null)

@@ -21,6 +21,7 @@ import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
 import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
@@ -46,18 +47,20 @@ public class SphereDetectionBehavior extends BehaviorInterface
    //   final int pointDropFactor = 4;
    private final static boolean DEBUG = false;
 
-   private final float BALL_RADIUS = 0.127f;
+   private final float BALL_RADIUS = 0.0762f;
 
-   private final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
+   protected final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
    private final HumanoidReferenceFrames humanoidReferenceFrames;
+
+   // temp vars
+   private final Point3d chestPosition = new Point3d();
 
    public SphereDetectionBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames)
    {
       super(outgoingCommunicationBridge);
       this.attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
       this.humanoidReferenceFrames = referenceFrames;
-
    }
 
    public boolean foundBall()
@@ -69,7 +72,7 @@ public class SphereDetectionBehavior extends BehaviorInterface
    {
       ballFound.set(false);
    }
-   
+
    public double getSpehereRadius()
    {
       return ballRadius.getValueAsDouble();
@@ -80,27 +83,16 @@ public class SphereDetectionBehavior extends BehaviorInterface
       return new Point3d(ballX.getDoubleValue(), ballY.getDoubleValue(), ballZ.getDoubleValue());
    }
 
-   PointCloudWorldPacket pointCloudPacket;
-   PointCloudWorldPacket pointCloudPacketLatest = null;
-
    @Override
    public void doControl()
    {
-
-      while ((pointCloudPacket = pointCloudQueue.poll()) != null)
+      if (pointCloudQueue.isNewPacketAvailable())
       {
-         pointCloudPacketLatest = pointCloudPacket;
+         findBallsAndSaveResult(pointCloudQueue.getLatestPacket().getDecayingWorldScan());
       }
-
-      if (pointCloudPacketLatest != null)
-      {
-         Point3f[] points = pointCloudPacketLatest.getDecayingWorldScan();
-         findBallsAndSaveResult(points);
-      }
-
    }
 
-   private void findBallsAndSaveResult(Point3f[] points)
+   protected void findBallsAndSaveResult(Point3f[] points)
    {
       ArrayList<Sphere3D_F64> balls = detectBalls(points);
 
@@ -132,7 +124,21 @@ public class SphereDetectionBehavior extends BehaviorInterface
          ballY.set(0);
          ballZ.set(0);
       }
-
+      
+      PointCloudWorldPacket pointCloudWorldPacket = new PointCloudWorldPacket();
+      pointCloudWorldPacket.setDestination(PacketDestination.UI);
+      pointCloudWorldPacket.setTimestamp(System.nanoTime());
+      Point3d[] points3d = new Point3d[points.length];
+      for (int i = 0; i < points.length; i++)
+      {
+         points3d[i] = new Point3d(points[i]);
+      }
+      pointCloudWorldPacket.setDecayingWorldScan(points3d);
+      Point3d[] groundQuadTree = new Point3d[1];
+      groundQuadTree[0] = new Point3d();
+      pointCloudWorldPacket.setGroundQuadTreeSupport(groundQuadTree);
+      
+      sendPacketToNetworkProcessor(pointCloudWorldPacket);
    }
 
    public ArrayList<Sphere3D_F64> detectBalls(Point3f[] fullPoints)
@@ -170,15 +176,24 @@ public class SphereDetectionBehavior extends BehaviorInterface
       }
 
       // sort large to small
-      List<Shape> spheres = findSpheres.getFound();
+      humanoidReferenceFrames.getChestFrame().getTransformToWorldFrame().getTranslation(chestPosition);
+
+      final List<Shape> spheres = findSpheres.getFound();
       Collections.sort(spheres, new Comparator<Shape>()
       {
-
-         @Override
-         public int compare(Shape o1, Shape o2)
+         @Override public int compare(Shape shape0, Shape shape1)
          {
-            return Integer.compare(o1.points.size(), o2.points.size());
-         };
+            Sphere3D_F64 sphereParams0 = (Sphere3D_F64) shape0.getParameters();
+            Sphere3D_F64 sphereParams1 = (Sphere3D_F64) shape1.getParameters();
+
+            Point3D_F64 center0 = sphereParams0.getCenter();
+            Point3D_F64 center1 = sphereParams1.getCenter();
+
+            double distSq0 = (center0.x - chestPosition.x) * (center0.x - chestPosition.x) + (center0.y - chestPosition.y) * (center0.y - chestPosition.y);
+            double distSq1 = (center1.x - chestPosition.x) * (center1.x - chestPosition.x) + (center1.y - chestPosition.y) * (center1.y - chestPosition.y);
+
+            return distSq0 < distSq1 ? 1 : -1;
+         }
       });
 
       if (spheres.size() > 0)
@@ -269,7 +284,6 @@ public class SphereDetectionBehavior extends BehaviorInterface
    @Override
    public boolean hasInputBeenSet()
    {
-      // TODO Auto-generated method stub
       return true;
    }
 
