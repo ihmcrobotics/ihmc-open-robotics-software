@@ -1,16 +1,23 @@
 package us.ihmc.llaQuadruped;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionStandPrepControllerParameters;
 
 public class LLAQuadrupedStandPrepParameters implements QuadrupedPositionStandPrepControllerParameters
 {
-   private static final double INITIAL_HEIGHT = 0.38;
+   private static final Vector3d INITIAL_POSITION = new Vector3d(-0.17853, -0.05263, 0.38); 
+   
+   public Vector3d getInitialPosition()
+   {
+      return INITIAL_POSITION;
+   }
    
    @Override
    public double getInitialHeight()
    {
-      return INITIAL_HEIGHT;
+      return INITIAL_POSITION.getZ();
    }
 
    @Override
