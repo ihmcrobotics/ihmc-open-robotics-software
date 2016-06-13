@@ -27,6 +27,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 /**
  * This class can detect if the foot is on partial support.
@@ -87,27 +88,32 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       copFiltered = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint(namePrefix + "CoPFiltered",
             "", registry, copAlpha, worldFrame);
 
-      if (yoGraphicsListRegistry != null && VISUALIZE)
+      if (yoGraphicsListRegistry != null)
       {
+         String listName = getClass().getSimpleName();
          String caption = "";
 
          caption = namePrefix + "PlanePoint";
          yoPlanePoint = new YoFramePoint(caption, worldFrame, registry);
          YoGraphicPosition planePointViz =
                new YoGraphicPosition(caption, yoPlanePoint, 0.005, YoAppearance.Blue(), GraphicType.SOLID_BALL);
-         yoGraphicsListRegistry.registerArtifact(caption, planePointViz.createArtifact());
+         YoArtifactPosition planePointArtifact = planePointViz.createArtifact();
+         planePointArtifact.setVisible(VISUALIZE);
+         yoGraphicsListRegistry.registerArtifact(listName, planePointArtifact);
 
          caption = namePrefix + "PlaneNormal";
          yoPlaneNormal = new YoFrameVector(caption, worldFrame, registry);
          YoGraphicVector planeNormalViz =
                new YoGraphicVector(caption, yoPlanePoint, yoPlaneNormal, YoAppearance.Blue());
-         yoGraphicsListRegistry.registerYoGraphic(caption, planeNormalViz);
+         planeNormalViz.setVisible(VISUALIZE);
+         yoGraphicsListRegistry.registerYoGraphic(listName, planeNormalViz);
 
          caption = namePrefix + "LineOfRotationGeometric";
          yoLineOfRotation = new YoFrameLineSegment2d(caption, "", "", worldFrame, registry);
          YoArtifactLineSegment2d lineOfRotationArtifact =
                new YoArtifactLineSegment2d(caption, yoLineOfRotation, Color.GREEN, 0.01, 0.01);
-         yoGraphicsListRegistry.registerArtifact(caption, lineOfRotationArtifact);
+         lineOfRotationArtifact.setVisible(VISUALIZE);
+         yoGraphicsListRegistry.registerArtifact(listName, lineOfRotationArtifact);
       }
       else
       {
