@@ -198,9 +198,9 @@ public class RobotTools
          
       }
            
-      public Joint findSCSJoint(InverseDynamicsJoint joint)
+      public PinJoint findSCSPinJoint(InverseDynamicsJoint joint)
       {
-         return idToSCSJointMap.get(joint);
+         return (PinJoint) idToSCSJointMap.get(joint);
       }
    }
 
