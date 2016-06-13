@@ -9,6 +9,8 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,7 +18,6 @@ import java.util.HashMap;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListener
@@ -28,6 +29,8 @@ public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListe
 
    private HashMap<String, Artifact> artifactList = new HashMap<>();
    private ArrayList<JComponent> componentList = new ArrayList<>();
+
+   private HashMap<String, ArrayList<JCheckBox>> boxesByLabel = new HashMap<>();
 
    public PlotterShowHideMenu(Plotter plotter)
    {
@@ -44,6 +47,7 @@ public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListe
       }
       componentList.clear();
       artifactList.clear();
+      boxesByLabel.clear();
 
       Collections.sort(newArtifacts, new Comparator<Artifact>()
       {
@@ -57,14 +61,41 @@ public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListe
       });
 
       String label = null;
+      ArrayList<JCheckBox> boxesForLabel = null;
       for (Artifact artifact : newArtifacts)
       {
          if (label != artifact.getLabel())
          {
+            if (label != null)
+            {
+               boxesByLabel.put(label, boxesForLabel);
+            }
+            boxesForLabel = new ArrayList<>();
+
             label = artifact.getLabel();
-            JLabel labelPanel = new JLabel(label);
-            componentList.add(labelPanel);
-            this.add(labelPanel);
+            JCheckBox labelCheckBox = new JCheckBox(label);
+            labelCheckBox.setSelected(true);
+            labelCheckBox.addActionListener(new ActionListener()
+            {
+               @Override
+               public void actionPerformed(ActionEvent e)
+               {
+                  String label = labelCheckBox.getText();
+                  ArrayList<JCheckBox> checkBoxes = boxesByLabel.get(label);
+
+                  if (label == null || checkBoxes == null)
+                  {
+                     return;
+                  }
+
+                  for (JCheckBox checkBox : checkBoxes)
+                  {
+                     checkBox.setSelected(labelCheckBox.isSelected());
+                  }
+               }
+            });
+            componentList.add(labelCheckBox);
+            this.add(labelCheckBox);
          }
 
          String name = artifact.getName();
@@ -72,10 +103,10 @@ public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListe
 
          final JCheckBox checkBox = new JCheckBox(name);
          checkBox.setSelected(artifact.isVisible());
-         checkBox.addActionListener(new ActionListener()
+         checkBox.addItemListener(new ItemListener()
          {
             @Override
-            public void actionPerformed(ActionEvent e)
+            public void itemStateChanged(ItemEvent e)
             {
                String name = checkBox.getText();
                boolean visible = checkBox.isSelected();
@@ -83,6 +114,7 @@ public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListe
                plotter.repaint();
             }
          });
+         boxesForLabel.add(checkBox);
 
          JPanel checkBoxPanel = new JPanel(new GridBagLayout());
          GridBagConstraints layoutConstraints = new GridBagConstraints();
@@ -99,6 +131,11 @@ public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListe
 
          componentList.add(checkBoxPanel);
          this.add(checkBoxPanel);
+      }
+
+      if (label != null)
+      {
+         boxesByLabel.put(label, boxesForLabel);
       }
    }
 
