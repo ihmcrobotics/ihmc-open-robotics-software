@@ -36,6 +36,8 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
+   private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
+   private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
 
    private final DoubleYoVariable robotTime;
    private final QuadrupedReferenceFrames referenceFrames;
@@ -140,6 +142,8 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
          solePositionController.getGains(quadrant).setDerivativeGains(solePositionDerivativeGainsParameter.get());
       }
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
    }
 
    private void updateEstimates()
