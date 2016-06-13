@@ -5,6 +5,8 @@ import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -57,17 +59,26 @@ public class QuadrupedSolePositionController
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
    private final QuadrantDependentList<EuclideanPositionController> solePositionController;
    private final QuadrantDependentList<YoEuclideanPositionGains> solePositionControllerGains;
+   private final QuadrantDependentList<YoFramePoint> yoSolePositionSetpoint;
+   private final QuadrantDependentList<YoFrameVector> yoSoleLinearVelocitySetpoint;
+   private final QuadrantDependentList<YoFrameVector> yoSoleForceFeedforwardSetpoint;
 
    public QuadrupedSolePositionController(QuadrantDependentList<ReferenceFrame> soleFrame, double controlDT, YoVariableRegistry registry)
    {
       this.soleFrame = soleFrame;
       this.solePositionController = new QuadrantDependentList<>();
       this.solePositionControllerGains = new QuadrantDependentList<>();
+      this.yoSolePositionSetpoint = new QuadrantDependentList<>();
+      this.yoSoleLinearVelocitySetpoint = new QuadrantDependentList<>();
+      this.yoSoleForceFeedforwardSetpoint = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
          solePositionController.set(robotQuadrant, new EuclideanPositionController(prefix + "SolePosition", soleFrame.get(robotQuadrant), controlDT, registry));
          solePositionControllerGains.set(robotQuadrant, new YoEuclideanPositionGains(prefix + "SolePosition", registry));
+         yoSolePositionSetpoint.set(robotQuadrant, new YoFramePoint(prefix + "SolePositionSetpoint", ReferenceFrame.getWorldFrame(), registry));
+         yoSoleLinearVelocitySetpoint.set(robotQuadrant, new YoFrameVector(prefix + "SoleLinearVelocitySetpoint", ReferenceFrame.getWorldFrame(), registry));
+         yoSoleForceFeedforwardSetpoint.set(robotQuadrant, new YoFrameVector(prefix + "SoleForceFeedforwardSetpoint", ReferenceFrame.getWorldFrame(), registry));
       }
    }
 
@@ -111,6 +122,11 @@ public class QuadrupedSolePositionController
          soleForceFeedforwardSetpoint.changeFrame(soleFrame.get(robotQuadrant));
          solePositionController.get(robotQuadrant).setGains(solePositionControllerGains.get(robotQuadrant));
          solePositionController.get(robotQuadrant).compute(soleForceCommand.get(robotQuadrant), solePositionSetpoint, soleLinearVelocitySetpoint, soleLinearVelocityEstimate, soleForceFeedforwardSetpoint);
+
+         // update log variables
+         yoSolePositionSetpoint.get(robotQuadrant).setAndMatchFrame(solePositionSetpoint);
+         yoSoleLinearVelocitySetpoint.get(robotQuadrant).setAndMatchFrame(soleLinearVelocitySetpoint);
+         yoSoleForceFeedforwardSetpoint.get(robotQuadrant).setAndMatchFrame(soleForceFeedforwardSetpoint);
 
          solePositionSetpoint.changeFrame(solePositionSetpointFrame);
          soleLinearVelocitySetpoint.changeFrame(soleLinearVelocitySetpointFrame);

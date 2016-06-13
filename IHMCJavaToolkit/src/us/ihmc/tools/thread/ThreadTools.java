@@ -208,6 +208,7 @@ public class ThreadTools
       {
          private final AtomicInteger threadNumber = new AtomicInteger(1);
 
+         @Override
          public Thread newThread(Runnable r)
          {
             Thread t = new Thread(r, name + "-thread-" + threadNumber.getAndIncrement());

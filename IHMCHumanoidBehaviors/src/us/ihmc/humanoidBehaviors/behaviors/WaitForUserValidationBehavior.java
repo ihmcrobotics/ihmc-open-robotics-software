@@ -25,7 +25,6 @@ public class WaitForUserValidationBehavior extends BehaviorInterface
 
    public void reset()
    {
-      System.out.println("RESETTING USER VALIDATION TO FALSE");
       validAcknoledged.set(false);
    }
 
@@ -34,7 +33,6 @@ public class WaitForUserValidationBehavior extends BehaviorInterface
    {
       if (validClicked.getBooleanValue())
       {
-         System.out.println("in do control valid clicked is true");
          validAcknoledged.set(true);
       }
    }
@@ -76,7 +74,9 @@ public class WaitForUserValidationBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      return validAcknoledged.getBooleanValue();
+      return true;
+      
+//      return validAcknoledged.getBooleanValue();
    }
 
    @Override

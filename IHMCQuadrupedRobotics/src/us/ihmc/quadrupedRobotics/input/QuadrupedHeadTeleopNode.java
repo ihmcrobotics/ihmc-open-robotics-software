@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import us.ihmc.quadrupedRobotics.packets.QuadrupedNeckJointPositionPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedNeckJointPositionPacket;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.communication.net.NetClassList;

@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.KickBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.ihmcPerception.vision.HSVValue;
+import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -21,7 +24,8 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class KickBallBehavior extends BehaviorInterface
 {
-   private static final boolean CREATE_COACTIVE_ELEMENT = false;
+   private static final boolean CREATE_COACTIVE_ELEMENT = true;
+   private static final boolean USE_BLOB_FILTERING = true;
 
    private enum KickState
    {
@@ -50,16 +54,26 @@ public class KickBallBehavior extends BehaviorInterface
 
    private final KickBallBehaviorCoactiveElementBehaviorSide coactiveElement;
 
-   public KickBallBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public KickBallBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
-      super(outgoingCommunicationBridge);
+      super(behaviorCommunicationBridge);
+
       this.yoTime = yoTime;
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
 
       // create sub-behaviors:
+      if(USE_BLOB_FILTERING)
+      {
+         BlobFilteredSphereDetectionBehavior sphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel); // new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+         sphereDetectionBehavior.addHSVRange(new HSVRange(new HSVValue(55, 80, 80), new HSVValue(139, 255, 255)));
+         this.sphereDetectionBehavior = sphereDetectionBehavior;
+      }
+      else
+      {
+         sphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+      }
 
-      sphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
       behaviors.add(sphereDetectionBehavior);
 
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
@@ -118,15 +132,12 @@ public class KickBallBehavior extends BehaviorInterface
             {
                coactiveElement.searchingForBall.set(true);
                coactiveElement.foundBall.set(false);
-               coactiveElement.ballX.set(0);
-               coactiveElement.ballY.set(0);
-               coactiveElement.ballZ.set(0);
+               coactiveElement.ballPositions.get(0).setToZero();
             }
          }
       };
 
       pipeLine.submitSingleTaskStage(findBallTask);
-      //
 
       BehaviorTask validateBallTask = new BehaviorTask(waitForUserValidationBehavior, yoTime, 0)
       {
@@ -139,10 +150,8 @@ public class KickBallBehavior extends BehaviorInterface
                coactiveElement.waitingForValidation.set(true);
                coactiveElement.validAcknowledged.set(false);
                coactiveElement.foundBall.set(false);
-               coactiveElement.ballX.set(sphereDetectionBehavior.getBallLocation().x);
-               coactiveElement.ballY.set(sphereDetectionBehavior.getBallLocation().y);
-               coactiveElement.ballZ.set(sphereDetectionBehavior.getBallLocation().z);
-               coactiveElement.ballRadius.set(sphereDetectionBehavior.getSpehereRadius());
+               coactiveElement.ballPositions.get(0).set(sphereDetectionBehavior.getBallLocation());
+               coactiveElement.ballRadii[0].set(sphereDetectionBehavior.getSpehereRadius());
             }
          }
       };
@@ -160,10 +169,8 @@ public class KickBallBehavior extends BehaviorInterface
                coactiveElement.searchingForBall.set(false);
                coactiveElement.waitingForValidation.set(false);
                coactiveElement.foundBall.set(true);
-               coactiveElement.ballX.set(sphereDetectionBehavior.getBallLocation().x);
-               coactiveElement.ballY.set(sphereDetectionBehavior.getBallLocation().x);
-               coactiveElement.ballZ.set(sphereDetectionBehavior.getBallLocation().x);
-               coactiveElement.ballRadius.set(sphereDetectionBehavior.getSpehereRadius());
+               coactiveElement.ballPositions.get(0).set(sphereDetectionBehavior.getBallLocation());
+               coactiveElement.ballRadii[0].set(sphereDetectionBehavior.getSpehereRadius());
             }
             walkToLocationBehavior.setTarget(getoffsetPoint());
          }
@@ -226,9 +233,7 @@ public class KickBallBehavior extends BehaviorInterface
          coactiveElement.searchingForBall.set(false);
          coactiveElement.waitingForValidation.set(false);
          coactiveElement.foundBall.set(false);
-         coactiveElement.ballX.set(0);
-         coactiveElement.ballY.set(0);
-         coactiveElement.ballZ.set(0);
+         coactiveElement.ballPositions.get(0).setToZero();
       }
       for (BehaviorInterface behavior : behaviors)
       {
@@ -302,5 +307,34 @@ public class KickBallBehavior extends BehaviorInterface
       doPostBehaviorCleanup();
       this.stop();
       this.pipeLine.clearAll();
+   }
+
+   public boolean isUseBlobFiltering()
+   {
+      return USE_BLOB_FILTERING;
+   }
+
+   public Point2d getBlobLocation()
+   {
+      if(USE_BLOB_FILTERING)
+      {
+         return ((BlobFilteredSphereDetectionBehavior) sphereDetectionBehavior).getLatestBallPosition();
+      }
+      else
+      {
+         return null;
+      }
+   }
+
+   public int getNumBlobsDetected()
+   {
+      if(USE_BLOB_FILTERING)
+      {
+         return ((BlobFilteredSphereDetectionBehavior) sphereDetectionBehavior).getNumBallsDetected();
+      }
+      else
+      {
+         return 0;
+      }
    }
 }

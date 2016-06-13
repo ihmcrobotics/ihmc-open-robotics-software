@@ -191,7 +191,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
       if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
-         return 0.4;
+         return 0.6;
       else
          return 0.3;
    }
@@ -414,9 +414,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public ICPControlGains getICPControlGains()
+   public ICPControlGains createICPControlGains(YoVariableRegistry registry)
    {
-      ICPControlGains gains = new ICPControlGains();
+      ICPControlGains gains = new ICPControlGains("", registry);
 
       double kpParallel = 2.5;
       double kpOrthogonal = 1.5;
@@ -472,20 +472,17 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
-      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
+      YoFootOrientationGains gains = new YoFootOrientationGains("PelvisOrientation", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kp = 80.0;
+      double kpXY = 80.0;
+      double kpZ = 40.0;
       double zeta = realRobot ? 0.5 : 0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
       double maxAccel = realRobot ? 12.0 : 36.0;
       double maxJerk = realRobot ? 180.0 : 540.0;
 
-      gains.setProportionalGain(kp);
+      gains.setProportionalGains(kpXY, kpZ);
       gains.setDampingRatio(zeta);
-      gains.setIntegralGain(ki);
-      gains.setMaximumIntegralError(maxIntegralError);
       gains.setMaximumAcceleration(maxAccel);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
@@ -598,8 +595,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double kpXY = 150.0;
       double kpZ = 200.0;
       double zetaXYZ = realRobot ? 0.7 : 0.7;
-      double kpOrientation = 200.0;
+
+      double kpXYOrientation = 200.0;
+      double kpZOrientation = 200.0;
       double zetaOrientation = 0.7;
+
       // Reduce maxPositionAcceleration from 30 to 6 to prevent too high acceleration when hitting joint limits.
       double maxPositionAcceleration = realRobot ? 6.0 : Double.POSITIVE_INFINITY;
 //      double maxPositionAcceleration = realRobot ? 30.0 : Double.POSITIVE_INFINITY;
@@ -610,7 +610,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
-      gains.setOrientationProportionalGains(kpOrientation, kpOrientation);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
       gains.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
       gains.createDerivativeGainUpdater(true);
@@ -624,7 +624,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootSE3Gains gains = new YoFootSE3Gains("HoldFoot", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 100.0;
+      double kpXY = 0.0; //100.0;
       double kpZ = 0.0;
       double zetaXYZ = realRobot ? 0.2 : 1.0;
       double kpXYOrientation = realRobot ? 100.0 : 200.0;
@@ -980,6 +980,18 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxAllowedDistanceCMPSupport()
    {
-      return 0.05;
+      return 0.06;
+   }
+
+   @Override
+   public void useInverseDynamicsControlCore()
+   {
+      // once another mode is implemented, use this to change the default gains for inverse dynamics
+   }
+
+   @Override
+   public void useVirtualModelControlCore()
+   {
+      // once another mode is implemented, use this to change the default gains for virtual model control
    }
 }

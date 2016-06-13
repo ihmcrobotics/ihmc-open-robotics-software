@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -37,7 +38,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -60,6 +60,7 @@ public class BalanceManager
    private final ICPBasedLinearMomentumRateOfChangeControlModule icpBasedLinearMomentumRateOfChangeControlModule;
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final PushRecoveryControlModule pushRecoveryControlModule;
+   private final MomentumRecoveryControlModule momentumRecoveryControlModule;
    private final HighLevelHumanoidControllerToolbox momentumBasedController;
 
    private final YoFramePoint yoCenterOfMass = new YoFramePoint("centerOfMass", worldFrame, registry);
@@ -102,11 +103,8 @@ public class BalanceManager
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-   private final BooleanYoVariable useUpperBodyLinearMomentumIfFalling = new BooleanYoVariable("UseUpperBodyLinearMomentumIfFalling", registry);
-   private final BooleanYoVariable shouldUseUpperBodyLinearMomentum = new BooleanYoVariable("ShouldUseUpperBodyLinearMomentum", registry);
-   private final BooleanYoVariable useHighBodyLinearMomentumWeight = new BooleanYoVariable("UseHighBodyLinearMomentumWeight", registry);
-
-   private final YoFrameConvexPolygon2d yoSafeICPArea = new YoFrameConvexPolygon2d("safeArea", "", worldFrame, 10, registry);
+   private final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
    public BalanceManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry)
@@ -122,7 +120,7 @@ public class BalanceManager
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       SideDependentList<? extends ContactablePlaneBody> contactableFeet = momentumBasedController.getContactableFeet();
-      ICPControlGains icpControlGains = walkingControllerParameters.getICPControlGains();
+      ICPControlGains icpControlGains = walkingControllerParameters.createICPControlGains(registry);
       double controlDT = momentumBasedController.getControlDT();
       double gravityZ = momentumBasedController.getGravityZ();
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
@@ -135,9 +133,8 @@ public class BalanceManager
 
       bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
 
-      double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
       icpBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
-            totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection, maxAllowedDistanceCMPSupport);
+            totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(minimumSwingTimeForDisturbanceRecovery);
@@ -155,7 +152,9 @@ public class BalanceManager
       pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, bipedSupportPolygons, pelvisXYControlGains, registry);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
-      useUpperBodyLinearMomentumIfFalling.set(false);
+
+      double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
+      momentumRecoveryControlModule = new MomentumRecoveryControlModule(momentumBasedController, maxAllowedDistanceCMPSupport, registry);
 
       String graphicListName = "BalanceManager";
 
@@ -174,9 +173,6 @@ public class BalanceManager
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, achievedCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCMPViz.createArtifact());
-
-//         YoArtifactPolygon yoGraphicPolygon = new YoArtifactPolygon("SafeArea", yoSafeICPArea, Color.RED, false);
-//         yoGraphicsListRegistry.registerArtifact("SafeArea", yoGraphicPolygon);
       }
 
       parentRegistry.addChild(registry);
@@ -187,6 +183,11 @@ public class BalanceManager
       icpBasedLinearMomentumRateOfChangeControlModule.setMomentumWeight(linearWeight);
    }
 
+   public void setMomentumWeight(Vector3d angularWeight, Vector3d linearWeight)
+   {
+      icpBasedLinearMomentumRateOfChangeControlModule.setMomentumWeight(angularWeight, linearWeight);
+   }
+
    public void setHighMomentumWeightForRecovery(Vector3d highLinearWeight)
    {
       icpBasedLinearMomentumRateOfChangeControlModule.setHighMomentumWeightForRecovery(highLinearWeight);
@@ -195,6 +196,11 @@ public class BalanceManager
    public void addFootstepToPlan(Footstep footstep)
    {
       icpPlanner.addFootstepToPlan(footstep);
+   }
+
+   public void setNextFootstep(Footstep nextFootstep)
+   {
+      momentumRecoveryControlModule.setNextFootstep(nextFootstep);
    }
 
    public boolean checkAndUpdateFootstep(Footstep footstep)
@@ -242,113 +248,30 @@ public class BalanceManager
 
       yoFinalDesiredICP.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
 
-      if (useUpperBodyLinearMomentumIfFalling.getBooleanValue())
-      {
-         // if we are in double support but we were recovering keep the momentum weight high until the icp error is small
-         if (supportLeg == null)
-         {
-            getICPError(icpError2d);
-            boolean icpErrorSmall = icpError2d.lengthSquared() < 0.03 * 0.03;
-            if (icpErrorSmall)
-            {
-               useHighBodyLinearMomentumWeight.set(false);
-            }
+      getICPError(icpError2d);
+      momentumRecoveryControlModule.setICPError(icpError2d);
+      momentumRecoveryControlModule.setSupportSide(supportLeg);
+      momentumRecoveryControlModule.compute();
 
-            shouldUseUpperBodyLinearMomentum.set(false);
-         }
+      momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);
+      if (!keepCMPInsideSupportPolygon)
+         areaToProjectInto.clearAndUpdate(worldFrame);
+      icpBasedLinearMomentumRateOfChangeControlModule.setCMPProjectionArea(areaToProjectInto, safeArea);
 
-         // allow the controller to use upper body momentum to control the capture point
-         if (supportLeg != null && shouldUseUpperBodyLinearMomentum.getBooleanValue())
-         {
-            keepCMPInsideSupportPolygon = false;
-            useHighBodyLinearMomentumWeight.set(true);
-         }
-
-         if (useHighBodyLinearMomentumWeight.getBooleanValue())
-         {
-            icpBasedLinearMomentumRateOfChangeControlModule.setHighMomentumWeight();
-         }
-         else
-         {
-            icpBasedLinearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
-         }
-      }
+      if (momentumRecoveryControlModule.getUseHighMomentumWeight())
+         icpBasedLinearMomentumRateOfChangeControlModule.setHighMomentumWeight();
       else
-      {
          icpBasedLinearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
-      }
 
-      if (supportLeg == null)
-      {
-         yoSafeICPArea.hide();
-      }
-
-      icpBasedLinearMomentumRateOfChangeControlModule.keepCMPInsideSupportPolygon(keepCMPInsideSupportPolygon);
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
-
       icpBasedLinearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setOmega0(omega0);
-
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCapturePoint(desiredCapturePoint2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
-
       icpBasedLinearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
-
       icpBasedLinearMomentumRateOfChangeControlModule.compute(desiredCMP);
       yoDesiredCMP.set(desiredCMP);
-   }
-
-   private final FramePoint2d tmpCapturePoint = new FramePoint2d();
-   private final ConvexPolygonShrinker polygonShrinker = new ConvexPolygonShrinker();
-   private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d tempPolygon1 = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d tempPolygon2 = new FrameConvexPolygon2d();
-
-   public void checkIfUseUpperBodyLinearMomentum(Footstep nextFootstep)
-   {
-      RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
-      FrameConvexPolygon2d support = momentumBasedController.getBipedSupportPolygons().getFootPolygonInSoleFrame(supportSide);
-
-      // icp based fall detection:
-      // compute the safe area for the capture point as the support polygon after the step completed
-      safeArea.setIncludingFrame(support);
-      momentumBasedController.getDefaultFootPolygon(nextFootstep.getRobotSide(), tempPolygon1);
-      tempPolygon2.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), tempPolygon1.getConvexPolygon2d());
-      tempPolygon2.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
-      polygonShrinker.shrinkConstantDistanceInto(tempPolygon2, -0.05, tempPolygon1);
-      safeArea.addVertices(tempPolygon1);
-      safeArea.update();
-
-      // hysteresis:
-      // shrink the safe area if we are already using upper body momentum
-      if (shouldUseUpperBodyLinearMomentum.getBooleanValue())
-      {
-         polygonShrinker.shrinkConstantDistanceInto(safeArea, 0.05, tempPolygon1);
-         safeArea.setIncludingFrameAndUpdate(tempPolygon1);
-      }
-      safeArea.changeFrameAndProjectToXYPlane(worldFrame);
-      yoSafeICPArea.setFrameConvexPolygon2d(safeArea);
-
-      // check if the icp is in the safe area
-      momentumBasedController.getCapturePoint(capturePoint2d);
-      tmpCapturePoint.setIncludingFrame(capturePoint2d);
-      tmpCapturePoint.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
-      boolean icpInSafeArea = safeArea.isPointInside(tmpCapturePoint);
-
-      // check the icp tracking error
-      getICPError(icpError2d);
-      boolean icpErrorSmall = icpError2d.lengthSquared() < 0.03 * 0.03;
-
-      if (!icpInSafeArea)
-      {
-         shouldUseUpperBodyLinearMomentum.set(true);
-      }
-      else if (icpErrorSmall)
-      {
-         shouldUseUpperBodyLinearMomentum.set(false);
-      }
-
    }
 
    public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
@@ -407,7 +330,7 @@ public class BalanceManager
       return icpPlanner.getInitialTransferDuration();
    }
 
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   public MomentumRateCommand getInverseDynamicsCommand()
    {
       return icpBasedLinearMomentumRateOfChangeControlModule.getMomentumRateCommand();
    }
@@ -645,11 +568,6 @@ public class BalanceManager
    public void getCapturePoint(FramePoint2d capturePointToPack)
    {
       momentumBasedController.getCapturePoint(capturePointToPack);
-   }
-
-   public boolean isUseUpperBodyLinearMomentumIfFalling()
-   {
-      return useUpperBodyLinearMomentumIfFalling.getBooleanValue();
    }
 
 }

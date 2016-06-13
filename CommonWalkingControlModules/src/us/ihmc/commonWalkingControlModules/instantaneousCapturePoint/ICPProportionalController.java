@@ -5,10 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -19,7 +16,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class ICPProportionalController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FrameVector2d tempControl = new FrameVector2d(worldFrame);
    private final YoFrameVector2d icpError = new YoFrameVector2d("icpError", "", worldFrame, registry);
    private final YoFrameVector2d icpErrorIntegrated = new YoFrameVector2d("icpErrorIntegrated", "", worldFrame, registry);
@@ -34,28 +31,18 @@ public class ICPProportionalController
    private final FrameVector2d icpIntegral = new FrameVector2d(worldFrame);
 
    private final double controlDT;
-   private final DoubleYoVariable captureKpParallelToMotion = new DoubleYoVariable("captureKpParallel", registry);
-   private final DoubleYoVariable captureKpOrthogonalToMotion = new DoubleYoVariable("captureKpOrthogonal", registry);
+   private final DoubleYoVariable captureKpParallelToMotion;
+   private final DoubleYoVariable captureKpOrthogonalToMotion;
 
-   private final DoubleYoVariable captureKi = new DoubleYoVariable("captureKi", registry);
-   private final DoubleYoVariable captureKiBleedoff = new DoubleYoVariable("captureKiBleedoff", registry);
+   private final DoubleYoVariable captureKi;
+   private final DoubleYoVariable captureKiBleedoff;
 
    private final Vector2dZUpFrame icpVelocityDirectionFrame;
 
    private final FrameVector2d tempICPErrorIntegrated = new FrameVector2d(worldFrame);
 
-   private final CMPProjector cmpProjector;
-
-   private final BooleanYoVariable keepCMPInsideSupportPolygon = new BooleanYoVariable("keepCMPInsideSupportPolygon", registry);
-   private final DoubleYoVariable maxDistanceCMPSupport = new DoubleYoVariable("maxDistanceCMPSupport", registry);
-   private final ConvexPolygonShrinker polygonShrinker = new ConvexPolygonShrinker();
-   private final FrameConvexPolygon2d supportPolygonLocal = new FrameConvexPolygon2d();
-
-   public ICPProportionalController(ICPControlGains gains, double controlDT, CMPProjector cmpProjector,
-         double maxAllowedDistanceCMPSupport, YoVariableRegistry parentRegistry)
+   public ICPProportionalController(ICPControlGains gains, double controlDT, YoVariableRegistry parentRegistry)
    {
-      this.cmpProjector = cmpProjector;
-
       this.controlDT = controlDT;
 
       icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
@@ -63,13 +50,10 @@ public class ICPProportionalController
       icpPosition = new YoFramePoint("icpPosition", ReferenceFrame.getWorldFrame(), registry);
       parentRegistry.addChild(registry);
 
-      captureKpParallelToMotion.set(gains.getKpParallelToMotion());
-      captureKpOrthogonalToMotion.set(gains.getKpOrthogonalToMotion());
-      captureKi.set(gains.getKi());
-      captureKiBleedoff.set(gains.getKiBleedOff());
-
-      keepCMPInsideSupportPolygon.set(false);
-      maxDistanceCMPSupport.set(maxAllowedDistanceCMPSupport);
+      captureKpParallelToMotion = gains.getYoKpParallelToMotion();
+      captureKpOrthogonalToMotion = gains.getYoKpOrthogonalToMotion();
+      captureKi = gains.getYoKi();
+      captureKiBleedoff = gains.getYoKiBleedOff();
    }
 
    public void reset()
@@ -80,7 +64,7 @@ public class ICPProportionalController
    private final FramePoint2d desiredCMP = new FramePoint2d();
 
    public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FramePoint2d finalDesiredCapturePoint,
-         FrameVector2d desiredCapturePointVelocity, double omega0, FrameConvexPolygon2d supportPolygon)
+         FrameVector2d desiredCapturePointVelocity, double omega0)
    {
       capturePoint.changeFrame(worldFrame);
       desiredCapturePoint.changeFrame(worldFrame);
@@ -142,26 +126,6 @@ public class ICPProportionalController
 
       desiredCMPToICP.sub(capturePoint, desiredCMP);
 
-      supportPolygonLocal.setIncludingFrame(supportPolygon);
-      if (!keepCMPInsideSupportPolygon.getBooleanValue())
-      {
-         polygonShrinker.shrinkConstantDistanceInto(supportPolygon, -maxDistanceCMPSupport.getDoubleValue(), supportPolygonLocal);
-      }
-
-      cmpProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygonLocal, finalDesiredCapturePoint, desiredCMP);
-      capturePoint.changeFrame(worldFrame);
-      desiredCMP.changeFrame(worldFrame);
-
-      if (desiredCMP.containsNaN())
-      {
-         desiredCMP.set(capturePoint);
-         System.err.println("ICPProportionalController: desiredCMP contained NaN. Set it to capturePoint...");
-      }
-      if (cmpProjector.getWasCMPProjected())
-      {
-         icpErrorIntegrated.scale(0.9); //Bleed off quickly when projecting. 0.9 is a pretty arbitrary magic number.
-      }
-
       desiredCMP.changeFrame(rawCMPOutput.getReferenceFrame());
       rawCMPOutput.set(desiredCMP);
 
@@ -206,8 +170,8 @@ public class ICPProportionalController
       }
    }
 
-   public void setKeepCMPInsideSupportPolygon(boolean keepCMPInsideSupportPolygon)
+   public void bleedOffIntegralTerm()
    {
-      this.keepCMPInsideSupportPolygon.set(keepCMPInsideSupportPolygon);
+      icpErrorIntegrated.scale(0.9); //Bleed off quickly when projecting. 0.9 is a pretty arbitrary magic number.
    }
 }

@@ -33,12 +33,10 @@ public class VariableChangedMessage
 
    public static class Builder implements us.ihmc.concurrent.Builder<VariableChangedMessage>
    {
-
+      @Override
       public VariableChangedMessage newInstance()
       {
          return new VariableChangedMessage();
       }
-
    }
-
 }

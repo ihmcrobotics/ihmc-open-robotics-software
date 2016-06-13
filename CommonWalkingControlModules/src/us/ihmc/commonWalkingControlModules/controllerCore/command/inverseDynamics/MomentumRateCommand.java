@@ -50,6 +50,15 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       MatrixTools.setDenseMatrixFromTuple3d(momentumRate, linearMomentumRateOfChange.getVector(), 3, 0);
    }
 
+   public void setAngularMomentumRateOfChange(FrameVector angularMomentumRateOfChange)
+   {
+      selectionMatrix.reshape(6, SpatialMotionVector.SIZE);
+      selectionMatrix.set(CommonOps.identity(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE));
+
+      momentumRate.reshape(selectionMatrix.getNumCols(), 1);
+      MatrixTools.setDenseMatrixFromTuple3d(momentumRate, angularMomentumRateOfChange.getVector(), 0, 0);
+   }
+
    public void setLinearMomentumXYRateOfChange(FrameVector2d linearMomentumRateOfChange)
    {
       selectionMatrix.reshape(2, SpatialMotionVector.SIZE);
@@ -87,6 +96,11 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       weightVector.set(3, 0, linearX);
       weightVector.set(4, 0, linearY);
       weightVector.set(5, 0, linearZ);
+   }
+
+   public void setWeights(DenseMatrix64F weights)
+   {
+      weightVector.set(weights);
    }
 
    public void setAlphaTaskPriority(double angularX, double angularY, double angularZ, double linearX, double linearY, double linearZ)

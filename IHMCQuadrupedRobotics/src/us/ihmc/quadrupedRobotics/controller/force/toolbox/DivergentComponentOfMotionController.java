@@ -63,7 +63,7 @@ public class DivergentComponentOfMotionController
    YoFramePoint yoCmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
    DoubleYoVariable yoLipNaturalFrequency = new DoubleYoVariable("lipNaturalFrequency", registry);
 
-   public DivergentComponentOfMotionController(ReferenceFrame comFrame, double controlDT, double mass, double gravity, double comHeight, YoVariableRegistry parentRegistry)
+   public DivergentComponentOfMotionController(ReferenceFrame comFrame, double controlDT, double mass, double gravity, double comHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.controlDT = controlDT;
       this.mass = mass;
@@ -89,12 +89,8 @@ public class DivergentComponentOfMotionController
       artifactList.add(yoIcpPositionSetpointViz.createArtifact());
       artifactList.add(yoCmpPositionSetpointViz.createArtifact());
       parentRegistry.addChild(registry);
-   }
-
-   public void registerGraphics(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
-      yoGraphicsListRegistry.registerArtifactList(artifactList);
+      graphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+      graphicsListRegistry.registerArtifactList(artifactList);
    }
 
    public void setComHeight(double comHeight)

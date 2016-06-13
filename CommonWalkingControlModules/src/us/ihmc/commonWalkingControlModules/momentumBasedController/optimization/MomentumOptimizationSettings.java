@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 public class MomentumOptimizationSettings
 {
    private final Vector3d linearMomentumWeight = new Vector3d(0.05, 0.05, 0.01);
-   private final Vector3d highLinearMomentumWeightForRecovery = new Vector3d(0.25, 0.25, 0.05);
+   private final Vector3d highLinearMomentumWeightForRecovery = new Vector3d(1.0, 1.0, 0.05);
    private final Vector3d angularMomentumWeight = new Vector3d(0.0, 0.0, 0.0);
 
    private Vector3d defaultAngularFootWeight = new Vector3d(0.5, 0.5, 0.5);
@@ -14,7 +14,7 @@ public class MomentumOptimizationSettings
    private Vector3d highAngularFootWeight = new Vector3d(5.0, 5.0, 5.0);
    private Vector3d highLinearFootWeight = new Vector3d(50.0, 50.0, 50.0);
 
-   private Vector3d chestAngularWeight = new Vector3d(15.0, 10.0, 5.0); //10.0;
+   private Vector3d chestAngularWeight = new Vector3d(15.0, 10.0, 5.0);
    private Vector3d pelvisAngularWeight = new Vector3d(5.0, 5.0, 5.0);
 
    private double jointAccelerationWeight = 0.005;

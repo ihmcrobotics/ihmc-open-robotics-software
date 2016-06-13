@@ -203,12 +203,11 @@ public class QuadrupedVirtualModelController
 
             // compute desired joint torque with position and torque limits
             double tau = legEffortVector.get(robotQuadrant).get(index, 0);
-            double tauPositionLowerLimit = settings.getJointPositionLimitStiffness(jointName) * (jointLimit.getSoftLowerPositionLimit() - joint.getQ()) - settings.getJointPositionLimitDamping(jointName) * joint.getQd();
-            double tauPositionUpperLimit = settings.getJointPositionLimitStiffness(jointName) * (jointLimit.getSoftUpperPositionLimit() - joint.getQ()) - settings.getJointPositionLimitDamping(jointName) * joint.getQd();
-            double tauEffortLowerLimit = -jointLimit.getTorqueLimit();
-            double tauEffortUpperLimit = jointLimit.getTorqueLimit();
-            tau = Math.min(Math.max(tau, tauPositionLowerLimit), tauPositionUpperLimit);
-            tau = Math.min(Math.max(tau, tauEffortLowerLimit), tauEffortUpperLimit);
+            if (joint.getQ() < jointLimit.getSoftLowerPositionLimit())
+               tau = Math.max(tau, settings.getJointPositionLimitStiffness(jointName) * (jointLimit.getSoftLowerPositionLimit() - joint.getQ()) - settings.getJointPositionLimitDamping(jointName) * joint.getQd());
+            if (joint.getQ() > jointLimit.getSoftUpperPositionLimit())
+               tau = Math.min(tau, settings.getJointPositionLimitStiffness(jointName) * (jointLimit.getSoftUpperPositionLimit() - joint.getQ()) - settings.getJointPositionLimitDamping(jointName) * joint.getQd());
+            tau = Math.min(Math.max(tau, -jointLimit.getTorqueLimit()), jointLimit.getTorqueLimit());
 
             // filter desired joint torque and add damping
             legEffortFilter.get(robotQuadrant)[index].setBreakFrequency(settings.getJointEffortBreakFrequency(jointName));

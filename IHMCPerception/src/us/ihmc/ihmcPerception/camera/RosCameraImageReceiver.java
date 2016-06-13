@@ -1,6 +1,7 @@
 package us.ihmc.ihmcPerception.camera;
 
 import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -35,7 +36,7 @@ public class RosCameraImageReceiver extends RosCameraReceiver
                PrintTools.debug(this, "Sending intrinsicParameters");
                intrinsicParameters.print();
             }
-            cameraDataReceiver.updateImage(robotSide, image, timeStamp, intrinsicParameters);
+            cameraDataReceiver.updateImage(VideoSource.getMultisenseSourceFromRobotSide(robotSide), image, timeStamp, intrinsicParameters);
          }
       };
       rosMainNode.attachSubscriber(cameraParameters.getRosTopic(), imageSubscriber);

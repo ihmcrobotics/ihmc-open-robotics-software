@@ -6,7 +6,7 @@ public class DepthDataStateCommand extends Packet<DepthDataStateCommand>
 {
    public enum LidarState
    {
-      DISABLE, ENABLE
+      DISABLE, ENABLE, ENABLE_BEHAVIOR_ONLY
    }
    
    public LidarState lidarState;

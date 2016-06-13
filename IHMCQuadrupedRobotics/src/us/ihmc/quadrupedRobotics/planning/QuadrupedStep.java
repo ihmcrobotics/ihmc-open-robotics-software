@@ -120,4 +120,13 @@ public class QuadrupedStep
          return this.goalPosition.epsilonEquals(other.goalPosition, epsilon) && MathTools.epsilonEquals(this.groundClearance, other.groundClearance, epsilon);
       }
    }
+
+   @Override public String toString()
+   {
+      String string = super.toString();
+      string += "\nrobotQuadrant: " + robotQuadrant;
+      string += "\ngoalPosition:" + goalPosition;
+      string += "\ngroundClearance: " + groundClearance;
+      return string;
+   }
 }

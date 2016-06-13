@@ -22,12 +22,13 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 public class WholeBodyControllerCore
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final EnumYoVariable<WholeBodyControllerCoreMode> currentMode = new EnumYoVariable<>("currentWholeBodyControllerCoreMode", registry, WholeBodyControllerCoreMode.class);
+   private final EnumYoVariable<WholeBodyControllerCoreMode> currentMode = new EnumYoVariable<>("currentControllerCoreMode", registry, WholeBodyControllerCoreMode.class);
    private final IntegerYoVariable numberOfFBControllerEnabled = new IntegerYoVariable("numberOfFBControllerEnabled", registry);
 
    private final WholeBodyFeedbackController feedbackController;
    private final WholeBodyInverseDynamicsSolver inverseDynamicsSolver;
    private final WholeBodyInverseKinematicsSolver inverseKinematicsSolver;
+   private final WholeBodyVirtualModelControlSolver virtualModelControlSolver;
 
    private final ControllerCoreOutput controllerCoreOutput;
    private final YoRootJointDesiredConfigurationData yoRootJointDesiredConfigurationData;
@@ -42,6 +43,7 @@ public class WholeBodyControllerCore
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
       inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, registry);
       inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, registry);
+      virtualModelControlSolver = new WholeBodyVirtualModelControlSolver(toolbox, registry);
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       SixDoFJoint rootJoint = toolbox.getRobotRootJoint();
@@ -59,6 +61,7 @@ public class WholeBodyControllerCore
       feedbackController.initialize();
       inverseDynamicsSolver.initialize();
       inverseKinematicsSolver.reset();
+      virtualModelControlSolver.reset();
       yoLowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
@@ -67,6 +70,7 @@ public class WholeBodyControllerCore
       feedbackController.reset();
       inverseDynamicsSolver.reset();
       inverseKinematicsSolver.reset();
+      virtualModelControlSolver.clear();
       yoLowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
@@ -84,6 +88,10 @@ public class WholeBodyControllerCore
          break;
       case INVERSE_KINEMATICS:
          inverseKinematicsSolver.submitInverseKinematicsCommand(controllerCoreCommand.getInverseKinematicsCommandList());
+         break;
+      case VIRTUAL_MODEL:
+         feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
+         virtualModelControlSolver.submitVirtualModelControlCommandList(controllerCoreCommand.getVirtualModelControlCommandList());
          break;
       case OFF:
          break;
@@ -106,6 +114,10 @@ public class WholeBodyControllerCore
          break;
       case INVERSE_KINEMATICS:
          doInverseKinematics();
+         break;
+      case VIRTUAL_MODEL:
+         doVirtualModelControl();
+         break;
       case OFF:
          doNothing();
          break;
@@ -142,6 +154,20 @@ public class WholeBodyControllerCore
       RootJointDesiredConfigurationDataReadOnly inverseKinematicsOutputForRootJoint = inverseKinematicsSolver.getOutputForRootJoint();
       yoLowLevelOneDoFJointDesiredDataHolder.completeWith(inverseKinematicsOutput);
       yoRootJointDesiredConfigurationData.completeWith(inverseKinematicsOutputForRootJoint);
+   }
+
+   private void doVirtualModelControl()
+   {
+      feedbackController.compute();
+      InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getOutput();
+      numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
+      virtualModelControlSolver.submitVirtualModelControlCommandList(feedbackControllerOutput);
+      virtualModelControlSolver.compute();
+      feedbackController.computeAchievedAccelerations(); // FIXME
+      LowLevelOneDoFJointDesiredDataHolder virtualModelControlOutput = virtualModelControlSolver.getOutput();
+      RootJointDesiredConfigurationDataReadOnly virtualModelControlOutputForRootJoint = virtualModelControlSolver.getOutputForRootJoint();
+      yoLowLevelOneDoFJointDesiredDataHolder.completeWith(virtualModelControlOutput);
+      yoRootJointDesiredConfigurationData.completeWith(virtualModelControlOutputForRootJoint);
    }
 
    private void doNothing()
@@ -184,6 +210,11 @@ public class WholeBodyControllerCore
          if (lowLevelJointData.hasDesiredTorque())
             joint.setTau(lowLevelJointData.getDesiredTorque());
       }
+   }
+
+   public ControllerCoreOutput getControllerCoreOutput()
+   {
+      return controllerCoreOutput;
    }
 
    public ControllerCoreOutputReadOnly getOutputForHighLevelController()

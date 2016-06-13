@@ -9,7 +9,6 @@ import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
@@ -21,6 +20,7 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -34,7 +34,6 @@ public class DRCNetworkProcessor
    public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       packetRouter = new PacketRouter<>(PacketDestination.class);
-      packetRouter.setPacketTypeToDebug(TextToSpeechPacket.class);
       try
       {
          setupControllerCommunicator(params);
@@ -50,7 +49,7 @@ public class DRCNetworkProcessor
          setupDrillDetectionModule(params);
          setupKinematicsToolboxModule(robotModel, params);
          addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts());
-//         addTextToSpeechEngine();
+         addTextToSpeechEngine();
       }
       catch (IOException e)
       {
@@ -60,11 +59,12 @@ public class DRCNetworkProcessor
 
    private void addTextToSpeechEngine()
    {
-      PacketCommunicator ttsModuleCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("10.6.100.5", NetworkPorts.TEXT_TO_SPEECH, NET_CLASS_LIST);
-      packetRouter.attachPacketCommunicator(PacketDestination.SPEECH_TO_TEXT, ttsModuleCommunicator);
+      PacketCommunicator ttsModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.TEXT_TO_SPEECH, NET_CLASS_LIST);
+      packetRouter.attachPacketCommunicator(PacketDestination.TEXT_TO_SPEECH, ttsModuleCommunicator);
       try
       {
          ttsModuleCommunicator.connect();
+         new TextToSpeechNetworkModule();
       }
       catch (IOException e)
       {
@@ -72,7 +72,7 @@ public class DRCNetworkProcessor
       }
 
       String methodName = "addTextToSpeechEngine";
-      printModuleConnectedDebugStatement(PacketDestination.SPEECH_TO_TEXT, methodName);
+      printModuleConnectedDebugStatement(PacketDestination.TEXT_TO_SPEECH, methodName);
       
    }
 

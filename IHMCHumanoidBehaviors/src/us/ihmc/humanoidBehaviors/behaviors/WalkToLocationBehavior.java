@@ -84,7 +84,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
       this.swingTime = walkingControllerParameters.getDefaultSwingTime();
       this.transferTime = walkingControllerParameters.getDefaultTransferTime();
 
-      this.pathType = new SimplePathParameters(walkingControllerParameters.getMaxStepLength(), walkingControllerParameters.getInPlaceWidth(), 0.0,
+      this.pathType = new SimplePathParameters(walkingControllerParameters.getMaxStepLength()/2, walkingControllerParameters.getInPlaceWidth(), 0.0,
             Math.toRadians(20.0), Math.toRadians(10.0), 0.4); // 10 5 0.4
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
 
@@ -326,9 +326,13 @@ public class WalkToLocationBehavior extends BehaviorInterface
    public boolean isDone()
    {
       if (!haveFootstepsBeenGenerated.getBooleanValue() || !hasTargetBeenProvided.getBooleanValue())
+      {
          return false;
+      }
       if (haveFootstepsBeenGenerated.getBooleanValue() && footsteps.size() == 0)
+      {
          return true;
+      }
       return footstepListBehavior.isDone();
    }
 

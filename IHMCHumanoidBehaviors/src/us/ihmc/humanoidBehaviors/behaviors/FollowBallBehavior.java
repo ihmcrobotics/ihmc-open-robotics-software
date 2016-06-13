@@ -1,6 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import javax.vecmath.Point3f;
+
 import bubo.clouds.FactoryPointCloudShape;
 import bubo.clouds.detect.CloudShapeTypes;
 import bubo.clouds.detect.PointCloudShapeFinder;
@@ -9,33 +16,24 @@ import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.producers.CompressedVideoDataClient;
-import us.ihmc.communication.producers.CompressedVideoDataFactory;
-import us.ihmc.communication.producers.VideoStreamer;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
+import us.ihmc.ihmcPerception.vision.HSVValue;
+import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.thread.ThreadTools;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4d;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-public class FollowBallBehavior extends BehaviorInterface implements VideoStreamer
+public class FollowBallBehavior extends BehaviorInterface
 {
+   private static final boolean DEBUG = true;
+
    private FootstepDataListMessage outgoingFootstepDataList;
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
    private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue;
@@ -43,18 +41,17 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
 
    private final SDFFullHumanoidRobotModel fullRobotModel;
 
-   private final double defaultSwingTime;
-   private final double defaultTranferTime;
+   private final double swingTime = 0.6;
+   private final double tranferTime = 0.5;
 
+   private final ColoredCircularBlobDetectorBehaviorService coloredCircularBlobDetectorBehaviorService;
+   
    private BufferedImage lastBufferedImage;
-   private final CompressedVideoDataClient videoDataClient;
-   private boolean detectBall = false;
-   private BallDetectionThread computerVisionThread = new BallDetectionThread();
-   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>();
-
+   
    private final ReferenceFrame headFrame;
-   private static final double FILTERING_ANGLE = Math.toRadians(3.0);
-   private static final double FILTERING_DISTANCE = 0.08;
+   private static final double FILTERING_ANGLE = Math.toRadians(5.0);
+   private static final double FILTERING_MIN_DISTANCE = 0.1;
+   private static final double FILTERING_MAX_DISTANCE = 7.0;
 
    // http://www.bostondynamics.com/img/MultiSense_SL.pdf
    private static final double HORIZONTAL_FOV = Math.toRadians(80.0);
@@ -68,76 +65,52 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
    private static final int SPHERE_DETECTION_NUM_NEIGHBORS = 41;
    private static final double SPHERE_DETECTION_MAX_NEIGHBOR_DIST = 0.098158;
 
+   private static final double MIN_BALL_RADIUS = 0.05;
+   private static final double MAX_BALL_RADIUS = 0.15;
+
    private final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
-   private final Point3d latestBallPosition = new Point3d();
+   private final PointCloudShapeFinder pointCloudSphereFinder;
 
-   public FollowBallBehavior(BehaviorCommunicationBridge communicationBridge, WalkingControllerParameters walkingControllerParameters,
-         SDFFullHumanoidRobotModel fullRobotModel)
+   public FollowBallBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, SDFFullHumanoidRobotModel fullRobotModel)
    {
-      super(communicationBridge);
+      super(behaviorCommunicationBridge);
 
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>();
       attachControllerListeningQueue(footstepStatusQueue, FootstepStatus.class);
       walkingStatusQueue = new ConcurrentListeningQueue<>();
       attachControllerListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
 
-      defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
-      defaultTranferTime = walkingControllerParameters.getDefaultTransferTime();
-
-      videoDataClient = CompressedVideoDataFactory.createCompressedVideoDataClient(this);
-      computerVisionThread.start();
-      communicationBridge.attachGlobalListener(getNetworkProcessorGlobalObjectConsumer());
-      attachNetworkProcessorListeningQueue(videoPacketQueue, VideoPacket.class);
+      coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(this);
+      HSVRange greenRange = new HSVRange(new HSVValue(78, 100, 100), new HSVValue(83, 255, 255));
+      coloredCircularBlobDetectorBehaviorService.addHSVRange(greenRange);
+      
+      behaviorCommunicationBridge.attachGlobalListener(getNetworkProcessorGlobalObjectConsumer());
       attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
 
       this.fullRobotModel = fullRobotModel;
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
+
+      ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac
+            .createDefault(SPHERE_DECECTION_ITERATIONS, SPHERE_DETECTION_ANGLE_TOLERANCE, SPHERE_DETECTION_RANSAC_DISTANCE_THRESHOLD, CloudShapeTypes.SPHERE);
+      configRansac.minimumPoints = SPHERE_DETECTION_MIN_PTS;
+      pointCloudSphereFinder = FactoryPointCloudShape
+            .ransacSingleAll(new ConfigSurfaceNormals(SPHERE_DETECTION_NUM_NEIGHBORS, SPHERE_DETECTION_MAX_NEIGHBOR_DIST), configRansac);
    }
 
-   private class BallDetectionThread extends Thread
+   @Override
+   public void doControl()
    {
-      @Override public void run()
-      {
-         while (true)
-         {
-            if (detectBall)
-            {
-               if (videoPacketQueue.isNewPacketAvailable())
-               {
-                  VideoPacket packet = videoPacketQueue.poll();
-                  while (videoPacketQueue.isNewPacketAvailable())
-                  {
-                     packet = videoPacketQueue.poll();
-                  }
+      generateAndSendPathToBall();
 
-                  videoDataClient.consumeObject(packet.getData(), packet.getPosition(), packet.getOrientation(), packet.getIntrinsicParameters());
-               }
-               else
-               {
-                  ThreadTools.sleep(10);
-               }
-            }
-         }
-      }
-   }
-
-   @Override public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParamaters)
-   {
-      this.lastBufferedImage = bufferedImage;
-      // set ball center from image
-   }
-
-   @Override public void doControl()
-   {
-      if (checkForNewFootstepStatusPacket())
-      {
-         generateAndSendPathToBall();
-      }
-      else
-      {
-         ThreadTools.sleep(10);
-      }
+      //      if (checkForNewFootstepStatusPacket())
+//      {
+//         generateAndSendPathToBall();
+//      }
+//      else
+//      {
+//         ThreadTools.sleep(10);
+//      }
    }
 
    private boolean checkForNewFootstepStatusPacket()
@@ -153,6 +126,9 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       }
    }
 
+   private static int counter = 0;
+   private static int id = 0;
+
    private void generateAndSendPathToBall()
    {
       Point3f[] fullPointCloud = null;
@@ -163,28 +139,61 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       if (fullPointCloud != null)
       {
          fullRobotModel.getHead();
-         List<Point3f> filteredPointCloud = filterPointsNearBall(fullPointCloud, headFrame);
-         List<Sphere3D_F64> detectedSpheres = detectBalls(filteredPointCloud);
+         List<Point3f> filteredPointCloud = filterPointsNearBall(fullPointCloud);
+
+         if (DEBUG)
+            System.out.println("starting sphere detection");
+
+         long startTime = System.currentTimeMillis();
+         List<Sphere3D_F64> detectedSpheres = detectSpheres(filteredPointCloud, pointCloudSphereFinder);
+         long stopTime = System.currentTimeMillis();
+         long detectionTime = stopTime - startTime;
+
+         if(DEBUG)
+         {
+            System.out.println("sphere detection found: " + detectedSpheres.size() + " spheres");
+            System.out.println("\t detection time: " + detectionTime);
+
+            for (int i = 0; i < detectedSpheres.size(); i++)
+               System.out.println("\t center: " + detectedSpheres.get(i).getCenter());
+         }
+
+         for (Sphere3D_F64 ball : detectedSpheres)
+         {
+            RigidBodyTransform ballTransform = new RigidBodyTransform();
+            ballTransform.setTranslation(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
+            sendPacketToNetworkProcessor(new DetectedObjectPacket(ballTransform, id++));
+         }
       }
    }
 
-   private static List<Point3f> filterPointsNearBall(Point3f[] fullPointCloud, ReferenceFrame cameraFrame)
+   private List<Point3f> filterPointsNearBall(Point3f[] fullPointCloud)
    {
       List<Point3f> filteredPoints = new ArrayList<Point3f>();
-      RigidBodyTransform worldToCameraTransform = cameraFrame.getTransformToWorldFrame();
+      RigidBodyTransform worldToCameraTransform = headFrame.getTransformToWorldFrame();
+      worldToCameraTransform.invert();
+
+      int cameraPixelWidth = lastBufferedImage.getWidth();
+      int cameraPixelHeight = lastBufferedImage.getHeight();
+
+      double ballCenterX = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().getX() - lastBufferedImage.getMinX();
+      double ballCenterY = coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d().getY() - lastBufferedImage.getMinY();
+
+      double desiredRayAngleX = VERTICAL_FOV * (- ballCenterY / cameraPixelHeight + 0.5);
+      double desiredRayAngleY = HORIZONTAL_FOV * (ballCenterX / cameraPixelWidth - 0.5);
+
       Point3f tempPoint = new Point3f();
-      double desiredRayAngleX = 0.0; // TODO determine ray from 2d point
-      double desiredRayAngleY = 0.0; // TODO determine ray from 2d point
 
       for (int i = 0; i < fullPointCloud.length; i++)
       {
          tempPoint.set(fullPointCloud[i]);
          worldToCameraTransform.transform(tempPoint);
 
-         if (tempPoint.z > FILTERING_DISTANCE)
+         if (tempPoint.x > FILTERING_MIN_DISTANCE && tempPoint.x < FILTERING_MAX_DISTANCE)
          {
-            double rayAngleX = Math.atan2(tempPoint.y, tempPoint.z);
-            double rayAngleY = Math.atan2(tempPoint.x, tempPoint.z);
+            // rayAngle axes are in terms of the buffered image (y-down), temp pnt axes are in terms of camera frame (z-up)
+            double rayAngleX = Math.atan2(tempPoint.z, tempPoint.x);
+            double rayAngleY = Math.atan2(tempPoint.y, tempPoint.x);
             if (Math.abs(rayAngleX - desiredRayAngleX) < FILTERING_ANGLE && Math.abs(rayAngleY - desiredRayAngleY) < FILTERING_ANGLE)
             {
                filteredPoints.add(fullPointCloud[i]);
@@ -195,25 +204,21 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
       return filteredPoints;
    }
 
-   private static ArrayList<Sphere3D_F64> detectBalls(List<Point3f> pointCloud)
+   private static ArrayList<Sphere3D_F64> detectSpheres(List<Point3f> pointCloud, PointCloudShapeFinder pointCloudSphereFinder)
    {
       ArrayList<Sphere3D_F64> foundBalls = new ArrayList<Sphere3D_F64>();
       ArrayList<Point3D_F64> pointsNearBy = new ArrayList<Point3D_F64>();
 
-      for (Point3f tmpPoint : pointCloud)
+      for (int i = 0; i < pointCloud.size(); i++)
       {
+         Point3f tmpPoint = pointCloud.get(i);
          pointsNearBy.add(new Point3D_F64(tmpPoint.x, tmpPoint.y, tmpPoint.z));
       }
 
-      // find plane
-      ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac
-            .createDefault(SPHERE_DECECTION_ITERATIONS, SPHERE_DETECTION_ANGLE_TOLERANCE, SPHERE_DETECTION_RANSAC_DISTANCE_THRESHOLD, CloudShapeTypes.SPHERE);
-      configRansac.minimumPoints = SPHERE_DETECTION_MIN_PTS;
-      PointCloudShapeFinder findSpheres = FactoryPointCloudShape
-            .ransacSingleAll(new ConfigSurfaceNormals(SPHERE_DETECTION_NUM_NEIGHBORS, SPHERE_DETECTION_MAX_NEIGHBOR_DIST), configRansac);
+      pointCloudSphereFinder.process(pointsNearBy, null);
 
       // sort large to small
-      List<PointCloudShapeFinder.Shape> spheres = findSpheres.getFound();
+      List<PointCloudShapeFinder.Shape> spheres = pointCloudSphereFinder.getFound();
       Collections.sort(spheres, new Comparator<PointCloudShapeFinder.Shape>()
       {
          @Override public int compare(PointCloudShapeFinder.Shape o1, PointCloudShapeFinder.Shape o2)
@@ -222,76 +227,73 @@ public class FollowBallBehavior extends BehaviorInterface implements VideoStream
          }
       });
 
-      if (spheres.size() > 0)
+      for (int i = 0; i < spheres.size(); i++)
       {
-//         ballsFound = spheres.size();
-//         smallestRadius = ((Sphere3D_F64) spheres.get(0).getParameters()).getRadius();
-      }
+         PointCloudShapeFinder.Shape sphere = spheres.get(i);
+         Sphere3D_F64 sphereParams = sphere.getParameters();
 
-      for (PointCloudShapeFinder.Shape sphere : spheres)
-      {
-//         Sphere3D_F64 sphereParams = (Sphere3D_F64) sphere.getParameters();
-//         PrintTools.debug(DEBUG, this, "sphere radius" + sphereParams.getRadius() + " center " + sphereParams.getCenter());
-
-//         if ((sphereParams.getRadius() < BALL_RADIUS + 0.025f) && (sphereParams.getRadius() > BALL_RADIUS - 0.025f))// soccer ball -
-//         {
-//            foundBalls.add(sphereParams);
-//            PrintTools.debug(DEBUG, this, "------Found Soccer Ball radius" + sphereParams.getRadius() + " center " + sphereParams.getCenter());
-//
-//            RigidBodyTransform t = new RigidBodyTransform();
-//            t.setTranslation(sphereParams.getCenter().x, sphereParams.getCenter().y, sphereParams.getCenter().z);
-//         }
-
+         if ((sphereParams.getRadius() < MAX_BALL_RADIUS) && (sphereParams.getRadius() > MIN_BALL_RADIUS))
+            foundBalls.add(sphereParams);
       }
 
       return foundBalls;
    }
 
-   @Override public void initialize()
+   @Override
+   public void initialize()
    {
-      detectBall = true;
+      coloredCircularBlobDetectorBehaviorService.initialize();
    }
 
-   @Override public void pause()
-   {
-      sendPacketToController(new PauseWalkingMessage(true));
-      detectBall = false;
-   }
-
-   @Override public void stop()
+   @Override
+   public void pause()
    {
       sendPacketToController(new PauseWalkingMessage(true));
-      detectBall = false;
+      coloredCircularBlobDetectorBehaviorService.pause();
    }
 
-   @Override public void resume()
+   @Override
+   public void stop()
+   {
+      sendPacketToController(new PauseWalkingMessage(true));
+      coloredCircularBlobDetectorBehaviorService.stop();
+   }
+
+   @Override
+   public void resume()
    {
       sendPacketToController(new PauseWalkingMessage(false));
-      detectBall = true;
+      coloredCircularBlobDetectorBehaviorService.resume();
    }
 
-   @Override public boolean isDone()
+   @Override
+   public boolean isDone()
    {
       return false;
    }
 
-   @Override protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+   @Override
+   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
    }
 
-   @Override protected void passReceivedControllerObjectToChildBehaviors(Object object)
+   @Override
+   protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
    }
 
-   @Override public void enableActions()
+   @Override
+   public void enableActions()
    {
    }
 
-   @Override public void doPostBehaviorCleanup()
+   @Override
+   public void doPostBehaviorCleanup()
    {
    }
 
-   @Override public boolean hasInputBeenSet()
+   @Override
+   public boolean hasInputBeenSet()
    {
       return true;
    }

@@ -26,8 +26,14 @@ public class OneDoFState extends JointState<OneDegreeOfFreedomJoint>
    @Override
    public void get(OneDegreeOfFreedomJoint joint)
    {
-      joint.setQ(q);
-      joint.setQd(qd);
+      if(!Double.isNaN(q))
+      {
+         joint.setQ(q);
+      }
+      if(!Double.isNaN(qd))
+      {
+         joint.setQd(qd);
+      }
    }
 
    @Override

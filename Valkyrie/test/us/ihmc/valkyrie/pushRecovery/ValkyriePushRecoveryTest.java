@@ -7,8 +7,8 @@ import us.ihmc.darpaRoboticsChallenge.pushRecovery.DRCPushRecoveryTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 @DeployableTestClass(targets = TestPlanTarget.InDevelopment)
 public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
@@ -99,7 +99,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 25.2, targets = TestPlanTarget.InDevelopment)
+   @DeployableTestMethod(estimatedDuration = 25.2, targets = TestPlanTarget.Fast)
    @Test(timeout = 130000)
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
