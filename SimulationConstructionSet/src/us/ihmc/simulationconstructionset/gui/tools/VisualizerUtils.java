@@ -41,8 +41,9 @@ public class VisualizerUtils
 
       scs.addExtraJpanel(scrollPane, "Plotter Legend");
 
-      PlotterShowHideMenu menuPanel = plotter.getMenuPanel();
-      scs.addExtraJpanel(new JScrollPane(menuPanel), PlotterShowHideMenu.getPanelName());
+      JScrollPane menuScrollPanel = new JScrollPane(plotter.getMenuPanel());
+      menuScrollPanel.getVerticalScrollBar().setUnitIncrement(16);
+      scs.addExtraJpanel(menuScrollPanel, PlotterShowHideMenu.getPanelName());
 
       for (int i = 0; i < yoGraphicsListRegistries.length; i++)
       {
