@@ -57,7 +57,7 @@ public class ParameterSaver
       {
          for (Parameter parameter : parameters)
          {
-            writer.println(parameter.dump());
+            writer.print(parameter.dump() + "\n");
          }
       }
       catch (IOException e)
