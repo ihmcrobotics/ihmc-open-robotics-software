@@ -16,7 +16,7 @@ public class PacketRouter<T extends Enum<T>>
    private final T[] destinationConstants;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
    private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all destinations
-   private String[] packetTypesToDebug = null; //set to null to debug all packets
+   private String[] packetTypesToDebug = {"VideoPacket", "FisheyePacket"}; //set to null to debug all packets
    
    private final int BROADCAST = 0;
 
@@ -34,8 +34,7 @@ public class PacketRouter<T extends Enum<T>>
       communicatorDestinations = new HashMap<>();
       redirects = new EnumMap<>(destinationType);
       
-      if (DEBUG)
-         PrintTools.debug(this, "Creating Packet Router");
+      PrintTools.debug(DEBUG, this, "Creating Packet Router");
    }
 
    public void attachPacketCommunicator(T destination, final PacketCommunicator packetCommunicator)
@@ -61,8 +60,7 @@ public class PacketRouter<T extends Enum<T>>
       communicators.put(destination, packetCommunicator);
       communicatorDestinations.put(packetCommunicator, destination);
       
-      if (DEBUG)
-         PrintTools.debug(this, "Attached " + destination + " to the network processor");
+      PrintTools.debug(DEBUG, this, "Attached " + destination + " to the network processor");
    }
    
    private void checkCommunicatorId(final T destination)
@@ -90,7 +88,7 @@ public class PacketRouter<T extends Enum<T>>
    {
       T source = communicatorDestinations.get(sourceCommunicator);
 
-      if (shouldPrintDebugStatement(sourceCommunicator, packet.getDestination(), packet.getClass()))
+      if (shouldPrintDebugStatement(sourceCommunicator, packet.getDestination(), packet))
       {
          PrintTools.debug(this, "NP received " + packet.getClass().getSimpleName() + " heading for " + destinationConstants[packet.destination] + " from " + source + " at " + System.nanoTime());
       }
@@ -107,7 +105,7 @@ public class PacketRouter<T extends Enum<T>>
       }
       else if (destinationCommunicator != null && destinationCommunicator.isConnected())
       {
-         if(shouldPrintDebugStatement(sourceCommunicator, destination.ordinal(), packet.getClass()))
+         if(shouldPrintDebugStatement(sourceCommunicator, destination.ordinal(), packet))
          {
             PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + source + " to " + destination + " at " + System.nanoTime());
          }
@@ -165,7 +163,7 @@ public class PacketRouter<T extends Enum<T>>
          {
             if (destinationCommunicator != null && destinationCommunicator.isConnected())
             {
-               if(shouldPrintDebugStatement(sourceCommunicator, destination.ordinal(), packet.getClass()))
+               if(shouldPrintDebugStatement(sourceCommunicator, destination.ordinal(), packet))
                {
                   PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(sourceCommunicator) + " to " + destination + " at " + System.nanoTime());
                }
@@ -222,37 +220,38 @@ public class PacketRouter<T extends Enum<T>>
       redirects.remove(redirectFrom);
    }
    
-   private boolean shouldPrintDebugStatement(PacketCommunicator sourceCommunicator, int destinationCommunicatorId, Class<?> packetType)
+   private boolean shouldPrintDebugStatement(PacketCommunicator sourceCommunicator, int destinationCommunicatorId, Packet<?> packetType)
    {
       if (!DEBUG)
          return false;
-      
-      if(sourceCommunicatorIdToDebug != Integer.MIN_VALUE && sourceCommunicatorIdToDebug != communicatorDestinations.get(sourceCommunicator).ordinal())
+
+      if (sourceCommunicatorIdToDebug != Integer.MIN_VALUE && sourceCommunicatorIdToDebug != communicatorDestinations.get(sourceCommunicator).ordinal())
       {
          return false;
       }
-      
-      if(destinationCommunicatorIdToDebug != Integer.MIN_VALUE && destinationCommunicatorIdToDebug != destinationCommunicatorId)
+
+      if (destinationCommunicatorIdToDebug != Integer.MIN_VALUE && destinationCommunicatorIdToDebug != destinationCommunicatorId)
       {
          return false;
       }
-      
-      if(packetTypesToDebug != null )
+
+      if (packetTypesToDebug != null)
       {
-         for (int i=0; i< packetTypesToDebug.length; i++)
+         for (int i = 0; i < packetTypesToDebug.length; i++)
          {
-            if(packetTypesToDebug[i].equals(packetType.getSimpleName())) {
+            if (packetTypesToDebug[i].equals(packetType.getClass().getSimpleName()))
+            {
                return true;
             }
          }
          return false;
-      }    
+      }
       return true;
    }
    
-   
-   //Put these here so they aty not final, I can change these debug variables at runtime
-   public void setDEBUG(boolean debug)
+   // Put these here so they are not final, I can change these debug variables at runtime.
+   @SuppressWarnings("unused")
+   private void setDEBUG(boolean debug)
    {
       DEBUG = debug;
    }
@@ -266,16 +265,6 @@ public class PacketRouter<T extends Enum<T>>
    {
       this.destinationCommunicatorIdToDebug = destinationCommunicatorIdToDebug;
    }
-   
-   public void setPacketTypeToDebug(Class<?> packetTypeToDebug)
-   {
-      this.packetTypesToDebug = new String[]{ packetTypeToDebug.getSimpleName() };
-   }
-   
-//   public void setPacketTypesToDebug(Class<?>[] packetTypesToDebug)
-//   {
-//      this.packetTypesToDebug = packetTypesToDebug;
-//   }
    
    private class PacketRoutingAction implements GlobalPacketConsumer
    {

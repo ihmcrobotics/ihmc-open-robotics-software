@@ -114,12 +114,28 @@ public class GroundPlaneEstimator
    }
 
    /**
+    * @param point : point in world frame to be vertically projected onto ground plane
+    */
+   public void projectZ(Point3d point)
+   {
+      point.setZ(groundPlane.getZOnPlane(point.getX(), point.getY()));
+   }
+
+   /**
     * @param point : point to be orthogonally projected onto ground plane
     */
    public void projectOrthogonal(FramePoint point)
    {
       point.changeFrame(ReferenceFrame.getWorldFrame());
       groundPlane.orthogonalProjection(point.getPoint());
+   }
+
+   /**
+    * @param point : point in world frame to be orthogonally projected onto ground plane
+    */
+   public void projectOrthogonal(Point3d point)
+   {
+      groundPlane.orthogonalProjection(point);
    }
 
    /**

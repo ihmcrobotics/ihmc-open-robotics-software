@@ -7,6 +7,7 @@ import java.io.IOException;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.tools.io.DatagramInputStream;
 import us.ihmc.tools.io.DatagramOutputStream;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class UDPYoWhiteBoard extends DataStreamYoWhiteBoard
 {
@@ -54,20 +55,32 @@ public class UDPYoWhiteBoard extends DataStreamYoWhiteBoard
             System.out.println("UDPYoWhiteBoard created and set input streams.");
          }
 
-         super.run();
+         super.setupAndRunHandlingThread();
       }
       catch (IOException e)
       {
          e.printStackTrace();
       }
    }
+   
+   public void startUDPThread()
+   {
+      ThreadTools.startAThread(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            UDPYoWhiteBoard.this.run();
+         }
+      }, getName() + "UDPThread");
+   }
 
+   @Override
    protected void allowThrowOutStalePacketsIfYouWish()
    {
       if (throwOutStalePackets)
       {
          datagramInputStream.setThrowOutStalePackets(throwOutStalePackets);
       }
-      
    }
 }

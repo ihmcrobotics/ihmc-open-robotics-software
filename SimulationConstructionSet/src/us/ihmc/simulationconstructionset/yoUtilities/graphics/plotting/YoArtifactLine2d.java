@@ -54,9 +54,10 @@ public class YoArtifactLine2d extends Artifact
       if (stroke != null)
          ((Graphics2D) graphics).setStroke(stroke);
 
-      plotterGraphics.setCenter(Xcenter, Ycenter);
-      plotterGraphics.setScale(scaleFactor);
-      plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.1);
+//      plotterGraphics.setCenter(Xcenter, Ycenter);
+//      plotterGraphics.setScale(scaleFactor);
+//      plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.0);
+      graphics.drawLine(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
    }
 
    public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)

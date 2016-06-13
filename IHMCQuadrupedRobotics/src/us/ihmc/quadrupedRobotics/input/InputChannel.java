@@ -17,8 +17,5 @@ public enum InputChannel
    BUTTON_B,
    BUTTON_X,
    BUTTON_Y,
-   D_PAD_UP,
-   D_PAD_RIGHT,
-   D_PAD_DOWN,
-   D_PAD_LEFT,
+   D_PAD,
 }
