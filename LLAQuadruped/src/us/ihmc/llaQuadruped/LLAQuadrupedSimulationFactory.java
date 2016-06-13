@@ -268,7 +268,7 @@ public class LLAQuadrupedSimulationFactory
    public void start()
    {
       scs.startOnAThread();
-      scs.simulate(0.3);
+      scs.simulate(0.5);
    }
 
    public static void main(String[] commandLineArguments)
