@@ -15,6 +15,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListener
@@ -22,34 +24,49 @@ public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListe
    private static final long serialVersionUID = 6578501007583079034L;
    private static final String panelName = "Plotter Menu";
 
-   private HashMap<String, Artifact> artifactList = new HashMap<>();
-   private ArrayList<JPanel> checkBoxPanels = new ArrayList<>();
+   private final Plotter plotter;
 
-   public PlotterShowHideMenu()
+   private HashMap<String, Artifact> artifactList = new HashMap<>();
+   private ArrayList<JComponent> componentList = new ArrayList<>();
+
+   public PlotterShowHideMenu(Plotter plotter)
    {
       super(new GridLayout(0, 1));
+      this.plotter = plotter;
    }
 
    @Override
    public void artifactsChanged(ArrayList<Artifact> newArtifacts)
    {
-      for (JPanel checkBox : checkBoxPanels)
+      for (JComponent checkBox : componentList)
       {
          this.remove(checkBox);
       }
-      checkBoxPanels.clear();
+      componentList.clear();
+      artifactList.clear();
 
       Collections.sort(newArtifacts, new Comparator<Artifact>()
       {
          @Override
          public int compare(Artifact o1, Artifact o2)
          {
-            return o1.getName().compareTo(o2.getName());
+            String o1Str = o1.getLabel() + o1.getName();
+            String o2Str = o2.getLabel() + o2.getName();
+            return o1Str.compareTo(o2Str);
          }
       });
 
+      String label = null;
       for (Artifact artifact : newArtifacts)
       {
+         if (label != artifact.getLabel())
+         {
+            label = artifact.getLabel();
+            JLabel labelPanel = new JLabel(label);
+            componentList.add(labelPanel);
+            this.add(labelPanel);
+         }
+
          String name = artifact.getName();
          artifactList.put(name, artifact);
 
@@ -63,6 +80,7 @@ public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListe
                String name = checkBox.getText();
                boolean visible = checkBox.isSelected();
                artifactList.get(name).setVisible(visible);
+               plotter.repaint();
             }
          });
 
@@ -79,7 +97,7 @@ public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListe
          layoutConstraints.gridx = 1;
          checkBoxPanel.add(checkBox, layoutConstraints);
 
-         checkBoxPanels.add(checkBoxPanel);
+         componentList.add(checkBoxPanel);
          this.add(checkBoxPanel);
       }
    }

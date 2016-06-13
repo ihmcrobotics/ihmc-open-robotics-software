@@ -84,7 +84,7 @@
         </inertia>
       </inertial>
       <visual name='front_left_thigh_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 0 3.14159</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -101,7 +101,7 @@
       <child>front_left_thigh</child>
       <parent>front_left_hip</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -142,7 +142,7 @@
       <child>front_left_shin</child>
       <parent>front_left_thigh</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -209,7 +209,7 @@
         </inertia>
       </inertial>
       <visual name='front_right_thigh_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 0 3.14159</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -226,7 +226,7 @@
       <child>front_right_thigh</child>
       <parent>front_right_hip</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -267,7 +267,7 @@
       <child>front_right_shin</child>
       <parent>front_right_thigh</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -334,7 +334,7 @@
         </inertia>
       </inertial>
       <visual name='hind_left_thigh_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -351,7 +351,7 @@
       <child>hind_left_thigh</child>
       <parent>hind_left_hip</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -392,7 +392,7 @@
       <child>hind_left_shin</child>
       <parent>hind_left_thigh</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -459,7 +459,7 @@
         </inertia>
       </inertial>
       <visual name='hind_right_thigh_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -476,7 +476,7 @@
       <child>hind_right_thigh</child>
       <parent>hind_right_hip</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -517,7 +517,7 @@
       <child>hind_right_shin</child>
       <parent>hind_right_thigh</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
