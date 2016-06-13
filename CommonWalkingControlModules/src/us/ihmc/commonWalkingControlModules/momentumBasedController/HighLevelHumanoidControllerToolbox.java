@@ -332,7 +332,7 @@ public class HighLevelHumanoidControllerToolbox
          }
       }
 
-      String graphicListName = "HumanoidControllerToolbox";
+      String graphicListName = getClass().getSimpleName();
       if (yoGraphicsListRegistry != null)
       {
          YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), ROTATED_CROSS);

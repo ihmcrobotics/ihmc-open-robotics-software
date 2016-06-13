@@ -40,7 +40,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactL
 
 public class ICPPlanner
 {
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    private static final double ICP_CORNER_POINT_SIZE = 0.004;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -148,7 +148,7 @@ public class ICPPlanner
 
       parentRegistry.addChild(registry);
 
-      if (VISUALIZE && yoGraphicsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          setupVisualizers(yoGraphicsListRegistry);
       }
@@ -156,8 +156,8 @@ public class ICPPlanner
 
    private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      YoGraphicsList yoGraphicsList = new YoGraphicsList("ICPPlanner");
-      ArtifactList artifactList = new ArtifactList("ICPPlanner");
+      YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
+      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
       referenceCMPsCalculator.createVisualizerForConstantCMPs(yoGraphicsList, artifactList);
 
@@ -187,6 +187,9 @@ public class ICPPlanner
       artifactList.add(singleSupportFinalICPViz.createArtifact());
 
       icpSingleSupportTrajectoryGenerator.createVisualizers(yoGraphicsList, artifactList);
+
+      artifactList.setVisible(VISUALIZE);
+      yoGraphicsList.setVisible(VISUALIZE);
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       yoGraphicsListRegistry.registerArtifactList(artifactList);
