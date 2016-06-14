@@ -15,7 +15,7 @@
         </inertia>
       </inertial>
       <visual name='body_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <geometry>
           <box>
             <size>0.6 0.2 0.01</size>
@@ -28,9 +28,9 @@
       </velocity_decay>
     </link>
     <link name='front_left_hip'>
-      <pose>0.04 0.206 0 0 -0 0</pose>
+      <pose>0.04 0.206 0 0 0 0</pose>
       <inertial>
-        <pose>0.098 0 0 0 -0 0</pose>
+        <pose>0.098 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -70,9 +70,9 @@
       </axis>
     </joint>
     <link name='front_left_thigh'>
-      <pose>0.236 0.27 0 0 -0 0</pose>
+      <pose>0.236 0.27 0 0 0 0</pose>
       <inertial>
-        <pose>0.098 0 0 0 -0 0</pose>
+        <pose>0.098 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -84,7 +84,7 @@
         </inertia>
       </inertial>
       <visual name='front_left_thigh_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -112,9 +112,9 @@
       </axis>
     </joint>
     <link name='front_left_shin'>
-      <pose>0.236 0.27 -0.196 0 -0 0</pose>
+      <pose>0.236 0.27 -0.196 0 0 0</pose>
       <inertial>
-        <pose>0 0 -0.098 0 -0 0</pose>
+        <pose>0 0 -0.098 0 0 0</pose>
         <mass>0.5</mass>
         <inertia>
           <ixx>0.005</ixx>
@@ -126,7 +126,7 @@
         </inertia>
       </inertial>
       <visual name='front_left_shin_visual'>
-        <pose>0 0 -0.095 0 -0 0</pose>
+        <pose>0 0 -0.095 0 0 0</pose>
         <geometry>
           <box>
             <size>0.01 0.01 0.19</size>
@@ -153,9 +153,9 @@
       </axis>
     </joint>
     <link name='front_right_hip'>
-      <pose>0.04 -0.206 0 0 -0 0</pose>
+      <pose>0.04 -0.206 0 0 0 0</pose>
       <inertial>
-        <pose>0.098 0 0 0 -0 0</pose>
+        <pose>0.098 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -195,9 +195,9 @@
       </axis>
     </joint>
     <link name='front_right_thigh'>
-      <pose>0.236 -0.27 0 0 -0 0</pose>
+      <pose>0.236 -0.27 0 0 0 0</pose>
       <inertial>
-        <pose>0.098 0 0 0 -0 0</pose>
+        <pose>0.098 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -209,7 +209,7 @@
         </inertia>
       </inertial>
       <visual name='front_right_thigh_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -237,9 +237,9 @@
       </axis>
     </joint>
     <link name='front_right_shin'>
-      <pose>0.236 -0.27 -0.196 0 -0 0</pose>
+      <pose>0.236 -0.27 -0.196 0 0 0</pose>
       <inertial>
-        <pose>0 0 -0.098 0 -0 0</pose>
+        <pose>0 0 -0.098 0 0 0</pose>
         <mass>0.5</mass>
         <inertia>
           <ixx>0.005</ixx>
@@ -251,7 +251,7 @@
         </inertia>
       </inertial>
       <visual name='front_right_shin_visual'>
-        <pose>0 0 -0.095 0 -0 0</pose>
+        <pose>0 0 -0.095 0 0 0</pose>
         <geometry>
           <box>
             <size>0.01 0.01 0.19</size>
@@ -278,9 +278,9 @@
       </axis>
     </joint>
     <link name='hind_left_hip'>
-      <pose>-0.04 0.206 0 0 -0 0</pose>
+      <pose>-0.04 0.206 0 0 0 0</pose>
       <inertial>
-        <pose>-0.098 0 0 0 -0 0</pose>
+        <pose>-0.098 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -320,9 +320,9 @@
       </axis>
     </joint>
     <link name='hind_left_thigh'>
-      <pose>-0.236 0.27 0 0 -0 0</pose>
+      <pose>-0.236 0.27 0 0 0 0</pose>
       <inertial>
-        <pose>0.098 0 0 0 -0 0</pose>
+        <pose>0.098 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -334,7 +334,7 @@
         </inertia>
       </inertial>
       <visual name='hind_left_thigh_visual'>
-        <pose>0 0 0 0 -0 3.14159</pose>
+        <pose>0 0 0 0 0 3.14159</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -362,9 +362,9 @@
       </axis>
     </joint>
     <link name='hind_left_shin'>
-      <pose>-0.236 0.27 -0.196 0 -0 0</pose>
+      <pose>-0.236 0.27 -0.196 0 0 0</pose>
       <inertial>
-        <pose>0 0 -0.098 0 -0 0</pose>
+        <pose>0 0 -0.098 0 0 0</pose>
         <mass>0.5</mass>
         <inertia>
           <ixx>0.005</ixx>
@@ -376,7 +376,7 @@
         </inertia>
       </inertial>
       <visual name='hind_left_shin_visual'>
-        <pose>0 0 -0.095 0 -0 0</pose>
+        <pose>0 0 -0.095 0 0 0</pose>
         <geometry>
           <box>
             <size>0.01 0.01 0.19</size>
@@ -403,9 +403,9 @@
       </axis>
     </joint>
     <link name='hind_right_hip'>
-      <pose>-0.04 -0.206 0 0 -0 0</pose>
+      <pose>-0.04 -0.206 0 0 0 0</pose>
       <inertial>
-        <pose>-0.098 0 0 0 -0 0</pose>
+        <pose>-0.098 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -445,9 +445,9 @@
       </axis>
     </joint>
     <link name='hind_right_thigh'>
-      <pose>-0.236 -0.27 0 0 -0 0</pose>
+      <pose>-0.236 -0.27 0 0 0 0</pose>
       <inertial>
-        <pose>0.098 0 0 0 -0 0</pose>
+        <pose>0.098 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -459,7 +459,7 @@
         </inertia>
       </inertial>
       <visual name='hind_right_thigh_visual'>
-        <pose>0 0 0 0 -0 3.14159</pose>
+        <pose>0 0 0 0 0 3.14159</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -487,9 +487,9 @@
       </axis>
     </joint>
     <link name='hind_right_shin'>
-      <pose>-0.236 -0.27 -0.196 0 -0 0</pose>
+      <pose>-0.236 -0.27 -0.196 0 0 0</pose>
       <inertial>
-        <pose>0 0 -0.098 0 -0 0</pose>
+        <pose>0 0 -0.098 0 0 0</pose>
         <mass>0.5</mass>
         <inertia>
           <ixx>0.005</ixx>
@@ -501,7 +501,7 @@
         </inertia>
       </inertial>
       <visual name='hind_right_shin_visual'>
-        <pose>0 0 -0.095 0 -0 0</pose>
+        <pose>0 0 -0.095 0 0 0</pose>
         <geometry>
           <box>
             <size>0.01 0.01 0.19</size>
