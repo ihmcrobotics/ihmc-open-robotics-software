@@ -4,11 +4,11 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.quadrupedRobotics.util.LowPassFilter;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.util.LowPassFilter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -40,6 +40,7 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<FrameVector> soleVirtualForce;
    private final QuadrantDependentList<FrameVector> soleContactForce;
    private final QuadrantDependentList<FramePoint> solePosition;
+   private final QuadrantDependentList<FrameVector[]> jointTorques;
    private final QuadrantDependentList<YoFrameVector> yoSoleVirtualForce;
    private final QuadrantDependentList<YoFrameVector> yoSoleContactForce;
    private final QuadrantDependentList<YoFramePoint> yoSolePosition;
@@ -79,11 +80,17 @@ public class QuadrupedVirtualModelController
       solePosition = new QuadrantDependentList<>();
       soleVirtualForce = new QuadrantDependentList<>();
       soleContactForce = new QuadrantDependentList<>();
+      jointTorques = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePosition.set(robotQuadrant, new FramePoint(worldFrame));
          soleVirtualForce.set(robotQuadrant, new FrameVector(worldFrame));
          soleContactForce.set(robotQuadrant, new FrameVector(worldFrame));
+         jointTorques.set(robotQuadrant, new FrameVector[legJointNames.length]);
+         for (int i = 0; i < legJointNames.length; i++)
+         {
+            jointTorques.get(robotQuadrant)[i] = new FrameVector(worldFrame);
+         }
       }
 
       // initialize yo variables
@@ -244,12 +251,9 @@ public class QuadrupedVirtualModelController
             joint.setTau(tau);
             
             // update joint torque vectors
-            FrameVector frameTuple = yoJointTorques.get(robotQuadrant)[index].getFrameTuple();
-            frameTuple.setToZero(joint.getFrameBeforeJoint());
-            frameTuple.set(tau * joint.getJointAxis().getX(), tau * joint.getJointAxis().getY(), tau * joint.getJointAxis().getZ());
-            frameTuple.changeFrame(worldFrame);
-            yoJointTorques.get(robotQuadrant)[index].setWithoutChecks(frameTuple);
-            yoJointTorqueGraphicPositions.get(robotQuadrant)[index].setFromReferenceFrame(joint.getFrameBeforeJoint());
+            jointTorques.get(robotQuadrant)[index].setToZero(joint.getFrameBeforeJoint());
+            jointTorques.get(robotQuadrant)[index].set(tau * joint.getJointAxis().getX(), tau * joint.getJointAxis().getY(), tau * joint.getJointAxis().getZ());
+            jointTorques.get(robotQuadrant)[index].changeFrame(worldFrame);
             
             index++;
          }
@@ -261,6 +265,10 @@ public class QuadrupedVirtualModelController
          yoSoleVirtualForce.get(robotQuadrant).setAndMatchFrame(soleVirtualForce.get(robotQuadrant));
          yoSoleContactForce.get(robotQuadrant).setAndMatchFrame(soleContactForce.get(robotQuadrant));
          yoSolePosition.get(robotQuadrant).setAndMatchFrame(solePosition.get(robotQuadrant));
+         for (int i = 0; i < legJointNames.length; i++)
+         {
+            yoJointTorques.get(robotQuadrant)[i].setWithoutChecks(jointTorques.get(robotQuadrant)[i]);
+         }
       }
 
       // update yo graphics
@@ -276,10 +284,11 @@ public class QuadrupedVirtualModelController
             yoSoleContactForceGraphicPosition.get(robotQuadrant).setAndMatchFrame(solePosition.get(robotQuadrant));
          else
             yoSoleContactForceGraphicPosition.get(robotQuadrant).set(1E6, 1E6, 1E6);
-         
          for (int i = 0; i < legJointNames.length; i++)
          {
-            if (!yoJointTorqueGraphicsVisible.get(robotQuadrant).getBooleanValue())
+            if (yoJointTorqueGraphicsVisible.get(robotQuadrant).getBooleanValue())
+               yoJointTorqueGraphicPositions.get(robotQuadrant)[i].setFromReferenceFrame(referenceFrames.getLegJointFrame(robotQuadrant, legJointNames[i]));
+            else
                yoJointTorqueGraphicPositions.get(robotQuadrant)[i].set(1E6, 1E6, 1E6);
          }
       }
