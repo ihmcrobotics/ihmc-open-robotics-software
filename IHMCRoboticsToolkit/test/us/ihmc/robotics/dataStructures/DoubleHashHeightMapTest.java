@@ -14,9 +14,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import javax.vecmath.GMatrix;
 import javax.vecmath.Point3d;
 
+import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.InclusionFunction;
@@ -70,7 +70,8 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
    {
       double gridResolution = 1;
       HeightMapWithPoints map = new DoubleHashHeightMap(gridResolution);
-      GMatrix matrix = new GMatrix(7, 7, new double[] { 
+      DenseMatrix64F matrix = new DenseMatrix64F(7, 7);
+      matrix.setData(new double[] { 
             0, 0, 0, 0, 3, 0, 0, 
             0, 0, 8, 8, 0, 0, 0, 
             0, 0, 0, 0, 0, 1, 0, 
@@ -294,7 +295,8 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
    {
       double b = 10000;    // borderOfExpectedFootPlacement
        double gridResolution = 0.01;
-      GMatrix matrix = new GMatrix(11, 11, new double[]
+      DenseMatrix64F matrix = new DenseMatrix64F(11, 11);
+      matrix.setData(new double[]
       {
          b, b, b, b, b, b, b, b, b, b, b, 
          b, b, b, 0, 0, 0, 0, 0, b, b, b, 
