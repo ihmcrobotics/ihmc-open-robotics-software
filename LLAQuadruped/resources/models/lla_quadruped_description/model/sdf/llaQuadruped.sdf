@@ -15,7 +15,7 @@
         </inertia>
       </inertial>
       <visual name='body_visual'>
-        <pose>0 0 0 0 0 0</pose>
+        <pose>0.3 0 0 0 0 0</pose>
         <geometry>
           <box>
             <size>0.6 0.2 0.01</size>
@@ -28,7 +28,7 @@
       </velocity_decay>
     </link>
     <link name='front_left_hip'>
-      <pose>0.04 0.206 0 0 0 0</pose>
+      <pose>0.34 0.206 0 0 0 0</pose>
       <inertial>
         <pose>0.098 0 0 0 0 0</pose>
         <mass>2</mass>
@@ -70,7 +70,7 @@
       </axis>
     </joint>
     <link name='front_left_thigh'>
-      <pose>0.236 0.27 0 0 0 0</pose>
+      <pose>0.536 0.27 0 0 0 0</pose>
       <inertial>
         <pose>0.098 0 0 0 0 0</pose>
         <mass>2</mass>
@@ -112,7 +112,7 @@
       </axis>
     </joint>
     <link name='front_left_shin'>
-      <pose>0.236 0.27 -0.196 0 0 0</pose>
+      <pose>0.536 0.27 -0.196 0 0 0</pose>
       <inertial>
         <pose>0 0 -0.098 0 0 0</pose>
         <mass>0.5</mass>
@@ -153,7 +153,7 @@
       </axis>
     </joint>
     <link name='front_right_hip'>
-      <pose>0.04 -0.206 0 0 0 0</pose>
+      <pose>0.34 -0.206 0 0 0 0</pose>
       <inertial>
         <pose>0.098 0 0 0 0 0</pose>
         <mass>2</mass>
@@ -195,7 +195,7 @@
       </axis>
     </joint>
     <link name='front_right_thigh'>
-      <pose>0.236 -0.27 0 0 0 0</pose>
+      <pose>0.536 -0.27 0 0 0 0</pose>
       <inertial>
         <pose>0.098 0 0 0 0 0</pose>
         <mass>2</mass>
@@ -237,7 +237,7 @@
       </axis>
     </joint>
     <link name='front_right_shin'>
-      <pose>0.236 -0.27 -0.196 0 0 0</pose>
+      <pose>0.536 -0.27 -0.196 0 0 0</pose>
       <inertial>
         <pose>0 0 -0.098 0 0 0</pose>
         <mass>0.5</mass>
@@ -278,7 +278,7 @@
       </axis>
     </joint>
     <link name='hind_left_hip'>
-      <pose>-0.04 0.206 0 0 0 0</pose>
+      <pose>0.26 0.206 0 0 0 0</pose>
       <inertial>
         <pose>-0.098 0 0 0 0 0</pose>
         <mass>2</mass>
@@ -320,7 +320,7 @@
       </axis>
     </joint>
     <link name='hind_left_thigh'>
-      <pose>-0.236 0.27 0 0 0 0</pose>
+      <pose>0.064 0.27 0 0 0 0</pose>
       <inertial>
         <pose>0.098 0 0 0 0 0</pose>
         <mass>2</mass>
@@ -362,7 +362,7 @@
       </axis>
     </joint>
     <link name='hind_left_shin'>
-      <pose>-0.236 0.27 -0.196 0 0 0</pose>
+      <pose>0.064 0.27 -0.196 0 0 0</pose>
       <inertial>
         <pose>0 0 -0.098 0 0 0</pose>
         <mass>0.5</mass>
@@ -403,7 +403,7 @@
       </axis>
     </joint>
     <link name='hind_right_hip'>
-      <pose>-0.04 -0.206 0 0 0 0</pose>
+      <pose>0.26 -0.206 0 0 0 0</pose>
       <inertial>
         <pose>-0.098 0 0 0 0 0</pose>
         <mass>2</mass>
@@ -445,7 +445,7 @@
       </axis>
     </joint>
     <link name='hind_right_thigh'>
-      <pose>-0.236 -0.27 0 0 0 0</pose>
+      <pose>0.064 -0.27 0 0 0 0</pose>
       <inertial>
         <pose>0.098 0 0 0 0 0</pose>
         <mass>2</mass>
@@ -487,7 +487,7 @@
       </axis>
     </joint>
     <link name='hind_right_shin'>
-      <pose>-0.236 -0.27 -0.196 0 0 0</pose>
+      <pose>0.064 -0.27 -0.196 0 0 0</pose>
       <inertial>
         <pose>0 0 -0.098 0 0 0</pose>
         <mass>0.5</mass>
