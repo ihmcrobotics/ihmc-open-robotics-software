@@ -60,7 +60,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.geometry.HumanEvaluationLine2dTest.class,
    us.ihmc.robotics.geometry.InertiaToolsTest.class,
    us.ihmc.robotics.geometry.InPlaceConvexHullCalculator2dTest.class,
-   us.ihmc.robotics.geometry.IterativeBestFitPlaneCalculatorTest.class,
    us.ihmc.robotics.geometry.LeastSquaresZPlaneFitterTest.class,
    us.ihmc.robotics.geometry.Line2dTest.class,
    us.ihmc.robotics.geometry.LineSegment2dTest.class,
