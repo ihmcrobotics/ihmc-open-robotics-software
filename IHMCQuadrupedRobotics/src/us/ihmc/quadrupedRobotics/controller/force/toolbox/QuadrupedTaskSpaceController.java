@@ -1,9 +1,9 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.quadrupedRobotics.mechanics.contactForceOptimization.QuadrupedContactForceLimits;
-import us.ihmc.quadrupedRobotics.mechanics.contactForceOptimization.QuadrupedContactForceOptimization;
-import us.ihmc.quadrupedRobotics.mechanics.contactForceOptimization.QuadrupedContactForceOptimizationSettings;
+import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.QuadrupedContactForceLimits;
+import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.QuadrupedContactForceOptimization;
+import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.QuadrupedContactForceOptimizationSettings;
 import us.ihmc.quadrupedRobotics.mechanics.virtualModelController.QuadrupedVirtualModelController;
 import us.ihmc.quadrupedRobotics.mechanics.virtualModelController.QuadrupedVirtualModelControllerSettings;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
