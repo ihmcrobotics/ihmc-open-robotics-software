@@ -41,6 +41,14 @@ public class QuadrupedModelPredictiveControllerWithLaneChange implements Quadrup
    private final DenseMatrix64F CmSB = new DenseMatrix64F(2, 6);
    private final DenseMatrix64F CmSx0py0 = new DenseMatrix64F(2, 1);
 
+   private int numberOfContacts = 0;
+   private int numberOfIntervals = 0;
+   private int numberOfPreviewSteps = 0;
+
+   private final double maxPreviewTime = 10;
+   private final double copRegularization = 1;
+   private final double stepAdjustmentRegularization = 1000000;
+
    public QuadrupedModelPredictiveControllerWithLaneChange(DivergentComponentOfMotionEstimator dcmPositionEstimator, int maxPreviewSteps)
    {
       this.linearInvertedPendulumModel = dcmPositionEstimator.getLinearInvertedPendulumModel();
@@ -64,44 +72,120 @@ public class QuadrupedModelPredictiveControllerWithLaneChange implements Quadrup
       // u0, u1, u2, u3 are the normalized contact pressures for each quadrant and
       // u4, u5 are the x and y step adjustment in meters
 
-      double copRegularization = 1;
-      double stepAdjustmentRegularization = 1000000;
-      double maxPreviewTime = 10;
-
-      int rowOffset, columnOffset;
-      stepAdjustmentVector.changeFrame(ReferenceFrame.getWorldFrame());
+      // Compute current divergent component of motion.
       dcmPositionEstimator.compute(currentDcmEstimate, currentComVelocity);
       currentDcmEstimate.changeFrame(ReferenceFrame.getWorldFrame());
+      cmpPositionSetpoint.setToZero(ReferenceFrame.getWorldFrame());
+      stepAdjustmentVector.changeFrame(ReferenceFrame.getWorldFrame());
 
-      int nContacts  = 0;
+      // Compute current number of contacts.
+      numberOfContacts = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
          {
-            nContacts++;
+            numberOfContacts++;
          }
       }
 
-      int nPreviewSteps = 1;
+      // Compute number of steps occurring inside preview window.
+      numberOfPreviewSteps = 1;
       for (int i = 1; i < queuedSteps.size(); i++)
       {
          QuadrupedTimedStep step = queuedSteps.get(i);
-         if ((step.getTimeInterval().getEndTime() - currentTime) < maxPreviewTime)
+         if (step.getTimeInterval().getEndTime() - currentTime < maxPreviewTime)
          {
-            nPreviewSteps++;
+            numberOfPreviewSteps++;
          }
       }
 
-      int nIntervals = timedStepPressurePlanner.compute(nPreviewSteps, queuedSteps, currentSolePosition, currentContactState, currentTime);
-      x0.reshape(2 * nIntervals, 1);             // center of pressure offset
-      y0.reshape(2, 1);                          // final divergent component of motion offset
-      B.reshape(2 * nIntervals, nContacts + 2);  // center of pressure map
-      C.reshape(2, 2 * nIntervals);              // final divergent component of motion map
-      S.reshape(2, 2 * nIntervals);              // final interval selection matrix
+      // Compute nominal piecewise center of pressure plan.
+      numberOfIntervals = timedStepPressurePlanner.compute(numberOfPreviewSteps, queuedSteps, currentSolePosition, currentContactState, currentTime);
+
+      // Solve constrained quadratic program.
+      DenseMatrix64F A = qpCostMatrix;
+      DenseMatrix64F b = qpCostVector;
+      DenseMatrix64F Aeq = qpEqualityMatrix;
+      DenseMatrix64F beq = qpEqualityVector;
+      DenseMatrix64F Ain = qpInequalityMatrix;
+      DenseMatrix64F bin = qpInequalityVector;
+
+      initializeCostTerms(currentContactState);
+      initializeEqualityConstraints(currentContactState, currentSolePosition);
+      initializeInequalityConstraints();
+
+      DenseMatrix64F u = qpSolutionVector;
+      u.reshape(numberOfContacts + 2, 1);
+      try
+      {
+         qpSolver.solve(A, b, Aeq, beq, Ain, bin, u, false);
+      }
+      catch (NoConvergenceException e)
+      {
+         System.err.println("NoConvergenceException: " + e.getMessage());
+      }
+
+      // Compute optimal centroidal moment pivot and step adjustment
+      int rowOffset = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
+         {
+            double normalizedContactPressure = u.get(rowOffset++, 0);
+            currentSolePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+            addPointWithScaleFactor(cmpPositionSetpoint, currentSolePosition.get(robotQuadrant), normalizedContactPressure);
+         }
+      }
+      for (Direction direction : Direction.values2D())
+      {
+         stepAdjustmentVector.set(direction, u.get(rowOffset++, 0));
+      }
+   }
+
+   private void initializeCostTerms(QuadrantDependentList<ContactState> currentContactState)
+   {
+      // Initialize cost terms. (min_u u'Au + b'u)
+      DenseMatrix64F A = qpCostMatrix;
+      A.reshape(numberOfContacts + 2, numberOfContacts + 2);
+      A.zero();
+      for (int i = 0; i < numberOfContacts; i++)
+      {
+         A.set(i, i, copRegularization);
+      }
+      for (int i = numberOfContacts; i < numberOfContacts + 2; i++)
+      {
+         A.set(i, i, stepAdjustmentRegularization);
+      }
+
+      DenseMatrix64F b = qpCostVector;
+      b.reshape(numberOfContacts + 2, 1);
+      b.zero();
+
+      int rowOffset = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
+         {
+            b.set(rowOffset++, 0, timedStepPressurePlanner.getNormalizedPressureContributedByQuadrant(robotQuadrant, 0));
+         }
+      }
+      CommonOps.multTransA(A, b, b);
+   }
+
+   private void initializeEqualityConstraints(QuadrantDependentList<ContactState> currentContactState, QuadrantDependentList<FramePoint> currentSolePosition)
+   {
+      // Initialize equality constraints. (Aeq u = beq)
+      x0.reshape(2 * numberOfIntervals, 1);                    // center of pressure offset
+      y0.reshape(2, 1);                                        // final divergent component of motion offset
+      B.reshape(2 * numberOfIntervals, numberOfContacts + 2);  // center of pressure map
+      C.reshape(2, 2 * numberOfIntervals);                     // final divergent component of motion map
+      S.reshape(2, 2 * numberOfIntervals);                     // final interval selection matrix
       B.zero();
       C.zero();
       S.zero();
-      rowOffset = 0;
+
+      int rowOffset = 0;
+      int columnOffset = 0;
       for (Direction direction : Direction.values2D())
       {
          columnOffset = 0;
@@ -115,127 +199,74 @@ public class QuadrupedModelPredictiveControllerWithLaneChange implements Quadrup
             }
          }
 
-         for (int i = 0; i < nIntervals; i++)
+         for (int i = 0; i < numberOfIntervals; i++)
          {
             timedStepPressurePlanner.getCenterOfPressureAtStartOfInterval(i).changeFrame(ReferenceFrame.getWorldFrame());
             x0.set(i * 2 + rowOffset, 0, timedStepPressurePlanner.getCenterOfPressureAtStartOfInterval(i).get(direction));
-            B.set(i * 2 + rowOffset, nContacts + rowOffset, timedStepPressurePlanner.getNormalizedPressureContributedByQueuedSteps(i));
+            B.set(i * 2 + rowOffset, numberOfContacts + rowOffset, timedStepPressurePlanner.getNormalizedPressureContributedByQueuedSteps(i));
          }
          x0.set(rowOffset, 0, 0);
 
          double naturalFrequency = linearInvertedPendulumModel.getNaturalFrequency();
-         for (int i = nIntervals - 2; i >= 0; i--)
+         for (int i = numberOfIntervals - 2; i >= 0; i--)
          {
-            double expn = Math.exp(naturalFrequency * (timedStepPressurePlanner.getTimeAtStartOfInterval(nIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1)));
+            double expn = Math.exp(naturalFrequency * (timedStepPressurePlanner.getTimeAtStartOfInterval(numberOfIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1)));
             double expi = Math.exp(naturalFrequency * (timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i)));
             C.set(rowOffset, i * 2 + rowOffset, expn * (1 - expi));
          }
-         C.set(rowOffset, 2 * nIntervals - 2 + rowOffset, 0);
-         S.set(rowOffset, 2 * nIntervals - 2 + rowOffset, 1);
+         C.set(rowOffset, 2 * numberOfIntervals - 2 + rowOffset, 0);
+         S.set(rowOffset, 2 * numberOfIntervals - 2 + rowOffset, 1);
 
-         double previewTime = timedStepPressurePlanner.getTimeAtStartOfInterval(nIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(0);
+         double previewTime = timedStepPressurePlanner.getTimeAtStartOfInterval(numberOfIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(0);
          y0.set(rowOffset, 0, Math.exp(naturalFrequency * previewTime) * currentDcmEstimate.get(direction));
          rowOffset++;
       }
 
-      CmS.reshape(2, 2 * nIntervals);
-      CmSB.reshape(2, nContacts + 2);
+      CmS.reshape(2, 2 * numberOfIntervals);
+      CmSB.reshape(2, numberOfContacts + 2);
       CmSx0py0.reshape(2, 1);
       CommonOps.subtract(C, S, CmS);
       CommonOps.mult(CmS, B, CmSB);
       CmSx0py0.set(y0);
       CommonOps.multAdd(CmS, x0, CmSx0py0);
 
-      DenseMatrix64F u = qpSolutionVector;
-      DenseMatrix64F beq = qpEqualityVector;
       DenseMatrix64F Aeq = qpEqualityMatrix;
-      DenseMatrix64F bin = qpInequalityVector;
-      DenseMatrix64F Ain = qpInequalityMatrix;
-      DenseMatrix64F b = qpCostVector;
-      DenseMatrix64F A = qpCostMatrix;
+      Aeq.reshape(3, numberOfContacts + 2);
+      Aeq.zero();
+      for (int i = 0; i < numberOfContacts + 2; i++)
+      {
+         Aeq.set(0, i, CmSB.get(0, i));
+         Aeq.set(1, i, CmSB.get(1, i));
+      }
+      for (int i = 0; i < numberOfContacts; i++)
+      {
+         Aeq.set(2, i, 1);
+      }
 
-      // Initialize solution vector.
-      u.reshape(nContacts + 2, 1);
-
-      // Initialize equality constraints. (Aeq u = beq)
+      DenseMatrix64F beq = qpEqualityVector;
       beq.reshape(3, 1);
       beq.zero();
       beq.set(0, 0, -CmSx0py0.get(0, 0));
       beq.set(1, 0, -CmSx0py0.get(1, 0));
       beq.set(2, 0, 1);
-      Aeq.reshape(3, nContacts + 2);
-      Aeq.zero();
-      for (int i = 0; i < nContacts + 2; i++)
-      {
-         Aeq.set(0, i, CmSB.get(0, i));
-         Aeq.set(1, i, CmSB.get(1, i));
-      }
-      for (int i = 0; i < nContacts; i++)
-      {
-         Aeq.set(2, i, 1);
-      }
+   }
 
+   private void initializeInequalityConstraints()
+   {
       // Initialize inequality constraints. (Ain u <= bin)
-      bin.reshape(nContacts, 1);
-      bin.zero();
-      Ain.reshape(nContacts, nContacts + 2);
+      DenseMatrix64F Ain = qpInequalityMatrix;
+      Ain.reshape(numberOfContacts, numberOfContacts + 2);
       Ain.zero();
-      for (int i = 0; i < nContacts; i++)
+      for (int i = 0; i < numberOfContacts; i++)
       {
          Ain.set(i, i, -1);
       }
 
-      // Initialize cost terms. (min_u u'Au + b'u)
-      A.reshape(nContacts + 2, nContacts + 2);
-      A.zero();
-      for (int i = 0; i < nContacts; i++)
-      {
-         A.set(i, i, copRegularization);
-      }
-      for (int i = nContacts; i < nContacts + 2; i++)
-      {
-         A.set(i, i, stepAdjustmentRegularization);
-      }
-
-      b.reshape(nContacts + 2, 1);
-      b.zero();
-      rowOffset = 0;
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
-         {
-            b.set(rowOffset++, 0, timedStepPressurePlanner.getNormalizedPressureContributedByQuadrant(robotQuadrant, 0));
-         }
-      }
-      CommonOps.multTransA(A, b, b);
-
-      // Solve constrained quadratic program.
-      try
-      {
-         qpSolver.solve(A, b, Aeq, beq, Ain, bin, u, false);
-      }
-      catch (NoConvergenceException e)
-      {
-         System.err.println("NoConvergenceException: " + e.getMessage());
-      }
-
-      rowOffset = 0;
-      cmpPositionSetpoint.setToZero(ReferenceFrame.getWorldFrame());
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
-         {
-            double normalizedContactPressure = u.get(rowOffset++, 0);
-            currentSolePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-            addPointWithScaleFactor(cmpPositionSetpoint, currentSolePosition.get(robotQuadrant), normalizedContactPressure);
-         }
-      }
-
-      for (Direction direction : Direction.values2D())
-      {
-         stepAdjustmentVector.set(direction, u.get(rowOffset++, 0));
-      }
+      DenseMatrix64F bin = qpInequalityVector;
+      bin.reshape(numberOfContacts, 1);
+      bin.zero();
    }
+
 
    private void addPointWithScaleFactor(FramePoint point, FramePoint pointToAdd, double scaleFactor)
    {
