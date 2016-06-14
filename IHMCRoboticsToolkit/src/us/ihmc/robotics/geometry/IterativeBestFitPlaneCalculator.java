@@ -1,11 +1,13 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.MathTools;
-
-import javax.vecmath.GMatrix;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.SingularMatrixException;
 import javax.vecmath.Vector3d;
+
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import us.ihmc.robotics.MathTools;
 
 public class IterativeBestFitPlaneCalculator
 {
@@ -42,12 +44,12 @@ public class IterativeBestFitPlaneCalculator
 
 
 
-   private GMatrix matrixXCase = new GMatrix(2, 2);
-   private GMatrix matrixYCase = new GMatrix(2, 2);
-   private GMatrix vectorXCase = new GMatrix(2, 1);
-   private GMatrix vectorYCase = new GMatrix(2, 1);
-   private GMatrix retXCase = new GMatrix(2, 1);
-   private GMatrix retYCase = new GMatrix(2, 1);
+   private DenseMatrix64F matrixXCase = new DenseMatrix64F(2, 2);
+   private DenseMatrix64F matrixYCase = new DenseMatrix64F(2, 2);
+   private DenseMatrix64F vectorXCase = new DenseMatrix64F(2, 1);
+   private DenseMatrix64F vectorYCase = new DenseMatrix64F(2, 1);
+   private DenseMatrix64F retXCase = new DenseMatrix64F(2, 1);
+   private DenseMatrix64F retYCase = new DenseMatrix64F(2, 1);
 
    private double[] solveAsDegenerate1Case(BestFitPlaneDataAccumulator data)
    {
@@ -57,8 +59,8 @@ public class IterativeBestFitPlaneCalculator
 
       try
       {
-         matrixXCase.invert();
-         retXCase.mul(matrixXCase, vectorXCase);
+         CommonOps.invert(matrixXCase);
+         CommonOps.mult(matrixXCase, vectorXCase, retXCase);
       }
       catch (SingularMatrixException e)
       {
@@ -69,8 +71,8 @@ public class IterativeBestFitPlaneCalculator
 
       try
       {
-         matrixYCase.invert();
-         retYCase.mul(matrixYCase, vectorYCase);
+         CommonOps.invert(matrixYCase);
+         CommonOps.mult(matrixYCase, vectorYCase, retYCase);
       }
       catch (Exception e)
       {
@@ -81,23 +83,23 @@ public class IterativeBestFitPlaneCalculator
       double[] ret = null;
       if (xSuccess && ySuccess)
       {
-         double kx = retXCase.getElement(0, 0);
-         double ky = retYCase.getElement(0, 0);
+         double kx = retXCase.get(0, 0);
+         double ky = retYCase.get(0, 0);
 //         System.out.println("IterativeBestFitPlaneCalculator kx= "+kx+" and ky= "+ky);
          double kySquared = ky*ky;
          double kxSquared = kx*kx;
          double sharedFactor = kx * ky / (kxSquared + kySquared);
          if (!MathTools.isFinite(sharedFactor))
             sharedFactor=0.0;
-         ret = new double[] {sharedFactor * ky, sharedFactor * kx, retXCase.getElement(1, 0)};
+         ret = new double[] {sharedFactor * ky, sharedFactor * kx, retXCase.get(1, 0)};
       }
       else if (xSuccess &&!ySuccess)
       {
-         ret = new double[] {retXCase.getElement(0, 0), 0.0, retXCase.getElement(1, 0)};
+         ret = new double[] {retXCase.get(0, 0), 0.0, retXCase.get(1, 0)};
       }
       else if (!xSuccess && ySuccess)
       {
-         ret = new double[] {0.0, retYCase.getElement(0, 0), retYCase.getElement(1, 0)};
+         ret = new double[] {0.0, retYCase.get(0, 0), retYCase.get(1, 0)};
       }
       else
       {

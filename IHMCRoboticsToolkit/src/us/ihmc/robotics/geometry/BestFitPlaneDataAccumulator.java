@@ -1,8 +1,9 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.GMatrix;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
+
+import org.ejml.data.DenseMatrix64F;
 
 public class BestFitPlaneDataAccumulator
 {
@@ -54,23 +55,23 @@ public class BestFitPlaneDataAccumulator
       vectorToPopulate.z = sumZ;
    }
 
-   public void populateDegenerate1XCase(GMatrix matrixXCase, GMatrix vectorXCase)
+   public void populateDegenerate1XCase(DenseMatrix64F matrixXCase, DenseMatrix64F vectorXCase)
    {
-      matrixXCase.setElement(0, 0, sumXsquared);
-      matrixXCase.setElement(0, 1, sumX);
-      matrixXCase.setElement(1, 0, sumX);
-      matrixXCase.setElement(1, 1, sumUnity);
-      vectorXCase.setElement(0, 0, sumZX);
-      vectorXCase.setElement(1, 0, sumZ);
+      matrixXCase.set(0, 0, sumXsquared);
+      matrixXCase.set(0, 1, sumX);
+      matrixXCase.set(1, 0, sumX);
+      matrixXCase.set(1, 1, sumUnity);
+      vectorXCase.set(0, 0, sumZX);
+      vectorXCase.set(1, 0, sumZ);
    }
-   public void populateDegenerate1YCase(GMatrix matrixYCase, GMatrix vectorYCase)
+   public void populateDegenerate1YCase(DenseMatrix64F matrixYCase, DenseMatrix64F vectorYCase)
    {
-      matrixYCase.setElement(0, 0, sumYsquared);
-      matrixYCase.setElement(0, 1, sumY);
-      matrixYCase.setElement(1, 0, sumY);
-      matrixYCase.setElement(1, 1, sumUnity);
-      vectorYCase.setElement(0, 0, sumZY);
-      vectorYCase.setElement(1, 0, sumZ);
+      matrixYCase.set(0, 0, sumYsquared);
+      matrixYCase.set(0, 1, sumY);
+      matrixYCase.set(1, 0, sumY);
+      matrixYCase.set(1, 1, sumUnity);
+      vectorYCase.set(0, 0, sumZY);
+      vectorYCase.set(1, 0, sumZ);
    }
    public double solveDegenerate0Case()
    {
