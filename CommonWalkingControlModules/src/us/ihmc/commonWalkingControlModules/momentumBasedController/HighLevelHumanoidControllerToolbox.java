@@ -892,6 +892,11 @@ public class HighLevelHumanoidControllerToolbox
       polygonToPack.set(defaultFootPolygons.get(robotSide));
    }
 
+   public SideDependentList<FrameConvexPolygon2d> getDefaultFootPolygons()
+   {
+      return defaultFootPolygons;
+   }
+
    private final FramePoint tempPosition = new FramePoint();
    public void resetFootSupportPolygon(RobotSide robotSide)
    {
