@@ -21,7 +21,6 @@ public class ArtifactList
    public ArtifactList(String label, Artifact[] artifactArray)
    {
       this.label = label;
-      updateLabels(artifacts);
 
       ArrayList<Artifact> artifacts = new ArrayList<Artifact>(artifactArray.length);
 
@@ -31,6 +30,7 @@ public class ArtifactList
       }
 
       this.artifacts = artifacts;
+      updateLabels(artifacts);
    }
 
    public ArtifactList(String label, Artifact artifact)
