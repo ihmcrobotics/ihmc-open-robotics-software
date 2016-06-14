@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.mechanics.contactForceOptimization;
+package us.ihmc.quadrupedRobotics.optimization.contactForceOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;

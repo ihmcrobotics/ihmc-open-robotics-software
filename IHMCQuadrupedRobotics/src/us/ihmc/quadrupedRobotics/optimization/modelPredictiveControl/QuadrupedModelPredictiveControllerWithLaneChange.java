@@ -1,9 +1,11 @@
-package us.ihmc.quadrupedRobotics.controller.force.toolbox;
+package us.ihmc.quadrupedRobotics.optimization.modelPredictiveControl;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolver;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMotionEstimator;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStepPressurePlanner;

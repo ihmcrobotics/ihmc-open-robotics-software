@@ -1,4 +1,5 @@
-package us.ihmc.quadrupedRobotics.mechanics.contactForceOptimization;
+
+package us.ihmc.quadrupedRobotics.optimization.contactForceOptimization;
 
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
