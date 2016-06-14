@@ -154,7 +154,8 @@ public class BalanceManager
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
 
       double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
-      momentumRecoveryControlModule = new MomentumRecoveryControlModule(momentumBasedController, maxAllowedDistanceCMPSupport, registry);
+      SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = momentumBasedController.getDefaultFootPolygons();
+      momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, maxAllowedDistanceCMPSupport, registry, yoGraphicsListRegistry);
 
       String graphicListName = getClass().getSimpleName();
 
@@ -253,6 +254,8 @@ public class BalanceManager
       getICPError(icpError2d);
       momentumRecoveryControlModule.setICPError(icpError2d);
       momentumRecoveryControlModule.setSupportSide(supportLeg);
+      momentumRecoveryControlModule.setCapturePoint(capturePoint2d);
+      momentumRecoveryControlModule.setSupportPolygon(bipedSupportPolygons.getSupportPolygonInWorld());
       momentumRecoveryControlModule.compute();
 
       momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);

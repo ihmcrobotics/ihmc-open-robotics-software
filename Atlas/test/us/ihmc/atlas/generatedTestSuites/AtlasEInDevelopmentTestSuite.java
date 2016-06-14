@@ -12,10 +12,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasPointyRocksTest.class
+   us.ihmc.atlas.roughTerrainWalking.AtlasLineContactWalkingTest.class
 })
 
-public class AtlasDInDevelopmentTestSuite
+public class AtlasEInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {
