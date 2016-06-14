@@ -73,7 +73,7 @@ public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListe
             boxesForLabel = new ArrayList<>();
 
             label = artifact.getLabel();
-            JCheckBox labelCheckBox = new JCheckBox(label);
+            final JCheckBox labelCheckBox = new JCheckBox(label);
             labelCheckBox.setSelected(true);
             labelCheckBox.addActionListener(new ActionListener()
             {
