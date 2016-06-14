@@ -61,8 +61,7 @@ public enum LegJointName
       }
    }
 
-
-   public String getCamelCaseNameForStartOfExpression()
+   public String getCamelCaseName()
    {
       switch (this)
       {
@@ -88,11 +87,48 @@ public enum LegJointName
             return "unknown Position";
       }
    }
+   
+   /**
+    * @deprecated Use getCamelCaseName() instead.
+    */
+   public String getCamelCaseNameForStartOfExpression()
+   {
+      return getCamelCaseName();
+   }
 
+   public String getPascalCaseName()
+   {
+      switch (this)
+      {
+         case HIP_YAW :
+            return "HipYaw";
 
+         case HIP_ROLL :
+            return "HipRoll";
+
+         case HIP_PITCH :
+            return "HipPitch";
+
+         case KNEE :
+            return "Knee";
+
+         case ANKLE_ROLL :
+            return "AnkleRoll";
+
+         case ANKLE_PITCH :
+            return "AnklePitch";
+
+         default :
+            return "Unknown Position";
+      }
+   }
+
+   /**
+    * @deprecated Use getPascalCaseName() instead.
+    */
    public String getCamelCaseNameForMiddleOfExpression()
    {
-      return StringUtils.capitalize(getCamelCaseNameForStartOfExpression());
+      return getPascalCaseName();
    }
 
    public Vector3d getJointAxis()
@@ -125,7 +161,7 @@ public enum LegJointName
    @Override
    public String toString()
    {
-      return getCamelCaseNameForMiddleOfExpression();
+      return getPascalCaseName();
    }
 
    private static Vector3d xAxis()
