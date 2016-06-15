@@ -1490,26 +1490,6 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Return translational portion of this transform.
-    * 
-    * @param vector
-    */
-   public final void get(Vector3d vector)
-   {
-      getTranslation(vector);
-   }
-
-   /**
-    * Return translational portion of this transform.
-    * 
-    * @param vector
-    */
-   public final void get(Vector3f vector)
-   {
-      getTranslation(vector);
-   }
-
-   /**
     * Pack rotation part into Matrix3f and translation part into Vector3f
     * 
     * @param matrix
