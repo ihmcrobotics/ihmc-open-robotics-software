@@ -60,7 +60,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       Matrix3d rotation = new Matrix3d();
       Vector3d offset = new Vector3d();
       cylinderTransform.get(offset);
-      cylinderTransform.get(rotation);
+      cylinderTransform.getRotation(rotation);
       
       FramePoint cylinderCenter = new FramePoint(new TransformReferenceFrame("cylinderCenter", ReferenceFrame.getWorldFrame(), cylinderTransform), 0.0, 0.0, cylinderHeight / 2.0 );
       cylinderCenter.changeFrame(ReferenceFrame.getWorldFrame());

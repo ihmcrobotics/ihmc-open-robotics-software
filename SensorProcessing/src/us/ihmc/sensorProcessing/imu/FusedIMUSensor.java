@@ -253,7 +253,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
 
       // R_{Fused IMU}^{world} = R_{IMU}^{world} * R_{Fused IMU}^{IMU}
       transformFromFusedIMUToWorld.multiply(transformFromIMUToWorld, transformFromFusedIMUToIMU);
-      transformFromFusedIMUToWorld.get(rotationFromFusedIMUToWorld);
+      transformFromFusedIMUToWorld.getRotation(rotationFromFusedIMUToWorld);
 
       orientationToPack.setIncludingFrame(fusedMeasurementFrame, rotationFromFusedIMUToWorld);
    }

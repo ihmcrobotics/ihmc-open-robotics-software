@@ -183,7 +183,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
    {
       RigidBodyTransform footToSupportTransform = desiredHeadingFrame.getTransformToDesiredFrame(worldFrame);
       Matrix3d footToSupportRotation = new Matrix3d();
-      footToSupportTransform.get(footToSupportRotation);
+      footToSupportTransform.getRotation(footToSupportRotation);
       double yaw = RotationTools.computeYaw(footToSupportRotation);
       double pitch = stepPitch.getDoubleValue();
       double roll = 0.0;
