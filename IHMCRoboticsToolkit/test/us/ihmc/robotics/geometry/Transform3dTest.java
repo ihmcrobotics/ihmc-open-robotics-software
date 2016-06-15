@@ -1424,7 +1424,7 @@ public class Transform3dTest
 			Transform3d transform = new Transform3d(quat1,
 					new Vector3d(0, 0, 0), 1.0);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 
 			assertEquals(quat1.x, quatCheck.x, 1e-10);
@@ -1457,7 +1457,7 @@ public class Transform3dTest
 
 			transform.setRotationAndZeroTranslation(quat1);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 
 			assertEquals(quat1.x, quatCheck.x, 1e-10);
@@ -1493,7 +1493,7 @@ public class Transform3dTest
 
 			transform.set(quat1, vector);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 
 			assertEquals(quat1.x, quatCheck.x, 1e-10);
@@ -1531,7 +1531,7 @@ public class Transform3dTest
 
 			transform.set(quat1, vector, scale);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 			transform.getScale(scaleCheck);
 
@@ -1568,7 +1568,7 @@ public class Transform3dTest
 
 			transform.setRotationAndZeroTranslation(quat1);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 
 			assertEquals(quat1.x, quatCheck.x, 1e-5);
@@ -1604,7 +1604,7 @@ public class Transform3dTest
 
 			transform.set(quat1, vector);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 
 			assertEquals(quat1.x, quatCheck.x, 1e-5);
@@ -1642,7 +1642,7 @@ public class Transform3dTest
 			double scale = random.nextDouble();
 			transform.set(quat1, vector, scale);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 
 			transform.getScale(scaleCheck);
@@ -1750,7 +1750,7 @@ public class Transform3dTest
 			Transform3d transform = new Transform3d(quat1,
 					new Vector3f(0, 0, 0), 1.0);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 
 			assertEquals(quat1.x, quatCheck.x, 1e-3);
 			assertEquals(quat1.y, quatCheck.y, 1e-3);

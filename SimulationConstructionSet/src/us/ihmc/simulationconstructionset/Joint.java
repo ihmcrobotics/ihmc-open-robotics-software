@@ -787,7 +787,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     */
    public void getRotationToWorld(Quat4d rotation)
    {
-      transformToNext.get(rotation);
+      transformToNext.getRotation(rotation);
    }
 
    /**

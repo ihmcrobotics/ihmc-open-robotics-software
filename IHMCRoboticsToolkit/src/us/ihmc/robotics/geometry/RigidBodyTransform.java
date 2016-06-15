@@ -1548,28 +1548,6 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Convert and pack rotation part of transform into Quat4d.
-    * 
-    * @param quat
-    * @param vector
-    */
-   public void get(Quat4d quat)
-   {
-      getRotation(quat);
-   }
-
-   /**
-    * Convert and pack rotation part of transform into Quat4f.
-    * 
-    * @param quat
-    * @param vector
-    */
-   public void get(Quat4f quat)
-   {
-      getRotation(quat);
-   }
-
-   /**
     * Convert and pack rotation part of transform into Quat4f and pack
     * translation into Vector3f.
     * 
