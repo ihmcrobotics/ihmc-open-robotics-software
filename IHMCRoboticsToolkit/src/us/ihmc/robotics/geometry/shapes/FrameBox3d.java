@@ -64,7 +64,7 @@ public class FrameBox3d extends FrameShape3d
 
    public void getRotation(Matrix3d rotationMatrixToPack)
    {
-      this.box3d.transform.get(rotationMatrixToPack);
+      this.box3d.getRotation(rotationMatrixToPack);
    }
 
    public Matrix3d getRotationCopy()

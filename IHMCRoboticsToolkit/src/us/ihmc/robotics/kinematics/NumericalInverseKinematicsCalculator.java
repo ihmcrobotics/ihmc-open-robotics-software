@@ -209,7 +209,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
       errorTransform.invert(desiredTransform);
       errorTransform.multiply(actualTransform);
 
-      errorTransform.get(errorRotationMatrix);
+      errorTransform.getRotation(errorRotationMatrix);
       RotationTools.convertMatrixToAxisAngle(errorRotationMatrix, errorAxisAngle);
 
       axis.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());

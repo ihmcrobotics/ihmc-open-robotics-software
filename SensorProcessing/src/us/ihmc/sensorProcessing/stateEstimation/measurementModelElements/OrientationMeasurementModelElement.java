@@ -66,7 +66,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
    public void computeMatrixBlocks()
    {
       estimationFrame.getTransformToDesiredFrame(tempTransform, measurementFrame);
-      tempTransform.get(tempMatrix3d);
+      tempTransform.getRotation(tempMatrix3d);
       
       DenseMatrix64F orientationStateOutputBlock = getOutputMatrixBlock(orientationStatePort);  
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix3d, orientationStateOutputBlock);

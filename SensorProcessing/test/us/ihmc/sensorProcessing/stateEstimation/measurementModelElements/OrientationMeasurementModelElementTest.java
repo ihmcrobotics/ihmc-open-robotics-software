@@ -73,7 +73,7 @@ public class OrientationMeasurementModelElementTest
 
       RigidBodyTransform transformFromMeasurementToWorld = measurementFrame.getTransformToDesiredFrame(elevator.getBodyFixedFrame());
       Matrix3d rotationFromMeasurementToWorld = new Matrix3d();
-      transformFromMeasurementToWorld.get(rotationFromMeasurementToWorld);
+      transformFromMeasurementToWorld.getRotation(rotationFromMeasurementToWorld);
       orientationMeasurementInputPort.setData(rotationFromMeasurementToWorld);
 
       DenseMatrix64F zeroResidual = modelElement.computeResidual();

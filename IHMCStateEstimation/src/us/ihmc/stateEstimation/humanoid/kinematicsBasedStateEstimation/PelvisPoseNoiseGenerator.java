@@ -126,7 +126,7 @@ public class PelvisPoseNoiseGenerator
       updateBeforeYoVariables();
       integrateError();
       
-      pelvisPose.get(pelvisRotation);
+      pelvisPose.getRotation(pelvisRotation);
       pelvisRotation.mul(rotationError);
       pelvisPose.setRotation(pelvisRotation);
       
@@ -188,7 +188,7 @@ public class PelvisPoseNoiseGenerator
       translationNoise.set(xNoise, yNoise, zNoise);
       
       
-      pelvisPose.get(pelvisRotation);
+      pelvisPose.getRotation(pelvisRotation);
       
       pelvisRotation.mul(rotationError);
       pelvisRotation.transform(translationNoise);

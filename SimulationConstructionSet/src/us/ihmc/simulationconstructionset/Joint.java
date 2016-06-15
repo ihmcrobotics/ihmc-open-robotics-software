@@ -776,7 +776,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     */
    public void getRotationToWorld(Matrix3d rotation)
    {
-      transformToNext.get(rotation);
+      transformToNext.getRotation(rotation);
    }
 
    /**

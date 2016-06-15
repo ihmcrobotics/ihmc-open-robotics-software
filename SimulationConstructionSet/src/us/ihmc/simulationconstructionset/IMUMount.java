@@ -84,7 +84,7 @@ public class IMUMount
    {
       // Offsets of IMUMount:
       transformFromMountToJoint.get(tempIMUOffset);
-      transformFromMountToJoint.get(tempIMURotation);
+      transformFromMountToJoint.getRotation(tempIMURotation);
 
       // Orientation:
       parentJoint.getRotationToWorld(tempRotationToWorld);
@@ -120,7 +120,7 @@ public class IMUMount
       
       // Offsets of IMUMount:
       transformFromMountToJoint.get(tempIMUOffset);
-      transformFromMountToJoint.get(tempIMURotation);
+      transformFromMountToJoint.getRotation(tempIMURotation);
 
       // Orientation:
       parentJoint.getRotationToWorld(tempRotationToWorld);

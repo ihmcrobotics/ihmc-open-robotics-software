@@ -294,7 +294,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
    private void extractTandR(RigidBodyTransform tran, Vector3d T, Vector3d R)
    {
       tran.get(T);
-      tran.get(rotationMatrix);
+      tran.getRotation(rotationMatrix);
 
       MatrixTools.matrix3DToDenseMatrix(rotationMatrix, m, 0, 0);
 
