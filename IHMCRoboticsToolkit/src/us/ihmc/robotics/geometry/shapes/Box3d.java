@@ -423,7 +423,7 @@ public class Box3d implements Shape3d
    {
       if (dirtyBit)
       {
-         transform.get(temporaryMatrix);
+         transform.getRotation(temporaryMatrix);
 
          for (FaceName faceName : faces.keySet())
          {

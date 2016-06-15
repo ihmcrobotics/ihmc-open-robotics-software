@@ -1810,26 +1810,6 @@ public class Transform3d extends RigidBodyTransform
    }
 
    /**
-    * Return rotation portion of this transform.
-    * 
-    * @param matrix
-    */
-   public final void get(Matrix3d matrix)
-   {
-      getRotation(matrix);
-   }
-
-   /**
-    * Return rotation portion of this transform.
-    * 
-    * @param matrix
-    */
-   public final void get(Matrix3f matrix)
-   {
-      getRotation(matrix);
-   }
-
-   /**
     * Pack rotation part into Matrix3f and translation part into Vector3f
     * 
     * @param matrix
