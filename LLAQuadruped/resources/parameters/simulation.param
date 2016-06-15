@@ -1,5 +1,5 @@
 us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager.bypassDoNothingState=true
-us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProvider.comHeightNominal=0.3
+us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProvider.comHeightNominal=0.35
 us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProvider.comPositionLowerLimits=-1.7976931348623157E308,-1.7976931348623157E308,0.2
 us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProvider.comPositionUpperLimits=1.7976931348623157E308,1.7976931348623157E308,1.7976931348623157E308
 us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProvider.comVelocityLowerLimits=-1.7976931348623157E308,-1.7976931348623157E308,-1.7976931348623157E308
@@ -37,11 +37,11 @@ us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTimedStepController.
 us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTimedStepController.minimumStepAdjustmentTime=0.1
 us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.trajectoryTime=1.0
 us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.jointDamping=15.0
-us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.stanceLength=0.35717
+us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.stanceLength=0.48
 us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.stanceWidth=0.54
-us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.stanceHeight=0.3
-us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.stanceXOffset=0.0
-us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.stanceYOffset=0.0
+us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.stanceHeight=0.4
+us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.stanceXOffset=-0.3
+us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.stanceYOffset=-0.15
 us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.solePositionProportionalGains=20000.0,20000.0,20000.0
 us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.solePositionDerivativeGains=200.0,200.0,200.0
 us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.solePositionIntegralGains=0.0,0.0,0.0
