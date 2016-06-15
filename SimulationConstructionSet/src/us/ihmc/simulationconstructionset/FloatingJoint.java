@@ -226,7 +226,7 @@ public class FloatingJoint extends Joint
       setRotation(rotationMatrix);
 
       Vector3d translation = new Vector3d();
-      transform.get(translation);
+      transform.getTranslation(translation);
       setPosition(translation);
    }
 

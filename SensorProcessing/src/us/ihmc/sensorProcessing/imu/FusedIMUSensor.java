@@ -164,9 +164,9 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       RotationTools.convertTransformToYawPitchRoll(secondTransform, secondYawPitchRoll);
 
       Vector3d firstOffset = new Vector3d();
-      firstTransform.get(firstOffset);
+      firstTransform.getTranslation(firstOffset);
       Vector3d secondOffset = new Vector3d();
-      secondTransform.get(secondOffset);
+      secondTransform.getTranslation(secondOffset);
 
       Vector3d fusedOffset = new Vector3d();
       fusedOffset.add(firstOffset, secondOffset);
