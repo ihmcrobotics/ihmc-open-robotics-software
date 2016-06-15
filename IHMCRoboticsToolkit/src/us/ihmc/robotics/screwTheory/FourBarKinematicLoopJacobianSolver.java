@@ -23,7 +23,7 @@ public class FourBarKinematicLoopJacobianSolver
    
    public FourBarKinematicLoopJacobianSolver(FourBarCalculatorWithDerivatives fourBarCalculator, InverseDynamicsJoint[] jointsForJacobianCalculation, PassiveRevoluteJoint outputJoint)
    {
-      this.fourBarCalculator = fourBarCalculator;
+      this.fourBarCalculator = new FourBarCalculatorWithDerivatives(fourBarCalculator);
       this.jointsForJacobianCalculation = jointsForJacobianCalculation;
       this.outputJoint = outputJoint;
       
