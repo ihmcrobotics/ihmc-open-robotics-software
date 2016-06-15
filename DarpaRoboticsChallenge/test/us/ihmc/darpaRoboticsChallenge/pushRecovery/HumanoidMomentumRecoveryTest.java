@@ -28,6 +28,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
@@ -57,14 +58,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    public void testPushDuringDoubleSupport() throws SimulationExceededMaximumTimeException
    {
       setupTest();
-
-      Point3d cameraFix = new Point3d(0.0, 0.0, 1.0);
-      Point3d cameraPosition = new Point3d(0.0, 10.0, 1.0);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
-
-      allowUpperBodyMomentumInSingleSupport.set(true);
-      allowUpperBodyMomentumInDoubleSupport.set(true);
-      allowUsingHighMomentumWeight.set(true);
+      setupCameraSideView();
+      enableMomentum();
 
       assertTrue(standAndPush());
    }
@@ -79,16 +74,81 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    public void testPushDuringDoubleSupportExpectFall() throws SimulationExceededMaximumTimeException
    {
       setupTest();
-
-      Point3d cameraFix = new Point3d(0.0, 0.0, 1.0);
-      Point3d cameraPosition = new Point3d(0.0, 10.0, 1.0);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
-
-      allowUpperBodyMomentumInSingleSupport.set(false);
-      allowUpperBodyMomentumInDoubleSupport.set(false);
-      allowUsingHighMomentumWeight.set(false);
+      setupCameraSideView();
+      disableMomentum();
 
       assertFalse(standAndPush());
+   }
+
+   @DeployableTestMethod(estimatedDuration = 30.0)
+   @Test(timeout = 300000)
+   /**
+    * End to end test that makes sure the robot can recover from a push using upper body momentum
+    *
+    * @throws SimulationExceededMaximumTimeException
+    */
+   public void testPushDuringSwing() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      setupCameraBackView();
+      enableMomentum();
+
+      assertTrue(stepAndPush());
+   }
+
+   @DeployableTestMethod(estimatedDuration = 30.0)
+   @Test(timeout = 300000)
+   /**
+    * End to end test that makes sure the robot falls during test if momentum is disabled
+    *
+    * @throws SimulationExceededMaximumTimeException
+    */
+   public void testPushDuringSwingExpectFall() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      setupCameraBackView();
+      disableMomentum();
+
+      assertFalse(stepAndPush());
+   }
+
+   @DeployableTestMethod(estimatedDuration = 30.0)
+   @Test(timeout = 300000)
+   /**
+    * End to end test that makes sure the momentum recovery does not get triggered during
+    * some normal steps
+    *
+    * @throws SimulationExceededMaximumTimeException
+    */
+   public void testRegularWalk() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      setupCameraSideView();
+      enableMomentum();
+      ControllerSpy controllerSpy = new ControllerSpy(drcSimulationTestHelper);
+
+      FootstepDataListMessage message = new FootstepDataListMessage();
+      addFootstep(new Point3d(0.4, 0.15, 0.0), RobotSide.LEFT, message);
+      addFootstep(new Point3d(0.8, -0.15, 0.0), RobotSide.RIGHT, message);
+      addFootstep(new Point3d(0.8, 0.4, 0.0), RobotSide.LEFT, message);
+      addFootstep(new Point3d(0.8, 0.1, 0.0), RobotSide.RIGHT, message);
+
+      drcSimulationTestHelper.send(message);
+      double simulationTime = 1.0 * message.footstepDataList.size() + 2.0;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      assertFalse(controllerSpy.wasMomentumTriggered());
+      assertFalse(controllerSpy.wasWeightTriggered());
+   }
+
+   private void addFootstep(Point3d stepLocation, RobotSide robotSide, FootstepDataListMessage message)
+   {
+      FootstepDataMessage footstepData = new FootstepDataMessage();
+      footstepData.setLocation(stepLocation);
+      footstepData.setOrientation(new Quat4d(0.0, 0.0, 0.0, 1.0));
+      footstepData.setRobotSide(robotSide);
+      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+      message.add(footstepData);
    }
 
    private boolean standAndPush() throws SimulationExceededMaximumTimeException
@@ -104,50 +164,6 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       rootJoint.setVelocity(rootVelocity);
 
       return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
-   }
-
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
-   /**
-    * End to end test that makes sure the robot can recover from a push using upper body momentum
-    *
-    * @throws SimulationExceededMaximumTimeException
-    */
-   public void testPushDuringSwing() throws SimulationExceededMaximumTimeException
-   {
-      setupTest();
-
-      Point3d cameraFix = new Point3d(0.0, 0.0, 1.0);
-      Point3d cameraPosition = new Point3d(-10.0, 0.0, 1.0);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
-
-      allowUpperBodyMomentumInSingleSupport.set(true);
-      allowUpperBodyMomentumInDoubleSupport.set(true);
-      allowUsingHighMomentumWeight.set(true);
-
-      assertTrue(stepAndPush());
-   }
-
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
-   /**
-    * End to end test that makes sure the robot falls during test if momentum is disabled
-    *
-    * @throws SimulationExceededMaximumTimeException
-    */
-   public void testPushDuringSwingExpectFall() throws SimulationExceededMaximumTimeException
-   {
-      setupTest();
-
-      Point3d cameraFix = new Point3d(0.0, 0.0, 1.0);
-      Point3d cameraPosition = new Point3d(-10.0, 0.0, 1.0);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
-
-      allowUpperBodyMomentumInSingleSupport.set(false);
-      allowUpperBodyMomentumInDoubleSupport.set(false);
-      allowUsingHighMomentumWeight.set(false);
-
-      assertFalse(stepAndPush());
    }
 
    private boolean stepAndPush() throws SimulationExceededMaximumTimeException
@@ -184,6 +200,20 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
    }
 
+   private void enableMomentum()
+   {
+      allowUpperBodyMomentumInSingleSupport.set(true);
+      allowUpperBodyMomentumInDoubleSupport.set(true);
+      allowUsingHighMomentumWeight.set(true);
+   }
+
+   private void disableMomentum()
+   {
+      allowUpperBodyMomentumInSingleSupport.set(false);
+      allowUpperBodyMomentumInDoubleSupport.set(false);
+      allowUsingHighMomentumWeight.set(false);
+   }
+
    private void setupTest()
    {
       BambooTools.reportTestStartedMessage();
@@ -211,6 +241,20 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       ThreadTools.sleep(1000);
    }
 
+   private void setupCameraBackView()
+   {
+      Point3d cameraFix = new Point3d(0.0, 0.0, 1.0);
+      Point3d cameraPosition = new Point3d(-10.0, 0.0, 1.0);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+   }
+
+   private void setupCameraSideView()
+   {
+      Point3d cameraFix = new Point3d(0.0, 0.0, 1.0);
+      Point3d cameraPosition = new Point3d(0.0, 10.0, 1.0);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+   }
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -234,5 +278,41 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
 
       simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   private class ControllerSpy extends SimpleRobotController
+   {
+      private final BooleanYoVariable usingUpperBodyMomentum;
+      private final BooleanYoVariable usingHighMomentumWeight;
+
+      private final BooleanYoVariable momentumWasTriggered = new BooleanYoVariable("momentumWasTriggered", registry);
+      private final BooleanYoVariable weightWasTriggered = new BooleanYoVariable("weightWasTriggered", registry);
+
+      public ControllerSpy(DRCSimulationTestHelper drcSimulationTestHelper)
+      {
+         usingUpperBodyMomentum = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("usingUpperBodyMomentum");
+         usingHighMomentumWeight = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("usingHighMomentumWeight");
+         drcSimulationTestHelper.addRobotControllerOnControllerThread(this);
+      }
+
+      @Override
+      public void doControl()
+      {
+         if (usingUpperBodyMomentum.getBooleanValue())
+            momentumWasTriggered.set(true);
+         if (usingHighMomentumWeight.getBooleanValue())
+            weightWasTriggered.set(true);
+      }
+
+      public boolean wasWeightTriggered()
+      {
+         return weightWasTriggered.getBooleanValue();
+      }
+
+      public boolean wasMomentumTriggered()
+      {
+         return momentumWasTriggered.getBooleanValue();
+      }
+
    }
 }
