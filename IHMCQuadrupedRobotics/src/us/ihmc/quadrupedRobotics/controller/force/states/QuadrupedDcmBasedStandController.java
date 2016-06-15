@@ -44,6 +44,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 2);
    private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
    private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
+   private final DoubleParameter contactPressureLowerLimitParameter = parameterFactory.createDouble("contactPressureLowerLimit", 50);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -124,6 +125,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
+      taskSpaceControllerSettings.getContactForceLimits().setPressureLowerLimit(contactPressureLowerLimitParameter.get());
    }
 
    private void updateEstimates()
