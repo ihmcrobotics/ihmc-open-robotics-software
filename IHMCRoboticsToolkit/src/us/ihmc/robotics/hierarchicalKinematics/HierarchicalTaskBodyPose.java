@@ -147,7 +147,7 @@ public class HierarchicalTaskBodyPose extends HierarchicalTask {
       endEffectorPose.transform( tempPos );  
       position.set( tempPos );
       
-      endEffectorPose.get( rotation );
+      endEffectorPose.getRotation( rotation );
    }
 
    @Override
