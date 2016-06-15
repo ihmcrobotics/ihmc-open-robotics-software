@@ -364,7 +364,7 @@ public abstract class SDFRobotWriter
       Vector3d translation = new Vector3d();
       scsJointOffset.get(translation);
       Matrix3d rotation = new Matrix3d();
-      scsJointOffset.get(rotation);
+      scsJointOffset.getRotation(rotation);
       Vector3d eulerAngles = new Vector3d();
       scsJointOffset.getEulerXYZ(eulerAngles);
 //      eulerAngles.y = Math.asin(rotation.m02);

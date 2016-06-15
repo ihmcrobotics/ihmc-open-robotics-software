@@ -1490,26 +1490,6 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Return rotation portion of this transform.
-    * 
-    * @param matrix
-    */
-   public void get(Matrix3d matrix)
-   {
-      getRotation(matrix);
-   }
-
-   /**
-    * Return rotation portion of this transform.
-    * 
-    * @param matrix
-    */
-   public void get(Matrix3f matrix)
-   {
-      getRotation(matrix);
-   }
-
-   /**
     * Return translational portion of this transform.
     * 
     * @param vector
@@ -1565,28 +1545,6 @@ public class RigidBodyTransform implements Serializable
    {
       getRotation(quat);
       getTranslation(point);
-   }
-
-   /**
-    * Convert and pack rotation part of transform into Quat4d.
-    * 
-    * @param quat
-    * @param vector
-    */
-   public void get(Quat4d quat)
-   {
-      getRotation(quat);
-   }
-
-   /**
-    * Convert and pack rotation part of transform into Quat4f.
-    * 
-    * @param quat
-    * @param vector
-    */
-   public void get(Quat4f quat)
-   {
-      getRotation(quat);
    }
 
    /**

@@ -16,7 +16,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -26,6 +25,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 public class ICPBasedLinearMomentumRateOfChangeControlModule
 {
@@ -111,7 +111,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       {
          String graphicListName = getClass().getSimpleName();
          YoGraphicPosition unprojectedDesiredCMPViz = new YoGraphicPosition("Unprojected Desired CMP", yoUnprojectedDesiredCMP, 0.008, Purple(), GraphicType.ROTATED_CROSS);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, unprojectedDesiredCMPViz.createArtifact());
+         YoArtifactPosition artifact = unprojectedDesiredCMPViz.createArtifact();
+         artifact.setVisible(false);
+         yoGraphicsListRegistry.registerArtifact(graphicListName, artifact);
 
 //         YoArtifactPolygon yoSafeArea = new YoArtifactPolygon("SafeArea", yoSafeAreaPolygon, Color.GREEN, false);
 //         yoGraphicsListRegistry.registerArtifact(graphicListName, yoSafeArea);

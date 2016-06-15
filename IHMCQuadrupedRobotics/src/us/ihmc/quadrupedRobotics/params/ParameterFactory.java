@@ -68,6 +68,7 @@ public class ParameterFactory
    public BooleanParameter createBoolean(String name, boolean defaultValue)
    {
       final BooleanParameter parameter = new BooleanParameter(namespace + "." + name, defaultValue);
+      register(parameter);
 
       if (registry != null)
       {
@@ -87,18 +88,18 @@ public class ParameterFactory
             @Override
             public void onChange(Parameter parameter)
             {
-               variable.set(((BooleanParameter) parameter).get());
+               variable.set(((BooleanParameter) parameter).get(),false);
             }
          });
       }
 
-      register(parameter);
       return parameter;
    }
 
    public DoubleParameter createDouble(String name, double defaultValue)
    {
       final DoubleParameter parameter = new DoubleParameter(namespace + "." + name, defaultValue);
+      register(parameter);
 
       if (registry != null)
       {
@@ -118,18 +119,17 @@ public class ParameterFactory
             @Override
             public void onChange(Parameter parameter)
             {
-               variable.set(((DoubleParameter) parameter).get());
+               variable.set(((DoubleParameter) parameter).get(), false);
             }
          });
       }
-
-      register(parameter);
       return parameter;
    }
 
    public DoubleArrayParameter createDoubleArray(String name, double... defaultValue)
    {
       final DoubleArrayParameter parameter = new DoubleArrayParameter(namespace + "." + name, defaultValue);
+      register(parameter);
 
       if (registry != null)
       {
@@ -153,13 +153,12 @@ public class ParameterFactory
                @Override
                public void onChange(Parameter parameter)
                {
-                  variable.set(((DoubleArrayParameter) parameter).get()[count]);
+                  variable.set(((DoubleArrayParameter) parameter).get()[count], false);
                }
             });
          }
       }
 
-      register(parameter);
       return parameter;
    }
 
@@ -167,6 +166,7 @@ public class ParameterFactory
    {
       StringParameter parameter = new StringParameter(namespace + "." + name, defaultValue);
       register(parameter);
+
       return parameter;
    }
 

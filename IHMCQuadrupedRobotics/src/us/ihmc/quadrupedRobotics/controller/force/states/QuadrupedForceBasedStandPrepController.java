@@ -22,11 +22,10 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedForceBasedStandPrepController implements QuadrupedController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedStandPrepController.class.getSimpleName());
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
-   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
    private final DoubleParameter stanceLengthParameter = parameterFactory.createDouble("stanceLength", 1.0);
    private final DoubleParameter stanceWidthParameter = parameterFactory.createDouble("stanceWidth", 0.5);
    private final DoubleParameter stanceHeightParameter = parameterFactory.createDouble("stanceHeight", 0.60);
@@ -36,6 +35,9 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
+   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
+   private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
+   private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
 
    private final DoubleYoVariable robotTime;
    private final QuadrupedReferenceFrames referenceFrames;
@@ -105,17 +107,10 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
 
       // Initialize sole position controller
       solePositionControllerSetpoints.initialize(taskSpaceEstimates);
-      for (RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         solePositionController.getGains(quadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
-         solePositionController.getGains(quadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
-         solePositionController.getGains(quadrant).setDerivativeGains(solePositionDerivativeGainsParameter.get());
-      }
       solePositionController.reset();
 
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
@@ -126,6 +121,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    @Override
    public ControllerEvent process()
    {
+      updateGains();
       updateEstimates();
       updateSetpoints();
 
@@ -135,6 +131,19 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    @Override
    public void onExit()
    {
+   }
+
+   private void updateGains()
+   {
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         solePositionController.getGains(quadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
+         solePositionController.getGains(quadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
+         solePositionController.getGains(quadrant).setDerivativeGains(solePositionDerivativeGainsParameter.get());
+      }
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
    }
 
    private void updateEstimates()

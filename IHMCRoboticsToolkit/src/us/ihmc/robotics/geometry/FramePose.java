@@ -132,7 +132,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
    {
       transform.get(tempVector);
       pose.setPosition(tempVector);
-      transform.get(tempMatrix);
+      transform.getRotation(tempMatrix);
       pose.setOrientation(tempMatrix);
    }
 
@@ -159,7 +159,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
    {
       transform.get(tempVector);
       pose.setPosition(tempVector);
-      transform.get(tempMatrix);
+      transform.getRotation(tempMatrix);
       pose.setOrientation(tempMatrix);
       
       this.referenceFrame = referenceFrame;

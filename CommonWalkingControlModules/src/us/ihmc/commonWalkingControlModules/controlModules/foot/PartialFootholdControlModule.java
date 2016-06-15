@@ -138,11 +138,15 @@ public class PartialFootholdControlModule
 
       if (yoGraphicsListRegistry != null)
       {
+         String listName = getClass().getSimpleName();
+
          YoArtifactPolygon yoGraphicPolygon = new YoArtifactPolygon(namePrefix + "UnsafeRegion", yoUnsafePolygon, Color.RED, false);
-         yoGraphicsListRegistry.registerArtifact("Partial Foothold", yoGraphicPolygon);
+         yoGraphicPolygon.setVisible(false);
+         yoGraphicsListRegistry.registerArtifact(listName, yoGraphicPolygon);
 
          YoArtifactPolygon yoShrunkPolygon = new YoArtifactPolygon(namePrefix + "ShrunkPolygon", yoShrunkFootPolygon, Color.CYAN, false);
-         yoGraphicsListRegistry.registerArtifact("Shrunk Polygon", yoShrunkPolygon);
+         yoShrunkPolygon.setVisible(false);
+         yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
 
 //         YoArtifactPolygon yoFullSupportGraphic = new YoArtifactPolygon(namePrefix + "FullSupportAfterShrinking", yoFullSupportAfterShrinking, Color.GREEN, false);
 //         yoGraphicsListRegistry.registerArtifact("FullSupportAfterShrinking", yoFullSupportGraphic);

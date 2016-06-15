@@ -250,7 +250,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
    {
       RigidBodyTransform supportFootToWorldTransform = supportFootFrame.getTransformToDesiredFrame(worldFrame);
       Matrix3d supportFootToWorldRotation = new Matrix3d();
-      supportFootToWorldTransform.get(supportFootToWorldRotation);
+      supportFootToWorldTransform.getRotation(supportFootToWorldRotation);
 
       double maxTurnInAngle = 0.25;
       double maxTurnOutAngle = 0.4;

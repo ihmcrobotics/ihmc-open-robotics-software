@@ -80,7 +80,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
    private TerrainObject3D createConvexPolygonTerrainObject(RigidBodyTransform transformToWorld)
    {
       Matrix3d rotationToWorld = new Matrix3d();
-      transformToWorld.get(rotationToWorld);
+      transformToWorld.getRotation(rotationToWorld);
 
       Vector3d normal = new Vector3d();
       rotationToWorld.getColumn(2, normal);

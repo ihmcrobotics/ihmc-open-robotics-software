@@ -32,7 +32,7 @@ public class InertiaTools
    public static Matrix3d rotate(RigidBodyTransform inertialFrameRotation, Matrix3d inertia)
    {
       Matrix3d temp = new Matrix3d();
-      inertialFrameRotation.get(temp);
+      inertialFrameRotation.getRotation(temp);
 
       return rotate(temp, inertia);
    }
