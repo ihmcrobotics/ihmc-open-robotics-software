@@ -20,28 +20,39 @@ public class CombinedFuzzySearcher
    }
 
    /**
+    * <p>
     * This method uses several search techniques simultaneously to heuristically build up a list
     * of possible matches based on the passed in search string. It searches the supplied collection
     * for all possible matches.
+    * </p>
     *
+    * <p>
     * Three searches will be performed: Matching on the exact substring that is passed in, matching on
     * regular expression, and using a "fuzzy" search similar to many popular text editors and IDEs that
     * support fuzzy searching w/out the need for wildcards (Atom, Sublime Text, IntelliJ IDEA, etc.) provided
     * by Apache Commons Lang.
+    * </p>
     *
+    * <p>
     * The returned List is sorted and has element uniqueness based on the following set of criteria:
+    * <ol>
+    * <li> Any given String, for its fully qualified name, will only show up once, and,</li>
+    * <li> The matching information for that String will correspond to search "priority"</li>
+    * </ol>
+    *</p>
     *
-    * 1.) Any given String, for its fully qualified name, will only show up once, and
-    * 2.) The matching information for that String will correspond to search "priority"
-    *
+    * <p>
     * In this case, priority simply means that if the same String is identified by multiple
     * search techniques (e.g. both Exact Substring and Fuzzy Search find the same String for the same query), then only
     * the {@link CombinedFuzzySearchResult} with {@link us.ihmc.tools.search.strings.fuzzySearch.CombinedFuzzySearchResult.CombinedFuzzySearchResultType} corresponding to the highest
     * priority will be in the result set. The priorities are:
     *
-    * 1.) Exact Substring has highest priority
-    * 2.) Regular Expression is next
-    * 3.) Fuzzy results are last
+    * <ol>
+    * <li> Exact Substring has highest priority</li>
+    * <li> Regular Expression is next</li>
+    * <li> Fuzzy results are last</li>
+    * </ol>
+    * </p>
     *
     * @see CombinedFuzzySearchResult
     * @see us.ihmc.tools.search.strings.fuzzySearch.CombinedFuzzySearchResult.CombinedFuzzySearchResultType
