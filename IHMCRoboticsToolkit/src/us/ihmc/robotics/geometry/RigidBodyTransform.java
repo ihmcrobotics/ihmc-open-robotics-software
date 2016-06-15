@@ -1491,7 +1491,8 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Return rotation portion of this transform.
-    * 
+    * @deprecated This method is unclear in what it is packing in the Matrix3d.
+    * (it is overridden in Transform3d)
     * @param matrix
     */
    public void get(Matrix3d matrix)
@@ -1501,7 +1502,8 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Return rotation portion of this transform.
-    * 
+    * @deprecated This method is unclear in what it is packing in the Matrix3d.
+    * (it is overridden in Transform3d)
     * @param matrix
     */
    public void get(Matrix3f matrix)
