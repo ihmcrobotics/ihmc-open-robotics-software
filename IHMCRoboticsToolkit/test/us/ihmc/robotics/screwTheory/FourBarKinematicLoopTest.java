@@ -50,6 +50,28 @@ public class FourBarKinematicLoopTest
       initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
       boolean recomputeJointLimits = false;      
       
+      printInitialJointPositionsInWorld();
+      
+      masterJointA.setQ(0.0);
+      passiveJointB.setQ(0.0);
+      passiveJointC.setQ(0.0);
+      passiveJointD.setQ(0.0);
+      
+      FramePoint jointAPosition = new FramePoint(masterJointA.getFrameBeforeJoint());
+      FramePoint jointBPosition = new FramePoint(passiveJointB.getFrameBeforeJoint());
+      FramePoint jointCPosition = new FramePoint(passiveJointC.getFrameBeforeJoint());
+      FramePoint jointDPosition = new FramePoint(passiveJointD.getFrameBeforeJoint());
+            
+      jointAPosition.changeFrame(worldFrame);
+      jointBPosition.changeFrame(worldFrame);
+      jointCPosition.changeFrame(worldFrame);
+      jointDPosition.changeFrame(worldFrame);
+      
+      System.out.println("joint a position = " + jointAPosition.getPoint());
+      System.out.println("joint b position = " + jointBPosition.getPoint());
+      System.out.println("joint c position = " + jointCPosition.getPoint());
+      System.out.println("joint d position = " + jointDPosition.getPoint());
+      
       // try making a four bar with no joint limits
       try
       {
@@ -908,6 +930,29 @@ public class FourBarKinematicLoopTest
       jointCPosition.changeFrame(worldFrame);
       jointDPosition.changeFrame(worldFrame);
 
+      System.out.println("joint a position = " + jointAPosition.getPoint());
+      System.out.println("joint b position = " + jointBPosition.getPoint());
+      System.out.println("joint c position = " + jointCPosition.getPoint());
+      System.out.println("joint d position = " + jointDPosition.getPoint());
+   }
+   
+   private void printInitialJointPositionsInWorld()
+   {     
+      masterJointA.setQ(0.0);
+      passiveJointB.setQ(0.0);
+      passiveJointC.setQ(0.0);
+      passiveJointD.setQ(0.0);
+      
+      FramePoint jointAPosition = new FramePoint(masterJointA.getFrameBeforeJoint());
+      FramePoint jointBPosition = new FramePoint(passiveJointB.getFrameBeforeJoint());
+      FramePoint jointCPosition = new FramePoint(passiveJointC.getFrameBeforeJoint());
+      FramePoint jointDPosition = new FramePoint(passiveJointD.getFrameBeforeJoint());
+      
+      jointAPosition.changeFrame(worldFrame);
+      jointBPosition.changeFrame(worldFrame);
+      jointCPosition.changeFrame(worldFrame);
+      jointDPosition.changeFrame(worldFrame);
+      
       System.out.println("joint a position = " + jointAPosition.getPoint());
       System.out.println("joint b position = " + jointBPosition.getPoint());
       System.out.println("joint c position = " + jointCPosition.getPoint());
