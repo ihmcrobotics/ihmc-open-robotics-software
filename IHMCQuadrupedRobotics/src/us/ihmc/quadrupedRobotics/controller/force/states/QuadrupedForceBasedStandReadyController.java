@@ -66,17 +66,10 @@ public class QuadrupedForceBasedStandReadyController implements QuadrupedControl
 
       // Initialize sole position controller
       solePositionControllerSetpoints.initialize(taskSpaceEstimates);
-      for (RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         solePositionController.getGains(quadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
-         solePositionController.getGains(quadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
-         solePositionController.getGains(quadrant).setDerivativeGains(solePositionDerivativeGainsParameter.get());
-      }
       solePositionController.reset();
 
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
@@ -94,6 +87,7 @@ public class QuadrupedForceBasedStandReadyController implements QuadrupedControl
    @Override
    public ControllerEvent process()
    {
+      updateGains();
       updateEstimates();
       updateSetpoints();
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
@@ -104,6 +98,17 @@ public class QuadrupedForceBasedStandReadyController implements QuadrupedControl
    @Override
    public void onExit()
    {
+   }
+
+   private void updateGains()
+   {
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         solePositionController.getGains(quadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
+         solePositionController.getGains(quadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
+         solePositionController.getGains(quadrant).setDerivativeGains(solePositionDerivativeGainsParameter.get());
+      }
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
    }
 
    private void updateEstimates()
