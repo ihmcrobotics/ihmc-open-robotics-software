@@ -6,7 +6,7 @@ import java.util.List;
 public abstract class Parameter
 {
    private final String path;
-   private final List<ParameterChangeListener> changeListeners = new ArrayList<>();
+   private final transient List<ParameterChangeListener> changeListeners = new ArrayList<>();
 
    public Parameter(String path)
    {
