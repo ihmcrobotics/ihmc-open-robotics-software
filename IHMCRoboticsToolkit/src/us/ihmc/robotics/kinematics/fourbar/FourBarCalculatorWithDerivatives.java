@@ -46,6 +46,17 @@ public class FourBarCalculatorWithDerivatives
    // Angular accelerations
    private double angleDt2DAB, angleDt2ABC, angleDt2BCD, angleDt2CDA;
 
+   public FourBarCalculatorWithDerivatives(FourBarCalculatorWithDerivatives fourBarCalculatorWithDerivatives)
+   {
+      this.a = fourBarCalculatorWithDerivatives.a;
+      this.b = fourBarCalculatorWithDerivatives.b;
+      this.c = fourBarCalculatorWithDerivatives.c;
+      this.d = fourBarCalculatorWithDerivatives.d;
+
+      this.minA = fourBarCalculatorWithDerivatives.minA;
+      this.maxA = fourBarCalculatorWithDerivatives.maxA;
+   }
+
    public FourBarCalculatorWithDerivatives(double length_DA, double length_AB, double length_BC, double length_CD)
    {
       this.a = abs(length_DA);

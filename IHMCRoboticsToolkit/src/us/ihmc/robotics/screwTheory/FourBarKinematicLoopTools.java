@@ -10,7 +10,7 @@ public class FourBarKinematicLoopTools
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean DEBUG = false;
 
-   public static void checkJointAxesAreParallelAndSetJointAxis(FrameVector masterAxis, FrameVector jointBAxis, FrameVector jointCAxis, FrameVector jointDAxis)
+   public static void checkJointAxesAreParallel(FrameVector masterAxis, FrameVector jointBAxis, FrameVector jointCAxis, FrameVector jointDAxis)
    {
       masterAxis.changeFrame(worldFrame);
       jointBAxis.changeFrame(worldFrame);
