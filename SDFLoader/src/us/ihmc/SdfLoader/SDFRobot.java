@@ -324,7 +324,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    //               System.out.println("SDFRobot: Adding force sensor to: " + joint.getName());
                   
                   Vector3d offsetToPack = new Vector3d();
-                  forceSensor.getTransform().get(offsetToPack);
+                  forceSensor.getTransform().getTranslation(offsetToPack);
                   JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(jointName, offsetToPack, this);
                   scsJoint.addJointWrenchSensor(jointWrenchSensor);
                   

@@ -86,7 +86,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       rotationToWorld.getColumn(2, normal);
 
       Vector3d centroid = new Vector3d();
-      transformToWorld.get(centroid);
+      transformToWorld.getTranslation(centroid);
 
       int nPoints = 5;
       double radius = 0.23;

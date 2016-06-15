@@ -2169,7 +2169,7 @@ public class Transform3dTest
 
 			JUnitTools.assertMatrix3dEquals("", matrixCheck, matrix, 1e-12);
 
-			transform.get(vectorCheck);
+			transform.getTranslation(vectorCheck);
 
 			JUnitTools.assertVector3dEquals("", vectorCheck, vector, 1e-12);
 		}
@@ -2231,7 +2231,7 @@ public class Transform3dTest
 			transform.getRotation(matrixCheck);
 			JUnitTools.assertMatrix3fEquals("", matrixCheck, matrix, 1e-6);
 
-			transform.get(vectorCheck);
+			transform.getTranslation(vectorCheck);
 			JUnitTools.assertVector3fEquals("", vectorCheck, vector, 1e-6);
 		}
 	}

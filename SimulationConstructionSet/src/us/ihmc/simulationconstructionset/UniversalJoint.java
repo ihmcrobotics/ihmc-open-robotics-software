@@ -151,7 +151,7 @@ public class UniversalJoint extends PinJoint
 
    public void getTranslationToWorld(Vector3d translation)
    {
-      joint2.transformToNext.get(translation);
+      joint2.transformToNext.getTranslation(translation);
    }
 
 

@@ -205,7 +205,7 @@ public class LidarScan
       Vector3d origin = new Vector3d();
       RigidBodyTransform transform = new RigidBodyTransform();
       getInterpolatedTransform(index, transform);
-      transform.get(origin);
+      transform.getTranslation(origin);
 
       return new LineSegment3d(new Point3d(origin), getPoint(index, range));
    }

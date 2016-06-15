@@ -279,7 +279,7 @@ public class RigidBodyInertiaTest
       transform.getRotation(rotation);
 
       Vector3d translation = new Vector3d();
-      transform.get(translation);
+      transform.getTranslation(translation);
 
       Matrix3d translationTilde = new Matrix3d();
       MatrixTools.toTildeForm(translationTilde, translation);

@@ -353,7 +353,7 @@ public class ReferenceFrameTest
       expectedTranslation.add(translation2);
       expectedTranslation.add(translation3);
 
-      transformToDesiredFrame.get(totalTranslation);
+      transformToDesiredFrame.getTranslation(totalTranslation);
 
       JUnitTools.assertTuple3dEquals(expectedTranslation, totalTranslation, 1e-7);
 
@@ -368,7 +368,7 @@ public class ReferenceFrameTest
       expectedTranslation.add(translation2);
       expectedTranslation.add(translation3);
 
-      transformToDesiredFrame.get(totalTranslation);
+      transformToDesiredFrame.getTranslation(totalTranslation);
 
       JUnitTools.assertTuple3dEquals(expectedTranslation, totalTranslation, 1e-7);
    }

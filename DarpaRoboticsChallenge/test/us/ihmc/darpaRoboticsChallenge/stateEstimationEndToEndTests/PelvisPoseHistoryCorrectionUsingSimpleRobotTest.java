@@ -366,7 +366,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
       for (int i = 0; i < targets.length; i++)
       {
-         targets[i].get(targetTranslation);
+         targets[i].getTranslation(targetTranslation);
          targets[i].getRotation(targetRotation);
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
@@ -432,7 +432,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       
       for (int i = 0; i < targets.length; i++)
       {
-         targets[i].get(targetTranslation);
+         targets[i].getTranslation(targetTranslation);
          targets[i].getRotation(targetRotation);
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
@@ -496,7 +496,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
       for (int i = 0; i < targets.length; i++)
       {
-         targets[i].get(targetTranslation);
+         targets[i].getTranslation(targetTranslation);
          targets[i].getRotation(targetRotation);
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
@@ -564,7 +564,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       
       for (int i = 0; i < targets.length; i++)
       {
-         targets[i].get(targetTranslation);
+         targets[i].getTranslation(targetTranslation);
          targets[i].getRotation(targetRotation);
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
@@ -631,7 +631,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       for (int i = 0; i < targets.length; i++)
       {
          targets[i].setTranslation(i, i, i / numTargets);
-         targets[i].get(targetTranslation);
+         targets[i].getTranslation(targetTranslation);
          targets[i].getRotation(targetRotation);
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
@@ -700,7 +700,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       for (int i = 0; i < targets.length; i++)
       {
          targets[i].setTranslation(i, i, i / numTargets);
-         targets[i].get(targetTranslation);
+         targets[i].getTranslation(targetTranslation);
          targets[i].getRotation(targetRotation);
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);

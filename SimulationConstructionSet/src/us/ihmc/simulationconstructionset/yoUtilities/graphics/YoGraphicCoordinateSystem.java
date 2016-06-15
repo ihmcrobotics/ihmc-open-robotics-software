@@ -106,7 +106,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
 
    public void setTransformToWorld(RigidBodyTransform transformToWorld)
    {
-      transformToWorld.get(translationToWorld);
+      transformToWorld.getTranslation(translationToWorld);
 
       x.set(translationToWorld.x);
       y.set(translationToWorld.y);

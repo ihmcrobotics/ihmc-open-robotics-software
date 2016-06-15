@@ -292,7 +292,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
          retBuffer.append("  Parent Joint: " + this.parentJoint.name + "\n");
       else
          retBuffer.append("  Root Joint \n");
-      transformToNext.get(translation);
+      transformToNext.getTranslation(translation);
       retBuffer.append("   Location vector: " + translation + "\n");
       retBuffer.append("   offset vector: " + offset + "\n");
 
@@ -798,7 +798,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     */
    public void getTranslationToWorld(Vector3d translation)
    {
-      transformToNext.get(translation);
+      transformToNext.getTranslation(translation);
    }
 
    /**
