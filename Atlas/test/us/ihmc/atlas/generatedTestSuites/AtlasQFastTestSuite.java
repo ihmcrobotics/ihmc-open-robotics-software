@@ -12,9 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.pushRecovery.AtlasPushRecoveryMultiStepTest.class,
-   us.ihmc.atlas.roughTerrainWalking.AtlasEndToEndCinderBlockFieldTest.class,
-   us.ihmc.atlas.roughTerrainWalking.AtlasFootstepSnapperTest.class
+   us.ihmc.atlas.pushRecovery.AtlasMomentumRecoveryTest.class,
+   us.ihmc.atlas.pushRecovery.AtlasPushRecoveryMultiStepTest.class
 })
 
 public class AtlasQFastTestSuite

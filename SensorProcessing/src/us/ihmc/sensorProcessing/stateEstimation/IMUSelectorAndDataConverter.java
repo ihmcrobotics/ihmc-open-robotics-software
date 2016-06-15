@@ -140,7 +140,7 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       estimationFrame.getTransformToDesiredFrame(transformFromEstimationFrameToIMUFrame, orientationMeasurementFrame);
       
       transformFromEstimationToWorld.multiply(transformFromIMUToWorld, transformFromEstimationFrameToIMUFrame);
-      transformFromEstimationToWorld.get(rotationFromEstimationToWorld);
+      transformFromEstimationToWorld.getRotation(rotationFromEstimationToWorld);
       tempOrientationEstimationFrame.setIncludingFrame(ReferenceFrame.getWorldFrame(), rotationFromEstimationToWorld);
       
       // Introduce simulated IMU drift

@@ -81,7 +81,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
    private void computeOrientationStateOutputBlock()
    {
       estimationFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-      tempTransform.get(rotationFromEstimationToWorld);
+      tempTransform.getRotation(rotationFromEstimationToWorld);
 
       tempCenterOfMassPosition.setIncludingFrame(centerOfMassPositionPort.getData());
       tempCenterOfMassPosition.changeFrame(estimationFrame);

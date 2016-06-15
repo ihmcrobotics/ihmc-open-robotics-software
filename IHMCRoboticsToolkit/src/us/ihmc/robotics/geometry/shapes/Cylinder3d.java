@@ -251,7 +251,7 @@ public class Cylinder3d implements Shape3d
       Plane3d plane3d;
 
       Matrix3d m1 = new Matrix3d();
-      transform.get(m1);
+      transform.getRotation(m1);
       Vector3d normal = new Vector3d();
       m1.getColumn(Direction.Z.getIndex(), normal);
 

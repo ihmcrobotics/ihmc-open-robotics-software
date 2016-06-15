@@ -70,7 +70,7 @@ public class BipedSupportPolygons
 
       supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
 
-      ArtifactList artifactList = new ArtifactList("Biped Support Polygon");
+      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
       YoArtifactPolygon supportPolygonArtifact = new YoArtifactPolygon("Combined Polygon", supportPolygonViz, Color.pink, false);
       artifactList.add(supportPolygonArtifact);

@@ -3,17 +3,18 @@ package us.ihmc.llaQuadruped;
 import java.io.IOException;
 
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
@@ -23,9 +24,12 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
@@ -43,7 +47,7 @@ public class LLAQuadrupedSimulationFactory
 {
    private static final boolean USE_FORCE_DEVELOPMENT = false;
    
-   private static final double SIMULATION_DT = 0.000125;
+   private static final double SIMULATION_DT = 0.00006;
    private static final double SIMULATION_GRAVITY = -9.81;
    private static final boolean SHOW_OVERHEAD_VIEW = false;
    private static final int RECORD_FREQUENCY = (int) (0.01 / SIMULATION_DT);
@@ -67,6 +71,7 @@ public class LLAQuadrupedSimulationFactory
    private DRCKinematicsBasedStateEstimator stateEstimator;
    private DRCPoseCommunicator poseCommunicator;
    private LLAQuadrupedStandPrepParameters standPrepParameters;
+   private LLAQuadrupedGroundContactParameters groundContactParameters;
    private Point3d initialCoMPosition;
    private SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
    private LLAQuadrupedNetClassList netClassList;
@@ -99,7 +104,7 @@ public class LLAQuadrupedSimulationFactory
    private SimulationConstructionSet scs;
 
 
-   private void createFirstStage()
+   private void createFirstStage() throws IOException
    {
       modelFactory = new LLAQuadrupedModelFactory();
       sdfRobot = modelFactory.createSdfRobot();
@@ -115,11 +120,14 @@ public class LLAQuadrupedSimulationFactory
       physicalProperties = new LLAQuadrupedPhysicalProperties();
       standPrepParameters = new LLAQuadrupedStandPrepParameters();
       initialCoMPosition = new Point3d();
+      groundContactParameters = new LLAQuadrupedGroundContactParameters();
+      ParameterRegistry.getInstance().loadFromResources("parameters/simulation.param");
    }
    
-   private void createSecondStage()
+   private void createSecondStage() throws IOException
    {
       packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, netClassList);
+      packetCommunicator.connect();
       referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       sdfPerfectSimulatedOutputWriter = new SDFPerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
       
@@ -156,10 +164,10 @@ public class LLAQuadrupedSimulationFactory
       sdfQuadrupedPerfectSimulatedSensor = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot, fullRobotModel, referenceFrames);
       
       groundContactModel = new LinearGroundContactModel(sdfRobot, robotsYoVariableRegistry);
-      groundContactModel.setZStiffness(1000.0);
-      groundContactModel.setZDamping(400.0);
-      groundContactModel.setXYStiffness(4000.0);
-      groundContactModel.setXYDamping(500.0);
+      groundContactModel.setZStiffness(groundContactParameters.getZStiffness());
+      groundContactModel.setZDamping(groundContactParameters.getZDamping());
+      groundContactModel.setXYStiffness(groundContactParameters.getXYStiffness());
+      groundContactModel.setXYDamping(groundContactParameters.getXYDamping());
       groundContactModel.setGroundProfile3D(groundProfile3D);
    }
    
@@ -195,7 +203,15 @@ public class LLAQuadrupedSimulationFactory
    private void createEighthStage()
    {
       sdfRobot.setController(simulationController);
-      sdfRobot.setPositionInWorld(new Vector3d(0.0, 0.0, standPrepParameters.getInitialHeight()));
+      sdfRobot.setPositionInWorld(standPrepParameters.getInitialPosition());
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         for (LegJointName legJointName : modelFactory.getJointNameMap().getLegJointNames())
+         {
+            OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = sdfRobot.getOneDegreeOfFreedomJoint(modelFactory.getJointNameMap().getLegJointName(robotQuadrant, legJointName));
+            oneDegreeOfFreedomJoint.setQ(standPrepParameters.getInitialJointPosition(robotQuadrant, legJointName));
+         }
+      }
       try
       {
          sdfRobot.update();
@@ -232,6 +248,8 @@ public class LLAQuadrupedSimulationFactory
          scs.setCameraDollyOffsets(4.0, 4.0, 1.0);
          scs.getStandardSimulationGUI().selectPanel("Plotter");
       }
+      scs.setCameraTracking(false, false, false, false);
+      scs.setCameraDolly(false, false, false, false);
    }
    
    public void createSimulation() throws IOException

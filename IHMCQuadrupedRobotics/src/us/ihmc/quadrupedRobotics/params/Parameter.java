@@ -6,7 +6,7 @@ import java.util.List;
 public abstract class Parameter
 {
    private final String path;
-   private final List<ParameterChangeListener> changeListeners = new ArrayList<>();
+   private final transient List<ParameterChangeListener> changeListeners = new ArrayList<>();
 
    public Parameter(String path)
    {
@@ -81,9 +81,9 @@ public abstract class Parameter
 
    protected void notifyChangeListeners()
    {
-      for (ParameterChangeListener listener : changeListeners)
+      for(int i = 0; i < changeListeners.size(); i++)
       {
-         listener.onChange(this);
+         changeListeners.get(i).onChange(this);
       }
    }
 }

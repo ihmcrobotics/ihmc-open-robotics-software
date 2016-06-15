@@ -182,6 +182,7 @@ public class QuadrupedTaskSpaceController
             virtualModelController.setSoleContactForceVisible(robotQuadrant, false);
             virtualModelController.setSoleVirtualForceVisible(robotQuadrant, true);
          }
+         virtualModelController.setJointTorquesVisible(robotQuadrant, true);
       }
       virtualModelController.compute(settings.getVirtualModelControllerSettings());
    }

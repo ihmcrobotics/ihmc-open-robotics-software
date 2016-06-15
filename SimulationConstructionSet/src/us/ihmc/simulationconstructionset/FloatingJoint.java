@@ -222,7 +222,7 @@ public class FloatingJoint extends Joint
    public void setRotationAndTranslation(RigidBodyTransform transform)
    {
       Matrix3d rotationMatrix = new Matrix3d();
-      transform.get(rotationMatrix);
+      transform.getRotation(rotationMatrix);
       setRotation(rotationMatrix);
 
       Vector3d translation = new Vector3d();

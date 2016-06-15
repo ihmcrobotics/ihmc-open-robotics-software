@@ -102,7 +102,7 @@ public class Box3d implements Shape3d
 
    public void getRotation(Matrix3d rotationMatrixToPack)
    {
-      this.transform.get(rotationMatrixToPack);
+      this.transform.getRotation(rotationMatrixToPack);
    }
 
    public Matrix3d getRotationCopy()
@@ -423,7 +423,7 @@ public class Box3d implements Shape3d
    {
       if (dirtyBit)
       {
-         transform.get(temporaryMatrix);
+         transform.getRotation(temporaryMatrix);
 
          for (FaceName faceName : faces.keySet())
          {
