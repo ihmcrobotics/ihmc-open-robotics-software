@@ -24,7 +24,8 @@ public class DivergentComponentOfMotionEstimator
    YoFramePoint yoDcmPositionEstimate = new YoFramePoint("dcmPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
    YoFramePoint yoIcpPositionEstimate = new YoFramePoint("icpPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
 
-   public DivergentComponentOfMotionEstimator(ReferenceFrame comZUpFrame, LinearInvertedPendulumModel lipModel, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public DivergentComponentOfMotionEstimator(ReferenceFrame comZUpFrame, LinearInvertedPendulumModel lipModel, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry graphicsListRegistry)
    {
       this.comZUpFrame = comZUpFrame;
       this.lipModel = lipModel;

@@ -42,8 +42,10 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
    // parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 2.0);
-   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory.createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
-   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory.createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);
+   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory
+         .createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
+   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory
+         .createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);
    private final DoubleArrayParameter bodyOrientationIntegralGainsParameter = parameterFactory.createDoubleArray("bodyOrientationIntegralGains", 0, 0, 0);
    private final DoubleParameter bodyOrientationMaxIntegralErrorParameter = parameterFactory.createDouble("bodyOrientationMaxIntegralError", 0);
    private final DoubleArrayParameter comPositionProportionalGainsParameter = parameterFactory.createDoubleArray("comPositionProportionalGains", 0, 0, 5000);
@@ -95,10 +97,12 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
    {
       QUAD_SUPPORT, HIND_LEFT_FRONT_RIGHT_SUPPORT, HIND_RIGHT_FRONT_LEFT_SUPPORT
    }
+
    public enum TrotEvent
    {
       TIMEOUT
    }
+
    private final FiniteStateMachine<TrotState, TrotEvent> trotStateMachine;
 
    public QuadrupedDcmBasedTrotController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
@@ -145,7 +149,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(1, gravity, inputProvider.getComPositionInput().getZ());
 
       // state machine
-      FiniteStateMachineBuilder<TrotState, TrotEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(TrotState.class, TrotEvent.class, "TrotState", registry);
+      FiniteStateMachineBuilder<TrotState, TrotEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(TrotState.class, TrotEvent.class, "TrotState",
+            registry);
       stateMachineBuilder.addState(TrotState.QUAD_SUPPORT, new QuadSupportState());
       stateMachineBuilder.addState(TrotState.HIND_LEFT_FRONT_RIGHT_SUPPORT, new DoubleSupportState(RobotQuadrant.HIND_LEFT, RobotQuadrant.FRONT_RIGHT));
       stateMachineBuilder.addState(TrotState.HIND_RIGHT_FRONT_LEFT_SUPPORT, new DoubleSupportState(RobotQuadrant.HIND_RIGHT, RobotQuadrant.FRONT_LEFT));
@@ -211,14 +216,16 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 
-   @Override public ControllerEvent process()
+   @Override
+   public ControllerEvent process()
    {
       updateEstimates();
       updateSetpoints();
       return null;
    }
 
-   @Override public void onEntry()
+   @Override
+   public void onEntry()
    {
       // initialize estimates
       lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
@@ -262,13 +269,15 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       trotStateMachine.reset();
    }
 
-   @Override public void onExit()
+   @Override
+   public void onExit()
    {
       trotStateMachine.reset();
       timedStepController.removeSteps();
    }
 
-   private void computeNominalCmpPositions(RobotQuadrant hindSupportQuadrant, RobotQuadrant frontSupportQuadrant, FramePoint nominalCmpPositionAtSoS, FramePoint nominalCmpPositionAtEoS)
+   private void computeNominalCmpPositions(RobotQuadrant hindSupportQuadrant, RobotQuadrant frontSupportQuadrant, FramePoint nominalCmpPositionAtSoS,
+         FramePoint nominalCmpPositionAtEoS)
    {
       taskSpaceEstimates.getSolePosition(hindSupportQuadrant).changeFrame(worldFrame);
       taskSpaceEstimates.getSolePosition(frontSupportQuadrant).changeFrame(worldFrame);
@@ -287,7 +296,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       nominalCmpPositionAtEoS.add(xOffset, yOffset, 0.0);
    }
 
-   private void computeNominalDcmPositions(FramePoint nominalCmpPositionAtSoS, FramePoint nominalCmpPositionAtEoS, FramePoint nominalDcmPositionAtSoS, FramePoint nominalDcmPositionAtEoS)
+   private void computeNominalDcmPositions(FramePoint nominalCmpPositionAtSoS, FramePoint nominalCmpPositionAtEoS, FramePoint nominalDcmPositionAtSoS,
+         FramePoint nominalDcmPositionAtEoS)
    {
       double timeAtEoS = doubleSupportDurationParameter.get();
       double relativeYawAtEoS = inputProvider.getPlanarVelocityInput().getZ() * timeAtEoS;
@@ -332,7 +342,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          timeInterval = new TimeInterval();
       }
 
-      @Override public void onEntry()
+      @Override
+      public void onEntry()
       {
          timeInterval.setInterval(robotTimestamp.getDoubleValue(), robotTimestamp.getDoubleValue() + quadSupportDurationParameter.get());
 
@@ -354,7 +365,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          }
       }
 
-      @Override public TrotEvent process()
+      @Override
+      public TrotEvent process()
       {
          double currentTime = robotTimestamp.getDoubleValue();
 
@@ -370,7 +382,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
             return null;
       }
 
-      @Override public void onExit()
+      @Override
+      public void onExit()
       {
       }
    }
@@ -410,7 +423,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          }
       }
 
-      @Override public void onEntry()
+      @Override
+      public void onEntry()
       {
          double initialTime = robotTimestamp.getDoubleValue();
 
@@ -458,7 +472,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          }
       }
 
-      @Override public TrotEvent process()
+      @Override
+      public TrotEvent process()
       {
          double currentTime = robotTimestamp.getDoubleValue();
 
@@ -485,7 +500,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
             return null;
       }
 
-      @Override public void onExit()
+      @Override
+      public void onExit()
       {
       }
    }

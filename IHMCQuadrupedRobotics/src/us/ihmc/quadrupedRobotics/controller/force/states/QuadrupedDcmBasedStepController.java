@@ -36,8 +36,10 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
 
    // parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory.createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
-   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory.createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);
+   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory
+         .createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
+   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory
+         .createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);
    private final DoubleArrayParameter bodyOrientationIntegralGainsParameter = parameterFactory.createDoubleArray("bodyOrientationIntegralGains", 0, 0, 0);
    private final DoubleParameter bodyOrientationMaxIntegralErrorParameter = parameterFactory.createDouble("bodyOrientationMaxIntegralError", 0);
    private final DoubleArrayParameter comPositionProportionalGainsParameter = parameterFactory.createDoubleArray("comPositionProportionalGains", 0, 0, 5000);
@@ -212,7 +214,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       }
    }
 
-   @Override public ControllerEvent process()
+   @Override
+   public ControllerEvent process()
    {
       if (timedStepController.getQueueSize() == 0)
       {
@@ -223,7 +226,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       return null;
    }
 
-   @Override public void onEntry()
+   @Override
+   public void onEntry()
    {
       // initialize estimates
       lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
@@ -283,7 +287,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
 
       // compute dcm trajectory for desired step plan
       double initialTime = robotTimestamp.getDoubleValue();
-      int nIntervals = copPlanner.compute(timedStepController.getQueueSize(), timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), initialTime);
+      int nIntervals = copPlanner.compute(timedStepController.getQueueSize(), timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(),
+            taskSpaceControllerSettings.getContactState(), initialTime);
       dcmPositionWaypoint.setIncludingFrame(copPlanner.getCenterOfPressureAtStartOfInterval(nIntervals - 1));
       dcmPositionWaypoint.changeFrame(ReferenceFrame.getWorldFrame());
       dcmPositionWaypoint.add(0, 0, lipModel.getComHeight());
@@ -299,7 +304,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       dcmTransitionTrajectory.initializeTrajectory(dcmPositionEstimate, dcmPositionWaypoint, transitionStartTime, transitionEndTime);
    }
 
-   @Override public void onExit()
+   @Override
+   public void onExit()
    {
       // remove remaining steps from the queue
       removeSteps();

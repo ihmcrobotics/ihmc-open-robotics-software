@@ -92,7 +92,8 @@ public class QuadrupedBodyOrientationController
       bodyAngularVelocityEstimate.changeFrame(bodyFrame);
       comTorqueFeedforwardSetpoint.changeFrame(bodyFrame);
       bodyOrientationController.setGains(bodyOrientationControllerGains);
-      bodyOrientationController.compute(comTorqueCommand, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate, comTorqueFeedforwardSetpoint);
+      bodyOrientationController
+            .compute(comTorqueCommand, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate, comTorqueFeedforwardSetpoint);
 
       // update log variables
       yoBodyOrientationSetpoint.setAndMatchFrame(bodyOrientationSetpoint);
