@@ -61,9 +61,9 @@ public class QuadrupedContactForceOptimizationSettings
 
    public void setComTorqueCommandWeights(double weightX, double weightY, double weightZ)
    {
-       comTorqueCommandWeights[0] = Math.max(weightX, 0.0);
-       comTorqueCommandWeights[1] = Math.max(weightY, 0.0);
-       comTorqueCommandWeights[2] = Math.max(weightZ, 0.0);
+      comTorqueCommandWeights[0] = Math.max(weightX, 0.0);
+      comTorqueCommandWeights[1] = Math.max(weightY, 0.0);
+      comTorqueCommandWeights[2] = Math.max(weightZ, 0.0);
    }
 
    public void setComForceCommandWeights(double[] weights)
@@ -103,7 +103,7 @@ public class QuadrupedContactForceOptimizationSettings
 
    public /* const */ double[] getComForceCommandWeights()
    {
-     return comForceCommandWeights;
+      return comForceCommandWeights;
    }
 
    public /* const */ double[] getContactForceCommandWeights(RobotQuadrant robotQuadrant)

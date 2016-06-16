@@ -149,7 +149,7 @@ public class PiecewiseReverseDcmTrajectory
       cmpPositionAtSoS[0] = new FramePoint(ReferenceFrame.getWorldFrame());
       cmpPositionAtSoS[1] = new FramePoint(ReferenceFrame.getWorldFrame());
       cmpPositionAtSoS[0].set(0.0, 0.0, 0.0);
-      cmpPositionAtSoS[1].set(0.0,-0.4, 0.0);
+      cmpPositionAtSoS[1].set(0.0, -0.4, 0.0);
 
       double timeAtEoS = 0.8;
       FramePoint dcmPositionAtEoS = new FramePoint(ReferenceFrame.getWorldFrame());

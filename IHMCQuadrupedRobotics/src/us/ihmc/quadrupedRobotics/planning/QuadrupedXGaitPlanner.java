@@ -35,7 +35,8 @@ public class QuadrupedXGaitPlanner
       pastSteps.put(RobotEnd.HIND, new QuadrupedTimedStep());
    }
 
-   public void computeInitialPlan(ArrayList<QuadrupedTimedStep> plannedSteps, Vector3d planarVelocity, RobotQuadrant initialStepQuadrant, FramePoint supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettings xGaitSettings)
+   public void computeInitialPlan(ArrayList<QuadrupedTimedStep> plannedSteps, Vector3d planarVelocity, RobotQuadrant initialStepQuadrant,
+         FramePoint supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettings xGaitSettings)
    {
       // initialize nominal support rectangle
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -73,7 +74,8 @@ public class QuadrupedXGaitPlanner
          else
          {
             double endPhaseShift = thisStepQuadrant.isQuadrantInHind() ? 180.0 - xGaitSettings.getEndPhaseShift() : xGaitSettings.getEndPhaseShift();
-            double endTimeShift = (xGaitSettings.getEndDoubleSupportDuration() + xGaitSettings.getStepDuration()) * Math.max(Math.min(endPhaseShift, 180.0), 0.0) / 180.0;
+            double endTimeShift = xGaitSettings.getEndDoubleSupportDuration() + xGaitSettings.getStepDuration();
+            endTimeShift *= Math.max(Math.min(endPhaseShift, 180.0), 0.0) / 180.0;
             thisStepStartTime = lastStepStartTime + endTimeShift;
             thisStepEndTime = thisStepStartTime + xGaitSettings.getStepDuration();
          }
@@ -99,7 +101,8 @@ public class QuadrupedXGaitPlanner
       }
    }
 
-   public void computeOnlinePlan(ArrayList<QuadrupedTimedStep> plannedSteps, EndDependentList<QuadrupedTimedStep> latestSteps, Vector3d planarVelocity, double currentTime, double currentYaw, QuadrupedXGaitSettings xGaitSettings)
+   public void computeOnlinePlan(ArrayList<QuadrupedTimedStep> plannedSteps, EndDependentList<QuadrupedTimedStep> latestSteps, Vector3d planarVelocity,
+         double currentTime, double currentYaw, QuadrupedXGaitSettings xGaitSettings)
    {
       // initialize latest step
       QuadrupedTimedStep latestStep;
@@ -215,7 +218,8 @@ public class QuadrupedXGaitPlanner
       finalPose.setYawPitchRoll(a, initialPose.getPitch(), initialPose.getRoll());
    }
 
-   private void computeStepTimeInterval(QuadrupedTimedStep thisStep, QuadrupedTimedStep pastStepOnSameEnd, QuadrupedTimedStep pastStepOnOppositeEnd, QuadrupedXGaitSettings xGaitSettings)
+   private void computeStepTimeInterval(QuadrupedTimedStep thisStep, QuadrupedTimedStep pastStepOnSameEnd, QuadrupedTimedStep pastStepOnOppositeEnd,
+         QuadrupedXGaitSettings xGaitSettings)
    {
       RobotEnd thisStepEnd = thisStep.getRobotQuadrant().getEnd();
       RobotSide thisStepSide = thisStep.getRobotQuadrant().getSide();
