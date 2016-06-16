@@ -50,7 +50,7 @@ public class FourBarKinematicLoopTest
       initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
       boolean recomputeJointLimits = false;      
       
-      printInitialJointPositionsInWorld();
+      printInitialJointPositions();
       
       masterJointA.setQ(0.0);
       passiveJointB.setQ(0.0);
@@ -259,8 +259,7 @@ public class FourBarKinematicLoopTest
       boolean recomputeJointLimits = true;
       
 //      initializeAllJointsToSameLimits(0.0, Math.PI);
-      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
-            recomputeJointLimits);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD, recomputeJointLimits);
       
       // master joint is 90 degrees, non-zero velocity
       masterJointA.setQ(0.0); // 0.5 * Math.PI);
@@ -936,7 +935,7 @@ public class FourBarKinematicLoopTest
       System.out.println("joint d position = " + jointDPosition.getPoint());
    }
    
-   private void printInitialJointPositionsInWorld()
+   private void printInitialJointPositions()
    {     
       masterJointA.setQ(0.0);
       passiveJointB.setQ(0.0);
@@ -953,7 +952,7 @@ public class FourBarKinematicLoopTest
       jointCPosition.changeFrame(worldFrame);
       jointDPosition.changeFrame(worldFrame);
       
-      System.out.println("joint a position = " + jointAPosition.getPoint());
+      System.out.println("\njoint a position = " + jointAPosition.getPoint());
       System.out.println("joint b position = " + jointBPosition.getPoint());
       System.out.println("joint c position = " + jointCPosition.getPoint());
       System.out.println("joint d position = " + jointDPosition.getPoint());
