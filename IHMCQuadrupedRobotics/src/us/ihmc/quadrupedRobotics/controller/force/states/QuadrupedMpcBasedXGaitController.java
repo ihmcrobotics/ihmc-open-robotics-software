@@ -41,8 +41,10 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final DoubleParameter mpcMaximumPreviewTimeParameter = parameterFactory.createDouble("maximumPreviewTime", 10);
    private final DoubleParameter mpcStepAdjustmentCostParameter = parameterFactory.createDouble("stepAdjustmentCost", 1000000);
    private final DoubleParameter mpcCopAdjustmentCostParameter = parameterFactory.createDouble("copAdjustmentCost", 1);
-   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory.createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
-   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory.createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);
+   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory
+         .createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
+   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory
+         .createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);
    private final DoubleArrayParameter bodyOrientationIntegralGainsParameter = parameterFactory.createDoubleArray("bodyOrientationIntegralGains", 0, 0, 0);
    private final DoubleParameter bodyOrientationMaxIntegralErrorParameter = parameterFactory.createDouble("bodyOrientationMaxIntegralError", 0);
    private final DoubleArrayParameter comPositionProportionalGainsParameter = parameterFactory.createDoubleArray("comPositionProportionalGains", 0, 0, 5000);
@@ -72,7 +74,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final QuadrupedBodyOrientationController bodyOrientationController;
    private final QuadrupedTimedStepController timedStepController;
    private final QuadrupedMpcOptimizationWithLaneChange mpcOptimization;
-   private final QuadrupedMpcOptimizationWithLaneChangeSettings mpcOptimizationSettings;
+   private final QuadrupedMpcOptimizationWithLaneChangeSettings mpcSettings;
 
    // task space controller
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
@@ -93,7 +95,6 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private EndDependentList<QuadrupedTimedStep> latestSteps;
    private final FrameVector stepAdjustmentVector;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
-
 
    public QuadrupedMpcBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedControllerInputProviderInterface inputProvider, QuadrupedXGaitSettingsProvider settingsProvider)
@@ -121,7 +122,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
       timedStepController = controllerToolbox.getTimedStepController();
       mpcOptimization = new QuadrupedDcmBasedMpcOptimizationWithLaneChange(controllerToolbox.getDcmPositionEstimator(), NUMBER_OF_PREVIEW_STEPS);
-      mpcOptimizationSettings = new QuadrupedMpcOptimizationWithLaneChangeSettings(mpcMaximumPreviewTimeParameter.get(), mpcStepAdjustmentCostParameter.get(), mpcCopAdjustmentCostParameter.get());
+      mpcSettings = new QuadrupedMpcOptimizationWithLaneChangeSettings(mpcMaximumPreviewTimeParameter.get(), mpcStepAdjustmentCostParameter.get(),
+            mpcCopAdjustmentCostParameter.get());
 
       // task space controllers
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
@@ -146,7 +148,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       xGaitSettings = new QuadrupedXGaitSettings();
       supportCentroid = new FramePoint();
       stepAdjustmentVector = new FrameVector();
-      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getFootReferenceFrames(), minimumStepClearanceParameter.get(), maximumStepStrideParameter.get());
+      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getFootReferenceFrames(), minimumStepClearanceParameter.get(),
+            maximumStepStrideParameter.get());
       latestSteps = new EndDependentList<>();
       for (RobotEnd robotEnd : RobotEnd.values)
       {
@@ -163,9 +166,9 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 
    private void updateGains()
    {
-      mpcOptimizationSettings.setMaximumPreviewTime(mpcMaximumPreviewTimeParameter.get());
-      mpcOptimizationSettings.setStepAdjustmentCost(mpcStepAdjustmentCostParameter.get());
-      mpcOptimizationSettings.setCopAdjustmentCost(mpcCopAdjustmentCostParameter.get());
+      mpcSettings.setMaximumPreviewTime(mpcMaximumPreviewTimeParameter.get());
+      mpcSettings.setStepAdjustmentCost(mpcStepAdjustmentCostParameter.get());
+      mpcSettings.setCopAdjustmentCost(mpcCopAdjustmentCostParameter.get());
       comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
       comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
       comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
@@ -208,10 +211,10 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       // update desired body orientation, angular velocity, and torque
       bodyYawSetpoint += inputProvider.getPlanarVelocityInput().getZ() * controlDT;
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(worldFrame);
-      bodyOrientationControllerSetpoints.getBodyOrientation().setYawPitchRoll(
-            RotationTools.computeYaw(inputProvider.getBodyOrientationInput()) + bodyYawSetpoint,
-            RotationTools.computePitch(inputProvider.getBodyOrientationInput()) + groundPlaneEstimator.getPitch(bodyYawSetpoint),
-            RotationTools.computeRoll(inputProvider.getBodyOrientationInput()));
+      bodyOrientationControllerSetpoints.getBodyOrientation()
+            .setYawPitchRoll(RotationTools.computeYaw(inputProvider.getBodyOrientationInput()) + bodyYawSetpoint,
+                  RotationTools.computePitch(inputProvider.getBodyOrientationInput()) + groundPlaneEstimator.getPitch(bodyYawSetpoint),
+                  RotationTools.computeRoll(inputProvider.getBodyOrientationInput()));
       bodyOrientationControllerSetpoints.getBodyAngularVelocity().setToZero();
       bodyOrientationControllerSetpoints.getComTorqueFeedforward().setToZero();
       bodyOrientationController.compute(taskSpaceControllerCommands.getComTorque(), bodyOrientationControllerSetpoints, taskSpaceEstimates);
@@ -233,8 +236,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       {
          timedStepController.addStep(xGaitPreviewSteps.get(i));
       }
-      mpcOptimization.compute(stepAdjustmentVector, cmpPositionSetpoint, timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(), taskSpaceControllerSettings.getContactState(), taskSpaceEstimates.getComPosition(), taskSpaceEstimates.getComVelocity(), currentTime,
-            mpcOptimizationSettings);
+      mpcOptimization.compute(stepAdjustmentVector, cmpPositionSetpoint, timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(),
+            taskSpaceControllerSettings.getContactState(), taskSpaceEstimates.getComPosition(), taskSpaceEstimates.getComVelocity(), currentTime, mpcSettings);
       for (int i = 0; i < timedStepController.getQueue().size(); i++)
       {
          timedStepController.getQueue().get(i).getGoalPosition().add(stepAdjustmentVector.getVector());
@@ -257,14 +260,14 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       settingsProvider.getXGaitSettings(xGaitSettings);
 
       // increase stance dimensions to prevent self collisions
+      double strideRotation = inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration();
       double strideLength = Math.abs(2 * inputProvider.getPlanarVelocityInput().getX() * xGaitSettings.getStepDuration());
       double strideWidth = Math.abs(2 * inputProvider.getPlanarVelocityInput().getY() * xGaitSettings.getStepDuration());
-      strideLength += Math.abs(xGaitSettings.getStanceWidth() / 2 * Math.sin(2 * inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration()));
-      strideWidth += Math.abs(xGaitSettings.getStanceLength() / 2 * Math.sin(2 * inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration()));
+      strideLength += Math.abs(xGaitSettings.getStanceWidth() / 2 * Math.sin(2 * strideRotation));
+      strideWidth += Math.abs(xGaitSettings.getStanceLength() / 2 * Math.sin(2 * strideRotation));
       xGaitSettings.setStanceLength(Math.max(xGaitSettings.getStanceLength(), strideLength / 2 + minimumStepClearanceParameter.get()));
       xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth / 2 + minimumStepClearanceParameter.get()));
    }
-
 
    @Override
    public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
@@ -327,7 +330,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       supportCentroid.setToZero(supportFrame);
       double initialStepStartTime = robotTimestamp.getDoubleValue() + initialTransitionDurationParameter.get();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
-      xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, inputProvider.getPlanarVelocityInput(), initialQuadrant, supportCentroid, initialStepStartTime, bodyYawSetpoint, xGaitSettings);
+      xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, inputProvider.getPlanarVelocityInput(), initialQuadrant, supportCentroid, initialStepStartTime,
+            bodyYawSetpoint, xGaitSettings);
       for (int i = 0; i < xGaitPreviewSteps.size(); i++)
       {
          timedStepController.addStep(xGaitPreviewSteps.get(i));

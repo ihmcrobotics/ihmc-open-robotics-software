@@ -7,5 +7,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 public interface QuadrupedTimedStepTransitionCallback
 {
    void onLiftOff(RobotQuadrant robotQuadrant, QuadrantDependentList<ContactState> contactState);
+
    void onTouchDown(RobotQuadrant robotQuadrant, QuadrantDependentList<ContactState> contactState);
 }

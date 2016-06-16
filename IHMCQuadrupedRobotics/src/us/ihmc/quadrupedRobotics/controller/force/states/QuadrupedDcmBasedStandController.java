@@ -29,8 +29,10 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
 
    // parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory.createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 2500);
-   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory.createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 500);
+   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory
+         .createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 2500);
+   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory
+         .createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 500);
    private final DoubleArrayParameter bodyOrientationIntegralGainsParameter = parameterFactory.createDoubleArray("bodyOrientationIntegralGains", 0, 0, 0);
    private final DoubleParameter bodyOrientationMaxIntegralErrorParameter = parameterFactory.createDouble("bodyOrientationMaxIntegralError", 0);
    private final DoubleArrayParameter comPositionProportionalGainsParameter = parameterFactory.createDoubleArray("comPositionProportionalGains", 0, 0, 5000);
@@ -181,7 +183,8 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 
-   @Override public ControllerEvent process()
+   @Override
+   public ControllerEvent process()
    {
       lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
       updateGains();
@@ -190,7 +193,8 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       return null;
    }
 
-   @Override public void onEntry()
+   @Override
+   public void onEntry()
    {
       // initialize estimates
       lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
@@ -216,7 +220,8 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       taskSpaceController.reset();
    }
 
-   @Override public void onExit()
+   @Override
+   public void onExit()
    {
    }
 }
