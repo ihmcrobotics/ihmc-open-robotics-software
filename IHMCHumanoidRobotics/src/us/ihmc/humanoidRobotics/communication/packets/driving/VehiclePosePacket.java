@@ -36,12 +36,12 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
    public VehiclePosePacket(RigidBodyTransform transformFromVehicleToWorld)
    {
       Matrix3d rotationMatrix = new Matrix3d();
-      transformFromVehicleToWorld.get(rotationMatrix);
+      transformFromVehicleToWorld.getRotation(rotationMatrix);
       orientation = new Quat4d();
       RotationTools.convertMatrixToQuaternion(rotationMatrix, orientation);
 
       Vector3d translation = new Vector3d();
-      transformFromVehicleToWorld.get(translation);
+      transformFromVehicleToWorld.getTranslation(translation);
       position = new Point3d(translation);
    }
 

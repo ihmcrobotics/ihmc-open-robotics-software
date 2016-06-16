@@ -1490,46 +1490,6 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Return rotation portion of this transform.
-    * 
-    * @param matrix
-    */
-   public void get(Matrix3d matrix)
-   {
-      getRotation(matrix);
-   }
-
-   /**
-    * Return rotation portion of this transform.
-    * 
-    * @param matrix
-    */
-   public void get(Matrix3f matrix)
-   {
-      getRotation(matrix);
-   }
-
-   /**
-    * Return translational portion of this transform.
-    * 
-    * @param vector
-    */
-   public final void get(Vector3d vector)
-   {
-      getTranslation(vector);
-   }
-
-   /**
-    * Return translational portion of this transform.
-    * 
-    * @param vector
-    */
-   public final void get(Vector3f vector)
-   {
-      getTranslation(vector);
-   }
-
-   /**
     * Pack rotation part into Matrix3f and translation part into Vector3f
     * 
     * @param matrix
@@ -1565,28 +1525,6 @@ public class RigidBodyTransform implements Serializable
    {
       getRotation(quat);
       getTranslation(point);
-   }
-
-   /**
-    * Convert and pack rotation part of transform into Quat4d.
-    * 
-    * @param quat
-    * @param vector
-    */
-   public void get(Quat4d quat)
-   {
-      getRotation(quat);
-   }
-
-   /**
-    * Convert and pack rotation part of transform into Quat4f.
-    * 
-    * @param quat
-    * @param vector
-    */
-   public void get(Quat4f quat)
-   {
-      getRotation(quat);
    }
 
    /**
@@ -2148,101 +2086,4 @@ public class RigidBodyTransform implements Serializable
       out.format( F + F + F + "|" + F + "\n", 0f,0f,0f,1f );      
       return stream.toString();
    }
-   
-   
-   /**
-    * Simple linear interpolation between two transforms. Note that 0<= alpha <= 1
-    * No bound limit is performed on alpha.
-    */
-   public void interpolate(RigidBodyTransform initialTransform, RigidBodyTransform finalTransform, double alpha)
-   {     
-      Vector3d initialPosition = new Vector3d(); 
-      Vector3d finalPosition   = new Vector3d(); 
-      
-      Quat4d initialRotation = new Quat4d();
-      Quat4d finalRotation   = new Quat4d();
-      
-      initialTransform.get(initialRotation, initialPosition);
-      finalTransform.get(finalRotation, finalPosition);
-      
-      Quat4d computedRotation   = new Quat4d();
-      computedRotation.interpolate(initialRotation, finalRotation, alpha);
-      
-      Vector3d computedPosition = new Vector3d( 
-            initialPosition.x *(1.0 - alpha) + finalPosition.x*alpha,
-            initialPosition.y *(1.0 - alpha) + finalPosition.y*alpha,
-            initialPosition.z *(1.0 - alpha) + finalPosition.z*alpha );
-      
-      this.set( computedRotation, computedPosition);
-   }
-   
-   static public Vector3d getRotationDifference( Quat4d Q1, Quat4d Q2 )
-   { 
-      Matrix3d R1  = new Matrix3d();
-      Matrix3d R2  = new Matrix3d();
-      R1.set(Q1);
-      R2.set(Q2);
-      return getRotationDifference( R1, R2 );
-   }
-   
-   /**
-    * Rotation difference between two rotation matrixes. Translation difference is neglected.
-    * This difference is used often to compute the orientation error during an iterative inverse
-    * kinematics routine.
-    */
-   static public Vector3d getRotationDifference( RigidBodyTransform T1, RigidBodyTransform T2 )
-   {  
-      Matrix3d R1  = new Matrix3d();
-      Matrix3d R2  = new Matrix3d();
-      T1.getRotation( R1 );
-      T2.getRotation( R2 );
-      return getRotationDifference( R1, R2 );
-   }
-   
-   /**
-    * Rotation difference between two rotation matrixes. Translation difference is neglected.
-    * This difference is used often to compute the orientation error during an iterative inverse
-    * kinematics routine.
-    */
-   static public Vector3d getRotationDifference( Matrix3d R1, Matrix3d R2 )
-   {    
-      Matrix3d Rtemp = new Matrix3d();
-      Matrix3d R1t   = new Matrix3d();
-      Vector3d axis  = new Vector3d();
-      
-      R1t.set(R1);
-      R1t.transpose();
-      Rtemp.mul( R1t, R2 );
-      
-      AxisAngle4d axis_angle = new AxisAngle4d();
-
-      RotationTools.convertMatrixToAxisAngle(Rtemp, axis_angle);
-      
-      axis.set( axis_angle.getX(), axis_angle.getY(), axis_angle.getZ() );
-      axis.scale( - axis_angle.getAngle());
-      R1.transform(axis);
-      return  axis ;
-   }
-   
-   static public Vector3d getTranslationDifference( RigidBodyTransform T1, RigidBodyTransform T2 )
-   {     
-      Vector3d pos1  = new Vector3d();
-      Vector3d pos2  = new Vector3d();
-      T1.getTranslation( pos1 );
-      T2.getTranslation( pos2 );
-      pos2.sub(pos1);   
-      return pos2;
-   } 
-   
-   public Vector3d cloneTranslation(){
-      return new Vector3d(mat03, mat13, mat23 );
-   }
-   
-   public Quat4d cloneRotation(){
-      Quat4d output= new Quat4d();
-      getRotation(output);
-      return output;
-   }
-      
-   
 }

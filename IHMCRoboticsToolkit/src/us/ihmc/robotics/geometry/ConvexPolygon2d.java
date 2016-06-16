@@ -2281,7 +2281,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    private boolean isTransformationInPlane(RigidBodyTransform transform)
    {
       // arguably not a sufficient condition. ReferenceFrame2d needed!
-      transform.get(tempRotation);
+      transform.getRotation(tempRotation);
 
       return ReferenceFrame.isRotationInPlane(tempRotation);
    }

@@ -304,7 +304,7 @@ public class EntryBoxArrayPanel extends JPanel
          YoEntryBox yo = entryBoxesOnThisPanel.get(i);
          if (yo.getVariableInThisBox() != null)
          {
-            returnString += yo.getVariableInThisBox().getName();
+            returnString += yo.getVariableInThisBox().getFullNameWithNameSpace();
             currentBox++;
             if (currentBox < numOfFullBoxes)
                returnString += ",";

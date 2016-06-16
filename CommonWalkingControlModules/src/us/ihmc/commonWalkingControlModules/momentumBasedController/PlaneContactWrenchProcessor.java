@@ -21,6 +21,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 /**
  * @author twan
@@ -28,6 +29,8 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
  */
 public class PlaneContactWrenchProcessor
 {
+   private final static boolean VISUALIZE = false;
+
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 
@@ -60,7 +63,7 @@ public class PlaneContactWrenchProcessor
          normalTorques.put(contactableBody, normalTorque);
 
          String copName = name + "CoP";
-         String listName = "cops";
+         String listName = getClass().getSimpleName();
 
          YoFramePoint2d cop2d = new YoFramePoint2d(copName + "2d", "", contactableBody.getSoleFrame(), registry);
          centersOfPressure2d.put(contactableBody, cop2d);
@@ -79,8 +82,11 @@ public class PlaneContactWrenchProcessor
          if (yoGraphicsListRegistry != null)
          {
             YoGraphicPosition copViz = new YoGraphicPosition(copName, cop, 0.005, YoAppearance.Navy(), YoGraphicPosition.GraphicType.BALL);
+            copViz.setVisible(VISUALIZE);
             yoGraphicsListRegistry.registerYoGraphic(listName, copViz);
-            yoGraphicsListRegistry.registerArtifact(listName, copViz.createArtifact());
+            YoArtifactPosition artifact = copViz.createArtifact();
+            artifact.setVisible(VISUALIZE);
+            yoGraphicsListRegistry.registerArtifact(listName, artifact);
          }
       }
 

@@ -31,7 +31,7 @@ public class QuadrupedVirtualModelControllerSettings
    public void setDefaults()
    {
       defaultJointDamping = 0.0;
-      defaultJointEffortBreakFrequency = 1000.0;
+      defaultJointEffortBreakFrequency = 1e9;
       defaultJointPositionLimitStiffness = 100.0;
       defaultJointPositionLimitDamping = 10.0;
       jointDamping.clear();
