@@ -10,6 +10,7 @@ import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverse
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.model.QuadrupedStandPrepParameters;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineYoVariableTrigger;
@@ -31,7 +32,7 @@ public class QuadrupedPositionDevelopmentControllerManager implements QuadrupedC
    private final FiniteStateMachineYoVariableTrigger<QuadrupedPositionDevelopmentControllerRequestedEvent> userEventTrigger;
 
    public QuadrupedPositionDevelopmentControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedModelFactory modelFactory,
-         QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionStandPrepControllerParameters initialPositionParameters,
+         QuadrupedPhysicalProperties physicalProperties, QuadrupedStandPrepParameters initialPositionParameters,
          QuadrupedLegInverseKinematicsCalculator legIKCalculator)
    {
       this.stateMachine = buildStateMachine(runtimeEnvironment, modelFactory, physicalProperties, initialPositionParameters, legIKCalculator);
@@ -76,7 +77,7 @@ public class QuadrupedPositionDevelopmentControllerManager implements QuadrupedC
 
    private FiniteStateMachine<QuadrupedPositionDevelopmentControllerState, ControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
          QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties,
-         QuadrupedPositionStandPrepControllerParameters initialPositionParameters,
+         QuadrupedStandPrepParameters initialPositionParameters,
          QuadrupedLegInverseKinematicsCalculator legIKCalculator)
    {
       QuadrupedController jointInitializationController = new QuadrupedPositionJointInitializationController(runtimeEnvironment);
