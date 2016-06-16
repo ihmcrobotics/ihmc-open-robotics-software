@@ -38,7 +38,7 @@ public class SimulatedOrientationSensor extends SimulatedSensor<Matrix3d>
 
    public void startComputation()
    {
-      frameUsedForPerfectOrientation.getTransformToDesiredFrame(worldFrame).get(rotationMatrix);
+      frameUsedForPerfectOrientation.getTransformToDesiredFrame(worldFrame).getRotation(rotationMatrix);
       yoFrameQuaternionPerfect.set(rotationMatrix);
 
       corrupt(rotationMatrix);

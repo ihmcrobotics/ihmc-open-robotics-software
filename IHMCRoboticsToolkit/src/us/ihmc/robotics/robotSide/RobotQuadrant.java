@@ -541,7 +541,7 @@ public enum RobotQuadrant
       return null;
    }
 
-   public String getCamelCaseNameForMiddleOfExpression()
+   public String getPascalCaseName()
    {
       switch (this)
       {
@@ -572,7 +572,7 @@ public enum RobotQuadrant
       }
    }
    
-   public String getCamelCaseNameForStartOfExpression()
+   public String getCamelCaseName()
    {
       switch (this)
       {
@@ -603,13 +603,19 @@ public enum RobotQuadrant
       }
    }
    
-   public String getPascalCaseName()
+   /**
+    * @deprecated Use getPascalCaseName() instead.
+    */
+   public String getCamelCaseNameForMiddleOfExpression()
    {
-      return getCamelCaseNameForMiddleOfExpression();
+      return getPascalCaseName();
    }
    
-   public String getCamelCaseName()
+   /**
+    * @deprecated Use getCamelCaseName() instead.
+    */
+   public String getCamelCaseNameForStartOfExpression()
    {
-      return getCamelCaseNameForStartOfExpression();
+      return getCamelCaseName();
    }
 }

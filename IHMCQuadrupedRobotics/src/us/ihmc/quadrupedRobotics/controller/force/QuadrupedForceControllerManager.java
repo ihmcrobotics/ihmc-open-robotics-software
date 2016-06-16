@@ -125,6 +125,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       return "A proxy controller for switching between multiple subcontrollers";
    }
 
+   @Override
    public RobotMotionStatusHolder getMotionStatusHolder()
    {
       return motionStatusHolder;

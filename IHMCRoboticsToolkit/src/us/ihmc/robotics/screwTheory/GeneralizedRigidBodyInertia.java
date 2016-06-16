@@ -195,7 +195,7 @@ public abstract class GeneralizedRigidBodyInertia
       Matrix3d rotation = new Matrix3d();
       transform.getRotation(rotation);
 
-      transform.get(tempVector); // p
+      transform.getTranslation(tempVector); // p
 
       // mass moment of inertia part:
 

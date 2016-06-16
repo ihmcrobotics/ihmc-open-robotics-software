@@ -31,6 +31,8 @@ public enum LegJointName
 // HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL;
 
    FUTURE_EXPANSION_TEST1, HIP_PITCH, HIP_ROLL, FUTURE_EXPANSION_TEST2, HIP_YAW, KNEE, ANKLE_ROLL, ANKLE_PITCH, FUTURE_EXPANSION_TEST3;
+   
+   public static final LegJointName[] values = values();
 
    public String getShortUnderBarName()
    {
@@ -59,8 +61,7 @@ public enum LegJointName
       }
    }
 
-
-   public String getCamelCaseNameForStartOfExpression()
+   public String getCamelCaseName()
    {
       switch (this)
       {
@@ -86,11 +87,48 @@ public enum LegJointName
             return "unknown Position";
       }
    }
+   
+   /**
+    * @deprecated Use getCamelCaseName() instead.
+    */
+   public String getCamelCaseNameForStartOfExpression()
+   {
+      return getCamelCaseName();
+   }
 
+   public String getPascalCaseName()
+   {
+      switch (this)
+      {
+         case HIP_YAW :
+            return "HipYaw";
 
+         case HIP_ROLL :
+            return "HipRoll";
+
+         case HIP_PITCH :
+            return "HipPitch";
+
+         case KNEE :
+            return "Knee";
+
+         case ANKLE_ROLL :
+            return "AnkleRoll";
+
+         case ANKLE_PITCH :
+            return "AnklePitch";
+
+         default :
+            return "Unknown Position";
+      }
+   }
+
+   /**
+    * @deprecated Use getPascalCaseName() instead.
+    */
    public String getCamelCaseNameForMiddleOfExpression()
    {
-      return StringUtils.capitalize(getCamelCaseNameForStartOfExpression());
+      return getPascalCaseName();
    }
 
    public Vector3d getJointAxis()
@@ -120,10 +158,10 @@ public enum LegJointName
       }
    }
 
-
+   @Override
    public String toString()
    {
-      return getCamelCaseNameForMiddleOfExpression();
+      return getPascalCaseName();
    }
 
    private static Vector3d xAxis()
