@@ -2,6 +2,7 @@ package us.ihmc.tools.search.strings.fuzzySearch.comparators;
 
 import org.junit.Test;
 import us.ihmc.tools.search.strings.fuzzySearch.CombinedFuzzySearchResult;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -11,8 +12,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class SortByMatchedStringComparatorTest
 {
-
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.003)
+   @Test(timeout = 30)
    public void testCompare()
    {
       CombinedFuzzySearchResult aardvark = new CombinedFuzzySearchResult("Aardvark", CombinedFuzzySearchResult.CombinedFuzzySearchResultType.EXACT_SUBSTRING,
