@@ -34,6 +34,7 @@ public class FourBarKinematicLoop
     *            
     * Note: zero configuration corresponds to vertical links. Positive angles clockwise.             
     */
+   
    private static final boolean DEBUG = true;
    private static final boolean DEFAULT_OUTPUT_jOINT = true; //temporary variable to test loop while it's not part of a larger kinematic chain
 
@@ -50,6 +51,8 @@ public class FourBarKinematicLoop
    private final double[] passiveJointSigns = new double[4];
 
    private final ReferenceFrame frameBeforeFourBarWithZAlongJointAxis;
+   
+   private final boolean fourBarClockwise;
 
    public FourBarKinematicLoop(String name, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3d jointDInJointABeforeFrame,
          boolean recomputeJointLimits)
@@ -86,6 +89,9 @@ public class FourBarKinematicLoop
       FrameVector2d vectorDAProjected = new FrameVector2d();
       FrameVector2d vectorABProjected = new FrameVector2d();
       computeJointToJointVectorProjectedOntoFourBarPlane(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected);
+      
+      // Check four bar orientation
+      fourBarClockwise = isFourBarClockwise(vectorABProjected, vectorDAProjected);
 
       // Calculator
       fourBarCalculator = createFourBarCalculator(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected);
@@ -148,6 +154,23 @@ public class FourBarKinematicLoop
       }     
    }
 
+   private static boolean isFourBarClockwise(FrameVector2d frameVectorDA, FrameVector2d frameVectorAB)
+   {
+      Vector2d vectorDA = new Vector2d();
+      Vector2d vectorAB = new Vector2d();
+      frameVectorDA.get(vectorDA);
+      frameVectorAB.get(vectorAB);
+      
+      if (AngleTools.angleMinusPiToPi(vectorDA, vectorAB) < 0.0) 
+      {
+         return true;
+      }
+      else
+      {
+         return false;
+      }      
+   }
+   
    private void computeJointToJointVectorProjectedOntoFourBarPlane(FrameVector2d vectorBCProjectedToPack, FrameVector2d vectorCDProjectedToPack, FrameVector2d vectorDAProjectedToPack, FrameVector2d vectorABProjectedToPack)
    {
       FramePoint masterJointAPosition = new FramePoint(masterJointA.getFrameAfterJoint());
@@ -233,14 +256,25 @@ public class FourBarKinematicLoop
       vectorCDProjected.get(tempVectorCD);
       vectorDAProjected.get(tempVectorDA);
 
-      passiveInteriorAnglesAtZeroConfiguration[0] = Math.PI - Math.abs(AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorDA));
-      passiveInteriorAnglesAtZeroConfiguration[1] = Math.PI - Math.abs(AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC));
-      passiveInteriorAnglesAtZeroConfiguration[2] = Math.PI - Math.abs(AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD));
-      passiveInteriorAnglesAtZeroConfiguration[3] = Math.PI; //  - jointDAxis.getZ() * AngleTools.angleMinusPiToPi(tempVectorCD, tempVectorDA);
-      passiveJointSigns[0] = 1.0;
-      passiveJointSigns[1] = jointBAxis.getZ();
-      passiveJointSigns[2] = jointCAxis.getZ();
-      passiveJointSigns[3] = jointDAxis.getZ();
+      passiveInteriorAnglesAtZeroConfiguration[0] = Math.abs(Math.PI - AngleTools.angleMinusPiToPi(tempVectorDA, tempVectorAB));
+      passiveInteriorAnglesAtZeroConfiguration[1] = Math.abs(Math.PI - AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorBC));
+      passiveInteriorAnglesAtZeroConfiguration[2] = Math.abs(Math.PI - AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorCD));
+      passiveInteriorAnglesAtZeroConfiguration[3] = Math.PI;
+      
+      if (fourBarClockwise)
+      {
+         passiveJointSigns[0] = 1.0;
+         passiveJointSigns[1] = jointBAxis.getZ();
+         passiveJointSigns[2] = jointCAxis.getZ();
+         passiveJointSigns[3] = jointDAxis.getZ();    
+      }
+      else 
+      {
+         passiveJointSigns[0] = - 1.0;
+         passiveJointSigns[1] = - jointBAxis.getZ();
+         passiveJointSigns[2] = - jointCAxis.getZ();
+         passiveJointSigns[3] = - jointDAxis.getZ();    
+      }
 
       if (DEBUG)
       {
