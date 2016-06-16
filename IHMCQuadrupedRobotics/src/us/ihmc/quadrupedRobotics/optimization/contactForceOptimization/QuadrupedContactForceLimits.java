@@ -1,4 +1,3 @@
-
 package us.ihmc.quadrupedRobotics.optimization.contactForceOptimization;
 
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -66,6 +65,7 @@ public class QuadrupedContactForceLimits
          coefficientOfFriction.get(robotQuadrant)[0] = value;
       }
    }
+
    public void setPressureLowerLimit(RobotQuadrant robotQuadrant, double value)
 
    {

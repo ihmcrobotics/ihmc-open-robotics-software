@@ -164,7 +164,8 @@ public class QuadrupedTimedStepPressurePlanner
     * @param initialTime initial time
     * @return numberOfTransitions
     */
-   public int compute(int numberOfSteps, PreallocatedQueue<QuadrupedTimedStep> stepQueue, QuadrantDependentList<FramePoint> initialSolePosition, QuadrantDependentList<ContactState> initialContactState, double initialTime)
+   public int compute(int numberOfSteps, PreallocatedQueue<QuadrupedTimedStep> stepQueue, QuadrantDependentList<FramePoint> initialSolePosition,
+         QuadrantDependentList<ContactState> initialContactState, double initialTime)
    {
       for (int i = 0; i < numberOfSteps; i++)
       {
@@ -182,7 +183,8 @@ public class QuadrupedTimedStepPressurePlanner
     * @param initialTime initial time
     * @return numberOfTransitions
     */
-   public int compute(int numberOfSteps, List<QuadrupedTimedStep> stepList, QuadrantDependentList<FramePoint> initialSolePosition, QuadrantDependentList<ContactState> initialContactState, double initialTime)
+   public int compute(int numberOfSteps, List<QuadrupedTimedStep> stepList, QuadrantDependentList<FramePoint> initialSolePosition,
+         QuadrantDependentList<ContactState> initialContactState, double initialTime)
    {
       for (int i = 0; i < numberOfSteps; i++)
       {
@@ -200,7 +202,8 @@ public class QuadrupedTimedStepPressurePlanner
     * @param initialTime initial time
     * @return numberOfIntervals
     */
-   public int compute(int numberOfSteps, QuadrupedTimedStep[] stepArray, QuadrantDependentList<FramePoint> initialSolePosition, QuadrantDependentList<ContactState> initialContactState, double initialTime)
+   public int compute(int numberOfSteps, QuadrupedTimedStep[] stepArray, QuadrantDependentList<FramePoint> initialSolePosition,
+         QuadrantDependentList<ContactState> initialContactState, double initialTime)
    {
       // initialize contact state and sole positions
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -339,7 +342,8 @@ public class QuadrupedTimedStepPressurePlanner
       }
    }
 
-   private void computeCenterOfPressure(QuadrantDependentList<FramePoint> solePosition, QuadrantDependentList<MutableDouble> contactPressure, FramePoint copPosition)
+   private void computeCenterOfPressure(QuadrantDependentList<FramePoint> solePosition, QuadrantDependentList<MutableDouble> contactPressure,
+         FramePoint copPosition)
    {
       // Compute center of pressure given the vertical force at each contact.
       double pressure = 1e-6;
