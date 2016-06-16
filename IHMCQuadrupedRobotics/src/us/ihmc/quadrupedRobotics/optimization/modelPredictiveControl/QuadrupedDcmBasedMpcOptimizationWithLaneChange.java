@@ -18,7 +18,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
-public class QuadrupedModelPredictiveControllerWithLaneChange implements QuadrupedModelPredictiveController
+public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements QuadrupedMpcOptimizationWithLaneChange
 {
    private final FramePoint currentDcmEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
@@ -47,11 +47,7 @@ public class QuadrupedModelPredictiveControllerWithLaneChange implements Quadrup
    private int numberOfIntervals = 0;
    private int numberOfPreviewSteps = 0;
 
-   private final double maxPreviewTime = 10;
-   private final double copRegularization = 1;
-   private final double stepAdjustmentRegularization = 1000000;
-
-   public QuadrupedModelPredictiveControllerWithLaneChange(DivergentComponentOfMotionEstimator dcmPositionEstimator, int maxPreviewSteps)
+   public QuadrupedDcmBasedMpcOptimizationWithLaneChange(DivergentComponentOfMotionEstimator dcmPositionEstimator, int maxPreviewSteps)
    {
       this.linearInvertedPendulumModel = dcmPositionEstimator.getLinearInvertedPendulumModel();
       this.dcmPositionEstimator = dcmPositionEstimator;
@@ -59,7 +55,9 @@ public class QuadrupedModelPredictiveControllerWithLaneChange implements Quadrup
       this.timedStepPressurePlanner = new QuadrupedTimedStepPressurePlanner(maxPreviewSteps + 4);
    }
 
-   public void compute(FrameVector stepAdjustmentVector, FramePoint cmpPositionSetpoint, PreallocatedQueue<QuadrupedTimedStep> queuedSteps, QuadrantDependentList<FramePoint> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint currentComPosition, FrameVector currentComVelocity, double currentTime)
+   public void compute(FrameVector stepAdjustmentVector, FramePoint cmpPositionSetpoint, PreallocatedQueue<QuadrupedTimedStep> queuedSteps,
+         QuadrantDependentList<FramePoint> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint currentComPosition,
+         FrameVector currentComVelocity, double currentTime, QuadrupedMpcOptimizationWithLaneChangeSettings settings)
    {
       // Compute step adjustment and contact pressure by solving the following QP:
       // min_u u'Au
@@ -95,7 +93,7 @@ public class QuadrupedModelPredictiveControllerWithLaneChange implements Quadrup
       for (int i = 1; i < queuedSteps.size(); i++)
       {
          QuadrupedTimedStep step = queuedSteps.get(i);
-         if (step.getTimeInterval().getEndTime() - currentTime < maxPreviewTime)
+         if (step.getTimeInterval().getEndTime() - currentTime < settings.getMaximumPreviewTime())
          {
             numberOfPreviewSteps++;
          }
@@ -112,7 +110,7 @@ public class QuadrupedModelPredictiveControllerWithLaneChange implements Quadrup
       DenseMatrix64F Ain = qpInequalityMatrix;
       DenseMatrix64F bin = qpInequalityVector;
 
-      initializeCostTerms(currentContactState);
+      initializeCostTerms(currentContactState, settings);
       initializeEqualityConstraints(currentContactState, currentSolePosition);
       initializeInequalityConstraints();
 
@@ -144,7 +142,7 @@ public class QuadrupedModelPredictiveControllerWithLaneChange implements Quadrup
       }
    }
 
-   private void initializeCostTerms(QuadrantDependentList<ContactState> currentContactState)
+   private void initializeCostTerms(QuadrantDependentList<ContactState> currentContactState, QuadrupedMpcOptimizationWithLaneChangeSettings settings)
    {
       // Initialize cost terms. (min_u u'Au + b'u)
       DenseMatrix64F A = qpCostMatrix;
@@ -152,11 +150,11 @@ public class QuadrupedModelPredictiveControllerWithLaneChange implements Quadrup
       A.zero();
       for (int i = 0; i < numberOfContacts; i++)
       {
-         A.set(i, i, copRegularization);
+         A.set(i, i, settings.getCopAdjustmentCost());
       }
       for (int i = numberOfContacts; i < numberOfContacts + 2; i++)
       {
-         A.set(i, i, stepAdjustmentRegularization);
+         A.set(i, i, settings.getStepAdjustmentCost());
       }
 
       DenseMatrix64F b = qpCostVector;
@@ -212,8 +210,10 @@ public class QuadrupedModelPredictiveControllerWithLaneChange implements Quadrup
          double naturalFrequency = linearInvertedPendulumModel.getNaturalFrequency();
          for (int i = numberOfIntervals - 2; i >= 0; i--)
          {
-            double expn = Math.exp(naturalFrequency * (timedStepPressurePlanner.getTimeAtStartOfInterval(numberOfIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1)));
-            double expi = Math.exp(naturalFrequency * (timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i)));
+            double tn = timedStepPressurePlanner.getTimeAtStartOfInterval(numberOfIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1);
+            double ti = timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i);
+            double expn = Math.exp(naturalFrequency * tn);
+            double expi = Math.exp(naturalFrequency * ti);
             C.set(rowOffset, i * 2 + rowOffset, expn * (1 - expi));
          }
          C.set(rowOffset, 2 * numberOfIntervals - 2 + rowOffset, 0);
@@ -268,7 +268,6 @@ public class QuadrupedModelPredictiveControllerWithLaneChange implements Quadrup
       bin.reshape(numberOfContacts, 1);
       bin.zero();
    }
-
 
    private void addPointWithScaleFactor(FramePoint point, FramePoint pointToAdd, double scaleFactor)
    {
