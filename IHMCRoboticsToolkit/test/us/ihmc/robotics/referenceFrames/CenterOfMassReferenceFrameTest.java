@@ -65,7 +65,7 @@ public class CenterOfMassReferenceFrameTest
 
       Matrix3d rotation = new Matrix3d();
       RigidBodyTransform transform = centerOfMassReferenceFrame.getTransformToDesiredFrame(elevator.getBodyFixedFrame());
-      transform.get(rotation);
+      transform.getRotation(rotation);
       Matrix3d idenitity = new Matrix3d();
       idenitity.setIdentity();
       JUnitTools.assertMatrix3dEquals("", idenitity, rotation, 1e-12);

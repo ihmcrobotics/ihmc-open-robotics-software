@@ -446,13 +446,13 @@ public class TwistTest extends SpatialMotionVectorTest
 
       Matrix3d oldRotation = new Matrix3d();
       Matrix3d newRotation = new Matrix3d();
-      transform.get(oldRotation);
-      transform.get(newRotation);
+      transform.getRotation(oldRotation);
+      transform.getRotation(newRotation);
 
       Vector3d oldPosition = new Vector3d();
       Vector3d newPosition = new Vector3d();
-      transform.get(oldPosition);
-      transform.get(newPosition);
+      transform.getTranslation(oldPosition);
+      transform.getTranslation(newPosition);
 
       ScrewTestTools.integrate(newRotation, newPosition, dt, twist);
 

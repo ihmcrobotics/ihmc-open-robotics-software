@@ -1,9 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <sdf version='1.4'>
   <model name='llaQuadruped'>
     <link name='body'>
-      <pose>0 0 0 0 -0 0</pose>
       <inertial>
-        <pose>0.3 0.1 0.1 0 -0 0</pose>
+        <pose>0.3 0.15 0.05 0 0 0</pose>
         <mass>20</mass>
         <inertia>
           <ixx>1</ixx>
@@ -15,22 +15,17 @@
         </inertia>
       </inertial>
       <visual name='body_visual'>
-        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <box>
             <size>0.6 0.2 0.01</size>
           </box>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <link name='front_left_hip'>
-      <pose>-0.04 0.206 0 0 -0 0</pose>
+      <pose>0.04 0.2 0 0 0 0</pose>
       <inertial>
-        <pose>-0.098 0 0 0 -0 0</pose>
+        <pose>0.1 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -42,7 +37,7 @@
         </inertia>
       </inertial>
       <visual name='front_left_hip_visual'>
-        <pose>0 0 0.04 0 1.57075 0</pose>
+        <pose>0 0 0.04 0 1.57075 3.14159</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -70,9 +65,9 @@
       </axis>
     </joint>
     <link name='front_left_thigh'>
-      <pose>-0.236 0.27 0 0 -0 0</pose>
+      <pose>0.24 0.27 0 0 0 0</pose>
       <inertial>
-        <pose>0.098 0 0 0 -0 0</pose>
+        <pose>0.1 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -84,7 +79,7 @@
         </inertia>
       </inertial>
       <visual name='front_left_thigh_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -92,16 +87,12 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='front_left_hip_pitch' type='revolute'>
       <child>front_left_thigh</child>
       <parent>front_left_hip</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -112,9 +103,9 @@
       </axis>
     </joint>
     <link name='front_left_shin'>
-      <pose>-0.236 0.27 -0.196 0 -0 0</pose>
+      <pose>0.24 0.27 -0.2 0 0 0</pose>
       <inertial>
-        <pose>0 0 -0.098 0 -0 0</pose>
+        <pose>0 0 -0.1 0 0 0</pose>
         <mass>0.5</mass>
         <inertia>
           <ixx>0.005</ixx>
@@ -126,23 +117,19 @@
         </inertia>
       </inertial>
       <visual name='front_left_shin_visual'>
-        <pose>0 0 -0.095 0 -0 0</pose>
+        <pose>0 0 -0.1 0 0 0</pose>
         <geometry>
           <box>
             <size>0.01 0.01 0.19</size>
           </box>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='front_left_knee_pitch' type='revolute'>
       <child>front_left_shin</child>
       <parent>front_left_thigh</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -153,9 +140,9 @@
       </axis>
     </joint>
     <link name='front_right_hip'>
-      <pose>-0.04 -0.206 0 0 -0 0</pose>
+      <pose>0.04 -0.2 0 0 0 0</pose>
       <inertial>
-        <pose>-0.098 0 0 0 -0 0</pose>
+        <pose>0.1 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -167,7 +154,7 @@
         </inertia>
       </inertial>
       <visual name='front_right_hip_visual'>
-        <pose>0 0 0.04 0 1.57075 0</pose>
+        <pose>0 0 0.04 0 1.57075 3.14159</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -175,10 +162,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='front_right_hip_roll' type='revolute'>
       <child>front_right_hip</child>
@@ -195,9 +178,9 @@
       </axis>
     </joint>
     <link name='front_right_thigh'>
-      <pose>-0.236 -0.27 0 0 -0 0</pose>
+      <pose>0.24 -0.27 0 0 0 0</pose>
       <inertial>
-        <pose>0.098 0 0 0 -0 0</pose>
+        <pose>0.1 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -209,7 +192,7 @@
         </inertia>
       </inertial>
       <visual name='front_right_thigh_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -217,16 +200,12 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='front_right_hip_pitch' type='revolute'>
       <child>front_right_thigh</child>
       <parent>front_right_hip</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -237,9 +216,9 @@
       </axis>
     </joint>
     <link name='front_right_shin'>
-      <pose>-0.236 -0.27 -0.196 0 -0 0</pose>
+      <pose>0.24 -0.27 -0.2 0 0 0</pose>
       <inertial>
-        <pose>0 0 -0.098 0 -0 0</pose>
+        <pose>0 0 -0.1 0 0 0</pose>
         <mass>0.5</mass>
         <inertia>
           <ixx>0.005</ixx>
@@ -251,23 +230,19 @@
         </inertia>
       </inertial>
       <visual name='front_right_shin_visual'>
-        <pose>0 0 -0.095 0 -0 0</pose>
+        <pose>0 0 -0.1 0 0 0</pose>
         <geometry>
           <box>
             <size>0.01 0.01 0.19</size>
           </box>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='front_right_knee_pitch' type='revolute'>
       <child>front_right_shin</child>
       <parent>front_right_thigh</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -278,9 +253,9 @@
       </axis>
     </joint>
     <link name='hind_left_hip'>
-      <pose>0.04 0.206 0 0 -0 0</pose>
+      <pose>-0.04 0.2 0 0 0 0</pose>
       <inertial>
-        <pose>0.098 0 0 0 -0 0</pose>
+        <pose>-0.1 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -292,7 +267,7 @@
         </inertia>
       </inertial>
       <visual name='hind_left_hip_visual'>
-        <pose>0 0 0.04 4.57097e-18 1.57075 3.14159</pose>
+        <pose>0 0 0.04 0 1.57075 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -300,10 +275,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='hind_left_hip_roll' type='revolute'>
       <child>hind_left_hip</child>
@@ -320,9 +291,9 @@
       </axis>
     </joint>
     <link name='hind_left_thigh'>
-      <pose>0.236 0.27 0 0 -0 0</pose>
+      <pose>-0.24 0.27 0 0 0 0</pose>
       <inertial>
-        <pose>0.098 0 0 0 -0 0</pose>
+        <pose>0.1 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -334,7 +305,7 @@
         </inertia>
       </inertial>
       <visual name='hind_left_thigh_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 0 3.14159</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -342,16 +313,12 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='hind_left_hip_pitch' type='revolute'>
       <child>hind_left_thigh</child>
       <parent>hind_left_hip</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -362,9 +329,9 @@
       </axis>
     </joint>
     <link name='hind_left_shin'>
-      <pose>0.236 0.27 -0.196 0 -0 0</pose>
+      <pose>-0.24 0.27 -0.2 0 0 0</pose>
       <inertial>
-        <pose>0 0 -0.098 0 -0 0</pose>
+        <pose>0 0 -0.1 0 0 0</pose>
         <mass>0.5</mass>
         <inertia>
           <ixx>0.005</ixx>
@@ -376,23 +343,19 @@
         </inertia>
       </inertial>
       <visual name='hind_left_shin_visual'>
-        <pose>0 0 -0.095 0 -0 0</pose>
+        <pose>0 0 -0.1 0 0 0</pose>
         <geometry>
           <box>
             <size>0.01 0.01 0.19</size>
           </box>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='hind_left_knee_pitch' type='revolute'>
       <child>hind_left_shin</child>
       <parent>hind_left_thigh</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -403,9 +366,9 @@
       </axis>
     </joint>
     <link name='hind_right_hip'>
-      <pose>0.04 -0.206 0 0 -0 0</pose>
+      <pose>-0.04 -0.2 0 0 0 0</pose>
       <inertial>
-        <pose>0.098 0 0 0 -0 0</pose>
+        <pose>-0.1 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -417,7 +380,7 @@
         </inertia>
       </inertial>
       <visual name='hind_right_hip_visual'>
-        <pose>0 0 0.04 4.57097e-18 1.57075 3.14159</pose>
+        <pose>0 0 0.04 0 1.57075 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -425,10 +388,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='hind_right_hip_roll' type='revolute'>
       <child>hind_right_hip</child>
@@ -445,9 +404,9 @@
       </axis>
     </joint>
     <link name='hind_right_thigh'>
-      <pose>0.236 -0.27 0 0 -0 0</pose>
+      <pose>-0.24 -0.27 0 0 0 0</pose>
       <inertial>
-        <pose>0.098 0 0 0 -0 0</pose>
+        <pose>0.1 0 0 0 0 0</pose>
         <mass>2</mass>
         <inertia>
           <ixx>0.006</ixx>
@@ -459,7 +418,7 @@
         </inertia>
       </inertial>
       <visual name='hind_right_thigh_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 0 3.14159</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -467,16 +426,12 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='hind_right_hip_pitch' type='revolute'>
       <child>hind_right_thigh</child>
       <parent>hind_right_hip</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>
@@ -487,9 +442,9 @@
       </axis>
     </joint>
     <link name='hind_right_shin'>
-      <pose>0.236 -0.27 -0.196 0 -0 0</pose>
+      <pose>-0.24 -0.27 -0.2 0 0 0</pose>
       <inertial>
-        <pose>0 0 -0.098 0 -0 0</pose>
+        <pose>0 0 -0.1 0 0 0</pose>
         <mass>0.5</mass>
         <inertia>
           <ixx>0.005</ixx>
@@ -501,23 +456,19 @@
         </inertia>
       </inertial>
       <visual name='hind_right_shin_visual'>
-        <pose>0 0 -0.095 0 -0 0</pose>
+        <pose>0 0 -0.1 0 0 0</pose>
         <geometry>
           <box>
             <size>0.01 0.01 0.19</size>
           </box>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='hind_right_knee_pitch' type='revolute'>
       <child>hind_right_shin</child>
       <parent>hind_right_thigh</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>0 -1 0</xyz>
         <limit>
           <lower>-3.14159</lower>
           <upper>3.14159</upper>

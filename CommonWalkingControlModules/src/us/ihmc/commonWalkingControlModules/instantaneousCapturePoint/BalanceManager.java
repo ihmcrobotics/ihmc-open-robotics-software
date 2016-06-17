@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModu
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -48,6 +47,7 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 public class BalanceManager
 {
@@ -154,9 +154,10 @@ public class BalanceManager
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
 
       double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
-      momentumRecoveryControlModule = new MomentumRecoveryControlModule(momentumBasedController, maxAllowedDistanceCMPSupport, registry);
+      SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = momentumBasedController.getDefaultFootPolygons();
+      momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, maxAllowedDistanceCMPSupport, registry, yoGraphicsListRegistry);
 
-      String graphicListName = "BalanceManager";
+      String graphicListName = getClass().getSimpleName();
 
       if (yoGraphicsListRegistry != null)
       {
@@ -172,7 +173,9 @@ public class BalanceManager
          yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCapturePointViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, achievedCMPViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCMPViz.createArtifact());
+         YoArtifactPosition perfectCMPArtifact = perfectCMPViz.createArtifact();
+         perfectCMPArtifact.setVisible(false);
+         yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCMPArtifact);
       }
 
       parentRegistry.addChild(registry);
@@ -251,6 +254,8 @@ public class BalanceManager
       getICPError(icpError2d);
       momentumRecoveryControlModule.setICPError(icpError2d);
       momentumRecoveryControlModule.setSupportSide(supportLeg);
+      momentumRecoveryControlModule.setCapturePoint(capturePoint2d);
+      momentumRecoveryControlModule.setSupportPolygon(bipedSupportPolygons.getSupportPolygonInWorld());
       momentumRecoveryControlModule.compute();
 
       momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);

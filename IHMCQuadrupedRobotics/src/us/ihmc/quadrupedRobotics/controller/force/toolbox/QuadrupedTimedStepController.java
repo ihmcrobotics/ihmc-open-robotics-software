@@ -27,8 +27,10 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class QuadrupedTimedStepController
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
    // parameters
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithoutRegistry(getClass());
+   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 10000, 10000, 5000);
    private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
@@ -63,7 +65,7 @@ public class QuadrupedTimedStepController
    private final QuadrantDependentList<FiniteStateMachine<StepState, StepEvent>> stepStateMachine;
    private QuadrupedTimedStepTransitionCallback stepTransitionCallback;
 
-   public QuadrupedTimedStepController(QuadrupedSolePositionController solePositionController, DoubleYoVariable timestamp, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   public QuadrupedTimedStepController(QuadrupedSolePositionController solePositionController, DoubleYoVariable timestamp, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       // control variables
       this.timestamp = timestamp;
@@ -95,6 +97,7 @@ public class QuadrupedTimedStepController
       // graphics
       stepQueueVisualization = BagOfBalls.createRainbowBag(stepQueue.capacity(), 0.015, "xGaitSteps", registry, graphicsListRegistry);
       stepQueueVisualizationPosition = new FramePoint();
+      parentRegistry.addChild(registry);
    }
 
    public void registerStepTransitionCallback(QuadrupedTimedStepTransitionCallback stepTransitionCallback)

@@ -1810,26 +1810,6 @@ public class Transform3d extends RigidBodyTransform
    }
 
    /**
-    * Return rotation portion of this transform.
-    * 
-    * @param matrix
-    */
-   public final void get(Matrix3d matrix)
-   {
-      getRotation(matrix);
-   }
-
-   /**
-    * Return rotation portion of this transform.
-    * 
-    * @param matrix
-    */
-   public final void get(Matrix3f matrix)
-   {
-      getRotation(matrix);
-   }
-
-   /**
     * Pack rotation part into Matrix3f and translation part into Vector3f
     * 
     * @param matrix
@@ -1854,30 +1834,6 @@ public class Transform3d extends RigidBodyTransform
    {
       getRotation(quat);
       getTranslation(vector);
-   }
-
-   /**
-    * Convert and pack rotation part of transform into Quat4d.
-    * 
-    * @param quat
-    * @param vector
-    */
-   @Override
-   public final void get(Quat4d quat)
-   {
-      getRotation(quat);
-   }
-
-   /**
-    * Convert and pack rotation part of transform into Quat4f.
-    * 
-    * @param quat
-    * @param vector
-    */
-   @Override
-   public final void get(Quat4f quat)
-   {
-      getRotation(quat);
    }
 
    /**

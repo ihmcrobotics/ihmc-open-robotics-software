@@ -84,11 +84,11 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
 
       // rotation matrix
       elevatorFrame.getTransformToDesiredFrame(tempTransform, measurementFrame);
-      tempTransform.get(rotationFromWorldToMeasurement);
+      tempTransform.getRotation(rotationFromWorldToMeasurement);
 
       // z
       estimationFrame.getTransformToDesiredFrame(tempTransform, measurementFrame);
-      tempTransform.get(tempMatrix);
+      tempTransform.getRotation(tempMatrix);
       MatrixTools.toTildeForm(zTildeRMP, unbiasedEstimatedMeasurement);
       zTildeRMP.mul(tempMatrix);
    }
