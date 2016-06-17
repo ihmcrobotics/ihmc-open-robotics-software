@@ -11,23 +11,27 @@ public class QuadrupedForceControllerToolbox
    private final QuadrupedReferenceFrames referenceFrames;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedTaskSpaceController taskSpaceController;
+   private final LinearInvertedPendulumModel linearInvertedPendulumModel;
+   private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final DivergentComponentOfMotionController dcmPositionController;
+   private final QuadrupedComPositionController comPositionController;
    private final QuadrupedBodyOrientationController bodyOrientationController;
    private final QuadrupedSolePositionController solePositionController;
-   private final QuadrupedComPositionController comPositionController;
    private final QuadrupedTimedStepController timedStepController;
 
    public QuadrupedForceControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties, YoVariableRegistry registry)
    {
-      double gravity = 9.81;
       double mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
+      double gravity = 9.81;
 
       // create controllers and estimators
       referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), physicalProperties);
       taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(runtimeEnvironment.getFullRobotModel(), referenceFrames, registry);
       taskSpaceController = new QuadrupedTaskSpaceController(runtimeEnvironment.getFullRobotModel(), referenceFrames, runtimeEnvironment.getControlDT(), registry, runtimeEnvironment.getGraphicsListRegistry());
+      linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassZUpFrame(), mass, gravity, 1.0, registry);
+      dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassZUpFrame(), linearInvertedPendulumModel, registry, runtimeEnvironment.getGraphicsListRegistry());
+      dcmPositionController = new DivergentComponentOfMotionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry, runtimeEnvironment.getGraphicsListRegistry());
       comPositionController = new QuadrupedComPositionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), registry);
-      dcmPositionController = new DivergentComponentOfMotionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), mass, gravity, 1.0, registry, runtimeEnvironment.getGraphicsListRegistry());
       bodyOrientationController = new QuadrupedBodyOrientationController(referenceFrames.getBodyFrame(), runtimeEnvironment.getControlDT(), registry);
       solePositionController = new QuadrupedSolePositionController(referenceFrames.getFootReferenceFrames(), runtimeEnvironment.getControlDT(), registry);
       timedStepController = new QuadrupedTimedStepController(solePositionController, runtimeEnvironment.getRobotTimestamp(), registry, runtimeEnvironment.getGraphicsListRegistry());
@@ -48,14 +52,24 @@ public class QuadrupedForceControllerToolbox
       return taskSpaceController;
    }
 
-   public QuadrupedComPositionController getComPositionController()
+   public LinearInvertedPendulumModel getLinearInvertedPendulumModel()
    {
-      return comPositionController;
+      return linearInvertedPendulumModel;
+   }
+
+   public DivergentComponentOfMotionEstimator getDcmPositionEstimator()
+   {
+      return dcmPositionEstimator;
    }
 
    public DivergentComponentOfMotionController getDcmPositionController()
    {
       return dcmPositionController;
+   }
+
+   public QuadrupedComPositionController getComPositionController()
+   {
+      return comPositionController;
    }
 
    public QuadrupedBodyOrientationController getBodyOrientationController()
