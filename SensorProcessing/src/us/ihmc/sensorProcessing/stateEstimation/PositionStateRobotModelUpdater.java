@@ -138,7 +138,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    private void updateRootJointPosition(SixDoFJoint rootJoint, ReferenceFrame estimationFrame, FramePoint centerOfMassPosition)
    {
       tempCenterOfMassPositionState.setIncludingFrame(centerOfMassPosition);
-      estimationFrame.getTransformToDesiredFrame(worldFrame).get(tempOrientationStateReconstructMatrix);
+      estimationFrame.getTransformToDesiredFrame(worldFrame).getRotation(tempOrientationStateReconstructMatrix);
       tempOrientationStateReconstruct.set(tempOrientationStateReconstructMatrix);
 
       computeEstimationLinkToWorldTransform(estimationFrame, tempEstimationLinkToWorld, tempCenterOfMassPositionState, tempOrientationStateReconstruct);

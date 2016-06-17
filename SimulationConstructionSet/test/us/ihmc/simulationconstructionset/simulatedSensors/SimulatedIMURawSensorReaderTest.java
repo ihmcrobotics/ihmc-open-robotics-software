@@ -140,8 +140,8 @@ public class SimulatedIMURawSensorReaderTest
    {
       Matrix3d randomTransformBodyToWorldMatrix = new Matrix3d();
       Matrix3d transformIMUToJointMatrix = new Matrix3d();
-      randomTransformBodyToWorld.get(randomTransformBodyToWorldMatrix);
-      transformIMUToJoint.get(transformIMUToJointMatrix);
+      randomTransformBodyToWorld.getRotation(randomTransformBodyToWorldMatrix);
+      transformIMUToJoint.getRotation(transformIMUToJointMatrix);
       
       expectedIMUOrientation.mul(randomTransformBodyToWorldMatrix, transformIMUToJointMatrix);
    }
@@ -374,7 +374,7 @@ public class SimulatedIMURawSensorReaderTest
       
       public FrameVector getReferenceFrameTransInWorldFrame(ReferenceFrame frame) {
          Vector3d trans = new Vector3d();
-         frame.getTransformToDesiredFrame(worldFrame).get(trans);
+         frame.getTransformToDesiredFrame(worldFrame).getTranslation(trans);
          FrameVector ret = new FrameVector(worldFrame, trans);
          return ret;
       }

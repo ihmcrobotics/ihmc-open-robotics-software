@@ -131,7 +131,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable, PacketConsume
                   first = false;
                   Vector3d T = new Vector3d();
                   RigidBodyTransform tran = polarLidarScan.getAverageTransform();
-                  tran.get(T);
+                  tran.getTranslation(T);
                   testbedLocation.set(T.x,T.y,T.z);
                }
 

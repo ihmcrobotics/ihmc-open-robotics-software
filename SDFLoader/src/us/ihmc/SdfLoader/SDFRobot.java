@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -232,7 +233,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       rootJoint.getTransformToWorld(transform);
    }
 
-   public void setPositionInWorld(Vector3d offset)
+   public void setPositionInWorld(Tuple3d offset)
    {
       rootJoint.setPosition(offset);
    }
@@ -324,7 +325,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    //               System.out.println("SDFRobot: Adding force sensor to: " + joint.getName());
                   
                   Vector3d offsetToPack = new Vector3d();
-                  forceSensor.getTransform().get(offsetToPack);
+                  forceSensor.getTransform().getTranslation(offsetToPack);
                   JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(jointName, offsetToPack, this);
                   scsJoint.addJointWrenchSensor(jointWrenchSensor);
                   

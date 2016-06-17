@@ -2,10 +2,10 @@ package us.ihmc.tools.search.strings.fuzzySearch.comparators;
 
 import org.junit.Test;
 import us.ihmc.tools.search.strings.fuzzySearch.CombinedFuzzySearchResult;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -13,8 +13,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class SortFuzzyMatchesDescendingByFuzzyDistanceComparatorTest
 {
-
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.01)
+   @Test(timeout = 100)
    public void testCompare()
    {
       Random random = new Random(1976L);

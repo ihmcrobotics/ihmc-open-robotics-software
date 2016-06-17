@@ -9,6 +9,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.model.QuadrupedStandPrepParameters;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
@@ -20,7 +21,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedController
 {
    private final ParameterFactory parameterFactory = ParameterFactory.createWithoutRegistry(getClass());
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
-   private final QuadrupedPositionStandPrepControllerParameters initialPositionParameters;
+   private final QuadrupedStandPrepParameters initialPositionParameters;
 
    private final SDFFullQuadrupedRobotModel fullRobotModel;
    private final double dt;
@@ -32,7 +33,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedController
     */
    private double timeInTrajectory = 0.0;
 
-   public QuadrupedPositionStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedPositionStandPrepControllerParameters initialPositionParameters)
+   public QuadrupedPositionStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedStandPrepParameters initialPositionParameters)
    {
       this.initialPositionParameters = initialPositionParameters;
       this.fullRobotModel = environment.getFullRobotModel();
@@ -54,7 +55,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedController
          joint.setUnderPositionControl(true);
 
          QuadrupedJointName jointId = fullRobotModel.getNameForOneDoFJoint(joint);
-         double desiredPosition = initialPositionParameters.getInitialPosition(jointId);
+         double desiredPosition = initialPositionParameters.getInitialJointPosition(jointId);
 
          // Start the trajectory from the current pos/vel/acc.
          MinimumJerkTrajectory trajectory = trajectories.get(i);

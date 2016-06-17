@@ -75,7 +75,7 @@ public class Box3d implements Shape3d
 
    public void getCenter(Tuple3d centerToPack)
    {
-      transform.get(temporaryVector);
+      transform.getTranslation(temporaryVector);
       centerToPack.set(temporaryVector);
    }
 
@@ -102,7 +102,7 @@ public class Box3d implements Shape3d
 
    public void getRotation(Matrix3d rotationMatrixToPack)
    {
-      this.transform.get(rotationMatrixToPack);
+      this.transform.getRotation(rotationMatrixToPack);
    }
 
    public Matrix3d getRotationCopy()
@@ -402,7 +402,7 @@ public class Box3d implements Shape3d
    {
       StringBuilder builder = new StringBuilder();
 
-      transform.get(temporaryVector);
+      transform.getTranslation(temporaryVector);
       builder.append("center: (" + temporaryVector.getX() + ", " + temporaryVector.getY() + ", " + temporaryVector.getZ() + ")\n");
       builder.append("dimensions: (" + dimensions.get(Direction.X) + ", " + dimensions.get(Direction.Y) + ", " + dimensions.get(Direction.Z) + ")\n");
       builder.append("faces: \n");
@@ -423,7 +423,7 @@ public class Box3d implements Shape3d
    {
       if (dirtyBit)
       {
-         transform.get(temporaryMatrix);
+         transform.getRotation(temporaryMatrix);
 
          for (FaceName faceName : faces.keySet())
          {

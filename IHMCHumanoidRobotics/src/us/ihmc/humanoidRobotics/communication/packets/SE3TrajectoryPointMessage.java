@@ -343,7 +343,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       transform.transform(position);
       if (tempQuaternionForTransform == null)
          tempQuaternionForTransform = new Quat4d();
-      transform.get(tempQuaternionForTransform);
+      transform.getRotation(tempQuaternionForTransform);
       orientation.mul(tempQuaternionForTransform, orientation);
       transform.transform(linearVelocity);
       transform.transform(angularVelocity);
