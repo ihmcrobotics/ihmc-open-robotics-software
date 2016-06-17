@@ -74,31 +74,16 @@ public class FourBarKinematicLoopTools
       }     
    }
    
-   public static boolean isFourBarClockwise(FrameVector2d frameVectorDA, FrameVector2d frameVectorAB)
+   public static boolean checkFourBarConvexityAndOrientation(FrameVector2d vectorABProjected, FrameVector2d vectorBCProjected, FrameVector2d vectorCDProjected, FrameVector2d vectorDAProjected)
    {
-      Vector2d vectorDA = new Vector2d();
-      Vector2d vectorAB = new Vector2d();
-      frameVectorDA.get(vectorDA);
-      frameVectorAB.get(vectorAB);
-
-      if (AngleTools.angleMinusPiToPi(vectorAB, vectorDA) > 0.0)
-      {
-         return true;
-      }
-      else
-      {
-         return false;
-      }      
-   }
-   
-   public static void checkFourBarConvexity(FrameVector2d vectorABProjected, FrameVector2d vectorBCProjected, FrameVector2d vectorCDProjected)
-   {
-      boolean ccwConvex = vectorABProjected.cross(vectorBCProjected) > 0.0 && vectorBCProjected.cross(vectorCDProjected) > 0.0;
-      boolean cwConvex = vectorABProjected.cross(vectorBCProjected) < 0.0 && vectorBCProjected.cross(vectorCDProjected) < 0.0;
+      boolean ccwConvex = vectorABProjected.cross(vectorBCProjected) > 0.0 && vectorBCProjected.cross(vectorCDProjected) > 0.0 && vectorCDProjected.cross(vectorDAProjected) > 0.0;
+      boolean cwConvex = vectorABProjected.cross(vectorBCProjected) < 0.0 && vectorBCProjected.cross(vectorCDProjected) < 0.0 && vectorCDProjected.cross(vectorDAProjected) < 0.0;
 
       if (!ccwConvex && !cwConvex)
       {
          throw new RuntimeException("At q = 0 the fourBar must be convex");
       }  
+      
+      return cwConvex;
    }
 }

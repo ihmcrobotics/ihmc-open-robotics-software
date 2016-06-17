@@ -54,7 +54,7 @@ public class FourBarKinematicLoop
 
    private final ReferenceFrame frameBeforeFourBarWithZAlongJointAxis;
    
-   private final boolean fourBarClockwise;
+   private final boolean fourBarIsClockwise;
 
    /**
     * <dt><b>Precondition:</b><dd>
@@ -97,12 +97,9 @@ public class FourBarKinematicLoop
       FrameVector2d vectorABProjected = new FrameVector2d();
       computeJointToJointVectorProjectedOntoFourBarPlane(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected);
       
-      // Check that the fourbar is convex in its zero angle configuration
-      FourBarKinematicLoopTools.checkFourBarConvexity(vectorABProjected, vectorBCProjected, vectorCDProjected);
+      // Check that the fourbar is convex in its zero angle configuration and it's orientation (CW or CCW)
+      fourBarIsClockwise = FourBarKinematicLoopTools.checkFourBarConvexityAndOrientation(vectorABProjected, vectorBCProjected, vectorCDProjected, vectorDAProjected);
       
-      // Check four bar orientation
-      fourBarClockwise = FourBarKinematicLoopTools.isFourBarClockwise(vectorDAProjected, vectorABProjected);
-
       // Calculator
       fourBarCalculator = createFourBarCalculator(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected);
       
@@ -249,7 +246,7 @@ public class FourBarKinematicLoop
       vectorCDProjected.get(tempVectorCD);
       vectorDAProjected.get(tempVectorDA);
 
-      if (fourBarClockwise)
+      if (fourBarIsClockwise)
       {
          interiorAnglesAtZeroConfiguration[0] = Math.PI - AngleTools.angleMinusPiToPi(tempVectorAB, tempVectorDA);
          interiorAnglesAtZeroConfiguration[1] = Math.PI - AngleTools.angleMinusPiToPi(tempVectorBC, tempVectorAB);
