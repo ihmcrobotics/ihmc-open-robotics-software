@@ -97,12 +97,15 @@ public class FourBarKinematicLoop
       FrameVector2d vectorABProjected = new FrameVector2d();
       computeJointToJointVectorProjectedOntoFourBarPlane(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected);
       
+      // Check that the fourbar is convex in its zero angle configuration
+      FourBarKinematicLoopTools.checkFourBarConvexity(vectorABProjected, vectorBCProjected, vectorCDProjected);
+      
       // Check four bar orientation
-      fourBarClockwise = isFourBarClockwise(vectorDAProjected, vectorABProjected);
+      fourBarClockwise = FourBarKinematicLoopTools.isFourBarClockwise(vectorDAProjected, vectorABProjected);
 
       // Calculator
       fourBarCalculator = createFourBarCalculator(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected);
-
+      
       // Set output joint     
       if(DEFAULT_OUTPUT_jOINT)
       {
@@ -161,23 +164,6 @@ public class FourBarKinematicLoop
       }     
    }
 
-   private static boolean isFourBarClockwise(FrameVector2d frameVectorDA, FrameVector2d frameVectorAB)
-   {
-      Vector2d vectorDA = new Vector2d();
-      Vector2d vectorAB = new Vector2d();
-      frameVectorDA.get(vectorDA);
-      frameVectorAB.get(vectorAB);
-
-      if (AngleTools.angleMinusPiToPi(vectorAB, vectorDA) > 0.0)
-      {
-         return true;
-      }
-      else
-      {
-         return false;
-      }      
-   }
-   
    private void computeJointToJointVectorProjectedOntoFourBarPlane(FrameVector2d vectorBCProjectedToPack, FrameVector2d vectorCDProjectedToPack, FrameVector2d vectorDAProjectedToPack, FrameVector2d vectorABProjectedToPack)
    {
       FramePoint masterJointAPosition = new FramePoint(masterJointA.getFrameAfterJoint());
