@@ -57,9 +57,19 @@ public class FourBarKinematicLoop
    private final boolean fourBarIsClockwise;
 
    /**
+    * @param name
+    * @param masterJointA
+    * @param passiveJointB
+    * @param passiveJointC
+    * @param passiveJointD
+    * @param jointDInJointABeforeFrame The position in A's frame to which D is rigidly attached
+    * @param recomputeJointLimits
+    *
     * <dt><b>Precondition:</b><dd>
-    * The four joints must form a convex quadrilateral at q=0
-    * */
+    * The cartesian positions of masterJointA, passiveJointB, passiveJointC, and passiveJointD must form a convex quadrilateral when their joint angles are 0. <br>
+    * Additionally, the cartesian positions of masterJointA, passiveJointB, passiveJointC and jointDInJointABeforeFrame must form a convex quadrilateral when their joint angles are 0
+    *
+    */
    public FourBarKinematicLoop(String name, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3d jointDInJointABeforeFrame,
          boolean recomputeJointLimits)
    {
@@ -95,11 +105,17 @@ public class FourBarKinematicLoop
       FrameVector2d vectorCDProjected = new FrameVector2d();
       FrameVector2d vectorDAProjected = new FrameVector2d();
       FrameVector2d vectorABProjected = new FrameVector2d();
-      computeJointToJointVectorProjectedOntoFourBarPlane(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected);
-      
+      FrameVector2d vectorDAClosurePointProjected = new FrameVector2d();
+      FrameVector2d vectorCDClosurePointProjected = new FrameVector2d();
+      computeJointToJointVectorProjectedOntoFourBarPlane(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected,
+            vectorDAClosurePointProjected, vectorCDClosurePointProjected);
+
       // Check that the fourbar is convex in its zero angle configuration and it's orientation (CW or CCW)
-      fourBarIsClockwise = FourBarKinematicLoopTools.checkFourBarConvexityAndOrientation(vectorABProjected, vectorBCProjected, vectorCDProjected, vectorDAProjected);
-      
+      FourBarKinematicLoopTools
+            .checkFourBarConvexityAndOrientation(vectorABProjected, vectorBCProjected, vectorCDClosurePointProjected, vectorDAClosurePointProjected);
+      fourBarIsClockwise = FourBarKinematicLoopTools
+            .checkFourBarConvexityAndOrientation(vectorABProjected, vectorBCProjected, vectorCDProjected, vectorDAProjected);
+
       // Calculator
       fourBarCalculator = createFourBarCalculator(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected);
       
@@ -161,18 +177,18 @@ public class FourBarKinematicLoop
       }     
    }
 
-   private void computeJointToJointVectorProjectedOntoFourBarPlane(FrameVector2d vectorBCProjectedToPack, FrameVector2d vectorCDProjectedToPack, FrameVector2d vectorDAProjectedToPack, FrameVector2d vectorABProjectedToPack)
+    private void computeJointToJointVectorProjectedOntoFourBarPlane(FrameVector2d vectorBCProjectedToPack, FrameVector2d vectorCDProjectedToPack,
+         FrameVector2d vectorDAProjectedToPack, FrameVector2d vectorABProjectedToPack, FrameVector2d vectorDAClosurePointProjectedToPack,
+         FrameVector2d vectorCDClosurePointProjectedToPack)
    {
       FramePoint masterJointAPosition = new FramePoint(masterJointA.getFrameAfterJoint());
       FramePoint jointBPosition = new FramePoint(passiveJointB.getFrameAfterJoint());
       FramePoint jointCPosition = new FramePoint(passiveJointC.getFrameAfterJoint());
       FramePoint jointDZeroAnglePosition = new FramePoint(passiveJointD.getFrameAfterJoint());
+      FramePoint jointDClosedLoopPosition = new FramePoint(masterJointA.getFrameBeforeJoint(), jointDInJointABeforeFrame);
 
       if(DEBUG)
          System.out.println("\njointDInJointABeforeFrame = " + jointDInJointABeforeFrame + "\n");
-
-      FramePoint jointDClosedLoopPosition = new FramePoint();
-      jointDClosedLoopPosition.setIncludingFrame(masterJointA.getFrameBeforeJoint(), jointDInJointABeforeFrame);
 
       if(DEBUG)
          System.out.println("\njointDClosedLoopPosition = " + jointDClosedLoopPosition + "\n");
@@ -187,16 +203,22 @@ public class FourBarKinematicLoop
       FrameVector vectorBC = new FrameVector(frameBeforeFourBarWithZAlongJointAxis);
       FrameVector vectorCD = new FrameVector(frameBeforeFourBarWithZAlongJointAxis);
       FrameVector vectorDA = new FrameVector(frameBeforeFourBarWithZAlongJointAxis);
+      FrameVector vectorDAClosurePoint = new FrameVector(frameBeforeFourBarWithZAlongJointAxis);
+      FrameVector vectorCDClosurePoint = new FrameVector(frameBeforeFourBarWithZAlongJointAxis);
 
       vectorAB.sub(jointBPosition, masterJointAPosition);
       vectorBC.sub(jointCPosition, jointBPosition);
       vectorCD.sub(jointDZeroAnglePosition, jointCPosition);
       vectorDA.sub(masterJointAPosition, jointDClosedLoopPosition);
+      vectorDAClosurePoint.sub(masterJointAPosition, jointDClosedLoopPosition);
+      vectorCDClosurePoint.sub(jointDClosedLoopPosition, jointCPosition);
 
       vectorBCProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorBC);
       vectorCDProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorCD);
       vectorDAProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorDA);
       vectorABProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorAB);
+      vectorDAClosurePointProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorDAClosurePoint);
+      vectorCDClosurePointProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorCDClosurePoint);
 
       if (DEBUG)
       {
