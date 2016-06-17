@@ -43,12 +43,12 @@ public class FourBarKinematicLoopTest
       // initialize to a square of unit length
       Vector3d jointAxis = new Vector3d(0.0, 0.0, 1.0);
       Vector3d elevatorToJointA = new Vector3d();
-      Vector3d jointAtoB = new Vector3d(1.0, 0.0, 0.0);
+      Vector3d jointAtoB = new Vector3d(0.0, 1.0, 0.0);
       Vector3d jointBtoC = new Vector3d(1.0, 0.0, 0.0);
-      Vector3d jointCtoD = new Vector3d(1.0, 0.0, 0.0);
+      Vector3d jointCtoD = new Vector3d(0.0, -1.0, 0.0);
       Vector3d jointAtoD = new Vector3d(1.0, 0.0, 0.0);
       initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
-      boolean recomputeJointLimits = false;      
+      boolean recomputeJointLimits = false;
       
       printInitialJointPositions();
       
@@ -56,22 +56,7 @@ public class FourBarKinematicLoopTest
       passiveJointB.setQ(0.0);
       passiveJointC.setQ(0.0);
       passiveJointD.setQ(0.0);
-      
-      FramePoint jointAPosition = new FramePoint(masterJointA.getFrameBeforeJoint());
-      FramePoint jointBPosition = new FramePoint(passiveJointB.getFrameBeforeJoint());
-      FramePoint jointCPosition = new FramePoint(passiveJointC.getFrameBeforeJoint());
-      FramePoint jointDPosition = new FramePoint(passiveJointD.getFrameBeforeJoint());
-            
-      jointAPosition.changeFrame(worldFrame);
-      jointBPosition.changeFrame(worldFrame);
-      jointCPosition.changeFrame(worldFrame);
-      jointDPosition.changeFrame(worldFrame);
-      
-      System.out.println("joint a position = " + jointAPosition.getPoint());
-      System.out.println("joint b position = " + jointBPosition.getPoint());
-      System.out.println("joint c position = " + jointCPosition.getPoint());
-      System.out.println("joint d position = " + jointDPosition.getPoint());
-      
+
       // try making a four bar with no joint limits
       try
       {
@@ -83,19 +68,20 @@ public class FourBarKinematicLoopTest
       {
       }
       
-      initializeAllJointsToSameLimits(0.0, Math.PI);      
+      initializeJointLimits(-0.5 * Math.PI, 0.5 * Math.PI, -0.5 * Math.PI, 0.5 * Math.PI, -0.5 * Math.PI, 0.5 * Math.PI, 0.0, Math.PI);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
             recomputeJointLimits);
 
-      // master joint is 90 degrees, 0 velocity/acceleration
-      masterJointA.setQ(0.5 * Math.PI);
+      // master joint is 0 degrees, 0 velocity/acceleration
+      masterJointA.setQ(0.0);
       masterJointA.setQd(0.0);
+      masterJointA.setQdd(0.0);
       fourBarKinematicLoop.update();
 
       printJointPositionsAndAngles();
 
-      assertEquals(passiveJointB.getQ(), -0.5 * Math.PI, eps);
-      assertEquals(passiveJointC.getQ(), -0.5 * Math.PI, eps);
+      assertEquals(passiveJointB.getQ(), 0.0, eps);
+      assertEquals(passiveJointC.getQ(), 0.0, eps);
       assertEquals(passiveJointD.getQ(), -0.5 * Math.PI, eps);
 
       assertEquals(passiveJointB.getQd(), 0.0, eps);
@@ -156,7 +142,7 @@ public class FourBarKinematicLoopTest
    {
       // initialize to a square of unit length
       FrameVector jointAxis = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
-      FrameVector jointAtoD = new FrameVector(worldFrame, 1.0, 0.0, 0.0);
+      FrameVector jointAtoD = new FrameVector(worldFrame, Math.cos(0.1), - Math.sin(0.1), 0.0);
       FramePoint jointAPosition = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
       FramePoint jointBPosition = new FramePoint(worldFrame, 1.0, 0.0, 0.0);
       FramePoint jointCPosition = new FramePoint(worldFrame, 2.0, 0.0, 0.0);
@@ -189,6 +175,9 @@ public class FourBarKinematicLoopTest
       masterJointA.setQd(0.0);
       masterJointA.setQdd(0.0);
       fourBarKinematicLoop.update();
+
+      printJointPositionsAndAngles();
+
       assertEquals(passiveJointB.getQ(), -0.5 * Math.PI, eps);
       assertEquals(passiveJointC.getQ(), -0.5 * Math.PI, eps);
       assertEquals(passiveJointD.getQ(), -0.5 * Math.PI, eps);
@@ -885,6 +874,18 @@ public class FourBarKinematicLoopTest
       passiveJointC.setJointLimitUpper(upperLimit);
       passiveJointD.setJointLimitLower(lowerLimit);
       passiveJointD.setJointLimitUpper(upperLimit);
+   }
+
+   private void initializeJointLimits(double lowerLimitA, double upperLimitA, double lowerLimitB, double upperLimitB, double lowerLimitC, double upperLimitC, double lowerLimitD, double upperLimitD)
+   {
+      masterJointA.setJointLimitLower(lowerLimitA);
+      masterJointA.setJointLimitUpper(upperLimitA);
+      passiveJointB.setJointLimitLower(lowerLimitB);
+      passiveJointB.setJointLimitUpper(upperLimitB);
+      passiveJointC.setJointLimitLower(lowerLimitC);
+      passiveJointC.setJointLimitUpper(upperLimitC);
+      passiveJointD.setJointLimitLower(lowerLimitD);
+      passiveJointD.setJointLimitUpper(upperLimitD);
    }
    
    private static double getInteriorAngleFromCosineRule(double adjacentSide1, double adjacentSide2, double oppositeSide)
