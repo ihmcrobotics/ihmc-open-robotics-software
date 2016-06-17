@@ -52,6 +52,7 @@ dependencies {
    compile ihmc.getProjectDependency(":SDFLoader")
    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
    compile ihmc.getProjectDependency(":IHMCStateEstimation")
+   testCompile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
 }
 
 jar {
