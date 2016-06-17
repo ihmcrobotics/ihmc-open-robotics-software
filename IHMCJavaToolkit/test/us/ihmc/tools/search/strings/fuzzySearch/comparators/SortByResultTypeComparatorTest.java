@@ -3,6 +3,7 @@ package us.ihmc.tools.search.strings.fuzzySearch.comparators;
 import org.junit.Test;
 import us.ihmc.tools.search.strings.fuzzySearch.CombinedFuzzySearchResult;
 import us.ihmc.tools.search.strings.fuzzySearch.CombinedFuzzySearchResult.CombinedFuzzySearchResultType;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;
 
@@ -13,8 +14,8 @@ import static org.junit.Assert.*;
  */
 public class SortByResultTypeComparatorTest
 {
-
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.02)
+   @Test(timeout = 100)
    public void testCompare()
    {
       Random random = new Random(1976L);

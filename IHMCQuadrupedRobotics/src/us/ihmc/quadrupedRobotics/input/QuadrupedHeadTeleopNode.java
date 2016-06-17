@@ -9,13 +9,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedNeckJointPositionPacket;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedNeckJointPositionPacket;
+import us.ihmc.quadrupedRobotics.params.DoubleParameter;
+import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 
 public class QuadrupedHeadTeleopNode implements InputEventCallback
 {
@@ -40,11 +40,11 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
    private boolean teleopEnabled = true;
    private HashMap<QuadrupedJointName, Double> neckJointPositionSetpoints = new HashMap<>();
 
-   public QuadrupedHeadTeleopNode(String host, NetClassList netClassList, PollingInputDevice device) throws IOException
+   public QuadrupedHeadTeleopNode(String host, NetworkPorts port, NetClassList netClassList, PollingInputDevice device) throws IOException
    {
 
       // TODO: Don't hardcode localhost
-      this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, NetworkPorts.CONTROLLER_PORT, netClassList);
+      this.packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, port, netClassList);
       this.device = device;
 
       // Initialize all channels to zero.

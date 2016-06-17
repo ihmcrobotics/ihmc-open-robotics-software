@@ -121,7 +121,7 @@ public class EfpAxisDependentGainPDConstraintToIntegrate implements FunctionToIn
 
       computeErrors();
 
-      stiffnessFrame.getTransformToDesiredFrame(worldFrame).get(stiffnessFrameToWorldFrameRotation);
+      stiffnessFrame.getTransformToDesiredFrame(worldFrame).getRotation(stiffnessFrameToWorldFrameRotation);
 
       stiffnessGainMatrix.setM00(stiffnessX.getDoubleValue());
       stiffnessGainMatrix.setM11(stiffnessY.getDoubleValue());
