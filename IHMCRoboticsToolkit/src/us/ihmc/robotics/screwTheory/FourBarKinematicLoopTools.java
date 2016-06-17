@@ -79,6 +79,15 @@ public class FourBarKinematicLoopTools
       boolean ccwConvex = vectorABProjected.cross(vectorBCProjected) > 0.0 && vectorBCProjected.cross(vectorCDProjected) > 0.0 && vectorCDProjected.cross(vectorDAProjected) > 0.0;
       boolean cwConvex = vectorABProjected.cross(vectorBCProjected) < 0.0 && vectorBCProjected.cross(vectorCDProjected) < 0.0 && vectorCDProjected.cross(vectorDAProjected) < 0.0;
 
+      System.out.println("vectorABProjected = " + vectorABProjected);
+      System.out.println("vectorBCProjected = " + vectorBCProjected);
+      System.out.println("vectorCDProjected = " + vectorCDProjected);
+      System.out.println("vectorDAProjected = " + vectorDAProjected);
+
+      System.out.println("vectorABProjected.cross(vectorBCProjected) = " + vectorABProjected.cross(vectorBCProjected));
+      System.out.println("vectorBCProjected.cross(vectorCDProjected) = " + vectorBCProjected.cross(vectorCDProjected));
+      System.out.println("vectorCDProjected.cross(vectorDAProjected) = " + vectorCDProjected.cross(vectorDAProjected));
+
       if (!ccwConvex && !cwConvex)
       {
          throw new RuntimeException("At q = 0 the fourBar must be convex");

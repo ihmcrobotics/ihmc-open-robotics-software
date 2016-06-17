@@ -219,23 +219,23 @@ public class FourBarKinematicLoopTest
       Vector3d jointAxis = new Vector3d(0.0, 0.0, 1.0);
       Vector3d elevatorToJointA = new Vector3d();
       Vector3d jointAtoB = new Vector3d(1.0, 0.0, 0.0);
-      Vector3d jointBtoC = new Vector3d(2.0, 0.0, 0.2);
-      Vector3d jointCtoD = new Vector3d(1.0, 0.0, -0.2);
-      Vector3d jointAtoD = new Vector3d(2.0, 0.0, 0.0);
+      Vector3d jointBtoC = new Vector3d(0.0, 2.0, 0.2);
+      Vector3d jointCtoD = new Vector3d(-1.0, 0.0, -0.2);
+      Vector3d jointAtoD = new Vector3d(0.0, 2.0, 0.0);
       initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
       boolean recomputeJointLimits = false;
-      initializeAllJointsToSameLimits(0.0, Math.PI);
+      initializeJointLimits(-0.5 * Math.PI, 0.5 * Math.PI, -0.5 * Math.PI, 0.5 * Math.PI, -0.5 * Math.PI, 0.5 * Math.PI, 0.0, Math.PI);
 
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
             recomputeJointLimits);
 
       // master joint is 90 degrees, 0 velocity
-      masterJointA.setQ(0.5 * Math.PI);
+      masterJointA.setQ(0.0);
       masterJointA.setQd(0.0);
       fourBarKinematicLoop.update();
-      assertEquals(passiveJointB.getQ(), -0.5 * Math.PI, eps);
-      assertEquals(passiveJointC.getQ(), -0.5 * Math.PI, eps);
-      assertEquals(passiveJointD.getQ(), -0.5 * Math.PI, eps);
+      assertEquals(passiveJointB.getQ(), 0.0, eps);
+      assertEquals(passiveJointC.getQ(), 0.0, eps);
+      assertEquals(passiveJointD.getQ(), 0.0, eps);
       assertEquals(passiveJointB.getQd(), 0.0, eps);
       assertEquals(passiveJointC.getQd(), 0.0, eps);
       assertEquals(passiveJointD.getQd(), 0.0, eps);
@@ -243,23 +243,23 @@ public class FourBarKinematicLoopTest
       // master joint is near maximum angle, non-zero velocity
       double masterJointVelocity = 0.2;
       double angleEpsilon = 1e-4;
-      masterJointA.setQ(Math.PI - angleEpsilon);
+      masterJointA.setQ(0.5 * Math.PI - angleEpsilon);
       masterJointA.setQd(masterJointVelocity);
       fourBarKinematicLoop.update();
-      assertEquals(passiveJointB.getQ(), -Math.PI + angleEpsilon, eps);
-      assertEquals(passiveJointC.getQ(), -angleEpsilon, eps);
-      assertEquals(passiveJointD.getQ(), -Math.PI + angleEpsilon, eps);
+      assertEquals(passiveJointB.getQ(), -0.5 * Math.PI + angleEpsilon, eps);
+      assertEquals(passiveJointC.getQ(), 0.5 * Math.PI - angleEpsilon, eps);
+      assertEquals(passiveJointD.getQ(), -0.5 * Math.PI + angleEpsilon, eps);
       assertEquals(passiveJointB.getQd(), -masterJointVelocity, eps);
       assertEquals(passiveJointC.getQd(), masterJointVelocity, eps);
       assertEquals(passiveJointD.getQd(), -masterJointVelocity, eps);
 
       // master joint in near minimum angle, non-zero velocity
-      masterJointA.setQ(angleEpsilon);
+      masterJointA.setQ(-0.5 * Math.PI + angleEpsilon);
       masterJointA.setQd(masterJointVelocity);
       fourBarKinematicLoop.update();
-      assertEquals(passiveJointB.getQ(), -angleEpsilon, eps);
-      assertEquals(passiveJointC.getQ(), -Math.PI + angleEpsilon, eps);
-      assertEquals(passiveJointD.getQ(), -angleEpsilon, eps);
+      assertEquals(passiveJointB.getQ(), 0.5 * Math.PI - angleEpsilon, eps);
+      assertEquals(passiveJointC.getQ(), -0.5 * Math.PI + angleEpsilon, eps);
+      assertEquals(passiveJointD.getQ(), 0.5 * Math.PI - angleEpsilon, eps);
       assertEquals(passiveJointB.getQd(), -masterJointVelocity, eps);
       assertEquals(passiveJointC.getQd(), masterJointVelocity, eps);
       assertEquals(passiveJointD.getQd(), -masterJointVelocity, eps);
