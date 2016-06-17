@@ -80,7 +80,7 @@ public class GazeboSensorReader implements SensorReader
       this.imu = stateEstimatorSensorDefinitions.getIMUSensorDefinitions().get(0);
 
       imuToParentLinkRotationOffset = new Quat4d();
-      imu.getIMUFrame().getTransformToDesiredFrame(imu.getRigidBody().getBodyFixedFrame()).get(imuToParentLinkRotationOffset);
+      imu.getIMUFrame().getTransformToDesiredFrame(imu.getRigidBody().getBodyFixedFrame()).getRotation(imuToParentLinkRotationOffset);
 
       jointDataLength = jointList.size() * 8 * 2;
       imuDataLength = 10 * 8;

@@ -24,7 +24,7 @@ public class TransformableMatrix3d extends Matrix3d implements GeometryObject<Tr
    @Override
    public void applyTransform(RigidBodyTransform transform)
    {
-      transform.get(temporaryMatrix);
+      transform.getRotation(temporaryMatrix);
       this.mul(temporaryMatrix, this);
       this.mulTransposeRight(this, temporaryMatrix);
    }

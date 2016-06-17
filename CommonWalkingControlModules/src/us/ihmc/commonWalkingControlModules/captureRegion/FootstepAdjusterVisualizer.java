@@ -33,7 +33,8 @@ public class FootstepAdjusterVisualizer
       nextFootstepPolygon = new FrameConvexPolygon2d(worldFrame);
 
       nextFootstepPolygonArtifact = new YoArtifactPolygon(nextFootstepCaption, yoNextFootstepPolygon, colorDefault, false);
-      yoGraphicsListRegistry.registerArtifact(nextFootstepCaption, nextFootstepPolygonArtifact);
+      nextFootstepPolygonArtifact.setVisible(false);
+      yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), nextFootstepPolygonArtifact);
 
       parentRegistry.addChild(registry);
    }

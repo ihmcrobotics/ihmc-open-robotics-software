@@ -310,8 +310,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private void sendCorrectionUpdatePacket()
    {
-      errorBetweenCorrectedAndLocalizationTransform.get(translationalResidualError);
-      totalErrorBetweenPelvisAndLocalizationTransform.get(translationalTotalError);
+      errorBetweenCorrectedAndLocalizationTransform.getTranslation(translationalResidualError);
+      totalErrorBetweenPelvisAndLocalizationTransform.getTranslation(translationalTotalError);
       
       double absoluteResidualError = translationalResidualError.length();
       double absoluteTotalError = translationalTotalError.length();

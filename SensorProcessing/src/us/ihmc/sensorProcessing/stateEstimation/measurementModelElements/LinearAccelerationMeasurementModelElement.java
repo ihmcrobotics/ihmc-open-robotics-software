@@ -132,11 +132,11 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
 
       // R_{w}^{p}
       estimationFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-      tempTransform.get(rotationFromEstimationToWorld);
+      tempTransform.getRotation(rotationFromEstimationToWorld);
 
       // R_{p}^{m}
       estimationFrame.getTransformToDesiredFrame(tempTransform, measurementFrame);
-      tempTransform.get(rotationFromEstimationToMeasurement);
+      tempTransform.getRotation(rotationFromEstimationToMeasurement);
 
       // T_{i}^{p,p}
       twistCalculator.getRelativeTwist(twistOfMeasurementFrameWithRespectToEstimation, estimationLink, measurementLink);
@@ -343,7 +343,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    private void computeCenterOfMassAccelerationBlock()
    {
       ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(tempTransform, measurementFrame);
-      tempTransform.get(tempMatrix);
+      tempTransform.getRotation(tempMatrix);
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(centerOfMassAccelerationPort));
    }
 

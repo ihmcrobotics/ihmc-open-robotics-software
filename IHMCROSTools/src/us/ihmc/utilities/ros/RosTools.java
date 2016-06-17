@@ -210,7 +210,7 @@ public class RosTools
       pelvisTransform.getTranslation(point);
 
       Quat4d rotation = new Quat4d();
-      pelvisTransform.get(rotation);
+      pelvisTransform.getRotation(rotation);
       
       packVector3dAndQuat4dToGeometry_msgsPose(point, rotation, pose);
    }

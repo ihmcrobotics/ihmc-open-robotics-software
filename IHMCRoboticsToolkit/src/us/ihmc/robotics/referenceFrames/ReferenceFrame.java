@@ -713,7 +713,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       // true if the transform preserves the z axis direction and magnitude, paying no heed to transformations.
       // for SO(3) matrices (orthogonal with determinant 1, equivalent to rotations)
       Matrix3d rotation = new Matrix3d();
-      transform.get(rotation);
+      transform.getRotation(rotation);
 
       return isRotationInPlane(rotation);
    }

@@ -58,14 +58,38 @@ public class QuadrupedContactForceLimits
       coefficientOfFriction.get(robotQuadrant)[0] = value;
    }
 
+   public void setCoefficientOfFriction(double value)
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         coefficientOfFriction.get(robotQuadrant)[0] = value;
+      }
+   }
    public void setPressureLowerLimit(RobotQuadrant robotQuadrant, double value)
+
    {
       pressureLowerLimit.get(robotQuadrant)[0] = value;
+   }
+
+   public void setPressureLowerLimit(double value)
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         pressureLowerLimit.get(robotQuadrant)[0] = value;
+      }
    }
 
    public void setPressureUpperLimit(RobotQuadrant robotQuadrant, double value)
    {
       pressureUpperLimit.get(robotQuadrant)[0] = value;
+   }
+
+   public void setPressureUpperLimit(double value)
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         pressureUpperLimit.get(robotQuadrant)[0] = value;
+      }
    }
 
    public double getCoefficientOfFriction(RobotQuadrant robotQuadrant)

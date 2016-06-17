@@ -676,7 +676,7 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
    private boolean isTransformationInPlane(RigidBodyTransform transform)
    {
       // arguably not a sufficient condition. ReferenceFrame2d needed!
-      transform.get(tempRotation);
+      transform.getRotation(tempRotation);
 
       return ReferenceFrame.isRotationInPlane(tempRotation);
    }

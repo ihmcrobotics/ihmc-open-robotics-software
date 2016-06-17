@@ -228,7 +228,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    public Line getAxis()
    {
       Vector3d axisOrigin = new Vector3d();
-      location.get(axisOrigin);
+      location.getTranslation(axisOrigin);
 
       Vector3d axisDirection = getAxisDirectionCopy();
 
@@ -242,7 +242,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    public Vector3d getAxisDirectionCopy()
    {
       Matrix3d rotation = new Matrix3d();
-      location.get(rotation);
+      location.getRotation(rotation);
 
       Vector3d axisDirection = new Vector3d();
       rotation.getColumn(Direction.Z.getIndex(), axisDirection);

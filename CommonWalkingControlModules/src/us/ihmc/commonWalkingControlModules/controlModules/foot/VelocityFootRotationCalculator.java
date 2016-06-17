@@ -38,7 +38,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 public class VelocityFootRotationCalculator implements FootRotationCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
 
    private final String name = getClass().getSimpleName();
 
@@ -193,7 +193,8 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       if (yoGraphicsListRegistry != null)
       {
          Artifact lineOfRotationArtifact = new YoArtifactLineSegment2d(namePrefix + "LineOfRotation", yoLineOfRotation, Color.ORANGE, 0.005, 0.01);
-         yoGraphicsListRegistry.registerArtifact("FootRotation", lineOfRotationArtifact);
+         lineOfRotationArtifact.setVisible(false);
+         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), lineOfRotationArtifact);
       }
    }
 

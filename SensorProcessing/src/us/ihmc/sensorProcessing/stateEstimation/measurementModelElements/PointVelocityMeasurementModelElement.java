@@ -94,7 +94,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    public void computeMatrixBlocks()
    {
       estimationFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-      tempTransform.get(rotationFromEstimationToWorld);
+      tempTransform.getRotation(rotationFromEstimationToWorld);
       
       if (!assumePerfectIMU)
       {

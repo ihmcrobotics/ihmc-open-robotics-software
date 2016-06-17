@@ -63,7 +63,7 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
    {
       Vector3d translationToWorld = new Vector3d();
 
-      transformToWorld.get(translationToWorld);
+      transformToWorld.getTranslation(translationToWorld);
 
       this.yoFramePoint.set(translationToWorld);
       FrameOrientation orientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), transformToWorld);

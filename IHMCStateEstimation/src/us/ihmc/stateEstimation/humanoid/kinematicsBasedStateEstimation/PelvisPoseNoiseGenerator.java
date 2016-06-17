@@ -126,11 +126,11 @@ public class PelvisPoseNoiseGenerator
       updateBeforeYoVariables();
       integrateError();
       
-      pelvisPose.get(pelvisRotation);
+      pelvisPose.getRotation(pelvisRotation);
       pelvisRotation.mul(rotationError);
       pelvisPose.setRotation(pelvisRotation);
       
-      pelvisPose.get(pelvisTranslation);
+      pelvisPose.getTranslation(pelvisTranslation);
       pelvisTranslation.add(translationError);
       pelvisPose.setTranslation(pelvisTranslation);
       
@@ -142,10 +142,10 @@ public class PelvisPoseNoiseGenerator
 
    private void updateBeforeYoVariables()
    {
-      pelvisPose.get(pelvisTranslation);
+      pelvisPose.getTranslation(pelvisTranslation);
       nonProcessedRootJointPosition.set(pelvisTranslation);
       
-      pelvisPose.get(rot);
+      pelvisPose.getRotation(rot);
       nonProcessedRootJointQuaternion.set(rot);
       nonProcessedRootJointQuaternion.getYawPitchRoll(tempRots);
       nonProcessedRootJointYaw.set(tempRots[0]);
@@ -162,10 +162,10 @@ public class PelvisPoseNoiseGenerator
       error_y.set(translationError.getY());  
       error_z.set(translationError.getZ()); 
       
-      pelvisPose.get(pelvisTranslation);
+      pelvisPose.getTranslation(pelvisTranslation);
       processedRootJointPosition.set(pelvisTranslation);
       
-      pelvisPose.get(rot);
+      pelvisPose.getRotation(rot);
       processedRootJointQuaternion.set(rot);
       processedRootJointQuaternion.getYawPitchRoll(tempRots);
       processedRootJointYaw.set(tempRots[0]);
@@ -188,7 +188,7 @@ public class PelvisPoseNoiseGenerator
       translationNoise.set(xNoise, yNoise, zNoise);
       
       
-      pelvisPose.get(pelvisRotation);
+      pelvisPose.getRotation(pelvisRotation);
       
       pelvisRotation.mul(rotationError);
       pelvisRotation.transform(translationNoise);

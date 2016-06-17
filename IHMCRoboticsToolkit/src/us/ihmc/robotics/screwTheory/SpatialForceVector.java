@@ -490,7 +490,7 @@ public class SpatialForceVector
       // essentially using the transpose of the Adjoint operator, Ad_H = [R, 0; tilde(p) * R, R] (Matlab notation), but without creating a 6x6 matrix
       // compute the relevant rotations and translations
       expressedInFrame.getTransformToDesiredFrame(temporaryTransformHToDesiredFrame, newReferenceFrame);
-      temporaryTransformHToDesiredFrame.get(tempVector); // p
+      temporaryTransformHToDesiredFrame.getTranslation(tempVector); // p
 
       // transform the torques and forces so that they are expressed in newReferenceFrame
       temporaryTransformHToDesiredFrame.transform(linearPart);
