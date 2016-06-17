@@ -52,33 +52,7 @@ public class FourBarKinematicLoopTools
                + passiveJointC.getSuccessor() + "\t  " + passiveJointD.getPredecessor() + "\n");
       }
    }
-   
-   public static void verifyMasterJointLimits(String fourBarName, RevoluteJoint masterJointA, FourBarCalculatorWithDerivatives fourBarCalculator)
-   {
-      double maxValidMasterJointAngle = fourBarCalculator.getMaxDAB();
-      double minValidMasterJointAngle = fourBarCalculator.getMinDAB();
-      
-      // A) Angle limits not set
-      if (masterJointA.getJointLimitLower() == Double.NEGATIVE_INFINITY || masterJointA.getJointLimitUpper() == Double.POSITIVE_INFINITY)
-      {
-         throw new RuntimeException("Must set the joint limits for the master joint of the " + fourBarName + " four bar.\nNote that for the given link lengths max angle is " + maxValidMasterJointAngle + "and min angle is" + minValidMasterJointAngle);
-      }
 
-      // B) Max angle limit is too large
-
-      if (masterJointA.getJointLimitUpper() > maxValidMasterJointAngle)
-      {
-         throw new RuntimeException("The maximum valid joint angle for the master joint of the " + fourBarName + " four bar is " + maxValidMasterJointAngle + " to avoid flipping, but was set to " + masterJointA.getJointLimitUpper());
-      }
-
-      // C) Min angle limit is too small
-
-      if (masterJointA.getJointLimitLower() < minValidMasterJointAngle)
-      {
-         throw new RuntimeException("The minimum valid joint angle for the master joint of the " + fourBarName + " four bar is " + minValidMasterJointAngle + " to avoid flipping, but was set to " + masterJointA.getJointLimitLower());
-      }
-   }
-   
    public static PassiveRevoluteJoint setFourBarOutputJoint(PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD)
    {
       // If the output joint is D then it will have at least 1 child, otherwise it won't have any
