@@ -36,6 +36,7 @@ public class QuadrupedControllerManagerFactory
    private IHMCCommunicationKryoNetClassList kryoNetClassList;
    private QuadrupedPhysicalProperties physicalProperties;
    private QuadrupedReferenceFrames referenceFrames;
+   private QuadrupedControlMode controlMode;
    
    // TO CONSTRUCT
    private PacketCommunicator packetCommunicator;
@@ -73,7 +74,7 @@ public class QuadrupedControllerManagerFactory
                                                            yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead, globalDataProducer, footSwitches);
    }
    
-   public QuadrupedControllerManager createControllerManager(QuadrupedControlMode controlMode) throws IOException
+   public QuadrupedControllerManager createControllerManager() throws IOException
    {
       createContactableFeet();
       createFootSwitches();
@@ -146,5 +147,10 @@ public class QuadrupedControllerManagerFactory
    public void setReferenceFrames(QuadrupedReferenceFrames referenceFrames)
    {
       this.referenceFrames = referenceFrames;
+   }
+   
+   public void setControlMode(QuadrupedControlMode controlMode)
+   {
+      this.controlMode = controlMode;
    }
 }
