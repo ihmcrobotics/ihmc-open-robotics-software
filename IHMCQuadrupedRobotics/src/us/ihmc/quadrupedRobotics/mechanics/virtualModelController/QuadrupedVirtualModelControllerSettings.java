@@ -78,6 +78,7 @@ public class QuadrupedVirtualModelControllerSettings
       defaultJointPositionLimitDamping = value;
       jointPositionLimitDamping.clear();
    }
+
    public void setJointPositionLimitDamping(QuadrupedJointName jointName, double value)
    {
       jointPositionLimitDamping.put(jointName, value);

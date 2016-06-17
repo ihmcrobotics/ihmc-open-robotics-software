@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.mechanics.contactForceOptimization;
+package us.ihmc.quadrupedRobotics.optimization.contactForceOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -387,12 +387,12 @@ public class QuadrupedContactForceOptimization
       int m = u.getNumRows();
 
       // equality constraints:
-      // Aeq u + beq = 0
+      // Aeq u = beq
       beq.reshape(0, 1);
       Aeq.reshape(0, m);
 
       // inequality constraints:
-      // Ain u + bin >= 0
+      // Ain u <= bin
       bin.reshape(2 * m, 1);
       Ain.reshape(2 * m, m);
       bin.zero();
