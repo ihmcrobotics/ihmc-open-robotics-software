@@ -89,9 +89,9 @@ public class FreeJoint extends Joint
       vTranslate.z = z;
       tTranslate.setTranslation(vTranslate);
 
-      tYaw.rotZ(yaw);
-      tRoll.rotX(roll);
-      tPitch.rotY(pitch);
+      tYaw.setRotationYawAndZeroTranslation(yaw);
+      tRoll.setRotationRollAndZeroTranslation(roll);
+      tPitch.setRotationPitchAndZeroTranslation(pitch);
 
       tTranslate.multiply(tYaw);
       tTranslate.multiply(tRoll);

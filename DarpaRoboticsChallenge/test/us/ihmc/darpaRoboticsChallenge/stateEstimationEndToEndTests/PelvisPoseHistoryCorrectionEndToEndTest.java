@@ -605,7 +605,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       for (int i = 0; i < numTargets; i++)
       {
          targets[i] = new RigidBodyTransform();
-         targets[i].setEuler(0, 0, random.nextDouble() * 2.0 * Math.PI);
+         targets[i].setRotationEulerAndZeroTranslation(0, 0, random.nextDouble() * 2.0 * Math.PI);
          targets[i].setTranslation(RandomTools.generateRandomVector(random, 1.0));
       }
       return targets;

@@ -29,9 +29,9 @@ public class FrameOrientationTest
    {
       testTransform = new RigidBodyTransform();
       testTransform.setTranslation(new Vector3d(0.0, 0.0, 1.0));
-      testTransform.rotX(0.2);
-      testTransform.rotY(0.6);
-      testTransform.rotZ(0.8);
+      testTransform.setRotationRollAndZeroTranslation(0.2);
+      testTransform.setRotationPitchAndZeroTranslation(0.6);
+      testTransform.setRotationYawAndZeroTranslation(0.8);
       testFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("testFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform(), false, false,
               false);
    }

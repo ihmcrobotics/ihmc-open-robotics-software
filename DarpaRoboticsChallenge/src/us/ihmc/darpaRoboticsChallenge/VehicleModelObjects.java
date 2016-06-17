@@ -24,7 +24,7 @@ public class VehicleModelObjects
          double roll = 0.0;
          double pitch = 0.0;
          double yaw = 0.0;
-         transform3D.setEuler(roll, pitch, yaw);
+         transform3D.setRotationEulerAndZeroTranslation(roll, pitch, yaw);
 
          Vector3d translation = new Vector3d(0.0, 0.0, 0.0);
          transform3D.setTranslationAndIdentityRotation(translation);
@@ -65,11 +65,11 @@ public class VehicleModelObjects
 
          //Rotate to have the Z axis point out
          RigidBodyTransform finalAdjustment = new RigidBodyTransform();
-         finalAdjustment.setEuler(0.0, Math.PI, 0.0);
+         finalAdjustment.setRotationEulerAndZeroTranslation(0.0, Math.PI, 0.0);
          transform3D.multiply(finalAdjustment);
 
          finalAdjustment = new RigidBodyTransform();
-         finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
+         finalAdjustment.setRotationEulerAndZeroTranslation(new Vector3d(0.0, 0.0, -Math.PI/2.0));
          transform3D.multiply(finalAdjustment);
 
          objectTransforms.put(VehicleObject.GAS_PEDAL, transform3D);
@@ -107,11 +107,11 @@ public class VehicleModelObjects
 
          //Rotate to have the Z axis point out
          RigidBodyTransform finalAdjustment = new RigidBodyTransform();
-         finalAdjustment.setEuler(new Vector3d(0.0, Math.PI, 0.0));
+         finalAdjustment.setRotationEulerAndZeroTranslation(new Vector3d(0.0, Math.PI, 0.0));
          transform3D.multiply(finalAdjustment);
 
          finalAdjustment = new RigidBodyTransform();
-         finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
+         finalAdjustment.setRotationEulerAndZeroTranslation(new Vector3d(0.0, 0.0, -Math.PI/2.0));
          transform3D.multiply(finalAdjustment);
 
          objectTransforms.put(VehicleObject.BRAKE_PEDAL, transform3D);
@@ -134,7 +134,7 @@ public class VehicleModelObjects
          RigidBodyTransform transform3D = new RigidBodyTransform(transform3DfromWorldToParent);
 
          RigidBodyTransform finalAdjustment = new RigidBodyTransform();
-         finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
+         finalAdjustment.setRotationEulerAndZeroTranslation(new Vector3d(0.0, 0.0, -Math.PI/2.0));
          transform3D.multiply(finalAdjustment);
 
          //transform to parent
@@ -241,11 +241,11 @@ public class VehicleModelObjects
 
          //Rotate to have the Z axis point out
          RigidBodyTransform finalAdjustment = new RigidBodyTransform();
-         finalAdjustment.setEuler(new Vector3d(0.0, -Math.PI/2.0, 0.0));
+         finalAdjustment.setRotationEulerAndZeroTranslation(new Vector3d(0.0, -Math.PI/2.0, 0.0));
          transform3D.multiply(finalAdjustment);
 
          finalAdjustment = new RigidBodyTransform();
-         finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
+         finalAdjustment.setRotationEulerAndZeroTranslation(new Vector3d(0.0, 0.0, -Math.PI/2.0));
          transform3D.multiply(finalAdjustment);
 
          RigidBodyTransform adjustmentForSwitch = new RigidBodyTransform();
@@ -269,11 +269,11 @@ public class VehicleModelObjects
 
          //Rotate to have the Z axis point out
          RigidBodyTransform finalAdjustment = new RigidBodyTransform();
-         finalAdjustment.setEuler(new Vector3d(0.0, -Math.PI/2.0, 0.0));
+         finalAdjustment.setRotationEulerAndZeroTranslation(new Vector3d(0.0, -Math.PI/2.0, 0.0));
          transform3D.multiply(finalAdjustment);
 
          finalAdjustment = new RigidBodyTransform();
-         finalAdjustment.setEuler(new Vector3d(0.0, 0.0, -Math.PI/2.0));
+         finalAdjustment.setRotationEulerAndZeroTranslation(new Vector3d(0.0, 0.0, -Math.PI/2.0));
          transform3D.multiply(finalAdjustment);
 
          RigidBodyTransform adjustmentForSwitch = new RigidBodyTransform();

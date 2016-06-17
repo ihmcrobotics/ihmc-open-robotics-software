@@ -1255,7 +1255,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       double x = xy[0];
       double y = xy[1];
       RigidBodyTransform location = new RigidBodyTransform();
-      location.rotZ(Math.toRadians(yawDegrees));
+      location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(x, y, height / 2));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);

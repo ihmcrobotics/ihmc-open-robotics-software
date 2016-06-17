@@ -135,10 +135,10 @@ public class CameraMount implements CameraMountInterface
          // Note that pan, tilt, roll are in z, y, x ccordinates.
          // transformToCamera = transformToMount * panTiltRollTransform3D
 
-         panTiltRollTransform3D.rotZ(pan.getDoubleValue());
-         temp1.rotY(tilt.getDoubleValue());
+         panTiltRollTransform3D.setRotationYawAndZeroTranslation(pan.getDoubleValue());
+         temp1.setRotationPitchAndZeroTranslation(tilt.getDoubleValue());
          panTiltRollTransform3D.multiply(temp1);
-         temp1.rotX(roll.getDoubleValue());
+         temp1.setRotationRollAndZeroTranslation(roll.getDoubleValue());
          panTiltRollTransform3D.multiply(temp1);
 
          transformToCamera.multiply(transformToMount, panTiltRollTransform3D);

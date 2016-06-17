@@ -232,7 +232,7 @@ public class VisionPoseEstimator implements DRCStereoListener
                   {
                      RigidBodyTransform cameraToWorld = data.getRight();
                      RigidBodyTransform opticalFrameToCameraFrame = new RigidBodyTransform();
-                     opticalFrameToCameraFrame.setEuler(-Math.PI / 2.0, 0.0, -Math.PI / 2);
+                     opticalFrameToCameraFrame.setRotationEulerAndZeroTranslation(-Math.PI / 2.0, 0.0, -Math.PI / 2);
                      RigidBodyTransform targetToWorld = new RigidBodyTransform();
 
                      targetToWorld.multiply(cameraToWorld, opticalFrameToCameraFrame);
