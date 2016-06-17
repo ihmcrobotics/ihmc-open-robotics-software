@@ -427,13 +427,19 @@ public class FourBarKinematicLoop
 
    public void verifyMasterJointLimits()
    {
-      double maxValidMasterJointAngle = convertInteriorAngleToJointAngle(fourBarCalculator.getMaxDAB(), 0);
-      double minValidMasterJointAngle = convertInteriorAngleToJointAngle(fourBarCalculator.getMinDAB(), 0);
+      double maxValidMasterJointAngle = fourBarIsClockwise ?
+            convertInteriorAngleToJointAngle(fourBarCalculator.getMaxDAB(), 0) :
+            convertInteriorAngleToJointAngle(fourBarCalculator.getMinDAB(), 0);
+      double minValidMasterJointAngle = fourBarIsClockwise ?
+            convertInteriorAngleToJointAngle(fourBarCalculator.getMinDAB(), 0) :
+            convertInteriorAngleToJointAngle(fourBarCalculator.getMaxDAB(), 0);
 
       // A) Angle limits not set
       if (masterJointA.getJointLimitLower() == Double.NEGATIVE_INFINITY || masterJointA.getJointLimitUpper() == Double.POSITIVE_INFINITY)
       {
-         throw new RuntimeException("Must set the joint limits for the master joint of the " + name + " four bar.\nNote that for the given link lengths max angle is " + maxValidMasterJointAngle + "and min angle is" + minValidMasterJointAngle);
+         throw new RuntimeException(
+               "Must set the joint limits for the master joint of the " + name + " four bar.\nNote that for the given link lengths max angle is "
+                     + maxValidMasterJointAngle + "and min angle is" + minValidMasterJointAngle);
       }
 
       // B) Max angle limit is too large
@@ -453,6 +459,8 @@ public class FourBarKinematicLoop
    {
       double currentMasterJointA = masterJointA.getQ();
       double interiorAngleA = convertJointAngleToInteriorAngle(currentMasterJointA, 0);
+      double interiorAngleDtA = passiveJointSigns[0] * masterJointA.getQd();
+      double interiorAngleDt2A = passiveJointSigns[0] * masterJointA.getQdd();
 
       if(DEBUG)
          System.out.println("interior angle A = " + interiorAngleA / Math.PI);
@@ -462,7 +470,7 @@ public class FourBarKinematicLoop
          throw new RuntimeException(masterJointA.getName() + " is set outside of its bounds [" + masterJointA.getJointLimitLower() + ", " + masterJointA.getJointLimitUpper() + "]. The current value is: " +  masterJointA.getQ());
       }
 
-      fourBarCalculator.updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(interiorAngleA, masterJointA.getQd(), masterJointA.getQdd());
+      fourBarCalculator.updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(interiorAngleA, interiorAngleDtA, interiorAngleDt2A);
       jacobian = fourBarJacobianSolver.computeJacobian(fourBarOutputJoint);
       
       if(DEBUG)
