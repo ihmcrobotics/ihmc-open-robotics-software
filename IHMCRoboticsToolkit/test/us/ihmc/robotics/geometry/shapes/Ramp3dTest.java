@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -295,13 +294,12 @@ public class Ramp3dTest
 	  double width = 2.1722197228830327;
 	  double length = 6.070053014293947;
 	  double height = 0.6127921569306827;
-	         
-      Matrix4d matrix = new Matrix4d(0.999,  -0.026,   0.022, -0.260, 
+
+	  RigidBodyTransform transform = new RigidBodyTransform(new double[]{
+            0.999,  -0.026,   0.022, -0.260, 
             0.029,   0.990,  -0.137,  0.083, 
             -0.018,   0.138,   0.990, -0.029, 
-            0,       0,       0,      1);
-
-      RigidBodyTransform transform = new RigidBodyTransform(matrix);
+            0,       0,       0,      1});
       
       Ramp3d ramp = new Ramp3d(transform, width, length, height);
 
@@ -384,7 +382,6 @@ public class Ramp3dTest
 
       Random random = new Random(897932L);
       Point3d pointToPack = new Point3d();
-      double rampLength;
       Vector3d normalToPack = new Vector3d();
 
       // points that can be projected directly (ie just set z=0 in angled frame) give surface normal
