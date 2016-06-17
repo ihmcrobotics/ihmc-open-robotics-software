@@ -1,8 +1,11 @@
 package us.ihmc.robotics.screwTheory;
 
+import javax.vecmath.Vector2d;
+
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorWithDerivatives;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FourBarKinematicLoopTools
@@ -69,5 +72,33 @@ public class FourBarKinematicLoopTools
       {
          return passiveJointB;
       }     
+   }
+   
+   public static boolean isFourBarClockwise(FrameVector2d frameVectorDA, FrameVector2d frameVectorAB)
+   {
+      Vector2d vectorDA = new Vector2d();
+      Vector2d vectorAB = new Vector2d();
+      frameVectorDA.get(vectorDA);
+      frameVectorAB.get(vectorAB);
+
+      if (AngleTools.angleMinusPiToPi(vectorAB, vectorDA) > 0.0)
+      {
+         return true;
+      }
+      else
+      {
+         return false;
+      }      
+   }
+   
+   public static void checkFourBarConvexity(FrameVector2d vectorABProjected, FrameVector2d vectorBCProjected, FrameVector2d vectorCDProjected)
+   {
+      boolean ccwConvex = vectorABProjected.cross(vectorBCProjected) > 0.0 && vectorBCProjected.cross(vectorCDProjected) > 0.0;
+      boolean cwConvex = vectorABProjected.cross(vectorBCProjected) < 0.0 && vectorBCProjected.cross(vectorCDProjected) < 0.0;
+
+      if (!ccwConvex && !cwConvex)
+      {
+         throw new RuntimeException("At q = 0 the fourBar must be convex");
+      }  
    }
 }
