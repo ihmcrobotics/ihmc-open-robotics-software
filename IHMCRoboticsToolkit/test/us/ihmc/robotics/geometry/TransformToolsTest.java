@@ -29,7 +29,7 @@ public class TransformToolsTest
 
       RigidBodyTransform transform2 = new RigidBodyTransform();
 
-      transform2.rotX(Math.PI / 4);
+      transform2.setRotationRollAndZeroTranslation(Math.PI / 4);
 
       RigidBodyTransformTest.assertTransformEquals(transform, transform2, 1e-7);
 
@@ -39,7 +39,7 @@ public class TransformToolsTest
 
       transform2 = new RigidBodyTransform();
 
-      transform2.rotY(3 * Math.PI / 4);
+      transform2.setRotationPitchAndZeroTranslation(3 * Math.PI / 4);
 
       RigidBodyTransformTest.assertTransformEquals(transform, transform2, 1e-7);
 
@@ -49,7 +49,7 @@ public class TransformToolsTest
 
       transform2 = new RigidBodyTransform();
 
-      transform2.rotZ(-Math.PI / 2);
+      transform2.setRotationYawAndZeroTranslation(-Math.PI / 2);
 
       RigidBodyTransformTest.assertTransformEquals(transform, transform2, 1e-7);
    }

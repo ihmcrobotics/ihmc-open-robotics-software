@@ -330,7 +330,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.transformToRoot = new RigidBodyTransform();
       this.inverseTransformToRoot = new RigidBodyTransform();
 
-      transformToParent.normalize();
+      transformToParent.normalizeRotationPart();
       this.transformToParent = transformToParent;
 
       this.isBodyCenteredFrame = isBodyCenteredFrame;
@@ -586,7 +586,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
                   referenceFrame.transformToRoot.multiply(referenceFrame.postCorruptionTransform);
                }
                
-               referenceFrame.transformToRoot.normalize();
+               referenceFrame.transformToRoot.normalizeRotationPart();
                referenceFrame.inverseTransformToRoot.invert(referenceFrame.transformToRoot);
 
                referenceFrame.transformToRootID = nextTransformToRootID;

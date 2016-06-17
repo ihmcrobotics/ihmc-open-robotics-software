@@ -47,7 +47,7 @@ public class RigidBodyInertiaTest
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            transformToParent.setEuler(1.0, 2.0, 3.0);
+            transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
             RigidBodyTransform translation = new RigidBodyTransform();
             translation.setTranslation(new Vector3d(3.0, 4.0, 5.0));
             transformToParent.multiply(translation);
@@ -61,7 +61,7 @@ public class RigidBodyInertiaTest
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            transformToParent.setEuler(1.0, 2.0, 3.0);
+            transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
             RigidBodyTransform translation = new RigidBodyTransform();
             translation.setTranslation(new Vector3d(3.0, 4.0, 5.0));
             transformToParent.multiply(translation);
@@ -75,7 +75,7 @@ public class RigidBodyInertiaTest
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            transformToParent.setEuler(1.0, 2.0, 3.0);
+            transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
          }
       };
 

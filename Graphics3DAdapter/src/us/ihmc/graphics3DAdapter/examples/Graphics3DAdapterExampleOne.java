@@ -249,7 +249,7 @@ public class Graphics3DAdapterExampleOne
          }
          
          Transform3d transform = new Transform3d();
-         transform.setEuler(Math.PI/2.0, 0.0, rotation);
+         transform.setRotationEulerAndZeroTranslation(Math.PI/2.0, 0.0, rotation);
          transform.setTranslation(new Vector3d(translation, 0.0, 0.0));
          transform.setScale(scale);
          node.setTransform(transform);

@@ -52,7 +52,7 @@ public class Ramp3dTest
    public void testExampleUsage()
    {
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotZ(Math.PI / 2.0);
+      transform.setRotationYawAndZeroTranslation(Math.PI / 2.0);
       transform.setTranslation(new Vector3d(2.0, 0.0, 3.0));
 
       // example use
@@ -103,7 +103,7 @@ public class Ramp3dTest
       assertEquals(pointToProject.z, 0.5, 1e-14);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotZ(0.5 * Math.PI);
+      transform.setRotationYawAndZeroTranslation(0.5 * Math.PI);
       ramp3d.applyTransform(transform);
       pointToProject.set(0.0, 0.0, 1.0);
       ramp3d.orthogonalProjection(pointToProject);
@@ -129,7 +129,7 @@ public class Ramp3dTest
 
       // can apply transform and test a point that switches sides of the ramp
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotZ(Math.PI / 2.0);
+      transform.setRotationYawAndZeroTranslation(Math.PI / 2.0);
 
       Point3d p1 = new Point3d(new double[] {0.4, 0.2, 0.0});
       Point3d p2 = new Point3d(new double[] {0.4, -0.2, 0.0});
@@ -160,7 +160,7 @@ public class Ramp3dTest
 
       // With default epsilon and translation
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotZ(0.75 * Math.PI);
+      transform.setRotationYawAndZeroTranslation(0.75 * Math.PI);
       transform.setTranslation(new Vector3d(1.0, -1.0, 2.0));
    }
 
@@ -440,19 +440,19 @@ public class Ramp3dTest
    public void testIndependenceOfCopiedTransforms()
    {
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotX(Math.PI / 6);
+      transform.setRotationRollAndZeroTranslation(Math.PI / 6);
       Ramp3d ramp = new Ramp3d(transform, 1.0, 1.0, 1.0);
 
       Ramp3d rampCopy = new Ramp3d(ramp);
       RigidBodyTransform transformAppliedOnlyToCopy = new RigidBodyTransform();
-      transformAppliedOnlyToCopy.rotY(Math.PI / 4);
+      transformAppliedOnlyToCopy.setRotationPitchAndZeroTranslation(Math.PI / 4);
       rampCopy.applyTransform(transformAppliedOnlyToCopy);
       assertFalse(rampCopy.getTransform().equals(ramp.getTransform()));
 
       Ramp3d rampCopyBySet = new Ramp3d(5.0, 6.0, 7.0);
       rampCopyBySet.set(ramp);
       RigidBodyTransform transformAppliedOnlyToCopyBySet = new RigidBodyTransform();
-      transformAppliedOnlyToCopyBySet.rotZ(Math.PI / 5);
+      transformAppliedOnlyToCopyBySet.setRotationYawAndZeroTranslation(Math.PI / 5);
       rampCopyBySet.applyTransform(transformAppliedOnlyToCopyBySet);
       assertFalse(rampCopyBySet.getTransform().equals(ramp.getTransform()));
    }
@@ -462,7 +462,7 @@ public class Ramp3dTest
    public void testSetMethodSetsUpAllFieldsOfNewRampAccurately()
    {
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotX(Math.PI / 6);
+      transform.setRotationRollAndZeroTranslation(Math.PI / 6);
       Ramp3d ramp = new Ramp3d(transform, 2.0, 3.0, 4.0);
       Ramp3d rampCopyBySet = new Ramp3d(5.0, 6.0, 7.0);
       rampCopyBySet.set(ramp);
@@ -489,10 +489,10 @@ public class Ramp3dTest
       RigidBodyTransform transformReturn = new RigidBodyTransform();
       RigidBodyTransform transformTemp = new RigidBodyTransform();
 
-      transformReturn.rotX(random.nextDouble());
-      transformTemp.rotY(random.nextDouble());
+      transformReturn.setRotationRollAndZeroTranslation(random.nextDouble());
+      transformTemp.setRotationPitchAndZeroTranslation(random.nextDouble());
       transformReturn.multiply(transformTemp);
-      transformTemp.rotZ(random.nextDouble());
+      transformTemp.setRotationYawAndZeroTranslation(random.nextDouble());
       transformReturn.multiply(transformTemp);
       transformReturn.setTranslation(new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble()));
 

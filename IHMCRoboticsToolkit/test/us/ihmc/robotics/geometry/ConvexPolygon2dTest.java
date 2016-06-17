@@ -1748,7 +1748,7 @@ public class ConvexPolygon2dTest
       // pure translation:
       double yaw = 0.4;
       Vector3d eulerAngles = new Vector3d(0.0, 0.0, yaw);
-      transform.setEuler(eulerAngles);
+      transform.setRotationEulerAndZeroTranslation(eulerAngles);
 
       final int listSize = 8;
 

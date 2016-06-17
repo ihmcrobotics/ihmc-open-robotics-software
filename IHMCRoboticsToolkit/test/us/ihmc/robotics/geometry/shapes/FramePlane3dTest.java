@@ -78,7 +78,7 @@ public class FramePlane3dTest
    public void testApplyTransform()
    {
       RigidBodyTransform transformation = new RigidBodyTransform();
-      transformation.rotZ(2.3);
+      transformation.setRotationYawAndZeroTranslation(2.3);
       FramePlane3d plane = new FramePlane3d(worldFrame);
       plane.applyTransform(transformation);
       FrameVector expectedNormal = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
@@ -94,7 +94,7 @@ public class FramePlane3dTest
       assertTrue(plane2.epsilonEquals(new FramePlane3d(expectedNormal, expectedPoint), epsilon));
 
       RigidBodyTransform transformation3 = new RigidBodyTransform();
-      transformation3.rotY(Math.PI / 2);
+      transformation3.setRotationPitchAndZeroTranslation(Math.PI / 2);
       transformation3.setTranslation(new Vector3d(1.0, 2.0, 3.0));
       FramePlane3d plane3 = new FramePlane3d(worldFrame);
       plane3.applyTransform(transformation3);
@@ -103,7 +103,7 @@ public class FramePlane3dTest
       assertTrue(plane3.epsilonEquals(new FramePlane3d(expectedNormal, expectedPoint), epsilon));
 
       RigidBodyTransform transformation4 = new RigidBodyTransform();
-      transformation4.rotY(Math.PI / 2);
+      transformation4.setRotationPitchAndZeroTranslation(Math.PI / 2);
       transformation4.setTranslation(new Vector3d(1.0, 2.0, 3.0));
       FramePlane3d plane4 = new FramePlane3d(worldFrame);
       FramePlane3d plane5 = plane4.applyTransformCopy(transformation4);

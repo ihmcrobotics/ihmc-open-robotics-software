@@ -413,7 +413,7 @@ public class RigidBodyTransform implements Serializable
    public final void applyRotationX(double angle)
    {
       RigidBodyTransform temp = new RigidBodyTransform();
-      temp.rotX(angle);    
+      temp.setRotationRollAndZeroTranslation(angle);    
       multiply(temp);
    }
    
@@ -423,7 +423,7 @@ public class RigidBodyTransform implements Serializable
    public final void applyRotationY(double angle)
    {
       RigidBodyTransform temp = new RigidBodyTransform();
-      temp.rotY(angle);   
+      temp.setRotationPitchAndZeroTranslation(angle);   
       multiply(temp);
    }
    
@@ -433,7 +433,7 @@ public class RigidBodyTransform implements Serializable
    public final void applyRotationZ(double angle)
    {
       RigidBodyTransform temp = new RigidBodyTransform();
-      temp.rotZ(angle);    
+      temp.setRotationYawAndZeroTranslation(angle);    
       multiply(temp);
    }
    
@@ -936,7 +936,7 @@ public class RigidBodyTransform implements Serializable
     */
    public final void setRotationEulerAndZeroTranslation(Vector3d vector)
    {
-      setEuler(vector.x, vector.y, vector.z);
+      setRotationEulerAndZeroTranslation(vector.x, vector.y, vector.z);
    }
 
    /**

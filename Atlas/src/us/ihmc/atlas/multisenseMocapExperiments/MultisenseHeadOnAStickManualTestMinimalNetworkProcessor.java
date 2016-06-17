@@ -74,9 +74,9 @@ public class MultisenseHeadOnAStickManualTestMinimalNetworkProcessor  extends Ro
    {
       UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
       Point3d[] points = pointCloudData.getPoints();
-      orientationTransformFromLeftOpticalFrameToZUp.setEuler(-Math.PI/2, 0.0, -Math.PI/2);
+      orientationTransformFromLeftOpticalFrameToZUp.setRotationEulerAndZeroTranslation(-Math.PI/2, 0.0, -Math.PI/2);
       
-      rpyCalibrationOffset.setEuler(Math.toRadians(-1.4), Math.toRadians(0.5), Math.toRadians(2.0));
+      rpyCalibrationOffset.setRotationEulerAndZeroTranslation(Math.toRadians(-1.4), Math.toRadians(0.5), Math.toRadians(2.0));
       rpyCalibrationOffset.setTranslation(-0.005,-0.003,-0.003);
       
       for(int i = 0; i < points.length; i++)
