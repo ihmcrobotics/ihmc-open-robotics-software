@@ -52,8 +52,6 @@ public class QuadrupedTestTeleopMode implements QuadrupedTeleopMode
    @Override
    public void onEntry()
    {
-      QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
-      packetCommunicator.send(eventPacket);
    }
 
    @Override
