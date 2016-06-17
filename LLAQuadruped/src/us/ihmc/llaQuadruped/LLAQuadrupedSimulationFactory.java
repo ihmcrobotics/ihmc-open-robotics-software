@@ -6,6 +6,7 @@ import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
@@ -22,7 +23,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinema
 
 public class LLAQuadrupedSimulationFactory
 {
-   private static final boolean USE_FORCE_DEVELOPMENT = false;
+   private static final QuadrupedControlMode CONTROL_MODE = QuadrupedControlMode.FORCE;
    
    private static final double SIMULATION_DT = 0.00006;
    private static final double SIMULATION_GRAVITY = -9.81;
@@ -100,14 +101,7 @@ public class LLAQuadrupedSimulationFactory
       controllerManagerFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
       controllerManagerFactory.setYoGraphicsListRegistryForDetachedOverhead(yoGraphicsListRegistryForDetachedOverhead);
 
-      if (USE_FORCE_DEVELOPMENT)
-      {
-         controllerManager = controllerManagerFactory.createForceDevelopmentControllerManager();
-      }
-      else
-      {
-         controllerManager = controllerManagerFactory.createForceControllerManager();
-      }
+      controllerManager = controllerManagerFactory.createControllerManager(CONTROL_MODE);
    }
    
    private void createSCS()
@@ -134,17 +128,13 @@ public class LLAQuadrupedSimulationFactory
       scs = simulationFactory.createSimulation();
    }
    
-   public void createSimulation() throws IOException
+   public SimulationConstructionSet createSimulation() throws IOException
    {
       createSimulationParameters();
       createControllerManager();
       createSCS();
-   }
-   
-   public void start()
-   {
-      scs.startOnAThread();
-      scs.simulate();
+      
+      return scs;
    }
 
    public static void main(String[] commandLineArguments)
@@ -152,8 +142,9 @@ public class LLAQuadrupedSimulationFactory
       try
       {
          LLAQuadrupedSimulationFactory simulationFactory = new LLAQuadrupedSimulationFactory();
-         simulationFactory.createSimulation();
-         simulationFactory.start();
+         SimulationConstructionSet scs = simulationFactory.createSimulation();
+         scs.startOnAThread();
+         scs.simulate();
       }
       catch (IOException ioException)
       {
