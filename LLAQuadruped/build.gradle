@@ -44,6 +44,7 @@ dependencies {
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 
    compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
+   compile ihmc.getProjectDependency(":IHMCUnitTesting")
    compile ihmc.getProjectDependency(":SimulationConstructionSet")
    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
@@ -51,6 +52,7 @@ dependencies {
    compile ihmc.getProjectDependency(":SDFLoader")
    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
    compile ihmc.getProjectDependency(":IHMCStateEstimation")
+   testCompile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
 }
 
 jar {
