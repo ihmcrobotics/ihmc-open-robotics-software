@@ -46,6 +46,15 @@ public class PreallocatedQueue<T>
       return capacity;
    }
 
+   public void resize(int size)
+   {
+      if (size > capacity)
+      {
+         throw new RuntimeException("Size must not exceed capacity");
+      }
+      this.size = size;
+   }
+
    public boolean enqueue()
    {
       if (size < elements.size())
@@ -67,14 +76,14 @@ public class PreallocatedQueue<T>
       return false;
    }
 
-   public T get(int queueIndex)
+   public T get(int index)
    {
-      if (queueIndex >= size)
+      if (index >= size)
       {
          throw new IndexOutOfBoundsException();
       }
 
-      return elements.get((position + queueIndex) % elements.size());
+      return elements.get((position + index) % elements.size());
    }
 
    public T getTail()
@@ -90,5 +99,23 @@ public class PreallocatedQueue<T>
    public T getHead()
    {
       return get(0);
+   }
+
+   public void swap(int indexA, int indexB)
+   {
+      if (indexA >= size)
+      {
+         throw new IndexOutOfBoundsException();
+      }
+      if (indexB >= size)
+      {
+         throw new IndexOutOfBoundsException();
+      }
+
+      int a = (position + indexA) % elements.size();
+      int b = (position + indexB) % elements.size();
+      T tmp = elements.get(a);
+      elements.set(a, elements.get(b));
+      elements.set(b, tmp);
    }
 }

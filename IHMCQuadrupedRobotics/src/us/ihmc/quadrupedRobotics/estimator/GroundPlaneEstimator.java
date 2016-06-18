@@ -26,7 +26,8 @@ public class GroundPlaneEstimator
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoFrameVector yoGroundPlaneNormal = new YoFrameVector("groundPlaneNormal", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint yoGroundPlanePoint = new YoFramePoint("groundPlanePoint", ReferenceFrame.getWorldFrame(), registry);;
+   private final YoFramePoint yoGroundPlanePoint = new YoFramePoint("groundPlanePoint", ReferenceFrame.getWorldFrame(), registry);
+   ;
 
    public GroundPlaneEstimator()
    {

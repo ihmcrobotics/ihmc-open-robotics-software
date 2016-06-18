@@ -73,13 +73,24 @@ public class QuadrupedSolePositionController
       this.yoSoleForceFeedforwardSetpoint = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
+         String prefix = robotQuadrant.getPascalCaseName();
+         ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
          solePositionController.set(robotQuadrant, new EuclideanPositionController(prefix + "SolePosition", soleFrame.get(robotQuadrant), controlDT, registry));
          solePositionControllerGains.set(robotQuadrant, new YoEuclideanPositionGains(prefix + "SolePosition", registry));
-         yoSolePositionSetpoint.set(robotQuadrant, new YoFramePoint(prefix + "SolePositionSetpoint", ReferenceFrame.getWorldFrame(), registry));
-         yoSoleLinearVelocitySetpoint.set(robotQuadrant, new YoFrameVector(prefix + "SoleLinearVelocitySetpoint", ReferenceFrame.getWorldFrame(), registry));
-         yoSoleForceFeedforwardSetpoint.set(robotQuadrant, new YoFrameVector(prefix + "SoleForceFeedforwardSetpoint", ReferenceFrame.getWorldFrame(), registry));
+         yoSolePositionSetpoint.set(robotQuadrant, new YoFramePoint(prefix + "SolePositionSetpoint", worldFrame, registry));
+         yoSoleLinearVelocitySetpoint.set(robotQuadrant, new YoFrameVector(prefix + "SoleLinearVelocitySetpoint", worldFrame, registry));
+         yoSoleForceFeedforwardSetpoint.set(robotQuadrant, new YoFrameVector(prefix + "SoleForceFeedforwardSetpoint", worldFrame, registry));
       }
+   }
+
+   public QuadrantDependentList<ReferenceFrame> getReferenceFrame()
+   {
+      return soleFrame;
+   }
+
+   public ReferenceFrame getReferenceFrame(RobotQuadrant robotQuadrant)
+   {
+      return soleFrame.get(robotQuadrant);
    }
 
    public QuadrantDependentList<YoEuclideanPositionGains> getGains()
@@ -121,7 +132,9 @@ public class QuadrupedSolePositionController
          soleLinearVelocityEstimate.changeFrame(soleFrame.get(robotQuadrant));
          soleForceFeedforwardSetpoint.changeFrame(soleFrame.get(robotQuadrant));
          solePositionController.get(robotQuadrant).setGains(solePositionControllerGains.get(robotQuadrant));
-         solePositionController.get(robotQuadrant).compute(soleForceCommand.get(robotQuadrant), solePositionSetpoint, soleLinearVelocitySetpoint, soleLinearVelocityEstimate, soleForceFeedforwardSetpoint);
+         solePositionController.get(robotQuadrant)
+               .compute(soleForceCommand.get(robotQuadrant), solePositionSetpoint, soleLinearVelocitySetpoint, soleLinearVelocityEstimate,
+                     soleForceFeedforwardSetpoint);
 
          // update log variables
          yoSolePositionSetpoint.get(robotQuadrant).setAndMatchFrame(solePositionSetpoint);

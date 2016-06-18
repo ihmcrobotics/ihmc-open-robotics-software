@@ -6,25 +6,20 @@ import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
+import us.ihmc.quadrupedRobotics.QuadrupedTestAdministratorFactory;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.factories.QuadrupedControllerManagerFactory;
 import us.ihmc.quadrupedRobotics.factories.QuadrupedSimulationFactory;
 import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
-import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 
-public class LLAQuadrupedSimulationFactory
+public class LLAQuadrupedTestFactory
 {
-   private static final QuadrupedControlMode CONTROL_MODE = QuadrupedControlMode.FORCE;
-   private final QuadrupedGroundContactModelType groundContactModelType = QuadrupedGroundContactModelType.FLAT;
    private static final double SIMULATION_DT = 0.00006;
    private static final double SIMULATION_GRAVITY = -9.81;
    private static final int RECORD_FREQUENCY = (int) (0.01 / SIMULATION_DT);
@@ -35,6 +30,8 @@ public class LLAQuadrupedSimulationFactory
    private LLAQuadrupedStandPrepParameters standPrepParameters;
    private LLAQuadrupedGroundContactParameters groundContactParameters;
    private LLAQuadrupedNetClassList netClassList;
+   
+   // Parameters getting moved soon
    private RobotController headController;
    private SimulationConstructionSetParameters scsParameters;
    private SDFRobot sdfRobot;
@@ -47,14 +44,6 @@ public class LLAQuadrupedSimulationFactory
    private SDFPerfectSimulatedOutputWriter sdfPerfectSimulatedOutputWriter;
    private SDFQuadrupedPerfectSimulatedSensor sdfQuadrupedPerfectSimulatedSensor;
    
-   // Factories
-   QuadrupedControllerManagerFactory controllerManagerFactory = new QuadrupedControllerManagerFactory();
-   QuadrupedSimulationFactory simulationFactory = new QuadrupedSimulationFactory();
-   
-   // Products
-   private QuadrupedControllerManager controllerManager;
-   private SimulationConstructionSet scs;
-
    private void createSimulationParameters() throws IOException
    {
       modelFactory = new LLAQuadrupedModelFactory();
@@ -72,15 +61,16 @@ public class LLAQuadrupedSimulationFactory
       groundContactParameters = new LLAQuadrupedGroundContactParameters();
       scsParameters = new SimulationConstructionSetParameters();
       ParameterRegistry.getInstance().loadFromResources("parameters/simulation.param");
-      
+
       referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       sdfPerfectSimulatedOutputWriter = new SDFPerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
-      
+
       sdfQuadrupedPerfectSimulatedSensor = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot, fullRobotModel, referenceFrames);
    }
-   
-   private void createControllerManager() throws IOException
+
+   private QuadrupedControllerManagerFactory createControllerManagerFactory() throws IOException
    {
+      QuadrupedControllerManagerFactory controllerManagerFactory = new QuadrupedControllerManagerFactory();
       controllerManagerFactory.setControlDT(SIMULATION_DT);
       controllerManagerFactory.setGravity(SIMULATION_GRAVITY);
       controllerManagerFactory.setFullRobotModel(fullRobotModel);
@@ -91,18 +81,15 @@ public class LLAQuadrupedSimulationFactory
       controllerManagerFactory.setTimestampYoVariable(sdfRobot.getYoTime());
       controllerManagerFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
       controllerManagerFactory.setYoGraphicsListRegistryForDetachedOverhead(yoGraphicsListRegistryForDetachedOverhead);
-      controllerManagerFactory.setControlMode(CONTROL_MODE);
-
-      controllerManager = controllerManagerFactory.createControllerManager();
+      return controllerManagerFactory;
    }
-   
-   private void createSCS()
+
+   private QuadrupedSimulationFactory createSimulationFactory()
    {
+      QuadrupedSimulationFactory simulationFactory = new QuadrupedSimulationFactory();
       simulationFactory.setControlDT(SIMULATION_DT);
       simulationFactory.setGravity(SIMULATION_GRAVITY);
       simulationFactory.setRecordFrequency(RECORD_FREQUENCY);
-      simulationFactory.setControllerManager(controllerManager);
-      simulationFactory.setGroundContactModelType(groundContactModelType);
       simulationFactory.setGroundContactParameters(groundContactParameters);
       simulationFactory.setHeadController(headController);
       simulationFactory.setModelFactory(modelFactory);
@@ -116,31 +103,15 @@ public class LLAQuadrupedSimulationFactory
       simulationFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
       simulationFactory.setYoGraphicsListRegistryForDetachedOverhead(yoGraphicsListRegistryForDetachedOverhead);
       simulationFactory.setStandPrepParameters(standPrepParameters);
-      
-      scs = simulationFactory.createSimulation();
+      return simulationFactory;
    }
    
-   public SimulationConstructionSet createSimulation() throws IOException
+   public QuadrupedTestAdministratorFactory createTestAdministratorFactory() throws IOException
    {
       createSimulationParameters();
-      createControllerManager();
-      createSCS();
-      
-      return scs;
-   }
-
-   public static void main(String[] commandLineArguments)
-   {
-      try
-      {
-         LLAQuadrupedSimulationFactory simulationFactory = new LLAQuadrupedSimulationFactory();
-         SimulationConstructionSet scs = simulationFactory.createSimulation();
-         scs.startOnAThread();
-         scs.simulate();
-      }
-      catch (IOException ioException)
-      {
-         ioException.printStackTrace();
-      }
+      QuadrupedTestAdministratorFactory testAdministratorFactory = new QuadrupedTestAdministratorFactory();
+      testAdministratorFactory.setConrollerManagerFactory(createControllerManagerFactory());
+      testAdministratorFactory.setSimulationFactory(createSimulationFactory());
+      return testAdministratorFactory;
    }
 }
