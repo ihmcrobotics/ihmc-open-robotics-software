@@ -13,12 +13,6 @@ import java.util.concurrent.Executors;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 
-import bubo.clouds.FactoryPointCloudShape;
-import bubo.clouds.detect.CloudShapeTypes;
-import bubo.clouds.detect.PointCloudShapeFinder;
-import bubo.clouds.detect.PointCloudShapeFinder.Shape;
-import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
-import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.communication.packets.PacketDestination;
@@ -30,6 +24,12 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder.Shape;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class SphereDetectionBehavior extends BehaviorInterface

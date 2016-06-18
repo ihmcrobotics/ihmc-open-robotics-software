@@ -8,11 +8,6 @@ import java.util.List;
 
 import javax.vecmath.Point3f;
 
-import bubo.clouds.FactoryPointCloudShape;
-import bubo.clouds.detect.CloudShapeTypes;
-import bubo.clouds.detect.PointCloudShapeFinder;
-import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
-import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
@@ -29,6 +24,11 @@ import us.ihmc.ihmcPerception.vision.HSVValue;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 
 public class FollowBallBehavior extends BehaviorInterface
 {
