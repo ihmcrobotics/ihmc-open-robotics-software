@@ -18,6 +18,7 @@ public class JMEModifierKey
       case CTRL: return KeyInput.KEY_LCONTROL;
       case META: return KeyInput.KEY_LMETA;
       case ALT: return KeyInput.KEY_LMENU;
+      case SPACE: return KeyInput.KEY_SPACE;
       case A: return KeyInput.KEY_A;
       case B: return KeyInput.KEY_B;
       case C: return KeyInput.KEY_C;
