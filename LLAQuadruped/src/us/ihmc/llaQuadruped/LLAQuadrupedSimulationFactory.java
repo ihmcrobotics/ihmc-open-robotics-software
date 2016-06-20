@@ -14,7 +14,6 @@ import us.ihmc.quadrupedRobotics.factories.QuadrupedControllerManagerFactory;
 import us.ihmc.quadrupedRobotics.factories.QuadrupedSimulationFactory;
 import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -39,7 +38,6 @@ public class LLAQuadrupedSimulationFactory
    private SimulationConstructionSetParameters scsParameters;
    private SDFRobot sdfRobot;
    private SDFFullQuadrupedRobotModel fullRobotModel;
-   private YoVariableRegistry robotYoVariableRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
    private QuadrupedReferenceFrames referenceFrames;
@@ -60,7 +58,6 @@ public class LLAQuadrupedSimulationFactory
       modelFactory = new LLAQuadrupedModelFactory();
       sdfRobot = modelFactory.createSdfRobot();
       fullRobotModel = modelFactory.createFullRobotModel();
-      robotYoVariableRegistry = sdfRobot.getRobotsYoVariableRegistry();
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
       yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
@@ -79,24 +76,7 @@ public class LLAQuadrupedSimulationFactory
       sdfQuadrupedPerfectSimulatedSensor = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot, fullRobotModel, referenceFrames);
    }
    
-   private void createControllerManager() throws IOException
-   {
-      controllerManagerFactory.setControlDT(SIMULATION_DT);
-      controllerManagerFactory.setGravity(SIMULATION_GRAVITY);
-      controllerManagerFactory.setFullRobotModel(fullRobotModel);
-      controllerManagerFactory.setKryoNetClassList(netClassList);
-      controllerManagerFactory.setPhysicalProperties(physicalProperties);
-      controllerManagerFactory.setReferenceFrames(referenceFrames);
-      controllerManagerFactory.setRobotYoVariableRegistry(robotYoVariableRegistry);
-      controllerManagerFactory.setTimestampYoVariable(sdfRobot.getYoTime());
-      controllerManagerFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
-      controllerManagerFactory.setYoGraphicsListRegistryForDetachedOverhead(yoGraphicsListRegistryForDetachedOverhead);
-      controllerManagerFactory.setControlMode(CONTROL_MODE);
-
-      controllerManager = controllerManagerFactory.createControllerManager();
-   }
-   
-   private void createSCS()
+   private void createSCS() throws IOException
    {
       simulationFactory.setControlDT(SIMULATION_DT);
       simulationFactory.setGravity(SIMULATION_GRAVITY);
@@ -116,6 +96,11 @@ public class LLAQuadrupedSimulationFactory
       simulationFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
       simulationFactory.setYoGraphicsListRegistryForDetachedOverhead(yoGraphicsListRegistryForDetachedOverhead);
       simulationFactory.setStandPrepParameters(standPrepParameters);
+      simulationFactory.setFullRobotModel(fullRobotModel);
+      simulationFactory.setKryoNetClassList(netClassList);
+      simulationFactory.setPhysicalProperties(physicalProperties);
+      simulationFactory.setReferenceFrames(referenceFrames);
+      simulationFactory.setControlMode(CONTROL_MODE);
       
       scs = simulationFactory.createSimulation();
    }
@@ -123,7 +108,6 @@ public class LLAQuadrupedSimulationFactory
    public SimulationConstructionSet createSimulation() throws IOException
    {
       createSimulationParameters();
-      createControllerManager();
       createSCS();
       
       return scs;
