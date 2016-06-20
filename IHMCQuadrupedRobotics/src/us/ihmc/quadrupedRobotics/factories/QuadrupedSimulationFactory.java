@@ -1,14 +1,21 @@
 package us.ihmc.quadrupedRobotics.factories;
 
+import java.io.IOException;
+
 import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.OutputWriter;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
+import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedStandPrepParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
@@ -30,7 +37,14 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinema
 
 public class QuadrupedSimulationFactory
 {
-   // PROVIDED
+   // Controller
+   private SDFFullQuadrupedRobotModel fullRobotModel;
+   private IHMCCommunicationKryoNetClassList netClassList;
+   private QuadrupedPhysicalProperties physicalProperties;
+   private QuadrupedReferenceFrames referenceFrames;
+   private QuadrupedControlMode controlMode;
+   
+   // Simulation
    private double controlDT;
    private double gravity;
    private int recordFrequency;
@@ -57,6 +71,24 @@ public class QuadrupedSimulationFactory
    private QuadrupedSimulationController simulationController;
    
    // CREATION
+   
+   private void createControllerManager() throws IOException
+   {
+      QuadrupedControllerManagerFactory controllerManagerFactory = new QuadrupedControllerManagerFactory();
+      controllerManagerFactory.setControlDT(controlDT);
+      controllerManagerFactory.setGravity(gravity);
+      controllerManagerFactory.setFullRobotModel(fullRobotModel);
+      controllerManagerFactory.setKryoNetClassList(netClassList);
+      controllerManagerFactory.setPhysicalProperties(physicalProperties);
+      controllerManagerFactory.setReferenceFrames(referenceFrames);
+      controllerManagerFactory.setRobotYoVariableRegistry(sdfRobot.getRobotsYoVariableRegistry());
+      controllerManagerFactory.setTimestampYoVariable(sdfRobot.getYoTime());
+      controllerManagerFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
+      controllerManagerFactory.setYoGraphicsListRegistryForDetachedOverhead(yoGraphicsListRegistryForDetachedOverhead);
+      controllerManagerFactory.setControlMode(controlMode);
+
+      controllerManager = controllerManagerFactory.createControllerManager();
+   }
    
    private void createGroundContactModel()
    {
@@ -124,8 +156,9 @@ public class QuadrupedSimulationFactory
       System.out.println("Total mass: " + totalMass);
    }
    
-   public SimulationConstructionSet createSimulation()
+   public SimulationConstructionSet createSimulation() throws IOException
    {
+      createControllerManager();
       createGroundContactModel();
       createSimulationController();
       setupSDFRobot();
@@ -244,5 +277,30 @@ public class QuadrupedSimulationFactory
    public void setStandPrepParameters(QuadrupedStandPrepParameters standPrepParameters)
    {
       this.standPrepParameters = standPrepParameters;
+   }
+   
+   public void setKryoNetClassList(IHMCCommunicationKryoNetClassList netClassList)
+   {
+      this.netClassList = netClassList;
+   }
+   
+   public void setPhysicalProperties(QuadrupedPhysicalProperties physicalProperties)
+   {
+      this.physicalProperties = physicalProperties;
+   }
+   
+   public void setReferenceFrames(QuadrupedReferenceFrames referenceFrames)
+   {
+      this.referenceFrames = referenceFrames;
+   }
+   
+   public void setControlMode(QuadrupedControlMode controlMode)
+   {
+      this.controlMode = controlMode;
+   }
+   
+   public void setFullRobotModel(SDFFullQuadrupedRobotModel fullRobotModel)
+   {
+      this.fullRobotModel = fullRobotModel;
    }
 }
