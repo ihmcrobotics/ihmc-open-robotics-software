@@ -59,16 +59,21 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       xGaitSettingsProvider = new QuadrupedXGaitSettingsProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
 
       GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
-      globalDataProducer.attachListener(QuadrupedForceControllerEventPacket.class, new PacketConsumer<QuadrupedForceControllerEventPacket>()
+      
+      if (globalDataProducer != null)
       {
-         @Override
-         public void receivedPacket(QuadrupedForceControllerEventPacket packet)
+         globalDataProducer.attachListener(QuadrupedForceControllerEventPacket.class, new PacketConsumer<QuadrupedForceControllerEventPacket>()
          {
-            requestedEvent.set(packet.get());
-         }
-      });
+            @Override
+            public void receivedPacket(QuadrupedForceControllerEventPacket packet)
+            {
+               requestedEvent.set(packet.get());
+            }
+         });
 
-      ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
+         ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
+      }
+
 
       this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry);
       this.stateMachine = buildStateMachine(runtimeEnvironment, inputProvider);
