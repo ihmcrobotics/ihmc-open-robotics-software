@@ -72,6 +72,13 @@ public class QuadrupedSimulationFactory
    
    // CREATION
    
+   private void setupYoRegistries()
+   {
+      yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
+      yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
+   }
+
    private void createControllerManager() throws IOException
    {
       QuadrupedControllerManagerFactory controllerManagerFactory = new QuadrupedControllerManagerFactory();
@@ -89,7 +96,7 @@ public class QuadrupedSimulationFactory
 
       controllerManager = controllerManagerFactory.createControllerManager();
    }
-   
+
    private void createGroundContactModel()
    {
       switch (groundContactModelType)
@@ -158,6 +165,7 @@ public class QuadrupedSimulationFactory
    
    public SimulationConstructionSet createSimulation() throws IOException
    {
+      setupYoRegistries();
       createControllerManager();
       createGroundContactModel();
       createSimulationController();
@@ -214,16 +222,6 @@ public class QuadrupedSimulationFactory
       this.showPlotter = showPlotter;
    }
    
-   public void setYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-   }
-   
-   public void setYoGraphicsListRegistryForDetachedOverhead(YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
-   {
-      this.yoGraphicsListRegistryForDetachedOverhead = yoGraphicsListRegistryForDetachedOverhead;
-   }
-   
    public void setSDFRobot(SDFRobot sdfRobot)
    {
       this.sdfRobot = sdfRobot;
@@ -257,11 +255,6 @@ public class QuadrupedSimulationFactory
    public void setStateEstimator(DRCKinematicsBasedStateEstimator stateEstimator)
    {
       this.stateEstimator = stateEstimator;
-   }
-   
-   public void setControllerManager(QuadrupedControllerManager controllerManager)
-   {
-      this.controllerManager = controllerManager;
    }
    
    public void setSensorReader(SensorReader sensorReader)
