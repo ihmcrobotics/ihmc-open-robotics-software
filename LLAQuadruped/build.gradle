@@ -13,6 +13,7 @@ apply plugin: "us.ihmc.gradle.ihmc-build"
 
 if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
     evaluationDependsOn(':IHMCOpenRoboticsSoftware')
+    evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCQuadrupedRobotics"))
 }
 
 sourceCompatibility = 1.7
