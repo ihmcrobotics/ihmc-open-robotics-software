@@ -39,7 +39,7 @@ public class FourBarKinematicLoop
     */
    
    private static final boolean DEBUG = false;
-   private static final boolean DEFAULT_OUTPUT_jOINT = true; //temporary variable to test loop while it's not part of a larger kinematic chain
+   private static final boolean DEFAULT_OUTPUT_JOINT = true; //temporary variable to test loop while it's not part of a larger kinematic chain
    private static final double eps = 1e-7;
 
    private final String name;
@@ -123,10 +123,14 @@ public class FourBarKinematicLoop
       fourBarCalculator = createFourBarCalculator(vectorBCProjected, vectorCDProjected, vectorDAClosurePointProjected, vectorABProjected);
       
       // Set output joint     
-      if(DEFAULT_OUTPUT_jOINT)
+      if(DEFAULT_OUTPUT_JOINT)
       {
          fourBarOutputJoint = passiveJointC;
-         System.out.println("\nNote! Output joint set to default: " + fourBarOutputJoint.name + "\n");
+
+         if(DEBUG)
+         {
+            System.out.println("\nNote! Output joint set to default: " + fourBarOutputJoint.name + "\n");
+         }
       }
       else
       {

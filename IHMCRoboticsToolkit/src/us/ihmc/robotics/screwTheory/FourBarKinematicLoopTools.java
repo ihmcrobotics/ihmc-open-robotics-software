@@ -1,9 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import javax.vecmath.Vector2d;
-
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -78,15 +75,6 @@ public class FourBarKinematicLoopTools
    {
       boolean ccwConvex = vectorABProjected.cross(vectorBCProjected) > 0.0 && vectorBCProjected.cross(vectorCDProjected) > 0.0 && vectorCDProjected.cross(vectorDAProjected) > 0.0;
       boolean cwConvex = vectorABProjected.cross(vectorBCProjected) < 0.0 && vectorBCProjected.cross(vectorCDProjected) < 0.0 && vectorCDProjected.cross(vectorDAProjected) < 0.0;
-
-      System.out.println("vectorABProjected = " + vectorABProjected);
-      System.out.println("vectorBCProjected = " + vectorBCProjected);
-      System.out.println("vectorCDProjected = " + vectorCDProjected);
-      System.out.println("vectorDAProjected = " + vectorDAProjected);
-
-      System.out.println("vectorABProjected.cross(vectorBCProjected) = " + vectorABProjected.cross(vectorBCProjected));
-      System.out.println("vectorBCProjected.cross(vectorCDProjected) = " + vectorBCProjected.cross(vectorCDProjected));
-      System.out.println("vectorCDProjected.cross(vectorDAProjected) = " + vectorCDProjected.cross(vectorDAProjected));
 
       if (!ccwConvex && !cwConvex)
       {
