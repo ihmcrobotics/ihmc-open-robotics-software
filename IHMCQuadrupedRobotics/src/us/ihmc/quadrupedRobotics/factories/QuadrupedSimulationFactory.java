@@ -4,7 +4,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
@@ -12,7 +12,6 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedStandPrepParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -104,13 +103,10 @@ public class QuadrupedSimulationFactory
    {
       sdfRobot.setController(simulationController);
       sdfRobot.setPositionInWorld(standPrepParameters.getInitialBodyPosition());
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      for (QuadrupedJointName quadrupedJointName : modelFactory.getQuadrupedJointNames())
       {
-         for (LegJointName legJointName : modelFactory.getJointNameMap().getLegJointNames())
-         {
-            OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = sdfRobot.getOneDegreeOfFreedomJoint(modelFactory.getJointNameMap().getLegJointName(robotQuadrant, legJointName));
-            oneDegreeOfFreedomJoint.setQ(standPrepParameters.getInitialJointPosition(robotQuadrant, legJointName));
-         }
+         OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = sdfRobot.getOneDegreeOfFreedomJoint(modelFactory.getSDFNameForJointName(quadrupedJointName));
+         oneDegreeOfFreedomJoint.setQ(standPrepParameters.getInitialJointPosition(quadrupedJointName));
       }
       try
       {

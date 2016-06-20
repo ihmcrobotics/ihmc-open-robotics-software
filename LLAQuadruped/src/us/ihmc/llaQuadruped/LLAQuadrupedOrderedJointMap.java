@@ -16,12 +16,8 @@ public enum LLAQuadrupedOrderedJointMap
    HIND_LEFT_KNEE_PITCH,
    HIND_RIGHT_HIP_ROLL,
    HIND_RIGHT_HIP_PITCH,
-   HIND_RIGHT_KNEE_PITCH,
-   NECK_ROOT_YAW,
-   NECK_ROOT_PITCH,
-   HEAD_YAW,
-   HEAD_PITCH,
-   HEAD_ROLL;
+   HIND_RIGHT_KNEE_PITCH
+   ;
 
    public static final LLAQuadrupedOrderedJointMap[] values = values();
    private final String lowercaseName;
@@ -61,12 +57,6 @@ public enum LLAQuadrupedOrderedJointMap
       case HIND_RIGHT_HIP_PITCH: 
       case HIND_RIGHT_KNEE_PITCH:
          return RobotQuadrant.HIND_RIGHT;
-      case NECK_ROOT_YAW:
-      case NECK_ROOT_PITCH:
-      case HEAD_YAW:
-      case HEAD_PITCH:
-      case HEAD_ROLL:
-         return null;
       default:
          throw new RuntimeException("RobotQuadrant undefined for " + this.name());
       }
