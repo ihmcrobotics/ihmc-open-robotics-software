@@ -9,7 +9,6 @@ import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
@@ -61,7 +60,7 @@ public class DRCNetworkProcessor
    private void addTextToSpeechEngine()
    {
       PacketCommunicator ttsModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.TEXT_TO_SPEECH, NET_CLASS_LIST);
-      packetRouter.attachPacketCommunicator(PacketDestination.SPEECH_TO_TEXT, ttsModuleCommunicator);
+      packetRouter.attachPacketCommunicator(PacketDestination.TEXT_TO_SPEECH, ttsModuleCommunicator);
       try
       {
          ttsModuleCommunicator.connect();
@@ -73,7 +72,7 @@ public class DRCNetworkProcessor
       }
 
       String methodName = "addTextToSpeechEngine";
-      printModuleConnectedDebugStatement(PacketDestination.SPEECH_TO_TEXT, methodName);
+      printModuleConnectedDebugStatement(PacketDestination.TEXT_TO_SPEECH, methodName);
       
    }
 

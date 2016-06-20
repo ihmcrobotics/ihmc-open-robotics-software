@@ -14,7 +14,7 @@ public class ExampleTerrainWithTable extends CombinedTerrainObject3D
 //      this.addTable(0.0, 0.0, 1.0, 0.5, 0.0, 1.0);
       
       RigidBodyTransform configuration = new RigidBodyTransform();
-      configuration.setEuler(new Vector3d(0.0, 0.0, Math.PI/4.0));
+      configuration.setRotationEulerAndZeroTranslation(new Vector3d(0.0, 0.0, Math.PI/4.0));
       configuration.setTranslation(new Vector3d(3.0, 0.0, 0.6));
       
       this.addRotatableTable(configuration, 2.0, 1.0, 1.2, 0.05);

@@ -1810,26 +1810,6 @@ public class Transform3d extends RigidBodyTransform
    }
 
    /**
-    * Return rotation portion of this transform.
-    * 
-    * @param matrix
-    */
-   public final void get(Matrix3d matrix)
-   {
-      getRotation(matrix);
-   }
-
-   /**
-    * Return rotation portion of this transform.
-    * 
-    * @param matrix
-    */
-   public final void get(Matrix3f matrix)
-   {
-      getRotation(matrix);
-   }
-
-   /**
     * Pack rotation part into Matrix3f and translation part into Vector3f
     * 
     * @param matrix
@@ -1854,30 +1834,6 @@ public class Transform3d extends RigidBodyTransform
    {
       getRotation(quat);
       getTranslation(vector);
-   }
-
-   /**
-    * Convert and pack rotation part of transform into Quat4d.
-    * 
-    * @param quat
-    * @param vector
-    */
-   @Override
-   public final void get(Quat4d quat)
-   {
-      getRotation(quat);
-   }
-
-   /**
-    * Convert and pack rotation part of transform into Quat4f.
-    * 
-    * @param quat
-    * @param vector
-    */
-   @Override
-   public final void get(Quat4f quat)
-   {
-      getRotation(quat);
    }
 
    /**
@@ -1944,7 +1900,7 @@ public class Transform3d extends RigidBodyTransform
     */
    private final void invertAffine(Transform3d transform)
    {
-      double det = transform.determinant();
+      double det = transform.determinantRotationPart();
       if (det == 0)
       {
          throw new RuntimeException("Matrix is singular.");
@@ -2034,7 +1990,7 @@ public class Transform3d extends RigidBodyTransform
     */
    private final void invertAffine()
    {
-      double det = this.determinant();
+      double det = this.determinantRotationPart();
       if (det == 0.0)
       {
          throw new RuntimeException("Matrix is singular.");
@@ -2324,7 +2280,7 @@ public class Transform3d extends RigidBodyTransform
     * @param angle
     */
    @Override
-   public final void rotX(double angle)
+   public final void setRotationRollAndZeroTranslation(double angle)
    {
       mat00 = 1.0;
       mat01 = 0.0;
@@ -2351,7 +2307,7 @@ public class Transform3d extends RigidBodyTransform
     * @param angle
     */
    @Override
-   public final void rotY(double angle)
+   public final void setRotationPitchAndZeroTranslation(double angle)
    {
       mat00 = Math.cos(angle);
       mat01 = 0.0;
@@ -2378,7 +2334,7 @@ public class Transform3d extends RigidBodyTransform
     * @param angle
     */
    @Override
-   public final void rotZ(double angle)
+   public final void setRotationYawAndZeroTranslation(double angle)
    {
       mat00 = Math.cos(angle);
       mat01 = -Math.sin(angle);
@@ -2416,7 +2372,7 @@ public class Transform3d extends RigidBodyTransform
     * Orthonormalization of the rotation matrix using Gram-Schmidt method.
     */
    @Override
-   public final void normalize()
+   public final void normalizeRotationPart()
    {
 
       computeRotationScale();

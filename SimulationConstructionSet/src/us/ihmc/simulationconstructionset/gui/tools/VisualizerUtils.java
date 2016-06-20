@@ -1,8 +1,6 @@
 package us.ihmc.simulationconstructionset.gui.tools;
 
-import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -11,6 +9,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
 import us.ihmc.plotting.Artifact;
+import us.ihmc.plotting.PlotterShowHideMenu;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -42,6 +41,10 @@ public class VisualizerUtils
 
       scs.addExtraJpanel(scrollPane, "Plotter Legend");
 
+      JScrollPane menuScrollPanel = new JScrollPane(plotter.getMenuPanel());
+      menuScrollPanel.getVerticalScrollBar().setUnitIncrement(16);
+      scs.addExtraJpanel(menuScrollPanel, PlotterShowHideMenu.getPanelName());
+
       for (int i = 0; i < yoGraphicsListRegistries.length; i++)
       {
          YoGraphicsListRegistry yoGraphicsListRegistry = yoGraphicsListRegistries[i];
@@ -67,34 +70,34 @@ public class VisualizerUtils
 
       if (showOverheadView)
          scs.getStandardSimulationGUI().selectPanel(plotterName);
-      
+
       return plotter;
    }
-   
+
    public static SimulationOverheadPlotter createOverheadPlotterInSeparateWindow(SimulationConstructionSet scs, boolean showOverheadView, String variableNameToTrack, YoGraphicsListRegistry... yoGraphicsListRegistries)
    {
       JFrame overheadWindow = new JFrame("plotter");
       overheadWindow.setSize(new Dimension(1000, 1000));
-      
+
       SimulationOverheadPlotter plotter = new SimulationOverheadPlotter();
       plotter.setDrawHistory(false);
       plotter.setXVariableToTrack(null);
       plotter.setYVariableToTrack(null);
 
       scs.attachPlaybackListener(plotter);
-      
+
       JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
       overheadWindow.add(splitPane);
-      
+
       JPanel plotterPanel = plotter.getJPanel();
       JPanel plotterKeyJPanel = plotter.getJPanelKey();
       JScrollPane scrollPane = new JScrollPane(plotterKeyJPanel);
 
       splitPane.add(plotterPanel);
       splitPane.add(scrollPane);
-      
+
       splitPane.setResizeWeight(1.0);
-      
+
       for (int i = 0; i < yoGraphicsListRegistries.length; i++)
       {
          YoGraphicsListRegistry yoGraphicsListRegistry = yoGraphicsListRegistries[i];
@@ -119,8 +122,8 @@ public class VisualizerUtils
       }
 
       overheadWindow.setVisible(showOverheadView);
-      
-      return plotter;   
+
+      return plotter;
    }
-   
+
 }

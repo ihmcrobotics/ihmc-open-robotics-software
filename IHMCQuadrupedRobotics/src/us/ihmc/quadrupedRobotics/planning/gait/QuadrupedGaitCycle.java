@@ -140,7 +140,7 @@ public enum QuadrupedGaitCycle
    {
       if (percentGaitCycle >= 1.0 || percentGaitCycle < 0.0 || Double.isNaN(percentGaitCycle))
       {
-         throw new RuntimeException("timeInGait must be 0.0 < 1.0");
+         throw new RuntimeException("percentGaitCycle must be 0.0 < 1.0. percentGaitCycle: " + percentGaitCycle);
       }
    }
 

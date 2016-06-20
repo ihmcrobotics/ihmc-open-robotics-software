@@ -42,7 +42,7 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
    {
       this(name, yoFrameLineSegment2d, color, Double.NaN, Double.NaN);
    }
-   
+
    public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d yoFrameLineSegment2d, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
       this(name, yoFrameLineSegment2d.getYoX0(), yoFrameLineSegment2d.getYoY0(), yoFrameLineSegment2d.getYoX1(), yoFrameLineSegment2d.getYoY1(), color, arrowHeadWidth, arrowHeadHeight);
@@ -52,12 +52,12 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
    {
       this(name, startPoint.getYoX(), startPoint.getYoY(), endPoint.getYoX(), endPoint.getYoY(), color, Double.NaN, Double.NaN);
    }
-   
+
    public YoArtifactLineSegment2d(String name, YoFramePoint2d startPoint, YoFramePoint2d endPoint, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
       this(name, startPoint.getYoX(), startPoint.getYoY(), endPoint.getYoX(), endPoint.getYoY(), color, arrowHeadWidth, arrowHeadHeight);
    }
-   
+
    public YoArtifactLineSegment2d(String name, DoubleYoVariable startX, DoubleYoVariable startY, DoubleYoVariable endX, DoubleYoVariable endY, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
       super(name);
@@ -68,12 +68,12 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
       this.color = color;
       this.arrowHeadWidth = arrowHeadWidth;
       this.arrowHeadHeight = arrowHeadHeight;
-      
+
       variables[0] = startX;
       variables[1] = endX;
       variables[2] = startY;
       variables[3] = endY;
-      
+
       drawArrow = true;
    }
 
@@ -157,9 +157,10 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
       if (stroke != null)
          ((Graphics2D) graphics).setStroke(stroke);
 
-      plotterGraphics.setCenter(Xcenter, Ycenter);
-      plotterGraphics.setScale(scaleFactor);
-      plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.1);
+//      plotterGraphics.setCenter(Xcenter, Ycenter);
+//      plotterGraphics.setScale(scaleFactor);
+//      plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.1);
+      graphics.drawLine(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
    }
 
    @Override

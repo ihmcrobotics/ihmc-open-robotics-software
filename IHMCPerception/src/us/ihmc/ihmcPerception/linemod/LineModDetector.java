@@ -208,7 +208,7 @@ public class LineModDetector
       
       LineModTemplate template = LineModInterface.trainTemplateBytes(cloud, mask);
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setEuler(roll, pitch, yaw);
+      transform.setRotationEulerAndZeroTranslation(roll, pitch, yaw);
       transform.setTranslation(0, 0, distance);
       template.transform = transform;
       byteFeatures.add(template);

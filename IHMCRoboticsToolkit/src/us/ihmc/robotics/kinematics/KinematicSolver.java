@@ -246,8 +246,8 @@ public class KinematicSolver implements InverseKinematicsCalculator
 
    private DenseMatrix64F getSpatialErrorEndEffectorDesired()
    {
-      transformEndEffectorToDesired.get(errorTranslationVector);
-      transformEndEffectorToDesired.get(errorQuat);
+      transformEndEffectorToDesired.getTranslation(errorTranslationVector);
+      transformEndEffectorToDesired.getRotation(errorQuat);
       errorAxisAngle.set(errorQuat);
       errorAngularVector.set(errorAxisAngle.x, errorAxisAngle.y, errorAxisAngle.z);
       errorAngularVector.scale(errorAxisAngle.angle);

@@ -57,7 +57,8 @@ public class PiecewisePeriodicDcmTrajectory
     * @param cmpPositionAtEoS centroidal moment pivot position at the end of the final step
     * @param relativeYawAtEoS relative yaw angle at end of the final step
     */
-   public void initializeTrajectory(int numSteps, double[] timeAtSoS, FramePoint[] cmpPositionAtSoS, double timeAtEoS, FramePoint cmpPositionAtEoS, double relativeYawAtEoS)
+   public void initializeTrajectory(int numSteps, double[] timeAtSoS, FramePoint[] cmpPositionAtSoS, double timeAtEoS, FramePoint cmpPositionAtEoS,
+         double relativeYawAtEoS)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       double naturalFrequency = Math.sqrt(gravity / comHeight);
@@ -190,7 +191,7 @@ public class PiecewisePeriodicDcmTrajectory
       cmpPositionAtSoS[0] = new FramePoint(ReferenceFrame.getWorldFrame());
       cmpPositionAtSoS[1] = new FramePoint(ReferenceFrame.getWorldFrame());
       cmpPositionAtSoS[0].set(0.0, 0.0, 0.0);
-      cmpPositionAtSoS[1].set(0.0,-0.4, 0.0);
+      cmpPositionAtSoS[1].set(0.0, -0.4, 0.0);
 
       double timeAtEoS = 0.8;
       FramePoint cmpPositionAtEoS = new FramePoint(ReferenceFrame.getWorldFrame());

@@ -466,7 +466,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
          lastJoint.getTransformToWorld(transformToWorld);
          Matrix3d rotationMatrix = new Matrix3d();
-         transformToWorld.get(rotationMatrix);
+         transformToWorld.getRotation(rotationMatrix);
          lastFrameOrientation.set(rotationMatrix);
          
          transformToWorld.invert();

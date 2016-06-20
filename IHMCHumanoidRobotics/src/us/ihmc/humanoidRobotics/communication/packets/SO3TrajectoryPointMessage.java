@@ -154,7 +154,7 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
    {
       if (tempQuaternionForTransform == null)
          tempQuaternionForTransform = new Quat4d();
-      transform.get(tempQuaternionForTransform);
+      transform.getRotation(tempQuaternionForTransform);
       orientation.mul(tempQuaternionForTransform, orientation);
       transform.transform(angularVelocity);
    }

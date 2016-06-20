@@ -282,6 +282,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     *
     * @return String representation of this joint and its children.
     */
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();
@@ -291,7 +292,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
          retBuffer.append("  Parent Joint: " + this.parentJoint.name + "\n");
       else
          retBuffer.append("  Root Joint \n");
-      transformToNext.get(translation);
+      transformToNext.getTranslation(translation);
       retBuffer.append("   Location vector: " + translation + "\n");
       retBuffer.append("   offset vector: " + offset + "\n");
 
@@ -405,6 +406,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     *
     * @return Transform3D belonging to this joint.
     */
+   @Override
    public RigidBodyTransform getJointTransform3D()
    {
       return this.jointTransform3D;
@@ -542,6 +544,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     *
     * @return Transform3D describing the translation between this joint and its parent.
     */
+   @Override
    public RigidBodyTransform getOffsetTransform3D()
    {
       return this.offsetTransform3D;
@@ -773,7 +776,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     */
    public void getRotationToWorld(Matrix3d rotation)
    {
-      transformToNext.get(rotation);
+      transformToNext.getRotation(rotation);
    }
 
    /**
@@ -784,7 +787,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     */
    public void getRotationToWorld(Quat4d rotation)
    {
-      transformToNext.get(rotation);
+      transformToNext.getRotation(rotation);
    }
 
    /**
@@ -795,7 +798,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     */
    public void getTranslationToWorld(Vector3d translation)
    {
-      transformToNext.get(translation);
+      transformToNext.getTranslation(translation);
    }
 
    /**

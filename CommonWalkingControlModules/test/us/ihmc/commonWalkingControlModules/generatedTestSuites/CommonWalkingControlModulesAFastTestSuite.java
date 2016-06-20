@@ -13,6 +13,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculatorTest.class,
+   us.ihmc.commonWalkingControlModules.controllerCore.VirtualModelControllerTest.class,
    us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolverTest.class,
    us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolverTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataTansformerTest.class,
@@ -22,6 +23,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepTest.class,
    us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.DoubleSupportICPEquationsTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.MomentumRecoveryControlModuleTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPPlanarProjectorTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointToolsTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.CentroidalMomentumBenchmarkTest.class,

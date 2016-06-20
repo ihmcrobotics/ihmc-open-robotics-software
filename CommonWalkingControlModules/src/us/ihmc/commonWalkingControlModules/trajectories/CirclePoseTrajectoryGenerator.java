@@ -494,7 +494,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       initialOrientation.changeFrame(circleFrame);
       orientationToPack.setIncludingFrame(initialOrientation);
 
-      axisRotationTransform.rotZ(angleFromInitialOrientation);
+      axisRotationTransform.setRotationYawAndZeroTranslation(angleFromInitialOrientation);
 
       orientationToPack.applyTransform(axisRotationTransform);
    }

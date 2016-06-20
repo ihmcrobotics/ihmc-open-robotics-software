@@ -22,7 +22,7 @@ public class PlanarJointReferenceFrame extends ReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      transformToParent.rotZ(rotation);
+      transformToParent.setRotationYawAndZeroTranslation(rotation);
       transformToParent.setTranslation(translation);
    }
 

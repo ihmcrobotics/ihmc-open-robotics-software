@@ -14,7 +14,7 @@ import java.util.List;
 public class ColoredBallEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject;
-   private static final double BALL_RADIUS = 0.1;
+   public static final double BALL_RADIUS = 0.0762;
 
    public ColoredBallEnvironment()
    {

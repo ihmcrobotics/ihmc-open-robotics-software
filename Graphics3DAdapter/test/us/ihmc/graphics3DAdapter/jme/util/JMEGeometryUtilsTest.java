@@ -126,7 +126,7 @@ public class JMEGeometryUtilsTest
       AxisAngle4d axisAngleTransformed = new AxisAngle4d();
 
       Quat4d quat4d = new Quat4d();
-      transform3D.get(quat4d);
+      transform3D.getRotation(quat4d);
       axisAngleTransformed.set(quat4d);
 
       // Unit vector in x
