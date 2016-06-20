@@ -101,7 +101,8 @@ public class MomentumRecoveryControlModule
       maxIcpError.set(defaultMaxIcpError);
 
       allowUpperBodyMomentumInSingleSupport.set(true);
-      allowUpperBodyMomentumInDoubleSupport.set(false);
+      allowUpperBodyMomentumInDoubleSupport.set(true);
+      allowUsingHighMomentumWeight.set(true);
       maxDistanceCMPSupport.set(maxAllowedDistanceCMPSupport);
 
       parentRegistry.addChild(registry);
