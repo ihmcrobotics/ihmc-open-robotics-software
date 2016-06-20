@@ -25,22 +25,22 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
    }
 
    private final ParameterFactory parameterFactory = ParameterFactory.createWithoutRegistry(getClass());
+   private final DoubleParameter xScaleParameter = parameterFactory.createDouble("xScale", 0.20);
    private final DoubleParameter rollScaleParameter = parameterFactory.createDouble("rollScale", 0.15);
    private final DoubleParameter pitchScaleParameter = parameterFactory.createDouble("pitchScale", 0.15);
    private final DoubleParameter yawScaleParameter = parameterFactory.createDouble("yawScale", 0.15);
-   private final DoubleParameter xScaleParameter = parameterFactory.createDouble("xScale", 0.20);
-   private final DoubleParameter vxScaleParameter = parameterFactory.createDouble("vxScale", 1.0);
-   private final DoubleParameter vyScaleParameter = parameterFactory.createDouble("vyScale", 0.5);
-   private final DoubleParameter vzScaleParameter = parameterFactory.createDouble("vzScale", 0.25);
-   private final DoubleParameter wzScaleParameter = parameterFactory.createDouble("wzScale", 1.0);
+   private final DoubleParameter yawRateScaleParameter = parameterFactory.createDouble("yawRateScale", 0.25);
+   private final DoubleParameter zRateParameter = parameterFactory.createDouble("zRateParameter", 0.5);
+   private final DoubleParameter xStrideMaxParameter = parameterFactory.createDouble("xStrideMax", 0.55);
+   private final DoubleParameter yStrideMaxParameter = parameterFactory.createDouble("yStrideMax", 0.4);
    private final DoubleParameter deltaPhaseShiftParameter = parameterFactory.createDouble("deltaPhaseShiftParameter", 22.5);
+   private final DoubleParameter deltaDoubleSupportParameter = parameterFactory.createDouble("deltaDoubleSupportParameter", 0.0025);
    private final DoubleParameter deltaStanceWidthParameter = parameterFactory.createDouble("deltaStanceWidthParameter", 0.05);
-   private final DoubleParameter deltaStanceLengthParameter = parameterFactory.createDouble("deltaStanceLengthParameter", 0.05);
    private final DoubleParameter defaultComHeightParameter = parameterFactory.createDouble("defaultComHeight", 0.55);
    private final DoubleParameter defaultStanceLengthParameter = parameterFactory.createDouble("defaultStanceLength", 1.0);
    private final DoubleParameter defaultStanceWidthParameter = parameterFactory.createDouble("defaultStanceWidth", 0.2);
    private final DoubleParameter defaultStepGroundClearanceParameter = parameterFactory.createDouble("defaultStepGroundClearance", 0.1);
-   private final DoubleParameter defaultStepDurationParameter = parameterFactory.createDouble("defaultStepDurationParameter", 0.375);
+   private final DoubleParameter defaultStepDurationParameter = parameterFactory.createDouble("defaultStepDurationParameter", 0.35);
    private final DoubleParameter defaultEndDoubleSupportDurationParameter = parameterFactory.createDouble("defaultEndDoubleSupportDuration", 0.0);
    private final DoubleParameter defaultEndPhaseShiftParameter = parameterFactory.createDouble("defaultEndPhaseShift", 90);
 
@@ -68,8 +68,6 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
    @Override
    public void onEntry()
    {
-      QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
-      packetCommunicator.send(eventPacket);
    }
 
    @Override
@@ -86,14 +84,18 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       BodyOrientationPacket orientationPacket = new BodyOrientationPacket(bodyYaw, bodyPitch, bodyRoll);
       packetCommunicator.send(orientationPacket);
 
+
       double xVelocity = 0.0;
       double yVelocity = 0.0;
       double yawRate = 0.0;
+      double xVelocityMax = 0.5 * xStrideMaxParameter.get() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
+      double yVelocityMax = 0.5 * yStrideMaxParameter.get() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
+      double yawRateMax = yawRateScaleParameter.get() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
       if (mode == XGaitInputMode.VELOCITY)
       {
-         xVelocity = channels.get(InputChannel.LEFT_STICK_Y) * vxScaleParameter.get();
-         yVelocity = channels.get(InputChannel.LEFT_STICK_X) * vyScaleParameter.get();
-         yawRate = channels.get(InputChannel.RIGHT_STICK_X) * wzScaleParameter.get();
+         xVelocity = channels.get(InputChannel.LEFT_STICK_Y) * xVelocityMax;
+         yVelocity = channels.get(InputChannel.LEFT_STICK_X) * yVelocityMax;
+         yawRate = channels.get(InputChannel.RIGHT_STICK_X) * yawRateMax;
       }
       PlanarVelocityPacket velocityPacket = new PlanarVelocityPacket(xVelocity, yVelocity, yawRate);
       packetCommunicator.send(velocityPacket);
@@ -103,11 +105,11 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       double comZdot = 0.0;
       if (channels.get(InputChannel.D_PAD) == 0.25)
       {
-         comZdot += vzScaleParameter.get();
+         comZdot += zRateParameter.get();
       }
       if (channels.get(InputChannel.D_PAD) == 0.75)
       {
-         comZdot -= vzScaleParameter.get();
+         comZdot -= zRateParameter.get();
       }
       if (mode == XGaitInputMode.POSITION)
       {
@@ -115,6 +117,11 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       }
       ComPositionPacket comPositionPacket = new ComPositionPacket(comX, comY, comZ.update(comZdot));
       packetCommunicator.send(comPositionPacket);
+
+      double deltaTrigger = (channels.get(InputChannel.LEFT_TRIGGER) - channels.get(InputChannel.RIGHT_TRIGGER));
+      xGaitSettings.setEndDoubleSupportDuration(MathTools.clipToMinMax(xGaitSettings.getEndDoubleSupportDuration() + deltaTrigger * deltaDoubleSupportParameter.get(), 0, 1));
+      QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
+      packetCommunicator.send(settingsPacket);
    }
 
    @Override

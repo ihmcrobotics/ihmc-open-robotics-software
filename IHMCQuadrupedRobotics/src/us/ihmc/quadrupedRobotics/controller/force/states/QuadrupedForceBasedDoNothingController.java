@@ -41,7 +41,7 @@ public class QuadrupedForceBasedDoNothingController implements QuadrupedControll
    @Override
    public void onEntry()
    {
-      for(int i = 0; i < legJoints.size(); i++)
+      for (int i = 0; i < legJoints.size(); i++)
       {
          OneDoFJoint joint = legJoints.get(i);
          joint.setUnderPositionControl(false);
@@ -52,7 +52,7 @@ public class QuadrupedForceBasedDoNothingController implements QuadrupedControll
    @Override
    public ControllerEvent process()
    {
-      for(int i = 0; i < legJoints.size(); i++)
+      for (int i = 0; i < legJoints.size(); i++)
       {
          OneDoFJoint joint = legJoints.get(i);
          joint.setUnderPositionControl(false);

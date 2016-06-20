@@ -58,6 +58,11 @@ public class QuadrupedComPositionController
       yoComForceFeedforwardSetpoint = new YoFrameVector("comForceFeedforwardSetpoint", ReferenceFrame.getWorldFrame(), registry);
    }
 
+   public ReferenceFrame getReferenceFrame()
+   {
+      return comZUpFrame;
+   }
+
    public YoEuclideanPositionGains getGains()
    {
       return comPositionControllerGains;
