@@ -310,7 +310,7 @@ public class FrameMatrix3DTest
 
          RigidBodyTransform transformToWorldFrame = randomFrame.getTransformToDesiredFrame(bFrame);
          Matrix3d rotationToWorld = new Matrix3d();
-         transformToWorldFrame.get(rotationToWorld);
+         transformToWorldFrame.getRotation(rotationToWorld);
          matrixTransformed.mul(rotationToWorld, matrixOriginal);
          matrixTransformed.mulTransposeRight(matrixTransformed, rotationToWorld);
 

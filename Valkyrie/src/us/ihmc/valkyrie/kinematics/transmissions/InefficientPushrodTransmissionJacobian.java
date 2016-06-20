@@ -115,11 +115,11 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
       topFrame.updateTranslation(new FrameVector(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the top joint frame.
       
       RigidBodyTransform transformFromActuatorSlide5FrameToBoneFrame = new RigidBodyTransform();      
-      transformFromActuatorSlide5FrameToBoneFrame.rotY(-actuatorSlider5PitchRotation);
+      transformFromActuatorSlide5FrameToBoneFrame.setRotationPitchAndZeroTranslation(-actuatorSlider5PitchRotation);
       transformFromActuatorSlide5FrameToBoneFrame.setTranslation(new Vector3d(rod5PointInBoneFrame));
       
       RigidBodyTransform transformFromActuatorSlide6FrameToBoneFrame = new RigidBodyTransform();      
-      transformFromActuatorSlide6FrameToBoneFrame.rotY(-actuatorSlider6PitchRotation);
+      transformFromActuatorSlide6FrameToBoneFrame.setRotationPitchAndZeroTranslation(-actuatorSlider6PitchRotation);
       transformFromActuatorSlide6FrameToBoneFrame.setTranslation(new Vector3d(rod6PointInBoneFrame));
 
       actuator5SlideFrame.setTransformAndUpdate(transformFromActuatorSlide5FrameToBoneFrame);
@@ -428,17 +428,17 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
       {
       case X:
       {
-         transform3DToPack.rotX(rotationAngle);
+         transform3DToPack.setRotationRollAndZeroTranslation(rotationAngle);
          break;
       }
       case Y:
       {
-         transform3DToPack.rotY(rotationAngle);
+         transform3DToPack.setRotationPitchAndZeroTranslation(rotationAngle);
          break;
       }
       case Z:
       {
-         transform3DToPack.rotZ(rotationAngle);
+         transform3DToPack.setRotationYawAndZeroTranslation(rotationAngle);
          break;
       }
       default: 

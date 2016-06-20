@@ -113,7 +113,7 @@ public class PelvisRotationalStateUpdater
 
       // R_{root}^{world} = R_{estimationLink}^{world} * R_{root}^{estimationLink}
       transformFromRootJointFrameToWorld.multiply(transformFromMeasurementFrameToWorld, transformFromRootJointFrameToMeasurementFrame);
-      transformFromRootJointFrameToWorld.get(rotationFromRootJointFrameToWorld);
+      transformFromRootJointFrameToWorld.getRotation(rotationFromRootJointFrameToWorld);
 
 
       yoRootJointFrameQuaternion.getYawPitchRoll(lastComputedYawPitchRoll);
@@ -161,7 +161,7 @@ public class PelvisRotationalStateUpdater
 
       // R_{root}^{world} = R_{estimationLink}^{world} * R_{root}^{estimationLink}
       transformFromRootJointFrameToWorld.multiply(transformFromMeasurementFrameToWorld, transformFromRootJointFrameToMeasurementFrame);
-      transformFromRootJointFrameToWorld.get(rotationFromRootJointFrameToWorld);
+      transformFromRootJointFrameToWorld.getRotation(rotationFromRootJointFrameToWorld);
 
       rotationFromRootJointFrameToWorld.mul(rotationFrozenOffset, rotationFromRootJointFrameToWorld);
 

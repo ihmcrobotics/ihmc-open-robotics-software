@@ -280,7 +280,8 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    {
       Matrix3d hingeRotation = new Matrix3d();
       hingeRotation.rotZ(getHingeYaw());
-      RigidBodyTransform newDoorPose = new RigidBodyTransform(hingeRotation, originalDoorPose.cloneTranslation());
+      RigidBodyTransform newDoorPose = new RigidBodyTransform(originalDoorPose);
+      newDoorPose.setRotation(hingeRotation);
       doorFrame.setPoseAndUpdate(newDoorPose);
       
       for(RobotSide robotSide : RobotSide.values())

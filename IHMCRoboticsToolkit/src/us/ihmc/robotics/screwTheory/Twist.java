@@ -140,7 +140,7 @@ public class Twist extends SpatialMotionVector
       else
       {
          RigidBodyTransform transformFromBody = bodyFrame.getTransformToDesiredFrame(expressedInFrame);
-         transformFromBody.get(tempVector);
+         transformFromBody.getTranslation(tempVector);
 
          linearVelocityAtBodyOriginToPack.cross(angularPart, tempVector);    // omega x p
          linearVelocityAtBodyOriginToPack.add(linearPart);    // omega x p + v
@@ -237,7 +237,7 @@ public class Twist extends SpatialMotionVector
       // essentially using the Adjoint operator, Ad_H = [R, 0; tilde(p) * R, R] (Matlab notation), but without creating a 6x6 matrix
       // compute the relevant rotations and translations
       expressedInFrame.getTransformToDesiredFrame(temporaryTransformToDesiredFrame, newReferenceFrame);
-      temporaryTransformToDesiredFrame.get(tempVector);    // p
+      temporaryTransformToDesiredFrame.getTranslation(tempVector);    // p
 
       // transform the velocities so that they are expressed in newReferenceFrame
       temporaryTransformToDesiredFrame.transform(angularPart);    // only rotates, since we're passing in a vector

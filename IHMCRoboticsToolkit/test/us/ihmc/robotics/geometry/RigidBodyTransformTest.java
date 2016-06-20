@@ -1,14 +1,11 @@
 package us.ihmc.robotics.geometry;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.junit.Test;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.AxisAngle4f;
@@ -24,12 +21,17 @@ import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4d;
 import javax.vecmath.Vector4f;
-import java.util.Random;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import org.junit.Test;
+
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class RigidBodyTransformTest
 {
@@ -227,7 +229,7 @@ public class RigidBodyTransformTest
          axisAngle.angle = (float) theta;
 
          transform.setRotationAndZeroTranslation(axisAngle);
-         transform.normalize();
+         transform.normalizeRotationPart();
          transform.getRotation(axisAngleToCheck);
 
          assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
@@ -245,7 +247,7 @@ public class RigidBodyTransformTest
          axisAngle.angle = (float) theta;
 
          transform.setRotationAndZeroTranslation(axisAngle);
-         transform.normalize();
+         transform.normalizeRotationPart();
          transform.getRotation(axisAngleToCheck);
 
          assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
@@ -263,7 +265,7 @@ public class RigidBodyTransformTest
          axisAngle.angle = (float) theta;
 
          transform.setRotationAndZeroTranslation(axisAngle);
-         transform.normalize();
+         transform.normalizeRotationPart();
          transform.getRotation(axisAngleToCheck);
 
          assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
@@ -296,7 +298,7 @@ public class RigidBodyTransformTest
          randomizeVector(random, vector);
 
          RigidBodyTransform transform = new RigidBodyTransform(axisAngle, vector);
-         transform.normalize();
+         transform.normalizeRotationPart();
          transform.getRotation(axisAngleToCheck);
 
          assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
@@ -316,7 +318,7 @@ public class RigidBodyTransformTest
          randomizeVector(random, vector);
 
          RigidBodyTransform transform = new RigidBodyTransform(axisAngle, vector);
-         transform.normalize();
+         transform.normalizeRotationPart();
          transform.getRotation(axisAngleToCheck);
 
          assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
@@ -336,7 +338,7 @@ public class RigidBodyTransformTest
          randomizeVector(random, vector);
 
          RigidBodyTransform transform = new RigidBodyTransform(axisAngle, vector);
-         transform.normalize();
+         transform.normalizeRotationPart();
          transform.getRotation(axisAngleToCheck);
 
          assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
@@ -386,7 +388,7 @@ public class RigidBodyTransformTest
 
          RigidBodyTransform transform1 = new RigidBodyTransform(axisAngle, new Vector3f(0,
                0, 0));
-         transform1.normalize();
+         transform1.normalizeRotationPart();
          transform1.getRotation(axisAngleToCheck);
 
          assertEquals(axisAngle.x, axisAngleToCheck.x, 1e-3);
@@ -405,7 +407,7 @@ public class RigidBodyTransformTest
 
          RigidBodyTransform transform2 = new RigidBodyTransform(axisAngle, new Vector3f(0,
                0, 0));
-         transform2.normalize();
+         transform2.normalizeRotationPart();
          transform2.getRotation(axisAngleToCheck);
 
          assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
@@ -429,7 +431,7 @@ public class RigidBodyTransformTest
 
       transform.set(matrix);
 
-      transform.normalize();
+      transform.normalizeRotationPart();
 
       assertTrue(checkOrthogonality(transform));
    }
@@ -549,7 +551,7 @@ public class RigidBodyTransformTest
          RigidBodyTransform transform = new RigidBodyTransform(quat1,
                new Vector3d(0, 0, 0));
 
-         transform.get(quatCheck);
+         transform.getRotation(quatCheck);
          transform.getTranslation(trans);
 
          assertEquals(quat1.x, quatCheck.x, 1e-10);
@@ -582,7 +584,7 @@ public class RigidBodyTransformTest
 
          transform.setRotationAndZeroTranslation(quat1);
 
-         transform.get(quatCheck);
+         transform.getRotation(quatCheck);
          transform.getTranslation(trans);
 
          assertEquals(quat1.x, quatCheck.x, 1e-10);
@@ -618,7 +620,7 @@ public class RigidBodyTransformTest
 
          transform.set(quat1, vector);
 
-         transform.get(quatCheck);
+         transform.getRotation(quatCheck);
          transform.getTranslation(trans);
 
          assertEquals(quat1.x, quatCheck.x, 1e-10);
@@ -651,7 +653,7 @@ public class RigidBodyTransformTest
 
          transform.setRotationAndZeroTranslation(quat1);
 
-         transform.get(quatCheck);
+         transform.getRotation(quatCheck);
          transform.getTranslation(trans);
 
          assertEquals(quat1.x, quatCheck.x, 1e-5);
@@ -687,7 +689,7 @@ public class RigidBodyTransformTest
 
          transform.set(quat1, vector);
 
-         transform.get(quatCheck);
+         transform.getRotation(quatCheck);
          transform.getTranslation(trans);
 
          assertEquals(quat1.x, quatCheck.x, 1e-5);
@@ -713,7 +715,7 @@ public class RigidBodyTransformTest
          createRandomTransformationMatrix(matrix, random);
 
          transform.set(matrix);
-         assertEquals(matrix.determinant(), transform.determinant(), 1e-8);
+         assertEquals(matrix.determinant(), transform.determinantRotationPart(), 1e-8);
       }
    }
 
@@ -768,7 +770,7 @@ public class RigidBodyTransformTest
          RigidBodyTransform transform = new RigidBodyTransform(quat1,
                new Vector3f(0, 0, 0));
 
-         transform.get(quatCheck);
+         transform.getRotation(quatCheck);
 
          assertEquals(quat1.x, quatCheck.x, 1e-3);
          assertEquals(quat1.y, quatCheck.y, 1e-3);
@@ -1194,17 +1196,17 @@ public class RigidBodyTransformTest
          randomizeVector(random, vector);
 
          RigidBodyTransform transform = new RigidBodyTransform(matrix, vector);
-         transform.normalize();
+         transform.normalizeRotationPart();
          transform.get(matrixCheck, vectorCheck);
 
          JUnitTools.assertMatrix3dEquals("", matrixCheck, matrix, 1e-12);
          JUnitTools.assertVector3dEquals("", vectorCheck, vector, 1e-12);
 
-         transform.get(matrixCheck);
+         transform.getRotation(matrixCheck);
 
          JUnitTools.assertMatrix3dEquals("", matrixCheck, matrix, 1e-12);
 
-         transform.get(vectorCheck);
+         transform.getTranslation(vectorCheck);
 
          JUnitTools.assertVector3dEquals("", vectorCheck, vector, 1e-12);
       }
@@ -1263,10 +1265,10 @@ public class RigidBodyTransformTest
          JUnitTools.assertMatrix3fEquals("", matrixCheck, matrix, 1e-6);
          JUnitTools.assertVector3fEquals("", vectorCheck, vector, 1e-6);
 
-         transform.get(matrixCheck);
+         transform.getRotation(matrixCheck);
          JUnitTools.assertMatrix3fEquals("", matrixCheck, matrix, 1e-6);
 
-         transform.get(vectorCheck);
+         transform.getTranslation(vectorCheck);
          JUnitTools.assertVector3fEquals("", vectorCheck, vector, 1e-6);
       }
    }
@@ -1903,7 +1905,7 @@ public class RigidBodyTransformTest
       Vector3d vector3 = new Vector3d(0, 0, 1);
       DenseMatrix64F rotationMatrix = new DenseMatrix64F(3, 3);
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotX(Math.PI / 2);
+      transform.setRotationRollAndZeroTranslation(Math.PI / 2);
       transform.getRotation(rotationMatrix);
 
       MatrixTools.mult(rotationMatrix, vector);
@@ -1927,7 +1929,7 @@ public class RigidBodyTransformTest
       Vector3d vector3 = new Vector3d(0, 0, 1);
       DenseMatrix64F rotationMatrix = new DenseMatrix64F(3, 3);
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotY(Math.PI / 2);
+      transform.setRotationPitchAndZeroTranslation(Math.PI / 2);
       transform.getRotation(rotationMatrix);
 
       MatrixTools.mult(rotationMatrix, vector);
@@ -1951,7 +1953,7 @@ public class RigidBodyTransformTest
       Vector3d vector3 = new Vector3d(0, 0, 1);
       DenseMatrix64F rotationMatrix = new DenseMatrix64F(3, 3);
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotZ(Math.PI / 2);
+      transform.setRotationYawAndZeroTranslation(Math.PI / 2);
       transform.getRotation(rotationMatrix);
 
       MatrixTools.mult(rotationMatrix, vector);
@@ -2026,7 +2028,7 @@ public class RigidBodyTransformTest
          vector.y = -(Math.PI / 2 - 0.01) * random.nextDouble() - 0.01;
          vector.z = -Math.PI + random.nextDouble() * 2 * Math.PI;
 
-         transform.setEuler(vector);
+         transform.setRotationEulerAndZeroTranslation(vector);
 
          transform.getEulerXYZ(vectorToCheck);
          JUnitTools.assertVector3dEquals("", vector, vectorToCheck, 1e-5);
@@ -2741,68 +2743,6 @@ public class RigidBodyTransformTest
    private double[] generateArrayOfTestAnglesMinus2PiToPiButExcludePlusMinusPi()
    {      
       return AngleTools.generateArrayOfTestAngles(nTests, 0.0, true, false);
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testGetErrorImpl()
-   {
-      double EPS = 0.00001;
-      Matrix3d R1  = new Matrix3d();
-      Matrix3d R2  = new Matrix3d();
-      Matrix3d temp = new Matrix3d();
-      Quat4d quat = new Quat4d();
-      Vector3d err = new Vector3d();
-      
-      R1.setIdentity();
-      R2.setIdentity();
-        
-      temp.rotY(0.4);
-      err =  RigidBodyTransform.getRotationDifference(temp, R2);
-      System.out.println( err );
-      
-      assertTrue(  err.epsilonEquals( new Vector3d(0, 0.4, 0),  EPS) );
-
-
-      temp.rotZ(0.4);
-      err = RigidBodyTransform.getRotationDifference(temp, R2);
-      System.out.println( err );
-      
-      assertTrue(  err.epsilonEquals( new Vector3d(0, 0, 0.4),  EPS) );
-
-      temp.rotX(0.4);
-      err = RigidBodyTransform.getRotationDifference(temp, R2);
-      System.out.println( err );   
-      assertTrue(  err.epsilonEquals( new Vector3d( 0.4, 0, 0),  EPS) );
-      
-      temp.rotX(0.4);  R1.mul(temp);
-      temp.rotY(0.8);  R1.mul(temp);     
-      temp.rotZ(1.2);  R1.mul(temp);   
-      
-      System.out.println("..........");
-      // The Quat4d.set(Matrix3d) is buggy
-//      quat.set( R1 );
-      RotationTools.convertMatrixToQuaternion(R1, quat);
-      System.out.println("R1: " + quat );
-      
-      //----------------
-      temp.rotZ(0.3);  R2.mul(temp);     
-      temp.rotY(0.6);  R2.mul(temp);   
-      temp.rotX(0.9);  R2.mul(temp);
- 
-      quat.set( R2 );
-      System.out.println("R2: " + quat );
-      
-      err = RigidBodyTransform.getRotationDifference(R1, R2);
-      System.out.println("error: " + err );
-
-      assertTrue(  err.epsilonEquals( new Vector3d( 0.5219536449894595, -0.546598672388116, 0.975076469006518 ),  EPS) );
-      
-      
-      err = RigidBodyTransform.getRotationDifference(R1, R1);
-      System.out.println("error: " + err );
-
-      assertTrue("identity failed :" ,  err.epsilonEquals( new Vector3d( 0.0, 0.0, 0.0 ),  EPS) );
    }
 
    public static void assertTransformEquals(RigidBodyTransform expectedTransform, RigidBodyTransform actualTransform, double epsilon)

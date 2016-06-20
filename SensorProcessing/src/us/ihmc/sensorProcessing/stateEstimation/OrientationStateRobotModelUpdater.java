@@ -132,7 +132,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       computeEstimationLinkToWorldTransform(tempEstimationLinkToWorld, tempOrientationEstimatinLink);
       computeRootJointToWorldTransform(rootJoint, estimationFrame, tempRootJointToWorld, tempEstimationLinkToWorld);
       Matrix3d rootJointRotation = new Matrix3d();
-      tempRootJointToWorld.get(rootJointRotation);
+      tempRootJointToWorld.getRotation(rootJointRotation);
 
       rootJoint.setRotation(rootJointRotation);
    }

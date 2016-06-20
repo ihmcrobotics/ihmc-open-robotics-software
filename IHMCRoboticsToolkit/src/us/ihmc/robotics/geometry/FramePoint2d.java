@@ -179,7 +179,7 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, TransformablePoint2
       temporaryPointForYawing.sub(pointToYawAbout);
 
       temporaryTransformToDesiredFrame.setIdentity();
-      temporaryTransformToDesiredFrame.rotZ(yaw);
+      temporaryTransformToDesiredFrame.setRotationYawAndZeroTranslation(yaw);
 
       temporaryPointForYawing.applyTransform(temporaryTransformToDesiredFrame);
 

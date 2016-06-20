@@ -44,7 +44,7 @@ public class JMEPointCloudGeneratorTest
       RigidBodyTransform startTransform = new RigidBodyTransform();
       RigidBodyTransform endTransform = new RigidBodyTransform();
       
-      endTransform.rotX(Math.PI / 4);
+      endTransform.setRotationRollAndZeroTranslation(Math.PI / 4);
       LidarScan lidarScan = new LidarScan(lidarScanParameters, startTransform, endTransform, ranges, 1);
       
       JMEPointCloudGenerator jmePointCloudGenerator = new JMEPointCloudGenerator(jmeGraphics3DAdapter.getRenderer().getAssetManager());

@@ -52,7 +52,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
             System.out.println("Simulation contact '" + name + "'");
             Vector3d gcOffset = new Vector3d();
 
-            SDFConversionsHelper.poseToTransform(collision.getPose()).get(gcOffset);
+            SDFConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
             link.getTransformFromModelReferenceFrame().transform(gcOffset);
             addSimulationContactPoint(joint.getName(), gcOffset);
          }
@@ -62,7 +62,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
             System.out.println("Controller contact '" + name + "'");
             Vector3d gcOffset = new Vector3d();
 
-            SDFConversionsHelper.poseToTransform(collision.getPose()).get(gcOffset);
+            SDFConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
             link.getTransformFromModelReferenceFrame().transform(gcOffset);
             boolean assigned = false;
 

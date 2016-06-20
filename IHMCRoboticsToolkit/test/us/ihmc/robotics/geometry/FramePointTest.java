@@ -70,7 +70,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
 
       Transform3d transform = new Transform3d();
       Vector3d euler = new Vector3d(Math.PI / 2.0, 0.0, 0.0);
-      transform.setEuler(euler);
+      transform.setRotationEulerAndZeroTranslation(euler);
       Vector3d translation = new Vector3d(5.0, 0.0, 0.0);
       transform.setTranslation(translation);
 
@@ -79,7 +79,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
 
       transform = new Transform3d();
       euler = new Vector3d(0.0, Math.PI / 2.0, 0.0);
-      transform.setEuler(euler);
+      transform.setRotationEulerAndZeroTranslation(euler);
       translation = new Vector3d(5.0, 0.0, 0.0);
       transform.setTranslation(translation);
 
@@ -88,7 +88,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
 
       transform = new Transform3d();
       euler = new Vector3d(0.0, 0.0, Math.PI / 2.0);
-      transform.setEuler(euler);
+      transform.setRotationEulerAndZeroTranslation(euler);
       translation = new Vector3d(5.0, 0.0, 0.0);
       transform.setTranslation(translation);
 
@@ -466,7 +466,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       Transform3d transform3D = new Transform3d();
 
       Vector3d rotateVector = new Vector3d(0.0, 0.0, Math.PI / 2.0);
-      transform3D.setEuler(rotateVector);
+      transform3D.setRotationEulerAndZeroTranslation(rotateVector);
       FramePoint resultPoint = new FramePoint(framePoint);
       resultPoint.applyTransform(transform3D);
       FramePoint expectedResultPoint = new FramePoint(theFrame, -2.0, 1.0, 3.0);

@@ -848,4 +848,16 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    {
       return Double.POSITIVE_INFINITY;
    }
+
+   @Override
+   public void useInverseDynamicsControlCore()
+   {
+      // once another mode is implemented, use this to change the default gains for inverse dynamics
+   }
+
+   @Override
+   public void useVirtualModelControlCore()
+   {
+      // once another mode is implemented, use this to change the default gains for virtual model control
+   }
 }

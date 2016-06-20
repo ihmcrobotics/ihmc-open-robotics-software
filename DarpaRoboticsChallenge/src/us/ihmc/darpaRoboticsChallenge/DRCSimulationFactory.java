@@ -338,7 +338,7 @@ public class DRCSimulationFactory
 
       RigidBodyTransform estimationLinkTransform3D = estimationJoint.getJointTransform3D();
       Quat4d initialEstimationLinkOrientation = new Quat4d();
-      estimationLinkTransform3D.get(initialEstimationLinkOrientation);
+      estimationLinkTransform3D.getRotation(initialEstimationLinkOrientation);
 
       if (drcStateEstimator != null)
          drcStateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);

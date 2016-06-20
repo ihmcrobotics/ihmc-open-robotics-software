@@ -138,17 +138,21 @@ public class PartialFootholdControlModule
 
       if (yoGraphicsListRegistry != null)
       {
+         String listName = getClass().getSimpleName();
+
          YoArtifactPolygon yoGraphicPolygon = new YoArtifactPolygon(namePrefix + "UnsafeRegion", yoUnsafePolygon, Color.RED, false);
-         yoGraphicsListRegistry.registerArtifact("Partial Foothold", yoGraphicPolygon);
+         yoGraphicPolygon.setVisible(false);
+         yoGraphicsListRegistry.registerArtifact(listName, yoGraphicPolygon);
 
          YoArtifactPolygon yoShrunkPolygon = new YoArtifactPolygon(namePrefix + "ShrunkPolygon", yoShrunkFootPolygon, Color.CYAN, false);
-         yoGraphicsListRegistry.registerArtifact("Shrunk Polygon", yoShrunkPolygon);
+         yoShrunkPolygon.setVisible(false);
+         yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
 
 //         YoArtifactPolygon yoFullSupportGraphic = new YoArtifactPolygon(namePrefix + "FullSupportAfterShrinking", yoFullSupportAfterShrinking, Color.GREEN, false);
 //         yoGraphicsListRegistry.registerArtifact("FullSupportAfterShrinking", yoFullSupportGraphic);
       }
 
-      footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, 20, 10, walkingControllerParameters, yoGraphicsListRegistry, registry);
+      footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, 40, 20, walkingControllerParameters, yoGraphicsListRegistry, registry);
 
       shrinkMaxLimit = explorationParameters.getShrinkMaxLimit();
       thresholdForCoPRegionOccupancy = explorationParameters.getThresholdForCoPRegionOccupancy();
@@ -356,12 +360,12 @@ public class PartialFootholdControlModule
       fullSupportAfterShrinking.update();
       momentumBasedController.getCapturePoint(capturePoint);
       yoFullSupportAfterShrinking.setFrameConvexPolygon2d(fullSupportAfterShrinking);
-      boolean icpInPolygon = fullSupportAfterShrinking.isPointInside(capturePoint);
-      if (!icpInPolygon)
-      {
-         shrunkFootPolygon.set(backupFootPolygon);
-         return false;
-      }
+//      boolean icpInPolygon = fullSupportAfterShrinking.isPointInside(capturePoint);
+//      if (!icpInPolygon)
+//      {
+//         shrunkFootPolygon.set(backupFootPolygon);
+//         return false;
+//      }
 
       List<YoContactPoint> contactPoints = contactStateToModify.getContactPoints();
       for (int i = 0; i < controllerFootPolygon.getNumberOfVertices(); i++)
@@ -381,7 +385,8 @@ public class PartialFootholdControlModule
    private static final double width = 0.01;
    private void fitLine()
    {
-      footCoPOccupancyGrid.fitLineToData(line);
+      if (!footCoPOccupancyGrid.fitLineToData(line))
+         return;
 
       lineL.setIncludingFrame(line);
       lineL.shiftToLeft(width/2.0);

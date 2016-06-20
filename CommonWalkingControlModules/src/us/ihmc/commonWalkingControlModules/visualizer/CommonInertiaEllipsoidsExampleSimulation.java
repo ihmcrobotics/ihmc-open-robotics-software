@@ -45,7 +45,7 @@ public class CommonInertiaEllipsoidsExampleSimulation
 
       System.out.println(momentOfInertia);
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotX(-Math.PI / 2.0);
+      transform.setRotationRollAndZeroTranslation(-Math.PI / 2.0);
       System.out.println(transform);
       momentOfInertia = InertiaTools.rotate(transform, momentOfInertia);
       System.out.println(momentOfInertia);

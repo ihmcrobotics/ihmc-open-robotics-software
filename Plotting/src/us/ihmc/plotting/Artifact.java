@@ -15,7 +15,8 @@ public abstract class Artifact implements Plottable, Serializable
    private boolean showID = false;
    private boolean drawHistory = false;
    private boolean recordHistory = false;
-   
+   private String label = null;
+
 
    public Artifact(String id)
    {
@@ -34,32 +35,32 @@ public abstract class Artifact implements Plottable, Serializable
    {
       this.type = type;
    }
-   
+
    public void setShowID(boolean showID)
    {
       this.showID = showID;
    }
-   
+
    public boolean getShowID()
    {
       return showID;
    }
-   
+
    public void setDrawHistory(boolean drawHistory)
    {
       this.drawHistory = drawHistory;
    }
-   
+
    public boolean getDrawHistory()
    {
       return drawHistory;
    }
-   
+
    public void setRecordHistory(boolean recordHistory)
    {
       this.recordHistory = recordHistory;
    }
-   
+
    public boolean getRecordHistory()
    {
       return recordHistory;
@@ -108,12 +109,20 @@ public abstract class Artifact implements Plottable, Serializable
    public String getName() {
       return getID();
    }
-   
+
    public String toString()
    {
       return getID();
    }
-   
 
-   
+   public void setLabel(String label)
+   {
+      this.label = label;
+   }
+
+   public String getLabel()
+   {
+      return label;
+   }
+
 }

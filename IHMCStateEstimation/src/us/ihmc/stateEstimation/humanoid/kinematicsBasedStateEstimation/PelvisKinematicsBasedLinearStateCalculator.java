@@ -34,6 +34,7 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 
 /**
@@ -108,8 +109,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
       this.footSwitches = footSwitches;
       this.centerOfPressureDataHolderFromController = centerOfPressureDataHolderFromController;
       this.feetRigidBodies = new ArrayList<>(feetContactablePlaneBodies.keySet());
-      
-      rootJointLinearVelocityBacklashKinematics = BacklashCompensatingVelocityYoFrameVector.createBacklashCompensatingVelocityYoFrameVector("estimatedRootJointLinearVelocityBacklashKin", "", 
+
+      rootJointLinearVelocityBacklashKinematics = BacklashCompensatingVelocityYoFrameVector.createBacklashCompensatingVelocityYoFrameVector("estimatedRootJointLinearVelocityBacklashKin", "",
             alphaRootJointLinearVelocityBacklashKinematics, estimatorDT, slopTimeRootJointLinearVelocityBacklashKinematics, registry, rootJointPosition);
 
       for (int i = 0; i < feetRigidBodies.size(); i++)
@@ -141,12 +142,12 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
          YoFramePoint copPositionInWorld = new YoFramePoint(namePrefix + "CoPPositionsInWorld", worldFrame, registry);
          copPositionsInWorld.put(foot, copPositionInWorld);
-         
+
          YoFrameVector footVelocityInWorld = new YoFrameVector(namePrefix + "VelocityInWorld", worldFrame, registry);
          footVelocitiesInWorld.put(foot, footVelocityInWorld);
-         
+
          footTwistsInWorld.put(foot, new Twist());
-         
+
          ReferenceFrame copFrame = new ReferenceFrame("copFrame", soleFrame)
          {
             private static final long serialVersionUID = -1926704435608610401L;
@@ -171,7 +172,9 @@ public class PelvisKinematicsBasedLinearStateCalculator
                RigidBody foot = feetRigidBodies.get(i);
                String sidePrefix = foot.getName();
                YoGraphicPosition copInWorld = new YoGraphicPosition(sidePrefix + "StateEstimatorCoP", copPositionsInWorld.get(foot), 0.005, YoAppearance.DeepPink());
-               yoGraphicsListRegistry.registerArtifact("StateEstimator", copInWorld.createArtifact());
+               YoArtifactPosition artifact = copInWorld.createArtifact();
+               artifact.setVisible(false);
+               yoGraphicsListRegistry.registerArtifact("StateEstimator", artifact);
             }
          }
       }
@@ -191,14 +194,14 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    public void setAlphaPelvisPosition(double alphaFilter)
    {
-      alphaFootToRootJointPosition.set(alphaFilter); 
+      alphaFootToRootJointPosition.set(alphaFilter);
    }
 
    public void setPelvisLinearVelocityAlphaNewTwist(double alpha)
    {
       alphaRootJointLinearVelocityNewTwist.set(alpha);
    }
-   
+
    public void setPelvisLinearVelocityBacklashParameters(double alphaFilter, double slopTime)
    {
       alphaRootJointLinearVelocityBacklashKinematics.set(alphaFilter);
@@ -209,7 +212,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    {
       alphaCoPFilter.set(alphaFilter);
    }
-   
+
    public void enableTwistEstimation(boolean enable)
    {
       useTwistToComputeRootJointLinearVelocity.set(enable);
@@ -291,7 +294,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          centerOfPressureDataHolderFromController.getCenterOfPressure(tempCoP2d, trustedFoot);
       else
          footSwitches.get(trustedFoot).computeAndPackCoP(tempCoP2d);
-      
+
       if (trustCoPAsNonSlippingContactPoint.getBooleanValue())
       {
          if (tempCoP2d.containsNaN())
@@ -367,7 +370,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    {
       reset();
       updateKinematicsNewTwist();
-      
+
       twistCalculator.compute();
 
       for (int i = 0; i < feetRigidBodies.size(); i++)
@@ -384,19 +387,19 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       kinematicsIsUpToDate.set(true);
    }
-   
+
    private final Twist tempRootBodyTwist = new Twist();
-   
+
    private void updateKinematicsNewTwist()
-   {      
+   {
       rootJoint.getJointTwist(tempRootBodyTwist);
-      
+
       rootJointLinearVelocityNewTwist.getFrameTupleIncludingFrame(tempFrameVector);
       tempFrameVector.changeFrame(tempRootBodyTwist.getExpressedInFrame());
-      
+
       tempRootBodyTwist.setLinearPart(tempFrameVector);
       rootJoint.setJointTwist(tempRootBodyTwist);
-      
+
       twistCalculator.compute();
 
       for (int i = 0; i < feetRigidBodies.size(); i++)
@@ -419,7 +422,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          footVelocityInWorld.set(tempFrameVector);
       }
    }
-   
+
    public void updateFeetPositionsWhenTrustingIMUOnly(FramePoint pelvisPosition)
    {
       for (int i = 0; i < feetRigidBodies.size(); i++)
@@ -428,7 +431,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          updateFootPosition(foot, pelvisPosition);
       }
    }
-   
+
    public void estimatePelvisLinearState(List<RigidBody> trustedFeet, List<RigidBody> unTrustedFeet, FramePoint pelvisPosition)
    {
       if (!kinematicsIsUpToDate.getBooleanValue())
@@ -441,17 +444,17 @@ public class PelvisKinematicsBasedLinearStateCalculator
          correctFootPositionsUsingCoP(trustedFoot);
          updatePelvisWithKinematics(trustedFoot, trustedFeet.size());
       }
-      
+
       rootJointLinearVelocityBacklashKinematics.update();
 
       kinematicsIsUpToDate.set(false);
-      
+
       for(int i = 0; i < unTrustedFeet.size(); i++)
       {
          RigidBody unTrustedFoot = unTrustedFeet.get(i);
          updateFootPosition(unTrustedFoot, pelvisPosition);
       }
-      
+
       kinematicsIsUpToDate.set(false);
    }
 
@@ -470,7 +473,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    {
       rootJointPosition.getFrameTupleIncludingFrame(positionToPack);
    }
-   
+
    public void getPelvisVelocity(FrameVector linearVelocityToPack)
    {
       rootJointLinearVelocityNewTwist.getFrameTupleIncludingFrame(linearVelocityToPack);

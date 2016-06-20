@@ -5,16 +5,16 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.InputChannel;
 import us.ihmc.quadrupedRobotics.input.InputEvent;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
-import us.ihmc.quadrupedRobotics.packets.BodyOrientationPacket;
-import us.ihmc.quadrupedRobotics.packets.ComPositionPacket;
-import us.ihmc.quadrupedRobotics.packets.QuadrupedForceControllerEventPacket;
-import us.ihmc.quadrupedRobotics.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
@@ -52,8 +52,6 @@ public class QuadrupedTestTeleopMode implements QuadrupedTeleopMode
    @Override
    public void onEntry()
    {
-      QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
-      packetCommunicator.send(eventPacket);
    }
 
    @Override

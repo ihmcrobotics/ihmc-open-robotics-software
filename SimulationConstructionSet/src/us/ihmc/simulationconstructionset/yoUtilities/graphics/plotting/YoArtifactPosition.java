@@ -18,7 +18,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 
-
 public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
 {
    private static final long serialVersionUID = -1824071784539220859L;
@@ -46,6 +45,7 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
       this.scale = scale;
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       if (getRecordHistory())
@@ -61,6 +61,7 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
    private static final int MIN_RADIUS = 5;
    private static final int MAX_RADIUS = 25;
 
+   @Override
    public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       double radius = Math.round(4.0 * scale * scaleFactor);
@@ -68,6 +69,7 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
       draw(graphics, Xcenter, Ycenter, (int) radius);
    }
 
+   @Override
    public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
@@ -87,7 +89,6 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
       x.set(point2d.getX());
       y.set(point2d.getY());
    }
-
    
    private void draw(Graphics graphics, double xWorld, double yWorld, int Xcenter, int Ycenter, double scaleFactor)
    {
@@ -100,7 +101,6 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
 
       draw(graphics, x, y, radius);
    }
-
 
    private void draw(Graphics graphics, int x, int y, int radius)
    {
@@ -161,6 +161,7 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
       }
    }
    
+   @Override
    public void drawHistory(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       synchronized(historicalPositions)
@@ -175,24 +176,27 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
       }
    }
 
+   @Override
    public RemoteGraphicType getRemoteGraphicType() 
    {
       return RemoteGraphicType.POSITION_ARTIFACT;
    }
    
+   @Override
    public DoubleYoVariable[] getVariables() 
    {
       return new DoubleYoVariable[]{x, y};
    }
 
+   @Override
    public double[] getConstants() 
    {
       return new double[]{scale, graphicType.ordinal()};
    }
    
+   @Override
    public AppearanceDefinition getAppearance()
    {
       return new YoAppearanceRGBColor(color, 0.0);
    }
-   
 }

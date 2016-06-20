@@ -123,7 +123,7 @@ public class Ellipsoid3dTest
       double zRadius = 3.0;
       
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotX(Math.PI / 2.0);
+      transform.setRotationRollAndZeroTranslation(Math.PI / 2.0);
       transform.setTranslation(new Vector3d(0.0, 5.0, 0.0));
 
       Ellipsoid3d ellipsoid = new Ellipsoid3d(xRadius, yRadius, zRadius, transform);
@@ -225,11 +225,11 @@ public class Ellipsoid3dTest
                RigidBodyTransform transform = new RigidBodyTransform();
 
                if (i == 0)
-                  transform.rotX(angle);
+                  transform.setRotationRollAndZeroTranslation(angle);
                if (i == 1)
-                  transform.rotY(angle);
+                  transform.setRotationPitchAndZeroTranslation(angle);
                if (i == 2)
-                  transform.rotZ(angle);
+                  transform.setRotationYawAndZeroTranslation(angle);
 
                Ellipsoid3d ellipsoid = new Ellipsoid3d(xRadius, yRadius, zRadius);
                ellipsoid.setTransform(transform);
@@ -349,10 +349,10 @@ public class Ellipsoid3dTest
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       RigidBodyTransform tempTransform = new RigidBodyTransform();
-      transform.rotX(2 * Math.PI * random.nextDouble());
-      tempTransform.rotY(2 * Math.PI * random.nextDouble());
+      transform.setRotationRollAndZeroTranslation(2 * Math.PI * random.nextDouble());
+      tempTransform.setRotationPitchAndZeroTranslation(2 * Math.PI * random.nextDouble());
       transform.multiply(tempTransform);
-      tempTransform.rotZ(2 * Math.PI * random.nextDouble());
+      tempTransform.setRotationYawAndZeroTranslation(2 * Math.PI * random.nextDouble());
       transform.multiply(tempTransform);
 
       double[] matrix = new double[16];
