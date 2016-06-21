@@ -101,6 +101,7 @@ public enum QuadrupedJointName
       throw new IllegalStateException("Invalid joint for quadrant: " + this);
    }
 
+   @SuppressWarnings("incomplete-switch")
    public static QuadrupedJointName getName(RobotQuadrant quadrant, LegJointName legJointName)
    {
       switch(quadrant)

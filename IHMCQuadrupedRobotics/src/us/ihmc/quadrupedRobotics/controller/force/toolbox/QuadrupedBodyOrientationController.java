@@ -58,6 +58,11 @@ public class QuadrupedBodyOrientationController
       yoComTorqueFeedforwardSetpoint = new YoFrameVector("comTorqueFeedforwardSetpoint", ReferenceFrame.getWorldFrame(), registry);
    }
 
+   public ReferenceFrame getReferenceFrame()
+   {
+      return bodyFrame;
+   }
+
    public YoAxisAngleOrientationGains getGains()
    {
       return bodyOrientationControllerGains;
@@ -87,7 +92,8 @@ public class QuadrupedBodyOrientationController
       bodyAngularVelocityEstimate.changeFrame(bodyFrame);
       comTorqueFeedforwardSetpoint.changeFrame(bodyFrame);
       bodyOrientationController.setGains(bodyOrientationControllerGains);
-      bodyOrientationController.compute(comTorqueCommand, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate, comTorqueFeedforwardSetpoint);
+      bodyOrientationController
+            .compute(comTorqueCommand, bodyOrientationSetpoint, bodyAngularVelocitySetpoint, bodyAngularVelocityEstimate, comTorqueFeedforwardSetpoint);
 
       // update log variables
       yoBodyOrientationSetpoint.setAndMatchFrame(bodyOrientationSetpoint);

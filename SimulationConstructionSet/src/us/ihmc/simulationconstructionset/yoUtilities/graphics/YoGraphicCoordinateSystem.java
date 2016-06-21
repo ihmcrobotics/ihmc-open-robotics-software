@@ -206,7 +206,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       transform3D.setIdentity();
       translationVector.set(x.getDoubleValue(), y.getDoubleValue(), z.getDoubleValue());
       transform3D.setScale(scale);
-      transform3D.setEuler(roll.getDoubleValue(), pitch.getDoubleValue(), yaw.getDoubleValue());
+      transform3D.setRotationEulerAndZeroTranslation(roll.getDoubleValue(), pitch.getDoubleValue(), yaw.getDoubleValue());
       transform3D.setTranslation(translationVector);
    }
 

@@ -109,7 +109,7 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
       translationVector.set(yoFramePoint.getX(), yoFramePoint.getY(), yoFramePoint.getZ());
       yoFrameOrientation.getEulerAngles(rotationEulerVector);
 
-      transform3D.setEuler(rotationEulerVector);
+      transform3D.setRotationEulerAndZeroTranslation(rotationEulerVector);
       transform3D.setTranslation(translationVector);
       transform3D.setScale(scale);
    }

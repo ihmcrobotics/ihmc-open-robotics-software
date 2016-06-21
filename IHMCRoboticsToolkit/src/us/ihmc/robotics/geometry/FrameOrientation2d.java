@@ -63,7 +63,7 @@ public class FrameOrientation2d extends AbstractReferenceFrameHolder implements 
 
    public void getTransform3D(RigidBodyTransform transformToPack)
    {
-      transformToPack.setEuler(0.0, 0.0, this.yaw);
+      transformToPack.setRotationEulerAndZeroTranslation(0.0, 0.0, this.yaw);
    }
 
    public double getYaw()

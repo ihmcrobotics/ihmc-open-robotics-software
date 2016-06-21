@@ -341,7 +341,7 @@ public class GraphicsDemoTools
       public void run()
       {
          Transform3d transform = new Transform3d();
-         transform.setEuler(nextVector3d(parametersHolder.getRotationTrajectory()));
+         transform.setRotationEulerAndZeroTranslation(nextVector3d(parametersHolder.getRotationTrajectory()));
          transform.setTranslation(nextVector3d(parametersHolder.getTranslationTrajectory()));
          transform.setScale(parametersHolder.getScaleTrajectory().getNextValue());
          node.setTransform(transform);

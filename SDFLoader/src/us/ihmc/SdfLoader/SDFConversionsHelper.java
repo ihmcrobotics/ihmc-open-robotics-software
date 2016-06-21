@@ -71,7 +71,7 @@ public class SDFConversionsHelper
       eulerAngels.setX(Double.parseDouble(data[3]));
       eulerAngels.setY(Double.parseDouble(data[4]));
       eulerAngels.setZ(Double.parseDouble(data[5]));
-      rotation.setEuler(eulerAngels);
+      rotation.setRotationEulerAndZeroTranslation(eulerAngels);
    
       ret.multiply(translation, rotation);
    

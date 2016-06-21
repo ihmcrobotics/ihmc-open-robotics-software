@@ -1438,7 +1438,7 @@ public class BasicEnvironment{
          double x = xy[0];
          double y = xy[1];
          RigidBodyTransform location = new RigidBodyTransform();
-         location.rotZ(Math.toRadians(yawDegrees));
+         location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
          location.setTranslation(new Vector3d(x, y, height / 2));
          RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
@@ -1451,7 +1451,7 @@ public class BasicEnvironment{
          double x = xy[0];
          double y = xy[1];
          RigidBodyTransform location = new RigidBodyTransform();
-         location.rotZ(Math.toRadians(yawDegrees));
+         location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
          location.setTranslation(new Vector3d(x, y, height / 2));
          RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
@@ -1464,7 +1464,7 @@ public class BasicEnvironment{
          double xCenter = centerPoint[0];
          double yCenter = centerPoint[1];
          RigidBodyTransform location = new RigidBodyTransform();
-         location.rotZ(Math.toRadians(yawDegrees));
+         location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
          location.setTranslation(new Vector3d(xCenter, yCenter, stairTopHeight - thickness / 2));
          RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, tread, width, thickness), app);
@@ -1524,7 +1524,7 @@ public class BasicEnvironment{
          double yCenter = centerPoint[1];
 
          RigidBodyTransform location = new RigidBodyTransform();
-         location.rotZ(Math.toRadians(yawDegrees));
+         location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
          location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
          RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength + overlapToPreventGaps, cinderBlockWidth + overlapToPreventGaps,
@@ -1536,10 +1536,10 @@ public class BasicEnvironment{
                                          double yLength, double zLength, double slopeRadians, double yawDegrees, AppearanceDefinition app)
       {
          RigidBodyTransform location = new RigidBodyTransform();
-         location.rotZ(Math.toRadians(yawDegrees));
+         location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
          RigidBodyTransform tilt = new RigidBodyTransform();
-         tilt.rotY(-slopeRadians);
+         tilt.setRotationPitchAndZeroTranslation(-slopeRadians);
          location.multiply(tilt);
 
          location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));
@@ -1566,10 +1566,10 @@ public class BasicEnvironment{
          AppearanceDefinition app = cinderBlockAppearance;
 
          RigidBodyTransform location = new RigidBodyTransform();
-         location.rotZ(Math.toRadians(yawDegrees));
+         location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
          RigidBodyTransform tilt = new RigidBodyTransform();
-         tilt.rotY(-cinderBlockTiltRadians);
+         tilt.setRotationPitchAndZeroTranslation(-cinderBlockTiltRadians);
          location.multiply(tilt);
 
          double zCenter = (cinderBlockHeight * Math.cos(cinderBlockTiltRadians) + cinderBlockLength * Math.sin(cinderBlockTiltRadians)) / 2;
@@ -1612,8 +1612,8 @@ public class BasicEnvironment{
          RigidBodyTransform location = new RigidBodyTransform();
          RigidBodyTransform setUpright = new RigidBodyTransform();
 
-         location.rotZ(Math.toRadians(yawDegrees));
-         setUpright.rotX(Math.toRadians(90));
+         location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
+         setUpright.setRotationRollAndZeroTranslation(Math.toRadians(90));
          location.multiply(setUpright);
 
          location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockWidth / 2 + numberFlatSupports * cinderBlockHeight));
@@ -1639,7 +1639,7 @@ public class BasicEnvironment{
          double rampRise = cinderBlockLength * Math.sin(cinderBlockTiltRadians);
 
          RigidBodyTransform blockSupportLocation = new RigidBodyTransform();
-         blockSupportLocation.rotZ(Math.toRadians(yawDegrees));
+         blockSupportLocation.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
          double[] xySupportRotatedOffset = rotateAroundOrigin(new double[] {(cinderBlockLength - rampRise) / 2, 0}, yawDegrees);
          blockSupportLocation.setTranslation(new Vector3d(xCenter + xySupportRotatedOffset[0], yCenter + xySupportRotatedOffset[1],
                rampRise / 2 + numberFlatSupports * cinderBlockHeight));

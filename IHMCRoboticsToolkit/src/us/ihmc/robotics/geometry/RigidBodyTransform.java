@@ -413,7 +413,7 @@ public class RigidBodyTransform implements Serializable
    public final void applyRotationX(double angle)
    {
       RigidBodyTransform temp = new RigidBodyTransform();
-      temp.rotX(angle);    
+      temp.setRotationRollAndZeroTranslation(angle);    
       multiply(temp);
    }
    
@@ -423,7 +423,7 @@ public class RigidBodyTransform implements Serializable
    public final void applyRotationY(double angle)
    {
       RigidBodyTransform temp = new RigidBodyTransform();
-      temp.rotY(angle);   
+      temp.setRotationPitchAndZeroTranslation(angle);   
       multiply(temp);
    }
    
@@ -433,7 +433,7 @@ public class RigidBodyTransform implements Serializable
    public final void applyRotationZ(double angle)
    {
       RigidBodyTransform temp = new RigidBodyTransform();
-      temp.rotZ(angle);    
+      temp.setRotationYawAndZeroTranslation(angle);    
       multiply(temp);
    }
    
@@ -917,6 +917,14 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
+    * @deprecated use {@link #setRotationEulerAndZeroTranslation(Vector3d)} instead.
+    * @param vector
+    */
+   public final void setEuler(Vector3d vector)
+   {
+      setRotationEulerAndZeroTranslation(vector);
+   }
+   /**
     * Set the rotational component of the transform to the rotation matrix
     * created given an X-Y-Z rotation described by the angles in vector which
     * describe angles of rotation about the X, Y, and Z axis, respectively. The
@@ -926,9 +934,17 @@ public class RigidBodyTransform implements Serializable
     * 
     * @param vector
     */
-   public final void setEuler(Vector3d vector)
+   public final void setRotationEulerAndZeroTranslation(Vector3d vector)
    {
-      setEuler(vector.x, vector.y, vector.z);
+      setRotationEulerAndZeroTranslation(vector.x, vector.y, vector.z);
+   }
+
+   /**
+    * @deprecated Use {@link #setRotationEulerAndZeroTranslation(double, double, double)} instead.
+    */
+   public final void setEuler(double rotX, double rotY, double rotZ)
+   {
+      setRotationEulerAndZeroTranslation(rotX, rotY, rotZ);
    }
 
    /**
@@ -943,7 +959,7 @@ public class RigidBodyTransform implements Serializable
     * @param rotY
     * @param rotZ
     */
-   public final void setEuler(double rotX, double rotY, double rotZ)
+   public final void setRotationEulerAndZeroTranslation(double rotX, double rotY, double rotZ)
    {
       double sina = Math.sin(rotX);
       double sinb = Math.sin(rotY);
@@ -967,6 +983,14 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
+    * @deprecated use {@link #getRotationEuler(Vector3d)} instead.
+    */
+   public void getEulerXYZ(Vector3d vector)
+   {
+      getRotationEuler(vector);
+   }
+
+   /**
     * Computes the RPY angles from the rotation matrix for rotations about the
     * X, Y, and Z axes respectively. Note that this method is here for the
     * purpose of unit testing the method setEuler. This particular solution is
@@ -974,7 +998,7 @@ public class RigidBodyTransform implements Serializable
     * 
     * @param vector
     */
-   public void getEulerXYZ(Vector3d vector)
+   public void getRotationEuler(Vector3d vector)
    {
       vector.x = Math.atan2(mat21, mat22);
       vector.y = Math.atan2(-mat20, Math.sqrt(mat21 * mat21 + mat22 * mat22));
@@ -1650,12 +1674,21 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
+    * @deprecated use {@link #setRotationRollAndZeroTranslation(double)} instead
+    * @param angle
+    */
+   public void rotX(double angle)
+   {
+      setRotationRollAndZeroTranslation(angle);
+   }
+
+   /**
     * Create RigidBodyTransform with zero translation and the rotation matrix being a
     * rotation about the x-axis by angle.
     * 
     * @param angle
     */
-   public void rotX(double angle)
+   public void setRotationRollAndZeroTranslation(double angle)
    {
       double cosAngle = Math.cos(angle);
       double sinAngle = Math.sin(angle);
@@ -1675,12 +1708,21 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
+    * @deprecated Use {@link #setRotationPitchAndZeroTranslation(double)} instead.
+    * @param angle
+    */
+   public void rotY(double angle)
+   {
+      setRotationPitchAndZeroTranslation(angle);
+   }
+
+   /**
     * Create RigidBodyTransform with zero translation and the rotation matrix being a
     * rotation about the y-axis by angle.
     * 
     * @param angle
     */
-   public void rotY(double angle)
+   public void setRotationPitchAndZeroTranslation(double angle)
    {
       double cosAngle = Math.cos(angle);
       double sinAngle = Math.sin(angle);
@@ -1700,12 +1742,21 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
+    * @deprecated Use {@link #setRotationYawAndZeroTranslation(double)} instead.
+    * @param angle
+    */
+   public void rotZ(double angle)
+   {
+      setRotationYawAndZeroTranslation(angle);
+   }
+
+   /**
     * Create RigidBodyTransform with zero translation and the rotation matrix being a
     * rotation about the z-axis by angle.
     * 
     * @param angle
     */
-   public void rotZ(double angle)
+   public void setRotationYawAndZeroTranslation(double angle)
    {
       double cosAngle = Math.cos(angle);
       double sinAngle = Math.sin(angle);
@@ -2006,19 +2057,36 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
+    * @deprecated use {@link #determinantRotationPart()} instead
+    * @return
+    */
+   public final double determinant()
+   {
+      return determinantRotationPart();
+   }
+
+   /**
     * Return the determinant of this transform.
     * 
     * @return
     */
-   public final double determinant()
+   public final double determinantRotationPart()
    {
       return (mat00 * (mat11 * mat22 - mat12 * mat21) - mat01 * (mat10 * mat22 - mat12 * mat20) + mat02 * (mat10 * mat21 - mat11 * mat20));
    }
 
    /**
-    * Orthonormalization of the rotation matrix using Gram-Schmidt method.
+    * @deprecated use {@link #normalizeRotationPart()} instead.
     */
    public void normalize()
+   {
+      normalizeRotationPart();
+   }
+
+   /**
+    * Orthonormalization of the rotation matrix using Gram-Schmidt method.
+    */
+   public void normalizeRotationPart()
    {
       double xdoty = mat00 * mat01 + mat10 * mat11 + mat20 * mat21;
       double xdotx = mat00 * mat00 + mat10 * mat10 + mat20 * mat20;

@@ -33,11 +33,11 @@ public class TransformRayDemo
    public TransformRayDemo()
    {
       final Graphics3DObject graphic = new Graphics3DObject();
-      incrementalRotation.rotX(-Math.PI / 16);
+      incrementalRotation.setRotationRollAndZeroTranslation(-Math.PI / 16);
       graphic.addCylinder(5.0, 0.2, YoAppearance.Red());
 
       final Graphics3DNode rayNode = new Graphics3DNode("laserRay", Graphics3DNodeType.VISUALIZATION);
-      tInit.rotY(Math.PI / 4.0);
+      tInit.setRotationPitchAndZeroTranslation(Math.PI / 4.0);
       // tInit.rotX(Math.PI / 4.0);
       rayNode.setTransform(tInit);
       rayNode.setGraphicsObject(graphic);

@@ -16,7 +16,8 @@ import us.ihmc.robotDataCommunication.logger.LogPropertiesReader;
 import us.ihmc.robotDataCommunication.logger.YoVariableLogReader;
 import us.ihmc.robotDataCommunication.logger.YoVariableLoggerListener;
 
-public class LogFileCompressor extends YoVariableLogReader
+public class
+LogFileCompressor extends YoVariableLogReader
 {
    public static final int NUMBER_OF_THREADS = 8;
    public static final int MAX_BUFFER_SIZE_IN_BYTE = 100000000;

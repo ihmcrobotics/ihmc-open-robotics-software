@@ -59,16 +59,21 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       xGaitSettingsProvider = new QuadrupedXGaitSettingsProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
 
       GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
-      globalDataProducer.attachListener(QuadrupedForceControllerEventPacket.class, new PacketConsumer<QuadrupedForceControllerEventPacket>()
+      
+      if (globalDataProducer != null)
       {
-         @Override
-         public void receivedPacket(QuadrupedForceControllerEventPacket packet)
+         globalDataProducer.attachListener(QuadrupedForceControllerEventPacket.class, new PacketConsumer<QuadrupedForceControllerEventPacket>()
          {
-            requestedEvent.set(packet.get());
-         }
-      });
+            @Override
+            public void receivedPacket(QuadrupedForceControllerEventPacket packet)
+            {
+               requestedEvent.set(packet.get());
+            }
+         });
 
-      ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
+         ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
+      }
+
 
       this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry);
       this.stateMachine = buildStateMachine(runtimeEnvironment, inputProvider);
@@ -140,7 +145,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       QuadrupedController standReadyController = new QuadrupedForceBasedStandReadyController(runtimeEnvironment, controllerToolbox);
       QuadrupedController standController = new QuadrupedDcmBasedStandController(runtimeEnvironment, controllerToolbox, inputProvider);
       QuadrupedController stepController = new QuadrupedDcmBasedStepController(runtimeEnvironment, controllerToolbox, inputProvider, timedStepProvider);
-      QuadrupedController xGaitController = new QuadrupedDcmBasedXGaitController(runtimeEnvironment, controllerToolbox, inputProvider, xGaitSettingsProvider);
+      QuadrupedController xGaitController = new QuadrupedMpcBasedXGaitController(runtimeEnvironment, controllerToolbox, inputProvider, xGaitSettingsProvider);
 
       FiniteStateMachineBuilder<QuadrupedForceControllerState, ControllerEvent> builder = new FiniteStateMachineBuilder<>(
             QuadrupedForceControllerState.class, ControllerEvent.class, "forceControllerState", registry);

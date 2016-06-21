@@ -13,6 +13,7 @@ apply plugin: "us.ihmc.gradle.ihmc-build"
 
 if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
     evaluationDependsOn(':IHMCOpenRoboticsSoftware')
+    evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCQuadrupedRobotics"))
 }
 
 sourceCompatibility = 1.7
@@ -45,15 +46,16 @@ dependencies {
 
    compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
    compile ihmc.getProjectDependency(":SimulationConstructionSet")
-   compile ihmc.getProjectDependency(":Graphics3DAdapter")
    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
    compile ihmc.getProjectDependency(":IHMCCommunication")
    compile ihmc.getProjectDependency(":SDFLoader")
-   compile ihmc.getProjectDependency(":CommonWalkingControlModules")
    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
+//   compile ihmc.getProjectDependency(":IHMCStateEstimation")
    compile ihmc.getProjectDependency(":SensorProcessing")
-   compile ihmc.getProjectDependency(":IHMCStateEstimation")
+
+   testCompile ihmc.getProjectTestDependency(":IHMCQuadrupedRobotics")
+   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 }
 
 jar {

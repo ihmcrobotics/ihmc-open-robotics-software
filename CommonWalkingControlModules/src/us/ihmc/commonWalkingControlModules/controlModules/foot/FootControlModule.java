@@ -404,9 +404,11 @@ public class FootControlModule
       switch (command.getExecutionMode())
       {
       case OVERRIDE:
-         boolean initializeToCurrent = !stateMachine.isCurrentState(ConstraintType.MOVE_VIA_WAYPOINTS);
+         boolean isInMoveViaWaypointsState = stateMachine.isCurrentState(ConstraintType.MOVE_VIA_WAYPOINTS);
+         boolean initializeToCurrent = !isInMoveViaWaypointsState;
          moveViaWaypointsState.handleFootTrajectoryCommand(command, initializeToCurrent);
-         resetCurrentState();
+         if (isInMoveViaWaypointsState)
+            resetCurrentState();
          break;
       case QUEUE:
          boolean success = moveViaWaypointsState.queueHandTrajectoryCommand(command);

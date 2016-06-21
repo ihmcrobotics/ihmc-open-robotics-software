@@ -54,7 +54,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    {     
       RigidBodyTransform translateForwardAndDownOnFoot = new RigidBodyTransform();
       translateForwardAndDownOnFoot.setTranslation(0.021564, 0.0, -0.051054);
-      translateForwardAndDownOnFoot.setEuler(Math.PI, 0.0, 0.0);
+      translateForwardAndDownOnFoot.setRotationEulerAndZeroTranslation(Math.PI, 0.0, 0.0);
 
       transformFromSixAxisMeasurementToAnkleZUpFrames.put(RobotSide.LEFT, translateForwardAndDownOnFoot);
       transformFromSixAxisMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new RigidBodyTransform(translateForwardAndDownOnFoot));

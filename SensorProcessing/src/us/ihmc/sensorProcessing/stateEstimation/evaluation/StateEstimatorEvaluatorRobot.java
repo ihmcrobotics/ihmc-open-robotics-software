@@ -88,7 +88,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
          RigidBodyTransform imu1Offset = new RigidBodyTransform();
          if (ROTATE_IMU_FRAMES)
          {
-            imu1Offset.rotX(Math.PI / 7.0);
+            imu1Offset.setRotationRollAndZeroTranslation(Math.PI / 7.0);
          }
 
          Vector3d offsetVector1 = new Vector3d();
@@ -120,7 +120,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
          RigidBodyTransform imu2Offset = new RigidBodyTransform();
          if (ROTATE_IMU_FRAMES)
          {
-            imu2Offset.rotY(Math.PI / 8.0);
+            imu2Offset.setRotationPitchAndZeroTranslation(Math.PI / 8.0);
          }
 
          Vector3d offsetVector2 = new Vector3d();
@@ -204,7 +204,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
       else
       {
          RigidBodyTransform rootJointPostionAndRotation = new RigidBodyTransform();
-         rootJointPostionAndRotation.rotY(Math.PI*0.9);
+         rootJointPostionAndRotation.setRotationPitchAndZeroTranslation(Math.PI*0.9);
          rootJointPostionAndRotation.setTranslation(new Vector3d(0.0, 0.0, 0.4));
          rootJoint.setRotationAndTranslation(rootJointPostionAndRotation);
          
