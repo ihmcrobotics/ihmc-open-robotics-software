@@ -186,7 +186,7 @@ public class HumanEvaluationLine2dTest
       Vector3d translation = new Vector3d(random.nextDouble(), random.nextDouble(), 0.0);
       Vector3d eulerAngles = new Vector3d(0.0, 0.0, 0.0);
 
-      transform.setEuler(eulerAngles);
+      transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
       Line2d line = new Line2d(line2dPointPoint);

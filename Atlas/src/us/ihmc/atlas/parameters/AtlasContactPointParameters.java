@@ -174,7 +174,7 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
       {
          RigidBodyTransform handContactPointTransform = new RigidBodyTransform();
 
-         handContactPointTransform.rotX(robotSide.negateIfRightSide(Math.PI / 2.0));
+         handContactPointTransform.setRotationRollAndZeroTranslation(robotSide.negateIfRightSide(Math.PI / 2.0));
          handContactPointTransform.setTranslation(new Vector3d(0.0, robotSide.negateIfRightSide(0.13), robotSide.negateIfRightSide(0.01)));
          handContactPointTransforms.put(robotSide, handContactPointTransform);
          handContactPoints.put(robotSide, new ArrayList<Point2d>());

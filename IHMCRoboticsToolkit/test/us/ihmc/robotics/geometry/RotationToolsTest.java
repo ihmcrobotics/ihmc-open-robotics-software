@@ -615,11 +615,11 @@ public class RotationToolsTest
             for (int rollIndex = 0; rollIndex < numberOfIterations; rollIndex++)
             {
                double roll = rollIndex * dAngle + startAngle;
-               expectedTransform.setEuler(roll, pitch, yaw);
+               expectedTransform.setRotationEulerAndZeroTranslation(roll, pitch, yaw);
 
                RotationTools.convertTransformToYawPitchRoll(expectedTransform, actualYawPitchRoll);
 
-               actualTransform.setEuler(actualYawPitchRoll[2], actualYawPitchRoll[1], actualYawPitchRoll[0]);
+               actualTransform.setRotationEulerAndZeroTranslation(actualYawPitchRoll[2], actualYawPitchRoll[1], actualYawPitchRoll[0]);
 
                assertTrue(expectedTransform.epsilonEquals(actualTransform, EPSILON));
             }

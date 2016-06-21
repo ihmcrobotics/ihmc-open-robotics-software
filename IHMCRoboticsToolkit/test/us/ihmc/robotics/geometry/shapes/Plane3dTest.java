@@ -120,7 +120,7 @@ public class Plane3dTest
    public void testApplyTransform()
    {
       RigidBodyTransform transformation = new RigidBodyTransform();
-      transformation.rotZ(2.3);
+      transformation.setRotationYawAndZeroTranslation(2.3);
       Plane3d plane = new Plane3d();
       plane.applyTransform(transformation);
       JUnitTools.assertTuple3dEquals(plane.getNormalCopy(), new Vector3d(0.0, 0.0, 1.0), 1e-14);
@@ -134,7 +134,7 @@ public class Plane3dTest
       JUnitTools.assertTuple3dEquals(plane2.getPointCopy(), new Point3d(1.0, 2.0, 3.0), 1e-14);
 
       RigidBodyTransform transformation3 = new RigidBodyTransform();
-      transformation3.rotY(Math.PI / 2);
+      transformation3.setRotationPitchAndZeroTranslation(Math.PI / 2);
       transformation3.setTranslation(new Vector3d(1.0, 2.0, 3.0));
       Plane3d plane3 = new Plane3d();
       plane3.applyTransform(transformation3);
@@ -142,7 +142,7 @@ public class Plane3dTest
       JUnitTools.assertTuple3dEquals(plane3.getPointCopy(), new Point3d(1.0, 2.0, 3.0), 1e-14);
 
       RigidBodyTransform transformation4 = new RigidBodyTransform();
-      transformation4.rotY(Math.PI / 2);
+      transformation4.setRotationPitchAndZeroTranslation(Math.PI / 2);
       transformation4.setTranslation(new Vector3d(1.0, 2.0, 3.0));
       Plane3d plane4 = new Plane3d();
       Plane3d plane5 = plane4.applyTransformCopy(transformation4);

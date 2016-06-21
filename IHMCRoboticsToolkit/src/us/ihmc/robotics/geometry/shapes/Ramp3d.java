@@ -61,7 +61,7 @@ public class Ramp3d implements Shape3d
       // additional transform where x-axis is plane of the ramp and y-axis is
       // still perpendicular to it's length
       angleOfRampIncline = Math.atan(height / length);
-      transformFromAngledFrameToRamp.rotY(-angleOfRampIncline);
+      transformFromAngledFrameToRamp.setRotationPitchAndZeroTranslation(-angleOfRampIncline);
 
       temporaryTransform.multiply(transform, transformFromAngledFrameToRamp);
       surfaceNormal = new Vector3d(0.0, 0.0, 1.0);

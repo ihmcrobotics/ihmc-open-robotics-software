@@ -10,6 +10,8 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
 import us.ihmc.quadrupedRobotics.controller.forceDevelopment.QuadrupedForceDevelopmentControllerManager;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -34,6 +36,7 @@ public class QuadrupedControllerManagerFactory
    private IHMCCommunicationKryoNetClassList kryoNetClassList;
    private QuadrupedPhysicalProperties physicalProperties;
    private QuadrupedReferenceFrames referenceFrames;
+   private QuadrupedControlMode controlMode;
    
    // TO CONSTRUCT
    private PacketCommunicator packetCommunicator;
@@ -71,7 +74,7 @@ public class QuadrupedControllerManagerFactory
                                                            yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead, globalDataProducer, footSwitches);
    }
    
-   public QuadrupedForceDevelopmentControllerManager createForceDevelopmentControllerManager() throws IOException
+   public QuadrupedControllerManager createControllerManager() throws IOException
    {
       createContactableFeet();
       createFootSwitches();
@@ -79,29 +82,20 @@ public class QuadrupedControllerManagerFactory
       createGlobalDataProducer();
       createRuntimeEnvironment();
       
-      return new QuadrupedForceDevelopmentControllerManager(runtimeEnvironment, physicalProperties);
+      switch (controlMode)
+      {
+      case FORCE:
+         return new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties);
+      case FORCE_DEV:
+         return new QuadrupedForceDevelopmentControllerManager(runtimeEnvironment, physicalProperties);
+      case POSITION:
+         return null;
+      case POSITION_DEV:
+         return null;
+      default:
+         return null;
+      }
    }
-   
-   public QuadrupedForceControllerManager createForceControllerManager() throws IOException
-   {
-      createContactableFeet();
-      createFootSwitches();
-      createPacketCommunicator();
-      createGlobalDataProducer();
-      createRuntimeEnvironment();
-      
-      return new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties);
-   }
-   
-//   public QuadrupedPositionControllerManager createPositionControllerManager()
-//   {
-//      return new QuadrupedPositionControllerManager(runtimeEnvironment, physicalProperties);
-//   }
-//   
-//   public QuadrupedPositionDevelopmentControllerManager createPositionDevelopmentControllerManager()
-//   {
-//      return new QuadrupedPositionDevelopmentControllerManager(runtimeEnvironment, physicalProperties);
-//   }
    
    // OPTIONS
    
@@ -153,5 +147,10 @@ public class QuadrupedControllerManagerFactory
    public void setReferenceFrames(QuadrupedReferenceFrames referenceFrames)
    {
       this.referenceFrames = referenceFrames;
+   }
+   
+   public void setControlMode(QuadrupedControlMode controlMode)
+   {
+      this.controlMode = controlMode;
    }
 }

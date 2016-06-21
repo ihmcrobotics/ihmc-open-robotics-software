@@ -115,7 +115,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
       double hipRollAngle = Math.atan2(footPositionInFrameBeforeHipRoll.getY(), -footPositionInFrameBeforeHipRoll.getZ());
 
       transformFromBeforeHipRollToAfterHipRoll.setIdentity();
-      transformFromBeforeHipRollToAfterHipRoll.rotX(-hipRollAngle);
+      transformFromBeforeHipRollToAfterHipRoll.setRotationRollAndZeroTranslation(-hipRollAngle);
 
       footPositionInFrameAfterHipRoll.set(footPositionInFrameBeforeHipRoll);
       transformFromBeforeHipRollToAfterHipRoll.transform(footPositionInFrameAfterHipRoll);

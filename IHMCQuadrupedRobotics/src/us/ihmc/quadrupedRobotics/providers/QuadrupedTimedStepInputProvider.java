@@ -17,14 +17,17 @@ public class QuadrupedTimedStepInputProvider
    {
       timedStepPacket = new AtomicReference<>(new QuadrupedTimedStepPacket());
 
-      globalDataProducer.attachListener(QuadrupedTimedStepPacket.class, new PacketConsumer<QuadrupedTimedStepPacket>()
+      if (globalDataProducer != null)
       {
-         @Override
-         public void receivedPacket(QuadrupedTimedStepPacket packet)
+         globalDataProducer.attachListener(QuadrupedTimedStepPacket.class, new PacketConsumer<QuadrupedTimedStepPacket>()
          {
-            timedStepPacket.set(packet);
-         }
-      });
+            @Override
+            public void receivedPacket(QuadrupedTimedStepPacket packet)
+            {
+               timedStepPacket.set(packet);
+            }
+         });
+      }
    }
 
    public ArrayList<QuadrupedTimedStep> get()

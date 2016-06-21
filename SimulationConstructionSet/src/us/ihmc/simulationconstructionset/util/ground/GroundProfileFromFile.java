@@ -273,7 +273,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
       @SuppressWarnings("unused") double unitScale = 0.01;
 
       RigidBodyTransform transform3D = new RigidBodyTransform();
-      transform3D.rotZ(Math.PI / 8.0);
+      transform3D.setRotationYawAndZeroTranslation(Math.PI / 8.0);
 
       GroundProfileFromFile groundProfile = new GroundProfileFromFile(datafile, 10, transform3D, new VariableType[] {VariableType.X, VariableType.Z,
               VariableType.Y});

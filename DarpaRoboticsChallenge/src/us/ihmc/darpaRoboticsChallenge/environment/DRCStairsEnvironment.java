@@ -140,7 +140,7 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
       double xCenter = centerPoint[0];
       double yCenter = centerPoint[1];
       RigidBodyTransform location = new RigidBodyTransform();
-      location.rotZ(Math.toRadians(yawDegrees));
+      location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(xCenter, yCenter, stairTopHeight - thickness / 2));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, tread, width, thickness), app);
@@ -151,10 +151,10 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
          double yLength, double zLength, double slopeRadians, double yawDegrees, AppearanceDefinition app)
    {
       RigidBodyTransform location = new RigidBodyTransform();
-      location.rotZ(Math.toRadians(yawDegrees));
+      location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       RigidBodyTransform tilt = new RigidBodyTransform();
-      tilt.rotY(-slopeRadians);
+      tilt.setRotationPitchAndZeroTranslation(-slopeRadians);
       location.multiply(tilt);
 
       location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));

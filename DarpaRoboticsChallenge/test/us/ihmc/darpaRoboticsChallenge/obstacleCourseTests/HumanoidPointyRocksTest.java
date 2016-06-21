@@ -1144,7 +1144,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private ArrayList<Point2d> generateContactPointsForRotatedLineOfContact(double angle)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotZ(angle);
+      transform.setRotationYawAndZeroTranslation(angle);
 
       Line2d leftLine = new Line2d(new Point2d(0.0, 0.005), new Vector2d(1.0, 0.0));
       Line2d rightLine = new Line2d(new Point2d(0.0, -0.005), new Vector2d(1.0, 0.0));

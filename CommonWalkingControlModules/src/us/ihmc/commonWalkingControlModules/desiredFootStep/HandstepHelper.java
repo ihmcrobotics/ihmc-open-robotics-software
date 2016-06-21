@@ -53,7 +53,7 @@ public class HandstepHelper
       if (rotateZIntoX)
       {
          RigidBodyTransform transformThree = new RigidBodyTransform();
-         transformThree.rotY(Math.PI / 2.0);
+         transformThree.setRotationPitchAndZeroTranslation(Math.PI / 2.0);
          transformOne.multiply(transformThree);
       }
 

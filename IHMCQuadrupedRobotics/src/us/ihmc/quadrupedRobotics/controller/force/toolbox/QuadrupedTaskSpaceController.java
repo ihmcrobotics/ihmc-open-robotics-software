@@ -1,9 +1,9 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.quadrupedRobotics.mechanics.contactForceOptimization.QuadrupedContactForceLimits;
-import us.ihmc.quadrupedRobotics.mechanics.contactForceOptimization.QuadrupedContactForceOptimization;
-import us.ihmc.quadrupedRobotics.mechanics.contactForceOptimization.QuadrupedContactForceOptimizationSettings;
+import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.QuadrupedContactForceLimits;
+import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.QuadrupedContactForceOptimization;
+import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.QuadrupedContactForceOptimizationSettings;
 import us.ihmc.quadrupedRobotics.mechanics.virtualModelController.QuadrupedVirtualModelController;
 import us.ihmc.quadrupedRobotics.mechanics.virtualModelController.QuadrupedVirtualModelControllerSettings;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -133,7 +133,8 @@ public class QuadrupedTaskSpaceController
    private final FrameVector contactForceStorage;
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceController");
 
-   public QuadrupedTaskSpaceController(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public QuadrupedTaskSpaceController(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT,
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       // virtual model controller
       virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, controlDT, registry);

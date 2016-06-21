@@ -16,12 +16,6 @@ import javax.vecmath.Point3f;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import boofcv.struct.calib.IntrinsicParameters;
-import bubo.clouds.FactoryPointCloudShape;
-import bubo.clouds.detect.CloudShapeTypes;
-import bubo.clouds.detect.PointCloudShapeFinder;
-import bubo.clouds.detect.PointCloudShapeFinder.Shape;
-import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
-import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point3D_F64;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
@@ -32,6 +26,12 @@ import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder.Shape;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
@@ -232,7 +232,7 @@ public class VisionPoseEstimator implements DRCStereoListener
                   {
                      RigidBodyTransform cameraToWorld = data.getRight();
                      RigidBodyTransform opticalFrameToCameraFrame = new RigidBodyTransform();
-                     opticalFrameToCameraFrame.setEuler(-Math.PI / 2.0, 0.0, -Math.PI / 2);
+                     opticalFrameToCameraFrame.setRotationEulerAndZeroTranslation(-Math.PI / 2.0, 0.0, -Math.PI / 2);
                      RigidBodyTransform targetToWorld = new RigidBodyTransform();
 
                      targetToWorld.multiply(cameraToWorld, opticalFrameToCameraFrame);

@@ -251,7 +251,7 @@ public class WheelRotationEstimator extends IcpCloud3D
    private void setupRotationTransforms(int i)
    {
       tempTransformFromCurrentToRotary.setIdentity();
-      tempTransformFromCurrentToRotary.rotX(indexToAngle(i));
+      tempTransformFromCurrentToRotary.setRotationRollAndZeroTranslation(indexToAngle(i));
       tempInverseTransformFromCurrentToRotary.invert(tempTransformFromCurrentToRotary);
    }
 

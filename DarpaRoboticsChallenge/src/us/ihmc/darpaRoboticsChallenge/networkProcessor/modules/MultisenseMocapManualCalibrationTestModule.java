@@ -112,7 +112,7 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
             
             //manual calibration offsets from mocap jig misalignment
             //had to make pitch and roll negative to match frames of ui tool
-            mocapCalibrationTransform.setEuler(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(0.0));
+            mocapCalibrationTransform.setRotationEulerAndZeroTranslation(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(0.0));
             mocapToStateEstimatorFrameConverter.setMocapJigCalibrationTransform(mocapCalibrationTransform);
             mocapToStateEstimatorFrameConverter.update(mocapObject);
             

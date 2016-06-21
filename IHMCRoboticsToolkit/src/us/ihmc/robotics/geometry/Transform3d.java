@@ -1900,7 +1900,7 @@ public class Transform3d extends RigidBodyTransform
     */
    private final void invertAffine(Transform3d transform)
    {
-      double det = transform.determinant();
+      double det = transform.determinantRotationPart();
       if (det == 0)
       {
          throw new RuntimeException("Matrix is singular.");
@@ -1990,7 +1990,7 @@ public class Transform3d extends RigidBodyTransform
     */
    private final void invertAffine()
    {
-      double det = this.determinant();
+      double det = this.determinantRotationPart();
       if (det == 0.0)
       {
          throw new RuntimeException("Matrix is singular.");
@@ -2280,7 +2280,7 @@ public class Transform3d extends RigidBodyTransform
     * @param angle
     */
    @Override
-   public final void rotX(double angle)
+   public final void setRotationRollAndZeroTranslation(double angle)
    {
       mat00 = 1.0;
       mat01 = 0.0;
@@ -2307,7 +2307,7 @@ public class Transform3d extends RigidBodyTransform
     * @param angle
     */
    @Override
-   public final void rotY(double angle)
+   public final void setRotationPitchAndZeroTranslation(double angle)
    {
       mat00 = Math.cos(angle);
       mat01 = 0.0;
@@ -2334,7 +2334,7 @@ public class Transform3d extends RigidBodyTransform
     * @param angle
     */
    @Override
-   public final void rotZ(double angle)
+   public final void setRotationYawAndZeroTranslation(double angle)
    {
       mat00 = Math.cos(angle);
       mat01 = -Math.sin(angle);
@@ -2372,7 +2372,7 @@ public class Transform3d extends RigidBodyTransform
     * Orthonormalization of the rotation matrix using Gram-Schmidt method.
     */
    @Override
-   public final void normalize()
+   public final void normalizeRotationPart()
    {
 
       computeRotationScale();

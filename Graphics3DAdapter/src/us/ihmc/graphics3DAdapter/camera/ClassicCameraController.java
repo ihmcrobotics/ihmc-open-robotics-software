@@ -757,7 +757,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       // double offsetDistance = v3d.length();
 
-      t3d.rotZ(-dx * rotate_factor);
+      t3d.setRotationYawAndZeroTranslation(-dx * rotate_factor);
       t3d.transform(v3d);
 
       if (!isDolly || (!isDollyX && !isDollyY))
@@ -814,7 +814,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       double delX0 = camX - fixX, delY0 = camY - fixY, delZ0 = camZ - fixZ;
       v3d.set(delX0, delY0, delZ0);
 
-      t3d.rotZ(-dx * rotate_factor);
+      t3d.setRotationYawAndZeroTranslation(-dx * rotate_factor);
       t3d.transform(v3d);
 
       if (!isDolly || (!isDollyX && !isDollyY))
@@ -856,7 +856,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       // double offsetDistance = v3d.length();
 
-      t3d.rotZ(-dx * rotate_camera_factor);
+      t3d.setRotationYawAndZeroTranslation(-dx * rotate_camera_factor);
       t3d.transform(v3d);
 
       if (!isTracking || (!isTrackingX && !isTrackingY))
@@ -1309,7 +1309,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       currXform.setRotationAndZeroTranslation(rotationMatrix);
       currXform.setTranslation(positionOffset);
-      currXform.normalize();
+      currXform.normalizeRotationPart();
    }
    
    private boolean shouldAcceptDeviceInput()

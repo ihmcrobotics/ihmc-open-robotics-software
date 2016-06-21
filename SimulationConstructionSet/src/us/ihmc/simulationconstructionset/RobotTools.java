@@ -140,7 +140,7 @@ public class RobotTools
          if (scsFloatingJoint != null)
          {
             scsFloatingJoint.getTransformToWorld(transformToWorld);
-            transformToWorld.normalize();
+            transformToWorld.normalizeRotationPart();
             idFloatingJoint.setPositionAndRotation(transformToWorld);
          }
 

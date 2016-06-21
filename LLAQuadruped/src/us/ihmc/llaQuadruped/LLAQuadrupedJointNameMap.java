@@ -20,23 +20,19 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
 {
    private final String modelName = "llaQuadruped";
    private final String rootJoint = "body";
-   private final String headName = "head";
 
    private final LegJointName[] legJointNames = {LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE};
-   private final NeckJointName[] neckJointNames = new NeckJointName[] {};
    private final String[] jointNamesBeforeFeet = new String[4];
 
    private final HashMap<String, QuadrupedJointName> quadrupedJointNameMap = new HashMap<>();
    private final HashMap<QuadrupedJointName, String> sdfJointNameMap = new HashMap<>();
    private final HashMap<String, JointRole> jointRoles = new HashMap<>();
 
-   private final LinkedHashMap<String, NeckJointName> neckJointMap = new LinkedHashMap<String, NeckJointName>();
    private final List<ImmutablePair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<>();
    private final QuadrantDependentList<HashMap<LegJointName, String>> mapFromLegJointNameToJointId = new QuadrantDependentList<>();
 
    public LLAQuadrupedJointNameMap(LLAQuadrupedPhysicalProperties physicalProperties)
    {
-      // // FIXME: 6/2/16 are these the correct joint names?
       quadrupedJointNameMap.put("front_left_hip_roll", QuadrupedJointName.FRONT_LEFT_HIP_ROLL);
       quadrupedJointNameMap.put("front_left_hip_pitch", QuadrupedJointName.FRONT_LEFT_HIP_PITCH);
       quadrupedJointNameMap.put("front_left_knee_pitch", QuadrupedJointName.FRONT_LEFT_KNEE_PITCH);
@@ -49,11 +45,6 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
       quadrupedJointNameMap.put("hind_right_hip_roll", QuadrupedJointName.HIND_RIGHT_HIP_ROLL);
       quadrupedJointNameMap.put("hind_right_hip_pitch", QuadrupedJointName.HIND_RIGHT_HIP_PITCH);
       quadrupedJointNameMap.put("hind_right_knee_pitch", QuadrupedJointName.HIND_RIGHT_KNEE_PITCH);
-      quadrupedJointNameMap.put("neck_root_yaw", QuadrupedJointName.PROXIMAL_NECK_YAW);
-      quadrupedJointNameMap.put("neck_root_pitch", QuadrupedJointName.PROXIMAL_NECK_PITCH);
-      quadrupedJointNameMap.put("head_yaw", QuadrupedJointName.DISTAL_NECK_YAW);
-      quadrupedJointNameMap.put("head_pitch", QuadrupedJointName.DISTAL_NECK_PITCH);
-      quadrupedJointNameMap.put("head_roll", QuadrupedJointName.DISTAL_NECK_ROLL);
 
       for (Map.Entry<String, QuadrupedJointName> entry : quadrupedJointNameMap.entrySet())
       {
@@ -68,14 +59,7 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
       for (LLAQuadrupedOrderedJointMap joint : LLAQuadrupedOrderedJointMap.values())
       {
          String jointName = joint.getName();
-         if (jointName.toLowerCase().contains("neck") || jointName.toLowerCase().contains("head"))
-         {
-            jointRoles.put(jointName, JointRole.NECK);
-         }
-         else
-         {
-            jointRoles.put(jointName, JointRole.LEG);
-         }
+         jointRoles.put(jointName, JointRole.LEG);
 
          RobotQuadrant robotQuadrant = joint.getRobotQuadrant();
          if (robotQuadrant != null)
@@ -98,6 +82,11 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
       jointNamesBeforeFeet[3] = getLegJointName(RobotQuadrant.HIND_RIGHT, LegJointName.KNEE);
    }
 
+   public Collection<QuadrupedJointName> getQuadrupedJointNames()
+   {
+      return quadrupedJointNameMap.values();
+   }
+   
    @Override
    public String getModelName()
    {
@@ -113,7 +102,7 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
    @Override
    public NeckJointName getNeckJointName(String jointName)
    {
-      return neckJointMap.get(jointName);
+      return null;
    }
 
    @Override
@@ -143,7 +132,7 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
    @Override
    public String getHeadName()
    {
-      return headName;
+      return null;
    }
 
    @Override
@@ -197,7 +186,7 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
    @Override
    public NeckJointName[] getNeckJointNames()
    {
-      return neckJointNames;
+      return new NeckJointName[0];
    }
 
    @Override
