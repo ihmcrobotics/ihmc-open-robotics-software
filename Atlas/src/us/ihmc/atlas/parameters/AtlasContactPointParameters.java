@@ -88,8 +88,8 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
 
    public void addMoreFootContactPointsSimOnly()
    {
-      int nContactPointsX = 8;
-      int nContactPointsY = 3;
+      int nContactPointsX = 16;
+      int nContactPointsY = 8;
 
       double dx = 1.01 * footLengthForControl / (nContactPointsX - 1.0);
       double xOffset = 1.01 * footLengthForControl / 2.0;
@@ -107,9 +107,14 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
             {
                if ((ix == 1 || ix == nContactPointsX) && (iy == 1 || iy == nContactPointsY)) // Avoid adding corners a second time
                   continue;
+
+               if (ix != 1 && ix != nContactPointsX && iy != 1 && iy != nContactPointsY)
+                  continue;
+
                double x = (ix - 1) * dx - xOffset;
                double y = (iy - 1) * dy - yOffset;
-               Point3d gcOffset = new Point3d(x, y, 0);
+               double z = 0.01 * ((xOffset - Math.abs(x))/xOffset + (yOffset - Math.abs(y))/yOffset);
+               Point3d gcOffset = new Point3d(x, y, z);
 
                AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide).transform(gcOffset);
                addSimulationContactPoint(jointMap.getJointBeforeFootName(robotSide), gcOffset);
@@ -266,7 +271,7 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
          boolean areHandsFlipped)
    {
       double offsetFromWristToPalmPlane = 0.22; // 0.24
-      Point3d palmCenter = new Point3d(-0.002, robotSide.negateIfRightSide(offsetFromWristToPalmPlane), 0.0); // [-0.002, 0.22, 0.0] (-0.002, 0.24, 0.015)  
+      Point3d palmCenter = new Point3d(-0.002, robotSide.negateIfRightSide(offsetFromWristToPalmPlane), 0.0); // [-0.002, 0.22, 0.0] (-0.002, 0.24, 0.015)
       double palmWidth = 0.07;
       double palmHeight = 0.075;
 
