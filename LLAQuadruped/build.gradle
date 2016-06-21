@@ -46,7 +46,7 @@ dependencies {
 
    compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
    compile ihmc.getProjectDependency(":IHMCUnitTesting")
-   testCompile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
+   testCompile ihmc.getProjectTestDependency(":IHMCQuadrupedRobotics")
    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
    
    compile ihmc.getProjectDependency(":SimulationConstructionSet")
