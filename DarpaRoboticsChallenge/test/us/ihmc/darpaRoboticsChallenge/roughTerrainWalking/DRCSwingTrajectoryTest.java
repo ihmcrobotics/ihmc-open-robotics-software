@@ -137,6 +137,8 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    @Test(timeout = 390000)
    public void testMultipleHeightFootsteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters.setRunMultiThreaded(false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double[] heights = {0.1, 0.2, 0.3};
@@ -146,8 +148,6 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       {
          double currentHeight = heights[i];
          DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-         simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-         simulationTestingParameters.setRunMultiThreaded(false);
          FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
          drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
                  getRobotModel());
@@ -190,13 +190,13 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    @Test(timeout = 180000)
    public void testReallyHighFootstep() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters.setRunMultiThreaded(false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success;
       double currentHeight = 0.6;
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-      simulationTestingParameters.setRunMultiThreaded(false);
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
               getRobotModel());
@@ -221,13 +221,13 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    @Test(timeout = 160000)
    public void testNegativeSwingHeight() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters.setRunMultiThreaded(false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success;
       double currentHeight = -0.1;
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-      simulationTestingParameters.setRunMultiThreaded(false);
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
             getRobotModel());
