@@ -4122,11 +4122,10 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       List<YoGraphicsList> yoGraphicsLists = yoGraphicsListRegistry.getYoGraphicsLists();
       
       if (yoGraphicsLists == null) return;
-      
-      addCheckBoxesToDynamicGraphicCheckBoxMenuItem(yoGraphicsLists);
 
       if(dynamicGraphicMenuManager != null)
       {
+         addCheckBoxesToDynamicGraphicCheckBoxMenuItem(yoGraphicsLists);
          displayYoGraphicMenu();
       }
 
