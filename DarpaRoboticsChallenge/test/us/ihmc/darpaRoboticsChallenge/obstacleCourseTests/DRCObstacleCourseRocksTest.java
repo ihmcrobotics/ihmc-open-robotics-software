@@ -59,7 +59,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
 	@Test(timeout = 330000)
    public void testWalkingOntoRocks() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
       
@@ -97,7 +97,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
    
    

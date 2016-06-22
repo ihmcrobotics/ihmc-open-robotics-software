@@ -74,7 +74,7 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
    @Test(timeout = 520000)
    public void testWalkingWithHighSteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -120,7 +120,7 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
       assertFalse(checker.hasMaxValueExeededAnyJoint());
       assertFalse(checker.hasMinValueExeededAnyJoint());
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private FootstepDataListMessage createFootstepsWithHighSwing()

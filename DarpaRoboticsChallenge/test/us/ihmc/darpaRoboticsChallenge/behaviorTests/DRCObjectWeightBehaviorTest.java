@@ -34,7 +34,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
    public void setUp()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
      
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(),

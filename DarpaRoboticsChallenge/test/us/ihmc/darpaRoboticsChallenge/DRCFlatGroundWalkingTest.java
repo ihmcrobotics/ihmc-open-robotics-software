@@ -33,7 +33,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterface
 {
-   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private BlockingSimulationRunner blockingSimulationRunner;
 
    /**
@@ -122,7 +122,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       checkSimulationRunsSameWayTwice(verifier);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
    
    private void simulateAndAssertGoodWalking(DRCFlatGroundWalkingTrack track, String runName, boolean doPelvisYawWarmup) throws SimulationExceededMaximumTimeException, ControllerFailureException
@@ -212,7 +212,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
          checkNothingChanged(nothingChangedVerifier);
 
       createVideo(scs);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void verifyDesiredICPIsContinous(SimulationConstructionSet scs)
@@ -362,5 +362,10 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       cameraConfiguration.setCameraDolly(true, true, true, false);
       scs.setupCamera(cameraConfiguration);
       scs.selectCamera("testCamera");
+   }
+
+   public SimulationTestingParameters getSimulationTestingParameters()
+   {
+      return simulationTestingParameters;
    }
 }

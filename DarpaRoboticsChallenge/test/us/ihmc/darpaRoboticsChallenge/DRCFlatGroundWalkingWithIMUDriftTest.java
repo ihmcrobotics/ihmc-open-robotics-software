@@ -136,7 +136,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
          checkNothingChanged(nothingChangedVerifier);
 
       createVideo(scs);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
  
    private void initiateMotion(SimulationConstructionSet scs, double standingTimeDuration, BlockingSimulationRunner runner)
@@ -211,5 +211,10 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
       cameraConfiguration.setCameraDolly(true, true, true, false);
       scs.setupCamera(cameraConfiguration);
       scs.selectCamera("testCamera");
+   }
+
+   public static SimulationTestingParameters getSimulationTestingParameters()
+   {
+      return simulationTestingParameters;
    }
 }
