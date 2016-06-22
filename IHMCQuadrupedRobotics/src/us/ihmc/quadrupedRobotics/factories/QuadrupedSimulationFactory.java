@@ -8,18 +8,28 @@ import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
+import us.ihmc.quadrupedRobotics.controller.forceDevelopment.QuadrupedForceDevelopmentControllerManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
+import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.model.QuadrupedStandPrepParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
+import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -34,15 +44,18 @@ import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RotatablePlaneTerrainProfile;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
+import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
+import us.ihmc.util.PeriodicThreadScheduler;
 
 public class QuadrupedSimulationFactory
 {
    // Controller
    private SDFFullQuadrupedRobotModel fullRobotModel;
-   private IHMCCommunicationKryoNetClassList netClassList;
    private QuadrupedPhysicalProperties physicalProperties;
-   private QuadrupedReferenceFrames referenceFrames;
    private QuadrupedControlMode controlMode;
+   private GlobalDataProducer globalDataProducer;
+   private QuadrantDependentList<FootSwitchInterface> footSwitches;
+   private SDFRobot sdfRobot;
    
    // Simulation
    private double controlDT;
@@ -55,7 +68,6 @@ public class QuadrupedSimulationFactory
    private QuadrupedModelFactory modelFactory;
    private SimulationConstructionSetParameters scsParameters;
    private QuadrupedGroundContactModelType groundContactModelType;
-   private SDFRobot sdfRobot;
    private QuadrupedGroundContactParameters groundContactParameters;
    private QuadrupedStandPrepParameters standPrepParameters;
    private RobotController headController;
@@ -64,6 +76,10 @@ public class QuadrupedSimulationFactory
    private QuadrupedControllerManager controllerManager;
    private SensorReader sensorReader;
    private OutputWriter outputWriter;
+   private boolean useNetworking;
+   private IHMCCommunicationKryoNetClassList netClassList;
+   private SensorTimestampHolder timestampProvider;
+   private PacketCommunicator packetCommunicator;
    
    // TO CONSTRUCT
    private GroundProfile3D groundProfile3D;
@@ -72,31 +88,68 @@ public class QuadrupedSimulationFactory
    
    // CREATION
    
+   private void createPacketCommunicator() throws IOException
+   {
+      packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, netClassList);
+      packetCommunicator.connect();
+   }
+   
+   private void createGlobalDataProducer()
+   {
+      if (useNetworking)
+      {
+         globalDataProducer = new QuadrupedGlobalDataProducer(packetCommunicator);
+      }
+   }
+   
    private void setupYoRegistries()
    {
-      yoGraphicsListRegistry = new YoGraphicsListRegistry();
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
       yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
    }
 
-   private void createControllerManager() throws IOException
+   public void createControllerManager() throws IOException
    {
-      QuadrupedControllerManagerFactory controllerManagerFactory = new QuadrupedControllerManagerFactory();
-      controllerManagerFactory.setControlDT(controlDT);
-      controllerManagerFactory.setGravity(gravity);
-      controllerManagerFactory.setFullRobotModel(fullRobotModel);
-      controllerManagerFactory.setKryoNetClassList(netClassList);
-      controllerManagerFactory.setPhysicalProperties(physicalProperties);
-      controllerManagerFactory.setReferenceFrames(referenceFrames);
-      controllerManagerFactory.setRobotYoVariableRegistry(sdfRobot.getRobotsYoVariableRegistry());
-      controllerManagerFactory.setTimestampYoVariable(sdfRobot.getYoTime());
-      controllerManagerFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
-      controllerManagerFactory.setYoGraphicsListRegistryForDetachedOverhead(yoGraphicsListRegistryForDetachedOverhead);
-      controllerManagerFactory.setControlMode(controlMode);
-
-      controllerManager = controllerManagerFactory.createControllerManager();
+      
+      QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT, sdfRobot.getYoTime(), fullRobotModel, sdfRobot.getRobotsYoVariableRegistry(),
+                                                           yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead, globalDataProducer, footSwitches);
+      switch (controlMode)
+      {
+      case FORCE:
+         controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties);
+         break;
+      case FORCE_DEV:
+         controllerManager = new QuadrupedForceDevelopmentControllerManager(runtimeEnvironment, physicalProperties);
+         break;
+      case POSITION:
+         controllerManager = null;
+         break;
+      case POSITION_DEV:
+         controllerManager = null;
+         break;
+      default:
+         controllerManager = null;
+         break;
+      }
    }
-
+   
+   private void createPoseCommunicator()
+   {
+      JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(fullRobotModel);
+      PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("PoseCommunicator");
+      
+      if (useNetworking)
+      {
+         poseCommunicator = new DRCPoseCommunicator(fullRobotModel, jointConfigurationGathererAndProducer, null, globalDataProducer,
+                                                    timestampProvider, sensorReader.getSensorRawOutputMapReadOnly(),
+                                                    controllerManager.getMotionStatusHolder(), null, scheduler, netClassList);
+      }
+      else
+      {
+         poseCommunicator = null;
+      }
+   }
+   
    private void createGroundContactModel()
    {
       switch (groundContactModelType)
@@ -165,8 +218,10 @@ public class QuadrupedSimulationFactory
    
    public SimulationConstructionSet createSimulation() throws IOException
    {
+//      createGlobalDataProducer();
       setupYoRegistries();
       createControllerManager();
+      createPoseCommunicator();
       createGroundContactModel();
       createSimulationController();
       setupSDFRobot();
@@ -222,11 +277,6 @@ public class QuadrupedSimulationFactory
       this.showPlotter = showPlotter;
    }
    
-   public void setSDFRobot(SDFRobot sdfRobot)
-   {
-      this.sdfRobot = sdfRobot;
-   }
-   
    public void setModelFactory(QuadrupedModelFactory modelFactory)
    {
       this.modelFactory = modelFactory;
@@ -252,16 +302,6 @@ public class QuadrupedSimulationFactory
       this.headController = headController;
    }
    
-   public void setStateEstimator(DRCKinematicsBasedStateEstimator stateEstimator)
-   {
-      this.stateEstimator = stateEstimator;
-   }
-   
-   public void setSensorReader(SensorReader sensorReader)
-   {
-      this.sensorReader = sensorReader;
-   }
-   
    public void setOutputWriter(OutputWriter outputWriter)
    {
       this.outputWriter = outputWriter;
@@ -272,19 +312,9 @@ public class QuadrupedSimulationFactory
       this.standPrepParameters = standPrepParameters;
    }
    
-   public void setKryoNetClassList(IHMCCommunicationKryoNetClassList netClassList)
-   {
-      this.netClassList = netClassList;
-   }
-   
    public void setPhysicalProperties(QuadrupedPhysicalProperties physicalProperties)
    {
       this.physicalProperties = physicalProperties;
-   }
-   
-   public void setReferenceFrames(QuadrupedReferenceFrames referenceFrames)
-   {
-      this.referenceFrames = referenceFrames;
    }
    
    public void setControlMode(QuadrupedControlMode controlMode)
@@ -295,5 +325,50 @@ public class QuadrupedSimulationFactory
    public void setFullRobotModel(SDFFullQuadrupedRobotModel fullRobotModel)
    {
       this.fullRobotModel = fullRobotModel;
+   }
+   
+   public void setGlobalDataProducer(GlobalDataProducer globalDataProducer)
+   {
+      this.globalDataProducer = globalDataProducer;
+   }
+
+   public void setFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches)
+   {
+      this.footSwitches = footSwitches;
+   }
+   
+   public void setYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+   }
+   
+   public void setStateEstimator(DRCKinematicsBasedStateEstimator stateEstimator)
+   {
+      this.stateEstimator = stateEstimator;
+   }
+   
+   public void setUseNetworking(boolean useNetworking)
+   {
+      this.useNetworking = useNetworking;
+   }
+   
+   public void setNetClassList(IHMCCommunicationKryoNetClassList netClassList)
+   {
+      this.netClassList = netClassList;
+   }
+   
+   public void setTimestampHolder(SensorTimestampHolder timestampProvider)
+   {
+      this.timestampProvider = timestampProvider;
+   }
+
+   public void setSDFRobot(SDFRobot sdfRobot)
+   {
+      this.sdfRobot = sdfRobot;
+   }
+   
+   public void setSensorReader(SensorReader sensorReader)
+   {
+      this.sensorReader = sensorReader;
    }
 }
