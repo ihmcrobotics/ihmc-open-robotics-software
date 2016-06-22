@@ -2,6 +2,28 @@
 <sdf version='1.4'>
   <model name='llaQuadruped'>
     <link name='body'>
+      <sensor name='imu' type='imu'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <imu>
+          <noise>
+            <type>gaussian</type>
+            <rate>
+              <mean>0</mean>
+              <stddev>0.0002</stddev>
+              <bias_mean>7.5e-06</bias_mean>
+              <bias_stddev>8e-07</bias_stddev>
+            </rate>
+            <accel>
+              <mean>0</mean>
+              <stddev>0.017</stddev>
+              <bias_mean>0.1</bias_mean>
+              <bias_stddev>0.001</bias_stddev>
+            </accel>
+          </noise>
+        </imu>
+        <pose>0.3 0.15 0.05 0 0 0</pose>
+      </sensor>
       <inertial>
         <pose>0.3 0.15 0.05 0 0 0</pose>
         <mass>20</mass>

@@ -83,7 +83,7 @@ public class CombinedFuzzySearcher
       accumulator.addAll(resultsOfRegexSearch);
 
       List<CombinedFuzzySearchResult> allSearchResults = new ArrayList<>(accumulator);
-      allSearchResults.sort(new SortByResultTypeComparator());
+      Collections.sort(allSearchResults, new SortByResultTypeComparator());
 
       ArrayList<CombinedFuzzySearchResult> sortedFuzzyResults = new ArrayList<>();
 

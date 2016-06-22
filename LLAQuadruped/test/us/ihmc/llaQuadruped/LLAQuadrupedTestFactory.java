@@ -9,13 +9,10 @@ import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
 import us.ihmc.quadrupedRobotics.QuadrupedTestAdministratorFactory;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
-import us.ihmc.quadrupedRobotics.factories.QuadrupedControllerManagerFactory;
 import us.ihmc.quadrupedRobotics.factories.QuadrupedSimulationFactory;
 import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 
 public class LLAQuadrupedTestFactory
@@ -36,9 +33,6 @@ public class LLAQuadrupedTestFactory
    private SimulationConstructionSetParameters scsParameters;
    private SDFRobot sdfRobot;
    private SDFFullQuadrupedRobotModel fullRobotModel;
-   private YoVariableRegistry robotYoVariableRegistry;
-   private YoGraphicsListRegistry yoGraphicsListRegistry;
-   private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
    private QuadrupedReferenceFrames referenceFrames;
    private DRCKinematicsBasedStateEstimator stateEstimator;
    private SDFPerfectSimulatedOutputWriter sdfPerfectSimulatedOutputWriter;
@@ -49,10 +43,6 @@ public class LLAQuadrupedTestFactory
       modelFactory = new LLAQuadrupedModelFactory();
       sdfRobot = modelFactory.createSdfRobot();
       fullRobotModel = modelFactory.createFullRobotModel();
-      robotYoVariableRegistry = sdfRobot.getRobotsYoVariableRegistry();
-      yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
-      yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
       netClassList = new LLAQuadrupedNetClassList();
       headController = null;
       stateEstimator = null;
@@ -66,22 +56,6 @@ public class LLAQuadrupedTestFactory
       sdfPerfectSimulatedOutputWriter = new SDFPerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
 
       sdfQuadrupedPerfectSimulatedSensor = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot, fullRobotModel, referenceFrames);
-   }
-
-   private QuadrupedControllerManagerFactory createControllerManagerFactory() throws IOException
-   {
-      QuadrupedControllerManagerFactory controllerManagerFactory = new QuadrupedControllerManagerFactory();
-      controllerManagerFactory.setControlDT(SIMULATION_DT);
-      controllerManagerFactory.setGravity(SIMULATION_GRAVITY);
-      controllerManagerFactory.setFullRobotModel(fullRobotModel);
-      controllerManagerFactory.setKryoNetClassList(netClassList);
-      controllerManagerFactory.setPhysicalProperties(physicalProperties);
-      controllerManagerFactory.setReferenceFrames(referenceFrames);
-      controllerManagerFactory.setRobotYoVariableRegistry(robotYoVariableRegistry);
-      controllerManagerFactory.setTimestampYoVariable(sdfRobot.getYoTime());
-      controllerManagerFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
-      controllerManagerFactory.setYoGraphicsListRegistryForDetachedOverhead(yoGraphicsListRegistryForDetachedOverhead);
-      return controllerManagerFactory;
    }
 
    private QuadrupedSimulationFactory createSimulationFactory()
@@ -100,9 +74,11 @@ public class LLAQuadrupedTestFactory
       simulationFactory.setOutputWriter(sdfPerfectSimulatedOutputWriter);
       simulationFactory.setShowPlotter(true);
       simulationFactory.setUseTrackAndDolly(false);
-      simulationFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
-      simulationFactory.setYoGraphicsListRegistryForDetachedOverhead(yoGraphicsListRegistryForDetachedOverhead);
       simulationFactory.setStandPrepParameters(standPrepParameters);
+      simulationFactory.setFullRobotModel(fullRobotModel);
+      simulationFactory.setKryoNetClassList(netClassList);
+      simulationFactory.setPhysicalProperties(physicalProperties);
+      simulationFactory.setReferenceFrames(referenceFrames);
       return simulationFactory;
    }
    
@@ -110,7 +86,6 @@ public class LLAQuadrupedTestFactory
    {
       createSimulationParameters();
       QuadrupedTestAdministratorFactory testAdministratorFactory = new QuadrupedTestAdministratorFactory();
-      testAdministratorFactory.setConrollerManagerFactory(createControllerManagerFactory());
       testAdministratorFactory.setSimulationFactory(createSimulationFactory());
       return testAdministratorFactory;
    }

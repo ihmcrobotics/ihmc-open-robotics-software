@@ -128,10 +128,10 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       ControllerSpy controllerSpy = new ControllerSpy(drcSimulationTestHelper);
 
       FootstepDataListMessage message = new FootstepDataListMessage();
-      addFootstep(new Point3d(0.4, 0.15, 0.0), RobotSide.LEFT, message);
-      addFootstep(new Point3d(0.8, -0.15, 0.0), RobotSide.RIGHT, message);
-      addFootstep(new Point3d(0.8, 0.4, 0.0), RobotSide.LEFT, message);
-      addFootstep(new Point3d(0.8, 0.1, 0.0), RobotSide.RIGHT, message);
+      addFootstep(new Point3d(0.3, 0.15, 0.0), RobotSide.LEFT, message);
+      addFootstep(new Point3d(0.6, -0.15, 0.0), RobotSide.RIGHT, message);
+      addFootstep(new Point3d(0.6, 0.3, 0.0), RobotSide.LEFT, message);
+      addFootstep(new Point3d(0.6, 0.0, 0.0), RobotSide.RIGHT, message);
 
       drcSimulationTestHelper.send(message);
       double simulationTime = 1.0 * message.footstepDataList.size() + 2.0;
