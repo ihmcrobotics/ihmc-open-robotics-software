@@ -72,7 +72,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
    {
       // March 2015: Low pelvis orientation gains cause the pelvis to flip out. Trying to track down why this happens.
 
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       // Use perfect sensors and run single threaded to make sure state estimation isn't what's causing the problem.
       simulationTestingParameters.setUsePefectSensors(true);
@@ -132,7 +132,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    public abstract String getZetaPelvisOrientationName();

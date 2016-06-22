@@ -62,7 +62,7 @@ public abstract class DRCPushRecoveryTest
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @After
@@ -84,7 +84,7 @@ public abstract class DRCPushRecoveryTest
       doubleSupportStartConditions = null;
       pushRobotController = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    protected abstract DRCRobotModel getRobotModel();

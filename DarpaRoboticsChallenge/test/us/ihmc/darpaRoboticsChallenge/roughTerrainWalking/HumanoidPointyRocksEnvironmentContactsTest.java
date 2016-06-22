@@ -145,7 +145,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
 
    private void setupTest(CommonAvatarEnvironmentInterface environment)
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       // create simulation test helper
       String className = getClass().getSimpleName();

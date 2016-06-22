@@ -97,7 +97,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
    @Test(timeout = 490000)
    public void testTurn361DegreesInPlace() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -112,14 +112,14 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       PrintTools.debug(this, "Behavior Should be done");
       assertCurrentMidFeetPoseIsWithinThreshold(desiredMidFeetPose2d);
       assertTrue(walkToLocationBehavior.isDone());
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 31.7)
    @Test(timeout = 160000)
    public void testWalkForwardsX() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -134,14 +134,14 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       PrintTools.debug(this, "Behavior Should be done");
       assertCurrentMidFeetPoseIsWithinThreshold(desiredMidFeetPose2d);
       assertTrue(walkToLocationBehavior.isDone());
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 28.8)
    @Test(timeout = 140000)
    public void testWalkBackwardsASmallAmountWithoutTurningInPlace() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -173,14 +173,14 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       // TODO: Determine why position error is so large when walking backwards
       assertPosesAreWithinThresholds(desiredMidFeetPose2d, getCurrentMidFeetPose2dCopy(), 10.0 * POSITION_THRESHOLD);
       assertTrue(walkToLocationBehavior.isDone());
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 45.4)
    @Test(timeout = 230000)
    public void testWalkAtAngleUsingStartOrientation() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -207,14 +207,14 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       PrintTools.debug(this, "Behavior Should be done");
       assertCurrentMidFeetPoseIsWithinThreshold(targetMidFeetPose2d);
       assertTrue(walkToLocationBehavior.isDone());
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 66.4)
    @Test(timeout = 330000)
    public void testWalkAtAngleUsingTargetOrientation() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -243,14 +243,14 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       PrintTools.debug(this, "Behavior Should be done");
       assertCurrentMidFeetPoseIsWithinThreshold(targetMidFeetPose2d);
       assertTrue(walkToLocationBehavior.isDone());
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 47.3)
    @Test(timeout = 240000)
    public void testWalkAtAngleUsingStartTargetMeanOrientation() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -287,14 +287,14 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       PrintTools.debug(this, "Behavior Should be done");
       assertCurrentMidFeetPoseIsWithinThreshold(targetMidFeetPose2d);
       assertTrue(walkToLocationBehavior.isDone());
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 32.6)
    @Test(timeout = 160000)
    public void testWalkAtAngleAndFinishAlignedWithWalkingPath() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -310,14 +310,14 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       PrintTools.debug(this, "Behavior Should be done");
       assertCurrentMidFeetPoseIsWithinThreshold(desiredMidFeetPose2d);
       assertTrue(walkToLocationBehavior.isDone());
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 26.0)
    @Test(timeout = 130000)
    public void testWalkAtAngleAndFinishAlignedWithInitialOrientation() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -333,14 +333,14 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       PrintTools.debug(this, "Behavior Should be done");
       assertCurrentMidFeetPoseIsWithinThreshold(desiredMidFeetPose2d);
       assertTrue(walkToLocationBehavior.isDone());
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 34.8)
    @Test(timeout = 170000)
    public void testWalkAndStopBehavior() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -368,14 +368,14 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       double orientationThreshold = Math.PI;
       assertPosesAreWithinThresholds(midFeetPose2dAtStop, midFeetPose2dFinal, positionThreshold, orientationThreshold);
       assertTrue(!walkToLocationBehavior.isDone());
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 57.8, targets = {TestPlanTarget.InDevelopment})
    @Test(timeout = 290000)
    public void testWalkPauseAndResumeBehavior() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -407,7 +407,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       assertPosesAreWithinThresholds(desiredMidFeetPose2d, midFeetPoseFinal, POSITION_THRESHOLD, ORIENTATION_THRESHOLD);
       assertPosesAreWithinThresholds(desiredMidFeetPose2d, midFeetPoseFinal, 0.9 * POSITION_THRESHOLD, ORIENTATION_THRESHOLD);
       assertPosesAreWithinThresholds(desiredMidFeetPose2d, midFeetPoseFinal, POSITION_THRESHOLD, 0.9 * ORIENTATION_THRESHOLD);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 45.7, targets = {TestPlanTarget.InDevelopment})
@@ -415,7 +415,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
    public void testWalkPauseAndResumeOnLastStepBehavior() throws SimulationExceededMaximumTimeException
    {
       // This test makes sure that walking behavior doesn't declare isDone() when *starting/resuming* walking
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -445,14 +445,14 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       assertPosesAreWithinThresholds(midFeetPoseAtPause, midFeetPoseAtResume, positionThreshold, orientationThreshold);
       assertTrue(walkToLocationBehavior.isDone());
       assertPosesAreWithinThresholds(desiredMidFeetPose2d, midFeetPoseFinal);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 67.6, targets = {TestPlanTarget.InDevelopment})
    @Test(timeout = 340000)
    public void testWalkStopAndWalkToDifferentLocation() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -494,7 +494,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       PrintTools.debug(this, "Stop Simulating Behavior");
       assertCurrentMidFeetPoseIsWithinThreshold(newDesiredMidFeetPose2d);
       assertTrue(walkToLocationBehavior.isDone());
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private FramePose2d copyAndOffsetCurrentMidfeetPose2d(double walkDistance, Vector2d walkDirection)

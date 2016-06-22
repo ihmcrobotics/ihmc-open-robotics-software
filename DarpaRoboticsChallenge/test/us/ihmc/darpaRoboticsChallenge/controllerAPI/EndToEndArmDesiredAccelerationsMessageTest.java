@@ -41,7 +41,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
    @Test(timeout = 300000)
    public void testSimpleCommands() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
 

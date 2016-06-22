@@ -67,7 +67,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
    @Test(timeout = 960000)
    public void testVariousHandstepsOnWalls() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       double wallMaxY = 3.5;
       DRCWallWorldEnvironment environment = new DRCWallWorldEnvironment(-1.0, wallMaxY);
@@ -126,7 +126,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       Vector3d plusMinusVector = new Vector3d(0.4, 0.3, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupCameraForHandstepsOnWalls()

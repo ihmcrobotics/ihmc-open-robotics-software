@@ -14,7 +14,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class BambooToolsTest
 {
-
+   private static final boolean SHOW_GUI = false;
 	@DeployableTestMethod
 	@Test(timeout=300000)
    public void testGetClassAndMethodName()
@@ -30,16 +30,16 @@ public class BambooToolsTest
 	@Test(timeout=300000)
    public void testLogMessagesToFile() throws IOException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(SHOW_GUI);
       
-      BambooTools.reportOutMessage("OutMessage1");
-      BambooTools.reportOutMessage("OutMessage2");
-      BambooTools.reportErrorMessage("ErrorMessage1");
-      BambooTools.reportErrorMessage("ErrorMessage2");
-      BambooTools.reportParameterMessage("ParameterMessage1");
-      BambooTools.reportParameterMessage("ParameterMessage2");
+      BambooTools.reportOutMessage("OutMessage1", SHOW_GUI);
+      BambooTools.reportOutMessage("OutMessage2", SHOW_GUI);
+      BambooTools.reportErrorMessage("ErrorMessage1", SHOW_GUI);
+      BambooTools.reportErrorMessage("ErrorMessage2", SHOW_GUI);
+      BambooTools.reportParameterMessage("ParameterMessage1", SHOW_GUI);
+      BambooTools.reportParameterMessage("ParameterMessage2", SHOW_GUI);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(SHOW_GUI);
 
       File file = new File("testMessages.txt");
       BambooTools.logMessagesToFile(file);

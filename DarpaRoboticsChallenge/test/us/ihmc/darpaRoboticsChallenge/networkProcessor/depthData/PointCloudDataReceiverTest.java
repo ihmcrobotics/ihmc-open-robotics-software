@@ -82,7 +82,7 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
    @Test(timeout = 140000)
    public void testIsReceivingScansAnd95PercentOfPointsAreCorrect() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       jmeLidarScanVisualizer = new JMELidarScanVisualizer();
       
@@ -135,7 +135,7 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
       if (!ALLOW_PERCENTAGE_OUT_OF_RANGE)
          throwAllAssertionErrors();
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void throwAllAssertionErrors()

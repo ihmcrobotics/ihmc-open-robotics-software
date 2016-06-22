@@ -89,7 +89,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
    @Test(timeout = 360000)
    public void testWalkingUpRampUsingSnapFootsteps() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       doUpRampTest();
 
       Point3d center = new Point3d(7.579638943201888, 0.020725665285290903, 1.46537366331119);
@@ -97,7 +97,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void doUpRampTest() throws SimulationExceededMaximumTimeException

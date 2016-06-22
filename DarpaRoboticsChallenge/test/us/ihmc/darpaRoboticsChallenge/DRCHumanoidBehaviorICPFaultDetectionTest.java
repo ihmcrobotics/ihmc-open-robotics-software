@@ -95,7 +95,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 	@Test(timeout=300000)
    public void TestForVideo() throws SimulationExceededMaximumTimeException, InterruptedException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -108,14 +108,14 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void TestPushLeftEarlySwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -128,7 +128,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
@@ -136,7 +136,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    public void TestPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
 
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -148,7 +148,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 
    }
 
@@ -156,7 +156,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 	@Test(timeout=300000)
    public void TestPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -178,7 +178,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
@@ -186,7 +186,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    public void TestPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
 
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -221,7 +221,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       }
 
       blockingSimulationRunner.simulateAndBlock(100.0);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 
    }
 
@@ -229,7 +229,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 	@Test(timeout=300000)
    public void TestPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -244,7 +244,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
       blockingSimulationRunner.simulateAndBlock(8.0);
       pushRobotController.applyForce(forceDirection, magnitude, duration);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
