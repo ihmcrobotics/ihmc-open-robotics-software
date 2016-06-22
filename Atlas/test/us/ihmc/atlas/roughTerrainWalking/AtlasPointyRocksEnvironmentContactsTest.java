@@ -16,7 +16,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    @Override
    public DRCRobotModel getRobotModel()
    {
-      robotModel.addMoreFootContactPointsSimOnly();
+      robotModel.addMoreFootContactPointsSimOnly(16, 8, true);
       return robotModel;
    }
 
