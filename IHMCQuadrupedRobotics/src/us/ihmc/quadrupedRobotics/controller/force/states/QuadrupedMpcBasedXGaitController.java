@@ -236,6 +236,29 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       {
          timedStepController.addStep(xGaitPreviewSteps.get(i));
       }
+
+      // update cmp position and step adjustment
+      computeCmpPositionAndStepAdjustment();
+   }
+
+   private void updateSettings()
+   {
+      settingsProvider.getXGaitSettings(xGaitSettings);
+
+      // increase stance dimensions to prevent self collisions
+      double strideRotation = inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration();
+      double strideLength = Math.abs(2 * inputProvider.getPlanarVelocityInput().getX() * xGaitSettings.getStepDuration());
+      double strideWidth = Math.abs(2 * inputProvider.getPlanarVelocityInput().getY() * xGaitSettings.getStepDuration());
+      strideLength += Math.abs(xGaitSettings.getStanceWidth() / 2 * Math.sin(2 * strideRotation));
+      strideWidth += Math.abs(xGaitSettings.getStanceLength() / 2 * Math.sin(2 * strideRotation));
+      xGaitSettings.setStanceLength(Math.max(xGaitSettings.getStanceLength(), strideLength / 2 + minimumStepClearanceParameter.get()));
+      xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth / 2 + minimumStepClearanceParameter.get()));
+   }
+
+   private void computeCmpPositionAndStepAdjustment()
+   {
+      double currentTime = robotTimestamp.getDoubleValue();
+
       mpcOptimization.compute(stepAdjustmentVector, cmpPositionSetpoint, timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(),
             taskSpaceControllerSettings.getContactState(), taskSpaceEstimates.getComPosition(), taskSpaceEstimates.getComVelocity(), currentTime, mpcSettings);
       for (int i = 0; i < timedStepController.getQueue().size(); i++)
@@ -253,20 +276,6 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
          if (latestSteps.get(robotEnd).getTimeInterval().getEndTime() > currentTime)
             latestSteps.get(robotEnd).set(timedStepController.getLatestStep(robotEnd));
       }
-   }
-
-   private void updateSettings()
-   {
-      settingsProvider.getXGaitSettings(xGaitSettings);
-
-      // increase stance dimensions to prevent self collisions
-      double strideRotation = inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration();
-      double strideLength = Math.abs(2 * inputProvider.getPlanarVelocityInput().getX() * xGaitSettings.getStepDuration());
-      double strideWidth = Math.abs(2 * inputProvider.getPlanarVelocityInput().getY() * xGaitSettings.getStepDuration());
-      strideLength += Math.abs(xGaitSettings.getStanceWidth() / 2 * Math.sin(2 * strideRotation));
-      strideWidth += Math.abs(xGaitSettings.getStanceLength() / 2 * Math.sin(2 * strideRotation));
-      xGaitSettings.setStanceLength(Math.max(xGaitSettings.getStanceLength(), strideLength / 2 + minimumStepClearanceParameter.get()));
-      xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth / 2 + minimumStepClearanceParameter.get()));
    }
 
    @Override
@@ -340,6 +349,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       {
          latestSteps.get(robotEnd).set(timedStepController.getLatestStep(robotEnd));
       }
+
+      computeCmpPositionAndStepAdjustment();
    }
 
    @Override

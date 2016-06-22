@@ -16,7 +16,7 @@ import us.ihmc.util.PeriodicThreadScheduler;
 
 public class YoVariableProducer implements Runnable
 {
-   private static final int SEND_BUFFER_LENGTH = 8192; //1024;
+   private static final int SEND_BUFFER_LENGTH = 4096; //1024;
    
    private final PeriodicThreadScheduler scheduler;
    

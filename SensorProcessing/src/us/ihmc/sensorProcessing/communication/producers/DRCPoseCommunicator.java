@@ -45,7 +45,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final GlobalDataProducer dataProducer;
    private final JointConfigurationGatherer jointConfigurationGathererAndProducer;
-   private final SensorTimestampHolder sensorOutputMapReadOnly;
+   private final SensorTimestampHolder sensorTimestampHolder;
    private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
 //   private final SideDependentList<String> wristForceSensorNames;
    private final RobotMotionStatusHolder robotMotionStatusFromController;
@@ -67,7 +67,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    {
       this.dataProducer = dataProducer;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
-      this.sensorOutputMapReadOnly = sensorTimestampHolder;
+      this.sensorTimestampHolder = sensorTimestampHolder;
       this.sensorRawOutputMapReadOnly = sensorRawOutputMapReadOnly;
       this.robotMotionStatusFromController = robotMotionStatusFromController;
       this.scheduler = scheduler;
@@ -194,8 +194,8 @@ public class DRCPoseCommunicator implements RawOutputWriter
          return;
       }
 
-      long timestamp = sensorOutputMapReadOnly.getVisionSensorTimestamp();
-      long pps = sensorOutputMapReadOnly.getSensorHeadPPSTimestamp();
+      long timestamp = sensorTimestampHolder.getVisionSensorTimestamp();
+      long pps = sensorTimestampHolder.getSensorHeadPPSTimestamp();
       jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, pps, state);
       
       if(sensorRawOutputMapReadOnly != null)

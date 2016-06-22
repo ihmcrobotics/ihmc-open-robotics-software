@@ -1,14 +1,21 @@
 package us.ihmc.quadrupedRobotics.factories;
 
+import java.io.IOException;
+
 import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.OutputWriter;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
+import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedStandPrepParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
@@ -30,7 +37,14 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinema
 
 public class QuadrupedSimulationFactory
 {
-   // PROVIDED
+   // Controller
+   private SDFFullQuadrupedRobotModel fullRobotModel;
+   private IHMCCommunicationKryoNetClassList netClassList;
+   private QuadrupedPhysicalProperties physicalProperties;
+   private QuadrupedReferenceFrames referenceFrames;
+   private QuadrupedControlMode controlMode;
+   
+   // Simulation
    private double controlDT;
    private double gravity;
    private int recordFrequency;
@@ -58,6 +72,31 @@ public class QuadrupedSimulationFactory
    
    // CREATION
    
+   private void setupYoRegistries()
+   {
+      yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
+      yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
+   }
+
+   private void createControllerManager() throws IOException
+   {
+      QuadrupedControllerManagerFactory controllerManagerFactory = new QuadrupedControllerManagerFactory();
+      controllerManagerFactory.setControlDT(controlDT);
+      controllerManagerFactory.setGravity(gravity);
+      controllerManagerFactory.setFullRobotModel(fullRobotModel);
+      controllerManagerFactory.setKryoNetClassList(netClassList);
+      controllerManagerFactory.setPhysicalProperties(physicalProperties);
+      controllerManagerFactory.setReferenceFrames(referenceFrames);
+      controllerManagerFactory.setRobotYoVariableRegistry(sdfRobot.getRobotsYoVariableRegistry());
+      controllerManagerFactory.setTimestampYoVariable(sdfRobot.getYoTime());
+      controllerManagerFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
+      controllerManagerFactory.setYoGraphicsListRegistryForDetachedOverhead(yoGraphicsListRegistryForDetachedOverhead);
+      controllerManagerFactory.setControlMode(controlMode);
+
+      controllerManager = controllerManagerFactory.createControllerManager();
+   }
+
    private void createGroundContactModel()
    {
       switch (groundContactModelType)
@@ -124,8 +163,10 @@ public class QuadrupedSimulationFactory
       System.out.println("Total mass: " + totalMass);
    }
    
-   public SimulationConstructionSet createSimulation()
+   public SimulationConstructionSet createSimulation() throws IOException
    {
+      setupYoRegistries();
+      createControllerManager();
       createGroundContactModel();
       createSimulationController();
       setupSDFRobot();
@@ -181,16 +222,6 @@ public class QuadrupedSimulationFactory
       this.showPlotter = showPlotter;
    }
    
-   public void setYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-   }
-   
-   public void setYoGraphicsListRegistryForDetachedOverhead(YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
-   {
-      this.yoGraphicsListRegistryForDetachedOverhead = yoGraphicsListRegistryForDetachedOverhead;
-   }
-   
    public void setSDFRobot(SDFRobot sdfRobot)
    {
       this.sdfRobot = sdfRobot;
@@ -226,11 +257,6 @@ public class QuadrupedSimulationFactory
       this.stateEstimator = stateEstimator;
    }
    
-   public void setControllerManager(QuadrupedControllerManager controllerManager)
-   {
-      this.controllerManager = controllerManager;
-   }
-   
    public void setSensorReader(SensorReader sensorReader)
    {
       this.sensorReader = sensorReader;
@@ -244,5 +270,30 @@ public class QuadrupedSimulationFactory
    public void setStandPrepParameters(QuadrupedStandPrepParameters standPrepParameters)
    {
       this.standPrepParameters = standPrepParameters;
+   }
+   
+   public void setKryoNetClassList(IHMCCommunicationKryoNetClassList netClassList)
+   {
+      this.netClassList = netClassList;
+   }
+   
+   public void setPhysicalProperties(QuadrupedPhysicalProperties physicalProperties)
+   {
+      this.physicalProperties = physicalProperties;
+   }
+   
+   public void setReferenceFrames(QuadrupedReferenceFrames referenceFrames)
+   {
+      this.referenceFrames = referenceFrames;
+   }
+   
+   public void setControlMode(QuadrupedControlMode controlMode)
+   {
+      this.controlMode = controlMode;
+   }
+   
+   public void setFullRobotModel(SDFFullQuadrupedRobotModel fullRobotModel)
+   {
+      this.fullRobotModel = fullRobotModel;
    }
 }

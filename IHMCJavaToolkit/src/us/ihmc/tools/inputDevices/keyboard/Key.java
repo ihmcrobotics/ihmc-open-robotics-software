@@ -12,6 +12,7 @@ public enum Key
    CTRL,
    META,
    ALT,
+   SPACE,
    A,
    B,
    C,
@@ -60,6 +61,7 @@ public enum Key
       case KeyEvent.VK_CONTROL: return CTRL;
       case KeyEvent.VK_META: return META;
       case KeyEvent.VK_ALT: return ALT;
+      case KeyEvent.VK_SPACE: return SPACE;
       case KeyEvent.VK_A: return A;
       case KeyEvent.VK_B: return B;
       case KeyEvent.VK_C: return C;
