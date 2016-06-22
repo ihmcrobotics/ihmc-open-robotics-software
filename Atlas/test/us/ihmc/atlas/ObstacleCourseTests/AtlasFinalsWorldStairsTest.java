@@ -75,10 +75,10 @@ public class AtlasFinalsWorldStairsTest
    @Test(timeout = 680000)
    public void testWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
       robotModel.addMoreFootContactPointsSimOnly(8, 3, false);
@@ -123,10 +123,10 @@ public class AtlasFinalsWorldStairsTest
    @Test(timeout = 151825)
    public void testFastWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
       robotModel.addMoreFootContactPointsSimOnly(8, 3, false);
