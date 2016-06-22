@@ -280,6 +280,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    private final SimulationConstructionSetParameters parameters;
 
+   private final DynamicGraphicMenuManager dynamicGraphicMenuManager;
+
    public static SimulationConstructionSet generateSimulationFromDataFile(File chosenFile)
    {
       // / get file stuff
@@ -397,6 +399,11 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
                createFrame(showGUI);
             }
          });
+         this.dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
+      }
+      else
+      {
+         this.dynamicGraphicMenuManager = null;
       }
 
       mySimulation = simulation;
@@ -2140,7 +2147,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       {
          if (parameters.getShowWindows()) myGUI.show();
          
-         if (!parameters.getShowYoGraphicObjects())
+         if (!parameters.getShowYoGraphicObjects() && dynamicGraphicMenuManager != null)
          {
             dynamicGraphicMenuManager.hideAllGraphics();
          }
@@ -4118,7 +4125,11 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       
       addCheckBoxesToDynamicGraphicCheckBoxMenuItem(yoGraphicsLists);
 
-      displayYoGraphicMenu();
+      if(dynamicGraphicMenuManager != null)
+      {
+         displayYoGraphicMenu();
+      }
+
       yoGraphicListRegistries.add(yoGraphicsListRegistry);
    }
    
@@ -4202,8 +4213,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       return yoGraphicListRegistries;
    }
-
-   private final DynamicGraphicMenuManager dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
 
    private void displayYoGraphicMenu()
    {
