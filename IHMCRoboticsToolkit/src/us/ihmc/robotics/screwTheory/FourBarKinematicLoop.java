@@ -125,7 +125,7 @@ public class FourBarKinematicLoop
       // Set output joint     
       if(DEFAULT_OUTPUT_JOINT)
       {
-         fourBarOutputJoint = passiveJointC;
+         fourBarOutputJoint = passiveJointB; //  passiveJointC;
 
          if(DEBUG)
          {
@@ -135,9 +135,9 @@ public class FourBarKinematicLoop
       else
       {
          fourBarOutputJoint = FourBarKinematicLoopTools.setFourBarOutputJoint(passiveJointB, passiveJointC, passiveJointD);
-      }   
+      }
 
-      // Jacobian        
+      // Jacobian
       fourBarJacobianSolver = new FourBarKinematicLoopJacobianSolver(fourBarCalculator, getJointsForJacobianCalculation(fourBarOutputJoint), fourBarOutputJoint);
       jacobian = fourBarJacobianSolver.computeJacobian(fourBarOutputJoint);      
       
