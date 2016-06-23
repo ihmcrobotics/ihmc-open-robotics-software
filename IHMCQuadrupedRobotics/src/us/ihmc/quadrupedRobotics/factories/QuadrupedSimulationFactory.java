@@ -9,17 +9,22 @@ import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
+import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
 import us.ihmc.quadrupedRobotics.controller.forceDevelopment.QuadrupedForceDevelopmentControllerManager;
+import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
+import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
+import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
@@ -27,10 +32,19 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedStandPrepParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.sensors.ContactSensorHolder;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
+import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
+import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
+import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -49,44 +63,103 @@ import us.ihmc.util.PeriodicThreadScheduler;
 
 public class QuadrupedSimulationFactory
 {
-   // Controller
    private SDFFullQuadrupedRobotModel fullRobotModel;
    private QuadrupedPhysicalProperties physicalProperties;
    private QuadrupedControlMode controlMode;
-   private GlobalDataProducer globalDataProducer;
-   private QuadrantDependentList<FootSwitchInterface> footSwitches;
    private SDFRobot sdfRobot;
-   
-   // Simulation
    private double controlDT;
    private double gravity;
    private int recordFrequency;
    private boolean useTrackAndDolly;
    private boolean showPlotter;
-   private YoGraphicsListRegistry yoGraphicsListRegistry;
-   private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
    private QuadrupedModelFactory modelFactory;
    private SimulationConstructionSetParameters scsParameters;
    private QuadrupedGroundContactModelType groundContactModelType;
    private QuadrupedGroundContactParameters groundContactParameters;
    private QuadrupedStandPrepParameters standPrepParameters;
-   private RobotController headController;
-   private DRCKinematicsBasedStateEstimator stateEstimator;
-   private DRCPoseCommunicator poseCommunicator;
+   private QuadrupedRobotControllerFactory headControllerFactory;
    private QuadrupedControllerManager controllerManager;
-   private SensorReader sensorReader;
    private OutputWriter outputWriter;
    private boolean useNetworking;
-   private IHMCCommunicationKryoNetClassList netClassList;
+   private NetClassList netClassList;
    private SensorTimestampHolder timestampProvider;
    private PacketCommunicator packetCommunicator;
+   private boolean useStateEstimator;
+   private QuadrupedSensorInformation sensorInformation;
+   private StateEstimatorParameters stateEstimatorParameters;
+   private QuadrupedReferenceFrames referenceFrames;
+   private SensorProcessingConfiguration sensorProcessingConfiguration;
    
    // TO CONSTRUCT
+   private YoGraphicsListRegistry yoGraphicsListRegistry;
+   private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
+   private SensorReader sensorReader;
+   private QuadrantDependentList<ContactablePlaneBody> contactableFeet;
+   private QuadrantDependentList<FootSwitchInterface> footSwitches;
+   private DRCKinematicsBasedStateEstimator stateEstimator;
+   private GlobalDataProducer globalDataProducer;
+   private RobotController headController;
+   private DRCPoseCommunicator poseCommunicator;
    private GroundProfile3D groundProfile3D;
    private LinearGroundContactModel groundContactModel;
    private QuadrupedSimulationController simulationController;
    
    // CREATION
+   
+   private void setupYoRegistries()
+   {
+      yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
+      yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
+   }
+
+   private void createSensorReader()
+   {
+      if (useStateEstimator)
+      {
+         SixDoFJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
+         IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
+         ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
+         ContactSensorHolder contactSensorHolder = null;
+         RawJointSensorDataHolderMap rawJointSensorDataHolderMap = null;
+         DesiredJointDataHolder estimatorDesiredJointDataHolder = null;
+
+         SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory;
+         sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(sdfRobot, sensorProcessingConfiguration);
+         sensorReaderFactory.build(rootInverseDynamicsJoint, imuDefinitions, forceSensorDefinitions, contactSensorHolder, rawJointSensorDataHolderMap,
+                                   estimatorDesiredJointDataHolder, sdfRobot.getRobotsYoVariableRegistry());
+
+         sensorReader = sensorReaderFactory.getSensorReader();
+      }
+      else
+      {
+         sensorReader = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot, fullRobotModel, referenceFrames);
+      }
+   }
+   
+   private void createContactibleFeet()
+   {
+      contactableFeet = QuadrupedStateEstimatorFactory.createFootContactableBodies(fullRobotModel, referenceFrames, physicalProperties);
+   }
+   
+   private void createFootSwitches()
+   {
+      footSwitches = QuadrupedStateEstimatorFactory.createFootSwitches(contactableFeet, gravity, fullRobotModel, sdfRobot.getRobotsYoVariableRegistry());
+   }
+   
+   private void createStateEstimator()
+   {
+      if (useStateEstimator)
+      {
+         stateEstimator = QuadrupedStateEstimatorFactory
+               .createStateEstimator(sensorInformation, stateEstimatorParameters, fullRobotModel, sensorReader.getSensorOutputMapReadOnly(), contactableFeet,
+                                     footSwitches, gravity, controlDT, sdfRobot.getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
+      }
+      else
+      {
+         stateEstimator = null;
+      }
+   }
    
    private void createPacketCommunicator() throws IOException
    {
@@ -102,12 +175,18 @@ public class QuadrupedSimulationFactory
       }
    }
    
-   private void setupYoRegistries()
+   private void createHeadController()
    {
-      yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
-      yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
+      if (headControllerFactory != null)
+      {
+         headControllerFactory.setControlDt(controlDT);
+         headControllerFactory.setFullRobotModel(fullRobotModel);
+         headControllerFactory.setGlobalDataProducer(globalDataProducer);
+      
+         headController = headControllerFactory.createRobotController();
+      }
    }
-
+   
    public void createControllerManager() throws IOException
    {
       
@@ -218,8 +297,14 @@ public class QuadrupedSimulationFactory
    
    public SimulationConstructionSet createSimulation() throws IOException
    {
-//      createGlobalDataProducer();
       setupYoRegistries();
+      createSensorReader();
+      createContactibleFeet();
+      createFootSwitches();
+      createStateEstimator();
+      createPacketCommunicator();
+      createGlobalDataProducer();
+      createHeadController();
       createControllerManager();
       createPoseCommunicator();
       createGroundContactModel();
@@ -297,9 +382,9 @@ public class QuadrupedSimulationFactory
       this.groundContactParameters = groundContactParameters;
    }
    
-   public void setHeadController(RobotController headController)
+   public void setHeadControllerFactory(QuadrupedRobotControllerFactory headControllerFactory)
    {
-      this.headController = headController;
+      this.headControllerFactory = headControllerFactory;
    }
    
    public void setOutputWriter(OutputWriter outputWriter)
@@ -331,28 +416,13 @@ public class QuadrupedSimulationFactory
    {
       this.globalDataProducer = globalDataProducer;
    }
-
-   public void setFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches)
-   {
-      this.footSwitches = footSwitches;
-   }
-   
-   public void setYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-   }
-   
-   public void setStateEstimator(DRCKinematicsBasedStateEstimator stateEstimator)
-   {
-      this.stateEstimator = stateEstimator;
-   }
    
    public void setUseNetworking(boolean useNetworking)
    {
       this.useNetworking = useNetworking;
    }
    
-   public void setNetClassList(IHMCCommunicationKryoNetClassList netClassList)
+   public void setNetClassList(NetClassList netClassList)
    {
       this.netClassList = netClassList;
    }
@@ -367,8 +437,28 @@ public class QuadrupedSimulationFactory
       this.sdfRobot = sdfRobot;
    }
    
-   public void setSensorReader(SensorReader sensorReader)
+   public void setUseStateEstimator(boolean useStateEstimator)
    {
-      this.sensorReader = sensorReader;
+      this.useStateEstimator = useStateEstimator;
+   }
+
+   public void setSensorInformation(QuadrupedSensorInformation sensorInformation)
+   {
+      this.sensorInformation = sensorInformation;
+   }
+
+   public void setStateEstimatorParameters(StateEstimatorParameters stateEstimatorParameters)
+   {
+      this.stateEstimatorParameters = stateEstimatorParameters;
+   }
+
+   public void setReferenceFrames(QuadrupedReferenceFrames referenceFrames)
+   {
+      this.referenceFrames = referenceFrames;
+   }
+
+   public void setSensorProcessingConfiguration(SensorProcessingConfiguration sensorProcessingConfiguration)
+   {
+      this.sensorProcessingConfiguration = sensorProcessingConfiguration;
    }
 }
