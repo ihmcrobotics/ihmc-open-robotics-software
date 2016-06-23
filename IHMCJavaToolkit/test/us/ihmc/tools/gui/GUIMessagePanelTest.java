@@ -5,8 +5,12 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import us.ihmc.tools.gui.GUIMessagePanel;
+import us.ihmc.tools.testing.TestPlanAnnotations;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
+@DeployableTestClass(targets = {TestPlanTarget.UI})
 public class GUIMessagePanelTest
 {
 	@DeployableTestMethod(estimatedDuration = 0.4)
