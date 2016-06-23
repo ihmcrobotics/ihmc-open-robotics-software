@@ -28,7 +28,7 @@ import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimato
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.model.QuadrupedStandPrepParameters;
+import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -76,7 +76,7 @@ public class QuadrupedSimulationFactory
    private SimulationConstructionSetParameters scsParameters;
    private QuadrupedGroundContactModelType groundContactModelType;
    private QuadrupedGroundContactParameters groundContactParameters;
-   private QuadrupedStandPrepParameters standPrepParameters;
+   private QuadrupedSimulationInitialPositionParameters initialPositionParameters;
    private QuadrupedRobotControllerFactory headControllerFactory;
    private QuadrupedControllerManager controllerManager;
    private OutputWriter outputWriter;
@@ -273,11 +273,11 @@ public class QuadrupedSimulationFactory
    private void setupSDFRobot()
    {
       sdfRobot.setController(simulationController);
-      sdfRobot.setPositionInWorld(standPrepParameters.getInitialBodyPosition());
+      sdfRobot.setPositionInWorld(initialPositionParameters.getInitialBodyPosition());
       for (QuadrupedJointName quadrupedJointName : modelFactory.getQuadrupedJointNames())
       {
          OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = sdfRobot.getOneDegreeOfFreedomJoint(modelFactory.getSDFNameForJointName(quadrupedJointName));
-         oneDegreeOfFreedomJoint.setQ(standPrepParameters.getInitialJointPosition(quadrupedJointName));
+         oneDegreeOfFreedomJoint.setQ(initialPositionParameters.getInitialJointPosition(quadrupedJointName));
       }
       try
       {
@@ -289,10 +289,8 @@ public class QuadrupedSimulationFactory
       {
          throw new RuntimeException("UnreasonableAccelerationException");
       }
-      double totalMass = sdfRobot.computeCenterOfMass(standPrepParameters.getInitialCOMPosition());
       sdfRobot.setGravity(gravity);
       sdfRobot.setGroundContactModel(groundContactModel);
-      System.out.println("Total mass: " + totalMass);
    }
    
    public SimulationConstructionSet createSimulation() throws IOException
@@ -392,9 +390,9 @@ public class QuadrupedSimulationFactory
       this.outputWriter = outputWriter;
    }
    
-   public void setStandPrepParameters(QuadrupedStandPrepParameters standPrepParameters)
+   public void setInitialPositionParameters(QuadrupedSimulationInitialPositionParameters initialPositionParameters)
    {
-      this.standPrepParameters = standPrepParameters;
+      this.initialPositionParameters = initialPositionParameters;
    }
    
    public void setPhysicalProperties(QuadrupedPhysicalProperties physicalProperties)
