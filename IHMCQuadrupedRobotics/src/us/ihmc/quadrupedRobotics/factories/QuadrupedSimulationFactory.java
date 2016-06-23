@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.factories;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 
 import javax.vecmath.Point3d;
 
@@ -59,40 +58,39 @@ import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RotatablePlaneTerrainProfile;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
-import us.ihmc.tools.factories.Factory;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
 
-public class QuadrupedSimulationFactory implements Factory
+public class QuadrupedSimulationFactory
 {
-   protected RequiredFactoryField<SDFFullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
-   protected RequiredFactoryField<QuadrupedPhysicalProperties> physicalProperties = new RequiredFactoryField<>("physicalProperties");
-   protected RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
-   protected RequiredFactoryField<SDFRobot> sdfRobot = new RequiredFactoryField<>("sdfRobot");
-   protected RequiredFactoryField<Double> controlDT = new RequiredFactoryField<>("controlDT");
-   protected RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
-   protected RequiredFactoryField<Integer> recordFrequency = new RequiredFactoryField<>("recordFrequency");
-   protected RequiredFactoryField<Boolean> useTrackAndDolly = new RequiredFactoryField<>("useTrackAndDolly");
-   protected RequiredFactoryField<Boolean> showPlotter = new RequiredFactoryField<>("showPlotter");
-   protected RequiredFactoryField<QuadrupedModelFactory> modelFactory = new RequiredFactoryField<>("modelFactory");
-   protected RequiredFactoryField<SimulationConstructionSetParameters> scsParameters = new RequiredFactoryField<>("scsParameters");
-   protected RequiredFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new RequiredFactoryField<>("groundContactModelType");
-   protected RequiredFactoryField<QuadrupedGroundContactParameters> groundContactParameters = new RequiredFactoryField<>("groundContactParameters");
-   protected RequiredFactoryField<QuadrupedSimulationInitialPositionParameters> initialPositionParameters = new RequiredFactoryField<>("initialPositionParameters");
-   protected RequiredFactoryField<OutputWriter> outputWriter = new RequiredFactoryField<>("outputWriter");
-   protected RequiredFactoryField<Boolean> useNetworking = new RequiredFactoryField<>("useNetworking");
-   protected RequiredFactoryField<NetClassList> netClassList = new RequiredFactoryField<>("netClassList");
-   protected RequiredFactoryField<SensorTimestampHolder> timestampProvider = new RequiredFactoryField<>("timestampProvider");
-   protected RequiredFactoryField<Boolean> useStateEstimator = new RequiredFactoryField<>("useStateEstimator");
-   protected RequiredFactoryField<QuadrupedSensorInformation> sensorInformation = new RequiredFactoryField<>("sensorInformation");
-   protected RequiredFactoryField<StateEstimatorParameters> stateEstimatorParameters = new RequiredFactoryField<>("stateEstimatorParameters");
-   protected RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
-   protected RequiredFactoryField<SensorProcessingConfiguration> sensorProcessingConfiguration = new RequiredFactoryField<>("sensorProcessingConfiguration");
+   private RequiredFactoryField<SDFFullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
+   private RequiredFactoryField<QuadrupedPhysicalProperties> physicalProperties = new RequiredFactoryField<>("physicalProperties");
+   private RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
+   private RequiredFactoryField<SDFRobot> sdfRobot = new RequiredFactoryField<>("sdfRobot");
+   private RequiredFactoryField<Double> controlDT = new RequiredFactoryField<>("controlDT");
+   private RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
+   private RequiredFactoryField<Integer> recordFrequency = new RequiredFactoryField<>("recordFrequency");
+   private RequiredFactoryField<Boolean> useTrackAndDolly = new RequiredFactoryField<>("useTrackAndDolly");
+   private RequiredFactoryField<Boolean> showPlotter = new RequiredFactoryField<>("showPlotter");
+   private RequiredFactoryField<QuadrupedModelFactory> modelFactory = new RequiredFactoryField<>("modelFactory");
+   private RequiredFactoryField<SimulationConstructionSetParameters> scsParameters = new RequiredFactoryField<>("scsParameters");
+   private RequiredFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new RequiredFactoryField<>("groundContactModelType");
+   private RequiredFactoryField<QuadrupedGroundContactParameters> groundContactParameters = new RequiredFactoryField<>("groundContactParameters");
+   private RequiredFactoryField<QuadrupedSimulationInitialPositionParameters> initialPositionParameters = new RequiredFactoryField<>("initialPositionParameters");
+   private RequiredFactoryField<OutputWriter> outputWriter = new RequiredFactoryField<>("outputWriter");
+   private RequiredFactoryField<Boolean> useNetworking = new RequiredFactoryField<>("useNetworking");
+   private RequiredFactoryField<NetClassList> netClassList = new RequiredFactoryField<>("netClassList");
+   private RequiredFactoryField<SensorTimestampHolder> timestampProvider = new RequiredFactoryField<>("timestampProvider");
+   private RequiredFactoryField<Boolean> useStateEstimator = new RequiredFactoryField<>("useStateEstimator");
+   private RequiredFactoryField<QuadrupedSensorInformation> sensorInformation = new RequiredFactoryField<>("sensorInformation");
+   private RequiredFactoryField<StateEstimatorParameters> stateEstimatorParameters = new RequiredFactoryField<>("stateEstimatorParameters");
+   private RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
+   private RequiredFactoryField<SensorProcessingConfiguration> sensorProcessingConfiguration = new RequiredFactoryField<>("sensorProcessingConfiguration");
    
-   protected OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
+   private OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
    
    // TO CONSTRUCT
    private YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -463,11 +461,5 @@ public class QuadrupedSimulationFactory implements Factory
    public void setSensorProcessingConfiguration(SensorProcessingConfiguration sensorProcessingConfiguration)
    {
       this.sensorProcessingConfiguration.set(sensorProcessingConfiguration);
-   }
-
-   @Override
-   public Object accessFieldValue(Field field, Object object) throws IllegalArgumentException, IllegalAccessException
-   {
-      return field.get(object);
    }
 }

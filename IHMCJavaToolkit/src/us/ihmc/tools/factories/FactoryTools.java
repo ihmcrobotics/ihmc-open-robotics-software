@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 
 public class FactoryTools
 {
-   public static void checkAllRequiredFactoryFieldsAreSet(Factory factory)
+   public static void checkAllRequiredFactoryFieldsAreSet(Object factory)
    {
       for (Field field : factory.getClass().getDeclaredFields())
       {
@@ -13,8 +13,8 @@ public class FactoryTools
             RequiredFactoryField<?> requiredFactoryField = null;
             try
             {
-               requiredFactoryField = (RequiredFactoryField<?>) factory.accessFieldValue(field, factory);
-               
+               field.setAccessible(true);
+               requiredFactoryField = (RequiredFactoryField<?>) field.get(factory);
                requiredFactoryField.get();
             }
             catch (IllegalArgumentException | IllegalAccessException e)
