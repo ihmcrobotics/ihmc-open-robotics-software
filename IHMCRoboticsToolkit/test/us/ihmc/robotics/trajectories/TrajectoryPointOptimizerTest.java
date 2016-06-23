@@ -34,13 +34,6 @@ public class TrajectoryPointOptimizerTest
 
       double[] waypointTimes = new double[waypoints.size()];
       optimizer.getWaypointTimes(waypointTimes);
-      String timesString = "";
-      for (int i = 0; i < waypointTimes.length; i++)
-      {
-         timesString += waypointTimes[i] + " ";
-      }
-      System.out.println("Waypoint Times: " + timesString);
-
       ArrayList<double[]> coefficients = new ArrayList<>();
       for (int i = 0; i < waypoints.size() + 1; i++)
       {
@@ -48,6 +41,12 @@ public class TrajectoryPointOptimizerTest
       }
       optimizer.getPolynomialCoefficients(coefficients, 0);
 
+      String timesString = "";
+      for (int i = 0; i < waypointTimes.length; i++)
+      {
+         timesString += waypointTimes[i] + " ";
+      }
+      System.out.println("Waypoint Times: " + timesString);
       for (double[] coeffs : coefficients)
       {
          String coeffString = "";
