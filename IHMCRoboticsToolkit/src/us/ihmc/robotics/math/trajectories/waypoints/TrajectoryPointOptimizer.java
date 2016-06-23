@@ -22,10 +22,12 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 public class TrajectoryPointOptimizer
 {
    private static final int maxWaypoints = 10;
-   private static final double regularizationWeight = 1E-10;
    private static final int maxIterations = 20;
+
+   private static final double regularizationWeight = 1E-10;
    private static final double epsilon = 1E-7;
-   private static final double initialTimeGain = 1E-3;
+
+   private static final double initialTimeGain = 0.001;
    private static final double costEpsilon = 0.1;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -220,8 +222,8 @@ public class TrajectoryPointOptimizer
    private final DenseMatrix64F x0, x1, xd0, xd1;
    private final ArrayList<DenseMatrix64F> waypoints = new ArrayList<>();
 
-   private final double[] intervalTimes = new double[maxWaypoints+1];
-   private final double[] saveIntervalTimes = new double[maxWaypoints+1];
+   private final DenseMatrix64F intervalTimes = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F saveIntervalTimes = new DenseMatrix64F(1, 1);
    private final double[] costs = new double[maxIterations+1];
 
    private final DenseMatrix64F H = new DenseMatrix64F(1, 1);
@@ -301,12 +303,8 @@ public class TrajectoryPointOptimizer
    {
       int intervals = nWaypoints.getIntegerValue() + 1;
       this.intervals.set(intervals);
-      for (int i = 0; i < intervals; i++)
-      {
-         // TODO: use better initial guess:
-         // instead of equal time for all intervals use distance between waypoints maybe
-         intervalTimes[i] = 1.0 / intervals;
-      }
+      intervalTimes.reshape(intervals, 1);
+      CommonOps.fill(intervalTimes, 1.0/intervals);
 
       problemSize.set(dimensions.getIntegerValue() * coefficients.getIntegerValue() * intervals);
       costs[0] = solveMinAcceleration();
@@ -333,7 +331,7 @@ public class TrajectoryPointOptimizer
    {
       int intervals = this.intervals.getIntegerValue();
       timeGradient.reshape(intervals, 1);
-      System.arraycopy(intervalTimes, 0, saveIntervalTimes, 0, intervalTimes.length);
+      saveIntervalTimes.set(intervalTimes);
 
       for (int i = 0; i < intervals; i++)
       {
@@ -341,18 +339,18 @@ public class TrajectoryPointOptimizer
          {
             if (j == i)
             {
-               intervalTimes[j] += epsilon;
+               intervalTimes.add(j, 0, epsilon);
             }
             else
             {
-               intervalTimes[j] -= epsilon / (intervals-1);
+               intervalTimes.add(j, 0, -epsilon / (intervals-1));
             }
          }
 
          double value = (solveMinAcceleration() - cost) / epsilon;
          timeGradient.set(i, value);
 
-         System.arraycopy(saveIntervalTimes, 0, intervalTimes, 0, saveIntervalTimes.length);
+         intervalTimes.set(saveIntervalTimes);
       }
 
       double length = CommonOps.elementSum(timeGradient);
@@ -360,15 +358,7 @@ public class TrajectoryPointOptimizer
       CommonOps.scale(-timeGain.getDoubleValue(), timeGradient);
 
       double maxUpdate = CommonOps.elementMaxAbs(timeGradient);
-      double minIntervalTime = Double.MAX_VALUE;
-      for (int i = 0; i < intervals; i++)
-      {
-         double intervalTime = intervalTimes[i];
-         if (intervalTime < minIntervalTime)
-         {
-            minIntervalTime = intervalTime;
-         }
-      }
+      double minIntervalTime = CommonOps.elementMin(intervalTimes);
       if (maxUpdate > 0.4 * minIntervalTime)
       {
          CommonOps.scale(0.4 * minIntervalTime / maxUpdate, timeGradient);
@@ -376,14 +366,14 @@ public class TrajectoryPointOptimizer
 
       for (int i = 0; i < intervals; i++)
       {
-         intervalTimes[i] += timeGradient.get(i);
+         intervalTimes.add(i, 0, timeGradient.get(i));
       }
       double newCost = solveMinAcceleration();
 
       if (newCost > cost)
       {
          timeGain.mul(0.5);
-         System.arraycopy(saveIntervalTimes, 0, intervalTimes, 0, saveIntervalTimes.length);
+         intervalTimes.set(saveIntervalTimes);
          return cost;
       }
 
@@ -479,7 +469,7 @@ public class TrajectoryPointOptimizer
          double t = 0.0;
          for (int w = 0 ; w < nWaypoints.getIntegerValue(); w++)
          {
-            t += intervalTimes[w];
+            t += intervalTimes.get(w);
             int colOffset = w * order.getCoefficients();
             DenseMatrix64F waypoint = waypoints.get(w);
 
@@ -557,17 +547,18 @@ public class TrajectoryPointOptimizer
       CommonOps.fill(H, 0.0);
 
       double t0 = 0.0;
-      double t1 = intervalTimes[0];
+      double t1 = 0.0;
       for (int i = 0; i < intervals.getIntegerValue(); i++)
       {
+         t0 = t1;
+         t1 = t1 + intervalTimes.get(i);
+
          order.getHBlock(t0, t1, hBlock);
          for (int d = 0; d < dimensions.getIntegerValue(); d++)
          {
             int offset = (i + d * intervals.getIntegerValue()) * coefficients.getIntegerValue();
             CommonOps.insert(hBlock, H, offset, offset);
          }
-         t0 = t1;
-         t1 = t1 + intervalTimes[i+1];
       }
    }
 
@@ -580,10 +571,10 @@ public class TrajectoryPointOptimizer
       {
          if (i == 0)
          {
-            timesToPack[0] = intervalTimes[0];
+            timesToPack[0] = intervalTimes.get(0);
             continue;
          }
-         timesToPack[i] = timesToPack[i-1] + intervalTimes[i];
+         timesToPack[i] = timesToPack[i-1] + intervalTimes.get(i);
       }
    }
 
