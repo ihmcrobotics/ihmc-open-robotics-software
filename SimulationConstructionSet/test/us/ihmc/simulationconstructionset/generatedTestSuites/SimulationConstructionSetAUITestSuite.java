@@ -12,6 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.UI)
 @SuiteClasses
 ({
+   us.ihmc.simulationconstructionset.bambooTools.BambooToolsTest.class,
    us.ihmc.simulationconstructionset.dataExporter.DataExporterGraphCreatorTest.class,
    us.ihmc.simulationconstructionset.gui.actions.ActionsTest.class,
    us.ihmc.simulationconstructionset.gui.YoEntryBoxTest.class,
