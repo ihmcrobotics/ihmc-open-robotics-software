@@ -1,4 +1,4 @@
-package us.ihmc.tools.exceptions;
+package us.ihmc.tools.factories;
 
 @SuppressWarnings("serial")
 public class FactoryFieldNotSetException extends RuntimeException
