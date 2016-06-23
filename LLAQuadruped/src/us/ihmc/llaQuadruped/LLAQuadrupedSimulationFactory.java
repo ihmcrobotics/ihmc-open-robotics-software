@@ -62,7 +62,6 @@ public class LLAQuadrupedSimulationFactory
       simulationFactory.setRecordFrequency(RECORD_FREQUENCY);
       simulationFactory.setGroundContactModelType(groundContactModelType);
       simulationFactory.setGroundContactParameters(groundContactParameters);
-      simulationFactory.setHeadControllerFactory(null);
       simulationFactory.setModelFactory(modelFactory);
       simulationFactory.setSDFRobot(sdfRobot);
       simulationFactory.setSCSParameters(scsParameters);

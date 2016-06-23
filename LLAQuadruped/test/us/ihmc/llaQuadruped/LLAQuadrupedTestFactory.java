@@ -37,7 +37,7 @@ public class LLAQuadrupedTestFactory
       QuadrupedPhysicalProperties physicalProperties = new LLAQuadrupedPhysicalProperties();
       NetClassList netClassList = new LLAQuadrupedNetClassList();
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
-      QuadrupedSimulationInitialPositionParameters standPrepParameters = new LLAQuadrupedSimulationInitialPositionParameters();
+      QuadrupedSimulationInitialPositionParameters initialPositionParameters = new LLAQuadrupedSimulationInitialPositionParameters();
       QuadrupedGroundContactParameters groundContactParameters = new LLAQuadrupedGroundContactParameters();
       SensorProcessingConfiguration sensorProcessingConfiguration = new LLAQuadrupedSensorProcessingConfiguration();
       QuadrupedSensorInformation sensorInformation = new LLAQuadrupedSensorInformation();
@@ -63,7 +63,7 @@ public class LLAQuadrupedTestFactory
       simulationFactory.setOutputWriter(outputWriter);
       simulationFactory.setShowPlotter(SHOW_PLOTTER);
       simulationFactory.setUseTrackAndDolly(USE_TRACK_AND_DOLLY);
-      simulationFactory.setInitialPositionParameters(standPrepParameters);
+      simulationFactory.setInitialPositionParameters(initialPositionParameters);
       simulationFactory.setFullRobotModel(fullRobotModel);
       simulationFactory.setPhysicalProperties(physicalProperties);
       simulationFactory.setUseNetworking(USE_NETWORKING);
