@@ -64,6 +64,7 @@ public class TrajectoryPointOptimizer
    private final DenseMatrix64F AdLine = new DenseMatrix64F(1, 1);
 
    private final DenseMatrix64F timeGradient = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F timeUpdate = new DenseMatrix64F(1, 1);
    private final DoubleYoVariable timeGain = new DoubleYoVariable("TimeGain", registry);
 
    public TrajectoryPointOptimizer(int dimensions, PolynomialOrder order, YoVariableRegistry parentRegistry)
@@ -174,29 +175,43 @@ public class TrajectoryPointOptimizer
 
       double length = CommonOps.elementSum(timeGradient);
       CommonOps.add(timeGradient, -length / intervals);
-      CommonOps.scale(-timeGain.getDoubleValue(), timeGradient);
 
-      double maxUpdate = CommonOps.elementMaxAbs(timeGradient);
+      for (int i = 0; i < 10; i++)
+      {
+         double newCost = applyTimeUpdate();
+
+         if (newCost > cost)
+         {
+            timeGain.mul(0.5);
+            intervalTimes.set(saveIntervalTimes);
+         }
+         else
+         {
+            return newCost;
+         }
+      }
+
+      return applyTimeUpdate();
+   }
+
+   private double applyTimeUpdate()
+   {
+      timeUpdate.set(timeGradient);
+      CommonOps.scale(-timeGain.getDoubleValue(), timeUpdate);
+
+      double maxUpdate = CommonOps.elementMaxAbs(timeUpdate);
       double minIntervalTime = CommonOps.elementMin(intervalTimes);
       if (maxUpdate > 0.4 * minIntervalTime)
       {
-         CommonOps.scale(0.4 * minIntervalTime / maxUpdate, timeGradient);
+         CommonOps.scale(0.4 * minIntervalTime / maxUpdate, timeUpdate);
       }
 
-      for (int i = 0; i < intervals; i++)
+      for (int i = 0; i < intervals.getIntegerValue(); i++)
       {
-         intervalTimes.add(i, 0, timeGradient.get(i));
-      }
-      double newCost = solveMinAcceleration();
-
-      if (newCost > cost)
-      {
-         timeGain.mul(0.5);
-         intervalTimes.set(saveIntervalTimes);
-         return computeTimeUpdate(cost);
+         intervalTimes.add(i, 0, timeUpdate.get(i));
       }
 
-      return newCost;
+      return solveMinAcceleration();
    }
 
    private double solveMinAcceleration()

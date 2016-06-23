@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -31,7 +31,7 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
 
    private final TrajectoryPointOptimizer optimizer;
    private final ArrayList<double[]> coefficients = new ArrayList<>();
-   private final HashMap<Direction, ArrayList<YoPolynomial>> trajectories = new HashMap<>();
+   private final EnumMap<Direction, ArrayList<YoPolynomial>> trajectories = new EnumMap<>(Direction.class);
 
    private final FramePoint initialPosition = new FramePoint();
    private final FrameVector initialVelocity = new FrameVector();
