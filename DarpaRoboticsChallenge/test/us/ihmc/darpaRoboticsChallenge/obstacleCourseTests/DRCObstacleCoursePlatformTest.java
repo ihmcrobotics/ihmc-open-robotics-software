@@ -390,10 +390,10 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 	@Test(timeout = 190000)
 	public void testWalkingOffOfMediumPlatformSlowSteps() throws SimulationExceededMaximumTimeException
 	{
+	   simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 	   BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
 	   DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
-	   simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 	   drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", selectedLocation,  simulationTestingParameters, getRobotModel());
 
 	   SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
