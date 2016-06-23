@@ -4,7 +4,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 
-public interface QuadrupedStandPrepParameters
+public interface QuadrupedSimulationInitialPositionParameters
 {
    /**
     * Maps joint names to initial positions.
@@ -14,8 +14,6 @@ public interface QuadrupedStandPrepParameters
     * @return the initial angle in radians.
     */
    public double getInitialJointPosition(QuadrupedJointName joint);
-   
-   public Point3d getInitialCOMPosition();
-   
+
    public Point3d getInitialBodyPosition();
 }
