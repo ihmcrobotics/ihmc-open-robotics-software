@@ -15,7 +15,9 @@ import us.ihmc.simulationconstructionset.gui.actions.dialogActions.*;
 import us.ihmc.simulationconstructionset.gui.camera.AbstractCameraPropertiesHolder;
 import us.ihmc.simulationconstructionset.gui.config.*;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.*;
+import us.ihmc.tools.testing.TestPlanAnnotations;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 import java.awt.*;
 import java.lang.reflect.*;
@@ -25,6 +27,7 @@ import java.util.List;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@TestPlanAnnotations.DeployableTestClass(targets = { TestPlanTarget.UI})
 public class ActionsTest
 {
 
