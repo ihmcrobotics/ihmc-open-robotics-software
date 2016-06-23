@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import us.ihmc.robotics.math.trajectories.waypoints.PolynomialOrder;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
-import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer.PolynomialOrder;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class TrajectoryPointOptimizerTest
