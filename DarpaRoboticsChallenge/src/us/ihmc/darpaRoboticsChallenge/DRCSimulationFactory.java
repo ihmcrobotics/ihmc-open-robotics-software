@@ -136,9 +136,9 @@ public class DRCSimulationFactory
       {
          VisualizerUtils.createOverheadPlotter(scs, guiInitialSetup.isShowOverheadView(), drcControllerThread.getDynamicGraphicObjectsListRegistry(),
                drcEstimatorThread.getDynamicGraphicObjectsListRegistry());
+         guiInitialSetup.initializeGUI(scs, simulatedRobot, drcRobotModel);
       }
 
-      guiInitialSetup.initializeGUI(scs, simulatedRobot, drcRobotModel);
 
       if (environment != null && environment.getTerrainObject3D() != null)
       {
