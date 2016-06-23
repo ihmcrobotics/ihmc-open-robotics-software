@@ -1143,13 +1143,20 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    public void closeAndDispose()
    {
-      EventDispatchThreadHelper.invokeAndWait(new Runnable()
+      if(myGUI != null)
       {
-         public void run()
+         EventDispatchThreadHelper.invokeAndWait(new Runnable()
          {
-            closeAndDisposeLocal();
-         }
-      });
+            public void run()
+            {
+               closeAndDisposeLocal();
+            }
+         });
+      }
+      else
+      {
+         closeAndDisposeLocal();
+      }
    }
 
    private void closeAndDisposeLocal()
