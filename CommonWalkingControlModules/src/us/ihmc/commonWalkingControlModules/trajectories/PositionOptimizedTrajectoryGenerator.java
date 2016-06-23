@@ -222,6 +222,13 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
       getAcceleration(accelerationToPack);
    }
 
+   public void informDone()
+   {
+      desiredPosition.setToZero(true);
+      desiredVelocity.setToZero(true);
+      desiredAcceleration.setToZero(true);
+   }
+
    @Override
    public void showVisualization()
    {
