@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class BambooToolsTest
 {
@@ -26,7 +27,7 @@ public class BambooToolsTest
       assertEquals("BambooToolsTest.testGetClassAndMethodName", classAndMethodName);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(targets = { TestPlanTarget.UI })
 	@Test(timeout=300000)
    public void testLogMessagesToFile() throws IOException
    {
