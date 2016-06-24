@@ -123,15 +123,15 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
       initialPosition.changeFrame(worldFrame);
       finalPosition.changeFrame(worldFrame);
+      double maxStepZ = Math.max(initialPosition.getZ(), finalPosition.getZ());
 
       switch (trajectoryType.getEnumValue())
       {
       case OBSTACLE_CLEARANCE:
-         double maxZ = Math.max(initialPosition.getZ(), finalPosition.getZ());
          for (int i = 0; i < numberWaypoints; i++)
          {
             waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
-            waypointPositions.get(i).setZ(maxZ + swingHeight.getDoubleValue());
+            waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
          }
          break;
       case PUSH_RECOVERY:
@@ -154,10 +154,10 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       }
 
       stanceFootPosition.changeFrame(worldFrame);
-      double maxZ = stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue();
+      double maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + defaultSwingHeight);
       for (int i = 0; i < numberWaypoints; i++)
       {
-         waypointPositions.get(i).setZ(Math.min(waypointPositions.get(i).getZ(), maxZ));
+         waypointPositions.get(i).setZ(Math.min(waypointPositions.get(i).getZ(), maxWaypointZ));
       }
 
       trajectory.setEndpointConditions(initialPosition, initialVelocity, finalPosition, finalVelocity);
