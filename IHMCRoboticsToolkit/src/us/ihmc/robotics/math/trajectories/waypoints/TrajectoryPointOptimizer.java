@@ -67,6 +67,8 @@ public class TrajectoryPointOptimizer
    private final DenseMatrix64F timeUpdate = new DenseMatrix64F(1, 1);
    private final DoubleYoVariable timeGain = new DoubleYoVariable("TimeGain", registry);
 
+   private final DoubleYoVariable computationTime = new DoubleYoVariable("ComputationTimeMS", registry);
+
    public TrajectoryPointOptimizer(int dimensions, PolynomialOrder order, YoVariableRegistry parentRegistry)
    {
       this(dimensions, order);
@@ -125,6 +127,8 @@ public class TrajectoryPointOptimizer
 
    public void compute()
    {
+      long startTime = System.nanoTime();
+
       int intervals = nWaypoints.getIntegerValue() + 1;
       this.intervals.set(intervals);
       intervalTimes.reshape(intervals, 1);
@@ -145,6 +149,9 @@ public class TrajectoryPointOptimizer
          if (iteration == maxIterations-1)
             System.err.println("Trajectory optimization max iteration.");
       }
+
+      long duration = System.nanoTime() - startTime;
+      computationTime.set((double)duration / 10E6);
    }
 
    private double computeTimeUpdate(double cost)
