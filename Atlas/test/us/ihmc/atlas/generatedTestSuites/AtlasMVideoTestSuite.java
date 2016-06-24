@@ -12,10 +12,11 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Video)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseSteppingStonesTest.class
+   us.ihmc.atlas.roughTerrainWalking.AtlasEndToEndCinderBlockFieldTest.class,
+   us.ihmc.atlas.roughTerrainWalking.AtlasPointyRocksEnvironmentContactsTest.class
 })
 
-public class AtlasHVideoTestSuite
+public class AtlasMVideoTestSuite
 {
    public static void main(String[] args)
    {
