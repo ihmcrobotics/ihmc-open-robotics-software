@@ -129,7 +129,7 @@ public class SwingState extends AbstractUnconstrainedState
             initialVelocityProvider, stanceConfigurationProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider, registry,
             yoGraphicsListRegistry, maxSwingHeightFromStanceFoot, visualizeSwingTrajectory);
       this.touchdownVelocityProvider = touchdownVelocityProvider;
-      swingTrajectoryGeneratorNew = new TwoWaypointSwingGenerator(namePrefix + "SwingNew", worldFrame, registry, yoGraphicsListRegistry);
+      swingTrajectoryGeneratorNew = new TwoWaypointSwingGenerator(namePrefix + "SwingNew", registry, yoGraphicsListRegistry);
 
       pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
             pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGenerator, touchdownTrajectoryGenerator);
@@ -204,6 +204,7 @@ public class SwingState extends AbstractUnconstrainedState
          swingTrajectoryGeneratorNew.setFinalConditions(finalPosition, finalVelocity);
          swingTrajectoryGeneratorNew.setStepTime(swingTimeProvider.getValue());
          swingTrajectoryGeneratorNew.setTrajectoryType(trajectoryParametersProvider.getTrajectoryParameters().getTrajectoryType());
+         swingTrajectoryGeneratorNew.setSwingHeight(trajectoryParametersProvider.getTrajectoryParameters().getSwingHeight());
       }
 
       positionTrajectoryGenerator.initialize();

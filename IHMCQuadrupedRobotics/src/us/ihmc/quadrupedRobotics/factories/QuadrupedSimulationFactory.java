@@ -58,8 +58,9 @@ import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RotatablePlaneTerrainProfile;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
-import us.ihmc.tools.exceptions.OptionalFactoryField;
-import us.ihmc.tools.exceptions.RequiredFactoryField;
+import us.ihmc.tools.factories.FactoryTools;
+import us.ihmc.tools.factories.OptionalFactoryField;
+import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
 
@@ -300,6 +301,8 @@ public class QuadrupedSimulationFactory
    
    public SimulationConstructionSet createSimulation() throws IOException
    {
+      FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
+      
       setupYoRegistries();
       createSensorReader();
       createContactibleFeet();
