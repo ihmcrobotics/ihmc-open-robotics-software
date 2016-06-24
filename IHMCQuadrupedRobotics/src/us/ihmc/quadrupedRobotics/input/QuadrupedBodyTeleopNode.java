@@ -62,7 +62,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       this.packetCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
-      this.taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(fullRobotModel, referenceFrames, registry);
+      this.taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(fullRobotModel, referenceFrames, registry, null);
       this.xGaitTeleopMode = new QuadrupedXGaitTeleopMode(packetCommunicator, referenceFrames);
       this.testTeleopMode = new QuadrupedTestTeleopMode(packetCommunicator, referenceFrames);
 
