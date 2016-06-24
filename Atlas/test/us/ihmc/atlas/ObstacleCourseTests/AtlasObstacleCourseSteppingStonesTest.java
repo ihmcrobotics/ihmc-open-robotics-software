@@ -12,7 +12,9 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.Video})
+// moved to in development
+// this test is flaky because toe off is not triggered properly - the toe off condition needs to be fixed
+@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
 public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseSteppingStonesTest
 {
    @Override
