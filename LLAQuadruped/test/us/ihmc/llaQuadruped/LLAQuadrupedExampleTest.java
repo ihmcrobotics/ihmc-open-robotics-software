@@ -7,8 +7,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import us.ihmc.quadrupedRobotics.QuadrupedTestAdministrator;
-import us.ihmc.quadrupedRobotics.QuadrupedTestAdministratorFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestConductor;
+import us.ihmc.quadrupedRobotics.QuadrupedTestConductorFactory;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.tools.MemoryTools;
@@ -19,8 +19,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @DeployableTestClass(targets = TestPlanTarget.Fast)
 public class LLAQuadrupedExampleTest
 {
-   private static QuadrupedTestAdministratorFactory testAdministratorFactory;
-   private QuadrupedTestAdministrator testAdministrator;
+   private static QuadrupedTestConductorFactory testAdministratorFactory;
+   private QuadrupedTestConductor testAdministrator;
    
    @BeforeClass
    public static void setupClass()
@@ -46,7 +46,7 @@ public class LLAQuadrupedExampleTest
          testAdministratorFactory.setControlMode(QuadrupedControlMode.FORCE);
          testAdministratorFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
 
-         testAdministrator = testAdministratorFactory.createTestAdministrator();
+         testAdministrator = testAdministratorFactory.createTestConductor();
       }
       catch (IOException e)
       {
@@ -64,6 +64,6 @@ public class LLAQuadrupedExampleTest
    @Test(timeout = 800000)
    public void exampleTest()
    {
-      testAdministrator.simulate(1.0);
+//      testAdministrator.simulate(1.0);
    }
 }

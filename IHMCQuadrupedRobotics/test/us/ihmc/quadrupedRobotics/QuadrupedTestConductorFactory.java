@@ -7,7 +7,7 @@ import us.ihmc.quadrupedRobotics.factories.QuadrupedSimulationFactory;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-public class QuadrupedTestAdministratorFactory
+public class QuadrupedTestConductorFactory
 {
    // Factories
    private QuadrupedSimulationFactory simulationFactory;
@@ -18,13 +18,13 @@ public class QuadrupedTestAdministratorFactory
    
    // Creation
    
-   public QuadrupedTestAdministrator createTestAdministrator() throws IOException
+   public QuadrupedTestConductor createTestConductor() throws IOException
    {
       simulationFactory.setControlMode(controlMode);
       simulationFactory.setGroundContactModelType(groundContactModelType);
       SimulationConstructionSet scs = simulationFactory.createSimulation();
       
-      return new QuadrupedTestAdministrator(scs);
+      return new QuadrupedTestConductor(scs);
    }
    
    // Setters
