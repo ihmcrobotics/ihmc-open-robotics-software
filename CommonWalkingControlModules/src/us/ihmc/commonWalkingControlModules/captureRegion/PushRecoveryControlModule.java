@@ -252,8 +252,15 @@ public class PushRecoveryControlModule
       FramePoint2d footCentroid = footPolygon.getCentroid();
       FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
       isCaptureRegionEmpty.set(captureRegion.isEmpty());
-      boolean hasFootstepBeenAdjusted = footstepAdjustor.adjustFootstep(nextFootstep, footCentroid, captureRegion);
-      footstepWasProjectedInCaptureRegion.set(hasFootstepBeenAdjusted);
+      if (!recovering.getBooleanValue())
+      {
+         boolean hasFootstepBeenAdjusted = footstepAdjustor.adjustFootstep(nextFootstep, footCentroid, captureRegion);
+         footstepWasProjectedInCaptureRegion.set(hasFootstepBeenAdjusted);
+      }
+      else
+      {
+         footstepWasProjectedInCaptureRegion.set(false);
+      }
 
       if (footstepWasProjectedInCaptureRegion.getBooleanValue())
       {

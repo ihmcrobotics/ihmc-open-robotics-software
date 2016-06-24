@@ -16,11 +16,11 @@ import us.ihmc.robotics.trajectories.providers.VectorProvider;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-/** 
- * 
+/**
  *
- * This trajectory unless the robot is pushed, this class will behave exactly like the TwoWaypointTrajectoyrGenerator except this class has 
- * the soft TouchdownTrajectoryGenerator included rather than the two being combined in an ArrayList of position trajectory generators. When 
+ *
+ * This trajectory unless the robot is pushed, this class will behave exactly like the TwoWaypointTrajectoyrGenerator except this class has
+ * the soft TouchdownTrajectoryGenerator included rather than the two being combined in an ArrayList of position trajectory generators. When
  * the robot is pushed, the XY portion of the trajectory are replanned so the robot can recover from the push.
  */
 public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenerator
@@ -72,8 +72,8 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
 
       velocitySources[0] = initialVelocityProvider;
 
-      xPolynomial = new YoPolynomial(namePrefix + "PolynomialX", 5, registry);
-      yPolynomial = new YoPolynomial(namePrefix + "PolynomialY", 5, registry);
+      xPolynomial = new YoPolynomial(namePrefix + "PolynomialX", 6, registry);
+      yPolynomial = new YoPolynomial(namePrefix + "PolynomialY", 6, registry);
 
       swingTime = new DoubleYoVariable(namePrefix + "SwingTime", registry);
       swingTime.set(swingTimeProvider.getValue());
@@ -115,8 +115,14 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       double xFinal = tempPosition.getX();
       double yFinal = tempPosition.getY();
 
-      xPolynomial.setQuarticUsingFinalAcceleration(timeIntoStep.getDoubleValue(), swingTime.getDoubleValue(), x0, xd0, xFinal, 0.0, 0.0);
-      yPolynomial.setQuarticUsingFinalAcceleration(timeIntoStep.getDoubleValue(), swingTime.getDoubleValue(), y0, yd0, yFinal, 0.0, 0.0);
+      nominalTrajectoryGenerator.compute(timeIntoStep.getDoubleValue());
+      nominalTrajectoryGenerator.getAcceleration(tempVector);
+      tempVector.changeFrame(desiredPosition.getReferenceFrame());
+      double xdd0 = tempVector.getX();
+      double ydd0 = tempVector.getY();
+
+      xPolynomial.setQuintic(timeIntoStep.getDoubleValue(), swingTime.getDoubleValue(), x0, xd0, xdd0, xFinal, 0.0, 0.0);
+      yPolynomial.setQuintic(timeIntoStep.getDoubleValue(), swingTime.getDoubleValue(), y0, yd0, ydd0, yFinal, 0.0, 0.0);
 
       if (VISUALIZE)
       {

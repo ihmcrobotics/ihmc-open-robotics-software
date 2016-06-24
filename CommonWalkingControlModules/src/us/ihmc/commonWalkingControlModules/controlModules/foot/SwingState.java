@@ -131,16 +131,19 @@ public class SwingState extends AbstractUnconstrainedState
       this.touchdownVelocityProvider = touchdownVelocityProvider;
       swingTrajectoryGeneratorNew = new TwoWaypointSwingGenerator(namePrefix + "SwingNew", registry, yoGraphicsListRegistry);
 
-      pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
-            pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGenerator, touchdownTrajectoryGenerator);
 
       if (useNewSwingTrajectoyOptimization)
       {
          positionTrajectoryGenerators.add(swingTrajectoryGeneratorNew);
+         pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
+               pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGeneratorNew, touchdownTrajectoryGenerator);
+
       }
       else
       {
          positionTrajectoryGenerators.add(swingTrajectoryGenerator);
+         pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
+               pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGenerator, touchdownTrajectoryGenerator);
       }
       positionTrajectoryGenerators.add(touchdownTrajectoryGenerator);
 
