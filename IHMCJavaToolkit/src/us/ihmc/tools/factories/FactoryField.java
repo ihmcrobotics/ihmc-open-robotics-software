@@ -1,4 +1,4 @@
-package us.ihmc.tools.exceptions;
+package us.ihmc.tools.factories;
 
 public abstract class FactoryField<T>
 {
