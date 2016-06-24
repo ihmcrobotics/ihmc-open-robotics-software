@@ -153,6 +153,11 @@ public class QuadrupedTestConductor implements VariableChangedListener
       }
    }
 
+   public void destroy()
+   {
+      scs.closeAndDispose();
+   }
+   
    public void addFinalGoal(YoVariableTestGoal yoVariableTestGoal)
    {
       finalGoals.add(yoVariableTestGoal);
