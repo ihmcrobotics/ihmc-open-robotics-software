@@ -151,7 +151,7 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
             PrintTools.error(this, exception.getMessage());
             while (!tcpYoWhiteBoard.isTCPSocketConnected())
             {
-               PrintTools.debug(true, this, "Waiting for TCP socket to connect.");
+               PrintTools.debug(DEBUG, this, "Waiting for TCP socket to connect.");
                ThreadTools.sleepSeconds(3.0);
             }
             
