@@ -58,6 +58,12 @@ public class MomentumOptimizationSettings
       this.pelvisAngularWeight.set(pelvisAngularWeight);
    }
 
+   public void setHandTaskspaceControlWeights(Vector3d angular, Vector3d linear)
+   {
+      handAngularTaskspaceWeight.set(angular);
+      handLinearTaskspaceWeight.set(linear);
+   }
+
    public void setManipulationWeights(double jointspace, double taskspace, double userMode)
    {
       handJointspaceWeight = jointspace;

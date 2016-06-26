@@ -14,7 +14,8 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
 {
-   private static final boolean VERBOSE = true;
+	private static final boolean VERBOSE = false;
+	private static final boolean PRINT_ERRORS = false;
 
    private final String ipAddress;
    private int port;
@@ -89,7 +90,8 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
          }
          catch (IOException connectIOException)
          {
-            PrintTools.error(this, connectIOException.getMessage());
+            if (PRINT_ERRORS)
+               PrintTools.error(this, connectIOException.getMessage());
 
             try
             {
@@ -127,8 +129,11 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
          }
          catch (ConnectException connectException)
          {
-            PrintTools.error(this, "Failed to connect to " + ipAddress + ":" + port);
-            PrintTools.error(this, connectException.getMessage());
+            if (PRINT_ERRORS)
+            {
+               PrintTools.error(this, "Failed to connect to " + ipAddress + ":" + port);
+               PrintTools.error(this, connectException.getMessage());
+            }
          }
          catch (IOException connectIOException)
          {

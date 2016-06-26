@@ -156,7 +156,11 @@ public class JointPrivilegedConfigurationHandler
       for (int i = 0; i < command.getNumberOfJoints(); i++)
       {
          OneDoFJoint joint = command.getJoint(i);
-         int jointIndex = jointIndices.get(joint).intValue();
+         MutableInt mutableIndex = jointIndices.get(joint);
+         if (mutableIndex == null)
+        	 continue;
+
+         int jointIndex = mutableIndex.intValue();
 
          if (command.hasNewPrivilegedConfiguration(i))
          {
