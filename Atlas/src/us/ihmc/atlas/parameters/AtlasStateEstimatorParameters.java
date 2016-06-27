@@ -246,7 +246,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public double getIMUDriftFilterFreqInHertz()
    {
-      return 0.5332;
+      return 0.024; //0.5332;
    }
 
    @Override
