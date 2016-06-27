@@ -91,7 +91,6 @@ public class QuadrupedStateEstimatorFactory
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          RigidBody foot = fullRobotModel.getFoot(robotQuadrant);
-         System.out.println(foot.getName() + " " + foot.hashCode());
          ListOfPointsContactablePlaneBody footContactableBody = new ListOfPointsContactablePlaneBody(foot, referenceFrames.getFootFrame(robotQuadrant), quadrupedPhysicalProperties.getFootGroundContactPoints(robotQuadrant));
          footContactableBodies.set(robotQuadrant, footContactableBody);
       }

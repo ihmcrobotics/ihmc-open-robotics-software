@@ -67,7 +67,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
 	@Test(timeout = 260000)
    public void testSimpleFlatGroundScript() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
 
@@ -99,14 +99,14 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
 
 
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 	@DeployableTestMethod(estimatedDuration = 53.8)
 	@Test(timeout = 270000)
    public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
@@ -140,7 +140,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
 
 
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 

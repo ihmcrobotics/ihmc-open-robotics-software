@@ -40,9 +40,7 @@ import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -56,9 +54,6 @@ import java.util.*;
 
 public class VirtualModelControllerTestHelper
 {
-
-   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-
    private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
@@ -99,41 +94,14 @@ public class VirtualModelControllerTestHelper
    public static final double FOOT_RAD = 0.05;
    public static final double FOOT_MASS = 3.0 * POUNDS;
 
-   private final Random random = new Random(100L);
+   private static final Random random = new Random(100L);
 
-
-   private BlockingSimulationRunner blockingSimulationRunner;
-
-   public VirtualModelControllerTestHelper()
+   private VirtualModelControllerTestHelper()
    {
-   }
-
-   public void setSCSAndCreateSimulationRunner(SimulationConstructionSet scs)
-   {
-      blockingSimulationRunner = new BlockingSimulationRunner(scs, 10.0);
-   }
-
-   public void simulateAndBlock(double simulationTime) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
-   {
-      blockingSimulationRunner.simulateAndBlock(simulationTime);
-   }
-
-   public boolean simulateAndBlockAndCatchExceptions(double simulationTime) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
-   {
-      try
-      {
-         simulateAndBlock(simulationTime);
-         return true;
-      }
-      catch (Exception e)
-      {
-         System.err.println("Caught exception in " + getClass().getSimpleName() + ".simulateAndBlockAndCatchExceptions. Exception = /n" + e);
-         return false;
-      }
    }
 
    public static void createVirtualModelControlTest(SCSRobotFromInverseDynamicsRobotModel robotModel, FullRobotModel controllerModel, ReferenceFrame centerOfMassFrame,
-         List<RigidBody> endEffectors, List<Vector3d> desiredForces, List<Vector3d> desiredTorques, List<ExternalForcePoint> externalForcePoints, DenseMatrix64F selectionMatrix) throws Exception
+         List<RigidBody> endEffectors, List<Vector3d> desiredForces, List<Vector3d> desiredTorques, List<ExternalForcePoint> externalForcePoints, DenseMatrix64F selectionMatrix, SimulationTestingParameters simulationTestingParameters) throws Exception
    {
       double simulationDuration = 20.0;
 
@@ -195,8 +163,7 @@ public class VirtualModelControllerTestHelper
       DummyArmController armController = new DummyArmController(robotModel, controllerModel, controllerModel.getOneDoFJoints(), forcePointControllers, virtualModelController,
             geometricJacobianHolder, endEffectors, desiredWrenches, selectionMatrix);
 
-      SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
-      SimulationConstructionSet scs = new SimulationConstructionSet(robotModel, scsParameters);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotModel, simulationTestingParameters);
       robotModel.setController(armController);
       scs.getRootRegistry().addChild(registry);
       for (ForcePointController forcePointController : forcePointControllers)
@@ -240,7 +207,7 @@ public class VirtualModelControllerTestHelper
       }
    }
 
-   public RobotLegs createRobotLeg(double gravity)
+   public static RobotLegs createRobotLeg(double gravity)
    {
       RobotLegs robotLeg = new RobotLegs("robotLegs");
       robotLeg.setGravity(gravity);
@@ -425,7 +392,7 @@ public class VirtualModelControllerTestHelper
       return robotLeg;
    }
 
-   private Link pelvis()
+   private static Link pelvis()
    {
       AppearanceDefinition pelvisAppearance = YoAppearance.Blue();
 
@@ -444,7 +411,7 @@ public class VirtualModelControllerTestHelper
       return ret;
    }
 
-   private Link hip_differential()
+   private static Link hip_differential()
    {
       Link ret = new Link("hip_differential");
 
@@ -461,7 +428,7 @@ public class VirtualModelControllerTestHelper
    }
 
 
-   private Link thigh()
+   private static Link thigh()
    {
       AppearanceDefinition thighApp = YoAppearance.Green();
 
@@ -480,7 +447,7 @@ public class VirtualModelControllerTestHelper
    }
 
 
-   private Link shin()
+   private static Link shin()
    {
       AppearanceDefinition shinApp = YoAppearance.Red();
 
@@ -498,7 +465,7 @@ public class VirtualModelControllerTestHelper
       return ret;
    }
 
-   private Link ankle_differential()
+   private static Link ankle_differential()
    {
       Link ret = new Link("ankle_differential");
 
@@ -514,7 +481,7 @@ public class VirtualModelControllerTestHelper
       return ret;
    }
 
-   private Link foot()
+   private static Link foot()
    {
       AppearanceDefinition footApp = YoAppearance.PlaneMaterial();
 
@@ -538,7 +505,7 @@ public class VirtualModelControllerTestHelper
 
       return ret;
    }
-   private RigidBody copyLinkAsRigidBody(Link link, InverseDynamicsJoint currentInverseDynamicsJoint, String bodyName)
+   private static RigidBody copyLinkAsRigidBody(Link link, InverseDynamicsJoint currentInverseDynamicsJoint, String bodyName)
    {
       Vector3d comOffset = new Vector3d();
       link.getComOffset(comOffset);
@@ -602,27 +569,27 @@ public class VirtualModelControllerTestHelper
       JUnitTools.assertTuple3dEquals(inputWrench.getLinearPartCopy(), outputWrench.getLinearPartCopy(), epsilon);
    }
 
-   public RobotArm createRobotArm()
+   public static RobotArm createRobotArm()
    {
       return new RobotArm();
    }
 
-   public ForkedRobotArm createForkedRobotArm()
+   public static ForkedRobotArm createForkedRobotArm()
    {
       return new ForkedRobotArm();
    }
 
-   public PlanarRobotArm createPlanarArm()
+   public static PlanarRobotArm createPlanarArm()
    {
       return new PlanarRobotArm();
    }
 
-   public PlanarForkedRobotArm createPlanarForkedRobotArm()
+   public static PlanarForkedRobotArm createPlanarForkedRobotArm()
    {
       return new PlanarForkedRobotArm();
    }
 
-   public class PlanarRobotArm implements FullRobotModel
+   public static class PlanarRobotArm implements FullRobotModel
    {
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
@@ -870,7 +837,7 @@ public class VirtualModelControllerTestHelper
       }
    }
 
-   public class RobotArm implements FullRobotModel
+   public static class RobotArm implements FullRobotModel
    {
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
@@ -1152,7 +1119,7 @@ public class VirtualModelControllerTestHelper
       }
    }
 
-   public class ForkedRobotArm implements FullRobotModel
+   public static class ForkedRobotArm implements FullRobotModel
    {
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
@@ -1475,7 +1442,7 @@ public class VirtualModelControllerTestHelper
       }
    }
 
-   public class PlanarForkedRobotArm implements FullRobotModel
+   public static class PlanarForkedRobotArm implements FullRobotModel
    {
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
@@ -1787,7 +1754,7 @@ public class VirtualModelControllerTestHelper
       }
    }
 
-   public class RobotLegs extends Robot implements FullRobotModel
+   public static class RobotLegs extends Robot implements FullRobotModel
    {
       private RigidBody elevator;
       private RigidBody pelvis;
@@ -1989,7 +1956,7 @@ public class VirtualModelControllerTestHelper
       }
    }
 
-   private class LegReferenceFrames implements CommonHumanoidReferenceFrames
+   private static class LegReferenceFrames implements CommonHumanoidReferenceFrames
    {
       private final ReferenceFrame pelvisFrame;
       private final ReferenceFrame centerOfMassFrame;

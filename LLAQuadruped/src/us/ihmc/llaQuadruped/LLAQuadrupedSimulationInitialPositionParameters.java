@@ -3,12 +3,11 @@ package us.ihmc.llaQuadruped;
 import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
-import us.ihmc.quadrupedRobotics.model.QuadrupedStandPrepParameters;
+import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 
-public class LLAQuadrupedStandPrepParameters implements QuadrupedStandPrepParameters
+public class LLAQuadrupedSimulationInitialPositionParameters implements QuadrupedSimulationInitialPositionParameters
 {
    private static final Point3d INITIAL_BODY_POSITION = new Point3d(0.0, 0.0, 0.37);
-   private static final Point3d INITIAL_COM_POSITION = new Point3d(0.0, 0.0, 0.37);
    private static final double HIP_ROLL_ANGLE = 0.0;
    private static final double HIP_PITCH_ANGLE = 0.3;
    private static final double KNEE_PITCH_ANGLE = 0.6;
@@ -17,12 +16,6 @@ public class LLAQuadrupedStandPrepParameters implements QuadrupedStandPrepParame
    public Point3d getInitialBodyPosition()
    {
       return INITIAL_BODY_POSITION;
-   }
-
-   @Override
-   public Point3d getInitialCOMPosition()
-   {
-      return INITIAL_COM_POSITION;
    }
 
    @Override

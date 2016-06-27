@@ -85,7 +85,7 @@ public abstract class HandDesiredConfigurationBehaviorTest implements MultiRobot
    @Test(timeout = 83115)
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -105,14 +105,14 @@ public abstract class HandDesiredConfigurationBehaviorTest implements MultiRobot
       assertTrue(fingerJointQFinal > fingerJointQInitial);
       assertTrue(behavior.isDone());
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 27.7)
    @Test(timeout = 83115)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       PrintTools.debug(this, "Initializing Simulation");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -145,14 +145,14 @@ public abstract class HandDesiredConfigurationBehaviorTest implements MultiRobot
       assertTrue(Math.abs(fingerJointQFinal - fingerJointQAtStop) < 3.0);
       assertTrue(!behavior.isDone());
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
    
    @DeployableTestMethod(estimatedDuration = 27.7)
    @Test(timeout = 83115)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       PrintTools.debug(this, "Initializing Simulation");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -194,7 +194,7 @@ public abstract class HandDesiredConfigurationBehaviorTest implements MultiRobot
       assertTrue(Math.abs(fingerJointQAtResume - fingerJointQAtPause) < 3.0);
       assertTrue(fingerJointQFinal > fingerJointQAtResume);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private double getTotalFingerJointQ(RobotSide robotSide)

@@ -81,6 +81,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.trajectories.providers.ConstantDoubleProviderTest.class,
    us.ihmc.robotics.trajectories.providers.ConstantPositionProviderTest.class,
    us.ihmc.robotics.trajectories.providers.CurrentPositionProviderTest.class,
+   us.ihmc.robotics.trajectories.TrajectoryPointOptimizerTest.class,
    us.ihmc.robotics.trajectories.TrapezoidalVelocityTrajectoryTest.class,
    us.ihmc.robotics.trajectories.WaypointMotionGeneratorTest.class
 })

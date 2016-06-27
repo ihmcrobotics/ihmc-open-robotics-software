@@ -67,7 +67,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
    @Test(timeout = 470000)
    public void testWalkingOverCinderBlockField() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
       FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockFieldEnvironment.getCinderBlockPoses());

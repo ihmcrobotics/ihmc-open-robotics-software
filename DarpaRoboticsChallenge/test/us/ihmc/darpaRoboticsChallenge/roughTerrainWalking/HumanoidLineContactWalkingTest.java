@@ -350,7 +350,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
 
    private void setupTest()
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       // create simulation test helper
       FlatGroundEnvironment emptyEnvironment = new FlatGroundEnvironment();

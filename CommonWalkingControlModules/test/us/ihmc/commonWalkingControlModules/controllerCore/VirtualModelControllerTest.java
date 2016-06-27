@@ -54,8 +54,7 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -105,8 +104,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -128,8 +127,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -151,8 +150,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -180,8 +179,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -209,8 +208,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -236,8 +235,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -263,8 +262,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -290,8 +289,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -317,8 +316,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -344,8 +343,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -371,8 +370,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -399,8 +398,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -428,8 +427,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -457,8 +456,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -486,8 +485,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -512,8 +511,8 @@ public class VirtualModelControllerTest
    {
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -541,8 +540,8 @@ public class VirtualModelControllerTest
 
       double gravity = -9.81;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      VirtualModelControllerTestHelper.RobotLegs robotLeg = testHelper.createRobotLeg(gravity);
+      
+      VirtualModelControllerTestHelper.RobotLegs robotLeg = VirtualModelControllerTestHelper.createRobotLeg(gravity);
       RigidBody endEffector = robotLeg.getFoot(RobotSide.LEFT);
       RigidBody foot = endEffector.getParentJoint().getSuccessor();
       RigidBody pelvis = robotLeg.getRootJoint().getSuccessor();
@@ -597,11 +596,11 @@ public class VirtualModelControllerTest
    @Test(timeout = 300000000)
    public void testVMCWithArm() throws Exception
    {
-      simulationTestingParameters.setKeepSCSUp(true);
-      hasSCSSimulation = true;
+      simulationTestingParameters.setKeepSCSUp(false);
+      hasSCSSimulation = false;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      VirtualModelControllerTestHelper.RobotArm robotArm = testHelper.createRobotArm();
+      
+      VirtualModelControllerTestHelper.RobotArm robotArm = VirtualModelControllerTestHelper.createRobotArm();
       SCSRobotFromInverseDynamicsRobotModel scsRobotArm = robotArm.getSCSRobotArm();
 
       List<RigidBody> endEffectors = new ArrayList<>();
@@ -627,7 +626,7 @@ public class VirtualModelControllerTest
 
       DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
       VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, robotArm.getCenterOfMassFrame(), endEffectors, desiredForces,
-            desiredTorques, externalForcePoints, selectionMatrix);
+            desiredTorques, externalForcePoints, selectionMatrix, simulationTestingParameters);
 
       simulationTestingParameters.setKeepSCSUp(false);
    }
@@ -636,11 +635,11 @@ public class VirtualModelControllerTest
    @Test(timeout = 3000000)
    public void testVMCWithPlanarArm() throws Exception
    {
-      simulationTestingParameters.setKeepSCSUp(true);
-      hasSCSSimulation = true;
+      simulationTestingParameters.setKeepSCSUp(false);
+      hasSCSSimulation = false;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      VirtualModelControllerTestHelper.PlanarRobotArm robotArm = testHelper.createPlanarArm();
+      
+      VirtualModelControllerTestHelper.PlanarRobotArm robotArm = VirtualModelControllerTestHelper.createPlanarArm();
       SCSRobotFromInverseDynamicsRobotModel scsRobotArm = robotArm.getSCSRobotArm();
 
       List<RigidBody> endEffectors = new ArrayList<>();
@@ -662,7 +661,7 @@ public class VirtualModelControllerTest
       externalForcePoints.add(robotArm.getExternalForcePoint());
 
       DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
-      VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, robotArm.getCenterOfMassFrame(), endEffectors, desiredForces, desiredTorques, externalForcePoints, selectionMatrix);
+      VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, robotArm.getCenterOfMassFrame(), endEffectors, desiredForces, desiredTorques, externalForcePoints, selectionMatrix, simulationTestingParameters);
 
       simulationTestingParameters.setKeepSCSUp(false);
    }
@@ -671,11 +670,11 @@ public class VirtualModelControllerTest
    @Test(timeout = 3000000)
    public void testPlanarHydra() throws Exception
    {
-      simulationTestingParameters.setKeepSCSUp(true);
-      hasSCSSimulation = true;
+      simulationTestingParameters.setKeepSCSUp(false);
+      hasSCSSimulation = false;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      VirtualModelControllerTestHelper.PlanarForkedRobotArm robotArm = testHelper.createPlanarForkedRobotArm();
+      
+      VirtualModelControllerTestHelper.PlanarForkedRobotArm robotArm = VirtualModelControllerTestHelper.createPlanarForkedRobotArm();
       SCSRobotFromInverseDynamicsRobotModel scsRobotArm = robotArm.getSCSRobotArm();
 
       List<RigidBody> endEffectors = new ArrayList<>();
@@ -707,21 +706,21 @@ public class VirtualModelControllerTest
       DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
 
       VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, robotArm.getCenterOfMassFrame(), endEffectors, desiredForces,
-            desiredTorques, externalForcePoints, selectionMatrix);
+            desiredTorques, externalForcePoints, selectionMatrix, simulationTestingParameters);
 
       simulationTestingParameters.setKeepSCSUp(false);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod
    @Test(timeout = 3000000)
    public void testHydra() throws Exception
    {
-      simulationTestingParameters.setKeepSCSUp(true);
-      hasSCSSimulation = true;
+      simulationTestingParameters.setKeepSCSUp(false);
+      hasSCSSimulation = false;
 
-      VirtualModelControllerTestHelper testHelper = new VirtualModelControllerTestHelper();
-      VirtualModelControllerTestHelper.ForkedRobotArm robotArm = testHelper.createForkedRobotArm();
+      
+      VirtualModelControllerTestHelper.ForkedRobotArm robotArm = VirtualModelControllerTestHelper.createForkedRobotArm();
       SCSRobotFromInverseDynamicsRobotModel scsRobotArm = robotArm.getSCSRobotArm();
 
       List<RigidBody> endEffectors = new ArrayList<>();
@@ -751,7 +750,7 @@ public class VirtualModelControllerTest
       DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
 
       VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, robotArm.getCenterOfMassFrame(), endEffectors, desiredForces,
-            desiredTorques, externalForcePoints, selectionMatrix);
+            desiredTorques, externalForcePoints, selectionMatrix, simulationTestingParameters);
 
       simulationTestingParameters.setKeepSCSUp(false);
    }

@@ -40,7 +40,7 @@ public class MomentumRecoveryControlModule
    private static final double defaultDistanceToShrinkSafeAreaIfRecoveringSS = 0.05;
    private static final double defaultDistanceToShrinkSafeAreaDS = 0.01;
    private static final double defaultDistanceToShrinkSafeAreaIfRecoveringDS = 0.05;
-   private static final double defaultMaxIcpError = 0.015;
+   private static final double defaultMaxIcpError = 0.03;
 
    private static final boolean showVizByDefault = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

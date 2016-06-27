@@ -32,6 +32,8 @@ public class PelvisIMUBasedLinearStateCalculator
    
    private final YoFrameVector rootJointLinearVelocity = new YoFrameVector("imuRootJointLinearVelocity", worldFrame, registry);
    private final YoFrameVector rootJointPosition = new YoFrameVector("imuRootJointPosition", worldFrame, registry);
+   private final BooleanYoVariable setRootJointPositionImuOnlyToCurrent = new BooleanYoVariable("setRootJointPositionImuOnlyToCurrent", registry);
+   private final YoFrameVector rootJointPositionImuOnly = new YoFrameVector("imuOnlyIntregratedRootJointPosition", worldFrame, registry);
 
    private final YoFrameVector yoMeasurementFrameLinearVelocityInWorld;
    private final YoFrameVector yoLinearAccelerationMeasurementInWorld;
@@ -88,6 +90,8 @@ public class PelvisIMUBasedLinearStateCalculator
       yoMeasurementFrameLinearVelocityInWorld = new YoFrameVector("imuLinearVelocityInWorld", worldFrame, registry);
       yoLinearAccelerationMeasurement = new YoFrameVector("imuLinearAcceleration", measurementFrame, registry);
       yoLinearAccelerationMeasurementInWorld = new YoFrameVector("imuLinearAccelerationInWorld", worldFrame, registry);
+      
+      setRootJointPositionImuOnlyToCurrent.set(true);
       
       parentRegistry.addChild(registry);
    }
@@ -193,6 +197,13 @@ public class PelvisIMUBasedLinearStateCalculator
       rootJointLinearVelocity.getFrameTupleIncludingFrame(tempRootJointVelocityIntegrated);
       tempRootJointVelocityIntegrated.scale(estimatorDT);
 
+      if(setRootJointPositionImuOnlyToCurrent.getBooleanValue())
+      {
+         rootJointPositionImuOnly.set(rootJointPositionPrevValue);
+         setRootJointPositionImuOnlyToCurrent.set(false);
+      }
+      rootJointPositionImuOnly.add(tempRootJointVelocityIntegrated);
+      
       rootJointPosition.set(rootJointPositionPrevValue);
       rootJointPosition.add(tempRootJointVelocityIntegrated);
       rootJointPosition.getFrameTupleIncludingFrame(rootJointPositionToPack);

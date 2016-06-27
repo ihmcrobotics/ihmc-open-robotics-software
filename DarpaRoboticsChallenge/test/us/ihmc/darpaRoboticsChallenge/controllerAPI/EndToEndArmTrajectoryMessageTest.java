@@ -57,7 +57,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test(timeout = 300000)
    public void testSingleTrajectoryPoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
@@ -110,7 +110,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test(timeout = 300000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
@@ -192,7 +192,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test(timeout = 300000)
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
@@ -324,7 +324,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test(timeout = 300000)
    public void testQueuedMessages() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
@@ -455,7 +455,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test(timeout = 300000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
 
@@ -568,7 +568,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test(timeout = 300000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
@@ -699,7 +699,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test(timeout = 300000)
    public void testStopAllTrajectory() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
 

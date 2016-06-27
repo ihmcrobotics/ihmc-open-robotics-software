@@ -80,7 +80,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
    @Test(timeout = 64580)
    public void testDoNothingBehavior() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -118,14 +118,14 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       assertTrue("Actual high level state: " + actualState + ", does not match desired high level state: " + desiredState + ".",
             desiredState.equals(actualState));
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 21.5)
    @Test(timeout = 64580)
    public void testRandomState() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -149,7 +149,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       assertTrue("Actual high level state: " + actualState + ", does not match desired high level state: " + desiredState + ".",
             desiredState.equals(actualState));
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private HighLevelState getCurrentHighLevelState()

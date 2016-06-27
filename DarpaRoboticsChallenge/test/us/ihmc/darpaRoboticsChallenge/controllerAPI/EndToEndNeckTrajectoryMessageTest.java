@@ -39,7 +39,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
    @Test(timeout = 30000)
    public void testSingleWaypoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;

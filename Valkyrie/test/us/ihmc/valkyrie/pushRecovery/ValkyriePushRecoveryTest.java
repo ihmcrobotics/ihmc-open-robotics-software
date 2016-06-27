@@ -59,7 +59,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 46.3, targets = TestPlanTarget.Slow)
+   @DeployableTestMethod(estimatedDuration = 46.3, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 230000)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {

@@ -4,11 +4,9 @@ import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import us.ihmc.quadrupedRobotics.QuadrupedTestAdministrator;
-import us.ihmc.quadrupedRobotics.QuadrupedTestAdministratorFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestConductor;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.tools.MemoryTools;
@@ -19,23 +17,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @DeployableTestClass(targets = TestPlanTarget.Fast)
 public class LLAQuadrupedExampleTest
 {
-   private static QuadrupedTestAdministratorFactory testAdministratorFactory;
-   private QuadrupedTestAdministrator testAdministrator;
-   
-   @BeforeClass
-   public static void setupClass()
-   {
-      try
-      {
-         LLAQuadrupedTestFactory llaQuadrupedTestFactory = new LLAQuadrupedTestFactory();
-         testAdministratorFactory = llaQuadrupedTestFactory.createTestAdministratorFactory();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException("Error loading simulation: " + e.getMessage());
-      }
-   }
-   
+   private QuadrupedTestConductor conductor;
+
    @Before
    public void setup()
    {
@@ -43,27 +26,28 @@ public class LLAQuadrupedExampleTest
       {
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-         testAdministratorFactory.setControlMode(QuadrupedControlMode.FORCE);
-         testAdministratorFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
+         LLAQuadrupedTestFactory llaQuadrupedTestFactory = new LLAQuadrupedTestFactory();
+         llaQuadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+         llaQuadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
 
-         testAdministrator = testAdministratorFactory.createTestAdministrator();
+         conductor = llaQuadrupedTestFactory.createTestConductor();
       }
       catch (IOException e)
       {
          throw new RuntimeException("Error loading simulation: " + e.getMessage());
       }
    }
-   
+
    @After
    public void tearDown()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    @DeployableTestMethod(estimatedDuration = 10.0)
    @Test(timeout = 800000)
    public void exampleTest()
    {
-      testAdministrator.simulate(1.0);
+      conductor.simulate();
    }
 }
