@@ -256,7 +256,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
             accelerationIntegration.compute();
 
          double ramp = timeInStandprep.getDoubleValue() / standPrepRampUpTime.getDoubleValue();
-         MathTools.clipToMinMax(ramp, 0.0, 1.0);
+         ramp = MathTools.clipToMinMax(ramp, 0.0, 1.0);
 
          for (int i = 0; i < effortControlCommandCalculators.size(); i++)
          {
