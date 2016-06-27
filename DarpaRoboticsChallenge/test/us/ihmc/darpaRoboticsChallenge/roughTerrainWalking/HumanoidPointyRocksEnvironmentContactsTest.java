@@ -174,7 +174,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          message.add(footstepData);
 
          drcSimulationTestHelper.send(message);
-         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
+         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
          assertTrue(success);
 
          percentageChickenSupport.set(0.7);
@@ -225,6 +225,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       };
       DRCRobotModel robotModel = getRobotModel(16, 8, onlyEdgeContacts);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, className, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.getSimulationConstructionSet().hideAllDynamicGraphicObjects();
 
       // increase ankle damping to match the real robot better
       DoubleYoVariable damping_l_akx = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_akx");
