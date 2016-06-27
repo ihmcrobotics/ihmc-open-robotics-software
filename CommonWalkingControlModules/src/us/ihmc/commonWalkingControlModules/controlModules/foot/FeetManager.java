@@ -95,6 +95,14 @@ public class FeetManager
       }
    }
 
+   public void initialize()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footControlModules.get(robotSide).initialize();
+      }
+   }
+
    public void compute()
    {
       for (RobotSide robotSide : RobotSide.values)
