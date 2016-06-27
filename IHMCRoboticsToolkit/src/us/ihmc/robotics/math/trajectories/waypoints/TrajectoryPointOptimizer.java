@@ -372,7 +372,6 @@ public class TrajectoryPointOptimizer
          {
             CommonOps.insert(AdLine, Ad, line, subProblemSize - order.getCoefficients());
             bd.set(line, 0.0);
-            line++;
          }
 
          int rowOffset = d * dimensionConstraints;
