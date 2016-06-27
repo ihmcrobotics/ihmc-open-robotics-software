@@ -89,7 +89,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
-      assertTrue(success);
+      assertTrue("Caught Exception: " + drcSimulationTestHelper.getCaughtException(), success);
       
       Point3d center = new Point3d(0.6853965087476173, 4.5173529666394305, 0.8898586980716016);      
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
