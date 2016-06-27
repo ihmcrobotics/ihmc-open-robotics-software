@@ -7,42 +7,48 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedStepCrossoverProjection
 {
-   private final QuadrantDependentList<ReferenceFrame> soleFrames;
    private final double minimumClearance;
    private final double maximumStride;
    private final FramePoint goalPosition;
+   private final ReferenceFrame bodyZUpFrame;
 
-   public QuadrupedStepCrossoverProjection(QuadrantDependentList<ReferenceFrame> soleFrames, double minimumClearance, double maximumStride)
+   public QuadrupedStepCrossoverProjection(ReferenceFrame bodyZUpFrame, double minimumClearance, double maximumStride)
    {
-      this.soleFrames = soleFrames;
       this.minimumClearance = minimumClearance;
       this.maximumStride = maximumStride;
       this.goalPosition = new FramePoint();
+      this.bodyZUpFrame = bodyZUpFrame;
    }
 
-   public void project(QuadrupedTimedStep step)
+   public void project(QuadrupedTimedStep step, QuadrantDependentList<FramePoint> solePositionEstimate)
    {
       step.getGoalPosition(goalPosition);
-      project(step.getRobotQuadrant(), goalPosition);
+      project(step.getRobotQuadrant(), goalPosition, solePositionEstimate);
       step.setGoalPosition(goalPosition);
    }
 
-   public void project(RobotQuadrant stepQuadrant, FramePoint goalPosition)
+   public void project(RobotQuadrant stepQuadrant, FramePoint goalPosition, QuadrantDependentList<FramePoint> solePositionEstimate)
    {
       ReferenceFrame referenceFrame = goalPosition.getReferenceFrame();
-      RobotQuadrant acrossBodyQuadrant = stepQuadrant.getAcrossBodyQuadrant();
-      ReferenceFrame acrossBodySoleFrame = soleFrames.get(acrossBodyQuadrant);
-      goalPosition.changeFrame(acrossBodySoleFrame);
+      goalPosition.changeFrame(bodyZUpFrame);
 
-      if (stepQuadrant.getSide().negateIfRightSide(goalPosition.getY()) > maximumStride)
-         goalPosition.setY(stepQuadrant.getSide().negateIfRightSide(maximumStride));
-      if (stepQuadrant.getSide().negateIfRightSide(goalPosition.getY()) < minimumClearance)
-         goalPosition.setY(stepQuadrant.getSide().negateIfRightSide(minimumClearance));
-      if (goalPosition.getX() > maximumStride)
-         goalPosition.setX(maximumStride);
-      if (goalPosition.getX() < -maximumStride)
-         goalPosition.setX(-maximumStride);
+      FramePoint acrossBodySolePosition = solePositionEstimate.get(stepQuadrant.getAcrossBodyQuadrant());
+      acrossBodySolePosition.changeFrame(bodyZUpFrame);
 
+      double xStride = goalPosition.getX() - acrossBodySolePosition.getX();
+      double yStride = goalPosition.getY() - acrossBodySolePosition.getY();
+
+      if (xStride > maximumStride)
+         xStride = maximumStride;
+      if (xStride < -maximumStride)
+         xStride = -maximumStride;
+      if (stepQuadrant.getSide().negateIfRightSide(yStride) > maximumStride)
+         yStride = stepQuadrant.getSide().negateIfRightSide(maximumStride);
+      if (stepQuadrant.getSide().negateIfRightSide(yStride) < minimumClearance)
+         yStride = stepQuadrant.getSide().negateIfRightSide(minimumClearance);
+
+      goalPosition.setX(acrossBodySolePosition.getX() + xStride);
+      goalPosition.setY(acrossBodySolePosition.getY() + yStride);
       goalPosition.changeFrame(referenceFrame);
    }
 }

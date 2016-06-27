@@ -98,7 +98,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    @Test(timeout = 300000)
    public void testForVideo() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCRobotModel robotModel = getRobotModel();
       setupTest(robotModel);
 
@@ -116,14 +116,14 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(robotModel.getSimpleRobotName(),
                drcFlatGroundWalkingTrack.getSimulationConstructionSet(), 1);
       }
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 40.4)
    @Test(timeout = 200000)
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -135,14 +135,14 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 48.5)
    @Test(timeout = 240000)
    public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -154,14 +154,14 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 63.2)
    @Test(timeout = 320000)
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -182,14 +182,14 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 41.2)
    @Test(timeout = 210000)
    public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -201,14 +201,14 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 42.8)
    @Test(timeout = 210000)
    public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -220,14 +220,14 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 71.9)
    @Test(timeout = 360000)
    public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -249,14 +249,14 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 77.2)
    @Test(timeout = 390000)
    public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -278,14 +278,14 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 49.6)
    @Test(timeout = 250000)
    public void testPushRightTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       setupTest(getRobotModel());
 
       // setup all parameters
@@ -301,7 +301,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInTransferState, side, swingFinishConditions, transferTime);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException

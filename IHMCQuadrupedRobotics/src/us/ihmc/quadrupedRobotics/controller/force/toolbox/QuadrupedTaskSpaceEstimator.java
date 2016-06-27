@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -13,6 +15,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedTaskSpaceEstimator
 {
@@ -138,7 +142,8 @@ public class QuadrupedTaskSpaceEstimator
 
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceEstimator");
 
-   public QuadrupedTaskSpaceEstimator(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   public QuadrupedTaskSpaceEstimator(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry graphicsListRegistry)
    {
       this.referenceFrames = referenceFrames;
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
@@ -160,7 +165,7 @@ public class QuadrupedTaskSpaceEstimator
       yoSoleLinearVelocityEstimate = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
+         String prefix = robotQuadrant.getCamelCaseName();
          yoSoleOrientationEstimate.set(robotQuadrant, new YoFrameOrientation(prefix + "SoleOrientationEstimate", worldFrame, registry));
          yoSolePositionEstimate.set(robotQuadrant, new YoFramePoint(prefix + "SolePositionEstimate", worldFrame, registry));
          yoSoleAngularVelocityEstimate.set(robotQuadrant, new YoFrameVector(prefix + "SoleAngularVelocityEstimate", worldFrame, registry));
@@ -172,6 +177,18 @@ public class QuadrupedTaskSpaceEstimator
       yoBodyLinearVelocityEstimate = new YoFrameVector("bodyLinearVelocityEstimate", worldFrame, registry);
       yoComPositionEstimate = new YoFramePoint("comPositionEstimate", worldFrame, registry);
       yoComVelocityEstimate = new YoFrameVector("comVelocityEstimate", worldFrame, registry);
+
+      // graphics
+      if (graphicsListRegistry != null)
+      {
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            String prefix = robotQuadrant.getCamelCaseName();
+            YoFramePoint yoSolePosition = yoSolePositionEstimate.get(robotQuadrant);
+            YoGraphicPosition yoSolePositionGraphic = new YoGraphicPosition(prefix + "SolePositionEstimate", yoSolePosition, 0.01, YoAppearance.Black());
+            graphicsListRegistry.registerArtifact(prefix + "SolePositionEstimate", yoSolePositionGraphic.createArtifact());
+         }
+      }
 
       // solvers
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());

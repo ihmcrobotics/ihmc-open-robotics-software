@@ -32,7 +32,7 @@ public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalk
 	@Test(timeout = 150919)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
 
       String runName = "ValkyrieFlatGroundWalkingTest";
       robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);

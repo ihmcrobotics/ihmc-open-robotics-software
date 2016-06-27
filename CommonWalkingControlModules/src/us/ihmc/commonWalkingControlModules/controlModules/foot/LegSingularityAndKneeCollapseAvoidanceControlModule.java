@@ -41,7 +41,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private boolean moreVisualizers = true;
 
    private static final boolean USE_SINGULARITY_AVOIDANCE_SWING = true; // Limit the swing foot motion according to the leg motion range.
-   private static final boolean USE_KNEE_MECHANICAL_LIMIT_AVOIDANCE_SWING = true; // Limit the swing foot motion according to the knee flexion limit.
+   private static final boolean USE_KNEE_MECHANICAL_LIMIT_AVOIDANCE_SWING = false; // Limit the swing foot motion according to the knee flexion limit.
    private static final boolean USE_HIP_MECHANICAL_LIMIT_AVOIDANCE_SWING = false; // Limit the swing foot motion according to the hip flexion limit.
    public static final boolean USE_SINGULARITY_AVOIDANCE_SUPPORT = true; // Progressively limit the CoM height as the support leg(s) are getting more straight
    private static final boolean USE_UNREACHABLE_FOOTSTEP_CORRECTION = true; // Lower the CoM if a footstep is unreachable

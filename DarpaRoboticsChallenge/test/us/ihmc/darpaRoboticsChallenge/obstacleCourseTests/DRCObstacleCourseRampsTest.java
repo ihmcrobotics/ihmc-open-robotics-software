@@ -63,7 +63,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 	@Test(timeout = 230000)
    public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       doUpRampTest(null, StepLength.SHORT);
       
       Point3d center = new Point3d(6.135997212353164, 0.008329425009630976, 1.3724038542384285);
@@ -71,14 +71,14 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 	@DeployableTestMethod(estimatedDuration = 57.0)
 	@Test(timeout = 280000)
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_TOP;
       
@@ -107,14 +107,14 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 	@DeployableTestMethod(estimatedDuration = 49.3)
 	@Test(timeout = 250000)
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       doUpRampTest(null, StepLength.MEDIUM);
       
       Point3d center = new Point3d(7.579638943201888, 0.020725665285290903, 1.46537366331119);
@@ -122,14 +122,14 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 	@DeployableTestMethod(estimatedDuration = 46.4)
 	@Test(timeout = 230000)
    public void testWalkingUpRampWithShortStepsALittleTooHigh() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Vector3d minLocationCorruption = new Vector3d(0.0, 0.0, 0.0);
       Vector3d maxLocationCorruption = new Vector3d(0.0, 0.0, 0.05);
@@ -143,14 +143,14 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 	@DeployableTestMethod(estimatedDuration = 43.9)
 	@Test(timeout = 220000)
    public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Vector3d minLocationCorruption = new Vector3d(0.0, 0.0, -0.06);
       Vector3d maxLocationCorruption = new Vector3d(0.0, 0.0, 0.0);
@@ -164,7 +164,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private enum StepLength

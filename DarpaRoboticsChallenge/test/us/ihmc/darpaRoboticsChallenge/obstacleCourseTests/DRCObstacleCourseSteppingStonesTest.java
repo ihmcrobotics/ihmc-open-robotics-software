@@ -61,7 +61,7 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
    {
       try
       {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.EASY_STEPPING_STONES;
 
@@ -91,7 +91,7 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
       }
       catch (Throwable throwable)
       {

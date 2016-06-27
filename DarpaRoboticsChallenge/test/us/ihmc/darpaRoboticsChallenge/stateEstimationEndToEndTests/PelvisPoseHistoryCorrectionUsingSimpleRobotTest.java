@@ -301,7 +301,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 	@Test(timeout = 130000)
    public void testRandomInterpolationFinals() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       Random random = new Random(1984L);
 
       setupRobot();
@@ -320,7 +320,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          assertTrue(testInterpolationForTranslationToRandomTargetsFromSpecificLocations(random, externalPelvisPoseCreator, registry, 10));
          assertTrue(testYawForTranslation(random, externalPelvisPoseCreator, registry, 10));
       }
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private RigidBodyTransform[] createRandomCorrectionTargets(Random random, int numOfTargets)

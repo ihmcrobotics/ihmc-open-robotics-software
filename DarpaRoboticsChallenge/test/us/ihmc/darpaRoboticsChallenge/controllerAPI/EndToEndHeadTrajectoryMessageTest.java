@@ -45,7 +45,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
    @Test(timeout = 300000)
    public void testSingleWaypoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
