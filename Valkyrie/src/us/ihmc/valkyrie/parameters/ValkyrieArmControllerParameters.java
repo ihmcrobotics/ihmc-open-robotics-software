@@ -37,8 +37,8 @@ public class ValkyrieArmControllerParameters extends ArmControllerParameters
       double zeta = runningOnRealRobot ? 1.0 : 0.7;
       double ki = runningOnRealRobot ? 0.0 : 0.0;
       double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 15.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAccel = runningOnRealRobot ? 50.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 750.0 : Double.POSITIVE_INFINITY;
 
       jointspaceControlGains.setKp(kp);
       jointspaceControlGains.setZeta(zeta);
