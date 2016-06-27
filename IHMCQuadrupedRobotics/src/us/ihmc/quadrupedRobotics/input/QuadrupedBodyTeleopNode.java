@@ -15,7 +15,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.mode.QuadrupedTeleopMode;
-import us.ihmc.quadrupedRobotics.input.mode.QuadrupedTestTeleopMode;
+import us.ihmc.quadrupedRobotics.input.mode.QuadrupedStepTeleopMode;
 import us.ihmc.quadrupedRobotics.input.mode.QuadrupedXGaitTeleopMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotDataCommunication.YoVariableServer;
@@ -47,7 +47,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
 
    private final QuadrupedXGaitTeleopMode xGaitTeleopMode;
-   private final QuadrupedTestTeleopMode testTeleopMode;
+   private final QuadrupedStepTeleopMode stepTeleopMode;
    private QuadrupedTeleopMode activeTeleopMode;
 
    public QuadrupedBodyTeleopNode(String host, NetworkPorts port, NetClassList netClassList, PollingInputDevice device,
@@ -64,7 +64,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       this.taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(fullRobotModel, referenceFrames, registry, null);
       this.xGaitTeleopMode = new QuadrupedXGaitTeleopMode(packetCommunicator, referenceFrames);
-      this.testTeleopMode = new QuadrupedTestTeleopMode(packetCommunicator, referenceFrames);
+      this.stepTeleopMode = new QuadrupedStepTeleopMode(packetCommunicator, referenceFrames);
 
       // Set the default teleop mode.
       this.activeTeleopMode = xGaitTeleopMode;
@@ -135,7 +135,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       {
       case VIEW_BUTTON:
          activeTeleopMode.onExit();
-         activeTeleopMode = testTeleopMode;
+         activeTeleopMode = stepTeleopMode;
          activeTeleopMode.onEntry();
          break;
       case MENU_BUTTON:
