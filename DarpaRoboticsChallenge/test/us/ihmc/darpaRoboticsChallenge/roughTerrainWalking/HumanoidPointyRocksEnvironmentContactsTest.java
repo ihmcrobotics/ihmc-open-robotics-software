@@ -116,6 +116,8 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          assertTrue(success);
       }
 
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.checkNothingChanged();
    }
 
    @Before
