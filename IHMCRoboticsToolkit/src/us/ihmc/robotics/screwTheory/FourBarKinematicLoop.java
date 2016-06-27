@@ -50,7 +50,7 @@ public class FourBarKinematicLoop
    private final FourBarCalculatorWithDerivatives fourBarCalculator;
 
    private final FourBarKinematicLoopJacobianSolver fourBarJacobianSolver;
-   private DenseMatrix64F jacobian, outputJointVelocitiesToPack;
+   private final DenseMatrix64F columnJacobian = new DenseMatrix64F(6, 1);
 
    private final double[] interiorAnglesAtZeroConfiguration = new double[4];
    private final double[] jointSigns = new double[4];
@@ -139,8 +139,7 @@ public class FourBarKinematicLoop
 
       // Jacobian
       fourBarJacobianSolver = new FourBarKinematicLoopJacobianSolver(fourBarCalculator, getJointsForJacobianCalculation(fourBarOutputJoint), fourBarOutputJoint);
-      jacobian = fourBarJacobianSolver.computeJacobian(fourBarOutputJoint);      
-      
+
       // Initialize interior angle offsets and signs
       initializeInteriorAnglesAtZeroConfigurationAndJointSigns(vectorDAClosurePointProjected, vectorABProjected, vectorBCProjected, vectorCDProjected);
       
@@ -453,19 +452,18 @@ public class FourBarKinematicLoop
       }
 
       fourBarCalculator.updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(interiorAngleA, interiorAngleDtA, interiorAngleDt2A);
-      jacobian = fourBarJacobianSolver.computeJacobian(fourBarOutputJoint);
+      fourBarJacobianSolver.computeJacobian(columnJacobian);
       
       if(DEBUG)
       {
-         System.out.println("\nJacobian: \n" + jacobian);
+         System.out.println("\nJacobian: \n" + columnJacobian);
       }
       
-      outputJointVelocitiesToPack = jacobian;
-      fourBarJacobianSolver.solveLinearVelFromAngularVel(outputJointVelocitiesToPack, masterJointA.getQd());
+      fourBarJacobianSolver.solveLinearVelFromAngularVel(columnJacobian, masterJointA.getQd());
      
       if(DEBUG)
       {
-         System.out.println("\nVelocity output (J*qd): \n" + outputJointVelocitiesToPack);
+         System.out.println("\nVelocity output (J*qd): \n" + columnJacobian);
 
          System.out.println("Calculator output:");
          System.out.println("ABC = " + fourBarCalculator.getAngleABC());
@@ -549,14 +547,9 @@ public class FourBarKinematicLoop
    {
       return passiveJointD;
    }
-   
-   public DenseMatrix64F getOutputJointLinearVelocities()
-   {
-      return outputJointVelocitiesToPack;
-   }
-   
+
    public DenseMatrix64F getFourBarJacobian()
    {
-      return jacobian;
+      return columnJacobian;
    }
 }
