@@ -15,45 +15,47 @@ public class FourBarKinematicLoopJacobianSolver
    private final GeometricJacobian geometricJacobian;
    private final InverseDynamicsJoint[] jointsForJacobianCalculation;
    private final ReferenceFrame geometricJacobianFrame;
+   private final DenseMatrix64F geometricJacobianToColumnJacobian;
 
-   private final DenseMatrix64F columnJacobian;
-   private DenseMatrix64F geometricJacobianToColumnJacobian;
-  
-   private final PassiveRevoluteJoint outputJoint;
-   
    public FourBarKinematicLoopJacobianSolver(FourBarCalculatorWithDerivatives fourBarCalculator, InverseDynamicsJoint[] jointsForJacobianCalculation, PassiveRevoluteJoint outputJoint)
    {
       this.fourBarCalculator = new FourBarCalculatorWithDerivatives(fourBarCalculator);
       this.jointsForJacobianCalculation = jointsForJacobianCalculation;
-      this.outputJoint = outputJoint;
-      
-      columnJacobian = new DenseMatrix64F(6, 1);  
-      geometricJacobianToColumnJacobian = new DenseMatrix64F();
-      //      jacobianFrame = jointsForJacobianCalculation[jointsForJacobianCalculation.length - 1].getFrameAfterJoint();
-      geometricJacobianFrame = outputJoint.getFrameAfterJoint();  
-      geometricJacobian = new GeometricJacobian(jointsForJacobianCalculation, geometricJacobianFrame);
+      this.geometricJacobianToColumnJacobian = createGeometricJacobianToColumnJacobianMatrix(jointsForJacobianCalculation);
+
+      this.geometricJacobianFrame = outputJoint.getFrameAfterJoint();
+      this.geometricJacobian = new GeometricJacobian(jointsForJacobianCalculation, geometricJacobianFrame);
+
+      if(DEBUG)
+      {
+         System.out.println("four bar output joint = " + outputJoint.getName());
+         System.out.println("joints for jacobian calculation:");
+
+         for(InverseDynamicsJoint joint : jointsForJacobianCalculation)
+         {
+            System.out.println(joint.getName());
+         }
+      }
    }
 
-   public DenseMatrix64F computeJacobian(PassiveRevoluteJoint fourBarOutputJoint)
+   public void computeJacobian(DenseMatrix64F jacobianToPack)
    {      
       // Geometric Jacobian - open kinematic chain Jacobian
       geometricJacobian.compute();
       geometricJacobian.changeFrame(geometricJacobianFrame);
 
       // Vector to go from open loop to closed loop Jacobian
-      geometricJacobianToColumnJacobian = computeVectorTransformGeometricToColumnJacobian();
+      computeVectorTransformGeometricToColumnJacobian();
       
       // Column Jacobian - fourbars are a 1DOF system so the Jacobian is a column vector
-      CommonOps.mult(geometricJacobian.getJacobianMatrix(), geometricJacobianToColumnJacobian, columnJacobian);
+      CommonOps.mult(geometricJacobian.getJacobianMatrix(), geometricJacobianToColumnJacobian, jacobianToPack);
 
       if (DEBUG)
       {
          System.out.println("Geometric jacobian size: " + geometricJacobian.getJacobianMatrix().getNumRows() + " , " + geometricJacobian.getJacobianMatrix().getNumCols());
          System.out.println("Column vector open to closed loop jacobian size: " + geometricJacobianToColumnJacobian.getNumRows() + " , " + geometricJacobianToColumnJacobian.getNumCols());
-         System.out.println("Jacobian size: " + columnJacobian.getNumRows() + " , " + columnJacobian.getNumCols());
+         System.out.println("Jacobian size: " + jacobianToPack.getNumRows() + " , " + jacobianToPack.getNumCols());
       }
-
-      return columnJacobian;
    }
 
    public void solveLinearVelFromAngularVel(DenseMatrix64F jacobian, double inputJointVelocity)
@@ -61,7 +63,7 @@ public class FourBarKinematicLoopJacobianSolver
       CommonOps.scale(inputJointVelocity, jacobian);
    }
 
-   private DenseMatrix64F computeVectorTransformGeometricToColumnJacobian()
+   private void computeVectorTransformGeometricToColumnJacobian()
    {
       // Vector containing angular velocity of passive joints for angular velocity of input joint (master) equal 1
       double dqA_functionOfqA = 1.0;
@@ -71,15 +73,27 @@ public class FourBarKinematicLoopJacobianSolver
 
       if (jointsForJacobianCalculation.length == 3) // Output joint is D
       {
-         return new DenseMatrix64F(3, 1, true, new double[] {dqA_functionOfqA, dqB_functionOfqA, dqC_functionOfqA});
+         geometricJacobianToColumnJacobian.set(3, 1, true, new double[] {dqA_functionOfqA, dqB_functionOfqA, dqC_functionOfqA});
       }
       else if (jointsForJacobianCalculation.length == 2) // Output joint is C
       {
-         return new DenseMatrix64F(2, 1, true, new double[] {dqA_functionOfqA, dqB_functionOfqA});
+         geometricJacobianToColumnJacobian.set(2, 1, true, new double[] {dqA_functionOfqA, dqB_functionOfqA});
       }
       else // Output joint is B
       {
-         return new DenseMatrix64F(1, 1, true, new double[] {dqA_functionOfqA});
+         geometricJacobianToColumnJacobian.set(1, 1, true, new double[]{dqA_functionOfqA});
       }
+   }
+
+   private DenseMatrix64F createGeometricJacobianToColumnJacobianMatrix(InverseDynamicsJoint[] jointsForJacobianCalculation)
+   {
+      int numberOfJointsForJacobianCalculation = jointsForJacobianCalculation.length;
+
+      if(numberOfJointsForJacobianCalculation < 1 || numberOfJointsForJacobianCalculation > 3)
+      {
+         throw new RuntimeException("Illegal number of joints for jacobian calculation. Expected 1, 2, or 3 and got " + numberOfJointsForJacobianCalculation);
+      }
+
+      return new DenseMatrix64F(3, jointsForJacobianCalculation.length, true);
    }
 }
