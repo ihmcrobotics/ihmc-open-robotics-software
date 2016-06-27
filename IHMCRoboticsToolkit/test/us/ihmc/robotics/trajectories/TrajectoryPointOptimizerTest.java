@@ -137,10 +137,35 @@ public class TrajectoryPointOptimizerTest
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testTrivialProblem()
+   {
+      int dimensions = 1;
+      PolynomialOrder order = PolynomialOrder.ORDER7;
+      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order);
+
+      double x0 = 0.0;
+      double xd0 = 1.0;
+      double x1 = 1.0;
+      double xd1 = 1.0;
+
+      optimizer.setEndPoints(new double[] {x0}, new double[] {xd0}, new double[] {x1}, new double[] {xd1});
+      optimizer.compute();
+
+      ArrayList<double[]> coefficients = new ArrayList<>();
+      coefficients.add(new double[order.getCoefficients()]);
+      optimizer.getPolynomialCoefficients(coefficients, 0);
+
+      double[] expected = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0};
+      for (int i = 0; i < order.getCoefficients(); i++)
+         assertEquals(expected[i], coefficients.get(0)[i], epsilon);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTimeDescent()
    {
       int dimensions = 2;
-      PolynomialOrder order = PolynomialOrder.ORDER7;
+      PolynomialOrder order = PolynomialOrder.ORDER5;
       TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order);
 
       double[] x0 = new double[] {0.0, 0.0};
@@ -150,36 +175,38 @@ public class TrajectoryPointOptimizerTest
 
       optimizer.setEndPoints(x0, xd0, x1, xd1);
       ArrayList<double[]> waypoints = new ArrayList<>();
-      waypoints.add(new double[] {0.01, 0.01});
+      waypoints.add(new double[] {0.001, 0.001});
+      waypoints.add(new double[] {0.8, 0.8});
       optimizer.setWaypoints(waypoints);
 
       optimizer.compute();
 
       double[] waypointTimes = new double[waypoints.size()];
       optimizer.getWaypointTimes(waypointTimes);
+//      printResults(waypointTimes, new ArrayList<>());
 
       assertTrue(waypointTimes[0] < 0.1);
       assertTrue(waypointTimes[0] > 0.0);
    }
 
-//   private void printResults(double[] waypointTimes, ArrayList<double[]> coefficients)
-//   {
-//      String timesString = "";
-//      for (int i = 0; i < waypointTimes.length; i++)
-//      {
-//         timesString += waypointTimes[i] + " ";
-//      }
-//      System.out.println("Waypoint Times: " + timesString);
-//      for (double[] coeffs : coefficients)
-//      {
-//         String coeffString = "";
-//         for (int i = 0; i < coeffs.length; i++)
-//         {
-//            coeffString += coeffs[i] + " ";
-//         }
-//         System.out.println("Polynomial Coefficients: " + coeffString);
-//      }
-//   }
+   private void printResults(double[] waypointTimes, ArrayList<double[]> coefficients)
+   {
+      String timesString = "";
+      for (int i = 0; i < waypointTimes.length; i++)
+      {
+         timesString += waypointTimes[i] + " ";
+      }
+      System.out.println("Waypoint Times: " + timesString);
+      for (double[] coeffs : coefficients)
+      {
+         String coeffString = "";
+         for (int i = 0; i < coeffs.length; i++)
+         {
+            coeffString += coeffs[i] + " ";
+         }
+         System.out.println("Polynomial Coefficients: " + coeffString);
+      }
+   }
 
    public static void main(String[] args)
    {
