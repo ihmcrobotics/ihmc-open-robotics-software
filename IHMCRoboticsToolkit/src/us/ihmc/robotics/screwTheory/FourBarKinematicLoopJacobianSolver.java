@@ -58,11 +58,6 @@ public class FourBarKinematicLoopJacobianSolver
       }
    }
 
-   public void solveLinearVelFromAngularVel(DenseMatrix64F jacobian, double inputJointVelocity)
-   {
-      CommonOps.scale(inputJointVelocity, jacobian);
-   }
-
    private void computeVectorTransformGeometricToColumnJacobian()
    {
       // Vector containing angular velocity of passive joints for angular velocity of input joint (master) equal 1
@@ -94,6 +89,6 @@ public class FourBarKinematicLoopJacobianSolver
          throw new RuntimeException("Illegal number of joints for jacobian calculation. Expected 1, 2, or 3 and got " + numberOfJointsForJacobianCalculation);
       }
 
-      return new DenseMatrix64F(3, jointsForJacobianCalculation.length, true);
+      return new DenseMatrix64F(3, jointsForJacobianCalculation.length);
    }
 }
