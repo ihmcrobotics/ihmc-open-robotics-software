@@ -306,6 +306,11 @@ public class FootControlModule
       return stateMachine.getCurrentStateEnum();
    }
 
+   public void initialize()
+   {
+      stateMachine.setCurrentState(ConstraintType.FULL);
+   }
+
    public void doControl()
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
