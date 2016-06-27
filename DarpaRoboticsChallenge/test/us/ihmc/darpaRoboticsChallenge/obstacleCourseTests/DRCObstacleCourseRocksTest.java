@@ -27,7 +27,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -50,7 +50,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -62,7 +62,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
-      
+
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -85,7 +85,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
 
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
       }
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
@@ -96,20 +96,20 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
-   
+
+
    private void setupCameraForWalkingOntoRocks(SimulationConstructionSet scs)
    {
       Point3d cameraFix = new Point3d(0.1, 3.2, 0.5);
-      Point3d cameraPosition = new Point3d(-2.8, 4.8, 1.5);
+      Point3d cameraPosition = new Point3d(-5.6, 9.6, 3.0);
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
-  
+
    private FootstepDataListMessage createFootstepsForWalkingToTheRocks(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
@@ -123,7 +123,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
-   
+
    private FootstepDataListMessage createFootstepsForSteppingOntoTheRocks(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
