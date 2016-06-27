@@ -16,7 +16,6 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    @Override
    public DRCRobotModel getRobotModel()
    {
-      robotModel.addMoreFootContactPointsSimOnly(16, 8, true);
       return robotModel;
    }
 
@@ -24,5 +23,12 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    public String getSimpleRobotName()
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+   }
+
+   @Override
+   protected DRCRobotModel getRobotModel(int xContactPoints, int yContactPoints, boolean createOnlyEdgePoints)
+   {
+      robotModel.addMoreFootContactPointsSimOnly(16, 8, createOnlyEdgePoints);
+      return robotModel;
    }
 }
