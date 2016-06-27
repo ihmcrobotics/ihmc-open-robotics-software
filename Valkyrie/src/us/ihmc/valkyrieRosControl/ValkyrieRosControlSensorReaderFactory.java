@@ -6,6 +6,7 @@ import java.util.HashMap;
 import com.esotericsoftware.minlog.Log;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -22,6 +23,7 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.valkyrieRosControl.dataHolders.*;
@@ -181,4 +183,16 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
       return true;
    }
 
+   public ControllerFailureListener createControllerFailureListener()
+   {
+      ControllerFailureListener listener = new ControllerFailureListener()
+      {
+         @Override
+         public void controllerFailed(FrameVector2d fallingDirection)
+         {
+            sensorReader.handleControllerFailure();
+         }
+      };
+      return listener;
+   }
 }
