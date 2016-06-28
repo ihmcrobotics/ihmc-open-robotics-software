@@ -76,7 +76,7 @@ import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
    private static final boolean PRINT_MODEL = false;
-   
+
    private final CapturePointPlannerParameters capturePointPlannerParameters;
    private final ArmControllerParameters armControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -103,8 +103,8 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final JaxbSDFLoader loader;
 
    private boolean enableJointDamping = true;
-   
-   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless) 
+
+   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless)
    {
 	   this(target,headless, "DEFAULT");
    }
@@ -116,11 +116,11 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       physicalProperties = new ValkyriePhysicalProperties();
       sensorInformation = new ValkyrieSensorInformation(target);
       InputStream sdf = null;
-      
+
       if(model.equalsIgnoreCase("DEFAULT"))
       {
     	  System.out.println("Loading robot model from: '"+getSdfFile()+"'");
-    	  sdf=getSdfFileAsStream();    	  
+    	  sdf=getSdfFileAsStream();
       }
       else
       {
@@ -131,13 +131,13 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
     		  try
     		  {
     			  sdf=new FileInputStream(model);
-    		  } 
-    		  catch (FileNotFoundException e) 
+    		  }
+    		  catch (FileNotFoundException e)
     		  {
     			  System.err.println("failed to load sdf file - file not found");
     		  }
     	  }
-    	  
+
       }
 
       if (headless)
@@ -163,7 +163,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
          loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, transform);
       }
-      
+
       for(RobotSide side : RobotSide.values())
       {
          for(String parentJointName : ValkyrieSensorInformation.contactSensors.get(side).keySet())
@@ -181,7 +181,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
    }
-   
+
    @Override
    public CapturePointPlannerParameters getCapturePointPlannerParameters()
    {
@@ -217,18 +217,18 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       return jointMap;
    }
-   
+
    public double getStandPrepAngle(String jointName)
    {
       return standPrepAngles.get(jointName);
    }
-   
+
    @Override
    public LinkedHashMap<NeckJointName,ImmutablePair<Double,Double>> getSliderBoardControlledNeckJointsWithLimits()
    {
       return walkingControllerParameters.getSliderBoardControlledNeckJointsWithLimits();
    }
-   
+
    @Override
    public SideDependentList<LinkedHashMap<String,ImmutablePair<Double,Double>>> getSliderBoardControlledFingerJointsWithLimits()
    {
@@ -245,7 +245,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       return offsetHandFromWrist.get(side);
    }
-   
+
    @Override
    public RigidBodyTransform getTransform3dWristToHand(RobotSide side)
    {
@@ -263,7 +263,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
          angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
          angles[1] = 0.0f;
          angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
-         //       
+         //
          Quaternion centerOfHandToWristRotation = new Quaternion(angles);
          offsetHandFromWrist.set(robotSide, new Transform(centerOfHandToWristTranslation, centerOfHandToWristRotation));
       }
@@ -323,7 +323,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       System.err.println("Joint Damping not setup for Valkyrie. ValkyrieRobotModel setJointDamping!");
    }
-   
+
    @Override
    public void setEnableJointDamping(boolean enableJointDamping)
    {
@@ -362,7 +362,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    @Override
    public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes)
-   { 
+   {
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;
       SDFHumanoidJointNameMap jointMap = getJointMap();
@@ -457,7 +457,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       return null;
    }
-   
+
    @Override
    public LogSettings getLogSettings()
    {
@@ -590,5 +590,10 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       linkHolder.getInertia().m11 = 0.00208115; // i_yy
       linkHolder.getInertia().m12 = -9.8165e-09; // i_yz
       linkHolder.getInertia().m22 = 0.00178402; // i_zz
+   }
+
+   public void addMoreFootContactPointsSimOnly(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly)
+   {
+      jointMap.getContactPointParameters().addMoreFootContactPointsSimOnly(nContactPointsX, nContactPointsY, edgePointsOnly);
    }
 }
