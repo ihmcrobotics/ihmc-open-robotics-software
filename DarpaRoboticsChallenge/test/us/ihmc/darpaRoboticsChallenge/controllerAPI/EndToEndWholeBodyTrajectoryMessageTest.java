@@ -1,11 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge.controllerAPI;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
@@ -150,6 +151,56 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       EndToEndFootTrajectoryMessageTest.assertSingleWaypointExecuted(footSide, desiredFootPose.getFramePointCopy().getPoint(), desiredFootPose.getFrameOrientationCopy().getQuaternion(), scs);
       for (RobotSide robotSide : RobotSide.values)
          EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(robotSide, desiredHandPoses.get(robotSide).getFramePointCopy().getPoint(), desiredHandPoses.get(robotSide).getFrameOrientationCopy().getQuaternion(), scs);
+   }
+
+   @Test
+   public void testIssue47BadChestTrajectoryMessage() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+
+      ThreadTools.sleep(1000);
+
+      WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(5);
+      chestTrajectoryMessage.setTrajectoryPoint(0, 0.00, new Quat4d(), new Vector3d());
+      chestTrajectoryMessage.setTrajectoryPoint(1, 0.10, new Quat4d(), new Vector3d());
+      chestTrajectoryMessage.setTrajectoryPoint(2, 0.20, new Quat4d(), new Vector3d());
+      chestTrajectoryMessage.setTrajectoryPoint(3, 0.10, new Quat4d(), new Vector3d());
+      chestTrajectoryMessage.setTrajectoryPoint(4, 0.00, new Quat4d(), new Vector3d());
+      wholeBodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
+      drcSimulationTestHelper.send(wholeBodyTrajectoryMessage);
+      
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+   }
+
+   @Test
+   public void testIssue47BadPelvisTrajectoryMessage() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+
+      ThreadTools.sleep(1000);
+
+      WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(5);
+      pelvisTrajectoryMessage.setTrajectoryPoint(0, 0.00, new Point3d(), new Quat4d(), new Vector3d(), new Vector3d());
+      pelvisTrajectoryMessage.setTrajectoryPoint(1, 0.10, new Point3d(), new Quat4d(), new Vector3d(), new Vector3d());
+      pelvisTrajectoryMessage.setTrajectoryPoint(2, 0.20, new Point3d(), new Quat4d(), new Vector3d(), new Vector3d());
+      pelvisTrajectoryMessage.setTrajectoryPoint(3, 0.10, new Point3d(), new Quat4d(), new Vector3d(), new Vector3d());
+      pelvisTrajectoryMessage.setTrajectoryPoint(4, 0.00, new Point3d(), new Quat4d(), new Vector3d(), new Vector3d());
+      wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
+      drcSimulationTestHelper.send(wholeBodyTrajectoryMessage);
+      
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
    }
 
    @Before
