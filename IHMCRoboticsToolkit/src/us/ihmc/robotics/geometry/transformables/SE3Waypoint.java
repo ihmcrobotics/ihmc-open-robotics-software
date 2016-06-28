@@ -213,6 +213,71 @@ public class SE3Waypoint implements GeometryObject<SE3Waypoint>, SE3WaypointInte
       return so3Waypoint;
    }
 
+   public double getPositionX()
+   {
+      return euclideanWaypoint.getPositionX();
+   }
+
+   public double getPositionY()
+   {
+      return euclideanWaypoint.getPositionY();
+   }
+
+   public double getPositionZ()
+   {
+      return euclideanWaypoint.getPositionZ();
+   }
+
+   public double getOrientationQx()
+   {
+      return so3Waypoint.getOrientationQx();
+   }
+
+   public double getOrientationQy()
+   {
+      return so3Waypoint.getOrientationQy();
+   }
+
+   public double getOrientationQz()
+   {
+      return so3Waypoint.getOrientationQz();
+   }
+
+   public double getOrientationQs()
+   {
+      return so3Waypoint.getOrientationQs();
+   }
+
+   public double getLinearVelocityX()
+   {
+      return euclideanWaypoint.getLinearVelocityX();
+   }
+
+   public double getLinearVelocityY()
+   {
+      return euclideanWaypoint.getLinearVelocityY();
+   }
+
+   public double getLinearVelocityZ()
+   {
+      return euclideanWaypoint.getLinearVelocityZ();
+   }
+
+   public double getAngularVelocityX()
+   {
+      return so3Waypoint.getAngularVelocityX();
+   }
+
+   public double getAngularVelocityY()
+   {
+      return so3Waypoint.getAngularVelocityY();
+   }
+
+   public double getAngularVelocityZ()
+   {
+      return so3Waypoint.getAngularVelocityZ();
+   }
+
    private NumberFormat numberFormat;
 
    public NumberFormat getNumberFormat()
