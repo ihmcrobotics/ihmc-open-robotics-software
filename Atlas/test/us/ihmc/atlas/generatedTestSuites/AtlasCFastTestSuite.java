@@ -14,6 +14,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 ({
    us.ihmc.atlas.behaviorTests.AtlasFootstepListBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasHeadTrajectoryBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasObjectWeightBehaviorTest.class
 })
 
