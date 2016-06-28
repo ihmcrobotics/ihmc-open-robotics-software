@@ -2,11 +2,13 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.Abstract1DTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -22,6 +24,22 @@ import java.util.Random;
                   topic = "/control/pelvis_height_trajectory")
 public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<PelvisHeightTrajectoryMessage> implements VisualizablePacket, TransformableDataObject<PelvisHeightTrajectoryMessage>
 {
+   @RosExportedField(documentation = "When OVERRIDE is chosen:"
+         + "\n - The time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point."
+         + " Otherwise the controller will prepend a first trajectory point at the current desired position."
+         + "\n When QUEUE is chosen:"
+         + "\n - The message must carry the ID of the message it should be queued to."
+         + "\n - The very first message of a list of queued messages has to be an OVERRIDE message."
+         + "\n - The trajectory point times are relative to the the last trajectory point time of the previous message."
+         + "\n - The controller will queue the joint trajectory messages as a per joint basis."
+         + " The first trajectory point has to be greater than zero.")
+   public ExecutionMode executionMode;
+   @RosExportedField(documentation = "Only needed when using QUEUE mode, it refers to the message Id to which this message should be queued to."
+         + " It is used by the controller to ensure that no message has been lost on the way."
+         + " If a message appears to be missing (previousMessageId different from the last message ID received by the controller), the motion is aborted."
+         + " If previousMessageId == 0, the controller will not check for the ID of the last received message.")
+   public long previousMessageId = INVALID_MESSAGE_ID;
+
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -30,12 +48,14 @@ public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<P
    {
       super();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      executionMode = ExecutionMode.OVERRIDE;
    }
 
    public PelvisHeightTrajectoryMessage(Random random)
    {
       super(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      executionMode = ExecutionMode.OVERRIDE;
    }
 
    /**
@@ -47,6 +67,9 @@ public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<P
       super(pelvisHeightTrajectoryMessage);
       setUniqueId(pelvisHeightTrajectoryMessage.getUniqueId());
       setDestination(pelvisHeightTrajectoryMessage.getDestination());
+
+      executionMode = pelvisHeightTrajectoryMessage.executionMode;
+      previousMessageId = pelvisHeightTrajectoryMessage.previousMessageId;
    }
 
    /**
@@ -59,6 +82,7 @@ public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<P
    {
       super(trajectoryTime, desiredHeight);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      executionMode = ExecutionMode.OVERRIDE;
    }
 
    /**
@@ -71,6 +95,30 @@ public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<P
    {
       super(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      executionMode = ExecutionMode.OVERRIDE;
+   }
+
+   /**
+    * Set how the controller should consume this message:
+    * <li> {@link ExecutionMode#OVERRIDE}: this message will override any previous message, including canceling any active execution of a message.
+    * <li> {@link ExecutionMode#QUEUE}: this message is queued and will be executed once all the previous messages are done.
+    * @param executionMode
+    * @param previousMessageId when queuing, one needs to provide the ID of the message this message should be queued to.
+    */
+   public void setExecutionMode(ExecutionMode executionMode, long previousMessageId)
+   {
+      this.executionMode = executionMode;
+      this.previousMessageId = previousMessageId;
+   }
+
+   public ExecutionMode getExecutionMode()
+   {
+      return executionMode;
+   }
+
+   public long getPreviousMessageId()
+   {
+      return previousMessageId;
    }
 
    @Override

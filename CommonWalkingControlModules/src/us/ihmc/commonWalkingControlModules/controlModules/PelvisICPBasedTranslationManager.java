@@ -1,16 +1,22 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -24,6 +30,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTra
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class PelvisICPBasedTranslationManager
 {
@@ -38,7 +45,7 @@ public class PelvisICPBasedTranslationManager
 
    private final DoubleYoVariable initialPelvisPositionTime = new DoubleYoVariable("initialPelvisPositionTime", registry);
 
-   private final MultipleWaypointsPositionTrajectoryGenerator waypointPositionTrajectoryGenerator;
+   private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
 
    private final YoFrameVector2d pelvisPositionError = new YoFrameVector2d("pelvisPositionError", worldFrame, registry);
    private final DoubleYoVariable proportionalGain = new DoubleYoVariable("pelvisPositionProportionalGain", registry);
@@ -77,6 +84,12 @@ public class PelvisICPBasedTranslationManager
    private final FrameVector2d tempICPOffset = new FrameVector2d();
    private final FrameVector2d icpOffsetForFreezing = new FrameVector2d();
 
+   private final LongYoVariable lastCommandId;
+
+   private final BooleanYoVariable isReadyToHandleQueuedCommands;
+   private final LongYoVariable numberOfQueuedCommands;
+   private final CommandArrayDeque<PelvisTrajectoryCommand> commandQueue = new CommandArrayDeque<>(PelvisTrajectoryCommand.class);
+
    public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox momentumBasedController, BipedSupportPolygons bipedSupportPolygons, YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
    {
       supportPolygonSafeMargin.set(0.04);
@@ -91,7 +104,7 @@ public class PelvisICPBasedTranslationManager
       this.bipedSupportPolygons = bipedSupportPolygons;
 
       boolean allowMultipleFrames = true;
-      waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset", 15, allowMultipleFrames, worldFrame, registry);
+      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset", allowMultipleFrames, worldFrame, registry);
 
       proportionalGain.set(0.5);
       integralGain.set(1.5);
@@ -105,6 +118,13 @@ public class PelvisICPBasedTranslationManager
             initialize();
          }
       });
+
+      String namePrefix = "PelvisXYTranslation";
+      lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
+      lastCommandId.set(Packet.INVALID_MESSAGE_ID);
+
+      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedPelvisTrajectoryCommands", registry);
+      numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
 
       parentRegistry.addChild(registry);
    }
@@ -142,9 +162,18 @@ public class PelvisICPBasedTranslationManager
          if (!isTrajectoryStopped.getBooleanValue())
          {
             double deltaTime = yoTime.getDoubleValue() - initialPelvisPositionTime.getDoubleValue();
-            waypointPositionTrajectoryGenerator.compute(deltaTime);
+            positionTrajectoryGenerator.compute(deltaTime);
+
+            if (positionTrajectoryGenerator.isDone() && !commandQueue.isEmpty())
+            {
+               double firstTrajectoryPointTime = positionTrajectoryGenerator.getLastWaypointTime();
+               PelvisTrajectoryCommand command = commandQueue.poll();
+               numberOfQueuedCommands.decrement();
+               initializeTrajectoryGenerator(command, firstTrajectoryPointTime);
+               positionTrajectoryGenerator.compute(deltaTime);
+            }
          }
-         waypointPositionTrajectoryGenerator.getPosition(tempPosition);
+         positionTrajectoryGenerator.getPosition(tempPosition);
          desiredPelvisPosition.setByProjectionOntoXYPlane(tempPosition);
       }
 
@@ -170,34 +199,143 @@ public class PelvisICPBasedTranslationManager
       freeze();
    }
 
-   public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
+   public void holdCurrentPosition()
    {
       initialPelvisPositionTime.set(yoTime.getDoubleValue());
+
+      tempPosition.setToZero(pelvisZUpFrame);
+      tempPosition.changeFrame(worldFrame);
+      tempVelocity.setToZero(worldFrame);
+
+      positionTrajectoryGenerator.clear();
+      positionTrajectoryGenerator.changeFrame(worldFrame);
+      positionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
+      positionTrajectoryGenerator.initialize();
+      isTrajectoryStopped.set(false);
+      isRunning.set(true);
+   }
+
+   public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
+   {
+      switch (command.getExecutionMode())
+      {
+      case OVERRIDE:
+         isReadyToHandleQueuedCommands.set(true);
+         clearCommandQueue(command.getCommandId());
+         initialPelvisPositionTime.set(yoTime.getDoubleValue());
+         initializeTrajectoryGenerator(command, 0.0);
+         return;
+      case QUEUE:
+         boolean success = queuePelvisTrajectoryCommand(command);
+         if (!success)
+         {
+            isReadyToHandleQueuedCommands.set(false);
+            clearCommandQueue(INVALID_MESSAGE_ID);
+            holdCurrentPosition();
+         }
+         return;
+      default:
+         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
+         break;
+      }
+   }
+
+   private boolean queuePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
+   {
+      if (!isReadyToHandleQueuedCommands.getBooleanValue())
+      {
+         PrintTools.warn(this, "The very first " + command.getClass().getSimpleName() + " of a series must be " + ExecutionMode.OVERRIDE + ". Aborting motion.");
+         return false;
+      }
+
+      long previousCommandId = command.getPreviousCommandId();
+
+      if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
+      {
+         PrintTools.warn(this, "Previous command ID mismatch: previous ID from command = " + previousCommandId
+               + ", last message ID received by the controller = " + lastCommandId.getLongValue() + ". Aborting motion.");
+         return false;
+      }
+
+      if (command.getTrajectoryPoint(0).getTime() < 1.0e-5)
+      {
+         PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
+         return false;
+      }
+
+      commandQueue.add(command);
+      numberOfQueuedCommands.increment();
+      lastCommandId.set(command.getCommandId());
+
+      return true;
+   }
+
+   private void initializeTrajectoryGenerator(PelvisTrajectoryCommand command, double firstTrajectoryPointTime)
+   {
+      command.addTimeOffset(firstTrajectoryPointTime);
 
       if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          if (isRunning.getBooleanValue())
-            waypointPositionTrajectoryGenerator.getPosition(tempPosition);
+            positionTrajectoryGenerator.getPosition(tempPosition);
          else
             tempPosition.setToZero(pelvisZUpFrame);
          tempPosition.changeFrame(worldFrame);
          tempVelocity.setToZero(worldFrame);
 
-         waypointPositionTrajectoryGenerator.clear();
-         waypointPositionTrajectoryGenerator.changeFrame(worldFrame);
-         waypointPositionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
+         positionTrajectoryGenerator.clear();
+         positionTrajectoryGenerator.changeFrame(worldFrame);
+         positionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
       }
       else
       {
-         waypointPositionTrajectoryGenerator.clear();
-         waypointPositionTrajectoryGenerator.changeFrame(worldFrame);
+         positionTrajectoryGenerator.clear();
+         positionTrajectoryGenerator.changeFrame(worldFrame);
       }
 
-      waypointPositionTrajectoryGenerator.appendWaypoints(command);
-      waypointPositionTrajectoryGenerator.changeFrame(worldFrame);
-      waypointPositionTrajectoryGenerator.initialize();
+      int numberOfTrajectoryPoints = queueExceedingTrajectoryPointsIfNeeded(command);
+
+      for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+      {
+         positionTrajectoryGenerator.appendWaypoint(command.getTrajectoryPoint(trajectoryPointIndex));
+      }
+
+      positionTrajectoryGenerator.changeFrame(worldFrame);
+      positionTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);
       isRunning.set(true);
+   }
+
+   private int queueExceedingTrajectoryPointsIfNeeded(PelvisTrajectoryCommand command)
+   {
+      int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
+
+      int maximumNumberOfWaypoints = positionTrajectoryGenerator.getMaximumNumberOfWaypoints() - positionTrajectoryGenerator.getCurrentNumberOfWaypoints();
+
+      if (numberOfTrajectoryPoints <= maximumNumberOfWaypoints)
+         return numberOfTrajectoryPoints;
+
+      PelvisTrajectoryCommand commandForExcedent = commandQueue.addFirst();
+      numberOfQueuedCommands.increment();
+      commandForExcedent.clear();
+      commandForExcedent.setPropertiesOnly(command);
+
+      for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+      {
+         commandForExcedent.addTrajectoryPoint(command.getTrajectoryPoint(trajectoryPointIndex));
+      }
+
+      double timeOffsetToSubtract = command.getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
+      commandForExcedent.subtractTimeOffset(timeOffsetToSubtract);
+
+      return maximumNumberOfWaypoints;
+   }
+
+   private void clearCommandQueue(long lastCommandId)
+   {
+      commandQueue.clear();
+      numberOfQueuedCommands.set(0);
+      this.lastCommandId.set(lastCommandId);
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
@@ -323,10 +461,10 @@ public class PelvisICPBasedTranslationManager
       tempPosition.setToZero(pelvisZUpFrame);
       tempPosition.changeFrame(worldFrame);
       tempVelocity.setToZero(worldFrame);
-      waypointPositionTrajectoryGenerator.clear();
-      waypointPositionTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
-      waypointPositionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
-      waypointPositionTrajectoryGenerator.initialize();
+      positionTrajectoryGenerator.clear();
+      positionTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
+      positionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
+      positionTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);
    }
 }
