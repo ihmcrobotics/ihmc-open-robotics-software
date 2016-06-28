@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -45,7 +45,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
+   @DeployableTestMethod(estimatedDuration = 20.0)
    @Test(timeout = 300000)
    public void testSingleWaypoint() throws Exception
    {
@@ -135,7 +135,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
-      
+
       HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(humanoidReferenceFrames.getPelvisZUpFrame());
@@ -153,7 +153,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(robotSide, desiredHandPoses.get(robotSide).getFramePointCopy().getPoint(), desiredHandPoses.get(robotSide).getFrameOrientationCopy().getQuaternion(), scs);
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 15.0)
+   @Test(timeout = 300000)
    public void testIssue47BadChestTrajectoryMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -173,12 +174,13 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       chestTrajectoryMessage.setTrajectoryPoint(4, 0.00, new Quat4d(), new Vector3d());
       wholeBodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
       drcSimulationTestHelper.send(wholeBodyTrajectoryMessage);
-      
+
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 15.0)
+   @Test(timeout = 300000)
    public void testIssue47BadPelvisTrajectoryMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -198,7 +200,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       pelvisTrajectoryMessage.setTrajectoryPoint(4, 0.00, new Point3d(), new Quat4d(), new Vector3d(), new Vector3d());
       wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
       drcSimulationTestHelper.send(wholeBodyTrajectoryMessage);
-      
+
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
    }
