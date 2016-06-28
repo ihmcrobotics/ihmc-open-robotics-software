@@ -18,6 +18,7 @@ import us.ihmc.quadrupedRobotics.input.InputEvent;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
+import us.ihmc.quadrupedRobotics.params.IntegerParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
@@ -49,7 +50,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private final DoubleParameter singleStepSwingDuration = parameterFactory.createDouble("singleStepSwingDuration", 2.0);
 
    // xgait step parameters
-   private final DoubleParameter xGaitStepPlanSize = parameterFactory.createDouble("xGaitStepPlanSize", 8);
+   private final IntegerParameter xGaitStepPlanSize = parameterFactory.createInteger("xGaitStepPlanSize", 8);
    private final DoubleParameter xGaitStanceWidth = parameterFactory.createDouble("xGaitStanceWidth", 0.25);
    private final DoubleParameter xGaitStanceLength = parameterFactory.createDouble("xGaitStanceWidth", 1.0);
    private final DoubleArrayParameter xGaitStepDuration = parameterFactory.createDoubleArray("xGaitStepDuration", 0.75, 0.75);
@@ -155,7 +156,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
          double yVelocity = channels.get(InputChannel.LEFT_STICK_X) * yVelocityMax;
          double yawRate = channels.get(InputChannel.RIGHT_STICK_X) * yawRateMax;
          Vector3d planarVelocity = new Vector3d(xVelocity, yVelocity, yawRate);
-         sendXGaitFootsteps(xGaitSettings, planarVelocity, (int)xGaitStepPlanSize.get());
+         sendXGaitFootsteps(xGaitSettings, planarVelocity, xGaitStepPlanSize.get());
       }
    }
 
