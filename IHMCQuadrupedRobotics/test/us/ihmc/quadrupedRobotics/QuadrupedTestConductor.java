@@ -155,6 +155,7 @@ public class QuadrupedTestConductor implements VariableChangedListener
 
    public void destroy()
    {
+      ThreadTools.sleep(1000);
       scs.closeAndDispose();
    }
    
