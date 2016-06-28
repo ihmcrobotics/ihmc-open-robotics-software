@@ -416,7 +416,7 @@ public class FootControlModule
             resetCurrentState();
          break;
       case QUEUE:
-         boolean success = moveViaWaypointsState.queueHandTrajectoryCommand(command);
+         boolean success = moveViaWaypointsState.queueFootTrajectoryCommand(command);
          if (!success)
             moveViaWaypointsState.holdCurrentPosition();
          return;
