@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -469,7 +468,8 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       return commandInputManager;
    }
 
-   public HighLevelHumanoidControllerToolbox getMomentumBasedController() {
+   public HighLevelHumanoidControllerToolbox getMomentumBasedController()
+   {
       if (momentumBasedController == null)
          throw new RuntimeException("momentumBasedController was not created yet.");
 
