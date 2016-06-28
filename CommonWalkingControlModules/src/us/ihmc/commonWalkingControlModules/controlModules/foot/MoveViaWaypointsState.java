@@ -72,7 +72,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedArmTrajectoryCommands", registry);
+      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedFootTrajectoryCommands", registry);
       numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
    }
 
@@ -100,7 +100,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       initializeTrajectoryGenerators(command, initializeToCurrent, 0.0);
    }
 
-   public boolean queueHandTrajectoryCommand(FootTrajectoryCommand command)
+   public boolean queueFootTrajectoryCommand(FootTrajectoryCommand command)
    {
       if (!isReadyToHandleQueuedCommands.getBooleanValue())
       {
@@ -223,7 +223,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
          orientationTrajectoryGenerator.clear();
       }
 
-      int numberOfTrajectoryPoints = queueExcedingTrajectoryPointsIfNeeded(command);
+      int numberOfTrajectoryPoints = queueExceedingTrajectoryPointsIfNeeded(command);
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
@@ -235,7 +235,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       orientationTrajectoryGenerator.initialize();
    }
 
-   private int queueExcedingTrajectoryPointsIfNeeded(FootTrajectoryCommand command)
+   private int queueExceedingTrajectoryPointsIfNeeded(FootTrajectoryCommand command)
    {
       int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
 
