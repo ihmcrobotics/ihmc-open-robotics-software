@@ -25,6 +25,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestInterface
@@ -130,7 +131,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
 
 
-   @DeployableTestMethod(estimatedDuration = 37.4)
+   @DeployableTestMethod(estimatedDuration = 37.4, targets = {TestPlanTarget.Flaky, TestPlanTarget.Video})
    @Test(timeout = 122232)
    public void testTurningInPlaceAndPassingPIWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
