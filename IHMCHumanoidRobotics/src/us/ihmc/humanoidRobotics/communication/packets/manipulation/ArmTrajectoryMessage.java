@@ -68,6 +68,7 @@ public class ArmTrajectoryMessage extends TrackablePacket<ArmTrajectoryMessage> 
          jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage(armTrajectoryMessage.jointTrajectoryMessages[i]);
 
       executionMode = armTrajectoryMessage.executionMode;
+      previousMessageId = armTrajectoryMessage.previousMessageId;
    }
 
    /**
@@ -270,6 +271,8 @@ public class ArmTrajectoryMessage extends TrackablePacket<ArmTrajectoryMessage> 
 
       for (int i = 0; i < getNumberOfJoints(); i++)
          setTrajectory1DMessage(i, new OneDoFJointTrajectoryMessage(random));
+
+      executionMode = ExecutionMode.values[random.nextInt(2)];
    }
 
    @Override
