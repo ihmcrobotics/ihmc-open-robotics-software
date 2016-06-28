@@ -9,13 +9,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Flaky)
+@TestSuiteTarget(TestPlanTarget.Slow)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseWobblyFootTest.class
+   us.ihmc.atlas.roughTerrainWalking.AtlasPointyRocksEnvironmentContactsTest.class
 })
 
-public class AtlasEFlakyTestSuite
+public class AtlasHSlowTestSuite
 {
    public static void main(String[] args)
    {
