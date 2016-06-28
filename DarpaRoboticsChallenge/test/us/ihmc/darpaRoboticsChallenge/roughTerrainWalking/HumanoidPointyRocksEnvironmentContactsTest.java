@@ -64,8 +64,8 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
 
    protected abstract DRCRobotModel getRobotModel(int xContactPoints, int yContactPoints, boolean createOnlyEdgePoints);
 
-   @DeployableTestMethod(estimatedDuration = 100.0, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 130.0, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+   @Test(timeout = 400000)
    public void testWalkingOnLinesInEnvironment() throws SimulationExceededMaximumTimeException
    {
       PointyRocksWorld world = new PointyRocksWorld(PointyRocksType.LINES, 6);
@@ -103,6 +103,12 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       ArrayList<FramePoint> stepLocations = world.getStepLocations();
       for (int i = 0; i < stepLocations.size(); i++)
       {
+         if (i == stepLocations.size()-2)
+         {
+            percentageChickenSupport.set(0.5);
+            doFootExplorationInTransferToStanding.set(false);
+         }
+
          FootstepDataListMessage message = new FootstepDataListMessage();
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
@@ -123,7 +129,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       drcSimulationTestHelper.checkNothingChanged();
    }
 
-   @DeployableTestMethod(estimatedDuration = 100.0, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+   @DeployableTestMethod(estimatedDuration = 60.0, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
    @Test(timeout = 300000)
    public void testWalkingOnPointInEnvironment() throws SimulationExceededMaximumTimeException
    {
@@ -162,6 +168,12 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       ArrayList<FramePoint> stepLocations = world.getStepLocations();
       for (int i = 0; i < stepLocations.size(); i++)
       {
+         if (i == stepLocations.size()-2)
+         {
+            percentageChickenSupport.set(0.7);
+            doFootExplorationInTransferToStanding.set(false);
+         }
+
          FootstepDataListMessage message = new FootstepDataListMessage();
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
@@ -176,8 +188,6 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          drcSimulationTestHelper.send(message);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
          assertTrue(success);
-
-         percentageChickenSupport.set(0.7);
       }
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
