@@ -1,9 +1,5 @@
 package us.ihmc.atlas.controllerAPI;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.controllerAPI.EndToEndWholeBodyTrajectoryMessageTest;
