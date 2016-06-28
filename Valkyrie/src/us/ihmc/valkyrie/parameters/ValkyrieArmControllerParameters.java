@@ -137,8 +137,8 @@ public class ValkyrieArmControllerParameters extends ArmControllerParameters
       DoubleYoVariable elbow = new DoubleYoVariable("elbowAccelerationIntegrationAlphaVelocity", registry);
       DoubleYoVariable wrist = new DoubleYoVariable("wristAccelerationIntegrationAlphaVelocity", registry);
 
-      elbow.set(0.93);
-      wrist.set(0.93);
+      elbow.set(0.83);
+      wrist.set(0.83);
 
       jointAccelerationIntegrationAlphaVelocity = new HashMap<>();
       jointAccelerationIntegrationAlphaVelocity.put(ArmJointName.ELBOW_ROLL, elbow);
