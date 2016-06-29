@@ -468,6 +468,11 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       return commandInputManager;
    }
 
+   public StatusMessageOutputManager getStatusOutputManager()
+   {
+      return statusOutputManager;
+   }
+
    public HighLevelHumanoidControllerToolbox getMomentumBasedController()
    {
       if (momentumBasedController == null)
