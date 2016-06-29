@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -25,6 +26,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -231,7 +233,8 @@ public class WalkingMessageHandler
 
    private final Point3d actualFootPositionInWorld = new Point3d();
    private final Quat4d actualFootOrientationInWorld = new Quat4d();
-   TextToSpeechPacket reusableSpeechPacket = new TextToSpeechPacket();
+   private final TextToSpeechPacket reusableSpeechPacket = new TextToSpeechPacket();
+   private final WalkingControllerFailureStatusMessage failureStatusMessage = new WalkingControllerFailureStatusMessage();
 
    public void reportFootstepStarted(RobotSide robotSide)
    {
@@ -272,6 +275,13 @@ public class WalkingMessageHandler
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
 //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING_ABORTED);
 //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
+   }
+
+   public void reportControllerFailure(FrameVector2d fallingDirection)
+   {
+      fallingDirection.changeFrame(worldFrame);
+      failureStatusMessage.setFallingDirection(fallingDirection);
+      statusOutputManager.reportStatusMessage(failureStatusMessage);
    }
 
    public void registerCompletedDesiredFootstep(Footstep completedFesiredFootstep)
