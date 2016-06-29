@@ -18,6 +18,10 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.yaml.snakeyaml.Yaml;
 
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -316,8 +320,17 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
          PrintTools.error("Command calculator is NULL for the joint: " + oneDoFJoint.getName());
    }
 
-   public void handleControllerFailure()
+   public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)
    {
-      resetIHMCControlRatioAndStandPrepRequested.set(true);
+      StatusMessageListener<WalkingControllerFailureStatusMessage> controllerFailureListener = new StatusMessageListener<WalkingControllerFailureStatusMessage>()
+      {
+         @Override
+         public void receivedNewMessageStatus(WalkingControllerFailureStatusMessage statusMessage)
+         {
+            if (statusMessage != null)
+               resetIHMCControlRatioAndStandPrepRequested.set(true);
+         }
+      };
+      statusOutputManager.attachStatusMessageListener(WalkingControllerFailureStatusMessage.class, controllerFailureListener);
    }
 }

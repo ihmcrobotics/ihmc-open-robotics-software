@@ -10,6 +10,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
@@ -217,7 +219,9 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
        * Create controllers
        */
       MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, controllerPacketCommunicator, sensorInformation);
-      controllerFactory.attachControllerFailureListener(sensorReaderFactory.createControllerFailureListener());
+      CommandInputManager commandInputManager = controllerFactory.getCommandInputManager();
+      StatusMessageOutputManager statusOutputManager = controllerFactory.getStatusOutputManager();
+      sensorReaderFactory.attachControllerAPI(commandInputManager, statusOutputManager);
 
       /*
        * Create output writer
