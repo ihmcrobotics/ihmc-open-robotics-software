@@ -46,6 +46,8 @@ import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.Momentum;
+import us.ihmc.robotics.screwTheory.MomentumCalculator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -135,6 +137,9 @@ public class HighLevelHumanoidControllerToolbox
 
    protected final YoFramePoint yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
+
+   private final AdjustedCapturePointCalculator adjustedCapturePointCalculator;
+   private final MomentumCalculator upperBodyMomentumCalculator;
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
@@ -336,8 +341,13 @@ public class HighLevelHumanoidControllerToolbox
       if (yoGraphicsListRegistry != null)
       {
          YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), ROTATED_CROSS);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, capturePointViz.createArtifact());
+//         yoGraphicsListRegistry.registerArtifact(graphicListName, capturePointViz.createArtifact());
       }
+
+      RigidBody chest = fullRobotModel.getChest();
+      double upperBodyMass = TotalMassCalculator.computeSubTreeMass(chest);
+      adjustedCapturePointCalculator = new AdjustedCapturePointCalculator(gravityZ, upperBodyMass, omega0, registry, yoGraphicsListRegistry);
+      upperBodyMomentumCalculator = new MomentumCalculator(twistCalculator, ScrewTools.computeSupportAndSubtreeSuccessors(twistCalculator.getRootBody()));
    }
 
    public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
@@ -409,6 +419,8 @@ public class HighLevelHumanoidControllerToolbox
    private final FramePoint2d centerOfMassPosition2d = new FramePoint2d();
    private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
 
+   private final FramePoint2d adjustedCapturePoint = new FramePoint2d();
+
    private void computeCapturePoint()
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
@@ -424,6 +436,45 @@ public class HighLevelHumanoidControllerToolbox
 
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
       yoCapturePoint.setXY(capturePoint2d);
+
+      double timeToStop = 0.03;
+      computeCop();
+      computeAngularMomentum();
+      adjustedCapturePointCalculator.computeAdjustedCapturePoint(timeToStop , cop, capturePoint2d, upperBodyAngularMomentumXY, adjustedCapturePoint);
+      adjustedCapturePoint.changeFrame(yoCapturePoint.getReferenceFrame());
+      yoCapturePoint.setXY(adjustedCapturePoint);
+   }
+
+   private final FramePoint2d cop = new FramePoint2d();
+   private final FramePoint2d footCop = new FramePoint2d();
+   private void computeCop()
+   {
+      cop.setToZero(worldFrame);
+      double force = 0.0;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footSwitches.get(robotSide).computeAndPackCoP(footCop);
+         if (footCop.containsNaN()) continue;
+         footCop.changeFrameAndProjectToXYPlane(worldFrame);
+
+         footSwitches.get(robotSide).computeAndPackFootWrench(footWrench);
+         double footForce = footWrench.getLinearPartZ();
+         force += footForce;
+         footCop.scale(footForce);
+         cop.add(footCop);
+      }
+      cop.scale(1.0 / force);
+   }
+
+   private final FrameVector upperBodyAngularMomentum = new FrameVector();
+   private final FrameVector2d upperBodyAngularMomentumXY = new FrameVector2d();
+   private final Momentum upperBodyMomentum = new Momentum();
+   private void computeAngularMomentum()
+   {
+      upperBodyMomentum.setToZero(centerOfMassFrame);
+      upperBodyMomentumCalculator.computeAndPack(upperBodyMomentum);
+      upperBodyMomentum.getAngularPartIncludingFrame(upperBodyAngularMomentum);
+      upperBodyAngularMomentumXY.setByProjectionOntoXYPlaneIncludingFrame(upperBodyAngularMomentum);
    }
 
    public void getCapturePoint(FramePoint2d capturePointToPack)
