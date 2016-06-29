@@ -782,11 +782,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertNumberOfWaypoints(2, scs);
 
       Quat4d controllerDesiredOrientation = findControllerDesiredOrientation(scs);
-
-      assertEquals(desiredChestOrientation.getQx(), controllerDesiredOrientation.x, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredChestOrientation.getQy(), controllerDesiredOrientation.y, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredChestOrientation.getQz(), controllerDesiredOrientation.z, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredChestOrientation.getQs(), controllerDesiredOrientation.w, EPSILON_FOR_DESIREDS);
+      JUnitTools.assertQuaternionsEqual(desiredChestOrientation.getQuaternion(), controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
    }
 
    public static void assertNumberOfWaypoints(int expectedNumberOfTrajectoryPoints, SimulationConstructionSet scs)
