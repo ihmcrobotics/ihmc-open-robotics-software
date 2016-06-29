@@ -203,16 +203,17 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
          SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(trajectoryPointIndex + 1, scs);
 
-         Vector3d expectedAngularVelocity = expectedTrajectoryPoint.getAngularVelocityCopy();
-         fromWorldToDesiredPelvisOrientation.transform(expectedAngularVelocity);
 
          assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
          // Not checking the height on purpose as it is non-trivial.
          assertEquals(expectedTrajectoryPoint.getPositionX(), controllerTrajectoryPoint.getPositionX(), EPSILON_FOR_DESIREDS);
          assertEquals(expectedTrajectoryPoint.getPositionY(), controllerTrajectoryPoint.getPositionY(), EPSILON_FOR_DESIREDS);
-         JUnitTools.assertQuaternionsEqual(expectedTrajectoryPoint.getOrientationCopy(), controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
          JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getLinearVelocityCopy(), controllerTrajectoryPoint.getLinearVelocityCopy(), EPSILON_FOR_DESIREDS);
-         JUnitTools.assertTuple3dEquals(expectedAngularVelocity, controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
+
+         expectedTrajectoryPoint.applyTransform(fromWorldToDesiredPelvisOrientation);
+
+         JUnitTools.assertQuaternionsEqual(expectedTrajectoryPoint.getOrientationCopy(), controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
+         JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getAngularVelocityCopy(), controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
       }
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime);
@@ -223,15 +224,15 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
       SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(scs);
 
-      Vector3d expectedAngularVelocity = expectedTrajectoryPoint.getAngularVelocityCopy();
-      fromWorldToDesiredPelvisOrientation.transform(expectedAngularVelocity);
-
       // Not check the height on purpose as it is non-trivial.
       assertEquals(expectedTrajectoryPoint.getPositionX(), controllerTrajectoryPoint.getPositionX(), EPSILON_FOR_DESIREDS);
       assertEquals(expectedTrajectoryPoint.getPositionY(), controllerTrajectoryPoint.getPositionY(), EPSILON_FOR_DESIREDS);
-      JUnitTools.assertQuaternionsEqual(expectedTrajectoryPoint.getOrientationCopy(), controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
       JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getLinearVelocityCopy(), controllerTrajectoryPoint.getLinearVelocityCopy(), EPSILON_FOR_DESIREDS);
-      JUnitTools.assertTuple3dEquals(expectedAngularVelocity, controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
+
+      expectedTrajectoryPoint.applyTransform(fromWorldToDesiredPelvisOrientation);
+
+      JUnitTools.assertQuaternionsEqual(expectedTrajectoryPoint.getOrientationCopy(), controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
+      JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getAngularVelocityCopy(), controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
    }
 
    @DeployableTestMethod(estimatedDuration = 50.0)
@@ -355,13 +356,16 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
          assertTrue(success);
          previousTimeInState = timeInState;
-         walkingDesiredOrientation = findQuat4d(PelvisOrientationManager.class.getSimpleName(), "desiredPelvis", scs);
-         walkingDesiredOrientation.conjugate();
-         fromWorldToDesiredPelvisOrientation.setRotation(walkingDesiredOrientation);
+         if (!isDone)
+         {
+            walkingDesiredOrientation = findQuat4d(PelvisOrientationManager.class.getSimpleName(), "desiredPelvis", scs);
+            walkingDesiredOrientation.conjugate();
+            fromWorldToDesiredPelvisOrientation.setRotation(walkingDesiredOrientation);
+         }
       }
 
       
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.2);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
       SE3TrajectoryPointMessage fromMessage = pelvisTrajectoryMessage.getLastTrajectoryPoint();
@@ -369,7 +373,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
       SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(scs);
 
-      // Not check the height on purpose as it is non-trivial.
+      // Not checking the height on purpose as it is non-trivial.
       assertEquals(expectedTrajectoryPoint.getPositionX(), controllerTrajectoryPoint.getPositionX(), EPSILON_FOR_DESIREDS);
       assertEquals(expectedTrajectoryPoint.getPositionY(), controllerTrajectoryPoint.getPositionY(), EPSILON_FOR_DESIREDS);
       JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getLinearVelocityCopy(), controllerTrajectoryPoint.getLinearVelocityCopy(), EPSILON_FOR_DESIREDS);
@@ -377,8 +381,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       expectedTrajectoryPoint.applyTransform(fromWorldToDesiredPelvisOrientation);
 
       // These asserts are causing trouble
-      JUnitTools.assertQuaternionsEqual(expectedTrajectoryPoint.getOrientationCopy(), controllerTrajectoryPoint.getOrientationCopy(), 2.0 * EPSILON_FOR_DESIREDS);
-      JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getAngularVelocityCopy(), controllerTrajectoryPoint.getAngularVelocityCopy(), 2.0 * EPSILON_FOR_DESIREDS);
+      JUnitTools.assertQuaternionsEqual(expectedTrajectoryPoint.getOrientationCopy(), controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
+      JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getAngularVelocityCopy(), controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
    }
 
    @DeployableTestMethod(estimatedDuration = 50.0)
