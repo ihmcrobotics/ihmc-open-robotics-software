@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.util.BidirectionGroundContactModel;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
 public abstract class RobotContactPointParameters
@@ -223,6 +224,24 @@ public abstract class RobotContactPointParameters
          linearGroundContactModel.setZDamping(1500.0);
          linearGroundContactModel.setXYStiffness(50000.0);
          linearGroundContactModel.setXYDamping(2000.0);
+      }
+   }
+
+   public void setupGroundContactModelParameters(BidirectionGroundContactModel bidirectionGroundContactModel)
+   {
+      if (useSoftGroundContactParameters)
+      {
+         bidirectionGroundContactModel.setZStiffness(4000.0);
+         bidirectionGroundContactModel.setZDamping(750.0);
+         bidirectionGroundContactModel.setXYStiffness(50000.0);
+         bidirectionGroundContactModel.setXYDamping(1000.0);
+      }
+      else
+      {
+         bidirectionGroundContactModel.setZStiffness(2000.0);
+         bidirectionGroundContactModel.setZDamping(1500.0);
+         bidirectionGroundContactModel.setXYStiffness(50000.0);
+         bidirectionGroundContactModel.setXYDamping(2000.0);
       }
    }
 }

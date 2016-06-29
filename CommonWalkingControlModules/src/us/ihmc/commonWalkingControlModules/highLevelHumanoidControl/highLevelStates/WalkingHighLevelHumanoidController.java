@@ -556,7 +556,9 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          }
          else if (!balanceManager.isPushRecoveryEnabled() || balanceManager.isRecoveryImpossible())
          {
-            momentumBasedController.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection());
+            FrameVector2d fallingDirection = failureDetectionControlModule.getFallingDirection();
+            walkingMessageHandler.reportControllerFailure(fallingDirection);
+            momentumBasedController.reportControllerFailureToListeners(fallingDirection);
          }
       }
 
