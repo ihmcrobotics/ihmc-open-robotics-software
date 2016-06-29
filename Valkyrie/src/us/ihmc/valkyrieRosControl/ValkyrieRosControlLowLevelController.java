@@ -286,6 +286,7 @@ public class ValkyrieRosControlLowLevelController
 
       if (requestCalibrationAtomic.getAndSet(false))
       {
+         requestCalibration.set(false);
          highLevelStateCommand.setHighLevelState(HighLevelState.CALIBRATION);
          commandInputManager.submitCommand(highLevelStateCommand);
          automatedCalibrationExecutor.submit(rampUpIHMCControlRatioTask);
