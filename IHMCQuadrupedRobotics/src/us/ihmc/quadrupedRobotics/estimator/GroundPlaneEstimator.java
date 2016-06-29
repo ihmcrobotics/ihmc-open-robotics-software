@@ -21,7 +21,7 @@ public class GroundPlaneEstimator
    private final static int MAX_GROUND_PLANE_POINTS = 100;
    private final Plane3d groundPlane = new Plane3d();
    private final Vector3d groundPlaneNormal = new Vector3d();
-   private final Vector3d groundPlanePoint = new Vector3d();
+   private final Point3d groundPlanePoint = new Point3d();
    private final ArrayList<Point3d> groundPlanePoints = new ArrayList<>(MAX_GROUND_PLANE_POINTS);
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -173,7 +173,7 @@ public class GroundPlaneEstimator
       planeFitter.fitPlaneToPoints(groundPlanePoints, groundPlane);
       groundPlane.getNormal(groundPlaneNormal);
       yoGroundPlaneNormal.set(groundPlaneNormal);
-      groundPlane.getNormal(groundPlanePoint);
+      groundPlane.getPoint(groundPlanePoint);
       yoGroundPlanePoint.set(groundPlanePoint);
    }
 }
