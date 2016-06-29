@@ -1000,6 +1000,13 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    }
 
    @Override
+   public void resetEstimatedJointTorqueOffset(OneDoFJoint joint)
+   {
+      if (hasTorqueOffsetForJoint(joint))
+         helpers.get(joint).setTorqueOffset(0.0);
+   }
+
+   @Override
    public boolean hasTorqueOffsetForJoint(OneDoFJoint joint)
    {
       return helpers.containsKey(joint);

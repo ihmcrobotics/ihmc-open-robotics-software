@@ -67,8 +67,8 @@ public class ValkyrieRosControlLowLevelController
    private final DoubleYoVariable timeInCalibration = new DoubleYoVariable("timeInCalibration", registry);
 
    private final BooleanYoVariable isPerformingCalibration = new BooleanYoVariable("isPerformingCalibration", registry);
-   private final BooleanYoVariable calibrationRequested = new BooleanYoVariable("calibrationRequested", registry);
-   private final AtomicBoolean calibrationRequestedAtomic = new AtomicBoolean(false);
+   private final BooleanYoVariable requestCalibration = new BooleanYoVariable("requestCalibration", registry);
+   private final AtomicBoolean requestCalibrationAtomic = new AtomicBoolean(false);
 
    private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;
    private final ValkyrieAccelerationIntegration accelerationIntegration;
@@ -104,13 +104,13 @@ public class ValkyrieRosControlLowLevelController
       torqueHysteresisCompensator = new ValkyrieTorqueHysteresisCompensator(yoEffortJointHandleHolders, yoTime, registry);
       accelerationIntegration = new ValkyrieAccelerationIntegration(yoEffortJointHandleHolders, updateDT, registry);
 
-      calibrationRequested.addVariableChangedListener(new VariableChangedListener()
+      requestCalibration.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            if (calibrationRequested.getBooleanValue())
-               calibrationRequestedAtomic.set(true);
+            if (requestCalibration.getBooleanValue())
+               requestCalibrationAtomic.set(true);
          }
       });
 
@@ -152,6 +152,11 @@ public class ValkyrieRosControlLowLevelController
          public void doAction()
          {
             timeInCalibration.set(yoTime.getDoubleValue() - calibrationStartTime.getDoubleValue());
+            if (timeInCalibration.getDoubleValue() >= calibrationDuration.getDoubleValue() - 0.1)
+            {
+               if (jointTorqueOffsetEstimator != null)
+                  jointTorqueOffsetEstimator.enableJointTorqueOffsetEstimationAtomic(false);
+            }
          }
 
          @Override
@@ -166,8 +171,19 @@ public class ValkyrieRosControlLowLevelController
          public void doTransitionOutOfAction()
          {
             calibrationStartTime.set(Double.NaN);
-            if (jointTorqueOffsetEstimator != null)
-               jointTorqueOffsetEstimator.enableJointTorqueOffsetEstimationAtomic(false);
+
+            List<OneDoFJoint> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
+
+            for (int i = 0; i < oneDoFJoints.size(); i++)
+            {
+               OneDoFJoint joint = oneDoFJoints.get(i);
+               if (jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(joint))
+               {
+                  subtractTorqueOffset(joint, jointTorqueOffsetEstimator.getEstimatedJointTorqueOffset(joint));
+                  jointTorqueOffsetEstimator.resetEstimatedJointTorqueOffset(joint);
+               }
+            }
+
             if (forceSensorCalibrationModule != null)
                forceSensorCalibrationModule.requestFootForceSensorCalibrationAtomic();
          }
@@ -256,7 +272,7 @@ public class ValkyrieRosControlLowLevelController
 
    public void requestCalibration()
    {
-      calibrationRequestedAtomic.set(true);
+      requestCalibrationAtomic.set(true);
    }
 
    public void doControl()
@@ -268,7 +284,7 @@ public class ValkyrieRosControlLowLevelController
 
       yoTime.set(TimeTools.nanoSecondstoSeconds(timestamp) - wakeUpTime.getDoubleValue());
 
-      if (calibrationRequestedAtomic.getAndSet(false))
+      if (requestCalibrationAtomic.getAndSet(false))
       {
          highLevelStateCommand.setHighLevelState(HighLevelState.CALIBRATION);
          commandInputManager.submitCommand(highLevelStateCommand);
@@ -284,7 +300,7 @@ public class ValkyrieRosControlLowLevelController
          automatedCalibrationExecutor.clear();
       }
 
-      isPerformingCalibration.set(!automatedCalibrationExecutor.isDone());
+      isPerformingCalibration.set(!automatedCalibrationExecutor.isDone() && currentHighLevelState.get() == HighLevelState.CALIBRATION);
 
       if (isPerformingCalibration.getBooleanValue())
          automatedCalibrationExecutor.doControl();
