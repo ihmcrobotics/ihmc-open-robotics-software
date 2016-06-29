@@ -44,8 +44,8 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
    private final ValkyrieSensorInformation sensorInformation;
 
    public ValkyrieRosControlSensorReaderFactory(TimestampProvider timestampProvider, SensorProcessingConfiguration sensorProcessingConfiguration,
-         HashMap<String, EffortJointHandle> effortJointHandles, HashMap<String, PositionJointHandle> positionJointHandles, HashMap<String, IMUHandle> imuHandles, HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles,
-         ValkyrieSensorInformation sensorInformation)
+         HashMap<String, EffortJointHandle> effortJointHandles, HashMap<String, PositionJointHandle> positionJointHandles,
+         HashMap<String, IMUHandle> imuHandles, HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles, ValkyrieSensorInformation sensorInformation)
    {
       this.timestampProvider = timestampProvider;
       this.sensorProcessingConfiguration = sensorProcessingConfiguration;
@@ -84,7 +84,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
                      estimatorDesiredJointDataHolder.get(oneDoFJoint), sensorReaderRegistry);
                yoEffortJointHandleHolders.add(holder);
             }
-            else if(positionJointHandles.containsKey(joint.getName()))
+            else if (positionJointHandles.containsKey(joint.getName()))
             {
                YoPositionJointHandleHolder holder = new YoPositionJointHandleHolder(positionJointHandles.get(joint.getName()), oneDoFJoint,
                      estimatorDesiredJointDataHolder.get(oneDoFJoint), sensorReaderRegistry);
@@ -112,17 +112,18 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
                System.err.println("Cannot create listener for IMU " + imuDefinition.getName() + ", cannot find corresponding serial in ValkyrieSensorNames");
             }
          }
-         else if(ValkyrieRosControlController.USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS)
+         else if (ValkyrieRosControlController.USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS)
          {
             String name = imuDefinition.getName();
             name = name.replace(imuDefinition.getRigidBody().getName() + "_", "");
 
-            if(imuHandles.containsKey("CF" + name) && imuHandles.containsKey("EF" + name))
+            if (imuHandles.containsKey("CF" + name) && imuHandles.containsKey("EF" + name))
             {
-               IMUHandle complimentaryFilterHandle =  imuHandles.get("CF" + name);
+               IMUHandle complimentaryFilterHandle = imuHandles.get("CF" + name);
                IMUHandle kalmanFilterHandle = imuHandles.get("EF" + name);
 
-               YoSwitchableFilterModeIMUHandleHolder holder = YoSwitchableFilterModeIMUHandleHolder.create(complimentaryFilterHandle, kalmanFilterHandle, imuDefinition, sensorReaderRegistry);
+               YoSwitchableFilterModeIMUHandleHolder holder = YoSwitchableFilterModeIMUHandleHolder.create(complimentaryFilterHandle, kalmanFilterHandle,
+                     imuDefinition, sensorReaderRegistry);
                yoIMUHandleHolders.add(holder);
                stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
             }
@@ -157,9 +158,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
       }
 
       sensorReader = new ValkyrieRosControlSensorReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, timestampProvider,
-            yoEffortJointHandleHolders,
-            yoPositionJointHandleHolders,
-            yoIMUHandleHolders, yoForceTorqueSensorHandles, sensorReaderRegistry);
+            yoEffortJointHandleHolders, yoPositionJointHandleHolders, yoIMUHandleHolders, yoForceTorqueSensorHandles, sensorReaderRegistry);
 
       parentRegistry.addChild(sensorReaderRegistry);
 
