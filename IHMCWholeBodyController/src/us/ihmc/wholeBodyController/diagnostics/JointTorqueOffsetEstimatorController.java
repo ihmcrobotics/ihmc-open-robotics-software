@@ -223,7 +223,9 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
    {
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
-         updatePDController(oneDoFJoints.get(i), getTimeInCurrentState());
+         OneDoFJoint joint = oneDoFJoints.get(i);
+         if (hasTorqueOffsetForJoint(joint))
+         updatePDController(joint, getTimeInCurrentState());
       }
    }
 
@@ -405,6 +407,13 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
    {
       DiagnosticsWhenHangingHelper helper = helpers.get(joint);
       return helper == null ? 0.0 : helper.getTorqueOffset();
+   }
+
+   @Override
+   public void resetEstimatedJointTorqueOffset(OneDoFJoint joint)
+   {
+      if (hasTorqueOffsetForJoint(joint))
+         helpers.get(joint).setTorqueOffset(0.0);
    }
 
    @Override

@@ -10,6 +10,8 @@ public interface JointTorqueOffsetEstimator
 
    public double getEstimatedJointTorqueOffset(OneDoFJoint joint);
 
+   public void resetEstimatedJointTorqueOffset(OneDoFJoint joint);
+
    public boolean hasTorqueOffsetForJoint(OneDoFJoint joint);
 
    public void enableJointTorqueOffsetEstimationAtomic(boolean enable);

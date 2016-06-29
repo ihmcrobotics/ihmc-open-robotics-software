@@ -213,7 +213,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, controllerPacketCommunicator, sensorInformation);
       CommandInputManager commandInputManager = controllerFactory.getCommandInputManager();
       StatusMessageOutputManager statusOutputManager = controllerFactory.getStatusOutputManager();
-      sensorReaderFactory.attachControllerAPI(commandInputManager, statusOutputManager);
 
       /*
        * Create output writer
@@ -244,6 +243,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, sensorInformation, controllerFactory, threadDataSynchronizer, drcOutputWriter,
             dataProducer, yoVariableServer, gravity, estimatorDT);
 
+      sensorReaderFactory.attachControllerAPI(commandInputManager, statusOutputManager);
       sensorReaderFactory.attachForceSensorCalibrationModule(estimatorThread.getForceSensorCalibrationModule());
       sensorReaderFactory.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimatorControllerFactory.getJointTorqueOffsetEstimatorController());
 
