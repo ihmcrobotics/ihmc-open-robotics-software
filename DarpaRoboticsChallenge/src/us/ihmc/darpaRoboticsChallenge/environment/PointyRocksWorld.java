@@ -27,6 +27,7 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public enum PointyRocksType {
+      SINGLE_LINE_BALANCE,
       LINES,
       POINT,
       PARTIAL
@@ -54,10 +55,12 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
       this.type = type;
 
       addGround();
-      addStartBlock();
 
       switch (type)
       {
+      case SINGLE_LINE_BALANCE:
+         setupSingleLine();
+         break;
       case LINES:
          setupLines();
          break;
@@ -69,8 +72,17 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
       }
    }
 
+   private void setupSingleLine()
+   {
+      addStartBlock();
+
+      Vector2d linePosition = new Vector2d(0.4, -0.16);
+      addLine(linePosition, 0.0);
+   }
+
    private void setupPoint()
    {
+      addStartBlock();
       double step = 0.5;
 
       Vector2d position = new Vector2d(length/2.0 + step/2.0, 0.15);
@@ -84,6 +96,7 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
 
    private void setupLines()
    {
+      addStartBlock();
       for (int i = 0; i < steps; i++)
       {
          double y = i%2 == 0 ? -0.15 : 0.15;
@@ -153,6 +166,10 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
    {
       switch (type)
       {
+      case SINGLE_LINE_BALANCE:
+         cameraFixToPack.set(0.0, 0.0, 1.0);
+         cameraPositionToPack.set(-10.0, 0.0, 5.0);
+         break;
       case LINES:
          cameraFixToPack.set((step*steps + length)/2.0, 0.0, 1.0);
          cameraPositionToPack.set((step*steps + length)/2.0, -10.0, 5.0);
