@@ -40,7 +40,7 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
    ArrayList<OneDoFJoint> oneDoFJointsExcludingHands = new ArrayList<>();
 
    private SDFHumanoidJointNameMap humanoidJointNameMap;
-
+   
    // copy constructor
    public SDFFullHumanoidRobotModel(SDFFullHumanoidRobotModel modelToCopy)
    {
