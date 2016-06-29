@@ -47,7 +47,7 @@ import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
-public class DiagnosticsWhenHangingController extends HighLevelBehavior implements RobotController
+public class DiagnosticsWhenHangingController extends HighLevelBehavior implements RobotController, JointTorqueOffsetEstimator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -245,6 +245,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       return fullRobotModel;
    }
 
+   @Override
    public ArrayList<OneDoFJoint> getOneDoFJoints()
    {
       return oneDoFJoints;
@@ -984,4 +985,23 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    //       footSwitch.setSensorWrenchOffset(tempWrench);
    //    }
    // }
+
+   @Override
+   public void enableJointTorqueOffsetEstimationAtomic(boolean enable)
+   {
+      adaptTorqueOffset.set(enable);
+   }
+
+   @Override
+   public double getEstimatedJointTorqueOffset(OneDoFJoint joint)
+   {
+      DiagnosticsWhenHangingHelper helper = helpers.get(joint);
+      return helper == null ? Double.NaN : helper.getTorqueOffset();
+   }
+
+   @Override
+   public boolean hasTorqueOffsetForJoint(OneDoFJoint joint)
+   {
+      return helpers.containsKey(joint);
+   }
 }
