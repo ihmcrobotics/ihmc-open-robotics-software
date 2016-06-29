@@ -1,15 +1,20 @@
 package us.ihmc.quadrupedRobotics.estimator;
 
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicShape;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -21,25 +26,33 @@ public class GroundPlaneEstimator
    private final static int MAX_GROUND_PLANE_POINTS = 100;
    private final Plane3d groundPlane = new Plane3d();
    private final Vector3d groundPlaneNormal = new Vector3d();
-   private final Vector3d groundPlanePoint = new Vector3d();
+   private final Point3d groundPlanePoint = new Point3d();
    private final ArrayList<Point3d> groundPlanePoints = new ArrayList<>(MAX_GROUND_PLANE_POINTS);
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoFrameVector yoGroundPlaneNormal = new YoFrameVector("groundPlaneNormal", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint yoGroundPlanePoint = new YoFramePoint("groundPlanePoint", ReferenceFrame.getWorldFrame(), registry);
-   ;
+   private final YoFrameVector yoGroundPlaneNormal = new YoFrameVector("groundPlaneNormal", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameOrientation yoGroundPlaneOrientation = new YoFrameOrientation("groundPlaneOrientation", ReferenceFrame.getWorldFrame(), registry);
 
    public GroundPlaneEstimator()
    {
-      this(null);
+      this(null, null);
    }
 
-   public GroundPlaneEstimator(YoVariableRegistry parentRegistry)
+   public GroundPlaneEstimator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
 
       if (parentRegistry != null)
       {
          parentRegistry.addChild(registry);
+      }
+
+      if (graphicsListRegistry != null)
+      {
+         Graphics3DObject groundPlaneGraphic = new Graphics3DObject();
+         groundPlaneGraphic.addCylinder(0.005, 0.5, YoAppearance.Glass());
+         YoGraphicShape yoGroundPlaneGraphic = new YoGraphicShape("groundPlaneEstimate", groundPlaneGraphic, yoGroundPlanePoint, yoGroundPlaneOrientation, 1.0);
+         graphicsListRegistry.registerYoGraphic("groundPlaneEstimate", yoGroundPlaneGraphic);
       }
    }
 
@@ -173,7 +186,8 @@ public class GroundPlaneEstimator
       planeFitter.fitPlaneToPoints(groundPlanePoints, groundPlane);
       groundPlane.getNormal(groundPlaneNormal);
       yoGroundPlaneNormal.set(groundPlaneNormal);
-      groundPlane.getNormal(groundPlanePoint);
+      groundPlane.getPoint(groundPlanePoint);
       yoGroundPlanePoint.set(groundPlanePoint);
+      yoGroundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
    }
 }
