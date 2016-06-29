@@ -188,6 +188,71 @@ public class SimpleSE3TrajectoryPoint extends SimpleTrajectoryPoint<SE3Waypoint,
       se3TrajectoryPointToPack.setAngularVelocity(so3Waypoint.getAngularVelocity());
    }
 
+   public double getPositionX()
+   {
+      return waypointData.getPositionX();
+   }
+
+   public double getPositionY()
+   {
+      return waypointData.getPositionY();
+   }
+
+   public double getPositionZ()
+   {
+      return waypointData.getPositionZ();
+   }
+
+   public double getOrientationQx()
+   {
+      return waypointData.getOrientationQx();
+   }
+
+   public double getOrientationQy()
+   {
+      return waypointData.getOrientationQy();
+   }
+
+   public double getOrientationQz()
+   {
+      return waypointData.getOrientationQz();
+   }
+
+   public double getOrientationQs()
+   {
+      return waypointData.getOrientationQs();
+   }
+
+   public double getLinearVelocityX()
+   {
+      return waypointData.getLinearVelocityX();
+   }
+
+   public double getLinearVelocityY()
+   {
+      return waypointData.getLinearVelocityY();
+   }
+
+   public double getLinearVelocityZ()
+   {
+      return waypointData.getLinearVelocityZ();
+   }
+
+   public double getAngularVelocityX()
+   {
+      return waypointData.getAngularVelocityX();
+   }
+
+   public double getAngularVelocityY()
+   {
+      return waypointData.getAngularVelocityY();
+   }
+
+   public double getAngularVelocityZ()
+   {
+      return waypointData.getAngularVelocityZ();
+   }
+
    @Override
    public void applyTransform(RigidBodyTransform transform)
    {

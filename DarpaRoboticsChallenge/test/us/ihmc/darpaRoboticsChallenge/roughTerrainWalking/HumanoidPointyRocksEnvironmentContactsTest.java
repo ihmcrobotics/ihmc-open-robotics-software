@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExploreFootPolygonState.ExplorationMethod;
@@ -18,11 +19,13 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.PointyRocksWorld;
+import us.ihmc.darpaRoboticsChallenge.environment.PointyRocksWorld.PointyRocksType;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
@@ -60,13 +63,74 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
    private BooleanYoVariable allowUpperBodyMomentumInDoubleSupport;
    private BooleanYoVariable allowUsingHighMomentumWeight;
    private BooleanYoVariable doToeOffIfPossible;
+   private SideDependentList<BooleanYoVariable> requestExploration = new SideDependentList<>();
+   private SideDependentList<BooleanYoVariable> doPartialDetection = new SideDependentList<>();
+   private SideDependentList<BooleanYoVariable> cropToConvexHullOfCoPs = new SideDependentList<>();
 
-   @DeployableTestMethod(estimatedDuration = 100.0, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
-   @Test(timeout = 300000)
+   protected abstract DRCRobotModel getRobotModel(int xContactPoints, int yContactPoints, boolean createOnlyEdgePoints);
+
+   @Ignore
+   @DeployableTestMethod(estimatedDuration = 130.0, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+   @Test(timeout = 400000)
+   public void testBalanceOnLine() throws SimulationExceededMaximumTimeException
+   {
+      PointyRocksWorld world = new PointyRocksWorld(PointyRocksType.SINGLE_LINE_BALANCE, 0);
+      setupTest(world, false);
+      doPartialDetection.get(RobotSide.RIGHT).set(true);
+
+      Point3d cameraFix = new Point3d();
+      Point3d cameraPosition = new Point3d();
+      world.setupCamera(cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+
+      // enable the use of body momentum in the controller
+      allowUpperBodyMomentumInSingleSupport.set(true);
+      allowUpperBodyMomentumInDoubleSupport.set(true);
+      allowUsingHighMomentumWeight.set(true);
+
+      // change the walking parameters
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         autoCropToLineAfterExploration.get(robotSide).set(true);
+         holdFlatDuringExploration.get(robotSide).set(true);
+         holdFlatDuringHoldPosition.get(robotSide).set(true);
+         smartHoldPosition.get(robotSide).set(false);
+         explorationMethods.get(robotSide).set(ExplorationMethod.FAST_LINE);
+      }
+
+      doFootExplorationInTransferToStanding.set(true);
+      percentageChickenSupport.set(0.4);
+      timeBeforeExploring.set(1.0);
+      transferTime.set(0.15);
+      swingTime.set(0.8);
+
+      armsUp();
+
+      FootstepDataListMessage message = new FootstepDataListMessage();
+      FootstepDataMessage footstepData = new FootstepDataMessage();
+      Point3d position = new Point3d(0.4, -0.16, 0.0);
+      footstepData.setLocation(position);
+      footstepData.setOrientation(new Quat4d(0.0, 0.0, 0.0, 1.0));
+      footstepData.setRobotSide(RobotSide.RIGHT);
+      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+      message.add(footstepData);
+      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
+
+      Point3d desiredPosition = new Point3d(0.4, 0.16, 0.3);
+      Quat4d desiredOrientation = new Quat4d();
+      FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(RobotSide.LEFT, 1.0, desiredPosition, desiredOrientation);
+      drcSimulationTestHelper.send(footTrajectoryMessage);
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 130.0, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+   @Test(timeout = 400000)
    public void testWalkingOnLinesInEnvironment() throws SimulationExceededMaximumTimeException
    {
-      PointyRocksWorld world = new PointyRocksWorld(6);
-      setupTest(world);
+      PointyRocksWorld world = new PointyRocksWorld(PointyRocksType.LINES, 6);
+      setupTest(world, true);
 
       Point3d cameraFix = new Point3d();
       Point3d cameraPosition = new Point3d();
@@ -100,6 +164,12 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       ArrayList<FramePoint> stepLocations = world.getStepLocations();
       for (int i = 0; i < stepLocations.size(); i++)
       {
+         if (i == stepLocations.size()-2)
+         {
+            percentageChickenSupport.set(0.5);
+            doFootExplorationInTransferToStanding.set(false);
+         }
+
          FootstepDataListMessage message = new FootstepDataListMessage();
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
@@ -116,6 +186,73 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          assertTrue(success);
       }
 
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.checkNothingChanged();
+   }
+
+   @DeployableTestMethod(estimatedDuration = 60.0, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+   @Test(timeout = 300000)
+   public void testWalkingOnPointInEnvironment() throws SimulationExceededMaximumTimeException
+   {
+      PointyRocksWorld world = new PointyRocksWorld(PointyRocksType.POINT, 0);
+      setupTest(world, false);
+
+      Point3d cameraFix = new Point3d();
+      Point3d cameraPosition = new Point3d();
+      world.setupCamera(cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+
+      armsUp();
+
+      // enable the use of body momentum in the controller
+      allowUpperBodyMomentumInSingleSupport.set(true);
+      allowUpperBodyMomentumInDoubleSupport.set(true);
+      allowUsingHighMomentumWeight.set(true);
+
+      // change the walking parameters
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         autoCropToLineAfterExploration.get(robotSide).set(false);
+         holdFlatDuringExploration.get(robotSide).set(true);
+         holdFlatDuringHoldPosition.get(robotSide).set(true);
+         smartHoldPosition.get(robotSide).set(false);
+         explorationMethods.get(robotSide).set(ExplorationMethod.FAST_LINE);
+      }
+
+      doFootExplorationInTransferToStanding.set(true);
+      percentageChickenSupport.set(0.3);
+      timeBeforeExploring.set(1.0);
+      transferTime.set(0.15);
+      swingTime.set(0.4);
+      doToeOffIfPossible.set(false);
+
+      ArrayList<FramePoint> stepLocations = world.getStepLocations();
+      for (int i = 0; i < stepLocations.size(); i++)
+      {
+         if (i == stepLocations.size()-2)
+         {
+            percentageChickenSupport.set(0.7);
+            doFootExplorationInTransferToStanding.set(false);
+         }
+
+         FootstepDataListMessage message = new FootstepDataListMessage();
+         FootstepDataMessage footstepData = new FootstepDataMessage();
+
+         Point3d position = stepLocations.get(i).getPointCopy();
+         RobotSide robotSide = position.getY() > 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
+         footstepData.setLocation(position);
+         footstepData.setOrientation(new Quat4d(0.0, 0.0, 0.0, 1.0));
+         footstepData.setRobotSide(robotSide);
+         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         message.add(footstepData);
+
+         drcSimulationTestHelper.send(message);
+         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+         assertTrue(success);
+      }
+
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.checkNothingChanged();
    }
 
    @Before
@@ -143,7 +280,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private void setupTest(CommonAvatarEnvironmentInterface environment)
+   private void setupTest(CommonAvatarEnvironmentInterface environment, boolean onlyEdgeContacts)
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -157,8 +294,9 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
             return location;
          }
       };
-      DRCRobotModel robotModel = getRobotModel();
+      DRCRobotModel robotModel = getRobotModel(16, 8, onlyEdgeContacts);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, className, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.getSimulationConstructionSet().hideAllDynamicGraphicObjects();
 
       // increase ankle damping to match the real robot better
       DoubleYoVariable damping_l_akx = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_akx");
@@ -179,7 +317,9 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       for (RobotSide robotSide : RobotSide.values)
       {
          String footName = drcSimulationTestHelper.getControllerFullRobotModel().getFoot(robotSide).getName();
+         String longFootName = robotSide.getLowerCaseName() + "Foot";
          String footControlNamespace = robotSide.getLowerCaseName() + "FootControlModule";
+         String partialfootControlNamespace = footName + "PartialFootholdControlModule";
 
          BooleanYoVariable autoCrop = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable(footName + "AutoCropToLineAfterExploration");
          autoCropToLineAfterExploration.put(robotSide, autoCrop);
@@ -191,6 +331,12 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          this.smartHoldPosition.put(robotSide, smartHoldPosition);
          EnumYoVariable<ExplorationMethod> explorationMethod = (EnumYoVariable<ExplorationMethod>) drcSimulationTestHelper.getYoVariable(footName + "ExplorationMethod");
          explorationMethods.put(robotSide, explorationMethod);
+         BooleanYoVariable requestExplorationForFoot = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable(footControlNamespace, longFootName + "RequestExploration");
+         requestExploration.put(robotSide, requestExplorationForFoot);
+         BooleanYoVariable doPartialDetectionForFoot = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable(partialfootControlNamespace, footName + "DoPartialFootholdDetection");
+         doPartialDetection.put(robotSide, doPartialDetectionForFoot);
+         BooleanYoVariable cropToConvexHullOfCoPsForFoot = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable(partialfootControlNamespace, footName + "CropToConvexHullOfCoPs");
+         cropToConvexHullOfCoPs.put(robotSide, cropToConvexHullOfCoPsForFoot);
       }
       allowUpperBodyMomentumInSingleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
       allowUpperBodyMomentumInDoubleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");

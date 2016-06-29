@@ -250,6 +250,36 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
       return getTime();
    }
 
+   public double getPositionX()
+   {
+      return geometryObject.getPositionX();
+   }
+
+   public double getPositionY()
+   {
+      return geometryObject.getPositionY();
+   }
+
+   public double getPositionZ()
+   {
+      return geometryObject.getPositionZ();
+   }
+
+   public double getLinearVelocityX()
+   {
+      return geometryObject.getLinearVelocityX();
+   }
+
+   public double getLinearVelocityY()
+   {
+      return geometryObject.getLinearVelocityY();
+   }
+
+   public double getLinearVelocityZ()
+   {
+      return geometryObject.getLinearVelocityZ();
+   }
+
    @Override
    public String toString()
    {

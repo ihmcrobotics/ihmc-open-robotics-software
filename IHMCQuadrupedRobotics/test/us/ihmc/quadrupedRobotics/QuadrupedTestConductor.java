@@ -19,14 +19,14 @@ public class QuadrupedTestConductor implements VariableChangedListener
    // Yo variables
    private final DoubleYoVariable yoTime;
    
-   private List<YoVariableTestGoal> finalGoals = new ArrayList<>();
-   private List<YoVariableTestGoal> waypointGoals = new ArrayList<>();
    private List<YoVariableTestGoal> sustainGoals = new ArrayList<>();
+   private List<YoVariableTestGoal> waypointGoals = new ArrayList<>();
+   private List<YoVariableTestGoal> terminalGoals = new ArrayList<>();
    
    // Temp lists for reporting
-   private List<YoVariableTestGoal> finalGoalsNotMeeting = new ArrayList<>();
-   private List<YoVariableTestGoal> waypointGoalsNotMet = new ArrayList<>();
    private List<YoVariableTestGoal> sustainGoalsNotMeeting = new ArrayList<>();
+   private List<YoVariableTestGoal> waypointGoalsNotMet = new ArrayList<>();
+   private List<YoVariableTestGoal> terminalGoalsNotMeeting = new ArrayList<>();
    
    private AssertionFailedError assertionFailedError = null;
    
@@ -44,7 +44,7 @@ public class QuadrupedTestConductor implements VariableChangedListener
    {
       sustainGoalsNotMeeting.clear();
       waypointGoalsNotMet.clear();
-      finalGoalsNotMeeting.clear();
+      terminalGoalsNotMeeting.clear();
       
       for (int i = 0; i < sustainGoals.size(); i++)
       {
@@ -62,11 +62,11 @@ public class QuadrupedTestConductor implements VariableChangedListener
          }
       }
 
-      for (int i = 0; i < finalGoals.size(); i++)
+      for (int i = 0; i < terminalGoals.size(); i++)
       {
-         if (!finalGoals.get(i).currentlyMeetsGoal())
+         if (!terminalGoals.get(i).currentlyMeetsGoal())
          {
-            finalGoalsNotMeeting.add(finalGoals.get(i));
+            terminalGoalsNotMeeting.add(terminalGoals.get(i));
          }
       }
       
@@ -75,12 +75,12 @@ public class QuadrupedTestConductor implements VariableChangedListener
          createAssertionFailedException();
          stop();
       }
-      else if (finalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.size() > 0)
+      else if (terminalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.size() > 0)
       {
          createAssertionFailedException();
          stop();
       }
-      else if (finalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.isEmpty())
+      else if (terminalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.isEmpty())
       {
          createSuccessMessage();
          stop();
@@ -90,11 +90,10 @@ public class QuadrupedTestConductor implements VariableChangedListener
    private void createSuccessMessage()
    {
       StringBuffer message = new StringBuffer();
-      for (YoVariableTestGoal goal : finalGoals)
+      for (YoVariableTestGoal goal : terminalGoals)
       {
-         message.append("Final goal met: ");
+         message.append("\nTerminal goal met: ");
          goal.getYoVariable().getNameAndValueString(message);
-         message.append("\n");
       }
       PrintTools.info(this, message.toString());
    }
@@ -105,21 +104,18 @@ public class QuadrupedTestConductor implements VariableChangedListener
       
       for (YoVariableTestGoal goal : sustainGoalsNotMeeting)
       {
-         message.append("Goal not sustained: ");
+         message.append("\nGoal not sustained: ");
          goal.getYoVariable().getNameAndValueString(message);
-         message.append("\n");
       }
       for (YoVariableTestGoal goal : waypointGoalsNotMet)
       {
-         message.append("Waypoint not met: ");
+         message.append("\nWaypoint not met: ");
          goal.getYoVariable().getNameAndValueString(message);
-         message.append("\n");
       }
-      for (YoVariableTestGoal goal : finalGoalsNotMeeting)
+      for (YoVariableTestGoal goal : terminalGoalsNotMeeting)
       {
-         message.append("Final goal not met: ");
+         message.append("\nTerminal goal not met: ");
          goal.getYoVariable().getNameAndValueString(message);
-         message.append("\n");
       }
       
       assertionFailedError = new AssertionFailedError(message.toString());
@@ -129,9 +125,9 @@ public class QuadrupedTestConductor implements VariableChangedListener
    {
       yoTime.removeVariableChangedListener(this);
       
-      finalGoals.clear();
-      waypointGoals.clear();
       sustainGoals.clear();
+      waypointGoals.clear();
+      terminalGoals.clear();
       scs.stop();
    }
    
@@ -155,17 +151,8 @@ public class QuadrupedTestConductor implements VariableChangedListener
 
    public void destroy()
    {
+      ThreadTools.sleep(1000);
       scs.closeAndDispose();
-   }
-   
-   public void addFinalGoal(YoVariableTestGoal yoVariableTestGoal)
-   {
-      finalGoals.add(yoVariableTestGoal);
-   }
-   
-   public void addWaypointGoal(YoVariableTestGoal yoVariableTestGoal)
-   {
-      waypointGoals.add(yoVariableTestGoal);
    }
    
    public void addSustainGoal(YoVariableTestGoal yoVariableTestGoal)
@@ -173,6 +160,16 @@ public class QuadrupedTestConductor implements VariableChangedListener
       sustainGoals.add(yoVariableTestGoal);
    }
 
+   public void addWaypointGoal(YoVariableTestGoal yoVariableTestGoal)
+   {
+      waypointGoals.add(yoVariableTestGoal);
+   }
+
+   public void addTerminalGoal(YoVariableTestGoal yoVariableTestGoal)
+   {
+      terminalGoals.add(yoVariableTestGoal);
+   }
+   
    public SimulationConstructionSet getScs()
    {
       return scs;

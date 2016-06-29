@@ -76,6 +76,12 @@ public class TimeInterval
       return this;
    }
 
+   public TimeInterval scaleDuration(double scalar)
+   {
+      this.endTime = this.startTime + scalar * (this.endTime - this.startTime);
+      return this;
+   }
+
    public boolean epsilonEquals(TimeInterval other, double epsilon)
    {
       return MathTools.epsilonEquals(this.startTime, other.startTime, epsilon) && MathTools.epsilonEquals(this.endTime, other.endTime, epsilon);

@@ -271,12 +271,12 @@ public class TrajectoryPointOptimizer
       A.reshape(constraints, problemSize.getIntegerValue());
       b.reshape(constraints, 1);
       CommonOps.fill(A, 0.0);
-      CommonOps.fill(b, 0.0);
 
       int dimensionConstraints = constraints / dimensions;
       int subProblemSize = problemSize.getIntegerValue() / dimensions;
       Ad.reshape(dimensionConstraints, subProblemSize);
       bd.reshape(dimensionConstraints, 1);
+      CommonOps.fill(Ad, 0.0);
 
       for (int d = 0; d < dimensions; d++)
       {
@@ -372,7 +372,6 @@ public class TrajectoryPointOptimizer
          {
             CommonOps.insert(AdLine, Ad, line, subProblemSize - order.getCoefficients());
             bd.set(line, 0.0);
-            line++;
          }
 
          int rowOffset = d * dimensionConstraints;

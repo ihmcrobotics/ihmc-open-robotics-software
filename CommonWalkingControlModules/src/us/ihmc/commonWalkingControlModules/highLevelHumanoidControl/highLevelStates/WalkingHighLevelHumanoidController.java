@@ -428,6 +428,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       chestOrientationManager.holdCurrentOrientation();
 
       balanceManager.initialize();
+      feetManager.initialize();
       //      requestICPPlannerToHoldCurrent(); // Not sure if we want to do this. Might cause robot to fall. Might just be better to recenter ICP whenever switching to walking.
 
       // Need to reset it so the planner will be initialized even when restarting the walking controller.
@@ -555,7 +556,9 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          }
          else if (!balanceManager.isPushRecoveryEnabled() || balanceManager.isRecoveryImpossible())
          {
-            momentumBasedController.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection());
+            FrameVector2d fallingDirection = failureDetectionControlModule.getFallingDirection();
+            walkingMessageHandler.reportControllerFailure(fallingDirection);
+            momentumBasedController.reportControllerFailureToListeners(fallingDirection);
          }
       }
 
