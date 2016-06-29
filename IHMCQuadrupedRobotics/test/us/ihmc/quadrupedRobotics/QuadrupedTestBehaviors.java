@@ -13,7 +13,8 @@ public class QuadrupedTestBehaviors
       conductor.simulate();
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.58));
+      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 2.0));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.STAND));
       conductor.simulate();
    }

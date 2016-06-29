@@ -92,9 +92,8 @@ public class QuadrupedTestConductor implements VariableChangedListener
       StringBuffer message = new StringBuffer();
       for (YoVariableTestGoal goal : terminalGoals)
       {
-         message.append("Terminal goal met: ");
+         message.append("\nTerminal goal met: ");
          goal.getYoVariable().getNameAndValueString(message);
-         message.append("\n");
       }
       PrintTools.info(this, message.toString());
    }
@@ -105,21 +104,18 @@ public class QuadrupedTestConductor implements VariableChangedListener
       
       for (YoVariableTestGoal goal : sustainGoalsNotMeeting)
       {
-         message.append("Goal not sustained: ");
+         message.append("\nGoal not sustained: ");
          goal.getYoVariable().getNameAndValueString(message);
-         message.append("\n");
       }
       for (YoVariableTestGoal goal : waypointGoalsNotMet)
       {
-         message.append("Waypoint not met: ");
+         message.append("\nWaypoint not met: ");
          goal.getYoVariable().getNameAndValueString(message);
-         message.append("\n");
       }
       for (YoVariableTestGoal goal : terminalGoalsNotMeeting)
       {
-         message.append("Terminal goal not met: ");
+         message.append("\nTerminal goal not met: ");
          goal.getYoVariable().getNameAndValueString(message);
-         message.append("\n");
       }
       
       assertionFailedError = new AssertionFailedError(message.toString());
