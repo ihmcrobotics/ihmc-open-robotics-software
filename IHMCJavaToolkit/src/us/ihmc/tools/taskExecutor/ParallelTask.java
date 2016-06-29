@@ -27,6 +27,7 @@ public class ParallelTask<T> implements Task
          taskExecutor.clear();
    }
 
+   @Override
    public void doTransitionIntoAction()
    {
       for (TaskExecutor taskExecutor : executors.values())
@@ -35,6 +36,7 @@ public class ParallelTask<T> implements Task
       }
    }
 
+   @Override
    public void doAction()
    {
       for (TaskExecutor taskExecutor : executors.values())
@@ -43,11 +45,13 @@ public class ParallelTask<T> implements Task
       }
    }
 
+   @Override
    public void doTransitionOutOfAction()
    {
       // empty
    }
 
+   @Override
    public boolean isDone()
    {
       for (TaskExecutor taskExecutor : executors.values())
@@ -57,26 +61,5 @@ public class ParallelTask<T> implements Task
       }
 
       return true;
-   }
-
-   @Override
-   public void pause()
-   {
-      // TODO Auto-generated method stub
-      
-   }
-
-   @Override
-   public void resume()
-   {
-      // TODO Auto-generated method stub
-      
-   }
-
-   @Override
-   public void stop()
-   {
-      // TODO Auto-generated method stub
-      
    }
 }
