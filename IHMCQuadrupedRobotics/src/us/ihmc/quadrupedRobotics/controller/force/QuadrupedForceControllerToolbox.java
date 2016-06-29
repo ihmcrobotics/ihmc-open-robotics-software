@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
+import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -18,6 +19,7 @@ public class QuadrupedForceControllerToolbox
    private final QuadrupedBodyOrientationController bodyOrientationController;
    private final QuadrupedSolePositionController solePositionController;
    private final QuadrupedTimedStepController timedStepController;
+   private final GroundPlaneEstimator groundPlaneEstimator;
 
    public QuadrupedForceControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties, YoVariableRegistry registry)
    {
@@ -35,6 +37,7 @@ public class QuadrupedForceControllerToolbox
       bodyOrientationController = new QuadrupedBodyOrientationController(referenceFrames.getBodyFrame(), runtimeEnvironment.getControlDT(), registry);
       solePositionController = new QuadrupedSolePositionController(referenceFrames.getFootReferenceFrames(), runtimeEnvironment.getControlDT(), registry);
       timedStepController = new QuadrupedTimedStepController(solePositionController, runtimeEnvironment.getRobotTimestamp(), registry, runtimeEnvironment.getGraphicsListRegistry());
+      groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
    }
 
    public QuadrupedReferenceFrames getReferenceFrames()
@@ -85,5 +88,10 @@ public class QuadrupedForceControllerToolbox
    public QuadrupedTimedStepController getTimedStepController()
    {
       return timedStepController;
+   }
+
+   public GroundPlaneEstimator getGroundPlaneEstimator()
+   {
+      return groundPlaneEstimator;
    }
 }
