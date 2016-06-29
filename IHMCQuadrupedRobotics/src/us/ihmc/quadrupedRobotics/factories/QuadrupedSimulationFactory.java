@@ -23,10 +23,15 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
 import us.ihmc.quadrupedRobotics.controller.forceDevelopment.QuadrupedForceDevelopmentControllerManager;
+import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerManager;
+import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.controller.positionDevelopment.QuadrupedPositionDevelopmentControllerManager;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
+import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedInverseKinematicsCalculators;
+import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
@@ -90,6 +95,7 @@ public class QuadrupedSimulationFactory
    private RequiredFactoryField<QuadrupedSensorInformation> sensorInformation = new RequiredFactoryField<>("sensorInformation");
    private RequiredFactoryField<StateEstimatorParameters> stateEstimatorParameters = new RequiredFactoryField<>("stateEstimatorParameters");
    private RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
+   private RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>("positionBasedCrawlControllerParameters");
    
    private OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
    
@@ -108,6 +114,7 @@ public class QuadrupedSimulationFactory
    private GroundProfile3D groundProfile3D;
    private LinearGroundContactModel groundContactModel;
    private QuadrupedSimulationController simulationController;
+   private QuadrupedLegInverseKinematicsCalculator legInverseKinematicsCalculator;
    
    // CREATION
    
@@ -204,6 +211,15 @@ public class QuadrupedSimulationFactory
       }
    }
    
+   private void createInverseKinematicsCalculator()
+   {
+      if (controlMode.get() == QuadrupedControlMode.POSITION || controlMode.get() == QuadrupedControlMode.POSITION_DEV)
+      {
+         legInverseKinematicsCalculator = new QuadrupedInverseKinematicsCalculators(modelFactory.get(), physicalProperties.get(), fullRobotModel.get(), referenceFrames.get(),
+                                                                                    sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
+      }
+   }
+   
    public void createControllerManager() throws IOException
    {
       
@@ -218,10 +234,12 @@ public class QuadrupedSimulationFactory
          controllerManager = new QuadrupedForceDevelopmentControllerManager(runtimeEnvironment, physicalProperties.get());
          break;
       case POSITION:
-         controllerManager = null;
+         controllerManager = new QuadrupedPositionControllerManager(runtimeEnvironment, modelFactory.get(), physicalProperties.get(), initialPositionParameters.get(),
+                                                                    positionBasedCrawlControllerParameters.get(), legInverseKinematicsCalculator);
          break;
       case POSITION_DEV:
-         controllerManager = null;
+         controllerManager = new QuadrupedPositionDevelopmentControllerManager(runtimeEnvironment, modelFactory.get(), physicalProperties.get(),
+                                                                               initialPositionParameters.get(), legInverseKinematicsCalculator);
          break;
       default:
          controllerManager = null;
@@ -333,6 +351,7 @@ public class QuadrupedSimulationFactory
       createPacketCommunicator();
       createGlobalDataProducer();
       createHeadController();
+      createInverseKinematicsCalculator();
       createControllerManager();
       createPoseCommunicator();
       createGroundContactModel();
@@ -478,5 +497,10 @@ public class QuadrupedSimulationFactory
    public void setReferenceFrames(QuadrupedReferenceFrames referenceFrames)
    {
       this.referenceFrames.set(referenceFrames);
+   }
+   
+   public void setPositionBasedCrawlControllerParameters(QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters)
+   {
+      this.positionBasedCrawlControllerParameters.set(positionBasedCrawlControllerParameters);
    }
 }
