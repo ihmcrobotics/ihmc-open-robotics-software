@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.generatedTestSuites;
+package us.ihmc.atlas.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
@@ -12,10 +12,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Slow)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.pushRecovery.ValkyriePushRecoveryTest.class
+   us.ihmc.atlas.roughTerrainWalking.AtlasPointyRocksEnvironmentContactsTest.class
 })
 
-public class ValkyrieCSlowTestSuite
+public class AtlasHSlowTestSuite
 {
    public static void main(String[] args)
    {

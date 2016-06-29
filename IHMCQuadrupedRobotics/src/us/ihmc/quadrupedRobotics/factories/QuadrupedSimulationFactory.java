@@ -1,8 +1,10 @@
 package us.ihmc.quadrupedRobotics.factories;
 
 import java.io.IOException;
+import java.net.BindException;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
@@ -43,7 +45,6 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
-import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -61,6 +62,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinema
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
 
@@ -88,7 +90,6 @@ public class QuadrupedSimulationFactory
    private RequiredFactoryField<QuadrupedSensorInformation> sensorInformation = new RequiredFactoryField<>("sensorInformation");
    private RequiredFactoryField<StateEstimatorParameters> stateEstimatorParameters = new RequiredFactoryField<>("stateEstimatorParameters");
    private RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
-   private RequiredFactoryField<SensorProcessingConfiguration> sensorProcessingConfiguration = new RequiredFactoryField<>("sensorProcessingConfiguration");
    
    private OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
    
@@ -129,7 +130,7 @@ public class QuadrupedSimulationFactory
          DesiredJointDataHolder estimatorDesiredJointDataHolder = null;
 
          SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory;
-         sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(sdfRobot.get(), sensorProcessingConfiguration.get());
+         sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(sdfRobot.get(), stateEstimatorParameters.get());
          sensorReaderFactory.build(rootInverseDynamicsJoint, imuDefinitions, forceSensorDefinitions, contactSensorHolder, rawJointSensorDataHolderMap,
                                    estimatorDesiredJointDataHolder, sdfRobot.get().getRobotsYoVariableRegistry());
 
@@ -167,8 +168,20 @@ public class QuadrupedSimulationFactory
    
    private void createPacketCommunicator() throws IOException
    {
-      packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, netClassList.get());
-      packetCommunicator.connect();
+      if (useNetworking.get())
+      {
+         try
+         {
+            packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, netClassList.get());
+            packetCommunicator.connect();
+         }
+         catch (BindException bindException)
+         {
+            PrintTools.error(this, bindException.getMessage());
+            PrintTools.warn(this, "Continuing without networking");
+            useNetworking.set(false);
+         }
+      }
    }
    
    private void createGlobalDataProducer()
@@ -218,11 +231,10 @@ public class QuadrupedSimulationFactory
    
    private void createPoseCommunicator()
    {
-      JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(fullRobotModel.get());
-      PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("PoseCommunicator");
-      
       if (useNetworking.get())
       {
+         JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(fullRobotModel.get());
+         PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("PoseCommunicator");
          poseCommunicator = new DRCPoseCommunicator(fullRobotModel.get(), jointConfigurationGathererAndProducer, null, globalDataProducer,
                                                     timestampProvider.get(), sensorReader.getSensorRawOutputMapReadOnly(),
                                                     controllerManager.getMotionStatusHolder(), null, scheduler, netClassList.get());
@@ -293,7 +305,17 @@ public class QuadrupedSimulationFactory
       {
          throw new RuntimeException("UnreasonableAccelerationException");
       }
-      double totalMass = sdfRobot.get().computeCenterOfMass(initialPositionParameters.get().getInitialBodyPosition());
+      
+      Point3d initialCoMPosition = new Point3d();
+      double totalMass = sdfRobot.get().computeCenterOfMass(initialCoMPosition);
+      
+      if (useStateEstimator.get())
+      {
+         Quat4d initialEstimationLinkOrientation = new Quat4d();
+         sdfRobot.get().getPelvisJoint().getJointTransform3D().getRotation(initialEstimationLinkOrientation);
+         stateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
+      }
+      
       sdfRobot.get().setGravity(gravity.get());
       sdfRobot.get().setGroundContactModel(groundContactModel);
       System.out.println("Total mass: " + totalMass);
@@ -456,10 +478,5 @@ public class QuadrupedSimulationFactory
    public void setReferenceFrames(QuadrupedReferenceFrames referenceFrames)
    {
       this.referenceFrames.set(referenceFrames);
-   }
-
-   public void setSensorProcessingConfiguration(SensorProcessingConfiguration sensorProcessingConfiguration)
-   {
-      this.sensorProcessingConfiguration.set(sensorProcessingConfiguration);
    }
 }

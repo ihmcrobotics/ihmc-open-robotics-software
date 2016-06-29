@@ -41,7 +41,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class SwingState extends AbstractUnconstrainedState
 {
-   private static final boolean useNewSwingTrajectoyOptimization = false;
+   private static final boolean useNewSwingTrajectoyOptimization = true;
 
    private final boolean visualizeSwingTrajectory = true;
 
@@ -49,6 +49,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoVariableDoubleProvider swingTimeRemaining;
 
    private final TwoWaypointPositionTrajectoryGenerator swingTrajectoryGenerator;
+   private final CurrentConfigurationProvider stanceConfigurationProvider;
 
    private final TwoWaypointSwingGenerator swingTrajectoryGeneratorNew;
    private final VectorProvider touchdownVelocityProvider;
@@ -56,6 +57,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final FrameVector initialVelocity = new FrameVector();
    private final FramePoint finalPosition = new FramePoint();
    private final FrameVector finalVelocity = new FrameVector();
+   private final FramePoint stanceFootPosition = new FramePoint();
 
    private final PositionTrajectoryGenerator positionTrajectoryGenerator, pushRecoveryPositionTrajectoryGenerator;
    private final VelocityConstrainedOrientationTrajectoryGenerator orientationTrajectoryGenerator;
@@ -110,7 +112,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
       ReferenceFrame stanceFootFrame = referenceFrames.getFootFrame(robotSide.getOppositeSide());
-      CurrentConfigurationProvider stanceConfigurationProvider = new CurrentConfigurationProvider(stanceFootFrame);
+      stanceConfigurationProvider = new CurrentConfigurationProvider(stanceFootFrame);
       initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, rigidBody, twistCalculator);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
@@ -129,18 +131,21 @@ public class SwingState extends AbstractUnconstrainedState
             initialVelocityProvider, stanceConfigurationProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider, registry,
             yoGraphicsListRegistry, maxSwingHeightFromStanceFoot, visualizeSwingTrajectory);
       this.touchdownVelocityProvider = touchdownVelocityProvider;
-      swingTrajectoryGeneratorNew = new TwoWaypointSwingGenerator(namePrefix + "SwingNew", worldFrame, registry, yoGraphicsListRegistry);
+      swingTrajectoryGeneratorNew = new TwoWaypointSwingGenerator(namePrefix + "SwingNew", maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
 
-      pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
-            pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGenerator, touchdownTrajectoryGenerator);
 
       if (useNewSwingTrajectoyOptimization)
       {
          positionTrajectoryGenerators.add(swingTrajectoryGeneratorNew);
+         pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
+               pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGeneratorNew, touchdownTrajectoryGenerator);
+
       }
       else
       {
          positionTrajectoryGenerators.add(swingTrajectoryGenerator);
+         pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
+               pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGenerator, touchdownTrajectoryGenerator);
       }
       positionTrajectoryGenerators.add(touchdownTrajectoryGenerator);
 
@@ -200,10 +205,13 @@ public class SwingState extends AbstractUnconstrainedState
          initialVelocityProvider.get(initialVelocity);
          finalConfigurationProvider.getPosition(finalPosition);
          touchdownVelocityProvider.get(finalVelocity);
+         stanceConfigurationProvider.getPosition(stanceFootPosition);
          swingTrajectoryGeneratorNew.setInitialConditions(initialPosition, initialVelocity);
          swingTrajectoryGeneratorNew.setFinalConditions(finalPosition, finalVelocity);
          swingTrajectoryGeneratorNew.setStepTime(swingTimeProvider.getValue());
          swingTrajectoryGeneratorNew.setTrajectoryType(trajectoryParametersProvider.getTrajectoryParameters().getTrajectoryType());
+         swingTrajectoryGeneratorNew.setSwingHeight(trajectoryParametersProvider.getTrajectoryParameters().getSwingHeight());
+         swingTrajectoryGeneratorNew.setStanceFootPosition(stanceFootPosition);
       }
 
       positionTrajectoryGenerator.initialize();

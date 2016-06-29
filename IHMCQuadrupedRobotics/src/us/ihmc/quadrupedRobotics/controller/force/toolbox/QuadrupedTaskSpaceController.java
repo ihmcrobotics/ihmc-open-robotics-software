@@ -137,12 +137,11 @@ public class QuadrupedTaskSpaceController
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       // virtual model controller
-      virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, controlDT, registry);
+      virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, controlDT, registry, graphicsListRegistry);
       contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames, registry);
       contactForceStorage = new FrameVector();
 
       parentRegistry.addChild(registry);
-      virtualModelController.registerGraphics(graphicsListRegistry);
       reset();
    }
 

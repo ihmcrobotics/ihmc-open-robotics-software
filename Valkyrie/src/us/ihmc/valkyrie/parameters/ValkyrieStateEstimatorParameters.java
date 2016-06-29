@@ -17,7 +17,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -277,7 +276,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public double getIMUDriftFilterFreqInHertz()
    {
-      return 0.5332;
+      return 0.024; //0.5332;
    }
 
    @Override
@@ -289,7 +288,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public double getFootVelocityThresholdToEnableIMUDriftCompensation()
    {
-      return 0.03;
+      return 0.005;
    }
 
    @Override

@@ -835,6 +835,17 @@ public class VirtualModelControllerTestHelper
 
          return rigidBody;
       }
+
+      @Override
+      public OneDoFJoint[] getControllableOneDoFJoints()
+      {
+         return null;
+      }
+
+      @Override
+      public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
    }
 
    public static class RobotArm implements FullRobotModel
@@ -1116,6 +1127,17 @@ public class VirtualModelControllerTestHelper
          RigidBody rigidBody = new RigidBody("hand", inertia, joint);
 
          return rigidBody;
+      }
+
+      @Override
+      public OneDoFJoint[] getControllableOneDoFJoints()
+      {
+         return null;
+      }
+
+      @Override
+      public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
       }
    }
 
@@ -1440,6 +1462,17 @@ public class VirtualModelControllerTestHelper
 
          return rigidBody;
       }
+
+      @Override
+      public OneDoFJoint[] getControllableOneDoFJoints()
+      {
+         return null;
+      }
+
+      @Override
+      public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
    }
 
    public static class PlanarForkedRobotArm implements FullRobotModel
@@ -1752,6 +1785,17 @@ public class VirtualModelControllerTestHelper
 
          return rigidBody;
       }
+
+      @Override
+      public OneDoFJoint[] getControllableOneDoFJoints()
+      {
+         return null;
+      }
+
+      @Override
+      public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
    }
 
    public static class RobotLegs extends Robot implements FullRobotModel
@@ -1953,6 +1997,19 @@ public class VirtualModelControllerTestHelper
       public SideDependentList<ContactableFoot> getFootContactableBodies()
       {
          return footContactableBodies;
+      }
+
+      @Override
+      public OneDoFJoint[] getControllableOneDoFJoints()
+      {
+         
+         
+         return null;
+      }
+
+      @Override
+      public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
       }
    }
 

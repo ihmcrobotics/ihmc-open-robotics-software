@@ -12,9 +12,12 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseEveryBuildTest.class,
-   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseFlatTest.class,
-   us.ihmc.valkyrie.obstacleCourse.ValkyrieObstacleCourseRampFootstepSnapperTest.class
+   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndPelvisTrajectoryMessageTest.class,
+   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToWholeBodyTrajectoryMessageTest.class,
+   us.ihmc.valkyrie.kinematics.transmissions.ComparePushRodTransmissionsTest.class,
+   us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobianTest.class,
+   us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmissionTest.class,
+   us.ihmc.valkyrie.kinematics.util.ClosedFormJacobianTest.class
 })
 
 public class ValkyrieHFastTestSuite

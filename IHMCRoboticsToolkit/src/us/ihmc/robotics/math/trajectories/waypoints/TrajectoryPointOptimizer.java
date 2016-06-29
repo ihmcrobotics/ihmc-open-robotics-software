@@ -21,191 +21,16 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
  */
 public class TrajectoryPointOptimizer
 {
-   private static final int maxWaypoints = 10;
-   private static final double regularizationWeight = 1E-10;
+   private static final int maxWaypoints = 12;
    private static final int maxIterations = 20;
+
+   private static final double regularizationWeight = 1E-10;
    private static final double epsilon = 1E-7;
-   private static final double initialTimeGain = 1E-3;
+
+   private static final double initialTimeGain = 0.001;
    private static final double costEpsilon = 0.1;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   // TODO: clean up this polynomial enum and make it generic
-   public enum PolynomialOrder {
-         ORDER3,
-         ORDER5,
-         ORDER7;
-
-      public int getCoefficients()
-      {
-         switch (this)
-         {
-         case ORDER3:
-            return 4;
-         case ORDER5:
-            return 6;
-         case ORDER7:
-            return 8;
-         default:
-            throw new RuntimeException("Unknown Polynomial Order");
-         }
-      }
-
-      public void getHBlock(double t0, double t1, DenseMatrix64F hBlockToPack)
-      {
-         int blockSize = this.getCoefficients() - 2;
-         hBlockToPack.reshape(blockSize, blockSize);
-
-         switch (this)
-         {
-         case ORDER7:
-            hBlockToPack.set(blockSize-6, blockSize-6, 1764.0/11.0 * timeDifference(11, t0, t1));
-            hBlockToPack.set(blockSize-5, blockSize-6, 126.0       * timeDifference(10, t0, t1));
-            hBlockToPack.set(blockSize-4, blockSize-6, 280.0/3.0   * timeDifference(9,  t0, t1));
-            hBlockToPack.set(blockSize-3, blockSize-6, 63.0        * timeDifference(8,  t0, t1));
-            hBlockToPack.set(blockSize-2, blockSize-6, 36.0        * timeDifference(7,  t0, t1));
-            hBlockToPack.set(blockSize-1, blockSize-6, 14.0        * timeDifference(6,  t0, t1));
-            hBlockToPack.set(blockSize-5, blockSize-5, 100.0       * timeDifference(9,  t0, t1));
-            hBlockToPack.set(blockSize-4, blockSize-5, 75.0        * timeDifference(8,  t0, t1));
-            hBlockToPack.set(blockSize-3, blockSize-5, 360.0/7.0   * timeDifference(7,  t0, t1));
-            hBlockToPack.set(blockSize-2, blockSize-5, 30.0        * timeDifference(6,  t0, t1));
-            hBlockToPack.set(blockSize-1, blockSize-5, 12.0        * timeDifference(5,  t0, t1));
-         case ORDER5:
-            hBlockToPack.set(blockSize-4, blockSize-4, 400.0/7.0   * timeDifference(7,  t0, t1));
-            hBlockToPack.set(blockSize-3, blockSize-4, 40.0        * timeDifference(6,  t0, t1));
-            hBlockToPack.set(blockSize-2, blockSize-4, 24.0        * timeDifference(5,  t0, t1));
-            hBlockToPack.set(blockSize-1, blockSize-4, 10.0        * timeDifference(4,  t0, t1));
-            hBlockToPack.set(blockSize-3, blockSize-3, 144.0/5.0   * timeDifference(5,  t0, t1));
-            hBlockToPack.set(blockSize-2, blockSize-3, 18.0        * timeDifference(4,  t0, t1));
-            hBlockToPack.set(blockSize-1, blockSize-3, 8.0         * timeDifference(3,  t0, t1));
-         case ORDER3:
-            hBlockToPack.set(blockSize-2, blockSize-2, 12.0        * timeDifference(3,  t0, t1));
-            hBlockToPack.set(blockSize-1, blockSize-2, 6.0         * timeDifference(2,  t0, t1));
-            hBlockToPack.set(blockSize-1, blockSize-1, 4.0         * timeDifference(1,  t0, t1));
-            break;
-         default:
-            throw new RuntimeException("Unknown Polynomial Order");
-         }
-
-         for (int col = 1; col < blockSize; col++)
-         {
-            for (int row = 0; row < col; row++)
-            {
-               hBlockToPack.set(row, col, hBlockToPack.get(col, row));
-            }
-         }
-      }
-
-      private double timeDifference(int power, double t0, double t1)
-      {
-         return Math.pow(t1, power) - Math.pow(t0, power);
-      }
-
-      public boolean getPositionLine(double t, DenseMatrix64F lineToPack)
-      {
-         lineToPack.reshape(1, getCoefficients());
-         switch (this)
-         {
-         case ORDER7:
-            lineToPack.set(0, getCoefficients()-8, 1.0 * Math.pow(t, 7));
-            lineToPack.set(0, getCoefficients()-7, 1.0 * Math.pow(t, 6));
-         case ORDER5:
-            lineToPack.set(0, getCoefficients()-6, 1.0 * Math.pow(t, 5));
-            lineToPack.set(0, getCoefficients()-5, 1.0 * Math.pow(t, 4));
-         case ORDER3:
-            lineToPack.set(0, getCoefficients()-4, 1.0 * Math.pow(t, 3));
-            lineToPack.set(0, getCoefficients()-3, 1.0 * Math.pow(t, 2));
-            lineToPack.set(0, getCoefficients()-2, 1.0 * t);
-            lineToPack.set(0, getCoefficients()-1, 1.0);
-            break;
-         default:
-            throw new RuntimeException("Unknown Polynomial Order");
-         }
-
-         return true;
-      }
-
-      public boolean getVelocityLine(double t, DenseMatrix64F lineToPack)
-      {
-         lineToPack.reshape(1, getCoefficients());
-         boolean isEndCondition = false;
-
-         switch (this)
-         {
-         case ORDER7:
-            lineToPack.set(0, getCoefficients()-8, 7.0 * Math.pow(t, 6));
-            lineToPack.set(0, getCoefficients()-7, 6.0 * Math.pow(t, 5));
-         case ORDER5:
-            lineToPack.set(0, getCoefficients()-6, 5.0 * Math.pow(t, 4));
-            lineToPack.set(0, getCoefficients()-5, 4.0 * Math.pow(t, 3));
-         case ORDER3:
-            lineToPack.set(0, getCoefficients()-4, 3.0 * Math.pow(t, 2));
-            lineToPack.set(0, getCoefficients()-3, 2.0 * t);
-            lineToPack.set(0, getCoefficients()-2, 1.0);
-            lineToPack.set(0, getCoefficients()-1, 0.0);
-            isEndCondition = true;
-            break;
-         default:
-            throw new RuntimeException("Unknown Polynomial Order");
-         }
-
-         return isEndCondition;
-      }
-
-      public boolean getAccelerationLine(double t, DenseMatrix64F lineToPack)
-      {
-         lineToPack.reshape(1, getCoefficients());
-         boolean isEndCondition = false;
-
-         switch (this)
-         {
-         case ORDER7:
-            lineToPack.set(0, getCoefficients()-8, 7.0 * 6.0 * Math.pow(t, 5));
-            lineToPack.set(0, getCoefficients()-7, 6.0 * 5.0 * Math.pow(t, 4));
-         case ORDER5:
-            lineToPack.set(0, getCoefficients()-6, 5.0 * 4.0 * Math.pow(t, 3));
-            lineToPack.set(0, getCoefficients()-5, 4.0 * 3.0 * Math.pow(t, 2));
-            isEndCondition = true;
-         case ORDER3:
-            lineToPack.set(0, getCoefficients()-4, 3.0 * 2.0 * t);
-            lineToPack.set(0, getCoefficients()-3, 2.0 * 1.0);
-            lineToPack.set(0, getCoefficients()-2, 1.0 * 0.0);
-            lineToPack.set(0, getCoefficients()-1, 0.0);
-            break;
-         default:
-            throw new RuntimeException("Unknown Polynomial Order");
-         }
-
-         return isEndCondition;
-      }
-
-      public boolean getJerkLine(double t, DenseMatrix64F lineToPack)
-      {
-         lineToPack.reshape(1, getCoefficients());
-         boolean isEndCondition = false;
-
-         switch (this)
-         {
-         case ORDER7:
-            lineToPack.set(0, getCoefficients()-8, 7.0 * 6.0 * 5.0 * Math.pow(t, 4));
-            lineToPack.set(0, getCoefficients()-7, 6.0 * 5.0 * 4.0 * Math.pow(t, 3));
-            isEndCondition = true;
-         case ORDER5:
-            lineToPack.set(0, getCoefficients()-6, 5.0 * 4.0 * 3.0 * Math.pow(t, 2));
-            lineToPack.set(0, getCoefficients()-5, 4.0 * 3.0 * 2.0 * t);
-         case ORDER3:
-            lineToPack.set(0, getCoefficients()-4, 3.0 * 2.0 * 1.0);
-            lineToPack.set(0, getCoefficients()-3, 2.0 * 1.0 * 0.0);
-            lineToPack.set(0, getCoefficients()-2, 1.0 * 0.0);
-            lineToPack.set(0, getCoefficients()-1, 0.0);
-            break;
-         default:
-            throw new RuntimeException("Unknown Polynomial Order");
-         }
-
-         return isEndCondition;
-      }
-   }
 
    private final PolynomialOrder order;
 
@@ -220,8 +45,8 @@ public class TrajectoryPointOptimizer
    private final DenseMatrix64F x0, x1, xd0, xd1;
    private final ArrayList<DenseMatrix64F> waypoints = new ArrayList<>();
 
-   private final double[] intervalTimes = new double[maxWaypoints+1];
-   private final double[] saveIntervalTimes = new double[maxWaypoints+1];
+   private final DenseMatrix64F intervalTimes = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F saveIntervalTimes = new DenseMatrix64F(1, 1);
    private final double[] costs = new double[maxIterations+1];
 
    private final DenseMatrix64F H = new DenseMatrix64F(1, 1);
@@ -239,7 +64,10 @@ public class TrajectoryPointOptimizer
    private final DenseMatrix64F AdLine = new DenseMatrix64F(1, 1);
 
    private final DenseMatrix64F timeGradient = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F timeUpdate = new DenseMatrix64F(1, 1);
    private final DoubleYoVariable timeGain = new DoubleYoVariable("TimeGain", registry);
+
+   private final DoubleYoVariable computationTime = new DoubleYoVariable("ComputationTimeMS", registry);
 
    public TrajectoryPointOptimizer(int dimensions, PolynomialOrder order, YoVariableRegistry parentRegistry)
    {
@@ -299,41 +127,38 @@ public class TrajectoryPointOptimizer
 
    public void compute()
    {
+      long startTime = System.nanoTime();
+
       int intervals = nWaypoints.getIntegerValue() + 1;
       this.intervals.set(intervals);
-      for (int i = 0; i < intervals; i++)
-      {
-         // TODO: use better initial guess:
-         // instead of equal time for all intervals use distance between waypoints maybe
-         intervalTimes[i] = 1.0 / intervals;
-      }
+      intervalTimes.reshape(intervals, 1);
+      CommonOps.fill(intervalTimes, 1.0/intervals);
 
       problemSize.set(dimensions.getIntegerValue() * coefficients.getIntegerValue() * intervals);
       costs[0] = solveMinAcceleration();
 
       for (int iteration = 0; iteration < maxIterations; iteration++)
       {
-         this.iteration.set(iteration);
          double newCost = computeTimeUpdate(costs[iteration]);
+         this.iteration.set(iteration+1);
          costs[iteration+1] = newCost;
 
          if (Math.abs(costs[iteration] - newCost) < costEpsilon)
-         {
             break;
-         }
 
          if (iteration == maxIterations-1)
-         {
             System.err.println("Trajectory optimization max iteration.");
-         }
       }
+
+      long duration = System.nanoTime() - startTime;
+      computationTime.set((double)duration / 10E6);
    }
 
    private double computeTimeUpdate(double cost)
    {
       int intervals = this.intervals.getIntegerValue();
       timeGradient.reshape(intervals, 1);
-      System.arraycopy(intervalTimes, 0, saveIntervalTimes, 0, intervalTimes.length);
+      saveIntervalTimes.set(intervalTimes);
 
       for (int i = 0; i < intervals; i++)
       {
@@ -341,53 +166,59 @@ public class TrajectoryPointOptimizer
          {
             if (j == i)
             {
-               intervalTimes[j] += epsilon;
+               intervalTimes.add(j, 0, epsilon);
             }
             else
             {
-               intervalTimes[j] -= epsilon / (intervals-1);
+               intervalTimes.add(j, 0, -epsilon / (intervals-1));
             }
          }
 
          double value = (solveMinAcceleration() - cost) / epsilon;
          timeGradient.set(i, value);
 
-         System.arraycopy(saveIntervalTimes, 0, intervalTimes, 0, saveIntervalTimes.length);
+         intervalTimes.set(saveIntervalTimes);
       }
 
       double length = CommonOps.elementSum(timeGradient);
       CommonOps.add(timeGradient, -length / intervals);
-      CommonOps.scale(-timeGain.getDoubleValue(), timeGradient);
 
-      double maxUpdate = CommonOps.elementMaxAbs(timeGradient);
-      double minIntervalTime = Double.MAX_VALUE;
-      for (int i = 0; i < intervals; i++)
+      for (int i = 0; i < 10; i++)
       {
-         double intervalTime = intervalTimes[i];
-         if (intervalTime < minIntervalTime)
+         double newCost = applyTimeUpdate();
+
+         if (newCost > cost)
          {
-            minIntervalTime = intervalTime;
+            timeGain.mul(0.5);
+            intervalTimes.set(saveIntervalTimes);
+         }
+         else
+         {
+            return newCost;
          }
       }
+
+      return applyTimeUpdate();
+   }
+
+   private double applyTimeUpdate()
+   {
+      timeUpdate.set(timeGradient);
+      CommonOps.scale(-timeGain.getDoubleValue(), timeUpdate);
+
+      double maxUpdate = CommonOps.elementMaxAbs(timeUpdate);
+      double minIntervalTime = CommonOps.elementMin(intervalTimes);
       if (maxUpdate > 0.4 * minIntervalTime)
       {
-         CommonOps.scale(0.4 * minIntervalTime / maxUpdate, timeGradient);
+         CommonOps.scale(0.4 * minIntervalTime / maxUpdate, timeUpdate);
       }
 
-      for (int i = 0; i < intervals; i++)
+      for (int i = 0; i < intervals.getIntegerValue(); i++)
       {
-         intervalTimes[i] += timeGradient.get(i);
-      }
-      double newCost = solveMinAcceleration();
-
-      if (newCost > cost)
-      {
-         timeGain.mul(0.5);
-         System.arraycopy(saveIntervalTimes, 0, intervalTimes, 0, saveIntervalTimes.length);
-         return cost;
+         intervalTimes.add(i, 0, timeUpdate.get(i));
       }
 
-      return newCost;
+      return solveMinAcceleration();
    }
 
    private double solveMinAcceleration()
@@ -440,12 +271,12 @@ public class TrajectoryPointOptimizer
       A.reshape(constraints, problemSize.getIntegerValue());
       b.reshape(constraints, 1);
       CommonOps.fill(A, 0.0);
-      CommonOps.fill(b, 0.0);
 
       int dimensionConstraints = constraints / dimensions;
       int subProblemSize = problemSize.getIntegerValue() / dimensions;
       Ad.reshape(dimensionConstraints, subProblemSize);
       bd.reshape(dimensionConstraints, 1);
+      CommonOps.fill(Ad, 0.0);
 
       for (int d = 0; d < dimensions; d++)
       {
@@ -479,7 +310,7 @@ public class TrajectoryPointOptimizer
          double t = 0.0;
          for (int w = 0 ; w < nWaypoints.getIntegerValue(); w++)
          {
-            t += intervalTimes[w];
+            t += intervalTimes.get(w);
             int colOffset = w * order.getCoefficients();
             DenseMatrix64F waypoint = waypoints.get(w);
 
@@ -541,7 +372,6 @@ public class TrajectoryPointOptimizer
          {
             CommonOps.insert(AdLine, Ad, line, subProblemSize - order.getCoefficients());
             bd.set(line, 0.0);
-            line++;
          }
 
          int rowOffset = d * dimensionConstraints;
@@ -557,17 +387,18 @@ public class TrajectoryPointOptimizer
       CommonOps.fill(H, 0.0);
 
       double t0 = 0.0;
-      double t1 = intervalTimes[0];
+      double t1 = 0.0;
       for (int i = 0; i < intervals.getIntegerValue(); i++)
       {
+         t0 = t1;
+         t1 = t1 + intervalTimes.get(i);
+
          order.getHBlock(t0, t1, hBlock);
          for (int d = 0; d < dimensions.getIntegerValue(); d++)
          {
             int offset = (i + d * intervals.getIntegerValue()) * coefficients.getIntegerValue();
             CommonOps.insert(hBlock, H, offset, offset);
          }
-         t0 = t1;
-         t1 = t1 + intervalTimes[i+1];
       }
    }
 
@@ -580,11 +411,24 @@ public class TrajectoryPointOptimizer
       {
          if (i == 0)
          {
-            timesToPack[0] = intervalTimes[0];
+            timesToPack[0] = intervalTimes.get(0);
             continue;
          }
-         timesToPack[i] = timesToPack[i-1] + intervalTimes[i];
+         timesToPack[i] = timesToPack[i-1] + intervalTimes.get(i);
       }
+   }
+
+   public double getWaypointTime(int waypoint)
+   {
+      if (waypoint < 0)
+         throw new RuntimeException("Unexpected Waypoint Index");
+      if (waypoint > nWaypoints.getIntegerValue()-1)
+         throw new RuntimeException("Unexpected Waypoint Index");
+
+      double time = intervalTimes.get(0);
+      for (int i = 1; i < waypoint+1; i++)
+         time += intervalTimes.get(i);
+      return time;
    }
 
    public void getPolynomialCoefficients(ArrayList<double[]> coefficientsToPack, int dimension)

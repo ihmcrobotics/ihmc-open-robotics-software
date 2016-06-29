@@ -19,7 +19,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-@DeployableTestClass(targets = {TestPlanTarget.Flaky, TestPlanTarget.Video})
+@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
 public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFootTest
 {
    @Override

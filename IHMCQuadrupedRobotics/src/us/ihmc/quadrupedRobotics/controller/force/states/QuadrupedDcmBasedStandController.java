@@ -108,7 +108,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
-      groundPlaneEstimator = new GroundPlaneEstimator();
+      groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }

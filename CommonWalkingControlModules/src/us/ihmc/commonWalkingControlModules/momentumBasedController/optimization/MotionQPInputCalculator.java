@@ -382,10 +382,7 @@ public class MotionQPInputCalculator
          }
       }
 
-      boolean success = jointIndexHandler.compactBlockToFullBlock(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
-
-      if (!success)
-         return false;
+      jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
 
       // Compute the task objective: p = S * ( TDot - JDot qDot )
       convectiveTermCalculator.computeJacobianDerivativeTerm(jacobian, convectiveTerm);

@@ -110,7 +110,7 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
 
                double x = (ix - 1) * dx - xOffset;
                double y = (iy - 1) * dy - yOffset;
-               double z = 0.001 * ((xOffset - Math.abs(x))/xOffset + (yOffset - Math.abs(y))/yOffset);
+               double z = 0.005 * ((xOffset - Math.abs(x))/xOffset + (yOffset - Math.abs(y))/yOffset);
                Point3d gcOffset = new Point3d(x, y, z);
 
                AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide).transform(gcOffset);
