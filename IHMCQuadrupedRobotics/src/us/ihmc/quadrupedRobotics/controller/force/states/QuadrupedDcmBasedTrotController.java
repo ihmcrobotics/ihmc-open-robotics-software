@@ -140,7 +140,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
-      groundPlaneEstimator = new GroundPlaneEstimator();
+      groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
       groundPlanePositions = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
