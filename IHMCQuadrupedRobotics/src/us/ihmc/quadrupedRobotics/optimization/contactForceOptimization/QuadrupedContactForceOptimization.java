@@ -76,7 +76,7 @@ public class QuadrupedContactForceOptimization
          contactForceCommand.set(robotQuadrant, new FrameVector(comFrame));
          contactForceSolution.set(robotQuadrant, new FrameVector(comFrame));
          contactPosition.set(robotQuadrant, new FramePoint(comFrame));
-         contactState.set(robotQuadrant, ContactState.IN_CONTACT);
+         contactState.set(robotQuadrant, ContactState.NO_CONTACT);
       }
 
       yoComTorqueCommand = new YoFrameVector("ComTorqueCommand", worldFrame, registry);
@@ -85,7 +85,7 @@ public class QuadrupedContactForceOptimization
       yoComForceSolution = new YoFrameVector("ComForceSolution", worldFrame, registry);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
+         String prefix = robotQuadrant.getCamelCaseName();
          yoContactForceCommand.set(robotQuadrant, new YoFrameVector(prefix + "ContactForceCommand", worldFrame, registry));
          yoContactForceSolution.set(robotQuadrant, new YoFrameVector(prefix + "ContactForceSolution", worldFrame, registry));
          yoContactPosition.set(robotQuadrant, new YoFramePoint(prefix + "ContactPosition", worldFrame, registry));

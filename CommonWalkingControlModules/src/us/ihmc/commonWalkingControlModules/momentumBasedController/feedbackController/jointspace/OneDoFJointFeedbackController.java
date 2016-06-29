@@ -7,17 +7,14 @@ import us.ihmc.robotics.controllers.PDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
 
 public class OneDoFJointFeedbackController implements FeedbackControllerInterface
 {
    private final JointspaceAccelerationCommand output = new JointspaceAccelerationCommand();
 
    private final OneDoFJoint joint;
-   private final boolean isRevoluteJoint;
 
    private final BooleanYoVariable isEnabled;
 
@@ -50,8 +47,6 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       YoVariableRegistry registry = new YoVariableRegistry(jointName + "PDController");
 
       this.joint = joint;
-      isRevoluteJoint = joint instanceof RevoluteJoint;
-
       isEnabled = new BooleanYoVariable("control_enabled_" + jointName, registry);
       isEnabled.set(false);
 
@@ -125,11 +120,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       qCurrent.set(joint.getQ());
       qDCurrent.set(joint.getQd());
 
-      if (isRevoluteJoint)
-         qError.set(AngleTools.computeAngleDifferenceMinusPiToPi(qDesired.getDoubleValue(), qCurrent.getDoubleValue()));
-      else
-         qError.set(qDesired.getDoubleValue() - qCurrent.getDoubleValue());
-         
+      qError.set(qDesired.getDoubleValue() - qCurrent.getDoubleValue());
       qDError.set(qDDesired.getDoubleValue() - qDCurrent.getDoubleValue());
 
       double qdd_fb = kp.getDoubleValue() * qError.getDoubleValue() + kd.getDoubleValue() * qDError.getDoubleValue();

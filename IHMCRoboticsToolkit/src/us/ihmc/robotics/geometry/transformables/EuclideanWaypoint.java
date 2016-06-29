@@ -148,6 +148,36 @@ public class EuclideanWaypoint implements GeometryObject<EuclideanWaypoint>, Euc
       return linearVelocity;
    }
 
+   public double getPositionX()
+   {
+      return position.getX();
+   }
+
+   public double getPositionY()
+   {
+      return position.getY();
+   }
+
+   public double getPositionZ()
+   {
+      return position.getZ();
+   }
+
+   public double getLinearVelocityX()
+   {
+      return linearVelocity.getX();
+   }
+
+   public double getLinearVelocityY()
+   {
+      return linearVelocity.getY();
+   }
+
+   public double getLinearVelocityZ()
+   {
+      return linearVelocity.getZ();
+   }
+
    NumberFormat numberFormat;
 
    public NumberFormat getNumberFormat()

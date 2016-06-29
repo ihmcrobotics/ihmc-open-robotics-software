@@ -6,6 +6,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 
 public class ValkyrieRosControlEffortJointControlCommandCalculator
@@ -15,6 +16,7 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
    private final PIDController pidController;
    private final DoubleYoVariable tauOff;
    private final DoubleYoVariable standPrepAngle;
+   private final DoubleYoVariable initialAngle;
 
    private final double controlDT;
 
@@ -29,6 +31,7 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
       YoVariableRegistry registry = new YoVariableRegistry(pdControllerBaseName + "Command");
 
       this.standPrepAngle = new DoubleYoVariable(pdControllerBaseName + "StandPrepAngle", registry);
+      this.initialAngle = new DoubleYoVariable(pdControllerBaseName + "InitialAngle", registry);
 
       pidController = new PIDController(pdControllerBaseName + "StandPrep", registry);
       this.tauOff = new DoubleYoVariable("tau_offset_" + pdControllerBaseName, registry);
@@ -49,16 +52,26 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
    public void initialize()
    {
       pidController.setCumulativeError(0.0);
+
+      double q = yoEffortJointHandleHolder.getQ();
+      OneDoFJoint joint = yoEffortJointHandleHolder.getOneDoFJoint();
+      double jointLimitLower = joint.getJointLimitLower();
+      double jointLimitUpper = joint.getJointLimitUpper();
+      if (Double.isNaN(q) || Double.isInfinite(q))
+         q = standPrepAngle.getDoubleValue();
+      q = MathTools.clipToMinMax(q, jointLimitLower, jointLimitUpper);
+
+      initialAngle.set(q);
    }
 
-   public void computeAndUpdateJointTorque(double inStateTime, double factor, double masterGain)
+   public void computeAndUpdateJointTorque(double ramp, double factor, double masterGain)
    {
       double standPrepFactor = 1.0 - factor;
 
       factor = MathTools.clipToMinMax(factor, 0.0, 1.0);
 
       double q = yoEffortJointHandleHolder.getQ();
-      double qDesired = standPrepAngle.getDoubleValue();
+      double qDesired = (1.0 - ramp) * initialAngle.getDoubleValue() + ramp * standPrepAngle.getDoubleValue();
       double qd = yoEffortJointHandleHolder.getQd();
       double qdDesired = 0.0;
 

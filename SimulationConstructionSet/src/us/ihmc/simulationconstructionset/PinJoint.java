@@ -32,7 +32,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    private static final long serialVersionUID = -8016564065453170730L;
 
    private AxisAngle4d axisAngle = new AxisAngle4d();
-   public DoubleYoVariable q, qd, qdd, tau;
+   public DoubleYoVariable q, qd, qdd,  tau;
    
    public DoubleYoVariable tauJointLimit, tauVelocityLimit, tauDamping;
    public double q_min = Double.NEGATIVE_INFINITY, q_max = Double.POSITIVE_INFINITY, k_limit, b_limit;
@@ -108,6 +108,9 @@ public class PinJoint extends OneDegreeOfFreedomJoint
       physics.u_i.normalize();
       setPinTransform3D(this.jointTransform3D, physics.u_i);
    }
+
+
+
 
    /**
     * This function updates the transform, velocity, and joint axis.  If specified

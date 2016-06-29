@@ -18,7 +18,6 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParamet
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
-import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -45,7 +44,6 @@ public class LLAQuadrupedSimulationFactory
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
       QuadrupedSimulationInitialPositionParameters initialPositionParameters = new LLAQuadrupedSimulationInitialPositionParameters();
       QuadrupedGroundContactParameters groundContactParameters = new LLAQuadrupedGroundContactParameters();
-      SensorProcessingConfiguration sensorProcessingConfiguration = new LLAQuadrupedSensorProcessingConfiguration();
       QuadrupedSensorInformation sensorInformation = new LLAQuadrupedSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = new LLAQuadrupedStateEstimatorParameters();
       
@@ -77,7 +75,6 @@ public class LLAQuadrupedSimulationFactory
       simulationFactory.setUseStateEstimator(USE_STATE_ESTIMATOR);
       simulationFactory.setStateEstimatorParameters(stateEstimatorParameters);
       simulationFactory.setSensorInformation(sensorInformation);
-      simulationFactory.setSensorProcessingConfiguration(sensorProcessingConfiguration);
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
       

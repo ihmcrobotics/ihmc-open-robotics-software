@@ -395,7 +395,35 @@ public class WholeBodyTrajectoryMessage extends TrackablePacket<WholeBodyTraject
          errorMessage = "The robotSide of a field is inconsistent with its name.";
          return errorMessage;
       }
+
+      if ((errorMessage = validateIfNeeded(leftHandTrajectoryMessage)) != null)
+         return errorMessage;
+      if ((errorMessage = validateIfNeeded(rightHandTrajectoryMessage)) != null)
+         return errorMessage;
+      if ((errorMessage = validateIfNeeded(leftArmTrajectoryMessage)) != null)
+         return errorMessage;
+      if ((errorMessage = validateIfNeeded(rightArmTrajectoryMessage)) != null)
+         return errorMessage;
+      if ((errorMessage = validateIfNeeded(chestTrajectoryMessage)) != null)
+         return errorMessage;
+      if ((errorMessage = validateIfNeeded(pelvisTrajectoryMessage)) != null)
+         return errorMessage;
+      if ((errorMessage = validateIfNeeded(leftFootTrajectoryMessage)) != null)
+         return errorMessage;
+      if ((errorMessage = validateIfNeeded(rightFootTrajectoryMessage)) != null)
+         return errorMessage;
+
       return null;
+   }
+
+   private String validateIfNeeded(Packet<?> message)
+   {
+      String errorMessage = null;
+
+      if (message != null && message.getUniqueId() != Packet.INVALID_MESSAGE_ID)
+         errorMessage = message.validateMessage();
+
+      return errorMessage;
    }
 
    @Override

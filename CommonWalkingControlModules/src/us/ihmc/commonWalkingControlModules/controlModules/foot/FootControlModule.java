@@ -306,6 +306,11 @@ public class FootControlModule
       return stateMachine.getCurrentStateEnum();
    }
 
+   public void initialize()
+   {
+      stateMachine.setCurrentState(ConstraintType.FULL);
+   }
+
    public void doControl()
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
@@ -411,7 +416,7 @@ public class FootControlModule
             resetCurrentState();
          break;
       case QUEUE:
-         boolean success = moveViaWaypointsState.queueHandTrajectoryCommand(command);
+         boolean success = moveViaWaypointsState.queueFootTrajectoryCommand(command);
          if (!success)
             moveViaWaypointsState.holdCurrentPosition();
          return;

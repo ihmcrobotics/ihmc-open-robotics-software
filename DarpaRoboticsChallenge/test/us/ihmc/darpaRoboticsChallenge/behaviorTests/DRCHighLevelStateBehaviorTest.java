@@ -2,8 +2,6 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.Random;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -16,14 +14,12 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HighLevelStateBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -35,11 +31,14 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @After
    public void destroySimulationAndRecycleMemory()
    {
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+
       if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
@@ -63,8 +62,6 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCHighLevelStateBehaviorTest.class + " after class.");
    }
 
-   private static final boolean DEBUG = false;
-
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
    @Before
@@ -78,26 +75,16 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
 
    @DeployableTestMethod(estimatedDuration = 21.5)
    @Test(timeout = 64580)
-   public void testDoNothingBehavior() throws SimulationExceededMaximumTimeException
+   public void testWalkingState() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      testState(HighLevelState.WALKING);
+   }
 
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      double trajectoryTime = 2.0;
-      HighLevelState desiredState = HighLevelState.DO_NOTHING_BEHAVIOR;
-
-      final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
-
-      highLevelStateBehavior.initialize();
-      highLevelStateBehavior.setInput(new HighLevelStateMessage(desiredState));
-      assertTrue(highLevelStateBehavior.hasInputBeenSet());
-
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(highLevelStateBehavior, trajectoryTime);
-      assertTrue(success);
-
-      assertTrue(highLevelStateBehavior.isDone());
+   @DeployableTestMethod(estimatedDuration = 21.5)
+   @Test(timeout = 64580)
+   public void testDoNothingBahviourState() throws SimulationExceededMaximumTimeException
+   {
+      testState(HighLevelState.DO_NOTHING_BEHAVIOR);
 
       OneDegreeOfFreedomJoint[] oneDofJoints = drcBehaviorTestHelper.getRobot().getOneDoFJoints();
 
@@ -105,34 +92,27 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       {
          String jointName = joint.getName();
          double tau = joint.getTau().getDoubleValue();
-         PrintTools.debug(this, joint.getName() + " tau : " + tau);
 
          if (!jointName.contains("hokuyo"))
          {
-            assertTrue(tau == 0.0);
+            assertTrue(joint.getName() + " tau : " + tau, tau == 0.0);
          }
       }
-      
-      HighLevelState actualState = getCurrentHighLevelState();
-
-      assertTrue("Actual high level state: " + actualState + ", does not match desired high level state: " + desiredState + ".",
-            desiredState.equals(actualState));
-      
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 21.5)
    @Test(timeout = 64580)
-   public void testRandomState() throws SimulationExceededMaximumTimeException
+   public void testDiagnosticsState() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      testState(HighLevelState.DIAGNOSTICS);
+   }
 
+   private void testState(HighLevelState desiredState) throws SimulationExceededMaximumTimeException
+   {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       double trajectoryTime = 2.0;
-      HighLevelState[] highLevelStates = HighLevelState.values();
-      HighLevelState desiredState = highLevelStates[RandomTools.generateRandomInt(new Random(), 0, highLevelStates.length - 1)];
 
       final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
 
@@ -148,8 +128,6 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       assertTrue(highLevelStateBehavior.isDone());
       assertTrue("Actual high level state: " + actualState + ", does not match desired high level state: " + desiredState + ".",
             desiredState.equals(actualState));
-
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private HighLevelState getCurrentHighLevelState()

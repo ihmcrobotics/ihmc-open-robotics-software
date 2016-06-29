@@ -8,18 +8,21 @@ import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
-import us.ihmc.quadrupedRobotics.QuadrupedTestAdministratorFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestConductor;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.factories.QuadrupedSimulationFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
+import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
-import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.tools.factories.FactoryTools;
+import us.ihmc.tools.factories.RequiredFactoryField;
 
 public class LLAQuadrupedTestFactory
 {
@@ -31,15 +34,19 @@ public class LLAQuadrupedTestFactory
    private static final boolean USE_TRACK_AND_DOLLY = false;
    private static final boolean USE_NETWORKING = false;
    
-   private QuadrupedSimulationFactory createSimulationFactory() throws IOException
+   private RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
+   private RequiredFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new RequiredFactoryField<>("controlMode");
+   
+   public QuadrupedTestConductor createTestConductor() throws IOException
    {
+      FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
+      
       QuadrupedModelFactory modelFactory = new LLAQuadrupedModelFactory();
       QuadrupedPhysicalProperties physicalProperties = new LLAQuadrupedPhysicalProperties();
       NetClassList netClassList = new LLAQuadrupedNetClassList();
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
       QuadrupedSimulationInitialPositionParameters initialPositionParameters = new LLAQuadrupedSimulationInitialPositionParameters();
       QuadrupedGroundContactParameters groundContactParameters = new LLAQuadrupedGroundContactParameters();
-      SensorProcessingConfiguration sensorProcessingConfiguration = new LLAQuadrupedSensorProcessingConfiguration();
       QuadrupedSensorInformation sensorInformation = new LLAQuadrupedSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = new LLAQuadrupedStateEstimatorParameters();
       
@@ -71,16 +78,19 @@ public class LLAQuadrupedTestFactory
       simulationFactory.setUseStateEstimator(USE_STATE_ESTIMATOR);
       simulationFactory.setStateEstimatorParameters(stateEstimatorParameters);
       simulationFactory.setSensorInformation(sensorInformation);
-      simulationFactory.setSensorProcessingConfiguration(sensorProcessingConfiguration);
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
-      return simulationFactory;
+      simulationFactory.setGroundContactModelType(groundContactModelType.get());
+      return new QuadrupedTestConductor(simulationFactory.createSimulation());
    }
    
-   public QuadrupedTestAdministratorFactory createTestAdministratorFactory() throws IOException
+   public void setControlMode(QuadrupedControlMode controlMode)
    {
-      QuadrupedTestAdministratorFactory testAdministratorFactory = new QuadrupedTestAdministratorFactory();
-      testAdministratorFactory.setSimulationFactory(createSimulationFactory());
-      return testAdministratorFactory;
+      this.controlMode.set(controlMode);
+   }
+   
+   public void setGroundContactModelType(QuadrupedGroundContactModelType groundContactModelType)
+   {
+      this.groundContactModelType.set(groundContactModelType);
    }
 }

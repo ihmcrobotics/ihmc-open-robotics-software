@@ -43,7 +43,7 @@ public class PIDController
       {
          @Override public void variableChanged(YoVariable<?> v)
          {
-            integralLeakRatio.set(MathTools.clipToMinMax(integralLeakRatio.getDoubleValue(), 0.0, 1.0));
+            integralLeakRatio.set(MathTools.clipToMinMax(integralLeakRatio.getDoubleValue(), 0.0, 1.0), false);
          }
       };
 

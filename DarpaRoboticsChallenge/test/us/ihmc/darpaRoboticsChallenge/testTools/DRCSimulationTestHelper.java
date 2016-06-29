@@ -78,6 +78,7 @@ public class DRCSimulationTestHelper
 
    private final DRCNetworkModuleParameters networkProcessorParameters;
    private DRCSimulationStarter simulationStarter;
+   private Exception caughtException;
 
    public DRCSimulationTestHelper(String name, DRCObstacleCourseStartingLocation selectedLocation,
          SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
@@ -311,6 +312,7 @@ public class DRCSimulationTestHelper
       }
       catch (Exception e)
       {
+         this.caughtException = e;
          System.err.println("Caught exception in " + getClass().getSimpleName() + ".simulateAndBlockAndCatchExceptions. Exception = /n" + e);
          return false;
       }
@@ -391,6 +393,11 @@ public class DRCSimulationTestHelper
       //    exceptions.add("kp_");
 
       return exceptions;
+   }
+
+   public Exception getCaughtException()
+   {
+      return caughtException;
    }
 
    public void send(Packet<?> packet)

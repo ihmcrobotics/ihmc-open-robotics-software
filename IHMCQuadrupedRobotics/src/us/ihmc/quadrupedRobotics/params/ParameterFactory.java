@@ -4,6 +4,7 @@ import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 /**
@@ -154,6 +155,72 @@ public class ParameterFactory
                public void onChange(Parameter parameter)
                {
                   variable.set(((DoubleArrayParameter) parameter).get()[count], false);
+               }
+            });
+         }
+      }
+
+      return parameter;
+   }
+
+   public IntegerParameter createInteger(String name, int defaultValue)
+   {
+      final IntegerParameter parameter = new IntegerParameter(namespace + "." + name, defaultValue);
+      register(parameter);
+
+      if (registry != null)
+      {
+         final IntegerYoVariable variable = new IntegerYoVariable("param__" + parameter.getShortPath(), registry);
+         variable.set(parameter.get());
+         variable.addVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               parameter.set(((IntegerYoVariable) v).getIntegerValue());
+            }
+         });
+
+         parameter.addChangeListener(new ParameterChangeListener()
+         {
+            @Override
+            public void onChange(Parameter parameter)
+            {
+               variable.set(((IntegerParameter) parameter).get(), false);
+            }
+         });
+      }
+      return parameter;
+   }
+
+   public IntegerArrayParameter createIntegerArray(String name, int... defaultValue)
+   {
+      final IntegerArrayParameter parameter = new IntegerArrayParameter(namespace + "." + name, defaultValue);
+      register(parameter);
+
+      if (registry != null)
+      {
+         for (int i = 0; i < parameter.get().length; i++)
+         {
+            final int count = i;
+
+            final IntegerYoVariable variable = new IntegerYoVariable("param__" + parameter.getShortPath() + count, registry);
+            variable.set(parameter.get(i));
+            variable.addVariableChangedListener(new VariableChangedListener()
+            {
+               @Override
+               public void variableChanged(YoVariable<?> v)
+               {
+                  parameter.set(count, ((IntegerYoVariable) v).getIntegerValue());
+               }
+            });
+
+            parameter.addChangeListener(new ParameterChangeListener()
+            {
+               @Override
+               public void onChange(Parameter parameter)
+               {
+                  variable.set(((IntegerArrayParameter) parameter).get()[count], false);
                }
             });
          }

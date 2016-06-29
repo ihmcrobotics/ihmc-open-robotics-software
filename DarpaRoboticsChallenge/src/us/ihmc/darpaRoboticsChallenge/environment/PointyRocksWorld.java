@@ -26,6 +26,15 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   public enum PointyRocksType {
+      SINGLE_LINE_BALANCE,
+      LINES,
+      POINT,
+      PARTIAL
+   }
+
+   private final PointyRocksType type;
+
    private final String name = getClass().getSimpleName();
    private final AppearanceDefinition groundColor = YoAppearance.Texture("Textures/water.png");
    private final AppearanceDefinition blockColor = YoAppearance.Grey();
@@ -40,11 +49,53 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
 
    private final ArrayList<FramePoint> stepLocations = new ArrayList<>();
 
-   public PointyRocksWorld(int steps)
+   public PointyRocksWorld(PointyRocksType type, int steps)
    {
       this.steps = steps;
+      this.type = type;
 
       addGround();
+
+      switch (type)
+      {
+      case SINGLE_LINE_BALANCE:
+         setupSingleLine();
+         break;
+      case LINES:
+         setupLines();
+         break;
+      case POINT:
+         setupPoint();
+         break;
+      default:
+         throw new RuntimeException("unimplemented poity rocks type");
+      }
+   }
+
+   private void setupSingleLine()
+   {
+      addStartBlock();
+
+      Vector2d linePosition = new Vector2d(0.4, -0.16);
+      addLine(linePosition, 0.0);
+   }
+
+   private void setupPoint()
+   {
+      addStartBlock();
+      double step = 0.5;
+
+      Vector2d position = new Vector2d(length/2.0 + step/2.0, 0.15);
+      Vector2d dimensions = new Vector2d(0.02, 0.02);
+
+      addBlock(0.0, position, dimensions);
+      stepLocations.add(new FramePoint(worldFrame, position.getX(), position.getY(), 0.0));
+
+      addFinalBlock(step + length);
+   }
+
+   private void setupLines()
+   {
       addStartBlock();
       for (int i = 0; i < steps; i++)
       {
@@ -91,6 +142,13 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
       stepLocations.add(new FramePoint(worldFrame, position.getX(), position.getY(), 0.0));
    }
 
+   private void addBlock(double yaw, Vector2d position, Vector2d dimensions)
+   {
+      Vector3d position3d = new Vector3d(position.getX(), position.getY(), -height/2.0);
+      Vector3d dimensions3d = new Vector3d(dimensions.getX(), dimensions.getY(), height);
+      addBlock(yaw, position3d, dimensions3d, blockColor);
+   }
+
    private void addBlock(double yaw, Vector3d position, Vector3d dimensions, AppearanceDefinition color)
    {
       AxisAngle4d orientation = new AxisAngle4d(new Vector3d(0.0, 0.0, 1.0), yaw);
@@ -106,8 +164,23 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
 
    public void setupCamera(Point3d cameraFixToPack, Point3d cameraPositionToPack)
    {
-      cameraFixToPack.set((step*steps + length)/2.0, 0.0, 1.0);
-      cameraPositionToPack.set((step*steps + length)/2.0, -10.0, 5.0);
+      switch (type)
+      {
+      case SINGLE_LINE_BALANCE:
+         cameraFixToPack.set(0.0, 0.0, 1.0);
+         cameraPositionToPack.set(-10.0, 0.0, 5.0);
+         break;
+      case LINES:
+         cameraFixToPack.set((step*steps + length)/2.0, 0.0, 1.0);
+         cameraPositionToPack.set((step*steps + length)/2.0, -10.0, 5.0);
+         break;
+      case POINT:
+         cameraFixToPack.set((length + 0.5)/2.0, 0.0, 1.0);
+         cameraPositionToPack.set((length + 0.5)/2.0, -10.0, 5.0);
+         break;
+      default:
+         throw new RuntimeException("unimplemented poity rocks type");
+      }
    }
 
    @Override
