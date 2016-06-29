@@ -1,4 +1,4 @@
-package us.ihmc.atlas.generatedTestSuites;
+package us.ihmc.valkyrie.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
@@ -12,14 +12,11 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
-   us.ihmc.atlas.initialSetup.AtlasDrivingInitialSetupTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasHighSwingTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseDoNothingTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class
+   us.ihmc.valkyrie.simulation.ValkyrieFlatGroundWalkingTest.class,
+   us.ihmc.valkyrie.simulation.ValkyrieFlatGroundWalkingWithIMUDriftTest.class
 })
 
-public class AtlasLFastTestSuite
+public class ValkyrieLFastTestSuite
 {
    public static void main(String[] args)
    {

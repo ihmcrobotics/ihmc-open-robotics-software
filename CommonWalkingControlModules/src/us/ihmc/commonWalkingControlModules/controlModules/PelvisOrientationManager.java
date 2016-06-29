@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -9,16 +11,20 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -28,13 +34,12 @@ import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class PelvisOrientationManager
 {
@@ -59,7 +64,7 @@ public class PelvisOrientationManager
    private final DoubleYoVariable initialPelvisOrientationOffsetTime = new DoubleYoVariable("initialPelvisOrientationOffsetTime", registry);
    private final YoFrameQuaternion desiredPelvisOrientationOffset;
 
-   private final MultipleWaypointsOrientationTrajectoryGenerator waypointOrientationOffsetTrajectoryGenerator;
+   private final MultipleWaypointsOrientationTrajectoryGenerator orientationOffsetTrajectoryGenerator;
 
    private final YoFrameQuaternion desiredPelvisOrientationWithOffset = new YoFrameQuaternion("desiredPelvisOrientationWithOffset", worldFrame, registry);
 
@@ -81,6 +86,12 @@ public class PelvisOrientationManager
    private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isPelvisOrientationOffsetTrajectoryStopped", registry);
 
    private final YoOrientationPIDGainsInterface gains;
+
+   private final LongYoVariable lastCommandId;
+
+   private final BooleanYoVariable isReadyToHandleQueuedCommands;
+   private final LongYoVariable numberOfQueuedCommands;
+   private final CommandArrayDeque<PelvisOrientationTrajectoryCommand> commandQueue = new CommandArrayDeque<>(PelvisOrientationTrajectoryCommand.class);
 
    public PelvisOrientationManager(WalkingControllerParameters walkingControllerParameters, HighLevelHumanoidControllerToolbox momentumBasedController,
          YoVariableRegistry parentRegistry)
@@ -127,9 +138,16 @@ public class PelvisOrientationManager
       desiredPelvisOrientationOffset = new YoFrameQuaternion("desiredPelvis", "Offset", desiredPelvisFrame, registry);
 
       boolean allowMultipleFrames = true;
-      waypointOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisOffset", allowMultipleFrames,
+      orientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisOffset", allowMultipleFrames,
             desiredPelvisFrame, registry);
-      waypointOrientationOffsetTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
+      orientationOffsetTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
+
+      String namePrefix = "pelvisOrientation";
+      lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
+      lastCommandId.set(Packet.INVALID_MESSAGE_ID);
+
+      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedPelvisOrientationTrajectoryCommands", registry);
+      numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
 
       parentRegistry.addChild(registry);
    }
@@ -192,15 +210,25 @@ public class PelvisOrientationManager
 
       if (isTrajectoryStopped.getBooleanValue())
       {
-         waypointOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
+         orientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
          tempAngularVelocity.setToZero();
          tempAngularAcceleration.setToZero();
       }
       else
       {
          double deltaTimeOffset = yoTime.getDoubleValue() - initialPelvisOrientationOffsetTime.getDoubleValue();
-         waypointOrientationOffsetTrajectoryGenerator.compute(deltaTimeOffset);
-         waypointOrientationOffsetTrajectoryGenerator.getAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
+         orientationOffsetTrajectoryGenerator.compute(deltaTimeOffset);
+
+         if (orientationOffsetTrajectoryGenerator.isDone() && !commandQueue.isEmpty())
+         {
+            double firstTrajectoryPointTime = orientationOffsetTrajectoryGenerator.getLastWaypointTime();
+            PelvisOrientationTrajectoryCommand command = commandQueue.poll();
+            numberOfQueuedCommands.decrement();
+            initializeOffsetTrajectoryGenerator(command, firstTrajectoryPointTime);
+            orientationOffsetTrajectoryGenerator.compute(deltaTimeOffset);
+         }
+
+         orientationOffsetTrajectoryGenerator.getAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
       }
 
       desiredPelvisOrientationOffset.set(tempOrientation);
@@ -238,16 +266,16 @@ public class PelvisOrientationManager
    {
       initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
 
-      waypointOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
+      orientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
       tempOrientation.changeFrame(desiredPelvisFrame);
       tempAngularVelocity.setToZero(desiredPelvisFrame);
 
-      waypointOrientationOffsetTrajectoryGenerator.clear();
-      waypointOrientationOffsetTrajectoryGenerator.switchTrajectoryFrame(desiredPelvisFrame);
-      waypointOrientationOffsetTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
+      orientationOffsetTrajectoryGenerator.clear();
+      orientationOffsetTrajectoryGenerator.switchTrajectoryFrame(desiredPelvisFrame);
+      orientationOffsetTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
       tempOrientation.setToZero(desiredPelvisFrame);
-      waypointOrientationOffsetTrajectoryGenerator.appendWaypoint(trajectoryTime, tempOrientation, tempAngularVelocity);
-      waypointOrientationOffsetTrajectoryGenerator.initialize();
+      orientationOffsetTrajectoryGenerator.appendWaypoint(trajectoryTime, tempOrientation, tempAngularVelocity);
+      orientationOffsetTrajectoryGenerator.initialize();
 
       isTrajectoryStopped.set(false);
    }
@@ -257,53 +285,149 @@ public class PelvisOrientationManager
       isTrajectoryStopped.set(command.isStopAllTrajectory());
    }
 
+   private final PelvisOrientationTrajectoryCommand tempPelvisOrientationTrajectoryCommand = new PelvisOrientationTrajectoryCommand();
+
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      handleTrajectoryCommand(command);
+      tempPelvisOrientationTrajectoryCommand.set(command);
+      handlePelvisOrientationTrajectoryCommands(tempPelvisOrientationTrajectoryCommand);
    }
 
    public void handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command)
    {
-      handleTrajectoryCommand(command);
+      switch (command.getExecutionMode())
+      {
+      case OVERRIDE:
+         isReadyToHandleQueuedCommands.set(true);
+         clearCommandQueue(command.getCommandId());
+         initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
+         initializeOffsetTrajectoryGenerator(command, 0.0);
+         return;
+      case QUEUE:
+         boolean success = queuePelvisOrientationTrajectoryCommand(command);
+         if (!success)
+         {
+            isReadyToHandleQueuedCommands.set(false);
+            clearCommandQueue(INVALID_MESSAGE_ID);
+            setToHoldCurrent(pelvisOrientationTrajectoryGenerator.getCurrentTrajectoryFrame());
+         }
+         return;
+      default:
+         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
+         break;
+      }
    }
 
-   public void handleTrajectoryCommand(TrajectoryPointListInterface<?, ? extends SO3TrajectoryPointInterface<?>> trajectoryPointList)
+   private boolean queuePelvisOrientationTrajectoryCommand(PelvisOrientationTrajectoryCommand command)
    {
-      initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
-
-      if (trajectoryPointList.getTrajectoryPoint(0).getTime() > 1.0e-5)
+      if (!isReadyToHandleQueuedCommands.getBooleanValue())
       {
-         waypointOrientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
+         PrintTools.warn(this, "The very first " + command.getClass().getSimpleName() + " of a series must be " + ExecutionMode.OVERRIDE + ". Aborting motion.");
+         return false;
+      }
+
+      long previousCommandId = command.getPreviousCommandId();
+
+      if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
+      {
+         PrintTools.warn(this, "Previous command ID mismatch: previous ID from command = " + previousCommandId
+               + ", last message ID received by the controller = " + lastCommandId.getLongValue() + ". Aborting motion.");
+         return false;
+      }
+
+      if (command.getTrajectoryPoint(0).getTime() < 1.0e-5)
+      {
+         PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
+         return false;
+      }
+
+      commandQueue.add(command);
+      numberOfQueuedCommands.increment();
+      lastCommandId.set(command.getCommandId());
+
+      return true;
+   }
+
+   private void initializeOffsetTrajectoryGenerator(PelvisOrientationTrajectoryCommand command, double firstTrajectoryPointTime)
+   {
+      command.addTimeOffset(firstTrajectoryPointTime);
+
+      if (command.getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
+      {
+         orientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
          tempOrientation.changeFrame(worldFrame);
          tempAngularVelocity.setToZero(worldFrame);
 
-         waypointOrientationOffsetTrajectoryGenerator.clear();
-         waypointOrientationOffsetTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
-         waypointOrientationOffsetTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
+         orientationOffsetTrajectoryGenerator.clear();
+         orientationOffsetTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
+         orientationOffsetTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
       }
       else
       {
-         waypointOrientationOffsetTrajectoryGenerator.clear();
-         waypointOrientationOffsetTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
+         orientationOffsetTrajectoryGenerator.clear();
+         orientationOffsetTrajectoryGenerator.switchTrajectoryFrame(worldFrame);
       }
 
-      waypointOrientationOffsetTrajectoryGenerator.appendWaypoints(trajectoryPointList);
-      waypointOrientationOffsetTrajectoryGenerator.changeFrame(desiredPelvisFrame);
-      waypointOrientationOffsetTrajectoryGenerator.initialize();
+      int numberOfTrajectoryPoints = queueExceedingTrajectoryPointsIfNeeded(command);
+
+      for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+      {
+         orientationOffsetTrajectoryGenerator.appendWaypoint(command.getTrajectoryPoint(trajectoryPointIndex));
+      }
+
+      orientationOffsetTrajectoryGenerator.changeFrame(desiredPelvisFrame);
+      orientationOffsetTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);
+   }
+
+   private int queueExceedingTrajectoryPointsIfNeeded(PelvisOrientationTrajectoryCommand command)
+   {
+      int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
+
+      int maximumNumberOfWaypoints = orientationOffsetTrajectoryGenerator.getMaximumNumberOfWaypoints() - orientationOffsetTrajectoryGenerator.getCurrentNumberOfWaypoints();
+
+      if (numberOfTrajectoryPoints <= maximumNumberOfWaypoints)
+         return numberOfTrajectoryPoints;
+
+      PelvisOrientationTrajectoryCommand commandForExcedent = commandQueue.addFirst();
+      numberOfQueuedCommands.increment();
+      commandForExcedent.clear();
+      commandForExcedent.setPropertiesOnly(command);
+
+      for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+      {
+         commandForExcedent.addTrajectoryPoint(command.getTrajectoryPoint(trajectoryPointIndex));
+      }
+
+      double timeOffsetToSubtract = command.getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
+      commandForExcedent.subtractTimeOffset(timeOffsetToSubtract);
+
+      return maximumNumberOfWaypoints;
+   }
+
+   private void clearCommandQueue(long lastCommandId)
+   {
+      commandQueue.clear();
+      numberOfQueuedCommands.set(0);
+      this.lastCommandId.set(lastCommandId);
    }
 
    public void resetOrientationOffset()
    {
       tempOrientation.setToZero(desiredPelvisFrame);
       tempAngularVelocity.setToZero(desiredPelvisFrame);
-      waypointOrientationOffsetTrajectoryGenerator.clear();
-      waypointOrientationOffsetTrajectoryGenerator.switchTrajectoryFrame(desiredPelvisFrame);
-      waypointOrientationOffsetTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
-      waypointOrientationOffsetTrajectoryGenerator.initialize();
+      orientationOffsetTrajectoryGenerator.clear();
+      orientationOffsetTrajectoryGenerator.switchTrajectoryFrame(desiredPelvisFrame);
+      orientationOffsetTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
+      orientationOffsetTrajectoryGenerator.initialize();
+   }
+   
+   public void setToHoldCurrentInWorldFrame()
+   {
+      setToHoldCurrent(worldFrame);
    }
 
-   public void setToHoldCurrentInWorldFrame()
+   public void setToHoldCurrent(ReferenceFrame trajectoryFrame)
    {
       tempOrientation.setToZero(pelvisFrame);
       tempOrientation.changeFrame(worldFrame);
@@ -311,7 +435,8 @@ public class PelvisOrientationManager
       finalPelvisOrientation.set(tempOrientation);
       desiredPelvisOrientation.set(tempOrientation);
 
-      initialize(worldFrame);
+      resetOrientationOffset();
+      initialize(trajectoryFrame);
    }
 
    public void prepareForLocomotion()
