@@ -44,8 +44,7 @@ import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
-import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
+import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimatorControllerFactory;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {   
@@ -102,7 +101,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
    }
 
-   private DiagnosticsWhenHangingControllerFactory diagnosticControllerFactory = null;
+   private JointTorqueOffsetEstimatorControllerFactory jointTorqueOffsetEstimatorControllerFactory = null;
 
    private MomentumBasedControllerFactory createDRCControllerFactory(ValkyrieRobotModel robotModel, PacketCommunicator packetCommunicator,
          DRCRobotSensorInformation sensorInformation)
@@ -121,17 +120,10 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
             feetContactSensorNames, wristForceSensorNames, walkingControllerParamaters, armControllerParamaters, capturePointPlannerParameters,
             initialBehavior);
 
-      HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
-      humanoidJointPoseList.createPoseSetters();
-      humanoidJointPoseList.createPoseSettersJustArms();
-      humanoidJointPoseList.createPoseSettersJustLegs();
-      humanoidJointPoseList.createPoseSettersTuneWaist();
-
       ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
       valkyrieTorqueOffsetPrinter.setRobotName(robotModel.getFullRobotName());
-      diagnosticControllerFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, true, true, valkyrieTorqueOffsetPrinter);
-      diagnosticControllerFactory.setTransitionRequested(true);
-      controllerFactory.addHighLevelBehaviorFactory(diagnosticControllerFactory);
+      jointTorqueOffsetEstimatorControllerFactory = new JointTorqueOffsetEstimatorControllerFactory(valkyrieTorqueOffsetPrinter);
+      controllerFactory.addHighLevelBehaviorFactory(jointTorqueOffsetEstimatorControllerFactory);
       PeriodicRealtimeThreadScheduler networkSubscriberScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY);
       controllerFactory.createControllerNetworkSubscriber(networkSubscriberScheduler, packetCommunicator);
 
@@ -252,8 +244,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, sensorInformation, controllerFactory, threadDataSynchronizer, drcOutputWriter,
             dataProducer, yoVariableServer, gravity, estimatorDT);
 
-      if (diagnosticControllerFactory != null)
-         diagnosticControllerFactory.attachJointTorqueOffsetProcessor(sensorReaderFactory.getSensorReader());
+      sensorReaderFactory.attachForceSensorCalibrationModule(estimatorThread.getForceSensorCalibrationModule());
+      sensorReaderFactory.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimatorControllerFactory.getJointTorqueOffsetEstimatorController());
 
       /*
        * Connect all servers

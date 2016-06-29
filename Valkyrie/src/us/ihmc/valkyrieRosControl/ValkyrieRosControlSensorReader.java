@@ -20,6 +20,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.imu.MicroStrainData;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
@@ -27,6 +28,7 @@ import us.ihmc.valkyrieRosControl.dataHolders.YoForceTorqueSensorHandle;
 import us.ihmc.valkyrieRosControl.dataHolders.YoIMUHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
+import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
 
 public class ValkyrieRosControlSensorReader implements SensorReader, JointTorqueOffsetProcessor
 {
@@ -164,5 +166,15 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)
    {
       lowlLevelController.attachControllerAPI(commandInputManager, statusOutputManager);
+   }
+
+   public void attachForceSensorCalibrationModule(ForceSensorCalibrationModule forceSensorCalibrationModule)
+   {
+      lowlLevelController.attachForceSensorCalibrationModule(forceSensorCalibrationModule);
+   }
+
+   public void attachJointTorqueOffsetEstimator(JointTorqueOffsetEstimator jointTorqueOffsetEstimator)
+   {
+      lowlLevelController.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimator);
    }
 }
