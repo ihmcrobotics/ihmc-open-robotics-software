@@ -14,10 +14,12 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 @DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
 public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrialsTerrainTest
 {
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+      return robotModel;
    }
 
    @Override
@@ -25,7 +27,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
-   
+
    @Override
 	@DeployableTestMethod(estimatedDuration = 79.4)
    @Test(timeout = 400000)
@@ -33,7 +35,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    {
       super.testTrialsTerrainZigzagHurdlesScript();
    }
-   
+
    @Override
 	@DeployableTestMethod(estimatedDuration = 147.5)
    @Test(timeout = 740000)
@@ -41,7 +43,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    {
       super.testWalkingOntoAndOverSlopesSideways();
    }
-   
+
    @Override
 	@DeployableTestMethod(estimatedDuration = 137.4)
    @Test(timeout = 690000)
@@ -49,7 +51,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    {
       super.testTrialsTerrainSlopeScriptRandomFootSlip();
    }
-   
+
    @Override
 	@DeployableTestMethod(estimatedDuration = 131.3)
    @Test(timeout = 660000)
@@ -57,12 +59,13 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    {
       super.testTrialsTerrainSlopeScript();
    }
-   
+
    @Override
 	@DeployableTestMethod(estimatedDuration = 67.7)
    @Test(timeout = 340000)
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
+      robotModel.addMoreFootContactPointsSimOnly(8, 3, true);
       super.testTrialsTerrainZigzagHurdlesScriptRandomFootSlip();
    }
 }

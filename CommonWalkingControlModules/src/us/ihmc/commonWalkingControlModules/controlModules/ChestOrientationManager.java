@@ -91,7 +91,7 @@ public class ChestOrientationManager
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedArmTrajectoryCommands", registry);
+      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedChestTrajectoryCommands", registry);
       numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
 
       parentRegistry.addChild(registry);
@@ -166,7 +166,7 @@ public class ChestOrientationManager
          initializeTrajectoryGenerator(command, 0.0);
          return;
       case QUEUE:
-         boolean success = queueHandTrajectoryCommand(command);
+         boolean success = queueChestTrajectoryCommand(command);
          if (!success)
          {
             isReadyToHandleQueuedCommands.set(false);
@@ -180,7 +180,7 @@ public class ChestOrientationManager
       }
    }
 
-   public boolean queueHandTrajectoryCommand(ChestTrajectoryCommand command)
+   private boolean queueChestTrajectoryCommand(ChestTrajectoryCommand command)
    {
       if (!isReadyToHandleQueuedCommands.getBooleanValue())
       {
@@ -228,7 +228,7 @@ public class ChestOrientationManager
          orientationTrajectoryGenerator.clear(worldFrame);
       }
 
-      int numberOfTrajectoryPoints = queueExcedingTrajectoryPointsIfNeeded(command);
+      int numberOfTrajectoryPoints = queueExceedingTrajectoryPointsIfNeeded(command);
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
@@ -241,7 +241,7 @@ public class ChestOrientationManager
       isTrajectoryStopped.set(false);
    }
 
-   private int queueExcedingTrajectoryPointsIfNeeded(ChestTrajectoryCommand command)
+   private int queueExceedingTrajectoryPointsIfNeeded(ChestTrajectoryCommand command)
    {
       int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
 

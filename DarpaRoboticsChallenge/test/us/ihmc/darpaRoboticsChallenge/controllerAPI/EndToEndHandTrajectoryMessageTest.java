@@ -8,9 +8,12 @@ import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTraj
 import java.util.ArrayList;
 import java.util.Random;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -60,6 +63,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -989,15 +993,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       assertNumberOfWaypoints(robotSide, 2, scs);
 
       Point3d controllerDesiredPosition = findControllerDesiredPosition(robotSide, scs);
-      assertEquals(desiredPosition.getX(), controllerDesiredPosition.x, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredPosition.getY(), controllerDesiredPosition.y, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredPosition.getZ(), controllerDesiredPosition.z, EPSILON_FOR_DESIREDS);
+      JUnitTools.assertTuple3dEquals(desiredPosition, controllerDesiredPosition, EPSILON_FOR_DESIREDS);
 
       Quat4d controllerDesiredOrientation = findControllerDesiredOrientation(robotSide, scs);
-      assertEquals(desiredOrientation.getX(), controllerDesiredOrientation.x, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getY(), controllerDesiredOrientation.y, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getZ(), controllerDesiredOrientation.z, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getW(), controllerDesiredOrientation.w, EPSILON_FOR_DESIREDS);
+      JUnitTools.assertQuaternionsEqual(desiredOrientation, controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
    }
 
    public static void assertNumberOfWaypoints(RobotSide robotSide, int expectedNumberOfTrajectoryPoints, SimulationConstructionSet scs)
@@ -1048,6 +1047,34 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       tuple3d.y = scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix)).getValueAsDouble();
       tuple3d.z = scs.getVariable(nameSpace, YoFrameVariableNameTools.createZName(prefix, suffix)).getValueAsDouble();
       return tuple3d;
+   }
+
+   public static Point2d findPoint2d(String nameSpace, String varname, SimulationConstructionSet scs)
+   {
+      return findPoint2d(nameSpace, varname, "", scs);
+   }
+
+   public static Point2d findPoint2d(String nameSpace, String varnamePrefix, String varnameSuffix, SimulationConstructionSet scs)
+   {
+      return new Point2d(findTuple2d(nameSpace, varnamePrefix, varnameSuffix, scs));
+   }
+
+   public static Vector2d findVector2d(String nameSpace, String varname, SimulationConstructionSet scs)
+   {
+      return findVector2d(nameSpace, varname, "", scs);
+   }
+
+   public static Vector2d findVector2d(String nameSpace, String varnamePrefix, String varnameSuffix, SimulationConstructionSet scs)
+   {
+      return new Vector2d(findTuple2d(nameSpace, varnamePrefix, varnameSuffix, scs));
+   }
+
+   public static Tuple2d findTuple2d(String nameSpace, String prefix, String suffix, SimulationConstructionSet scs)
+   {
+      Tuple2d tuple2d = new Point2d();
+      tuple2d.x = scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix)).getValueAsDouble();
+      tuple2d.y = scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix)).getValueAsDouble();
+      return tuple2d;
    }
 
    @Before

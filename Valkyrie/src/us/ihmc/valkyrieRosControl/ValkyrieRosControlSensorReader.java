@@ -1,10 +1,25 @@
 package us.ihmc.valkyrieRosControl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.yaml.snakeyaml.Yaml;
+
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -25,15 +40,6 @@ import us.ihmc.valkyrieRosControl.dataHolders.YoIMUHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 public class ValkyrieRosControlSensorReader implements SensorReader, JointTorqueOffsetProcessor
 {
    private final SensorProcessing sensorProcessing;
@@ -51,6 +57,8 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
 
    private final DenseMatrix64F torqueForce = new DenseMatrix64F(6, 1);
 
+   private final AtomicBoolean resetIHMCControlRatioAndStandPrepRequested = new AtomicBoolean(false);
+
    private final ArrayList<ValkyrieRosControlEffortJointControlCommandCalculator> effortControlCommandCalculators = new ArrayList<>();
    private final LinkedHashMap<String, ValkyrieRosControlEffortJointControlCommandCalculator> effortJointToControlCommandCalculatorMap = new LinkedHashMap<>();
    private final ArrayList<ValkyrieRosControlPositionJointControlCommandCalculator> positionControlCommandCalculators = new ArrayList<>();
@@ -58,9 +66,9 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
 
    private final DoubleYoVariable doIHMCControlRatio;
    private final DoubleYoVariable timeInStandprep;
+   private final DoubleYoVariable standPrepRampUpTime;
    private final DoubleYoVariable masterGain;
 
-   private final BooleanYoVariable startStandPrep;
    private long standPrepStartTime = -1;
 
    private final Matrix3d quaternionConversionMatrix = new Matrix3d();
@@ -86,8 +94,8 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       doIHMCControlRatio = new DoubleYoVariable("doIHMCControlRatio", registry);
       masterGain = new DoubleYoVariable("StandPrepMasterGain", registry);
       timeInStandprep = new DoubleYoVariable("timeInStandprep", registry);
-      startStandPrep = new BooleanYoVariable("startStandPrep", registry);
-      startStandPrep.set(true);
+      standPrepRampUpTime = new DoubleYoVariable("standPrepRampUpTime", registry);
+      standPrepRampUpTime.set(5.0);
       masterGain.set(0.3);
 
       double updateDT = sensorProcessingConfiguration.getEstimatorDT();
@@ -233,6 +241,12 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    {
       long timestamp = timestampProvider.getTimestamp();
 
+      if (resetIHMCControlRatioAndStandPrepRequested.getAndSet(false))
+      {
+         standPrepStartTime = -1;
+         doIHMCControlRatio.set(0.0);
+      }
+
       if (standPrepStartTime > 0)
       {
          timeInStandprep.set(TimeTools.nanoSecondstoSeconds(timestamp - standPrepStartTime));
@@ -241,20 +255,23 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
          if (ValkyrieRosControlController.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
             accelerationIntegration.compute();
 
+         double ramp = timeInStandprep.getDoubleValue() / standPrepRampUpTime.getDoubleValue();
+         ramp = MathTools.clipToMinMax(ramp, 0.0, 1.0);
+
          for (int i = 0; i < effortControlCommandCalculators.size(); i++)
          {
             ValkyrieRosControlEffortJointControlCommandCalculator commandCalculator = effortControlCommandCalculators.get(i);
-            commandCalculator.computeAndUpdateJointTorque(timeInStandprep.getDoubleValue(), doIHMCControlRatio.getDoubleValue(), masterGain.getDoubleValue());
+            commandCalculator.computeAndUpdateJointTorque(ramp, doIHMCControlRatio.getDoubleValue(), masterGain.getDoubleValue());
          }
 
          for (int i = 0; i < positionControlCommandCalculators.size(); i++)
          {
             ValkyrieRosControlPositionJointControlCommandCalculator commandCalculator = positionControlCommandCalculators.get(i);
-            commandCalculator.computeAndUpdateJointPosition(timeInStandprep.getDoubleValue(), doIHMCControlRatio.getDoubleValue(), masterGain.getDoubleValue());
+            commandCalculator.computeAndUpdateJointPosition(ramp, doIHMCControlRatio.getDoubleValue(), masterGain.getDoubleValue());
          }
 
       }
-      else if (startStandPrep.getBooleanValue())
+      else
       {
          standPrepStartTime = timestamp;
          for (int i = 0; i < effortControlCommandCalculators.size(); i++)
@@ -297,5 +314,10 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
          jointCommandCalculator.subtractTorqueOffset(torqueOffset);
       else
          PrintTools.error("Command calculator is NULL for the joint: " + oneDoFJoint.getName());
+   }
+
+   public void handleControllerFailure()
+   {
+      resetIHMCControlRatioAndStandPrepRequested.set(true);
    }
 }

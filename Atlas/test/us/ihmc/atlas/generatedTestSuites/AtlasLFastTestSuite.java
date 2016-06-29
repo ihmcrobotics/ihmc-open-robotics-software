@@ -12,6 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
+   us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
+   us.ihmc.atlas.initialSetup.AtlasDrivingInitialSetupTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasHighSwingTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseDoNothingTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class

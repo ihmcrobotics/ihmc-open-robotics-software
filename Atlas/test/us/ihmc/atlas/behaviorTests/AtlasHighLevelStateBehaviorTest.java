@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow})
+@DeployableTestClass(targets = {TestPlanTarget.Fast})
 public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -35,18 +35,26 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 35.3)
-   @Test(timeout = 180000)
-   public void testDoNothingBehavior() throws SimulationExceededMaximumTimeException
+   @DeployableTestMethod(estimatedDuration = 20.0)
+   @Test(timeout = 300000)
+   public void testWalkingState() throws SimulationExceededMaximumTimeException
    {
-      super.testDoNothingBehavior();
+      super.testWalkingState();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 44.4, targets = TestPlanTarget.Flaky)
-   @Test(timeout = 220000)
-   public void testRandomState() throws SimulationExceededMaximumTimeException
+   @DeployableTestMethod(estimatedDuration = 20.0)
+   @Test(timeout = 300000)
+   public void testDoNothingBahviourState() throws SimulationExceededMaximumTimeException
    {
-      super.testRandomState();
+      super.testDoNothingBahviourState();
+   }
+
+   @Override
+   @DeployableTestMethod(estimatedDuration = 20.0, targets = {TestPlanTarget.InDevelopment})
+   @Test(timeout = 300000)
+   public void testDiagnosticsState() throws SimulationExceededMaximumTimeException
+   {
+      super.testDiagnosticsState();
    }
 }

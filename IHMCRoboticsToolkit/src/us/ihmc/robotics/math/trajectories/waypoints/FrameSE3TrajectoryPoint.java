@@ -361,6 +361,71 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
    }
 
+   public double getPositionX()
+   {
+      return geometryObject.getPositionX();
+   }
+
+   public double getPositionY()
+   {
+      return geometryObject.getPositionY();
+   }
+
+   public double getPositionZ()
+   {
+      return geometryObject.getPositionZ();
+   }
+
+   public double getOrientationQx()
+   {
+      return geometryObject.getOrientationQx();
+   }
+
+   public double getOrientationQy()
+   {
+      return geometryObject.getOrientationQy();
+   }
+
+   public double getOrientationQz()
+   {
+      return geometryObject.getOrientationQz();
+   }
+
+   public double getOrientationQs()
+   {
+      return geometryObject.getOrientationQs();
+   }
+
+   public double getLinearVelocityX()
+   {
+      return geometryObject.getLinearVelocityX();
+   }
+
+   public double getLinearVelocityY()
+   {
+      return geometryObject.getLinearVelocityY();
+   }
+
+   public double getLinearVelocityZ()
+   {
+      return geometryObject.getLinearVelocityZ();
+   }
+
+   public double getAngularVelocityX()
+   {
+      return geometryObject.getAngularVelocityX();
+   }
+
+   public double getAngularVelocityY()
+   {
+      return geometryObject.getAngularVelocityY();
+   }
+
+   public double getAngularVelocityZ()
+   {
+      return geometryObject.getAngularVelocityZ();
+   }
+
    @Override
    public String toString()
    {
@@ -368,5 +433,4 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       String timeToString = "time = " + doubleFormat.format(getTime());
       return "SE3 trajectory point: (" + timeToString + ", " + geometryObject + ")";
    }
-
 }

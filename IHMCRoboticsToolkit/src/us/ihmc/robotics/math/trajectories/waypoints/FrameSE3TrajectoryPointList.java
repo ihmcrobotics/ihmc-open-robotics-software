@@ -4,8 +4,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<FrameSE3TrajectoryPointList, FrameSE3TrajectoryPoint, SimpleSE3TrajectoryPoint>
 {
    public FrameSE3TrajectoryPointList()
@@ -13,11 +11,11 @@ public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<FrameS
       super(FrameSE3TrajectoryPoint.class);
    }
    
-   public void setIncludingFrame(ReferenceFrame referenceFrame, FrameSE3TrajectoryPointList trajectoryPointList)
+   public void setIncludingFrame(FrameSE3TrajectoryPointList trajectoryPointList)
    {
       clear(trajectoryPointList.getReferenceFrame());
       for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); i++)
-         addTrajectoryPoint(trajectoryPointList.getLastTrajectoryPoint());
+         addTrajectoryPoint(trajectoryPointList.getTrajectoryPoint(i));
    }
 
    public void addTrajectoryPoint(double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
