@@ -96,7 +96,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
    @Test(timeout = 250000)
    public void testHeadPitch() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double trajectoryTime = 4.0;
       Vector3d axis = new Vector3d(0, 1, 0);
@@ -104,13 +104,13 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    //   @Test(timeout = 300000)
    public void testHeadRoll() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double trajectoryTime = 4.0;
       Vector3d axis = new Vector3d(1, 0, 0);
@@ -118,13 +118,13 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    //   @Test(timeout = 300000)
    public void testHeadYaw() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double trajectoryTime = 4.0;
       Vector3d axis = new Vector3d(0, 0, 1);
@@ -132,19 +132,19 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    //   @Test(timeout = 300000)
    public void testRandomOrientation() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double trajectoryTime = 4.0;
       Quat4d desiredHeadQuat = new Quat4d(RandomTools.generateRandomQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
       HeadTrajectoryMessage message = new HeadTrajectoryMessage(trajectoryTime, desiredHeadQuat);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private HeadTrajectoryMessage createHeadOrientationPacket(Vector3d axis, double rotationAngle, double trajectoryTime)

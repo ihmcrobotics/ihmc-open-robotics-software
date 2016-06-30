@@ -29,26 +29,34 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
 
    // parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 2);
-   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory.createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 2500);
-   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory.createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 500);
+   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory
+         .createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 2500);
+   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory
+         .createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 500);
    private final DoubleArrayParameter bodyOrientationIntegralGainsParameter = parameterFactory.createDoubleArray("bodyOrientationIntegralGains", 0, 0, 0);
    private final DoubleParameter bodyOrientationMaxIntegralErrorParameter = parameterFactory.createDouble("bodyOrientationMaxIntegralError", 0);
    private final DoubleArrayParameter comPositionProportionalGainsParameter = parameterFactory.createDoubleArray("comPositionProportionalGains", 0, 0, 5000);
    private final DoubleArrayParameter comPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("comPositionDerivativeGains", 0, 0, 750);
    private final DoubleArrayParameter comPositionIntegralGainsParameter = parameterFactory.createDoubleArray("comPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter comPositionMaxIntegralErrorParameter = parameterFactory.createDouble("comPositionMaxIntegralError", 0);
+   private final DoubleParameter comPositionGravityCompensationParameter = parameterFactory.createDouble("comPositionGravityCompensation", 1);
    private final DoubleArrayParameter dcmPositionProportionalGainsParameter = parameterFactory.createDoubleArray("dcmPositionProportionalGains", 2, 2, 0);
    private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
    private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
+   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 2);
+   private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
+   private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
+   private final DoubleParameter contactPressureLowerLimitParameter = parameterFactory.createDouble("contactPressureLowerLimit", 50);
 
    // frames
    private final ReferenceFrame supportFrame;
    private final ReferenceFrame worldFrame;
 
-   // feedback controller
+   // feedback controllers
+   private final LinearInvertedPendulumModel lipModel;
    private final FramePoint dcmPositionEstimate;
+   private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final DivergentComponentOfMotionController.Setpoints dcmPositionControllerSetpoints;
    private final DivergentComponentOfMotionController dcmPositionController;
    private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
@@ -82,7 +90,9 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       worldFrame = ReferenceFrame.getWorldFrame();
 
       // feedback controllers
+      lipModel = controllerToolbox.getLinearInvertedPendulumModel();
       dcmPositionEstimate = new FramePoint();
+      dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
       dcmPositionControllerSetpoints = new DivergentComponentOfMotionController.Setpoints();
       dcmPositionController = controllerToolbox.getDcmPositionController();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
@@ -98,7 +108,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
-      groundPlaneEstimator = new GroundPlaneEstimator();
+      groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
@@ -108,18 +118,30 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       return registry;
    }
 
+   private void updateGains()
+   {
+      dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
+      dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
+      dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
+      comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
+      comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
+      comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
+      bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
+      bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
+      bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
+      taskSpaceControllerSettings.getContactForceLimits().setPressureLowerLimit(contactPressureLowerLimitParameter.get());
+   }
+
    private void updateEstimates()
    {
       // update task space estimates
       taskSpaceEstimator.compute(taskSpaceEstimates);
 
       // update dcm estimate
-      taskSpaceEstimates.getComPosition().changeFrame(worldFrame);
-      taskSpaceEstimates.getComVelocity().changeFrame(worldFrame);
-      dcmPositionEstimate.changeFrame(worldFrame);
-      dcmPositionEstimate.set(taskSpaceEstimates.getComVelocity());
-      dcmPositionEstimate.scale(1.0 / dcmPositionController.getNaturalFrequency());
-      dcmPositionEstimate.add(taskSpaceEstimates.getComPosition());
+      dcmPositionEstimator.compute(dcmPositionEstimate, taskSpaceEstimates.getComVelocity());
 
       // update ground plane estimate
       groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
@@ -130,7 +152,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       // update desired dcm position
       dcmPositionControllerSetpoints.getDcmPosition().changeFrame(supportFrame);
       dcmPositionControllerSetpoints.getDcmPosition().set(inputProvider.getComVelocityInput());
-      dcmPositionControllerSetpoints.getDcmPosition().scale(1.0 / dcmPositionController.getNaturalFrequency());
+      dcmPositionControllerSetpoints.getDcmPosition().scale(1.0 / lipModel.getNaturalFrequency());
       dcmPositionControllerSetpoints.getDcmPosition().add(inputProvider.getComPositionInput());
       dcmPositionControllerSetpoints.getDcmVelocity().setToZero(supportFrame);
       dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
@@ -143,7 +165,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       comPositionControllerSetpoints.getComVelocity().set(inputProvider.getComVelocityInput());
       comPositionControllerSetpoints.getComForceFeedforward().changeFrame(supportFrame);
       comPositionControllerSetpoints.getComForceFeedforward().set(taskSpaceControllerCommands.getComForce());
-      comPositionControllerSetpoints.getComForceFeedforward().setZ(mass * gravity);
+      comPositionControllerSetpoints.getComForceFeedforward().setZ(comPositionGravityCompensationParameter.get() * mass * gravity);
       comPositionController.compute(taskSpaceControllerCommands.getComForce(), comPositionControllerSetpoints, taskSpaceEstimates);
 
       // update desired body orientation and angular rate
@@ -161,41 +183,33 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 
-   @Override public ControllerEvent process()
+   @Override
+   public ControllerEvent process()
    {
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
+      lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
+      updateGains();
       updateEstimates();
       updateSetpoints();
       return null;
    }
 
-   @Override public void onEntry()
+   @Override
+   public void onEntry()
    {
       // initialize estimates
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
+      lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
       updateEstimates();
 
       // initialize feedback controllers
       dcmPositionControllerSetpoints.initialize(dcmPositionEstimate);
       dcmPositionController.reset();
-      dcmPositionController.setComHeight(inputProvider.getComPositionInput().getZ());
-      dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
-      dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
-      dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
       comPositionControllerSetpoints.initialize(taskSpaceEstimates);
       comPositionController.reset();
-      comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
-      comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
-      comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
       bodyOrientationControllerSetpoints.initialize(taskSpaceEstimates);
       bodyOrientationController.reset();
-      bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
-      bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
-      bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
 
       // initialize task space controller
       taskSpaceControllerSettings.initialize();
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
       taskSpaceControllerSettings.getContactForceOptimizationSettings().setComForceCommandWeights(1.0, 1.0, 1.0);
       taskSpaceControllerSettings.getContactForceOptimizationSettings().setComTorqueCommandWeights(1.0, 1.0, 1.0);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -206,7 +220,8 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       taskSpaceController.reset();
    }
 
-   @Override public void onExit()
+   @Override
+   public void onExit()
    {
    }
 }

@@ -74,7 +74,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       for (int i = 0; i < 100000; i++)
       {
          transformInPlane.setIdentity();
-         transformInPlane.rotZ(RandomTools.generateRandomDouble(random, -Math.PI, Math.PI));
+         transformInPlane.setRotationYawAndZeroTranslation(RandomTools.generateRandomDouble(random, -Math.PI, Math.PI));
          transformInPlane.setTranslation(RandomTools.generateRandomVector(random));
 
          transformNOTInPlane.setIdentity();

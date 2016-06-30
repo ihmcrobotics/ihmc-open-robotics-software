@@ -196,7 +196,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    {
       RigidBodyTransform pinJointTransform = new RigidBodyTransform();
       RigidBodyTransform newValvePose = new RigidBodyTransform();
-      pinJointTransform.rotX(valvePinJoint.getQ().getDoubleValue());
+      pinJointTransform.setRotationRollAndZeroTranslation(valvePinJoint.getQ().getDoubleValue());
       newValvePose.multiply(originalValvePose, pinJointTransform);
       valveFrame.setPoseAndUpdate(newValvePose);
 

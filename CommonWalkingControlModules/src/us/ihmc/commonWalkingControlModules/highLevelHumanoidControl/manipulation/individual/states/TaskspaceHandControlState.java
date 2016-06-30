@@ -134,7 +134,7 @@ public class TaskspaceHandControlState extends HandControlState
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedArmTrajectoryCommands", registry);
+      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedHandTrajectoryCommands", registry);
       numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
 
       parentRegistry.addChild(registry);
@@ -297,7 +297,7 @@ public class TaskspaceHandControlState extends HandControlState
          orientationTrajectoryGenerator.clear(worldFrame);
       }
 
-      int numberOfTrajectoryPoints = queueExcedingTrajectoryPointsIfNeeded(command);
+      int numberOfTrajectoryPoints = queueExceedingTrajectoryPointsIfNeeded(command);
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
@@ -312,7 +312,7 @@ public class TaskspaceHandControlState extends HandControlState
       orientationTrajectoryGenerator.initialize();
    }
 
-   private int queueExcedingTrajectoryPointsIfNeeded(HandTrajectoryCommand command)
+   private int queueExceedingTrajectoryPointsIfNeeded(HandTrajectoryCommand command)
    {
       int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
 

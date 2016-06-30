@@ -152,7 +152,7 @@ public class FourBarCalculatorWithDerivativesTest
    public void testVelocitiesWithRandomQuadrilateral()
    {
       double eps = 1.0e-6;
-      Random rand = new Random();
+      Random rand = new Random(1976L);
       double DA, AB, BC, CD;
       FourBarCalculatorWithDerivatives fourBar;
       boolean isQuadrilateralOK;

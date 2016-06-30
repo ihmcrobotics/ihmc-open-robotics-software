@@ -147,7 +147,7 @@ public class PiecewiseForwardDcmTrajectory
       cmpPositionAtSoS[0] = new FramePoint(ReferenceFrame.getWorldFrame());
       cmpPositionAtSoS[1] = new FramePoint(ReferenceFrame.getWorldFrame());
       cmpPositionAtSoS[0].set(0.0, 0.0, 0.0);
-      cmpPositionAtSoS[1].set(0.0,-0.4, 0.0);
+      cmpPositionAtSoS[1].set(0.0, -0.4, 0.0);
 
       FramePoint dcmPositionAtSoS = new FramePoint(ReferenceFrame.getWorldFrame());
       dcmPositionAtSoS.set(0.0, -0.05, comHeight);

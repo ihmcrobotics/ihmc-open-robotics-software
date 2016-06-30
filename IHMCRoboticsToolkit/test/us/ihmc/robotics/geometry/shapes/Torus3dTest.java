@@ -28,7 +28,7 @@ public class Torus3dTest
       double thickness = 0.1;
       
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotX(Math.PI/2.0);
+      transform.setRotationRollAndZeroTranslation(Math.PI/2.0);
       transform.setTranslation(new Vector3d(2.0, 0.0, 3.0));
       
       Torus3d torus3d = new Torus3d(transform, radius, thickness);
@@ -483,19 +483,19 @@ public class Torus3dTest
    public void testIndependenceOfCopiedTransforms()
    {
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotX(Math.PI / 6);
+      transform.setRotationRollAndZeroTranslation(Math.PI / 6);
       Torus3d torus = new Torus3d(transform, 7.0, 2.0);
       
       Torus3d torusCopy = new Torus3d(torus);
       RigidBodyTransform transformAppliedOnlyToCopy = new RigidBodyTransform();
-      transformAppliedOnlyToCopy.rotY(Math.PI / 4);
+      transformAppliedOnlyToCopy.setRotationPitchAndZeroTranslation(Math.PI / 4);
       torusCopy.applyTransform(transformAppliedOnlyToCopy);
       assertFalse(torusCopy.getTransform().equals(torus.getTransform()));
       
       Torus3d torusCopyBySet = new Torus3d(5.0, 1.0);
       torusCopyBySet.set(torus);
       RigidBodyTransform transformAppliedOnlyToCopyBySet = new RigidBodyTransform();
-      transformAppliedOnlyToCopyBySet.rotZ(Math.PI / 5);
+      transformAppliedOnlyToCopyBySet.setRotationYawAndZeroTranslation(Math.PI / 5);
       torusCopyBySet.applyTransform(transformAppliedOnlyToCopyBySet);      
       assertFalse(torusCopyBySet.getTransform().equals(torus.getTransform()));
    }

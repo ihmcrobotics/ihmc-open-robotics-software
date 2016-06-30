@@ -330,7 +330,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.transformToRoot = new RigidBodyTransform();
       this.inverseTransformToRoot = new RigidBodyTransform();
 
-      transformToParent.normalize();
+      transformToParent.normalizeRotationPart();
       this.transformToParent = transformToParent;
 
       this.isBodyCenteredFrame = isBodyCenteredFrame;
@@ -586,7 +586,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
                   referenceFrame.transformToRoot.multiply(referenceFrame.postCorruptionTransform);
                }
                
-               referenceFrame.transformToRoot.normalize();
+               referenceFrame.transformToRoot.normalizeRotationPart();
                referenceFrame.inverseTransformToRoot.invert(referenceFrame.transformToRoot);
 
                referenceFrame.transformToRootID = nextTransformToRootID;
@@ -713,7 +713,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       // true if the transform preserves the z axis direction and magnitude, paying no heed to transformations.
       // for SO(3) matrices (orthogonal with determinant 1, equivalent to rotations)
       Matrix3d rotation = new Matrix3d();
-      transform.get(rotation);
+      transform.getRotation(rotation);
 
       return isRotationInPlane(rotation);
    }

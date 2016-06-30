@@ -11,6 +11,7 @@ import org.ejml.alg.dense.decomposition.svd.SvdImplicitQrDecompose_D64;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.SingularOps;
 
 /**
  * Compute the singular value decomposition of a data matrix to find the three principal axes (called: principal axis, secondary axis, and third axis) and the associated variance.
@@ -27,8 +28,9 @@ public class PrincipalComponentAnalysis3D
    private static final boolean DEBUG = false;
 
    private final DenseMatrix64F pointCloud = new DenseMatrix64F(1, 3);
-   private final DenseMatrix64F V = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F U = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F W = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F V = new DenseMatrix64F(3, 3);
 
    private int numberOfPoints;
 
@@ -126,9 +128,21 @@ public class PrincipalComponentAnalysis3D
     */
    public void compute()
    {
+      if (pointCloud.getNumRows() < 3)
+      {
+         principalAxis.set(Double.NaN, Double.NaN, Double.NaN);
+         secondaryAxis.set(Double.NaN, Double.NaN, Double.NaN);
+         thirdAxis.set(Double.NaN, Double.NaN, Double.NaN);
+         principalValues.set(0.0, 0.0, 0.0);
+         return;
+      }
+
       svd.decompose(pointCloud);
 
+      U.zero(); // do not need U
+      svd.getW(W);
       svd.getV(V, false);
+      SingularOps.descendingOrder(U, false, W, V, false);
 
       if (DEBUG)
          System.out.println("V: \n" + V);
@@ -136,8 +150,6 @@ public class PrincipalComponentAnalysis3D
       principalAxis.set(V.get(0, 0), V.get(1, 0), V.get(2, 0));
       secondaryAxis.set(V.get(0, 1), V.get(1, 1), V.get(2, 1));
       thirdAxis.cross(principalAxis, secondaryAxis);
-
-      svd.getW(W);
 
       if (DEBUG)
          System.out.println("W: \n" + W);

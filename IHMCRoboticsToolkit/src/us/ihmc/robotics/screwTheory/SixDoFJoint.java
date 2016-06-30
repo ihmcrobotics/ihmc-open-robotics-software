@@ -131,7 +131,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
          throw new AssertionError("quaternion is not normalized.  " + jointRotation);
       }
 
-      transform.get(jointTranslation);
+      transform.getTranslation(jointTranslation);
       this.afterJointFrame.setRotation(jointRotation);
       this.afterJointFrame.setTranslation(jointTranslation);
    }

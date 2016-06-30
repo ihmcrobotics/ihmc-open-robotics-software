@@ -136,9 +136,9 @@ public class DRCSimulationFactory
       {
          VisualizerUtils.createOverheadPlotter(scs, guiInitialSetup.isShowOverheadView(), drcControllerThread.getDynamicGraphicObjectsListRegistry(),
                drcEstimatorThread.getDynamicGraphicObjectsListRegistry());
+         guiInitialSetup.initializeGUI(scs, simulatedRobot, drcRobotModel);
       }
 
-      guiInitialSetup.initializeGUI(scs, simulatedRobot, drcRobotModel);
 
       if (environment != null && environment.getTerrainObject3D() != null)
       {
@@ -300,7 +300,7 @@ public class DRCSimulationFactory
             boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
             boolean isBackJoint = jointRole == JointRole.SPINE;
 
-            JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, isUpperBodyJoint, isBackJoint, drcRobotModel.getSimulateDT());
+            JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, isUpperBodyJoint, isBackJoint, false, drcRobotModel.getSimulateDT());
             simulatedRobot.setController(positionControlSimulator);
          }
       }
@@ -338,7 +338,7 @@ public class DRCSimulationFactory
 
       RigidBodyTransform estimationLinkTransform3D = estimationJoint.getJointTransform3D();
       Quat4d initialEstimationLinkOrientation = new Quat4d();
-      estimationLinkTransform3D.get(initialEstimationLinkOrientation);
+      estimationLinkTransform3D.getRotation(initialEstimationLinkOrientation);
 
       if (drcStateEstimator != null)
          drcStateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);

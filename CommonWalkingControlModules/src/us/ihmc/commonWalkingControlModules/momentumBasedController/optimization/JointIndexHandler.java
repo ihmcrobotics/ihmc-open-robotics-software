@@ -61,6 +61,29 @@ public class JointIndexHandler
       return true;
    }
 
+   public void compactBlockToFullBlockIgnoreUnindexedJoints(InverseDynamicsJoint[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   {
+      fullMatrix.zero();
+
+      for (int index = 0; index < joints.length; index++)
+      {
+         InverseDynamicsJoint joint = joints[index];
+         indicesIntoCompactBlock.reset();
+         ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
+         int[] indicesIntoFullBlock = columnsForJoints.get(joint);
+
+         if (indicesIntoFullBlock == null) // don't do anything for joints that are not in the list
+            continue;
+
+         for (int i = 0; i < indicesIntoCompactBlock.size(); i++)
+         {
+            int compactBlockIndex = indicesIntoCompactBlock.get(i);
+            int fullBlockIndex = indicesIntoFullBlock[i];
+            CommonOps.extract(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, fullMatrix, 0, fullBlockIndex);
+         }
+      }
+   }
+
    public InverseDynamicsJoint[] getIndexedJoints()
    {
       return indexedJoints;

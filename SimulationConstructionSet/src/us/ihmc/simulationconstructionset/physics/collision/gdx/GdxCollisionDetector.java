@@ -124,7 +124,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
          info.getTransformToWorldForPhysics(transformScs, workSpace);
 
-         transformScs.get(world);
+         transformScs.getTranslation(world);
 
 //       System.out.println("Collision shape translation "+world.x+" "+world.y+" "+world.z);
 

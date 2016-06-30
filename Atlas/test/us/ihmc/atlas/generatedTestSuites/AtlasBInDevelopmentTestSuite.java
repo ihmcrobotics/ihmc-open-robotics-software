@@ -12,7 +12,9 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasWalkToLocationBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasWalkToLocationBehaviorTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class
 })
 
 public class AtlasBInDevelopmentTestSuite

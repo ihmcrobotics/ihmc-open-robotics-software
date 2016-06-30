@@ -141,17 +141,17 @@ public class UniversalJoint extends PinJoint
 
    public void getRotationToWorld(Matrix3d rotation)
    {
-      joint2.transformToNext.get(rotation);
+      joint2.transformToNext.getRotation(rotation);
    }
 
    public void getRotationToWorld(Quat4d rotation)
    {
-      joint2.transformToNext.get(rotation);
+      joint2.transformToNext.getRotation(rotation);
    }
 
    public void getTranslationToWorld(Vector3d translation)
    {
-      joint2.transformToNext.get(translation);
+      joint2.transformToNext.getTranslation(translation);
    }
 
 

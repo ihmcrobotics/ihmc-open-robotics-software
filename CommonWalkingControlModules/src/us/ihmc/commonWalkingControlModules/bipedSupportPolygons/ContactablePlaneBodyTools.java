@@ -13,7 +13,7 @@ public class ContactablePlaneBodyTools
    {
       RigidBodyTransform transform3D = new RigidBodyTransform();
       transform3D.setTranslation(0.1, 0.2, -0.5);
-      transform3D.rotY(Math.PI / 2.0);
+      transform3D.setRotationPitchAndZeroTranslation(Math.PI / 2.0);
 
       ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(rigidBody.getName() + "SoleFrame", endEffectorFrame,
             transform3D);

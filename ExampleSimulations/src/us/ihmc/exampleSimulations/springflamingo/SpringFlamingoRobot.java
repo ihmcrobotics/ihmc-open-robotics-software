@@ -116,7 +116,7 @@ public class SpringFlamingoRobot extends Robot
       this.addRootJoint(plane);
 
       RigidBodyTransform camRotation = new RigidBodyTransform();
-      camRotation.rotZ(Math.PI);
+      camRotation.setRotationYawAndZeroTranslation(Math.PI);
 
       CameraMount robotCam = new CameraMount("robot cam mount", camRotation, this);
       plane.addCameraMount(robotCam);

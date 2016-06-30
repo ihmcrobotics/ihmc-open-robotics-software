@@ -1,9 +1,6 @@
 package us.ihmc.SdfLoader;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -22,6 +19,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements FullHumanoidRobotModel
 {
@@ -30,7 +28,8 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
     
    private  SideDependentList< ArrayList<OneDoFJoint>> armJointIDsList;
    private  SideDependentList< ArrayList<OneDoFJoint>> legJointIDsList;
-    
+
+   private RigidBody[] endEffectors = new RigidBody[4];
    private SideDependentList<RigidBody> feet;
    private SideDependentList<RigidBody> hands;
    
@@ -38,6 +37,7 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
    
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> attachmentPlateFrames = new SideDependentList<>();
+   ArrayList<OneDoFJoint> oneDoFJointsExcludingHands = new ArrayList<>();
 
    private SDFHumanoidJointNameMap humanoidJointNameMap;
    
@@ -76,6 +76,16 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
             attachmentPlateFrames.put(robotSide, null);
          }
       }
+
+      int index = 0;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         endEffectors[index] = feet.get(robotSide);
+         endEffectors[index+2] = hands.get(robotSide);
+         index++;
+      }
+
+      getAllJointsExcludingHands(oneDoFJointsExcludingHands);
    }
 
    public void setJointAngles(RobotSide side, LimbName limb, double[] q) 
@@ -143,6 +153,20 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
 
    /** {@inheritDoc} */
    @Override
+   public OneDoFJoint[] getControllableOneDoFJoints()
+   {
+      return oneDoFJointsExcludingHands.toArray(new OneDoFJoint[oneDoFJointsExcludingHands.size()]);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+   {
+      oneDoFJointsToPack.addAll(oneDoFJointsExcludingHands);
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public ReferenceFrame getFrameAfterLegJoint(RobotSide robotSide, LegJointName legJointName)
    {
       return getLegJoint(robotSide, legJointName).getFrameAfterJoint();
@@ -187,7 +211,7 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
       case LEG:
          return feet.get(robotSide);
       default:
-         throw new RuntimeException("Unkown end effector");
+         throw new RuntimeException("Unknown end effector");
       }
    }
 
@@ -363,7 +387,24 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
          initialized = true;
       }
    }
-   
+
+   private void getAllJointsExcludingHands(ArrayList<OneDoFJoint> jointsToPack)
+   {
+      getOneDoFJoints(jointsToPack);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody hand = getHand(robotSide);
+         if (hand != null)
+         {
+            OneDoFJoint[] fingerJoints = ScrewTools.filterJoints(ScrewTools.computeSubtreeJoints(hand), OneDoFJoint.class);
+            for (OneDoFJoint fingerJoint : fingerJoints)
+            {
+               jointsToPack.remove(fingerJoint);
+            }
+         }
+      }
+   }
+
    public ArrayList<OneDoFJoint> getArmJointIDs(RobotSide side)
    {
       return armJointIDsList.get(side);

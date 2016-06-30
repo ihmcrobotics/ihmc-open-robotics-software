@@ -98,10 +98,10 @@ public class TransformTools
    public static RigidBodyTransform yawPitchDegreesTransform(Vector3d center, double yawCCWDegrees, double pitchDownDegrees)
    {
       RigidBodyTransform location = new RigidBodyTransform();
-      location.rotZ(Math.toRadians(yawCCWDegrees));
+      location.setRotationYawAndZeroTranslation(Math.toRadians(yawCCWDegrees));
 
       RigidBodyTransform tilt = new RigidBodyTransform();
-      tilt.rotY(Math.toRadians(pitchDownDegrees));
+      tilt.setRotationPitchAndZeroTranslation(Math.toRadians(pitchDownDegrees));
       location.multiply(tilt);
 
       location.setTranslation(center);
@@ -130,7 +130,7 @@ public class TransformTools
    public static RigidBodyTransform createTransformFromTranslationAndEulerAngles(Vector3d translation, Vector3d eulerAngles)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setEuler(eulerAngles);
+      transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
       return transform;
@@ -190,15 +190,15 @@ public class TransformTools
 
       if (axis == Axis.X)
       {
-         rotator.rotX(angle);
+         rotator.setRotationRollAndZeroTranslation(angle);
       }
       else if (axis == Axis.Y)
       {
-         rotator.rotY(angle);
+         rotator.setRotationPitchAndZeroTranslation(angle);
       }
       else if (axis == Axis.Z)
       {
-         rotator.rotZ(angle);
+         rotator.setRotationYawAndZeroTranslation(angle);
       }
 
       transform.multiply(rotator);

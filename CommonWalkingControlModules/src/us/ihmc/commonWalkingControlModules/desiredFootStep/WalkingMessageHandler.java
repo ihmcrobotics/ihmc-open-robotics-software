@@ -9,6 +9,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
@@ -16,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -24,6 +26,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -230,6 +233,8 @@ public class WalkingMessageHandler
 
    private final Point3d actualFootPositionInWorld = new Point3d();
    private final Quat4d actualFootOrientationInWorld = new Quat4d();
+   private final TextToSpeechPacket reusableSpeechPacket = new TextToSpeechPacket();
+   private final WalkingControllerFailureStatusMessage failureStatusMessage = new WalkingControllerFailureStatusMessage();
 
    public void reportFootstepStarted(RobotSide robotSide)
    {
@@ -241,6 +246,8 @@ public class WalkingMessageHandler
       actualFootPoseInWorld.getPose(actualFootPositionInWorld, actualFootOrientationInWorld);
       statusOutputManager.reportStatusMessage(new FootstepStatus(FootstepStatus.Status.COMPLETED, currentFootstepIndex.getIntegerValue(),
             actualFootPositionInWorld, actualFootOrientationInWorld, robotSide));
+//      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FOOTSTEP_COMPLETED);
+//      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
 
    public void reportWalkingStarted()
@@ -248,6 +255,8 @@ public class WalkingMessageHandler
       WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
       walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.STARTED);
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
+      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING);
+      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
 
    public void reportWalkingComplete()
@@ -255,6 +264,8 @@ public class WalkingMessageHandler
       WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
       walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.COMPLETED);
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
+//      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FINISHED_WALKING);
+//      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
 
    public void reportWalkingAbortRequested()
@@ -262,6 +273,15 @@ public class WalkingMessageHandler
       WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
       walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.ABORT_REQUESTED);
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
+//      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING_ABORTED);
+//      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
+   }
+
+   public void reportControllerFailure(FrameVector2d fallingDirection)
+   {
+      fallingDirection.changeFrame(worldFrame);
+      failureStatusMessage.setFallingDirection(fallingDirection);
+      statusOutputManager.reportStatusMessage(failureStatusMessage);
    }
 
    public void registerCompletedDesiredFootstep(Footstep completedFesiredFootstep)

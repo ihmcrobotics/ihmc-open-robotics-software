@@ -291,8 +291,8 @@ public class OpenCVColoredCircularBlobDetector
             dirty = false;
          }
 
-         final Color lowerBoundBackgroundColor = convertHSVtoRGB(lowerBound);
-         final Color upperBoundBackgroundColor = convertHSVtoRGB(upperBound);
+         final Color lowerBoundBackgroundColor = OpenCVTools.convertHSVValueToColor(lowerBound);
+         final Color upperBoundBackgroundColor = OpenCVTools.convertHSVValueToColor(upperBound);
 
          SwingUtilities.invokeLater(new Runnable()
          {
@@ -321,15 +321,6 @@ public class OpenCVColoredCircularBlobDetector
       }
 
       System.exit(0);
-   }
-
-   private static Color convertHSVtoRGB(HSVValue upperBound)
-   {
-      int rgb = Color.HSBtoRGB((float) upperBound.getHue() / 180.0f, (float) upperBound.getSaturation() / 255.0f, (float) upperBound.getBrightnessValue() / 255.0f);
-      int red = (rgb >> 16) & 0xFF;
-      int green = (rgb >> 8) & 0xFF;
-      int blue = (rgb) & 0xFF;
-      return new Color(red, green, blue);
    }
 
    private static JPanel setupHSVPanel(String panelTitle, final HSVValue hsvValue, JPanel colorIndicationPanel)

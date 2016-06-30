@@ -1,9 +1,13 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import org.junit.Test;
+
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class DoubleStepGroundProfileTest extends GroundProfileTest
 {
+   @Override
    public GroundProfile3D getGroundProfile()
    {
       double yMin = -1.0;
@@ -15,20 +19,30 @@ public class DoubleStepGroundProfileTest extends GroundProfileTest
 
       return new DoubleStepGroundProfile(yMin, yMax, initialElevationChangeX, finalElevationChangeX, initialElevationDifference, finalElevationDifference);
    }
+   
+   @Override
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout=300000)
+   public void testSurfaceNormalGridForSmoothTerrainUsingHeightMap()
+   {
+      super.testSurfaceNormalGridForSmoothTerrainUsingHeightMap();
+   }
 
+   @Override
    public double getMaxPercentageOfAllowableValleyPoints()
    {
       return 0.0;
    }
 
+   @Override
    public double getMaxPercentageOfAllowablePeakPoints()
    {
       return 0.0;
    }
 
+   @Override
    public double getMaxPercentageOfAllowableDropOffs()
    {
       return 0.01;
    }
-
 }

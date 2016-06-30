@@ -250,17 +250,17 @@ public class FloatingPlanarJoint extends Joint
       if (type == YZ)
       {
          position.set(0.0, q_t1.getDoubleValue(), q_t2.getDoubleValue());
-         t1.rotX(q_rot.getDoubleValue());
+         t1.setRotationRollAndZeroTranslation(q_rot.getDoubleValue());
       }
       else if (type == XZ)
       {
          position.set(q_t1.getDoubleValue(), 0.0, q_t2.getDoubleValue());
-         t1.rotY(q_rot.getDoubleValue());
+         t1.setRotationPitchAndZeroTranslation(q_rot.getDoubleValue());
       }
       else
       {
          position.set(q_t1.getDoubleValue(), q_t2.getDoubleValue(), 0.0);
-         t1.rotZ(q_rot.getDoubleValue());
+         t1.setRotationYawAndZeroTranslation(q_rot.getDoubleValue());
       }
 
       t1.setTranslation(position);

@@ -12,6 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
+   us.ihmc.tools.inputDevices.keyboard.linux.RepeatingReleasedEventsFixerTest.class,
    us.ihmc.tools.thread.ThreadToolsTest.class
 })
 

@@ -38,23 +38,26 @@ public class IHMCROSTranslationRuntimeToolsTest
       Packet<?> ihmcMessage = null;
       Random random = new Random(1976L);
 
-      for (Class<?> concreteType : concreteTypes)
+      for(int i = 0; i < 10000; i++)
       {
-         Constructor<?> randomConstructor = null;
-         try
+         for (Class<?> concreteType : concreteTypes)
          {
-            randomConstructor = concreteType.getConstructor(Random.class);
-            ihmcMessage = (Packet<?>) randomConstructor.newInstance(random);
-            rosMessage = IHMCROSTranslationRuntimeTools.convertToRosMessage(ihmcMessage);
-            Packet packet = IHMCROSTranslationRuntimeTools.convertToIHMCMessage(rosMessage);
-            assertTrue("Problem with packet " + concreteType + ". \n" + ihmcMessage + ", \n" + packet, packet.epsilonEquals(ihmcMessage, 0.1));
-         }
-         catch (Exception e)
-         {
-            System.out.println("Conversion failed!");
-            System.out.println("Message type: " + concreteType);
-            e.printStackTrace();
-            fail();
+            Constructor<?> randomConstructor = null;
+            try
+            {
+               randomConstructor = concreteType.getConstructor(Random.class);
+               ihmcMessage = (Packet<?>) randomConstructor.newInstance(random);
+               rosMessage = IHMCROSTranslationRuntimeTools.convertToRosMessage(ihmcMessage);
+               Packet packet = IHMCROSTranslationRuntimeTools.convertToIHMCMessage(rosMessage);
+               assertTrue("Problem with packet " + concreteType + ". \n" + ihmcMessage + ", \n" + packet, packet.epsilonEquals(ihmcMessage, 0.1));
+            }
+            catch (Exception e)
+            {
+               System.out.println("Conversion failed!");
+               System.out.println("Message type: " + concreteType);
+               e.printStackTrace();
+               fail();
+            }
          }
       }
    }

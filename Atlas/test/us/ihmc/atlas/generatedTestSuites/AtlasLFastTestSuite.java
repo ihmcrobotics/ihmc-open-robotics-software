@@ -12,9 +12,11 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampsTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRocksTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseStandingYawedTest.class
+   us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
+   us.ihmc.atlas.initialSetup.AtlasDrivingInitialSetupTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasHighSwingTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseDoNothingTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class
 })
 
 public class AtlasLFastTestSuite

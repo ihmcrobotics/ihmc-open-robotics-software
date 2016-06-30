@@ -34,7 +34,7 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    @Override
    public void applyTransform(RigidBodyTransform transform3D)
    {
-      transform3D.get(tempQuaternionForTransform);
+      transform3D.getRotation(tempQuaternionForTransform);
       this.mul(tempQuaternionForTransform, this);
       normalizeAndLimitToPiMinusPi();
    }

@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
+import java.awt.geom.Rectangle2D;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
@@ -41,7 +42,7 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
       this.pixels = 2;
       stroke = createStroke();
    }
-   
+
    public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill, int lineWidth)
    {
       super(name);
@@ -51,7 +52,7 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
       this.pixels = lineWidth;
       stroke = createStroke();
    }
-   
+
    public BasicStroke createStroke()
    {
       return new BasicStroke(pixels);
@@ -60,7 +61,11 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
    public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(color);
-      graphics.drawString("Polygon", Xcenter, Ycenter);
+      String name = "Polygon";
+      Rectangle2D textDimensions = graphics.getFontMetrics().getStringBounds(name, graphics);
+      int x = Xcenter - (int) (textDimensions.getWidth()/2);
+      int y = Ycenter + (int) (textDimensions.getHeight()/2);
+      graphics.drawString(name, x, y);
    }
 
    public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
@@ -68,7 +73,7 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
       if (isVisible)
       {
          graphics.setColor(color);
-         
+
          Stroke previousStroke = ((Graphics2D) graphics).getStroke();
          ((Graphics2D) graphics).setStroke(stroke);
 
@@ -86,7 +91,7 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
             e.printStackTrace();
             return;
          }
-         
+
          if (convexPolygon2d.isEmpty())
                return;
 
@@ -98,7 +103,7 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
          {
             plotterGraphics.drawPolygon(graphics, convexPolygon2d);
          }
-         
+
          ((Graphics2D) graphics).setStroke(previousStroke);
       }
    }

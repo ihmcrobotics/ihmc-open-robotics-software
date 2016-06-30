@@ -29,9 +29,9 @@ public class FrameOrientationTest
    {
       testTransform = new RigidBodyTransform();
       testTransform.setTranslation(new Vector3d(0.0, 0.0, 1.0));
-      testTransform.rotX(0.2);
-      testTransform.rotY(0.6);
-      testTransform.rotZ(0.8);
+      testTransform.setRotationRollAndZeroTranslation(0.2);
+      testTransform.setRotationPitchAndZeroTranslation(0.6);
+      testTransform.setRotationYawAndZeroTranslation(0.8);
       testFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("testFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform(), false, false,
               false);
    }
@@ -274,7 +274,7 @@ public class FrameOrientationTest
          RigidBodyTransform randomTransformToWorld = randomFrame_B.getTransformToDesiredFrame(worldFrame);
          randomTransformToWorld.setTranslation(0.0, 0.0, 0.0);
          Quat4d randomQuaternionForTransformToWorld = new Quat4d();
-         randomTransformToWorld.get(randomQuaternionForTransformToWorld);
+         randomTransformToWorld.getRotation(randomQuaternionForTransformToWorld);
 
          testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
          testedFrameOrientation.applyTransform(randomTransformToWorld);
@@ -287,7 +287,7 @@ public class FrameOrientationTest
          RigidBodyTransform randomTransformToA = randomFrame_B.getTransformToDesiredFrame(randomFrame_A);
          randomTransformToA.setTranslation(0.0, 0.0, 0.0);
          Quat4d randomQuaternionForTransformToA = new Quat4d();
-         randomTransformToA.get(randomQuaternionForTransformToA);
+         randomTransformToA.getRotation(randomQuaternionForTransformToA);
 
          testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
          testedFrameOrientation.applyTransform(randomTransformToA);
@@ -321,7 +321,7 @@ public class FrameOrientationTest
          RigidBodyTransform randomTransformToWorld = randomFrame_B.getTransformToDesiredFrame(worldFrame);
          randomTransformToWorld.setTranslation(0.0, 0.0, 0.0);
          Quat4d randomQuaternionForTransformToWorld = new Quat4d();
-         randomTransformToWorld.get(randomQuaternionForTransformToWorld);
+         randomTransformToWorld.getRotation(randomQuaternionForTransformToWorld);
 
          testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
          testedFrameOrientation.changeFrame(worldFrame);
@@ -334,7 +334,7 @@ public class FrameOrientationTest
          RigidBodyTransform randomTransformToA = randomFrame_B.getTransformToDesiredFrame(randomFrame_A);
          randomTransformToA.setTranslation(0.0, 0.0, 0.0);
          Quat4d randomQuaternionForTransformToA = new Quat4d();
-         randomTransformToA.get(randomQuaternionForTransformToA);
+         randomTransformToA.getRotation(randomQuaternionForTransformToA);
 
          testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
          testedFrameOrientation.changeFrame(randomFrame_A);

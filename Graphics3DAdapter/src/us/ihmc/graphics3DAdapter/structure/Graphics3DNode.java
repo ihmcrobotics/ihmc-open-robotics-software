@@ -108,7 +108,7 @@ public class Graphics3DNode
    public Vector3d getTranslation()
    {
       Vector3d translation = new Vector3d();
-      getTransform().get(translation);
+      getTransform().getTranslation(translation);
 
       return translation;
    }

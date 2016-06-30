@@ -173,7 +173,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
             Vector3d newDesiredVelocityDirection = new Vector3d(desiredHeading.getX(), desiredHeading.getY(), 0.0);
             newDesiredVelocityDirection.normalize(); // just to be sure
             RigidBodyTransform transform3D = new RigidBodyTransform();
-            transform3D.rotZ(-Math.PI / 4.0);
+            transform3D.setRotationYawAndZeroTranslation(-Math.PI / 4.0);
             transform3D.transform(newDesiredVelocityDirection);
 
             desiredVelocityDirection.set(newDesiredVelocityDirection.getX(), newDesiredVelocityDirection.getY());
@@ -188,7 +188,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
             Vector3d newDesiredVelocityDirection = new Vector3d(desiredHeading.getX(), desiredHeading.getY(), 0.0);
             newDesiredVelocityDirection.normalize(); // just to be sure
             RigidBodyTransform transform3D = new RigidBodyTransform();
-            transform3D.rotZ(Math.PI / 4.0);
+            transform3D.setRotationYawAndZeroTranslation(Math.PI / 4.0);
             transform3D.transform(newDesiredVelocityDirection);
 
             desiredVelocityDirection.set(newDesiredVelocityDirection.getX(), newDesiredVelocityDirection.getY());

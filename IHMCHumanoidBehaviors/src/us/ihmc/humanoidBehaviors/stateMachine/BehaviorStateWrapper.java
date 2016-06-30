@@ -4,6 +4,7 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveBehaviorTools;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
 {   
@@ -35,6 +36,7 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
    {
       if (initializeOnTransitionIntoAction)
       {
+         PrintTools.debug(this, "Initializing " + getStateEnum().name());
          behavior.initialize();
 
          CoactiveElement coactiveElement = behavior.getCoactiveElement();
@@ -60,7 +62,7 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
    @Override
    public void doTransitionOutOfAction()
    {
-      behavior.doPostBehaviorCleanup();
+      doPostBehaviorCleanup();
    }
 
    @Override
@@ -71,26 +73,31 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
    
    public void pause()
    {
+      PrintTools.debug(this, "Pausing " + getStateEnum().name());
       behavior.pause();
    }
 
    public void resume()
    {
+      PrintTools.debug(this, "Resuming " + getStateEnum().name());
       behavior.resume();
    }
 
    public void stop()
    {
+      PrintTools.debug(this, "Stopping " + getStateEnum().name());
       behavior.stop();
    }
 
    public void enableActions()
    {
+      PrintTools.debug(this, "Enabling " + getStateEnum().name());
       behavior.enableActions();
    }
    
    public void doPostBehaviorCleanup()
    {
+      PrintTools.debug(this, "Cleaning up " + getStateEnum().name());
       behavior.doPostBehaviorCleanup();
    }
 

@@ -42,9 +42,9 @@ public class CapsuleTest
       tr_base.multiply(tr_other);
       transforms.add(new RigidBodyTransform(tr_base));
 
-      tr_other.rotY(1.2);
+      tr_other.setRotationPitchAndZeroTranslation(1.2);
       tr_base.multiply(tr_other);
-      tr_other.rotZ(-0.6);
+      tr_other.setRotationYawAndZeroTranslation(-0.6);
       tr_other.setTranslation(new Vector3d(0, -2, 3));
       tr_base.multiply(tr_other);
       transforms.add(new RigidBodyTransform(tr_base));

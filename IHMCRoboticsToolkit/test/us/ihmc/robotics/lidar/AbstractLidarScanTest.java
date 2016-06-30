@@ -59,7 +59,7 @@ public class AbstractLidarScanTest
       {
          Point3d p = new Point3d(ranges[i], 0, 0);
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.rotZ(params.sweepYawMin + i * sweepPerStep);
+         transform.setRotationYawAndZeroTranslation(params.sweepYawMin + i * sweepPerStep);
          transform.transform(p);
          JUnitTools.assertTuple3dEquals(p, lidarScan.getPoint(i), eps);
       }
@@ -77,8 +77,8 @@ public class AbstractLidarScanTest
       LidarScanParameters params = new LidarScanParameters(numPoints, 0, 0, 0, 0, 0, 0);
       RigidBodyTransform startTransform = new RigidBodyTransform();
       RigidBodyTransform endTransform = new RigidBodyTransform();
-      startTransform.rotZ(sweepMin);
-      endTransform.rotZ(sweepMax);
+      startTransform.setRotationYawAndZeroTranslation(sweepMin);
+      endTransform.setRotationYawAndZeroTranslation(sweepMax);
 
       float[] ranges = new float[numPoints];
       for (int i = 0; i < ranges.length; i++)
@@ -93,7 +93,7 @@ public class AbstractLidarScanTest
       {
          Point3d p = new Point3d(ranges[i], 0, 0);
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.rotZ(sweepMin + i * sweepPerStep);
+         transform.setRotationYawAndZeroTranslation(sweepMin + i * sweepPerStep);
          transform.transform(p);
          JUnitTools.assertTuple3dEquals(p, lidarScan.getPoint(i), eps);
       }

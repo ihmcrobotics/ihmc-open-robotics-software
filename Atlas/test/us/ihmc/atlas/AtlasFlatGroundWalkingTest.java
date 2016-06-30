@@ -23,7 +23,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 	@Test(timeout = 1000000)
    public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
 
       String runName = "AtlasFlatGroundWalkingTest";
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
@@ -39,7 +39,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       try
       {
          Assume.assumeTrue(BambooTools.isNightlyBuild());
-         BambooTools.reportTestStartedMessage();
+         BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
 
          robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
 

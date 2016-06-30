@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
@@ -31,6 +32,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatus
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 
 public abstract class ControllerAPIDefinition
@@ -70,8 +72,10 @@ public abstract class ControllerAPIDefinition
       statusMessages.add(CapturabilityBasedStatus.class);
       statusMessages.add(FootstepStatus.class);
       statusMessages.add(WalkingStatusMessage.class);
+      statusMessages.add(WalkingControllerFailureStatusMessage.class);
       statusMessages.add(ManipulationAbortedStatus.class);
       statusMessages.add(HighLevelStateChangeStatusMessage.class);
+      statusMessages.add(TextToSpeechPacket.class);
 
       supportedStatusMessages = Collections.unmodifiableList(statusMessages);
    }
