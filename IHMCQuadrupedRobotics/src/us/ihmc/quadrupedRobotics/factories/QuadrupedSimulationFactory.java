@@ -287,7 +287,7 @@ public class QuadrupedSimulationFactory
          groundProfile3D = new AlternatingSlopesGroundProfile(xSlopePairs, xMin, xMax, yMin, yMax);
          break;
       case STEPPED:
-         groundProfile3D = new VaryingStairGroundProfile(0.0, 0.0, new double[] {2.0, 1.0, 1.0, 0.5}, new double[] {0.0, 0.05, -0.1, 0.05, 0.05});
+         groundProfile3D = new VaryingStairGroundProfile(0.0, 0.0, new double[] {1.5, 1.0, 1.0, 0.5}, new double[] {0.0, 0.05, -0.1, 0.05, 0.05});
          break;
       default:
          groundProfile3D = null;
