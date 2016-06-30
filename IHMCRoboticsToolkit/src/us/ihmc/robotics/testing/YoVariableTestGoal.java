@@ -2,6 +2,7 @@ package us.ihmc.robotics.testing;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -87,6 +88,18 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
          public boolean currentlyMeetsGoal()
          {
             return enumYoVariable.getEnumValue().equals(enumValue);
+         }
+      };
+   }
+   
+   public static YoVariableTestGoal booleanEquals(final BooleanYoVariable booleanYoVariable, final boolean booleanValue)
+   {
+      return new YoVariableTestGoal(booleanYoVariable)
+      {
+         @Override
+         public boolean currentlyMeetsGoal()
+         {
+            return booleanYoVariable.getBooleanValue() == booleanValue;
          }
       };
    }
