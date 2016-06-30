@@ -20,6 +20,7 @@ import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JApplet;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -1253,6 +1254,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       if (myGUI != null)
       {
          myGUI.addButton(button);
+      }
+   }
+
+   public void addComboBox(JComboBox<?> comboBox)
+   {
+      if (myGUI != null)
+      {
+         myGUI.addComboBox(comboBox);
       }
    }
 
