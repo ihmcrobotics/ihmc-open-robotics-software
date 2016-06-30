@@ -26,6 +26,11 @@ public class HighLevelStateCommand implements Command<HighLevelStateCommand, Hig
       highLevelState = message.getHighLevelState();
    }
 
+   public void setHighLevelState(HighLevelState highLevelState)
+   {
+      this.highLevelState = highLevelState;
+   }
+
    public HighLevelState getHighLevelState()
    {
       return highLevelState;

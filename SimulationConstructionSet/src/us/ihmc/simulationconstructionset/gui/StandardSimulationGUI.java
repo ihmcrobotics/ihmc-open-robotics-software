@@ -30,6 +30,7 @@ import javax.swing.AbstractButton;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -113,7 +114,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.gui.GraphicsUpdatable;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
 public class StandardSimulationGUI implements SelectGraphConfigurationCommandExecutor, GraphGroupSelector, EntryBoxGroupSelector, CameraSelector,
@@ -841,6 +841,12 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    public void addButton(AbstractButton button)
    {
       buttonPanel.add(button);
+      buttonPanel.updateUI();
+   }
+
+   public void addComboBox(JComboBox<?> comboBox)
+   {
+      buttonPanel.add(comboBox);
       buttonPanel.updateUI();
    }
 
