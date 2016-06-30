@@ -14,7 +14,7 @@ public enum HighLevelState
    DO_NOTHING_BEHAVIOR,
    @RosEnumValueDocumentation(documentation = "The robot is peforming an automated diagnostic routine")
    DIAGNOSTICS,
-   @RosEnumValueDocumentation(documentation = "Automated calibration routine depending on the robot. For Valkyrie: estimation of the joint torque offsets and foot force/torque sensor offsets.")
+   @RosEnumValueDocumentation(documentation = "Automated calibration routine depending on the robot. For Valkyrie: estimation of the joint torque offsets.")
    CALIBRATION;
 
    public static final HighLevelState[] values = values();
