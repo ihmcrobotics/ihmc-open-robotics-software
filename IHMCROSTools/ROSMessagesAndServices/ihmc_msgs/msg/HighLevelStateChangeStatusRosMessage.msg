@@ -21,4 +21,5 @@ int64 unique_id
 uint8 WALKING=0 # whole body force control employing IHMC walking, balance, and manipulation algorithms
 uint8 DO_NOTHING_BEHAVIOR=1 # do nothing behavior. the robot will start in this behavior, and report this behavior when falling and ramping down the controller. This behavior is intended for feedback only. Requesting this behavior is not supported and can cause the robot to shut down.
 uint8 DIAGNOSTICS=2 # The robot is peforming an automated diagnostic routine
+uint8 CALIBRATION=3 # Automated calibration routine depending on the robot. For Valkyrie: estimation of the joint torque offsets.
 
