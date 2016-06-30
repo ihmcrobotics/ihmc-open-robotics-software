@@ -246,6 +246,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       sensorReaderFactory.attachControllerAPI(commandInputManager, statusOutputManager);
       sensorReaderFactory.attachForceSensorCalibrationModule(estimatorThread.getForceSensorCalibrationModule());
       sensorReaderFactory.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimatorControllerFactory.getJointTorqueOffsetEstimatorController());
+      sensorReaderFactory.setupLowLevelControlWithPacketCommunicator(controllerPacketCommunicator);
 
       /*
        * Connect all servers

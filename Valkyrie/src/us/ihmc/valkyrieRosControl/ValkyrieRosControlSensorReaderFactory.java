@@ -7,6 +7,7 @@ import com.esotericsoftware.minlog.Log;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -196,5 +197,10 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
    public void attachJointTorqueOffsetEstimator(JointTorqueOffsetEstimator jointTorqueOffsetEstimator)
    {
       sensorReader.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimator);
+   }
+
+   public void setupLowLevelControlWithPacketCommunicator(PacketCommunicator packetCommunicator)
+   {
+      sensorReader.setupLowLevelControlWithPacketCommunicator(packetCommunicator);
    }
 }
