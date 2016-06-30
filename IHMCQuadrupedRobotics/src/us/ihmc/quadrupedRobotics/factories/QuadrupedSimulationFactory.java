@@ -62,6 +62,7 @@ import us.ihmc.simulationconstructionset.util.ground.AlternatingSlopesGroundProf
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RotatablePlaneTerrainProfile;
+import us.ihmc.simulationconstructionset.util.ground.VaryingStairGroundProfile;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.tools.factories.FactoryTools;
@@ -284,6 +285,9 @@ public class QuadrupedSimulationFactory
             {1.0, 0.0}, {3.0, 0.1}
          };
          groundProfile3D = new AlternatingSlopesGroundProfile(xSlopePairs, xMin, xMax, yMin, yMax);
+         break;
+      case STEPPED:
+         groundProfile3D = new VaryingStairGroundProfile(0.0, 0.0, new double[] {2.0, 1.0, 1.0, 0.5}, new double[] {0.0, 0.05, -0.1, 0.05, 0.05});
          break;
       default:
          groundProfile3D = null;
