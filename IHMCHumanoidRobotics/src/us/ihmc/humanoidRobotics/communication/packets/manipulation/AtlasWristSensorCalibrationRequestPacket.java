@@ -9,7 +9,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation = "Request taring of the wrist force/torque sensors.",
-      rosPackage = "ihmc_atlas",
+      rosPackage = "ihmc_atlas_ros",
       topic = "/control/request_wrist_sensor_calibration")
 public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristSensorCalibrationRequestPacket>
 {

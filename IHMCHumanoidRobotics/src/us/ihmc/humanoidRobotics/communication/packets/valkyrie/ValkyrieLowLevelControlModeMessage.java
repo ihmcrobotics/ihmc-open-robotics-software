@@ -9,7 +9,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.robotics.random.RandomTools;
 
 @RosMessagePacket(documentation = "Request a Valkyrie low-level control mode, which is either: stand-prep, calibration, or high-level control.",
-      rosPackage = "ihmc_valkyrie",
+      rosPackage = "ihmc_valkyrie_ros",
       topic = "/control/low_level_control_mode")
 public class ValkyrieLowLevelControlModeMessage extends Packet<ValkyrieLowLevelControlModeMessage>
 {
