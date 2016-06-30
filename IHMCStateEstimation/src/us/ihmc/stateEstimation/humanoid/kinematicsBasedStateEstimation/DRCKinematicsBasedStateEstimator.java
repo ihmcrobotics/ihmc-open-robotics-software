@@ -374,4 +374,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    {
       forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
    }
+
+   public ForceSensorCalibrationModule getForceSensorCalibrationModule()
+   {
+      return forceSensorStateUpdater;
+   }
 }
