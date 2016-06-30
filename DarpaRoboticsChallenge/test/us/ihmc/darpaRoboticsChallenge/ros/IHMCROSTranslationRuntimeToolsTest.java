@@ -20,8 +20,8 @@ import static org.junit.Assert.*;
 public class IHMCROSTranslationRuntimeToolsTest
 {
 
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 1.0)
-   @Test(timeout = 30000)
+   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 30.0)
+   @Test(timeout = 40000)
    public void testBidirectionalConversionWithRandomConstructors()
    {
       Reflections reflections = new Reflections("us.ihmc");
