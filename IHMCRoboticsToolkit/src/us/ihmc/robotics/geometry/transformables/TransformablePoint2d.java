@@ -56,7 +56,7 @@ public class TransformablePoint2d extends Point2d implements GeometryObject<Tran
 
    private void checkIsTransformationInPlane(RigidBodyTransform transformToNewFrame, Point3d transformedPoint)
    {
-      transformToNewFrame.get(temporaryTranslation);
+      transformToNewFrame.getTranslation(temporaryTranslation);
       if (Math.abs(temporaryTranslation.z - transformedPoint.z) > epsilon)
          throw new RuntimeException("Cannot transform FramePoint2d to a plane with a different surface normal");
    }

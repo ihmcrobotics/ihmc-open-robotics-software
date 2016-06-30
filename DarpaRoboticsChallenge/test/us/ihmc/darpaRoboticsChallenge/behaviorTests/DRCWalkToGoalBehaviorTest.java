@@ -161,7 +161,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
    @Test(timeout = 300000)
    public void testWalkForwardsX() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -173,7 +173,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
       assertTrue(walkToGoalBehavior.isDone());
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private WalkToGoalBehavior testWalkToGoalBehavior(double walkDistance, Vector2d walkDirection, double trajectoryTime)

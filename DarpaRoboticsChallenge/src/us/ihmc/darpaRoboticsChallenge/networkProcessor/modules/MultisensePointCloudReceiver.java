@@ -98,7 +98,7 @@ public class MultisensePointCloudReceiver extends RosPointCloudSubscriber
                @Override
                protected void updateTransformToParent(RigidBodyTransform transformToParent)
                {
-                  transformToParent.setEuler(-Math.PI / 2, 0.0, -Math.PI / 2);
+                  transformToParent.setRotationEulerAndZeroTranslation(-Math.PI / 2, 0.0, -Math.PI / 2);
                   transformToParent.setTranslation(0, 0.035, -0.002);
                }
             };

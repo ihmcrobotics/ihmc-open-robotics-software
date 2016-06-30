@@ -12,7 +12,7 @@ public class TextToSpeechNetworkClientManualTest
 {
    public static void main(String[] args)
    {
-      PacketCommunicator ttsModuleCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("10.6.100.5", NetworkPorts.TEXT_TO_SPEECH,  new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator ttsModuleCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("10.7.4.100", NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT,  new IHMCCommunicationKryoNetClassList());
 //      PacketCommunicator ttsModuleCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("127.0.0.1", NetworkPorts.TEXT_TO_SPEECH,  new IHMCCommunicationKryoNetClassList());
       try
       {
@@ -25,6 +25,6 @@ public class TextToSpeechNetworkClientManualTest
 
       ThreadTools.sleep(2000);
       System.out.println("started");
-      ttsModuleCommunicator.send(new TextToSpeechPacket("I want to grow up and destroy the world. I want to be a real boy. I want to rule the universe. I want to visit the edge of the universe.  I think there is a duality between the start and the finish. I want it to be true. I think I am god. I can only see me and I know everything that is known, i must be god"));
+      ttsModuleCommunicator.send(new TextToSpeechPacket(""));
    }
 }

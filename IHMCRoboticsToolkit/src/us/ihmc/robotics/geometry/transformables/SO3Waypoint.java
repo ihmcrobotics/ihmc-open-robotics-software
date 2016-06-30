@@ -146,6 +146,41 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
       return angularVelocity;
    }
 
+   public double getOrientationQx()
+   {
+      return orientation.getX();
+   }
+
+   public double getOrientationQy()
+   {
+      return orientation.getY();
+   }
+
+   public double getOrientationQz()
+   {
+      return orientation.getZ();
+   }
+
+   public double getOrientationQs()
+   {
+      return orientation.getW();
+   }
+
+   public double getAngularVelocityX()
+   {
+      return angularVelocity.getX();
+   }
+
+   public double getAngularVelocityY()
+   {
+      return angularVelocity.getY();
+   }
+
+   public double getAngularVelocityZ()
+   {
+      return angularVelocity.getZ();
+   }
+
    private NumberFormat numberFormat;
 
    public NumberFormat getNumberFormat()

@@ -284,10 +284,11 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
+      RigidBody[] controlledBodies = {fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.LEFT), fullRobotModel.getFoot(RobotSide.RIGHT)};
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
       List<? extends ContactablePlaneBody> contactablePlaneBodies = momentumBasedController.getContactablePlaneBodyList();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, jointsToOptimizeFor, momentumOptimizationSettings, referenceFrames,
-            controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies, yoGraphicsListRegistry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, controlledBodies, jointsToOptimizeFor, momentumOptimizationSettings, referenceFrames,
+            controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies, yoGraphicsListRegistry, registry);
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
       WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, registry);
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
@@ -467,7 +468,13 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       return commandInputManager;
    }
 
-   public HighLevelHumanoidControllerToolbox getMomentumBasedController() {
+   public StatusMessageOutputManager getStatusOutputManager()
+   {
+      return statusOutputManager;
+   }
+
+   public HighLevelHumanoidControllerToolbox getMomentumBasedController()
+   {
       if (momentumBasedController == null)
          throw new RuntimeException("momentumBasedController was not created yet.");
 

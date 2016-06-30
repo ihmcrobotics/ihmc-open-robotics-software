@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Random;
 
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -127,7 +126,6 @@ public class ReferenceFrameTest
          Matrix3d rotY = new Matrix3d();
          Matrix3d rotZ = new Matrix3d();
          Vector3d trans = new Vector3d();
-         Matrix4d matrix = new Matrix4d();
 
          randomizeVector(random, trans);
          createRandomRotationMatrixX(random, rotX);
@@ -136,25 +134,8 @@ public class ReferenceFrameTest
 
          rotX.mul(rotY);
          rotX.mul(rotZ);
-
-         matrix.m00 = rotX.m00;
-         matrix.m01 = rotX.m01;
-         matrix.m02 = rotX.m02;
-         matrix.m03 = trans.x;
-         matrix.m10 = rotX.m10;
-         matrix.m11 = rotX.m11;
-         matrix.m12 = rotX.m12;
-         matrix.m13 = trans.y;
-         matrix.m20 = rotX.m20;
-         matrix.m21 = rotX.m21;
-         matrix.m22 = rotX.m22;
-         matrix.m23 = trans.z;
-         matrix.m30 = 0;
-         matrix.m31 = 0;
-         matrix.m32 = 0;
-         matrix.m33 = 1;
          
-         RigidBodyTransform ret = new RigidBodyTransform(matrix);
+         RigidBodyTransform ret = new RigidBodyTransform(rotX, trans);
          return ret;
    }
    
@@ -225,7 +206,7 @@ public class ReferenceFrameTest
       RigidBodyTransform shouldBeIdentity = new RigidBodyTransform(transformFrom10To9);
       shouldBeIdentity.multiply(transformFrom9To10);
 
-      assertEquals(1.0, shouldBeIdentity.determinant(), 1e-7);
+      assertEquals(1.0, shouldBeIdentity.determinantRotationPart(), 1e-7);
 
       tearDown();
    }
@@ -353,7 +334,7 @@ public class ReferenceFrameTest
       expectedTranslation.add(translation2);
       expectedTranslation.add(translation3);
 
-      transformToDesiredFrame.get(totalTranslation);
+      transformToDesiredFrame.getTranslation(totalTranslation);
 
       JUnitTools.assertTuple3dEquals(expectedTranslation, totalTranslation, 1e-7);
 
@@ -368,7 +349,7 @@ public class ReferenceFrameTest
       expectedTranslation.add(translation2);
       expectedTranslation.add(translation3);
 
-      transformToDesiredFrame.get(totalTranslation);
+      transformToDesiredFrame.getTranslation(totalTranslation);
 
       JUnitTools.assertTuple3dEquals(expectedTranslation, totalTranslation, 1e-7);
    }
@@ -382,15 +363,15 @@ public class ReferenceFrameTest
       TransformReferenceFrame frame3 = new TransformReferenceFrame("frame3", frame2);
 
       RigidBodyTransform transform1 = new RigidBodyTransform();
-      transform1.rotX(0.77);
+      transform1.setRotationRollAndZeroTranslation(0.77);
       transform1.setTranslation(new Vector3d(0.1, 0.13, 0.45));
 
       RigidBodyTransform transform2 = new RigidBodyTransform();
-      transform2.rotY(0.4);
+      transform2.setRotationPitchAndZeroTranslation(0.4);
       transform2.setTranslation(new Vector3d(0.5, 0.12, 0.35));
 
       RigidBodyTransform transform3 = new RigidBodyTransform();
-      transform3.rotZ(0.37);
+      transform3.setRotationYawAndZeroTranslation(0.37);
       transform3.setTranslation(new Vector3d(0.11, 0.113, 0.415));
 
       frame1.setTransformAndUpdate(transform1);
@@ -406,12 +387,12 @@ public class ReferenceFrameTest
       RigidBodyTransformTest.assertTransformEquals(expectedTransform, transformToDesiredFrame, 1e-7);
 
       RigidBodyTransform preCorruptionTransform = new RigidBodyTransform();
-      preCorruptionTransform.rotX(0.35);
+      preCorruptionTransform.setRotationRollAndZeroTranslation(0.35);
       preCorruptionTransform.setTranslation(new Vector3d(0.51, 0.113, 0.7415));
       frame2.corruptTransformToParentPreMultiply(preCorruptionTransform);
 
       RigidBodyTransform postCorruptionTransform = new RigidBodyTransform();
-      postCorruptionTransform.rotY(0.97);
+      postCorruptionTransform.setRotationPitchAndZeroTranslation(0.97);
       postCorruptionTransform.setTranslation(new Vector3d(0.12, 0.613, 0.415));
       frame2.corruptTransformToParentPostMultiply(postCorruptionTransform);
 

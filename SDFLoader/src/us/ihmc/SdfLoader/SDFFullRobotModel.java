@@ -276,6 +276,20 @@ public class SDFFullRobotModel implements FullRobotModel
       oneDoFJointsToPack.addAll(values);
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public OneDoFJoint[] getControllableOneDoFJoints()
+   {
+      return getOneDoFJoints();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+   {
+      getOneDoFJoints(oneDoFJointsToPack);
+   }
+
    public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
    {
       return Collections.unmodifiableMap(oneDoFJoints);

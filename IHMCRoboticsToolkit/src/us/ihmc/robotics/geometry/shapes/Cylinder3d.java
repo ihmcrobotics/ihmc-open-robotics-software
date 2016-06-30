@@ -251,7 +251,7 @@ public class Cylinder3d implements Shape3d
       Plane3d plane3d;
 
       Matrix3d m1 = new Matrix3d();
-      transform.get(m1);
+      transform.getRotation(m1);
       Vector3d normal = new Vector3d();
       m1.getColumn(Direction.Z.getIndex(), normal);
 
@@ -260,7 +260,7 @@ public class Cylinder3d implements Shape3d
          case TOP :
             RigidBodyTransform topTransform = TransformTools.transformLocalZ(transform, height);
             Vector3d topCenter = new Vector3d();
-            topTransform.get(topCenter);
+            topTransform.getTranslation(topCenter);
             Point3d topCenterPoint = new Point3d(topCenter);
 
             plane3d = new Plane3d(topCenterPoint, normal);
@@ -269,7 +269,7 @@ public class Cylinder3d implements Shape3d
 
          case BOTTOM :
             Vector3d bottomCenter = new Vector3d();
-            transform.get(bottomCenter);
+            transform.getTranslation(bottomCenter);
             Point3d bottomCenterPoint = new Point3d(bottomCenter);
             normal.negate();
 

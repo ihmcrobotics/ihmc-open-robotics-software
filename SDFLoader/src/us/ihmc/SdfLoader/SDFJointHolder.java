@@ -200,7 +200,7 @@ public class SDFJointHolder
 
       modelToParentJoint.multiply(modelToParentLink, parentLinkToParentJoint);
       
-      modelToChildLink.get(linkRotation);
+      modelToChildLink.getRotation(linkRotation);
       
       modelToChildJoint.multiply(modelToChildLink, transformFromChildLink);
 
@@ -212,7 +212,7 @@ public class SDFJointHolder
 
       transformToParentJoint = parentJointToChildJoint;
       
-      parentJointToChildJoint.get(offsetFromParentJoint);
+      parentJointToChildJoint.getTranslation(offsetFromParentJoint);
       rotationTransform.transform(offsetFromParentJoint);
       
       linkRotation.transform(axisInModelFrame, axisInParentFrame);

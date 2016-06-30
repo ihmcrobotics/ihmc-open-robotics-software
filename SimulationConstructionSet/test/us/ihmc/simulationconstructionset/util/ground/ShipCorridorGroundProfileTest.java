@@ -15,11 +15,6 @@ public class ShipCorridorGroundProfileTest
    private ShipCorridorGroundProfile groundProfile;
    private final double epsilon = 1e-6;
    private final boolean debug = false;
-  
-   public ShipCorridorGroundProfileTest()
-   {
-      
-   }
 
    @Before
    public void setUp()
@@ -27,7 +22,7 @@ public class ShipCorridorGroundProfileTest
       groundProfile = new ShipCorridorGroundProfile(100.0, -10.0, 5.0, -5.0, 0.8, -0.8, 0.0, 3.0, Math.toRadians( 2.0 ));
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testSurfaceNormalAlongYAxis()
    {
@@ -86,8 +81,6 @@ public class ShipCorridorGroundProfileTest
   
             JUnitTools.assertTuple3dEquals(numericalSurfaceNormal, surfaceNormalFromGroundProfile, epsilon);
          }
-
       }
    }
-   
 }

@@ -394,7 +394,7 @@ public class PelvisLinearStateUpdater
       {
          RigidBody foot = feet.get(i);
          if (footSwitches.get(foot).hasFootHitGround())
-            haveFeetHitGroundFiltered.get(foot).set(true);
+            haveFeetHitGroundFiltered.get(foot).update(true);
          else
             haveFeetHitGroundFiltered.get(foot).set(false);
          

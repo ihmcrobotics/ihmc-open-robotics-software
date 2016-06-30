@@ -78,6 +78,21 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
 
    }
 
+   public RigidBodyTransform getLidarToSensorTransform(String lidarName)
+   {
+      return fullRobotModel.getLidarBaseToSensorTransform(lidarName);
+   }
+
+   public ReferenceFrame getLidarFrame(String lidarName)
+   {
+      return fullRobotModel.getLidarBaseFrame(lidarName);
+   }
+
+   public InverseDynamicsJoint getLidarJoint(String lidarName)
+   {
+      return fullRobotModel.getLidarJoint(lidarName);
+   }
+
    private void addPointsUnderFeet()
    {
 //      final double QuadTreePointUnderFeetScaling = 1.1;
@@ -98,21 +113,6 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
 
       }
 
-   }
-
-   public RigidBodyTransform getLidarToSensorTransform(String lidarName)
-   {
-      return fullRobotModel.getLidarBaseToSensorTransform(lidarName);
-   }
-
-   public ReferenceFrame getLidarFrame(String lidarName)
-   {
-      return fullRobotModel.getLidarBaseFrame(lidarName);
-   }
-
-   public InverseDynamicsJoint getLidarJoint(String lidarName)
-   {
-      return fullRobotModel.getLidarJoint(lidarName);
    }
 
    @Override
@@ -275,6 +275,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
 
       sensorSuitePacketCommunicator.attachListener(DepthDataStateCommand.class, new PacketConsumer<DepthDataStateCommand>()
       {
+         @Override
          public void receivedPacket(DepthDataStateCommand object)
          {
             setLidarState(object.getLidarState());
@@ -283,6 +284,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
 
       sensorSuitePacketCommunicator.attachListener(DepthDataClearCommand.class, new PacketConsumer<DepthDataClearCommand>()
       {
+         @Override
          public void receivedPacket(DepthDataClearCommand object)
          {
             clearLidar(object);
@@ -291,6 +293,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
 
       sensorSuitePacketCommunicator.attachListener(DepthDataFilterParameters.class, new PacketConsumer<DepthDataFilterParameters>()
       {
+         @Override
          public void receivedPacket(DepthDataFilterParameters object)
          {
             setFilterParameters(object);
@@ -338,6 +341,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
       return points;
    }
 
+   @Override
    public void start()
    {
       super.start();

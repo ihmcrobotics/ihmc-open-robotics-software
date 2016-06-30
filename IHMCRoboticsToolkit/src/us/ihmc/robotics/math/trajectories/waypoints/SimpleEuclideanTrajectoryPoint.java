@@ -141,6 +141,36 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
       simpleEuclideanTrajectoryPointToPack.setLinearVelocity(waypointData.getLinearVelocity());
    }
 
+   public double getPositionX()
+   {
+      return waypointData.getPositionX();
+   }
+
+   public double getPositionY()
+   {
+      return waypointData.getPositionY();
+   }
+
+   public double getPositionZ()
+   {
+      return waypointData.getPositionZ();
+   }
+
+   public double getLinearVelocityX()
+   {
+      return waypointData.getLinearVelocityX();
+   }
+
+   public double getLinearVelocityY()
+   {
+      return waypointData.getLinearVelocityY();
+   }
+
+   public double getLinearVelocityZ()
+   {
+      return waypointData.getLinearVelocityZ();
+   }
+
    @Override
    public void applyTransform(RigidBodyTransform transform)
    {
@@ -166,5 +196,4 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
 
       return "Euclidean trajectory point: (" + timeToString + ", " + waypointData + ")";
    }
-
 }

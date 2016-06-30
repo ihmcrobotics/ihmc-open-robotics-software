@@ -773,7 +773,7 @@ public class Transform3dTest
 			axisAngle.angle = (float) theta;
 
 			transform.setRotationAndZeroTranslation(axisAngle);
-			transform.normalize();
+			transform.normalizeRotationPart();
 			transform.getRotation(axisAngleToCheck);
 
 			assertEquals(axisAngle.x, axisAngleToCheck.x, 1e-4);
@@ -791,7 +791,7 @@ public class Transform3dTest
 			axisAngle.angle = (float) theta;
 
 			transform.setRotationAndZeroTranslation(axisAngle);
-			transform.normalize();
+			transform.normalizeRotationPart();
 			transform.getRotation(axisAngleToCheck);
 
 			assertEquals(axisAngle.x, axisAngleToCheck.x, 1e-4);
@@ -809,7 +809,7 @@ public class Transform3dTest
 			axisAngle.angle = (float) theta;
 
 			transform.setRotationAndZeroTranslation(axisAngle);
-			transform.normalize();
+			transform.normalizeRotationPart();
 			transform.getRotation(axisAngleToCheck);
 
 			assertEquals(axisAngle.x, axisAngleToCheck.x, 1e-4);
@@ -839,7 +839,7 @@ public class Transform3dTest
 			randomizeVector(random, vector);
 
 			Transform3d transform = new Transform3d(axisAngle, vector, 1.0);
-			transform.normalize();
+			transform.normalizeRotationPart();
 			transform.getRotation(axisAngleToCheck);
 
 			assertEquals(axisAngle.x, axisAngleToCheck.x, 1e-4);
@@ -859,7 +859,7 @@ public class Transform3dTest
 			randomizeVector(random, vector);
 
 			Transform3d transform = new Transform3d(axisAngle, vector, 1.0);
-			transform.normalize();
+			transform.normalizeRotationPart();
 			transform.getRotation(axisAngleToCheck);
 
 			assertEquals(axisAngle.x, axisAngleToCheck.x, 1e-4);
@@ -879,7 +879,7 @@ public class Transform3dTest
 			randomizeVector(random, vector);
 
 			Transform3d transform = new Transform3d(axisAngle, vector, 1.0);
-			transform.normalize();
+			transform.normalizeRotationPart();
 			transform.getRotation(axisAngleToCheck);
 
 			assertEquals(axisAngle.x, axisAngleToCheck.x, 1e-4);
@@ -1048,7 +1048,7 @@ public class Transform3dTest
 
 		transform.set(matrix);
 
-		transform.normalize();
+		transform.normalizeRotationPart();
 
 		assertTrue(checkOrthogonality(transform));
 
@@ -1090,7 +1090,7 @@ public class Transform3dTest
 
 			Transform3d transform1 = new Transform3d(axisAngle, new Vector3f(0,
 					0, 0), 1.0);
-			transform1.normalize();
+			transform1.normalizeRotationPart();
 			transform1.getRotation(axisAngleToCheck);
 
 			assertEquals(axisAngle.x, axisAngleToCheck.x, 1e-3);
@@ -1109,7 +1109,7 @@ public class Transform3dTest
 
 			Transform3d transform2 = new Transform3d(axisAngle, new Vector3f(0,
 					0, 0), 1.0);
-			transform2.normalize();
+			transform2.normalizeRotationPart();
 			transform2.getRotation(axisAngleToCheck);
 
 			assertEquals(axisAngle.x, axisAngleToCheck.x, 1e-4);
@@ -1424,7 +1424,7 @@ public class Transform3dTest
 			Transform3d transform = new Transform3d(quat1,
 					new Vector3d(0, 0, 0), 1.0);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 
 			assertEquals(quat1.x, quatCheck.x, 1e-10);
@@ -1457,7 +1457,7 @@ public class Transform3dTest
 
 			transform.setRotationAndZeroTranslation(quat1);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 
 			assertEquals(quat1.x, quatCheck.x, 1e-10);
@@ -1493,7 +1493,7 @@ public class Transform3dTest
 
 			transform.set(quat1, vector);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 
 			assertEquals(quat1.x, quatCheck.x, 1e-10);
@@ -1531,7 +1531,7 @@ public class Transform3dTest
 
 			transform.set(quat1, vector, scale);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 			transform.getScale(scaleCheck);
 
@@ -1568,7 +1568,7 @@ public class Transform3dTest
 
 			transform.setRotationAndZeroTranslation(quat1);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 
 			assertEquals(quat1.x, quatCheck.x, 1e-5);
@@ -1604,7 +1604,7 @@ public class Transform3dTest
 
 			transform.set(quat1, vector);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 
 			assertEquals(quat1.x, quatCheck.x, 1e-5);
@@ -1642,7 +1642,7 @@ public class Transform3dTest
 			double scale = random.nextDouble();
 			transform.set(quat1, vector, scale);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 			transform.getTranslation(trans);
 
 			transform.getScale(scaleCheck);
@@ -1673,7 +1673,7 @@ public class Transform3dTest
 			createRandomTransformationMatrix(matrix, random);
 
 			transform.set(matrix);
-			assertEquals(matrix.determinant(), transform.determinant(), 1e-8);
+			assertEquals(matrix.determinant(), transform.determinantRotationPart(), 1e-8);
 		}
 	}
 
@@ -1694,7 +1694,7 @@ public class Transform3dTest
 			matrix.mul(scale);
 			Transform3d transform2 = new Transform3d(matrix, vector, 1.0);
 
-			assertEquals(transform2.determinant(), transform.determinant(),
+			assertEquals(transform2.determinantRotationPart(), transform.determinantRotationPart(),
 					1e-8);
 		}
 	}
@@ -1750,7 +1750,7 @@ public class Transform3dTest
 			Transform3d transform = new Transform3d(quat1,
 					new Vector3f(0, 0, 0), 1.0);
 
-			transform.get(quatCheck);
+			transform.getRotation(quatCheck);
 
 			assertEquals(quat1.x, quatCheck.x, 1e-3);
 			assertEquals(quat1.y, quatCheck.y, 1e-3);
@@ -2159,17 +2159,17 @@ public class Transform3dTest
 			randomizeVector(random, vector);
 
 			Transform3d transform = new Transform3d(matrix, vector, 1.0);
-			transform.normalize();
+			transform.normalizeRotationPart();
 			transform.get(matrixCheck, vectorCheck);
 
 			JUnitTools.assertMatrix3dEquals("", matrixCheck, matrix, 1e-12);
 			JUnitTools.assertVector3dEquals("", vectorCheck, vector, 1e-12);
 
-			transform.get(matrixCheck);
+			transform.getRotation(matrixCheck);
 
 			JUnitTools.assertMatrix3dEquals("", matrixCheck, matrix, 1e-12);
 
-			transform.get(vectorCheck);
+			transform.getTranslation(vectorCheck);
 
 			JUnitTools.assertVector3dEquals("", vectorCheck, vector, 1e-12);
 		}
@@ -2228,10 +2228,10 @@ public class Transform3dTest
 			JUnitTools.assertMatrix3fEquals("", matrixCheck, matrix, 1e-6);
 			JUnitTools.assertVector3fEquals("", vectorCheck, vector, 1e-6);
 
-			transform.get(matrixCheck);
+			transform.getRotation(matrixCheck);
 			JUnitTools.assertMatrix3fEquals("", matrixCheck, matrix, 1e-6);
 
-			transform.get(vectorCheck);
+			transform.getTranslation(vectorCheck);
 			JUnitTools.assertVector3fEquals("", vectorCheck, vector, 1e-6);
 		}
 	}
@@ -3129,7 +3129,7 @@ public class Transform3dTest
 		Vector3d vector3 = new Vector3d(0, 0, 1);
 		DenseMatrix64F rotationMatrix = new DenseMatrix64F(3, 3);
 		Transform3d transform = new Transform3d();
-		transform.rotX(Math.PI / 2);
+		transform.setRotationRollAndZeroTranslation(Math.PI / 2);
 		transform.getRotation(rotationMatrix);
 
 		MatrixTools.mult(rotationMatrix, vector);
@@ -3153,7 +3153,7 @@ public class Transform3dTest
 		Vector3d vector3 = new Vector3d(0, 0, 1);
 		DenseMatrix64F rotationMatrix = new DenseMatrix64F(3, 3);
 		Transform3d transform = new Transform3d();
-		transform.rotY(Math.PI / 2);
+		transform.setRotationPitchAndZeroTranslation(Math.PI / 2);
 		transform.getRotation(rotationMatrix);
 
 		MatrixTools.mult(rotationMatrix, vector);
@@ -3177,7 +3177,7 @@ public class Transform3dTest
 		Vector3d vector3 = new Vector3d(0, 0, 1);
 		DenseMatrix64F rotationMatrix = new DenseMatrix64F(3, 3);
 		Transform3d transform = new Transform3d();
-		transform.rotZ(Math.PI / 2);
+		transform.setRotationYawAndZeroTranslation(Math.PI / 2);
 		transform.getRotation(rotationMatrix);
 
 		MatrixTools.mult(rotationMatrix, vector);
@@ -3252,7 +3252,7 @@ public class Transform3dTest
 			vector.y = -(Math.PI / 2 - 0.01) * random.nextDouble() - 0.01;
 			vector.z = -Math.PI + random.nextDouble() * 2 * Math.PI;
 
-			transform.setEuler(vector);
+			transform.setRotationEulerAndZeroTranslation(vector);
 
 			transform.getEulerXYZ(vectorToCheck);
 			JUnitTools.assertVector3dEquals("", vector, vectorToCheck, 1e-5);
@@ -3281,7 +3281,7 @@ public class Transform3dTest
 			vector.y = -(Math.PI / 2 - 0.01) * random.nextDouble() - 0.01;
 			vector.z = -Math.PI + random.nextDouble() * 2 * Math.PI;
 
-			transform.setEuler(vector);
+			transform.setRotationEulerAndZeroTranslation(vector);
 			double scale = random.nextDouble();
 			transform.setScale(scale);
 

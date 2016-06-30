@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.providers;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.quadrupedRobotics.packets.*;
+import us.ihmc.quadrupedRobotics.communication.packets.*;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
@@ -32,7 +32,7 @@ public class QuadrupedXGaitSettingsProvider
    private final DoubleParameter endDoubleSupportDurationLowerLimitParameter = parameterFactory.createDouble("endDoubleSupportDurationLowerLimit", 0.0);
    private final DoubleParameter endDoubleSupportDurationUpperLimitParameter = parameterFactory.createDouble("endDoubleSupportDurationUpperLimit", Double.MAX_VALUE);
    private final DoubleParameter endPhaseShiftLowerLimitParameter = parameterFactory.createDouble("endPhaseShiftLowerLimit", 0);
-   private final DoubleParameter endPhaseShiftUpperLimitParameter = parameterFactory.createDouble("endPhaseShiftUpperLimit", 180);
+   private final DoubleParameter endPhaseShiftUpperLimitParameter = parameterFactory.createDouble("endPhaseShiftUpperLimit", 359);
 
    private final DoubleYoVariable yoStanceLength;
    private final DoubleYoVariable yoStanceWidth;

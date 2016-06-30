@@ -358,9 +358,9 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public ICPControlGains getICPControlGains()
+   public ICPControlGains createICPControlGains(YoVariableRegistry registry)
    {
-      ICPControlGains gains = new ICPControlGains();
+      ICPControlGains gains = new ICPControlGains("", registry);
 
       double kpParallel = 2.5;
       double kpOrthogonal = 1.5;
@@ -846,5 +846,17 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    public double getCoPErrorThresholdForHighCoPDamping()
    {
       return Double.POSITIVE_INFINITY;
+   }
+
+   @Override
+   public void useInverseDynamicsControlCore()
+   {
+      // once another mode is implemented, use this to change the default gains for inverse dynamics
+   }
+
+   @Override
+   public void useVirtualModelControlCore()
+   {
+      // once another mode is implemented, use this to change the default gains for virtual model control
    }
 }

@@ -21,10 +21,13 @@ public class QuadrupedForceBasedStandReadyController implements QuadrupedControl
 
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
-   private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory.createDoubleArray("solePositionProportionalGains", 20000, 20000, 20000);
+   private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory
+         .createDoubleArray("solePositionProportionalGains", 20000, 20000, 20000);
    private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
+   private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
+   private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
 
    // Reference frames
    private final ReferenceFrame bodyFrame;
@@ -66,17 +69,10 @@ public class QuadrupedForceBasedStandReadyController implements QuadrupedControl
 
       // Initialize sole position controller
       solePositionControllerSetpoints.initialize(taskSpaceEstimates);
-      for (RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         solePositionController.getGains(quadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
-         solePositionController.getGains(quadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
-         solePositionController.getGains(quadrant).setDerivativeGains(solePositionDerivativeGainsParameter.get());
-      }
       solePositionController.reset();
 
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
@@ -94,14 +90,30 @@ public class QuadrupedForceBasedStandReadyController implements QuadrupedControl
    @Override
    public ControllerEvent process()
    {
+      updateGains();
       updateEstimates();
       updateSetpoints();
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
+
       return null;
    }
 
    @Override
    public void onExit()
    {
+   }
+
+   private void updateGains()
+   {
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         solePositionController.getGains(quadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
+         solePositionController.getGains(quadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
+         solePositionController.getGains(quadrant).setDerivativeGains(solePositionDerivativeGainsParameter.get());
+      }
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
    }
 
    private void updateEstimates()

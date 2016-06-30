@@ -39,7 +39,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
    public FrameOrientation(ReferenceFrame referenceFrame, RigidBodyTransform transform3D)
    {
       this(referenceFrame);
-      transform3D.get(quaternion);
+      transform3D.getRotation(quaternion);
       normalize();
    }
 
@@ -183,7 +183,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
    public void setIncludingFrame(ReferenceFrame referenceFrame, RigidBodyTransform transform3D)
    {
       this.referenceFrame = referenceFrame;
-      transform3D.get(quaternion);
+      transform3D.getRotation(quaternion);
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, double[] yawPitchRoll)

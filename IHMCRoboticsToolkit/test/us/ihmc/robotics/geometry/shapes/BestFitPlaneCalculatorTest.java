@@ -1,6 +1,15 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
+import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
+
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.DataGridTools;
 import us.ihmc.robotics.dataStructures.DoubleHashHeightMap;
@@ -10,14 +19,6 @@ import us.ihmc.robotics.geometry.HeightMapBestFitPlaneCalculator;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import javax.vecmath.GMatrix;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class BestFitPlaneCalculatorTest
 {
@@ -30,13 +31,14 @@ public class BestFitPlaneCalculatorTest
       double gridResolution = 1;
       HeightMapWithPoints map = new DoubleHashHeightMap(gridResolution);
       FramePoint2d footCenterPoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
-      GMatrix matrix = new GMatrix(7, 7, new double[]{0, 0, 0, 0, 3, 0, 0,
-                                                      0, 0, 8, 8, 0, 0, 0,
-                                                      0, 0, 0, 0, 0, 1, 0,
-                                                      0, 8, 1, 1, 1, 0, 0,
-                                                      0, 0, 2, 2, 2, 0, 0,
-                                                      0, 0, 0, 0, 8, 1, 0,
-                                                      0, 0, 0, 0, 0, 0, 0}
+      DenseMatrix64F matrix = new DenseMatrix64F(7, 7);
+      matrix.setData(new double[]{0, 0, 0, 0, 3, 0, 0,
+                                  0, 0, 8, 8, 0, 0, 0,
+                                  0, 0, 0, 0, 0, 1, 0,
+                                  0, 8, 1, 1, 1, 0, 0,
+                                  0, 0, 2, 2, 2, 0, 0,
+                                  0, 0, 0, 0, 8, 1, 0,
+                                  0, 0, 0, 0, 0, 0, 0}
       );
       DataGridTools.fillMapWithMatrixCentered(map, matrix, gridResolution);
       HeightMapBestFitPlaneCalculator calculator = new HeightMapBestFitPlaneCalculator();
@@ -60,14 +62,15 @@ public class BestFitPlaneCalculatorTest
       double gridResolution = 1;
       HeightMapWithPoints map = new DoubleHashHeightMap(gridResolution);
       double n = Double.NaN;
-      GMatrix matrix = new GMatrix(7, 7, new double[]{0, 0, 0, 0, 3, 0, 0,
-                                                      0, 0, 0, 0, 0, 0, 0,
-                                                      0, 0, 0, n, 0, 1, 0,
-                                                      0, 0, 1, n, 1, 0, 0,
-                                                      0, 0, 2, n, 2, 0, 0,
-                                                      0, 0, 0, 0, 0, 1, 0,
-                                                      0, 0, 0, 0, 0, 0, 0}
-      );
+      DenseMatrix64F matrix = new DenseMatrix64F(7, 7);
+      matrix.setData(new double[]{0, 0, 0, 0, 3, 0, 0,
+                                  0, 0, 0, 0, 0, 0, 0,
+                                  0, 0, 0, n, 0, 1, 0,
+                                  0, 0, 1, n, 1, 0, 0,
+                                  0, 0, 2, n, 2, 0, 0,
+                                  0, 0, 0, 0, 0, 1, 0,
+                                  0, 0, 0, 0, 0, 0, 0});
+
       DataGridTools.fillMapWithMatrix(map, matrix, gridResolution);
       HeightMapBestFitPlaneCalculator calculator = new HeightMapBestFitPlaneCalculator();
       double xyCenter = 3.0;
@@ -84,7 +87,4 @@ public class BestFitPlaneCalculatorTest
       assertEquals(xyCenter, point.getY(), 1e-7);
       assertEquals(1.0, point.getZ(), 1e-7);
    }
-   
-   
-
 }

@@ -57,11 +57,9 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
     compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0'
-    compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.23'
     compile group: 'us.ihmc', name: 'IHMCHierarchicalKinematics', version: '1.0'
     compile group: 'org.ejml', name: 'core', version: '0.28'
     compile group: 'org.ejml', name: 'dense64', version: '0.28'
-    compile group: 'xml-apis', name: 'xml-apis', version: '1.3.04'
 
     // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 

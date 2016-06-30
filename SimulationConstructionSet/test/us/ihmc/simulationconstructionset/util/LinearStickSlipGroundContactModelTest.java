@@ -145,8 +145,8 @@ public class LinearStickSlipGroundContactModelTest
       groundContactModelOnFlat.setGroundProfile3D(flatGroundProfile);
       
       RigidBodyTransform transform3D = new RigidBodyTransform();
-      transform3D.rotX(0.3);
-      transform3D.rotY(-0.7);
+      transform3D.setRotationRollAndZeroTranslation(0.3);
+      transform3D.setRotationPitchAndZeroTranslation(-0.7);
       transform3D.setTranslation(new Vector3d(0.1, 0.2, 0.3));
       
       RigidBodyTransform inverseTransform3D = new RigidBodyTransform(transform3D);

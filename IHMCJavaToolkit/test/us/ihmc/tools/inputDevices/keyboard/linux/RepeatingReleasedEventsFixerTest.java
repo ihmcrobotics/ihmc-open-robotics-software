@@ -3,8 +3,12 @@ package us.ihmc.tools.inputDevices.keyboard.linux;
 import org.junit.Test;
 
 import us.ihmc.tools.inputDevices.keyboard.linux.RepeatingReleasedEventsFixer;
+import us.ihmc.tools.testing.TestPlanAnnotations;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
+@DeployableTestClass(targets ={TestPlanTarget.InDevelopment})
 public class RepeatingReleasedEventsFixerTest
 {
 	@DeployableTestMethod(estimatedDuration = 0.0)

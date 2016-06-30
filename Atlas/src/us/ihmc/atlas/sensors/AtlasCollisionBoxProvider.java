@@ -32,7 +32,7 @@ public class AtlasCollisionBoxProvider extends SDFCollisionBoxProvider
          // Add extra collision sphere around the knee, to avoid hitting points there on the real robot
          String kneeJoint = jointMap.getLegJointName(robotSide, LegJointName.KNEE);
          RigidBodyTransform kneePose = new RigidBodyTransform();
-         kneePose.rotX(Math.PI / 2.0);
+         kneePose.setRotationRollAndZeroTranslation(Math.PI / 2.0);
          kneePose.setTranslation(0.05, 0, 0.03);
          CollisionCylinder knee = new CollisionCylinder(kneePose, 0.11, 0.15 + 2.0 * extent);
          addCollisionShape(kneeJoint, knee);

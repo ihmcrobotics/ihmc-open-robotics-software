@@ -1,12 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
@@ -25,7 +21,6 @@ public class EnableLidarBehavior extends BehaviorInterface
    public void doControl()
    {
       enableLidarPacket = new DepthDataStateCommand(LidarState.ENABLE);
-      //      clearLidarPacket.setDestination(PacketDestination.NETWORK_PROCESSOR);
 
       if (!packetHasBeenSent.getBooleanValue() && (enableLidarPacket != null))
       {
@@ -99,6 +94,7 @@ public class EnableLidarBehavior extends BehaviorInterface
    {
    }
 
+   @Override
    public boolean hasInputBeenSet()
    {
       if (enableLidarPacket != null)

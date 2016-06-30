@@ -9,6 +9,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -18,11 +19,11 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CoactiveElementYoWhiteBoardSynchronizerTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 10.0)
+   @Test(timeout = 120000)
    public void testCoactiveElementTCPYoWhiteBoardSynchronizer() throws IOException, InterruptedException
    {
-      int port = 0;
+      int port = NetworkPorts.COACTIVE_ELEMENTS_PORT.getPort();
 
       System.out.println("Creating human");
       SimpleCoactiveElement userInterfaceSideCoactiveElement = new SimpleCoactiveElement();

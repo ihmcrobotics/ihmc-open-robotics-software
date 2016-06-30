@@ -83,7 +83,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 	@Test(timeout = 420000)
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double standingTimeDuration = 1.0;
       double maximumWalkTime = 30.0;
@@ -167,7 +167,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 	@Test(timeout=300000)
    public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double standingTimeDuration = 1.0;
       double maximumWalkTime = 10.0;
@@ -297,7 +297,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 	@Test(timeout = 520000)
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double standingTimeDuration = 1.0;
       double walkingTimeDuration = 40.0;
@@ -342,7 +342,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       }
 
       createVideo(scs);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void initiateMotion(double standingTimeDuration, BlockingSimulationRunner runner, BooleanYoVariable walk)

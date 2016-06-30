@@ -547,7 +547,7 @@ public class PrincipalComponentAnalysis3DTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Fast)
 	@Test(timeout = 30000)
 	/**
 	 * Make sure PCA does not crap out if it gets an empty list of data points.
@@ -560,7 +560,7 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	}
 
-	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Fast)
 	@Test(timeout = 30000)
 	/**
 	 * Make sure PCA does not crap out if a single data point is passed to it.
@@ -576,7 +576,24 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	}
 
-	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Fast)
+	@Test(timeout = 30000)
+	/**
+	 * Make sure PCA does not crap out if two data points are passed to it.
+	 */
+	public void testTwoDataPoint()
+	{
+	   Random random = new Random(1298490387L);
+
+	   PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
+	   ArrayList<Point3d> listOfPoints = new ArrayList<>();
+	   listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
+	   listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
+	   pca.setPointCloud(listOfPoints);
+	   pca.compute();
+	}
+
+	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Fast)
 	@Test(timeout = 30000)
 	/**
 	 * Edge case:

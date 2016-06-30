@@ -73,7 +73,7 @@ public class ValkyrieSliderBoard
       }
       catch (IOException e)
       {
-         e.printStackTrace();
+         System.out.println("No joystick detected.");
          return;
       }
 

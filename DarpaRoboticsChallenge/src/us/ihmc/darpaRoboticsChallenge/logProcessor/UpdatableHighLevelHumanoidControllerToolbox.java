@@ -12,7 +12,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,7 +25,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumanoidControllerToolbox
 {
-   private final YoFramePoint capturePointUpdatedFromSCS;
+//   private final YoFramePoint capturePointUpdatedFromSCS;
    private final SideDependentList<YoFramePoint2d> desiredCoPsUpdatedFromSCS = new SideDependentList<>();
 
    public UpdatableHighLevelHumanoidControllerToolbox(SimulationConstructionSet scs,
@@ -43,7 +42,7 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
       DoubleYoVariable capturePointX = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointX");
       DoubleYoVariable capturePointY = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointY");
       DoubleYoVariable capturePointZ = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointZ");
-      capturePointUpdatedFromSCS = new YoFramePoint(capturePointX, capturePointY, capturePointZ, worldFrame);
+//      capturePointUpdatedFromSCS = new YoFramePoint(capturePointX, capturePointY, capturePointZ, worldFrame);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -62,7 +61,7 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
    public void update()
    {
       // update the yoCapturePoint
-      yoCapturePoint.set(capturePointUpdatedFromSCS);
+//      yoCapturePoint.set(capturePointUpdatedFromSCS);
 
       // update the bipedSupportPolygons
       updateBipedSupportPolygons();

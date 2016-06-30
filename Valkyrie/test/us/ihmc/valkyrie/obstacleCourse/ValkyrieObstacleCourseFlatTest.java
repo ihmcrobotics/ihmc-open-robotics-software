@@ -145,7 +145,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 26.5, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+   @DeployableTestMethod(estimatedDuration = 62.0, targets = {TestPlanTarget.Fast, TestPlanTarget.Video})
    @Test(timeout = 130000)
    public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
    {

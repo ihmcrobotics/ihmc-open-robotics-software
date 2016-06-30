@@ -1,6 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
 import org.junit.After;
 import org.junit.Test;
@@ -15,7 +16,6 @@ import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 import java.util.Random;
 
@@ -335,16 +335,17 @@ public class TwistTest extends SpatialMotionVectorTest
          Twist twist1 = new Twist(frameB, frameA, frameA, linearVelocity1, angularVelocity1);
 
          // first transform using 2.8 (b)
-         Matrix4d twist1TildeInA = toTildeForm(twist1);
+         DenseMatrix64F twist1TildeInA = toTildeForm(twist1);
          RigidBodyTransform transformFromAToC = frameA.getTransformToDesiredFrame(frameC);
-         Matrix4d transformFromAToCMatrix = new Matrix4d();
+         DenseMatrix64F transformFromAToCMatrix = new DenseMatrix64F(4, 4);
          transformFromAToC.get(transformFromAToCMatrix);
-         Matrix4d transformFromAToCMatrixInv = new Matrix4d(transformFromAToCMatrix);
-         transformFromAToCMatrixInv.invert();
+         DenseMatrix64F transformFromAToCMatrixInv = new DenseMatrix64F(transformFromAToCMatrix);
+         CommonOps.invert(transformFromAToCMatrixInv);
 
-         Matrix4d twist1TildeInC = new Matrix4d(transformFromAToCMatrix);
-         twist1TildeInC.mul(twist1TildeInA);
-         twist1TildeInC.mul(transformFromAToCMatrixInv);
+         DenseMatrix64F twist1TildeInC = new DenseMatrix64F(transformFromAToCMatrix);
+         DenseMatrix64F temp = new DenseMatrix64F(transformFromAToCMatrix);
+         CommonOps.mult(twist1TildeInC, twist1TildeInA, temp);
+         CommonOps.mult(temp, transformFromAToCMatrixInv, twist1TildeInC);
 
          Vector3d omega1InC = new Vector3d();
          Vector3d v1InC = new Vector3d();
@@ -446,13 +447,13 @@ public class TwistTest extends SpatialMotionVectorTest
 
       Matrix3d oldRotation = new Matrix3d();
       Matrix3d newRotation = new Matrix3d();
-      transform.get(oldRotation);
-      transform.get(newRotation);
+      transform.getRotation(oldRotation);
+      transform.getRotation(newRotation);
 
       Vector3d oldPosition = new Vector3d();
       Vector3d newPosition = new Vector3d();
-      transform.get(oldPosition);
-      transform.get(newPosition);
+      transform.getTranslation(oldPosition);
+      transform.getTranslation(newPosition);
 
       ScrewTestTools.integrate(newRotation, newPosition, dt, twist);
 
@@ -503,26 +504,26 @@ public class TwistTest extends SpatialMotionVectorTest
     * [tilde(omega), v;
     *             0, 0];
     */
-   private static Matrix4d toTildeForm(Twist twist)
+   private static DenseMatrix64F toTildeForm(Twist twist)
    {
       Vector3d angularVelocity = twist.getAngularPartCopy();
-      Matrix3d omegaTilde = new Matrix3d();
-      MatrixTools.toTildeForm(omegaTilde, angularVelocity);
-
       Vector3d linearVelocity = twist.getLinearPartCopy();
-      Matrix4d ret = new Matrix4d(omegaTilde, linearVelocity, 1.0);
-      ret.m33 = 0.0;
 
+      DenseMatrix64F ret = new DenseMatrix64F(4, 4);
+      MatrixTools.vectorToSkewSymmetricMatrix(ret, angularVelocity);
+      ret.set(0, 3, linearVelocity.getX());
+      ret.set(1, 3, linearVelocity.getY());
+      ret.set(2, 3, linearVelocity.getZ());
       return ret;
    }
 
    /**
     * Converts a twist in tilde form back to twist coordinates (angular velocity and linear velocity)
     */
-   private static void fromTildeForm(Matrix4d twistTilde, Vector3d angularVelocityToPack, Vector3d linearVelocityToPack)
+   private static void fromTildeForm(DenseMatrix64F twistTilde, Vector3d angularVelocityToPack, Vector3d linearVelocityToPack)
    {
-      twistTilde.get(linearVelocityToPack);
-      angularVelocityToPack.set(twistTilde.m21, twistTilde.m02, twistTilde.m10);
+      linearVelocityToPack.set(twistTilde.get(0, 3), twistTilde.get(1, 3), twistTilde.get(2, 3));
+      angularVelocityToPack.set(twistTilde.get(2, 1), twistTilde.get(0, 2), twistTilde.get(1, 0));
    }
 
    private static void fromTildeForm(Vector3d omegaToPack, Matrix3d omegaTilde)

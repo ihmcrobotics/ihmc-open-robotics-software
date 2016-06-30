@@ -22,6 +22,8 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
 
    private final YoVariableRegistry machineWritableYoVariableRegistry;
    private final YoVariableRegistry userInterfaceWritableYoVariableRegistry;
+   
+   private int connectionVerificationCounter = 0;
 
    /**
     * Server constructor.
@@ -126,23 +128,47 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
       {
          try
          {
-            writeData();
-            readData();
+            synchronized (tcpYoWhiteBoard.getConnectionConch())
+            {
+               writeData();
+               readData();
+               
+               if (connectionVerificationCounter < 5)
+               {
+                  connectionVerificationCounter++;
+                  
+                  if (connectionVerificationCounter == 5)
+                  {
+                     PrintTools.info(this, "Connected! Syncing data.");
+                  }
+               }
+            }
          }
-         catch (Exception e)
+         catch (Exception exception)
          {
-            PrintTools.debug(DEBUG, this, e.getMessage());
+            connectionVerificationCounter = 0;
+            
+            PrintTools.error(this, exception.getMessage());
+            while (!tcpYoWhiteBoard.isTCPSocketConnected())
+            {
+               PrintTools.debug(DEBUG, this, "Waiting for TCP socket to connect.");
+               ThreadTools.sleepSeconds(3.0);
+            }
+            
             try
             {
-               PrintTools.info(this, "Connecting");
-               tcpYoWhiteBoard.connect();
+               synchronized (tcpYoWhiteBoard.getConnectionConch())
+               {
+                  PrintTools.info(this, "Connecting White Board");
+                  tcpYoWhiteBoard.connect();
+               }
             }
-            catch (IOException ioException)
+            catch (IOException | NullPointerException ioException)
             {
-               PrintTools.error(this, "Failed to connect");
-               ioException.printStackTrace();
-               ThreadTools.sleep(500);
+               PrintTools.error(this, ioException.getMessage());
             }
+            
+            ThreadTools.sleep(500);
          }
 
          ThreadTools.sleep(millisecondsBetweenDataWrites);

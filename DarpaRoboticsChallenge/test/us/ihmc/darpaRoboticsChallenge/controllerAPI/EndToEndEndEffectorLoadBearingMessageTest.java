@@ -43,7 +43,7 @@ public abstract class EndToEndEndEffectorLoadBearingMessageTest implements Multi
    @Test(timeout = 300000)
    public void testSwitchFootToLoadBearing() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 

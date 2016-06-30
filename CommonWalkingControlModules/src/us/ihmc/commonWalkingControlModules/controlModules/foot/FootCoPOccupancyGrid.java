@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -17,6 +19,7 @@ import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -58,6 +61,7 @@ public class FootCoPOccupancyGrid
    private final DenseMatrix64F occupancyGrid = new DenseMatrix64F(1, 1);
 
    private final DoubleYoVariable decayRate;
+   private final BooleanYoVariable resetGridToEmpty;
 
    public FootCoPOccupancyGrid(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions,
          int nWidthSubdivisions, WalkingControllerParameters walkingControllerParameters,
@@ -81,7 +85,7 @@ public class FootCoPOccupancyGrid
       this.nLengthSubdivisions = new IntegerYoVariable(namePrefix + "NLengthSubdivisions", registry);
       this.nLengthSubdivisions.set(nLengthSubdivisions);
       this.nWidthSubdivisions = new IntegerYoVariable(namePrefix + "NWidthSubdivisions", registry);
-      this.nWidthSubdivisions.set(nLengthSubdivisions);
+      this.nWidthSubdivisions.set(nWidthSubdivisions);
 
       ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
       if (explorationParameters != null)
@@ -97,6 +101,9 @@ public class FootCoPOccupancyGrid
          decayRate.set(defaultDecayRate);
       }
 
+      resetGridToEmpty = new BooleanYoVariable(namePrefix + name + "Reset", registry);
+      resetGridToEmpty.set(false);
+
       currentXIndex = new IntegerYoVariable(namePrefix + "CurrentXIndex", registry);
       currentYIndex = new IntegerYoVariable(namePrefix + "CurrentYIndex", registry);
       areCurrentCoPIndicesValid = new BooleanYoVariable(namePrefix + "IsCurrentCoPIndicesValid", registry);
@@ -108,7 +115,7 @@ public class FootCoPOccupancyGrid
 
       if (VISUALIZE)
       {
-         cellViz = new YoFramePoint[20][20];
+         cellViz = new YoFramePoint[nLengthSubdivisions][nWidthSubdivisions];
          for (int i = 0; i < cellViz.length; i++)
          {
             for (int j = 0; j < cellViz[0].length; j++)
@@ -145,7 +152,6 @@ public class FootCoPOccupancyGrid
             cellArea.set(cellSize.getX() * cellSize.getY());
          }
       };
-
       nLengthSubdivisions.addVariableChangedListener(changedGridSizeListener);
       nWidthSubdivisions.addVariableChangedListener(changedGridSizeListener);
       changedGridSizeListener.variableChanged(null);
@@ -167,9 +173,23 @@ public class FootCoPOccupancyGrid
             }
          }
       };
-
       thresholdForCellActivation.addVariableChangedListener(changedThresholdForCellActivationListener);
       changedThresholdForCellActivationListener.variableChanged(null);
+
+      VariableChangedListener resetGridListener = new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if (resetGridToEmpty.getBooleanValue())
+            {
+               reset();
+            }
+            resetGridToEmpty.set(false);
+         }
+      };
+      resetGridToEmpty.addVariableChangedListener(resetGridListener);
+      resetGridListener.variableChanged(null);
    }
 
    private final FramePoint cellPosition = new FramePoint();
@@ -501,5 +521,108 @@ public class FootCoPOccupancyGrid
             }
          }
       }
+   }
+
+   private final FramePoint2d tempCellCenter = new FramePoint2d();
+   public void computeConvexHull(FrameConvexPolygon2d convexHullToPack)
+   {
+      convexHullToPack.clear(soleFrame);
+      tempCellCenter.setToZero(soleFrame);
+
+      for (int xIndex = 0; xIndex < nLengthSubdivisions.getIntegerValue(); xIndex++)
+      {
+         for (int yIndex = 0; yIndex < nWidthSubdivisions.getIntegerValue(); yIndex++)
+         {
+            if (isCellOccupied(xIndex, yIndex))
+            {
+               getCellCenter(tempCellCenter, xIndex, yIndex);
+               convexHullToPack.addVertex(tempCellCenter);
+            }
+         }
+      }
+
+      convexHullToPack.update();
+   }
+
+   private final PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
+   private final DenseMatrix64F pointCloud = new DenseMatrix64F(0, 0);
+   private final Point3d tempPoint3d = new Point3d();
+   private final FramePoint2d lineOrigin = new FramePoint2d();
+   private final Vector3d tempVector3d = new Vector3d();
+   private final FrameVector2d lineDirection = new FrameVector2d();
+
+   private final FramePoint2d pointA = new FramePoint2d();
+   private final FramePoint2d pointB = new FramePoint2d();
+
+   public boolean fitLineToData(FrameLine2d lineToPack)
+   {
+      // TODO: instead of counting keep track of number of occupied positions
+      int numberOfPoints = 0;
+      for (int xIndex = 0; xIndex < nLengthSubdivisions.getIntegerValue(); xIndex++)
+      {
+         for (int yIndex = 0; yIndex < nWidthSubdivisions.getIntegerValue(); yIndex++)
+         {
+            if (isCellOccupied(xIndex, yIndex))
+            {
+               numberOfPoints++;
+            }
+         }
+      }
+
+      if (numberOfPoints < 2)
+         return false;
+
+      if (numberOfPoints == 2)
+      {
+         for (int xIndex = 0; xIndex < nLengthSubdivisions.getIntegerValue(); xIndex++)
+         {
+            for (int yIndex = 0; yIndex < nWidthSubdivisions.getIntegerValue(); yIndex++)
+            {
+               if (isCellOccupied(xIndex, yIndex))
+               {
+                  getCellCenter(tempCellCenter, xIndex, yIndex);
+                  pointB.setIncludingFrame(pointA);
+                  pointA.setIncludingFrame(tempCellCenter);
+               }
+            }
+         }
+         lineToPack.set(pointA, pointB);
+         return true;
+      }
+
+      pointCloud.reshape(3, numberOfPoints);
+
+      int counter = 0;
+      for (int xIndex = 0; xIndex < nLengthSubdivisions.getIntegerValue(); xIndex++)
+      {
+         for (int yIndex = 0; yIndex < nWidthSubdivisions.getIntegerValue(); yIndex++)
+         {
+            if (isCellOccupied(xIndex, yIndex))
+            {
+               getCellCenter(tempCellCenter, xIndex, yIndex);
+               pointCloud.set(0, counter, tempCellCenter.getX());
+               pointCloud.set(1, counter, tempCellCenter.getY());
+               // TODO: make 2D PCA class
+               pointCloud.set(2, counter, 0.0);
+               counter++;
+            }
+         }
+      }
+
+      pca.setPointCloud(pointCloud);
+      pca.compute();
+      pca.getMean(tempPoint3d);
+      pca.getPrincipalVector(tempVector3d);
+
+      lineOrigin.setIncludingFrame(soleFrame, tempPoint3d.getX(), tempPoint3d.getY());
+      lineDirection.setIncludingFrame(soleFrame, tempVector3d.getX(), tempVector3d.getY());
+
+      if (lineDirection.containsNaN())
+         return false;
+
+      lineToPack.setToZero(soleFrame);
+      lineToPack.setOrigin(lineOrigin);
+      lineToPack.setDirection(lineDirection);
+      return true;
    }
 }

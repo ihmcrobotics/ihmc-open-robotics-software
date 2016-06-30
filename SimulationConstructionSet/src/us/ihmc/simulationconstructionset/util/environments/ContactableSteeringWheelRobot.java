@@ -254,7 +254,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    {
       RigidBodyTransform pinJointTransform = new RigidBodyTransform();
       RigidBodyTransform newPose = new RigidBodyTransform();
-      pinJointTransform.rotZ(steeringWheelPinJoint.getQ().getDoubleValue());
+      pinJointTransform.setRotationYawAndZeroTranslation(steeringWheelPinJoint.getQ().getDoubleValue());
       newPose.multiply(originalSteeringWheelPose, pinJointTransform);
       steeringWheelFrame.setPoseAndUpdate(newPose);
 

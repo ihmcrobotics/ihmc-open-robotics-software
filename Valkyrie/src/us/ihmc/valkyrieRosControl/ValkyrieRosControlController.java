@@ -210,6 +210,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
        * Create controllers
        */
       MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, controllerPacketCommunicator, sensorInformation);
+      controllerFactory.attachControllerFailureListener(sensorReaderFactory.createControllerFailureListener());
       
       /*
        * Create output writer

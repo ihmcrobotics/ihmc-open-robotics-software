@@ -6,6 +6,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.tools.testing.TestPlanAnnotations;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 import javax.vecmath.Vector3d;
 import java.io.File;
@@ -17,7 +18,7 @@ import java.nio.file.Paths;
 
 import static org.junit.Assert.assertTrue;
 
-
+@TestPlanAnnotations.DeployableTestClass(targets = {TestPlanTarget.UI})
 public class DataExporterGraphCreatorTest
 {
 

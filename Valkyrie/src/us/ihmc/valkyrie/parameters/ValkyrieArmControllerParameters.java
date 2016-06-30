@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.parameters;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -35,8 +37,8 @@ public class ValkyrieArmControllerParameters extends ArmControllerParameters
       double zeta = runningOnRealRobot ? 1.0 : 0.7;
       double ki = runningOnRealRobot ? 0.0 : 0.0;
       double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 15.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAccel = runningOnRealRobot ? 50.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 750.0 : Double.POSITIVE_INFINITY;
 
       jointspaceControlGains.setKp(kp);
       jointspaceControlGains.setZeta(zeta);
@@ -98,6 +100,52 @@ public class ValkyrieArmControllerParameters extends ArmControllerParameters
       {
          return null;
       }
+   }
+
+   private Map<ArmJointName, DoubleYoVariable> jointAccelerationIntegrationAlphaPosition;
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<ArmJointName, DoubleYoVariable> getOrCreateAccelerationIntegrationAlphaPosition(YoVariableRegistry registry)
+   {
+      if (jointAccelerationIntegrationAlphaPosition != null)
+         return jointAccelerationIntegrationAlphaPosition;
+
+      DoubleYoVariable elbow = new DoubleYoVariable("elbowAccelerationIntegrationAlphaPosition", registry);
+      DoubleYoVariable wrist = new DoubleYoVariable("wristAccelerationIntegrationAlphaPosition", registry);
+
+      elbow.set(0.999);
+      wrist.set(0.999);
+
+      jointAccelerationIntegrationAlphaPosition = new HashMap<>();
+      jointAccelerationIntegrationAlphaPosition.put(ArmJointName.ELBOW_ROLL, elbow);
+      jointAccelerationIntegrationAlphaPosition.put(ArmJointName.FIRST_WRIST_PITCH, wrist);
+      jointAccelerationIntegrationAlphaPosition.put(ArmJointName.WRIST_ROLL, wrist);
+
+      return jointAccelerationIntegrationAlphaPosition;
+   }
+
+   private Map<ArmJointName, DoubleYoVariable> jointAccelerationIntegrationAlphaVelocity;
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<ArmJointName, DoubleYoVariable> getOrCreateAccelerationIntegrationAlphaVelocity(YoVariableRegistry registry)
+   {
+      if (jointAccelerationIntegrationAlphaVelocity != null)
+         return jointAccelerationIntegrationAlphaVelocity;
+
+      DoubleYoVariable elbow = new DoubleYoVariable("elbowAccelerationIntegrationAlphaVelocity", registry);
+      DoubleYoVariable wrist = new DoubleYoVariable("wristAccelerationIntegrationAlphaVelocity", registry);
+
+      elbow.set(0.83);
+      wrist.set(0.83);
+
+      jointAccelerationIntegrationAlphaVelocity = new HashMap<>();
+      jointAccelerationIntegrationAlphaVelocity.put(ArmJointName.ELBOW_ROLL, elbow);
+      jointAccelerationIntegrationAlphaVelocity.put(ArmJointName.FIRST_WRIST_PITCH, wrist);
+      jointAccelerationIntegrationAlphaVelocity.put(ArmJointName.WRIST_ROLL, wrist);
+
+      return jointAccelerationIntegrationAlphaVelocity;
    }
 
    @Override

@@ -2,11 +2,10 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
-import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
-import us.ihmc.robotics.random.RandomTools;
 
 /**
  * This class is used to build trajectory messages in jointspace. It holds all the trajectory points to go through with a one-dimensional trajectory.

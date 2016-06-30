@@ -87,7 +87,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
                                             double z, double roll, double pitch, double yaw, double radius, double height)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setEuler(roll, pitch, yaw);
+      transform.setRotationEulerAndZeroTranslation(roll, pitch, yaw);
 
       Vector3d position = new Vector3d(x, y, z);
       Vector3d baseToCenter = new Vector3d(0.0, 0.0, -height / 2.0);
@@ -130,7 +130,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
    private void addBox(double x, double y, double z, double roll, double pitch, double yaw, double sizeX, double sizeY, double sizeZ, CombinedTerrainObject3D terrainObject)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setEuler(roll, pitch, yaw);
+      transform.setRotationEulerAndZeroTranslation(roll, pitch, yaw);
       transform.setTranslation(new Vector3d(x, y, z));
       Box3d box = new Box3d(transform, sizeX, sizeY, sizeZ);
       terrainObject.addRotatableBox(box, YoAppearance.DarkGray());

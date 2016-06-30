@@ -75,7 +75,7 @@ public class RowOfDominosRobot extends Robot
          floatingJoint.setRotationAndTranslation(nextDominoTransform);
          
          tempTransform.setIdentity();
-         tempTransform.rotZ(0.15);
+         tempTransform.setRotationYawAndZeroTranslation(0.15);
          tempTransform.setTranslation(dominoTranslation);
          
          tempTransform2.setIdentity();

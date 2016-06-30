@@ -74,7 +74,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getICPErrorThresholdToSpeedUpSwing();
 
-   public abstract ICPControlGains getICPControlGains();
+   public abstract ICPControlGains createICPControlGains(YoVariableRegistry registry);
 
    public abstract YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry);
 
@@ -166,6 +166,10 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public abstract double getMaxICPErrorBeforeSingleSupportY();
 
    public abstract boolean finishSingleSupportWhenICPPlannerIsDone();
+
+   public abstract void useInverseDynamicsControlCore();
+
+   public abstract void useVirtualModelControlCore();
 
    /**
     * This is the duration for which the desired foot center of pressure will be

@@ -66,7 +66,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
 	@Test(timeout = 130000)
    public void testBigStepUpWithHandPlatform() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double stepHeight = 0.2;
 
@@ -128,7 +128,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
 
       assertTrue(success);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupCameraForBigStepUpWithHandPlatform()
