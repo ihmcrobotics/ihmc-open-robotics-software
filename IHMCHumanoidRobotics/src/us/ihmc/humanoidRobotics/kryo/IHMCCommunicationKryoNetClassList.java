@@ -120,6 +120,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.TestbedClientPacke
 import us.ihmc.humanoidRobotics.communication.packets.sensing.TestbedServerPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.UIConnectedPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
+import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.BlindWalkingPacket;
@@ -267,6 +268,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Controller failure
       registerPacketClass(WalkingControllerFailureStatusMessage.class);
+
+      // Valkyrie specific
+      registerPacketClass(ValkyrieLowLevelControlModeMessage.class);
 
       // Handstep
       registerPacketClass(HandstepPacket.class);

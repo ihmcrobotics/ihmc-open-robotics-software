@@ -20,22 +20,15 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMess
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
-import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
@@ -52,8 +45,6 @@ public class ValkyrieRosControlLowLevelController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final TimestampProvider timestampProvider;
-
-   private enum ControlMode {WAITING, CALIBRATION, HIGH_LEVEL_CONTROL};
 
    private final AtomicBoolean resetIHMCControlRatioAndStandPrepRequested = new AtomicBoolean(false);
 
@@ -77,13 +68,10 @@ public class ValkyrieRosControlLowLevelController
    private final DoubleYoVariable calibrationStartTime = new DoubleYoVariable("calibrationStartTime", registry);
    private final DoubleYoVariable timeInCalibration = new DoubleYoVariable("timeInCalibration", registry);
 
-   private final BooleanYoVariable requestCalibration = new BooleanYoVariable("requestCalibration", registry);
-   private final AtomicBoolean requestCalibrationAtomic = new AtomicBoolean(false);
+   private final EnumYoVariable<ValkyrieLowLevelControlModeMessage.ControlMode> currentControlMode = new EnumYoVariable<>("lowLevelControlMode", registry, ValkyrieLowLevelControlModeMessage.ControlMode.class);
 
-   private final DoubleYoVariable minFootForceToSwitchToWalking = new DoubleYoVariable("minFootForceToSwitchToWalking", registry);
-   private final BooleanYoVariable isRobotReadyToWalk = new BooleanYoVariable("isRobotReadyToWalk", registry);
-
-   private final EnumYoVariable<ControlMode> currentControlMode = new EnumYoVariable<>("lowLevelControlMode", registry, ControlMode.class);
+   private final EnumYoVariable<ValkyrieLowLevelControlModeMessage.ControlMode> requestedLowLevelControlMode = new EnumYoVariable<>("requestedLowLevelControlMode", registry, ValkyrieLowLevelControlModeMessage.ControlMode.class, true);
+   private final AtomicReference<ValkyrieLowLevelControlModeMessage.ControlMode> requestedLowLevelControlModeAtomic = new AtomicReference<>(null);
 
    private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;
    private final ValkyrieAccelerationIntegration accelerationIntegration;
@@ -101,11 +89,6 @@ public class ValkyrieRosControlLowLevelController
    private ForceSensorCalibrationModule forceSensorCalibrationModule;
    private JointTorqueOffsetEstimator jointTorqueOffsetEstimator;
 
-   private final Wrench tempWrench = new Wrench();
-   private SideDependentList<ForceSensorDataReadOnly> feetForceSensorData = new SideDependentList<>();
-   private final SideDependentList<GlitchFilteredBooleanYoVariable> areFeetLoaded = new SideDependentList<>();
-   private final SideDependentList<SimpleMovingAverageFilteredYoVariable> feetForceMagnitude = new SideDependentList<>();
-
    @SuppressWarnings("unchecked")
    public ValkyrieRosControlLowLevelController(TimestampProvider timestampProvider, final double updateDT, List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
          List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, YoVariableRegistry parentRegistry)
@@ -116,11 +99,9 @@ public class ValkyrieRosControlLowLevelController
       controlRatioRampDuration.set(3.0);
       masterGain.set(0.3);
       calibrationDuration.set(10.0);
-      minFootForceToSwitchToWalking.set(50.0);
 
-      currentControlMode.set(ControlMode.WAITING);
+      currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.STAND_PREP);
 
-      isRobotReadyToWalk.set(true);
       wakeUpTime.set(Double.NaN);
       standPrepStartTime.set(Double.NaN);
       calibrationStartTime.set(Double.NaN);
@@ -128,25 +109,13 @@ public class ValkyrieRosControlLowLevelController
       torqueHysteresisCompensator = new ValkyrieTorqueHysteresisCompensator(yoEffortJointHandleHolders, yoTime, registry);
       accelerationIntegration = new ValkyrieAccelerationIntegration(yoEffortJointHandleHolders, updateDT, registry);
 
-      double minDurationBeforeFootIsLoaded = 3.0;
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         String prefix = "standPrep" + robotSide.getCamelCaseNameForMiddleOfExpression();
-         int windowSize = (int) (minDurationBeforeFootIsLoaded / updateDT);
-         SimpleMovingAverageFilteredYoVariable footForceMagnitude = new SimpleMovingAverageFilteredYoVariable(prefix + "FootForceMag", windowSize, parentRegistry);
-         feetForceMagnitude.put(robotSide, footForceMagnitude);
-         GlitchFilteredBooleanYoVariable isFootLoaded = new GlitchFilteredBooleanYoVariable(prefix + "FootIsLoaded", registry, windowSize);
-         areFeetLoaded.put(robotSide, isFootLoaded);
-      }
-
-      requestCalibration.addVariableChangedListener(new VariableChangedListener()
+      requestedLowLevelControlMode.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            if (requestCalibration.getBooleanValue())
-               requestCalibrationAtomic.set(true);
+            if (requestedLowLevelControlMode.getEnumValue() != null)
+               requestedLowLevelControlModeAtomic.set(requestedLowLevelControlMode.getEnumValue());
          }
       });
 
@@ -308,7 +277,7 @@ public class ValkyrieRosControlLowLevelController
 
    public void requestCalibration()
    {
-      requestCalibrationAtomic.set(true);
+      requestedLowLevelControlModeAtomic.set(ValkyrieLowLevelControlModeMessage.ControlMode.CALIBRATION);
    }
 
    public void doControl()
@@ -320,84 +289,75 @@ public class ValkyrieRosControlLowLevelController
 
       yoTime.set(TimeTools.nanoSecondstoSeconds(timestamp) - wakeUpTime.getDoubleValue());
 
+      taskExecutor.doControl();
+      ValkyrieLowLevelControlModeMessage.ControlMode newRequest = requestedLowLevelControlModeAtomic.getAndSet(null);
+      requestedLowLevelControlMode.set(null);
+
       switch (currentControlMode.getEnumValue())
       {
-      case WAITING:
+      case STAND_PREP:
          if (doIHMCControlRatio.getDoubleValue() > 1.0 - 1.0e-3 && currentHighLevelState.get() == HighLevelState.WALKING)
          {
-            currentControlMode.set(ControlMode.HIGH_LEVEL_CONTROL);
+            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.HIGH_LEVEL_CONTROL);
             break;
          }
 
-         if (requestCalibrationAtomic.getAndSet(false))
+         if (taskExecutor.isDone() && currentHighLevelState.get() != HighLevelState.DO_NOTHING_BEHAVIOR)
          {
-            requestCalibration.set(false);
+            highLevelStateCommand.setHighLevelState(HighLevelState.DO_NOTHING_BEHAVIOR);
+            commandInputManager.submitCommand(highLevelStateCommand);
+         }
+
+         if (newRequest == null)
+            break;
+
+         switch (newRequest)
+         {
+         case CALIBRATION:
             highLevelStateCommand.setHighLevelState(HighLevelState.CALIBRATION);
             commandInputManager.submitCommand(highLevelStateCommand);
             taskExecutor.submit(rampUpIHMCControlRatioTask);
             taskExecutor.submit(calibrationTask);
             taskExecutor.submit(rampDownIHMCControlRatioTask);
-            currentControlMode.set(ControlMode.CALIBRATION);
+            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.CALIBRATION);
+            break;
+         case HIGH_LEVEL_CONTROL:
+            highLevelStateCommand.setHighLevelState(HighLevelState.WALKING);
+            commandInputManager.submitCommand(highLevelStateCommand);
+            taskExecutor.submit(rampUpIHMCControlRatioTask);
+            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.HIGH_LEVEL_CONTROL);
+            break;
+         default:
             break;
          }
 
-         if (isRobotReadyToWalk.getBooleanValue())
-         {
-            boolean areBothFeetLoaded = true;
-            
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               feetForceSensorData.get(robotSide).getWrench(tempWrench);
-               SimpleMovingAverageFilteredYoVariable footForceMagnitude = feetForceMagnitude.get(robotSide);
-               footForceMagnitude.update(Math.abs(tempWrench.getLinearPartZ()));
-               GlitchFilteredBooleanYoVariable isFootLoaded = areFeetLoaded.get(robotSide);
-               isFootLoaded.update(footForceMagnitude.getDoubleValue() > minFootForceToSwitchToWalking.getDoubleValue());
-               areBothFeetLoaded &= isFootLoaded.getBooleanValue();
-            }
-            
-            if (areBothFeetLoaded)
-            {
-               highLevelStateCommand.setHighLevelState(HighLevelState.WALKING);
-               commandInputManager.submitCommand(highLevelStateCommand);
-               taskExecutor.submit(rampUpIHMCControlRatioTask);
-               currentControlMode.set(ControlMode.HIGH_LEVEL_CONTROL);
-            }
-         }
-         break;
-
       case CALIBRATION:
-         resetFeetForceData();
-         ignoreCalibrationRequests();
-
-         if (!taskExecutor.isDone())
-            taskExecutor.doControl();
-         else
+         if (taskExecutor.isDone())
          {
-            highLevelStateCommand.setHighLevelState(HighLevelState.DO_NOTHING_BEHAVIOR);
-            commandInputManager.submitCommand(highLevelStateCommand);
-            currentControlMode.set(ControlMode.WAITING);
+            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.STAND_PREP);
          }
          break;
       case HIGH_LEVEL_CONTROL:
-         resetFeetForceData();
-         ignoreCalibrationRequests();
-
-         taskExecutor.doControl();
+         if (newRequest != null && newRequest == ValkyrieLowLevelControlModeMessage.ControlMode.STAND_PREP)
+         {
+            taskExecutor.clear();
+            taskExecutor.submit(rampDownIHMCControlRatioTask);
+            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.STAND_PREP);
+            break;
+         }
 
          if (resetIHMCControlRatioAndStandPrepRequested.getAndSet(false))
          {
             standPrepStartTime.set(Double.NaN);
             doIHMCControlRatio.set(0.0);
             taskExecutor.clear();
-            currentControlMode.set(ControlMode.WAITING);
-            isRobotReadyToWalk.set(false);
+            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.STAND_PREP);
             break;
          }
 
          if (doIHMCControlRatio.getDoubleValue() < 1.0e-3 && taskExecutor.isDone())
          {
-            currentControlMode.set(ControlMode.WAITING);
-            isRobotReadyToWalk.set(false);
+            currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.STAND_PREP);
             break;
          }
 
@@ -405,26 +365,9 @@ public class ValkyrieRosControlLowLevelController
          if (ValkyrieRosControlController.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
             accelerationIntegration.compute();
          break;
-      default:
-         break;
       }
 
       updateCommandCalculators();
-   }
-
-   private void resetFeetForceData()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         feetForceMagnitude.get(robotSide).set(0.0);
-         areFeetLoaded.get(robotSide).set(false);
-      }
-   }
-
-   public void ignoreCalibrationRequests()
-   {
-      requestCalibration.set(false);
-      requestCalibrationAtomic.set(false);
    }
 
    public void updateCommandCalculators()
@@ -505,13 +448,6 @@ public class ValkyrieRosControlLowLevelController
    public void attachForceSensorCalibrationModule(DRCRobotSensorInformation sensorInformation, ForceSensorCalibrationModule forceSensorCalibrationModule)
    {
       this.forceSensorCalibrationModule = forceSensorCalibrationModule;
-      SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
-      ForceSensorDataHolderReadOnly forceSensorOutput = forceSensorCalibrationModule.getForceSensorOutput();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ForceSensorDataReadOnly footForceSensorData = forceSensorOutput.getByName(feetForceSensorNames.get(robotSide));
-         feetForceSensorData.put(robotSide, footForceSensorData);
-      }
    }
 
    public void attachJointTorqueOffsetEstimator(JointTorqueOffsetEstimator jointTorqueOffsetEstimator)
