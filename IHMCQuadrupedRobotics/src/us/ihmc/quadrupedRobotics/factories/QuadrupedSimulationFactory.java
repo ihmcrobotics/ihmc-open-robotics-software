@@ -368,8 +368,6 @@ public class QuadrupedSimulationFactory
          scs.setGroundVisible(false);
       }
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      VisualizerUtils.createOverheadPlotter(scs, false, "centerOfMass", yoGraphicsListRegistry);
-      VisualizerUtils.createOverheadPlotterInSeparateWindow(scs, false, "centerOfMass", yoGraphicsListRegistryForDetachedOverhead);
       scs.setDT(controlDT.get(), recordFrequency.get());
       if (scs.getSimulationConstructionSetParameters().getCreateGUI())
       {
@@ -380,6 +378,8 @@ public class QuadrupedSimulationFactory
          scs.setCameraDollyOffsets(4.0, 4.0, 1.0);
          if (showPlotter.get())
          {
+            VisualizerUtils.createOverheadPlotter(scs, false, "centerOfMass", yoGraphicsListRegistry);
+            VisualizerUtils.createOverheadPlotterInSeparateWindow(scs, false, "centerOfMass", yoGraphicsListRegistryForDetachedOverhead);
             scs.getStandardSimulationGUI().selectPanel("Plotter");
          }
       }
