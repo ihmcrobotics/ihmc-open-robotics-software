@@ -17,6 +17,8 @@ import org.yaml.snakeyaml.Yaml;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
@@ -471,5 +473,18 @@ public class ValkyrieRosControlLowLevelController
       public void doTransitionOutOfAction()
       {
       }
+   }
+
+   public void setupLowLevelControlWithPacketCommunicator(PacketCommunicator packetCommunicator)
+   {
+      packetCommunicator.attachListener(ValkyrieLowLevelControlModeMessage.class, new PacketConsumer<ValkyrieLowLevelControlModeMessage>()
+      {
+         @Override
+         public void receivedPacket(ValkyrieLowLevelControlModeMessage packet)
+         {
+            if (packet != null && packet.getRequestedControlMode() != null)
+               requestedLowLevelControlModeAtomic.set(packet.getRequestedControlMode());
+         }
+      });
    }
 }

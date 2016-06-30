@@ -10,6 +10,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -177,5 +178,10 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    public void attachJointTorqueOffsetEstimator(JointTorqueOffsetEstimator jointTorqueOffsetEstimator)
    {
       lowlLevelController.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimator);
+   }
+
+   public void setupLowLevelControlWithPacketCommunicator(PacketCommunicator packetCommunicator)
+   {
+      lowlLevelController.setupLowLevelControlWithPacketCommunicator(packetCommunicator);
    }
 }
