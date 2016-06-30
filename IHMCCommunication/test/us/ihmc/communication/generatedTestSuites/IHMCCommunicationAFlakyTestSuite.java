@@ -13,6 +13,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.communication.net.KryoObjectCommunicatorTest.class,
+   us.ihmc.communication.remote.DataObjectTransponderTest.class,
    us.ihmc.communication.streamingData.StreamingDataTCPServerTest.class
 })
 

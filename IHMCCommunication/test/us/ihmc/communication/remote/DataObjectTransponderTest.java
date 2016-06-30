@@ -7,11 +7,13 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.thread.ThreadTools;
 
-
+@DeployableTestClass(targets = TestPlanTarget.Fast)
 public class DataObjectTransponderTest
 {
    private static final int MAXIMUM_INTER_PACKET_DELAY_MILLIS = 300;
@@ -81,7 +83,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.0)
+   @DeployableTestMethod(estimatedDuration = 5.0, targets = TestPlanTarget.Flaky)
    @Test(timeout = 200000)
    public void testDoubleBidirectionalCommunication() throws InterruptedException
    {

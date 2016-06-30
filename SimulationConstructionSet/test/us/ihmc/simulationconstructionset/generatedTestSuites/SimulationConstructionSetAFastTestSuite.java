@@ -61,6 +61,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.simulationconstructionset.util.ground.SingleStepGroundProfileTest.class,
    us.ihmc.simulationconstructionset.util.ground.SlopedPlaneGroundProfileTest.class,
    us.ihmc.simulationconstructionset.util.ground.StairGroundProfileTest.class,
+   us.ihmc.simulationconstructionset.util.ground.VaryingStairGroundProfileTest.class,
    us.ihmc.simulationconstructionset.util.ground.WavyGroundProfileTest.class,
    us.ihmc.simulationconstructionset.util.IndexOrderCheckerTest.class,
    us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoardTest.class,
