@@ -402,6 +402,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
       wrenchToSubstractHandWeightTo.sub(wristWrenchDueToGravity);
    }
 
+   @Override
    public ForceSensorDataHolderReadOnly getForceSensorOutput()
    {
       if (outputForceSensorDataHolder == null)
