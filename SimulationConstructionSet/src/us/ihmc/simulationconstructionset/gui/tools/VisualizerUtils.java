@@ -48,6 +48,9 @@ public class VisualizerUtils
       for (int i = 0; i < yoGraphicsListRegistries.length; i++)
       {
          YoGraphicsListRegistry yoGraphicsListRegistry = yoGraphicsListRegistries[i];
+         if (yoGraphicsListRegistry == null)
+            continue;
+
          yoGraphicsListRegistry.addArtifactListsToPlotter(plotter.getPlotter());
          ArrayList<ArtifactList> buffer = new ArrayList<>();
          yoGraphicsListRegistry.getRegisteredArtifactLists(buffer);
