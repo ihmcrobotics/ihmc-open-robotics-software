@@ -44,6 +44,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.tools.reflect.RecursiveObjectComparerTest.class,
    us.ihmc.tools.reflect.ReflectionToolsTest.class,
    us.ihmc.tools.reflect.StringFieldMatcherTest.class,
+   us.ihmc.tools.search.strings.fuzzySearch.CombinedFuzzySearcherTest.class,
    us.ihmc.tools.search.strings.fuzzySearch.comparators.SortByMatchedStringComparatorTest.class,
    us.ihmc.tools.search.strings.fuzzySearch.comparators.SortByResultTypeComparatorTest.class,
    us.ihmc.tools.search.strings.fuzzySearch.comparators.SortFuzzyMatchesDescendingByFuzzyDistanceComparatorTest.class,
