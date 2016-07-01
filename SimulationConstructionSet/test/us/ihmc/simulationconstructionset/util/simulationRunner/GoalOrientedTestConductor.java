@@ -151,6 +151,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
 
    public void destroy()
    {
+      ThreadTools.sleep(200);
       scs.closeAndDispose();
    }
    
