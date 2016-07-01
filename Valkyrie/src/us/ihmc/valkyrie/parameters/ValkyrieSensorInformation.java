@@ -107,7 +107,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String right_frame_name = multisense_namespace + "/right_camera_frame";
 
    private static final String headLinkName = "multisense_root_link";
-   private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[4];
+   private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[2];
 
    private static final String left_camera_name = "stereo_camera_left";
    private static final String right_camera_name = "stereo_camera_right";
@@ -196,14 +196,18 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
          cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, right_camera_name, right_camera_compressed_topic, right_info_camera_topic, multisenseHandoffFrame, baseTfName,
                right_frame_name, MULTISENSE_SL_RIGHT_CAMERA_ID);
          pointCloudParamaters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
-         setupStaticTransformsForRos();
       }
       else
       {
-         lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(false, lidarSensorName, multisense_laser_topic_string, multisense_laser_topic_string,
-               lidarJointName, lidarJointTopic, lidarPoseLink, multisenseHandoffFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
-         cameraParamaters[0] = new DRCRobotCameraParameters(null, left_camera_name,left_camera_topic, left_frame_name,left_info_camera_topic,transformFromHeadToCamera, multisenseCameraId);
+         lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(false, lidarSensorName, multisense_near_Scan, multisense_height_map,
+               lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
+         cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, left_camera_name, left_camera_compressed_topic, left_info_camera_topic, multisenseHandoffFrame, baseTfName,
+               left_frame_name, MULTISENSE_SL_LEFT_CAMERA_ID);
+         cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, right_camera_name, right_camera_compressed_topic, right_info_camera_topic, multisenseHandoffFrame, baseTfName,
+               right_frame_name, MULTISENSE_SL_RIGHT_CAMERA_ID);
+         pointCloudParamaters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
       }
+      setupStaticTransformsForRos();
    }
 
    public static String getUrdfFeetForceSensorName(RobotSide side)
