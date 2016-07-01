@@ -258,7 +258,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(RobotSide.LEFT), 0.0, 0.0, 0.0);
       ArrayList<Point2d> contacts = generateContactPointsForRotatedLineOfContact(0.01, 0.0);
       success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, RobotSide.LEFT, contacts, stepLocation, jointNames, true);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       FramePoint desiredPosition = new FramePoint(fullRobotModel.getSoleFrame(RobotSide.RIGHT), 0.0, 0.0, 0.15);
       desiredPosition.changeFrame(worldFrame);
@@ -266,7 +266,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(RobotSide.RIGHT, 1.0, desiredPosition.getPoint(), desiredOrientation);
       drcSimulationTestHelper.send(footTrajectoryMessage);
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+      assertTrue(success);
    }
 
    @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.Fast})
