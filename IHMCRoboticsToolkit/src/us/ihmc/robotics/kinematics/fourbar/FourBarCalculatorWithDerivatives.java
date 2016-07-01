@@ -1,13 +1,7 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
-import static java.lang.Math.PI;
-import static java.lang.Math.abs;
-import static java.lang.Math.acos;
-import static java.lang.Math.cos;
-import static java.lang.Math.min;
-import static java.lang.Math.pow;
-import static java.lang.Math.sin;
-import static java.lang.Math.sqrt;
+import static java.lang.Math.*;
+import static java.lang.Math.atan2;
 import static us.ihmc.robotics.MathTools.checkIfInRange;
 import static us.ihmc.robotics.MathTools.clipToMinMax;
 import static us.ihmc.robotics.MathTools.cube;
@@ -15,6 +9,9 @@ import static us.ihmc.robotics.MathTools.square;
 import static us.ihmc.robotics.geometry.GeometryTools.getUnknownTriangleSideLengthByLawOfCosine;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.random.RandomTools;
+
+import java.util.Random;
 
 public class FourBarCalculatorWithDerivatives
 {
@@ -277,6 +274,61 @@ public class FourBarCalculatorWithDerivatives
       double angleDDot = (-cosAngleDDot + cosAngleDDot * square(cosAngle) - cosAngleDot * cosAngleDot * cosAngle) / pow(1 - square(cosAngle), 3.0 / 2.0);
 
       return angleDDot;
+   }
+
+   /**
+    * @param random
+    * @param sideLengths index 0 is AB, index 1 is BC, ...
+    * @param validInitialAngles index 0 is angle A, index 1 is angle B, ...
+    * @param minSideLength
+    * @param maxSideLength
+    */
+   public static void generateRandomFourBar(Random random, double[] sideLengths, double[] validInitialAngles, double minSideLength, double maxSideLength)
+   {
+      double e = RandomTools.generateRandomDouble(random, minSideLength, maxSideLength);
+      double k1 = random.nextDouble();
+      double k2 = random.nextDouble();
+      double d1 = e * abs(random.nextGaussian());
+      double d2 = e * abs(random.nextGaussian());
+
+      double DE = e * k1;
+      double DF = e * k2;
+      double BE = e * (1 - k1);
+      double BF = e * (1 - k2);
+
+      double AE = d1;
+      double CF = d2;
+
+      double DA = sqrt(DE * DE + AE * AE);
+      double DAE = atan2(DE, AE);
+      double ADE = atan2(AE, DE);
+
+      double AB = sqrt(AE * AE + BE * BE);
+      double BAE = atan2(BE, AE);
+      double ABE = atan2(AE, BE);
+
+      double CD = sqrt(CF * CF + DF * DF);
+      double CDF = atan2(CF, DF);
+      double DCF = atan2(DF, CF);
+
+      double BC = sqrt(BF * BF + CF * CF);
+      double CBF = atan2(CF, BF);
+      double BCF = atan2(BF, CF);
+
+      double A = DAE + BAE;
+      double B = ABE + CBF;
+      double C = BCF + DCF;
+      double D = ADE + CDF;
+
+      sideLengths[0] = AB;
+      sideLengths[1] = BC;
+      sideLengths[2] = CD;
+      sideLengths[3] = DA;
+
+      validInitialAngles[0] = A;
+      validInitialAngles[0] = B;
+      validInitialAngles[0] = C;
+      validInitialAngles[0] = D;
    }
 
    public double getAngleDAB()
