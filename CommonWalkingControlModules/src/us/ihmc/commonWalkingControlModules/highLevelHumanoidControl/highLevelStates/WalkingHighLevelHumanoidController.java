@@ -550,6 +550,10 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, desiredCapturePoint2d);
       if (failureDetectionControlModule.isRobotFalling())
       {
+         walkingMessageHandler.clearFootsteps();
+         walkingMessageHandler.clearFootTrajectory();
+         commandInputManager.flushAllCommands();
+
          if (enablePushRecoveryOnFailure.getBooleanValue() && !balanceManager.isPushRecoveryEnabled())
          {
             balanceManager.enablePushRecovery();
