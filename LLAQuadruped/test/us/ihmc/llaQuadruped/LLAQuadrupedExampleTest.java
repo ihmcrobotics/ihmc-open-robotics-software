@@ -6,9 +6,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.quadrupedRobotics.QuadrupedTestConductor;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
@@ -17,7 +17,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @DeployableTestClass(targets = TestPlanTarget.Fast)
 public class LLAQuadrupedExampleTest
 {
-   private QuadrupedTestConductor conductor;
+   private GoalOrientedTestConductor conductor;
 
    @Before
    public void setup()
