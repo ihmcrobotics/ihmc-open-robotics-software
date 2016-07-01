@@ -9,6 +9,7 @@ import java.util.Random;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.robotics.Axis;
@@ -27,16 +28,15 @@ public class FourBarKinematicLoopTest
    private final ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevatorFrame", worldFrame, new RigidBodyTransform());
    private final RigidBody elevator = new RigidBody("elevator", elevatorFrame);
 
-   private RigidBody rigidBodyAB, rigidBodyBC, rigidBodyCD;
+   private RigidBody rigidBodyAB, rigidBodyBC, rigidBodyCD, rigidBodyDA;
    private RevoluteJoint masterJointA;
    private PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD;
    private FourBarKinematicLoop fourBarKinematicLoop;
-   private Vector3d jointDinBeforeFrameA = new Vector3d();
    private final Random random = new Random(329023L);
 
    private final static double eps = 1e-7;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testPlanarSquareWithParallelReferenceFrames()
    {
@@ -47,13 +47,13 @@ public class FourBarKinematicLoopTest
       Vector3d jointBtoC = new Vector3d(1.0, 0.0, 0.0);
       Vector3d jointCtoD = new Vector3d(0.0, -1.0, 0.0);
       Vector3d jointAtoD = new Vector3d(1.0, 0.0, 0.0);
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       boolean recomputeJointLimits = false;
 
       testPlanarSquare(recomputeJointLimits, jointAtoD);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testPlanarSquareWithRotatedJointFrames()
    {
@@ -159,7 +159,7 @@ public class FourBarKinematicLoopTest
       assertTrue(fourBarKinematicLoop.getPassiveRevoluteJointD() == passiveJointD);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSquareWithoutClosureAtZeroAngles()
    {
@@ -174,7 +174,7 @@ public class FourBarKinematicLoopTest
       Vector3d jointBtoC = new Vector3d(Math.sqrt(0.5), Math.sqrt(0.5), bToCOffsetZ);
       Vector3d jointCtoD = new Vector3d(0.0, 1.0, cToDOffsetZ);
       Vector3d jointAtoD = new Vector3d(0.0, 1.0, aToBOffsetZ + bToCOffsetZ + cToDOffsetZ);
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       boolean recomputeJointLimits = false;
 
       initializeJointLimits(-0.5 * Math.PI, 0.5 * Math.PI, -0.25 * Math.PI, 0.75 * Math.PI, -0.25 * Math.PI, 0.75 * Math.PI, 0.0, Math.PI);
@@ -209,7 +209,7 @@ public class FourBarKinematicLoopTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRectangleWithJointOutOfPlane()
    {
@@ -220,7 +220,7 @@ public class FourBarKinematicLoopTest
       Vector3d jointBtoC = new Vector3d(0.0, 2.0, 0.2);
       Vector3d jointCtoD = new Vector3d(-1.0, 0.0, -0.2);
       Vector3d jointAtoD = new Vector3d(0.0, 2.0, 0.0);
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       boolean recomputeJointLimits = false;
       initializeJointLimits(-0.5 * Math.PI, 0.5 * Math.PI, -0.5 * Math.PI, 0.5 * Math.PI, -0.5 * Math.PI, 0.5 * Math.PI, 0.0, Math.PI);
 
@@ -263,7 +263,7 @@ public class FourBarKinematicLoopTest
       assertEquals(passiveJointD.getQd(), -masterJointVelocity, eps);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testParallelJointAxesIsEnforced_TranslatedJointsFrames()
    {
@@ -278,7 +278,7 @@ public class FourBarKinematicLoopTest
       // try making a four bar with non-parallel axes
       try
       {
-         initializeSquareFourBarInXYPlane(sideLength, epsilonRotatedZAxis, zAxis, zAxis, zAxis);
+         initializeSquareFourBarInXYPlane(sideLength, epsilonRotatedZAxis, zAxis, zAxis, zAxis, 1);
          new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
                recomputeJointLimits);
          fail();
@@ -289,7 +289,7 @@ public class FourBarKinematicLoopTest
 
       try
       {
-         initializeSquareFourBarInXYPlane(sideLength, zAxis, epsilonRotatedZAxis, zAxis, zAxis);
+         initializeSquareFourBarInXYPlane(sideLength, zAxis, epsilonRotatedZAxis, zAxis, zAxis, 1);
          new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
                recomputeJointLimits);
          fail();
@@ -300,7 +300,7 @@ public class FourBarKinematicLoopTest
 
       try
       {
-         initializeSquareFourBarInXYPlane(sideLength, zAxis, zAxis, epsilonRotatedZAxis, zAxis);
+         initializeSquareFourBarInXYPlane(sideLength, zAxis, zAxis, epsilonRotatedZAxis, zAxis, 1);
          new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
                recomputeJointLimits);
          fail();
@@ -311,7 +311,7 @@ public class FourBarKinematicLoopTest
 
       try
       {
-         initializeSquareFourBarInXYPlane(sideLength, zAxis, zAxis, zAxis, epsilonRotatedZAxis);
+         initializeSquareFourBarInXYPlane(sideLength, zAxis, zAxis, zAxis, epsilonRotatedZAxis, 1);
          new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
                recomputeJointLimits);
          fail();
@@ -325,16 +325,16 @@ public class FourBarKinematicLoopTest
 
       try
       {
-         initializeSquareFourBarInXYPlane(sideLength, negatedZAxis, zAxis, zAxis, zAxis);
+         initializeSquareFourBarInXYPlane(sideLength, negatedZAxis, zAxis, zAxis, zAxis, 1);
          new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD, recomputeJointLimits);
 
-         initializeSquareFourBarInXYPlane(sideLength, zAxis, negatedZAxis, zAxis, zAxis);
+         initializeSquareFourBarInXYPlane(sideLength, zAxis, negatedZAxis, zAxis, zAxis, 1);
          new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD, recomputeJointLimits);
 
-         initializeSquareFourBarInXYPlane(sideLength, zAxis, zAxis, negatedZAxis, zAxis);
+         initializeSquareFourBarInXYPlane(sideLength, zAxis, zAxis, negatedZAxis, zAxis, 1);
          new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD, recomputeJointLimits);
 
-         initializeSquareFourBarInXYPlane(sideLength, zAxis, zAxis, zAxis, negatedZAxis);
+         initializeSquareFourBarInXYPlane(sideLength, zAxis, zAxis, zAxis, negatedZAxis, 1);
          new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD, recomputeJointLimits);
       }
       catch (Exception e)
@@ -344,7 +344,7 @@ public class FourBarKinematicLoopTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testJointLimitsNearFourBarConstraint()
    {
@@ -384,7 +384,7 @@ public class FourBarKinematicLoopTest
       new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD.getVector(), recomputeJointLimits);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRecomputingJointLimits_NoLimitsAreSet_UnitSquare()
    {
@@ -395,7 +395,7 @@ public class FourBarKinematicLoopTest
       Vector3d jointBtoC = new Vector3d(0.0, 1.0, random.nextDouble());
       Vector3d jointCtoD = new Vector3d(-1.0, 0.0, random.nextDouble());
       Vector3d jointAtoD = new Vector3d(0.0, 1.0, random.nextDouble());
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       boolean recomputeJointLimits = true;
 
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
@@ -408,7 +408,7 @@ public class FourBarKinematicLoopTest
       assertEquals(jointAMax, 0.5 * Math.PI, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRecomputingJointLimits_NoLimitsAreSet_RandomQuadrilateral()
    {
@@ -422,7 +422,7 @@ public class FourBarKinematicLoopTest
          Vector3d jointBtoC = new Vector3d(Math.sqrt(0.5) * sideLengths[1], Math.sqrt(0.5) * sideLengths[1], random.nextDouble());
          Vector3d jointCtoD = new Vector3d(0.0, sideLengths[2], random.nextDouble());
          Vector3d jointAtoD = new Vector3d(0.0, sideLengths[3], random.nextDouble());
-         initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+         initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
          boolean recomputeJointLimits = true;
 
          fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
@@ -454,7 +454,7 @@ public class FourBarKinematicLoopTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRecomputingJointLimits_UserSetRestrictiveJointLimits_UnitSquare()
    {
@@ -470,7 +470,7 @@ public class FourBarKinematicLoopTest
       // joint limits for b are [-eps, eps]
       double angleEpsilon = 1e-4;
 
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       passiveJointB.setJointLimitLower(- angleEpsilon);
       passiveJointB.setJointLimitUpper(angleEpsilon);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
@@ -492,7 +492,7 @@ public class FourBarKinematicLoopTest
       }
 
       // joint limits for c are [-eps, eps]
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       passiveJointC.setJointLimitLower(- angleEpsilon);
       passiveJointC.setJointLimitUpper(angleEpsilon);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
@@ -503,7 +503,7 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, angleEpsilon, 0.01 * angleEpsilon);
 
       // joint limits for d are [90-eps, 90+eps]
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       passiveJointD.setJointLimitLower(0.5 * Math.PI - angleEpsilon);
       passiveJointD.setJointLimitUpper(0.5 * Math.PI + angleEpsilon);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
@@ -514,7 +514,7 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, angleEpsilon, 0.01 * angleEpsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRecomputingJointLimits_UserSetLimitsNearFourBarConstraints_UnitSquare()
    {
@@ -531,7 +531,7 @@ public class FourBarKinematicLoopTest
       // the constraints of the four bar inherently restrict a to [-90, 90]
 
       // joint limits for a are [-90+eps, 90-eps]
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       masterJointA.setJointLimitLower(-0.5 * Math.PI + angleEpsilon);
       masterJointA.setJointLimitUpper(0.5 * Math.PI - angleEpsilon);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
@@ -542,7 +542,7 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, 0.5 * Math.PI - angleEpsilon, 0.01 * angleEpsilon);
 
       // joint limits for a are [-90-eps, 90+eps]
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       masterJointA.setJointLimitLower(-0.5 * Math.PI - angleEpsilon);
       masterJointA.setJointLimitUpper(0.5 * Math.PI + angleEpsilon);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
@@ -553,7 +553,7 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, 0.5 * Math.PI, 0.01 * angleEpsilon);
 
       // joint limits for b are [-90+eps, 90-eps]
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       passiveJointB.setJointLimitLower(-0.5 * Math.PI + angleEpsilon);
       passiveJointB.setJointLimitUpper(0.5 * Math.PI - angleEpsilon);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
@@ -564,7 +564,7 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, 0.5 * Math.PI - angleEpsilon, 0.01 * angleEpsilon);
 
       // joint limits for b are [-90-eps, 90+eps]
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       passiveJointB.setJointLimitLower(-0.5 * Math.PI - angleEpsilon);
       passiveJointB.setJointLimitUpper(0.5 * Math.PI + angleEpsilon);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
@@ -575,7 +575,7 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, 0.5 * Math.PI, 0.01 * angleEpsilon);
 
       // joint limits for c are [-90+eps, 90-eps]
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       passiveJointC.setJointLimitLower(-0.5 * Math.PI + angleEpsilon);
       passiveJointC.setJointLimitUpper(0.5 * Math.PI - angleEpsilon);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
@@ -586,7 +586,7 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, 0.5 * Math.PI - angleEpsilon, 0.01 * angleEpsilon);
 
       // joint limits for c are [-90-eps, 90+eps]
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       passiveJointC.setJointLimitLower(-0.5 * Math.PI - angleEpsilon);
       passiveJointC.setJointLimitUpper(0.5 * Math.PI + angleEpsilon);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
@@ -597,7 +597,7 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, 0.5 * Math.PI, 0.01 * angleEpsilon);
 
       // joint limits for d are [-90+eps, 90-eps]
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       passiveJointD.setJointLimitLower(angleEpsilon);
       passiveJointD.setJointLimitUpper(Math.PI - angleEpsilon);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
@@ -608,7 +608,7 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, 0.5 * Math.PI - angleEpsilon, 0.01 * angleEpsilon);
 
       // joint limits for d are [-90-eps, 90+eps]
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       passiveJointD.setJointLimitLower(- angleEpsilon);
       passiveJointD.setJointLimitUpper(Math.PI + angleEpsilon);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
@@ -619,14 +619,14 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, 0.5 * Math.PI, 0.01 * angleEpsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRecomputingJointLimits_MasterJointLimitsMostRestrictive_UnitSquare()
    {
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testJointOrderIsChecked_PlanarSquare()
    {
@@ -639,7 +639,7 @@ public class FourBarKinematicLoopTest
       Vector3d jointDtoA = new Vector3d(1.0, 0.0, random.nextDouble());
       boolean recomputeJointLimits = true;
 
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
 
       // check that exception is thrown when joints are passed in out of order
       failIfFourBarConstructsWithoutAnException(masterJointA, passiveJointB, passiveJointD, passiveJointC, jointDtoA, recomputeJointLimits);
@@ -649,7 +649,7 @@ public class FourBarKinematicLoopTest
       failIfFourBarConstructsWithoutAnException(masterJointA, passiveJointD, passiveJointC, passiveJointB, jointDtoA, recomputeJointLimits);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAntiParallelJointAxesWithoutRecomputingJointLimits_UnitSquare()
    {
@@ -667,26 +667,176 @@ public class FourBarKinematicLoopTest
       double angleEpsilon1 = 3e-4;
 
       // try setting joint B, C, D to [45 deg, 135 deg] and make sure A's joint limits are recomputed accordingly
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxisUp, jointAxisDown, jointAxisDown, jointAxisDown);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxisUp, jointAxisDown, jointAxisDown, jointAxisDown, 1);
       passiveJointB.setJointLimitLower(-0.5 * Math.PI + angleEpsilon0);
       passiveJointB.setJointLimitUpper(0.5 * Math.PI - angleEpsilon1);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD, recomputeJointLimits);
       assertEquals(masterJointA.getJointLimitLower(), -0.5 * Math.PI + angleEpsilon0, eps);
       assertEquals(masterJointA.getJointLimitUpper(), 0.5 * Math.PI - angleEpsilon1, eps);
 
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxisUp, jointAxisDown, jointAxisDown, jointAxisDown);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxisUp, jointAxisDown, jointAxisDown, jointAxisDown, 1);
       passiveJointC.setJointLimitLower(-0.5 * Math.PI + angleEpsilon0);
       passiveJointC.setJointLimitUpper(0.5 * Math.PI - angleEpsilon1);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD, recomputeJointLimits);
       assertEquals(masterJointA.getJointLimitLower(), -0.5 * Math.PI + angleEpsilon1, eps);
       assertEquals(masterJointA.getJointLimitUpper(), 0.5 * Math.PI - angleEpsilon0, eps);
 
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxisUp, jointAxisDown, jointAxisDown, jointAxisDown);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxisUp, jointAxisDown, jointAxisDown, jointAxisDown, 1);
       passiveJointD.setJointLimitLower(- Math.PI + angleEpsilon0);
       passiveJointD.setJointLimitUpper(- angleEpsilon1);
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD, recomputeJointLimits);
       assertEquals(masterJointA.getJointLimitLower(), - 0.5 * Math.PI + angleEpsilon0, eps);
       assertEquals(masterJointA.getJointLimitUpper(), 0.5 * Math.PI - angleEpsilon1, eps);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testOutputJoint()
+   {
+      // initialize to a square of unit length
+      Vector3d jointAxis = new Vector3d(0.0, 1.0, 0.0);
+      Vector3d elevatorToJointA = new Vector3d();
+      Vector3d jointAtoB = new Vector3d(0.0, 0.0, -1.0);
+      Vector3d jointBtoC = new Vector3d(1.0, 0.0, 0.0);
+      Vector3d jointCtoD = new Vector3d(0.0, 0.0, 1.0);
+      Vector3d jointAtoD = new Vector3d(1.0, 0.0, 0.0);
+      boolean recomputeJointLimits = true;
+
+      int outputJointIndex = 1;
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, outputJointIndex);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
+            recomputeJointLimits);
+      assertTrue(passiveJointB == fourBarKinematicLoop.getFourBarOutputJoint());
+
+      outputJointIndex = 2;
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, outputJointIndex);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
+            recomputeJointLimits);
+      assertTrue(passiveJointC == fourBarKinematicLoop.getFourBarOutputJoint());
+
+      outputJointIndex = 3;
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, outputJointIndex);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
+            recomputeJointLimits);
+      assertTrue(passiveJointD == fourBarKinematicLoop.getFourBarOutputJoint());
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.5)
+   @Test(timeout = 30000)
+   public void testJacobian_UnitSquare()
+   {
+      // initialize to a square of unit length
+      Vector3d posY = new Vector3d(0.0, 1.0, 0.0);
+      Vector3d negY = new Vector3d(0.0, - 1.0, 0.0);
+      Vector3d elevatorToJointA = new Vector3d();
+      Vector3d jointAtoB = new Vector3d(0.0, 0.0, -1.0);
+      Vector3d jointBtoC = new Vector3d(1.0, 0.0, 0.0);
+      Vector3d jointCtoD = new Vector3d(0.0, 0.0, 1.0);
+      Vector3d jointAtoD = new Vector3d(1.0, 0.0, 0.0);
+      boolean recomputeJointLimits = true;
+
+      // test jacobian with joint axes aligned
+      int outputJointIndex = 1;
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, posY, outputJointIndex);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
+            recomputeJointLimits);
+      unitSquareJacobianTestForSpecificOutputJoint(outputJointIndex);
+
+      outputJointIndex = 2;
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, posY, outputJointIndex);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
+            recomputeJointLimits);
+      unitSquareJacobianTestForSpecificOutputJoint(outputJointIndex);
+
+      outputJointIndex = 3;
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, posY, outputJointIndex);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
+            recomputeJointLimits);
+      unitSquareJacobianTestForSpecificOutputJoint(outputJointIndex);
+
+      // test jacobian with joint axes reversed
+      outputJointIndex = 1;
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, posY, negY, negY, negY, outputJointIndex);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
+            recomputeJointLimits);
+      unitSquareJacobianTestForSpecificOutputJoint(outputJointIndex);
+
+      outputJointIndex = 2;
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, posY, negY, negY, negY, outputJointIndex);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
+            recomputeJointLimits);
+      unitSquareJacobianTestForSpecificOutputJoint(outputJointIndex);
+
+      outputJointIndex = 3;
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, posY, negY, negY, negY, outputJointIndex);
+      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD,
+            recomputeJointLimits);
+      unitSquareJacobianTestForSpecificOutputJoint(outputJointIndex);
+
+   }
+
+   private void unitSquareJacobianTestForSpecificOutputJoint(int outputJointIndex)
+   {
+      int numTests = 50;
+      Random random = new Random(538L);
+      DenseMatrix64F jacobian = new DenseMatrix64F(6, 1);
+      FrameVector tempLinearVelocity = new FrameVector();
+      double expectedLinearX, expectedLinearY, expectedLinearZ, expectedAngularX, expectedAngularY, expectedAngularZ;
+      ReferenceFrame outputJointFrame;
+
+      for(int i = 0; i < numTests; i++)
+      {
+         double qMaster = RandomTools.generateRandomDouble(random, - 0.5 * Math.PI + 0.01, 0.5 * Math.PI - 0.01);
+         double qdMaster = RandomTools.generateRandomDouble(random, -2.0, 2.0);
+
+         masterJointA.setQ(qMaster);
+         masterJointA.setQd(qdMaster);
+         fourBarKinematicLoop.update();
+         fourBarKinematicLoop.getJacobian(jacobian);
+
+         switch (outputJointIndex)
+         {
+         case 1:
+            expectedLinearX = - qdMaster * Math.cos(qMaster);
+            expectedLinearY = 0.0;
+            expectedLinearZ = qdMaster * Math.sin(qMaster);
+            expectedAngularX = 0.0;
+            expectedAngularY = qdMaster;
+            expectedAngularZ = 0.0;
+            outputJointFrame = passiveJointB.getFrameAfterJoint();
+            break;
+         case 2:
+            expectedLinearX = - qdMaster * Math.cos(qMaster);
+            expectedLinearY = 0.0;
+            expectedLinearZ = qdMaster * Math.sin(qMaster);
+            expectedAngularX = 0.0;
+            expectedAngularY = 0.0;
+            expectedAngularZ = 0.0;
+            outputJointFrame = passiveJointC.getFrameAfterJoint();
+            break;
+         case 3:
+            expectedLinearX = 0.0;
+            expectedLinearY = 0.0;
+            expectedLinearZ = 0.0;
+            expectedAngularX = 0.0;
+            expectedAngularY = qdMaster;
+            expectedAngularZ = 0.0;
+            outputJointFrame = passiveJointD.getFrameAfterJoint();
+            break;
+         default:
+            throw new RuntimeException("invalid output joint index: " + outputJointIndex);
+         }
+
+         tempLinearVelocity.setIncludingFrame(outputJointFrame, jacobian.get(3, 0), jacobian.get(4, 0), jacobian.get(5, 0));
+         tempLinearVelocity.changeFrame(worldFrame);
+
+         assertEquals(expectedAngularX, jacobian.get(0, 0), eps);
+         assertEquals(expectedAngularY, jacobian.get(1, 0), eps);
+         assertEquals(expectedAngularZ, jacobian.get(2, 0), eps);
+         assertEquals(expectedLinearX, tempLinearVelocity.getX(), eps);
+         assertEquals(expectedLinearY, tempLinearVelocity.getY(), eps);
+         assertEquals(expectedLinearZ, tempLinearVelocity.getZ(), eps);
+      }
    }
 
    private static void failIfFourBarConstructsWithoutAnException(RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB,
@@ -702,19 +852,21 @@ public class FourBarKinematicLoopTest
       }
    }
 
-   private void initializeFourBar(Vector3d elevatorToJointA, Vector3d jointAtoB, Vector3d jointBtoC, Vector3d jointCtoD, Vector3d jointAxis)
+   private void initializeFourBar(Vector3d elevatorToJointA, Vector3d jointAtoB, Vector3d jointBtoC, Vector3d jointCtoD, Vector3d jointAxis,
+         int outputJointIndex)
    {
-      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, jointAxis, jointAxis, jointAxis);
+      initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, jointAxis, jointAxis, jointAxis, outputJointIndex);
    }
 
-   private void initializeSquareFourBarInXYPlane(double sideLength, Vector3d jointAxisA, Vector3d jointAxisB, Vector3d jointAxisC, Vector3d jointAxisD)
+   private void initializeSquareFourBarInXYPlane(double sideLength, Vector3d jointAxisA, Vector3d jointAxisB, Vector3d jointAxisC, Vector3d jointAxisD,
+         int outputJointIndex)
    {
       initializeFourBar(new Vector3d(), new Vector3d(sideLength, 0.0, 0.0), new Vector3d(0.0, sideLength, 0.0), new Vector3d(-sideLength, 0.0, 0.0), jointAxisA,
-            jointAxisB, jointAxisC, jointAxisD);
+            jointAxisB, jointAxisC, jointAxisD, outputJointIndex);
    }
 
    private void initializeFourBar(Vector3d elevatorToJointA, Vector3d jointAtoB, Vector3d jointBtoC, Vector3d jointCtoD, Vector3d jointAxisA,
-         Vector3d jointAxisB, Vector3d jointAxisC, Vector3d jointAxisD)
+         Vector3d jointAxisB, Vector3d jointAxisC, Vector3d jointAxisD, int outputJointIndex)
    {
       masterJointA = ScrewTools.addRevoluteJoint("jointA", elevator, elevatorToJointA, jointAxisA);
       rigidBodyAB = createAndAttachCylinderRB("rigidBodyAB", masterJointA);
@@ -723,6 +875,26 @@ public class FourBarKinematicLoopTest
       passiveJointC = ScrewTools.addPassiveRevoluteJoint("jointC", rigidBodyBC, jointBtoC, jointAxisC, true);
       rigidBodyCD = createAndAttachCylinderRB("rigidBodyCD", passiveJointC);
       passiveJointD = ScrewTools.addPassiveRevoluteJoint("jointD", rigidBodyCD, jointCtoD, jointAxisD, true);
+      rigidBodyDA = createAndAttachCylinderRB("rigidBodyCD", passiveJointD);
+
+      RigidBody outputBody;
+      switch(outputJointIndex)
+      {
+      case 1:
+         outputBody = rigidBodyBC;
+         break;
+      case 2:
+         outputBody = rigidBodyCD;
+         break;
+      case 3:
+         outputBody = rigidBodyDA;
+         break;
+      default:
+         throw new RuntimeException("Invalid output joint index: " + outputJointIndex);
+      }
+
+      RevoluteJoint outputChildJoint = ScrewTools.addRevoluteJoint("outputChildJoint", outputBody, new Vector3d(), jointAxisA);
+      createAndAttachCylinderRB("outputChild_RB", outputChildJoint);
 
       masterJointA.setQ(random.nextDouble());
       passiveJointB.setQ(random.nextDouble());
@@ -740,6 +912,7 @@ public class FourBarKinematicLoopTest
       passiveJointC = ScrewTools.addPassiveRevoluteJoint("jointC", rigidBodyBC, jointCtoB, jointAxisC, true);
       rigidBodyCD = createAndAttachCylinderRB("rigidBodyCD", passiveJointC);
       passiveJointD = ScrewTools.addPassiveRevoluteJoint("jointD", rigidBodyCD, jointDtoC, jointAxisD, true);
+      rigidBodyDA = createAndAttachCylinderRB("rigidBodyCD", passiveJointD);
 
       masterJointA.setQ(random.nextDouble());
       passiveJointB.setQ(random.nextDouble());
