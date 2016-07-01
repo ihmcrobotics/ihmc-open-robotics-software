@@ -36,8 +36,10 @@ public class QuadrupedTestYoVariables
    private final DoubleYoVariable robotBodyZ;
    private final DoubleYoVariable robotBodyYaw;
    
-   private QuadrantDependentList<BooleanYoVariable> footSwitches = new QuadrantDependentList<>();
-   private QuadrantDependentList<DoubleYoVariable> solePositionZs = new QuadrantDependentList<>();
+   private final QuadrantDependentList<BooleanYoVariable> footSwitches = new QuadrantDependentList<>();
+   private final QuadrantDependentList<DoubleYoVariable> solePositionZs = new QuadrantDependentList<>();
+   
+   private final DoubleYoVariable groundPlanePointZ;
    
    @SuppressWarnings("unchecked")
    public QuadrupedTestYoVariables(SimulationConstructionSet scs)
@@ -72,6 +74,8 @@ public class QuadrupedTestYoVariables
          footSwitches.set(robotQuadrant, (BooleanYoVariable) scs.getVariable(robotQuadrant.getCamelCaseName() + "_SettableFootSwitch"));
          solePositionZs.set(robotQuadrant, (DoubleYoVariable) scs.getVariable(robotQuadrant.getCamelCaseName() + "SolePositionZ"));
       }
+      
+      groundPlanePointZ = (DoubleYoVariable) scs.getVariable("groundPlanePointZ");
    }
 
    public EnumYoVariable<QuadrupedForceControllerRequestedEvent> getUserTrigger()
@@ -192,5 +196,10 @@ public class QuadrupedTestYoVariables
    public QuadrantDependentList<DoubleYoVariable> getSolePositionZs()
    {
       return solePositionZs;
+   }
+
+   public DoubleYoVariable getGroundPlanePointZ()
+   {
+      return groundPlanePointZ;
    }
 }
