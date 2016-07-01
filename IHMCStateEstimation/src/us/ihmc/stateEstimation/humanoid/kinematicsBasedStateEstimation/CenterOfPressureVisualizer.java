@@ -40,12 +40,12 @@ public class CenterOfPressureVisualizer
    {
       this.footSwitches = footSwitches;
       footRigidBodies = footSwitches.keySet();
-      
+
       for (RigidBody rigidBody : footRigidBodies)
       {
          String rigidBodyName = rigidBody.getName();
          rigidBodyName = WordUtils.capitalize(rigidBodyName);
-         
+
          YoFramePoint rawCoPPositionInWorld = new YoFramePoint("raw" + rigidBodyName + "CoPPositionsInWorld", worldFrame, registry);
          footRawCoPPositionsInWorld.put(rigidBody, rawCoPPositionInWorld);
 
@@ -57,6 +57,7 @@ public class CenterOfPressureVisualizer
       overallRawCoPPositionInWorld = new YoFramePoint("overallRawCoPPositionInWorld", worldFrame, registry);
       YoGraphicPosition overallRawCoPDynamicGraphic = new YoGraphicPosition("Meas CoP", overallRawCoPPositionInWorld, 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND);
       YoArtifactPosition overallRawCoPArtifact = overallRawCoPDynamicGraphic.createArtifact();
+      overallRawCoPArtifact.setVisible(false);
       yoGraphicsListRegistry.registerArtifact("StateEstimator", overallRawCoPArtifact);
 
       parentRegistry.addChild(registry);
