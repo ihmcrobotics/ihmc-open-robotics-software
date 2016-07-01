@@ -9,6 +9,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.factories.QuadrupedSimulationFactory;
@@ -46,6 +47,7 @@ public class LLAQuadrupedSimulationFactory
       QuadrupedGroundContactParameters groundContactParameters = new LLAQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new LLAQuadrupedSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = new LLAQuadrupedStateEstimatorParameters();
+      QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new LLAQuadrupedPositionBasedCrawlControllerParameters();
       
       SDFFullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       SDFRobot sdfRobot = modelFactory.createSdfRobot();
@@ -77,6 +79,7 @@ public class LLAQuadrupedSimulationFactory
       simulationFactory.setSensorInformation(sensorInformation);
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
+      simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
       
       return simulationFactory.createSimulation();
    }

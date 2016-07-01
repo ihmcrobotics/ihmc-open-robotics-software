@@ -6,6 +6,8 @@ import org.ros.internal.message.Message;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.tools.testing.TestPlanAnnotations;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 import java.lang.reflect.*;
 import java.util.HashSet;
@@ -17,11 +19,11 @@ import static org.junit.Assert.*;
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
+@DeployableTestClass(targets = TestPlanTarget.Fast)
 public class IHMCROSTranslationRuntimeToolsTest
 {
-
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 1.0)
-   @Test(timeout = 30000)
+   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 15.0)
+   @Test(timeout = 120000)
    public void testBidirectionalConversionWithRandomConstructors()
    {
       Reflections reflections = new Reflections("us.ihmc");
@@ -38,23 +40,26 @@ public class IHMCROSTranslationRuntimeToolsTest
       Packet<?> ihmcMessage = null;
       Random random = new Random(1976L);
 
-      for (Class<?> concreteType : concreteTypes)
+      for(int i = 0; i < 5000; i++)
       {
-         Constructor<?> randomConstructor = null;
-         try
+         for (Class<?> concreteType : concreteTypes)
          {
-            randomConstructor = concreteType.getConstructor(Random.class);
-            ihmcMessage = (Packet<?>) randomConstructor.newInstance(random);
-            rosMessage = IHMCROSTranslationRuntimeTools.convertToRosMessage(ihmcMessage);
-            Packet packet = IHMCROSTranslationRuntimeTools.convertToIHMCMessage(rosMessage);
-            assertTrue("Problem with packet " + concreteType + ". \n" + ihmcMessage + ", \n" + packet, packet.epsilonEquals(ihmcMessage, 0.1));
-         }
-         catch (Exception e)
-         {
-            System.out.println("Conversion failed!");
-            System.out.println("Message type: " + concreteType);
-            e.printStackTrace();
-            fail();
+            Constructor<?> randomConstructor = null;
+            try
+            {
+               randomConstructor = concreteType.getConstructor(Random.class);
+               ihmcMessage = (Packet<?>) randomConstructor.newInstance(random);
+               rosMessage = IHMCROSTranslationRuntimeTools.convertToRosMessage(ihmcMessage);
+               Packet packet = IHMCROSTranslationRuntimeTools.convertToIHMCMessage(rosMessage);
+               assertTrue("Problem with packet " + concreteType + ". \n" + ihmcMessage + ", \n" + packet, packet.epsilonEquals(ihmcMessage, 0.1));
+            }
+            catch (Exception e)
+            {
+               System.out.println("Conversion failed!");
+               System.out.println("Message type: " + concreteType);
+               e.printStackTrace();
+               fail();
+            }
          }
       }
    }

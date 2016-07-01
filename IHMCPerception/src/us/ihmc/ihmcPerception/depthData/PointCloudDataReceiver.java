@@ -83,7 +83,6 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
       return fullRobotModel.getLidarBaseToSensorTransform(lidarName);
    }
 
-   @Override
    public ReferenceFrame getLidarFrame(String lidarName)
    {
       return fullRobotModel.getLidarBaseFrame(lidarName);
@@ -372,5 +371,6 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
          this.points = points;
          this.sources = sources;
       }
+
    }
 }

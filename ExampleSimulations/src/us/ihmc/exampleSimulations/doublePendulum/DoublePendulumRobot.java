@@ -17,7 +17,9 @@ import us.ihmc.simulationconstructionset.Robot;
  * Extending the class is an easy way to make a new type of robot, in this case a DoublePendulumRobot.
  */
 public class DoublePendulumRobot extends Robot
-{	
+{
+   private static final long serialVersionUID = -7671864179791904256L;
+	
    /* L1 and L2 are the link lengths, M1 and M2 are the link masses, and R1 and R2 are the radii of the links, 
     * Iyy1 and Iyy2 are the moments of inertia of the links. The moments of inertia are defined about the COM
     * for each link.
@@ -32,8 +34,8 @@ public class DoublePendulumRobot extends Robot
 
       // Create joints and assign links. Pin joints have a single axis of rotation.
       PinJoint pin1 = new PinJoint("joint1", new Vector3d(0.0, 0.0, 0.0), this, Axis.Y);
-      pin1.setInitialState(0.1, 0.0);
-      Link link1 = createLinkOne();
+      pin1.setInitialState(1.0, 0.0);
+      Link link1 = link1();
       pin1.setLink(link1); // associate link1 with the joint pin1
       this.addRootJoint(pin1);
 
@@ -42,7 +44,7 @@ public class DoublePendulumRobot extends Robot
        *  it should be placed a distance of L1 in the Z direction from the previous joint.
        */
       Joint pin2 = new PinJoint("joint2", new Vector3d(0.0, 0.0, L1), this, Axis.Y);
-      Link link2 = createLinkTwo();
+      Link link2 = link2();
       pin2.setLink(link2);
       pin1.addJoint(pin2);
    }
@@ -51,7 +53,7 @@ public class DoublePendulumRobot extends Robot
    /**
     * Create the first link for the DoublePendulumRobot.
     */
-   private Link createLinkOne()
+   private Link link1()
    {
       Link ret = new Link("link1");
       ret.setMass(M1);
@@ -71,7 +73,7 @@ public class DoublePendulumRobot extends Robot
    /**
     * Create the second link for the DoublePendulumRobot.
     */
-   private Link createLinkTwo()
+   private Link link2()
    {
       Link ret = new Link("link2");
       ret.setMass(M2);
