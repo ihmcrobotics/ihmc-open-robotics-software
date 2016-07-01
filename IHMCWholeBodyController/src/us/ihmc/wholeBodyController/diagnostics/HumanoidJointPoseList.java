@@ -177,6 +177,11 @@ public class HumanoidJointPoseList
       }
    }
    
+   public void createCalibrationPose()
+   {
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
+   }
+
    public void createPoseSetters()
    {
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));

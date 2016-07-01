@@ -7,11 +7,13 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.thread.ThreadTools;
 
-
+@DeployableTestClass(targets = TestPlanTarget.Fast)
 public class DataObjectTransponderTest
 {
    private static final int MAXIMUM_INTER_PACKET_DELAY_MILLIS = 300;
@@ -69,8 +71,8 @@ public class DataObjectTransponderTest
       }
    }
 
-	@DeployableTestMethod
-	@Test(timeout=20000)
+	@DeployableTestMethod(estimatedDuration = 1.0)
+	@Test(timeout = 20000)
    public void testBidirectionalCommunication() throws InterruptedException
    {
       int port = 1341;
@@ -81,8 +83,8 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-	@DeployableTestMethod
-	@Test(timeout=200000)
+   @DeployableTestMethod(estimatedDuration = 5.0, targets = TestPlanTarget.Flaky)
+   @Test(timeout = 200000)
    public void testDoubleBidirectionalCommunication() throws InterruptedException
    {
       int numberOfPackets = 60000;
@@ -95,32 +97,32 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-	@DeployableTestMethod
-	@Test(timeout=300000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testSerializabilityOfInteger() throws IOException
    {
       Integer integer = new Integer(2);
       JUnitTools.assertSerializable(integer);
    }
 
-	@DeployableTestMethod
-	@Test(timeout=300000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testSerializabilityOfIntPacket() throws IOException
    {
       IntegerPacket intPacket = new IntegerPacket(2);
       JUnitTools.assertSerializable(intPacket);
    }
 
-	@DeployableTestMethod
-	@Test(timeout=300000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testSerializabilityOfStringPacket() throws IOException
    {
       StringPacket packet = new StringPacket("Buzzap!");
       JUnitTools.assertSerializable(packet);
    }
 
-	@DeployableTestMethod
-	@Test(timeout=20000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 20000)
    public void testServerClientIntPacketCommunication() throws InterruptedException
    {
       int port = 1337;
@@ -130,8 +132,8 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-	@DeployableTestMethod
-	@Test(timeout=20000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 20000)
    public void testServerClientStringPacketCommunication() throws InterruptedException
    {
       int port = 1338;
@@ -141,8 +143,8 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-	@DeployableTestMethod
-	@Test(timeout=20000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 20000)
    public void testTwoPacketTypesAtTheSameTime() throws InterruptedException
    {
       int port = 1339;
@@ -153,8 +155,8 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-	@DeployableTestMethod
-	@Test(timeout=20000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 20000)
    public void testUnhandledPackets() throws InterruptedException
    {
       int port = 1340;

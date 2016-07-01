@@ -300,7 +300,7 @@ public class DRCSimulationFactory
             boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
             boolean isBackJoint = jointRole == JointRole.SPINE;
 
-            JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, isUpperBodyJoint, isBackJoint, drcRobotModel.getSimulateDT());
+            JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, isUpperBodyJoint, isBackJoint, false, drcRobotModel.getSimulateDT());
             simulatedRobot.setController(positionControlSimulator);
          }
       }

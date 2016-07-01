@@ -2,8 +2,11 @@ package us.ihmc.quadrupedRobotics;
 
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class QuadrupedTestYoVariables
@@ -33,6 +36,11 @@ public class QuadrupedTestYoVariables
    private final DoubleYoVariable robotBodyZ;
    private final DoubleYoVariable robotBodyYaw;
    
+   private final QuadrantDependentList<BooleanYoVariable> footSwitches = new QuadrantDependentList<>();
+   private final QuadrantDependentList<DoubleYoVariable> solePositionZs = new QuadrantDependentList<>();
+   
+   private final DoubleYoVariable groundPlanePointZ;
+   
    @SuppressWarnings("unchecked")
    public QuadrupedTestYoVariables(SimulationConstructionSet scs)
    {
@@ -60,6 +68,14 @@ public class QuadrupedTestYoVariables
       robotBodyY = (DoubleYoVariable) scs.getVariable("q_y");
       robotBodyZ = (DoubleYoVariable) scs.getVariable("q_z");
       robotBodyYaw = (DoubleYoVariable) scs.getVariable("q_yaw");
+      
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         footSwitches.set(robotQuadrant, (BooleanYoVariable) scs.getVariable(robotQuadrant.getCamelCaseName() + "_SettableFootSwitch"));
+         solePositionZs.set(robotQuadrant, (DoubleYoVariable) scs.getVariable(robotQuadrant.getCamelCaseName() + "SolePositionZ"));
+      }
+      
+      groundPlanePointZ = (DoubleYoVariable) scs.getVariable("groundPlanePointZ");
    }
 
    public EnumYoVariable<QuadrupedForceControllerRequestedEvent> getUserTrigger()
@@ -170,5 +186,20 @@ public class QuadrupedTestYoVariables
    public DoubleYoVariable getYoTime()
    {
       return yoTime;
+   }
+
+   public QuadrantDependentList<BooleanYoVariable> getFootSwitches()
+   {
+      return footSwitches;
+   }
+
+   public QuadrantDependentList<DoubleYoVariable> getSolePositionZs()
+   {
+      return solePositionZs;
+   }
+
+   public DoubleYoVariable getGroundPlanePointZ()
+   {
+      return groundPlanePointZ;
    }
 }

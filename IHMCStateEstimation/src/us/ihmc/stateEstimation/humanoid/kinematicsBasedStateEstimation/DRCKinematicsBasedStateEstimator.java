@@ -70,6 +70,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    private StateEstimatorModeSubscriber stateEstimatorModeSubscriber = null;
 
+   private final BooleanYoVariable reinitializeStateEstimator = new BooleanYoVariable("reinitializeStateEstimator", registry);
+
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, ForceSensorDataHolder forceSensorDataHolderToUpdate, String[] imuSensorsToUseInStateEstimator,
          double gravitationalAcceleration, Map<RigidBody, FootSwitchInterface> footSwitches,
@@ -181,6 +183,11 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    @Override
    public void doControl()
    {
+      if(reinitializeStateEstimator.getBooleanValue())
+      {
+         reinitializeStateEstimator.set(false);
+         initialize();
+      }
       yoTime.set(TimeTools.nanoSecondstoSeconds(sensorOutputMapReadOnly.getTimestamp()));
 
       if (fusedIMUSensor != null)
@@ -366,5 +373,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public void setRequestWristForceSensorCalibrationSubscriber(RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber)
    {
       forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
+   }
+
+   public ForceSensorCalibrationModule getForceSensorCalibrationModule()
+   {
+      return forceSensorStateUpdater;
    }
 }

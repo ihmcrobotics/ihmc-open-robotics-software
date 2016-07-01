@@ -13,8 +13,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseSteppingStonesTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasPointyRocksTest.class,
-   us.ihmc.atlas.pushRecovery.AtlasPushRecoveryMultiStepTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasPointyRocksTest.class
 })
 
 public class AtlasDInDevelopmentTestSuite

@@ -23,10 +23,15 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
 import us.ihmc.quadrupedRobotics.controller.forceDevelopment.QuadrupedForceDevelopmentControllerManager;
+import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerManager;
+import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.controller.positionDevelopment.QuadrupedPositionDevelopmentControllerManager;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
+import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedInverseKinematicsCalculators;
+import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
@@ -57,6 +62,7 @@ import us.ihmc.simulationconstructionset.util.ground.AlternatingSlopesGroundProf
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RotatablePlaneTerrainProfile;
+import us.ihmc.simulationconstructionset.util.ground.VaryingStairGroundProfile;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.tools.factories.FactoryTools;
@@ -90,6 +96,7 @@ public class QuadrupedSimulationFactory
    private RequiredFactoryField<QuadrupedSensorInformation> sensorInformation = new RequiredFactoryField<>("sensorInformation");
    private RequiredFactoryField<StateEstimatorParameters> stateEstimatorParameters = new RequiredFactoryField<>("stateEstimatorParameters");
    private RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
+   private RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>("positionBasedCrawlControllerParameters");
    
    private OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
    
@@ -108,6 +115,7 @@ public class QuadrupedSimulationFactory
    private GroundProfile3D groundProfile3D;
    private LinearGroundContactModel groundContactModel;
    private QuadrupedSimulationController simulationController;
+   private QuadrupedLegInverseKinematicsCalculator legInverseKinematicsCalculator;
    
    // CREATION
    
@@ -204,6 +212,15 @@ public class QuadrupedSimulationFactory
       }
    }
    
+   private void createInverseKinematicsCalculator()
+   {
+      if (controlMode.get() == QuadrupedControlMode.POSITION || controlMode.get() == QuadrupedControlMode.POSITION_DEV)
+      {
+         legInverseKinematicsCalculator = new QuadrupedInverseKinematicsCalculators(modelFactory.get(), physicalProperties.get(), fullRobotModel.get(), referenceFrames.get(),
+                                                                                    sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
+      }
+   }
+   
    public void createControllerManager() throws IOException
    {
       
@@ -218,10 +235,12 @@ public class QuadrupedSimulationFactory
          controllerManager = new QuadrupedForceDevelopmentControllerManager(runtimeEnvironment, physicalProperties.get());
          break;
       case POSITION:
-         controllerManager = null;
+         controllerManager = new QuadrupedPositionControllerManager(runtimeEnvironment, modelFactory.get(), physicalProperties.get(), initialPositionParameters.get(),
+                                                                    positionBasedCrawlControllerParameters.get(), legInverseKinematicsCalculator);
          break;
       case POSITION_DEV:
-         controllerManager = null;
+         controllerManager = new QuadrupedPositionDevelopmentControllerManager(runtimeEnvironment, modelFactory.get(), physicalProperties.get(),
+                                                                               initialPositionParameters.get(), legInverseKinematicsCalculator);
          break;
       default:
          controllerManager = null;
@@ -266,6 +285,9 @@ public class QuadrupedSimulationFactory
             {1.0, 0.0}, {3.0, 0.1}
          };
          groundProfile3D = new AlternatingSlopesGroundProfile(xSlopePairs, xMin, xMax, yMin, yMax);
+         break;
+      case STEPPED:
+         groundProfile3D = new VaryingStairGroundProfile(0.0, 0.0, new double[] {1.5, 1.0, 1.0, 0.5}, new double[] {0.0, 0.05, -0.1, 0.05, 0.05});
          break;
       default:
          groundProfile3D = null;
@@ -333,6 +355,7 @@ public class QuadrupedSimulationFactory
       createPacketCommunicator();
       createGlobalDataProducer();
       createHeadController();
+      createInverseKinematicsCalculator();
       createControllerManager();
       createPoseCommunicator();
       createGroundContactModel();
@@ -345,8 +368,6 @@ public class QuadrupedSimulationFactory
          scs.setGroundVisible(false);
       }
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      VisualizerUtils.createOverheadPlotter(scs, false, "centerOfMass", yoGraphicsListRegistry);
-      VisualizerUtils.createOverheadPlotterInSeparateWindow(scs, false, "centerOfMass", yoGraphicsListRegistryForDetachedOverhead);
       scs.setDT(controlDT.get(), recordFrequency.get());
       if (scs.getSimulationConstructionSetParameters().getCreateGUI())
       {
@@ -357,6 +378,8 @@ public class QuadrupedSimulationFactory
          scs.setCameraDollyOffsets(4.0, 4.0, 1.0);
          if (showPlotter.get())
          {
+            VisualizerUtils.createOverheadPlotter(scs, false, "centerOfMass", yoGraphicsListRegistry);
+            VisualizerUtils.createOverheadPlotterInSeparateWindow(scs, false, "centerOfMass", yoGraphicsListRegistryForDetachedOverhead);
             scs.getStandardSimulationGUI().selectPanel("Plotter");
          }
       }
@@ -478,5 +501,10 @@ public class QuadrupedSimulationFactory
    public void setReferenceFrames(QuadrupedReferenceFrames referenceFrames)
    {
       this.referenceFrames.set(referenceFrames);
+   }
+   
+   public void setPositionBasedCrawlControllerParameters(QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters)
+   {
+      this.positionBasedCrawlControllerParameters.set(positionBasedCrawlControllerParameters);
    }
 }
