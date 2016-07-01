@@ -138,8 +138,9 @@ public class HighLevelHumanoidControllerToolbox
    protected final YoFramePoint yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
 
-   private final AdjustedCapturePointCalculator adjustedCapturePointCalculator;
    private final MomentumCalculator upperBodyMomentumCalculator;
+   private final YoFrameVector yoUpperBodyAngularMomentum;
+   private final FramePoint2d cop = new FramePoint2d();
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
@@ -341,13 +342,14 @@ public class HighLevelHumanoidControllerToolbox
       if (yoGraphicsListRegistry != null)
       {
          YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), ROTATED_CROSS);
-//         yoGraphicsListRegistry.registerArtifact(graphicListName, capturePointViz.createArtifact());
+         yoGraphicsListRegistry.registerArtifact(graphicListName, capturePointViz.createArtifact());
       }
 
       RigidBody chest = fullRobotModel.getChest();
-      double upperBodyMass = TotalMassCalculator.computeSubTreeMass(chest);
-      adjustedCapturePointCalculator = new AdjustedCapturePointCalculator(gravityZ, upperBodyMass, omega0, registry, yoGraphicsListRegistry);
-      upperBodyMomentumCalculator = new MomentumCalculator(twistCalculator, ScrewTools.computeSupportAndSubtreeSuccessors(twistCalculator.getRootBody()));
+      upperBodyMass = TotalMassCalculator.computeSubTreeMass(chest);
+      upperBodyMomentumCalculator = new MomentumCalculator(twistCalculator, ScrewTools.computeSubtreeSuccessors(chest.getParentJoint()));
+      yoUpperBodyAngularMomentum = new YoFrameVector("UpperBodyAngularMomentum", centerOfMassFrame, registry);
+      momentumGain.set(0.0);
    }
 
    public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
@@ -399,6 +401,9 @@ public class HighLevelHumanoidControllerToolbox
       updateBipedSupportPolygons();
       readWristSensorData();
 
+      computeCop();
+      computeAngularMomentum();
+
       robotJacobianHolder.compute();
 
       for (int i = 0; i < updatables.size(); i++)
@@ -419,8 +424,6 @@ public class HighLevelHumanoidControllerToolbox
    private final FramePoint2d centerOfMassPosition2d = new FramePoint2d();
    private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
 
-   private final FramePoint2d adjustedCapturePoint = new FramePoint2d();
-
    private void computeCapturePoint()
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
@@ -436,16 +439,8 @@ public class HighLevelHumanoidControllerToolbox
 
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
       yoCapturePoint.setXY(capturePoint2d);
-
-      double timeToStop = 0.03;
-      computeCop();
-      computeAngularMomentum();
-      adjustedCapturePointCalculator.computeAdjustedCapturePoint(timeToStop , cop, capturePoint2d, upperBodyAngularMomentumXY, adjustedCapturePoint);
-      adjustedCapturePoint.changeFrame(yoCapturePoint.getReferenceFrame());
-      yoCapturePoint.setXY(adjustedCapturePoint);
    }
 
-   private final FramePoint2d cop = new FramePoint2d();
    private final FramePoint2d footCop = new FramePoint2d();
    private void computeCop()
    {
@@ -467,14 +462,31 @@ public class HighLevelHumanoidControllerToolbox
    }
 
    private final FrameVector upperBodyAngularMomentum = new FrameVector();
-   private final FrameVector2d upperBodyAngularMomentumXY = new FrameVector2d();
    private final Momentum upperBodyMomentum = new Momentum();
    private void computeAngularMomentum()
    {
       upperBodyMomentum.setToZero(centerOfMassFrame);
       upperBodyMomentumCalculator.computeAndPack(upperBodyMomentum);
       upperBodyMomentum.getAngularPartIncludingFrame(upperBodyAngularMomentum);
-      upperBodyAngularMomentumXY.setByProjectionOntoXYPlaneIncludingFrame(upperBodyAngularMomentum);
+      yoUpperBodyAngularMomentum.set(upperBodyAngularMomentum);
+   }
+
+   private final double upperBodyMass;
+   private final FramePoint2d localDesiredCapturePoint = new FramePoint2d();
+   private final DoubleYoVariable momentumGain = new DoubleYoVariable("MomentumGain", registry);
+   public void getAdjustedDesiredCapturePoint(FramePoint2d desiredCapturePoint, FramePoint2d adjustedDesiredCapturePoint)
+   {
+      ReferenceFrame comFrame = upperBodyAngularMomentum.getReferenceFrame();
+      localDesiredCapturePoint.setIncludingFrame(desiredCapturePoint);
+      localDesiredCapturePoint.changeFrameAndProjectToXYPlane(comFrame);
+      cop.changeFrame(comFrame);
+
+      double scaleFactor = momentumGain.getDoubleValue() * omega0.getDoubleValue() / (upperBodyMass * gravity);
+
+      adjustedDesiredCapturePoint.setIncludingFrame(comFrame, upperBodyAngularMomentum.getY(), upperBodyAngularMomentum.getX());
+      adjustedDesiredCapturePoint.scale(scaleFactor);
+      adjustedDesiredCapturePoint.add(localDesiredCapturePoint);
+      adjustedDesiredCapturePoint.changeFrameAndProjectToXYPlane(desiredCapturePoint.getReferenceFrame());
    }
 
    public void getCapturePoint(FramePoint2d capturePointToPack)
@@ -967,4 +979,15 @@ public class HighLevelHumanoidControllerToolbox
    {
       return omega0.getDoubleValue();
    }
+
+   public void getCop(FramePoint2d copToPack)
+   {
+      copToPack.setIncludingFrame(cop);
+   }
+
+   public void getUpperBodyAngularMomentum(FrameVector upperBodyAngularMomentumToPack)
+   {
+      upperBodyAngularMomentumToPack.setIncludingFrame(upperBodyAngularMomentum);
+   }
+
 }
