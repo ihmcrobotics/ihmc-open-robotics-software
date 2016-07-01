@@ -46,6 +46,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
@@ -84,6 +85,9 @@ public class BalanceManager
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
    private final FrameVector2d desiredCapturePointVelocity2d = new FrameVector2d();
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
+
+   private final FramePoint2d adjustedDesiredCapturePoint2d = new FramePoint2d();
+   private final YoFramePoint2d yoAdjustedDesiredCapturePoint = new YoFramePoint2d("adjustedDesiredICP", worldFrame, registry);
 
    private final FramePoint2d desiredCMP = new FramePoint2d();
    private final FramePoint2d achievedCMP = new FramePoint2d();
@@ -168,6 +172,9 @@ public class BalanceManager
          YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), CROSS);
          YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
 
+         YoGraphicPosition adjustedDesiredCapturePointViz = new YoGraphicPosition("Adjusted Desired Capture Point", yoAdjustedDesiredCapturePoint, 0.005, Yellow(), GraphicType.DIAMOND);
+         yoGraphicsListRegistry.registerArtifact(graphicListName, adjustedDesiredCapturePointViz.createArtifact());
+
          yoGraphicsListRegistry.registerArtifact(graphicListName, centerOfMassViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCapturePointViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCapturePointViz.createArtifact());
@@ -251,6 +258,12 @@ public class BalanceManager
 
       yoFinalDesiredICP.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
 
+      // --- compute adjusted desired capture point
+      momentumBasedController.getAdjustedDesiredCapturePoint(desiredCapturePoint2d, adjustedDesiredCapturePoint2d);
+      yoAdjustedDesiredCapturePoint.set(adjustedDesiredCapturePoint2d);
+      desiredCapturePoint2d.setIncludingFrame(adjustedDesiredCapturePoint2d);
+      // ---
+
       getICPError(icpError2d);
       momentumRecoveryControlModule.setICPError(icpError2d);
       momentumRecoveryControlModule.setSupportSide(supportLeg);
@@ -271,7 +284,7 @@ public class BalanceManager
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
       icpBasedLinearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setOmega0(omega0);
-      icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCapturePoint(desiredCapturePoint2d);
+      icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCapturePoint(adjustedDesiredCapturePoint2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
