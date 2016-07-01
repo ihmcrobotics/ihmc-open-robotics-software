@@ -96,7 +96,7 @@ public class MultiSenseSensorManager
             pointCloudDataReceiver, PointCloudSource.NEARSCAN);
 
       new RosPointCloudReceiver(lidarParamaters.getGroundCloudTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), sdfFullRobotModel.getLidarBaseFrame(lidarParamaters.getSensorNameInSdf()),
-            pointCloudDataReceiver, PointCloudSource.NEARSCAN);
+            pointCloudDataReceiver, PointCloudSource.QUADTREE);
    }
 
    private void registerCameraReceivers()
