@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics;
+package us.ihmc.simulationconstructionset.util.simulationRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class QuadrupedTestConductor implements VariableChangedListener
+public class GoalOrientedTestConductor implements VariableChangedListener
 {
    private final SimulationConstructionSet scs;
    
@@ -30,7 +30,7 @@ public class QuadrupedTestConductor implements VariableChangedListener
    
    private AssertionFailedError assertionFailedError = null;
    
-   public QuadrupedTestConductor(SimulationConstructionSet scs)
+   public GoalOrientedTestConductor(SimulationConstructionSet scs)
    {
       this.scs = scs;
       

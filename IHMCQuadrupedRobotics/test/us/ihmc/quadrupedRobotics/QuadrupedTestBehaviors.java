@@ -4,10 +4,11 @@ import junit.framework.AssertionFailedError;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 
 public class QuadrupedTestBehaviors
 {
-   public static void standUp(QuadrupedTestConductor conductor, QuadrupedTestYoVariables variables) throws AssertionFailedError
+   public static void standUp(GoalOrientedTestConductor conductor, QuadrupedTestYoVariables variables) throws AssertionFailedError
    {
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.STAND_READY));
       conductor.simulate();
