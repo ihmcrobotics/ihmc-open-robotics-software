@@ -56,27 +56,27 @@ public class ThePeoplesGloriousNetworkProcessor
    private final FullHumanoidRobotModel fullRobotModel;
 
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace,
-         String tfPrefix) throws IOException
+         String tfPrefix, String... additionalMessagePackages) throws IOException
    {
-      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, Collections.<Class>emptySet());
+      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, Collections.<Class>emptySet(), additionalMessagePackages);
    }
 
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace,
-         String tfPrefix, Collection<Class> additionalPacketTypes) throws IOException
+         String tfPrefix, Collection<Class> additionalPacketTypes, String... additionalMessagePackages) throws IOException
    {
-      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, additionalPacketTypes);
+      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, additionalPacketTypes, additionalMessagePackages);
    }
 
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
-         DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix, Collection<Class> additionalPacketTypes) throws IOException
+         DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix, Collection<Class> additionalPacketTypes, String... additionalMessagePackages) throws IOException
    {
-      this(rosUri, rosAPI_communicator, sensorCommunicator, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, additionalPacketTypes, null, null);
+      this(rosUri, rosAPI_communicator, sensorCommunicator, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, additionalPacketTypes, null, null, additionalMessagePackages);
    }
 
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
          DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix, Collection<Class> additionalPacketTypes,
          List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> customSubscribers,
-         List<Map.Entry<String, RosTopicPublisher<? extends Message>>> customPublishers) throws IOException
+         List<Map.Entry<String, RosTopicPublisher<? extends Message>>> customPublishers, String... additionalMessagePackages) throws IOException
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
       this.robotModel = robotModel;
@@ -96,8 +96,8 @@ public class ThePeoplesGloriousNetworkProcessor
       rosAPI_communicator.attachListener(HighLevelStateChangeStatusMessage.class, new PeriodicRosHighLevelStatePublisher(rosMainNode, namespace));
       rosAPI_communicator.attachListener(CapturabilityBasedStatus.class, new RosCapturabilityBasedStatusPublisher(rosMainNode, namespace));
 
-      setupInputs(namespace, robotDataReceiver, fullRobotModel);
-      setupOutputs(namespace, tfPrefix);
+      setupInputs(namespace, robotDataReceiver, fullRobotModel, additionalMessagePackages);
+      setupOutputs(namespace, tfPrefix, additionalMessagePackages);
 //      setupRosLocalization();
 //      setupErrorTopics();
 
@@ -134,7 +134,7 @@ public class ThePeoplesGloriousNetworkProcessor
 
 
    @SuppressWarnings("unchecked")
-   private void setupOutputs(String namespace, String tfPrefix)
+   private void setupOutputs(String namespace, String tfPrefix, String... additionalPackages)
    {
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
@@ -150,6 +150,15 @@ public class ThePeoplesGloriousNetworkProcessor
       }
 
       Set<Class<?>> outputTypes = GenericROSTranslationTools.getCoreOutputTopics();
+
+      if(additionalPackages != null && additionalPackages.length > 0)
+      {
+         for (String additionalPackage : additionalPackages)
+         {
+            Set<Class<?>> additionalOutputs = GenericROSTranslationTools.getOutputTopicsForPackage(additionalPackage);
+            outputTypes.addAll(additionalOutputs);
+         }
+      }
 
       for (Class outputType : outputTypes)
       {
@@ -185,9 +194,18 @@ public class ThePeoplesGloriousNetworkProcessor
       }
    }
 
-   private void setupInputs(String namespace, HumanoidRobotDataReceiver robotDataReceiver, FullHumanoidRobotModel fullRobotModel)
+   private void setupInputs(String namespace, HumanoidRobotDataReceiver robotDataReceiver, FullHumanoidRobotModel fullRobotModel, String... additionalPackages)
    {
       Set<Class<?>> inputTypes = GenericROSTranslationTools.getCoreInputTopics();
+
+      if(additionalPackages != null && additionalPackages.length > 0)
+      {
+         for (String additionalPackage : additionalPackages)
+         {
+            Set<Class<?>> additionalInputs = GenericROSTranslationTools.getInputTopicsForPackage(additionalPackage);
+            inputTypes.addAll(additionalInputs);
+         }
+      }
 
       for (Class inputType : inputTypes)
       {
@@ -198,6 +216,7 @@ public class ThePeoplesGloriousNetworkProcessor
          IHMCMsgToPacketSubscriber<Message> subscriber = IHMCMsgToPacketSubscriber
                .createIHMCMsgToPacketSubscriber(message, controllerCommunicationBridge, PacketDestination.CONTROLLER.ordinal());
          subscribers.add(subscriber);
+         System.out.println("Creating subscriber for " + namespace + rosAnnotation.topic());
          rosMainNode.attachSubscriber(namespace + rosAnnotation.topic(), subscriber);
       }
 
