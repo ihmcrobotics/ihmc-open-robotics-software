@@ -21,7 +21,7 @@ public class IHMCROSTranslationRuntimeToolsTest
 {
 
    @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 40000)
+   @Test(timeout = 120000)
    public void testBidirectionalConversionWithRandomConstructors()
    {
       Reflections reflections = new Reflections("us.ihmc");
