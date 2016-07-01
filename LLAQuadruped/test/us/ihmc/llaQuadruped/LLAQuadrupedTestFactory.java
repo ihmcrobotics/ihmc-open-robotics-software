@@ -8,7 +8,6 @@ import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
-import us.ihmc.quadrupedRobotics.QuadrupedTestConductor;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -22,6 +21,7 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.RequiredFactoryField;
 
@@ -38,7 +38,7 @@ public class LLAQuadrupedTestFactory
    private RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
    private RequiredFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new RequiredFactoryField<>("controlMode");
    
-   public QuadrupedTestConductor createTestConductor() throws IOException
+   public GoalOrientedTestConductor createTestConductor() throws IOException
    {
       FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
       
@@ -84,7 +84,7 @@ public class LLAQuadrupedTestFactory
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setGroundContactModelType(groundContactModelType.get());
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
-      return new QuadrupedTestConductor(simulationFactory.createSimulation());
+      return new GoalOrientedTestConductor(simulationFactory.createSimulation());
    }
    
    public void setControlMode(QuadrupedControlMode controlMode)
