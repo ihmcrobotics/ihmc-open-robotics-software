@@ -106,7 +106,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String left_frame_name = multisense_namespace + "/left_camera_frame";
    private static final String right_frame_name = multisense_namespace + "/right_camera_frame";
 
-   private static final String headLinkName = "multisense_root_link";
    private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[2];
 
    private static final String left_camera_name = "stereo_camera_left";
@@ -150,7 +149,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String multisense_laser_topic_string = multisense_namespace+"/lidar_scan";
    private static final String multisense_near_Scan = multisense_namespace+"/filtered_cloud";
    private static final String multisense_height_map = multisense_namespace+"/highly_filtered_cloud";
-   private static final String multisenseHandoffFrame = "head";
+   private static final String multisenseHandoffFrame = "upperNeckPitchLink";
 
    private static final String rightTrunkIMUSensor = "torso_rightTorsoImu";
    private static final String leftTrunkIMUSensor = "torso_leftTorsoImu";
@@ -371,7 +370,10 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 
    private void setupStaticTransformsForRos()
    {
-      ImmutableTriple<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new ImmutableTriple<String, String, RigidBodyTransform>("multisense_root_link", "multisense/head_root", new RigidBodyTransform());
+      RigidBodyTransform staticTransform = new RigidBodyTransform();
+      staticTransform.applyRotationX(Math.PI);
+      ImmutableTriple<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new ImmutableTriple<String, String, RigidBodyTransform>("upperNeckPitchLink", "multisense/head_root",
+            staticTransform);
       staticTranformsForRos.add(headToHeadRootStaticTransform);
    }
 }
