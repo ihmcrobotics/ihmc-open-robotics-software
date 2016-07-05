@@ -117,7 +117,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
       this.addKeyListener(this);
       this.setDropTarget(new DropTarget(this, new YoGraphTargetListener(this)));
 
-      popupMenu = new YoPopupMenu();
+      popupMenu = new ForcedRepaintPopupMenu();
       delete = new JMenuItem("Delete Graph");
       final YoGraph thisYoGraph = this;
       delete.addActionListener(new ActionListener()

@@ -2,14 +2,14 @@ package us.ihmc.simulationconstructionset.gui;
 
 import javax.swing.*;
 
-public class YoPopupMenu extends JPopupMenu
+public class ForcedRepaintPopupMenu extends JPopupMenu
 {
-   public YoPopupMenu()
+   public ForcedRepaintPopupMenu()
    {
       super();
    }
 
-   public YoPopupMenu(String label)
+   public ForcedRepaintPopupMenu(String label)
    {
       super(label);
    }
