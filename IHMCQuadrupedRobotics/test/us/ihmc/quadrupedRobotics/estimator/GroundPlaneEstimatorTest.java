@@ -27,7 +27,11 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
+@DeployableTestClass(targets = TestPlanTarget.Fast)
 public class GroundPlaneEstimatorTest
 {
    @Before
@@ -43,7 +47,8 @@ public class GroundPlaneEstimatorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.2)
+   @Test(timeout = 30000)
    public void testPointsWithSamePitchAndDifferentPositionGetSameAnswer()
    {
       GroundPlaneEstimator groundPlaneEstimator = new GroundPlaneEstimator();
@@ -73,7 +78,8 @@ public class GroundPlaneEstimatorTest
       assertTrue(normalA.epsilonEquals(normalB, 1e-7));
    }
    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
    public void testPointsWithSamePitchAndDifferentPositionGetSameAnswer2()
    {
       double epsilon = 0.001;
@@ -110,7 +116,8 @@ public class GroundPlaneEstimatorTest
       assertEquals(actualPitch, computedPitch, epsilon);
    }
    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.2, targets = TestPlanTarget.InDevelopment)
+   @Test(timeout = 30000)
    public void testGetPitchWithFeetOnPlane()
    {
       double epsilon = 0.00001;

@@ -9,16 +9,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimatorTest.class,
-   us.ihmc.quadrupedRobotics.gait.QuadrupedGaitTypeTest.class,
-   us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlannerTest.class,
-   us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygonTest.class
+   us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimatorTest.class
 })
 
-public class IHMCQuadrupedRoboticsAFastTestSuite
+public class IHMCQuadrupedRoboticsAInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {
