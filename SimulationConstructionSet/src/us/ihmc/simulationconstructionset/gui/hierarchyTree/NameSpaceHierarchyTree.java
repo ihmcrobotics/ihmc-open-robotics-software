@@ -5,7 +5,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.gui.RegularExpression;
-import us.ihmc.simulationconstructionset.gui.YoPopupMenu;
+import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
 import us.ihmc.simulationconstructionset.robotcommprotocol.CreatedNewRegistriesListener;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RegistrySettingsChangedListener;
 import us.ihmc.simulationconstructionset.util.SimpleFileReader;
@@ -115,7 +115,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
 
    private void initPopupMenu()
    {
-      popupMenu = new YoPopupMenu();
+      popupMenu = new ForcedRepaintPopupMenu();
       JMenuItem toggleVaribleSend = new JMenuItem("Toggle Variable Send");
       toggleVaribleSend.addActionListener(new ActionListener()
       {

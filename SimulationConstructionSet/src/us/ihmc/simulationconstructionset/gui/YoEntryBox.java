@@ -58,7 +58,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
       this.setDropTarget(new DropTarget(this, new YoEntryBoxTargetListener(this)));
       this.setTransferHandler(new YoEntryBoxTransferHandler());
 
-      popupMenu = new YoPopupMenu();
+      popupMenu = new ForcedRepaintPopupMenu();
       JMenuItem delete = new JMenuItem("Delete Entry Box");
       delete.addActionListener(new ActionListener()
       {
