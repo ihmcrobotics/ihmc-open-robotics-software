@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.pushRecovery.AtlasPushRecoveryMultiStepTest.class
+   us.ihmc.atlas.roughTerrainWalking.AtlasLineContactWalkingTest.class
 })
 
 public class AtlasEInDevelopmentTestSuite
