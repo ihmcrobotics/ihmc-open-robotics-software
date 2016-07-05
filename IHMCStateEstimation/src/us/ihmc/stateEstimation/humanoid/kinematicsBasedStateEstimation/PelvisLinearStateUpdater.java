@@ -578,16 +578,16 @@ public class PelvisLinearStateUpdater
 
    public void initializeCoMPositionToActual(Tuple3d initialCoMPosition)
    {
-//      initializeToActual = true;
-//      centerOfMassPosition.setIncludingFrame(worldFrame, initialCoMPosition);
-//      yoCenterOfMassPosition.set(initialCoMPosition);
+      initializeToActual = true;
+      centerOfMassPosition.setIncludingFrame(worldFrame, initialCoMPosition);
+      yoCenterOfMassPosition.set(initialCoMPosition);
    }
 
    public void initializeCoMPositionToActual(FramePoint initialCoMPosition)
    {
-//      initializeToActual = true;
-//      centerOfMassPosition.set(initialCoMPosition);
-//      yoCenterOfMassPosition.set(initialCoMPosition);
+      initializeToActual = true;
+      centerOfMassPosition.set(initialCoMPosition);
+      yoCenterOfMassPosition.set(initialCoMPosition);
    }
    
    public void getEstimatedPelvisPosition(FramePoint pelvisPositionToPack)
