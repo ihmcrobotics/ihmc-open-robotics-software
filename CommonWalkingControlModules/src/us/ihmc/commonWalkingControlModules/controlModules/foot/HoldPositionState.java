@@ -93,7 +93,7 @@ public class HoldPositionState extends AbstractFootControlState
    public HoldPositionState(FootControlHelper footControlHelper, PartialFootholdControlModule partialFootholdControlModule,
          YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.HOLD_POSITION, footControlHelper, registry);
+      super(ConstraintType.HOLD_POSITION, footControlHelper);
       this.gains = gains;
 
       soleFrame = contactableFoot.getSoleFrame();

@@ -45,7 +45,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains,
          YoVariableRegistry registry)
    {
-      super(constraintType, footControlHelper, registry);
+      super(constraintType, footControlHelper);
 
       this.legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 

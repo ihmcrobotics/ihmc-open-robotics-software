@@ -26,7 +26,7 @@ public class FullyConstrainedState extends AbstractFootControlState
 
    public FullyConstrainedState(FootControlHelper footControlHelper, YoVariableRegistry registry)
    {
-      super(ConstraintType.FULL, footControlHelper, registry);
+      super(ConstraintType.FULL, footControlHelper);
 
       fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
