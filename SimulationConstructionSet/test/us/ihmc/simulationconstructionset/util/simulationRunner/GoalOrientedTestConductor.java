@@ -28,7 +28,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
    private List<YoVariableTestGoal> waypointGoalsNotMet = new ArrayList<>();
    private List<YoVariableTestGoal> terminalGoalsNotMeeting = new ArrayList<>();
    
-   private AssertionFailedError assertionFailedError = null;
+   private String assertionFailedMessage = null;
    
    public GoalOrientedTestConductor(SimulationConstructionSet scs)
    {
@@ -118,7 +118,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
          goal.getYoVariable().getNameAndValueString(message);
       }
       
-      assertionFailedError = new AssertionFailedError(message.toString());
+      assertionFailedMessage = message.toString();
    }
    
    private void stop()
@@ -133,7 +133,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
    
    public void simulate() throws AssertionFailedError
    {
-      assertionFailedError = null;
+      assertionFailedMessage = null;
       yoTime.addVariableChangedListener(this);
       
       scs.simulate();
@@ -143,15 +143,15 @@ public class GoalOrientedTestConductor implements VariableChangedListener
          ThreadTools.sleep(100);
       }
       
-      if (assertionFailedError != null)
+      if (assertionFailedMessage != null)
       {
-         throw assertionFailedError;
+         throw new AssertionFailedError(assertionFailedMessage);
       }
    }
 
    public void destroy()
    {
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(200);
       scs.closeAndDispose();
    }
    

@@ -12,6 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
+   us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimatorTest.class,
    us.ihmc.quadrupedRobotics.gait.QuadrupedGaitTypeTest.class,
    us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlannerTest.class,
    us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygonTest.class
