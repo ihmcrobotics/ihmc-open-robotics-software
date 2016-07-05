@@ -80,7 +80,7 @@ public class BambooTools
    public static void createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(String simplifiedRobotModelName, SimulationConstructionSet scs,
          int additionalStackDepthForRelevantCallingMethod)
    {
-      System.out.println("Trying to create videos!");
+      PrintTools.info("Trying to create video!");
       try
       {
          String rootDirectoryToUse = determineEraseableBambooDataAndVideosRootDirectoryToUse();
