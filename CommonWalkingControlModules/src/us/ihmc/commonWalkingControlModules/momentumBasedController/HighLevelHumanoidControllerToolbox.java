@@ -4,6 +4,7 @@ import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Blue;
 import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArrayList;
 import static us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType.ROTATED_CROSS;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -59,7 +60,9 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 public class HighLevelHumanoidControllerToolbox
 {
@@ -135,6 +138,9 @@ public class HighLevelHumanoidControllerToolbox
 
    protected final YoFramePoint yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
+
+   private final FramePoint2d centerOfPressure = new FramePoint2d();
+   private final YoFramePoint2d yoCenterOfPressure = new YoFramePoint2d("CenterOfPressure", worldFrame, registry);
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
@@ -337,6 +343,10 @@ public class HighLevelHumanoidControllerToolbox
       {
          YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), ROTATED_CROSS);
          yoGraphicsListRegistry.registerArtifact(graphicListName, capturePointViz.createArtifact());
+
+         YoArtifactPosition copViz = new YoArtifactPosition("Controller CoP", yoCenterOfPressure.getYoX(), yoCenterOfPressure.getYoY(),
+               GraphicType.DIAMOND, Color.BLACK , 0.005);
+         yoGraphicsListRegistry.registerArtifact(graphicListName, copViz);
       }
    }
 
@@ -385,6 +395,7 @@ public class HighLevelHumanoidControllerToolbox
       if (referenceFramesVisualizer != null)
          referenceFramesVisualizer.update();
 
+      computeCop();
       computeCapturePoint();
       updateBipedSupportPolygons();
       readWristSensorData();
@@ -396,6 +407,30 @@ public class HighLevelHumanoidControllerToolbox
 
       for (RobotSide robotSide : RobotSide.values)
          footSwitches.get(robotSide).updateCoP();
+   }
+
+   private final FramePoint2d tempFootCop2d = new FramePoint2d();
+   private final FramePoint tempFootCop = new FramePoint();
+   private final Wrench tempFootWrench = new Wrench();
+   private void computeCop()
+   {
+      double force = 0.0;
+      centerOfPressure.setToZero(worldFrame);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footSwitches.get(robotSide).computeAndPackCoP(tempFootCop2d);
+         if (tempFootCop2d.containsNaN())
+            continue;
+         footSwitches.get(robotSide).computeAndPackFootWrench(tempFootWrench);
+         double footForce = tempFootWrench.getLinearPartZ();
+         force += footForce;
+         tempFootCop.setIncludingFrame(tempFootCop2d.getReferenceFrame(), tempFootCop2d.getX(), tempFootCop2d.getY(), 0.0);
+         tempFootCop.changeFrame(worldFrame);
+         tempFootCop.scale(footForce);
+         centerOfPressure.add(tempFootCop.getX(), tempFootCop.getY());
+      }
+      centerOfPressure.scale(1.0 / force);
+      yoCenterOfPressure.set(centerOfPressure);
    }
 
    public void updateBipedSupportPolygons()

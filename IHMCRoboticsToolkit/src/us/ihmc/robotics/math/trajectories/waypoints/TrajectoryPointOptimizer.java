@@ -27,7 +27,7 @@ public class TrajectoryPointOptimizer
    private static final double regularizationWeight = 1E-10;
    private static final double epsilon = 1E-7;
 
-   private static final double initialTimeGain = 0.001;
+   private static final double initialTimeGain = 0.002;
    private static final double costEpsilon = 0.1;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -128,6 +128,7 @@ public class TrajectoryPointOptimizer
    public void compute()
    {
       long startTime = System.nanoTime();
+      timeGain.set(initialTimeGain);
 
       int intervals = nWaypoints.getIntegerValue() + 1;
       this.intervals.set(intervals);
@@ -189,7 +190,7 @@ public class TrajectoryPointOptimizer
 
          if (newCost > cost)
          {
-            timeGain.mul(0.5);
+            timeGain.set(timeGain.getDoubleValue() * 0.5);
             intervalTimes.set(saveIntervalTimes);
          }
          else

@@ -323,6 +323,39 @@ public class GenericROSTranslationTools
       return inputTopics;
    }
 
+   public static Set<Class<?>> getOutputTopicsForPackage(String additionalPackage)
+   {
+      Set<Class<?>> allAnnotatedRosMessageClasses = getAllRosMessagePacketAnnotatedClasses();
+      Set<Class<?>> outputTopicsForPackage = new HashSet<>();
+
+      for (Class<?> annotatedClass : allAnnotatedRosMessageClasses)
+      {
+         RosMessagePacket annotation = annotatedClass.getAnnotation(RosMessagePacket.class);
+         if(StatusPacket.class.isAssignableFrom(annotatedClass) && annotation.rosPackage().equals(additionalPackage) && !annotation.topic().equals(RosMessagePacket.NO_CORRESPONDING_TOPIC_STRING))
+         {
+            outputTopicsForPackage.add(annotatedClass);
+         }
+      }
+      return outputTopicsForPackage;
+   }
+
+   public static Set<Class<?>> getInputTopicsForPackage(String additionalPackage)
+   {
+      Set<Class<?>> allAnnotatedRosMessageClasses = getAllRosMessagePacketAnnotatedClasses();
+      Set<Class<?>> inputTopicsForPackage = new HashSet<>();
+
+      for (Class<?> annotatedClass : allAnnotatedRosMessageClasses)
+      {
+         RosMessagePacket annotation = annotatedClass.getAnnotation(RosMessagePacket.class);
+         if(!StatusPacket.class.isAssignableFrom(annotatedClass) && annotation.rosPackage().equals(additionalPackage) &&!annotation.topic().equals(RosMessagePacket.NO_CORRESPONDING_TOPIC_STRING))
+         {
+            inputTopicsForPackage.add(annotatedClass);
+         }
+      }
+
+      return inputTopicsForPackage;
+   }
+
    private static void convertIHMCMessageFieldsToROSFields(Packet<?> ihmcMessage, Message message, ArrayList<Field> fields)
          throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException
    {
