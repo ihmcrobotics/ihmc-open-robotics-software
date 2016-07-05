@@ -131,11 +131,6 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
-   }
-
    private void removeSteps()
    {
       timedStepController.removeSteps();
@@ -214,16 +209,14 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       }
    }
 
-   @Override
-   public ControllerEvent process()
+   public void halt()
    {
-      if (timedStepController.getQueueSize() == 0)
-      {
-         return ControllerEvent.DONE;
-      }
-      updateEstimates();
-      updateSetpoints();
-      return null;
+      removeSteps();
+   }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
    }
 
    @Override
@@ -302,6 +295,18 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       dcmTrajectory.computeTrajectory(transitionEndTime);
       dcmTrajectory.getPosition(dcmPositionWaypoint);
       dcmTransitionTrajectory.initializeTrajectory(dcmPositionEstimate, dcmPositionWaypoint, transitionStartTime, transitionEndTime);
+   }
+
+   @Override
+   public ControllerEvent process()
+   {
+      if (timedStepController.getQueueSize() == 0)
+      {
+         return ControllerEvent.DONE;
+      }
+      updateEstimates();
+      updateSetpoints();
+      return null;
    }
 
    @Override
