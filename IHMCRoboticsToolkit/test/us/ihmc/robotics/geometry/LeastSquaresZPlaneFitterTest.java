@@ -20,6 +20,36 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 public class LeastSquaresZPlaneFitterTest
 {
+    
+   @Test
+   public void testPointsWithSamePitchAndDifferentPositionGetSameAnswer()
+   {
+      LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
+
+      List<Point3d> pointListA = new ArrayList<Point3d>();
+      Plane3d plane3dA = new Plane3d();
+
+      pointListA.add(new Point3d( 1.0,  1.0,  0.1));
+      pointListA.add(new Point3d( 1.0, -1.0,  0.1));
+      pointListA.add(new Point3d(-1.0,  1.0, -0.1));
+      pointListA.add(new Point3d(-1.0, -1.0, -0.1));
+      
+      leastSquaresZPlaneFitter.fitPlaneToPoints(pointListA, plane3dA);
+      Vector3d normalA = plane3dA.getNormalCopy();
+      
+      List<Point3d> pointListB = new ArrayList<Point3d>();
+      Plane3d plane3dB = new Plane3d();
+      pointListB.add(new Point3d( 1.0 + 4.0,  1.0 + 4.0,  0.1));
+      pointListB.add(new Point3d( 1.0 + 4.0, -1.0 + 4.0,  0.1));
+      pointListB.add(new Point3d(-1.0 + 4.0,  1.0 + 4.0, -0.1));
+      pointListB.add(new Point3d(-1.0 + 4.0, -1.0 + 4.0, -0.1));
+      
+      leastSquaresZPlaneFitter.fitPlaneToPoints(pointListB, plane3dB);
+      Vector3d normalB = plane3dB.getNormalCopy();
+      
+      assertTrue(normalA.epsilonEquals(normalB, 1e-7));
+   }
+   
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleFlatCase()

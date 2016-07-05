@@ -14,7 +14,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 // moved to in development
 // this test is flaky because toe off is not triggered properly - the toe off condition needs to be fixed
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
 public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseSteppingStonesTest
 {
    @Override

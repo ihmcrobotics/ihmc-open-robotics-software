@@ -74,31 +74,32 @@ import us.ihmc.util.PeriodicThreadScheduler;
 
 public class QuadrupedSimulationFactory
 {
-   private RequiredFactoryField<SDFFullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
-   private RequiredFactoryField<QuadrupedPhysicalProperties> physicalProperties = new RequiredFactoryField<>("physicalProperties");
-   private RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
-   private RequiredFactoryField<SDFRobot> sdfRobot = new RequiredFactoryField<>("sdfRobot");
-   private RequiredFactoryField<Double> controlDT = new RequiredFactoryField<>("controlDT");
-   private RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
-   private RequiredFactoryField<Integer> recordFrequency = new RequiredFactoryField<>("recordFrequency");
-   private RequiredFactoryField<Boolean> useTrackAndDolly = new RequiredFactoryField<>("useTrackAndDolly");
-   private RequiredFactoryField<Boolean> showPlotter = new RequiredFactoryField<>("showPlotter");
-   private RequiredFactoryField<QuadrupedModelFactory> modelFactory = new RequiredFactoryField<>("modelFactory");
-   private RequiredFactoryField<SimulationConstructionSetParameters> scsParameters = new RequiredFactoryField<>("scsParameters");
-   private RequiredFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new RequiredFactoryField<>("groundContactModelType");
-   private RequiredFactoryField<QuadrupedGroundContactParameters> groundContactParameters = new RequiredFactoryField<>("groundContactParameters");
-   private RequiredFactoryField<QuadrupedSimulationInitialPositionParameters> initialPositionParameters = new RequiredFactoryField<>("initialPositionParameters");
-   private RequiredFactoryField<OutputWriter> outputWriter = new RequiredFactoryField<>("outputWriter");
-   private RequiredFactoryField<Boolean> useNetworking = new RequiredFactoryField<>("useNetworking");
-   private RequiredFactoryField<NetClassList> netClassList = new RequiredFactoryField<>("netClassList");
-   private RequiredFactoryField<SensorTimestampHolder> timestampProvider = new RequiredFactoryField<>("timestampProvider");
-   private RequiredFactoryField<Boolean> useStateEstimator = new RequiredFactoryField<>("useStateEstimator");
-   private RequiredFactoryField<QuadrupedSensorInformation> sensorInformation = new RequiredFactoryField<>("sensorInformation");
-   private RequiredFactoryField<StateEstimatorParameters> stateEstimatorParameters = new RequiredFactoryField<>("stateEstimatorParameters");
-   private RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
-   private RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>("positionBasedCrawlControllerParameters");
+   private final RequiredFactoryField<SDFFullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
+   private final RequiredFactoryField<QuadrupedPhysicalProperties> physicalProperties = new RequiredFactoryField<>("physicalProperties");
+   private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
+   private final RequiredFactoryField<SDFRobot> sdfRobot = new RequiredFactoryField<>("sdfRobot");
+   private final RequiredFactoryField<Double> controlDT = new RequiredFactoryField<>("controlDT");
+   private final RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
+   private final RequiredFactoryField<Integer> recordFrequency = new RequiredFactoryField<>("recordFrequency");
+   private final RequiredFactoryField<Boolean> useTrackAndDolly = new RequiredFactoryField<>("useTrackAndDolly");
+   private final RequiredFactoryField<Boolean> showPlotter = new RequiredFactoryField<>("showPlotter");
+   private final RequiredFactoryField<QuadrupedModelFactory> modelFactory = new RequiredFactoryField<>("modelFactory");
+   private final RequiredFactoryField<SimulationConstructionSetParameters> scsParameters = new RequiredFactoryField<>("scsParameters");
+   private final RequiredFactoryField<QuadrupedGroundContactParameters> groundContactParameters = new RequiredFactoryField<>("groundContactParameters");
+   private final RequiredFactoryField<QuadrupedSimulationInitialPositionParameters> initialPositionParameters = new RequiredFactoryField<>("initialPositionParameters");
+   private final RequiredFactoryField<OutputWriter> outputWriter = new RequiredFactoryField<>("outputWriter");
+   private final RequiredFactoryField<Boolean> useNetworking = new RequiredFactoryField<>("useNetworking");
+   private final RequiredFactoryField<NetClassList> netClassList = new RequiredFactoryField<>("netClassList");
+   private final RequiredFactoryField<SensorTimestampHolder> timestampProvider = new RequiredFactoryField<>("timestampProvider");
+   private final RequiredFactoryField<Boolean> useStateEstimator = new RequiredFactoryField<>("useStateEstimator");
+   private final RequiredFactoryField<QuadrupedSensorInformation> sensorInformation = new RequiredFactoryField<>("sensorInformation");
+   private final RequiredFactoryField<StateEstimatorParameters> stateEstimatorParameters = new RequiredFactoryField<>("stateEstimatorParameters");
+   private final RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
+   private final RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>("positionBasedCrawlControllerParameters");
    
-   private OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
+   private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
+   private final OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
+   private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    
    // TO CONSTRUCT
    private YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -266,32 +267,43 @@ public class QuadrupedSimulationFactory
    
    private void createGroundContactModel()
    {
-      switch (groundContactModelType.get())
+      if (groundContactModelType.hasBeenSet() && !providedGroundProfile3D.hasBeenSet())
       {
-      case FLAT:
-         groundProfile3D = new FlatGroundProfile(0.0);
-         break;
-      case ROLLING_HILLS:
-      groundProfile3D =  new RollingGroundProfile(0.025, 1.0, 0.0, -20.0, 20.0, -20.0, 20.0);
-         break;
-      case ROTATABLE:
-         groundProfile3D = new RotatablePlaneTerrainProfile(new Point3d(), sdfRobot.get(), yoGraphicsListRegistry, controlDT.get());
-         break;
-      case SLOPES:
-         double xMin = -5.0, xMax = 40.0;
-         double yMin = -5.0, yMax =  5.0;
-         double[][] xSlopePairs = new double[][]
+         switch (groundContactModelType.get())
          {
-            {1.0, 0.0}, {3.0, 0.1}
-         };
-         groundProfile3D = new AlternatingSlopesGroundProfile(xSlopePairs, xMin, xMax, yMin, yMax);
-         break;
-      case STEPPED:
-         groundProfile3D = new VaryingStairGroundProfile(0.0, 0.0, new double[] {1.5, 1.0, 1.0, 0.5}, new double[] {0.0, 0.05, -0.1, 0.05, 0.05});
-         break;
-      default:
-         groundProfile3D = null;
-         break;
+         case FLAT:
+            groundProfile3D = new FlatGroundProfile(0.0);
+            break;
+         case ROLLING_HILLS:
+         groundProfile3D =  new RollingGroundProfile(0.025, 1.0, 0.0, -20.0, 20.0, -20.0, 20.0);
+            break;
+         case ROTATABLE:
+            groundProfile3D = new RotatablePlaneTerrainProfile(new Point3d(), sdfRobot.get(), yoGraphicsListRegistry, controlDT.get());
+            break;
+         case SLOPES:
+            double xMin = -5.0, xMax = 40.0;
+            double yMin = -5.0, yMax =  5.0;
+            double[][] xSlopePairs = new double[][]
+            {
+               {1.0, 0.0}, {3.0, 0.1}
+            };
+            groundProfile3D = new AlternatingSlopesGroundProfile(xSlopePairs, xMin, xMax, yMin, yMax);
+            break;
+         case STEPPED:
+            groundProfile3D = new VaryingStairGroundProfile(0.0, 0.0, new double[] {1.5, 1.0, 1.0, 0.5}, new double[] {0.0, 0.05, -0.1, 0.05, 0.05});
+            break;
+         default:
+            groundProfile3D = null;
+            break;
+         }
+      }
+      else if (providedGroundProfile3D.hasBeenSet())
+      {
+         groundProfile3D =  providedGroundProfile3D.get();
+      }
+      else
+      {
+         groundProfile3D = new FlatGroundProfile(0.0);
       }
       
       groundContactModel = new LinearGroundContactModel(sdfRobot.get(), sdfRobot.get().getRobotsYoVariableRegistry());
@@ -363,7 +375,7 @@ public class QuadrupedSimulationFactory
       setupSDFRobot();
       
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot.get(), scsParameters.get());
-      if (groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE)
+      if (groundContactModelType.hasBeenSet() && groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE)
       {
          scs.setGroundVisible(false);
       }
@@ -506,5 +518,10 @@ public class QuadrupedSimulationFactory
    public void setPositionBasedCrawlControllerParameters(QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters)
    {
       this.positionBasedCrawlControllerParameters.set(positionBasedCrawlControllerParameters);
+   }
+   
+   public void setGroundProfile3D(GroundProfile3D groundProfile3D)
+   {
+      providedGroundProfile3D.set(groundProfile3D);
    }
 }
