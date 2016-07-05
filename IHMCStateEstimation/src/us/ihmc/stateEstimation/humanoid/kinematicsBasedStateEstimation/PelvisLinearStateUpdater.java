@@ -223,7 +223,10 @@ public class PelvisLinearStateUpdater
          haveFeetHitGroundFiltered.put(foot, hasFootHitTheGroundFiltered);
          
          BooleanYoVariable isFootTrusted = new BooleanYoVariable("is" + footPrefix + "FootTrusted", registry);
-         isFootTrusted.set(true);
+         if(i == 0)
+         {
+            isFootTrusted.set(true);
+         }
          areFeetTrusted.put(foot, isFootTrusted);
          
          DoubleYoVariable footForceZInPercentOfTotalForce = new DoubleYoVariable(footPrefix + "FootForceZInPercentOfTotalForce", registry);
