@@ -94,39 +94,39 @@ public class LinearInvertedPendulumModel
 
    /**
     * Compute the total contact force acting on the CoM given the desired eCMP.
-    * @param comForce computed contact force acting on the center of mass
+    * @param comForceToPack computed contact force acting on the center of mass
     * @param cmpPosition known position of the enhanced centroidal moment pivot
     */
-   public void computeComForce(FrameVector comForce, FramePoint cmpPosition)
+   public void computeComForce(FrameVector comForceToPack, FramePoint cmpPosition)
    {
       ReferenceFrame cmpPositionFrame = cmpPosition.getReferenceFrame();
-      ReferenceFrame comForceFrame = comForce.getReferenceFrame();
+      ReferenceFrame comForceFrame = comForceToPack.getReferenceFrame();
       cmpPosition.changeFrame(comZUpFrame);
-      comForce.changeFrame(comZUpFrame);
+      comForceToPack.setToNaN(comZUpFrame);
 
       double omega = getNaturalFrequency();
-      comForce.set(cmpPosition);
-      comForce.scale(-mass * Math.pow(omega, 2));
-      comForce.changeFrame(comForceFrame);
+      comForceToPack.set(cmpPosition);
+      comForceToPack.scale(-mass * Math.pow(omega, 2));
+      comForceToPack.changeFrame(comForceFrame);
       cmpPosition.changeFrame(cmpPositionFrame);
    }
 
    /**
     * Compute the eCMP position given the total contact force acting on the CoM.
-    * @param cmpPosition computed position of the enhanced centroidal moment pivot
+    * @param cmpPositionToPack computed position of the enhanced centroidal moment pivot
     * @param comForce known contact force acting on the center of mass
     */
-   public void computeCmpPosition(FramePoint cmpPosition, FrameVector comForce)
+   public void computeCmpPosition(FramePoint cmpPositionToPack, FrameVector comForce)
    {
-      ReferenceFrame cmpPositionFrame = cmpPosition.getReferenceFrame();
+      ReferenceFrame cmpPositionFrame = cmpPositionToPack.getReferenceFrame();
       ReferenceFrame comForceFrame = comForce.getReferenceFrame();
-      cmpPosition.changeFrame(comZUpFrame);
+      cmpPositionToPack.setToNaN(comZUpFrame);
       comForce.changeFrame(comZUpFrame);
 
       double omega = getNaturalFrequency();
-      cmpPosition.set(comForce);
-      cmpPosition.scale(-1.0 / (mass * Math.pow(omega, 2)));
-      cmpPosition.changeFrame(cmpPositionFrame);
+      cmpPositionToPack.set(comForce);
+      cmpPositionToPack.scale(-1.0 / (mass * Math.pow(omega, 2)));
+      cmpPositionToPack.changeFrame(cmpPositionFrame);
       comForce.changeFrame(comForceFrame);
    }
 }

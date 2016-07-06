@@ -26,6 +26,15 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
    private final Map<Class<?>, List<FiniteStateMachineTransition<S, ? extends Enum<?>>>> transitions;
 
    /**
+    * The list of optional callback functions to handle events triggered in a specific state.
+    */
+   /*
+    * NOTE: This should be a {@link java.util.Set}, but due to real-time constraints a {@link List} must be used
+    * instead.
+    */
+   private final Map<Class<?>, List<FiniteStateMachineCallback<S, ? extends Enum<?>>>> callbacks;
+
+   /**
     * The default type of events, {@link E}. Specifying this is a convenience that allows the type to be omitted from calls to {@link #trigger(Enum)} unless the
     * event is of a different type.
     */
@@ -53,10 +62,12 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
     * Use {@link FiniteStateMachineBuilder} instead.
     */
    FiniteStateMachine(Map<S, FiniteStateMachineState<E>> states, Map<Class<?>, List<FiniteStateMachineTransition<S, ? extends Enum<?>>>> transitions,
-         S initialState, Class<S> enumType, Class<E> standardEventType, String yoVariableName, YoVariableRegistry registry)
+         Map<Class<?>, List<FiniteStateMachineCallback<S, ? extends Enum<?>>>> callbacks, S initialState, Class<S> enumType, Class<E> standardEventType,
+         String yoVariableName, YoVariableRegistry registry)
    {
       this.states = states;
       this.transitions = transitions;
+      this.callbacks = callbacks;
       this.initialState = initialState;
       this.standardEventType = standardEventType;
       this.state = new EnumYoVariable<>(yoVariableName, registry, enumType);
@@ -86,15 +97,33 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
    public <M extends Enum<M>> void trigger(Class<M> type, M event)
    {
       List<FiniteStateMachineTransition<S, ? extends Enum<?>>> transitionsTypeM = transitions.get(type);
-      for (int i = 0; i < transitionsTypeM.size(); i++)
+      if (transitionsTypeM != null)
       {
-         FiniteStateMachineTransition<S, ?> transition = transitionsTypeM.get(i);
-
-         // Check if this transition matches the source state and event.
-         if (transition.getFrom() == getState() && event == transition.getEvent())
+         for (int i = 0; i < transitionsTypeM.size(); i++)
          {
-            transition(transition.getFrom(), transition.getTo());
-            break;
+            FiniteStateMachineTransition<S, ?> transition = transitionsTypeM.get(i);
+
+            // Check if this transition matches the source state and event.
+            if (transition.getFrom() == getState() && event == transition.getEvent())
+            {
+               transition(transition.getFrom(), transition.getTo());
+               break;
+            }
+         }
+      }
+
+      List<FiniteStateMachineCallback<S, ? extends Enum<?>>> callbacksTypeM = callbacks.get(type);
+      if (callbacksTypeM != null)
+      {
+         for (int i = 0; i < callbacksTypeM.size(); i++)
+         {
+            FiniteStateMachineCallback<S, ?> callback = callbacksTypeM.get(i);
+
+            // Check if this callback should be called.
+            if (callback.getState() == getState() && event == callback.getEvent())
+            {
+               callback.call();
+            }
          }
       }
    }

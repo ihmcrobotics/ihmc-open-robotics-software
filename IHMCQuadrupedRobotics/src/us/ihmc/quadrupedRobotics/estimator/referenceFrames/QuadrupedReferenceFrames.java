@@ -7,10 +7,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
-import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
+import us.ihmc.SdfLoader.partNames.*;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -27,7 +24,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.containers.ContainerTools;
 
 public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 {
@@ -39,7 +35,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final ReferenceFrame bodyFrame, rootJointFrame;
    private final ZUpFrame bodyZUpFrame;
 
-   private final EnumMap<NeckJointName, ReferenceFrame> neckReferenceFrames = ContainerTools.createEnumMap(NeckJointName.class);
+   private final EnumMap<QuadrupedJointName, ReferenceFrame> namedReferenceFrames = new EnumMap<>(QuadrupedJointName.class);
    private final Map<QuadrupedJointName, ReferenceFrame> framesBeforeLegJoint = new EnumMap<>(QuadrupedJointName.class);
    private final Map<QuadrupedJointName, ReferenceFrame> framesAfterLegJoint = new EnumMap<>(QuadrupedJointName.class);
    private final QuadrantDependentList<ReferenceFrame> soleFrames = new QuadrantDependentList<ReferenceFrame>();
@@ -79,11 +75,15 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       centerOfMassPose = new FramePose(bodyFrame);
 
       bodyZUpFrame = new ZUpFrame(worldFrame, bodyFrame, "bodyZUpFrame");
-      RobotSpecificJointNames robotJointNames = fullRobotModel.getRobotSpecificJointNames();
-      
-      for (NeckJointName neckJointName : robotJointNames.getNeckJointNames())
+
+      for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
-         this.neckReferenceFrames.put(neckJointName, fullRobotModel.getNeckJoint(neckJointName).getFrameAfterJoint());
+         OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
+         if (joint != null)
+         {
+            ReferenceFrame frame = joint.getFrameAfterJoint();
+            namedReferenceFrames.put(jointName, frame);
+         }
       }
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -278,6 +278,11 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       return worldFrame;
    }
 
+   public ReferenceFrame getFrameByName(QuadrupedJointName name)
+   {
+      return namedReferenceFrames.get(name);
+   }
+
    @Override
    public ReferenceFrame getBodyFrame()
    {
@@ -300,11 +305,6 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    public ReferenceFrame getRootJointFrame()
    {
       return rootJointFrame;
-   }
-   
-   public ReferenceFrame getNeckFrame(NeckJointName neckJointName)
-   {
-      return neckReferenceFrames.get(neckJointName);
    }
 
    @Override

@@ -8,9 +8,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 
-public class VarPanelJPopupMenu extends JPopupMenu
+public class VarPanelJPopupMenu extends ForcedRepaintPopupMenu
 {
    private static final long serialVersionUID = -1080363015468056576L;
 

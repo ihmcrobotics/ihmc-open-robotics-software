@@ -60,11 +60,11 @@ public class TaskspaceHandControlState extends HandControlState
    private final FramePose desiredPose = new FramePose();
    private final FramePoint desiredPosition = new FramePoint(worldFrame);
    private final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
-   private final FrameVector desiredAcceleration = new FrameVector(worldFrame);
+   private final FrameVector feedForwardLinearAcceleration = new FrameVector(worldFrame);
 
    private final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
    private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
-   private final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
+   private final FrameVector feedForwardAngularAcceleration = new FrameVector(worldFrame);
    private final FrameSE3TrajectoryPoint initialTrajectoryPoint = new FrameSE3TrajectoryPoint();
 
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
@@ -239,13 +239,13 @@ public class TaskspaceHandControlState extends HandControlState
          orientationTrajectoryGenerator.compute(getTimeInCurrentState());
       }
 
-      positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, desiredAcceleration);
-      orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       desiredPose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
       yoDesiredPose.setAndMatchFrame(desiredPose);
 
-      spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, desiredLinearVelocity);
-      spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       spatialFeedbackControlCommand.setGains(gains);
       yoAngularWeight.get(angularWeight);
       yoLinearWeight.get(linearWeight);

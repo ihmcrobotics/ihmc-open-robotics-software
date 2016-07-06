@@ -93,8 +93,8 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
 
       doElasticityCompensation = runningOnRealRobot;
       jointElasticityFilterFrequencyHz = 20.0;
-      maximumDeflection = 0.25;
-      defaultJointStiffness = 10000;
+      maximumDeflection = 0.10;
+      defaultJointStiffness = 10000.0;
       for (RobotSide robotSide : RobotSide.values)
          jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 8000.0);
 
@@ -390,5 +390,11 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public SideDependentList<String> getFootForceSensorNames()
    {
       return footForceSensorNames;
+   }
+
+   @Override
+   public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
+   {
+      return false;
    }
 }

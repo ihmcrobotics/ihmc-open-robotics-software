@@ -230,4 +230,10 @@ public class LLAQuadrupedStateEstimatorParameters implements StateEstimatorParam
    {
       return null;
    }
+
+   @Override
+   public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
+   {
+      return false;
+   }
 }

@@ -305,4 +305,10 @@ public class WandererStateEstimatorParameters implements StateEstimatorParameter
    {
       return null;
    }
+
+   @Override
+   public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
+   {
+      return false;
+   }
 }
