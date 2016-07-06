@@ -1,27 +1,16 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.dnd.DropTarget;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.ArrayList;
-
-import javax.swing.BoxLayout;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.TransferHandler;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.dnd.DropTarget;
+import java.awt.event.*;
+import java.util.ArrayList;
 
 
 
@@ -69,7 +58,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
       this.setDropTarget(new DropTarget(this, new YoEntryBoxTargetListener(this)));
       this.setTransferHandler(new YoEntryBoxTransferHandler());
 
-      popupMenu = new JPopupMenu();
+      popupMenu = new ForcedRepaintPopupMenu();
       JMenuItem delete = new JMenuItem("Delete Entry Box");
       delete.addActionListener(new ActionListener()
       {
