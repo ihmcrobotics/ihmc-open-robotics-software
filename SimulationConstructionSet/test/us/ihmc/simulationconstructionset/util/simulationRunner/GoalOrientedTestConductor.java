@@ -17,6 +17,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public class GoalOrientedTestConductor implements VariableChangedListener
 {
    private final SimulationConstructionSet scs;
+   private final SimulationTestingParameters simulationTestingParameters;
    
    // Yo variables
    private final DoubleYoVariable yoTime;
@@ -32,9 +33,10 @@ public class GoalOrientedTestConductor implements VariableChangedListener
    
    private String assertionFailedMessage = null;
    
-   public GoalOrientedTestConductor(SimulationConstructionSet scs)
+   public GoalOrientedTestConductor(SimulationConstructionSet scs, SimulationTestingParameters simulationTestingParameters)
    {
       this.scs = scs;
+      this.simulationTestingParameters = simulationTestingParameters;
       
       yoTime = (DoubleYoVariable) scs.getVariable("t");
       
@@ -151,8 +153,13 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       }
    }
 
-   public void concludeTesting(SimulationTestingParameters simulationTestingParameters)
+   public void concludeTesting()
    {
+      if (simulationTestingParameters.getKeepSCSUp())
+      {
+         ThreadTools.sleepForever();
+      }
+      
       if (simulationTestingParameters.getCreateSCSVideos())
       {
          BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots()[0].getName(), scs, 1);
