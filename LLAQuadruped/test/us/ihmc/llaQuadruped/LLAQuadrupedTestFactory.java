@@ -20,13 +20,14 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.RequiredFactoryField;
 
 public class LLAQuadrupedTestFactory
 {
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private static final double SIMULATION_DT = 0.00006;
    private static final double SIMULATION_GRAVITY = -9.81;
    private static final int RECORD_FREQUENCY = (int) (0.01 / SIMULATION_DT);
@@ -36,7 +37,7 @@ public class LLAQuadrupedTestFactory
    private static final boolean USE_NETWORKING = false;
    
    private RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
-   private RequiredFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new RequiredFactoryField<>("controlMode");
+   private RequiredFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new RequiredFactoryField<>("groundContactModelType");
    
    public GoalOrientedTestConductor createTestConductor() throws IOException
    {
@@ -45,7 +46,6 @@ public class LLAQuadrupedTestFactory
       QuadrupedModelFactory modelFactory = new LLAQuadrupedModelFactory();
       QuadrupedPhysicalProperties physicalProperties = new LLAQuadrupedPhysicalProperties();
       NetClassList netClassList = new LLAQuadrupedNetClassList();
-      SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
       QuadrupedSimulationInitialPositionParameters initialPositionParameters = new LLAQuadrupedSimulationInitialPositionParameters();
       QuadrupedGroundContactParameters groundContactParameters = new LLAQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new LLAQuadrupedSensorInformation();
@@ -65,10 +65,9 @@ public class LLAQuadrupedTestFactory
       simulationFactory.setGravity(SIMULATION_GRAVITY);
       simulationFactory.setRecordFrequency(RECORD_FREQUENCY);
       simulationFactory.setGroundContactParameters(groundContactParameters);
-      simulationFactory.setHeadControllerFactory(null);
       simulationFactory.setModelFactory(modelFactory);
       simulationFactory.setSDFRobot(sdfRobot);
-      simulationFactory.setSCSParameters(scsParameters);
+      simulationFactory.setSCSParameters(simulationTestingParameters);
       simulationFactory.setOutputWriter(outputWriter);
       simulationFactory.setShowPlotter(SHOW_PLOTTER);
       simulationFactory.setUseTrackAndDolly(USE_TRACK_AND_DOLLY);
@@ -82,9 +81,10 @@ public class LLAQuadrupedTestFactory
       simulationFactory.setSensorInformation(sensorInformation);
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
+      simulationFactory.setControlMode(controlMode.get());
       simulationFactory.setGroundContactModelType(groundContactModelType.get());
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
-      return new GoalOrientedTestConductor(simulationFactory.createSimulation());
+      return new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
    }
    
    public void setControlMode(QuadrupedControlMode controlMode)
