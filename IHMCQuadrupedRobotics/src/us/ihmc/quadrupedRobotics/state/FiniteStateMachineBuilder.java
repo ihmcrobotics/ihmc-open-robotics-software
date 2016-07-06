@@ -16,6 +16,7 @@ public class FiniteStateMachineBuilder<S extends Enum<S>, E extends Enum<E>>
 
    private final Map<S, FiniteStateMachineState<E>> states = new HashMap<>();
    private final Map<Class<?>, List<FiniteStateMachineTransition<S, ? extends Enum<?>>>> transitions = new HashMap<>();
+   private final Map<Class<?>, List<FiniteStateMachineCallback<S, ? extends Enum<?>>>> callbacks = new HashMap<>();
 
    public FiniteStateMachineBuilder(Class<S> enumType, Class<E> standardEventType, String yoVariableName, YoVariableRegistry registry)
    {
@@ -46,14 +47,30 @@ public class FiniteStateMachineBuilder<S extends Enum<S>, E extends Enum<E>>
          transitions.put(eventType, transitionsOnE);
       }
 
-      FiniteStateMachineTransition<S, ?> transition = new FiniteStateMachineTransition<>(event, from, to);
-      transitionsOnE.add(transition);
+      transitionsOnE.add(new FiniteStateMachineTransition<>(event, from, to));
+      return this;
+   }
 
+   public FiniteStateMachineBuilder addCallback(E event, S state, Runnable callback)
+   {
+      return addCallback(standardEventType, event, state, callback);
+   }
+
+   public <M extends Enum<M>> FiniteStateMachineBuilder addCallback(Class<M> eventType, M event, S state, Runnable callback)
+   {
+      List<FiniteStateMachineCallback<S, ? extends Enum<?>>> callbacksOnE = callbacks.get(eventType);
+      if (callbacksOnE == null)
+      {
+         callbacksOnE = new ArrayList<>();
+         callbacks.put(eventType, callbacksOnE);
+      }
+
+      callbacksOnE.add(new FiniteStateMachineCallback<>(event, state, callback));
       return this;
    }
 
    public FiniteStateMachine<S, E> build(S initialState)
    {
-      return new FiniteStateMachine<>(states, transitions, initialState, enumType, standardEventType, yoVariableName, registry);
+      return new FiniteStateMachine<>(states, transitions, callbacks, initialState, enumType, standardEventType, yoVariableName, registry);
    }
 }

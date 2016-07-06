@@ -1,19 +1,14 @@
 package us.ihmc.quadrupedRobotics;
 
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-public class QuadrupedTestYoVariables
+public abstract class QuadrupedTestYoVariables
 {
    private final DoubleYoVariable yoTime;
-   private final EnumYoVariable<QuadrupedForceControllerRequestedEvent> userTrigger;
-   private final EnumYoVariable<QuadrupedForceControllerState> forceControllerState;
    
    private final DoubleYoVariable yoComPositionInputX;
    private final DoubleYoVariable yoComPositionInputY;
@@ -41,12 +36,9 @@ public class QuadrupedTestYoVariables
    
    private final DoubleYoVariable groundPlanePointZ;
    
-   @SuppressWarnings("unchecked")
    public QuadrupedTestYoVariables(SimulationConstructionSet scs)
    {
       yoTime = (DoubleYoVariable) scs.getVariable("t");
-      userTrigger = (EnumYoVariable<QuadrupedForceControllerRequestedEvent>) scs.getVariable("usertrigger");
-      forceControllerState = (EnumYoVariable<QuadrupedForceControllerState>) scs.getVariable("forceControllerState");
       
       yoComPositionInputX = (DoubleYoVariable) scs.getVariable("comPositionInputX");
       yoComPositionInputY = (DoubleYoVariable) scs.getVariable("comPositionInputY");
@@ -76,16 +68,6 @@ public class QuadrupedTestYoVariables
       }
       
       groundPlanePointZ = (DoubleYoVariable) scs.getVariable("groundPlanePointZ");
-   }
-
-   public EnumYoVariable<QuadrupedForceControllerRequestedEvent> getUserTrigger()
-   {
-      return userTrigger;
-   }
-
-   public EnumYoVariable<QuadrupedForceControllerState> getForceControllerState()
-   {
-      return forceControllerState;
    }
 
    public DoubleYoVariable getYoComPositionInputX()
