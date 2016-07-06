@@ -31,8 +31,6 @@ import java.util.Map;
 public class VirtualModelControlOptimizationControlModule
 {
    private static final boolean DEBUG = false;
-   private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
-   private static final boolean SETUP_RHO_TASKS = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -46,16 +44,13 @@ public class VirtualModelControlOptimizationControlModule
    private final DenseMatrix64F momentumSelectionMatrix = new DenseMatrix64F(0, 0);
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
-   private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMinVMC", registry);
 
    private YoFrameVector desiredLinearMomentumRate = null;
    private YoFrameVector desiredAngularMomentumRate = null;
    private YoFrameVector achievedLinearMomentumRate = null;
    private YoFrameVector achievedAngularMomentumRate = null;
    private final Map<RigidBody, YoWrench> contactWrenchSolutions = new HashMap<>();
-   private final BasisVectorVisualizer basisVectorVisualizer;
 
-   private final GroundContactForceQPSolver qpSolver;
    private final GroundContactForceOptimizationControlModule groundContactForceOptimization;
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
@@ -73,10 +68,10 @@ public class VirtualModelControlOptimizationControlModule
       jointsToOptimizeFor = toolbox.getJointIndexHandler().getIndexedJoints();
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
       contactablePlaneBodies = toolbox.getContactablePlaneBodies();
+      wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
 
-      groundContactForceOptimization = new GroundContactForceOptimizationControlModule(toolbox, rootJoint, useMomentumQP, parentRegistry);
-
-      int rhoSize = WholeBodyControlCoreToolbox.rhoSize;
+      groundContactForceOptimization = new GroundContactForceOptimizationControlModule(wrenchMatrixCalculator, toolbox.getMomentumOptimizationSettings(),
+            parentRegistry, toolbox.getYoGraphicsListRegistry());
 
       double gravityZ = toolbox.getGravityZ();
 
@@ -95,29 +90,14 @@ public class VirtualModelControlOptimizationControlModule
          }
       }
 
-
-      MomentumOptimizationSettings momentumOptimizationSettings = toolbox.getMomentumOptimizationSettings();
-
-      wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
-
-      YoGraphicsListRegistry yoGraphicsListRegistry = toolbox.getYoGraphicsListRegistry();
-      if (VISUALIZE_RHO_BASIS_VECTORS)
-         basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, yoGraphicsListRegistry, registry);
-      else
-         basisVectorVisualizer = null;
-
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
-
-      rhoMin.set(momentumOptimizationSettings.getRhoMin());
-      qpSolver = new GroundContactForceQPSolver(rhoSize, registry);
-      qpSolver.setMinRho(momentumOptimizationSettings.getRhoMin());
 
       parentRegistry.addChild(registry);
    }
 
    public void initialize()
    {
-      qpSolver.reset();
+      groundContactForceOptimization.initialize();
       externalWrenchHandler.reset();
       bodiesInContact.clear();
       selectionMatrices.clear();
@@ -133,17 +113,6 @@ public class VirtualModelControlOptimizationControlModule
       groundReactionWrenches.clear();
       wrenchMatrixCalculator.computeMatrices();
 
-      qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
-      qpSolver.addRegularization();
-
-      if (VISUALIZE_RHO_BASIS_VECTORS)
-         basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
-
-      if (SETUP_RHO_TASKS)
-         setupRhoTasks();
-
-      qpSolver.setMinRho(rhoMin.getDoubleValue());
-
       processMomentumRateCommand();
 
       NoConvergenceException noConvergenceException = null;
@@ -153,11 +122,10 @@ public class VirtualModelControlOptimizationControlModule
       {
          try
          {
-            groundReactionWrenches.putAll(groundContactForceOptimization.compute());
+            groundReactionWrenches.putAll(groundContactForceOptimization.compute(taskObjective, taskJacobian, taskWeightMatrix));
          }
          catch (NoConvergenceException e)
          {
-
             if (!hasNotConvergedInPast.getBooleanValue())
             {
                e.printStackTrace();
@@ -233,23 +201,6 @@ public class VirtualModelControlOptimizationControlModule
       {
          throw new VirtualModelControlModuleException(noConvergenceException, virtualModelControlSolutionToPack);
       }
-   }
-
-   private void setupRhoTasks()
-   {
-      DenseMatrix64F rhoPrevious = wrenchMatrixCalculator.getRhoPreviousMatrix();
-      DenseMatrix64F rhoRateWeight = wrenchMatrixCalculator.getRhoRateWeightMatrix();
-      qpSolver.addRhoTask(rhoPrevious, rhoRateWeight);
-
-      DenseMatrix64F copJacobian = wrenchMatrixCalculator.getCopJacobianMatrix();
-
-      DenseMatrix64F previousCoP = wrenchMatrixCalculator.getPreviousCoPMatrix();
-      DenseMatrix64F copRateWeight = wrenchMatrixCalculator.getCopRateWeightMatrix();
-      qpSolver.addRhoTask(copJacobian, previousCoP, copRateWeight);
-
-      DenseMatrix64F desiredCoP = wrenchMatrixCalculator.getDesiredCoPMatrix();
-      DenseMatrix64F desiredCoPWeight = wrenchMatrixCalculator.getDesiredCoPWeightMatrix();
-      qpSolver.addRhoTask(copJacobian, desiredCoP, desiredCoPWeight);
    }
 
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
@@ -359,9 +310,6 @@ public class VirtualModelControlOptimizationControlModule
          desiredLinearMomentumRate.set(tempTaskObjective.get(3), tempTaskObjective.get(4), tempTaskObjective.get(5));
          desiredAngularMomentumRate.set(tempTaskObjective.get(0), tempTaskObjective.get(1), tempTaskObjective.get(2));
       }
-
-      if (useMomentumQP)
-         qpSolver.addMomentumTask(taskJacobian, taskObjective, taskWeightMatrix);
    }
 
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)
