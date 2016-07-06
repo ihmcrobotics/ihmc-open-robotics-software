@@ -16,7 +16,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.quadrupedRobotics.gait.QuadrupedGaitTypeTest.class,
    us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlannerTest.class,
    us.ihmc.quadrupedRobotics.supportPolygon.QuadrupedSupportPolygonTest.class,
-   us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderTest.class
+   us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderTest.class,
+   us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel.class
 })
 
 public class IHMCQuadrupedRoboticsAFastTestSuite
