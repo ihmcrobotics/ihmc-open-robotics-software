@@ -1,111 +1,48 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ExternalWrenchHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlModuleException;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.frames.YoWrench;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.io.printing.PrintTools;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class GroundContactForceOptimizationControlModule
 {
-   private static final boolean DEBUG = false;
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
    private static final boolean SETUP_RHO_TASKS = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ReferenceFrame centerOfMassFrame;
-
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
-   private final ExternalWrenchHandler externalWrenchHandler;
-   private final SpatialForceVector centroidalMomentumRateSolution = new SpatialForceVector();
 
-   private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
-   private final DenseMatrix64F momentumSelectionMatrix = new DenseMatrix64F(0, 0);
+   private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMinGCFOptimization", registry);
 
-   private final InverseDynamicsJoint[] jointsToOptimizeFor;
-   private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMinVMC", registry);
-
-   private YoFrameVector desiredLinearMomentumRate = null;
-   private YoFrameVector desiredAngularMomentumRate = null;
-   private YoFrameVector achievedLinearMomentumRate = null;
-   private YoFrameVector achievedAngularMomentumRate = null;
-   private final Map<RigidBody, YoWrench> contactWrenchSolutions = new HashMap<>();
    private final BasisVectorVisualizer basisVectorVisualizer;
 
    private final GroundContactForceQPSolver qpSolver;
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
 
-   private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
-   private final List<RigidBody> bodiesInContact = new ArrayList<>();
-   private final List<DenseMatrix64F> selectionMatrices = new ArrayList<>();
-
-   private final boolean useMomentumQP;
-
-   public GroundContactForceOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, InverseDynamicsJoint rootJoint, boolean useMomentumQP,
-         YoVariableRegistry parentRegistry)
+   public GroundContactForceOptimizationControlModule(WrenchMatrixCalculator wrenchMatrixCalculator, MomentumOptimizationSettings momentumOptimizationSettings,
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.useMomentumQP = useMomentumQP;
-      jointsToOptimizeFor = toolbox.getJointIndexHandler().getIndexedJoints();
-      centerOfMassFrame = toolbox.getCenterOfMassFrame();
-      contactablePlaneBodies = toolbox.getContactablePlaneBodies();
-
+      this.wrenchMatrixCalculator = wrenchMatrixCalculator;
       int rhoSize = WholeBodyControlCoreToolbox.rhoSize;
 
-      double gravityZ = toolbox.getGravityZ();
-
-      if (DEBUG)
-      {
-         desiredLinearMomentumRate = new YoFrameVector("desiredLinearMomentumRateToQP", null, registry);
-         desiredAngularMomentumRate = new YoFrameVector("desiredAngularMomentumRateToQP", null, registry);
-         achievedLinearMomentumRate = new YoFrameVector("achievedLinearMomentumRateFromQP", null, registry);
-         achievedAngularMomentumRate = new YoFrameVector("achievedAngularMomentumRateFromQP", null, registry);
-
-         for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
-         {
-            RigidBody rigidBody = contactablePlaneBody.getRigidBody();
-            contactWrenchSolutions.put(rigidBody, new YoWrench(rigidBody.getName() + "_wrenchSolution", rigidBody.getBodyFixedFrame(),
-                  rigidBody.getBodyFixedFrame(), registry));
-         }
-      }
-
-
-      MomentumOptimizationSettings momentumOptimizationSettings = toolbox.getMomentumOptimizationSettings();
-
-      wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
-
-      YoGraphicsListRegistry yoGraphicsListRegistry = toolbox.getYoGraphicsListRegistry();
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, yoGraphicsListRegistry, registry);
       else
          basisVectorVisualizer = null;
-
-      externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
 
       rhoMin.set(momentumOptimizationSettings.getRhoMin());
       qpSolver = new GroundContactForceQPSolver(rhoSize, registry);
@@ -117,12 +54,9 @@ public class GroundContactForceOptimizationControlModule
    public void initialize()
    {
       qpSolver.reset();
-      externalWrenchHandler.reset();
-      bodiesInContact.clear();
-      selectionMatrices.clear();
    }
 
-   public Map<RigidBody, Wrench> compute() throws NoConvergenceException
+   public Map<RigidBody, Wrench> compute(DenseMatrix64F momentumObjective, DenseMatrix64F momentumJacobian, DenseMatrix64F momentumWeight) throws NoConvergenceException
    {
       wrenchMatrixCalculator.computeMatrices();
 
@@ -136,8 +70,7 @@ public class GroundContactForceOptimizationControlModule
          setupRhoTasks();
 
       qpSolver.setMinRho(rhoMin.getDoubleValue());
-
-      processMomentumRateCommand();
+      qpSolver.addMomentumTask(momentumJacobian, momentumObjective, momentumWeight);
 
       NoConvergenceException noConvergenceException = null;
 
@@ -163,6 +96,9 @@ public class GroundContactForceOptimizationControlModule
 
       DenseMatrix64F rhoSolution = qpSolver.getRhos();
 
+      if (noConvergenceException != null)
+         throw noConvergenceException;
+
       return wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
    }
 
@@ -181,137 +117,5 @@ public class GroundContactForceOptimizationControlModule
       DenseMatrix64F desiredCoP = wrenchMatrixCalculator.getDesiredCoPMatrix();
       DenseMatrix64F desiredCoPWeight = wrenchMatrixCalculator.getDesiredCoPWeightMatrix();
       qpSolver.addRhoTask(copJacobian, desiredCoP, desiredCoPWeight);
-   }
-
-   private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-   private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-   private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
-   private final DenseMatrix64F taskWeightMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-   private final DenseMatrix64F taskJacobian = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-   private final DenseMatrix64F taskObjective = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
-
-   public void submitMomentumRateCommand(MomentumRateCommand command)
-   {
-      momentumRateCommand.set(command);
-      momentumRateCommand.setWeights(command.getWeightVector());
-      momentumSelectionMatrix.set(command.getSelectionMatrix());
-   }
-
-   private final DenseMatrix64F currentColSum = new DenseMatrix64F(1, SpatialForceVector.SIZE);
-   private final DenseMatrix64F inputColSum = new DenseMatrix64F(1, SpatialForceVector.SIZE);
-   private final DenseMatrix64F tmpSelectionMatrix = new DenseMatrix64F(1, 1);
-
-   public void addSelection(DenseMatrix64F selectionMatrix)
-   {
-      selectionMatrices.add(selectionMatrix);
-   }
-
-   // creates the selection matrix for the full problem, compiling all virtual, external, and balancing wrenches
-   private void processSelectionMatrices()
-   {
-      momentumSelectionMatrix.set(momentumRateCommand.getSelectionMatrix());
-
-      for (int input = 0; input < selectionMatrices.size(); input++)
-      {
-         DenseMatrix64F selectionMatrix = selectionMatrices.get(input);
-
-         CommonOps.sumCols(momentumSelectionMatrix, currentColSum);
-         CommonOps.sumCols(selectionMatrix, inputColSum);
-
-         int currentRow = 0;
-         int inputRow = 0;
-         for (int col = 0; col < SpatialForceVector.SIZE; col++)
-         {
-            // if this column has value, we want to insert the next row below it
-            if (currentColSum.get(col) == 1)
-               currentRow++;
-
-            if (inputColSum.get(col) == 1 && currentColSum.get(col) == 0)
-            {
-               tmpSelectionMatrix.set(momentumSelectionMatrix);
-               momentumSelectionMatrix.reshape(momentumSelectionMatrix.getNumRows()+1, SpatialForceVector.SIZE);
-
-               // copy rows above
-               if (currentRow > 0)
-               {
-                  CommonOps.extract(tmpSelectionMatrix, 0, currentRow, 0, SpatialForceVector.SIZE, momentumSelectionMatrix, 0, 0);
-               }
-
-               // insert new row
-               CommonOps.extract(selectionMatrix, inputRow, inputRow + 1, 0, SpatialForceVector.SIZE, momentumSelectionMatrix, currentRow, 0);
-
-               // copy rows below
-               CommonOps.extract(tmpSelectionMatrix, currentRow, tmpSelectionMatrix.getNumRows(), 0, SpatialForceVector.SIZE, momentumSelectionMatrix,
-                     currentRow+1, 0);
-
-               currentRow++;
-               inputRow++;
-            }
-         }
-      }
-   }
-
-   private void processMomentumRateCommand()
-   {
-      processSelectionMatrices();
-
-      int taskSize = momentumSelectionMatrix.getNumRows();
-      taskObjective.reshape(taskSize, 1);
-      taskWeightMatrix.reshape(taskSize, taskSize);
-
-      if (taskSize == 0)
-         return;
-
-      // Compute the weight: W = S * W * S^T
-      tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-      tempTaskWeightSubspace.reshape(taskSize, SpatialAccelerationVector.SIZE);
-      momentumRateCommand.getWeightMatrix(tempTaskWeight);
-      CommonOps.mult(momentumSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps.multTransB(tempTaskWeightSubspace, momentumSelectionMatrix, taskWeightMatrix);
-
-      // Compute the task Jacobian: J = S * A
-      DenseMatrix64F rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
-      taskJacobian.reshape(taskSize, rhoJacobian.numCols);
-      CommonOps.mult(momentumSelectionMatrix, rhoJacobian, taskJacobian);
-
-      // Compute the task objective: p = S * (hDot - sum W_user - W_g)
-      DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
-      DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
-      DenseMatrix64F momentumRate = momentumRateCommand.getMomentumRate();
-      CommonOps.subtract(momentumRate, additionalExternalWrench, tempTaskObjective);
-      CommonOps.subtract(tempTaskObjective, gravityWrench, tempTaskObjective);
-      CommonOps.mult(momentumSelectionMatrix, tempTaskObjective, taskObjective);
-
-      // get the selected objective back out
-      CommonOps.multTransA(momentumSelectionMatrix, taskObjective, tempTaskObjective);
-
-      if (DEBUG)
-      {
-         desiredLinearMomentumRate.set(tempTaskObjective.get(3), tempTaskObjective.get(4), tempTaskObjective.get(5));
-         desiredAngularMomentumRate.set(tempTaskObjective.get(0), tempTaskObjective.get(1), tempTaskObjective.get(2));
-      }
-
-      if (useMomentumQP)
-         qpSolver.addMomentumTask(taskJacobian, taskObjective, taskWeightMatrix);
-   }
-
-   public void submitPlaneContactStateCommand(PlaneContactStateCommand command)
-   {
-      wrenchMatrixCalculator.submitPlaneContactStateCommand(command);
-
-      if (command.getNumberOfContactPoints() > 0)
-         bodiesInContact.add(command.getContactingRigidBody());
-   }
-
-   public void submitExternalWrenchCommand(ExternalWrenchCommand command)
-   {
-      RigidBody rigidBody = command.getRigidBody();
-      Wrench wrench = command.getExternalWrench();
-      externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
-   }
-
-   public void submitExternalWrench(RigidBody rigidBody, Wrench wrench)
-   {
-      externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 }
