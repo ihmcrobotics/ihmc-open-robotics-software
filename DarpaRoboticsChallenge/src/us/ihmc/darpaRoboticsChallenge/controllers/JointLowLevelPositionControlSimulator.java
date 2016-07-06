@@ -6,6 +6,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class JointLowLevelPositionControlSimulator implements RobotController
 {
@@ -78,6 +79,10 @@ public class JointLowLevelPositionControlSimulator implements RobotController
          double desiredRate = highLevelControllerOutputJoint.getQdDesired();
          double desiredTau = jointController.compute(currentPosition, desiredPosition, currentRate, desiredRate, controlDT);
          simulatedJoint.setTau(desiredTau);
+      }
+      else
+      {
+         PrintTools.debug(simulatedJoint.getName() + " now you fucked up");
       }
    }
 

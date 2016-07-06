@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl;
+package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -11,7 +11,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
-public class VirtualModelControlQPSolver
+public class GroundContactForceQPSolver
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -45,7 +45,7 @@ public class VirtualModelControlQPSolver
 
    private final int rhoSize;
 
-   public VirtualModelControlQPSolver(int rhoSize, YoVariableRegistry parentRegistry)
+   public GroundContactForceQPSolver(int rhoSize, YoVariableRegistry parentRegistry)
    {
       this.rhoSize = rhoSize;
 
