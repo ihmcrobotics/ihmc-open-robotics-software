@@ -3,7 +3,6 @@ package us.ihmc.tools.thread;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static us.ihmc.tools.testing.TestPlanTarget.InDevelopment;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -98,7 +97,10 @@ public class ThreadToolsTest
       {
          long startTime = System.currentTimeMillis();
          ScheduledFuture<?> future = ThreadTools.scheduleWithFixeDelayAndTimeLimit(getClass().getSimpleName(), runnable, initialDelay, delay, timeUnit, timeLimit);
-         while(!future.isDone());
+         while(!future.isDone())
+         {
+            // do nothing
+         }
          long endTime = System.currentTimeMillis();
          assertEquals(timeLimit, endTime - startTime, EPSILON);
       }
@@ -126,11 +128,15 @@ public class ThreadToolsTest
 
       ScheduledFuture<?> future = ThreadTools.scheduleWithFixedDelayAndIterationLimit(getClass().getSimpleName(), runnable, initialDelay, delay, timeUnit, iterations);
       
-      while(!future.isDone());
+      while(!future.isDone())
+      {
+         // do nothing
+      }
+      
       assertEquals(iterations, counter.get());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2, targets = TestPlanTarget.InDevelopment)
+   @DeployableTestMethod(estimatedDuration = 0.2, targets = TestPlanTarget.Flaky)
    @Test(timeout = 30000)
    public void testExecuteWithTimeout()
    {

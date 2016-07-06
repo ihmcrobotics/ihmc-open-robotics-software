@@ -9,12 +9,15 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class GoalOrientedTestConductor implements VariableChangedListener
 {
    private final SimulationConstructionSet scs;
+   private final SimulationTestingParameters simulationTestingParameters;
    
    // Yo variables
    private final DoubleYoVariable yoTime;
@@ -30,9 +33,10 @@ public class GoalOrientedTestConductor implements VariableChangedListener
    
    private String assertionFailedMessage = null;
    
-   public GoalOrientedTestConductor(SimulationConstructionSet scs)
+   public GoalOrientedTestConductor(SimulationConstructionSet scs, SimulationTestingParameters simulationTestingParameters)
    {
       this.scs = scs;
+      this.simulationTestingParameters = simulationTestingParameters;
       
       yoTime = (DoubleYoVariable) scs.getVariable("t");
       
@@ -149,8 +153,18 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       }
    }
 
-   public void destroy()
+   public void concludeTesting()
    {
+      if (simulationTestingParameters.getKeepSCSUp())
+      {
+         ThreadTools.sleepForever();
+      }
+      
+      if (simulationTestingParameters.getCreateSCSVideos())
+      {
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots()[0].getName(), scs, 1);
+      }
+      
       ThreadTools.sleep(200);
       scs.closeAndDispose();
    }
