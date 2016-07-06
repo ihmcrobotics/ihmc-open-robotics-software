@@ -52,7 +52,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 public class PelvisLinearStateUpdater
 {
    private static boolean VISUALIZE = false;
-   private static final boolean ALLOW_USING_IMU_ONLY = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
@@ -95,6 +94,7 @@ public class PelvisLinearStateUpdater
    private final Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies;
    
    private final BooleanYoVariable reinitialize = new BooleanYoVariable("reinitialize", registry);
+   private final BooleanYoVariable trustImuWhenNoFeetAreInContact = new BooleanYoVariable("trustImuWhenNoFeetAreInContact", registry);
 
    private enum SlippageCompensatorMode {LOAD_THRESHOLD, MIN_PELVIS_ACCEL};
    private final EnumYoVariable<SlippageCompensatorMode> slippageCompensatorMode = new EnumYoVariable<SlippageCompensatorMode>("slippageCompensatorMode", registry, SlippageCompensatorMode.class);
@@ -131,6 +131,7 @@ public class PelvisLinearStateUpdater
       this.footSwitches = footSwitches;
       this.feetContactablePlaneBodies = feetContactablePlaneBodies;
       this.feet.addAll(footSwitches.keySet());
+      this.trustImuWhenNoFeetAreInContact.set(stateEstimatorParameters.getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact());
       
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       rootJoint = inverseDynamicsStructure.getRootJoint();
@@ -337,7 +338,7 @@ public class PelvisLinearStateUpdater
 	   
 	   if (numberOfEndEffectorsTrusted == 0)
 	   {
-	      if (ALLOW_USING_IMU_ONLY)
+	      if (trustImuWhenNoFeetAreInContact.getBooleanValue())
 	      {
             yoRootJointPosition.getFrameTuple(rootJointPosition);
             kinematicsBasedLinearStateCalculator.updateFeetPositionsWhenTrustingIMUOnly(rootJointPosition);	     
@@ -455,7 +456,7 @@ public class PelvisLinearStateUpdater
       
       if(numberOfEndEffectorsTrusted == 0)
       {
-         if(ALLOW_USING_IMU_ONLY)
+         if(trustImuWhenNoFeetAreInContact.getBooleanValue())
          {
             for (int i = 0; i < feet.size(); i++)
             {

@@ -75,4 +75,6 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
    public abstract double getContactThresholdHeight();
 
    public abstract FootSwitchType getFootSwitchType();
+
+   public abstract boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact();
 }

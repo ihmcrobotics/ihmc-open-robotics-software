@@ -359,4 +359,10 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    {
       return false;
    }
+
+   @Override
+   public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
+   {
+      return false;
+   }
 }
