@@ -304,4 +304,11 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    {
       return null;
    }
+
+
+   @Override
+   public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
+   {
+      return false;
+   }
 }

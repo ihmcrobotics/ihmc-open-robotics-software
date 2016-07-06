@@ -391,4 +391,10 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    {
       return footForceSensorNames;
    }
+
+   @Override
+   public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
+   {
+      return false;
+   }
 }
