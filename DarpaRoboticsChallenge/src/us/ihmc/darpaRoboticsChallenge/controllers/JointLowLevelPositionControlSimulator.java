@@ -80,10 +80,6 @@ public class JointLowLevelPositionControlSimulator implements RobotController
          double desiredTau = jointController.compute(currentPosition, desiredPosition, currentRate, desiredRate, controlDT);
          simulatedJoint.setTau(desiredTau);
       }
-      else
-      {
-         PrintTools.debug(simulatedJoint.getName() + " now you fucked up");
-      }
    }
 
    public void resetIntegrator()
