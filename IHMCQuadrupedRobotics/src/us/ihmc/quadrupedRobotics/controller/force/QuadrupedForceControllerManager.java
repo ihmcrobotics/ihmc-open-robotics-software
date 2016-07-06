@@ -90,25 +90,38 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    @Override
    public void doControl()
    {
+      // update controller state machine
       QuadrupedForceControllerRequestedEvent reqEvent = requestedEvent.getAndSet(null);
       if (reqEvent != null)
       {
          stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, reqEvent);
       }
-
       stateMachine.process();
 
       // update contact state used for state estimation
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      switch(stateMachine.getState())
       {
-         if (controllerToolbox.getTaskSpaceController().getContactState(robotQuadrant) == ContactState.IN_CONTACT)
+      case DO_NOTHING:
+      case STAND_PREP:
+      case STAND_READY:
+         runtimeEnvironment.getFootSwitches().get(RobotQuadrant.FRONT_LEFT).setFootContactState(false);
+         runtimeEnvironment.getFootSwitches().get(RobotQuadrant.FRONT_RIGHT).setFootContactState(false);
+         runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_LEFT).setFootContactState(false);
+         runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_RIGHT).setFootContactState(true);
+         break;
+      default:
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
+            if (controllerToolbox.getTaskSpaceController().getContactState(robotQuadrant) == ContactState.IN_CONTACT)
+            {
+               runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
+            }
+            else
+            {
+               runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(false);
+            }
          }
-         else
-         {
-            runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(false);
-         }
+         break;
       }
    }
 
