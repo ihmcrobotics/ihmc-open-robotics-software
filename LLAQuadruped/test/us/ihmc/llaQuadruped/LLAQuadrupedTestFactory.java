@@ -37,7 +37,7 @@ public class LLAQuadrupedTestFactory
    private static final boolean USE_NETWORKING = false;
    
    private RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
-   private RequiredFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new RequiredFactoryField<>("controlMode");
+   private RequiredFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new RequiredFactoryField<>("groundContactModelType");
    
    public GoalOrientedTestConductor createTestConductor() throws IOException
    {
@@ -65,7 +65,6 @@ public class LLAQuadrupedTestFactory
       simulationFactory.setGravity(SIMULATION_GRAVITY);
       simulationFactory.setRecordFrequency(RECORD_FREQUENCY);
       simulationFactory.setGroundContactParameters(groundContactParameters);
-      simulationFactory.setHeadControllerFactory(null);
       simulationFactory.setModelFactory(modelFactory);
       simulationFactory.setSDFRobot(sdfRobot);
       simulationFactory.setSCSParameters(simulationTestingParameters);
@@ -82,6 +81,7 @@ public class LLAQuadrupedTestFactory
       simulationFactory.setSensorInformation(sensorInformation);
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
+      simulationFactory.setControlMode(controlMode.get());
       simulationFactory.setGroundContactModelType(groundContactModelType.get());
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
       return new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
