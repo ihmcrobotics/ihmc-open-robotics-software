@@ -268,6 +268,12 @@ public class IHMCROSTranslationRuntimeTools
    {
       String rosMessageClassNameFromIHMCMessage = GenericROSTranslationTools.getRosMessageClassNameFromIHMCMessage(outputType.getSimpleName());
       RosMessagePacket annotation = (RosMessagePacket) outputType.getAnnotation(RosMessagePacket.class);
+
+      if(annotation == null)
+      {
+         return null;
+      }
+
       return annotation.rosPackage() + "/" + rosMessageClassNameFromIHMCMessage;
    }
 }
