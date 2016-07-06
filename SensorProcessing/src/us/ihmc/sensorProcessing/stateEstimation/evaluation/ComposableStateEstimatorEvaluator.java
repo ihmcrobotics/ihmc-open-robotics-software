@@ -336,6 +336,13 @@ public class ComposableStateEstimatorEvaluator
             // TODO Auto-generated method stub
             return null;
          }
+
+         @Override
+         public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
+         {
+            // TODO Auto-generated method stub
+            return false;
+         }
       };
 
       JointAndIMUSensorMap sensorMap = null; // simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader().getJointAndIMUSensorMap();
