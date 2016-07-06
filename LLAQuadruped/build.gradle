@@ -53,9 +53,10 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
 //   compile ihmc.getProjectDependency(":IHMCStateEstimation")
    compile ihmc.getProjectDependency(":SensorProcessing")
+   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 
    testCompile ihmc.getProjectTestDependency(":IHMCQuadrupedRobotics")
-   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+   testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")
 }
 
 jar {

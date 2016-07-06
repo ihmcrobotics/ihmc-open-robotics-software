@@ -98,7 +98,7 @@ public class ThePeoplesGloriousNetworkProcessor
 
       setupInputs(namespace, robotDataReceiver, fullRobotModel, additionalMessagePackages);
       setupOutputs(namespace, tfPrefix, additionalMessagePackages);
-//      setupRosLocalization();
+      setupRosLocalization();
 //      setupErrorTopics();
 
       if (customSubscribers != null)
@@ -216,7 +216,6 @@ public class ThePeoplesGloriousNetworkProcessor
          IHMCMsgToPacketSubscriber<Message> subscriber = IHMCMsgToPacketSubscriber
                .createIHMCMsgToPacketSubscriber(message, controllerCommunicationBridge, PacketDestination.CONTROLLER.ordinal());
          subscribers.add(subscriber);
-         System.out.println("Creating subscriber for " + namespace + rosAnnotation.topic());
          rosMainNode.attachSubscriber(namespace + rosAnnotation.topic(), subscriber);
       }
 

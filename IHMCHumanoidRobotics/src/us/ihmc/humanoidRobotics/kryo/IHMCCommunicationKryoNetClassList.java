@@ -271,6 +271,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Valkyrie specific
       registerPacketClass(ValkyrieLowLevelControlModeMessage.class);
+      registerPacketField(ValkyrieLowLevelControlModeMessage.ControlMode.class);
 
       // Handstep
       registerPacketClass(HandstepPacket.class);

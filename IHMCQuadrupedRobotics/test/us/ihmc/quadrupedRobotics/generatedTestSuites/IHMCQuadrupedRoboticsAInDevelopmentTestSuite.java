@@ -1,4 +1,4 @@
-package us.ihmc.atlas.generatedTestSuites;
+package us.ihmc.quadrupedRobotics.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
@@ -9,13 +9,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Slow)
+@TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseSteppingStonesTest.class
+   us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimatorTest.class
 })
 
-public class AtlasCSlowTestSuite
+public class IHMCQuadrupedRoboticsAInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {
