@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
@@ -11,6 +12,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -20,6 +22,7 @@ import java.util.Map;
 
 public class GroundContactForceOptimizationControlModule
 {
+   private static final boolean DEBUG = false;
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
    private static final boolean SETUP_RHO_TASKS = true;
 
@@ -34,6 +37,9 @@ public class GroundContactForceOptimizationControlModule
    private final GroundContactForceQPSolver qpSolver;
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
+
+   private final YoFrameVector desiredLinearMomentumRate;
+   private final YoFrameVector desiredAngularMomentumRate;
 
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
 
@@ -53,6 +59,17 @@ public class GroundContactForceOptimizationControlModule
       else
          basisVectorVisualizer = null;
 
+      if (DEBUG)
+      {
+         desiredLinearMomentumRate = new YoFrameVector("desiredLinearMomentumRateToQP", null, registry);
+         desiredAngularMomentumRate = new YoFrameVector("desiredAngularMomentumRateToQP", null, registry);
+      }
+      else
+      {
+         desiredLinearMomentumRate = null;
+         desiredAngularMomentumRate = null;
+      }
+
       rhoMin.set(momentumOptimizationSettings.getRhoMin());
       qpSolver = new GroundContactForceQPSolver(rhoSize, registry);
       qpSolver.setMinRho(momentumOptimizationSettings.getRhoMin());
@@ -65,10 +82,8 @@ public class GroundContactForceOptimizationControlModule
       qpSolver.reset();
    }
 
-   public Map<RigidBody, Wrench> compute(DenseMatrix64F momentumJacobian) throws NoConvergenceException
+   public Map<RigidBody, Wrench> compute() throws NoConvergenceException
    {
-      wrenchMatrixCalculator.computeMatrices();
-
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
       qpSolver.addRegularization();
 
@@ -134,6 +149,11 @@ public class GroundContactForceOptimizationControlModule
       momentumRateCommand.setWeights(command.getWeightVector());
    }
 
+   public void submitPlaneContactStateCommand(PlaneContactStateCommand command)
+   {
+      wrenchMatrixCalculator.submitPlaneContactStateCommand(command);
+   }
+
    public void submitMomentumSelectionMatrix(DenseMatrix64F momentumSelectionMatrix)
    {
       this.momentumSelectionMatrix.set(momentumSelectionMatrix);
@@ -141,9 +161,12 @@ public class GroundContactForceOptimizationControlModule
 
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-   private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+   private final DenseMatrix64F fullMomentumObjective = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+
    public void processMomentumRateCommand(DenseMatrix64F additionalWrench)
    {
+      wrenchMatrixCalculator.computeMatrices();
+
       int taskSize = momentumSelectionMatrix.getNumRows();
       momentumObjective.reshape(taskSize, 1);
       momentumWeight.reshape(taskSize, taskSize);
@@ -165,18 +188,21 @@ public class GroundContactForceOptimizationControlModule
 
       // Compute the task objective: p = S * (hDot - sum W_user - W_g)
       DenseMatrix64F momentumRate = momentumRateCommand.getMomentumRate();
-      CommonOps.subtract(momentumRate, additionalWrench, tempTaskObjective);
-      CommonOps.mult(momentumSelectionMatrix, tempTaskObjective, momentumObjective);
+      CommonOps.subtract(momentumRate, additionalWrench, fullMomentumObjective);
+      CommonOps.mult(momentumSelectionMatrix, fullMomentumObjective, momentumObjective);
 
       // get the selected objective back out
-      CommonOps.multTransA(momentumSelectionMatrix, momentumObjective, tempTaskObjective);
+      CommonOps.multTransA(momentumSelectionMatrix, momentumObjective, fullMomentumObjective);
 
-      /*
       if (DEBUG)
       {
-         desiredLinearMomentumRate.set(tempTaskObjective.get(3), tempTaskObjective.get(4), tempTaskObjective.get(5));
-         desiredAngularMomentumRate.set(tempTaskObjective.get(0), tempTaskObjective.get(1), tempTaskObjective.get(2));
+         desiredLinearMomentumRate.set(fullMomentumObjective.get(3), fullMomentumObjective.get(4), fullMomentumObjective.get(5));
+         desiredAngularMomentumRate.set(fullMomentumObjective.get(0), fullMomentumObjective.get(1), fullMomentumObjective.get(2));
       }
-      */
+   }
+
+   public DenseMatrix64F getMomentumObjective()
+   {
+      return fullMomentumObjective;
    }
 }
