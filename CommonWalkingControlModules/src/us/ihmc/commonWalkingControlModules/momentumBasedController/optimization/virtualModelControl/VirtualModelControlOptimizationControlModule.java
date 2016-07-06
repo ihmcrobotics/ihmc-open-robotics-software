@@ -106,6 +106,7 @@ public class VirtualModelControlOptimizationControlModule
    private final DenseMatrix64F contactWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F totalWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F tmpWrench = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final DenseMatrix64F additionalWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final Map<RigidBody, Wrench> groundReactionWrenches = new HashMap<>();
 
    public void compute(VirtualModelControlSolution virtualModelControlSolutionToPack) throws VirtualModelControlModuleException
@@ -113,6 +114,7 @@ public class VirtualModelControlOptimizationControlModule
       groundReactionWrenches.clear();
       wrenchMatrixCalculator.computeMatrices();
 
+      processSelectionMatrices();
       processMomentumRateCommand();
 
       NoConvergenceException noConvergenceException = null;
@@ -122,7 +124,11 @@ public class VirtualModelControlOptimizationControlModule
       {
          try
          {
-            groundReactionWrenches.putAll(groundContactForceOptimization.compute(taskObjective, taskJacobian, taskWeightMatrix));
+            DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
+            DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
+            CommonOps.add(additionalExternalWrench, gravityWrench, additionalWrench);
+            groundContactForceOptimization.processMomentumRateCommand(additionalWrench);
+            groundReactionWrenches.putAll(groundContactForceOptimization.compute(taskJacobian));
          }
          catch (NoConvergenceException e)
          {
@@ -212,6 +218,7 @@ public class VirtualModelControlOptimizationControlModule
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
+      groundContactForceOptimization.submitMomentumRateCommand(command);
       momentumRateCommand.set(command);
       momentumRateCommand.setWeights(command.getWeightVector());
       momentumSelectionMatrix.set(command.getSelectionMatrix());
@@ -229,8 +236,6 @@ public class VirtualModelControlOptimizationControlModule
    // creates the selection matrix for the full problem, compiling all virtual, external, and balancing wrenches
    private void processSelectionMatrices()
    {
-      momentumSelectionMatrix.set(momentumRateCommand.getSelectionMatrix());
-
       for (int input = 0; input < selectionMatrices.size(); input++)
       {
          DenseMatrix64F selectionMatrix = selectionMatrices.get(input);
@@ -269,12 +274,12 @@ public class VirtualModelControlOptimizationControlModule
             }
          }
       }
+
+      groundContactForceOptimization.submitMomentumSelectionMatrix(momentumSelectionMatrix);
    }
 
    private void processMomentumRateCommand()
    {
-      processSelectionMatrices();
-
       int taskSize = momentumSelectionMatrix.getNumRows();
       taskObjective.reshape(taskSize, 1);
       taskWeightMatrix.reshape(taskSize, taskSize);
