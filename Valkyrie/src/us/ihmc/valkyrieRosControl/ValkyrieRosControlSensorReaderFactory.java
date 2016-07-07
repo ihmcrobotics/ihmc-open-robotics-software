@@ -17,6 +17,7 @@ import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.rosControl.EffortJointHandle;
+import us.ihmc.rosControl.wholeRobot.JointStateHandle;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
@@ -33,6 +34,7 @@ import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
 
 public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactory
 {
+
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private ValkyrieRosControlSensorReader sensorReader;
 
@@ -40,6 +42,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
    private final HashMap<String, EffortJointHandle> effortJointHandles;
    private final HashMap<String, PositionJointHandle> positionJointHandles;
+   private final HashMap<String, JointStateHandle> jointStateHandles;
    private final HashMap<String, IMUHandle> imuHandles;
    private final HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles;
 
@@ -47,7 +50,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
    private final ValkyrieSensorInformation sensorInformation;
 
    public ValkyrieRosControlSensorReaderFactory(TimestampProvider timestampProvider, SensorProcessingConfiguration sensorProcessingConfiguration,
-         HashMap<String, EffortJointHandle> effortJointHandles, HashMap<String, PositionJointHandle> positionJointHandles,
+         HashMap<String, EffortJointHandle> effortJointHandles, HashMap<String, PositionJointHandle> positionJointHandles, HashMap<String, JointStateHandle> jointStateHandles,
          HashMap<String, IMUHandle> imuHandles, HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles, ValkyrieSensorInformation sensorInformation)
    {
       this.timestampProvider = timestampProvider;
@@ -55,6 +58,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
       this.effortJointHandles = effortJointHandles;
       this.positionJointHandles = positionJointHandles;
+      this.jointStateHandles = jointStateHandles;
       this.imuHandles = imuHandles;
       this.forceTorqueSensorHandles = forceTorqueSensorHandles;
 
@@ -70,6 +74,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
       ArrayList<YoEffortJointHandleHolder> yoEffortJointHandleHolders = new ArrayList<>();
       ArrayList<YoPositionJointHandleHolder> yoPositionJointHandleHolders = new ArrayList<>();
+      ArrayList<YoJointStateHandleHolder> yoJointStateHandleHolders = new ArrayList<>();
       ArrayList<YoIMUHandleHolder> yoIMUHandleHolders = new ArrayList<>();
       ArrayList<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles = new ArrayList<>();
 
@@ -92,6 +97,11 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
                YoPositionJointHandleHolder holder = new YoPositionJointHandleHolder(positionJointHandles.get(joint.getName()), oneDoFJoint,
                      estimatorDesiredJointDataHolder.get(oneDoFJoint), sensorReaderRegistry);
                yoPositionJointHandleHolders.add(holder);
+            }
+            else if(jointStateHandles.containsKey(joint.getName()))
+            {
+               YoJointStateHandleHolder holder = new YoJointStateHandleHolder(jointStateHandles.get(joint.getName()), oneDoFJoint, sensorReaderRegistry);
+               yoJointStateHandleHolders.add(holder);
             }
          }
       }
@@ -161,7 +171,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
       }
 
       sensorReader = new ValkyrieRosControlSensorReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, timestampProvider,
-            yoEffortJointHandleHolders, yoPositionJointHandleHolders, yoIMUHandleHolders, yoForceTorqueSensorHandles, sensorReaderRegistry);
+            yoEffortJointHandleHolders, yoPositionJointHandleHolders, yoJointStateHandleHolders, yoIMUHandleHolders, yoForceTorqueSensorHandles, sensorReaderRegistry);
 
       parentRegistry.addChild(sensorReaderRegistry);
    }
