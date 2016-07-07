@@ -41,6 +41,11 @@ public class YoJointStateHandleHolder
       this.tauMeasured.set(handle.getEffort());
    }
 
+   public OneDoFJoint getJoint()
+   {
+      return joint;
+   }
+
    public double getTauMeasured()
    {
       return tauMeasured.getDoubleValue();
