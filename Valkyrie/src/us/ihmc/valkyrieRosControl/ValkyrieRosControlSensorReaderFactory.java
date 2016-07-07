@@ -171,7 +171,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
       }
 
       sensorReader = new ValkyrieRosControlSensorReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, timestampProvider,
-            yoEffortJointHandleHolders, yoPositionJointHandleHolders, yoIMUHandleHolders, yoForceTorqueSensorHandles, sensorReaderRegistry);
+            yoEffortJointHandleHolders, yoPositionJointHandleHolders, yoJointStateHandleHolders, yoIMUHandleHolders, yoForceTorqueSensorHandles, sensorReaderRegistry);
 
       parentRegistry.addChild(sensorReaderRegistry);
    }
