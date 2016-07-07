@@ -74,6 +74,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
       ArrayList<YoEffortJointHandleHolder> yoEffortJointHandleHolders = new ArrayList<>();
       ArrayList<YoPositionJointHandleHolder> yoPositionJointHandleHolders = new ArrayList<>();
+      ArrayList<YoJointStateHandleHolder> yoJointStateHandleHolders = new ArrayList<>();
       ArrayList<YoIMUHandleHolder> yoIMUHandleHolders = new ArrayList<>();
       ArrayList<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles = new ArrayList<>();
 
@@ -99,7 +100,8 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
             }
             else if(jointStateHandles.containsKey(joint.getName()))
             {
-
+               YoJointStateHandleHolder holder = new YoJointStateHandleHolder(jointStateHandles.get(joint.getName()), oneDoFJoint, sensorReaderRegistry);
+               yoJointStateHandleHolders.add(holder);
             }
          }
       }
