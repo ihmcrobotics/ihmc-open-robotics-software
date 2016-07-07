@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
+import java.io.IOException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,6 +9,9 @@ import org.junit.Test;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
+import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
@@ -22,8 +27,18 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      conductor = createGoalOrientedTestConductor();
-      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      try
+      {
+         QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
+         quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+         quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
+         conductor = quadrupedTestFactory.createTestConductor();
+         variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException("Error loading simulation: " + e.getMessage());
+      }
    }
    
    @After
