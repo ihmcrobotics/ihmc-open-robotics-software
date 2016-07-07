@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.jme3.util.xml.SAXUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
