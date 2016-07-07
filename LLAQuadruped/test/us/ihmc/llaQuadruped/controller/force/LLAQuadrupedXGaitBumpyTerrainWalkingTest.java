@@ -39,7 +39,7 @@ public class LLAQuadrupedXGaitBumpyTerrainWalkingTest extends QuadrupedXGaitBump
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 25.0, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+   @DeployableTestMethod(estimatedDuration = 25.0)
    @Test(timeout = 120000)
    public void testWalkingOverAggressiveBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
