@@ -13,7 +13,32 @@ public class MutationTestingTools
    public static void doPITMutationTestAndOpenResult(String targetTests, String targetClasses)
    {
       String reportDirectoryName = "pit-reports";
-      MutationCoverageReport.main(new String[] {"--reportDir", reportDirectoryName , "--targetClasses", targetClasses, "--targetTests", targetTests, "--sourceDirs", "src,test"});
+      MutationCoverageReport.main(new String[] {"--reportDir", reportDirectoryName,
+                                                "--targetClasses", targetClasses,
+                                                "--targetTests", targetTests,
+                                                "--sourceDirs", "src,test",
+                                                "--mutators",
+                                                "ALL"
+//                                                "RETURN_VALS,"
+//                                              + "INLINE_CONSTS,"
+//                                              + "MATH,"
+//                                              + "VOID_METHOD_CALLS,"
+//                                              + "NEGATE_CONDITIONALS,"
+//                                              + "CONDITIONALS_BOUNDARY,"
+//                                              + "INCREMENTS,"
+//                                              + "REMOVE_INCREMENTS,"
+//                                              + "NON_VOID_METHOD_CALLS,"
+//                                              + "CONSTRUCTOR_CALLS,"
+//                                              + "REMOVE_CONDITIONALS_EQ_IF,"
+//                                              + "REMOVE_CONDITIONALS_EQ_ELSE,"
+//                                              + "REMOVE_CONDITIONALS_ORD_IF,"
+//                                              + "REMOVE_CONDITIONALS_ORD_ELSE,"
+//                                              + "REMOVE_CONDITIONALS,"
+//                                              + "EXPERIMENTAL_MEMBER_VARIABLE,"
+//                                              + "EXPERIMENTAL_SWITCH,"
+//                                              + "EXPERIMENTAL_ARGUMENT_PROPAGATION,"
+//                                              + "REMOVE_SWITCH"
+                                                });
 
       File reportDirectory = new File(reportDirectoryName);
       if (reportDirectory.isDirectory() && reportDirectory.exists())
