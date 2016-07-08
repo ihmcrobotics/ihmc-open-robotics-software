@@ -101,12 +101,17 @@ public class MomentumOptimizationSettings
    public void setMomentumWeight(double linearMomentumWeightX, double linearMomentumWeightY, double linearMomentumWeightZ, double angularMomentumWeightXY, double angularMomentumWeightZ)
    {
       linearMomentumWeight.set(linearMomentumWeightX, linearMomentumWeightY, linearMomentumWeightZ);
-      angularMomentumWeight.set(angularMomentumWeightXY, angularMomentumWeightXY, angularMomentumWeightZ);
+      setAngularMomentumWeight(angularMomentumWeightXY, angularMomentumWeightZ);
    }
 
    public void setMomentumWeight(double linearMomentumWeightXY, double linearMomentumWeightZ, double angularMomentumWeightXY, double angularMomentumWeightZ)
    {
       setMomentumWeight(linearMomentumWeightXY, linearMomentumWeightXY, linearMomentumWeightZ, angularMomentumWeightXY, angularMomentumWeightZ);
+   }
+
+   public void setAngularMomentumWeight(double angularMomentumWeightXY, double angularMomentumWeightZ)
+   {
+      angularMomentumWeight.set(angularMomentumWeightXY, angularMomentumWeightXY, angularMomentumWeightZ);
    }
 
    public void setRhoPlaneContactRegularization(double rhoWeight)
