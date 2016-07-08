@@ -58,7 +58,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FramePoint2d desiredCapturePoint = new FramePoint2d();
    private final FrameVector2d desiredCapturePointVelocity = new FrameVector2d();
    private final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
-   private final FrameVector2d perfectCMPVelocity = new FrameVector2d();
+   private final FramePoint2d perfectCMP = new FramePoint2d();
 
    private final YoFrameVector defaultLinearMomentumRateWeight = new YoFrameVector("defaultLinearMomentumRateWeight", worldFrame, registry);
    private final YoFrameVector defaultAngularMomentumRateWeight = new YoFrameVector("defaultAngularMomentumRateWeight", worldFrame, registry);
@@ -155,7 +155,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       }
 
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(desiredCMPPreviousValue, capturePoint, desiredCapturePoint,
-                                                                                finalDesiredCapturePoint, desiredCapturePointVelocity, perfectCMPVelocity,
+                                                                                finalDesiredCapturePoint, desiredCapturePointVelocity, perfectCMP,
                                                                                 omega0);
 
       yoUnprojectedDesiredCMP.set(desiredCMP);
@@ -267,9 +267,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       this.finalDesiredCapturePoint.setIncludingFrame(finalDesiredCapturePoint);
    }
 
-   public void setPerfectCMPVelocity(FrameVector2d perfectCMPVelocity)
+   public void setPerfectCMP(FramePoint2d perfectCMP)
    {
-      this.perfectCMPVelocity.setIncludingFrame(perfectCMPVelocity);
+      this.perfectCMP.setIncludingFrame(perfectCMP);
    }
 
    public void setHighMomentumWeight()

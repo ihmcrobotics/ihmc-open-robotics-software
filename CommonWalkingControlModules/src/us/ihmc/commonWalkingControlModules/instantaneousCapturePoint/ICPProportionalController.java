@@ -71,9 +71,10 @@ public class ICPProportionalController
    }
 
    private final FramePoint2d desiredCMP = new FramePoint2d();
+   private final FramePoint2d previousPerfectCMP = new FramePoint2d();
 
    public FramePoint2d doProportionalControl(FramePoint2d desiredCMPPreviousValue, FramePoint2d capturePoint, FramePoint2d desiredCapturePoint,
-         FramePoint2d finalDesiredCapturePoint, FrameVector2d desiredCapturePointVelocity, FrameVector2d perfectCMPVelocity, double omega0)
+         FramePoint2d finalDesiredCapturePoint, FrameVector2d desiredCapturePointVelocity, FramePoint2d perfectCMP, double omega0)
    {
       capturePoint.changeFrame(worldFrame);
       desiredCapturePoint.changeFrame(worldFrame);
@@ -138,25 +139,35 @@ public class ICPProportionalController
 
       if (rateLimitFeedbackPart)
       {
-         rateLimitCMP(desiredCMPPreviousValue, desiredCMP, perfectCMPVelocity);
+         rateLimitCMP(desiredCMP, desiredCMPPreviousValue, perfectCMP, previousPerfectCMP);
          rateLimitedCMPOutput.set(desiredCMP);
       }
+
+      previousPerfectCMP.set(perfectCMP);
 
       return desiredCMP;
    }
 
-   private final FrameVector2d difference = new FrameVector2d();
+   private final FrameVector2d cmpError = new FrameVector2d();
+   private final FrameVector2d cmpErrorPreviousValue = new FrameVector2d();
+   private final FrameVector2d cmpErrorDifference = new FrameVector2d();
 
-   private void rateLimitCMP(FramePoint2d cmpPreviousValue, FramePoint2d cmp, FrameVector2d perfectCMPVelocity)
+   private void rateLimitCMP(FramePoint2d cmp, FramePoint2d cmpPreviousValue, FramePoint2d perfectCMP, FramePoint2d previousPerfectCMP)
    {
-      difference.setToZero(cmp.getReferenceFrame());
-      difference.sub(cmp, cmpPreviousValue);
+      cmpError.setToZero(cmp.getReferenceFrame());
+      cmpError.sub(cmp, perfectCMP);
 
-      double maxDifference = controlDT * (feedbackPartMaxRate.getDoubleValue() + perfectCMPVelocity.length());
-      double differenceMagnitude = difference.length();
-      if (differenceMagnitude > maxDifference)
-         difference.scale(maxDifference / differenceMagnitude);
-      cmp.add(cmpPreviousValue, difference);
+      cmpErrorPreviousValue.setToZero(cmp.getReferenceFrame());
+      cmpErrorPreviousValue.sub(cmpPreviousValue, previousPerfectCMP);
+
+      cmpErrorDifference.sub(cmpError, cmpErrorPreviousValue);
+      double errorDifferenceMagnitude = cmpErrorDifference.length();
+      double errorDifferenceMax = controlDT * feedbackPartMaxRate.getDoubleValue();
+      if (errorDifferenceMagnitude > errorDifferenceMax)
+         cmpErrorDifference.scale(errorDifferenceMax / errorDifferenceMagnitude);
+
+      cmpError.add(cmpErrorPreviousValue, cmpErrorDifference);
+      cmp.add(perfectCMP, cmpError);
    }
 
    private class Vector2dZUpFrame extends ReferenceFrame
