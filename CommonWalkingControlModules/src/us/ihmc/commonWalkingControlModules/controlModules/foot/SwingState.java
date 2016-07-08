@@ -41,7 +41,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class SwingState extends AbstractUnconstrainedState
 {
-   private static final boolean useNewSwingTrajectoyOptimization = true;
+   private static final boolean useNewSwingTrajectoyOptimization = false;
 
    private final boolean visualizeSwingTrajectory = true;
 
