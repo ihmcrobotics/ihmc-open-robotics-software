@@ -11,6 +11,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedPositionTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -82,14 +83,14 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
          runningDuration += randomSimulationDuration(random);
          variables.getYoPlanarVelocityInputX().set(randomValidVelocity(random));
          variables.getYoPlanarVelocityInputZ().set(randomValidYawRate(random));
-         conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.3));
+         conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
          
          runningDuration += 1.0;
          variables.getYoPlanarVelocityInputX().set(0.0);
          variables.getYoPlanarVelocityInputZ().set(0.0);
-         conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.3));
+         conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
@@ -112,14 +113,14 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
          double randomValidVelocity = randomValidVelocity(random);
          runningDuration += randomSimulationDuration;
          variables.getYoPlanarVelocityInputX().set(randomValidVelocity);
-         conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.3));
+         conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
          
          runningDuration += 1.0;
          variables.getYoPlanarVelocityInputX().set(0.0);
          variables.getYoPlanarVelocityInputZ().set(0.0);
-         conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.3));
+         conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
@@ -142,14 +143,14 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
          double randomValidVelocity = randomValidVelocity(random);
          runningDuration += randomSimulationDuration;
          variables.getYoPlanarVelocityInputX().set(randomValidVelocity);
-         conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.3));
+         conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
          
          runningDuration += 1.0;
          variables.getYoPlanarVelocityInputX().set(0.0);
          variables.getYoPlanarVelocityInputZ().set(0.0);
-         conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.3));
+         conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
          
@@ -157,7 +158,7 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
          double randomValidYawRate = randomValidYawRate(random);
          runningDuration += randomSimulationDuration;
          variables.getYoPlanarVelocityInputZ().set(randomValidYawRate);
-         conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.3));
+         conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), runningDuration));
          conductor.simulate();
       }
