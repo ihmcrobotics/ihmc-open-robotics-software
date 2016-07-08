@@ -1,7 +1,5 @@
 package us.ihmc.valkyrieRosControl.sliderBoardControl;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,8 +20,8 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
+import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -230,21 +228,9 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
 
    /* package private */ Map<String, Double> torqueOffsetMap = null;
 
-   @SuppressWarnings("unchecked")
    private void loadTorqueOffsets()
    {
-      try
-      {
-         Yaml yaml = new Yaml();
-         FileInputStream offsetsStream = new FileInputStream(new File(ValkyrieTorqueOffsetPrinter.IHMC_TORQUE_OFFSET_FILE));
-         torqueOffsetMap = (Map<String, Double>) yaml.load(offsetsStream);
-         offsetsStream.close();
-      }
-      catch (Exception e)
-      {
-         PrintTools.error(this, "Could not load joint torque offsets.");
-         torqueOffsetMap = null;
-      }
+      torqueOffsetMap = ValkyrieTorqueOffsetPrinter.loadTorqueOffsetsFromFile();
    }
 
    @Override

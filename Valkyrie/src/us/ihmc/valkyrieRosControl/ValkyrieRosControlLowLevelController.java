@@ -1,8 +1,5 @@
 package us.ihmc.valkyrieRosControl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -205,28 +202,15 @@ public class ValkyrieRosControlLowLevelController
       Yaml yaml = new Yaml();
       InputStream gainStream = getClass().getClassLoader().getResourceAsStream("standPrep/gains.yaml");
       InputStream setpointsStream = getClass().getClassLoader().getResourceAsStream("standPrep/setpoints.yaml");
-      InputStream offsetsStream;
-      try
-      {
-         offsetsStream = new FileInputStream(new File(ValkyrieTorqueOffsetPrinter.IHMC_TORQUE_OFFSET_FILE));
-      }
-      catch (FileNotFoundException e1)
-      {
-         offsetsStream = null;
-      }
 
       Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) yaml.load(gainStream);
       Map<String, Double> setPointMap = (Map<String, Double>) yaml.load(setpointsStream);
-      Map<String, Double> offsetMap = null;
-      if (offsetsStream != null)
-         offsetMap = (Map<String, Double>) yaml.load(offsetsStream);
+      Map<String, Double> offsetMap = ValkyrieTorqueOffsetPrinter.loadTorqueOffsetsFromFile();
 
       try
       {
          gainStream.close();
          setpointsStream.close();
-         if (offsetsStream != null)
-            offsetsStream.close();
       }
       catch (IOException e)
       {
@@ -238,7 +222,7 @@ public class ValkyrieRosControlLowLevelController
          Map<String, Double> standPrepGains = gainMap.get(jointName);
          double torqueOffset = 0.0;
          if (offsetMap != null && offsetMap.containsKey(jointName))
-            torqueOffset = offsetMap.get(jointName);
+            torqueOffset = -offsetMap.get(jointName);
 
          double standPrepAngle = 0.0;
          if (setPointMap.containsKey(jointName))
