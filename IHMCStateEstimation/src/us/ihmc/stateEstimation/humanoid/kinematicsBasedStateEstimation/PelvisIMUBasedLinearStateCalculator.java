@@ -33,9 +33,13 @@ public class PelvisIMUBasedLinearStateCalculator
    private final YoFrameVector rootJointLinearVelocity = new YoFrameVector("imuRootJointLinearVelocity", worldFrame, registry);
    private final YoFrameVector rootJointPosition = new YoFrameVector("imuRootJointPosition", worldFrame, registry);
    private final BooleanYoVariable setRootJointPositionImuOnlyToCurrent = new BooleanYoVariable("setRootJointPositionImuOnlyToCurrent", registry);
+   private final DoubleYoVariable alphaLeakIMUOnly = new DoubleYoVariable("imuOnlyAlphaLeak", registry);
    private final YoFrameVector rootJointPositionImuOnly = new YoFrameVector("imuOnlyIntregratedRootJointPosition", worldFrame, registry);
+   private final YoFrameVector imuLinearVelocityIMUOnly = new YoFrameVector("imuOnlyIntegratedIMULinearVelocity", worldFrame, registry);
+   private final YoFrameVector rootJointLinearVelocityIMUOnly = new YoFrameVector("imuOnlyIntegratedRootJointLinearVelocity", worldFrame, registry);
 
    private final YoFrameVector yoMeasurementFrameLinearVelocityInWorld;
+   private final YoFrameVector yoRootJointIMUBasedLinearVelocityInWorld;
    private final YoFrameVector yoLinearAccelerationMeasurementInWorld;
    private final YoFrameVector yoLinearAccelerationMeasurement;
    
@@ -88,10 +92,12 @@ public class PelvisIMUBasedLinearStateCalculator
       }
       
       yoMeasurementFrameLinearVelocityInWorld = new YoFrameVector("imuLinearVelocityInWorld", worldFrame, registry);
+      yoRootJointIMUBasedLinearVelocityInWorld = new YoFrameVector("rootJointIMUBasedLinearVelocityInWorld", worldFrame, registry);
       yoLinearAccelerationMeasurement = new YoFrameVector("imuLinearAcceleration", measurementFrame, registry);
       yoLinearAccelerationMeasurementInWorld = new YoFrameVector("imuLinearAccelerationInWorld", worldFrame, registry);
       
       setRootJointPositionImuOnlyToCurrent.set(true);
+      alphaLeakIMUOnly.set(0.999);
       
       parentRegistry.addChild(registry);
    }
@@ -180,6 +186,12 @@ public class PelvisIMUBasedLinearStateCalculator
       getCorrectionVelocityForMeasurementFrameOffset(correctionVelocityForMeasurementFrameOffset);
       correctionVelocityForMeasurementFrameOffset.changeFrame(worldFrame);
       rootJointVelocityToPack.sub(correctionVelocityForMeasurementFrameOffset);
+      yoRootJointIMUBasedLinearVelocityInWorld.set(rootJointVelocityToPack);
+
+      imuLinearVelocityIMUOnly.add(linearAccelerationMeasurement);
+      imuLinearVelocityIMUOnly.scale(alphaLeakIMUOnly.getDoubleValue());
+      rootJointLinearVelocityIMUOnly.set(imuLinearVelocityIMUOnly);
+      rootJointLinearVelocityIMUOnly.sub(correctionVelocityForMeasurementFrameOffset);
    }
    
    public void correctIMULinearVelocity(FrameVector rootJointVelocity)
