@@ -58,6 +58,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FramePoint2d desiredCapturePoint = new FramePoint2d();
    private final FrameVector2d desiredCapturePointVelocity = new FrameVector2d();
    private final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
+   private final FramePoint2d perfectCMP = new FramePoint2d();
 
    private final YoFrameVector defaultLinearMomentumRateWeight = new YoFrameVector("defaultLinearMomentumRateWeight", worldFrame, registry);
    private final YoFrameVector defaultAngularMomentumRateWeight = new YoFrameVector("defaultAngularMomentumRateWeight", worldFrame, registry);
@@ -146,15 +147,16 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
    private final BooleanYoVariable desiredCMPinSafeArea = new BooleanYoVariable("DesiredCMPinSafeArea", registry);
 
-   public void compute(FramePoint2d desiredCMPToPack)
+   public void compute(FramePoint2d desiredCMPPreviousValue, FramePoint2d desiredCMPToPack)
    {
       if (supportSide != supportLegPreviousTick.getEnumValue())
       {
          icpProportionalController.reset();
       }
 
-      FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint, desiredCapturePoint, finalDesiredCapturePoint,
-            desiredCapturePointVelocity, omega0);
+      FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(desiredCMPPreviousValue, capturePoint, desiredCapturePoint,
+                                                                                finalDesiredCapturePoint, desiredCapturePointVelocity, perfectCMP,
+                                                                                omega0);
 
       yoUnprojectedDesiredCMP.set(desiredCMP);
 
@@ -265,9 +267,15 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       this.finalDesiredCapturePoint.setIncludingFrame(finalDesiredCapturePoint);
    }
 
+   public void setPerfectCMP(FramePoint2d perfectCMP)
+   {
+      this.perfectCMP.setIncludingFrame(perfectCMP);
+   }
+
    public void setHighMomentumWeight()
    {
       linearMomentumRateWeight.set(highLinearMomentumRateWeight);
+      angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
    }
 
    public void setDefaultMomentumWeight()

@@ -307,6 +307,11 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
+   public void getAcceleration(YoFrameVector accelerationToPack)
+   {
+      accelerationToPack.set(currentAcceleration);
+   }
+
    public void getAcceleration(Vector3d accelerationToPack)
    {
       currentAcceleration.get(accelerationToPack);
