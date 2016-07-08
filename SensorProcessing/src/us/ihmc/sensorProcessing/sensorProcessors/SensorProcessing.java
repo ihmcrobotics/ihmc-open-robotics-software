@@ -32,6 +32,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.math.filters.BacklashProcessingYoFrameVector;
 import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.filters.ProcessingYoVariable;
@@ -925,6 +926,71 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          
          if (!forVizOnly)
             intermediateOrientations.put(imuDefinition, filteredOrientation);
+      }
+
+      return processorIDs;
+   }
+
+   /**
+    * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to each component of the IMU angular velocity.
+    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the robot is at rest.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
+   public Map<String, Integer> addIMUAngularVelocityBacklashFilter(DoubleYoVariable slopTime, boolean forVizOnly)
+   {
+      return addIMUAngularVelocityBacklashFilterWithSensorsToIgnore(slopTime, forVizOnly);
+   }
+
+   /**
+    * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to each component of the IMU angular velocity.
+    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the robot is at rest.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param sensorsToBeProcessed list of the names of the sensors that need to be filtered.
+    */
+   public Map<String, Integer> addIMUAngularVelocityBacklashFilterOnlyForSpecifiedSensors(DoubleYoVariable slopTime, boolean forVizOnly, String... sensorsToBeProcessed)
+   {
+      return addIMUAngularVelocityBacklashFilterWithSensorsToIgnore(slopTime, forVizOnly, invertSensorSelection(IMU_ANGULAR_VELOCITY, sensorsToBeProcessed));
+   }
+
+   /**
+    * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to each component of the IMU angular velocity.
+    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the robot is at rest.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToIgnore list of the names of the sensors to ignore.
+    */
+   public Map<String, Integer> addIMUAngularVelocityBacklashFilterWithSensorsToIgnore(DoubleYoVariable slopTime, boolean forVizOnly, String... sensorsToIgnore)
+   {
+      Map<String, Integer> processorIDs = new HashMap<>();
+
+      List<String> sensorToIgnoreList = new ArrayList<>();
+      if (sensorsToIgnore != null && sensorsToIgnore.length > 0)
+         sensorToIgnoreList.addAll(Arrays.asList(sensorsToIgnore));
+
+      for (int i = 0; i < imuSensorDefinitions.size(); i++)
+      {
+         IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
+         String imuName = imuDefinition.getName();
+
+         if (sensorToIgnoreList.contains(imuName))
+            continue;
+
+         YoFrameVector intermediateAngularVelocity = intermediateAngularVelocities.get(imuDefinition);
+         List<ProcessingYoVariable> processors = processedAngularVelocities.get(imuDefinition);
+         String prefix = IMU_ANGULAR_VELOCITY.getProcessorNamePrefix(BACKLASH);
+         int newProcessorID = processors.size();
+         processorIDs.put(imuName, newProcessorID);
+         String suffix = IMU_ANGULAR_VELOCITY.getProcessorNameSuffix(imuName, newProcessorID);
+         BacklashProcessingYoFrameVector filteredAngularVelocity = BacklashProcessingYoFrameVector.createBacklashProcessingYoFrameVector(prefix, suffix, updateDT, slopTime, registry, intermediateAngularVelocity);
+         processors.add(filteredAngularVelocity);
+         
+         if (!forVizOnly)
+            intermediateAngularVelocities.put(imuDefinition, filteredAngularVelocity);
       }
 
       return processorIDs;
