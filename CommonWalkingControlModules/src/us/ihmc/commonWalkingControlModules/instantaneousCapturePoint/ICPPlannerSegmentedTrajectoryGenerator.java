@@ -390,6 +390,11 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       accelerationToPack.setToZero(trajectoryFrame);
    }
 
+   public void getAcceleration(YoFrameVector accelerationToPack)
+   {
+      accelerationToPack.setToZero();
+   }
+
    @Override
    public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
