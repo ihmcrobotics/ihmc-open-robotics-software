@@ -10,12 +10,14 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorT
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -69,6 +71,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
+   private final boolean rateLimitFeedbackPart;
+   private final DoubleYoVariable feedbackPartMaxRate;
+   private final RateLimitedYoFrameVector2d yoRateLimitedDesiredCMP;
    private final YoFramePoint2d yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", worldFrame, registry);
    private final YoFrameConvexPolygon2d yoSafeAreaPolygon = new YoFrameConvexPolygon2d("yoSafeAreaPolygon", worldFrame, 10, registry);
    private final YoFrameConvexPolygon2d yoProjectionPolygon = new YoFrameConvexPolygon2d("yoProjectionPolygon", worldFrame, 10, registry);
@@ -106,6 +111,18 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
       linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
+
+      feedbackPartMaxRate = icpControlGains.getFeedbackPartMaxRate();
+      rateLimitFeedbackPart = feedbackPartMaxRate != null;
+
+      if (rateLimitFeedbackPart)
+      {
+         yoRateLimitedDesiredCMP = RateLimitedYoFrameVector2d.createRateLimitedYoFrameVector2d("rateLimitedDesiredCMP", "", registry, Double.POSITIVE_INFINITY, controlDT, worldFrame);
+      }
+      else
+      {
+         yoRateLimitedDesiredCMP = null;
+      }
 
       if (yoGraphicsListRegistry != null)
       {
@@ -146,7 +163,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
    private final BooleanYoVariable desiredCMPinSafeArea = new BooleanYoVariable("DesiredCMPinSafeArea", registry);
 
-   public void compute(FramePoint2d desiredCMPToPack)
+   public void compute(FramePoint2d desiredCMPPreviousValue, FramePoint2d desiredCMPToPack)
    {
       if (supportSide != supportLegPreviousTick.getEnumValue())
       {
@@ -155,6 +172,14 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint, desiredCapturePoint, finalDesiredCapturePoint,
             desiredCapturePointVelocity, omega0);
+
+      if (rateLimitFeedbackPart)
+      {
+         yoRateLimitedDesiredCMP.set(desiredCMPPreviousValue);
+         yoRateLimitedDesiredCMP.setMaxRate(feedbackPartMaxRate.getDoubleValue() + desiredCapturePointVelocity.length());
+         yoRateLimitedDesiredCMP.update(desiredCMP);
+         yoRateLimitedDesiredCMP.getFrameTuple2d(desiredCMP);
+      }
 
       yoUnprojectedDesiredCMP.set(desiredCMP);
 
