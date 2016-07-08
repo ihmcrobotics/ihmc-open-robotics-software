@@ -154,6 +154,9 @@ public class ICPProportionalController
 
    private void rateLimitCMP(FramePoint2d cmp, FramePoint2d cmpPreviousValue, FramePoint2d perfectCMP, FramePoint2d previousPerfectCMP)
    {
+      if (feedbackPartMaxRate.getDoubleValue() < 1.0e-3)
+         return;
+
       cmpError.setToZero(cmp.getReferenceFrame());
       cmpError.sub(cmp, perfectCMP);
 
