@@ -81,7 +81,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
 
       ditherAmplitude.set(0.3);
       ditherFrequency.set(5.0);
-      maximumTorqueOffset.set(15.0);
+      maximumTorqueOffset.set(3.0);
 
       estimateTorqueOffset.set(false);
       transferTorqueOffsets.set(false);
