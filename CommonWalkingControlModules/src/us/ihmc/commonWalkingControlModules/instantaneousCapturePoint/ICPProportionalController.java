@@ -10,6 +10,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -23,9 +24,10 @@ public class ICPProportionalController
 
    private final YoFrameVector2d feedbackPart = new YoFrameVector2d("feedbackPart", "", worldFrame, registry);
 
-   private final YoFrameVector2d desiredCMPToICP = new YoFrameVector2d("desiredCMPToICP", "", worldFrame, registry);
-
-   private final YoFrameVector2d rawCMPOutput = new YoFrameVector2d("rawCMPOutput", "", worldFrame, registry);
+   private final YoFramePoint2d cmpOutput = new YoFramePoint2d("icpControlCMPOutput", "", worldFrame, registry);
+   private final YoFramePoint2d rateLimitedCMPOutput;
+   private final boolean rateLimitFeedbackPart;
+   private final DoubleYoVariable feedbackPartMaxRate;
 
    private final YoFramePoint icpPosition;
    private final FrameVector2d icpIntegral = new FrameVector2d(worldFrame);
@@ -54,6 +56,13 @@ public class ICPProportionalController
       captureKpOrthogonalToMotion = gains.getYoKpOrthogonalToMotion();
       captureKi = gains.getYoKi();
       captureKiBleedoff = gains.getYoKiBleedOff();
+
+      feedbackPartMaxRate = gains.getFeedbackPartMaxRate();
+      rateLimitFeedbackPart = feedbackPartMaxRate != null;
+      if (rateLimitFeedbackPart)
+         rateLimitedCMPOutput = new YoFramePoint2d("icpControlRateLimitedCMPOutput", "", worldFrame, registry);
+      else
+         rateLimitedCMPOutput = null;
    }
 
    public void reset()
@@ -63,8 +72,8 @@ public class ICPProportionalController
 
    private final FramePoint2d desiredCMP = new FramePoint2d();
 
-   public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FramePoint2d finalDesiredCapturePoint,
-         FrameVector2d desiredCapturePointVelocity, double omega0)
+   public FramePoint2d doProportionalControl(FramePoint2d desiredCMPPreviousValue, FramePoint2d capturePoint, FramePoint2d desiredCapturePoint,
+         FramePoint2d finalDesiredCapturePoint, FrameVector2d desiredCapturePointVelocity, FrameVector2d perfectCMPVelocity, double omega0)
    {
       capturePoint.changeFrame(worldFrame);
       desiredCapturePoint.changeFrame(worldFrame);
@@ -124,12 +133,30 @@ public class ICPProportionalController
       feedbackPart.set(tempControl);
       desiredCMP.add(tempControl);
 
-      desiredCMPToICP.sub(capturePoint, desiredCMP);
+      desiredCMP.changeFrame(cmpOutput.getReferenceFrame());
+      cmpOutput.set(desiredCMP);
 
-      desiredCMP.changeFrame(rawCMPOutput.getReferenceFrame());
-      rawCMPOutput.set(desiredCMP);
+      if (rateLimitFeedbackPart)
+      {
+         rateLimitCMP(desiredCMPPreviousValue, desiredCMP, perfectCMPVelocity);
+         rateLimitedCMPOutput.set(desiredCMP);
+      }
 
       return desiredCMP;
+   }
+
+   private final FrameVector2d difference = new FrameVector2d();
+
+   private void rateLimitCMP(FramePoint2d cmpPreviousValue, FramePoint2d cmp, FrameVector2d perfectCMPVelocity)
+   {
+      difference.setToZero(cmp.getReferenceFrame());
+      difference.sub(cmp, cmpPreviousValue);
+
+      double maxDifference = controlDT * (feedbackPartMaxRate.getDoubleValue() + perfectCMPVelocity.length());
+      double differenceMagnitude = difference.length();
+      if (differenceMagnitude > maxDifference)
+         difference.scale(maxDifference / differenceMagnitude);
+      cmp.add(cmpPreviousValue, difference);
    }
 
    private class Vector2dZUpFrame extends ReferenceFrame

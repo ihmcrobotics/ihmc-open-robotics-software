@@ -10,14 +10,12 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorT
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -60,6 +58,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FramePoint2d desiredCapturePoint = new FramePoint2d();
    private final FrameVector2d desiredCapturePointVelocity = new FrameVector2d();
    private final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
+   private final FrameVector2d perfectCMPVelocity = new FrameVector2d();
 
    private final YoFrameVector defaultLinearMomentumRateWeight = new YoFrameVector("defaultLinearMomentumRateWeight", worldFrame, registry);
    private final YoFrameVector defaultAngularMomentumRateWeight = new YoFrameVector("defaultAngularMomentumRateWeight", worldFrame, registry);
@@ -71,9 +70,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
-   private final boolean rateLimitFeedbackPart;
-   private final DoubleYoVariable feedbackPartMaxRate;
-   private final RateLimitedYoFrameVector2d yoRateLimitedDesiredCMP;
    private final YoFramePoint2d yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", worldFrame, registry);
    private final YoFrameConvexPolygon2d yoSafeAreaPolygon = new YoFrameConvexPolygon2d("yoSafeAreaPolygon", worldFrame, 10, registry);
    private final YoFrameConvexPolygon2d yoProjectionPolygon = new YoFrameConvexPolygon2d("yoProjectionPolygon", worldFrame, 10, registry);
@@ -111,18 +107,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
       linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
-
-      feedbackPartMaxRate = icpControlGains.getFeedbackPartMaxRate();
-      rateLimitFeedbackPart = feedbackPartMaxRate != null;
-
-      if (rateLimitFeedbackPart)
-      {
-         yoRateLimitedDesiredCMP = RateLimitedYoFrameVector2d.createRateLimitedYoFrameVector2d("rateLimitedDesiredCMP", "", registry, Double.POSITIVE_INFINITY, controlDT, worldFrame);
-      }
-      else
-      {
-         yoRateLimitedDesiredCMP = null;
-      }
 
       if (yoGraphicsListRegistry != null)
       {
@@ -170,16 +154,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
          icpProportionalController.reset();
       }
 
-      FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint, desiredCapturePoint, finalDesiredCapturePoint,
-            desiredCapturePointVelocity, omega0);
-
-      if (rateLimitFeedbackPart)
-      {
-         yoRateLimitedDesiredCMP.set(desiredCMPPreviousValue);
-         yoRateLimitedDesiredCMP.setMaxRate(feedbackPartMaxRate.getDoubleValue() + desiredCapturePointVelocity.length());
-         yoRateLimitedDesiredCMP.update(desiredCMP);
-         yoRateLimitedDesiredCMP.getFrameTuple2d(desiredCMP);
-      }
+      FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(desiredCMPPreviousValue, capturePoint, desiredCapturePoint,
+                                                                                finalDesiredCapturePoint, desiredCapturePointVelocity, perfectCMPVelocity,
+                                                                                omega0);
 
       yoUnprojectedDesiredCMP.set(desiredCMP);
 
@@ -288,6 +265,11 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    public void setFinalDesiredCapturePoint(FramePoint2d finalDesiredCapturePoint)
    {
       this.finalDesiredCapturePoint.setIncludingFrame(finalDesiredCapturePoint);
+   }
+
+   public void setPerfectCMPVelocity(FrameVector2d perfectCMPVelocity)
+   {
+      this.perfectCMPVelocity.setIncludingFrame(perfectCMPVelocity);
    }
 
    public void setHighMomentumWeight()
