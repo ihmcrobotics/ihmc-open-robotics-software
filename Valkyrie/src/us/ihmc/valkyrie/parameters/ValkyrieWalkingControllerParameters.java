@@ -96,7 +96,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getOmega0()
    {
       // TODO probably need to be tuned.
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 3.4 : 3.3; // 3.3 seems more appropriate.
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 3.0 : 3.3; // 3.3 seems more appropriate.
    }
 
    @Override
