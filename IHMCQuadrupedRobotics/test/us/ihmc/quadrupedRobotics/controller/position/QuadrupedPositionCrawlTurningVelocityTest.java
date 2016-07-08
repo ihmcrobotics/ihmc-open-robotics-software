@@ -11,6 +11,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedPositionTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -61,7 +62,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
       variables.getYoPlanarVelocityInputZ().set(0.2);
-      conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.3));
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 45.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyYaw(), 1.0));
       conductor.simulate();
@@ -78,7 +79,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       
       variables.getYoPlanarVelocityInputZ().set(0.2);
       variables.getSwingDuration().set(2.0);
-      conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.3));
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 45.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyYaw(), 0.4));
       conductor.simulate();
@@ -98,19 +99,19 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       {
          variables.getYoPlanarVelocityInputX().set(-random.nextDouble() * 0.25);
          variables.getYoPlanarVelocityInputZ().set(0.0);
-         conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.3));
+         conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + random.nextDouble() * 5.0 + 15.0));
          conductor.simulate();
          
          variables.getYoPlanarVelocityInputX().set(0.0);
          variables.getYoPlanarVelocityInputZ().set(0.0);
-         conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.3));
+         conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
          conductor.simulate();
          
          variables.getYoPlanarVelocityInputX().set(0.0);
          variables.getYoPlanarVelocityInputZ().set(random.nextDouble() * 0.2 - 0.1);
-         conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.3));
+         conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + random.nextDouble() * 5.0 + 15.0));
          conductor.simulate();
       }
