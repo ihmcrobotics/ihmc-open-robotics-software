@@ -1,36 +1,21 @@
 package us.ihmc.llaQuadruped.controller.force;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import java.io.IOException;
-
 import org.junit.Test;
 
 import us.ihmc.llaQuadruped.LLAQuadrupedTestFactory;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedXGaitFlatGroundWalkingTest;
-import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = TestPlanTarget.InDevelopment)
 public class LLAQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFlatGroundWalkingTest
 {
    @Override
-   public GoalOrientedTestConductor createGoalOrientedTestConductor()
+   public QuadrupedTestFactory createQuadrupedTestFactory()
    {
-      try
-      {
-         LLAQuadrupedTestFactory llaQuadrupedTestFactory = new LLAQuadrupedTestFactory();
-         llaQuadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-         llaQuadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-         return llaQuadrupedTestFactory.createTestConductor();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException("Error loading simulation: " + e.getMessage());
-      }
+      return new LLAQuadrupedTestFactory();
    }
    
    @Override

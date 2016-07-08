@@ -30,6 +30,7 @@ public abstract class QuadrupedTestYoVariables
    private final DoubleYoVariable robotBodyY;
    private final DoubleYoVariable robotBodyZ;
    private final DoubleYoVariable robotBodyYaw;
+   private final DoubleYoVariable stanceHeight;
    
    private final QuadrantDependentList<BooleanYoVariable> footSwitches = new QuadrantDependentList<>();
    private final QuadrantDependentList<DoubleYoVariable> solePositionZs = new QuadrantDependentList<>();
@@ -60,6 +61,7 @@ public abstract class QuadrupedTestYoVariables
       robotBodyY = (DoubleYoVariable) scs.getVariable("q_y");
       robotBodyZ = (DoubleYoVariable) scs.getVariable("q_z");
       robotBodyYaw = (DoubleYoVariable) scs.getVariable("q_yaw");
+      stanceHeight = (DoubleYoVariable) scs.getVariable("param__stanceHeight");
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -183,5 +185,10 @@ public abstract class QuadrupedTestYoVariables
    public DoubleYoVariable getGroundPlanePointZ()
    {
       return groundPlanePointZ;
+   }
+
+   public DoubleYoVariable getStanceHeight()
+   {
+      return stanceHeight;
    }
 }
