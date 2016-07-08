@@ -122,7 +122,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          imusToUse.addAll(imuProcessedOutputs);
       }
 
-      pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, registry);
+      pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, estimatorDT, registry);
       
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, footSwitches, centerOfPressureDataHolderFromController, feet, gravitationalAcceleration, yoTime,
             stateEstimatorParameters, yoGraphicsListRegistry, registry);
