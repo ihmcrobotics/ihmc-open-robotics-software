@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -27,7 +29,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    public static final String[] forceSensorNames;
    private static final SideDependentList<String> feetForceSensorNames;
    private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTranformsForRos = new ArrayList<ImmutableTriple<String,String,RigidBodyTransform>>();
-
+  
    static
    {
       feetForceSensorNames = new SideDependentList<String>("leftAnkleRoll", "rightAnkleRoll");
@@ -86,10 +88,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private final DRCRobotPointCloudParameters[] pointCloudParamaters = new DRCRobotPointCloudParameters[1];
    public static final int POINT_CLOUD_SENSOR_ID = 0;
 
-   private static int multisenseCameraId = 0;
-   private static int leftHazardCameraId = 1;
-   private static int rightHazardCameraId = 2;
-
    /**
     * Multisense SL Parameters
     */
@@ -142,7 +140,10 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String lidarJointName = "hokuyo_joint";
    private static final String lidarBaseFrame = multisense_namespace + "/head_root";
    private static final String lidarEndFrame = "/head_hokuyo_frame";
-   private static final String baseTfName = multisense_namespace + "/head";
+   private static final String baseTfName = "upperNeckPitchLink";
+   
+   private ImmutableTriple<String, String, RigidBodyTransform> neckToLeftCameraTransform = new ImmutableTriple<>(baseTfName, multisense_namespace + "left_camera_optical_frame", new RigidBodyTransform(new Quat4d(0.997858923235, -4.00478664636e-18, -0.0654031292802, -6.1101236817e-17), new Vector3d(0.183847013385, -0.035, 0.0773367157227)));
+   private ImmutableTriple<String, String, RigidBodyTransform> neckToRightCameraTransform = new ImmutableTriple<>(baseTfName, multisense_namespace + "left_camera_optical_frame", new RigidBodyTransform(new Quat4d(0.997858923235, -4.00478664636e-18, -0.0654031292802, -6.1101236817e-17), new Vector3d(0.183847013385, 0.035, 0.0773367157227)));
 
    private static final String lidarSensorName = "head_hokuyo_sensor";
    private static final String lidarJointTopic = multisense_namespace + "/joint_states";
@@ -155,12 +156,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String leftTrunkIMUSensor = "torso_leftTorsoImu";
    private static final String rearPelvisIMUSensor = "pelvis_pelvisRearImu";
    private static final String middlePelvisIMUSensor = "pelvis_pelvisMiddleImu";
-   private static final RigidBodyTransform transformFromHeadToCamera = new RigidBodyTransform();
-   static
-   {
-      transformFromHeadToCamera.setRotation(new Quat4d(0.99786, -5.2082e-05, -0.065403, -0.00079462));
-      transformFromHeadToCamera.setTranslation(0.18385, -0.035, 0.077337);
-   }
 
    private static final HashMap<String, Integer> imuUSBSerialIds = new HashMap<>();
    static
@@ -190,10 +185,10 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       {
          lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(true, lidarSensorName, multisense_near_Scan, multisense_height_map,
                lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
-         cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, left_camera_name, left_camera_compressed_topic, left_info_camera_topic, multisenseHandoffFrame, baseTfName,
-               left_frame_name, MULTISENSE_SL_LEFT_CAMERA_ID);
-         cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, right_camera_name, right_camera_compressed_topic, right_info_camera_topic, multisenseHandoffFrame, baseTfName,
-               right_frame_name, MULTISENSE_SL_RIGHT_CAMERA_ID);
+         cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, left_camera_name, left_camera_compressed_topic, multisenseHandoffFrame, left_info_camera_topic, neckToLeftCameraTransform.right, MULTISENSE_SL_LEFT_CAMERA_ID);
+
+         cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, right_camera_name, right_camera_compressed_topic, multisenseHandoffFrame, right_info_camera_topic, neckToRightCameraTransform.right, MULTISENSE_SL_RIGHT_CAMERA_ID);
+
          pointCloudParamaters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
       }
       else
@@ -370,8 +365,10 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 
    private void setupStaticTransformsForRos()
    {
-      RigidBodyTransform staticTransform = new RigidBodyTransform();
-      staticTransform.applyRotationX(Math.PI);
+      Quat4d orientation = new Quat4d();
+      Vector3d translation = new Vector3d(0.183585961, 0.0, 0.075353826);
+      RotationTools.convertYawPitchRollToQuaternion(0.0, 0.130899694, -Math.PI, orientation);
+      RigidBodyTransform staticTransform = new RigidBodyTransform(orientation, translation);
       ImmutableTriple<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new ImmutableTriple<String, String, RigidBodyTransform>("upperNeckPitchLink", "multisense/head_root",
             staticTransform);
       staticTranformsForRos.add(headToHeadRootStaticTransform);
