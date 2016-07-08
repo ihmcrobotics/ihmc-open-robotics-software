@@ -293,6 +293,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    public void setHighMomentumWeight()
    {
       linearMomentumRateWeight.set(highLinearMomentumRateWeight);
+      angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
    }
 
    public void setDefaultMomentumWeight()
