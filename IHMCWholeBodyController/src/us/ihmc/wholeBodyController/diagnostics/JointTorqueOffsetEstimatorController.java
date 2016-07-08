@@ -52,7 +52,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
 
    private final BooleanYoVariable estimateTorqueOffset = new BooleanYoVariable("estimateTorqueOffset", registry);
    private final BooleanYoVariable transferTorqueOffsets = new BooleanYoVariable("transferTorqueOffsets", registry);
-   private final BooleanYoVariable recordTorqueOffsets = new BooleanYoVariable("recordTorqueOffsets", registry);
+   private final BooleanYoVariable exportJointTorqueOffsetsToFile = new BooleanYoVariable("recordTorqueOffsets", registry);
 
    private final boolean useArms = true;
 
@@ -199,9 +199,9 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
          transferTorqueOffsetsToOutputWriter();
       }
 
-      if (recordTorqueOffsets.getBooleanValue() && torqueOffsetPrinter != null)
+      if (exportJointTorqueOffsetsToFile.getBooleanValue() && torqueOffsetPrinter != null)
       {
-         recordTorqueOffsets.set(false);
+         exportJointTorqueOffsetsToFile.set(false);
          torqueOffsetPrinter.printTorqueOffsets(this);
       }
 
