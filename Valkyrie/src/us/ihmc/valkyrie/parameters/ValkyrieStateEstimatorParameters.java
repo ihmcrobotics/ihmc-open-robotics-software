@@ -80,13 +80,13 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       armJointPositionFilterFrequencyHz = Double.POSITIVE_INFINITY;
       jointOutputEncoderVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
       lowerBodyJointPositionFilterFrequencyHz = Double.POSITIVE_INFINITY;
-      lowerBodyJointVelocityFilterFrequencyHz = Double.POSITIVE_INFINITY;
+      lowerBodyJointVelocityFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
 
       // Somehow it's less shaky when these are low especially when pitching the chest forward.
       // I still don't quite get it. Sylvain
-      orientationFilterFrequencyHz        = runningOnRealRobot ? 12.0 : Double.POSITIVE_INFINITY;
-      angularVelocityFilterFrequencyHz    = runningOnRealRobot ? 12.0 : Double.POSITIVE_INFINITY;
-      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 12.0 : Double.POSITIVE_INFINITY;
+      orientationFilterFrequencyHz        = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      angularVelocityFilterFrequencyHz    = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
 
       lowerBodyJointVelocityBacklashSlopTime = 0.03;
       armJointVelocityBacklashSlopTime = 0.03;
