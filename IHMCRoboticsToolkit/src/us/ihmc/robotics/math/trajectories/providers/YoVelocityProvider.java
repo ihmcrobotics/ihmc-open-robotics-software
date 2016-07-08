@@ -25,7 +25,7 @@ public class YoVelocityProvider implements VectorProvider
 
    public void get(FrameVector velocityToPack)
    {
-      velocityToPack.setIncludingFrame(frameVector.getFrameVectorCopy());
+      frameVector.getFrameTupleIncludingFrame(velocityToPack);
    }
 
    public void set(FrameVector frameVector)
