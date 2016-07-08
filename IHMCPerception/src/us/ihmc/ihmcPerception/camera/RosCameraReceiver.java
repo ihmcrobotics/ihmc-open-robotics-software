@@ -1,19 +1,10 @@
 package us.ihmc.ihmcPerception.camera;
 
-import boofcv.struct.calib.IntrinsicParameters;
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
-import us.ihmc.utilities.ros.subscriber.RosImageSubscriber;
-
-import java.awt.image.BufferedImage;
 
 public abstract class RosCameraReceiver
 {
