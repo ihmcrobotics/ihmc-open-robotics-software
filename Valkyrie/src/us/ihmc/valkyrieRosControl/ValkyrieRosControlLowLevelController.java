@@ -152,6 +152,8 @@ public class ValkyrieRosControlLowLevelController
 
       calibrationTask = new AbstractLowLevelTask()
       {
+         private final ValkyrieTorqueOffsetPrinter torqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
+
          @Override
          public void doAction()
          {
@@ -177,6 +179,8 @@ public class ValkyrieRosControlLowLevelController
             calibrationStartTime.set(Double.NaN);
 
             List<OneDoFJoint> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
+
+            torqueOffsetPrinter.printTorqueOffsets(jointTorqueOffsetEstimator);
 
             for (int i = 0; i < oneDoFJoints.size(); i++)
             {
