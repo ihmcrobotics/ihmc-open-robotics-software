@@ -16,6 +16,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -34,6 +35,9 @@ public class IMUBiasStateEstimator
    private final List<DoubleYoVariable> orientationBiasMagnitudes = new ArrayList<>();
    private final List<AlphaFilteredYoFrameVector> angularVelocityBiases = new ArrayList<>();
    private final List<AlphaFilteredYoFrameVector> linearAccelerationBiases = new ArrayList<>();
+
+   private final List<YoFrameVector> linearAccelerationsInWorld = new ArrayList<>();
+   private final List<DoubleYoVariable> linearAccelerationMagnitudes = new ArrayList<>();
 
    private final DoubleYoVariable biasAlphaFilter = new DoubleYoVariable("imuBiasAlphaFilter", registry);
 
@@ -90,6 +94,9 @@ public class IMUBiasStateEstimator
          AlphaFilteredYoFrameQuaternion orientationBias = new AlphaFilteredYoFrameQuaternion("estimated" + sensorName + "QuaternionBias", "", rawOrientationBias, biasAlphaFilter, registry);
          orientationBias.update();
          orientationBiases.add(orientationBias);
+
+         linearAccelerationsInWorld.add(new YoFrameVector("unprocessed" + sensorName + "LinearAccelerationInWorld", worldFrame, registry));
+         linearAccelerationMagnitudes.add(new DoubleYoVariable("unprocessed" + sensorName + "LinearAccelerationMagnitude", registry));
 
          orientationBiasMagnitudes.add(new DoubleYoVariable("estimated" + sensorName + "OrientationBiasMagnitude", registry));
 
@@ -160,6 +167,12 @@ public class IMUBiasStateEstimator
             }
 
             linearAccelerationBiases.get(imuIndex).update(measurement);
+
+            imuSensor.getLinearAccelerationMeasurement(measurement);
+            linearAccelerationMagnitudes.get(imuIndex).set(measurement.length());
+            imuSensor.getOrientationMeasurement(orientationMeasurement);
+            orientationMeasurement.transform(measurement);
+            linearAccelerationsInWorld.get(imuIndex).set(measurement);
 
             if (isAccelerationIncludingGravity)
             {
