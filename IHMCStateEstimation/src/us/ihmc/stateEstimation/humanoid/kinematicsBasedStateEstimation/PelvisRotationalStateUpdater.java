@@ -52,13 +52,15 @@ public class PelvisRotationalStateUpdater
    private final TwistCalculator twistCalculator;
 
    private final IMUSensorReadOnly imuProcessedOutput;
+   private final IMUBiasProvider imuBiasProvider;
 
    private final ReferenceFrame measurementFrame;
    private final RigidBody measurementLink;
 
-   public PelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, double dt,
+   public PelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, IMUBiasProvider imuBiasProvider, double dt,
          YoVariableRegistry parentRegistry)
    {
+      this.imuBiasProvider = imuBiasProvider;
       checkNumberOfSensors(imuProcessedOutputs);
 
       imuProcessedOutput = imuProcessedOutputs.get(0);
@@ -67,8 +69,8 @@ public class PelvisRotationalStateUpdater
       rootJointFrame = rootJoint.getFrameAfterJoint();
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
 
-      this.measurementFrame = imuProcessedOutput.getMeasurementFrame();
-      this.measurementLink = imuProcessedOutput.getMeasurementLink();
+      measurementFrame = imuProcessedOutput.getMeasurementFrame();
+      measurementLink = imuProcessedOutput.getMeasurementLink();
 
       yoRootJointFrameOrientation = new YoFrameOrientation("estimatedRootJoint", worldFrame, registry);
       yoRootJointFrameQuaternion = new YoFrameQuaternion("estimatedRootJoint", worldFrame, registry);

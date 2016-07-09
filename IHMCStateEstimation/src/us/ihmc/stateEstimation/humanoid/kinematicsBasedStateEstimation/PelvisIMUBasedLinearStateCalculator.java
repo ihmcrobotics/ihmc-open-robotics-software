@@ -56,11 +56,12 @@ public class PelvisIMUBasedLinearStateCalculator
    private final FrameVector tempRootJointVelocityIntegrated = new FrameVector();
 
    private final IMUSensorReadOnly imuProcessedOutput;
+   private final IMUBiasProvider imuBiasProvider;
 
-
-   public PelvisIMUBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, double estimatorDT,
+   public PelvisIMUBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, IMUBiasProvider imuBiasProvider, double estimatorDT,
          double gravitationalAcceleration, YoVariableRegistry parentRegistry)
    {
+      this.imuBiasProvider = imuBiasProvider;
       this.estimatorDT = estimatorDT;
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
 
