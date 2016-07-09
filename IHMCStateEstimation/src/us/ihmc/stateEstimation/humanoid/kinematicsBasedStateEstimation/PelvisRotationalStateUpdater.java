@@ -159,7 +159,7 @@ public class PelvisRotationalStateUpdater
    private final Matrix3d rotationFromRootJointFrameToWorld = new Matrix3d();
    private final Matrix3d orientationMeasurement = new Matrix3d();
 
-   private final double[] yawPitchRoll = new double[3];
+   private final Matrix3d yawBiasMatrix = new Matrix3d();
 
    private void updateRootJointRotation()
    {
@@ -176,12 +176,9 @@ public class PelvisRotationalStateUpdater
 
       rotationFromRootJointFrameToWorld.mul(rotationFrozenOffset, rotationFromRootJointFrameToWorld);
 
-      RotationTools.convertMatrixToYawPitchRoll(rotationFromRootJointFrameToWorld, yawPitchRoll);
-
-      yawPitchRoll[0] -= imuBiasProvider.getYawBiasInWorldFrame(imuProcessedOutput);
-      yawPitchRoll[0] = AngleTools.trimAngleMinusPiToPi(yawPitchRoll[0]);
-
-      RotationTools.convertYawPitchRollToMatrix(yawPitchRoll, rotationFromRootJointFrameToWorld);
+      yawBiasMatrix.rotZ(imuBiasProvider.getYawBiasInWorldFrame(imuProcessedOutput));
+      yawBiasMatrix.transpose();
+      rotationFromRootJointFrameToWorld.mul(yawBiasMatrix, rotationFromRootJointFrameToWorld);
 
       rootJoint.setRotation(rotationFromRootJointFrameToWorld);
       rootJointFrame.update();
