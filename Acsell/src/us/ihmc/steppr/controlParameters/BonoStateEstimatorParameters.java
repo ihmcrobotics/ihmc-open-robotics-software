@@ -122,13 +122,13 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
-   public boolean useAccelerometerForEstimation()
+   public boolean enableIMUBiasCompensation()
    {
-      return true;
+      return false;
    }
 
    @Override
-   public boolean enableIMUBiasCompensation()
+   public boolean enableIMUYawDriftCompensation()
    {
       return false;
    }
@@ -136,7 +136,25 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public double getIMUBiasFilterFreqInHertz()
    {
-      return 2.4e-3;
+      return 6.0e-3;
+   }
+
+   @Override
+   public double getIMUYawDriftFilterFreqInHertz()
+   {
+      return 1.0e-3;
+   }
+
+   @Override
+   public double getIMUBiasVelocityThreshold()
+   {
+      return 0.015;
+   }
+
+   @Override
+   public boolean useAccelerometerForEstimation()
+   {
+      return true;
    }
 
    @Override
@@ -173,36 +191,6 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    public double getForceInPercentOfWeightThresholdToTrustFoot()
    {
       return 0.3;
-   }
-
-   @Override
-   public boolean estimateIMUDrift()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean compensateIMUDrift()
-   {
-      return true;
-   }
-
-   @Override
-   public double getIMUDriftFilterFreqInHertz()
-   {
-      return 0.5332;
-   }
-
-   @Override
-   public double getFootVelocityUsedForImuDriftFilterFreqInHertz()
-   {
-      return 0.5332;
-   }
-
-   @Override
-   public double getFootVelocityThresholdToEnableIMUDriftCompensation()
-   {
-      return 0.03;
    }
 
    @Override

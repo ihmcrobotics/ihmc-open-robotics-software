@@ -208,19 +208,13 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    }
 
    @Override
-   public boolean useAccelerometerForEstimation()
-   {
-      return true;
-   }
-
-   @Override
    public boolean enableIMUBiasCompensation()
    {
       return true;
    }
 
    @Override
-   public boolean cancelGravityFromAccelerationMeasurement()
+   public boolean enableIMUYawDriftCompensation()
    {
       return true;
    }
@@ -232,9 +226,27 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    }
 
    @Override
-   public double getIMUDriftFilterFreqInHertz()
+   public double getIMUYawDriftFilterFreqInHertz()
    {
       return 1.0e-3;
+   }
+
+   @Override
+   public double getIMUBiasVelocityThreshold()
+   {
+      return 0.015;
+   }
+
+   @Override
+   public boolean useAccelerometerForEstimation()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean cancelGravityFromAccelerationMeasurement()
+   {
+      return true;
    }
 
    @Override
@@ -265,30 +277,6 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public double getForceInPercentOfWeightThresholdToTrustFoot()
    {
       return 0.3;
-   }
-
-   @Override
-   public boolean estimateIMUDrift()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean compensateIMUDrift()
-   {
-      return true;
-   }
-
-   @Override
-   public double getFootVelocityUsedForImuDriftFilterFreqInHertz()
-   {
-      return 0.5332;
-   }
-
-   @Override
-   public double getFootVelocityThresholdToEnableIMUDriftCompensation()
-   {
-      return 0.005;
    }
 
    @Override

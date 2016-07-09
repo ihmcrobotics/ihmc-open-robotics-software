@@ -142,9 +142,11 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
       double biasFilterBreakFrequency = stateEstimatorParameters.getIMUBiasFilterFreqInHertz();
       biasAlphaFilter.set(computeAlphaGivenBreakFrequencyProperly(biasFilterBreakFrequency, updateDT));
 
-      enableYawDriftCompensation.set(stateEstimatorParameters.compensateIMUDrift());
-      double yawBiasFilterBreakFrequency = stateEstimatorParameters.getIMUDriftFilterFreqInHertz();
+      enableYawDriftCompensation.set(stateEstimatorParameters.enableIMUYawDriftCompensation());
+      double yawBiasFilterBreakFrequency = stateEstimatorParameters.getIMUYawDriftFilterFreqInHertz();
       yawBiasAlphaFilter.set(computeAlphaGivenBreakFrequencyProperly(yawBiasFilterBreakFrequency, updateDT));
+
+      imuBiasEstimationThreshold.set(stateEstimatorParameters.getIMUBiasVelocityThreshold());
    }
 
    public void initialize()
