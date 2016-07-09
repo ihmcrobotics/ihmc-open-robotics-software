@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4d;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -15,6 +15,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -28,6 +29,7 @@ public class IMUBiasStateEstimator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final List<YoFrameQuaternion> rawOrientationBiases = new ArrayList<>();
    private final List<AlphaFilteredYoFrameQuaternion> orientationBiases = new ArrayList<>();
    private final List<DoubleYoVariable> orientationBiasMagnitudes = new ArrayList<>();
    private final List<AlphaFilteredYoFrameVector> angularVelocityBiases = new ArrayList<>();
@@ -48,7 +50,7 @@ public class IMUBiasStateEstimator
    private final TwistCalculator twistCalculator;
 
    private final FrameVector gravityVector = new FrameVector();
-   private final FrameVector normalizedGravityVector = new FrameVector();
+   private final Vector3d zUpVector = new Vector3d();
 
    private final boolean isAccelerationIncludingGravity;
 
@@ -64,7 +66,7 @@ public class IMUBiasStateEstimator
       imuBiasEstimationThreshold.set(0.015);
 
       gravityVector.setIncludingFrame(worldFrame, 0.0, 0.0, -Math.abs(gravitationalAcceleration));
-      normalizedGravityVector.setIncludingFrame(worldFrame, 0.0, 0.0, -1.0);
+      zUpVector.set(0.0, 0.0, 1.0);
 
       for (int i = 0; i < imuProcessedOutputs.size(); i++)
       {
@@ -82,8 +84,11 @@ public class IMUBiasStateEstimator
          linearAccelerationBias.update(0.0, 0.0, 0.0);
          linearAccelerationBiases.add(linearAccelerationBias);
 
-         AlphaFilteredYoFrameQuaternion orientationBias = new AlphaFilteredYoFrameQuaternion("estimated" + sensorName + "QuaternionBias", "", biasAlphaFilter, measurementFrame, registry);
-         orientationBias.update(biasQuaternion);
+         YoFrameQuaternion rawOrientationBias = new YoFrameQuaternion("estimated" + sensorName + "RawQuaternionBias", measurementFrame, registry);
+         rawOrientationBiases.add(rawOrientationBias);
+
+         AlphaFilteredYoFrameQuaternion orientationBias = new AlphaFilteredYoFrameQuaternion("estimated" + sensorName + "QuaternionBias", "", rawOrientationBias, biasAlphaFilter, registry);
+         orientationBias.update();
          orientationBiases.add(orientationBias);
 
          orientationBiasMagnitudes.add(new DoubleYoVariable("estimated" + sensorName + "OrientationBiasMagnitude", registry));
@@ -100,9 +105,9 @@ public class IMUBiasStateEstimator
 
    private final Vector3d measurement = new Vector3d();
    private final FrameVector linearAcceleration = new FrameVector();
-   private final FrameVector biasRotationAxis = new FrameVector();
+   private final Vector3d biasRotationAxis = new Vector3d();
    private final AxisAngle4d biasAxisAngle = new AxisAngle4d();
-   private final Quat4d biasQuaternion = new Quat4d(0.0, 0.0, 0.0, 1.0);
+   private final Matrix3d orientationMeasurement = new Matrix3d();
 
    public void estimateBiases(List<RigidBody> trustedFeet)
    {
@@ -156,22 +161,35 @@ public class IMUBiasStateEstimator
 
             linearAccelerationBiases.get(imuIndex).update(measurement);
 
-            imuSensor.getLinearAccelerationMeasurement(measurement);
-
             if (isAccelerationIncludingGravity)
             {
                isIMUOrientationBiasEstimated.set(true);
-               linearAcceleration.setIncludingFrame(measurementFrame, measurement);
-               linearAcceleration.changeFrame(worldFrame);
-               linearAcceleration.normalize();
+               
+               imuSensor.getLinearAccelerationMeasurement(measurement);
+               imuSensor.getOrientationMeasurement(orientationMeasurement);
+               orientationMeasurement.transform(measurement);
+               measurement.normalize();
 
-               biasRotationAxis.cross(normalizedGravityVector, linearAcceleration);
-               double biasMagnitude = biasRotationAxis.angle(linearAcceleration);
-               biasRotationAxis.changeFrame(measurementFrame);
-               biasAxisAngle.set(biasRotationAxis.getVector(), biasMagnitude);
-               biasQuaternion.set(biasAxisAngle);
+               biasRotationAxis.cross(zUpVector, measurement);
+               double biasMagnitude = zUpVector.angle(measurement);
+
+               if (Math.abs(biasMagnitude) < 1.0e-7)
+               {
+                  rawOrientationBiases.get(imuIndex).setToZero();
+               }
+               else
+               {
+                  biasRotationAxis.scale(biasMagnitude);
+                  biasMagnitude = biasRotationAxis.length();
+                  biasRotationAxis.scale(1.0 / biasMagnitude);
+                  orientationMeasurement.transpose();
+                  orientationMeasurement.transform(biasRotationAxis);
+                  biasAxisAngle.set(biasRotationAxis, biasMagnitude);
+                  rawOrientationBiases.get(imuIndex).set(biasAxisAngle);
+               }
+
                AlphaFilteredYoFrameQuaternion yoOrientationBias = orientationBiases.get(imuIndex);
-               yoOrientationBias.update(biasQuaternion);
+               yoOrientationBias.update();
                yoOrientationBias.get(biasAxisAngle);
                orientationBiasMagnitudes.get(imuIndex).set(Math.abs(biasAxisAngle.getAngle()));
             }
