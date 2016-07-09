@@ -118,13 +118,14 @@ public class PelvisIMUBasedLinearStateCalculator
       if (!isEstimationEnabled())
          return;
 
+      imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuProcessedOutput, accelerationBias);
+
       linearAccelerationMeasurement.setToZero(measurementFrame);
       imuProcessedOutput.getLinearAccelerationMeasurement(linearAccelerationMeasurement.getVector());
+      linearAccelerationMeasurement.sub(accelerationBias);
 
       // Update acceleration in world (minus gravity)
       linearAccelerationMeasurement.changeFrame(worldFrame);
-      imuBiasProvider.getLinearAccelerationBiasInWorldFrame(imuProcessedOutput, accelerationBias);
-      linearAccelerationMeasurement.sub(accelerationBias);
       if (cancelGravityFromAccelerationMeasurement.getBooleanValue())
       {
          tempVector.setIncludingFrame(gravityVector);
@@ -136,8 +137,8 @@ public class PelvisIMUBasedLinearStateCalculator
       // Update acceleration in local frame (minus gravity)
       linearAccelerationMeasurement.setToZero(measurementFrame);
       imuProcessedOutput.getLinearAccelerationMeasurement(linearAccelerationMeasurement.getVector());
-      imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuProcessedOutput, accelerationBias);
       linearAccelerationMeasurement.sub(accelerationBias);
+
       if (cancelGravityFromAccelerationMeasurement.getBooleanValue())
       {
          tempVector.setIncludingFrame(gravityVector);

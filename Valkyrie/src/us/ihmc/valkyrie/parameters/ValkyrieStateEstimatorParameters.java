@@ -216,7 +216,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public boolean enableIMUBiasCompensation()
    {
-      return false;
+      return true;
    }
 
    @Override
@@ -228,7 +228,13 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public double getIMUBiasFilterFreqInHertz()
    {
-      return 5.3052e-4;
+      return 6.0e-3;
+   }
+
+   @Override
+   public double getIMUDriftFilterFreqInHertz()
+   {
+      return 1.0e-3;
    }
 
    @Override
@@ -271,12 +277,6 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public boolean compensateIMUDrift()
    {
       return true;
-   }
-
-   @Override
-   public double getIMUDriftFilterFreqInHertz()
-   {
-      return 0.024; //0.5332;
    }
 
    @Override

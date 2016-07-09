@@ -108,7 +108,6 @@ public class PelvisLinearStateUpdater
 
    private final PelvisKinematicsBasedLinearStateCalculator kinematicsBasedLinearStateCalculator;
    private final PelvisIMUBasedLinearStateCalculator imuBasedLinearStateCalculator;
-   private final IMUDriftCompensator imuDriftCompensator;
 
    private final SixDoFJoint rootJoint;
 
@@ -201,14 +200,6 @@ public class PelvisLinearStateUpdater
 
       //      requestStopEstimationOfPelvisLinearState.set(true);
 
-      imuDriftCompensator = new IMUDriftCompensator(footFrames, inverseDynamicsStructure, footSwitches, estimatorDT, registry);
-      imuDriftCompensator.activateEstimation(stateEstimatorParameters.estimateIMUDrift());
-      imuDriftCompensator.activateCompensation(stateEstimatorParameters.compensateIMUDrift());
-      imuDriftCompensator.setAlphaIMUDrift(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getIMUDriftFilterFreqInHertz(), estimatorDT));
-      imuDriftCompensator.setAlphaFootAngularVelocity(
-            computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getFootVelocityUsedForImuDriftFilterFreqInHertz(), estimatorDT));
-      imuDriftCompensator.setFootAngularVelocityThreshold(stateEstimatorParameters.getFootVelocityThresholdToEnableIMUDriftCompensation());
-
       if (VISUALIZE)
       {
          if (yoGraphicsListRegistry != null)
@@ -272,8 +263,6 @@ public class PelvisLinearStateUpdater
    {
       reinitialize.set(false);
 
-      imuDriftCompensator.initialize();
-
       centerOfMassCalculator.compute();
       centerOfMassCalculator.getCenterOfMass(tempCenterOfMassPosition);
 
@@ -325,9 +314,6 @@ public class PelvisLinearStateUpdater
       if (requestStopEstimationOfPelvisLinearState.getBooleanValue())
          return;
 
-      // adapted defaultActionIntoStates
-      imuDriftCompensator.updateAndCompensateDrift();
-
       kinematicsBasedLinearStateCalculator.updateKinematics();
 
       int numberOfEndEffectorsTrusted = setTrustedFeetUsingFootSwitches();
@@ -370,8 +356,6 @@ public class PelvisLinearStateUpdater
          updateTrustedFeetLists();
          yoRootJointPosition.getFrameTuple(rootJointPosition);
          kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, listOfUnTrustedFeet, rootJointPosition);
-
-         imuDriftCompensator.esimtateDriftIfPossible(listOfTrustedFeet);
 
          if (imuBasedLinearStateCalculator.isEstimationEnabled())
          {
