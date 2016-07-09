@@ -106,6 +106,7 @@ public class PelvisLinearStateUpdater
    private final PelvisKinematicsBasedLinearStateCalculator kinematicsBasedLinearStateCalculator;
    private final PelvisIMUBasedLinearStateCalculator imuBasedLinearStateCalculator;
    private final IMUDriftCompensator imuDriftCompensator;
+   private final IMUBiasStateEstimator imuBiasStateEstimator;
    
    private final SixDoFJoint rootJoint;
    
@@ -178,7 +179,8 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.enableTwistEstimation(stateEstimatorParameters.useTwistForPelvisLinearStateEstimation());
 
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, imuProcessedOutputs, estimatorDT, gravitationalAcceleration, registry);
-      imuBasedLinearStateCalculator.cancelGravityFromAccelerationMeasurement(stateEstimatorParameters.cancelGravityFromAccelerationMeasurement());
+      boolean cancelGravityFromAccelerationMeasurement = stateEstimatorParameters.cancelGravityFromAccelerationMeasurement();
+      imuBasedLinearStateCalculator.cancelGravityFromAccelerationMeasurement(cancelGravityFromAccelerationMeasurement);
       imuBasedLinearStateCalculator.enableEsimationModule(stateEstimatorParameters.useAccelerometerForEstimation());
       imuBasedLinearStateCalculator.enableAccelerationBiasEstimation(stateEstimatorParameters.estimateAccelerationBias());
       imuBasedLinearStateCalculator.setAlphaAccelerationBiasEstimation(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getAccelerationBiasFilterFreqInHertz(), estimatorDT));
@@ -200,6 +202,8 @@ public class PelvisLinearStateUpdater
       imuDriftCompensator.setAlphaIMUDrift(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getIMUDriftFilterFreqInHertz(), estimatorDT));
       imuDriftCompensator.setAlphaFootAngularVelocity(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getFootVelocityUsedForImuDriftFilterFreqInHertz(), estimatorDT));
       imuDriftCompensator.setFootAngularVelocityThreshold(stateEstimatorParameters.getFootVelocityThresholdToEnableIMUDriftCompensation());
+
+      imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet, twistCalculator, gravitationalAcceleration, cancelGravityFromAccelerationMeasurement, registry);
 
       if (VISUALIZE)
       {
@@ -362,6 +366,7 @@ public class PelvisLinearStateUpdater
          kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, listOfUnTrustedFeet, rootJointPosition);
 
          imuDriftCompensator.esimtateDriftIfPossible(listOfTrustedFeet);
+         imuBiasStateEstimator.estimateBiases(listOfTrustedFeet);
 
          if (imuBasedLinearStateCalculator.isEstimationEnabled())
          {
