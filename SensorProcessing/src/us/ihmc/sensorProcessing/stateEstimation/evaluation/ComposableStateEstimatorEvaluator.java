@@ -163,7 +163,7 @@ public class ComposableStateEstimatorEvaluator
             return false;
          }
 
-         public boolean estimateAccelerationBias()
+         public boolean enableIMUBiasCompensation()
          {
             return false;
          }
@@ -174,7 +174,7 @@ public class ComposableStateEstimatorEvaluator
             return true;
          }
 
-         public double getAccelerationBiasFilterFreqInHertz()
+         public double getIMUBiasFilterFreqInHertz()
          {
             return 0;
          }

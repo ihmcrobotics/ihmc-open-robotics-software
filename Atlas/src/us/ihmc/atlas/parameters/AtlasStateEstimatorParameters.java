@@ -184,21 +184,21 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
-   public boolean estimateAccelerationBias()
+   public boolean enableIMUBiasCompensation()
    {
       return false;
+   }
+
+   @Override
+   public double getIMUBiasFilterFreqInHertz()
+   {
+      return 2.4e-3;
    }
 
    @Override
    public boolean cancelGravityFromAccelerationMeasurement()
    {
       return true;
-   }
-
-   @Override
-   public double getAccelerationBiasFilterFreqInHertz()
-   {
-      return 5.3052e-4;
    }
 
    @Override

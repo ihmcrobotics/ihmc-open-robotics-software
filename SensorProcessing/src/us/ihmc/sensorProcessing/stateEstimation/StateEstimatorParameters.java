@@ -38,11 +38,10 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
    
    public abstract boolean useAccelerometerForEstimation();
    
-   public abstract boolean estimateAccelerationBias();
+   public abstract boolean enableIMUBiasCompensation();
+   public abstract double getIMUBiasFilterFreqInHertz();
 
    public abstract boolean cancelGravityFromAccelerationMeasurement();
-   
-   public abstract double getAccelerationBiasFilterFreqInHertz();
 
    public abstract double getPelvisPositionFusingFrequency();
    public abstract double getPelvisLinearVelocityFusingFrequency();
