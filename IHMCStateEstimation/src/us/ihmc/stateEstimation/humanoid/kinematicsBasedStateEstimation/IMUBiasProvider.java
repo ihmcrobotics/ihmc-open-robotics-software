@@ -24,4 +24,6 @@ public interface IMUBiasProvider
 
    void getLinearAccelerationBiasInWorldFrame(IMUSensorReadOnly imu, FrameVector linearAccelerationBiasToPack);
 
+   double getYawBiasInWorldFrame(IMUSensorReadOnly imu);
+
 }

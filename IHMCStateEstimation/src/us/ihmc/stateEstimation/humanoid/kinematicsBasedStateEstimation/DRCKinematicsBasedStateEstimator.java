@@ -24,7 +24,6 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -126,11 +125,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       boolean isAccelerationIncludingGravity = stateEstimatorParameters.cancelGravityFromAccelerationMeasurement();
-      imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet.keySet(), twistCalculator, gravitationalAcceleration, isAccelerationIncludingGravity, registry);
-      imuBiasStateEstimator.setEnableIMUBiasCompensation(stateEstimatorParameters.enableIMUBiasCompensation());
-      double biasBreakFrequency = stateEstimatorParameters.getIMUBiasFilterFreqInHertz();
-      double biasAlphaFilter = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(biasBreakFrequency, estimatorDT);
-      imuBiasStateEstimator.setBiasAlphaFilter(biasAlphaFilter);
+      imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet.keySet(), twistCalculator, gravitationalAcceleration, isAccelerationIncludingGravity, estimatorDT, registry);
+      imuBiasStateEstimator.configureModuleParameters(stateEstimatorParameters);
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
       pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, estimatorDT, registry);
