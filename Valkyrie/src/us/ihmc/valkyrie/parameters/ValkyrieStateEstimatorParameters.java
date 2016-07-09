@@ -214,7 +214,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    }
 
    @Override
-   public boolean estimateAccelerationBias()
+   public boolean enableIMUBiasCompensation()
    {
       return false;
    }
@@ -226,7 +226,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    }
 
    @Override
-   public double getAccelerationBiasFilterFreqInHertz()
+   public double getIMUBiasFilterFreqInHertz()
    {
       return 5.3052e-4;
    }

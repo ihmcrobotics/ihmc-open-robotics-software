@@ -112,21 +112,21 @@ public class LLAQuadrupedStateEstimatorParameters implements StateEstimatorParam
    }
 
    @Override
-   public boolean estimateAccelerationBias()
+   public boolean enableIMUBiasCompensation()
    {
       return false;
+   }
+
+   @Override
+   public double getIMUBiasFilterFreqInHertz()
+   {
+      return 0;
    }
 
    @Override
    public boolean cancelGravityFromAccelerationMeasurement()
    {
       return false;
-   }
-
-   @Override
-   public double getAccelerationBiasFilterFreqInHertz()
-   {
-      return 0;
    }
 
    @Override

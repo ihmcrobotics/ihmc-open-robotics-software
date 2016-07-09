@@ -178,7 +178,8 @@ public class PelvisRotationalStateUpdater
       rootJointFrame.update();
    }
 
-   private final Vector3d angularVocityMeasurement = new Vector3d();
+   private final Vector3d angularVelocityMeasurement = new Vector3d();
+   private final Vector3d angularVelocityMeasurementBias = new Vector3d();
 
    /** Angular velocity of the measurement link, with respect to world. */
    private final FrameVector angularVelocityMeasurementLinkRelativeToWorld = new FrameVector();
@@ -207,8 +208,10 @@ public class PelvisRotationalStateUpdater
       twistRootJointFrameRelativeToMeasurementLink.getAngularPart(angularVelocityRootJointFrameRelativeToMeasurementLink);
 
       // omega_{measurementLink}^{measurementFrame, world}
-      imuProcessedOutput.getAngularVelocityMeasurement(angularVocityMeasurement);
-      angularVelocityMeasurementLinkRelativeToWorld.setIncludingFrame(measurementFrame, angularVocityMeasurement);
+      imuProcessedOutput.getAngularVelocityMeasurement(angularVelocityMeasurement);
+      imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuProcessedOutput, angularVelocityMeasurementBias);
+      angularVelocityMeasurement.sub(angularVelocityMeasurementBias);
+      angularVelocityMeasurementLinkRelativeToWorld.setIncludingFrame(measurementFrame, angularVelocityMeasurement);
 
       // omega_{measurementLink}^{rootJointFrame, world}
       angularVelocityMeasurementLinkRelativeToWorld.changeFrame(rootJointFrame);

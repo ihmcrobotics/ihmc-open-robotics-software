@@ -186,9 +186,7 @@ public class PelvisLinearStateUpdater
             gravitationalAcceleration, registry);
       boolean cancelGravityFromAccelerationMeasurement = stateEstimatorParameters.cancelGravityFromAccelerationMeasurement();
       imuBasedLinearStateCalculator.cancelGravityFromAccelerationMeasurement(cancelGravityFromAccelerationMeasurement);
-      imuBasedLinearStateCalculator.enableEsimationModule(stateEstimatorParameters.useAccelerometerForEstimation());
-      imuBasedLinearStateCalculator.enableAccelerationBiasEstimation(stateEstimatorParameters.estimateAccelerationBias());
-      imuBasedLinearStateCalculator.setAlphaAccelerationBiasEstimation(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getAccelerationBiasFilterFreqInHertz(), estimatorDT));
+      imuBasedLinearStateCalculator.enableEstimationModule(stateEstimatorParameters.useAccelerometerForEstimation());
 
       alphaIMUAgainstKinematicsForVelocity
             .set(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getPelvisLinearVelocityFusingFrequency(), estimatorDT));
