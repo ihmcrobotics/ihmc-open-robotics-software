@@ -294,7 +294,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    {
       Integer imuIndex = imuToIndexMap.get(imu);
       if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
-         angularVelocityBiasToPack.setIncludingFrame(imu.getMeasurementFrame(), 0.0, 0.0, 0.0);
+         angularVelocityBiasToPack.setToZero(imu.getMeasurementFrame());
       else
          angularVelocityBiases.get(imuIndex.intValue()).getFrameTupleIncludingFrame(angularVelocityBiasToPack);
    }
@@ -314,7 +314,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    {
       Integer imuIndex = imuToIndexMap.get(imu);
       if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
-         angularVelocityBiasToPack.setIncludingFrame(worldFrame, 0.0, 0.0, 0.0);
+         angularVelocityBiasToPack.setToZero(worldFrame);
       else
          angularVelocityBiasesInWorld.get(imuIndex.intValue()).getFrameTupleIncludingFrame(angularVelocityBiasToPack);
    }
@@ -334,7 +334,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    {
       Integer imuIndex = imuToIndexMap.get(imu);
       if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
-         linearAccelerationBiasToPack.setIncludingFrame(imu.getMeasurementFrame(), 0.0, 0.0, 0.0);
+         linearAccelerationBiasToPack.setToZero(imu.getMeasurementFrame());
       else
          linearAccelerationBiases.get(imuIndex.intValue()).getFrameTupleIncludingFrame(linearAccelerationBiasToPack);
    }
@@ -354,7 +354,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    {
       Integer imuIndex = imuToIndexMap.get(imu);
       if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
-         linearAccelerationBiasToPack.setIncludingFrame(worldFrame, 0.0, 0.0, 0.0);
+         linearAccelerationBiasToPack.setToZero(worldFrame);
       else
          linearAccelerationBiasesInWorld.get(imuIndex.intValue()).getFrameTupleIncludingFrame(linearAccelerationBiasToPack);
    }
