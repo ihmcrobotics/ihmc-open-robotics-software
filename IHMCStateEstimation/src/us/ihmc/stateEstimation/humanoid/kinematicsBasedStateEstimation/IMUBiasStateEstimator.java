@@ -113,7 +113,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          isBiasEstimated.add(new BooleanYoVariable("is" + sensorName + "BiasEstimated", registry));
 
          angularVelocityBiasesInWorld.add(new YoFrameVector("estimated" + sensorName + "AngularVelocityBiasWorld", worldFrame, registry));
-         linearAccelerationBiasesInWorld.add(new YoFrameVector("estimated" + sensorName + "LinearAccelerationBias", worldFrame, registry));
+         linearAccelerationBiasesInWorld.add(new YoFrameVector("estimated" + sensorName + "LinearAccelerationBiasWorld", worldFrame, registry));
       }
 
       parentRegistry.addChild(registry);
