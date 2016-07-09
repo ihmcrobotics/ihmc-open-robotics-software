@@ -42,8 +42,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 
    // parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter mpcMaximumPreviewTimeParameter = parameterFactory.createDouble("maximumPreviewTime", 10);
-   private final DoubleParameter mpcStepAdjustmentCostParameter = parameterFactory.createDouble("stepAdjustmentCost", 1000000);
+   private final DoubleParameter mpcMaximumPreviewTimeParameter = parameterFactory.createDouble("maximumPreviewTime", 5);
+   private final DoubleParameter mpcStepAdjustmentCostParameter = parameterFactory.createDouble("stepAdjustmentCost", 500);
    private final DoubleParameter mpcCopAdjustmentCostParameter = parameterFactory.createDouble("copAdjustmentCost", 1);
    private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory
          .createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
@@ -97,8 +97,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final FiniteStateMachine xGaitPlannerStateMachine;
    private final ArrayList<QuadrupedTimedStep> xGaitPreviewSteps;
    private EndDependentList<QuadrupedTimedStep> latestSteps;
-   private final FrameVector stepAdjustmentVector;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
+   private final FrameVector stepAdjustmentVector;
 
    private enum XGaitPlannerState
    {
@@ -265,18 +265,17 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
             taskSpaceControllerSettings.getContactState(), taskSpaceEstimates.getComPosition(), taskSpaceEstimates.getComVelocity(), currentTime, mpcSettings);
       for (int i = 0; i < timedStepController.getQueue().size(); i++)
       {
+         stepAdjustmentVector.changeFrame(worldFrame);
          timedStepController.getQueue().get(i).getGoalPosition().add(stepAdjustmentVector.getVector());
          groundPlaneEstimator.projectZ(timedStepController.getQueue().get(i).getGoalPosition());
       }
       for (RobotEnd robotEnd : RobotEnd.values)
       {
          if (timedStepController.getLatestStep(robotEnd) != null)
+         {
             crossoverProjection.project(timedStepController.getLatestStep(robotEnd), taskSpaceEstimates.getSolePosition());
-      }
-      for (RobotEnd robotEnd : RobotEnd.values)
-      {
-         if (latestSteps.get(robotEnd).getTimeInterval().getEndTime() > currentTime)
-            latestSteps.get(robotEnd).set(timedStepController.getLatestStep(robotEnd));
+            groundPlaneEstimator.projectZ(timedStepController.getLatestStep(robotEnd).getGoalPosition());
+         }
       }
    }
 
@@ -311,7 +310,6 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    @Override
    public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
    {
-      latestSteps.getClass();
    }
 
    @Override
@@ -414,7 +412,12 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
          xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, latestSteps, planarVelocity, currentTime, bodyYawSetpoint, xGaitSettings);
          timedStepController.removeSteps();
          for (RobotEnd robotEnd : RobotEnd.values)
-            timedStepController.addStep(latestSteps.get(robotEnd));
+         {
+            if (timedStepController.getLatestStep(robotEnd) != null)
+               timedStepController.getLatestStep(robotEnd).set(latestSteps.get(robotEnd));
+            else
+               timedStepController.addStep(latestSteps.get(robotEnd));
+         }
          for (int i = 0; i < xGaitPreviewSteps.size(); i++)
             timedStepController.addStep(xGaitPreviewSteps.get(i));
          return null;
@@ -427,28 +430,35 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
          Vector3d planarVelocity = inputProvider.getPlanarVelocityInput();
          planarVelocity.set(0.0, 0.0, 0.0);
          xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, latestSteps, planarVelocity, currentTime, bodyYawSetpoint, xGaitSettings);
-         timedStepController.removeSteps();
-         for (RobotEnd robotEnd : RobotEnd.values)
-            timedStepController.addStep(latestSteps.get(robotEnd));
-         for (int i = 0; i < xGaitPreviewSteps.size(); i++)
-         {
-            if (xGaitPreviewSteps.get(i).getTimeInterval().getEndTime() < currentTime + haltTransitionDurationParameter.get())
-               timedStepController.addStep(xGaitPreviewSteps.get(i));
-         }
       }
    }
 
    private class HaltedXGaitPlanner implements FiniteStateMachineState<XGaitPlannerEvent>
    {
+      double haltTime;
+
       @Override
       public void onEntry()
       {
-
+         haltTime = robotTimestamp.getDoubleValue();
       }
 
       @Override
       public XGaitPlannerEvent process()
       {
+         timedStepController.removeSteps();
+         for (RobotEnd robotEnd : RobotEnd.values)
+         {
+            if (timedStepController.getLatestStep(robotEnd) != null)
+               timedStepController.getLatestStep(robotEnd).set(latestSteps.get(robotEnd));
+            else
+               timedStepController.addStep(latestSteps.get(robotEnd));
+         }
+         for (int i = 0; i < xGaitPreviewSteps.size(); i++)
+         {
+            if (xGaitPreviewSteps.get(i).getTimeInterval().getEndTime() < haltTime + haltTransitionDurationParameter.get())
+               timedStepController.addStep(xGaitPreviewSteps.get(i));
+         }
          return null;
       }
 
