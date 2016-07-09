@@ -4,22 +4,30 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolver;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMotionEstimator;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStepPressurePlanner;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements QuadrupedMpcOptimizationWithLaneChange
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
    private final FramePoint currentDcmEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
@@ -47,12 +55,25 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
    private int numberOfIntervals = 0;
    private int numberOfPreviewSteps = 0;
 
-   public QuadrupedDcmBasedMpcOptimizationWithLaneChange(DivergentComponentOfMotionEstimator dcmPositionEstimator, int maxPreviewSteps)
+   private YoFramePoint yoCmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
+   private YoFrameVector yoStepAdjustmentVector = new YoFrameVector("stepAdjustmentVector", ReferenceFrame.getWorldFrame(), registry);
+
+   public QuadrupedDcmBasedMpcOptimizationWithLaneChange(DivergentComponentOfMotionEstimator dcmPositionEstimator, int maxPreviewSteps,
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.linearInvertedPendulumModel = dcmPositionEstimator.getLinearInvertedPendulumModel();
       this.dcmPositionEstimator = dcmPositionEstimator;
       this.currentDcmEstimate = new FramePoint();
       this.timedStepPressurePlanner = new QuadrupedTimedStepPressurePlanner(maxPreviewSteps + 4);
+
+      if (graphicsListRegistry != null)
+      {
+         String cmpPositionGraphicName = registry.getName() + "cmpPositionSetpoint";
+         YoGraphicPosition cmpPositionGraphic = new YoGraphicPosition(cmpPositionGraphicName, yoCmpPositionSetpoint, 0.025, YoAppearance.Chartreuse());
+         graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), cmpPositionGraphic);
+         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), cmpPositionGraphic.createArtifact());
+      }
+      parentRegistry.addChild(registry);
    }
 
    public void compute(FrameVector stepAdjustmentVector, FramePoint cmpPositionSetpoint, PreallocatedQueue<QuadrupedTimedStep> queuedSteps,
@@ -75,7 +96,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       // Compute current divergent component of motion.
       dcmPositionEstimator.compute(currentDcmEstimate, currentComVelocity);
       currentDcmEstimate.changeFrame(ReferenceFrame.getWorldFrame());
-      cmpPositionSetpoint.setToZero(ReferenceFrame.getWorldFrame());
+      cmpPositionSetpoint.changeFrame(ReferenceFrame.getWorldFrame());
       stepAdjustmentVector.changeFrame(ReferenceFrame.getWorldFrame());
 
       // Compute current number of contacts.
@@ -127,6 +148,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
 
       // Compute optimal centroidal moment pivot and step adjustment
       int rowOffset = 0;
+      cmpPositionSetpoint.setToZero();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
@@ -140,6 +162,10 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       {
          stepAdjustmentVector.set(direction, u.get(rowOffset++, 0));
       }
+
+      // Update logging variables
+      yoCmpPositionSetpoint.setAndMatchFrame(cmpPositionSetpoint);
+      yoStepAdjustmentVector.setAndMatchFrame(stepAdjustmentVector);
    }
 
    private void initializeCostTerms(QuadrantDependentList<ContactState> currentContactState, QuadrupedMpcOptimizationWithLaneChangeSettings settings)
