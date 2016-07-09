@@ -115,7 +115,9 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          orientationBias.update();
          orientationBiases.add(orientationBias);
 
-         yawRateBiasesInWorld.add(new AlphaFilteredYoVariable("estimated" + sensorName + "YawRateBiasWorld", registry, yawBiasAlphaFilter));
+         AlphaFilteredYoVariable yawRateBiasInWorld = new AlphaFilteredYoVariable("estimated" + sensorName + "YawRateBiasWorld", registry, yawBiasAlphaFilter);
+         yawRateBiasInWorld.update(0.0);
+         yawRateBiasesInWorld.add(yawRateBiasInWorld);
          yawBiasesInWorld.add(new DoubleYoVariable("estimated" + sensorName + "YawBiasWorld", registry));
 
          linearAccelerationsInWorld.add(new YoFrameVector("unprocessed" + sensorName + "LinearAccelerationWorld", worldFrame, registry));
@@ -145,6 +147,23 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
       yawBiasAlphaFilter.set(computeAlphaGivenBreakFrequencyProperly(yawBiasFilterBreakFrequency, updateDT));
    }
 
+   public void initialize()
+   {
+      for (int imuIndex = 0; imuIndex < imuProcessedOutputs.size(); imuIndex++)
+      {
+         rawOrientationBiases.get(imuIndex).setToZero();
+         orientationBiases.get(imuIndex).setToZero();
+         orientationBiasMagnitudes.get(imuIndex).set(0.0);
+         angularVelocityBiases.get(imuIndex).setToZero();
+         linearAccelerationBiases.get(imuIndex).setToZero();
+         angularVelocityBiasesInWorld.get(imuIndex).setToZero();
+         linearAccelerationBiasesInWorld.get(imuIndex).setToZero();
+
+         yawRateBiasesInWorld.get(imuIndex).set(0.0);
+         yawBiasesInWorld.get(imuIndex).set(0.0);
+      }
+   }
+
    private final Twist twist = new Twist();
 
    private final Vector3d measurement = new Vector3d();
@@ -161,22 +180,18 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
    public void compute(List<RigidBody> trustedFeet)
    {
-      boolean atLeastOneIMUBiasCanBeEstimated = checkIfBiasEstimationPossible(trustedFeet);
-
-      if (atLeastOneIMUBiasCanBeEstimated)
-         estimateBiases();
+      checkIfBiasEstimationPossible(trustedFeet);
+      estimateBiases();
    }
 
-   private boolean checkIfBiasEstimationPossible(List<RigidBody> trustedFeet)
+   private void checkIfBiasEstimationPossible(List<RigidBody> trustedFeet)
    {
-      boolean atLeastOneIMUBiasCanBeEstimated = false;
-
       if (trustedFeet.size() < feet.size())
       {
          isIMUOrientationBiasEstimated.set(false);
          for (int i = 0; i < isBiasEstimated.size(); i++)
             isBiasEstimated.get(i).set(false);
-         return atLeastOneIMUBiasCanBeEstimated;
+         return;
       }
 
       for (int imuIndex = 0; imuIndex < imuProcessedOutputs.size(); imuIndex++)
@@ -203,11 +218,9 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
                && feetToIMULinearVelocityMagnitude < imuBiasEstimationThreshold.getDoubleValue())
          {
             isBiasEstimated.get(imuIndex).set(true);
-            atLeastOneIMUBiasCanBeEstimated = true;
             isIMUOrientationBiasEstimated.set(isAccelerationIncludingGravity);
          }
       }
-      return atLeastOneIMUBiasCanBeEstimated;
    }
 
    private void estimateBiases()
@@ -229,9 +242,6 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
             orientationMeasurement.transform(measurement, measurementInWorld);
             yawRateBiasesInWorld.get(imuIndex).update(measurementInWorld.getZ());
-
-            if (enableYawDriftCompensation.getBooleanValue())
-               yawBiasesInWorld.get(imuIndex).add(updateDT * yawRateBiasesInWorld.get(imuIndex).getDoubleValue());
 
             imuSensor.getLinearAccelerationMeasurement(measurement);
             orientationMeasurement.transform(measurement, measurementInWorld);
@@ -276,6 +286,10 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
             orientationMeasurement.transform(measurementBias);
             linearAccelerationBiasesInWorld.get(imuIndex).set(measurementBias);
          }
+
+         // Always update the yaw bias
+         if (enableYawDriftCompensation.getBooleanValue())
+            yawBiasesInWorld.get(imuIndex).add(updateDT * yawRateBiasesInWorld.get(imuIndex).getDoubleValue());
       }
    }
 

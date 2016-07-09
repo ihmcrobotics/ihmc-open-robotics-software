@@ -186,6 +186,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          forceSensorStateUpdater.initialize();
       }
       pelvisLinearStateUpdater.initialize();
+
+      imuBiasStateEstimator.initialize();
    }
 
    @Override
