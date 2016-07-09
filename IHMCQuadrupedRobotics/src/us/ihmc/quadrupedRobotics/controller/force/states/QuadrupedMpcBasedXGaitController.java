@@ -310,6 +310,12 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    @Override
    public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
    {
+      // update latest step
+      RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
+      if (thisStepQuadrant == latestSteps.get(thisStepEnd).getRobotQuadrant())
+      {
+         latestSteps.get(thisStepEnd).set(timedStepController.getLatestStep(thisStepQuadrant));
+      }
    }
 
    @Override
