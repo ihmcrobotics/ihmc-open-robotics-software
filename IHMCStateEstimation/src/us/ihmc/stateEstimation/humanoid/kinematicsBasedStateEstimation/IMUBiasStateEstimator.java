@@ -59,8 +59,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final List<DoubleYoVariable> feetToIMUAngularVelocityMagnitudes = new ArrayList<>();
    private final List<DoubleYoVariable> feetToIMULinearVelocityMagnitudes = new ArrayList<>();
    private final List<BooleanYoVariable> isBiasEstimated = new ArrayList<>();
-
-   private final BooleanYoVariable isIMUOrientationBiasEstimated = new BooleanYoVariable("isIMUOrientationBiasEstimated", registry);
+   private final List<BooleanYoVariable> isIMUOrientationBiasEstimated = new ArrayList<>();
 
    private final List<? extends IMUSensorReadOnly> imuProcessedOutputs;
    private final Map<IMUSensorReadOnly, Integer> imuToIndexMap = new HashMap<>();
@@ -128,6 +127,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          feetToIMUAngularVelocityMagnitudes.add(new DoubleYoVariable("feetTo" + sensorName + "AngularVelocityMagnitude", registry));
          feetToIMULinearVelocityMagnitudes.add(new DoubleYoVariable("feetTo" + sensorName + "LinearVelocityMagnitude", registry));
          isBiasEstimated.add(new BooleanYoVariable("is" + sensorName + "BiasEstimated", registry));
+         isIMUOrientationBiasEstimated.add(new BooleanYoVariable("is" + sensorName + "OrientationBiasEstimated", registry));
 
          angularVelocityBiasesInWorld.add(new YoFrameVector("estimated" + sensorName + "AngularVelocityBiasWorld", worldFrame, registry));
          linearAccelerationBiasesInWorld.add(new YoFrameVector("estimated" + sensorName + "LinearAccelerationBiasWorld", worldFrame, registry));
@@ -190,9 +190,11 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    {
       if (trustedFeet.size() < feet.size())
       {
-         isIMUOrientationBiasEstimated.set(false);
-         for (int i = 0; i < isBiasEstimated.size(); i++)
-            isBiasEstimated.get(i).set(false);
+         for (int imuIndex = 0; imuIndex < imuProcessedOutputs.size(); imuIndex++)
+         {
+            isIMUOrientationBiasEstimated.get(imuIndex).set(false);
+            isBiasEstimated.get(imuIndex).set(false);
+         }
          return;
       }
 
@@ -220,7 +222,12 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
                && feetToIMULinearVelocityMagnitude < imuBiasEstimationThreshold.getDoubleValue())
          {
             isBiasEstimated.get(imuIndex).set(true);
-            isIMUOrientationBiasEstimated.set(isAccelerationIncludingGravity);
+            isIMUOrientationBiasEstimated.get(imuIndex).set(isAccelerationIncludingGravity);
+         }
+         else
+         {
+            isBiasEstimated.get(imuIndex).set(false);
+            isIMUOrientationBiasEstimated.get(imuIndex).set(false);
          }
       }
    }
