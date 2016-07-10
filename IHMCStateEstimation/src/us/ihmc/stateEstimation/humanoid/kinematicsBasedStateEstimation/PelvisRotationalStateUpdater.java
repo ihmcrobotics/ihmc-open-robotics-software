@@ -52,13 +52,15 @@ public class PelvisRotationalStateUpdater
    private final TwistCalculator twistCalculator;
 
    private final IMUSensorReadOnly imuProcessedOutput;
+   private final IMUBiasProvider imuBiasProvider;
 
    private final ReferenceFrame measurementFrame;
    private final RigidBody measurementLink;
 
-   public PelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, double dt,
+   public PelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, IMUBiasProvider imuBiasProvider, double dt,
          YoVariableRegistry parentRegistry)
    {
+      this.imuBiasProvider = imuBiasProvider;
       checkNumberOfSensors(imuProcessedOutputs);
 
       imuProcessedOutput = imuProcessedOutputs.get(0);
@@ -67,8 +69,8 @@ public class PelvisRotationalStateUpdater
       rootJointFrame = rootJoint.getFrameAfterJoint();
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
 
-      this.measurementFrame = imuProcessedOutput.getMeasurementFrame();
-      this.measurementLink = imuProcessedOutput.getMeasurementLink();
+      measurementFrame = imuProcessedOutput.getMeasurementFrame();
+      measurementLink = imuProcessedOutput.getMeasurementLink();
 
       yoRootJointFrameOrientation = new YoFrameOrientation("estimatedRootJoint", worldFrame, registry);
       yoRootJointFrameQuaternion = new YoFrameQuaternion("estimatedRootJoint", worldFrame, registry);
@@ -157,6 +159,8 @@ public class PelvisRotationalStateUpdater
    private final Matrix3d rotationFromRootJointFrameToWorld = new Matrix3d();
    private final Matrix3d orientationMeasurement = new Matrix3d();
 
+   private final Matrix3d yawBiasMatrix = new Matrix3d();
+
    private void updateRootJointRotation()
    {
       // R_{measurementFrame}^{world}
@@ -172,11 +176,16 @@ public class PelvisRotationalStateUpdater
 
       rotationFromRootJointFrameToWorld.mul(rotationFrozenOffset, rotationFromRootJointFrameToWorld);
 
+      yawBiasMatrix.rotZ(imuBiasProvider.getYawBiasInWorldFrame(imuProcessedOutput));
+      yawBiasMatrix.transpose();
+      rotationFromRootJointFrameToWorld.mul(yawBiasMatrix, rotationFromRootJointFrameToWorld);
+
       rootJoint.setRotation(rotationFromRootJointFrameToWorld);
       rootJointFrame.update();
    }
 
-   private final Vector3d angularVocityMeasurement = new Vector3d();
+   private final Vector3d angularVelocityMeasurement = new Vector3d();
+   private final Vector3d angularVelocityMeasurementBias = new Vector3d();
 
    /** Angular velocity of the measurement link, with respect to world. */
    private final FrameVector angularVelocityMeasurementLinkRelativeToWorld = new FrameVector();
@@ -205,8 +214,10 @@ public class PelvisRotationalStateUpdater
       twistRootJointFrameRelativeToMeasurementLink.getAngularPart(angularVelocityRootJointFrameRelativeToMeasurementLink);
 
       // omega_{measurementLink}^{measurementFrame, world}
-      imuProcessedOutput.getAngularVelocityMeasurement(angularVocityMeasurement);
-      angularVelocityMeasurementLinkRelativeToWorld.setIncludingFrame(measurementFrame, angularVocityMeasurement);
+      imuProcessedOutput.getAngularVelocityMeasurement(angularVelocityMeasurement);
+      imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuProcessedOutput, angularVelocityMeasurementBias);
+      angularVelocityMeasurement.sub(angularVelocityMeasurementBias);
+      angularVelocityMeasurementLinkRelativeToWorld.setIncludingFrame(measurementFrame, angularVelocityMeasurement);
 
       // omega_{measurementLink}^{rootJointFrame, world}
       angularVelocityMeasurementLinkRelativeToWorld.changeFrame(rootJointFrame);
