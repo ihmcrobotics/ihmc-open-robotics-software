@@ -4,6 +4,9 @@ import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Purple
 
 import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
@@ -16,11 +19,13 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
@@ -30,6 +35,9 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 public class ICPBasedLinearMomentumRateOfChangeControlModule
 {
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
+   private final SpatialForceVector desiredMomentumRate = new SpatialForceVector();
+
+   private final DenseMatrix64F linearAndAngularZSelectionMatrix = CommonOps.identity(6);
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ICPProportionalController icpProportionalController;
@@ -66,6 +74,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final YoFrameVector angularMomentumRateWeight = new YoFrameVector("angularMomentumRateWeigth", worldFrame, registry);
    private final YoFrameVector linearMomentumRateWeight = new YoFrameVector("linearMomentumRateWeight", worldFrame, registry);
 
+   private final BooleanYoVariable minimizeAngularMomentumRateZ = new BooleanYoVariable("minimizeAngularMomentumRateZ", registry);
+
    private final CMPProjector cmpProjector;
    private final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
@@ -78,8 +88,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, parentRegistry, yoGraphicsListRegistry,
-            true);
+      this(referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, parentRegistry, yoGraphicsListRegistry, true);
    }
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
@@ -107,6 +116,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
       linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
+
+      MatrixTools.removeRow(linearAndAngularZSelectionMatrix, 0);
+      MatrixTools.removeRow(linearAndAngularZSelectionMatrix, 0);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -155,8 +167,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       }
 
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(desiredCMPPreviousValue, capturePoint, desiredCapturePoint,
-                                                                                finalDesiredCapturePoint, desiredCapturePointVelocity, perfectCMP,
-                                                                                omega0);
+            finalDesiredCapturePoint, desiredCapturePointVelocity, perfectCMP, omega0);
 
       yoUnprojectedDesiredCMP.set(desiredCMP);
 
@@ -198,7 +209,19 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
       controlledCoMAcceleration.set(linearMomentumRateOfChange);
       controlledCoMAcceleration.scale(1.0 / totalMass);
-      momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
+
+      if (minimizeAngularMomentumRateZ.getBooleanValue())
+      {
+         desiredMomentumRate.setToZero(centerOfMassFrame);
+         desiredMomentumRate.setLinearPart(linearMomentumRateOfChange);
+         momentumRateCommand.set(desiredMomentumRate);
+         momentumRateCommand.setSelectionMatrix(linearAndAngularZSelectionMatrix);
+      }
+      else
+      {
+         momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
+      }
+
       momentumRateCommand.setWeights(angularMomentumRateWeight.getX(), angularMomentumRateWeight.getY(), angularMomentumRateWeight.getZ(),
             linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
    }
@@ -216,7 +239,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       achievedCoMAcceleration2d.changeFrame(worldFrame);
 
       achievedCMPToPack.set(achievedCoMAcceleration2d);
-      achievedCMPToPack.scale(- 1.0 / (omega0 * omega0));
+      achievedCMPToPack.scale(-1.0 / (omega0 * omega0));
       achievedCMPToPack.add(centerOfMass2d);
    }
 
@@ -301,5 +324,10 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 
       yoSafeAreaPolygon.setFrameConvexPolygon2d(safeArea);
       yoProjectionPolygon.setFrameConvexPolygon2d(areaToProjectInto);
+   }
+
+   public void minimizeAngularMomentumRateZ(boolean enable)
+   {
+      minimizeAngularMomentumRateZ.set(enable);
    }
 }

@@ -580,4 +580,8 @@ public class BalanceManager
       momentumBasedController.getCapturePoint(capturePointToPack);
    }
 
+   public void minizeAngularMomentumRateZ(boolean enable)
+   {
+      icpBasedLinearMomentumRateOfChangeControlModule.minimizeAngularMomentumRateZ(enable);
+   }
 }

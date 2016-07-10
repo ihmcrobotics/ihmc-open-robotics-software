@@ -1014,4 +1014,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       // once another mode is implemented, use this to change the default gains for virtual model control
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean minizeAngularMomentumRateZDuringSwing()
+   {
+      return true;
+   }
 }
