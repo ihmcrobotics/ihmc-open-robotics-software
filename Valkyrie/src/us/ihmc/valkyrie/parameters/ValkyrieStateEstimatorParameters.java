@@ -258,7 +258,11 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public double getPelvisLinearVelocityFusingFrequency()
    {
-      return 0.4261; // alpha = 0.992 with dt = 0.003
+//      return 0.4261; // alpha = 0.992 with dt = 0.003
+      // For some reason, trusting more the accelerometer causes the state estimator to understimate the
+      // pelvis linear velocity when doing reasonably quick transfer during walking.
+      // This contributes in the capture point overshooting to the outside of the feet.
+      return 2.0146195328088035; // alpha = 0.975 with dt = 0.002
    }
 
    @Override
