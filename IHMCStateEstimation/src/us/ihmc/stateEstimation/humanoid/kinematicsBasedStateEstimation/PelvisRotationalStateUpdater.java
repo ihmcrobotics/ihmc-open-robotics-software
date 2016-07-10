@@ -176,9 +176,12 @@ public class PelvisRotationalStateUpdater
 
       rotationFromRootJointFrameToWorld.mul(rotationFrozenOffset, rotationFromRootJointFrameToWorld);
 
-      yawBiasMatrix.rotZ(imuBiasProvider.getYawBiasInWorldFrame(imuProcessedOutput));
-      yawBiasMatrix.transpose();
-      rotationFromRootJointFrameToWorld.mul(yawBiasMatrix, rotationFromRootJointFrameToWorld);
+      if (imuBiasProvider != null)
+      {
+         yawBiasMatrix.rotZ(imuBiasProvider.getYawBiasInWorldFrame(imuProcessedOutput));
+         yawBiasMatrix.transpose();
+         rotationFromRootJointFrameToWorld.mul(yawBiasMatrix, rotationFromRootJointFrameToWorld);
+      }
 
       rootJoint.setRotation(rotationFromRootJointFrameToWorld);
       rootJointFrame.update();
@@ -215,8 +218,11 @@ public class PelvisRotationalStateUpdater
 
       // omega_{measurementLink}^{measurementFrame, world}
       imuProcessedOutput.getAngularVelocityMeasurement(angularVelocityMeasurement);
-      imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuProcessedOutput, angularVelocityMeasurementBias);
-      angularVelocityMeasurement.sub(angularVelocityMeasurementBias);
+      if (imuBiasProvider != null)
+      {
+         imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuProcessedOutput, angularVelocityMeasurementBias);
+         angularVelocityMeasurement.sub(angularVelocityMeasurementBias);
+      }
       angularVelocityMeasurementLinkRelativeToWorld.setIncludingFrame(measurementFrame, angularVelocityMeasurement);
 
       // omega_{measurementLink}^{rootJointFrame, world}
