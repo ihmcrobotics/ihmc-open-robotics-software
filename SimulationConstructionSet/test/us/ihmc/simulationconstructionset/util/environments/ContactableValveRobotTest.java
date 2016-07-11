@@ -26,6 +26,7 @@ import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.FramePose;
@@ -73,7 +74,7 @@ public class ContactableValveRobotTest
       }
       catch (Exception e)
       {
-         System.err.println("Caught exception in SimulationTestHelper.simulateAndBlockAndCatchExceptions. Exception = " + e);
+         PrintTools.error(this, e.getMessage());
       }
 
       if (robots[1].getVariable("valveClosePercentage").getValueAsDouble() >= 99.0)
