@@ -1020,6 +1020,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean minimizeAngularMomentumRateZDuringSwing()
    {
-      return true;
+      // For some reason it causes the test ValkyrieEndToEndCinderBlockFieldTest to fail by making the state estimator drift more than usual.
+      // As there is no real need for it in sim, I'm leaving it on only for the real robot. (Sylvain)
+      return target == RobotTarget.REAL_ROBOT;
    }
 }
