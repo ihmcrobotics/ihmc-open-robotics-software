@@ -214,7 +214,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * Useful when the robot has heavy legs and tends to slips during swing.
     * @return
     */
-   public boolean minizeAngularMomentumRateZDuringSwing()
+   public boolean minimizeAngularMomentumRateZDuringSwing()
    {
       return false;
    }
