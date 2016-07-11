@@ -5,6 +5,7 @@ import java.util.Map;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.quadrupedRobotics.estimator.QuadrupedTouchdownDetectorBasedFootSwitch;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
@@ -66,7 +67,8 @@ public class QuadrupedStateEstimatorFactory
       return stateEstimator;
    }
 
-   public static QuadrantDependentList<FootSwitchInterface> createFootSwitches(QuadrantDependentList<ContactablePlaneBody> quadrupedFeet, double gravity, SDFFullRobotModel fullRobotModel, YoVariableRegistry registry)
+   public static QuadrantDependentList<FootSwitchInterface> createFootSwitches(QuadrantDependentList<ContactablePlaneBody> quadrupedFeet, double gravity,
+         SDFFullRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly, YoVariableRegistry registry)
    {
       QuadrantDependentList<FootSwitchInterface> footSwitches = new QuadrantDependentList<FootSwitchInterface>();
       double gravityMagnitude = Math.abs(gravity);
@@ -78,6 +80,7 @@ public class QuadrupedStateEstimatorFactory
          String namePrefix = contactablePlaneBody.getName() + "StateEstimator";
          SettableFootSwitch footSwitch = new SettableFootSwitch(quadrupedFeet.get(robotQuadrant), robotQuadrant, totalRobotWeight, registry);
 //         KinematicsBasedFootSwitch footSwitch = new KinematicsBasedFootSwitch(namePrefix, quadrupedFeet, switchZThreshold, totalRobotWeight, robotQuadrant, registry);
+//         QuadrupedTouchdownDetectorBasedFootSwitch footSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(contactablePlaneBody, fullRobotModel, totalRobotWeight, sensorOutputMapReadOnly, registry);
          footSwitches.set(robotQuadrant, footSwitch);
       }
       return footSwitches;

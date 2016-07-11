@@ -158,7 +158,7 @@ public class QuadrupedSimulationFactory
    
    private void createFootSwitches()
    {
-      footSwitches = QuadrupedStateEstimatorFactory.createFootSwitches(contactableFeet, gravity.get(), fullRobotModel.get(), sdfRobot.get().getRobotsYoVariableRegistry());
+      footSwitches = QuadrupedStateEstimatorFactory.createFootSwitches(contactableFeet, gravity.get(), fullRobotModel.get(), sensorReader.getSensorOutputMapReadOnly(), sdfRobot.get().getRobotsYoVariableRegistry());
    }
    
    private void createStateEstimator()
