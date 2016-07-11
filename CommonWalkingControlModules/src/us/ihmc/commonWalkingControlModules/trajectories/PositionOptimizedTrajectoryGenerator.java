@@ -97,7 +97,7 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
       this.finalPosition.changeFrame(trajectoryFrame);
       this.finalVelocity.changeFrame(trajectoryFrame);
 
-      optimizer.setEndPoints(initialPosition.toArray(), initialVelocity.toArray(), finalPosition.toArray(), finalVelocity.toArray());
+      optimizer.setEndPoints(initialPosition.toArray(), initialVelocity.toArray(), finalPosition.toArray(), finalVelocity.toArray()); // TODO garbage
    }
 
    public void setWaypoints(ArrayList<FramePoint> waypointPositions)
@@ -105,13 +105,13 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
       this.waypointPositions.clear();
       coefficients.clear();
 
-      coefficients.add(new double[order.getCoefficients()]);
+      coefficients.add(new double[order.getCoefficients()]); // TODO garbage
       for (int i = 0; i < waypointPositions.size(); i++)
       {
          waypointPosition.setIncludingFrame(waypointPositions.get(i));
          waypointPosition.changeFrame(trajectoryFrame);
-         this.waypointPositions.add(waypointPosition.toArray());
-         coefficients.add(new double[order.getCoefficients()]);
+         this.waypointPositions.add(waypointPosition.toArray()); // TODO garbage
+         coefficients.add(new double[order.getCoefficients()]); // TODO garbage
       }
 
       optimizer.setWaypoints(this.waypointPositions);
@@ -121,7 +121,7 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
          extendBySegment();
    }
 
-   private void extendBySegment()
+   private void extendBySegment() // TODO replace with max fixed size
    {
       int size = waypointTimes.size() + 1;
       for (Direction axis : Direction.values)
@@ -232,15 +232,11 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
    @Override
    public void showVisualization()
    {
-      // TODO Auto-generated method stub
-
    }
 
    @Override
    public void hideVisualization()
    {
-      // TODO Auto-generated method stub
-
    }
 
 }
