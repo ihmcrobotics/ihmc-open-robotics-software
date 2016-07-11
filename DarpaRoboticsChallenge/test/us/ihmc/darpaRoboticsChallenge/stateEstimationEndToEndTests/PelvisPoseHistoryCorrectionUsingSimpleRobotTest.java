@@ -40,6 +40,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseHistoryCorrection;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
@@ -820,7 +821,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       }
       catch (SimulationExceededMaximumTimeException | ControllerFailureException e)
       {
-         System.err.println("Caught exception in " + getClass().getSimpleName() + ".simulateAndBlockAndCatchExceptions. Exception = /n" + e);
+         PrintTools.error(this, e.getMessage());
          throw e;
       }
    }
