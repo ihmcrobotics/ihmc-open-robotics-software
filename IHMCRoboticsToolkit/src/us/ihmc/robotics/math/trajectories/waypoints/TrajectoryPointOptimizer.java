@@ -10,6 +10,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.time.ExecutionTimer;
 
 /**
  * This class can compute a optimal trajectory from a start point to a target point. Given position and
@@ -70,7 +71,7 @@ public class TrajectoryPointOptimizer
    private final DenseMatrix64F timeUpdate = new DenseMatrix64F(1, 1);
    private final DoubleYoVariable timeGain = new DoubleYoVariable("TimeGain", registry);
 
-   private final DoubleYoVariable computationTime = new DoubleYoVariable("ComputationTimeMS", registry);
+   private final ExecutionTimer timer = new ExecutionTimer("TrajectoryOptimizationTimer", 0.5, registry);
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
@@ -132,7 +133,7 @@ public class TrajectoryPointOptimizer
 
    public void compute()
    {
-      long startTime = System.nanoTime();
+      timer.startMeasurement();
       timeGain.set(initialTimeGain);
 
       int intervals = nWaypoints.getIntegerValue() + 1;
@@ -156,8 +157,7 @@ public class TrajectoryPointOptimizer
             System.err.println("Trajectory optimization max iteration.");
       }
 
-      long duration = System.nanoTime() - startTime;
-      computationTime.set((double)duration / 10E6);
+      timer.stopMeasurement();
    }
 
    private double computeTimeUpdate(double cost)
