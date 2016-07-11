@@ -1018,7 +1018,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public boolean minizeAngularMomentumRateZDuringSwing()
+   public boolean minimizeAngularMomentumRateZDuringSwing()
    {
       return true;
    }
