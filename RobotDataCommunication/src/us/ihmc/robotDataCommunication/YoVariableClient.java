@@ -220,8 +220,10 @@ public class YoVariableClient implements LogPacketHandler
 
    public void requestStop()
    {
+      System.out.println(streamingDataTCPClient.isRunning());
       if (streamingDataTCPClient.isRunning())
       {
+         System.out.println("HELP");
          streamingDataTCPClient.requestStop();
       }
    }
