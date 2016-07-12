@@ -13,10 +13,12 @@ public abstract class TouchdownDetectorBasedFootswitch implements FootSwitchInte
 
    protected final BooleanYoVariable hasTouchedDown;
 
-   public TouchdownDetectorBasedFootswitch()
+   public TouchdownDetectorBasedFootswitch(String name, YoVariableRegistry parentRegistry)
    {
-      hasTouchedDown = new BooleanYoVariable("hasTouchedDown", registry);
+      hasTouchedDown = new BooleanYoVariable(name + "_hasTouchedDown", registry);
       setupTouchdownDetectors(touchdownDetectors);
+
+      parentRegistry.addChild(registry);
    }
 
    abstract protected void setupTouchdownDetectors(ArrayList<TouchdownDetector> touchdownDetectors);
