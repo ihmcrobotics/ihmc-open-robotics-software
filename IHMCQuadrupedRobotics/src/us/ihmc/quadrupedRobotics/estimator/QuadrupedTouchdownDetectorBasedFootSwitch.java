@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.estimator;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.TouchdownDetectorBasedFootswitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.ActuatorForceBasedTouchdownDetector;
-import us.ihmc.commonWalkingControlModules.touchdownDetector.JointVelocityBasedTouchdownDetector;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.JointVelocityFiniteDifferenceBasedTouchdownDetector;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -29,6 +29,8 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, SDFFullRobotModel fullRobotModel, double totalRobotWeight,
          SensorOutputMapReadOnly sensorMap, YoVariableRegistry parentRegistry)
    {
+      super(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch", parentRegistry);
+
       this.robotQuadrant = robotQuadrant;
       this.foot = foot;
       this.fullRobotModel = fullRobotModel;
@@ -42,7 +44,13 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    {
       ForceSensorDataHolderReadOnly forceSensorProcessedOutputs = sensorMap.getForceSensorProcessedOutputs();
       ActuatorForceBasedTouchdownDetector actuatorForceBasedTouchdownDetector = new ActuatorForceBasedTouchdownDetector(robotQuadrant.toString().toLowerCase() + "_knee_pitch",
-            forceSensorProcessedOutputs.getByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), 100.0, registry);
+            forceSensorProcessedOutputs.getByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), 100.0, registry); //TODO magic number
+
+      JointVelocityFiniteDifferenceBasedTouchdownDetector jointVelocityFiniteDifferenceBasedTouchdownDetector = new JointVelocityFiniteDifferenceBasedTouchdownDetector(
+            fullRobotModel.getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), hasTouchedDown, registry);
+      jointVelocityFiniteDifferenceBasedTouchdownDetector.setLiftOffThreshold(-0.3);
+      jointVelocityFiniteDifferenceBasedTouchdownDetector.setFootInSwingThreshold(0.04);
+      jointVelocityFiniteDifferenceBasedTouchdownDetector.setTouchdownThreshold(-0.1);
 
       touchdownDetectors.add(actuatorForceBasedTouchdownDetector);
    }
