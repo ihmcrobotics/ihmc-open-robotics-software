@@ -1,7 +1,9 @@
 package us.ihmc.valkyrieRosControl;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import us.ihmc.affinity.Affinity;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -31,6 +33,7 @@ import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
+import us.ihmc.rosControl.wholeRobot.JointStateHandle;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
@@ -53,17 +56,30 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 //         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "lowerNeckPitch",
 //         "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll",
 //         "rightWristPitch" };
+
+   private static final String[] allValkyrieJoints = {
+         "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
+         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll",
+         "torsoYaw", "torsoPitch", "torsoRoll",
+         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch",
+         "lowerNeckPitch", "neckYaw", "upperNeckPitch",
+         "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll", "rightWristPitch"
+   };
+
 	private static final String[] torqueControlledJoints = {
 	      "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
 	      "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll",
 	      "torsoYaw", "torsoPitch", "torsoRoll",
 	      "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch",
-//	      "lowerNeckPitch", "neckYaw", "upperNeckPitch",
 	      "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"
 	      };
 
-   private static final String[] positionControlledJoints = {"lowerNeckPitch", "neckYaw", "upperNeckPitch",};
+   private static final String[] positionControlledJoints = {
+         "lowerNeckPitch", "neckYaw", "upperNeckPitch",
+         //"rightForearmYaw", "rightWristRoll", "rightWristPitch"
+         };
 
+   public static final boolean USE_YOVARIABLE_DESIREDS = true;
    public static final boolean USE_USB_MICROSTRAIN_IMUS = false;
    public static final boolean USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS = false;
    public static final String[] readIMUs = USE_USB_MICROSTRAIN_IMUS ? new String[0] : new String[ValkyrieSensorInformation.imuSensorsToUse.length];
@@ -129,6 +145,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       if (walkingProvider == WalkingProvider.VELOCITY_HEADING_COMPONENT)
          controllerFactory.createComponentBasedFootstepDataMessageGenerator();
+      if (USE_YOVARIABLE_DESIREDS)
+         controllerFactory.createUserDesiredControllerCommandGenerator();
 
       return controllerFactory;
    }
@@ -139,20 +157,39 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       long maxMemory = Runtime.getRuntime().maxMemory();
 
       System.out.println("Partying hard with max memory of: " + maxMemory);
+
       /*
        * Create joints
        */
 
-      HashMap<String, EffortJointHandle> effortJointHandles = new HashMap<>();
-      for (String joint : torqueControlledJoints)
-      {
-         effortJointHandles.put(joint, createEffortJointHandle(joint));
-      }
+      HashSet<String> torqueControlledJointsSet = new HashSet<>(Arrays.asList(torqueControlledJoints));
+      HashSet<String> positionControlledJointsSet = new HashSet<>(Arrays.asList(positionControlledJoints));
 
+      HashMap<String, EffortJointHandle> effortJointHandles = new HashMap<>();
       HashMap<String, PositionJointHandle> positionJointHandles = new HashMap<>();
-      for (String joint : positionControlledJoints)
+      HashMap<String, JointStateHandle> jointStateHandles = new HashMap<>();
+
+      for(String joint : allValkyrieJoints)
       {
-         positionJointHandles.put(joint, createPositionJointHandle(joint));
+         if(torqueControlledJointsSet.contains(joint) && positionControlledJointsSet.contains(joint))
+         {
+            throw new RuntimeException("Joint cannot be both position controlled and torque controlled via ROS Control! Joint name: " + joint);
+         }
+
+         if(torqueControlledJointsSet.contains(joint))
+         {
+            effortJointHandles.put(joint, createEffortJointHandle(joint));
+         }
+
+         if(positionControlledJointsSet.contains(joint))
+         {
+            positionJointHandles.put(joint, createPositionJointHandle(joint));
+         }
+
+         if(!(torqueControlledJointsSet.contains(joint) || positionControlledJointsSet.contains(joint)))
+         {
+            jointStateHandles.put(joint, createJointStateHandle(joint));
+         }
       }
 
       HashMap<String, IMUHandle> imuHandles = new HashMap<>();
@@ -205,7 +242,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
       ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider, stateEstimatorParameters,
-            effortJointHandles, positionJointHandles, imuHandles, forceTorqueSensorHandles, sensorInformation);
+            effortJointHandles, positionJointHandles, jointStateHandles, imuHandles, forceTorqueSensorHandles, sensorInformation);
 
       /*
        * Create controllers

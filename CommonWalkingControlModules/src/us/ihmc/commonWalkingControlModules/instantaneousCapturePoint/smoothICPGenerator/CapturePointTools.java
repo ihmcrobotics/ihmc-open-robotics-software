@@ -376,6 +376,21 @@ public class CapturePointTools
    }
 
    /**
+    * Computes the desired centroidal momentum pivot velocity by,
+    * \dot{CMP}_{d} = \dot{ICP}_{d} - \ddot{ICP}_{d}/omega0
+    * 
+    * @param desiredCapturePointVelocity
+    * @param desiredCapturePointAcceleration
+    * @param omega0
+    * @param desiredCMPVelocityToPack
+    */
+   public static void computeDesiredCentroidalMomentumPivotVelocity(YoFrameVector desiredCapturePointVelocity, YoFrameVector desiredCapturePointAcceleration, double omega0,
+         YoFrameVector desiredCMPVelocityToPack)
+   {
+      desiredCMPVelocityToPack.scaleAdd(-1.0 / omega0, desiredCapturePointAcceleration, desiredCapturePointVelocity);
+   }
+
+   /**
     * Computes the desired centroidal momentum pivot by,
     * CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
     * 

@@ -49,7 +49,7 @@ public class DRCNetworkProcessor
          setupDrillDetectionModule(params);
          setupKinematicsToolboxModule(robotModel, params);
          addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts());
-         addTextToSpeechEngine();
+         addTextToSpeechEngine(params);
       }
       catch (IOException e)
       {
@@ -57,8 +57,11 @@ public class DRCNetworkProcessor
       }
  }
 
-   private void addTextToSpeechEngine()
+   private void addTextToSpeechEngine(DRCNetworkModuleParameters params)
    {
+      if (!params.isTextToSpeechModuleEnabled())
+         return;
+
       PacketCommunicator ttsModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.TEXT_TO_SPEECH, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.TEXT_TO_SPEECH, ttsModuleCommunicator);
       try

@@ -85,7 +85,9 @@ public class HighLevelControlManagerFactory
          return null;
 
       balanceManager = new BalanceManager(momentumBasedController, walkingControllerParameters, capturePointPlannerParameters, registry);
-      balanceManager.setMomentumWeight(momentumOptimizationSettings.getLinearMomentumWeight());
+      Vector3d linearMomentumWeight = momentumOptimizationSettings.getLinearMomentumWeight();
+      Vector3d angularMomentumWeight = momentumOptimizationSettings.getAngularMomentumWeight();
+      balanceManager.setMomentumWeight(angularMomentumWeight, linearMomentumWeight);
       balanceManager.setHighMomentumWeightForRecovery(momentumOptimizationSettings.getHighLinearMomentumWeightForRecovery());
       return balanceManager;
    }

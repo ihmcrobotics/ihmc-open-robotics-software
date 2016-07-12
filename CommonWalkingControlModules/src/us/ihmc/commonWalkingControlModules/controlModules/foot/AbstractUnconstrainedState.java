@@ -74,7 +74,13 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       spatialFeedbackControlCommand.setGains(gains);
       FramePose anklePoseInFoot = new FramePose(contactableFoot.getFrameAfterParentJoint());
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
-      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(anklePoseInFoot);
+      changeControlFrame(anklePoseInFoot);
+   }
+
+   protected void changeControlFrame(FramePose controlFramePoseInEndEffector)
+   {
+      controlFramePoseInEndEffector.checkReferenceFrameMatch(contactableFoot.getRigidBody().getBodyFixedFrame());
+      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePoseInEndEffector);
    }
 
    public void setWeight(double weight)
