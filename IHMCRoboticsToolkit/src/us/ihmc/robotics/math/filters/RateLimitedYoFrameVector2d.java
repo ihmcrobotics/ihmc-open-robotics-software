@@ -5,7 +5,7 @@ import javax.vecmath.Vector2d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.FrameTuple2d;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -87,10 +87,16 @@ public class RateLimitedYoFrameVector2d extends YoFrameVector2d
       y.update(vector2dUnfiltered.y);
    }
 
-   public void update(FrameVector2d vector2dUnfiltered)
+   public void update(FrameTuple2d<?, ?> vector2dUnfiltered)
    {
       x.update(vector2dUnfiltered.getX());
       y.update(vector2dUnfiltered.getY());
+   }
+
+   public void setMaxRate(double maxRate)
+   {
+      x.setMaxRate(maxRate);
+      y.setMaxRate(maxRate);
    }
 
    public void reset()

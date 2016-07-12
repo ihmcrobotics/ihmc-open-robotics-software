@@ -11,7 +11,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class PelvisHeightTrajectoryCommand extends SimpleTrajectoryPoint1DList implements Command<PelvisHeightTrajectoryCommand, PelvisHeightTrajectoryMessage>
 {
    private long commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
-   private ExecutionMode executionMode;
+   private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    private long previousCommandId = Packet.INVALID_MESSAGE_ID;
 
    public PelvisHeightTrajectoryCommand()

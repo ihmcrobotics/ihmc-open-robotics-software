@@ -75,9 +75,15 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    private final SDFDescriptionMutator descriptionMutator;
 
    public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFDescriptionMutator descriptionMutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
+                   boolean enableTorqueVelocityLimits, boolean enableDamping)
+   {
+      this(generalizedSDFRobotModel.getName(), generalizedSDFRobotModel, descriptionMutator,sdfJointNameMap,useCollisionMeshes,enableTorqueVelocityLimits,enableDamping);
+   }
+
+   public SDFRobot(String name, GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFDescriptionMutator descriptionMutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
          boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
-      super(generalizedSDFRobotModel.getName());
+      super(name);
       this.descriptionMutator = descriptionMutator;
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
       

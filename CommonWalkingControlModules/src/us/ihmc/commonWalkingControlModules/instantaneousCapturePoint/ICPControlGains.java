@@ -9,15 +9,30 @@ public class ICPControlGains
    private final DoubleYoVariable kpOrthogonalToMotion;
    private final DoubleYoVariable ki;
    private final DoubleYoVariable kiBleedOff;
+   private final DoubleYoVariable feedbackPartMaxRate;
 
    public ICPControlGains(String suffix, YoVariableRegistry registry)
+   {
+      this(suffix, false, registry);
+   }
+
+   public ICPControlGains(String suffix, boolean limitFeedbackPartRate, YoVariableRegistry registry)
    {
       kpParallelToMotion = new DoubleYoVariable("captureKpParallel" + suffix, registry);
       kpOrthogonalToMotion = new DoubleYoVariable("captureKpOrthogonal" + suffix, registry);
       ki = new DoubleYoVariable("captureKi" + suffix, registry);
       kiBleedOff = new DoubleYoVariable("captureKiBleedOff" + suffix, registry);
-
       kiBleedOff.set(1.0);
+
+      if (limitFeedbackPartRate)
+      {
+         feedbackPartMaxRate = new DoubleYoVariable("feedbackPartMaxRate" + suffix, registry);
+         feedbackPartMaxRate.set(Double.POSITIVE_INFINITY);
+      }
+      else
+      {
+         feedbackPartMaxRate = null;
+      }
    }
 
    public void setKpParallelToMotion(double kpParallelToMotion)
@@ -40,6 +55,11 @@ public class ICPControlGains
       this.kiBleedOff.set(kiBleedOff);
    }
 
+   public void setFeedbackPartMaxRate(double maxRate)
+   {
+      feedbackPartMaxRate.set(maxRate);
+   }
+
    public DoubleYoVariable getYoKpParallelToMotion()
    {
       return kpParallelToMotion;
@@ -58,6 +78,11 @@ public class ICPControlGains
    public DoubleYoVariable getYoKiBleedOff()
    {
       return kiBleedOff;
+   }
+
+   public DoubleYoVariable getFeedbackPartMaxRate()
+   {
+      return feedbackPartMaxRate;
    }
 
    public double getKpParallelToMotion()

@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -98,7 +99,7 @@ public class BlockingSimulationRunner
       }
       catch (Exception e)
       {
-         System.err.println("Caught exception in " + getClass().getSimpleName() + ".simulateAndBlockAndCatchExceptions. Exception = /n" + e);
+         PrintTools.error(this, e.getMessage());
          return false;
       }
    }

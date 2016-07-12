@@ -96,7 +96,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public double getOmega0()
    {
       // TODO probably need to be tuned.
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 3.4 : 3.3; // 3.3 seems more appropriate.
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 3.0 : 3.3; // 3.3 seems more appropriate.
    }
 
    @Override
@@ -114,7 +114,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean doToeOffIfPossible()
    {
-      return !(target == DRCRobotModel.RobotTarget.REAL_ROBOT);
+      return true;
    }
 
    @Override
@@ -126,7 +126,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
-      return true;
+      return target != RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -183,7 +183,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
    {
-      return false;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -195,13 +195,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
-      return Double.POSITIVE_INFINITY;
+      return 0.05;
    }
 
    @Override
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
-      return getDefaultSwingTime();
+      return 0.70;
    }
 
    @Override
@@ -445,7 +445,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public ICPControlGains createICPControlGains(YoVariableRegistry registry)
    {
-      ICPControlGains gains = new ICPControlGains("", registry);
+      ICPControlGains gains = new ICPControlGains("", true, registry);
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
@@ -458,6 +458,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
+
+      gains.setFeedbackPartMaxRate(1.0);
 
       return gains;
    }
@@ -509,10 +511,10 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = runningOnRealRobot ? 100.0 : 100.0; // 160.0
-      double kpZ = runningOnRealRobot ? 80.0 : 100.0; // 120.0
-      double zetaXY = runningOnRealRobot ? 0.9 : 0.8; // 0.7
-      double zetaZ = runningOnRealRobot ? 1.00 : 0.8; // 0.7
+      double kpXY = runningOnRealRobot ? 80.0 : 100.0;
+      double kpZ = runningOnRealRobot ? 80.0 : 100.0;
+      double zetaXY = runningOnRealRobot ? 0.8 : 0.8; // 0.7
+      double zetaZ = runningOnRealRobot ? 0.8 : 0.8; // 0.7
       double maxAccel = runningOnRealRobot ? 18.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 270.0 : 270.0;
 
@@ -748,13 +750,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getDefaultTransferTime()
    {
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 2.0 : 0.25;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 0.70 : 0.25;
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.5 : 0.60;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.20 : 0.60;
    }
 
    /** @inheritDoc */
@@ -941,6 +943,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       // This seems to be specific to Val's, probably because of its particular kinematics.
       // Shouldn't affect the rest of the body as long as the head is controlled w.r.t. to the chest.
       momentumOptimizationSettings.setHeadWeights(5.0, 500.0, 50.0);
+      momentumOptimizationSettings.setAngularMomentumWeight(0.0, 0.5);
       return momentumOptimizationSettings;
    }
 
@@ -1011,5 +1014,14 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public void useVirtualModelControlCore()
    {
       // once another mode is implemented, use this to change the default gains for virtual model control
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean minimizeAngularMomentumRateZDuringSwing()
+   {
+      // For some reason it causes the test ValkyrieEndToEndCinderBlockFieldTest to fail by making the state estimator drift more than usual.
+      // As there is no real need for it in sim, I'm leaving it on only for the real robot. (Sylvain)
+      return target == RobotTarget.REAL_ROBOT;
    }
 }

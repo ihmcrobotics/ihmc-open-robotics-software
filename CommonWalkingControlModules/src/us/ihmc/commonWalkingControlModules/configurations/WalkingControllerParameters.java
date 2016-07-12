@@ -207,4 +207,15 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return Double.NaN;
    }
+
+   /**
+    * When true, some of the tracking performance will be degraded to reduce the generated angular momentum rate around
+    * the vertical axis during swing only.
+    * Useful when the robot has heavy legs and tends to slips during swing.
+    * @return
+    */
+   public boolean minimizeAngularMomentumRateZDuringSwing()
+   {
+      return false;
+   }
 }

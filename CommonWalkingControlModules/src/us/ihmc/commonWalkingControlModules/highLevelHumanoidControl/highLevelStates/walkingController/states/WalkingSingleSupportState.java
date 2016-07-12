@@ -40,6 +40,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final DoubleYoVariable icpErrorThresholdToSpeedUpSwing = new DoubleYoVariable("icpErrorThresholdToSpeedUpSwing", registry);
 
    private final BooleanYoVariable finishSingleSupportWhenICPPlannerIsDone = new BooleanYoVariable("finishSingleSupportWhenICPPlannerIsDone", registry);
+   private final BooleanYoVariable minimizeAngularMomentumRateZDuringSwing = new BooleanYoVariable("minimizeAngularMomentumRateZDuringSwing", registry);
 
    public WalkingSingleSupportState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox momentumBasedController,
          HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
@@ -57,6 +58,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
+      minimizeAngularMomentumRateZDuringSwing.set(walkingControllerParameters.minimizeAngularMomentumRateZDuringSwing());
    }
 
    @Override
@@ -124,6 +126,8 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       updateFootstepParameters();
 
+      balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getBooleanValue());
+
       balanceManager.setNextFootstep(nextFootstep);
 
       balanceManager.addFootstepToPlan(nextFootstep);
@@ -146,6 +150,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    public void doTransitionOutOfAction()
    {
       super.doTransitionOutOfAction();
+
+      balanceManager.minimizeAngularMomentumRateZ(false);
 
       actualFootPoseInWorld.setToZero(fullRobotModel.getEndEffectorFrame(swingSide, LimbName.LEG)); // changed Here Nicolas
       actualFootPoseInWorld.changeFrame(worldFrame);

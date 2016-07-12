@@ -3,6 +3,8 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -53,6 +55,7 @@ public class TrajectoryPointOptimizer
    private final DenseMatrix64F x = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F f = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F A = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F ATranspose = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F b = new DenseMatrix64F(1, 1);
 
    private final DenseMatrix64F E = new DenseMatrix64F(1, 1);
@@ -68,6 +71,8 @@ public class TrajectoryPointOptimizer
    private final DoubleYoVariable timeGain = new DoubleYoVariable("TimeGain", registry);
 
    private final DoubleYoVariable computationTime = new DoubleYoVariable("ComputationTimeMS", registry);
+
+   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
    public TrajectoryPointOptimizer(int dimensions, PolynomialOrder order, YoVariableRegistry parentRegistry)
    {
@@ -241,13 +246,15 @@ public class TrajectoryPointOptimizer
       CommonOps.fill(E, 0.0);
       CommonOps.insert(H, E, 0, 0);
       CommonOps.insert(A, E, problemSize, 0);
-      CommonOps.transpose(A);
-      CommonOps.insert(A, E, 0, problemSize);
+      ATranspose.reshape(A.getNumCols(), A.getNumRows());
+      CommonOps.transpose(A, ATranspose);
+      CommonOps.insert(ATranspose, E, 0, problemSize);
       CommonOps.scale(-1.0, f);
       CommonOps.insert(f, d, 0, 0);
       CommonOps.insert(b, d, problemSize, 0);
 
-      CommonOps.invert(E);
+      if (solver.setA(E))
+         solver.invert(E);
       x.reshape(size, 1);
       CommonOps.mult(E, d, x);
       x.reshape(problemSize, 1);

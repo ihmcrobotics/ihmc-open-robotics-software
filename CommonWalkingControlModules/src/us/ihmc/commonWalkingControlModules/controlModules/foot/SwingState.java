@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.PushRecoveryTrajectoryGe
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
@@ -16,14 +17,17 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.WrapperForMultiplePositionTrajectoryGenerators;
 import us.ihmc.robotics.math.trajectories.providers.YoSE3ConfigurationProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -36,12 +40,12 @@ import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SwingState extends AbstractUnconstrainedState
 {
-   private static final boolean useNewSwingTrajectoyOptimization = true;
+   private static final boolean useNewSwingTrajectoyOptimization = false;
+   private static final boolean CONTROL_TOE = false;
 
    private final boolean visualizeSwingTrajectory = true;
 
@@ -86,6 +90,11 @@ public class SwingState extends AbstractUnconstrainedState
    private final double controlDT;
 
    private final ReferenceFrame footFrame;
+   private final ReferenceFrame toeFrame;
+   private final ReferenceFrame stanceFootFrame;
+   private final ReferenceFrame controlFrame;
+
+   private final RigidBodyTransform transformFromToeToAnkle = new RigidBodyTransform();
 
    public SwingState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider,
          YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
@@ -102,18 +111,18 @@ public class SwingState extends AbstractUnconstrainedState
       replanTrajectory = new BooleanYoVariable(namePrefix + "SwingReplanTrajectory", registry);
       swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", registry);
 
-      ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
-      ArrayList<PositionTrajectoryGenerator> pushRecoveryPositionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
+      footFrame = contactableFoot.getFrameAfterParentJoint();
+      toeFrame = createToeFrame(robotSide);
 
-      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
-      footFrame = referenceFrames.getFootFrame(robotSide);
+      controlFrame = CONTROL_TOE ? toeFrame : footFrame;
+      stanceFootFrame = CONTROL_TOE ? createToeFrame(robotSide.getOppositeSide()) : momentumBasedController.getReferenceFrames().getFootFrame(robotSide.getOppositeSide());
+
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       RigidBody rigidBody = contactableFoot.getRigidBody();
 
-      initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
-      ReferenceFrame stanceFootFrame = referenceFrames.getFootFrame(robotSide.getOppositeSide());
       stanceConfigurationProvider = new CurrentConfigurationProvider(stanceFootFrame);
-      initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, rigidBody, twistCalculator);
+      initialConfigurationProvider = new CurrentConfigurationProvider(controlFrame);
+      initialVelocityProvider = new CurrentLinearVelocityProvider(controlFrame, rigidBody, twistCalculator);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
@@ -133,13 +142,14 @@ public class SwingState extends AbstractUnconstrainedState
       this.touchdownVelocityProvider = touchdownVelocityProvider;
       swingTrajectoryGeneratorNew = new TwoWaypointSwingGenerator(namePrefix + "SwingNew", maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
 
+      ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
+      ArrayList<PositionTrajectoryGenerator> pushRecoveryPositionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
 
       if (useNewSwingTrajectoyOptimization)
       {
          positionTrajectoryGenerators.add(swingTrajectoryGeneratorNew);
          pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
                pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGeneratorNew, touchdownTrajectoryGenerator);
-
       }
       else
       {
@@ -151,7 +161,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       positionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(positionTrajectoryGenerators, namePrefix, registry);
 
-      currentAngularVelocityProvider = new CurrentAngularVelocityProvider(footFrame, rigidBody, twistCalculator);
+      currentAngularVelocityProvider = new CurrentAngularVelocityProvider(controlFrame, rigidBody, twistCalculator);
       orientationTrajectoryGenerator = new VelocityConstrainedOrientationTrajectoryGenerator(namePrefix + "Swing", worldFrame, registry);
       hasInitialAngularConfigurationBeenProvided = new BooleanYoVariable(namePrefix + "HasInitialAngularConfigurationBeenProvided", registry);
 
@@ -164,6 +174,24 @@ public class SwingState extends AbstractUnconstrainedState
       currentTimeWithSwingSpeedUp = new DoubleYoVariable(namePrefix + "CurrentTimeWithSwingSpeedUp", registry);
       isSwingSpeedUpEnabled = new BooleanYoVariable(namePrefix + "IsSwingSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+
+      FramePose controlFramePose = new FramePose(controlFrame);
+      controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
+      changeControlFrame(controlFramePose);
+   }
+
+   private ReferenceFrame createToeFrame(RobotSide robotSide)
+   {
+      ContactableFoot contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
+      ReferenceFrame footFrame = momentumBasedController.getReferenceFrames().getFootFrame(robotSide);
+      FramePoint2d toeContactPoint2d = new FramePoint2d();
+      contactableFoot.getToeOffContactPoint(toeContactPoint2d);
+      FramePoint toeContactPoint = new FramePoint();
+      toeContactPoint.setXYIncludingFrame(toeContactPoint2d);
+      toeContactPoint.changeFrame(footFrame);
+
+      transformFromToeToAnkle.setTranslation(toeContactPoint.getVectorCopy());
+      return ReferenceFrame.constructFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "ToeFrame", footFrame, transformFromToeToAnkle);
    }
 
    private PositionTrajectoryGenerator setupPushRecoveryTrajectoryGenerator(DoubleProvider swingTimeProvider, YoVariableRegistry registry, String namePrefix,
@@ -193,7 +221,7 @@ public class SwingState extends AbstractUnconstrainedState
       if (!hasInitialAngularConfigurationBeenProvided.getBooleanValue())
       {
          currentAngularVelocityProvider.get(initialAngularVelocity);
-         initialOrientation.setToZero(footFrame);
+         initialOrientation.setToZero(controlFrame);
          orientationTrajectoryGenerator.setInitialConditions(initialOrientation, initialAngularVelocity);
       }
 
@@ -274,7 +302,14 @@ public class SwingState extends AbstractUnconstrainedState
    public void setFootstep(Footstep footstep, double swingTime)
    {
       swingTimeProvider.setValue(swingTime);
-      footstep.getPose(newFootstepPose);
+      if (CONTROL_TOE)
+      {
+         computeToeDesiredPose(footstep, newFootstepPose);
+      }
+      else
+      {
+         footstep.getPose(newFootstepPose);
+      }
       newFootstepPose.changeFrame(worldFrame);
 
       newFootstepPose.setZ(newFootstepPose.getZ() + finalSwingHeightOffset.getDoubleValue());
@@ -301,6 +336,16 @@ public class SwingState extends AbstractUnconstrainedState
       {
          trajectoryParametersProvider.set(new TrajectoryParameters(footstep.getTrajectoryType(), footstep.getSwingHeight()));
       }
+   }
+
+   private final RigidBodyTransform toePose = new RigidBodyTransform();
+   private final RigidBodyTransform footstepPose = new RigidBodyTransform();
+
+   private void computeToeDesiredPose(Footstep footstep, FramePose desiredToePoseToPack)
+   {
+      footstep.getPose(footstepPose);
+      toePose.multiply(footstepPose, transformFromToeToAnkle);
+      desiredToePoseToPack.setPoseIncludingFrame(worldFrame, toePose);
    }
 
    public void replanTrajectory(Footstep newFootstep, double swingTime)
