@@ -12,6 +12,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    private final EnumYoVariable<QuadrupedForceControllerState> forceControllerState;
    
    private final DoubleYoVariable stanceHeight;
+   private final DoubleYoVariable groundPlanePointZ;
 
    @SuppressWarnings("unchecked")
    public QuadrupedForceTestYoVariables(SimulationConstructionSet scs)
@@ -22,6 +23,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       forceControllerState = (EnumYoVariable<QuadrupedForceControllerState>) scs.getVariable("forceControllerState");
       
       stanceHeight = (DoubleYoVariable) scs.getVariable("param__stanceHeight");
+      groundPlanePointZ = (DoubleYoVariable) scs.getVariable("groundPlanePointZ");
    }
 
    public EnumYoVariable<QuadrupedForceControllerRequestedEvent> getUserTrigger()
@@ -37,5 +39,10 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    public DoubleYoVariable getStanceHeight()
    {
       return stanceHeight;
+   }
+
+   public DoubleYoVariable getGroundPlanePointZ()
+   {
+      return groundPlanePointZ;
    }
 }
