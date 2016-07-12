@@ -149,7 +149,7 @@ public class AngleTools
    {
       double difference = angleA - angleB;
       difference = difference % TwoPI;
-      difference = AngleTools.shiftAngleToStartOfRange(difference, -2.0 * PI);
+      difference = AngleTools.shiftAngleToStartOfRange(difference, -TwoPI);
 
       return difference;
    }
@@ -169,12 +169,12 @@ public class AngleTools
 
       if (angleToShift < startOfAngleRange)
       {
-         ret = angleToShift + Math.ceil((startOfAngleRange - angleToShift) / (2.0 * Math.PI)) * Math.PI * 2.0;
+         ret = angleToShift + Math.ceil((startOfAngleRange - angleToShift) / TwoPI) * TwoPI;
       }
 
-      if (angleToShift >= (startOfAngleRange + Math.PI * 2.0))
+      if (angleToShift >= (startOfAngleRange + TwoPI))
       {
-         ret = angleToShift - Math.floor((angleToShift - startOfAngleRange) / (2.0 * Math.PI)) * Math.PI * 2.0;
+         ret = angleToShift - Math.floor((angleToShift - startOfAngleRange) / TwoPI) * TwoPI;
       }
 
       return ret;
