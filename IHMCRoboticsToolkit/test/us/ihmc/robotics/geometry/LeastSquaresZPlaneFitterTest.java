@@ -20,8 +20,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 public class LeastSquaresZPlaneFitterTest
 {
-    
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testPointsWithSamePitchAndDifferentPositionGetSameAnswer()
    {
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
