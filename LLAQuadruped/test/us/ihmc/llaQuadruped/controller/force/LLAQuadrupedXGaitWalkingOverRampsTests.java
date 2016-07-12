@@ -43,4 +43,12 @@ public class LLAQuadrupedXGaitWalkingOverRampsTests extends QuadrupedXGaitWalkin
    {
       super.testWalkingUpRamp();
    }
+   
+   @Override
+   @DeployableTestMethod(estimatedDuration = 30.0)
+   @Test(timeout = 100000)
+   public void testWalkingOverAggressiveRamps() throws IOException
+   {
+      super.testWalkingUpRamp();
+   }
 }
