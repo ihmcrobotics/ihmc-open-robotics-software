@@ -42,6 +42,38 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    
    @DeployableTestMethod(estimatedDuration = 30.0)
    @Test(timeout = 100000)
+   public void testWalkingOverAggressiveRamps() throws IOException
+   {
+      RampsGroundProfile groundProfile = new RampsGroundProfile(0.2, 0.7, 1.5);
+      
+      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
+      quadrupedTestFactory.setGroundProfile3D(groundProfile);
+      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+      conductor = quadrupedTestFactory.createTestConductor();
+      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
+      
+      variables.getYoPlanarVelocityInputX().set(1.0);
+      conductor.addTimeLimit(variables.getYoTime(), 15.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 5.0));
+      conductor.simulate();
+      
+      variables.getYoPlanarVelocityInputX().set(0.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
+      conductor.simulate();
+      
+      variables.getYoPlanarVelocityInputX().set(-1.0);
+      conductor.addTimeLimit(variables.getYoTime(), 15.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), 0.0));
+      conductor.simulate();
+      
+      conductor.concludeTesting();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 30.0)
+   @Test(timeout = 100000)
    public void testWalkingOverShallowRamps() throws IOException
    {
       RampsGroundProfile groundProfile = new RampsGroundProfile(0.1, 0.7, 1.2);

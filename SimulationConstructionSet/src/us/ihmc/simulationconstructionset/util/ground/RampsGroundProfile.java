@@ -27,13 +27,18 @@ public class RampsGroundProfile extends GroundProfileFromHeightMap
    {
       if (Math.abs(x) < flatgroundLengthAtZero / 2.0)
       {
+         if (normalToPack != null)
+         {
+            normalToPack.setX(0.0);
+            normalToPack.setY(0.0);
+            normalToPack.setZ(1.0);
+         }
+         
          return 0.0;
       }
       else
       {
-         x = Math.abs(x);
-         x -= flatgroundLengthAtZero / 2.0;
-         x = x % (2.0 * rampLength);
+         x = (Math.abs(x) - (flatgroundLengthAtZero / 2.0)) % (2.0 * rampLength);
          
          if (x > rampLength)
          {
