@@ -34,8 +34,6 @@ public abstract class QuadrupedTestYoVariables
    private final QuadrantDependentList<BooleanYoVariable> footSwitches = new QuadrantDependentList<>();
    private final QuadrantDependentList<DoubleYoVariable> solePositionZs = new QuadrantDependentList<>();
    
-   private final DoubleYoVariable groundPlanePointZ;
-   
    public QuadrupedTestYoVariables(SimulationConstructionSet scs)
    {
       yoTime = (DoubleYoVariable) scs.getVariable("t");
@@ -66,8 +64,6 @@ public abstract class QuadrupedTestYoVariables
          footSwitches.set(robotQuadrant, (BooleanYoVariable) scs.getVariable(robotQuadrant.getCamelCaseName() + "_SettableFootSwitch"));
          solePositionZs.set(robotQuadrant, (DoubleYoVariable) scs.getVariable(robotQuadrant.getCamelCaseName() + "SolePositionZ"));
       }
-      
-      groundPlanePointZ = (DoubleYoVariable) scs.getVariable("groundPlanePointZ");
    }
 
    public DoubleYoVariable getYoComPositionInputX()
@@ -178,10 +174,5 @@ public abstract class QuadrupedTestYoVariables
    public QuadrantDependentList<DoubleYoVariable> getSolePositionZs()
    {
       return solePositionZs;
-   }
-
-   public DoubleYoVariable getGroundPlanePointZ()
-   {
-      return groundPlanePointZ;
    }
 }
