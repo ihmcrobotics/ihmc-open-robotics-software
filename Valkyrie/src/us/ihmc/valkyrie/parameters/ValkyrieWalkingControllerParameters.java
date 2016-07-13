@@ -445,7 +445,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public ICPControlGains createICPControlGains(YoVariableRegistry registry)
    {
-      ICPControlGains gains = new ICPControlGains("", true, registry);
+      ICPControlGains gains = new ICPControlGains("", registry);
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
@@ -459,7 +459,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
 
-      gains.setFeedbackPartMaxRate(1.0);
+      if (target == RobotTarget.REAL_ROBOT)
+         gains.setFeedbackPartMaxRate(1.0);
 
       return gains;
    }
