@@ -25,6 +25,8 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import javax.vecmath.Vector3d;
 
+import static cern.jet.math.Functions.sin;
+
 public class QuadrupedSoleWaypointStandPrepController implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -37,6 +39,7 @@ public class QuadrupedSoleWaypointStandPrepController implements QuadrupedContro
    private final DoubleParameter stanceHeightParameter = parameterFactory.createDouble("stanceHeight", 0.60);
    private final DoubleParameter stanceXOffsetParameter = parameterFactory.createDouble("stanceXOffset", 0.05);
    private final DoubleParameter stanceYOffsetParameter = parameterFactory.createDouble("stanceYOffset", 0.0);
+   private final DoubleParameter stancePitchParameter = parameterFactory.createDouble("stancePitch", 0.0);
 
    //Yo Variables
    private final DoubleYoVariable robotTime;
@@ -51,6 +54,7 @@ public class QuadrupedSoleWaypointStandPrepController implements QuadrupedContro
    private FramePoint solePosition;
    private final Vector3d zeroVelocity;
    private double taskStartTime;
+   private final double robotLength;
 
    public QuadrupedSoleWaypointStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
    {
@@ -71,6 +75,16 @@ public class QuadrupedSoleWaypointStandPrepController implements QuadrupedContro
          quadrupedFinalSoleWaypoint.set(quadrant, new SoleWaypoint());
       }
       zeroVelocity = new Vector3d(0, 0, 0);
+
+      // Calculate the robot length
+      FramePoint frontLeftHipRollFrame = new FramePoint();
+      frontLeftHipRollFrame.setToZero(referenceFrames.getLegAttachmentFrame(RobotQuadrant.FRONT_LEFT));
+      frontLeftHipRollFrame.changeFrame(referenceFrames.getBodyFrame());
+      FramePoint hindLeftHipRollFrame = new FramePoint();
+      hindLeftHipRollFrame.setToZero(referenceFrames.getLegAttachmentFrame(RobotQuadrant.HIND_LEFT));
+      hindLeftHipRollFrame.changeFrame(referenceFrames.getBodyFrame());
+      robotLength = frontLeftHipRollFrame.getX() - hindLeftHipRollFrame.getX();
+
       environment.getParentRegistry().addChild(registry);
    }
 
@@ -89,7 +103,8 @@ public class QuadrupedSoleWaypointStandPrepController implements QuadrupedContro
          solePosition.setToZero(referenceFrames.getBodyFrame());
          solePosition.add(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.get() / 2.0), 0.0, 0.0);
          solePosition.add(0.0, quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
-         solePosition.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(), -stanceHeightParameter.get());
+         solePosition.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(),
+               quadrant.getEnd().negateIfHindEnd(Math.sin(stancePitchParameter.get())) * robotLength / 2 - stanceHeightParameter.get());
          quadrupedFinalSoleWaypoint.get(quadrant).set(solePosition.getPoint(), zeroVelocity, trajectoryTimeParameter.get());
          quadrupedSoleWaypointList.get(quadrant).add(quadrupedFinalSoleWaypoint.get(quadrant));
       }
@@ -116,6 +131,6 @@ public class QuadrupedSoleWaypointStandPrepController implements QuadrupedContro
    private boolean isMotionExpired()
    {
       double currentTime = robotTime.getDoubleValue();
-      return currentTime  - taskStartTime > trajectoryTimeParameter.get();
+      return currentTime - taskStartTime > trajectoryTimeParameter.get();
    }
 }
