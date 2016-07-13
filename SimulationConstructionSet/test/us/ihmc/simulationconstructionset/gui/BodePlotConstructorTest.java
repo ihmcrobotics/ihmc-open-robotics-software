@@ -11,7 +11,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
  */
 public class BodePlotConstructorTest
 {
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testSimpleFilter()
    {
@@ -41,7 +41,7 @@ public class BodePlotConstructorTest
       humanAssistedTestFrame.setVisible(false);
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testSingleFreqPhaseShift()
    {
@@ -71,7 +71,7 @@ public class BodePlotConstructorTest
       humanAssistedTestFrame.setVisible(false);
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testSecondOrderResponse()
    {

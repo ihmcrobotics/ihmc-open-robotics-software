@@ -101,7 +101,7 @@ public class FootstepSnapperTest
       }
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
@@ -169,7 +169,7 @@ public class FootstepSnapperTest
    }
 
 
-   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testSimpleFootstepSnapperOnListOfPoints() throws InsufficientDataException, IOException
    {

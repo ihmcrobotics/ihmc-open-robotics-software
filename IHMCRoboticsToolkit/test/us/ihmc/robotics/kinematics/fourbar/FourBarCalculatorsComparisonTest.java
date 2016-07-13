@@ -41,7 +41,7 @@ public class FourBarCalculatorsComparisonTest
     */
    private static final double eps = 1e-7;
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void equalOuputAnglesForRandomQuadrilatteralTest()
    {

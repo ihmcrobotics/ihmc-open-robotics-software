@@ -185,7 +185,7 @@ public class LeastSquaresZPlaneFitterTest
    }
 
    // Straight up and down fails with LeastSquaresZPlaneFitter since it assumes equation Ax + By + z + C = 0
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testStraightUpAndDownPlane()
    {

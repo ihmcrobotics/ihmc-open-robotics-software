@@ -23,7 +23,7 @@ public class SimulationRewindabilityVerifierTest
    private static final boolean VERBOSE = false;
    private final double DT = 0.01;
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testRewindableSimulation() throws UnreasonableAccelerationException
    {
@@ -44,7 +44,7 @@ public class SimulationRewindabilityVerifierTest
       scs2.closeAndDispose();
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testEasilyDetectableNonRewindableSimulation() throws UnreasonableAccelerationException
    {
@@ -71,7 +71,7 @@ public class SimulationRewindabilityVerifierTest
       scs2.closeAndDispose();
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testDifficultToDetectNonRewindableSimulation() throws UnreasonableAccelerationException
    {

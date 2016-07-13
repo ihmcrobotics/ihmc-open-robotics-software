@@ -26,7 +26,7 @@ import us.ihmc.robotics.random.RandomTools;
 public class ConvexHullFootstepSnapperTest
 {
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 150000)
 	public void testBasicCropping()
 	{
@@ -45,7 +45,7 @@ public class ConvexHullFootstepSnapperTest
       assertEquals(4.0, endPolygon.getArea(), 1e-15);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 150000)
 	public void testRandomCropping()
 	{

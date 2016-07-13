@@ -22,7 +22,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class YoVariableListTest
 {
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testCommonUsage()
    {
@@ -104,7 +104,7 @@ public class YoVariableListTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 5000)
    public void testGetPerformanceInLargeList()
    {
@@ -157,7 +157,7 @@ public class YoVariableListTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testToString()
    {
@@ -176,7 +176,7 @@ public class YoVariableListTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testAddVariables()
    {
@@ -229,7 +229,7 @@ public class YoVariableListTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testCommonUsageTwo()
    {
@@ -283,7 +283,7 @@ public class YoVariableListTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testGetMatchingVariables()
    {
@@ -344,7 +344,7 @@ public class YoVariableListTest
       assertTrue(matchedNameShouldBeEmpty.isEmpty());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testAddChangeListener()
    {
