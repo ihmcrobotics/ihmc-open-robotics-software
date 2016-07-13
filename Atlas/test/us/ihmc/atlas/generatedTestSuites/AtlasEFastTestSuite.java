@@ -13,7 +13,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.atlas.commonWalkingControlModules.sensors.AtlasProvidedMassMatrixToolRigidBodyTest.class,
-   us.ihmc.atlas.controllerAPI.AtlasEndToEndArmDesiredAccelerationsMessageTest.class
+   us.ihmc.atlas.controllerAPI.AtlasEndToEndArmDesiredAccelerationsMessageTest.class,
+   us.ihmc.atlas.controllerAPI.AtlasEndToEndArmTrajectoryMessageTest.class
 })
 
 public class AtlasEFastTestSuite
