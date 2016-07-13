@@ -14,7 +14,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
 {
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 300000)
    public void testTCPWhiteBoardOne() throws IOException
    {
@@ -31,7 +31,7 @@ public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 501, 1001);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 300000)
    public void testTCPWhiteBoardTwo() throws IOException
    {

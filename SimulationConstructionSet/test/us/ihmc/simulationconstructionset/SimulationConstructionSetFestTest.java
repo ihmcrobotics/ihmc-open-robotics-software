@@ -36,7 +36,7 @@ public class SimulationConstructionSetFestTest
       return false;
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testSimulationConstructionSetUsingGUITestFixture() throws AWTException
    {
@@ -245,7 +245,7 @@ public class SimulationConstructionSetFestTest
       testFixture = null;
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=45000)
    public void testSimulationConstructionSetNewGraphWindowUsingGUITestFixture() throws AWTException
    {

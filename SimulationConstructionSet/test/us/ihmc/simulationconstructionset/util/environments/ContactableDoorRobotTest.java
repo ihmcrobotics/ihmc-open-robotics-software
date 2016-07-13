@@ -29,7 +29,7 @@ public class ContactableDoorRobotTest
    
    RigidBodyTransform doorToWorldTransform = new RigidBodyTransform();
    
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 100000)
    public void testPointIsClose()
    {      
@@ -50,7 +50,7 @@ public class ContactableDoorRobotTest
       assertTrue(door.isPointOnOrInside(diagonal));
    }
    
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testDoorIsClosing()
    {
