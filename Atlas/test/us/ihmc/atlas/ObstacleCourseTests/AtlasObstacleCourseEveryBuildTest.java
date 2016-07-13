@@ -30,16 +30,16 @@ public class AtlasObstacleCourseEveryBuildTest extends DRCObstacleCourseEveryBui
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 52.7)
-   @Test(timeout = 260000)
+   @DeployableTestMethod(estimatedDuration = 59.1)
+   @Test(timeout = 300000)
    public void testSimpleFlatGroundScript() throws SimulationExceededMaximumTimeException
    {
       super.testSimpleFlatGroundScript();
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 53.8)
-   @Test(timeout = 270000)
+   @DeployableTestMethod(estimatedDuration = 33.1)
+   @Test(timeout = 170000)
    public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpToRampWithLongSteps();

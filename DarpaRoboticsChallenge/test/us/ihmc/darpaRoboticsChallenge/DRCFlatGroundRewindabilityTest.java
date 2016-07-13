@@ -49,8 +49,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 11.5)
-   @Test(timeout = 58000)
+   @DeployableTestMethod(estimatedDuration = 9.2)
+   @Test(timeout = 46000)
    public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

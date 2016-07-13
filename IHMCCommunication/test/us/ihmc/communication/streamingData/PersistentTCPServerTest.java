@@ -19,7 +19,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public class PersistentTCPServerTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testPersistentTCPServer() throws UnknownHostException, IOException
    {

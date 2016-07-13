@@ -40,7 +40,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
    private static final boolean VERBOSE = false;
    private static final boolean SHOW_PLOTTER = false;
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.5)
 	@Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygon()
    {
@@ -139,7 +139,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.5)
 	@Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonTwo()
    {
@@ -197,7 +197,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.5)
 	@Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonThree()
    {
@@ -295,7 +295,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 1.4)
 	@Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonTiming()
    {
@@ -392,7 +392,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testBadCase()
    {

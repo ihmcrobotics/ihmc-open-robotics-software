@@ -97,7 +97,7 @@ public class KryoObjectCommunicatorTest
       server.close();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000) 
    public void testStateListener() throws IOException, InterruptedException
    {
@@ -149,7 +149,7 @@ public class KryoObjectCommunicatorTest
       client.close();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void testConnectionLimiter() throws IOException, InterruptedException
    {
@@ -223,7 +223,7 @@ public class KryoObjectCommunicatorTest
       
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout=300000)
    public void testSendAndReceive() throws IOException, InterruptedException
    {

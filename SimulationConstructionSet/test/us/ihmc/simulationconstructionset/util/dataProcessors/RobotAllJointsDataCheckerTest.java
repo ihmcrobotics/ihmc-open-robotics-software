@@ -24,8 +24,8 @@ public class RobotAllJointsDataCheckerTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 2.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 4.9)
+   @Test(timeout = 30000)
    public void test()
    {
       TwoLinkRobotForTesting twoLinkRobotForTesting = new TwoLinkRobotForTesting();

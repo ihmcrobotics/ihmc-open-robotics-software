@@ -2668,7 +2668,7 @@ public class Transform3dTest
 		}
 	}
 
-	@DeployableTestMethod(estimatedDuration = 1.3)
+	@DeployableTestMethod(estimatedDuration = 1.6)
 	@Test(timeout = 30000)
 	public void TestOrthogonalityOfChainOfTransformations()
 	{

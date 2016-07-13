@@ -385,7 +385,7 @@ public class TransformInterpolationCalculatorTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 0.05)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInterpolationWithFramePoses()
    {
@@ -433,7 +433,7 @@ public class TransformInterpolationCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.001)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInterpolationForTimeStampedTransform()
    {

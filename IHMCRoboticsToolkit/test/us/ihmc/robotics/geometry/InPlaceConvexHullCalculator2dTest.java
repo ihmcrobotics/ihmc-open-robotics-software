@@ -27,7 +27,7 @@ public class InPlaceConvexHullCalculator2dTest
    private static final boolean DEBUG = true;
    Random rand = new Random(100l);
 
-	@DeployableTestMethod(estimatedDuration = 1.6)
+	@DeployableTestMethod(estimatedDuration = 2.6)
 	@Test(timeout = 30000)
    public void testRandomV1()
    {
@@ -73,7 +73,7 @@ public class InPlaceConvexHullCalculator2dTest
       System.out.println(optClock / 1000000 + " " + inPlaceClock / 1000000);
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.6)
+	@DeployableTestMethod(estimatedDuration = 2.1)
 	@Test(timeout = 30000)
    public void testRandomV2()
    {

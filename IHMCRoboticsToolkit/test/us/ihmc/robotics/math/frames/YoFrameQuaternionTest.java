@@ -28,7 +28,7 @@ public class YoFrameQuaternionTest
 
    private static final double EPS = 1e-8;
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testInitialization()
    {
@@ -64,7 +64,7 @@ public class YoFrameQuaternionTest
       assertArrayEquals(yawPitchRollExpected, yawPitchRollActual, EPS);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetters()
    {
@@ -111,7 +111,7 @@ public class YoFrameQuaternionTest
       assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testReferenceFramesMismatching()
    {
@@ -147,7 +147,7 @@ public class YoFrameQuaternionTest
       assertFalse(hasReferenceFrameMismatchExceptionBeenThrown);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testMultiplication()
    {
@@ -181,7 +181,7 @@ public class YoFrameQuaternionTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testInterpolate()
    {

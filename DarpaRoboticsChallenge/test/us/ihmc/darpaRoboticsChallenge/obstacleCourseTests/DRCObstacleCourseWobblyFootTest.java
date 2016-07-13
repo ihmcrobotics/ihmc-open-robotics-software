@@ -60,8 +60,8 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 14.9)
-   @Test(timeout = 54656)
+   @DeployableTestMethod(estimatedDuration = 20.5)
+   @Test(timeout = 100000)
    public void testStandingForACoupleSecondsWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -131,8 +131,8 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
 
 
-   @DeployableTestMethod(estimatedDuration = 37.4, targets = {TestPlanTarget.Flaky, TestPlanTarget.Video})
-   @Test(timeout = 122232)
+   @DeployableTestMethod(estimatedDuration = 47.9, targets = {TestPlanTarget.Flaky, TestPlanTarget.Video})
+   @Test(timeout = 240000)
    public void testTurningInPlaceAndPassingPIWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();

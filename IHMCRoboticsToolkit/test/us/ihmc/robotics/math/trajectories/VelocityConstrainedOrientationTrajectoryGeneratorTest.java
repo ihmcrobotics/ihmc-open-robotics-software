@@ -21,8 +21,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 {
    private static boolean DEBUG = true;
 
-   @DeployableTestMethod(estimatedDuration = 2.0)
-   @Test(timeout = 10000)
+   @DeployableTestMethod(estimatedDuration = 2.2)
+   @Test(timeout = 30000)
    public void testDerivativesConsistency() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -84,8 +84,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
-   @Test(timeout = 2000)
+   @DeployableTestMethod(estimatedDuration = 0.2)
+   @Test(timeout = 30000)
    public void testLimitConditions() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -146,7 +146,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.6)
-   @Test(timeout = 2000)
+   @Test(timeout = 30000)
    public void testContinuityForSlowTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -247,8 +247,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.4)
-   @Test(timeout = 2000)
+   @DeployableTestMethod(estimatedDuration = 0.5)
+   @Test(timeout = 30000)
    public void testContinuityForFastishTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();

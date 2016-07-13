@@ -14,8 +14,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class SimpleMovingAverageFilteredYoVariableTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.2)
-   @Test(timeout = 500)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testWithFixedSizeDoubleArrays() throws Exception
    {
       for (int i = 0; i < 100; i++)
