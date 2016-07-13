@@ -20,7 +20,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class OrientationInterpolationCalculatorTest
 {
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 300000)
 
    /**

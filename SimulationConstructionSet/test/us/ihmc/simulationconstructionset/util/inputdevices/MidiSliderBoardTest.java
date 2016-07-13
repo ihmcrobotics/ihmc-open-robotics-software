@@ -22,7 +22,7 @@ public class MidiSliderBoardTest
    {
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testWeirdCase()
    {

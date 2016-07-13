@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.InertiaTools;
 public class LinkTest
 {
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testLinkInertia()
    {

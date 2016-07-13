@@ -57,7 +57,7 @@ public class PathToFootstepGeneratorTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test (timeout=300000)
    public void testStraightLinePathToFootstepGeneratorNoHeightMap()
    {
@@ -104,7 +104,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test (timeout=300000)
    public void testStraightLinePathToFootstepGenerator()
    {
@@ -151,7 +151,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test (timeout=300000)
    public void testStraightLinePathToFootstepGeneratorOnRandomTerrain()
    {
@@ -199,7 +199,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test (timeout=300000)
    public void testTurnStraightTurnOnRandomTerrain()
    {
@@ -247,7 +247,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test (timeout=300000)
    public void testTurnStraightTurnOnFlatGround()
    {
@@ -295,7 +295,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test (timeout=300000)
    public void testTurnInPlacePathOnFlatGround()
    {
@@ -349,7 +349,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test (timeout=300000)
    public void testTurnSideStepTurnOnFlatGround()
    {
@@ -398,7 +398,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test (timeout=300000)
    public void testTurnSideStepOtherWayTurnOnFlatGround()
    {
@@ -447,7 +447,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test (timeout=300000)
    public void testTurnBackwardsTurnOnFlatGround()
    {

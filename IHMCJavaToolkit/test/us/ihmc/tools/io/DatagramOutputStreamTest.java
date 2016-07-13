@@ -18,7 +18,7 @@ public class DatagramOutputStreamTest
    private static final boolean VERBOSE = false;
    
    //works half of the time.
-   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    public void testDatagramOutputStreamThrowOutStalePackets() throws IOException
    {
       boolean throwOutStalePackets = true;

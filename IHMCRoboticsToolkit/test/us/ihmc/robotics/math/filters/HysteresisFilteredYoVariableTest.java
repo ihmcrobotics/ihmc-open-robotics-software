@@ -28,7 +28,7 @@ public class HysteresisFilteredYoVariableTest
    {
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testNoHysteresis()
    {
@@ -51,7 +51,7 @@ public class HysteresisFilteredYoVariableTest
       //    plot(x, new double[][]{unfilteredValues, filteredValues}, "No Hysteresis");
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testSomeHysteresis()
    {
