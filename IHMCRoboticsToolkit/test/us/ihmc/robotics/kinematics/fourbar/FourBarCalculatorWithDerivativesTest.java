@@ -20,7 +20,7 @@ public class FourBarCalculatorWithDerivativesTest
    private static final double eps = 1e-7;
    private static final boolean PRINT = false;
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 300000)
    public void testSquare()
    {
@@ -32,7 +32,7 @@ public class FourBarCalculatorWithDerivativesTest
       assertEquals(PI / 2, fourBar.getAngleCDA(), eps);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 300000)
    public void testSquareDer()
    {
@@ -48,7 +48,7 @@ public class FourBarCalculatorWithDerivativesTest
       assertEquals(-1, fourBar.getAngleDtCDA(), eps);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 300000)
    public void testParallelogram()
    {
@@ -64,7 +64,7 @@ public class FourBarCalculatorWithDerivativesTest
       assertEquals(-1, fourBar.getAngleDtCDA(), eps);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 300000)
    public void testRandomQuadrilatteral()
    {
@@ -107,7 +107,7 @@ public class FourBarCalculatorWithDerivativesTest
       assertEquals(D, fourBar.getAngleCDA(), eps);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 300000)
    public void testRandomConvenientLinkageDerivatives()
    {
@@ -147,7 +147,7 @@ public class FourBarCalculatorWithDerivativesTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 300000)
    public void testVelocitiesWithRandomQuadrilateral()
    {
@@ -259,7 +259,7 @@ public class FourBarCalculatorWithDerivativesTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 300000)
    public void testAccelerationsWithRandomQuadrilateral()
    {
@@ -348,7 +348,7 @@ public class FourBarCalculatorWithDerivativesTest
       }
    }
 	
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testMasterAngleComputations()
    {

@@ -21,7 +21,7 @@ public class TypicalTorqueSpeedCurveTest
    {
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000) 
    public void testOne()
    {

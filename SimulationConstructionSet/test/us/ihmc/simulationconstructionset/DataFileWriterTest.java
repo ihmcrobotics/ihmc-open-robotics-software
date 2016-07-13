@@ -37,7 +37,7 @@ public class DataFileWriterTest
    @Rule
    public ExpectedException expectedException = ExpectedException.none();
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testDataFileWriterAndReader() throws IOException, RepeatDataBufferEntryException
    {
@@ -149,7 +149,7 @@ public class DataFileWriterTest
 
    @SuppressWarnings("deprecation")
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testFileReadAndWriteWithDataOutputStreamAndDataInputStream() throws IOException, FileNotFoundException, NullPointerException
    {
@@ -175,7 +175,7 @@ public class DataFileWriterTest
       assertTrue(testInteger == integerReadBack);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testFileReadAndWriteWithDataOutputStreamAndBufferedReader() throws FileNotFoundException, IOException
    {
@@ -211,7 +211,7 @@ public class DataFileWriterTest
       assertTrue(integerReadBack == -testInteger);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testFileReadAndWriteBackWithDataOutputStreamAndDeferredBufferedReaderCreation() throws IOException
    {
@@ -245,7 +245,7 @@ public class DataFileWriterTest
       assertTrue(testInteger == integerReadBack);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testFileReadAndWriteBackWithDataOutputStreamAndBufferedReaderStringsOnly() throws IOException
    {
@@ -281,7 +281,7 @@ public class DataFileWriterTest
       assertTrue(string3.equals(readBack3));
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 5000)
    public void testWritingAndReadingALongStateFile() throws IOException
    {
@@ -323,7 +323,7 @@ public class DataFileWriterTest
       fileOne.delete();
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 5000)
    public void testWritingAndReadingADataFileWithLotsOfVariables() throws IOException, RepeatDataBufferEntryException
    {

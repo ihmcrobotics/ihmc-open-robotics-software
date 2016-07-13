@@ -73,7 +73,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
    // "This test is flaky. Sometimes it works, sometimes it doesn't due to threading of the various globalDataProducer and communicators. We need to be able to shut those off or make them not screw up the robot run.")
-   @DeployableTestMethod(targets = TestPlanTarget.Flaky)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Flaky)
    @Test(timeout = 300000)
    public void testRunsTheSameWayTwiceJustStanding() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
