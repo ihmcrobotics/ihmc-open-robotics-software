@@ -40,21 +40,25 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       this.sensorMap = sensorMap;
       yoResolvedCoP = new YoFramePoint2d(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
       touchdownDetected = new BooleanYoVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry);
+
+      setupTouchdownDetectors();
    }
 
-   @Override
-   protected void setupTouchdownDetectors(ArrayList<TouchdownDetector> touchdownDetectors)
+   protected void setupTouchdownDetectors()
    {
       ForceSensorDataHolderReadOnly forceSensorProcessedOutputs = sensorMap.getForceSensorProcessedOutputs();
-      ActuatorForceBasedTouchdownDetector actuatorForceBasedTouchdownDetector = new ActuatorForceBasedTouchdownDetector(robotQuadrant.toString().toLowerCase() + "_knee_pitch",
-            forceSensorProcessedOutputs.getByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), 100.0, registry); //TODO magic number
+      if(forceSensorProcessedOutputs.getForceSensorDefinitions().size() > 0)
+      {
+         ActuatorForceBasedTouchdownDetector actuatorForceBasedTouchdownDetector = new ActuatorForceBasedTouchdownDetector(robotQuadrant.toString().toLowerCase() + "_knee_pitch",
+               forceSensorProcessedOutputs.getByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), 100.0, registry); //TODO magic number
+         touchdownDetectors.add(actuatorForceBasedTouchdownDetector);
+      }
 
       JointVelocityFiniteDifferenceBasedTouchdownDetector jointVelocityFiniteDifferenceBasedTouchdownDetector = new JointVelocityFiniteDifferenceBasedTouchdownDetector(
             fullRobotModel.getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), hasTouchedDown, registry);
       jointVelocityFiniteDifferenceBasedTouchdownDetector.setFootInSwingThreshold(0.05);
       jointVelocityFiniteDifferenceBasedTouchdownDetector.setTouchdownThreshold(0.1);
 
-      touchdownDetectors.add(actuatorForceBasedTouchdownDetector);
       touchdownDetectors.add(jointVelocityFiniteDifferenceBasedTouchdownDetector);
    }
 
