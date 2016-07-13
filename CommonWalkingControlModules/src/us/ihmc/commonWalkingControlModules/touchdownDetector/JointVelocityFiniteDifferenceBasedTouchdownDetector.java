@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.touchdownDetector;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements TouchdownDetector
@@ -10,7 +11,8 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
    private final OneDoFJoint joint;
    private final DoubleYoVariable velocityFiniteDifference;
    private final DoubleYoVariable liftOffThreshold, footInSwingThreshold, touchdownThreshold;
-   private final BooleanYoVariable controllerSetFootSwitch, liftOffDetected, footInSwing, touchdownDetected;
+   private final GlitchFilteredBooleanYoVariable footInSwingFiltered;
+   private final BooleanYoVariable controllerSetFootSwitch, touchdownDetected;
 
    private double previousVelocity;
    private boolean initialized = false;
@@ -24,8 +26,7 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
       liftOffThreshold = new DoubleYoVariable(joint.getName() + "_footLiftOffThreshold", registry);
       footInSwingThreshold = new DoubleYoVariable(joint.getName() + "_footInSwingThreshold", registry);
       touchdownThreshold = new DoubleYoVariable(joint.getName() + "__velocityFiniteDifferenceTouchdownThreshold", registry);
-      liftOffDetected = new BooleanYoVariable(joint.getName() + "_footLiftOffDetected", registry);
-      footInSwing = new BooleanYoVariable(joint.getName() + "_footInSwing", registry);
+      footInSwingFiltered = new GlitchFilteredBooleanYoVariable(joint.getName() + "_footInSwingFiltered", registry, 50);
       touchdownDetected = new BooleanYoVariable(joint.getName() + "_velocityFiniteDifferenceTouchdownDetected", registry);
    }
 
@@ -54,27 +55,19 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
 
          if(!controllerSetFootSwitch.getBooleanValue())
          {
-            if(liftOffDetected.getBooleanValue())
+            if(footInSwingFiltered.getBooleanValue())
             {
-               if(footInSwing.getBooleanValue())
-               {
-                  if(!touchdownDetected.getBooleanValue())
-                     touchdownDetected.set(velocityFiniteDifference.getDoubleValue() < touchdownThreshold.getDoubleValue());
-               }
-               else
-               {
-                  footInSwing.set(Math.abs(velocityFiniteDifference.getDoubleValue()) < footInSwingThreshold.getDoubleValue());
-               }
+               if(!touchdownDetected.getBooleanValue())
+                  touchdownDetected.set(velocityFiniteDifference.getDoubleValue() < touchdownThreshold.getDoubleValue());
             }
             else
             {
-               liftOffDetected.set(velocityFiniteDifference.getDoubleValue() < liftOffThreshold.getDoubleValue());
+               footInSwingFiltered.update(Math.abs(velocityFiniteDifference.getDoubleValue()) < footInSwingThreshold.getDoubleValue());
             }
          }
          else
          {
-            liftOffDetected.set(false);
-            footInSwing.set(false);
+            footInSwingFiltered.set(false);
             touchdownDetected.set(false);
          }
       }
