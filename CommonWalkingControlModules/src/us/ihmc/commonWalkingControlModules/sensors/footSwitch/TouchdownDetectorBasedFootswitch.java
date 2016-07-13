@@ -24,19 +24,6 @@ public abstract class TouchdownDetectorBasedFootswitch implements FootSwitchInte
    abstract protected void setupTouchdownDetectors(ArrayList<TouchdownDetector> touchdownDetectors);
 
    @Override
-   public boolean hasFootHitGround()
-   {
-      boolean ret = true;
-
-      for(TouchdownDetector touchdownDetector : touchdownDetectors)
-         ret &= touchdownDetector.hasTouchedDown();
-
-      hasTouchedDown.set(ret);
-
-      return hasTouchedDown.getBooleanValue();
-   }
-
-   @Override
    public void reset()
    {
       hasTouchedDown.set(false);

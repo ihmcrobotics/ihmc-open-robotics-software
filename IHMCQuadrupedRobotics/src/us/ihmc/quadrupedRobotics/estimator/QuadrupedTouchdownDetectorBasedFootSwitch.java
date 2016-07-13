@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.touchdownDetector.JointVelocityFinite
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -25,6 +26,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    private final double totalRobotWeight;
    private final YoFramePoint2d yoResolvedCoP;
    private final SensorOutputMapReadOnly sensorMap;
+   private final BooleanYoVariable touchdownDetected;
 
    public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, SDFFullRobotModel fullRobotModel, double totalRobotWeight,
          SensorOutputMapReadOnly sensorMap, YoVariableRegistry parentRegistry)
@@ -37,6 +39,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       this.totalRobotWeight = totalRobotWeight;
       this.sensorMap = sensorMap;
       yoResolvedCoP = new YoFramePoint2d(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
+      touchdownDetected = new BooleanYoVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry);
    }
 
    @Override
@@ -52,13 +55,21 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       jointVelocityFiniteDifferenceBasedTouchdownDetector.setTouchdownThreshold(0.1);
 
       touchdownDetectors.add(actuatorForceBasedTouchdownDetector);
+      touchdownDetectors.add(jointVelocityFiniteDifferenceBasedTouchdownDetector);
    }
 
    @Override
    public boolean hasFootHitGround()
    {
-      //TODO possibly something a little fancier with the TouchdownDetectors
-      return false;
+      boolean touchdown = true;
+      for (int i = 0; i < touchdownDetectors.size(); i++)
+      {
+         touchdown &= touchdownDetectors.get(i).hasTouchedDown();
+      }
+
+      touchdownDetected.set(touchdown);
+
+      return hasTouchedDown.getBooleanValue();
    }
 
    @Override
