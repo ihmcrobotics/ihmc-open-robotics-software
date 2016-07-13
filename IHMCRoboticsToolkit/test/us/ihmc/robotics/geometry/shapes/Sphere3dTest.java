@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class Sphere3dTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testCommonShape3dFunctionality()
    {

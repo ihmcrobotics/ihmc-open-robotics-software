@@ -19,8 +19,8 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;
 
-	@DeployableTestMethod(estimatedDuration = 208.3)
-	@Test(timeout = 1000000)
+	@DeployableTestMethod(estimatedDuration = 189.1)
+	@Test(timeout = 950000)
    public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());

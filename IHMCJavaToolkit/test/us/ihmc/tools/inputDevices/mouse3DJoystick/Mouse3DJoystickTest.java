@@ -16,7 +16,7 @@ import us.ihmc.tools.thread.ThreadTools;
 @DeployableTestClass(targets = TestPlanTarget.Fast)
 public class Mouse3DJoystickTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.8)
+	@DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testMouse3DJoystick()
    {

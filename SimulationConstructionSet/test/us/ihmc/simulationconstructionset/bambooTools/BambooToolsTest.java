@@ -16,7 +16,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 public class BambooToolsTest
 {
    private static final boolean SHOW_GUI = false;
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetClassAndMethodName()
    {

@@ -83,7 +83,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testCompareWithSingleFrameTrajectoryGenerators()
    {
@@ -242,7 +242,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
       assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testMultipleFramesWithSingleFrameTrajectoryGenerators()
    {

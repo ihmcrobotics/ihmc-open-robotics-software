@@ -20,7 +20,7 @@ public class MatrixTest
    Matrix matrix;
    Matrix matrixInverted;
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testInvert()
    {

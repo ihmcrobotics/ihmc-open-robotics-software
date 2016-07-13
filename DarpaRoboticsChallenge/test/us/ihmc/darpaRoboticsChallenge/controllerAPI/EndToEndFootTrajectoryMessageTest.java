@@ -58,8 +58,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 41.5)
+   @Test(timeout = 210000)
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -125,8 +125,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 46.8)
+   @Test(timeout = 230000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -249,8 +249,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 68.1)
+   @Test(timeout = 340000)
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -400,8 +400,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 108.9)
+   @Test(timeout = 540000)
    public void testQueuedMessages() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -558,8 +558,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 32.1)
+   @Test(timeout = 160000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -694,8 +694,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 38.0)
+   @Test(timeout = 190000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

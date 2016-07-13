@@ -89,8 +89,8 @@ public abstract class DRCPushRecoveryTest
 
    protected abstract DRCRobotModel getRobotModel();
 
-   @DeployableTestMethod(estimatedDuration = 32.0)
-   @Test(timeout = 160000)
+   @DeployableTestMethod(estimatedDuration = 23.7)
+   @Test(timeout = 120000)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(script, true, false);
@@ -109,8 +109,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 28.9)
-   @Test(timeout = 140000)
+   @DeployableTestMethod(estimatedDuration = 22.3)
+   @Test(timeout = 110000)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(script, false, false);
@@ -129,8 +129,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 26.7)
-   @Test(timeout = 130000)
+   @DeployableTestMethod(estimatedDuration = 21.1)
+   @Test(timeout = 110000)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
       setupTest(script, true, false);
@@ -149,8 +149,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.2)
-   @Test(timeout = 150000)
+   @DeployableTestMethod(estimatedDuration = 21.5)
+   @Test(timeout = 110000)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, true, false);
@@ -169,8 +169,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.9)
-   @Test(timeout = 150000)
+   @DeployableTestMethod(estimatedDuration = 21.4)
+   @Test(timeout = 110000)
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, true);
@@ -189,8 +189,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 24.2)
-   @Test(timeout = 120000)
+   @DeployableTestMethod(estimatedDuration = 18.7)
+   @Test(timeout = 93000)
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, true, false);
@@ -210,8 +210,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 18.2)
-   @Test(timeout = 91000)
+   @DeployableTestMethod(estimatedDuration = 13.8)
+   @Test(timeout = 69000)
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, false);
@@ -237,8 +237,8 @@ public abstract class DRCPushRecoveryTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 36.9)
-   @Test(timeout = 180000)
+   @DeployableTestMethod(estimatedDuration = 27.2)
+   @Test(timeout = 140000)
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, true, false);
@@ -257,8 +257,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 25.2)
-   @Test(timeout = 130000)
+   @DeployableTestMethod(estimatedDuration = 20.0)
+   @Test(timeout = 100000)
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, true);
@@ -278,8 +278,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 22.1)
-   @Test(timeout = 110000)
+   @DeployableTestMethod(estimatedDuration = 18.6)
+   @Test(timeout = 93000)
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, true);
@@ -298,8 +298,8 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 20.8)
-   @Test(timeout = 100000)
+   @DeployableTestMethod(estimatedDuration = 16.9)
+   @Test(timeout = 84000)
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, false, false);

@@ -66,8 +66,8 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
    public abstract InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFFullRobotModel fullRobotModel, SDFRobot sdfRobot);
    
    // 150313: This test currently fails, seemingly due to some sort of problem in the MomentumBasedController or InverseDynamicsCalculator. Trying to fix it...
-	@DeployableTestMethod(estimatedDuration = 39.1)
-   @Test(timeout = 200000)
+	@DeployableTestMethod(estimatedDuration = 38.0)
+   @Test(timeout = 190000)
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
    {
       // March 2015: Low pelvis orientation gains cause the pelvis to flip out. Trying to track down why this happens.

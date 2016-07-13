@@ -82,28 +82,28 @@ public class RotatableRampTerrainObjectTest
       ramp90Translated = new RotatableRampTerrainObject(transX, transY, 1, 2, 1, 90);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAt()
    {
       testHeightAtRampForAnyRamp(pointsOnSimpleRamp, simpleRamp);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtForRampDown()
    {
       testHeightAtRampForAnyRamp(strictlyInternalPointsOnSimpleRampDown, simpleRampDown);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSurfaceNormalAt()
    {
       testSurfaceNormalsForAnyRampFace(simpleRamp, expectedSimpleSurfaceNormal, pointsOnSimpleRamp);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOtherSurfaceNormalAt()
    {
@@ -111,7 +111,7 @@ public class RotatableRampTerrainObjectTest
             expectedSimpleSurfaceNormalOnOtherFaces, pointsOnOtherRampFaces);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSurfaceNormalAtForSlopedDown()
    {
@@ -119,7 +119,7 @@ public class RotatableRampTerrainObjectTest
             expectedSimpleSurfaceNormalSlopeDown, strictlyInternalPointsOnSimpleRampDown);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOtherSurfaceNormalAtForSlopedDown()
    {
@@ -127,7 +127,7 @@ public class RotatableRampTerrainObjectTest
             expectedSimpleSurfaceNormalOnOtherFacesSlopeDown, pointsOnOtherRampFacesSlopeDown);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtRamp90()
    {
@@ -142,7 +142,7 @@ public class RotatableRampTerrainObjectTest
       testHeightAtRampForAnyRamp(pointsOnRamp90withNumericalRotationError, ramp90);
    }   
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)   
    public void testSurfaceNormalForRamp90()
    {
@@ -150,7 +150,7 @@ public class RotatableRampTerrainObjectTest
             expectedSurfaceNormalRamp90, pointsOnRamp90);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)   
    public void testOtherSurfaceNormalForRamp90()
    {
@@ -177,14 +177,14 @@ public class RotatableRampTerrainObjectTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtTranslation()
    {
       testHeightAtRampForAnyRampWithTranslation(pointsOnSimpleRamp, simpleRampTranslated, new Vector3d(transX,transY,0));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAt90Translation()
    {

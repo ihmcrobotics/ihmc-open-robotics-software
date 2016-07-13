@@ -45,7 +45,7 @@ public class PointFeedbackControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testConvergence() throws Exception
    {
@@ -140,7 +140,7 @@ public class PointFeedbackControllerTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testConvergenceWithJerryQP() throws Exception
    {

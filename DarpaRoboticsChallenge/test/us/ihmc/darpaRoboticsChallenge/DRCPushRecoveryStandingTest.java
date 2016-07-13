@@ -80,8 +80,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    }
    
   
-	@DeployableTestMethod(estimatedDuration = 30.6)
-	@Test(timeout = 150000)
+	@DeployableTestMethod(estimatedDuration = 25.3)
+	@Test(timeout = 130000)
    public void testPushForwardInDoubleSupport() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -112,8 +112,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 46.6)
-	@Test(timeout = 230000)
+	@DeployableTestMethod(estimatedDuration = 33.4)
+	@Test(timeout = 170000)
    public void testPushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -196,8 +196,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 44.8)
-	@Test(timeout = 220000)
+	@DeployableTestMethod(estimatedDuration = 30.8)
+	@Test(timeout = 150000)
    public void testPushBackwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -234,8 +234,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 52.2)
-	@Test(timeout = 260000)
+	@DeployableTestMethod(estimatedDuration = 48.6)
+	@Test(timeout = 240000)
    public void testPushBackwardForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

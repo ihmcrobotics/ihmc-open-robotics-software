@@ -66,7 +66,7 @@ public class InverseDynamicsCalculatorSCSTest
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOneFreeRigidBody()
    {
@@ -132,7 +132,7 @@ public class InverseDynamicsCalculatorSCSTest
       compareWrenches(inputWrench, outputWrench);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testChainNoGravity()
    {
@@ -152,7 +152,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testTreeWithNoGravity()
    {
@@ -248,7 +248,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDoingNothing()
    {
@@ -278,7 +278,7 @@ public class InverseDynamicsCalculatorSCSTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGravityCompensationForChain()
    {
@@ -297,7 +297,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertZeroAccelerations(jointMap);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testChainWithGravity()
    {

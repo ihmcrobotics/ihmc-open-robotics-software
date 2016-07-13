@@ -21,7 +21,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class MatrixYoVariableConversionToolsTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testBackAndForthVector()
    {
@@ -42,7 +42,7 @@ public class MatrixYoVariableConversionToolsTest
       EjmlUnitTests.assertEquals(matrix, matrixBack, 1e-12);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout=300000)
    public void testBackAndForthMatrix()
    {

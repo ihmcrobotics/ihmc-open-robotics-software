@@ -95,7 +95,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.0, solution[1], getTestErrorEpsilon());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
   public void JOptimizerWebpageLPExample() throws Exception
   {

@@ -12,8 +12,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class SortByMatchedStringComparatorTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.003)
-   @Test(timeout = 30)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testCompare()
    {
       CombinedFuzzySearchResult aardvark = new CombinedFuzzySearchResult("Aardvark", CombinedFuzzySearchResult.CombinedFuzzySearchResultType.EXACT_SUBSTRING,

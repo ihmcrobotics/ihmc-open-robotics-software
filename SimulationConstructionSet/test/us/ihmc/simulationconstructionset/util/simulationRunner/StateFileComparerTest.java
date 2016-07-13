@@ -32,7 +32,7 @@ public class StateFileComparerTest
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAbsoluteCompareStateFiles() throws FileNotFoundException
    {
@@ -97,7 +97,7 @@ public class StateFileComparerTest
       stream.close();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCompareVarLists()
    {

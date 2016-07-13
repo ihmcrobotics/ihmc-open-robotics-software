@@ -13,7 +13,7 @@ import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class QuadrupedGaitTypeTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGaitStateTimes()
    {
@@ -28,7 +28,7 @@ public class QuadrupedGaitTypeTest
       assertEquals("not ALL_FOURS", QuadrupedSupportConfiguration.ALL_FOURS, QuadrupedGaitCycle.SAFE_WALK.getGaitPhase(1.01 % 1.0));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSwingDurations()
    {

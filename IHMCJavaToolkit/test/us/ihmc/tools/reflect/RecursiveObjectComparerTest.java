@@ -321,7 +321,7 @@ public class RecursiveObjectComparerTest
       compareAndAssert(d1, d2, true);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNaNVector() throws IllegalArgumentException, IllegalAccessException
    {

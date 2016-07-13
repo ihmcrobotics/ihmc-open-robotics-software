@@ -28,7 +28,7 @@ public class BooleanGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValue()
    {
@@ -40,7 +40,7 @@ public class BooleanGlobalParameterTest
       assertEquals(DEFAULT_VALUE, booleanGlobalParameter.getValue());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetValue()
    {
@@ -68,7 +68,7 @@ public class BooleanGlobalParameterTest
       assertEquals(newValue, booleanGlobalParameter.getValue());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
@@ -79,7 +79,7 @@ public class BooleanGlobalParameterTest
       parent.set(false);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantSetChild()
    {
