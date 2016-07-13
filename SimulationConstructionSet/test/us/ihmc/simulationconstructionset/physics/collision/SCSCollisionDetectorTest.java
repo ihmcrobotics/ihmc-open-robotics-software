@@ -74,7 +74,7 @@ public abstract class SCSCollisionDetectorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void createBox_checkBounds_hit()
    {
@@ -112,7 +112,7 @@ public abstract class SCSCollisionDetectorTest
     * Make a small object and see if it detects the collision correctly.  Small objects aren't already handled correctly
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void createBox_Collision_Small()
    {
@@ -142,7 +142,7 @@ public abstract class SCSCollisionDetectorTest
       collisionDetector.performCollisionDetection();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void collisionMask_hit()
    {
@@ -169,7 +169,7 @@ public abstract class SCSCollisionDetectorTest
     * Makes sure the offset from the link is handled correctly
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void checkCollisionShape_offset()
    {

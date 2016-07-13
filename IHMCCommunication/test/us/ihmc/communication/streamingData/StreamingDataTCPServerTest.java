@@ -16,7 +16,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public class StreamingDataTCPServerTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 1.0)
 	@Test(timeout=90000)
    public void testTypicalUsage()
    {
@@ -50,7 +50,7 @@ public class StreamingDataTCPServerTest
       streamingDataTCPServer.closeAndBlockTillFullyClosed();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 2.2)
 	@Test(timeout=90000)
    public void testMultipleProducersAndConsumersRobustly()
    {
@@ -103,7 +103,7 @@ public class StreamingDataTCPServerTest
       
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 3.1)
 	@Test(timeout=90000)
    public void testPersistentConsumerToServerRestart()
    {

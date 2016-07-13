@@ -22,7 +22,7 @@ public class FitNoisyGaussian2DTest {
     * Test with no noise added
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void perfectTest() {
       double meanX = 5;

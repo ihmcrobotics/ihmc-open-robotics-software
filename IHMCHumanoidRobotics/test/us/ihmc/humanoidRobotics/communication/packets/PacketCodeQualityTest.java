@@ -38,7 +38,7 @@ public class PacketCodeQualityTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAllRosExportedPacketsHaveRandomConstructor()
    {

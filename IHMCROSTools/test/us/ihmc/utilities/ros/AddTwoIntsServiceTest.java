@@ -33,7 +33,7 @@ public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
       super.setUp(USE_JAVA_ROSCORE);
    }
 
-   @DeployableTestMethod(estimatedDuration = 4.0)
+   @DeployableTestMethod(estimatedDuration = 2.2)
    @Test(timeout = 30000)
    public void lowlevelRosServiceClientTest() throws URISyntaxException, InterruptedException
    {
@@ -78,7 +78,7 @@ public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
       assertTrue(latch.await(1, TimeUnit.SECONDS));
    }
 
-   @DeployableTestMethod(estimatedDuration = 4.0)
+   @DeployableTestMethod(estimatedDuration = 2.7)
    @Test(timeout = 30000)
    public void highLevelRosServiceClientTest() throws InterruptedException
    {

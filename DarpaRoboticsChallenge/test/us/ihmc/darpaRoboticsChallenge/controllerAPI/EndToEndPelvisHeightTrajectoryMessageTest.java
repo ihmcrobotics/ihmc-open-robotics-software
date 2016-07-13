@@ -35,8 +35,8 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 15.2)
+   @Test(timeout = 76000)
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

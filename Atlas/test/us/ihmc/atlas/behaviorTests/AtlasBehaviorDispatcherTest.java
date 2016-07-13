@@ -35,8 +35,8 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 250000)
+   @DeployableTestMethod(estimatedDuration = 48.8)
+   @Test(timeout = 240000)
    public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException
    {
       super.testDispatchPelvisPoseBehavior();
@@ -51,16 +51,16 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 47.0)
-   @Test(timeout = 230000)
+   @DeployableTestMethod(estimatedDuration = 43.2)
+   @Test(timeout = 220000)
    public void testDispatchWalkToLocationBehaviorAndStop() throws SimulationExceededMaximumTimeException
    {
       super.testDispatchWalkToLocationBehaviorAndStop();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 314.6)
-   @Test(timeout = 1600000)
+   @DeployableTestMethod(estimatedDuration = 68.3)
+   @Test(timeout = 340000)
    public void testDispatchWalkToLocationBehaviorPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       super.testDispatchWalkToLocationBehaviorPauseAndResume();

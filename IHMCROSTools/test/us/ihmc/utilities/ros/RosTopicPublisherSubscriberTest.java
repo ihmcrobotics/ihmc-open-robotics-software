@@ -20,7 +20,7 @@ import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 @DeployableTestClass(targets=TestPlanTarget.Flaky)
 public class RosTopicPublisherSubscriberTest extends IHMCRosTestWithRosCore
 {
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testPubSubMultipleMessages() throws URISyntaxException, InterruptedException
    {

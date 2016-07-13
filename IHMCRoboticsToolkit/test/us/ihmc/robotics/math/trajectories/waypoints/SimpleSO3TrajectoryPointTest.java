@@ -33,7 +33,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class SimpleSO3TrajectoryPointTest
 {
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCommonUsageExample()
    {
@@ -74,7 +74,7 @@ public class SimpleSO3TrajectoryPointTest
       assertTrue(expectedSimpleSO3TrajectoryPoint.epsilonEquals(simpleSO3TrajectoryPoint, 1e-10));
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructors()
    {
@@ -136,7 +136,7 @@ public class SimpleSO3TrajectoryPointTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetters()
    {
@@ -218,7 +218,7 @@ public class SimpleSO3TrajectoryPointTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testChangeFrame() throws Exception
    {
@@ -246,7 +246,7 @@ public class SimpleSO3TrajectoryPointTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToZero() throws Exception
    {
@@ -280,7 +280,7 @@ public class SimpleSO3TrajectoryPointTest
             expectedAngularVelocity, testedSimpleSO3TrajectoryPoint, epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToNaN() throws Exception
    {
@@ -343,7 +343,7 @@ public class SimpleSO3TrajectoryPointTest
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeSetsAngGets()
    {
@@ -434,7 +434,7 @@ public class SimpleSO3TrajectoryPointTest
       assertEquals(expectedString, string);
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeMoreSettersAndGetters()
    {

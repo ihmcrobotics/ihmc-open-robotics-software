@@ -44,7 +44,7 @@ public class PelvisRotationalStateUpdaterTest
 
    private final List<IMUSensorReadOnly> imuSensors = new ArrayList<>();
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructorWithOneIMU()
    {
@@ -72,7 +72,7 @@ public class PelvisRotationalStateUpdaterTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructorWithZeroIMUSensor()
    {

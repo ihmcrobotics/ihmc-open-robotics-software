@@ -84,8 +84,8 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
-	@DeployableTestMethod(estimatedDuration = 16.4)
-   @Test(timeout = 49112)
+	@DeployableTestMethod(estimatedDuration = 32.5)
+   @Test(timeout = 160000)
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
