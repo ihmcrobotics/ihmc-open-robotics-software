@@ -21,7 +21,7 @@ public class AlphaFilteredWrappingYoVariableTest
    private static final boolean DEBUG = false;
    private final Random random = new Random();
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=60000)
    public void testInputModulo()
    {
@@ -69,7 +69,7 @@ public class AlphaFilteredWrappingYoVariableTest
    }
    
    
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=60000)
    public void testNoisyFixedPosition()
    {
@@ -166,7 +166,7 @@ public class AlphaFilteredWrappingYoVariableTest
 	   return wrappingError;
 	}
 	
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=60000)
    public void testWrappingError()
    {
@@ -207,7 +207,7 @@ public class AlphaFilteredWrappingYoVariableTest
 	   
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=60000)
    public void testAlphaAndBreakFrequencyComputations()
    {

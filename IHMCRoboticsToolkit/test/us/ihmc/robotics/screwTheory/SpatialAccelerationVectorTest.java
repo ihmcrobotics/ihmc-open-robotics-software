@@ -23,7 +23,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 1.7)
+	@DeployableTestMethod(estimatedDuration = 2.2)
 	@Test(timeout = 30000)
    public void testChangeFrameUsingNumericalDifferentiationVersusAnalytical()
    {

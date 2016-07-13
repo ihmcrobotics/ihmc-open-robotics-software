@@ -15,7 +15,7 @@ public class BetaFilteredYoVariableTest
 {
    private final Random rng = new Random();
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void testBetaFilteredYoVariable()
    {

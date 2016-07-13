@@ -13,7 +13,7 @@ public class AlphaBetaFilteredYoVariableTest
 {
    private static final double DT = 0.1;
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAlphaBetaFilteredVelocityAndPositionEstimatesWithNoVelocity()
    {
@@ -41,7 +41,7 @@ public class AlphaBetaFilteredYoVariableTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 1.9)
 	@Test(timeout=300000)
    public void testAlphaBetaFilteredVelocityAndPositionEstimatesWithConstantVelocity()
    {

@@ -66,7 +66,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.7)
+	@DeployableTestMethod(estimatedDuration = 0.5)
 	@Test(timeout = 30000)
    public void testStraightLinePath()
    {
@@ -74,7 +74,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       testPathToDestination(destination);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.5)
 	@Test(timeout = 30000)
    public void testAngledPaths()
    {

@@ -71,8 +71,8 @@ public class AtlasFinalsWorldStairsTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 135.0, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
-   @Test(timeout = 680000)
+	@DeployableTestMethod(estimatedDuration = 70.3, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+   @Test(timeout = 350000)
    public void testWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();

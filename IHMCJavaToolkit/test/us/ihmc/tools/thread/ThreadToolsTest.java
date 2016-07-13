@@ -70,7 +70,7 @@ public class ThreadToolsTest
       Assert.assertTrue("Output not correct: " + commandLineOutput.toString(), commandLineOutput.toString().matches("Hi\\s*"));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Flaky)
+   @DeployableTestMethod(estimatedDuration = 3.1, targets = TestPlanTarget.Flaky)
    @Test(timeout = 30000)
    public void testTimeLimitScheduler()
    {
@@ -136,7 +136,7 @@ public class ThreadToolsTest
       assertEquals(iterations, counter.get());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2, targets = TestPlanTarget.Flaky)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Flaky)
    @Test(timeout = 30000)
    public void testExecuteWithTimeout()
    {

@@ -45,7 +45,7 @@ public class RobotTest
       System.err.flush();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.5)
 	@Test(timeout=300000)
    public void testSwitchingRootJoint() throws InterruptedException, UnreasonableAccelerationException, SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -230,7 +230,7 @@ public class RobotTest
 //    sleepIfShowingGUI();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFloatingJointAndPinJointWithMassiveBody() throws UnreasonableAccelerationException
    {
@@ -263,7 +263,7 @@ public class RobotTest
       assertEquals(pin1.getTau().getDoubleValue(), torqueFromDynamics, pin1.getTau().getDoubleValue() * 1e-3);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCalculateAngularMomentum()
    {
@@ -293,7 +293,7 @@ public class RobotTest
 	   
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCompareFloatingJointAndFLoatingPlanarJoint()
            throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, InterruptedException
@@ -553,7 +553,7 @@ public class RobotTest
       return angularMomentum;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFreezeJointAtZero() throws UnreasonableAccelerationException
    {
@@ -669,7 +669,7 @@ public class RobotTest
       assertEquals(expectedJoint.getQDD().getDoubleValue(), joint1.getQDD().getDoubleValue(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFreezeJointAtZeroTwo() throws UnreasonableAccelerationException
    {
@@ -805,7 +805,7 @@ public class RobotTest
       throw new RuntimeException();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testChangeLinkParameters() throws UnreasonableAccelerationException
    {      
@@ -957,7 +957,7 @@ public class RobotTest
       assertEquals(joint2.getQDD().getDoubleValue(), joint2B.getQDD().getDoubleValue(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout=300000)
    public void testConservationOfEnergyAndMomentum() throws UnreasonableAccelerationException
    {

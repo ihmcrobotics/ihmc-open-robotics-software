@@ -20,8 +20,8 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
    private final double EPSILON = 1e-3;
    
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.2)
+   @Test(timeout = 30000)
    public void testCompareWithSimple()
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

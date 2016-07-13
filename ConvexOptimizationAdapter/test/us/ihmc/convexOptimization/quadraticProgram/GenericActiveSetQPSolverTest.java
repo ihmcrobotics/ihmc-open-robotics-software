@@ -39,7 +39,7 @@ public class GenericActiveSetQPSolverTest
     * So we put these test cases here to check 
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000) 
    public void choleskyDecompositionAccuracy()
    {
@@ -383,7 +383,7 @@ public class GenericActiveSetQPSolverTest
     * Randomized Test
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000) 
    public void testRandomQuadraticCostFunction()
    {
@@ -628,7 +628,7 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("HS21.yaml",solver); 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000) 
    public void testQPS_ZECEVVIC2() throws FileNotFoundException
    {
@@ -709,7 +709,7 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("HS118.yaml",solver); 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000) 
    public void testQPS_DUALC2() throws FileNotFoundException
    {
@@ -727,7 +727,7 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("DUALC5.yaml",solver); 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000) 
    public void testQPS_DUAL4() throws FileNotFoundException
    {
@@ -763,7 +763,7 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("QPCBLEND.yaml",solver); 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000) 
    public void testQPS_DUAL3() throws FileNotFoundException
    {
@@ -772,7 +772,7 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("DUAL3.yaml",solver); 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000) 
    public void testQPS_DUALC1() throws FileNotFoundException
    {
@@ -790,7 +790,7 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("DUALC8.yaml",solver); 
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.9)
+	@DeployableTestMethod(estimatedDuration = 1.7)
    @Test(timeout = 30000) 
    public void testQPS_PRIMAL1() throws FileNotFoundException
    {
@@ -798,15 +798,15 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("PRIMAL1.yaml",solver); 
    }
 
-	@DeployableTestMethod(estimatedDuration = 11.2)
-   @Test(timeout = 56000) 
+	@DeployableTestMethod(estimatedDuration = 11.1)
+   @Test(timeout = 55000) 
    public void testQPS_PRIMALC2() throws FileNotFoundException
    {
      GenericActiveSetQPSolver solver = new GenericActiveSetQPSolver();
      testCaseFromQPS("PRIMALC2.yaml",solver); 
    }
 
-	@DeployableTestMethod(estimatedDuration = 11.8)
+	@DeployableTestMethod(estimatedDuration = 11.7)
    @Test(timeout = 59000) 
    public void testQPS_PRIMALC1() throws FileNotFoundException
    {
@@ -814,7 +814,7 @@ public class GenericActiveSetQPSolverTest
      testCaseFromQPS("PRIMALC1.yaml",solver); 
    }
 
-	@DeployableTestMethod(estimatedDuration = 25.1)
+	@DeployableTestMethod(estimatedDuration = 26.0)
    @Test(timeout = 130000) 
    public void testQPS_PRIMALC5() throws FileNotFoundException
    {

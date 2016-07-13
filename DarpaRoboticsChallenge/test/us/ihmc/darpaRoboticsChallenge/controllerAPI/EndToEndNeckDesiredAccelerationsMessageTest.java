@@ -36,8 +36,8 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 14.8)
+   @Test(timeout = 74000)
    public void testSimpleCommands() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

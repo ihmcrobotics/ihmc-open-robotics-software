@@ -62,8 +62,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 16.9)
+   @Test(timeout = 84000)
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -118,8 +118,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 14.3)
+   @Test(timeout = 72000)
    public void testMultipleWaypoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -235,8 +235,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getAngularVelocityCopy(), controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 31.7)
+   @Test(timeout = 160000)
    public void testMessageWithTooManyWaypoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -385,8 +385,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getAngularVelocityCopy(), controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 16.5)
+   @Test(timeout = 83000)
    public void testStopAllTrajectory() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

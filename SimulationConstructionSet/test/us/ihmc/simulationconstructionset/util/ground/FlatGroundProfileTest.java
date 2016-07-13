@@ -7,7 +7,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class FlatGroundProfileTest extends GroundProfileTest
 {
-   @Override@DeployableTestMethod(estimatedDuration = 0.1)
+   @Override@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSurfaceNormalGridForSmoothTerrainUsingHeightMap()
    {

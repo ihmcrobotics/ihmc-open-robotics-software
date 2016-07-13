@@ -68,7 +68,7 @@ public class LeastSquaresZPlaneFitterTest
       JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 1.0), plane3d.getNormalCopy(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testRandomlyGeneratedPointsOnRandomPlanes()
    {

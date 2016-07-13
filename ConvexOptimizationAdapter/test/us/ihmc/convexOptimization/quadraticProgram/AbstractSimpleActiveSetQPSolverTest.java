@@ -1076,7 +1076,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertTrue(Double.isInfinite(lagrangeInequalityMultipliers[0]));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testLargeRandomProblemWithInequalityConstraints()
    {
@@ -1207,7 +1207,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testLargeRandomProblemWithInequalityAndBoundsConstraints()
    {

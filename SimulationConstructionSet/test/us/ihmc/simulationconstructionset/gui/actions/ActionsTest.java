@@ -83,7 +83,7 @@ public class ActionsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testCreateNewGraphWindowAction()
    {
@@ -102,7 +102,7 @@ public class ActionsTest
               .assertMethodNotCalled("getGraphArrayWindow", String.class);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testCreateNewViewportWindowAction()
    {
@@ -121,7 +121,7 @@ public class ActionsTest
               .assertMethodNotCalled("getViewportWindow", String.class);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testHideShowViewportAction()
    {
@@ -293,7 +293,7 @@ public class ActionsTest
               .assertMethodNotCalled("zoomIn");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectGraphConfigurationAction()
    {
@@ -309,7 +309,7 @@ public class ActionsTest
               .assertMethodCalled("selectGraphConfiguration", "Test");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectGraphGroupAction()
    {
@@ -325,7 +325,7 @@ public class ActionsTest
               .assertMethodCalled("selectGraphGroup", "Test");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectVarGroupAction()
    {
@@ -341,7 +341,7 @@ public class ActionsTest
               .assertMethodCalled("selectVarGroup", "Test");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectViewportAction()
    {
@@ -385,7 +385,7 @@ public class ActionsTest
               .assertAllInterfaceMethodsCalled();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectEntryBoxGroupAction()
    {
@@ -402,7 +402,7 @@ public class ActionsTest
               .assertAllInterfaceMethodsCalled();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectExtraPanelAction()
    {
@@ -419,14 +419,14 @@ public class ActionsTest
               .assertAllInterfaceMethodsCalled();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testThinBufferAction()
    {
       testActionCallingAllInterfaceMethods(ThinBufferCommandExecutor.class, ThinBufferAction.class);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectCameraAction()
    {
@@ -442,7 +442,7 @@ public class ActionsTest
               .assertMethodCalled("selectCamera", "Test");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectGUIConfigFromFileAction()
    {

@@ -25,7 +25,7 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
    
    
    @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void test()
    {
       YoVariableRegistry registry = new YoVariableRegistry("traj");

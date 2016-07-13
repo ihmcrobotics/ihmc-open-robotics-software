@@ -41,7 +41,7 @@ public class MathToolsTest
    {
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAngleFromZeroToTwoPi()
    {
@@ -186,7 +186,7 @@ public class MathToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.04)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void powWithIntegerTest()
    {
@@ -704,7 +704,7 @@ public class MathToolsTest
       /** @todo fill in the test code */
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testArePointsInOrderColinear2()
    {

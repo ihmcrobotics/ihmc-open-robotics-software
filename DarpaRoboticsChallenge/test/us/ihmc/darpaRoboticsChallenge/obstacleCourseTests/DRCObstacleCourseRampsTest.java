@@ -59,8 +59,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 //   private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05, 1.0);
 
 
-	@DeployableTestMethod(estimatedDuration = 46.7)
-	@Test(timeout = 230000)
+	@DeployableTestMethod(estimatedDuration = 57.9)
+	@Test(timeout = 290000)
    public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -74,8 +74,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 57.0)
-	@Test(timeout = 280000)
+	@DeployableTestMethod(estimatedDuration = 73.5)
+	@Test(timeout = 370000)
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -110,8 +110,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 49.3)
-	@Test(timeout = 250000)
+	@DeployableTestMethod(estimatedDuration = 61.8)
+	@Test(timeout = 310000)
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -125,8 +125,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 46.4)
-	@Test(timeout = 230000)
+	@DeployableTestMethod(estimatedDuration = 76.9)
+	@Test(timeout = 380000)
    public void testWalkingUpRampWithShortStepsALittleTooHigh() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -146,8 +146,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 43.9)
-	@Test(timeout = 220000)
+	@DeployableTestMethod(estimatedDuration = 68.7)
+	@Test(timeout = 340000)
    public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

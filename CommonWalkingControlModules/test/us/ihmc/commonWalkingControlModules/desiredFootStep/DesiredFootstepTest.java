@@ -133,7 +133,7 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.5, targets = TestPlanTarget.Flaky)
+   @DeployableTestMethod(estimatedDuration = 1.6, targets = TestPlanTarget.Flaky)
    @Test(timeout = 30000)
    public void testPassingPauseCommand() throws IOException
    {
@@ -174,7 +174,7 @@ public class DesiredFootstepTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 2.4)
+   @DeployableTestMethod(estimatedDuration = 2.6)
    @Test(timeout = 30000)
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
@@ -245,7 +245,7 @@ public class DesiredFootstepTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.4)
+   @DeployableTestMethod(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testPassingFootstepStatus() throws IOException
    {

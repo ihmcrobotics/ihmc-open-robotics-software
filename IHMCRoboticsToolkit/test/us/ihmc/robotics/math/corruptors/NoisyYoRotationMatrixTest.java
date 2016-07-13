@@ -16,7 +16,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class NoisyYoRotationMatrixTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void testNoNoise()
    {
