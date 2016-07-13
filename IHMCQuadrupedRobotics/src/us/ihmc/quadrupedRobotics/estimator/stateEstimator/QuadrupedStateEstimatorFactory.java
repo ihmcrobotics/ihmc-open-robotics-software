@@ -78,9 +78,10 @@ public class QuadrupedStateEstimatorFactory
       {
          ContactablePlaneBody contactablePlaneBody = quadrupedFeet.get(robotQuadrant);
          String namePrefix = contactablePlaneBody.getName() + "StateEstimator";
-         SettableFootSwitch footSwitch = new SettableFootSwitch(quadrupedFeet.get(robotQuadrant), robotQuadrant, totalRobotWeight, registry);
+//         SettableFootSwitch footSwitch = new SettableFootSwitch(quadrupedFeet.get(robotQuadrant), robotQuadrant, totalRobotWeight, registry);
 //         KinematicsBasedFootSwitch footSwitch = new KinematicsBasedFootSwitch(namePrefix, quadrupedFeet, switchZThreshold, totalRobotWeight, robotQuadrant, registry);
-//         QuadrupedTouchdownDetectorBasedFootSwitch footSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(contactablePlaneBody, fullRobotModel, totalRobotWeight, sensorOutputMapReadOnly, registry);
+         QuadrupedTouchdownDetectorBasedFootSwitch footSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(robotQuadrant, contactablePlaneBody, fullRobotModel,
+               totalRobotWeight, sensorOutputMapReadOnly, registry);
          footSwitches.set(robotQuadrant, footSwitch);
       }
       return footSwitches;
