@@ -8,5 +8,7 @@ public enum QuadrupedForceControllerState
    STAND_READY,
    STAND,
    STEP,
-   XGAIT
+   XGAIT,
+   FALL,
+   SOLE_WAYPOINT
 }
