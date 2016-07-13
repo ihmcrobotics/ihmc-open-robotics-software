@@ -115,7 +115,9 @@ public class QuadrupedSoleWaypointController
                   .appendWaypoint(quadrupedSoleWaypointList.get(quadrant).get(i).getTime(), quadrupedSoleWaypointList.get(quadrant).get(i).getPosition(),
                         quadrupedSoleWaypointList.get(quadrant).get(i).getVelocity());
          }
-         quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).initialize();
+         if(quadrupedSoleWaypointList.size(quadrant)>0){
+            quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).initialize();
+         }
       }
    }
 
