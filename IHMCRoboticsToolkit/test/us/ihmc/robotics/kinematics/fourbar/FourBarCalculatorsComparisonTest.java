@@ -36,7 +36,7 @@ public class FourBarCalculatorsComparisonTest
     *    BC = inputLink
     *    CD = floatingLink
     *    
-    *    Additionally it takes as an input the supplementary of angle BAD
+    *    It takes as an input the supplementary of angle BAD
     *        
     */
    private static final double eps = 1e-7;
