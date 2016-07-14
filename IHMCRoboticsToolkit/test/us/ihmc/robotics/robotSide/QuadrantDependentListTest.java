@@ -11,7 +11,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 @DeployableTestClass(targets = Fast)
 public class QuadrantDependentListTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMultipleIterations()
    {
@@ -33,7 +33,7 @@ public class QuadrantDependentListTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIteratorOrdering()
    {

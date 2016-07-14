@@ -77,7 +77,7 @@ public class SimulatedIMURawSensorReaderTest
       simulatedIMURawSensorReader.initialize();
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void testRead()
    {

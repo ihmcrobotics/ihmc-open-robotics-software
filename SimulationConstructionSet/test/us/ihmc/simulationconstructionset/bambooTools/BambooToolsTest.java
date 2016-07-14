@@ -16,7 +16,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 public class BambooToolsTest
 {
    private static final boolean SHOW_GUI = false;
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetClassAndMethodName()
    {
@@ -27,7 +27,7 @@ public class BambooToolsTest
       assertEquals("BambooToolsTest.testGetClassAndMethodName", classAndMethodName);
    }
 
-	@DeployableTestMethod(targets = { TestPlanTarget.UI })
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = { TestPlanTarget.UI })
 	@Test(timeout=300000)
    public void testLogMessagesToFile() throws IOException
    {

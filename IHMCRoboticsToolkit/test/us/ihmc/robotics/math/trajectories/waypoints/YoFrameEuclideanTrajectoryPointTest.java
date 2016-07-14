@@ -29,7 +29,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class YoFrameEuclideanTrajectoryPointTest
 {
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCommonUsageExample()
    {
@@ -78,7 +78,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       assertTrue(expectedYoFrameEuclideanTrajectoryPoint.epsilonEquals(yoFrameEuclideanTrajectoryPoint, 1e-10));
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor()
    {
@@ -97,7 +97,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       assertWaypointContainsExpectedData(expectedNamePrefix, expectedNameSuffix, expectedFrame, expectedTime, expectedPosition, expectedLinearVelocity, testedYoFrameEuclideanTrajectoryPoint, epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetters()
    {
@@ -149,7 +149,7 @@ public class YoFrameEuclideanTrajectoryPointTest
             epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testChangeFrame() throws Exception
    {
@@ -185,7 +185,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToZero() throws Exception
    {
@@ -227,7 +227,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       assertWaypointContainsExpectedData(expectedNamePrefix, expectedNameSuffix, expectedFrame, expectedTime, expectedPosition, expectedLinearVelocity, testedYoFrameEuclideanTrajectoryPoint, epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToNaN() throws Exception
    {
@@ -311,7 +311,7 @@ public class YoFrameEuclideanTrajectoryPointTest
    }
 
    
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSomeSetsAngGets()
    {
@@ -412,7 +412,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       assertEquals(expectedString, string);
    }
    
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeMoreSettersAndGetters()
    {

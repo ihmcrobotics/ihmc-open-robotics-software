@@ -245,8 +245,8 @@ public class NewPelvisPoseHistoryCorrectionTest
    
    private BooleanYoVariable isRotationCorrectionEnabled;
    
-   @DeployableTestMethod(estimatedDuration = 1.0)
-   @Test(timeout = 60000)
+   @DeployableTestMethod(estimatedDuration = 0.8)
+   @Test(timeout = 30000)
    public void testTranslationCorrectionOnlyWithPelvisFollowingAKnownPathAndRandomLocalizationOffsets()
    {
       isRotationCorrectionEnabled = (BooleanYoVariable) registry.getVariable("ClippedSpeedOffsetErrorInterpolator", "isRotationCorrectionEnabled");
@@ -318,7 +318,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    }
    
    @DeployableTestMethod(estimatedDuration = 1.0)
-   @Test(timeout = 60000)
+   @Test(timeout = 30000)
    public void testTooBigAngleErrorAreDetectedAndPacketIsSent()
    {
       boolean checkPacketHasBeenSentNextLoopIteration = false;

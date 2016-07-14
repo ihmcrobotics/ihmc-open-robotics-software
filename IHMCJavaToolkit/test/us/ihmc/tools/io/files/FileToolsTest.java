@@ -93,7 +93,7 @@ public class FileToolsTest
       assertTrue(lines.get(2).equals("line3"));
    }
 	
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testReadAllBytesAndReadLinesFromBytesAndReplaceLine()
    {

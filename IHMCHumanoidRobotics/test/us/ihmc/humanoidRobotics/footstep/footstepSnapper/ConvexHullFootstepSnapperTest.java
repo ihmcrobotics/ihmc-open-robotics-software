@@ -26,8 +26,8 @@ import us.ihmc.robotics.random.RandomTools;
 public class ConvexHullFootstepSnapperTest
 {
 
-	@DeployableTestMethod
-	@Test(timeout = 150000)
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
 	public void testBasicCropping()
 	{
       FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
@@ -45,8 +45,8 @@ public class ConvexHullFootstepSnapperTest
       assertEquals(4.0, endPolygon.getArea(), 1e-15);
    }
 
-	@DeployableTestMethod
-	@Test(timeout = 150000)
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
 	public void testRandomCropping()
 	{
       FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();

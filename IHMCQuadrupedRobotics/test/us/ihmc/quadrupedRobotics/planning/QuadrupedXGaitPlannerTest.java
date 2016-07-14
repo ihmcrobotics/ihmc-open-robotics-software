@@ -17,7 +17,7 @@ import java.util.ArrayList;
 @TestPlanAnnotations.DeployableTestClass(targets = Fast)
 public class QuadrupedXGaitPlannerTest
 {
-   @TestPlanAnnotations.DeployableTestMethod
+   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testInitialForwardVelocityPlan()
    {
@@ -78,7 +78,7 @@ public class QuadrupedXGaitPlannerTest
       }
    }
 
-   @TestPlanAnnotations.DeployableTestMethod
+   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testOnlineForwardVelocityPlan()
    {

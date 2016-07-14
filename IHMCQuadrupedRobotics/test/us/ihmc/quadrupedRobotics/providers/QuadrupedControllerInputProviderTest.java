@@ -130,7 +130,7 @@ public class QuadrupedControllerInputProviderTest
       assertTrue(randomPlanarVelocity.epsilonEquals(planarVelocityInput, epsilon));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testYoVariableNamesAreCorrectAndUpdateInputs() throws IOException
    {

@@ -92,8 +92,8 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
    //TODO: Fix HeadOrienationManager() so that head actually tracks desired yaw and roll orientations.  Currently, only pitch orientation tracks properly.
 
-	@DeployableTestMethod(estimatedDuration = 50.5)
-   @Test(timeout = 250000)
+	@DeployableTestMethod(estimatedDuration = 37.6)
+   @Test(timeout = 190000)
    public void testHeadPitch() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

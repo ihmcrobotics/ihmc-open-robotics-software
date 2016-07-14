@@ -54,8 +54,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test (timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 22.8)
+   @Test (timeout = 110000)
    public void testSingleTrajectoryPoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -104,8 +104,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertSingleWaypointExecuted(desiredRandomChestOrientation, scs);
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 19.0)
+   @Test(timeout = 95000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -193,8 +193,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 25.4)
+   @Test(timeout = 130000)
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -303,8 +303,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 23.6)
+   @Test(timeout = 120000)
    public void testQueuedMessages() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -425,8 +425,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 15.3)
+   @Test(timeout = 77000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -515,8 +515,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertNumberOfWaypoints(1, scs);
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 16.8)
+   @Test(timeout = 84000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -637,8 +637,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test (timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 21.8)
+   @Test (timeout = 110000)
    public void testStopAllTrajectory() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

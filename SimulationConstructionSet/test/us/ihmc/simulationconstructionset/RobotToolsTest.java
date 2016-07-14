@@ -27,7 +27,7 @@ public class RobotToolsTest
       return randomFloatingChain;
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testScsRobotFromInverseDynamicsRobotModel()
    {
@@ -37,7 +37,7 @@ public class RobotToolsTest
       assertNotNull(scsRobotFromInverseDynamicsRobotModel);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAddScsJointUsingIDJoint()
    {

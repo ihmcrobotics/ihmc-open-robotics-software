@@ -35,24 +35,24 @@ public class AtlasHandDesiredConfigurationBehaviorTest extends HandDesiredConfig
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 97.9)
-   @Test(timeout = 490000)
+   @DeployableTestMethod(estimatedDuration = 24.8)
+   @Test(timeout = 120000)
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
       super.testCloseHand();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 53.6)
-   @Test(timeout = 270000)
+   @DeployableTestMethod(estimatedDuration = 30.1)
+   @Test(timeout = 150000)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {
       super.testPauseAndResumeCloseHand();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 24.2)
-   @Test(timeout = 120000)
+   @DeployableTestMethod(estimatedDuration = 22.2)
+   @Test(timeout = 110000)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
       super.testStopCloseHand();

@@ -1,4 +1,4 @@
-package us.ihmc.llaQuadruped.generatedTestSuites;
+package us.ihmc.valkyrie.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
@@ -9,13 +9,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@TestSuiteTarget(TestPlanTarget.Video)
 @SuiteClasses
 ({
-   us.ihmc.llaQuadruped.LLAQuadrupedExampleTest.class
+   us.ihmc.valkyrie.simulation.ValkyrieFlatGroundWalkingTest.class
 })
 
-public class LLAQuadrupedAFastTestSuite
+public class ValkyrieFVideoTestSuite
 {
    public static void main(String[] args)
    {
