@@ -1,5 +1,7 @@
 package us.ihmc.llaQuadruped.controller.force;
 
+import java.io.IOException;
+
 import org.junit.Test;
 
 import us.ihmc.llaQuadruped.LLAQuadrupedTestFactory;
@@ -19,18 +21,50 @@ public class LLAQuadrupedForceBasedStandControllerTest extends QuadrupedForceBas
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
-   public void testStandingUpAndAdjustingCoM()
+   @DeployableTestMethod(estimatedDuration = 20.0)
+   @Test(timeout = 100000)
+   public void testStandingUpAndAdjustingCoM() throws IOException
    {
       super.testStandingUpAndAdjustingCoM();
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
-   public void testStandingAndResistingPushes()
+   @DeployableTestMethod(estimatedDuration = 20.0)
+   @Test(timeout = 100000)
+   public void testStandingAndResistingPushesOnBody() throws IOException
    {
-      super.testStandingAndResistingPushes();
+      super.testStandingAndResistingPushesOnBody();
+   }
+   
+   @Override
+   @DeployableTestMethod(estimatedDuration = 20.0)
+   @Test(timeout = 100000)
+   public void testStandingAndResistingPushesOnFrontLeftHipRoll() throws IOException
+   {
+      super.testStandingAndResistingPushesOnFrontLeftHipRoll();
+   }
+   
+   @Override
+   @DeployableTestMethod(estimatedDuration = 20.0)
+   @Test(timeout = 100000)
+   public void testStandingAndResistingPushesOnFrontRightHipRoll() throws IOException
+   {
+      super.testStandingAndResistingPushesOnFrontRightHipRoll();
+   }
+   
+   @Override
+   @DeployableTestMethod(estimatedDuration = 20.0)
+   @Test(timeout = 100000)
+   public void testStandingAndResistingPushesOnHindLeftHipRoll() throws IOException
+   {
+      super.testStandingAndResistingPushesOnHindLeftHipRoll();
+   }
+   
+   @Override
+   @DeployableTestMethod(estimatedDuration = 20.0)
+   @Test(timeout = 100000)
+   public void testStandingAndResistingPushesOnHindRightHipRoll() throws IOException
+   {
+      super.testStandingAndResistingPushesOnHindRightHipRoll();
    }
 }

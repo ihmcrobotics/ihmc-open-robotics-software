@@ -46,7 +46,7 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<Boolean> useStateEstimator = new OptionalFactoryField<>("useStateEstimator");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
-   private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
+   private final OptionalFactoryField<String> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    
    @Override
    public GoalOrientedTestConductor createTestConductor() throws IOException
@@ -71,9 +71,9 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       OutputWriter outputWriter = new SDFPerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
       
-      if (usePushRobotController.hasBeenSet() && usePushRobotController.get())
+      if (usePushRobotController.hasBeenSet())
       {
-         new PushRobotController(sdfRobot, "body");
+         new PushRobotController(sdfRobot, usePushRobotController.get());
       }
       
       QuadrupedSimulationFactory simulationFactory = new QuadrupedSimulationFactory();
@@ -142,8 +142,8 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
    }
    
    @Override
-   public void setUsePushRobotController(boolean usePushRobotController)
+   public void setUsePushRobotController(String jointNameToPushOn)
    {
-      this.usePushRobotController.set(usePushRobotController);
+      this.usePushRobotController.set(jointNameToPushOn);
    }
 }
