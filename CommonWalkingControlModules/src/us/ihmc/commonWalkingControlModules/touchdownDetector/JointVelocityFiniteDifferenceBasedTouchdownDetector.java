@@ -62,7 +62,7 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
          else
          {
             footInSwingFiltered.set(false);
-            touchdownDetected.set(false);
+            touchdownDetected.set(true);
          }
       }
       else

@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.estimator;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.TouchdownDetectorBasedFootswitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.ActuatorForceBasedTouchdownDetector;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTouchdownDetector;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.JointVelocityFiniteDifferenceBasedTouchdownDetector;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -22,12 +23,11 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    private final SDFFullRobotModel fullRobotModel;
    private final double totalRobotWeight;
    private final YoFramePoint2d yoResolvedCoP;
-   private final SensorOutputMapReadOnly sensorMap;
    private final BooleanYoVariable touchdownDetected;
    private final BooleanYoVariable trustTouchdownDetectors;
 
    public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, SDFFullRobotModel fullRobotModel, double totalRobotWeight,
-         SensorOutputMapReadOnly sensorMap, YoVariableRegistry parentRegistry)
+         YoVariableRegistry parentRegistry)
    {
       super(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch", parentRegistry);
 
@@ -35,7 +35,6 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       this.foot = foot;
       this.fullRobotModel = fullRobotModel;
       this.totalRobotWeight = totalRobotWeight;
-      this.sensorMap = sensorMap;
       yoResolvedCoP = new YoFramePoint2d(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
       touchdownDetected = new BooleanYoVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry);
       trustTouchdownDetectors = new BooleanYoVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrusted", registry);
@@ -45,13 +44,9 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
 
    protected void setupTouchdownDetectors()
    {
-      ForceSensorDataHolderReadOnly forceSensorProcessedOutputs = sensorMap.getForceSensorProcessedOutputs();
-      if(forceSensorProcessedOutputs.getForceSensorDefinitions().size() > 0)
-      {
-         ActuatorForceBasedTouchdownDetector actuatorForceBasedTouchdownDetector = new ActuatorForceBasedTouchdownDetector(robotQuadrant.toString().toLowerCase() + "_knee_pitch",
-               forceSensorProcessedOutputs.getByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), 100.0, registry); //TODO magic number
-         touchdownDetectors.add(actuatorForceBasedTouchdownDetector);
-      }
+      JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"),
+            registry);
+      jointTorqueBasedTouchdownDetector.setTorqueThreshold(3.0);
 
       JointVelocityFiniteDifferenceBasedTouchdownDetector jointVelocityFiniteDifferenceBasedTouchdownDetector = new JointVelocityFiniteDifferenceBasedTouchdownDetector(
             fullRobotModel.getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), controllerThinksHasTouchedDown, registry);
