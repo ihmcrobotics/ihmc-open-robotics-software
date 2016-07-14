@@ -46,7 +46,7 @@ public class ExternalForcePoint extends KinematicPoint
    /**
     * @param name
     * @param offset in world when all of the robot's joints are at zero
-    * @param robot
+    * @param registry
     */
    public ExternalForcePoint(String name, Vector3d offset, YoVariableRegistry registry)
    {

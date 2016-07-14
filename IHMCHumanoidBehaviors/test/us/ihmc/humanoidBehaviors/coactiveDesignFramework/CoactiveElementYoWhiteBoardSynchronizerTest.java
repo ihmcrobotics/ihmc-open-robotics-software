@@ -19,8 +19,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CoactiveElementYoWhiteBoardSynchronizerTest
 {
-   @DeployableTestMethod(estimatedDuration = 10.0)
-   @Test(timeout = 120000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testCoactiveElementTCPYoWhiteBoardSynchronizer() throws IOException, InterruptedException
    {
       int port = NetworkPorts.COACTIVE_ELEMENTS_PORT.getPort();

@@ -23,7 +23,7 @@ public class LLAQuadrupedPositionCrawlTurningVelocityTest extends QuadrupedPosit
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 150.0, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+   @DeployableTestMethod(estimatedDuration = 150.0)
    @Test(timeout = 600000)
    public void testTurnInPlaceRegularSpeed() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -32,7 +32,7 @@ public class LLAQuadrupedPositionCrawlTurningVelocityTest extends QuadrupedPosit
    
    //"Turn in place slowly still fails due to CoM shifting outside support polygon. Need to fix it..."
    @Override
-   @DeployableTestMethod(estimatedDuration = 150.0, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+   @DeployableTestMethod(estimatedDuration = 150.0)
    @Test(timeout = 600000)
    public void testTurnInPlaceSlowly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

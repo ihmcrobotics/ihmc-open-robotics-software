@@ -13,7 +13,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class GlobalTimerTest
 {
    private static final long RANDOM_SEED = 1976L;
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testgetElapsedTime()
    {
@@ -42,7 +42,7 @@ public class GlobalTimerTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 5.2)
    @Test(timeout = 30000)
    public void testgetElapsedTime2()
    {

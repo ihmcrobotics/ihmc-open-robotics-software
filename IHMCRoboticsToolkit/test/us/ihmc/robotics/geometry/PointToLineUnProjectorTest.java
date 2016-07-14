@@ -31,7 +31,7 @@ public class PointToLineUnProjectorTest
       runTest(x0, y0, z0, x1, y1, z1, x2, y2, z2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testGeneralCase()
    {
@@ -51,7 +51,7 @@ public class PointToLineUnProjectorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testDegenerateCase()
    {
@@ -71,7 +71,7 @@ public class PointToLineUnProjectorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testYCase()
    {
@@ -92,8 +92,8 @@ public class PointToLineUnProjectorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testXCase()
    {
       Random gen = new Random(124L);

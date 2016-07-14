@@ -36,7 +36,7 @@ public class BooleanYoVariableTest
       registry = null;
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testBooleanYoVariable()
    {
@@ -45,7 +45,7 @@ public class BooleanYoVariableTest
       assertEquals(false, booleanYoVariable.getBooleanValue());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testValueEquals()
    {
@@ -62,7 +62,7 @@ public class BooleanYoVariableTest
       assertFalse(booleanYoVariable.valueEquals(false));
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetAndSetBooleanYoVariable()
    {
@@ -73,7 +73,7 @@ public class BooleanYoVariableTest
       assertTrue(booleanYoVariable.getBooleanValue());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSet_boolean_boolean()
    {
@@ -89,7 +89,7 @@ public class BooleanYoVariableTest
       assertFalse(result);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetAndSetAsDouble()
    {
@@ -118,7 +118,7 @@ public class BooleanYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValueAsDouble()
    {
@@ -132,7 +132,7 @@ public class BooleanYoVariableTest
       assertEquals(1.0, result, EPSILON);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testToString()
    {
@@ -142,7 +142,7 @@ public class BooleanYoVariableTest
       assertEquals(booleanYoVariable.toString(), "booleanVariable: true");
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValueWithStringBuffer()
    {
@@ -159,7 +159,7 @@ public class BooleanYoVariableTest
       assertEquals(testStringBuffer.toString(), expectedTestStringBuffer.toString());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetAndSetValueAsLongBits()
    {
@@ -176,14 +176,14 @@ public class BooleanYoVariableTest
       booleanYoVariable.setValueFromLongBits(value, notifyListeners);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testYoVariableType()
    {
       assertEquals(booleanYoVariable.getYoVariableType(), YoVariableType.BOOLEAN);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDuplicate()
    {
@@ -200,7 +200,7 @@ public class BooleanYoVariableTest
 	   newRegistry = null;
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetValue()
    {

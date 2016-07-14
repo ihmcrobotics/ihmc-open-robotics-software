@@ -1,23 +1,15 @@
 package us.ihmc.valkyrieRosControl;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-
-import org.yaml.snakeyaml.Yaml;
+import javax.xml.bind.Unmarshaller;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.valkyrieRosControl.XMLJoints.XMLJointWithTorqueOffset;
@@ -26,11 +18,8 @@ import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
 
 public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
 {
-   private static final String NASA_TORQUE_OFFSET_FILE = System.getProperty("user.home") + File.separator + "valkyrie/ValkyrieJointTorqueOffsets.xml";
-   public static final String IHMC_TORQUE_OFFSET_FILE = System.getProperty("user.home") + File.separator + ".ihmc/ControllerConfig/jointTorqueOffsets.yaml";
-
-   private static final boolean WRITE_OFFSETS_TO_FILE_FOR_NASA = true;
-   private static final boolean WRITE_OFFSETS_TO_FILE_FOR_IHMC = false;
+   private static final boolean PRINT_TORQUE_OFFSETS = false;
+   private static final String TORQUE_OFFSET_FILE = System.getProperty("user.home") + File.separator + "valkyrie/ValkyrieJointTorqueOffsets.xml";
 
    private final java.text.NumberFormat doubleFormat = new java.text.DecimalFormat(" 0.00;-0.00");
    private String robotName = "Valkyrie";
@@ -40,79 +29,46 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
       this.robotName = robotName;
    }
 
-   @SuppressWarnings("unchecked")
    @Override
    public void printTorqueOffsets(JointTorqueOffsetEstimator jointTorqueOffsetEstimator)
    {
-      System.out.println();
-
-      List<OneDoFJoint> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
-
-      int maxNameLength = 0;
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
-         if (jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(oneDoFJoint))
-            maxNameLength = Math.max(maxNameLength, oneDoFJoint.getName().length());
-
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      if (PRINT_TORQUE_OFFSETS)
       {
-         if (jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(oneDoFJoint))
+         System.out.println();
+         
+         List<OneDoFJoint> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
+         
+         int maxNameLength = 0;
+         for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+            if (jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(oneDoFJoint))
+               maxNameLength = Math.max(maxNameLength, oneDoFJoint.getName().length());
+         
+         for (OneDoFJoint oneDoFJoint : oneDoFJoints)
          {
-            double torqueOffset = jointTorqueOffsetEstimator.getEstimatedJointTorqueOffset(oneDoFJoint);
-            String offsetString = doubleFormat.format(torqueOffset);
-            int nblankSpaces = maxNameLength - oneDoFJoint.getName().length() + 1;
-            String blanks = String.format("%1$" + nblankSpaces + "s", "");
-            System.out.println(oneDoFJoint.getName() + blanks + "torque offset = " + offsetString);
+            if (jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(oneDoFJoint))
+            {
+               double torqueOffset = jointTorqueOffsetEstimator.getEstimatedJointTorqueOffset(oneDoFJoint);
+               String offsetString = doubleFormat.format(torqueOffset);
+               int nblankSpaces = maxNameLength - oneDoFJoint.getName().length() + 1;
+               String blanks = String.format("%1$" + nblankSpaces + "s", "");
+               System.out.println(oneDoFJoint.getName() + blanks + "torque offset = " + offsetString);
+            }
          }
       }
 
-      System.out.println();
-
-      if (WRITE_OFFSETS_TO_FILE_FOR_NASA)
+      File file = new File(TORQUE_OFFSET_FILE);
+      Map<String, Double> oldTorqueOffsets = loadTorqueOffsetsFromFile();
+      try
       {
-         File file = new File(NASA_TORQUE_OFFSET_FILE);
-         try
-         {
-            writeTorqueOffsetsToFile(file, buildXMLJoints(jointTorqueOffsetEstimator));
-         }
-         catch (JAXBException e)
-         {
-            e.printStackTrace();
-         }
+         exportTorqueOffsetsToFile(file, buildXMLJoints(jointTorqueOffsetEstimator, oldTorqueOffsets));
       }
-
-      if (WRITE_OFFSETS_TO_FILE_FOR_IHMC)
+      catch (JAXBException e)
       {
-
-         Yaml yaml = new Yaml();
-         InputStream offsetsStream;
-         Map<String, Double> oldOffsetMap = null;
-         try
-         {
-            offsetsStream = new FileInputStream(new File(IHMC_TORQUE_OFFSET_FILE));
-            oldOffsetMap = (Map<String, Double>) yaml.load(offsetsStream);
-            if (offsetsStream != null)
-               offsetsStream.close();
-         }
-         catch (Exception e)
-         {
-            offsetsStream = null;
-            oldOffsetMap = null;
-         }
-
-         Path torqueOffsetFilePath = Paths.get(IHMC_TORQUE_OFFSET_FILE);
-         try
-         {
-            Files.createDirectories(torqueOffsetFilePath.getParent());
-            writeTorqueOffsetForIHMC(jointTorqueOffsetEstimator, torqueOffsetFilePath.toFile(), oldOffsetMap);
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-         }
+         e.printStackTrace();
       }
    }
 
-   private XMLJoints buildXMLJoints(JointTorqueOffsetEstimator jointTorqueOffsetEstimator)
+   private XMLJoints buildXMLJoints(JointTorqueOffsetEstimator jointTorqueOffsetEstimator, Map<String, Double> oldTorqueOffsets)
    {
       XMLJoints xmlJoints = new XMLJoints();
       xmlJoints.setRobotName(robotName);
@@ -125,20 +81,27 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
          if (!jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(joint))
             continue;
 
-         String name = joint.getName();
+         String jointName = joint.getName();
          String position = Double.toString(joint.getQ());
-         String torqueOffset = Double.toString(jointTorqueOffsetEstimator.getEstimatedJointTorqueOffset(joint));
+         
+         double jointTorqueOffsetToExport = jointTorqueOffsetEstimator.getEstimatedJointTorqueOffset(joint);
+         if (oldTorqueOffsets.containsKey(jointName))
+         {
+            jointTorqueOffsetToExport += oldTorqueOffsets.get(jointName);
+         }
+         String torqueOffset = Double.toString(jointTorqueOffsetToExport);
+            
          String type = null;
 
-         if (name.contains("leftAnkle"))
+         if (jointName.contains("leftAnkle"))
             type = "leftAnkle";
-         if (name.contains("rightAnkle"))
+         if (jointName.contains("rightAnkle"))
             type = "rightAnkle";
-         else if (name.contains("torsoRoll") || name.contains("torsoPitch"))
+         else if (jointName.contains("torsoRoll") || jointName.contains("torsoPitch"))
             type = "waist";
 
          XMLJointWithTorqueOffset xmlJointWithTorqueOffset = new XMLJointWithTorqueOffset();
-         xmlJointWithTorqueOffset.setName(name);
+         xmlJointWithTorqueOffset.setName(jointName);
          xmlJointWithTorqueOffset.setPosition(position);
          xmlJointWithTorqueOffset.setTorqueOffset(torqueOffset);
          xmlJointWithTorqueOffset.setType(type);
@@ -151,7 +114,7 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
       return xmlJoints;
    }
 
-   private void writeTorqueOffsetsToFile(File file, XMLJoints joints) throws JAXBException
+   private void exportTorqueOffsetsToFile(File file, XMLJoints joints) throws JAXBException
    {
       JAXBContext context = JAXBContext.newInstance(XMLJoints.class);
       Marshaller marshaller = context.createMarshaller();
@@ -160,37 +123,33 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
       marshaller.marshal(joints, file);
    }
 
-   private void writeTorqueOffsetForIHMC(JointTorqueOffsetEstimator jointTorqueOffsetEstimator, File file, Map<String, Double> oldOffsetMap) throws IOException
+   public static Map<String, Double> loadTorqueOffsetsFromFile()
    {
-
-      FileWriter fileWriter = new FileWriter(file);
-      BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-      List<OneDoFJoint> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
-
-      int maxNameLength = 0;
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
-         if (jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(oneDoFJoint))
-            maxNameLength = Math.max(maxNameLength, oneDoFJoint.getName().length());
-
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      JAXBContext context;
+      try
       {
-         if (jointTorqueOffsetEstimator.hasTorqueOffsetForJoint(oneDoFJoint))
+         File file = new File(TORQUE_OFFSET_FILE);
+         context = JAXBContext.newInstance(XMLJoints.class);
+         Unmarshaller um = context.createUnmarshaller();
+         XMLJoints xmlJoints = (XMLJoints) um.unmarshal(file);
+         List<XMLJointWithTorqueOffset> joints = xmlJoints.getJoints();
+         if (xmlJoints == null || joints == null)
+            return null;
+
+         Map<String, Double> torqueOffsetMap = new HashMap<>();
+
+         for (XMLJointWithTorqueOffset jointWithTorqueOffset : joints)
          {
-            double oldTorqueOffset = 0.0;
-            if (oldOffsetMap != null && oldOffsetMap.containsKey(oneDoFJoint.getName()))
-               oldTorqueOffset = oldOffsetMap.get(oneDoFJoint.getName());
-            double newTorqueOffset = oldTorqueOffset - jointTorqueOffsetEstimator.getEstimatedJointTorqueOffset(oneDoFJoint);
+            String jointName = jointWithTorqueOffset.getName();
+            double torqueOffset = Double.parseDouble(jointWithTorqueOffset.getTorqueOffset());
 
-            String offsetString = doubleFormat.format(newTorqueOffset);
-            int nblankSpaces = maxNameLength - oneDoFJoint.getName().length() + 1;
-            String blanks = String.format("%1$" + nblankSpaces + "s", "");
-            bufferedWriter.write(oneDoFJoint.getName() + blanks + ": " + offsetString);
-            bufferedWriter.newLine();
+            torqueOffsetMap.put(jointName, torqueOffset);
          }
+         return torqueOffsetMap;
       }
-
-      bufferedWriter.flush();
-      bufferedWriter.close();
+      catch (JAXBException e)
+      {
+         return null;
+      }
    }
 }

@@ -15,7 +15,7 @@ public class AlphaFilteredYoVariableTest
 {
    private final Random rng = new Random();
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testNoisyFixedPosition()
    {
@@ -43,7 +43,7 @@ public class AlphaFilteredYoVariableTest
       assertEquals(10, alphaFilteredYoVariable.getDoubleValue(), 1);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAlphaAndBreakFrequencyComputations()
    {

@@ -80,13 +80,13 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       armJointPositionFilterFrequencyHz = Double.POSITIVE_INFINITY;
       jointOutputEncoderVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
       lowerBodyJointPositionFilterFrequencyHz = Double.POSITIVE_INFINITY;
-      lowerBodyJointVelocityFilterFrequencyHz = Double.POSITIVE_INFINITY;
+      lowerBodyJointVelocityFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
 
       // Somehow it's less shaky when these are low especially when pitching the chest forward.
       // I still don't quite get it. Sylvain
-      orientationFilterFrequencyHz        = runningOnRealRobot ? 12.0 : Double.POSITIVE_INFINITY;
-      angularVelocityFilterFrequencyHz    = runningOnRealRobot ? 12.0 : Double.POSITIVE_INFINITY;
-      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 12.0 : Double.POSITIVE_INFINITY;
+      orientationFilterFrequencyHz        = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      angularVelocityFilterFrequencyHz    = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
 
       lowerBodyJointVelocityBacklashSlopTime = 0.03;
       armJointVelocityBacklashSlopTime = 0.03;
@@ -208,27 +208,45 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    }
 
    @Override
+   public boolean enableIMUBiasCompensation()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean enableIMUYawDriftCompensation()
+   {
+      return true;
+   }
+
+   @Override
+   public double getIMUBiasFilterFreqInHertz()
+   {
+      return 6.0e-3;
+   }
+
+   @Override
+   public double getIMUYawDriftFilterFreqInHertz()
+   {
+      return 1.0e-3;
+   }
+
+   @Override
+   public double getIMUBiasVelocityThreshold()
+   {
+      return 0.015;
+   }
+
+   @Override
    public boolean useAccelerometerForEstimation()
    {
       return true;
    }
 
    @Override
-   public boolean estimateAccelerationBias()
-   {
-      return false;
-   }
-
-   @Override
    public boolean cancelGravityFromAccelerationMeasurement()
    {
       return true;
-   }
-
-   @Override
-   public double getAccelerationBiasFilterFreqInHertz()
-   {
-      return 5.3052e-4;
    }
 
    @Override
@@ -240,7 +258,11 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public double getPelvisLinearVelocityFusingFrequency()
    {
-      return 0.4261; // alpha = 0.992 with dt = 0.003
+//      return 0.4261; // alpha = 0.992 with dt = 0.003
+      // For some reason, trusting more the accelerometer causes the state estimator to understimate the
+      // pelvis linear velocity when doing reasonably quick transfer during walking.
+      // This contributes in the capture point overshooting to the outside of the feet.
+      return 2.0146195328088035; // alpha = 0.975 with dt = 0.002
    }
 
    @Override
@@ -259,36 +281,6 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public double getForceInPercentOfWeightThresholdToTrustFoot()
    {
       return 0.3;
-   }
-
-   @Override
-   public boolean estimateIMUDrift()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean compensateIMUDrift()
-   {
-      return true;
-   }
-
-   @Override
-   public double getIMUDriftFilterFreqInHertz()
-   {
-      return 0.024; //0.5332;
-   }
-
-   @Override
-   public double getFootVelocityUsedForImuDriftFilterFreqInHertz()
-   {
-      return 0.5332;
-   }
-
-   @Override
-   public double getFootVelocityThresholdToEnableIMUDriftCompensation()
-   {
-      return 0.005;
    }
 
    @Override

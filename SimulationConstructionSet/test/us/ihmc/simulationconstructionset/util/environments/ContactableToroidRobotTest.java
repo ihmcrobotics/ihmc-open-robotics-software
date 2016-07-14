@@ -17,7 +17,7 @@ import us.ihmc.robotics.random.RandomTools;
 public class ContactableToroidRobotTest
 {
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsPointOnOrInsideAtOrigin()
    {
@@ -51,7 +51,7 @@ public class ContactableToroidRobotTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsPointOnOrInsideNotAtOriginUsingTransform()
    {
@@ -91,7 +91,7 @@ public class ContactableToroidRobotTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPointIsntInsideWhenUsingComOffset()
    {

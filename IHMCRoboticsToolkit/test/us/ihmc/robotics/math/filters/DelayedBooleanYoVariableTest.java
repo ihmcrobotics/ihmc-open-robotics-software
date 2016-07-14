@@ -33,7 +33,7 @@ public class DelayedBooleanYoVariableTest
       variableToDelay = null;
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDelayedYoVariableMultipleTickDelays()
    {
@@ -74,7 +74,7 @@ public class DelayedBooleanYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDelayedYoVariableOneTickDelay()
    {
@@ -106,7 +106,7 @@ public class DelayedBooleanYoVariableTest
       assertEquals(delayedYoVariable.getBooleanValue(), true);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDelayedYoVariableZeroTickDelay()
    {
@@ -138,7 +138,7 @@ public class DelayedBooleanYoVariableTest
       assertEquals(delayedYoVariable.getBooleanValue(), true);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdateWithZero()
    {
@@ -156,7 +156,7 @@ public class DelayedBooleanYoVariableTest
       assertEquals(delayedYoVariable.getBooleanValue(), true);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testReset()
    {  

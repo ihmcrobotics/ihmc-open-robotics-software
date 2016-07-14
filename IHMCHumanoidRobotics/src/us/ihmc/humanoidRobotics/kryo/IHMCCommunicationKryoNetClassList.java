@@ -6,6 +6,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
+import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
@@ -212,6 +213,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(RobotSide.class);
       registerPacketField(Point3d.class);
       registerPacketField(Vector3d.class);
+      registerPacketField(Vector2f.class);
       registerPacketClass(DesiredSteeringAnglePacket.class);
 
       registerPacketClass(HandComplianceControlParametersMessage.class);

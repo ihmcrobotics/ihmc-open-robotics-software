@@ -51,7 +51,7 @@ public class ValkyrieAccelerationIntegration
          processedJointHandles.add(jointHandle);
 
          DoubleYoVariable kVelocity = new DoubleYoVariable("kVelocity_" + jointName, registry);
-         DoubleYoVariable desiredVelocity = new DoubleYoVariable("q_d_AccInt_" + jointName, registry);
+         DoubleYoVariable desiredVelocity = new DoubleYoVariable("qd_d_AccInt_" + jointName, registry);
          DoubleYoVariable tauFromVelocity = new DoubleYoVariable("tau_vel_" + jointName, registry);
          BooleanYoVariable enabled = new BooleanYoVariable(jointName + "AccelIntEnabled", registry);
 
