@@ -47,6 +47,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"),
             registry);
       jointTorqueBasedTouchdownDetector.setTorqueThreshold(3.0);
+      touchdownDetectors.add(jointTorqueBasedTouchdownDetector);
 
       JointVelocityFiniteDifferenceBasedTouchdownDetector jointVelocityFiniteDifferenceBasedTouchdownDetector = new JointVelocityFiniteDifferenceBasedTouchdownDetector(
             fullRobotModel.getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), controllerThinksHasTouchedDown, registry);
