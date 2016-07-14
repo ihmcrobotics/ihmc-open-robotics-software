@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class DelayedDoubleYoVariableTest
 {
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDelayedYoVariableMultipleTickDelays()
    {
@@ -54,7 +54,7 @@ public class DelayedDoubleYoVariableTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDelayedYoVariableOneTickDelay()
    {
@@ -89,7 +89,7 @@ public class DelayedDoubleYoVariableTest
       assertEquals(delayedYoVariable.getDoubleValue(), 3.0, 1e-7);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDelayedYoVariableZeroTickDelay()
    {

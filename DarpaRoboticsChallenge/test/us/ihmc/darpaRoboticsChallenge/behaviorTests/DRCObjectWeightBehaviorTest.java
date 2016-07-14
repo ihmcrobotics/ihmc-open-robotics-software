@@ -60,8 +60,8 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 10.6)
-   @Test(timeout = 53000)
+   @DeployableTestMethod(estimatedDuration = 14.6)
+   @Test(timeout = 73000)
    public void testConstructorAndSetInput()
    {
       ObjectWeightBehavior behavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());

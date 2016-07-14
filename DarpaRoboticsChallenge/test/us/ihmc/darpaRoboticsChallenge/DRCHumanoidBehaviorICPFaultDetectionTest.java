@@ -91,7 +91,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    }
 
    // cropped to 1.5 - 6.3 seconds
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void TestForVideo() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -111,7 +111,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void TestPushLeftEarlySwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -131,7 +131,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void TestPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -152,7 +152,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void TestPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -181,7 +181,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void TestPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -225,7 +225,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void TestPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {

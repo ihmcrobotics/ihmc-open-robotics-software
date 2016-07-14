@@ -13,7 +13,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @DeployableTestClass(targets = TestPlanTarget.Fast)
 public class RecyclingQuadrantDependentListTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testBasicMethods()
    {

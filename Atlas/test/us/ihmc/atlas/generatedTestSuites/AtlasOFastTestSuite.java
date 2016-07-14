@@ -12,8 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseTrialsWalkingTaskTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasPelvisLowGainsTest.class
+   us.ihmc.atlas.roughTerrainWalking.AtlasSwingTrajectoryTest.class,
+   us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class
 })
 
 public class AtlasOFastTestSuite

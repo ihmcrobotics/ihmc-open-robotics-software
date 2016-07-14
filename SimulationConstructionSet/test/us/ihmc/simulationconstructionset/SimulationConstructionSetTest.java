@@ -26,7 +26,7 @@ public class SimulationConstructionSetTest
       return false;
    }
    
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testSimulationConstructionSetNewViewportWindowUsingGUITestFixture() throws AWTException
    {
@@ -56,7 +56,7 @@ public class SimulationConstructionSetTest
 
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testSimulationConstructionSetVideoGenerationUsingGUITestFixture() throws AWTException
    {

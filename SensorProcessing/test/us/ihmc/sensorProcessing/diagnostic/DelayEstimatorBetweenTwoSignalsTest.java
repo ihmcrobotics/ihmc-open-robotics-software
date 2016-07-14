@@ -16,7 +16,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class DelayEstimatorBetweenTwoSignalsTest
 {
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @DeployableTestMethod(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testPerfectSignal() throws Exception
    {
@@ -58,7 +58,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @DeployableTestMethod(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testWithShiftedSignal() throws Exception
    {
@@ -102,7 +102,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @DeployableTestMethod(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testNoisySignal() throws Exception
    {

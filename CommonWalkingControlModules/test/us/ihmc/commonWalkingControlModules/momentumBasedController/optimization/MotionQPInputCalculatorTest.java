@@ -36,7 +36,7 @@ public class MotionQPInputCalculatorTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testPointAccelerationCommandsWithChainRobot() throws Exception
    {
@@ -100,7 +100,7 @@ public class MotionQPInputCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 1.1)
    @Test(timeout = 30000)
    public void testPointAccelerationCommandsWithFloatingChainRobot() throws Exception
    {

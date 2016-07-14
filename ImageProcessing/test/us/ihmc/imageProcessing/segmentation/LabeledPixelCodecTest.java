@@ -20,8 +20,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class LabeledPixelCodecTest
 {
 
-	@DeployableTestMethod
-	@Test(timeout = 300000)
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
    public void write_read() throws IOException
    {
       String expectedName = "foo";

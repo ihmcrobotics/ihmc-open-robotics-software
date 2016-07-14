@@ -11,7 +11,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class SDFRobotTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.7)
+	@DeployableTestMethod(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testNullJointMap() throws FileNotFoundException, JAXBException
    {

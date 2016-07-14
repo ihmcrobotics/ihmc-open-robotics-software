@@ -121,7 +121,7 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
       assertEquals(2.0, objectiveCost, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testLargeRandomProblemWithNoEqualityConstraints()
    {
@@ -170,7 +170,7 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testLargeRandomProblemWithEqualityConstraints()
    {

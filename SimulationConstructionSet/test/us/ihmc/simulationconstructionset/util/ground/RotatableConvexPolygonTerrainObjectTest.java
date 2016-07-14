@@ -50,7 +50,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       inclinedTopFaceOctagon3dSecond = new RotatableConvexPolygonTerrainObject(normalYZVector, convexPolygon, 3.0);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAt()
    {
@@ -66,7 +66,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       assertEquals(0.0, flatTopFaceOctagon3d.heightAt(5.0, 5.0, 5.0), epsilon);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsClose()
    {
@@ -80,7 +80,7 @@ public class RotatableConvexPolygonTerrainObjectTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testClosestIntersectionTo()
    {
@@ -157,7 +157,7 @@ public class RotatableConvexPolygonTerrainObjectTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsInsideTheFace()
    {
@@ -181,7 +181,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       assertFalse(flatTopFaceOctagon3d.isInsideTheFace(facePlane, faceVertices3d, pointToCheck));
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSurfaceNormalAt()
    {
@@ -200,7 +200,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       JUnitTools.assertTuple3dEquals(expected, normalToPack, epsilon);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testClosestIntersectionAndNormalAt()
    {
@@ -326,28 +326,28 @@ public class RotatableConvexPolygonTerrainObjectTest
       JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetXMin()
    {
       assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getXMin(), epsilon);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetXMax()
    {
       assertEquals(2.0, flatTopFaceOctagon3d.getBoundingBox().getXMax(), epsilon);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetYMin()
    {
       assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getYMin(), epsilon);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetYMax()
    {

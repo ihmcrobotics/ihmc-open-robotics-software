@@ -91,7 +91,7 @@ public class YoKalmanFilterTest
       yoKalmanFilter.setProcessNoiseCovariance(Q);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testMeasurementCovarianceNotSymmetricPositiveDefinite1()
    {
@@ -277,7 +277,7 @@ public class YoKalmanFilterTest
       EjmlUnitTests.assertEquals(kalmanFilters[0].getCovariance(), kalmanFilters[1].getCovariance(), 1e-8);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testViaSimulatingATrueSystemAndCheckingErrorDynamics()
    {
@@ -374,7 +374,7 @@ public class YoKalmanFilterTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.8)
+	@DeployableTestMethod(estimatedDuration = 0.5)
 	@Test(timeout = 30000)
    public void testViaKeepingCovariancesConstantAndCheckingKMatrixConvergence()
    {

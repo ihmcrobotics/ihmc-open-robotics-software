@@ -430,7 +430,7 @@ public class LinearDynamicSystemTest {
         verifyLinearDynamicSystem(massSpringDamperSystem, massSpringDamperMatrixA);
     }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.6)
 	@Test(timeout = 30000)
     public void testRandomLinearDynamicSystems() {
 

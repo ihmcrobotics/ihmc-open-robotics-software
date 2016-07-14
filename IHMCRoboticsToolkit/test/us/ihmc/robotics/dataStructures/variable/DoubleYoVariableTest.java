@@ -42,7 +42,7 @@ public class DoubleYoVariableTest
       registry = null;
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDoubleYoVariableConstructorWithoutDescription()
    {
@@ -50,7 +50,7 @@ public class DoubleYoVariableTest
       assertEquals(doubleYoVariable1.getName(), "doubleYoVariable1");
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDoubleYoVariableConstructorWithDescription()
    {
@@ -61,7 +61,7 @@ public class DoubleYoVariableTest
       assertTrue(doubleYoVariableWithDescription.getDescription() == testDescription);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testToString()
    {
@@ -70,7 +70,7 @@ public class DoubleYoVariableTest
       assertEquals(doubleYoVariable1.toString(), "doubleYoVariable1: " + randomNumber);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsNaN()
    {
@@ -79,7 +79,7 @@ public class DoubleYoVariableTest
       assertTrue(doubleYoVariable2.isNaN());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAdditionWithDoubles()
    {
@@ -92,7 +92,7 @@ public class DoubleYoVariableTest
       assertTrue(doubleYoVariable1.getDoubleValue() == expectedSum);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSubtractionWithDoubles()
    {
@@ -105,7 +105,7 @@ public class DoubleYoVariableTest
       assertTrue(doubleYoVariable1.getDoubleValue() == expectedDifference);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testMultiplicationWithDoubles()
    {
@@ -118,7 +118,7 @@ public class DoubleYoVariableTest
       assertTrue(doubleYoVariable1.getDoubleValue() == expectedProduct);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAdditionWithDoubleYoVariables()
    {
@@ -132,7 +132,7 @@ public class DoubleYoVariableTest
       assertTrue(doubleYoVariable1.getDoubleValue() == expectedSum);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSubtractionWithDoubleYoVariables()
    {
@@ -146,7 +146,7 @@ public class DoubleYoVariableTest
       assertTrue(doubleYoVariable1.getDoubleValue() == expectedDifference);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testMultiplicationWithDoubleYoVariables()
    {
@@ -160,7 +160,7 @@ public class DoubleYoVariableTest
       assertTrue(doubleYoVariable1.getDoubleValue() == expectedProduct);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testValueEquals()
    {
@@ -169,7 +169,7 @@ public class DoubleYoVariableTest
       doubleYoVariable1.valueEquals(randomNumber);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetValueWithStringBuffer()
    {
@@ -196,7 +196,7 @@ public class DoubleYoVariableTest
       assertEquals(expectedStringBuffer.toString(), stringBufferTest.toString());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetAndSetMethods()
    {
@@ -206,7 +206,7 @@ public class DoubleYoVariableTest
       assertTrue(doubleYoVariable1.getDoubleValue() == doubleYoVariable2.getDoubleValue());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetAndSetDoubleValue()
    {
@@ -216,7 +216,7 @@ public class DoubleYoVariableTest
       assertTrue(doubleYoVariable1.getValueAsDouble() == doubleYoVariable2.getValueAsDouble());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetFinal()
    {
@@ -227,7 +227,7 @@ public class DoubleYoVariableTest
       assertEquals(10.0, doubleYoVariable1.getDoubleValue(), EPSILON); 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValueAsLongBitsAndSetValueFromLongBits()
    {
@@ -242,14 +242,14 @@ public class DoubleYoVariableTest
       assertEquals(0xfff0000000000000L, doubleYoVariable1.getValueAsLongBits());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetYoVariableType()
    {
       assertTrue(doubleYoVariable1.getYoVariableType() == YoVariableType.DOUBLE);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDuplicate()
    {

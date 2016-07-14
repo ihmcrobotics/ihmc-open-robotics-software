@@ -34,7 +34,7 @@ public class JointStateUpdaterTest
    private static final Random random = new Random(1776L);
    private static final double EPS = 1e-10;
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructorNormalCase()
    {
@@ -61,7 +61,7 @@ public class JointStateUpdaterTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testInitializingAndReading()
    {

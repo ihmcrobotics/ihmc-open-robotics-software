@@ -16,7 +16,7 @@ public class AlphaFusedYoVariableTest
 
    private final Random rng = new Random();
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAlphaFusedYoVariable()
    {

@@ -269,7 +269,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testDispatchWalkToLocationBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -324,7 +324,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testDispatchWalkToLocationBehaviorAndStop() throws SimulationExceededMaximumTimeException
    {
@@ -373,7 +373,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testDispatchWalkToLocationBehaviorPauseAndResume() throws SimulationExceededMaximumTimeException
    {
