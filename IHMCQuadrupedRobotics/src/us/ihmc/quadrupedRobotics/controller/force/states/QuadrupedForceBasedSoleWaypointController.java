@@ -15,7 +15,7 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSoleWaypointController;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedForceBasedSoleWaypointUsingInputController implements QuadrupedController
+public class QuadrupedForceBasedSoleWaypointController implements QuadrupedController
 {
    // Yo variables
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -37,10 +37,10 @@ public class QuadrupedForceBasedSoleWaypointUsingInputController implements Quad
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
 
-   private QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
+   private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
    private final QuadrupedSoleWaypointController quadrupedSoleWaypointController;
 
-   public QuadrupedForceBasedSoleWaypointUsingInputController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox,
+   public QuadrupedForceBasedSoleWaypointController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedSoleWaypointInputProvider inputProvider)
    {
       soleWaypointInputProvider = inputProvider;
@@ -48,7 +48,7 @@ public class QuadrupedForceBasedSoleWaypointUsingInputController implements Quad
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
-      yoPositionControllerGains = new YoEuclideanPositionGains("positionControllerGains",registry);
+      yoPositionControllerGains = new YoEuclideanPositionGains("positionControllerGains", registry);
       environment.getParentRegistry().addChild(registry);
    }
 
@@ -66,7 +66,7 @@ public class QuadrupedForceBasedSoleWaypointUsingInputController implements Quad
       }
       taskSpaceController.reset();
       updateGains();
-      quadrupedSoleWaypointController.initialize(soleWaypointInputProvider.get(),yoPositionControllerGains);
+      quadrupedSoleWaypointController.initialize(soleWaypointInputProvider.get(), yoPositionControllerGains);
    }
 
    @Override
@@ -74,7 +74,7 @@ public class QuadrupedForceBasedSoleWaypointUsingInputController implements Quad
    {
       boolean success = quadrupedSoleWaypointController.compute(taskSpaceControllerCommands.getSoleForce());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
-      return  success ? null : ControllerEvent.DONE;
+      return success ? null : ControllerEvent.DONE;
    }
 
    @Override
@@ -82,7 +82,8 @@ public class QuadrupedForceBasedSoleWaypointUsingInputController implements Quad
    {
    }
 
-   private void updateGains(){
+   private void updateGains()
+   {
       yoPositionControllerGains.setProportionalGains(solePositionProportionalGainsParameter.get());
       yoPositionControllerGains.setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
       yoPositionControllerGains.setDerivativeGains(solePositionDerivativeGainsParameter.get());
