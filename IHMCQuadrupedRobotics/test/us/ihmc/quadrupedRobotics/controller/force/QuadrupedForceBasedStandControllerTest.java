@@ -148,6 +148,29 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    
    @DeployableTestMethod(estimatedDuration = 10.0)
    @Test(timeout = 50000)
+   public void testStandingAndResistingHumanPowerKickToFace() throws IOException
+   {
+      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
+      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+      quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
+      quadrupedTestFactory.setUsePushRobotController("head_roll");
+      conductor = quadrupedTestFactory.createTestConductor();
+      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      pusher = new PushRobotTestConductor(conductor.getScs());
+      
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      
+      pusher.applyForce(new Vector3d(-1.0, -0.1, 0.75), 700.0, 0.05);
+      
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
+      conductor.simulate();
+      
+      conductor.concludeTesting();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 10.0)
+   @Test(timeout = 50000)
    public void testStandingAndResistingPushesOnBody() throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
