@@ -97,7 +97,7 @@ public class QuadrupedForceDevelopmentControllerManager implements QuadrupedCont
       // Initialize controllers.
       QuadrupedController jointInitializationController = new QuadrupedForceBasedJointInitializationController(runtimeEnvironment);
 //      QuadrupedController standPrepController = new QuadrupedForceBasedStandPrepController(runtimeEnvironment, controllerToolbox);
-//      QuadrupedController standReadyController = new QuadrupedForceBasedStandReadyController(runtimeEnvironment, controllerToolbox);
+//      QuadrupedController standReadyController = new QuadrupedForceBasedFreezeController(runtimeEnvironment, controllerToolbox);
       QuadrupedController trotWalkController = new QuadrupedVMCForceMultiGaitController(physicalProperties, runtimeEnvironment.getFullRobotModel(),
             runtimeEnvironment.getFootSwitches(), runtimeEnvironment.getControlDT(), runtimeEnvironment.getRobotTimestamp(), registry,
             runtimeEnvironment.getGraphicsListRegistry());

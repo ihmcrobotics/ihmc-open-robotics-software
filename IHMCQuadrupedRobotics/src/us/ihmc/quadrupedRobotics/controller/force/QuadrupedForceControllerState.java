@@ -6,6 +6,7 @@ public enum QuadrupedForceControllerState
    DO_NOTHING,
    STAND_PREP,
    STAND_READY,
+   FREEZE,
    STAND,
    STEP,
    XGAIT,

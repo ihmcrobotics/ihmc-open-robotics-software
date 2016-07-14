@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning;
 
 import us.ihmc.robotics.MathTools;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -19,9 +20,8 @@ public class SoleWaypoint
 
    public SoleWaypoint(SoleWaypoint other)
    {
-      this.position = new Point3d(other.position);
-      this.velocity = new Vector3d(other.velocity);
-      this.time = other.time;
+      this();
+      set(other);
    }
 
    public SoleWaypoint(Point3d position, Vector3d velocity, double time)
@@ -60,6 +60,13 @@ public class SoleWaypoint
       this.position.set(position);
       this.velocity.set(velocity);
       this.time = time;
+   }
+
+   public void set(SoleWaypoint other)
+   {
+      this.position.set(other.position);
+      this.velocity.set(other.velocity);
+      this.time = other.time;
    }
 
    public void setPosition(Point3d position)

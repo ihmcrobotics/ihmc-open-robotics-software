@@ -46,11 +46,11 @@ us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepCo
 us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.solePositionDerivativeGains=200.0,200.0,200.0
 us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.solePositionIntegralGains=0.0,0.0,0.0
 us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController.solePositionMaxIntegralError=0.0
-us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandReadyController.jointDamping=15.0
-us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandReadyController.solePositionProportionalGains=20000.0,20000.0,20000.0
-us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandReadyController.solePositionDerivativeGains=200.0,200.0,200.0
-us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandReadyController.solePositionIntegralGains=0.0,0.0,0.0
-us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandReadyController.solePositionMaxIntegralError=0.0
+us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFreezeController.jointDamping=15.0
+us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFreezeController.solePositionProportionalGains=20000.0,20000.0,20000.0
+us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFreezeController.solePositionDerivativeGains=200.0,200.0,200.0
+us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFreezeController.solePositionIntegralGains=0.0,0.0,0.0
+us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFreezeController.solePositionMaxIntegralError=0.0
 us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedDcmBasedStandController.jointDamping=2.0
 us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedDcmBasedStandController.bodyOrientationProportionalGains=5000.0,5000.0,2500.0
 us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedDcmBasedStandController.bodyOrientationDerivativeGains=750.0,750.0,500.0
