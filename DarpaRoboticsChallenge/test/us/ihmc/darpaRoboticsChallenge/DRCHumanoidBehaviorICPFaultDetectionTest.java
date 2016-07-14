@@ -10,7 +10,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
+import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
@@ -66,7 +66,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    private final SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
    private final SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
 
-   private DRCPushRobotController pushRobotController;
+   private PushRobotController pushRobotController;
    private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
    private SimulationConstructionSet scs;
@@ -261,7 +261,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
-      pushRobotController = new DRCPushRobotController(simulationStarter.getSDFRobot(), fullRobotModel);
+      pushRobotController = new PushRobotController(simulationStarter.getSDFRobot(), fullRobotModel);
 
       SimulationConstructionSet scs = simulationStarter.getSimulationConstructionSet();
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
