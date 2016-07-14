@@ -121,7 +121,7 @@ public abstract class AbstractHeightMapTest
    /* To use test unhandled points include this.
     * 
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testUnhandledPoints()
    {

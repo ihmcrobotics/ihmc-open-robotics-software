@@ -125,7 +125,7 @@ public class YoEntryBoxTest
 
    // GT - these values are twice the minimum working values for Trogdor.
    // This test is for humans to view
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testEnumDisplay() throws SimulationExceededMaximumTimeException, InterruptedException
    {

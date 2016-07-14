@@ -24,7 +24,7 @@ public class ConstantForceTrajectoryGeneratorTest
 
    private ConstantForceTrajectoryGenerator generator;
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructor()
    {
@@ -52,7 +52,7 @@ public class ConstantForceTrajectoryGeneratorTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsDone()
    {
@@ -66,7 +66,7 @@ public class ConstantForceTrajectoryGeneratorTest
       assertTrue(generator.isDone());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIncreasing()
    {

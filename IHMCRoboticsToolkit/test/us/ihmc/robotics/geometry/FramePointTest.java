@@ -475,8 +475,8 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertTrue(expectedResultPoint.epsilonEquals(resultPoint, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testConstructors()
    {
       Random random = new Random();
@@ -507,7 +507,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertTrue(pointToBeTested.getPoint().epsilonEquals(point3dExpected, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testYawAboutPointRegression()
    {
@@ -554,7 +554,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertEquals("not equal", -3096.5574256022164, result.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPitchAboutPointRegression()
    {

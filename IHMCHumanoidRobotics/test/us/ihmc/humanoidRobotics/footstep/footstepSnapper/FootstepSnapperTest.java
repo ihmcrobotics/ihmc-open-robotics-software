@@ -69,7 +69,7 @@ public class FootstepSnapperTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFootstepAndPointsFromDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
@@ -101,8 +101,8 @@ public class FootstepSnapperTest
       }
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
       boolean assertPositionConditions = true;
@@ -169,7 +169,7 @@ public class FootstepSnapperTest
    }
 
 
-   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testSimpleFootstepSnapperOnListOfPoints() throws InsufficientDataException, IOException
    {
@@ -237,7 +237,7 @@ public class FootstepSnapperTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testSimpleFootstepSnapperOnBumpyGround() throws InsufficientDataException
    {
@@ -322,7 +322,7 @@ public class FootstepSnapperTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.2)
+	@DeployableTestMethod(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testConvexHullFootstepSnapperOnSteps() throws InsufficientDataException
    {
@@ -365,7 +365,7 @@ public class FootstepSnapperTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.8)
+	@DeployableTestMethod(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testConvexHullFootstepSnapperOnOddTerrain() throws InsufficientDataException
    {
@@ -409,7 +409,7 @@ public class FootstepSnapperTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 4.0)
+	@DeployableTestMethod(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testAdjustingFootstepSnapperOnOddTerrain() throws InsufficientDataException
    {

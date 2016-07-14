@@ -417,7 +417,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
    @Ignore // Only run this one locally since it doesn't work on Bamboo on Linux necessarily.
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testFrameMethodsThatOnlyWorkOnSomeOperatingSystems()
    {

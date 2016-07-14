@@ -33,7 +33,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CentroidalMomentumMatrixSCSTest
 {
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testTree()
    {
@@ -67,7 +67,7 @@ public class CentroidalMomentumMatrixSCSTest
       JUnitTools.assertTuple3dEquals(angularMomentum, comMomentum.getAngularPart(), 1e-12);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFloatingBody()
    {

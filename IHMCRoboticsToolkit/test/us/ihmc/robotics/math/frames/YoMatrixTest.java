@@ -16,8 +16,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class YoMatrixTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSimpleYoMatrixExample()
    {
       int maxNumberOfRows = 4;
@@ -45,8 +45,8 @@ public class YoMatrixTest
       assertEquals(registry.getVariable("testMatrix_0_0").getValueAsDouble(), checkMatrix.get(0, 0), 1e-10);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testYoMatrixDimensioning()
    {
       int maxNumberOfRows = 4;
@@ -104,8 +104,8 @@ public class YoMatrixTest
       checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(name, maxNumberOfRows, maxNumberOfColumns, checkMatrix2, registry);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testYoMatrixSetToZero()
    {
       int maxNumberOfRows = 4;
@@ -128,8 +128,8 @@ public class YoMatrixTest
       checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(name, maxNumberOfRows, maxNumberOfColumns, zeroMatrix, registry);  
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testYoMatrixSetTooBig()
    {
       int maxNumberOfRows = 4;

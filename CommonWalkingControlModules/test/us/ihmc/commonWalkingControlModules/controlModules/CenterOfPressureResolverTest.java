@@ -43,7 +43,7 @@ public class CenterOfPressureResolverTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @DeployableTestMethod(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testCenterOfPressureResolverSimpleCaseWithNoTorque()
    {
@@ -63,7 +63,7 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.4)
+   @DeployableTestMethod(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testCenterOfPressureResolverSimpleCaseWithVerticalForce()
    {

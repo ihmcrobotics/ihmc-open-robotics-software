@@ -143,7 +143,7 @@ public class MatrixToolsTest
       assertEquals(p0.z, p1.z, 1e-8);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.02)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRemoveRow()
    {
@@ -175,7 +175,7 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.02)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRemoveZeroRows()
    {
@@ -219,7 +219,7 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.02)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testScaleTranspose() throws Exception
    {
@@ -282,7 +282,7 @@ public class MatrixToolsTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.4)
+   @DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testCheckDenseMatrixDimensions()
    {

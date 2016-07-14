@@ -23,7 +23,7 @@ public class YoConcatenatedSplinesTest
    private final static double EPSILON = 1;
    private final static Random random = new Random(2468642L);
 
-	@DeployableTestMethod(estimatedDuration = 1.2)
+	@DeployableTestMethod(estimatedDuration = 1.8)
 	@Test(timeout = 30000)
    public void testSimpleCubicQuinticCubic()
    {
@@ -56,7 +56,7 @@ public class YoConcatenatedSplinesTest
       }
    }
    
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testSimpleCubicQuinticCubicTroublesome()
    {
@@ -95,7 +95,7 @@ public class YoConcatenatedSplinesTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 2.3)
+	@DeployableTestMethod(estimatedDuration = 3.3)
 	@Test(timeout = 30000)
    public void testQuinticsFromCubicQuinticCubic()
    {
@@ -134,7 +134,7 @@ public class YoConcatenatedSplinesTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.1)
+	@DeployableTestMethod(estimatedDuration = 1.4)
 	@Test(timeout = 30000)
    public void testTimeFromArcLength()
    {

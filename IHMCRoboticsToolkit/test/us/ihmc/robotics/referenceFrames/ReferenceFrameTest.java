@@ -271,7 +271,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testGetTransformBetweenFrames()
    {
@@ -445,7 +445,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 	
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testConstructFrameFromPointAndAxis()
    {
@@ -474,7 +474,7 @@ public class ReferenceFrameTest
       tearDown();
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testCopyAndAlignAxisWithVector()
    {
@@ -512,7 +512,7 @@ public class ReferenceFrameTest
       tearDown();
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testCopyAndAlignTwoAxesWithTwoVectors()
    {
@@ -558,7 +558,7 @@ public class ReferenceFrameTest
       tearDown();
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testCopyAndAimAxisAtPoint()
    {
@@ -611,7 +611,7 @@ public class ReferenceFrameTest
       //NOTE:No other reference frame is serializable because of transform3D
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.8)
+	@DeployableTestMethod(estimatedDuration = 0.7)
 	@Test(timeout = 30000)
    public void testGarbageCollectionInBroadTrees()
    {

@@ -14,8 +14,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
 {
 
-	@DeployableTestMethod
-	@Test(timeout = 300000)
+	@DeployableTestMethod(estimatedDuration = 3.9)
+	@Test(timeout = 30000)
    public void testTCPWhiteBoardOne() throws IOException
    {
       String IPAddress = "localHost";
@@ -31,8 +31,8 @@ public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 501, 1001);
    }
 
-	@DeployableTestMethod
-	@Test(timeout = 300000)
+	@DeployableTestMethod(estimatedDuration = 5.6)
+	@Test(timeout = 30000)
    public void testTCPWhiteBoardTwo() throws IOException
    {
       String IPAddress = "localHost";

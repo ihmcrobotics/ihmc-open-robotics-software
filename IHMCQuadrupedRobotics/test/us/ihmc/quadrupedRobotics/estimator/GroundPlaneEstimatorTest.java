@@ -47,7 +47,7 @@ public class GroundPlaneEstimatorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.2)
+   @DeployableTestMethod(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testPointsWithSamePitchAndDifferentPositionGetSameAnswer()
    {
@@ -78,7 +78,7 @@ public class GroundPlaneEstimatorTest
       assertTrue(normalA.epsilonEquals(normalB, 1e-7));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @DeployableTestMethod(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testPointsWithSamePitchAndDifferentPositionGetSameAnswer2()
    {
@@ -116,7 +116,7 @@ public class GroundPlaneEstimatorTest
       assertEquals(actualPitch, computedPitch, epsilon);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.2, targets = TestPlanTarget.InDevelopment)
+   @DeployableTestMethod(estimatedDuration = 0.4, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 30000)
    public void testGetPitchWithFeetOnPlane()
    {

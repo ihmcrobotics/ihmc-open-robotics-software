@@ -12,7 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.controllerAPI.AtlasEndToEndArmTrajectoryMessageTest.class
+   us.ihmc.atlas.controllerAPI.AtlasEndToEndChestTrajectoryMessageTest.class,
+   us.ihmc.atlas.controllerAPI.AtlasEndToEndEndEffectorLoadBearingTest.class
 })
 
 public class AtlasFFastTestSuite

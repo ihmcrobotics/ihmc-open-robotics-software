@@ -19,7 +19,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class GraphicsDemoToolsTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.6)
 	@Test(timeout = 30000)
    public void testCreatePointCloud()
    {
