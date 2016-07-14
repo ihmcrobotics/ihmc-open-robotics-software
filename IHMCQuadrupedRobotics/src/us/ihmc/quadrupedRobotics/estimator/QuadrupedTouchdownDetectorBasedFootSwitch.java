@@ -27,6 +27,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    private final YoFramePoint2d yoResolvedCoP;
    private final SensorOutputMapReadOnly sensorMap;
    private final BooleanYoVariable touchdownDetected;
+   private final BooleanYoVariable initialized;
 
    public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, SDFFullRobotModel fullRobotModel, double totalRobotWeight,
          SensorOutputMapReadOnly sensorMap, YoVariableRegistry parentRegistry)
@@ -40,6 +41,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       this.sensorMap = sensorMap;
       yoResolvedCoP = new YoFramePoint2d(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
       touchdownDetected = new BooleanYoVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry);
+      initialized = new BooleanYoVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetectorInitialized", registry);
 
       setupTouchdownDetectors();
    }
@@ -73,7 +75,10 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
 
       touchdownDetected.set(touchdown);
 
-      return hasTouchedDown.getBooleanValue();
+      if(initialized.getBooleanValue())
+         return touchdownDetected.getBooleanValue();
+      else
+         return hasTouchedDown.getBooleanValue();
    }
 
    @Override
@@ -106,5 +111,11 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    public ReferenceFrame getMeasurementFrame()
    {
       return foot.getSoleFrame();
+   }
+
+   @Override
+   public void trustFootSwitch(boolean trustFootSwitch)
+   {
+      initialized.set(trustFootSwitch);
    }
 }
