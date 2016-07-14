@@ -101,8 +101,8 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    {
       kp.set(gains.getKp());
       kd.set(gains.getKd());
-      maxFeedbackAcceleration.set(gains.getMaximumAcceleration());
-      maxFeedbackJerk.set(gains.getMaximumJerk());
+      maxFeedbackAcceleration.set(gains.getMaximumFeedback());
+      maxFeedbackJerk.set(gains.getMaximumFeedbackRate());
    }
 
    public void setWeightForSolver(double weightForSolver)
