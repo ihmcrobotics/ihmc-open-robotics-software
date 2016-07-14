@@ -28,7 +28,7 @@ public class ComparePushRodTransmissionsTest
    private static final boolean DEBUG = true;
    private static final boolean VISUALIZE = false;
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testCompareInefficientToEfficientAnkle()
    {

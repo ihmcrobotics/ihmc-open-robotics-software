@@ -863,7 +863,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public final void testFramePoint()
    {
       createFrameTuple(theFrame);
@@ -873,7 +873,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 300000, expected = RuntimeException.class)
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testFramePoint1()
    {
       createFrameTuple(theFrame);
@@ -884,7 +884,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public final void testFramePoint2()
    {
       createFrameTuple(theFrame);

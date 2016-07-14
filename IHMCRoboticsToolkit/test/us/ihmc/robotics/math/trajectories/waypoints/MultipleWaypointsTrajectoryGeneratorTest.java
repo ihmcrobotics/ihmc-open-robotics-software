@@ -21,8 +21,8 @@ public class MultipleWaypointsTrajectoryGeneratorTest
 
    private final double EPSILON = 1e-3;
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void test()
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -74,8 +74,8 @@ public class MultipleWaypointsTrajectoryGeneratorTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testPassingThroughWayPoints()
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

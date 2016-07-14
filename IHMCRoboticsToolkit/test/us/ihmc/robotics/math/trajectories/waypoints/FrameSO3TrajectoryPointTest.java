@@ -31,7 +31,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class FrameSO3TrajectoryPointTest
 {
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCommonUsageExample()
    {
@@ -74,7 +74,7 @@ public class FrameSO3TrajectoryPointTest
       assertTrue(expectedFrameSO3TrajectoryPoint.epsilonEquals(frameSO3TrajectoryPoint, 1e-10));
    }
    
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructors()
    {
@@ -142,7 +142,7 @@ public class FrameSO3TrajectoryPointTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetters()
    {
@@ -230,7 +230,7 @@ public class FrameSO3TrajectoryPointTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testChangeFrame() throws Exception
    {
@@ -257,7 +257,7 @@ public class FrameSO3TrajectoryPointTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToZero() throws Exception
    {
@@ -294,7 +294,7 @@ public class FrameSO3TrajectoryPointTest
             epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToNaN() throws Exception
    {
@@ -360,7 +360,7 @@ public class FrameSO3TrajectoryPointTest
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
    }
    
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeSetsAngGets()
    {
@@ -450,7 +450,7 @@ public class FrameSO3TrajectoryPointTest
       assertEquals(expectedString, string);
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeMoreSettersAndGetters()
    {

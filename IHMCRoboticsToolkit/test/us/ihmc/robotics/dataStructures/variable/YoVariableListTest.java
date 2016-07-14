@@ -22,7 +22,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class YoVariableListTest
 {
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCommonUsage()
    {
@@ -104,8 +104,8 @@ public class YoVariableListTest
 
    }
 
-	@DeployableTestMethod
-	@Test(timeout = 5000)
+	@DeployableTestMethod(estimatedDuration = 0.5)
+	@Test(timeout = 30000)
    public void testGetPerformanceInLargeList()
    {
       // Test should take O(n) or O(n lg n) approximately. Was taking O(n^2)
@@ -157,7 +157,7 @@ public class YoVariableListTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testToString()
    {
@@ -176,7 +176,7 @@ public class YoVariableListTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAddVariables()
    {
@@ -229,7 +229,7 @@ public class YoVariableListTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCommonUsageTwo()
    {
@@ -283,7 +283,7 @@ public class YoVariableListTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetMatchingVariables()
    {
@@ -344,7 +344,7 @@ public class YoVariableListTest
       assertTrue(matchedNameShouldBeEmpty.isEmpty());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAddChangeListener()
    {

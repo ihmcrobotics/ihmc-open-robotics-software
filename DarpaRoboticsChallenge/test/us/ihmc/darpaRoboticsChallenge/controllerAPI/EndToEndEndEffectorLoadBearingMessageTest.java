@@ -39,8 +39,8 @@ public abstract class EndToEndEndEffectorLoadBearingMessageTest implements Multi
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @SuppressWarnings("unchecked")
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 41.3)
+   @Test(timeout = 210000)
    public void testSwitchFootToLoadBearing() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

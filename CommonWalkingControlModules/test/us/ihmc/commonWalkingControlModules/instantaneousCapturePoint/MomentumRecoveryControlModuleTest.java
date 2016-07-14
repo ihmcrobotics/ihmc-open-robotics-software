@@ -69,8 +69,8 @@ public class MomentumRecoveryControlModuleTest
    private BooleanYoVariable usingUpperBodyMomentum;
    private BooleanYoVariable usingHighMomentumWeight;
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test (timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test (timeout = 30000)
    /**
     * This test passes a huge ICP error and a bad ICP to the control module and makes
     * sure recovery gets triggered.
@@ -111,8 +111,8 @@ public class MomentumRecoveryControlModuleTest
       assertTrue(usingHighMomentumWeight.getBooleanValue());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test (timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test (timeout = 30000)
    /**
     * This test passes a huge ICP error and a bad ICP to the control module and makes
     * sure recovery gets triggered.
@@ -153,8 +153,8 @@ public class MomentumRecoveryControlModuleTest
       assertTrue(usingHighMomentumWeight.getBooleanValue());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test (timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test (timeout = 30000)
    /**
     * This test passes a huge ICP error and a bad ICP to the control module but disables momentum
     * recovery. It makes sure the recovery does not get triggered.
@@ -197,8 +197,8 @@ public class MomentumRecoveryControlModuleTest
       assertFalse(usingHighMomentumWeight.getBooleanValue());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test (timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test (timeout = 30000)
    /**
     * This test passes a huge ICP error and a bad ICP to the control module but disables momentum
     * recovery. It makes sure the recovery does not get triggered.
@@ -241,8 +241,8 @@ public class MomentumRecoveryControlModuleTest
       assertFalse(usingHighMomentumWeight.getBooleanValue());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test (timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test (timeout = 30000)
    public void testLogicDoubleSupportSafe()
    {
       Vector3d leftFootPosition = new Vector3d(0.0, 0.1, 0.0);
@@ -276,8 +276,8 @@ public class MomentumRecoveryControlModuleTest
       assertFalse(usingHighMomentumWeight.getBooleanValue());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test (timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test (timeout = 30000)
    public void testLogicDoubleSupportUnsafe()
    {
       Vector3d leftFootPosition = new Vector3d(0.0, 0.1, 0.0);
@@ -311,8 +311,8 @@ public class MomentumRecoveryControlModuleTest
       assertTrue(usingHighMomentumWeight.getBooleanValue());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test (timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test (timeout = 30000)
    public void testLogicSingleSupportSafe()
    {
       Vector3d leftFootPosition = new Vector3d(0.0, 0.1, 0.0);
@@ -351,8 +351,8 @@ public class MomentumRecoveryControlModuleTest
       assertFalse(usingHighMomentumWeight.getBooleanValue());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test (timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test (timeout = 30000)
    public void testLogicSingleSupportUnsafe()
    {
       Vector3d leftFootPosition = new Vector3d(0.0, 0.1, 0.0);
@@ -391,8 +391,8 @@ public class MomentumRecoveryControlModuleTest
       assertTrue(usingHighMomentumWeight.getBooleanValue());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test (timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test (timeout = 30000)
    /**
     * This test passes a huge ICP error and a good ICP to the control module and makes
     * sure high weight recovery gets triggered but not upper body momentum.

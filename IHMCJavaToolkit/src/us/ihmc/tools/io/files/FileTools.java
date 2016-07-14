@@ -103,7 +103,7 @@ public class FileTools
             newBytes[newBytesIndex++] = fileBytes[fileBytesIndex++];
             newBytes[newBytesIndex++] = fileBytes[fileBytesIndex++];
          }
-         else if (fileBytes[fileBytesIndex] == CARRIAGE_RETURN || fileBytes[fileBytesIndex] == LINE_FEED)
+         else if (fileBytesIndex < fileBytes.length && (fileBytes[fileBytesIndex] == CARRIAGE_RETURN || fileBytes[fileBytesIndex] == LINE_FEED))
          {
             newBytes[newBytesIndex++] = fileBytes[fileBytesIndex++];
          }

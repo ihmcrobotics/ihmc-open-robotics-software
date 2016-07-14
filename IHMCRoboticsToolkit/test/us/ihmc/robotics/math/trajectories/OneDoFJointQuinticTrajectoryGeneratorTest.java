@@ -47,7 +47,7 @@ public class OneDoFJointQuinticTrajectoryGeneratorTest
       trajectoryTimeProvider = new ConstantDoubleProvider(timeRequired);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructor()
    {
@@ -61,7 +61,7 @@ public class OneDoFJointQuinticTrajectoryGeneratorTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsDone()
    {
@@ -75,7 +75,7 @@ public class OneDoFJointQuinticTrajectoryGeneratorTest
       assertTrue(generator.isDone());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void test()
    {

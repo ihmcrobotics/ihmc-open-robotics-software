@@ -91,7 +91,7 @@ public class YoVariableHolderImplementationTest
       yoVariableHolderImplementation = null;
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVariable()
    {
@@ -112,7 +112,7 @@ public class YoVariableHolderImplementationTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVariable1()
    {
@@ -159,7 +159,7 @@ public class YoVariableHolderImplementationTest
       assert testPassed;
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVariables()
    {
@@ -189,7 +189,7 @@ public class YoVariableHolderImplementationTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVariables1()
    {
@@ -221,7 +221,7 @@ public class YoVariableHolderImplementationTest
       assertEquals(0, variables.size());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVariables2()
    {
@@ -257,7 +257,7 @@ public class YoVariableHolderImplementationTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHasUniqueVariable()
    {
@@ -277,7 +277,7 @@ public class YoVariableHolderImplementationTest
       assertTrue(!yoVariableHolderImplementation.hasUniqueVariable("registryC.variableTwo"));
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHasUniqueVariable1()
    {

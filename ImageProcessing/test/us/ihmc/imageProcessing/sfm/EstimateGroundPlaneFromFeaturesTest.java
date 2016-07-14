@@ -32,7 +32,7 @@ public class EstimateGroundPlaneFromFeaturesTest
     * Create a set of observations with perfect data and see if it can reconstruct the plane and transform
     */
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void perfect()
    {

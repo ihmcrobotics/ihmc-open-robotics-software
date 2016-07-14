@@ -51,7 +51,7 @@ public class SimulationConstructionSetMemoryReclamationTest
    }
 
    // TODO https://jira.ihmc.us/browse/DRC-2208
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testMemoryReclamationForSCSWithARobotAndVideo()
    {

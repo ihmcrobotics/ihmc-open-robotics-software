@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Video)
 @SuiteClasses
 ({
-   us.ihmc.atlas.roughTerrainWalking.AtlasEndToEndCinderBlockFieldTest.class
+   us.ihmc.atlas.roughTerrainWalking.AtlasPointyRocksEnvironmentContactsTest.class
 })
 
 public class AtlasMVideoTestSuite

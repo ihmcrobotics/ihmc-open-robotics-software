@@ -46,8 +46,8 @@ public class ContactableValveRobotTest
 
    private YoVariableRegistry valveTestRegistry;
 
-   @DeployableTestMethod
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 2.3)
+   @Test(timeout = 30000)
    public void testValveIsClosing()
    {
       boolean isValveClosed = false;
@@ -89,8 +89,8 @@ public class ContactableValveRobotTest
       blockingSimulationRunner.destroySimulation();
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testGetValveTransformToWorld()
    {
       Random random = new Random(1235125L);

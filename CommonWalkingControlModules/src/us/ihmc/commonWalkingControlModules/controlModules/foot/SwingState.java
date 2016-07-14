@@ -44,7 +44,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class SwingState extends AbstractUnconstrainedState
 {
-   private static final boolean useNewSwingTrajectoyOptimization = false;
+   private final boolean useNewSwingTrajectoyOptimization;
    private static final boolean CONTROL_TOE = false;
 
    private final boolean visualizeSwingTrajectory = true;
@@ -145,6 +145,7 @@ public class SwingState extends AbstractUnconstrainedState
       ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
       ArrayList<PositionTrajectoryGenerator> pushRecoveryPositionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
 
+      useNewSwingTrajectoyOptimization = walkingControllerParameters.useSwingTrajectoryOptimizer();
       if (useNewSwingTrajectoyOptimization)
       {
          positionTrajectoryGenerators.add(swingTrajectoryGeneratorNew);
@@ -240,6 +241,9 @@ public class SwingState extends AbstractUnconstrainedState
          swingTrajectoryGeneratorNew.setTrajectoryType(trajectoryParametersProvider.getTrajectoryParameters().getTrajectoryType());
          swingTrajectoryGeneratorNew.setSwingHeight(trajectoryParametersProvider.getTrajectoryParameters().getSwingHeight());
          swingTrajectoryGeneratorNew.setStanceFootPosition(stanceFootPosition);
+
+         // old one to compare output
+         swingTrajectoryGenerator.initialize();
       }
 
       positionTrajectoryGenerator.initialize();
@@ -274,6 +278,9 @@ public class SwingState extends AbstractUnconstrainedState
          positionTrajectoryGenerator.compute(time);
 
          positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+
+         if (useNewSwingTrajectoyOptimization)
+            swingTrajectoryGenerator.compute(time);
       }
       else
       {

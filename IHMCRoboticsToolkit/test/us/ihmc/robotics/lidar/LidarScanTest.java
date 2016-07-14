@@ -210,7 +210,7 @@ public class LidarScanTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testGetCopy()
    {
@@ -231,7 +231,7 @@ public class LidarScanTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testScanParameters()
    {
@@ -270,7 +270,7 @@ public class LidarScanTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testGetAllPoints()
    {

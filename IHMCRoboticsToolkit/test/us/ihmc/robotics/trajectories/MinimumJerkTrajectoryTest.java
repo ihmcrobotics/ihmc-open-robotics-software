@@ -18,7 +18,7 @@ public class MinimumJerkTrajectoryTest
       return min + Math.random() * (max - min);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testRandomInitialFinalConditions()
    {

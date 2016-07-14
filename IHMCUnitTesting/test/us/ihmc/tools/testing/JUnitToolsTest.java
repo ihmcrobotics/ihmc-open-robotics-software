@@ -74,7 +74,7 @@ public class JUnitToolsTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testAssertPoint3dEquals()
    {
       final int ITERATIONS = 1000;
@@ -96,7 +96,7 @@ public class JUnitToolsTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testAssertPoint3fEquals()
    {
       final int ITERATIONS = 1000;
@@ -118,7 +118,7 @@ public class JUnitToolsTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testAssertPoint2dEquals()
    {
       final int ITERATIONS = 1000;
@@ -142,7 +142,7 @@ public class JUnitToolsTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 30000)
    public void testAssertTuple2fEquals()
    {
       final int ITERATIONS = 1000;
@@ -161,7 +161,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
+   @DeployableTestMethod(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testAssertJamaMatrixEquals()
    {
@@ -215,7 +215,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAssertMatrixEqualsZero()
    {

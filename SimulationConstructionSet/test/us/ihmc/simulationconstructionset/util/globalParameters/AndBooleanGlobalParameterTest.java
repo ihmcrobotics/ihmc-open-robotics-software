@@ -26,7 +26,7 @@ public class AndBooleanGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetThrowsException()
    {
@@ -55,7 +55,7 @@ public class AndBooleanGlobalParameterTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAndBooleanGlobalParameter()
    {
@@ -78,7 +78,7 @@ public class AndBooleanGlobalParameterTest
       assertEquals(valueA && valueB, multiplicativeDoubleGlobalParameter.getValue());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAndBooleanGlobalParameterUpdate()
    {
@@ -114,7 +114,7 @@ public class AndBooleanGlobalParameterTest
       assertEquals(valueA && valueB, multiplicativeDoubleGlobalParameter.getValue());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFamilyTree()
    {

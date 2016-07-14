@@ -20,7 +20,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class AlphaFilteredYoFrameQuaternionTest
 {
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testInitialValue()
    {
@@ -40,7 +40,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       JUnitTools.assertQuaternionsEqual(qMeasured, qFiltered, 1e-12);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAlpha1()
    {
@@ -64,7 +64,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       JUnitTools.assertQuaternionsEqualUsingDifference(qInitial, qFiltered, 1e-12);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAlpha0()
    {
@@ -88,7 +88,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       JUnitTools.assertQuaternionsEqualUsingDifference(qFinal, qFiltered, 1e-12);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testStepChange()
    {

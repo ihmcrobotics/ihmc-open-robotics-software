@@ -50,7 +50,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    private static final boolean DO_ASSERTS = true;
 
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.1)
    @Test (timeout = 30000)
    public void testGetStoredPoints()
    {
@@ -848,7 +848,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       assertEquals(expected, actual, epsilon);
    }
 
-   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    @Test(timeout = 150000)
    public void testOnALineOfPoints()
    {
@@ -867,7 +867,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       ThreadTools.sleepForever();
    }
 
-   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    @Test(timeout = 150000)
    public void testOnSomeSlopes()
    {
@@ -889,7 +889,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 //    ThreadTools.sleepForever();
    }
 
-   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    @Test(timeout = 150000)
    public void testOnSomeStairCases()
    {
@@ -915,7 +915,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       ThreadTools.sleepForever();
    }
 
-   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    @Test(timeout = 150000)
    public void testUsingStairGroundProfile()
    {
