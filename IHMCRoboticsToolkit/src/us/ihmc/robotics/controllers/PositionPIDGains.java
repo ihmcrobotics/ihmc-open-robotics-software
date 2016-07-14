@@ -10,8 +10,8 @@ public class PositionPIDGains implements PositionPIDGainsInterface
    private double positionMaxDerivativeError = Double.POSITIVE_INFINITY;
    private double positionMaxProportionalError = Double.POSITIVE_INFINITY;
 
-   private double positionMaximumAcceleration = Double.POSITIVE_INFINITY;
-   private double positionMaximumJerk = Double.POSITIVE_INFINITY;
+   private double positionMaximumFeedback = Double.POSITIVE_INFINITY;
+   private double positionMaximumFeedbackRate = Double.POSITIVE_INFINITY;
 
    @Override
    public void set(PositionPIDGainsInterface gains)
@@ -27,8 +27,8 @@ public class PositionPIDGains implements PositionPIDGainsInterface
       positionMaxDerivativeError = gains.getMaximumDerivativeError();
       positionMaxProportionalError = gains.getMaximumProportionalError();
 
-      positionMaximumAcceleration = gains.getMaximumAcceleration();
-      positionMaximumJerk = gains.getMaximumJerk();
+      positionMaximumFeedback = gains.getMaximumFeedback();
+      positionMaximumFeedbackRate = gains.getMaximumFeedbackRate();
    }
 
    public void setGains(double proportionalGain, double derivativeGain)
@@ -65,10 +65,10 @@ public class PositionPIDGains implements PositionPIDGainsInterface
       this.positionMaxIntegralError = maxIntegralError;
    }
 
-   public void setMaximumAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setMaximumFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      positionMaximumAcceleration = maxAcceleration;
-      positionMaximumJerk = maxJerk;
+      positionMaximumFeedback = maxFeedback;
+      positionMaximumFeedbackRate = maxFeedbackRate;
    }
 
    public void setMaximumVelocityError(double maxDerivativeError)
@@ -106,15 +106,15 @@ public class PositionPIDGains implements PositionPIDGainsInterface
    }
 
    @Override
-   public double getMaximumAcceleration()
+   public double getMaximumFeedback()
    {
-      return positionMaximumAcceleration;
+      return positionMaximumFeedback;
    }
 
    @Override
-   public double getMaximumJerk()
+   public double getMaximumFeedbackRate()
    {
-      return positionMaximumJerk;
+      return positionMaximumFeedbackRate;
    }
 
    @Override

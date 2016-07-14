@@ -26,15 +26,15 @@ public interface YoPositionPIDGainsInterface extends PositionPIDGainsInterface
 
    public abstract void setIntegralGains(double[] integralGains, double maxIntegralError);
 
-   public abstract void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk);
+   public abstract void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate);
 
    public abstract void setMaxDerivativeError(double maxDerivativeError);
 
    public abstract void setMaxProportionalError(double maxProportionalError);
 
-   public abstract DoubleYoVariable getYoMaximumAcceleration();
+   public abstract DoubleYoVariable getYoMaximumFeedback();
 
-   public abstract DoubleYoVariable getYoMaximumJerk();
+   public abstract DoubleYoVariable getYoMaximumFeedbackRate();
 
    public abstract DoubleYoVariable getYoMaximumDerivativeError();
 

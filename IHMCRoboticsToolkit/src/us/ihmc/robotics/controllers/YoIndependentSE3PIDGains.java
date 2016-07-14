@@ -61,9 +61,9 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
       positionGains.setIntegralGains(integralGains, maxIntegralError);
    }
 
-   public void setPositionMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setPositionMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      positionGains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      positionGains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
    public void setPositionMaxDerivativeError(double maxDerivativeError)
@@ -106,9 +106,9 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
       orientationGains.setIntegralGains(integralGains, maxIntegralError);
    }
 
-   public void setOrientationMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setOrientationMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      orientationGains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      orientationGains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
    public void setOrientationMaxDerivativeError(double maxDerivativeError)

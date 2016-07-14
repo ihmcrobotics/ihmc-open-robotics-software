@@ -69,7 +69,7 @@ public class AxisAngleOrientationController
 
       feedbackAngularAction = new YoFrameVector(prefix + "FeedbackAngularAction", bodyFrame, registry);
       rateLimitedFeedbackAngularAction = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackAngularAction", "",
-            registry, gains.getYoMaximumJerk(), dt, feedbackAngularAction);
+            registry, gains.getYoMaximumFeedbackRate(), dt, feedbackAngularAction);
 
       parentRegistry.addChild(registry);
    }
@@ -94,7 +94,7 @@ public class AxisAngleOrientationController
       // Limit the max acceleration of the feedback, but not of the feedforward...
       // JEP changed 150430 based on Atlas hitting limit stops.
       double feedbackAngularActionMagnitude = output.length();
-      double maximumAction = gains.getMaximumAcceleration();
+      double maximumAction = gains.getMaximumFeedback();
       if (feedbackAngularActionMagnitude > maximumAction)
       {
          output.scale(maximumAction / feedbackAngularActionMagnitude);
@@ -204,7 +204,7 @@ public class AxisAngleOrientationController
 
    public void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      gains.setMaxAccelerationAndJerk(maxFeedback, maxFeedbackRate);
+      gains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
    public void setMaxDerivativeError(double maxDerivativeError)

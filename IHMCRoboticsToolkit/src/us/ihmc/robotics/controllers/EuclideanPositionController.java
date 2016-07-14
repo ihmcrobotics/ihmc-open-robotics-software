@@ -63,7 +63,7 @@ public class EuclideanPositionController implements PositionController
 
       feedbackLinearAction = new YoFrameVector(prefix + "FeedbackLinearAction", bodyFrame, registry);
       rateLimitedFeedbackLinearAction = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAction", "",
-            registry, gains.getYoMaximumJerk(), dt, feedbackLinearAction);
+            registry, gains.getYoMaximumFeedbackRate(), dt, feedbackLinearAction);
 
       parentRegistry.addChild(registry);
    }
@@ -86,9 +86,9 @@ public class EuclideanPositionController implements PositionController
       // Limit the max acceleration of the feedback, but not of the feedforward...
       // JEP changed 150430 based on Atlas hitting limit stops.
       double feedbackLinearActionMagnitude = output.length();
-      if (feedbackLinearActionMagnitude > gains.getMaximumAcceleration())
+      if (feedbackLinearActionMagnitude > gains.getMaximumFeedback())
       {
-         output.scale(gains.getMaximumAcceleration() / feedbackLinearActionMagnitude);
+         output.scale(gains.getMaximumFeedback() / feedbackLinearActionMagnitude);
       }
 
       feedbackLinearAction.set(output);
@@ -201,7 +201,7 @@ public class EuclideanPositionController implements PositionController
 
    public void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      gains.setMaxAccelerationAndJerk(maxFeedback, maxFeedbackRate);
+      gains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
    public void setMaxDerivativeError(double maxDerivativeError)
