@@ -665,7 +665,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 69.2, targets = {TestPlanTarget.Fast})
+   @DeployableTestMethod(estimatedDuration = 69.2, targets = {TestPlanTarget.InDevelopment})
    @Test(timeout = 350000)
    /**
     * In this test, the robot walks forward. On each step a half of the foot is cut out. The steps are continuous with no stopping in between steps.
