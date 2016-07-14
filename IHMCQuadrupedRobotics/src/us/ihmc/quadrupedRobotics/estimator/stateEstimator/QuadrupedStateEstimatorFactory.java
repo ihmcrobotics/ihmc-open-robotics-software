@@ -68,7 +68,7 @@ public class QuadrupedStateEstimatorFactory
    }
 
    public static QuadrantDependentList<FootSwitchInterface> createFootSwitches(QuadrantDependentList<ContactablePlaneBody> quadrupedFeet, double gravity,
-         SDFFullRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly, YoVariableRegistry registry)
+         SDFFullRobotModel fullRobotModel, YoVariableRegistry registry)
    {
       QuadrantDependentList<FootSwitchInterface> footSwitches = new QuadrantDependentList<FootSwitchInterface>();
       double gravityMagnitude = Math.abs(gravity);
@@ -81,7 +81,7 @@ public class QuadrupedStateEstimatorFactory
 //         SettableFootSwitch footSwitch = new SettableFootSwitch(quadrupedFeet.get(robotQuadrant), robotQuadrant, totalRobotWeight, registry);
 //         KinematicsBasedFootSwitch footSwitch = new KinematicsBasedFootSwitch(namePrefix, quadrupedFeet, switchZThreshold, totalRobotWeight, robotQuadrant, registry);
          QuadrupedTouchdownDetectorBasedFootSwitch footSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(robotQuadrant, contactablePlaneBody, fullRobotModel,
-               totalRobotWeight, sensorOutputMapReadOnly, registry);
+               totalRobotWeight, registry);
          footSwitches.set(robotQuadrant, footSwitch);
       }
       return footSwitches;
