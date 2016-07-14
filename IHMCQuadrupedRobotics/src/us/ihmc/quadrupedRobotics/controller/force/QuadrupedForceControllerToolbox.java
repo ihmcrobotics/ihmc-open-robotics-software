@@ -21,7 +21,7 @@ public class QuadrupedForceControllerToolbox
    private final QuadrupedTimedStepController timedStepController;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrupedFallDetector fallDetector;
-   private final QuadrupedSoleWaypointController quadrupedSoleWaypointController;
+   private final QuadrupedSoleWaypointController soleWaypointController;
 
    public QuadrupedForceControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties, YoVariableRegistry registry)
    {
@@ -41,7 +41,7 @@ public class QuadrupedForceControllerToolbox
       timedStepController = new QuadrupedTimedStepController(solePositionController, runtimeEnvironment.getRobotTimestamp(), registry, runtimeEnvironment.getGraphicsListRegistry());
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
       fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
-      quadrupedSoleWaypointController = new QuadrupedSoleWaypointController(runtimeEnvironment, referenceFrames, solePositionController, taskSpaceEstimator, taskSpaceController);
+      soleWaypointController = new QuadrupedSoleWaypointController(runtimeEnvironment, referenceFrames, solePositionController, taskSpaceEstimator);
    }
 
    public QuadrupedReferenceFrames getReferenceFrames()
@@ -104,8 +104,8 @@ public class QuadrupedForceControllerToolbox
       return fallDetector;
    }
 
-   public QuadrupedSoleWaypointController getQuadrupedSoleWaypointController()
+   public QuadrupedSoleWaypointController getSoleWaypointController()
    {
-      return quadrupedSoleWaypointController;
+      return soleWaypointController;
    }
 }
