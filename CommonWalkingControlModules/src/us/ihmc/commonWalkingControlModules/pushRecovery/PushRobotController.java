@@ -46,10 +46,14 @@ public class PushRobotController implements RobotController
    
    public PushRobotController(SDFRobot pushableRobot, FullRobotModel fullRobotModel)
    {
+      this(pushableRobot, fullRobotModel.getChest().getParentJoint().getName());
+   }
+   
+   public PushRobotController(SDFRobot pushableRobot, String jointNameToApplyForce)
+   {
       yoTime = pushableRobot.getYoTime();
       forcePoint = new ExternalForcePoint("pushTheRobot", new Vector3d(0, 0, 0.3), pushableRobot);
-      String upperSpineJointName = fullRobotModel.getChest().getParentJoint().getName();
-      pushableRobot.getJoint(upperSpineJointName).addExternalForcePoint(forcePoint);
+      pushableRobot.getJoint(jointNameToApplyForce).addExternalForcePoint(forcePoint);
       pushableRobot.setController(this);
 
       pushTimeSwitch.set(Double.NEGATIVE_INFINITY);
