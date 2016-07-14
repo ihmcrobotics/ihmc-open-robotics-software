@@ -19,10 +19,18 @@ public class LLAQuadrupedForceBasedStandControllerTest extends QuadrupedForceBas
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @DeployableTestMethod(estimatedDuration = 10.0)
    @Test(timeout = 50000)
    public void testStandingUpAndAdjustingCoM()
    {
       super.testStandingUpAndAdjustingCoM();
+   }
+   
+   @Override
+   @DeployableTestMethod(estimatedDuration = 10.0)
+   @Test(timeout = 50000)
+   public void testStandingAndResistingPushes()
+   {
+      super.testStandingAndResistingPushes();
    }
 }

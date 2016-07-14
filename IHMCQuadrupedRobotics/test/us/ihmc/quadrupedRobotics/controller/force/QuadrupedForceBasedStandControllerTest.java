@@ -2,10 +2,13 @@ package us.ihmc.quadrupedRobotics.controller.force;
 
 import java.io.IOException;
 
+import javax.vecmath.Vector3d;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -20,8 +23,9 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public abstract class QuadrupedForceBasedStandControllerTest implements QuadrupedMultiRobotTestInterface
 {
-   protected GoalOrientedTestConductor conductor;
-   protected QuadrupedForceTestYoVariables variables;
+   private GoalOrientedTestConductor conductor;
+   private QuadrupedForceTestYoVariables variables;
+   private PushRobotTestConductor pusher;
 
    @Before
    public void setup()
@@ -33,8 +37,10 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
+         quadrupedTestFactory.setUsePushRobotController(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+         pusher = new PushRobotTestConductor(conductor.getScs());
       }
       catch (IOException e)
       {
@@ -51,7 +57,44 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @DeployableTestMethod(estimatedDuration = 10.0)
+   @Test(timeout = 50000)
+   public void testStandingAndResistingPushes()
+   {
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      
+      pusher.applyForce(new Vector3d(0.0, 1.0, 0.0), 30.0, 1.0);
+      
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
+      conductor.simulate();
+      
+      pusher.applyForce(new Vector3d(-1.0, -1.0, 0.0), 30.0, 1.0);
+      
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
+      conductor.simulate();
+      
+      pusher.applyForce(new Vector3d(0.0, 0.0, 1.0), 50.0, 1.0);
+      
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
+      conductor.simulate();
+      
+      pusher.applyForce(new Vector3d(0.0, 0.0, -1.0), 50.0, 1.0);
+      
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
+      conductor.simulate();
+      
+      pusher.applyForce(new Vector3d(0.0, 0.0, 1.0), 200.0, 0.5);
+      
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
+      conductor.simulate();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 10.0)
    @Test(timeout = 50000)
    public void testStandingUpAndAdjustingCoM()
    {
