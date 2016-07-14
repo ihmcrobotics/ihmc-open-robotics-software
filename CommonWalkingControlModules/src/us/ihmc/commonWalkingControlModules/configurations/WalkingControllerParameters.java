@@ -218,4 +218,12 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return false;
    }
+
+   /**
+    * Determines whether the swing trajectory should be optimized (new feature to be tested with Atlas)
+    */
+   public boolean useSwingTrajectoryOptimizer()
+   {
+      return false;
+   }
 }
