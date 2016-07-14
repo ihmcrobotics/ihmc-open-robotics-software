@@ -36,7 +36,7 @@ public class MatrixExponentialCalculatorTest
       assertTrue(MatrixFeatures.isIdentical(taylorSeriesCheck, result, 1e-6));
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testEfficiency()
    {

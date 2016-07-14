@@ -120,7 +120,7 @@ public class ProcessSpawnerTest
       validateFileContents(randomString);
    }
 
-   @DeployableTestMethod(estimatedDuration = 2.6, targets = TestPlanTarget.Flaky)
+   @DeployableTestMethod(estimatedDuration = 2.1, targets = TestPlanTarget.Flaky)
    @Test(timeout = 30000)
    public void testExitListeners() throws Exception
    {

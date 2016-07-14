@@ -26,7 +26,7 @@ public class KryoObjectCommunicatorTest
 {
 
    // This test causes problems on Linux due to a bug in the way Java does its epoll wrapper
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testAutomaticReconnect() throws IOException, InterruptedException
    {
@@ -97,7 +97,7 @@ public class KryoObjectCommunicatorTest
       server.close();
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000) 
    public void testStateListener() throws IOException, InterruptedException
    {
@@ -149,7 +149,7 @@ public class KryoObjectCommunicatorTest
       client.close();
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void testConnectionLimiter() throws IOException, InterruptedException
    {
@@ -223,7 +223,7 @@ public class KryoObjectCommunicatorTest
       
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.4)
 	@Test(timeout=300000)
    public void testSendAndReceive() throws IOException, InterruptedException
    {

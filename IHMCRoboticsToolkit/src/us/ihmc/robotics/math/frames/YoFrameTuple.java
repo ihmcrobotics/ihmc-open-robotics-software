@@ -367,6 +367,12 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple();
    }
 
+   public final void sub(Tuple3d tuple1, Tuple3d tuple2)
+   {
+      frameTuple.sub(tuple1, tuple2);
+      getYoValuesFromFrameTuple();
+   }
+
    public final void sub(FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
    {
       frameTuple.setToZero(getReferenceFrame());

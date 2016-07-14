@@ -16,8 +16,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class AverageQuaternionCalculatorTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.04)
-   @Test(timeout = 500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testAgainstInterpolation() throws Exception
    {
       for (int nTest = 0; nTest < 10; nTest++)
@@ -47,8 +47,8 @@ public class AverageQuaternionCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.01)
-   @Test(timeout = 100)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testWithRotationsAroundTheSameAxis() throws Exception
    {
       for (int nTest = 0; nTest < 10; nTest++)

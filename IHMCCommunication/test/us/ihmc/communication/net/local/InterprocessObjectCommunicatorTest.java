@@ -20,7 +20,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class InterprocessObjectCommunicatorTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOpeningAndClosingALotOfPorts() throws IOException
    {
@@ -44,7 +44,7 @@ public class InterprocessObjectCommunicatorTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.5)
+	@DeployableTestMethod(estimatedDuration = 1.4)
    @Test(timeout = 30000)
    public void testSendingObjectsToClients() throws IOException
    {

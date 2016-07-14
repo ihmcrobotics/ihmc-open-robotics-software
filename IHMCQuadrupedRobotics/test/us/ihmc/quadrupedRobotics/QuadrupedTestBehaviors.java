@@ -10,38 +10,40 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestC
 
 public class QuadrupedTestBehaviors
 {
-   public static void standUp(GoalOrientedTestConductor conductor, QuadrupedTestYoVariables variables) throws AssertionFailedError
+   public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
    {
-      if (variables instanceof QuadrupedForceTestYoVariables)
-      {
-         QuadrupedForceTestYoVariables forceVariables = (QuadrupedForceTestYoVariables) variables;
-         
-         conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(forceVariables.getForceControllerState(), QuadrupedForceControllerState.STAND_READY));
-         conductor.simulate();
-         
-         forceVariables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
-         conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 2.0));
-         conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.1));
-         conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(forceVariables.getForceControllerState(), QuadrupedForceControllerState.STAND));
-         conductor.simulate();
-      }
-      else
-      {
-         QuadrupedPositionTestYoVariables positionVariables = (QuadrupedPositionTestYoVariables) variables;
-         conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(positionVariables.getPositionControllerState(), QuadrupedPositionControllerState.DO_NOTHING));
-         conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
-         conductor.simulate();
-         
-         positionVariables.getUserTrigger().set(QuadrupedPositionControllerRequestedEvent.REQUEST_STAND_PREP);
-         conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(positionVariables.getPositionControllerState(), QuadrupedPositionControllerState.STAND_READY));
-         conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
-         conductor.simulate();
-         
-         positionVariables.getUserTrigger().set(QuadrupedPositionControllerRequestedEvent.REQUEST_CRAWL);
-         conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.1));
-         conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(positionVariables.getPositionControllerState(), QuadrupedPositionControllerState.CRAWL));
-         conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
-         conductor.simulate();
-      }
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.STAND_READY));
+      conductor.simulate();
+
+      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
+      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 2.0));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.STAND));
+      conductor.simulate();
+   }
+
+   public static void standUp(GoalOrientedTestConductor conductor, QuadrupedPositionTestYoVariables variables) throws AssertionFailedError
+   {
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getPositionControllerState(), QuadrupedPositionControllerState.DO_NOTHING));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
+      conductor.simulate();
+
+      variables.getUserTrigger().set(QuadrupedPositionControllerRequestedEvent.REQUEST_STAND_PREP);
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getPositionControllerState(), QuadrupedPositionControllerState.STAND_READY));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
+      conductor.simulate();
+
+      variables.getUserTrigger().set(QuadrupedPositionControllerRequestedEvent.REQUEST_CRAWL);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getPositionControllerState(), QuadrupedPositionControllerState.CRAWL));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
+      conductor.simulate();
+   }
+
+   public static void enterXGait(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
+   {
+      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.XGAIT));
+      conductor.simulate();
    }
 }

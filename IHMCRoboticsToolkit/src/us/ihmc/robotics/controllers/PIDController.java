@@ -200,19 +200,24 @@ public class PIDController
 
    private double computeIntegralEffortAndAddPDEffort(double deltaTime)
    {
-      // LIMIT THE MAX INTEGRAL ERROR SO WON'T WIND UP
-      double maxError = maxIntegralError.getDoubleValue();
-      double errorAfterLeak = pdController.getPositionError() * deltaTime + integralLeakRatio.getDoubleValue() * cumulativeError.getDoubleValue();
-      cumulativeError.set(errorAfterLeak);
-      cumulativeError.set(MathTools.clipToMinMax(cumulativeError.getDoubleValue(), maxError));
+      double outputSignal = (pdController.getProportionalGain() * pdController.getPositionError()) + (pdController.getDerivativeGain() * pdController.getRateError());
 
-      actionI.set(integralGain.getDoubleValue() * cumulativeError.getDoubleValue());
+      if (integralGain.getDoubleValue() < 1.0e-5)
+      {
+         cumulativeError.set(0.0);
+      }
+      else
+      {
+         // LIMIT THE MAX INTEGRAL ERROR SO WON'T WIND UP
+         double maxError = maxIntegralError.getDoubleValue();
+         double errorAfterLeak = pdController.getPositionError() * deltaTime + integralLeakRatio.getDoubleValue() * cumulativeError.getDoubleValue();
+         cumulativeError.set(MathTools.clipToMinMax(errorAfterLeak, maxError));
 
-      double outputSignal = (pdController.getProportionalGain() * pdController.getPositionError()) + (integralGain.getDoubleValue() * cumulativeError.getDoubleValue())
-            + (pdController.getDerivativeGain() * pdController.getRateError());
-      
+         actionI.set(integralGain.getDoubleValue() * cumulativeError.getDoubleValue());
+         outputSignal += actionI.getDoubleValue();
+      }
+
       double maximumOutput = Math.abs( maxOutput.getDoubleValue() );
-
       outputSignal = MathTools.clipToMinMax(outputSignal, maximumOutput);
       return outputSignal;
    }

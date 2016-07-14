@@ -214,7 +214,7 @@ public class TrapezoidalVelocityTrajectoryTest
       assertTrue("endSpeed=" + endSpeed + ", : " + errorMessage, endSpeed <= maxVelocity);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testRandomStuff()
    {
@@ -279,7 +279,7 @@ public class TrapezoidalVelocityTrajectoryTest
       performTests(trap, t0, x0, v0, xF, vF, vMax, aMax);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.8)
+	@DeployableTestMethod(estimatedDuration = 1.1)
    @Test(timeout = 30000)
    public void testNotEnforcingFinalVelocity()
    {
@@ -395,7 +395,7 @@ public class TrapezoidalVelocityTrajectoryTest
 	/**
 	 * Never really worked yet. Some day maybe.
 	 */
-   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void DONTtestRandomSamples()
    {

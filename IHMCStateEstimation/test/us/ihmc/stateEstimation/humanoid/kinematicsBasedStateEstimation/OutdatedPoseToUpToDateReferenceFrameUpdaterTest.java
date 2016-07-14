@@ -25,8 +25,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
-   @Test(timeout = 3000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testGetUpToDateTimeStampedBufferNewestTimeStamp()
    {
       FramePose upToDatePoseInPresent = new FramePose(worldFrame);
@@ -48,8 +48,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
-   @Test(timeout = 3000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testGetUpToDateTimeStampedBufferOldestTimeStamp()
    {
       FramePose upToDatePoseInPresent = new FramePose(worldFrame);
@@ -75,8 +75,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
-   @Test(timeout = 3000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testUpdateOutdatedTransformWithKnownOffsets()
    {
       int numberOfUpToDateTransforms = 10;

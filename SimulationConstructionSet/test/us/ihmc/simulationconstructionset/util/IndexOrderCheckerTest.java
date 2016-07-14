@@ -20,7 +20,7 @@ public class IndexOrderCheckerTest
       indexOrderChecker = new IndexOrderChecker("test", registry, 1);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testNoOverflow()
    {
@@ -32,7 +32,7 @@ public class IndexOrderCheckerTest
       assertEquals(increment - 1, indexOrderChecker.getMissedIndices());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOverflowOne()
    {
@@ -43,7 +43,7 @@ public class IndexOrderCheckerTest
       assertEquals(0, indexOrderChecker.getMissedIndices());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOverflowTwo()
    {
@@ -55,7 +55,7 @@ public class IndexOrderCheckerTest
       assertEquals(increment - 1, indexOrderChecker.getMissedIndices());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testABunch()
    {

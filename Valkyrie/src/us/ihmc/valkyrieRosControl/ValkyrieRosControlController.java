@@ -74,8 +74,12 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 	      "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"
 	      };
 
-   private static final String[] positionControlledJoints = {"lowerNeckPitch", "neckYaw", "upperNeckPitch",};
+   private static final String[] positionControlledJoints = {
+         "lowerNeckPitch", "neckYaw", "upperNeckPitch",
+         //"rightForearmYaw", "rightWristRoll", "rightWristPitch"
+         };
 
+   public static final boolean USE_YOVARIABLE_DESIREDS = true;
    public static final boolean USE_USB_MICROSTRAIN_IMUS = false;
    public static final boolean USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS = false;
    public static final String[] readIMUs = USE_USB_MICROSTRAIN_IMUS ? new String[0] : new String[ValkyrieSensorInformation.imuSensorsToUse.length];
@@ -141,6 +145,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       if (walkingProvider == WalkingProvider.VELOCITY_HEADING_COMPONENT)
          controllerFactory.createComponentBasedFootstepDataMessageGenerator();
+      if (USE_YOVARIABLE_DESIREDS)
+         controllerFactory.createUserDesiredControllerCommandGenerator();
 
       return controllerFactory;
    }

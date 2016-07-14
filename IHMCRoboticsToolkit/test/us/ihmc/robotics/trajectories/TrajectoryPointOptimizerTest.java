@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.trajectories.waypoints.PolynomialOrder;
@@ -27,8 +28,14 @@ public class TrajectoryPointOptimizerTest
       YoVariableRegistry registry = new YoVariableRegistry("");
       TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order, registry);
 
-      optimizer.setEndPoints(new double[dimensions], new double[dimensions], new double[dimensions], new double[dimensions]);
-      optimizer.setEndPoints(new double[dimensions], new double[dimensions-1], new double[dimensions], new double[dimensions]);
+      TDoubleArrayList rightSize = new TDoubleArrayList(dimensions);
+      TDoubleArrayList wrongSize = new TDoubleArrayList(dimensions-1);
+
+      for (int i = 0; i < dimensions; i++)
+         rightSize.add(0.0);
+
+      optimizer.setEndPoints(rightSize, rightSize, rightSize, rightSize);
+      optimizer.setEndPoints(rightSize, wrongSize, rightSize, rightSize);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -39,13 +46,23 @@ public class TrajectoryPointOptimizerTest
       PolynomialOrder order = PolynomialOrder.ORDER3;
       TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order);
 
-      ArrayList<double[]> waypoints = new ArrayList<>();
-      waypoints.add(new double[] {1.0});
-      waypoints.add(new double[] {5.0});
-      waypoints.add(new double[] {21.0});
+      ArrayList<TDoubleArrayList> waypoints = new ArrayList<>();
+      TDoubleArrayList waypointA = new TDoubleArrayList();
+      TDoubleArrayList waypointB = new TDoubleArrayList();
+      TDoubleArrayList waypointC = new TDoubleArrayList();
+      waypointA.add(1.0);
+      waypointB.add(5.0);
+      waypointC.add(21.0);
+
+      waypoints.add(waypointA);
+      waypoints.add(waypointB);
+      waypoints.add(waypointC);
       optimizer.setWaypoints(waypoints);
 
-      waypoints.add(new double[] {5.0, 1.7});
+      TDoubleArrayList waypointD = new TDoubleArrayList();
+      waypointD.add(5.0);
+      waypointD.add(1.7);
+      waypoints.add(waypointD);
       optimizer.setWaypoints(waypoints);
    }
 
@@ -71,42 +88,60 @@ public class TrajectoryPointOptimizerTest
       PolynomialOrder order = PolynomialOrder.ORDER3;
       TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order);
 
-      double x0 = 0.0;
-      double xd0 = 0.0;
-      double x1 = 1.0;
-      double xd1 = 0.0;
+      TDoubleArrayList x0 = new TDoubleArrayList(dimensions);
+      TDoubleArrayList xd0 = new TDoubleArrayList(dimensions);
+      TDoubleArrayList x1 = new TDoubleArrayList(dimensions);
+      TDoubleArrayList xd1 = new TDoubleArrayList(dimensions);
 
-      optimizer.setEndPoints(new double[] {x0}, new double[] {xd0}, new double[] {x1}, new double[] {xd1});
+      for (int i = 0; i < dimensions; i++)
+      {
+         x0.add(0.0);
+         xd0.add(0.0);
+         x1.add(0.0);
+         xd1.add(0.0);
+      }
+
+      x1.set(0, 1.0);
+
+      optimizer.setEndPoints(x0, xd0, x1, xd1);
 
       // compute twice
       optimizer.compute();
-      ArrayList<double[]> dummyWaypoints = new ArrayList<>();
-      dummyWaypoints.add(new double[] {0.25});
-      dummyWaypoints.add(new double[] {0.3});
+      ArrayList<TDoubleArrayList> dummyWaypoints = new ArrayList<>();
+      TDoubleArrayList waypointA = new TDoubleArrayList();
+      TDoubleArrayList waypointB = new TDoubleArrayList();
+      waypointA.add(0.25);
+      waypointB.add(0.3);
+
+      dummyWaypoints.add(waypointA);
+      dummyWaypoints.add(waypointB);
       optimizer.setWaypoints(dummyWaypoints);
       optimizer.compute();
 
-      ArrayList<double[]> waypoints = new ArrayList<>();
-      waypoints.add(new double[] {0.5});
+      ArrayList<TDoubleArrayList> waypoints = new ArrayList<>();
+      TDoubleArrayList waypointC = new TDoubleArrayList();
+      waypointC.add(0.5);
+
+      waypoints.add(waypointC);
       optimizer.setWaypoints(waypoints);
       optimizer.compute();
 
-      ArrayList<double[]> coefficients = new ArrayList<>();
+      ArrayList<TDoubleArrayList> coefficients = new ArrayList<>();
       for (int i = 0; i < waypoints.size() + 1; i++)
-         coefficients.add(new double[order.getCoefficients()]);
+         coefficients.add(new TDoubleArrayList(order.getCoefficients()));
       optimizer.getPolynomialCoefficients(coefficients, 0);
 
       // computed by hand:
       double[] expected = new double[] {-2.0, 3.0, 0.0, 0.0};
 
-      double[] waypointTimes = new double[waypoints.size()];
+      TDoubleArrayList waypointTimes = new TDoubleArrayList(waypoints.size());
       optimizer.getWaypointTimes(waypointTimes);
 //      printResults(waypointTimes, coefficients);
 
       for (int i = 0; i < order.getCoefficients(); i++)
       {
-         assertEquals(coefficients.get(0)[i], expected[i], epsilon);
-         assertEquals(coefficients.get(0)[i], coefficients.get(1)[i], epsilon);
+         assertEquals(coefficients.get(0).get(i), expected[i], epsilon);
+         assertEquals(coefficients.get(0).get(i), coefficients.get(1).get(i), epsilon);
       }
    }
 
@@ -118,21 +153,26 @@ public class TrajectoryPointOptimizerTest
       PolynomialOrder order = PolynomialOrder.ORDER3;
       TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order);
 
-      double x0 = 1.0;
-      double xd0 = 1.0;
-      double x1 = 2.0;
-      double xd1 = 1.0;
+      TDoubleArrayList x0 = new TDoubleArrayList(dimensions);
+      TDoubleArrayList xd0 = new TDoubleArrayList(dimensions);
+      TDoubleArrayList x1 = new TDoubleArrayList(dimensions);
+      TDoubleArrayList xd1 = new TDoubleArrayList(dimensions);
 
-      optimizer.setEndPoints(new double[] {x0}, new double[] {xd0}, new double[] {x1}, new double[] {xd1});
+      x0.add(1.0);
+      xd0.add(1.0);
+      x1.add(2.0);
+      xd1.add(1.0);
+
+      optimizer.setEndPoints(x0, xd0, x1, xd1);
       optimizer.compute();
 
-      ArrayList<double[]> coefficients = new ArrayList<>();
-      coefficients.add(new double[order.getCoefficients()]);
+      ArrayList<TDoubleArrayList> coefficients = new ArrayList<>();
+      coefficients.add(new TDoubleArrayList());
       optimizer.getPolynomialCoefficients(coefficients, 0);
 
       double[] expected = new double[] {0.0, 0.0, 1.0, 1.0};
       for (int i = 0; i < order.getCoefficients(); i++)
-         assertEquals(coefficients.get(0)[i], expected[i], epsilon);
+         assertEquals(coefficients.get(0).get(i), expected[i], epsilon);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -143,21 +183,26 @@ public class TrajectoryPointOptimizerTest
       PolynomialOrder order = PolynomialOrder.ORDER7;
       TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order);
 
-      double x0 = 0.0;
-      double xd0 = 1.0;
-      double x1 = 1.0;
-      double xd1 = 1.0;
+      TDoubleArrayList x0 = new TDoubleArrayList(dimensions);
+      TDoubleArrayList xd0 = new TDoubleArrayList(dimensions);
+      TDoubleArrayList x1 = new TDoubleArrayList(dimensions);
+      TDoubleArrayList xd1 = new TDoubleArrayList(dimensions);
 
-      optimizer.setEndPoints(new double[] {x0}, new double[] {xd0}, new double[] {x1}, new double[] {xd1});
+      x0.add(0.0);
+      xd0.add(1.0);
+      x1.add(1.0);
+      xd1.add(1.0);
+
+      optimizer.setEndPoints(x0, xd0, x1, xd1);
       optimizer.compute();
 
-      ArrayList<double[]> coefficients = new ArrayList<>();
-      coefficients.add(new double[order.getCoefficients()]);
+      ArrayList<TDoubleArrayList> coefficients = new ArrayList<>();
+      coefficients.add(new TDoubleArrayList(0));
       optimizer.getPolynomialCoefficients(coefficients, 0);
 
       double[] expected = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0};
       for (int i = 0; i < order.getCoefficients(); i++)
-         assertEquals(expected[i], coefficients.get(0)[i], epsilon);
+         assertEquals(expected[i], coefficients.get(0).get(i), epsilon);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -168,25 +213,43 @@ public class TrajectoryPointOptimizerTest
       PolynomialOrder order = PolynomialOrder.ORDER5;
       TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order);
 
-      double[] x0 = new double[] {0.0, 0.0};
-      double[] xd0 = new double[] {0.0, 0.0};
-      double[] x1 = new double[] {1.0, 1.0};
-      double[] xd1 = new double[] {0.0, 0.0};
+      TDoubleArrayList x0 = new TDoubleArrayList(dimensions);
+      TDoubleArrayList xd0 = new TDoubleArrayList(dimensions);
+      TDoubleArrayList x1 = new TDoubleArrayList(dimensions);
+      TDoubleArrayList xd1 = new TDoubleArrayList(dimensions);
+
+      for (int i = 0; i < dimensions; i++)
+      {
+         x0.add(0.0);
+         xd0.add(0.0);
+         x1.add(0.0);
+         xd1.add(0.0);
+      }
+
+      x1.set(0, 1.0);
+      x1.set(1, 1.0);
 
       optimizer.setEndPoints(x0, xd0, x1, xd1);
-      ArrayList<double[]> waypoints = new ArrayList<>();
-      waypoints.add(new double[] {0.001, 0.001});
-      waypoints.add(new double[] {0.8, 0.8});
+      ArrayList<TDoubleArrayList> waypoints = new ArrayList<>();
+      TDoubleArrayList waypointA = new TDoubleArrayList();
+      TDoubleArrayList waypointB = new TDoubleArrayList();
+      waypointA.add(0.001);
+      waypointA.add(0.001);
+      waypointB.add(0.8);
+      waypointB.add(0.8);
+
+      waypoints.add(waypointA);
+      waypoints.add(waypointB);
       optimizer.setWaypoints(waypoints);
 
       optimizer.compute();
 
-      double[] waypointTimes = new double[waypoints.size()];
+      TDoubleArrayList waypointTimes = new TDoubleArrayList();
       optimizer.getWaypointTimes(waypointTimes);
 //      printResults(waypointTimes, new ArrayList<>());
 
-      assertTrue(waypointTimes[0] < 0.1);
-      assertTrue(waypointTimes[0] > 0.0);
+      assertTrue(waypointTimes.get(0) < 0.1);
+      assertTrue(waypointTimes.get(0) > 0.0);
    }
 
    private void printResults(double[] waypointTimes, ArrayList<double[]> coefficients)

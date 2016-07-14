@@ -11,6 +11,7 @@ public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
    private final EnumYoVariable<QuadrupedPositionControllerRequestedEvent> userTrigger;
    private final EnumYoVariable<QuadrupedPositionControllerState> positionControllerState;
    private final DoubleYoVariable swingDuration;
+   private final DoubleYoVariable desiredCoMPositionZ;
 
    @SuppressWarnings("unchecked")
    public QuadrupedPositionTestYoVariables(SimulationConstructionSet scs)
@@ -20,6 +21,7 @@ public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
       userTrigger = (EnumYoVariable<QuadrupedPositionControllerRequestedEvent>) scs.getVariable("usertrigger");
       positionControllerState = (EnumYoVariable<QuadrupedPositionControllerState>) scs.getVariable("positionControllerState");
       swingDuration = (DoubleYoVariable) scs.getVariable("swingDuration");
+      desiredCoMPositionZ = (DoubleYoVariable) scs.getVariable("desiredCoMPositionZ");
    }
 
    public EnumYoVariable<QuadrupedPositionControllerRequestedEvent> getUserTrigger()
@@ -35,5 +37,10 @@ public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
    public DoubleYoVariable getSwingDuration()
    {
       return swingDuration;
+   }
+
+   public DoubleYoVariable getDesiredCoMPositionZ()
+   {
+      return desiredCoMPositionZ;
    }
 }

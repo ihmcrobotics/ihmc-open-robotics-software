@@ -19,7 +19,7 @@ public class ConstantVelocityTrajectoryGeneratorTest
    private final double epsilon = 1e-7;
    private ConstantVelocityTrajectoryGenerator constantVelocityTrajectoryGenerator;
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSimpleTrajectory()
    {
@@ -36,7 +36,7 @@ public class ConstantVelocityTrajectoryGeneratorTest
       assertTrue(simpleLinearTrajectory.getAcceleration() == 0.0);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRandomTrajectories()
    {

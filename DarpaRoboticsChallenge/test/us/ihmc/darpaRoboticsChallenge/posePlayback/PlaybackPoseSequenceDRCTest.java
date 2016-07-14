@@ -15,7 +15,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public abstract class PlaybackPoseSequenceDRCTest implements MultiRobotTestInterface
 {
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testReadAndWriteWithRandomSequence()
    {

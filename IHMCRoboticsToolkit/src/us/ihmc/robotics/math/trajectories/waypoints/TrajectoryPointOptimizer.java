@@ -1,13 +1,18 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.time.ExecutionTimer;
 
 /**
  * This class can compute a optimal trajectory from a start point to a target point. Given position and
@@ -39,20 +44,22 @@ public class TrajectoryPointOptimizer
    private final IntegerYoVariable intervals = new IntegerYoVariable("NumberOfIntervals", registry);
    private final IntegerYoVariable coefficients = new IntegerYoVariable("Coefficients", registry);
    private final IntegerYoVariable problemSize = new IntegerYoVariable("ProblemSize", registry);
+   private final IntegerYoVariable inversionSize = new IntegerYoVariable("InversionSize", registry);
    private final IntegerYoVariable constraints = new IntegerYoVariable("Conditions", registry);
    private final IntegerYoVariable iteration = new IntegerYoVariable("Iteration", registry);
 
-   private final DenseMatrix64F x0, x1, xd0, xd1;
+   private final TDoubleArrayList x0, x1, xd0, xd1;
    private final ArrayList<DenseMatrix64F> waypoints = new ArrayList<>();
 
    private final DenseMatrix64F intervalTimes = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F saveIntervalTimes = new DenseMatrix64F(1, 1);
-   private final double[] costs = new double[maxIterations+1];
+   private final TDoubleArrayList costs = new TDoubleArrayList(maxIterations+1);
 
    private final DenseMatrix64F H = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F x = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F f = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F A = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F ATranspose = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F b = new DenseMatrix64F(1, 1);
 
    private final DenseMatrix64F E = new DenseMatrix64F(1, 1);
@@ -67,7 +74,11 @@ public class TrajectoryPointOptimizer
    private final DenseMatrix64F timeUpdate = new DenseMatrix64F(1, 1);
    private final DoubleYoVariable timeGain = new DoubleYoVariable("TimeGain", registry);
 
-   private final DoubleYoVariable computationTime = new DoubleYoVariable("ComputationTimeMS", registry);
+   private final ExecutionTimer timer = new ExecutionTimer("TrajectoryOptimizationTimer", 0.5, registry);
+
+   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
+
+   private final DenseMatrix64F tempCoeffs = new DenseMatrix64F(1, 1);
 
    public TrajectoryPointOptimizer(int dimensions, PolynomialOrder order, YoVariableRegistry parentRegistry)
    {
@@ -83,35 +94,48 @@ public class TrajectoryPointOptimizer
       coefficients.set(order.getCoefficients());
       timeGain.set(initialTimeGain);
 
-      x0 = new DenseMatrix64F(dimensions, 1);
-      x1 = new DenseMatrix64F(dimensions, 1);
-      xd0 = new DenseMatrix64F(dimensions, 1);
-      xd1 = new DenseMatrix64F(dimensions, 1);
+      x0 = new TDoubleArrayList(dimensions);
+      x1 = new TDoubleArrayList(dimensions);
+      xd0 = new TDoubleArrayList(dimensions);
+      xd1 = new TDoubleArrayList(dimensions);
+
+      for (int i = 0; i < dimensions; i++)
+      {
+         x0.add(0.0);
+         xd0.add(0.0);
+         x1.add(0.0);
+         xd1.add(0.0);
+      }
 
       for (int i = 0; i < maxWaypoints; i++)
       {
          waypoints.add(new DenseMatrix64F(dimensions, 1));
       }
+
+      tempCoeffs.reshape(order.getCoefficients(), 1);
    }
 
-   public void setEndPoints(double[] start, double startVel[], double[] target, double[] targetVel)
+   public void setEndPoints(TDoubleArrayList start, TDoubleArrayList startVel, TDoubleArrayList target, TDoubleArrayList targetVel)
    {
-      if (start.length != dimensions.getIntegerValue())
+      if (start.size() != dimensions.getIntegerValue())
          throw new RuntimeException("Unexpected Size of Input");
-      if (startVel.length != dimensions.getIntegerValue())
+      if (startVel.size() != dimensions.getIntegerValue())
          throw new RuntimeException("Unexpected Size of Input");
-      if (target.length != dimensions.getIntegerValue())
+      if (target.size() != dimensions.getIntegerValue())
          throw new RuntimeException("Unexpected Size of Input");
-      if (targetVel.length != dimensions.getIntegerValue())
+      if (targetVel.size() != dimensions.getIntegerValue())
          throw new RuntimeException("Unexpected Size of Input");
 
-      x0.setData(start);
-      xd0.setData(startVel);
-      x1.setData(target);
-      xd1.setData(targetVel);
+      for (int i = 0; i < dimensions.getIntegerValue(); i++)
+      {
+         x0.set(i, start.get(i));
+         xd0.set(i, startVel.get(i));
+         x1.set(i, target.get(i));
+         xd1.set(i, targetVel.get(i));
+      }
    }
 
-   public void setWaypoints(ArrayList<double[]> waypoints)
+   public void setWaypoints(List<TDoubleArrayList> waypoints)
    {
       if (waypoints.size() > maxWaypoints)
          throw new RuntimeException("Too Many Waypoints");
@@ -119,15 +143,21 @@ public class TrajectoryPointOptimizer
 
       for (int i = 0; i < nWaypoints.getIntegerValue(); i++)
       {
-         if (waypoints.get(i).length != dimensions.getIntegerValue())
+         if (waypoints.get(i).size() != dimensions.getIntegerValue())
             throw new RuntimeException("Unexpected Size of Input");
-         this.waypoints.get(i).setData(waypoints.get(i));
+
+         waypoints.get(i).toArray(this.waypoints.get(i).data);
       }
    }
 
    public void compute()
    {
-      long startTime = System.nanoTime();
+      compute(maxIterations);
+   }
+
+   public void compute(int maxIterations)
+   {
+      timer.startMeasurement();
       timeGain.set(initialTimeGain);
 
       int intervals = nWaypoints.getIntegerValue() + 1;
@@ -136,23 +166,23 @@ public class TrajectoryPointOptimizer
       CommonOps.fill(intervalTimes, 1.0/intervals);
 
       problemSize.set(dimensions.getIntegerValue() * coefficients.getIntegerValue() * intervals);
-      costs[0] = solveMinAcceleration();
+      costs.reset();
+      costs.add(solveMinAcceleration());
 
       for (int iteration = 0; iteration < maxIterations; iteration++)
       {
-         double newCost = computeTimeUpdate(costs[iteration]);
+         double newCost = computeTimeUpdate(costs.get(iteration));
          this.iteration.set(iteration+1);
-         costs[iteration+1] = newCost;
+         costs.add(newCost);
 
-         if (Math.abs(costs[iteration] - newCost) < costEpsilon)
+         if (Math.abs(costs.get(iteration) - newCost) < costEpsilon)
             break;
 
-         if (iteration == maxIterations-1)
-            System.err.println("Trajectory optimization max iteration.");
+//         if (iteration == maxIterations-1)
+//            System.err.println("Trajectory optimization max iteration.");
       }
 
-      long duration = System.nanoTime() - startTime;
-      computationTime.set((double)duration / 10E6);
+      timer.stopMeasurement();
    }
 
    private double computeTimeUpdate(double cost)
@@ -235,21 +265,23 @@ public class TrajectoryPointOptimizer
       // s.t. A*x == b
 
       int size = problemSize + constraints.getIntegerValue();
+      this.inversionSize.set(size);
       E.reshape(size, size);
       d.reshape(size, 1);
 
       CommonOps.fill(E, 0.0);
       CommonOps.insert(H, E, 0, 0);
       CommonOps.insert(A, E, problemSize, 0);
-      CommonOps.transpose(A);
-      CommonOps.insert(A, E, 0, problemSize);
+      ATranspose.reshape(A.getNumCols(), A.getNumRows());
+      CommonOps.transpose(A, ATranspose);
+      CommonOps.insert(ATranspose, E, 0, problemSize);
       CommonOps.scale(-1.0, f);
       CommonOps.insert(f, d, 0, 0);
       CommonOps.insert(b, d, problemSize, 0);
 
-      CommonOps.invert(E);
       x.reshape(size, 1);
-      CommonOps.mult(E, d, x);
+      if (solver.setA(E))
+         solver.solve(d, x);
       x.reshape(problemSize, 1);
 
       d.reshape(problemSize, 1);
@@ -403,19 +435,18 @@ public class TrajectoryPointOptimizer
       }
    }
 
-   public void getWaypointTimes(double[] timesToPack)
+   public void getWaypointTimes(TDoubleArrayList timesToPack)
    {
-      int n = nWaypoints.getIntegerValue();
-      if (timesToPack.length != n)
-         throw new RuntimeException("Unexpected Size of Output");
-      for (int i = 0; i < n; i++)
+      timesToPack.reset();
+
+      for (int i = 0; i < nWaypoints.getIntegerValue(); i++)
       {
          if (i == 0)
          {
-            timesToPack[0] = intervalTimes.get(0);
+            timesToPack.add(intervalTimes.get(0));
             continue;
          }
-         timesToPack[i] = timesToPack[i-1] + intervalTimes.get(i);
+         timesToPack.add(timesToPack.get(i-1) + intervalTimes.get(i));
       }
    }
 
@@ -432,7 +463,7 @@ public class TrajectoryPointOptimizer
       return time;
    }
 
-   public void getPolynomialCoefficients(ArrayList<double[]> coefficientsToPack, int dimension)
+   public void getPolynomialCoefficients(List<TDoubleArrayList> coefficientsToPack, int dimension)
    {
       if (coefficientsToPack.size() != intervals.getIntegerValue())
          throw new RuntimeException("Unexpected Size of Output");
@@ -441,11 +472,10 @@ public class TrajectoryPointOptimizer
 
       for (int i = 0; i < intervals.getIntegerValue(); i++)
       {
-         if (coefficientsToPack.get(i).length != order.getCoefficients())
-            throw new RuntimeException("Unexpected Size of Output");
-
          int index = i * order.getCoefficients() + dimension * order.getCoefficients() * intervals.getIntegerValue();
-         System.arraycopy(x.data, index, coefficientsToPack.get(i), 0, order.getCoefficients());
+         CommonOps.extract(x, index, index+order.getCoefficients(), 0, 1, tempCoeffs, 0, 0);
+         coefficientsToPack.get(i).reset();
+         coefficientsToPack.get(i).add(tempCoeffs.getData());
       }
    }
 

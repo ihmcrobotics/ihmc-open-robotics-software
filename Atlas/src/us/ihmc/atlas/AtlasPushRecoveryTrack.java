@@ -7,10 +7,10 @@ import com.martiansoftware.jsap.JSAPException;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.validation.YoVariableThreadAccessValidator;
@@ -57,7 +57,7 @@ public class AtlasPushRecoveryTrack
 
       SDFRobot robot = track.getDrcSimulation().getRobot();
       SDFFullHumanoidRobotModel fullRobotModel = model.createFullRobotModel();
-      DRCPushRobotController pushRobotController = new DRCPushRobotController(robot, fullRobotModel);
+      PushRobotController pushRobotController = new PushRobotController(robot, fullRobotModel);
 
       pushRobotController.addPushButtonToSCS(track.getSimulationConstructionSet());
       
