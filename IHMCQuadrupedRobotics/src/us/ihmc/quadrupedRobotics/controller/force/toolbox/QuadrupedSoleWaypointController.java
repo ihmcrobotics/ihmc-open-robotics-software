@@ -2,9 +2,6 @@ package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.params.BooleanParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -13,15 +10,12 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 
 public class QuadrupedSoleWaypointController
 {
    // Yo variables
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable robotTime;
-
 
    // SoleWaypoint variables
    QuadrantDependentList<MultipleWaypointsPositionTrajectoryGenerator> quadrupedWaypointsPositionTrajectoryGenerator;
@@ -75,9 +69,12 @@ public class QuadrupedSoleWaypointController
 
    public boolean compute(QuadrantDependentList<FrameVector> soleForce)
    {
-      if(robotTime.getDoubleValue()-taskStartTime>quadrupedSoleWaypointList.getFinalTime()){
+      if (robotTime.getDoubleValue() - taskStartTime > quadrupedSoleWaypointList.getFinalTime())
+      {
          return false;
-      }else{
+      }
+      else
+      {
          updateSetpoints(soleForce);
          return true;
       }
@@ -94,7 +91,8 @@ public class QuadrupedSoleWaypointController
                   .appendWaypoint(quadrupedSoleWaypointList.get(quadrant).get(i).getTime(), quadrupedSoleWaypointList.get(quadrant).get(i).getPosition(),
                         quadrupedSoleWaypointList.get(quadrant).get(i).getVelocity());
          }
-         if(quadrupedSoleWaypointList.size(quadrant)>0){
+         if (quadrupedSoleWaypointList.size(quadrant) > 0)
+         {
             quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).initialize();
          }
       }
