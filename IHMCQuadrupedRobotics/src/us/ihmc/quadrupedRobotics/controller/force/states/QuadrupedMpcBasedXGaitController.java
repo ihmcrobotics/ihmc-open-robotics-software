@@ -40,7 +40,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    // parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final DoubleParameter mpcMaximumPreviewTimeParameter = parameterFactory.createDouble("maximumPreviewTime", 5);
-   private final DoubleParameter mpcStepAdjustmentCostParameter = parameterFactory.createDouble("stepAdjustmentCost", 10000);
+   private final DoubleParameter mpcStepAdjustmentCostParameter = parameterFactory.createDouble("stepAdjustmentCost", 100000);
    private final DoubleParameter mpcCopAdjustmentCostParameter = parameterFactory.createDouble("copAdjustmentCost", 1);
    private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory
          .createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
@@ -258,44 +258,25 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       groundPlanePositions.get(thisStepQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
       groundPlanePositions.get(thisStepQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
       groundPlaneEstimator.compute(groundPlanePositions);
+
+      // update current step
+      RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
+      xGaitCurrentSteps.get(thisStepEnd).set(timedStepController.getCurrentStep(thisStepQuadrant));
    }
 
    @Override
    public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
    {
+      // update current step goal position
+      RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
+      if (thisStepQuadrant == xGaitCurrentSteps.get(thisStepEnd).getRobotQuadrant())
+         xGaitCurrentSteps.get(thisStepEnd).setGoalPosition(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
    }
 
    private void updateStepPlan()
    {
-      // update current steps
-      double currentTime = robotTimestamp.getDoubleValue();
-      for (RobotEnd robotEnd : RobotEnd.values)
-      {
-         QuadrupedTimedStep currentStep = timedStepController.getCurrentStep(robotEnd);
-         if (currentStep != null)
-         {
-            if (currentStep.getRobotQuadrant() != xGaitCurrentSteps.get(robotEnd).getRobotQuadrant())
-            {
-               for (int i = 0; i < xGaitPreviewSteps.size(); i++)
-               {
-                  if (currentStep.getRobotQuadrant() == xGaitPreviewSteps.get(i).getRobotQuadrant())
-                  {
-                     xGaitCurrentSteps.get(robotEnd).set(xGaitPreviewSteps.get(i));
-                     break;
-                  }
-               }
-            }
-            if (currentStep.getTimeInterval().getStartTime() < currentTime)
-            {
-               if (currentStep.getTimeInterval().getEndTime() > currentTime)
-                  xGaitCurrentSteps.get(robotEnd).setGoalPosition(currentStep.getGoalPosition());
-               else
-                  xGaitCurrentSteps.get(robotEnd).setGoalPosition(taskSpaceEstimates.getSolePosition(currentStep.getRobotQuadrant()));
-            }
-         }
-      }
-
       // compute xgait step plan
+      double currentTime = robotTimestamp.getDoubleValue();
       Vector3d inputVelocity = inputProvider.getPlanarVelocityInput();
       xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, xGaitCurrentSteps, inputVelocity, currentTime, bodyYawSetpoint, xGaitSettings);
    }
@@ -327,18 +308,19 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 
    private void computeStepAdjustmentAndCmpPosition()
    {
-      // solve for step adjustment and cmp position
       double currentTime = robotTimestamp.getDoubleValue();
+
+      // solve for step adjustment and cmp position
       mpcOptimization.compute(stepAdjustmentVector, cmpPositionSetpoint, timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(),
             taskSpaceControllerSettings.getContactState(), taskSpaceEstimates.getComPosition(), taskSpaceEstimates.getComVelocity(), currentTime, mpcSettings);
-      stepAdjustmentVector.changeFrame(worldFrame);
 
       // adjust goal positions in step controller queue
+      stepAdjustmentVector.changeFrame(worldFrame);
       for (int i = 0; i < timedStepController.getQueue().size(); i++)
       {
          QuadrupedTimedStep step = timedStepController.getQueue().get(i);
          step.getGoalPosition().add(stepAdjustmentVector.getVector());
-         if (step.getTimeInterval().getStartTime() < currentTime)
+         if (step.getTimeInterval().getStartTime() <= currentTime)
          {
             crossoverProjection.project(step, taskSpaceEstimates.getSolePosition());
          }
