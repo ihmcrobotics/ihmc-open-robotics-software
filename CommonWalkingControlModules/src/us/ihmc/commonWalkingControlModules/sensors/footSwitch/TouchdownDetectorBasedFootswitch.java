@@ -11,18 +11,18 @@ public abstract class TouchdownDetectorBasedFootswitch implements FootSwitchInte
    protected final YoVariableRegistry registry;
    protected final ArrayList<TouchdownDetector> touchdownDetectors = new ArrayList<>();
 
-   protected final BooleanYoVariable hasTouchedDown;
+   protected final BooleanYoVariable controllerThinksHasTouchedDown;
 
    public TouchdownDetectorBasedFootswitch(String name, YoVariableRegistry parentRegistry)
    {
       this.registry = parentRegistry;
-      hasTouchedDown = new BooleanYoVariable(name + "_hasTouchedDown", parentRegistry);
+      controllerThinksHasTouchedDown = new BooleanYoVariable(name + "_controllerThinksHasTouchedDown", parentRegistry);
    }
 
    @Override
    public void reset()
    {
-      hasTouchedDown.set(false);
+      controllerThinksHasTouchedDown.set(false);
    }
 
    @Override
@@ -34,6 +34,6 @@ public abstract class TouchdownDetectorBasedFootswitch implements FootSwitchInte
    @Override
    public void setFootContactState(boolean hasFootHitGround)
    {
-      hasTouchedDown.set(hasFootHitGround);
+      controllerThinksHasTouchedDown.set(hasFootHitGround);
    }
 }
