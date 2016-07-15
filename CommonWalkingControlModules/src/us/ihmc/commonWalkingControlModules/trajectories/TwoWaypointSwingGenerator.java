@@ -35,7 +35,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final DoubleYoVariable swingHeight;
    private final DoubleYoVariable maxSwingHeight;
 
-   private final PositionOptimizedTrajectoryGenerator trajectory;
+   private final Position2dOptimizedSwingTrajectoryGenerator trajectory;
 
    private final FramePoint initialPosition = new FramePoint();
    private final FrameVector initialVelocity = new FrameVector();
@@ -61,7 +61,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       this.maxSwingHeight = new DoubleYoVariable(namePrefix + "MaxSwingHeight", registry);
       this.maxSwingHeight.set(maxSwingHeight);
 
-      trajectory = new PositionOptimizedTrajectoryGenerator(namePrefix, registry, yoGraphicsListRegistry, maxTimeIterations);
+      trajectory = new Position2dOptimizedSwingTrajectoryGenerator(namePrefix, registry, yoGraphicsListRegistry, maxTimeIterations);
 
       for (int i = 0; i < numberWaypoints; i++)
          waypointPositions.add(new FramePoint());

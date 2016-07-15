@@ -11,7 +11,7 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
+import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -43,7 +43,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
 
    private static final double PUSH_DELAY = 0.5;
 
-   protected DRCPushRobotController pushRobotController;
+   protected PushRobotController pushRobotController;
 
    protected BlockingSimulationRunner blockingSimulationRunner;
 
@@ -164,7 +164,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       boolean runMultiThreaded = false;
       setupTrack(runMultiThreaded, robotModel);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      pushRobotController = new DRCPushRobotController(drcFlatGroundWalkingTrack.getDrcSimulation().getRobot(), fullRobotModel);
+      pushRobotController = new PushRobotController(drcFlatGroundWalkingTrack.getDrcSimulation().getRobot(), fullRobotModel);
 
       if (VISUALIZE_FORCE)
       {

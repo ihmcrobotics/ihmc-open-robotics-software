@@ -1,4 +1,4 @@
-package us.ihmc.llaQuadruped.generatedTestSuites;
+package us.ihmc.atlas.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
@@ -12,10 +12,11 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.llaQuadruped.controller.force.LLAQuadrupedXGaitRandomWalkingTest.class
+   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
+   us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class
 })
 
-public class LLAQuadrupedDInDevelopmentTestSuite
+public class AtlasGInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {

@@ -159,7 +159,7 @@ public class RigidBodySpatialAccelerationControlModule
 
    public void setPositionMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
-      se3pdController.setPositionMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      se3pdController.setPositionMaxFeedbackAndFeedbackRate(maxAcceleration, maxJerk);
    }
 
    public void setPositionMaxDerivativeError(double maxDerivativeError)
@@ -174,7 +174,7 @@ public class RigidBodySpatialAccelerationControlModule
 
    public void setOrientationMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
-      se3pdController.setOrientationMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      se3pdController.setOrientationMaxFeedbackAndFeedbackRate(maxAcceleration, maxJerk);
    }
 
    public void setOrientationMaxDerivativeError(double maxDerivativeError)
