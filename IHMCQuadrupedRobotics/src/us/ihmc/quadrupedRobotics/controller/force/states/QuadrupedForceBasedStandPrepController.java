@@ -86,6 +86,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       yoPositionControllerGains = new YoEuclideanPositionGains("positionControllerGains", registry);
 
       // Calculate the robot length
+      referenceFrames.updateFrames();
       FramePoint frontLeftHipRollFrame = new FramePoint();
       frontLeftHipRollFrame.setToZero(referenceFrames.getLegAttachmentFrame(RobotQuadrant.FRONT_LEFT));
       frontLeftHipRollFrame.changeFrame(referenceFrames.getBodyFrame());
