@@ -3,14 +3,15 @@ package us.ihmc.commonWalkingControlModules.touchdownDetector;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements TouchdownDetector
 {
    private final OneDoFJoint joint;
-   private final DoubleYoVariable velocityFiniteDifference;
-   private final DoubleYoVariable footInSwingThreshold, touchdownThreshold;
+   private final AlphaFilteredYoVariable velocityFiniteDifferenceFiltered;
+   private final DoubleYoVariable footInSwingThreshold, touchdownThreshold, finiteDifferenceAlphaFilter;
    private final GlitchFilteredBooleanYoVariable footInSwingFiltered;
    private final BooleanYoVariable controllerSetFootSwitch, touchdownDetected;
 
@@ -22,7 +23,9 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
       this.joint = joint;
       this.controllerSetFootSwitch = controllerSetFootSwitch;
 
-      velocityFiniteDifference = new DoubleYoVariable(joint.getName() + "_velocityFiniteDifference", registry);
+      finiteDifferenceAlphaFilter = new DoubleYoVariable(joint.getName() + "_velocityFiniteDifferenceAlpha", registry);
+      finiteDifferenceAlphaFilter.set(0.9);
+      velocityFiniteDifferenceFiltered = new AlphaFilteredYoVariable(joint.getName() + "_velocityFiniteDifferenceFiltered", registry, finiteDifferenceAlphaFilter);
       footInSwingThreshold = new DoubleYoVariable(joint.getName() + "_footInSwingThreshold", registry);
       touchdownThreshold = new DoubleYoVariable(joint.getName() + "__velocityFiniteDifferenceTouchdownThreshold", registry);
       footInSwingFiltered = new GlitchFilteredBooleanYoVariable(joint.getName() + "_footInSwingFiltered", registry, 50);
@@ -44,7 +47,7 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
    {
       if(initialized)
       {
-         velocityFiniteDifference.set(Math.abs(joint.getQd() - previousVelocity));
+         velocityFiniteDifferenceFiltered.update(Math.abs(joint.getQd() - previousVelocity) / 0.001);
          previousVelocity = joint.getQd();
 
          if(!controllerSetFootSwitch.getBooleanValue())
@@ -52,11 +55,11 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
             if(footInSwingFiltered.getBooleanValue())
             {
                if(!touchdownDetected.getBooleanValue())
-                  touchdownDetected.set(velocityFiniteDifference.getDoubleValue() > touchdownThreshold.getDoubleValue());
+                  touchdownDetected.set(velocityFiniteDifferenceFiltered.getDoubleValue() > touchdownThreshold.getDoubleValue());
             }
             else
             {
-               footInSwingFiltered.update(velocityFiniteDifference.getDoubleValue() < footInSwingThreshold.getDoubleValue());
+               footInSwingFiltered.update(velocityFiniteDifferenceFiltered.getDoubleValue() < footInSwingThreshold.getDoubleValue());
             }
          }
          else
