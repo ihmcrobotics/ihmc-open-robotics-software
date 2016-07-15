@@ -70,7 +70,7 @@ public class Line2dTest
 
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsPointInFrontOfLine2d()
    {
@@ -644,7 +644,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testContainsEpsilon()
    {
@@ -885,7 +885,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testDistanceLine2d()
    {
@@ -893,7 +893,7 @@ public class Line2dTest
       fail("Has not been implemented yet.");
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testDistanceLineSegment2d()
    {
@@ -901,7 +901,7 @@ public class Line2dTest
       fail("Has not been implemented yet.");
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testDistanceConvexPolygon2d()
    {
@@ -1376,7 +1376,7 @@ public class Line2dTest
       assertEquals("pure translation failed", vector.y, line.normalizedVector.y, delta);
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testApplyTransformTranslationException()
    {

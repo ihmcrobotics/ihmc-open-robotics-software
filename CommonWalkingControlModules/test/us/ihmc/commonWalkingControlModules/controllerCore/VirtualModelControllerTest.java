@@ -45,8 +45,8 @@ public class VirtualModelControllerTest
 
    private boolean hasSCSSimulation = false;
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testJacobianCalculation()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -95,8 +95,8 @@ public class VirtualModelControllerTest
       VirtualModelControllerTestHelper.compareWrenches(wrench, appliedWrench);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMC()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -118,8 +118,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, null);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testVMCSelectAll()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -141,8 +141,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, CommonOps.identity(Wrench.SIZE, Wrench.SIZE));
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCSelectForce()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -170,8 +170,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCSelectTorque()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -199,8 +199,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCSelectForceX()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -226,8 +226,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCSelectForceY()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -253,8 +253,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCSelectForceZ()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -280,8 +280,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCSelectTorqueX()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -307,8 +307,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCSelectTorqueY()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -334,8 +334,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCSelectTorqueZ()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -361,8 +361,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCSelectForceXTorqueY()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -389,8 +389,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCSelectForceYZTorqueX()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -418,8 +418,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCSelectForceXTorqueXZ()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -447,8 +447,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCWrongExpressedInFrame()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -476,8 +476,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCWrongExpressedOnFrame()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -505,8 +505,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCWrongExpressedInAndOnFrame()
    {
       double gravity = -9.81;
@@ -531,8 +531,8 @@ public class VirtualModelControllerTest
       submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 1500)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVMCVirtualWrenchCommand()
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -592,8 +592,8 @@ public class VirtualModelControllerTest
       VirtualModelControllerTestHelper.compareWrenches(desiredWrench, appliedWrench, selectionMatrix);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 300000000)
+   @DeployableTestMethod(estimatedDuration = 4.1)
+   @Test(timeout = 30000)
    public void testVMCWithArm() throws Exception
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -631,8 +631,8 @@ public class VirtualModelControllerTest
       simulationTestingParameters.setKeepSCSUp(false);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 3000000)
+   @DeployableTestMethod(estimatedDuration = 2.8)
+   @Test(timeout = 30000)
    public void testVMCWithPlanarArm() throws Exception
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -666,8 +666,8 @@ public class VirtualModelControllerTest
       simulationTestingParameters.setKeepSCSUp(false);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 3000000)
+   @DeployableTestMethod(estimatedDuration = 4.7)
+   @Test(timeout = 30000)
    public void testPlanarHydra() throws Exception
    {
       simulationTestingParameters.setKeepSCSUp(false);
@@ -712,8 +712,8 @@ public class VirtualModelControllerTest
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 3000000)
+   @DeployableTestMethod(estimatedDuration = 5.5)
+   @Test(timeout = 30000)
    public void testHydra() throws Exception
    {
       simulationTestingParameters.setKeepSCSUp(false);

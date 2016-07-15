@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
 @DeployableTestClass(targets = TestPlanTarget.Fast)
 public class IHMCROSTranslationRuntimeToolsTest
 {
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 15.0)
+   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 24.4)
    @Test(timeout = 120000)
    public void testBidirectionalConversionWithRandomConstructors()
    {

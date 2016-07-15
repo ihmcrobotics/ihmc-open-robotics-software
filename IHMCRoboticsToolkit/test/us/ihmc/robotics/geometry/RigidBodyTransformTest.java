@@ -1676,7 +1676,7 @@ public class RigidBodyTransformTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.1)
+	@DeployableTestMethod(estimatedDuration = 1.2)
 	@Test(timeout = 30000)
    public void TestOrthogonalityOfChainOfTransformations()
    {

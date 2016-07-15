@@ -60,7 +60,7 @@ public class TimeScriptTest
       enumVariable = null;
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testEmptyTimeScript()
    {
@@ -72,7 +72,7 @@ public class TimeScriptTest
       timeScript.doScript(time);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAddEntryAndDoScript()
    {
@@ -132,7 +132,7 @@ public class TimeScriptTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testTimeScriptCommand()
    {
@@ -218,7 +218,7 @@ public class TimeScriptTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSaveAndLoad()
    {

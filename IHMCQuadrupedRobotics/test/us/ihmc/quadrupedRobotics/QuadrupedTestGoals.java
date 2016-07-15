@@ -6,7 +6,7 @@ public class QuadrupedTestGoals
 {
    public static YoVariableTestGoal notFallen(QuadrupedForceTestYoVariables variables)
    {
-      return YoVariableTestGoal.deltaGreaterThan(variables.getRobotBodyZ(), variables.getGroundPlanePointZ(), variables.getStanceHeight().getDoubleValue() / 2.0);
+      return YoVariableTestGoal.deltaGreaterThan(variables.getRobotBodyZ(), variables.getGroundPlanePointZ(), variables.getYoComPositionInputZ().getDoubleValue() / 2.0);
    }
    
    public static YoVariableTestGoal notFallen(QuadrupedPositionTestYoVariables variables)

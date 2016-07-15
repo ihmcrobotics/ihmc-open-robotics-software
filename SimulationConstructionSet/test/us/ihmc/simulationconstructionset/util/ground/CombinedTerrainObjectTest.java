@@ -14,7 +14,7 @@ public class CombinedTerrainObjectTest
 
    //TODO: Flesh out this test case to be a really good one.
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testTwoIntersectingBoxes()
    {

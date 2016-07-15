@@ -123,7 +123,7 @@ public class AllYoVariablesSimulationComparerTest
 	      return ret;
 	   }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
 	public void testCompareWithZeroEpsilon() 
 	{
@@ -187,7 +187,7 @@ public class AllYoVariablesSimulationComparerTest
 		assertFalse(comparerWithLowEpsilon.compare(scs1, scs2)); 
 	}
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.5)
 	@Test(timeout = 30000)
 	public void testWithHighEpsilon()
 	{

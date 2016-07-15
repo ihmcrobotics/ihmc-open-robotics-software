@@ -208,7 +208,7 @@ public class RotationToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testConvertMatrixToAxisAngle()
    {
@@ -237,7 +237,7 @@ public class RotationToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testConvertMatrixToAxisAngle4f()
    {
@@ -267,7 +267,7 @@ public class RotationToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testConvertMatrixToQuaternion()
    {
@@ -295,7 +295,7 @@ public class RotationToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testConvertMatrixToQuaternionFloat()
    {
@@ -325,7 +325,7 @@ public class RotationToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 1.2)
    @Test(timeout = 30000)
    public void testConvertMatrixToYawPitchRoll()
    {
@@ -371,7 +371,7 @@ public class RotationToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testConvertQuaternionAsDoublesToYawPitchRoll()
    {
@@ -414,7 +414,7 @@ public class RotationToolsTest
       assertTrue(successRate > 0.9995);
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 0.9)
    @Test(timeout = 30000)
    public void testConvertQuaternionToYawPitchRoll()
    {
@@ -460,7 +460,7 @@ public class RotationToolsTest
    /**
     * This test prevents dramatic bugs, but not the precision is so shitty that it's not really meaningful.
     */
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testConvertQuaternionFloatToYawPitchRoll()
    {
@@ -505,7 +505,7 @@ public class RotationToolsTest
       assertTrue(successRate > 0.9991);
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testConvertRotationVectorToAxisAngle()
    {
@@ -533,7 +533,7 @@ public class RotationToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testConvertRotationVectorToMatrix()
    {
@@ -564,7 +564,7 @@ public class RotationToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testConvertTransformToQuaternion()
    {
@@ -592,7 +592,7 @@ public class RotationToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 1.2)
    @Test(timeout = 30000)
    public void testConvertTransformToYawPitchRoll()
    {
@@ -627,7 +627,7 @@ public class RotationToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 1.5)
    @Test(timeout = 30000)
    public void testConvertYawPitchRollToMatrix()
    {
@@ -663,7 +663,7 @@ public class RotationToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testConvertYawPitchRollArrayToMatrix()
    {
@@ -708,7 +708,7 @@ public class RotationToolsTest
     * Assumes that {@link RotationTools#convertMatrixToQuaternion(Matrix3d, Quat4d)} is tested.
     * Assumes that {@link RotationTools#quaternionEpsilonEquals(Quat4d, Quat4d, double)} is tested.
     */
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testConvertYawPitchRollToQuaternion()
    {
@@ -751,7 +751,7 @@ public class RotationToolsTest
     * Assumes that {@link RotationTools#convertMatrixToQuaternion(Matrix3d, Quat4d)} is tested.
     * Assumes that {@link RotationTools#quaternionEpsilonEquals(Quat4d, Quat4d, double)} is tested.
     */
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testConvertYawPitchRollArrayToQuaternion()
    {
@@ -799,7 +799,7 @@ public class RotationToolsTest
     * Assumes that {@link RotationTools#convertQuaternionToYawPitchRoll(Quat4d, double[])} is tested.
     * Assumes that {@link RotationTools#convertMatrixToYawPitchRoll(Matrix3d, double[])} is tested.
     */
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 1.4)
    @Test(timeout = 30000)
    public void testComputeYaw()
    {
@@ -842,7 +842,7 @@ public class RotationToolsTest
    /**
     * Assumes that {@link RotationTools#convertQuaternionToYawPitchRoll(Quat4d, double[])} is tested.
     */
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 1.2)
    @Test(timeout = 30000)
    public void testComputePitch()
    {
@@ -885,7 +885,7 @@ public class RotationToolsTest
     * Assumes that {@link RotationTools#convertQuaternionToYawPitchRoll(Quat4d, double[])} is tested.
     * Assumes that {@link RotationTools#convertMatrixToYawPitchRoll(Matrix3d, double[])} is tested.
     */
-   @DeployableTestMethod(estimatedDuration = 3.0)
+   @DeployableTestMethod(estimatedDuration = 1.5)
    @Test(timeout = 30000)
    public void testComputeRoll()
    {
@@ -1118,7 +1118,7 @@ public class RotationToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @DeployableTestMethod(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testIntegrateToQuaternion() throws Exception
    {

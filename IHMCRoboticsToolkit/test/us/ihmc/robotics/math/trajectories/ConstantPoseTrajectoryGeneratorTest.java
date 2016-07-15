@@ -54,7 +54,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       generator = new ConstantPoseTrajectoryGenerator(positionYoFramePoint, orientationQuaternion);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructors()
    {
@@ -119,7 +119,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    //TODO: Find a way to test this.
    public void testRegisterNewTrajectoryFrame()
@@ -130,7 +130,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       //      System.out.println(generator2);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    //TODO: Find a way to test this.
    public void testChangeFrame()
@@ -138,7 +138,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    //TODO: Find a way to test this.
    public void testSwitchTrajectoryFrame()
@@ -146,7 +146,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    //TODO: Find a way to test this.
    public void testRegisterAndSwitchFrame()
@@ -154,7 +154,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    //TODO: Find a way to test this.
    public void testSetConstantPose()
@@ -162,7 +162,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsDone()
    {
@@ -170,7 +170,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertTrue(generator1.isDone());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGet()
    {
@@ -183,7 +183,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackVelocity()
    {
@@ -199,7 +199,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertSame(referenceFrame, velocityToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackAcceleration()
    {
@@ -215,7 +215,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertSame(referenceFrame, accelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackAngularVelocity()
    {
@@ -231,7 +231,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertSame(referenceFrame, angularVelocityToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackAngularAcceleration()
    {
@@ -247,7 +247,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertSame(referenceFrame, angularAccelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackLinearData()
    {
@@ -289,7 +289,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertSame(referenceFrame, accelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackAngularData()
    {
@@ -331,21 +331,21 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertSame(referenceFrame, angularAccelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testInitialize()
    {
       generator.initialize();
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCompute()
    {
       generator.compute(0.0);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testToString()
    {

@@ -26,7 +26,7 @@ import static org.junit.Assert.assertTrue;
 public class Box3dTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.6)
+	@DeployableTestMethod(estimatedDuration = 0.9)
 	@Test(timeout = 30000)
    public void testCommonShape3dFunctionality()
    {

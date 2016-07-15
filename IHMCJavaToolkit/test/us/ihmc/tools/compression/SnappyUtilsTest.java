@@ -96,7 +96,7 @@ public class SnappyUtilsTest
          testCompression(elements, in, inOffset, out, outOffset, decompress, decompressOffset);
       }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
       public void testSlice() throws IOException
       {

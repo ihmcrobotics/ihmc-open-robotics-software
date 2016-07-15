@@ -25,7 +25,7 @@ public class YoWhiteBoardTest
 {
    private static final boolean VERBOSE = false;
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testWriteNotConnected() throws IOException
    {
@@ -33,7 +33,7 @@ public class YoWhiteBoardTest
       whiteBoard.writeData();
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testReadNotConnected() throws IOException
    {

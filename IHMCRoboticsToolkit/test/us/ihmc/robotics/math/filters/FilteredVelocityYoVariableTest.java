@@ -14,7 +14,7 @@ public class FilteredVelocityYoVariableTest
 
    private static final double DT = 0.1;
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdateForTranslationalVelocity()
    {
@@ -38,7 +38,7 @@ public class FilteredVelocityYoVariableTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdateForRotationalVelocity()
    {

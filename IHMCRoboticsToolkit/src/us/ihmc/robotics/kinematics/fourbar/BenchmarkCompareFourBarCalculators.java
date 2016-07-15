@@ -128,7 +128,9 @@ public class BenchmarkCompareFourBarCalculators
       if (totalTimeFastRunnerCalculator < totalTimeOtherCalculator) System.out.println("The FastRunner calculator is faster");
       else System.out.println("The FastRunner calculator is slower");
       
-      System.out.println("\n- Fast Runner time: " + totalTimeFastRunnerCalculator + "\n- Other calculator time: " + totalTimeOtherCalculator);
+      System.out.println("500,000 quadrilaterals computed");
+      
+      System.out.println("\n- Fast Runner time: " + totalTimeFastRunnerCalculator + " (ms)"+ "\n- Other calculator time: " + totalTimeOtherCalculator + " (ms)");
    }
    
    public static void main(String[] args)

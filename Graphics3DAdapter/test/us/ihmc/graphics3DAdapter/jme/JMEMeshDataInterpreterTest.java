@@ -20,7 +20,7 @@ import com.jme3.scene.Mesh;
 public class JMEMeshDataInterpreterTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testForASingleTriangle()
    {

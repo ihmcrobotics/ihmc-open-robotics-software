@@ -13,8 +13,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class BacklashProcessingYoVariableTest
 {
-   @DeployableTestMethod(estimatedDuration = 1.0)
-   @Test(timeout = 10000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testAgainstRevisedBacklash()
    {
       YoVariableRegistry registry = new YoVariableRegistry("dummy");

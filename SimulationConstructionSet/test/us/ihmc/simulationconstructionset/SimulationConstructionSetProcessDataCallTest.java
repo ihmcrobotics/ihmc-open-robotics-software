@@ -13,7 +13,7 @@ public class SimulationConstructionSetProcessDataCallTest
    private static final boolean DEBUG = false;
    private YoVariableRegistry registry;
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=1000)
    public void testForwardCount()
    {
@@ -71,7 +71,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=1000)
    public void testBackwardCount()
    {
@@ -130,7 +130,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=1000)
    public void testForwardCopy()
    {
@@ -188,7 +188,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=1000)
    public void testBackwardCopy()
    {

@@ -14,8 +14,8 @@ import static org.junit.Assert.*;
  */
 public class SortByResultTypeComparatorTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.02)
-   @Test(timeout = 100)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testCompare()
    {
       Random random = new Random(1976L);

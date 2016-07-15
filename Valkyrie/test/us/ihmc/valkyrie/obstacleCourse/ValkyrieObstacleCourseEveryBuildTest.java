@@ -29,15 +29,15 @@ public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEvery
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 70.0)
-   @Test(timeout = 260000)
+   @DeployableTestMethod(estimatedDuration = 72.0)
+   @Test(timeout = 360000)
    public void testSimpleFlatGroundScript() throws SimulationExceededMaximumTimeException
    {
       super.testSimpleFlatGroundScript();
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 53.8)
+   @DeployableTestMethod(estimatedDuration = 53.4)
    @Test(timeout = 270000)
    public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
    {

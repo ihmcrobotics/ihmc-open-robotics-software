@@ -28,7 +28,7 @@ public abstract class ConvexOptimizationAdapterTest
    public abstract double getTestErrorEpsilon();
    
    @SuppressWarnings("unchecked")
-   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void qpsFileTest() throws IOException
    {
@@ -95,7 +95,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.0, solution[1], getTestErrorEpsilon());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
   public void JOptimizerWebpageLPExample() throws Exception
   {
@@ -175,7 +175,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
    
    // Need to implement addQuadraticInequalities
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testLinearCostQuadraticInequalityOptimizationProblem()
    {
@@ -243,7 +243,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
    
    //Not implemented yet!
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testLinearCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -273,7 +273,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
 
    //Not implemented yet!
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {

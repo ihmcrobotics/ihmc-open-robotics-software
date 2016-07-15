@@ -37,8 +37,8 @@ public class JointConfigurationDataSenderTest
    private static final NetworkPorts TCP_PORT = NetworkPorts.createRandomTestPort(random);
    private static final String HOST = "localhost";
 
-	@DeployableTestMethod(estimatedDuration = 30.0)
-	@Test(timeout = 30000)
+	@DeployableTestMethod(estimatedDuration = 8.4)
+	@Test(timeout = 42000)
    public void test() throws InterruptedException, IOException
    {
       Random random = new Random(1274L);

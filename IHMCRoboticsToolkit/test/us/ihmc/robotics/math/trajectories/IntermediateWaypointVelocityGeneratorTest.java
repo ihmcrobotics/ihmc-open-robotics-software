@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class IntermediateWaypointVelocityGeneratorTest
 {
-   @DeployableTestMethod(estimatedDuration = 5.9)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void test()
    {
