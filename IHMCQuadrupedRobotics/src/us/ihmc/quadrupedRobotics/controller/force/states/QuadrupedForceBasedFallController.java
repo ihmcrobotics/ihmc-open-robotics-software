@@ -9,36 +9,32 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEsti
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 
 import javax.vecmath.Vector3d;
 
-public class QuadrupedForceBasedStandPrepController implements QuadrupedController
+public class QuadrupedForceBasedFallController implements QuadrupedController
 {
-   //Yo Variables
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable robotTime;
-   private final YoEuclideanPositionGains yoPositionControllerGains;
 
    // Parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
+   private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 3.0);
    private final DoubleParameter stanceLengthParameter = parameterFactory.createDouble("stanceLength", 1.0);
-   private final DoubleParameter stanceWidthParameter = parameterFactory.createDouble("stanceWidth", 0.5);
-   private final DoubleParameter stanceHeightParameter = parameterFactory.createDouble("stanceHeight", 0.60);
+   private final DoubleParameter stanceWidthParameter = parameterFactory.createDouble("stanceWidth", 0.8);
+   private final DoubleParameter stanceHeightParameter = parameterFactory.createDouble("stanceHeight", 0.40);
    private final DoubleParameter stanceXOffsetParameter = parameterFactory.createDouble("stanceXOffset", 0.05);
    private final DoubleParameter stanceYOffsetParameter = parameterFactory.createDouble("stanceYOffset", 0.0);
-   private final DoubleParameter stancePitchParameter = parameterFactory.createDouble("stancePitch", 0.0);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
    private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
    private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
@@ -48,24 +44,32 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
 
+   // YoVariables
+   private final DoubleYoVariable robotTime;
+
+   public enum FallBehavior
+   {
+      FREEZE, GO_HOME_Z, GO_HOME_XYZ
+   }
+
+   private final EnumYoVariable<FallBehavior> fallBehavior = EnumYoVariable.create("fallBehavior", FallBehavior.class, registry);
+   private final YoEuclideanPositionGains yoPositionControllerGains;
+
    // Task space controller
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
 
-   private QuadrupedSoleWaypointList quadrupedSoleWaypointList;
+   private final QuadrupedSoleWaypointList quadrupedSoleWaypointList;
    private final QuadrupedSoleWaypointController quadrupedSoleWaypointController;
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedReferenceFrames referenceFrames;
-   private QuadrantDependentList<SoleWaypoint> quadrupedInitialSoleWaypoint;
-   private QuadrantDependentList<SoleWaypoint> quadrupedFinalSoleWaypoint;
-   private FramePoint solePositionSetpoint;
+   private final FramePoint solePositionSetpoint;
    private final Vector3d zeroVelocity;
    private double taskStartTime;
-   private final double robotLength;
 
-   public QuadrupedForceBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
+   public QuadrupedForceBasedFallController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
    {
       quadrupedSoleWaypointController = controllerToolbox.getSoleWaypointController();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
@@ -85,15 +89,6 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
       yoPositionControllerGains = new YoEuclideanPositionGains("positionControllerGains", registry);
 
-      // Calculate the robot length
-      FramePoint frontLeftHipRollFrame = new FramePoint();
-      frontLeftHipRollFrame.setToZero(referenceFrames.getLegAttachmentFrame(RobotQuadrant.FRONT_LEFT));
-      frontLeftHipRollFrame.changeFrame(referenceFrames.getBodyFrame());
-      FramePoint hindLeftHipRollFrame = new FramePoint();
-      hindLeftHipRollFrame.setToZero(referenceFrames.getLegAttachmentFrame(RobotQuadrant.HIND_LEFT));
-      hindLeftHipRollFrame.changeFrame(referenceFrames.getBodyFrame());
-      robotLength = frontLeftHipRollFrame.getX() - hindLeftHipRollFrame.getX();
-
       environment.getParentRegistry().addChild(registry);
    }
 
@@ -108,14 +103,19 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
          solePositionSetpoint.setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
          solePositionSetpoint.changeFrame(referenceFrames.getBodyFrame());
          quadrupedSoleWaypointList.get(quadrant).get(0).set(solePositionSetpoint.getPoint(), zeroVelocity, 0.0);
-         solePositionSetpoint.setToZero(referenceFrames.getBodyFrame());
-         solePositionSetpoint.add(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.get() / 2.0), 0.0, 0.0);
-         solePositionSetpoint.add(0.0, quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
-         solePositionSetpoint.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(),
-               quadrant.getEnd().negateIfHindEnd(Math.sin(stancePitchParameter.get())) * robotLength / 2 - stanceHeightParameter.get());
+         switch (fallBehavior.getEnumValue())
+         {
+         case GO_HOME_XYZ:
+            solePositionSetpoint.set(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.get() / 2.0),
+                  quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
+            solePositionSetpoint.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(), -stanceHeightParameter.get());
+            break;
+         case GO_HOME_Z:
+            solePositionSetpoint.setZ(-stanceHeightParameter.get());
+            break;
+         }
          quadrupedSoleWaypointList.get(quadrant).get(1).set(solePositionSetpoint.getPoint(), zeroVelocity, trajectoryTimeParameter.get());
       }
-      updateGains();
       quadrupedSoleWaypointController.initialize(quadrupedSoleWaypointList, yoPositionControllerGains);
 
       // Initialize task space controller
