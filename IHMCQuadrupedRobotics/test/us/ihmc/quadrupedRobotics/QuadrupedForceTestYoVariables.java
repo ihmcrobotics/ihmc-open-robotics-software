@@ -13,6 +13,13 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    
    private final DoubleYoVariable stanceHeight;
    private final DoubleYoVariable groundPlanePointZ;
+   
+   private final DoubleYoVariable xGaitEndPhaseShiftInput;
+   private final DoubleYoVariable xGaitEndDoubleSupportDurationInput;
+   private final DoubleYoVariable xGaitStanceWidthInput;
+   private final DoubleYoVariable xGaitStanceLengthInput;
+   private final DoubleYoVariable xGaitStepGroundClearanceInput;
+   private final DoubleYoVariable xGaitStepDurationInput;
 
    @SuppressWarnings("unchecked")
    public QuadrupedForceTestYoVariables(SimulationConstructionSet scs)
@@ -24,6 +31,13 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       
       stanceHeight = (DoubleYoVariable) scs.getVariable("param__stanceHeight");
       groundPlanePointZ = (DoubleYoVariable) scs.getVariable("groundPlanePointZ");
+      
+      xGaitEndPhaseShiftInput = (DoubleYoVariable) scs.getVariable("endPhaseShiftInput");
+      xGaitEndDoubleSupportDurationInput = (DoubleYoVariable) scs.getVariable("endDoubleSupportDurationInput");
+      xGaitStanceWidthInput = (DoubleYoVariable) scs.getVariable("stanceWidthInput");
+      xGaitStanceLengthInput = (DoubleYoVariable) scs.getVariable("stanceLengthInput");
+      xGaitStepGroundClearanceInput = (DoubleYoVariable) scs.getVariable("stepGroundClearanceInput");
+      xGaitStepDurationInput = (DoubleYoVariable) scs.getVariable("stepDurationInput");
    }
 
    public EnumYoVariable<QuadrupedForceControllerRequestedEvent> getUserTrigger()
@@ -44,5 +58,35 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    public DoubleYoVariable getGroundPlanePointZ()
    {
       return groundPlanePointZ;
+   }
+
+   public DoubleYoVariable getXGaitEndDoubleSupportDurationInput()
+   {
+      return xGaitEndDoubleSupportDurationInput;
+   }
+
+   public DoubleYoVariable getXGaitEndPhaseShiftInput()
+   {
+      return xGaitEndPhaseShiftInput;
+   }
+
+   public DoubleYoVariable getXGaitStanceWidthInput()
+   {
+      return xGaitStanceWidthInput;
+   }
+
+   public DoubleYoVariable getXGaitStanceLengthInput()
+   {
+      return xGaitStanceLengthInput;
+   }
+
+   public DoubleYoVariable getXGaitStepGroundClearanceInput()
+   {
+      return xGaitStepGroundClearanceInput;
+   }
+
+   public DoubleYoVariable getXGaitStepDurationInput()
+   {
+      return xGaitStepDurationInput;
    }
 }

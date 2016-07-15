@@ -88,8 +88,8 @@ public class CenterOfMassHeightManager
       YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
       DoubleYoVariable kpCoMHeight = comHeightControlGains.getYoKp();
       DoubleYoVariable kdCoMHeight = comHeightControlGains.getYoKd();
-      DoubleYoVariable maxCoMHeightAcceleration = comHeightControlGains.getYoMaximumAcceleration();
-      DoubleYoVariable maxCoMHeightJerk = comHeightControlGains.getYoMaximumJerk();
+      DoubleYoVariable maxCoMHeightAcceleration = comHeightControlGains.getYoMaximumFeedback();
+      DoubleYoVariable maxCoMHeightJerk = comHeightControlGains.getYoMaximumFeedbackRate();
 
       double controlDT = momentumBasedController.getControlDT();
       // TODO Need to extract the maximum velocity parameter.

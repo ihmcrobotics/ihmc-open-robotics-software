@@ -18,8 +18,8 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    private final DoubleYoVariable maxDerivativeError;
    private final DoubleYoVariable maxProportionalError;
 
-   private final DoubleYoVariable maximumAcceleration;
-   private final DoubleYoVariable maximumJerk;
+   private final DoubleYoVariable maximumFeedback;
+   private final DoubleYoVariable maximumFeedbackRate;
 
    public YoSymmetricSE3PIDGains(String suffix, YoVariableRegistry registry)
    {
@@ -32,11 +32,11 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       maxDerivativeError = new DoubleYoVariable("maxDerivativeError" + suffix, registry);
       maxProportionalError = new DoubleYoVariable("maxProportionalError" + suffix, registry);
 
-      maximumAcceleration = new DoubleYoVariable("maximumAcceleration" + suffix, registry);
-      maximumJerk = new DoubleYoVariable("maximumJerk" + suffix, registry);
+      maximumFeedback = new DoubleYoVariable("maximumFeedback" + suffix, registry);
+      maximumFeedbackRate = new DoubleYoVariable("maximumFeedbackRate" + suffix, registry);
 
-      maximumAcceleration.set(Double.POSITIVE_INFINITY);
-      maximumJerk.set(Double.POSITIVE_INFINITY);
+      maximumFeedback.set(Double.POSITIVE_INFINITY);
+      maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
       maxDerivativeError.set(Double.POSITIVE_INFINITY);
       maxProportionalError.set(Double.POSITIVE_INFINITY);
    }
@@ -53,8 +53,8 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       maxDerivativeError.set(Double.POSITIVE_INFINITY);
       maxProportionalError.set(Double.POSITIVE_INFINITY);
 
-      maximumAcceleration.set(Double.POSITIVE_INFINITY);
-      maximumJerk.set(Double.POSITIVE_INFINITY);
+      maximumFeedback.set(Double.POSITIVE_INFINITY);
+      maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
    }
 
    @Override
@@ -94,14 +94,14 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       this.maxIntegralError.set(maxIntegralError);
    }
 
-   public void setMaximumAcceleration(double maxAcceleration)
+   public void setMaximumFeedback(double maxFeedback)
    {
-      maximumAcceleration.set(maxAcceleration);
+      maximumFeedback.set(maxFeedback);
    }
 
-   public void setMaximumJerk(double maxJerk)
+   public void setMaximumFeedbackRate(double maxFeedbackRate)
    {
-      maximumJerk.set(maxJerk);
+      maximumFeedbackRate.set(maxFeedbackRate);
    }
 
    @Override
@@ -110,7 +110,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
-      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+      setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       setMaxDerivativeError(gains.getMaximumDerivativeError());
       setMaxProportionalError(gains.getMaximumProportionalError());
    }
@@ -121,7 +121,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
-      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+      setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       setMaxDerivativeError(gains.getMaximumDerivativeError());
       setMaxProportionalError(gains.getMaximumProportionalError());
    }
@@ -232,10 +232,10 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    }
 
    @Override
-   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      maximumAcceleration.set(maxAcceleration);
-      maximumJerk.set(maxJerk);
+      maximumFeedback.set(maxFeedback);
+      maximumFeedbackRate.set(maxFeedbackRate);
    }
 
    @Override
@@ -251,15 +251,15 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumAcceleration()
+   public DoubleYoVariable getYoMaximumFeedback()
    {
-      return maximumAcceleration;
+      return maximumFeedback;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumJerk()
+   public DoubleYoVariable getYoMaximumFeedbackRate()
    {
-      return maximumJerk;
+      return maximumFeedbackRate;
    }
 
    @Override
@@ -311,15 +311,15 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    }
 
    @Override
-   public double getMaximumAcceleration()
+   public double getMaximumFeedback()
    {
-      return maximumAcceleration.getDoubleValue();
+      return maximumFeedback.getDoubleValue();
    }
 
    @Override
-   public double getMaximumJerk()
+   public double getMaximumFeedbackRate()
    {
-      return maximumJerk.getDoubleValue();
+      return maximumFeedbackRate.getDoubleValue();
    }
 
    @Override

@@ -17,8 +17,8 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
    private final DoubleYoVariable maxDerivativeError;
    private final DoubleYoVariable maxProportionalError;
 
-   private final DoubleYoVariable maxAcceleration;
-   private final DoubleYoVariable maxJerk;
+   private final DoubleYoVariable maxFeedback;
+   private final DoubleYoVariable maxFeedbackRate;
 
    public YoEuclideanPositionGains(String prefix, YoVariableRegistry registry)
    {
@@ -37,11 +37,11 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
       maxDerivativeError = new DoubleYoVariable(prefix + "PositionMaxDerivativeError", registry);
       maxProportionalError = new DoubleYoVariable(prefix + "PositionMaxProportionalError", registry);
 
-      maxAcceleration = new DoubleYoVariable(prefix + "PositionMaxAcceleration", registry);
-      maxJerk = new DoubleYoVariable(prefix + "PositionMaxJerk", registry);
+      maxFeedback = new DoubleYoVariable(prefix + "PositionMaxFeedback", registry);
+      maxFeedbackRate = new DoubleYoVariable(prefix + "PositionMaxFeedbackRate", registry);
 
-      maxAcceleration.set(Double.POSITIVE_INFINITY);
-      maxJerk.set(Double.POSITIVE_INFINITY);
+      maxFeedback.set(Double.POSITIVE_INFINITY);
+      maxFeedbackRate.set(Double.POSITIVE_INFINITY);
       maxDerivativeError.set(Double.POSITIVE_INFINITY);
       maxProportionalError.set(Double.POSITIVE_INFINITY);
    }
@@ -57,8 +57,8 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
       }
 
       maxIntegralError.set(0.0);
-      maxAcceleration.set(Double.POSITIVE_INFINITY);
-      maxJerk.set(Double.POSITIVE_INFINITY);
+      maxFeedback.set(Double.POSITIVE_INFINITY);
+      maxFeedbackRate.set(Double.POSITIVE_INFINITY);
       maxDerivativeError.set(Double.POSITIVE_INFINITY);
       maxProportionalError.set(Double.POSITIVE_INFINITY);
    }
@@ -161,10 +161,10 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      this.maxAcceleration.set(maxAcceleration);
-      this.maxJerk.set(maxJerk);
+      this.maxFeedback.set(maxFeedback);
+      this.maxFeedbackRate.set(maxFeedbackRate);
    }
 
    @Override
@@ -185,21 +185,21 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
-      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+      setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       setMaxDerivativeError(gains.getMaximumDerivativeError());
       setMaxProportionalError(gains.getMaximumProportionalError());
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumAcceleration()
+   public DoubleYoVariable getYoMaximumFeedback()
    {
-      return maxAcceleration;
+      return maxFeedback;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumJerk()
+   public DoubleYoVariable getYoMaximumFeedbackRate()
    {
-      return maxJerk;
+      return maxFeedbackRate;
    }
 
    @Override
@@ -251,15 +251,15 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public double getMaximumAcceleration()
+   public double getMaximumFeedback()
    {
-      return maxAcceleration.getDoubleValue();
+      return maxFeedback.getDoubleValue();
    }
 
    @Override
-   public double getMaximumJerk()
+   public double getMaximumFeedbackRate()
    {
-      return maxJerk.getDoubleValue();
+      return maxFeedbackRate.getDoubleValue();
    }
 
    @Override
