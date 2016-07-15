@@ -50,6 +50,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
+import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -158,7 +159,8 @@ public class QuadrupedSimulationFactory
    
    private void createFootSwitches()
    {
-      footSwitches = QuadrupedStateEstimatorFactory.createFootSwitches(contactableFeet, gravity.get(), fullRobotModel.get(), sdfRobot.get().getRobotsYoVariableRegistry());
+      footSwitches = QuadrupedStateEstimatorFactory.createFootSwitches(contactableFeet, gravity.get(), fullRobotModel.get(), FootSwitchType.TouchdownBased,
+            sdfRobot.get().getRobotsYoVariableRegistry());
    }
    
    private void createStateEstimator()
