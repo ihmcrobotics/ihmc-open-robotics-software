@@ -59,45 +59,44 @@ public class QuadrupedSoleWaypointList extends QuadrantDependentList<ArrayList<S
       return get(key).size();
    }
 
-   public int getMaxSize(){
+   public int getMaxSize()
+   {
       int maxSize = 0;
       for (RobotQuadrant quadrant : RobotQuadrant.values())
       {
-         if (size(quadrant) > maxSize){
-            maxSize =  size(quadrant);
+         if (size(quadrant) > maxSize)
+         {
+            maxSize = size(quadrant);
          }
       }
-      return  maxSize;
+      return maxSize;
    }
 
-   public int getMinSize(){
+   public int getMinSize()
+   {
       int minSize = Integer.MAX_VALUE;
       for (RobotQuadrant quadrant : RobotQuadrant.values())
       {
-         if (size(quadrant) < minSize){
-            minSize =  size(quadrant);
+         if (size(quadrant) < minSize)
+         {
+            minSize = size(quadrant);
          }
       }
-      return  minSize;
+      return minSize;
    }
 
-   public Point3d getFinalPosition(RobotQuadrant key){
-      return get(key).get(size(key)-1).getPosition();
+   public double getFinalTime(RobotQuadrant key)
+   {
+      return (size(key) == 0) ? 0 : get(key).get(size(key) - 1).getTime();
    }
 
-   public Vector3d getFinalVelocity(RobotQuadrant key){
-      return get(key).get(size(key)-1).getVelocity();
-   }
-
-   public double getFinalTime(RobotQuadrant key){
-      return get(key).get(size(key)-1).getTime();
-   }
-
-   public double getFinalTime(){
+   public double getFinalTime()
+   {
       double finalTime = 0;
       for (RobotQuadrant quadrant : RobotQuadrant.values())
       {
-         if(getFinalTime(quadrant) > finalTime){
+         if (getFinalTime(quadrant) > finalTime)
+         {
             finalTime = getFinalTime(quadrant);
          }
       }
