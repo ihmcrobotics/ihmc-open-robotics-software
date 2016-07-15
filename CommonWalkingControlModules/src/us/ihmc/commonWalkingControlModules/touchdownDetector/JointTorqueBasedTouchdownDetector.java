@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -28,7 +27,7 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    @Override
    public boolean hasTouchedDown()
    {
-      touchdownDetectedFiltered.update(Math.abs(joint.getTau()) < torqueThreshold.getDoubleValue());
+      touchdownDetectedFiltered.update(Math.abs(joint.getTau()) > torqueThreshold.getDoubleValue());
 
       return touchdownDetectedFiltered.getBooleanValue();
    }
