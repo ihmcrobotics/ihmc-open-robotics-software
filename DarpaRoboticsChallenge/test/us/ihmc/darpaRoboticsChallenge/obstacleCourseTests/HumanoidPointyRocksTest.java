@@ -270,8 +270,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.Fast})
-   @Test(timeout = 230000)
+   @DeployableTestMethod(estimatedDuration = 58.3, targets = {TestPlanTarget.Fast})
+   @Test(timeout = 290000)
    /**
     * This test takes one step at a time (throw-catch). For each step, the predicted contact points are randomly changed to be a
     * thin knife edge. However, the true contact points remain the full foot. So this tests that the ICP planner and such work well
@@ -315,8 +315,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.Fast})
-   @Test(timeout = 230000)
+   @DeployableTestMethod(estimatedDuration = 92.2, targets = {TestPlanTarget.Fast})
+   @Test(timeout = 460000)
    /**
     * This test steps in place with the actual and the predicted foot polygons changing to be the given foot shrinkage percentage.
     * This test therefore tests the ability to hold orientation of the foot without over-rotating. However, it does not test
@@ -437,8 +437,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.Fast})
-   @Test(timeout = 230000)
+   @DeployableTestMethod(estimatedDuration = 77.5, targets = {TestPlanTarget.Fast})
+   @Test(timeout = 390000)
    /**
     * In this test, the robot is standing, but then the floor is dropped out from underneath it. So the robot has to detect the rotation
     * and hold position. Then it takes some steps in place with the part of foot changing each step.
