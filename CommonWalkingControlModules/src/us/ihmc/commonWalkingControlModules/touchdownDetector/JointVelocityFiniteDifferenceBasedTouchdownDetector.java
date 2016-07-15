@@ -47,25 +47,20 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
    {
       if(initialized)
       {
-         velocityFiniteDifferenceFiltered.update(Math.abs(joint.getQd() - previousVelocity) / 0.001);
+         velocityFiniteDifferenceFiltered.update(Math.abs(joint.getQd() - previousVelocity) * 1000);
          previousVelocity = joint.getQd();
 
-         if(!controllerSetFootSwitch.getBooleanValue())
+         if(!controllerSetFootSwitch.getBooleanValue() || !touchdownDetected.getBooleanValue())
          {
+            footInSwingFiltered.update(velocityFiniteDifferenceFiltered.getDoubleValue() < footInSwingThreshold.getDoubleValue());
             if(footInSwingFiltered.getBooleanValue())
             {
-               if(!touchdownDetected.getBooleanValue())
-                  touchdownDetected.set(velocityFiniteDifferenceFiltered.getDoubleValue() > touchdownThreshold.getDoubleValue());
-            }
-            else
-            {
-               footInSwingFiltered.update(velocityFiniteDifferenceFiltered.getDoubleValue() < footInSwingThreshold.getDoubleValue());
+               touchdownDetected.set(velocityFiniteDifferenceFiltered.getDoubleValue() > touchdownThreshold.getDoubleValue());
             }
          }
          else
          {
             footInSwingFiltered.set(false);
-            touchdownDetected.set(true);
          }
       }
       else
