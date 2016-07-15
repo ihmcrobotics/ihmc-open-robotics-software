@@ -83,7 +83,8 @@ public class AxisAngleOrientationController
          FrameVector feedForward)
    {
       computeProportionalTerm(desiredOrientation);
-      computeDerivativeTerm(desiredAngularVelocity, currentAngularVelocity);
+      if (currentAngularVelocity != null)
+         computeDerivativeTerm(desiredAngularVelocity, currentAngularVelocity);
       computeIntegralTerm();
 
       output.setToZero(proportionalTerm.getReferenceFrame());
