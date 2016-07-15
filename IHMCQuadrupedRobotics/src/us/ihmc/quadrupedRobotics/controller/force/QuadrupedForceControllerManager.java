@@ -14,10 +14,7 @@ import us.ihmc.quadrupedRobotics.params.BooleanParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.params.ParameterPacketListener;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedTimedStepInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsProvider;
+import us.ihmc.quadrupedRobotics.providers.*;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineYoVariableTrigger;
@@ -43,6 +40,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final QuadrupedControllerInputProviderInterface inputProvider;
    private final QuadrupedTimedStepInputProvider timedStepProvider;
    private final QuadrupedXGaitSettingsProvider xGaitSettingsProvider;
+   private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
 
    private final FiniteStateMachine<QuadrupedForceControllerState, ControllerEvent> stateMachine;
    private final FiniteStateMachineYoVariableTrigger<QuadrupedForceControllerRequestedEvent> userEventTrigger;
@@ -57,6 +55,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
       timedStepProvider = new QuadrupedTimedStepInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
       xGaitSettingsProvider = new QuadrupedXGaitSettingsProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
 
       GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
 

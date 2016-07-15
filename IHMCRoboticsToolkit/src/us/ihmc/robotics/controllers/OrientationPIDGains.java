@@ -10,8 +10,8 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
    private double orientationMaxDerivativeError = Double.POSITIVE_INFINITY;
    private double orientationMaxProportionalError = Double.POSITIVE_INFINITY;
 
-   private double orientationMaximumAcceleration = Double.POSITIVE_INFINITY;
-   private double orientationMaximumJerk = Double.POSITIVE_INFINITY;
+   private double orientationMaximumFeedback = Double.POSITIVE_INFINITY;
+   private double orientationMaximumFeedbackRate = Double.POSITIVE_INFINITY;
 
    @Override
    public void set(OrientationPIDGainsInterface gains)
@@ -27,8 +27,8 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
       orientationMaxDerivativeError = gains.getMaximumDerivativeError();
       orientationMaxProportionalError = gains.getMaximumProportionalError();
 
-      orientationMaximumAcceleration = gains.getMaximumAcceleration();
-      orientationMaximumJerk = gains.getMaximumJerk();
+      orientationMaximumFeedback = gains.getMaximumFeedback();
+      orientationMaximumFeedbackRate = gains.getMaximumFeedbackRate();
    }
 
    public void setGains(double proportionalGain, double derivativeGain)
@@ -65,10 +65,10 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
       this.orientationMaxIntegralError = maxIntegralError;
    }
 
-   public void setMaximumAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setMaximumFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      orientationMaximumAcceleration = maxAcceleration;
-      orientationMaximumJerk = maxJerk;
+      orientationMaximumFeedback = maxFeedback;
+      orientationMaximumFeedbackRate = maxFeedbackRate;
    }
 
    public void setMaximumDerivativeError(double maxDerivativeError)
@@ -106,15 +106,15 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
    }
 
    @Override
-   public double getMaximumAcceleration()
+   public double getMaximumFeedback()
    {
-      return orientationMaximumAcceleration;
+      return orientationMaximumFeedback;
    }
 
    @Override
-   public double getMaximumJerk()
+   public double getMaximumFeedbackRate()
    {
-      return orientationMaximumJerk;
+      return orientationMaximumFeedbackRate;
    }
 
    @Override

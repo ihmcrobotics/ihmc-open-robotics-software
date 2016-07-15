@@ -485,6 +485,14 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       zUpNode.setShadowMode(ShadowMode.CastAndReceive);
    }
 
+   public void addDirectionalLight(ColorRGBA color, Vector3f direction)
+   {
+      DirectionalLight light = new DirectionalLight();
+      light.setColor(color);
+      light.setDirection(direction.normalizeLocal());
+      rootNode.addLight(light);
+   }
+
    public void setupSky()
    {
       try

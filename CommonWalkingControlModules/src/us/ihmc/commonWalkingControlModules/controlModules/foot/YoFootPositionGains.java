@@ -17,8 +17,8 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    private final DoubleYoVariable derivativeXYGain, derivativeZGain;
    private final DoubleYoVariable dampingRatio;
 
-   private final DoubleYoVariable maximumAcceleration;
-   private final DoubleYoVariable maximumJerk;
+   private final DoubleYoVariable maximumFeedback;
+   private final DoubleYoVariable maximumFeedbackRate;
    private final DoubleYoVariable maxDerivativeError;
    private final DoubleYoVariable maxProportionalError;
 
@@ -30,13 +30,13 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       derivativeZGain = new DoubleYoVariable("kdZLinear" + suffix, registry);
       dampingRatio = new DoubleYoVariable("zetaLinear" + suffix, registry);
 
-      maximumAcceleration = new DoubleYoVariable("maximumLinearAcceleration" + suffix, registry);
-      maximumJerk = new DoubleYoVariable("maximumLinearJerk" + suffix, registry);
+      maximumFeedback = new DoubleYoVariable("maximumLinearFeedback" + suffix, registry);
+      maximumFeedbackRate = new DoubleYoVariable("maximumLinearFeedbackRate" + suffix, registry);
       maxDerivativeError = new DoubleYoVariable("maximumLinearDerivativeError" + suffix, registry);
       maxProportionalError = new DoubleYoVariable("maximumLinearProportionalError" + suffix, registry);
 
-      maximumAcceleration.set(Double.POSITIVE_INFINITY);
-      maximumJerk.set(Double.POSITIVE_INFINITY);
+      maximumFeedback.set(Double.POSITIVE_INFINITY);
+      maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
       maxDerivativeError.set(Double.POSITIVE_INFINITY);
       maxProportionalError.set(Double.POSITIVE_INFINITY);
    }
@@ -49,8 +49,8 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       derivativeXYGain.set(0.0);
       derivativeZGain.set(0.0);
       dampingRatio.set(0.0);
-      maximumAcceleration.set(Double.POSITIVE_INFINITY);
-      maximumJerk.set(Double.POSITIVE_INFINITY);
+      maximumFeedback.set(Double.POSITIVE_INFINITY);
+      maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
       maxDerivativeError.set(Double.POSITIVE_INFINITY);
       maxProportionalError.set(Double.POSITIVE_INFINITY);
    }
@@ -178,10 +178,10 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      maximumAcceleration.set(maxAcceleration);
-      maximumJerk.set(maxJerk);
+      maximumFeedback.set(maxFeedback);
+      maximumFeedbackRate.set(maxFeedbackRate);
    }
 
    @Override
@@ -202,21 +202,21 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
-      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+      setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       setMaxDerivativeError(gains.getMaximumDerivativeError());
       setMaxProportionalError(gains.getMaximumProportionalError());
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumAcceleration()
+   public DoubleYoVariable getYoMaximumFeedback()
    {
-      return maximumAcceleration;
+      return maximumFeedback;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumJerk()
+   public DoubleYoVariable getYoMaximumFeedbackRate()
    {
-      return maximumJerk;
+      return maximumFeedbackRate;
    }
 
    @Override
@@ -270,15 +270,15 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public double getMaximumAcceleration()
+   public double getMaximumFeedback()
    {
-      return maximumAcceleration.getDoubleValue();
+      return maximumFeedback.getDoubleValue();
    }
 
    @Override
-   public double getMaximumJerk()
+   public double getMaximumFeedbackRate()
    {
-      return maximumJerk.getDoubleValue();
+      return maximumFeedbackRate.getDoubleValue();
    }
 
    @Override
