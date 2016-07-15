@@ -51,8 +51,8 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
 
       JointVelocityFiniteDifferenceBasedTouchdownDetector jointVelocityFiniteDifferenceBasedTouchdownDetector = new JointVelocityFiniteDifferenceBasedTouchdownDetector(
             fullRobotModel.getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), controllerThinksHasTouchedDown, registry);
-      jointVelocityFiniteDifferenceBasedTouchdownDetector.setFootInSwingThreshold(0.05);
-      jointVelocityFiniteDifferenceBasedTouchdownDetector.setTouchdownThreshold(0.1);
+      jointVelocityFiniteDifferenceBasedTouchdownDetector.setFootInSwingThreshold(30.0);
+      jointVelocityFiniteDifferenceBasedTouchdownDetector.setTouchdownThreshold(50.0);
 
       touchdownDetectors.add(jointVelocityFiniteDifferenceBasedTouchdownDetector);
    }
