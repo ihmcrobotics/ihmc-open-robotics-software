@@ -64,6 +64,7 @@ dependencies {
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
     
     testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")
+    testCompile ihmc.getProjectTestDependency(":CommonWalkingControlModules")
 }
 jar {
     manifest {

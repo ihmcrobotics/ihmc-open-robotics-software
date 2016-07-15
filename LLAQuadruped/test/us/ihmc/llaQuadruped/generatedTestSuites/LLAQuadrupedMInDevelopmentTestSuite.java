@@ -12,10 +12,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.llaQuadruped.controller.force.LLAQuadrupedXGaitRandomWalkingTest.class
+   us.ihmc.llaQuadruped.controller.position.LLAQuadrupedPositionCrawlWalkingWithStopsTest.class
 })
 
-public class LLAQuadrupedDInDevelopmentTestSuite
+public class LLAQuadrupedMInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {

@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestC
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMultiRobotTestInterface
+public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
@@ -53,14 +53,16 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    
    @DeployableTestMethod(estimatedDuration = 15.0)
    @Test(timeout = 30000)
-   public void testWalkingForwardFast()
+   public void testTrottingForwardFast()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      
       variables.getYoPlanarVelocityInputX().set(1.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 5.0));
+      conductor.addTimeLimit(variables.getYoTime(), 5.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 2.0));
       conductor.simulate();
       
@@ -69,14 +71,17 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    
    @DeployableTestMethod(estimatedDuration = 15.0)
    @Test(timeout = 30000)
-   public void testWalkingForwardSlow()
+   public void testTrottingForwardSlow()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      variables.getXGaitEndDoubleSupportDurationInput().set(0.3);
+      
       variables.getYoPlanarVelocityInputX().set(0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 5.0));
+      conductor.addTimeLimit(variables.getYoTime(), 5.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 0.3));
       conductor.simulate();
       
@@ -85,14 +90,16 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    
    @DeployableTestMethod(estimatedDuration = 15.0)
    @Test(timeout = 30000)
-   public void testWalkingBackwardsFast()
+   public void testTrottingBackwardsFast()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      
       variables.getYoPlanarVelocityInputX().set(-1.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 5.0));
+      conductor.addTimeLimit(variables.getYoTime(), 5.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -2.0));
       conductor.simulate();
       
@@ -101,14 +108,17 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    
    @DeployableTestMethod(estimatedDuration = 15.0)
    @Test(timeout = 30000)
-   public void testWalkingBackwardsSlow()
+   public void testTrottingBackwardsSlow()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      variables.getXGaitEndDoubleSupportDurationInput().set(0.3);
+      
       variables.getYoPlanarVelocityInputX().set(-0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 6.0));
+      conductor.addTimeLimit(variables.getYoTime(), 6.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -0.3));
       conductor.simulate();
       
@@ -117,16 +127,18 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    
    @DeployableTestMethod(estimatedDuration = 25.0)
    @Test(timeout = 30000)
-   public void testWalkingInAForwardLeftCircle()
+   public void testTrottingInAForwardLeftCircle()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      
       variables.getYoPlanarVelocityInputX().set(1.0);
       variables.getYoPlanarVelocityInputZ().set(0.5);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 10.0));
-      conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 1.5));
+      conductor.addTimeLimit(variables.getYoTime(), 15.0);
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 1.0));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI / 2, 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.3));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI, 0.1));
@@ -137,16 +149,18 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    
    @DeployableTestMethod(estimatedDuration = 25.0)
    @Test(timeout = 30000)
-   public void testWalkingInAForwardRightCircle()
+   public void testTrottingInAForwardRightCircle()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      
       variables.getYoPlanarVelocityInputX().set(1.0);
       variables.getYoPlanarVelocityInputZ().set(-0.5);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 10.0));
-      conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 1.5));
+      conductor.addTimeLimit(variables.getYoTime(), 15.0);
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 1.0));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI / 2, 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.3));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI, 0.1));
@@ -157,18 +171,19 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    
    @DeployableTestMethod(estimatedDuration = 25.0)
    @Test(timeout = 30000)
-   public void testWalkingInABackwardLeftCircle()
+   public void testTrottingInABackwardLeftCircle()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      
       variables.getYoPlanarVelocityInputX().set(-1.0);
       variables.getYoPlanarVelocityInputZ().set(-0.5);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 10.0));
-      conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), -1.5));
+      conductor.addTimeLimit(variables.getYoTime(), 10.0);
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -0.5));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI / 2, 0.1));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.3));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI, 0.1));
       conductor.simulate();
       
@@ -177,18 +192,19 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    
    @DeployableTestMethod(estimatedDuration = 25.0)
    @Test(timeout = 30000)
-   public void testWalkingInABackwardRightCircle()
+   public void testTrottingInABackwardRightCircle()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      
       variables.getYoPlanarVelocityInputX().set(-1.0);
       variables.getYoPlanarVelocityInputZ().set(0.5);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 10.0));
-      conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), -1.5));
+      conductor.addTimeLimit(variables.getYoTime(), 10.0);
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -0.5));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI / 2, 0.1));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.3));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI, 0.1));
       conductor.simulate();
       

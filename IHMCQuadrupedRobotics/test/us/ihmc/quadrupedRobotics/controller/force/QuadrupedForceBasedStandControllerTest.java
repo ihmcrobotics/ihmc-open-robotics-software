@@ -160,6 +160,10 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
+      conductor.simulate();
+      
       pusher.applyForce(new Vector3d(-1.0, -0.1, 0.75), 700.0, 0.05);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
