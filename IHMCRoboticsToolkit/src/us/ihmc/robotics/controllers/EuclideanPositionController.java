@@ -77,7 +77,8 @@ public class EuclideanPositionController implements PositionController
    public void compute(FrameVector output, FramePoint desiredPosition, FrameVector desiredVelocity, FrameVector currentVelocity, FrameVector feedForward)
    {
       computeProportionalTerm(desiredPosition);
-      computeDerivativeTerm(desiredVelocity, currentVelocity);
+      if (currentVelocity != null)
+         computeDerivativeTerm(desiredVelocity, currentVelocity);
       computeIntegralTerm();
       output.setToNaN(bodyFrame);
       output.add(proportionalTerm, derivativeTerm);
