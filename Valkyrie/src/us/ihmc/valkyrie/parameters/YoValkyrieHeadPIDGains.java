@@ -20,8 +20,8 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
    private final DoubleYoVariable maxDerivativeError;
    private final DoubleYoVariable maxProportionalError;
 
-   private final DoubleYoVariable maximumAcceleration;
-   private final DoubleYoVariable maximumJerk;
+   private final DoubleYoVariable maximumFeedback;
+   private final DoubleYoVariable maximumFeedbackRate;
 
    public YoValkyrieHeadPIDGains(String suffix, YoVariableRegistry registry)
    {
@@ -32,13 +32,13 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
       dampingRatioX = new DoubleYoVariable("zetaXAngular" + suffix, registry);
       dampingRatioYZ = new DoubleYoVariable("zetaYZAngular" + suffix, registry);
 
-      maximumAcceleration = new DoubleYoVariable("maximumAngularAcceleration" + suffix, registry);
-      maximumJerk = new DoubleYoVariable("maximumAngularJerk" + suffix, registry);
+      maximumFeedback = new DoubleYoVariable("maximumAngularFeedback" + suffix, registry);
+      maximumFeedbackRate = new DoubleYoVariable("maximumAngularFeedbackRate" + suffix, registry);
       maxDerivativeError = new DoubleYoVariable("maximumAngularDerivativeError" + suffix, registry);
       maxProportionalError = new DoubleYoVariable("maximumAngularProportionalError" + suffix, registry);
 
-      maximumAcceleration.set(Double.POSITIVE_INFINITY);
-      maximumJerk.set(Double.POSITIVE_INFINITY);
+      maximumFeedback.set(Double.POSITIVE_INFINITY);
+      maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
       maxDerivativeError.set(Double.POSITIVE_INFINITY);
       maxProportionalError.set(Double.POSITIVE_INFINITY);
    }
@@ -51,8 +51,8 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
       derivativeYZGain.set(0.0);
       dampingRatioX.set(0.0);
       dampingRatioYZ.set(0.0);
-      maximumAcceleration.set(Double.POSITIVE_INFINITY);
-      maximumJerk.set(Double.POSITIVE_INFINITY);
+      maximumFeedback.set(Double.POSITIVE_INFINITY);
+      maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
       maxDerivativeError.set(Double.POSITIVE_INFINITY);
       maxProportionalError.set(Double.POSITIVE_INFINITY);
    }
@@ -186,21 +186,21 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
    {
    }
 
-   public void setMaximumAcceleration(double maxAcceleration)
+   public void setMaximumFeedback(double maxFeedback)
    {
-      maximumAcceleration.set(maxAcceleration);
+      maximumFeedback.set(maxFeedback);
    }
 
-   public void setMaximumJerk(double maxJerk)
+   public void setMaximumFeedbackRate(double maxFeedbackRate)
    {
-      maximumJerk.set(maxJerk);
+      maximumFeedbackRate.set(maxFeedbackRate);
    }
 
    @Override
-   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      maximumAcceleration.set(maxAcceleration);
-      maximumJerk.set(maxJerk);
+      maximumFeedback.set(maxFeedback);
+      maximumFeedbackRate.set(maxFeedbackRate);
    }
 
    @Override
@@ -221,21 +221,21 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
-      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+      setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       setMaxDerivativeError(gains.getMaximumDerivativeError());
       setMaxProportionalError(gains.getMaximumProportionalError());
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumAcceleration()
+   public DoubleYoVariable getYoMaximumFeedback()
    {
-      return maximumAcceleration;
+      return maximumFeedback;
    }
 
    @Override
-   public DoubleYoVariable getYoMaximumJerk()
+   public DoubleYoVariable getYoMaximumFeedbackRate()
    {
-      return maximumJerk;
+      return maximumFeedbackRate;
    }
 
    @Override
@@ -289,15 +289,15 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
    }
 
    @Override
-   public double getMaximumAcceleration()
+   public double getMaximumFeedback()
    {
-      return maximumAcceleration.getDoubleValue();
+      return maximumFeedback.getDoubleValue();
    }
 
    @Override
-   public double getMaximumJerk()
+   public double getMaximumFeedbackRate()
    {
-      return maximumJerk.getDoubleValue();
+      return maximumFeedbackRate.getDoubleValue();
    }
 
    @Override

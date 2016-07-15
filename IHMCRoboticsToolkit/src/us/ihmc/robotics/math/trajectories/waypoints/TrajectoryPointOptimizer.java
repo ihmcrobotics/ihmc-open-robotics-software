@@ -280,7 +280,7 @@ public class TrajectoryPointOptimizer
       CommonOps.insert(b, d, problemSize, 0);
 
       x.reshape(size, 1);
-      if (solver.setA(E))
+      if (solver.setA(E)) // TODO: if this does not work what then?
          solver.solve(d, x);
       x.reshape(problemSize, 1);
 
