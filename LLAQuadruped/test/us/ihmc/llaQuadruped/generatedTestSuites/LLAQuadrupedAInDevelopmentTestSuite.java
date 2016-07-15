@@ -13,8 +13,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.llaQuadruped.controller.force.LLAQuadrupedForceBasedStandControllerTest.class,
-   us.ihmc.llaQuadruped.controller.force.LLAQuadrupedTurning720Test.class,
-   us.ihmc.llaQuadruped.controller.force.LLAQuadrupedXGaitBumpyTerrainWalkingTest.class
+   us.ihmc.llaQuadruped.controller.force.LLAQuadrupedTurning720Test.class
 })
 
 public class LLAQuadrupedAInDevelopmentTestSuite
