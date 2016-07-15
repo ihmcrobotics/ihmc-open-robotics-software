@@ -24,7 +24,7 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
       this.controllerSetFootSwitch = controllerSetFootSwitch;
 
       finiteDifferenceAlphaFilter = new DoubleYoVariable(joint.getName() + "_velocityFiniteDifferenceAlpha", registry);
-      finiteDifferenceAlphaFilter.set(0.9);
+      finiteDifferenceAlphaFilter.set(0.99);
       velocityFiniteDifferenceFiltered = new AlphaFilteredYoVariable(joint.getName() + "_velocityFiniteDifferenceFiltered", registry, finiteDifferenceAlphaFilter);
       footInSwingThreshold = new DoubleYoVariable(joint.getName() + "_footInSwingThreshold", registry);
       touchdownThreshold = new DoubleYoVariable(joint.getName() + "__velocityFiniteDifferenceTouchdownThreshold", registry);

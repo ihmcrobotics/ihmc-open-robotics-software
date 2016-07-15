@@ -16,7 +16,7 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
       this.joint = joint;
 
       torqueThreshold = new DoubleYoVariable(joint.getName() + "_touchdownTorqueThreshold", registry);
-      touchdownDetectedFiltered = new GlitchFilteredBooleanYoVariable(joint.getName() + "_torqueBasedTouchdownDetected", registry, 10);
+      touchdownDetectedFiltered = new GlitchFilteredBooleanYoVariable(joint.getName() + "_torqueBasedTouchdownDetected", registry, 20);
    }
 
    public void setTorqueThreshold(double torqueThreshold)
