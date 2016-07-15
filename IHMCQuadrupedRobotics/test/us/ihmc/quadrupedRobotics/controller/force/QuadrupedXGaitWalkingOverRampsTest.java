@@ -41,10 +41,24 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    
    @DeployableTestMethod(estimatedDuration = 30.0)
    @Test(timeout = 100000)
+   public void testWalkingOverShallowRamps() throws IOException
+   {
+      RampsGroundProfile groundProfile = new RampsGroundProfile(0.1, 0.7, 1.2);
+      
+      walkOverRamps(groundProfile);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 30.0)
+   @Test(timeout = 100000)
    public void testWalkingOverAggressiveRamps() throws IOException
    {
       RampsGroundProfile groundProfile = new RampsGroundProfile(0.2, 0.7, 1.5);
       
+      walkOverRamps(groundProfile);
+   }
+
+   private void walkOverRamps(RampsGroundProfile groundProfile) throws IOException, AssertionFailedError
+   {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
@@ -54,17 +68,28 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getYoPlanarVelocityInputX().set(1.0);
-      conductor.addTimeLimit(variables.getYoTime(), 15.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 5.0));
-      conductor.simulate();
+      variables.getYoComPositionInputZ().set(0.60);
+      variables.getXGaitEndDoubleSupportDurationInput().set(0.3);
+      variables.getXGaitStanceWidthInput().set(0.21);
+      variables.getXGaitStepDurationInput().set(0.4);
+      variables.getXGaitStepGroundClearanceInput().set(0.2);
       
       variables.getYoPlanarVelocityInputX().set(0.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      variables.getYoPlanarVelocityInputX().set(-1.0);
-      conductor.addTimeLimit(variables.getYoTime(), 15.0);
+      variables.getYoPlanarVelocityInputX().set(0.5);
+      conductor.addTimeLimit(variables.getYoTime(), 20.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 5.0));
+      conductor.simulate();
+      
+      variables.getYoComPositionInputZ().set(0.60);
+      variables.getYoPlanarVelocityInputX().set(0.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
+      conductor.simulate();
+      
+      variables.getYoPlanarVelocityInputX().set(-0.5);
+      conductor.addTimeLimit(variables.getYoTime(), 20.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), 0.0));
       conductor.simulate();
       
@@ -73,48 +98,36 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    
    @DeployableTestMethod(estimatedDuration = 30.0)
    @Test(timeout = 100000)
-   public void testWalkingOverShallowRamps() throws IOException
+   public void testWalkingDownSlope() throws IOException
    {
-      RampsGroundProfile groundProfile = new RampsGroundProfile(0.1, 0.7, 1.2);
-      
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setGroundProfile3D(groundProfile);
-      
-      walkForwardsAndBack(quadrupedTestFactory);
+      walkSlope(0.2);
    }
 
    @DeployableTestMethod(estimatedDuration = 30.0)
    @Test(timeout = 100000)
-   public void testWalkingDownRamp() throws IOException
+   public void testWalkingUpSlope() throws IOException
    {
-      InclinedGroundProfile groundProfile = new InclinedGroundProfile(0.2);
-      
-      QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setGroundProfile3D(groundProfile);
-      
-      walkForwardsAndBack(quadrupedTestFactory);
+      walkSlope(-0.1);
    }
-   
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 100000)
-   public void testWalkingUpRamp() throws IOException
+
+   private void walkSlope(double slope) throws IOException, AssertionFailedError
    {
       InclinedGroundProfile groundProfile = new InclinedGroundProfile(-0.1);
       
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
-      
-      walkForwardsAndBack(quadrupedTestFactory);
-   }
-
-   private void walkForwardsAndBack(QuadrupedTestFactory quadrupedTestFactory) throws IOException, AssertionFailedError
-   {
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
+      
+      variables.getYoComPositionInputZ().set(0.65);
+      
+      variables.getYoPlanarVelocityInputX().set(0.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
+      conductor.simulate();
       
       variables.getYoPlanarVelocityInputX().set(1.0);
       conductor.addTimeLimit(variables.getYoTime(), 8.0);
