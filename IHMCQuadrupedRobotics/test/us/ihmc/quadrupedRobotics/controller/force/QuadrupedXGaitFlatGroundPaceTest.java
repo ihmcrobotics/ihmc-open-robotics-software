@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestC
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMultiRobotTestInterface
+public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
@@ -51,14 +51,14 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @DeployableTestMethod(estimatedDuration = 20.0)
    @Test(timeout = 30000)
-   public void testTrottingForwardFast()
+   public void testPacingForwardFast()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      variables.getXGaitEndPhaseShiftInput().set(0.0);
       
       variables.getYoPlanarVelocityInputX().set(1.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
@@ -69,14 +69,14 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @DeployableTestMethod(estimatedDuration = 20.0)
    @Test(timeout = 30000)
-   public void testTrottingForwardSlow()
+   public void testPacingForwardSlow()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      variables.getXGaitEndPhaseShiftInput().set(0.0);
       variables.getXGaitEndDoubleSupportDurationInput().set(0.3);
       
       variables.getYoPlanarVelocityInputX().set(0.1);
@@ -88,14 +88,14 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @DeployableTestMethod(estimatedDuration = 20.0)
    @Test(timeout = 30000)
-   public void testTrottingBackwardsFast()
+   public void testPacingBackwardsFast()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      variables.getXGaitEndPhaseShiftInput().set(0.0);
       
       variables.getYoPlanarVelocityInputX().set(-1.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
@@ -106,14 +106,14 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @DeployableTestMethod(estimatedDuration = 20.0)
    @Test(timeout = 30000)
-   public void testTrottingBackwardsSlow()
+   public void testPacingBackwardsSlow()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      variables.getXGaitEndPhaseShiftInput().set(0.0);
       variables.getXGaitEndDoubleSupportDurationInput().set(0.3);
       
       variables.getYoPlanarVelocityInputX().set(-0.1);
@@ -127,17 +127,17 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
    
    @DeployableTestMethod(estimatedDuration = 25.0)
    @Test(timeout = 30000)
-   public void testTrottingInAForwardLeftCircle()
+   public void testPacingInAForwardLeftCircle()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      variables.getXGaitEndPhaseShiftInput().set(0.0);
       
       variables.getYoPlanarVelocityInputX().set(1.0);
       variables.getYoPlanarVelocityInputZ().set(0.5);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTimeLimit(variables.getYoTime(), 15.0);
+      conductor.addTimeLimit(variables.getYoTime(), 10.0);
       conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 1.0));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI / 2, 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.3));
@@ -149,17 +149,17 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
    
    @DeployableTestMethod(estimatedDuration = 25.0)
    @Test(timeout = 30000)
-   public void testTrottingInAForwardRightCircle()
+   public void testPacingInAForwardRightCircle()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      variables.getXGaitEndPhaseShiftInput().set(0.0);
       
       variables.getYoPlanarVelocityInputX().set(1.0);
       variables.getYoPlanarVelocityInputZ().set(-0.5);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTimeLimit(variables.getYoTime(), 15.0);
+      conductor.addTimeLimit(variables.getYoTime(), 10.0);
       conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 1.0));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI / 2, 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.3));
@@ -171,12 +171,12 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
    
    @DeployableTestMethod(estimatedDuration = 25.0)
    @Test(timeout = 30000)
-   public void testTrottingInABackwardLeftCircle()
+   public void testPacingInABackwardLeftCircle()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      variables.getXGaitEndPhaseShiftInput().set(0.0);
       
       variables.getYoPlanarVelocityInputX().set(-1.0);
       variables.getYoPlanarVelocityInputZ().set(-0.5);
@@ -192,12 +192,12 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
    
    @DeployableTestMethod(estimatedDuration = 25.0)
    @Test(timeout = 30000)
-   public void testTrottingInABackwardRightCircle()
+   public void testPacingInABackwardRightCircle()
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      variables.getXGaitEndPhaseShiftInput().set(0.0);
       
       variables.getYoPlanarVelocityInputX().set(-1.0);
       variables.getYoPlanarVelocityInputZ().set(0.5);
