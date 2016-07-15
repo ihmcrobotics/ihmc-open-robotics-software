@@ -10,9 +10,9 @@ import javax.vecmath.Matrix3d;
 
 public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterface
 {
-   private final DoubleYoVariable proportionalXGain;
-   private final DoubleYoVariable derivativeXGain;
-   private final DoubleYoVariable dampingRatioX;
+   private final DoubleYoVariable proportionalYGain;
+   private final DoubleYoVariable derivativeYGain;
+   private final DoubleYoVariable dampingRatioY;
 
    private final DoubleYoVariable maxDerivativeError;
    private final DoubleYoVariable maxProportionalError;
@@ -22,9 +22,9 @@ public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterf
 
    public YoPlanarFootOrientationGains(String suffix, YoVariableRegistry registry)
    {
-      proportionalXGain = new DoubleYoVariable("kpXAngular" + suffix, registry);
-      derivativeXGain = new DoubleYoVariable("kdXAngular" + suffix, registry);
-      dampingRatioX = new DoubleYoVariable("zetaXAngular" + suffix, registry);
+      proportionalYGain = new DoubleYoVariable("kpYAngular" + suffix, registry);
+      derivativeYGain = new DoubleYoVariable("kdYAngular" + suffix, registry);
+      dampingRatioY = new DoubleYoVariable("zetaYAngular" + suffix, registry);
 
       maximumFeedback = new DoubleYoVariable("maximumAngularFeedback" + suffix, registry);
       maximumFeedbackRate = new DoubleYoVariable("maximumAngularFeedbackRate" + suffix, registry);
@@ -41,8 +41,8 @@ public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterf
 
    public void reset()
    {
-      proportionalXGain.set(0.0);
-      derivativeXGain.set(0.0);
+      proportionalYGain.set(0.0);
+      derivativeYGain.set(0.0);
       maximumFeedback.set(Double.POSITIVE_INFINITY);
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
       maxDerivativeError.set(Double.POSITIVE_INFINITY);
@@ -54,8 +54,8 @@ public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterf
    {
       Matrix3d proportionalGainMatrix = new Matrix3d();
 
-      proportionalXGain.addVariableChangedListener(new MatrixUpdater(0, 0, proportionalGainMatrix));
-      proportionalXGain.notifyVariableChangedListeners();
+      proportionalYGain.addVariableChangedListener(new MatrixUpdater(1, 1, proportionalGainMatrix));
+      proportionalYGain.notifyVariableChangedListeners();
 
       return proportionalGainMatrix;
    }
@@ -65,8 +65,8 @@ public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterf
    {
       Matrix3d derivativeGainMatrix = new Matrix3d();
 
-      derivativeXGain.addVariableChangedListener(new MatrixUpdater(0, 0, derivativeGainMatrix));
-      derivativeXGain.notifyVariableChangedListeners();
+      derivativeYGain.addVariableChangedListener(new MatrixUpdater(1, 1, derivativeGainMatrix));
+      derivativeYGain.notifyVariableChangedListeners();
 
       return derivativeGainMatrix;
    }
@@ -79,47 +79,47 @@ public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterf
 
    public void createDerivativeGainUpdater(boolean updateNow)
    {
-      VariableChangedListener kdXUpdater = new VariableChangedListener()
+      VariableChangedListener kdYUpdater = new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            derivativeXGain.set(GainCalculator.computeDerivativeGain(proportionalXGain.getDoubleValue(), dampingRatioX.getDoubleValue()));
+            derivativeYGain.set(GainCalculator.computeDerivativeGain(proportionalYGain.getDoubleValue(), dampingRatioY.getDoubleValue()));
          }
       };
 
-      proportionalXGain.addVariableChangedListener(kdXUpdater);
-      dampingRatioX.addVariableChangedListener(kdXUpdater);
+      proportionalYGain.addVariableChangedListener(kdYUpdater);
+      dampingRatioY.addVariableChangedListener(kdYUpdater);
 
       if (updateNow)
-         kdXUpdater.variableChanged(null);
+         kdYUpdater.variableChanged(null);
    }
 
    @Override
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
    {
-      proportionalXGain.set(proportionalGainX);
+      proportionalYGain.set(proportionalGainY);
    }
 
-   public void setProportionalGains(double proportionalGainX)
+   public void setProportionalGains(double proportionalGainY)
    {
-      setProportionalGains(proportionalGainX, 0.0, 0.0);
+      setProportionalGains(0.0, proportionalGainY, 0.0);
    }
 
    @Override
    public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
-      derivativeXGain.set(derivativeGainX);
+      derivativeYGain.set(derivativeGainY);
    }
 
-   public void setDerivativeGains(double derivativeGainX)
+   public void setDerivativeGains(double derivativeGainY)
    {
-      setDerivativeGains(derivativeGainX, 0.0, 0.0);
+      setDerivativeGains(0.0, derivativeGainY, 0.0);
    }
 
    public void setDampingRatio(double dampingRatio)
    {
-      dampingRatioX.set(dampingRatio);
+      dampingRatioY.set(dampingRatio);
    }
 
    @Override
@@ -214,7 +214,7 @@ public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterf
    @Override
    public double[] getProportionalGains()
    {
-      tempPropotionalGains[0] = proportionalXGain.getDoubleValue();
+      tempPropotionalGains[0] = proportionalYGain.getDoubleValue();
 
       return tempPropotionalGains;
    }
@@ -224,7 +224,7 @@ public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterf
    @Override
    public double[] getDerivativeGains()
    {
-      tempDerivativeGains[0] = derivativeXGain.getDoubleValue();
+      tempDerivativeGains[0] = derivativeYGain.getDoubleValue();
 
       return tempDerivativeGains;
    }

@@ -97,7 +97,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    {
       selectionMatrix.reshape(3, Twist.SIZE);
       selectionMatrix.zero();
-      selectionMatrix.set(0, 0, 1.0);
+      selectionMatrix.set(0, 1, 1.0);
       selectionMatrix.set(1, 3, 1.0);
       selectionMatrix.set(2, 5, 1.0);
    }
