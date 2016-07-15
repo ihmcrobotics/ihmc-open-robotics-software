@@ -11,7 +11,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
 {
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 1.2)
 	@Test(timeout=300000)
    public void testLocalYoWhiteBoardOne() throws IOException
    {
@@ -24,7 +24,7 @@ public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 1000, 2000);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 2.7)
 	@Test(timeout=300000)
    public void testLocalYoWhiteBoardTwo() throws IOException
    {

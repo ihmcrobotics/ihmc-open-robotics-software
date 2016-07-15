@@ -298,8 +298,8 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 0.015 , 0.015);
    }
 
-	@DeployableTestMethod(estimatedDuration = 25.0)
-	@Test(timeout = 130000)
+	@DeployableTestMethod(estimatedDuration = 27.3)
+	@Test(timeout = 140000)
    public void testRandomInterpolationFinals() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

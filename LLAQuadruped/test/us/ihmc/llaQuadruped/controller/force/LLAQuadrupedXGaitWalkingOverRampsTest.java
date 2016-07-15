@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = TestPlanTarget.InDevelopment)
-public class LLAQuadrupedXGaitWalkingOverRampsTests extends QuadrupedXGaitWalkingOverRampsTest
+public class LLAQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWalkingOverRampsTest
 {
    @Override
    public QuadrupedTestFactory createQuadrupedTestFactory()

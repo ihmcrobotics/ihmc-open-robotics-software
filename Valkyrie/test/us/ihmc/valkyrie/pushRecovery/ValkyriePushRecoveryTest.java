@@ -19,8 +19,8 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 25.0, targets = TestPlanTarget.Fast)
-   @Test(timeout = 163619)
+   @DeployableTestMethod(estimatedDuration = 16.3, targets = TestPlanTarget.Fast)
+   @Test(timeout = 81000)
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
    {
       super.testControllerFailureKicksIn();
@@ -99,8 +99,8 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 25.2, targets = TestPlanTarget.Fast)
-   @Test(timeout = 130000)
+   @DeployableTestMethod(estimatedDuration = 23.4, targets = TestPlanTarget.Fast)
+   @Test(timeout = 120000)
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
       super.testRecoveryWhileInFlamingoStance();

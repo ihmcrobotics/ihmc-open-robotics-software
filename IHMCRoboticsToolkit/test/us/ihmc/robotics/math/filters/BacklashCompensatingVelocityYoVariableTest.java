@@ -22,7 +22,7 @@ public class BacklashCompensatingVelocityYoVariableTest
 {
    private static final double EPSILON = 1e-8;
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testWithoutBacklashOrFiltering1()
    {
@@ -50,7 +50,7 @@ public class BacklashCompensatingVelocityYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testWithoutBacklashOrFiltering2()
    {
@@ -80,7 +80,7 @@ public class BacklashCompensatingVelocityYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testWithoutBacklash1()
    {
@@ -109,7 +109,7 @@ public class BacklashCompensatingVelocityYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testWithoutBacklash2()
    {
@@ -139,7 +139,7 @@ public class BacklashCompensatingVelocityYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testVelocityPositiveWithoutCrossingZero2()
    {
@@ -170,7 +170,7 @@ public class BacklashCompensatingVelocityYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testVelocityNegativeWithoutCrossingZero2()
    {
@@ -201,7 +201,7 @@ public class BacklashCompensatingVelocityYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.7)
 	@Test(timeout=300000)
    public void testBacklashOnlyCrossingZeroConstantPositiveAcceleration2()
    {
@@ -266,7 +266,7 @@ public class BacklashCompensatingVelocityYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.6)
 	@Test(timeout=300000)
    public void testBacklashOnlyCrossingZeroConstantNegativeAcceleration2()
    {
@@ -332,7 +332,7 @@ public class BacklashCompensatingVelocityYoVariableTest
    }
 
 	
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testNoisySignalAndMakeSureVelocityHasSignalContent()
    {
@@ -406,7 +406,7 @@ public class BacklashCompensatingVelocityYoVariableTest
       assertTrue(averageReconstructedPositionError2.getDoubleValue() < 0.25);
    }
    
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSignalWithBacklash()
    {
@@ -481,7 +481,7 @@ public class BacklashCompensatingVelocityYoVariableTest
    }
    
    
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testRemoveSquareWaveBacklash()
    {

@@ -45,8 +45,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 20.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 19.1)
+   @Test(timeout = 95000)
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -153,8 +153,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(robotSide, desiredHandPoses.get(robotSide).getFramePointCopy().getPoint(), desiredHandPoses.get(robotSide).getFrameOrientationCopy().getQuaternion(), scs);
    }
 
-   @DeployableTestMethod(estimatedDuration = 15.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 10.9)
+   @Test(timeout = 55000)
    public void testIssue47BadChestTrajectoryMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -179,8 +179,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 15.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 10.8)
+   @Test(timeout = 54000)
    public void testIssue47BadPelvisTrajectoryMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

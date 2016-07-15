@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.controllers;
+package us.ihmc.commonWalkingControlModules.pushRecovery;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,7 +22,7 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 
-public class DRCPushRobotController implements RobotController
+public class PushRobotController implements RobotController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -44,12 +44,16 @@ public class DRCPushRobotController implements RobotController
    
    private final YoGraphicVector forceVisualizer;
    
-   public DRCPushRobotController(SDFRobot pushableRobot, FullRobotModel fullRobotModel)
+   public PushRobotController(SDFRobot pushableRobot, FullRobotModel fullRobotModel)
+   {
+      this(pushableRobot, fullRobotModel.getChest().getParentJoint().getName());
+   }
+   
+   public PushRobotController(SDFRobot pushableRobot, String jointNameToApplyForce)
    {
       yoTime = pushableRobot.getYoTime();
       forcePoint = new ExternalForcePoint("pushTheRobot", new Vector3d(0, 0, 0.3), pushableRobot);
-      String upperSpineJointName = fullRobotModel.getChest().getParentJoint().getName();
-      pushableRobot.getJoint(upperSpineJointName).addExternalForcePoint(forcePoint);
+      pushableRobot.getJoint(jointNameToApplyForce).addExternalForcePoint(forcePoint);
       pushableRobot.setController(this);
 
       pushTimeSwitch.set(Double.NEGATIVE_INFINITY);

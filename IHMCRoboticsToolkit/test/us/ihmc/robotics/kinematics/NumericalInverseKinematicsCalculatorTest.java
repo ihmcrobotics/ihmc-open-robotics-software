@@ -33,8 +33,8 @@ public class NumericalInverseKinematicsCalculatorTest
     * make sure there are no exceptions when you pass in an infeasible desired transform
     */
 
-	@DeployableTestMethod(estimatedDuration = 11.1)
-	@Test(timeout = 55467)
+	@DeployableTestMethod(estimatedDuration = 3.7)
+	@Test(timeout = 30000)
    public void testInfeasible()
    {
       Random random = new Random(1235125L);
@@ -75,8 +75,8 @@ public class NumericalInverseKinematicsCalculatorTest
       if (DEBUG) printStatistics(iterationStatistics, timeStatistics);
    }
 
-	@DeployableTestMethod(estimatedDuration = 10.2)
-	@Test(timeout = 51211)
+	@DeployableTestMethod(estimatedDuration = 1.4)
+	@Test(timeout = 30000)
    public void testForwardThenInverse()
    {
       Random random = new Random(125125L);

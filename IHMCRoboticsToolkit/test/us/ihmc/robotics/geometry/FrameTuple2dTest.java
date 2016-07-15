@@ -43,7 +43,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       return createFrameTuple(referenceFrame, x, y, null);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testChangeFrame()
    {

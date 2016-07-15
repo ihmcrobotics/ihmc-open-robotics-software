@@ -12,8 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Slow)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseWobblyFootTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasWallWorldTest.class
+   us.ihmc.atlas.pushRecovery.AtlasPushRecoveryStandingTest.class
 })
 
 public class AtlasESlowTestSuite
