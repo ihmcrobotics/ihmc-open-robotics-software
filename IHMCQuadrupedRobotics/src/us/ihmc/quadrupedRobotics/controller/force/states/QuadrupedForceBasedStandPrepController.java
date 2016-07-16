@@ -60,6 +60,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final QuadrupedReferenceFrames referenceFrames;
    private FramePoint solePositionSetpoint;
    private final Vector3d zeroVelocity;
+   private double taskStartTime;
    private final double robotLength;
 
    public QuadrupedForceBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
