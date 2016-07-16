@@ -58,11 +58,8 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedReferenceFrames referenceFrames;
-   private QuadrantDependentList<SoleWaypoint> quadrupedInitialSoleWaypoint;
-   private QuadrantDependentList<SoleWaypoint> quadrupedFinalSoleWaypoint;
    private FramePoint solePositionSetpoint;
    private final Vector3d zeroVelocity;
-   private double taskStartTime;
    private final double robotLength;
 
    public QuadrupedForceBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)

@@ -67,7 +67,6 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    private final QuadrupedReferenceFrames referenceFrames;
    private final FramePoint solePositionSetpoint;
    private final Vector3d zeroVelocity;
-   private double taskStartTime;
 
    public QuadrupedForceBasedFallController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
    {
