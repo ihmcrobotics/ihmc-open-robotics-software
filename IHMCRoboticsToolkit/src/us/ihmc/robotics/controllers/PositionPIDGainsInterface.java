@@ -16,7 +16,7 @@ public interface PositionPIDGainsInterface
 
    public abstract double getMaximumProportionalError();
 
-   public abstract double getMaximumAcceleration();
+   public abstract double getMaximumFeedback();
 
-   public abstract double getMaximumJerk();
+   public abstract double getMaximumFeedbackRate();
 }

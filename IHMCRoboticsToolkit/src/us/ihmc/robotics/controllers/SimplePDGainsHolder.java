@@ -4,8 +4,8 @@ public class SimplePDGainsHolder implements PDGainsInterface
 {
    private double kp = 0.0;
    private double kd = 0.0;
-   private double maxAcceleration = Double.POSITIVE_INFINITY;
-   private double maxJerk = Double.POSITIVE_INFINITY;
+   private double maxFeedback = Double.POSITIVE_INFINITY;
+   private double maxFeedbackRate = Double.POSITIVE_INFINITY;
 
    public SimplePDGainsHolder()
    {
@@ -15,16 +15,16 @@ public class SimplePDGainsHolder implements PDGainsInterface
    {
       setKp(other.getKp());
       setKd(other.getKd());
-      setMaxAcceleration(other.getMaximumAcceleration());
-      setMaxJerk(other.getMaximumJerk());
+      setMaxFeedback(other.getMaximumFeedback());
+      setMaxFeedbackRate(other.getMaximumFeedbackRate());
    }
 
-   public void set(double kp, double kd, double maxAcceleration, double maxJerk)
+   public void set(double kp, double kd, double maxFeedback, double maxFeedbackRate)
    {
       setKp(kp);
       setKd(kd);
-      setMaxAcceleration(maxAcceleration);
-      setMaxJerk(maxJerk);
+      setMaxFeedback(maxFeedback);
+      setMaxFeedbackRate(maxFeedbackRate);
    }
 
    public void setKp(double kp)
@@ -37,14 +37,14 @@ public class SimplePDGainsHolder implements PDGainsInterface
       this.kd = kd;
    }
 
-   public void setMaxAcceleration(double maxAcceleration)
+   public void setMaxFeedback(double maxFeedback)
    {
-      this.maxAcceleration = maxAcceleration;
+      this.maxFeedback = maxFeedback;
    }
 
-   public void setMaxJerk(double maxJerk)
+   public void setMaxFeedbackRate(double maxFeedbackRate)
    {
-      this.maxJerk = maxJerk;
+      this.maxFeedbackRate = maxFeedbackRate;
    }
 
    @Override
@@ -60,14 +60,14 @@ public class SimplePDGainsHolder implements PDGainsInterface
    }
 
    @Override
-   public double getMaximumAcceleration()
+   public double getMaximumFeedback()
    {
-      return maxAcceleration;
+      return maxFeedback;
    }
 
    @Override
-   public double getMaximumJerk()
+   public double getMaximumFeedbackRate()
    {
-      return maxJerk;
+      return maxFeedbackRate;
    }
 }

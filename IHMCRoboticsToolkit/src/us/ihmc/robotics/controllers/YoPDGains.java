@@ -11,8 +11,8 @@ public class YoPDGains implements PDGainsInterface
    private final DoubleYoVariable zeta;
    private final DoubleYoVariable kd;
    private final DoubleYoVariable maximumOutput;
-   private final DoubleYoVariable maximumAcceleration;
-   private final DoubleYoVariable maximumJerk;
+   private final DoubleYoVariable maximumFeedback;
+   private final DoubleYoVariable maximumFeedbackRate;
    private final DoubleYoVariable positionDeadband;
 
    public YoPDGains(String suffix, YoVariableRegistry registry)
@@ -22,14 +22,14 @@ public class YoPDGains implements PDGainsInterface
       kd = new DoubleYoVariable("kd" + suffix, registry);
 
       maximumOutput = new DoubleYoVariable("maximumOutput" + suffix, registry);
-      maximumAcceleration = new DoubleYoVariable("maximumAcceleration" + suffix, registry);
-      maximumJerk = new DoubleYoVariable("maximumJerk" + suffix, registry);
+      maximumFeedback = new DoubleYoVariable("maximumFeedback" + suffix, registry);
+      maximumFeedbackRate = new DoubleYoVariable("maximumFeedbackRate" + suffix, registry);
 
       positionDeadband = new DoubleYoVariable("positionDeadband" + suffix, registry);
 
       maximumOutput.set(Double.POSITIVE_INFINITY);
-      maximumAcceleration.set(Double.POSITIVE_INFINITY);
-      maximumJerk.set(Double.POSITIVE_INFINITY);
+      maximumFeedback.set(Double.POSITIVE_INFINITY);
+      maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
    }
 
    public void setPDGains(double kp, double zeta)
@@ -58,20 +58,20 @@ public class YoPDGains implements PDGainsInterface
       this.maximumOutput.set(maximumOutput);
    }
 
-   public void setMaximumAcceleration(double maxAcceleration)
+   public void setMaximumFeedback(double maxFeedback)
    {
-      this.maximumAcceleration.set(maxAcceleration);
+      this.maximumFeedback.set(maxFeedback);
    }
 
-   public void setMaximumJerk(double maxJerk)
+   public void setMaximumFeedbackRate(double maxFeedbackRate)
    {
-      this.maximumJerk.set(maxJerk);
+      this.maximumFeedbackRate.set(maxFeedbackRate);
    }
 
-   public void setMaximumAccelerationAndMaximumJerk(double maxAcceleration, double maxJerk)
+   public void setMaximumFeedbackAndMaximumFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      maximumAcceleration.set(maxAcceleration);
-      maximumJerk.set(maxJerk);
+      maximumFeedback.set(maxFeedback);
+      maximumFeedbackRate.set(maxFeedbackRate);
    }
 
    public void setPositionDeadband(double deadband)
@@ -102,15 +102,15 @@ public class YoPDGains implements PDGainsInterface
    }
 
    @Override
-   public double getMaximumAcceleration()
+   public double getMaximumFeedback()
    {
-      return maximumAcceleration.getDoubleValue();
+      return maximumFeedback.getDoubleValue();
    }
 
    @Override
-   public double getMaximumJerk()
+   public double getMaximumFeedbackRate()
    {
-      return maximumJerk.getDoubleValue();
+      return maximumFeedbackRate.getDoubleValue();
    }
 
    public DoubleYoVariable getYoKp()
@@ -133,14 +133,14 @@ public class YoPDGains implements PDGainsInterface
       return maximumOutput;
    }
 
-   public DoubleYoVariable getYoMaximumAcceleration()
+   public DoubleYoVariable getYoMaximumFeedback()
    {
-      return maximumAcceleration;
+      return maximumFeedback;
    }
 
-   public DoubleYoVariable getYoMaximumJerk()
+   public DoubleYoVariable getYoMaximumFeedbackRate()
    {
-      return maximumJerk;
+      return maximumFeedbackRate;
    }
 
    public DoubleYoVariable getPositionDeadband()

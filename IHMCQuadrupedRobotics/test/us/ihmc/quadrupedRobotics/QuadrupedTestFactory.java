@@ -18,4 +18,6 @@ public interface QuadrupedTestFactory
    public void setUseStateEstimator(boolean useStateEstimator);
    
    public void setGroundProfile3D(GroundProfile3D groundProfile3D);
+
+   void setUsePushRobotController(String jointNameToPushOn);
 }

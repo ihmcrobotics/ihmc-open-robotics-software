@@ -865,7 +865,67 @@ public class QuadrupedSupportPolygon implements Serializable
          return closestDistance;
       }
    }
-   
+
+   /**
+    * Returns the distance the given (x,y) value is outside the polygon.  This is defined
+    * as the minimum distance from the point to each line segment on the polygon.
+    * If the point is inside the polygon, the distance will be the negative of the minimum distance
+    * from the point to each line segment on the polygon (i.e. -getDistanceInside2d). This test ignores Z values for the polygon.
+    *
+    * @param point Point2d
+    * @return boolean
+    */
+   public double getDistanceOutside2d(FramePoint2d point)
+   {
+      return getDistanceOutside2d(point.getX(), point.getY());
+   }
+
+   /**
+    * @see #getDistanceInside2d(FramePoint2d)
+    */
+   public double getDistanceOutside2d(FramePoint point)
+   {
+      return getDistanceOutside2d(point.getX(), point.getY());
+   }
+
+   /**
+    * @see #getDistanceInside2d(FramePoint2d)
+    */
+   private double getDistanceOutside2d(double x, double y)
+   {
+      if (size() == 1)
+      {
+         FramePoint footstep = getFootstep(getFirstSupportingQuadrant());
+         return GeometryTools.distanceBetweenPoints(x, y, footstep.getX(), footstep.getY());
+      }
+      else if (size() == 2)
+      {
+         FramePoint pointOne = getFootstep(getFirstSupportingQuadrant());
+         FramePoint pointTwo = getFootstep(getLastSupportingQuadrant());
+         return Math.abs(getDistanceToSideOfSegment(x, y, pointOne, pointTwo));
+      }
+      else
+      {
+         double closestDistanceOutside = Double.POSITIVE_INFINITY;
+         double closestDistanceInside = getDistanceInside2d(x, y);
+         if (closestDistanceInside >= 0)
+         {
+            return -closestDistanceInside;
+         }
+         for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+         {
+            FramePoint pointOne = getFootstep(robotQuadrant);
+            FramePoint pointTwo = getFootstep(getNextClockwiseSupportingQuadrant(robotQuadrant));
+            double distance = Math.abs(getDistanceToSideOfSegment(x, y, pointOne, pointTwo));
+            if (distance < closestDistanceOutside)
+            {
+               closestDistanceOutside = distance;
+            }
+         }
+         return closestDistanceOutside;
+      }
+   }
+
    private double getDistanceToSideOfSegment(double x, double y, FramePoint pointOne, FramePoint pointTwo)
    {
       double x1 = pointOne.getX();
