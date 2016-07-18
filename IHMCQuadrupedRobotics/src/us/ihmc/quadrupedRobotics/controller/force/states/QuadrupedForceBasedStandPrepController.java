@@ -27,7 +27,6 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
 {
    //Yo Variables
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable robotTime;
    private final YoEuclideanPositionGains yoPositionControllerGains;
 
    // Parameters
@@ -58,11 +57,8 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedReferenceFrames referenceFrames;
-   private QuadrantDependentList<SoleWaypoint> quadrupedInitialSoleWaypoint;
-   private QuadrantDependentList<SoleWaypoint> quadrupedFinalSoleWaypoint;
    private FramePoint solePositionSetpoint;
    private final Vector3d zeroVelocity;
-   private double taskStartTime;
    private final double robotLength;
 
    public QuadrupedForceBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
@@ -72,7 +68,6 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       referenceFrames = controllerToolbox.getReferenceFrames();
       quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
-      robotTime = environment.getRobotTimestamp();
       solePositionSetpoint = new FramePoint();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
@@ -101,7 +96,6 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    @Override
    public void onEntry()
    {
-      taskStartTime = robotTime.getDoubleValue();
       updateEstimates();
       updateGains();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
@@ -134,9 +128,12 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    @Override
    public ControllerEvent process()
    {
-      boolean success = quadrupedSoleWaypointController.compute(taskSpaceControllerCommands.getSoleForce());
+      if (!quadrupedSoleWaypointController.compute(taskSpaceControllerCommands.getSoleForce()))
+      {
+         return ControllerEvent.DONE;
+      }
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
-      return success ? null : ControllerEvent.DONE;
+      return null;
    }
 
    @Override

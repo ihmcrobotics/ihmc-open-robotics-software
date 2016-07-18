@@ -18,6 +18,7 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.time.ExecutionTimer;
 
 public class WholeBodyControllerCore
 {
@@ -35,6 +36,8 @@ public class WholeBodyControllerCore
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
    private OneDoFJoint[] controlledOneDoFJoints;
+   private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
+   private final ExecutionTimer controllerCoreSubmitTimer = new ExecutionTimer("controllerCoreSubmitTimer", 1.0, registry);
 
    public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands,
          YoVariableRegistry parentRegistry)
@@ -68,14 +71,30 @@ public class WholeBodyControllerCore
    public void reset()
    {
       feedbackController.reset();
-      inverseDynamicsSolver.reset();
-      inverseKinematicsSolver.reset();
-      virtualModelControlSolver.clear();
+
+      switch (currentMode.getEnumValue())
+      {
+      case INVERSE_DYNAMICS:
+         inverseDynamicsSolver.reset();
+         break;
+      case INVERSE_KINEMATICS:
+         inverseKinematicsSolver.reset();
+         break;
+      case VIRTUAL_MODEL:
+         virtualModelControlSolver.clear();
+         break;
+      case OFF:
+         break;
+      default:
+         throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
+      }
+
       yoLowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
    public void submitControllerCoreCommand(ControllerCoreCommand controllerCoreCommand)
    {
+      controllerCoreSubmitTimer.startMeasurement();
       reset();
 
       currentMode.set(controllerCoreCommand.getControllerCoreMode());
@@ -103,10 +122,12 @@ public class WholeBodyControllerCore
       yoRootJointDesiredConfigurationData.clear();
 
       controllerCoreCommand.clear();
+      controllerCoreSubmitTimer.stopMeasurement();
    }
 
    public void compute()
    {
+      controllerCoreComputeTimer.startMeasurement();
       switch (currentMode.getEnumValue())
       {
       case INVERSE_DYNAMICS:
@@ -129,6 +150,7 @@ public class WholeBodyControllerCore
 
       controllerCoreOutput.setRootJointDesiredConfigurationData(yoRootJointDesiredConfigurationData);
       controllerCoreOutput.setLowLevelOneDoFJointDesiredDataHolder(yoLowLevelOneDoFJointDesiredDataHolder);
+      controllerCoreComputeTimer.stopMeasurement();
    }
 
    private void doInverseDynamics()
