@@ -72,7 +72,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
-public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
+public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 

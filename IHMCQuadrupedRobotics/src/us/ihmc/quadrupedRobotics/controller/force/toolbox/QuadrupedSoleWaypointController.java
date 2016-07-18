@@ -75,6 +75,7 @@ public class QuadrupedSoleWaypointController
       }
       else
       {
+         updateEstimates();
          updateSetpoints(soleForce);
          return true;
       }
@@ -109,10 +110,8 @@ public class QuadrupedSoleWaypointController
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).compute(currentTrajectoryTime);
-         //query motion generator at the current time stamp within the trajectory
          quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).getPosition(solePositionControllerSetpoints.getSolePosition(quadrant));
-         quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).getVelocity(solePositionControllerSetpoints.getSoleLinearVelocity(quadrant));
-
+         solePositionControllerSetpoints.getSoleLinearVelocity(quadrant).setToZero();
       }
       solePositionController.compute(soleForce, solePositionControllerSetpoints, taskSpaceEstimates);
    }

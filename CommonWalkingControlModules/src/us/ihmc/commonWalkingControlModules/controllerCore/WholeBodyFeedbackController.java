@@ -22,6 +22,7 @@ import us.ihmc.robotics.controllers.PDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.time.ExecutionTimer;
 
 public class WholeBodyFeedbackController
 {
@@ -37,6 +38,9 @@ public class WholeBodyFeedbackController
 
    private final WholeBodyControlCoreToolbox coreToolbox;
    private final FeedbackControllerToolbox feedbackControllerToolbox;
+
+   private final ExecutionTimer feedbackControllerTimer = new ExecutionTimer("wholeBodyFeedbackControllerTimer", 1.0, registry);
+   private final ExecutionTimer achievedComputationTimer = new ExecutionTimer("achievedComputationTimer", 1.0, registry);
 
    public WholeBodyFeedbackController(WholeBodyControlCoreToolbox coreToolbox, FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
    {
@@ -150,6 +154,7 @@ public class WholeBodyFeedbackController
 
    public void compute()
    {
+      feedbackControllerTimer.startMeasurement();
       output.clear();
 
       for (int i = 0; i < allControllers.size(); i++)
@@ -161,10 +166,12 @@ public class WholeBodyFeedbackController
             output.addCommand(controller.getOutput());
          }
       }
+      feedbackControllerTimer.stopMeasurement();
    }
 
    public void computeAchievedAccelerations()
    {
+      achievedComputationTimer.startMeasurement();
       for (int i = 0; i < allControllers.size(); i++)
       {
          FeedbackControllerInterface controller = allControllers.get(i);
@@ -173,6 +180,7 @@ public class WholeBodyFeedbackController
             controller.computeAchievedAcceleration();
          }
       }
+      achievedComputationTimer.stopMeasurement();
    }
 
    public void submitFeedbackControlCommandList(FeedbackControlCommandList feedbackControlCommandList)
