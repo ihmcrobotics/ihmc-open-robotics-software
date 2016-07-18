@@ -99,7 +99,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
    private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
 
-   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.symmPosDef(0);
+   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
    @Override
    public void setMaxNumberOfIterations(int maxNumberOfIterations)
