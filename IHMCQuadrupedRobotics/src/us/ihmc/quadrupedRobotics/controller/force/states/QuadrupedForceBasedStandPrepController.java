@@ -87,7 +87,6 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       hindLeftHipRollFrame.setToZero(referenceFrames.getLegAttachmentFrame(RobotQuadrant.HIND_LEFT));
       hindLeftHipRollFrame.changeFrame(referenceFrames.getBodyFrame());
       robotLength = frontLeftHipRollFrame.getX() - hindLeftHipRollFrame.getX();
-
       environment.getParentRegistry().addChild(registry);
    }
 
@@ -96,6 +95,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    {
       taskSpaceEstimator.compute(taskSpaceEstimates);
       updateGains();
+      // Create sole waypoint trajectories
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          solePositionSetpoint.setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
@@ -108,7 +108,6 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
                quadrant.getEnd().negateIfHindEnd(Math.sin(stancePitchParameter.get())) * robotLength / 2 - stanceHeightParameter.get());
          quadrupedSoleWaypointList.get(quadrant).get(1).set(solePositionSetpoint.getPoint(), zeroVelocity, trajectoryTimeParameter.get());
       }
-      updateGains();
       quadrupedSoleWaypointController.initialize(quadrupedSoleWaypointList, yoPositionControllerGains, taskSpaceEstimates);
 
       // Initialize task space controller
