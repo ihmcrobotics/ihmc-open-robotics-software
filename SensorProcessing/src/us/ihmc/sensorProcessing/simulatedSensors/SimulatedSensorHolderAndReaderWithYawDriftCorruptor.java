@@ -1,100 +1,25 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
-import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
-import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-
-public class SimulatedSensorHolderAndReader implements SensorReader
+public class SimulatedSensorHolderAndReaderWithYawDriftCorruptor extends SimulatedSensorHolderAndReader
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
-   protected final IntegerYoVariable step = new IntegerYoVariable("step", registry);
-
-   protected final DoubleYoVariable yoTime;
-
-   protected final List<Pair<OneDoFJoint, SimulatedOneDoFJointPositionSensor>> jointPositionSensors = new ArrayList<>();
-   protected final List<Pair<OneDoFJoint, SimulatedOneDoFJointVelocitySensor>> jointVelocitySensors = new ArrayList<>();
-   protected final List<Pair<OneDoFJoint, SimulatedOneDoFJointTorqueSensor>> jointTorqueSensors = new ArrayList<>();
-   protected final List<Pair<IMUDefinition, SimulatedOrientationSensorFromRobot>> orientationSensors = new ArrayList<>();
-   protected final List<Pair<IMUDefinition, SimulatedAngularVelocitySensorFromRobot>> angularVelocitySensors = new ArrayList<>();
-   protected final List<Pair<IMUDefinition, SimulatedLinearAccelerationSensorFromRobot>> linearAccelerationSensors = new ArrayList<>();
-   protected final List<Pair<ForceSensorDefinition, WrenchCalculatorInterface>> forceTorqueSensors = new ArrayList<>();
-
-   protected final SensorProcessing sensorProcessing;
-
-   public SimulatedSensorHolderAndReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
+   public SimulatedSensorHolderAndReaderWithYawDriftCorruptor(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
          SensorProcessingConfiguration sensorProcessingConfiguration, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
-      this.yoTime = yoTime;
-      step.set(29831);
-
-      parentRegistry.addChild(registry);
-   }
-
-   public void addJointPositionSensorPort(OneDoFJoint oneDoFJoint, SimulatedOneDoFJointPositionSensor jointPositionSensor)
-   {
-      jointPositionSensors.add(Pair.of(oneDoFJoint, jointPositionSensor));
-   }
-
-   public void addJointTorqueSensorPort(OneDoFJoint oneDoFJoint, SimulatedOneDoFJointTorqueSensor jointTorqueSensor)
-   {
-      jointTorqueSensors.add(Pair.of(oneDoFJoint, jointTorqueSensor));
-   }
-
-   public void addJointVelocitySensorPort(OneDoFJoint oneDoFJoint, SimulatedOneDoFJointVelocitySensor jointVelocitySensor)
-   {
-      jointVelocitySensors.add(Pair.of(oneDoFJoint, jointVelocitySensor));
-   }
-
-   public void addOrientationSensorPort(IMUDefinition imuDefinition, SimulatedOrientationSensorFromRobot orientationSensor)
-   {
-      orientationSensors.add(Pair.of(imuDefinition, orientationSensor));
-   }
-
-   public void addAngularVelocitySensorPort(IMUDefinition imuDefinition, SimulatedAngularVelocitySensorFromRobot angularVelocitySensor)
-   {
-      angularVelocitySensors.add(Pair.of(imuDefinition, angularVelocitySensor));
-   }
-
-   public void addLinearAccelerationSensorPort(IMUDefinition imuDefinition, SimulatedLinearAccelerationSensorFromRobot linearAccelerationSensor)
-   {
-      linearAccelerationSensors.add(Pair.of(imuDefinition, linearAccelerationSensor));
-   }
-
-   public void addForceTorqueSensorPort(ForceSensorDefinition forceSensorDefinition, WrenchCalculatorInterface groundContactPointBasedWrenchCalculator)
-   {
-      forceTorqueSensors.add(Pair.of(forceSensorDefinition, groundContactPointBasedWrenchCalculator));
-   }
-
-   public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
-   {
-      return sensorProcessing;
+      super(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, yoTime, parentRegistry);
    }
 
    @Override
-   public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
-   {
-      return sensorProcessing;
-   }
-
    public void read()
    {
       for (int i = 0; i < jointPositionSensors.size(); i++)
@@ -165,10 +90,5 @@ public class SimulatedSensorHolderAndReader implements SensorReader
       sensorProcessing.startComputation(timestamp, timestamp, -1);
 
       step.increment();
-   }
-
-   @Override public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
-   {
-      return null;
    }
 }
