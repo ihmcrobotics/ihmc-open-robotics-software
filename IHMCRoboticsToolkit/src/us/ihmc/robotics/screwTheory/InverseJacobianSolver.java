@@ -16,6 +16,7 @@ public class InverseJacobianSolver implements JacobianSolver
       jacobianMatrix = new DenseMatrix64F(matrixSize, matrixSize);
    }
 
+   @Override
    public void solve(DenseMatrix64F solutionToPack, DenseMatrix64F vector)
    {
       if (!solver.setA(jacobianMatrix))
@@ -23,6 +24,7 @@ public class InverseJacobianSolver implements JacobianSolver
       solver.solve(vector, solutionToPack);
    }
 
+   @Override
    public void setJacobian(DenseMatrix64F jacobianMatrix)
    {
       this.jacobianMatrix.set(jacobianMatrix);      

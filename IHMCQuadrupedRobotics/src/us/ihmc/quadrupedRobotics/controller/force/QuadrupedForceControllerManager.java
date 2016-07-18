@@ -211,6 +211,16 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             QuadrupedForceControllerState.STAND_READY, QuadrupedForceControllerState.STAND_PREP);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP,
             QuadrupedForceControllerState.FREEZE, QuadrupedForceControllerState.STAND_PREP);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE,
+            QuadrupedForceControllerState.DO_NOTHING, QuadrupedForceControllerState.FREEZE);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE,
+            QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.FREEZE);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE,
+            QuadrupedForceControllerState.STAND_PREP, QuadrupedForceControllerState.FREEZE);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE,
+            QuadrupedForceControllerState.STAND_READY, QuadrupedForceControllerState.FREEZE);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE,
+            QuadrupedForceControllerState.SOLE_WAYPOINT, QuadrupedForceControllerState.FREEZE);
 
       // Fall triggered events
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FALL,

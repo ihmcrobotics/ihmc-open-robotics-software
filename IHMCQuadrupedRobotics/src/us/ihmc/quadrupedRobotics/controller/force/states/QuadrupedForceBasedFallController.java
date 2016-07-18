@@ -67,7 +67,6 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    private final QuadrupedReferenceFrames referenceFrames;
    private final FramePoint solePositionSetpoint;
    private final Vector3d zeroVelocity;
-   private double taskStartTime;
 
    public QuadrupedForceBasedFallController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
    {
@@ -88,16 +87,15 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
       yoPositionControllerGains = new YoEuclideanPositionGains("positionControllerGains", registry);
-
       environment.getParentRegistry().addChild(registry);
    }
 
    @Override
    public void onEntry()
    {
-      taskStartTime = robotTime.getDoubleValue();
-      updateEstimates();
+      taskSpaceEstimator.compute(taskSpaceEstimates);
       updateGains();
+      // Create sole waypoint trajectories
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          solePositionSetpoint.setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
@@ -116,7 +114,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
          }
          quadrupedSoleWaypointList.get(quadrant).get(1).set(solePositionSetpoint.getPoint(), zeroVelocity, trajectoryTimeParameter.get());
       }
-      quadrupedSoleWaypointController.initialize(quadrupedSoleWaypointList, yoPositionControllerGains);
+      quadrupedSoleWaypointController.initialize(quadrupedSoleWaypointList, yoPositionControllerGains, taskSpaceEstimates);
 
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
@@ -133,7 +131,8 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    @Override
    public ControllerEvent process()
    {
-      boolean success = quadrupedSoleWaypointController.compute(taskSpaceControllerCommands.getSoleForce());
+      taskSpaceEstimator.compute(taskSpaceEstimates);
+      boolean success = quadrupedSoleWaypointController.compute(taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
       return success ? null : ControllerEvent.DONE;
    }
@@ -141,11 +140,6 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    @Override
    public void onExit()
    {
-   }
-
-   private void updateEstimates()
-   {
-      taskSpaceEstimator.compute(taskSpaceEstimates);
    }
 
    private void updateGains()

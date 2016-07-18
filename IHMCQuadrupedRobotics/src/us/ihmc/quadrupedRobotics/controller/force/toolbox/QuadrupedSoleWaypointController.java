@@ -1,13 +1,12 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 
@@ -24,42 +23,34 @@ public class QuadrupedSoleWaypointController
    private final QuadrupedSolePositionController solePositionController;
    private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
 
-   // Task space controller
-   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
-   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
-
    private QuadrupedSoleWaypointList quadrupedSoleWaypointList;
    private double taskStartTime;
 
-   public QuadrupedSoleWaypointController(QuadrupedRuntimeEnvironment environment, QuadrupedReferenceFrames referenceFrames,
-         QuadrupedSolePositionController solePositionController, QuadrupedTaskSpaceEstimator taskSpaceEstimator)
+   public QuadrupedSoleWaypointController(ReferenceFrame bodyFrame, DoubleYoVariable robotTimeStamp, QuadrupedSolePositionController solePositionController,
+         YoVariableRegistry parentRegistry)
    {
       this.quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
-      robotTime = environment.getRobotTimestamp();
+      robotTime = robotTimeStamp;
       quadrupedWaypointsPositionTrajectoryGenerator = new QuadrantDependentList<>();
 
       // Feedback controller
       this.solePositionController = solePositionController;
       solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints();
 
-      // Task space estimates
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
-      this.taskSpaceEstimator = taskSpaceEstimator;
-
       // Create waypoint trajectory for each quadrant
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          MultipleWaypointsPositionTrajectoryGenerator tempWaypointGenerator = new MultipleWaypointsPositionTrajectoryGenerator(
-               quadrant.getCamelCaseName() + "SoleTrajectory", referenceFrames.getBodyFrame(), registry);
+               quadrant.getCamelCaseName() + "SoleTrajectory", bodyFrame, registry);
          quadrupedWaypointsPositionTrajectoryGenerator.set(quadrant, tempWaypointGenerator);
       }
-      environment.getParentRegistry().addChild(registry);
+      parentRegistry.addChild(registry);
    }
 
-   public void initialize(QuadrupedSoleWaypointList quadrupedSoleWaypointList, YoEuclideanPositionGains positionControllerGains)
+   public void initialize(QuadrupedSoleWaypointList quadrupedSoleWaypointList, YoEuclideanPositionGains positionControllerGains,
+         QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates)
    {
       this.quadrupedSoleWaypointList = quadrupedSoleWaypointList;
-      updateEstimates();
       solePositionControllerSetpoints.initialize(taskSpaceEstimates);
       solePositionController.reset();
       updateGains(positionControllerGains);
@@ -67,15 +58,22 @@ public class QuadrupedSoleWaypointController
       taskStartTime = robotTime.getDoubleValue();
    }
 
-   public boolean compute(QuadrantDependentList<FrameVector> soleForce)
+   public boolean compute(QuadrantDependentList<FrameVector> soleForceCommand, QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates)
    {
-      if (robotTime.getDoubleValue() - taskStartTime > quadrupedSoleWaypointList.getFinalTime())
+      double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
+      if (currentTrajectoryTime > quadrupedSoleWaypointList.getFinalTime())
       {
          return false;
       }
       else
       {
-         updateSetpoints(soleForce);
+         for (RobotQuadrant quadrant : RobotQuadrant.values)
+         {
+            quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).compute(currentTrajectoryTime);
+            quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).getPosition(solePositionControllerSetpoints.getSolePosition(quadrant));
+            solePositionControllerSetpoints.getSoleLinearVelocity(quadrant).setToZero();
+         }
+         solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, taskSpaceEstimates);
          return true;
       }
    }
@@ -96,25 +94,6 @@ public class QuadrupedSoleWaypointController
             quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).initialize();
          }
       }
-   }
-
-   private void updateEstimates()
-   {
-      taskSpaceEstimator.compute(taskSpaceEstimates);
-   }
-
-   private void updateSetpoints(QuadrantDependentList<FrameVector> soleForce)
-   {
-      double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
-      for (RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).compute(currentTrajectoryTime);
-         //query motion generator at the current time stamp within the trajectory
-         quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).getPosition(solePositionControllerSetpoints.getSolePosition(quadrant));
-         quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).getVelocity(solePositionControllerSetpoints.getSoleLinearVelocity(quadrant));
-
-      }
-      solePositionController.compute(soleForce, solePositionControllerSetpoints, taskSpaceEstimates);
    }
 
    private void updateGains(YoEuclideanPositionGains positionControllerGains)
