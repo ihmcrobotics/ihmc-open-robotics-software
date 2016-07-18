@@ -41,7 +41,7 @@ public class QuadrupedForceControllerToolbox
       timedStepController = new QuadrupedTimedStepController(solePositionController, runtimeEnvironment.getRobotTimestamp(), registry, runtimeEnvironment.getGraphicsListRegistry());
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
       fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
-      soleWaypointController = new QuadrupedSoleWaypointController(runtimeEnvironment, referenceFrames, solePositionController, taskSpaceEstimator);
+      soleWaypointController = new QuadrupedSoleWaypointController(referenceFrames.getBodyFrame(), runtimeEnvironment.getRobotTimestamp(), solePositionController, registry);
    }
 
    public QuadrupedReferenceFrames getReferenceFrames()

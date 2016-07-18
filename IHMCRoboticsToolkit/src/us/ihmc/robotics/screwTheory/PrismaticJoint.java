@@ -16,6 +16,7 @@ public class PrismaticJoint extends OneDoFJoint
       this.unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxis.getVector(), new Vector3d());
    }
 
+   @Override
    public void setSuccessor(RigidBody successor)
    {
       this.successor = successor;

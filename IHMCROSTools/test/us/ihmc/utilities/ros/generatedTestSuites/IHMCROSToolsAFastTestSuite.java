@@ -13,6 +13,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.utilities.ros.AddTwoIntsServiceTest.class,
+   us.ihmc.utilities.ros.ROSMessageFileCreatorTest.class,
    us.ihmc.utilities.ros.ROSMessageFolderExistsTest.class
 })
 
