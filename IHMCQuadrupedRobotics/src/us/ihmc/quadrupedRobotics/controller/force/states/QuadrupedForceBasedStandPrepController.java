@@ -16,9 +16,7 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import javax.vecmath.Vector3d;
@@ -89,15 +87,15 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       hindLeftHipRollFrame.setToZero(referenceFrames.getLegAttachmentFrame(RobotQuadrant.HIND_LEFT));
       hindLeftHipRollFrame.changeFrame(referenceFrames.getBodyFrame());
       robotLength = frontLeftHipRollFrame.getX() - hindLeftHipRollFrame.getX();
-
       environment.getParentRegistry().addChild(registry);
    }
 
    @Override
    public void onEntry()
    {
-      updateEstimates();
+      taskSpaceEstimator.compute(taskSpaceEstimates);
       updateGains();
+      // Create sole waypoint trajectories
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          solePositionSetpoint.setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
@@ -110,8 +108,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
                quadrant.getEnd().negateIfHindEnd(Math.sin(stancePitchParameter.get())) * robotLength / 2 - stanceHeightParameter.get());
          quadrupedSoleWaypointList.get(quadrant).get(1).set(solePositionSetpoint.getPoint(), zeroVelocity, trajectoryTimeParameter.get());
       }
-      updateGains();
-      quadrupedSoleWaypointController.initialize(quadrupedSoleWaypointList, yoPositionControllerGains);
+      quadrupedSoleWaypointController.initialize(quadrupedSoleWaypointList, yoPositionControllerGains, taskSpaceEstimates);
 
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
@@ -128,22 +125,15 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    @Override
    public ControllerEvent process()
    {
-      if (!quadrupedSoleWaypointController.compute(taskSpaceControllerCommands.getSoleForce()))
-      {
-         return ControllerEvent.DONE;
-      }
+      taskSpaceEstimator.compute(taskSpaceEstimates);
+      boolean success = quadrupedSoleWaypointController.compute(taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
-      return null;
+      return success ? null : ControllerEvent.DONE;
    }
 
    @Override
    public void onExit()
    {
-   }
-
-   private void updateEstimates()
-   {
-      taskSpaceEstimator.compute(taskSpaceEstimates);
    }
 
    private void updateGains()

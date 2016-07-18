@@ -68,6 +68,7 @@ public class FootControlModule
    private final OnToesState onToesState;
    private final FullyConstrainedState supportState;
    private final ExploreFootPolygonState exploreFootPolygonState;
+//   private final SupportState supportState;
 
    private final FootSwitchInterface footSwitch;
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
@@ -126,6 +127,8 @@ public class FootControlModule
 
       supportState = new FullyConstrainedState(footControlHelper, registry);
       states.add(supportState);
+//      supportState = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
+//      states.add(supportState);
 
       if (walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
       {

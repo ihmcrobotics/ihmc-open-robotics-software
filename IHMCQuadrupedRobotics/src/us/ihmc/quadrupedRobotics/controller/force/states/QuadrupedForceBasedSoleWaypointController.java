@@ -4,6 +4,7 @@ import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
@@ -39,12 +40,16 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
 
    private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
    private final QuadrupedSoleWaypointController quadrupedSoleWaypointController;
+   private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
+   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
 
    public QuadrupedForceBasedSoleWaypointController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedSoleWaypointInputProvider inputProvider)
    {
       soleWaypointInputProvider = inputProvider;
       quadrupedSoleWaypointController = controllerToolbox.getSoleWaypointController();
+      taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
+      taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
@@ -55,6 +60,8 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    @Override
    public void onEntry()
    {
+      taskSpaceEstimator.compute(taskSpaceEstimates);
+      updateGains();
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
@@ -65,14 +72,14 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
       }
       taskSpaceController.reset();
-      updateGains();
-      quadrupedSoleWaypointController.initialize(soleWaypointInputProvider.get(), yoPositionControllerGains);
+      quadrupedSoleWaypointController.initialize(soleWaypointInputProvider.get(), yoPositionControllerGains, taskSpaceEstimates);
    }
 
    @Override
    public ControllerEvent process()
    {
-      boolean success = quadrupedSoleWaypointController.compute(taskSpaceControllerCommands.getSoleForce());
+      taskSpaceEstimator.compute(taskSpaceEstimates);
+      boolean success = quadrupedSoleWaypointController.compute(taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
       return success ? null : ControllerEvent.DONE;
    }
@@ -88,5 +95,4 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
       yoPositionControllerGains.setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
       yoPositionControllerGains.setDerivativeGains(solePositionDerivativeGainsParameter.get());
    }
-
 }

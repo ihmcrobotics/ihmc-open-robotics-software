@@ -524,6 +524,7 @@ public class SpatialForceVector
       this.angularPart.negate();
    }
    
+   @Override
    public String toString()
    {
       String ret = new String("SpatialForceVector expressed in frame " + expressedInFrame + "\n" + "Angular part: " + angularPart + "\n"
