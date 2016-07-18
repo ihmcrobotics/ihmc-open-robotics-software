@@ -116,7 +116,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
          }
          quadrupedSoleWaypointList.get(quadrant).get(1).set(solePositionSetpoint.getPoint(), zeroVelocity, trajectoryTimeParameter.get());
       }
-      quadrupedSoleWaypointController.initialize(quadrupedSoleWaypointList, yoPositionControllerGains);
+      quadrupedSoleWaypointController.initialize(quadrupedSoleWaypointList, yoPositionControllerGains, taskSpaceEstimates);
 
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
@@ -133,7 +133,8 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    @Override
    public ControllerEvent process()
    {
-      boolean success = quadrupedSoleWaypointController.compute(taskSpaceControllerCommands.getSoleForce());
+      taskSpaceEstimator.compute(taskSpaceEstimates);
+      boolean success = quadrupedSoleWaypointController.compute(taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
       return success ? null : ControllerEvent.DONE;
    }
