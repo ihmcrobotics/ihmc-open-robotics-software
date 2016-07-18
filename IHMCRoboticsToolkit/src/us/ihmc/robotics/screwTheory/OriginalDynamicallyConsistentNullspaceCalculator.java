@@ -68,6 +68,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
       this.computeSNsBar = computeSNsBar;
    }
 
+   @Override
    public void reset()
    {
       nConstraints = 0;
@@ -75,6 +76,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
       actuatedJoints.clear();
    }
 
+   @Override
    public void addConstraint(RigidBody body, DenseMatrix64F selectionMatrix)
    {
       constrainedBodiesAndSelectionMatrices.put(body, selectionMatrix);
@@ -83,6 +85,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
       this.supportingBodyToJointPathMap.put(body, Arrays.asList(jointPath));
    }
 
+   @Override
    public void addActuatedJoint(InverseDynamicsJoint joint)
    {
       actuatedJoints.add(joint);
@@ -109,6 +112,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
       }
    }
 
+   @Override
    public void compute()
    {
       resizeMatrices();
@@ -168,11 +172,13 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
       SNsBar.reshape(nDegreesOfFreedom, nActuatedDegreesOfFreedom);
    }
 
+   @Override
    public DenseMatrix64F getDynamicallyConsistentNullspace()
    {
       return Ns;
    }
 
+   @Override
    public DenseMatrix64F getSNsBar()
    {
       if (!computeSNsBar)
