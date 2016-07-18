@@ -74,14 +74,14 @@ public class SE3PIDGains implements SE3PIDGainsInterface
       orientationGains.setIntegralGains(integralGainX, integralGainY, integralGainZ, maxIntegralError);
    }
 
-   public void setPositionMaximumAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setPositionMaximumFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      positionGains.setMaximumAccelerationAndJerk(maxAcceleration, maxJerk);
+      positionGains.setMaximumFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
-   public void setOrientationMaximumAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setOrientationMaximumFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      orientationGains.setMaximumAccelerationAndJerk(maxAcceleration, maxJerk);
+      orientationGains.setMaximumFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
    public void setOrientationMaximumDerivativeError(double maxDerivativeError)

@@ -11,7 +11,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
+import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
@@ -50,7 +50,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
    private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
 
-   private DRCPushRobotController pushRobotController;
+   private PushRobotController pushRobotController;
 
    private RobotVisualizer robotVisualizer;
 
@@ -311,7 +311,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
-      pushRobotController = new DRCPushRobotController(drcFlatGroundWalkingTrack.getDrcSimulation().getRobot(), fullRobotModel);
+      pushRobotController = new PushRobotController(drcFlatGroundWalkingTrack.getDrcSimulation().getRobot(), fullRobotModel);
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
       cameraConfiguration.setCameraFix(0.6, 0.0, 0.6);

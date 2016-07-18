@@ -101,7 +101,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
    {
       double xAmp1 = 0.04, xFreq1 = 0.5, xAmp2 = 0.02, xFreq2 = 0.5;
       double yAmp1 = 0.02, yFreq1 = 0.07, yAmp2 = 0.03, yFreq2 = 0.37;
-      BumpyGroundProfile groundProfile = new BumpyGroundProfile(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2);
+      BumpyGroundProfile groundProfile = new BumpyGroundProfile(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2, 1.0);
       
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
@@ -111,12 +111,26 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
-      variables.getYoPlanarVelocityInputX().set(1.0);
-      variables.getYoPlanarVelocityInputZ().set(0.4);
-      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 10.0));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 2.0));
+      variables.getYoComPositionInputZ().set(0.6);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
+      conductor.simulate();
+      
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
+
+      variables.getXGaitEndPhaseShiftInput().set(180.0);
+      variables.getXGaitEndDoubleSupportDurationInput().set(0.2);
+      variables.getXGaitStanceWidthInput().set(0.21);
+      variables.getXGaitStepDurationInput().set(0.4);
+      variables.getXGaitStepGroundClearanceInput().set(0.2);
+      variables.getYoPlanarVelocityInputX().set(0.5);
+      variables.getYoPlanarVelocityInputZ().set(0.0);
+      conductor.addTimeLimit(variables.getYoTime(), 20.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 5.0));
+      conductor.simulate();
+      
+      variables.getYoPlanarVelocityInputX().set(0.0);
+      variables.getYoPlanarVelocityInputZ().set(0.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();
       
       conductor.concludeTesting();

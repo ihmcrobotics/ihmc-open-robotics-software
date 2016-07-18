@@ -20,8 +20,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
-   protected GoalOrientedTestConductor conductor;
-   protected QuadrupedForceTestYoVariables variables;
+   private GoalOrientedTestConductor conductor;
+   private QuadrupedForceTestYoVariables variables;
 
    @Before
    public void setup()

@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.llaQuadruped.controller.position.LLAQuadrupedPositionCrawlRandomWalkingTest.class
+   us.ihmc.llaQuadruped.controller.position.LLAQuadrupedPositionCrawlFlatGroundWalkingTest.class
 })
 
 public class LLAQuadrupedFInDevelopmentTestSuite

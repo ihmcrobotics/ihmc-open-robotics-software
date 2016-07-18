@@ -15,9 +15,9 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedForceBasedStandReadyController implements QuadrupedController
+public class QuadrupedForceBasedFreezeController implements QuadrupedController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedStandReadyController.class.getSimpleName());
+   private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedFreezeController.class.getSimpleName());
 
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
@@ -43,7 +43,7 @@ public class QuadrupedForceBasedStandReadyController implements QuadrupedControl
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
 
-   public QuadrupedForceBasedStandReadyController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
+   public QuadrupedForceBasedFreezeController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
    {
       // Reference frames
       bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();

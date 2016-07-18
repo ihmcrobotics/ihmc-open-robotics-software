@@ -44,6 +44,7 @@ public class TrajectoryPointOptimizer
    private final IntegerYoVariable intervals = new IntegerYoVariable("NumberOfIntervals", registry);
    private final IntegerYoVariable coefficients = new IntegerYoVariable("Coefficients", registry);
    private final IntegerYoVariable problemSize = new IntegerYoVariable("ProblemSize", registry);
+   private final IntegerYoVariable inversionSize = new IntegerYoVariable("InversionSize", registry);
    private final IntegerYoVariable constraints = new IntegerYoVariable("Conditions", registry);
    private final IntegerYoVariable iteration = new IntegerYoVariable("Iteration", registry);
 
@@ -264,6 +265,7 @@ public class TrajectoryPointOptimizer
       // s.t. A*x == b
 
       int size = problemSize + constraints.getIntegerValue();
+      this.inversionSize.set(size);
       E.reshape(size, size);
       d.reshape(size, 1);
 
@@ -277,10 +279,9 @@ public class TrajectoryPointOptimizer
       CommonOps.insert(f, d, 0, 0);
       CommonOps.insert(b, d, problemSize, 0);
 
-      if (solver.setA(E))
-         solver.invert(E);
       x.reshape(size, 1);
-      CommonOps.mult(E, d, x);
+      if (solver.setA(E)) // TODO: if this does not work what then?
+         solver.solve(d, x);
       x.reshape(problemSize, 1);
 
       d.reshape(problemSize, 1);
