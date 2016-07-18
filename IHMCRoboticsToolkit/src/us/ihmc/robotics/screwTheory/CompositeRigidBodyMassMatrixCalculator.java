@@ -45,6 +45,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       this(rootBody, new ArrayList<InverseDynamicsJoint>());
    }
    
+   @Override
    public void compute()
    {
       MatrixTools.setToZero(massMatrix);
@@ -111,11 +112,13 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       }
    }
 
+   @Override
    public DenseMatrix64F getMassMatrix()
    {
       return massMatrix;
    }
 
+   @Override
    public InverseDynamicsJoint[] getJointsInOrder()
    {
       return jointsInOrder;
