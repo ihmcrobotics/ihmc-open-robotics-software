@@ -271,6 +271,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
       return new DenseMatrix64F(SpatialMotionVector.SIZE, ScrewTools.computeDegreesOfFreedom(unitTwists.keySet()));
    }
 
+   @Override
    public String toString()
    {
       StringBuilder builder = new StringBuilder();

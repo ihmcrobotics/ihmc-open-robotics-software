@@ -367,6 +367,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
    }
 
    ///CLOVER:OFF
+   @Override
    public String toString()
    {
       String ret = new String("Spatial acceleration of " + bodyFrame + ", with respect to " + baseFrame + ", expressed in " + expressedInFrame + "\n"
@@ -375,6 +376,4 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       return ret;
    }
    ///CLOVER:ON
-
-
 }
