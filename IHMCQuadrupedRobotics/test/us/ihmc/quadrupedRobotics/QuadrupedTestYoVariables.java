@@ -30,7 +30,8 @@ public abstract class QuadrupedTestYoVariables
    private final DoubleYoVariable robotBodyY;
    private final DoubleYoVariable robotBodyZ;
    private final DoubleYoVariable robotBodyYaw;
-   
+
+   private final QuadrantDependentList<BooleanYoVariable> controllerFootSwitches = new QuadrantDependentList<>();
    private final QuadrantDependentList<BooleanYoVariable> footSwitches = new QuadrantDependentList<>();
    private final QuadrantDependentList<DoubleYoVariable> solePositionZs = new QuadrantDependentList<>();
    
@@ -61,7 +62,8 @@ public abstract class QuadrupedTestYoVariables
       
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         footSwitches.set(robotQuadrant, (BooleanYoVariable) scs.getVariable(robotQuadrant.getCamelCaseName() + "_SettableFootSwitch"));
+         controllerFootSwitches.set(robotQuadrant, (BooleanYoVariable) scs.getVariable(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch_controllerThinksHasTouchedDown"));
+         footSwitches.set(robotQuadrant, (BooleanYoVariable) scs.getVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetected"));
          solePositionZs.set(robotQuadrant, (DoubleYoVariable) scs.getVariable(robotQuadrant.getCamelCaseName() + "SolePositionZ"));
       }
    }
@@ -164,6 +166,11 @@ public abstract class QuadrupedTestYoVariables
    public DoubleYoVariable getYoTime()
    {
       return yoTime;
+   }
+
+   public QuadrantDependentList<BooleanYoVariable> getControllerFootSwitches()
+   {
+      return controllerFootSwitches;
    }
 
    public QuadrantDependentList<BooleanYoVariable> getFootSwitches()
