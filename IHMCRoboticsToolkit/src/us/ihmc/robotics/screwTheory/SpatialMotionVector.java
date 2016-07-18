@@ -539,6 +539,7 @@ public abstract class SpatialMotionVector
    }
 
    ///CLOVER:OFF
+   @Override
    public String toString()
    {
       String ret = new String("Spatial motion of " + bodyFrame + ", with respect to " + baseFrame + ", expressed in frame " + expressedInFrame + "\n"
@@ -547,5 +548,4 @@ public abstract class SpatialMotionVector
       return ret;
    }
    ///CLOVER:ON
-
 }

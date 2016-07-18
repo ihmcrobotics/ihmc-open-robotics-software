@@ -75,11 +75,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.afterJointFrame = afterJointFrame;
    }
 
+   @Override
    public ReferenceFrame getFrameAfterJoint()
    {
       return afterJointFrame;
    }
 
+   @Override
    public void getJointTwist(Twist twistToPack)
    {
       twistToPack.set(unitJointTwist);
@@ -100,6 +102,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       twistToPack.scale(qd);
    }
 
+   @Override
    public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.set(unitJointAcceleration);
@@ -113,6 +116,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       accelerationToPack.scale(qdd);
    }
 
+   @Override
    public void getDesiredJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.set(unitJointAcceleration);
@@ -133,6 +137,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       accelerationToPack.scale(qddDesired);
    }
 
+   @Override
    public void getTauMatrix(DenseMatrix64F matrix)
    {
       MathTools.checkIfInRange(matrix.getNumRows(), 1, Integer.MAX_VALUE);
@@ -140,6 +145,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       matrix.set(0, 0, tau);
    }
 
+   @Override
    public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
    {
       MathTools.checkIfInRange(matrix.getNumRows(), 1, Integer.MAX_VALUE);
@@ -147,6 +153,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       matrix.set(rowStart, 0, qd);
    }
 
+   @Override
    public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       MathTools.checkIfInRange(matrix.getNumRows(), 1, Integer.MAX_VALUE);
@@ -154,16 +161,19 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       matrix.set(rowStart, 0, qddDesired);
    }
 
+   @Override
    public void setDesiredAccelerationToZero()
    {
       qddDesired = 0.0;
    }
 
+   @Override
    public void updateMotionSubspace()
    {
       // empty
    }
 
+   @Override
    public void setTorqueFromWrench(Wrench jointWrench)
    {
       unitSuccessorTwist.getBodyFrame().checkReferenceFrameMatch(jointWrench.getBodyFrame());
@@ -175,11 +185,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       // we disregard dimensions and just use .dot(.) for efficiency
    }
 
+   @Override
    public int getDegreesOfFreedom()
    {
       return 1;
    }
 
+   @Override
    public void setDesiredAcceleration(DenseMatrix64F matrix, int rowStart)
    {
       setQddDesired(matrix.get(rowStart + 0, 0));
@@ -257,21 +269,25 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.motionSubspace.compute();
    }
 
+   @Override
    public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       matrix.set(rowStart, q);
    }
 
+   @Override
    public void setConfiguration(DenseMatrix64F matrix, int rowStart)
    {
       setQ(matrix.get(rowStart, 0));
    }
 
+   @Override
    public void setVelocity(DenseMatrix64F matrix, int rowStart)
    {
       setQd(matrix.get(rowStart, 0));
    }
 
+   @Override
    public int getConfigurationMatrixSize()
    {
       return getDegreesOfFreedom();
@@ -289,6 +305,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       }
    }
 
+   @Override
    public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
    {
       OneDoFJoint oneDoFOriginalJoint = checkAndGetAsOneDoFJoint(originalJoint);
@@ -299,6 +316,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       setEnabled(oneDoFOriginalJoint.isEnabled());
    }
 
+   @Override
    public void setQddDesired(InverseDynamicsJoint originalJoint)
    {
       OneDoFJoint oneDoFOriginalJoint = checkAndGetAsOneDoFJoint(originalJoint);
@@ -415,6 +433,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.kd = kd;
    }
 
+   @Override
    public void calculateJointStateChecksum(GenericCRC32 checksum)
    {
       checksum.update(q);
@@ -422,6 +441,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       checksum.update(qdd);
    }
 
+   @Override
    public void calculateJointDesiredChecksum(GenericCRC32 checksum)
    {
       checksum.update(qddDesired);
