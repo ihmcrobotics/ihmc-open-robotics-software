@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.estimator;
+package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.TouchdownDetectorBasedFootswitch;
