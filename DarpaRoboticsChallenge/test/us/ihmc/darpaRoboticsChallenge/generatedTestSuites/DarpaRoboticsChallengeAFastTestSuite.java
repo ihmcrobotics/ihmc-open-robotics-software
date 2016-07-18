@@ -20,8 +20,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.WheelRotationEstimatorTest.class,
    us.ihmc.darpaRoboticsChallenge.odometry.IcpCloud3DTest.class,
    us.ihmc.darpaRoboticsChallenge.ros.IHMCROSTranslationRuntimeToolsTest.class,
-   us.ihmc.darpaRoboticsChallenge.stateEstimationEndToEndTests.PelvisPoseHistoryCorrectionUsingSimpleRobotTest.class,
-   us.ihmc.utilities.ros.ROSMessageFileCreatorTest.class
+   us.ihmc.darpaRoboticsChallenge.stateEstimationEndToEndTests.PelvisPoseHistoryCorrectionUsingSimpleRobotTest.class
 })
 
 public class DarpaRoboticsChallengeAFastTestSuite
