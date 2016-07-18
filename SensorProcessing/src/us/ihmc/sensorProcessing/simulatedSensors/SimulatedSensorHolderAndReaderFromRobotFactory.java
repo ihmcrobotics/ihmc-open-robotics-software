@@ -51,8 +51,6 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       this.sensorNoiseParameters = sensorProcessingConfiguration.getSensorNoiseParameters();
       this.estimateDT = sensorProcessingConfiguration.getEstimatorDT();
 
-      this.corruptYawDrift = new BooleanYoVariable("corruptYawDrift", registry);
-
       robot.getIMUMounts(imuMounts);
       robot.getForceSensors(groundContactPointBasedWrenchCalculators);
    }
