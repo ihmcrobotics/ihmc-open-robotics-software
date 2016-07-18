@@ -178,6 +178,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPointTest.class,
    us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPointTest.class,
    us.ihmc.robotics.math.trajectories.waypoints.SimpleSO3TrajectoryPointTest.class,
+   us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizerTest.class,
    us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPointTest.class,
    us.ihmc.robotics.math.trajectories.waypoints.YoFrameSE3TrajectoryPointTest.class,
    us.ihmc.robotics.math.trajectories.waypoints.YoFrameSO3TrajectoryPointTest.class,
@@ -244,7 +245,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.trajectories.providers.ConstantDoubleProviderTest.class,
    us.ihmc.robotics.trajectories.providers.ConstantPositionProviderTest.class,
    us.ihmc.robotics.trajectories.providers.CurrentPositionProviderTest.class,
-   us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizerTest.class,
    us.ihmc.robotics.trajectories.TrapezoidalVelocityTrajectoryTest.class,
    us.ihmc.robotics.trajectories.WaypointMotionGeneratorTest.class
 })
