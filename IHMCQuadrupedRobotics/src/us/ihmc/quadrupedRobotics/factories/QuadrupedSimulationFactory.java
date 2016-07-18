@@ -28,6 +28,8 @@ import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBas
 import us.ihmc.quadrupedRobotics.controller.positionDevelopment.QuadrupedPositionDevelopmentControllerManager;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
+import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedFootContactableBodiesFactory;
+import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedFootSwitchFactory;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedInverseKinematicsCalculators;
@@ -153,21 +155,39 @@ public class QuadrupedSimulationFactory
    
    private void createContactibleFeet()
    {
-      contactableFeet = QuadrupedStateEstimatorFactory.createFootContactableBodies(fullRobotModel.get(), referenceFrames.get(), physicalProperties.get());
+      QuadrupedFootContactableBodiesFactory footContactableBodiesFactory = new QuadrupedFootContactableBodiesFactory();
+      footContactableBodiesFactory.setFullRobotModel(fullRobotModel.get());
+      footContactableBodiesFactory.setPhysicalProperties(physicalProperties.get());
+      footContactableBodiesFactory.setReferenceFrames(referenceFrames.get());
+      contactableFeet = footContactableBodiesFactory.createFootContactableBodies();
    }
    
    private void createFootSwitches()
    {
-      footSwitches = QuadrupedStateEstimatorFactory.createFootSwitches(contactableFeet, gravity.get(), fullRobotModel.get(), sdfRobot.get().getRobotsYoVariableRegistry());
+      QuadrupedFootSwitchFactory footSwitchFactory = new QuadrupedFootSwitchFactory();
+      footSwitchFactory.setFootContactableBodies(contactableFeet);
+      footSwitchFactory.setFullRobotModel(fullRobotModel.get());
+      footSwitchFactory.setGravity(gravity.get());
+      footSwitchFactory.setYoVariableRegistry(sdfRobot.get().getRobotsYoVariableRegistry());
+      footSwitches = footSwitchFactory.createFootSwitches();
    }
    
    private void createStateEstimator()
    {
       if (useStateEstimator.get())
       {
-         stateEstimator = QuadrupedStateEstimatorFactory
-               .createStateEstimator(sensorInformation.get(), stateEstimatorParameters.get(), fullRobotModel.get(), sensorReader.getSensorOutputMapReadOnly(), contactableFeet,
-                                     footSwitches, gravity.get(), controlDT.get(), sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
+         QuadrupedStateEstimatorFactory stateEstimatorFactory = new QuadrupedStateEstimatorFactory();
+         stateEstimatorFactory.setEstimatorDT(controlDT.get());
+         stateEstimatorFactory.setFootContactableBodies(contactableFeet);
+         stateEstimatorFactory.setFootSwitches(footSwitches);
+         stateEstimatorFactory.setFullRobotModel(fullRobotModel.get());
+         stateEstimatorFactory.setGravity(gravity.get());
+         stateEstimatorFactory.setSensorInformation(sensorInformation.get());
+         stateEstimatorFactory.setSensorOutputMapReadOnly(sensorReader.getSensorOutputMapReadOnly());
+         stateEstimatorFactory.setStateEstimatorParameters(stateEstimatorParameters.get());
+         stateEstimatorFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
+         stateEstimatorFactory.setYoVariableRegistry(sdfRobot.get().getRobotsYoVariableRegistry());
+         stateEstimator = stateEstimatorFactory.createStateEstimator();
       }
       else
       {
