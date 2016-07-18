@@ -168,7 +168,7 @@ public class QuadrupedTimedStepController
       return stepQueue.capacity();
    }
 
-   public QuadrupedTimedStep getLatestStep(RobotEnd robotEnd)
+   public QuadrupedTimedStep getCurrentStep(RobotEnd robotEnd)
    {
       for (int i = 0; i < stepQueue.size(); i++)
       {
@@ -181,7 +181,7 @@ public class QuadrupedTimedStepController
       return null;
    }
 
-   public QuadrupedTimedStep getLatestStep(RobotQuadrant robotQuadrant)
+   public QuadrupedTimedStep getCurrentStep(RobotQuadrant robotQuadrant)
    {
       for (int i = 0; i < stepQueue.size(); i++)
       {
@@ -292,7 +292,7 @@ public class QuadrupedTimedStepController
       @Override
       public StepEvent process()
       {
-         QuadrupedTimedStep timedStep = getLatestStep(robotQuadrant);
+         QuadrupedTimedStep timedStep = getCurrentStep(robotQuadrant);
          if (timedStep != null)
          {
             double currentTime = timestamp.getDoubleValue();
@@ -336,7 +336,7 @@ public class QuadrupedTimedStepController
       public void onEntry()
       {
          // initialize swing trajectory
-         QuadrupedTimedStep timedStep = getLatestStep(robotQuadrant);
+         QuadrupedTimedStep timedStep = getCurrentStep(robotQuadrant);
          double groundClearance = timedStep.getGroundClearance();
          TimeInterval timeInterval = timedStep.getTimeInterval();
          timedStep.getGoalPosition(goalPosition);
@@ -355,7 +355,7 @@ public class QuadrupedTimedStepController
       @Override
       public StepEvent process()
       {
-         QuadrupedTimedStep timedStep = getLatestStep(robotQuadrant);
+         QuadrupedTimedStep timedStep = getCurrentStep(robotQuadrant);
          double currentTime = timestamp.getDoubleValue();
          double touchDownTime = timedStep.getTimeInterval().getEndTime();
 
