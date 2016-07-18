@@ -66,9 +66,9 @@ public class FootControlModule
    private final SwingState swingState;
    private final MoveViaWaypointsState moveViaWaypointsState;
    private final OnToesState onToesState;
-//   private final FullyConstrainedState supportState;
+   private final FullyConstrainedState supportState;
    private final ExploreFootPolygonState exploreFootPolygonState;
-   private final SupportState supportState;
+//   private final SupportState supportState;
 
    private final FootSwitchInterface footSwitch;
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
@@ -125,10 +125,10 @@ public class FootControlModule
       onToesState = new OnToesState(footControlHelper, toeOffFootControlGains, registry);
       states.add(onToesState);
 
-//      supportState = new FullyConstrainedState(footControlHelper, registry);
-//      states.add(supportState);
-      supportState = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
+      supportState = new FullyConstrainedState(footControlHelper, registry);
       states.add(supportState);
+//      supportState = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
+//      states.add(supportState);
 
       if (walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
       {
@@ -186,12 +186,12 @@ public class FootControlModule
          @Override
          public boolean checkCondition()
          {
-//            if (alwaysHoldPosition.getBooleanValue())
-//               return true;
-//            if (isFootBarelyLoaded())
-//               return true;
-//            if (holdPositionIfCopOnEdge.getBooleanValue())
-//               return footControlHelper.isCoPOnEdge();
+            if (alwaysHoldPosition.getBooleanValue())
+               return true;
+            if (isFootBarelyLoaded())
+               return true;
+            if (holdPositionIfCopOnEdge.getBooleanValue())
+               return footControlHelper.isCoPOnEdge();
             return false;
          }
       }));
@@ -201,12 +201,11 @@ public class FootControlModule
          @Override
          public boolean checkCondition()
          {
-//            if (alwaysHoldPosition.getBooleanValue())
-//               return false;
-//            if (isFootBarelyLoaded())
-//               return false;
-//            return !footControlHelper.isCoPOnEdge();
-            return true;
+            if (alwaysHoldPosition.getBooleanValue())
+               return false;
+            if (isFootBarelyLoaded())
+               return false;
+            return !footControlHelper.isCoPOnEdge();
          }
       }));
 

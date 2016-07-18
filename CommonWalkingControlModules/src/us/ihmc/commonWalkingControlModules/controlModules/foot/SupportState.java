@@ -179,7 +179,15 @@ public class SupportState extends AbstractFootControlState
       feedbackSelectionMatrix.reshape(6, 6);
       CommonOps.setIdentity(feedbackSelectionMatrix);
 
-      MatrixTools.removeRow(feedbackSelectionMatrix, 5); // angular z
+      if (footBarelyLoaded.getBooleanValue())
+      {
+         MatrixTools.removeRow(accelerationSelectionMatrix, 5); // angular z
+      }
+      else
+      {
+         MatrixTools.removeRow(feedbackSelectionMatrix, 5); // angular z
+      }
+
       if (copOnEdge.getBooleanValue())
       {
          MatrixTools.removeRow(accelerationSelectionMatrix, 4); // angular y
