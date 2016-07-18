@@ -41,7 +41,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    private final ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators = new ArrayList<WrenchCalculatorInterface>();
 
    private SimulatedSensorHolderAndReader simulatedSensorHolderAndReader;
-   private BooleanYoVariable yawDriftCorruptor;
+   private BooleanYoVariable corruptYawDrift;
 
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private final SensorProcessingConfiguration sensorProcessingConfiguration;
@@ -79,9 +79,9 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       Map<IMUMount, IMUDefinition> imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
       Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
 
-      yawDriftCorruptor.set(false);
+      corruptYawDrift.set(false);
 
-      if (yawDriftCorruptor.getBooleanValue())
+      if (corruptYawDrift.getBooleanValue())
          this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReaderWithYawDriftCorruptor(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, robot.getYoTime(), registry);
       else
          this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, robot.getYoTime(), registry);
@@ -162,7 +162,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
          SimulatedOrientationSensorFromRobot orientationSensor = new SimulatedOrientationSensorFromRobot(sensorName, imuMount, registry);
 
-         if (sensorNoiseParameters != null)
+         if (corruptYawDrift.getBooleanValue())
          {
             double yawDriftAcceleration = sensorNoiseParameters.getIMUYawDriftAcceleration();
             OrientationConstantAcceleratingYawDriftCorruptor yawDriftCorruptor = new OrientationConstantAcceleratingYawDriftCorruptor(sensorName, estimateDT, registry);
