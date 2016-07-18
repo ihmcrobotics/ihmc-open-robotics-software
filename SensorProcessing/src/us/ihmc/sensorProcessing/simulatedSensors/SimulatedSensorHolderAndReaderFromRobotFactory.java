@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianDoubleCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
@@ -40,6 +41,8 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    private final ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators = new ArrayList<WrenchCalculatorInterface>();
 
    private SimulatedSensorHolderAndReader simulatedSensorHolderAndReader;
+   private BooleanYoVariable yawDriftCorruptor;
+
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private final SensorProcessingConfiguration sensorProcessingConfiguration;
    private final SensorNoiseParameters sensorNoiseParameters;
@@ -75,7 +78,13 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
       Map<IMUMount, IMUDefinition> imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
       Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
-      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, robot.getYoTime(), registry);
+
+      yawDriftCorruptor.set(false);
+
+      if (yawDriftCorruptor.getBooleanValue())
+         this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReaderWithYawDriftCorruptor(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, robot.getYoTime(), registry);
+      else
+         this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, robot.getYoTime(), registry);
 
       createAndAddOrientationSensors(imuDefinitions, registry);
       createAndAddAngularVelocitySensors(imuDefinitions, registry);

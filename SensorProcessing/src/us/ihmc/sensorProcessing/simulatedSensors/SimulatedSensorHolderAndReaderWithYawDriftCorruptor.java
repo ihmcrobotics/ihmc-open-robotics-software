@@ -5,7 +5,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
-import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 import javax.vecmath.Matrix3d;
