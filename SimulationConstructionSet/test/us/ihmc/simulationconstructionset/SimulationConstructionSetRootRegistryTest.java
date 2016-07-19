@@ -8,7 +8,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.gui.CombinedVarPanel;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
-import us.ihmc.simulationconstructionset.gui.VarPanel;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
@@ -49,7 +49,7 @@ public class SimulationConstructionSetRootRegistryTest
          sleep(2000);  //+++JEP: Not sure why need this sleep, but it fails if we don't...
 
          combinedVarPanel.setVisibleVarPanel("root.RobotsRootRegistry.RegistryOne");
-         VarPanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
+         YoVariablePanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
         
          assertTrue(visibleVarPanel != null);
          assertTrue(variableOne == visibleVarPanel.getYoVariable("variableOne"));
@@ -92,7 +92,7 @@ public class SimulationConstructionSetRootRegistryTest
          // This also fails when the Search Panel doesn't come up...
          
          standardSimulationGUI.selectVarGroup("VarGroupToTest");
-         VarPanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
+         YoVariablePanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
          assertTrue(visibleVarPanel.getName().equals("VarGroupToTest"));
          assertTrue(variableOneA == visibleVarPanel.getYoVariable("variableOneA"));
          assertTrue(variableTwoB == visibleVarPanel.getYoVariable("variableTwoB"));
@@ -172,7 +172,7 @@ public class SimulationConstructionSetRootRegistryTest
          combinedVarPanel.setVisibleVarPanel("root.TestAfterConstruction.RegistryBeforeConstructionOne");
 //         sleep(2000);
          
-         VarPanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
+         YoVariablePanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
          System.out.println("visibleVarPanel = " + visibleVarPanel.getName());
          assertTrue(visibleVarPanel.getName().equals("RegistryBeforeConstructionOne"));
          assertTrue(variableBeforeConstructionOne == visibleVarPanel.getYoVariable("variableBeforeConstructionOne"));

@@ -10,8 +10,8 @@ import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.NewDataListener;
-import us.ihmc.simulationconstructionset.gui.VarPanel;
 import us.ihmc.simulationconstructionset.gui.YoEntryBox;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
 
 public class RobotSocketConnection implements RobotConnection, VariableChangedListener, DoDisconnectListener, RegistrySettingsChangedListener
 {
@@ -163,7 +163,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
 
          // Attach protocolListener as the change listener to anything the user can change a variable with...
          YoEntryBox.attachVariableChangedListener(this);
-         VarPanel.attachVariableChangedListener(this);
+         YoVariablePanel.attachVariableChangedListener(this);
 
 //       this.setText("Disconnect");
 

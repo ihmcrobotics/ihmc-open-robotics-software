@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.gui;
+package us.ihmc.simulationconstructionset.gui.yoVariableSearch;
 
 import java.awt.Component;
 import java.util.ArrayList;
@@ -8,34 +8,37 @@ import javax.swing.event.ChangeListener;
 
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
+import us.ihmc.simulationconstructionset.gui.SelectedVariableHolder;
 
-public class VarListVarPanel extends VarPanel
+public class YoVariableListPanel extends YoVariablePanel
 {
    private static final long serialVersionUID = -995471860623897960L;
    private YoVariableList varList;
 
-   public VarListVarPanel(String name, SelectedVariableHolder holder, VarPanelJPopupMenu varPanelJPopupMenu, VariableSearchPanel searchPanel)
+   public YoVariableListPanel(String name, SelectedVariableHolder holder, YoVariablePanelJPopupMenu varPanelJPopupMenu, YoVariableSearchPanel searchPanel)
    {
       this(new YoVariableList(name), holder, varPanelJPopupMenu, searchPanel);
    }
 
-   public VarListVarPanel(YoVariableList list, SelectedVariableHolder holder, VarPanelJPopupMenu varPanelJPopupMenu, VariableSearchPanel searchPanel)
+   public YoVariableListPanel(YoVariableList list, SelectedVariableHolder holder, YoVariablePanelJPopupMenu varPanelJPopupMenu, YoVariableSearchPanel searchPanel)
    {
       super(list.getName(), holder, varPanelJPopupMenu, searchPanel);
       this.varList = list;
       clearAndSetUpTextFields();
    }
 
-   public VarListVarPanel(String name, SelectedVariableHolder holder, VarPanelJPopupMenu varPanelJPopupMenu)
+   public YoVariableListPanel(String name, SelectedVariableHolder holder, YoVariablePanelJPopupMenu varPanelJPopupMenu)
    {
       this(new YoVariableList(name), holder, varPanelJPopupMenu, null);
    }
 
-   public VarListVarPanel(YoVariableList list, SelectedVariableHolder holder, VarPanelJPopupMenu varPanelJPopupMenu)
+   public YoVariableListPanel(YoVariableList list, SelectedVariableHolder holder, YoVariablePanelJPopupMenu varPanelJPopupMenu)
    {
       this(list, holder, varPanelJPopupMenu, null);
    }
 
+   @Override
    protected int getNumberOfYoVariables()
    {
       if (varList == null)
@@ -44,27 +47,31 @@ public class VarListVarPanel extends VarPanel
       return varList.size();
    }
 
-   protected YoVariable getYoVariable(int index)
+   @Override
+   protected YoVariable<?> getYoVariable(int index)
    {
       return varList.getVariable(index);
    }
 
-   protected List<YoVariable> getAllYoVariablesCopy()
+   @Override
+   protected List<YoVariable<?>> getAllYoVariablesCopy()
    {
-      return new ArrayList<YoVariable>(varList.getVariables());
+      return new ArrayList<YoVariable<?>> (varList.getVariables());
    }
 
+   @Override
    public void addChangeListener(ChangeListener changeListener)
    {
       varList.addChangeListener(changeListener);
    }
 
-   public YoVariable getYoVariable(String name)
+   @Override
+   public YoVariable<?> getYoVariable(String name)
    {
       return varList.getVariable(name);
    }
 
-   public void addVariable(final YoVariable v)
+   public void addVariable(final YoVariable<?> v)
    {
       if (v != null)
       {
@@ -72,6 +79,7 @@ public class VarListVarPanel extends VarPanel
 
          EventDispatchThreadHelper.invokeAndWait(new Runnable()
          {
+            @Override
             public void run()
             {
                addTextFieldForVariable(v);
@@ -80,7 +88,7 @@ public class VarListVarPanel extends VarPanel
       }
    }
 
-   public void removeVariable(YoVariable v)
+   public void removeVariable(YoVariable<?> v)
    {
       int indexOfVariableValueToRemove = varList.getIndexOfVariable(v);
       if ((indexOfVariableValueToRemove >= 0) && (indexOfVariableValueToRemove < textFields.size()))
@@ -106,6 +114,7 @@ public class VarListVarPanel extends VarPanel
       //    this.updateUI();
    }
 
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();
