@@ -91,12 +91,10 @@ public class SupportState extends AbstractFootControlState
 
       spatialAccelerationCommand.setWeight(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialAccelerationCommand.set(rootBody, contactableFoot.getRigidBody());
-      spatialAccelerationCommand.setSelectionMatrixToIdentity();
 
       spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       spatialFeedbackControlCommand.setGains(holdPositionGains);
-      spatialFeedbackControlCommand.setSelectionMatrixToIdentity();
 
       desiredLinearVelocity.setToZero(worldFrame);
       desiredAngularVelocity.setToZero(worldFrame);
@@ -190,14 +188,14 @@ public class SupportState extends AbstractFootControlState
 
       if (footBarelyLoaded.getBooleanValue())
       {
-         isDirectionFeedbackControlled[0] = true; // control x position
-         isDirectionFeedbackControlled[1] = true; // control y position
-         isDirectionFeedbackControlled[5] = true; // control z orientation
+         isDirectionFeedbackControlled[3] = true; // control x position
+         isDirectionFeedbackControlled[4] = true; // control y position
+         isDirectionFeedbackControlled[2] = true; // control z orientation
       }
       if (copOnEdge.getBooleanValue())
       {
-         isDirectionFeedbackControlled[3] = true; // control x orientation
-         isDirectionFeedbackControlled[4] = true; // control y orientation
+         isDirectionFeedbackControlled[0] = true; // control x orientation
+         isDirectionFeedbackControlled[1] = true; // control y orientation
       }
 
       for (int i = dofs-1; i >= 0; i--)
