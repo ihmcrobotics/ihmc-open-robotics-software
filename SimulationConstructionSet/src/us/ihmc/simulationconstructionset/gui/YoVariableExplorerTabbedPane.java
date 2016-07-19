@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanelJPo
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariableSearchPanel;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
 
-public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedListener
+public class YoVariableExplorerTabbedPane extends JTabbedPane implements RegistrySelectedListener
 {
    private static final long serialVersionUID = -3403238490036872889L;
 
@@ -50,7 +50,7 @@ public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedLis
    private int tabIndex = 0;
 
   
-   public CombinedVarPanel(YoVariableDoubleClickListener yoVariableDoubleClickListener, JFrame frame, BookmarkedVariablesHolder bookmarkedVariablesHolder,
+   public YoVariableExplorerTabbedPane(YoVariableDoubleClickListener yoVariableDoubleClickListener, JFrame frame, BookmarkedVariablesHolder bookmarkedVariablesHolder,
                            final SelectedVariableHolder selectedVariableHolder, EntryBoxArrayPanel entryBoxArrayPanel,
                            WriteDataCommandExecutor writeDataCommandExecutor, YoVariableRegistry rootRegistry)
    {
@@ -65,6 +65,7 @@ public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedLis
       {
          selectedVariableHolder.addChangeListener(new ChangeListener()
          {
+            @Override
             public void stateChanged(ChangeEvent e)
             {
                entryBox.setVariableInThisBox(selectedVariableHolder.getSelectedVariable());
@@ -191,12 +192,14 @@ public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedLis
       alertChangeListenersTimer = new Timer("CombinedVarPanelTimer");
       alertChangeListenersTask = new TimerTask()
       {
+         @Override
          public void run()
          {
             repaint();
 
             EventDispatchThreadHelper.justRun(new Runnable()
             {
+               @Override
                public void run()
                {
                   entryBox.updateActiveContainer();
@@ -212,6 +215,7 @@ public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedLis
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             closeAndDisposeLocal();
@@ -282,6 +286,7 @@ public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedLis
       return nameSpaceHierarchyTree;
    }
 
+   @Override
    public void registryWasSelected(YoVariableRegistry selectedRegistry)
    {
       setVisibleVarPanel(selectedRegistry);
@@ -292,4 +297,9 @@ public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedLis
       this.varPanelJPopupMenu = varPanelJPopupMenu;
    }
 
+
+   public YoVariableSearchPanel getYoVariableSearchPanel()
+   {
+      return variableSearchPanel;
+   }
 }
