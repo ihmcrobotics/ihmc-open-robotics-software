@@ -42,6 +42,8 @@ public class FootControlModule
    private final YoVariableRegistry registry;
    private final ContactablePlaneBody contactableFoot;
 
+   private final boolean useNewSupportState;
+
    public enum ConstraintType
    {
       FULL, HOLD_POSITION, TOES, SWING, MOVE_VIA_WAYPOINTS, EXPLORE_POLYGON
@@ -68,7 +70,7 @@ public class FootControlModule
    private final OnToesState onToesState;
    private final FullyConstrainedState supportState;
    private final ExploreFootPolygonState exploreFootPolygonState;
-//   private final SupportState supportState;
+   private final SupportState supportStateNew;
 
    private final FootSwitchInterface footSwitch;
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
@@ -126,9 +128,12 @@ public class FootControlModule
       states.add(onToesState);
 
       supportState = new FullyConstrainedState(footControlHelper, registry);
-      states.add(supportState);
-//      supportState = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
-//      states.add(supportState);
+      supportStateNew = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
+      useNewSupportState = walkingControllerParameters.useSupportState();
+      if (useNewSupportState)
+         states.add(supportStateNew);
+      else
+         states.add(supportState);
 
       if (walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
       {
@@ -201,6 +206,9 @@ public class FootControlModule
          @Override
          public boolean checkCondition()
          {
+            if (useNewSupportState)
+               return true;
+
             if (alwaysHoldPosition.getBooleanValue())
                return false;
             if (isFootBarelyLoaded())
