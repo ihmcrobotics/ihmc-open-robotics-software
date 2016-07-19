@@ -1,4 +1,4 @@
-package us.ihmc.robotics.trajectories;
+package us.ihmc.robotics.math.trajectories.waypoints;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

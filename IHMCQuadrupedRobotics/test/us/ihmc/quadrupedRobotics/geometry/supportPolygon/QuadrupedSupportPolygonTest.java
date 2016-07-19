@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.supportPolygon;
+package us.ihmc.quadrupedRobotics.geometry.supportPolygon;
 
 import static org.junit.Assert.*;
 import static us.ihmc.tools.testing.TestPlanTarget.*;

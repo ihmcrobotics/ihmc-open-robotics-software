@@ -23,6 +23,9 @@ import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTree;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceSearchPanel;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.RegistrySelectedListener;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanelJPopupMenu;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariableSearchPanel;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
 
 public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedListener
 {
@@ -30,12 +33,12 @@ public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedLis
 
    private final YoVariableRegistry rootRegistry;
    private final LinkedHashMap<JComponent, Integer> tabIndices = new LinkedHashMap<JComponent, Integer>();
-   private VarPanel visibleVarPanel;
+   private YoVariablePanel visibleVarPanel;
    private JScrollPane scrollPane;
    private NameSpaceHierarchyTree nameSpaceHierarchyTree;
    private JSplitPane splitPane;
    private JPanel variableDisplayPanel;
-   private VariableSearchPanel variableSearchPanel;
+   private YoVariableSearchPanel variableSearchPanel;
    private YoEntryBox entryBox;
    private Timer alertChangeListenersTimer;
    private TimerTask alertChangeListenersTask;
@@ -43,7 +46,7 @@ public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedLis
    private JScrollPane bookmarkedVariablesScrollPane;
 
    private final SelectedVariableHolder selectedVariableHolder;
-   private VarPanelJPopupMenu varPanelJPopupMenu;
+   private YoVariablePanelJPopupMenu varPanelJPopupMenu;
    private int tabIndex = 0;
 
   
@@ -100,7 +103,7 @@ public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedLis
    }
 
 
-   public void addVariableSearchPanel(VariableSearchPanel variableSearchPanel)
+   public void addVariableSearchPanel(YoVariableSearchPanel variableSearchPanel)
    {
       insertTab("Search", variableSearchPanel, tabIndex++);
       this.variableSearchPanel = variableSearchPanel;
@@ -128,7 +131,7 @@ public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedLis
 //    }
 // }
 
-   public void addExtraVarPanel(VarPanel extraVarPanel)
+   public void addExtraVarPanel(YoVariablePanel extraVarPanel)
    {
       setVisibleVarPanel(extraVarPanel);
    }
@@ -149,12 +152,12 @@ public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedLis
 
    public void setVisibleVarPanel(YoVariableRegistry registry)
    {
-      VarPanel varPanel = new YoVariableRegistryVarPanel(registry, selectedVariableHolder, varPanelJPopupMenu);
+      YoVariablePanel varPanel = new YoVariableRegistryVarPanel(registry, selectedVariableHolder, varPanelJPopupMenu);
 
       setVisibleVarPanel(varPanel);
    }
 
-   public void setVisibleVarPanel(VarPanel varPanel)
+   public void setVisibleVarPanel(YoVariablePanel varPanel)
    {
       if (visibleVarPanel != null)
       {
@@ -178,7 +181,7 @@ public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedLis
 
    }
 
-   public VarPanel getVisibleVarPanel()
+   public YoVariablePanel getVisibleVarPanel()
    {
       return visibleVarPanel;
    }
@@ -284,7 +287,7 @@ public class CombinedVarPanel extends JTabbedPane implements RegistrySelectedLis
       setVisibleVarPanel(selectedRegistry);
    }
 
-   public void setVarPanelJPopupMenu(VarPanelJPopupMenu varPanelJPopupMenu)
+   public void setVarPanelJPopupMenu(YoVariablePanelJPopupMenu varPanelJPopupMenu)
    {
       this.varPanelJPopupMenu = varPanelJPopupMenu;
    }

@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.gui;
+package us.ihmc.simulationconstructionset.gui.yoVariableSearch;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -9,7 +9,15 @@ import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 
-public class VarPanelJPopupMenu extends ForcedRepaintPopupMenu
+import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesHolder;
+import us.ihmc.simulationconstructionset.gui.CombinedVarPanel;
+import us.ihmc.simulationconstructionset.gui.EntryBoxArrayTabbedPanel;
+import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
+import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
+import us.ihmc.simulationconstructionset.gui.SelectedVariableHolder;
+import us.ihmc.simulationconstructionset.gui.YoSliderpanel;
+
+public class YoVariablePanelJPopupMenu extends ForcedRepaintPopupMenu
 {
    private static final long serialVersionUID = -1080363015468056576L;
 
@@ -24,7 +32,7 @@ public class VarPanelJPopupMenu extends ForcedRepaintPopupMenu
 
    private JMenuItem addToSliderBoard;
 
-   public VarPanelJPopupMenu(SelectedVariableHolder selectedVariableHolder)
+   public YoVariablePanelJPopupMenu(SelectedVariableHolder selectedVariableHolder)
    {
       super();
       this.selectedVariableHolder = selectedVariableHolder;
@@ -35,7 +43,7 @@ public class VarPanelJPopupMenu extends ForcedRepaintPopupMenu
       this.bookmarkedVariablesHolder = null;
    }
 
-   public VarPanelJPopupMenu(GraphArrayPanel graphArrayPanel, EntryBoxArrayTabbedPanel entryBoxArrayPanel, SelectedVariableHolder selectedVariableHolder,
+   public YoVariablePanelJPopupMenu(GraphArrayPanel graphArrayPanel, EntryBoxArrayTabbedPanel entryBoxArrayPanel, SelectedVariableHolder selectedVariableHolder,
          CombinedVarPanel combinedVarPanel, BookmarkedVariablesHolder bookmarkedVariablesHolder)
    {
       super();
@@ -53,6 +61,7 @@ public class VarPanelJPopupMenu extends ForcedRepaintPopupMenu
       JMenuItem addToNewGraph = new JMenuItem("Add Variable to New Graph");
       addToNewGraph.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             if (graphArrayPanel != null)
@@ -72,6 +81,7 @@ public class VarPanelJPopupMenu extends ForcedRepaintPopupMenu
       JMenuItem addToNewEntryBox = new JMenuItem("Add Variable to new Entry Box");
       addToNewEntryBox.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             if (entryBoxArrayPanel != null)
@@ -95,6 +105,7 @@ public class VarPanelJPopupMenu extends ForcedRepaintPopupMenu
       JMenuItem copyToClipBoard = new JMenuItem("Copy Name to Clipboard");
       copyToClipBoard.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             if (selectedVariableHolder.getSelectedVariable() != null)
@@ -112,6 +123,7 @@ public class VarPanelJPopupMenu extends ForcedRepaintPopupMenu
       JMenuItem copyFullNameToClipBoard = new JMenuItem("Copy Full Name to Clipboard");
       copyFullNameToClipBoard.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             if (selectedVariableHolder.getSelectedVariable() != null)
@@ -129,6 +141,7 @@ public class VarPanelJPopupMenu extends ForcedRepaintPopupMenu
       JMenuItem showNameSpace = new JMenuItem("Open Name Space");
       showNameSpace.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             if (combinedVarPanel != null)
@@ -146,11 +159,12 @@ public class VarPanelJPopupMenu extends ForcedRepaintPopupMenu
       JMenuItem displayNameSpaces = new JMenuItem("Display Name Spaces");
       displayNameSpaces.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             if (combinedVarPanel != null)
             {
-               VarPanel.addNameSpaceToVarNames();
+               YoVariablePanel.addNameSpaceToVarNames();
             }
 
             setVisible(false);
@@ -162,6 +176,7 @@ public class VarPanelJPopupMenu extends ForcedRepaintPopupMenu
       bookmarkVariable = new JMenuItem("Bookmark Variable");
       bookmarkVariable.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             if (bookmarkedVariablesHolder != null)
@@ -185,6 +200,7 @@ public class VarPanelJPopupMenu extends ForcedRepaintPopupMenu
       addToSliderBoard = new JMenuItem("addToSliderBoard");
       addToSliderBoard.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             if (selectedVariableHolder.getSelectedVariable() != null)

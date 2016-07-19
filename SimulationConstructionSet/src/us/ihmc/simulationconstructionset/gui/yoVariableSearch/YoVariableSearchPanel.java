@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.gui;
+package us.ihmc.simulationconstructionset.gui.yoVariableSearch;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -31,36 +31,33 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesHolder;
+import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesPanel;
+import us.ihmc.simulationconstructionset.gui.CombinedVarPanel;
+import us.ihmc.simulationconstructionset.gui.DoubleClickListener;
+import us.ihmc.simulationconstructionset.gui.EntryBoxArrayTabbedPanel;
+import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
+import us.ihmc.simulationconstructionset.gui.RegularExpression;
+import us.ihmc.simulationconstructionset.gui.SelectedVariableHolder;
+import us.ihmc.simulationconstructionset.gui.YoEntryBox;
 
-
-
-/**
- * <p>Title: SimulationConstructionSet</p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2000</p>
- *
- * <p>Company: Yobotics, Inc.</p>
- *
- * @author not attributable
- * @version 1.0
- */
-public class VariableSearchPanel extends JPanel implements ChangeListener
+public class YoVariableSearchPanel extends JPanel implements ChangeListener
 {
    private static final long serialVersionUID = -3986327052893068969L;
    private static final int SCROLL_PANE_INCREMENT = 12;
+   private static final boolean USE_BOOKMARKS_PANEL = false;
 
    private final DataBuffer dataBuffer;
    private final JCheckBox showInitCheckBox;
-   private VarListVarPanel varPanel;
+   private YoVariableListPanel varPanel;
    private final JTextArea entryBoxDescriptionArea;
    private final YoEntryBox entryBox;
    private final SelectedVariableHolder holder;
    private JLabel label;
 
-   public VariableSearchPanel(SelectedVariableHolder holder, DataBuffer dataBuffer, GraphArrayPanel graphArrayPanel, EntryBoxArrayTabbedPanel entryBoxArrayPanel,
-                              BookmarkedVariablesHolder bookmarkedVariablesHolder, CombinedVarPanel combinedVarPanel)
+   public YoVariableSearchPanel(SelectedVariableHolder holder, DataBuffer dataBuffer, GraphArrayPanel graphArrayPanel,
+                              EntryBoxArrayTabbedPanel entryBoxArrayPanel, BookmarkedVariablesHolder bookmarkedVariablesHolder,
+                              CombinedVarPanel combinedVarPanel)
    {
       super(new BorderLayout());
 
@@ -72,32 +69,36 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
       }
 
       // Setup a scroll panel for the VarPanel, then add it to the center of the display
-      this.varPanel = new VarListVarPanel("Search", holder,
-              new VarPanelJPopupMenu(graphArrayPanel, entryBoxArrayPanel, holder, combinedVarPanel, bookmarkedVariablesHolder), this);
+      this.varPanel = new YoVariableListPanel("Search", holder,
+                                          new YoVariablePanelJPopupMenu(graphArrayPanel, entryBoxArrayPanel, holder, combinedVarPanel, bookmarkedVariablesHolder),
+                                          this);
       this.holder = varPanel.getVariableHolder();
       this.holder.addChangeListener(this);
 
       JScrollPane searchResultScrollPane = new JScrollPane(varPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-                                              ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                                                           ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
       searchResultScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_PANE_INCREMENT);
       searchResultScrollPane.getVerticalScrollBar().setBlockIncrement(SCROLL_PANE_INCREMENT);
       searchResultScrollPane.setPreferredSize(new Dimension(60, 260));
       searchResultScrollPane.setBorder(new EtchedBorder());
 
-
-      BookmarkedVariablesPanel bookmarkedVariablesPanel = new BookmarkedVariablesPanel("Bookmarks", varPanel.selectedVariableHolder, bookmarkedVariablesHolder);
-      JScrollPane bookMarkScrollPane = new JScrollPane(bookmarkedVariablesPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-                                          ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-      bookMarkScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_PANE_INCREMENT);
-      bookMarkScrollPane.getVerticalScrollBar().setBlockIncrement(SCROLL_PANE_INCREMENT);
-      bookMarkScrollPane.setPreferredSize(new Dimension(60, 40));
-      bookMarkScrollPane.setBorder(new EtchedBorder());
-
-      JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, searchResultScrollPane, bookMarkScrollPane);
-      splitPane.setResizeWeight(1);
-      splitPane.setBorder(null);
-      splitPane.setDividerSize(3);
-      splitPane.setDividerLocation(200);
+      JSplitPane splitPane = null;
+      if (USE_BOOKMARKS_PANEL)
+      {
+         BookmarkedVariablesPanel bookmarkedVariablesPanel = new BookmarkedVariablesPanel("Bookmarks", varPanel.selectedVariableHolder, bookmarkedVariablesHolder);
+         JScrollPane bookMarkScrollPane = new JScrollPane(bookmarkedVariablesPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+                                                          ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+         bookMarkScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_PANE_INCREMENT);
+         bookMarkScrollPane.getVerticalScrollBar().setBlockIncrement(SCROLL_PANE_INCREMENT);
+         bookMarkScrollPane.setPreferredSize(new Dimension(60, 40));
+         bookMarkScrollPane.setBorder(new EtchedBorder());
+   
+         splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, searchResultScrollPane, bookMarkScrollPane);
+         splitPane.setResizeWeight(1);
+         splitPane.setBorder(null);
+         splitPane.setDividerSize(3);
+         splitPane.setDividerLocation(200);
+      }
 
       // Setup the description panel & YoEntryBox deal
       entryBox = new YoEntryBox(null, holder);
@@ -113,11 +114,11 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
       JScrollPane descrScroll = new JScrollPane(entryBoxDescriptionArea);
       descrScroll.setVisible(true);
 
-//    descrPanel.add(entryBox, BorderLayout.NORTH);
-//    descrPanel.add(descrScroll, BorderLayout.CENTER);
-//    descrPanel.setMinimumSize(new Dimension(10, 10));
-//    descrPanel.setPreferredSize(new Dimension(10, 10));
-//    descrPanel.setVisible(false);
+      //    descrPanel.add(entryBox, BorderLayout.NORTH);
+      //    descrPanel.add(descrScroll, BorderLayout.CENTER);
+      //    descrPanel.setMinimumSize(new Dimension(10, 10));
+      //    descrPanel.setPreferredSize(new Dimension(10, 10));
+      //    descrPanel.setVisible(false);
 
       label = new JLabel("Search Settings:");
       label.setAlignmentX(CENTER_ALIGNMENT);
@@ -155,7 +156,14 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
       c.fill = GridBagConstraints.BOTH;
       c.gridwidth = 6;
       c.gridheight = 5;
-      this.add(splitPane, c);
+      if (USE_BOOKMARKS_PANEL)
+      {
+         this.add(splitPane, c);
+      }
+      else
+      {
+         this.add(searchResultScrollPane, c);
+      }
 
       c.weighty = 0.0;
       c.gridy += 5;
@@ -174,19 +182,22 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
       return showInitCheckBox.isSelected();
    }
 
+   @Override
    public void paintComponent(Graphics g)
    {
       super.paintComponent(g);
       entryBox.updateActiveContainer();
    }
 
+   @Override
    public void stateChanged(ChangeEvent e)
    {
       Runnable entryBoxChanger = new Runnable()
       {
+         @Override
          public void run()
          {
-            YoVariable selectedVariable = holder.getSelectedVariable();
+            YoVariable<?> selectedVariable = holder.getSelectedVariable();
             if (selectedVariable != null)
             {
                entryBox.addVariable(selectedVariable);
@@ -201,7 +212,7 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
          }
       };
 
-      SwingUtilities.invokeLater(entryBoxChanger);    // so that we don't interfere with paintComponent
+      SwingUtilities.invokeLater(entryBoxChanger); // so that we don't interfere with paintComponent
    }
 
    public class VariableSearchField extends JPanel implements ActionListener
@@ -216,26 +227,28 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
          this.setLayout(new GridLayout(1, 1));
          searchTextField = new JTextField();
          searchTextField.setName("SearchTextField");
-         
+
          searchTextField.addActionListener(this);
          String s = "<html>Search Tips :<br>" + "A * B  = starting with 'A' and ending with 'B' <br>" + "A*  = starting with 'A' <br>"
-                    + "*A  = ending with 'A' <br>" + "\"A\"  = exactly 'A' <br>" + "A* | B*  anything starting with 'A' or 'B' <br>";
+               + "*A  = ending with 'A' <br>" + "\"A\"  = exactly 'A' <br>" + "A* | B*  anything starting with 'A' or 'B' <br>";
 
          searchTextField.setToolTipText(s);
 
-
          DocumentListener documentListener = new DocumentListener()
          {
+            @Override
             public void insertUpdate(DocumentEvent e)
             {
                findMatchingVariablesRegularExpression();
             }
 
+            @Override
             public void removeUpdate(DocumentEvent e)
             {
                findMatchingVariablesRegularExpression();
             }
 
+            @Override
             public void changedUpdate(DocumentEvent e)
             {
             }
@@ -246,11 +259,11 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
          this.add(searchTextField);
       }
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
          findMatchingVariablesRegularExpression();
       }
-
 
       private void findMatchingVariablesRegularExpression()
       {
@@ -267,25 +280,25 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
       {
          private String searchText;
          private boolean stopSearch = false;
-         private boolean addNameSpace = false;
-         private ArrayList<YoVariable> startsWithSearchTextList = new ArrayList<YoVariable>();
-         private ArrayList<YoVariable> doesNotStartWithSearchTextList = new ArrayList<YoVariable>();
+         private ArrayList<YoVariable<?>> startsWithSearchTextList = new ArrayList<YoVariable<?>>();
+         private ArrayList<YoVariable<?>> doesNotStartWithSearchTextList = new ArrayList<YoVariable<?>>();
 
          public Searcher(String searchText)
          {
             this.searchText = searchText;
          }
 
+         @Override
          public void run()
          {
-            final ArrayList<YoVariable> matchedVariables = search(searchText);
+            final ArrayList<YoVariable<?>> matchedVariables = search(searchText);
 
             if (!stopSearch)
                varPanel.removeAllVariables();
 
             if (matchedVariables != null)
             {
-               for (YoVariable variable : matchedVariables)
+               for (YoVariable<?> variable : matchedVariables)
                {
                   if (stopSearch)
                      break;
@@ -294,9 +307,9 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
             }
          }
 
-         public ArrayList<YoVariable> search(String searchText)
+         public ArrayList<YoVariable<?>> search(String searchText)
          {
-            ArrayList<YoVariable> ret = new ArrayList<YoVariable>();
+            ArrayList<YoVariable<?>> ret = new ArrayList<YoVariable<?>>();
             ArrayList<DataBufferEntry> entries = dataBuffer.getEntries();
             for (int i = 0; i < entries.size(); i++)
             {
@@ -320,15 +333,15 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
          }
 
          // display matches in the order: exact, starts with, rest
-         private void sortList(ArrayList<YoVariable> list)
+         private void sortList(ArrayList<YoVariable<?>> list)
          {
-            YoVariable temporaryYoVariable;
+            YoVariable<?> temporaryYoVariable;
             String searchTextLowerCase = searchText.toLowerCase();
 
             for (int i = 0; i < list.size(); i++)
             {
                if ((list.get(i).getName().length() >= searchText.length())
-                       && searchTextLowerCase.equals(list.get(i).getName().substring(0, searchText.length())))
+                     && searchTextLowerCase.equals(list.get(i).getName().substring(0, searchText.length())))
                {
                   startsWithSearchTextList.add(list.get(i));
                }
