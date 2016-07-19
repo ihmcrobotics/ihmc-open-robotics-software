@@ -108,6 +108,7 @@ public class QuadrupedSolePositionController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePositionController.get(robotQuadrant).reset();
+         solePositionController.get(robotQuadrant).resetIntegrator();
       }
    }
 

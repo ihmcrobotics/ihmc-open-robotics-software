@@ -73,6 +73,11 @@ public class EuclideanPositionController implements PositionController
       rateLimitedFeedbackLinearAction.reset();
    }
 
+   public void resetIntegrator()
+   {
+      positionErrorCumulated.setToZero();
+   }
+
    @Override
    public void compute(FrameVector output, FramePoint desiredPosition, FrameVector desiredVelocity, FrameVector currentVelocity, FrameVector feedForward)
    {
