@@ -1001,4 +1001,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       return true;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useSupportState()
+   {
+      return true;
+   }
 }

@@ -226,4 +226,12 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return false;
    }
+
+   /**
+    * Determined whether the robot should use the 'support state' or the 'fully constrained' & 'hold position' states (new feature to be tested with Atlas)
+    */
+   public boolean useSupportState()
+   {
+      return false;
+   }
 }
