@@ -26,6 +26,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -43,12 +44,14 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 public class SupportState extends AbstractFootControlState
 {
    private static final double defaultFootLoadThreshold = 0.2;
+   private static final int dofs = Twist.SIZE;
 
    private final YoVariableRegistry registry;
 
    private final BooleanYoVariable footBarelyLoaded;
    private final BooleanYoVariable copOnEdge;
    private final DoubleYoVariable footLoadThreshold;
+   private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
 
    private final FootSwitchInterface footSwitch;
 
@@ -112,6 +115,9 @@ public class SupportState extends AbstractFootControlState
       super.doTransitionIntoAction();
       FrameVector fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       momentumBasedController.setPlaneContactStateNormalContactVector(contactableFoot, fullyConstrainedNormalContactVector);
+
+      for (int i = 0; i < dofs; i++)
+         isDirectionFeedbackControlled[i] = false;
 
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
@@ -179,42 +185,33 @@ public class SupportState extends AbstractFootControlState
       feedbackSelectionMatrix.reshape(6, 6);
       CommonOps.setIdentity(feedbackSelectionMatrix);
 
+      for (int i = 0; i < dofs; i++)
+         isDirectionFeedbackControlled[i] = false;
+
       if (footBarelyLoaded.getBooleanValue())
       {
-         MatrixTools.removeRow(accelerationSelectionMatrix, 5); // angular z
+         isDirectionFeedbackControlled[0] = true; // control x position
+         isDirectionFeedbackControlled[1] = true; // control y position
+         isDirectionFeedbackControlled[5] = true; // control z orientation
       }
-      else
-      {
-         MatrixTools.removeRow(feedbackSelectionMatrix, 5); // angular z
-      }
-
       if (copOnEdge.getBooleanValue())
       {
-         MatrixTools.removeRow(accelerationSelectionMatrix, 4); // angular y
-         MatrixTools.removeRow(accelerationSelectionMatrix, 3); // angular x
-      }
-      else
-      {
-         MatrixTools.removeRow(feedbackSelectionMatrix, 4); // angular y
-         MatrixTools.removeRow(feedbackSelectionMatrix, 3); // angular x
+         isDirectionFeedbackControlled[3] = true; // control x orientation
+         isDirectionFeedbackControlled[4] = true; // control y orientation
       }
 
-      MatrixTools.removeRow(feedbackSelectionMatrix, 2); // linear z
-      if (footBarelyLoaded.getBooleanValue())
+      for (int i = dofs-1; i >= 0; i--)
       {
-         MatrixTools.removeRow(accelerationSelectionMatrix, 1); // linear y
-         MatrixTools.removeRow(accelerationSelectionMatrix, 0); // linear x
-      }
-      else
-      {
-         MatrixTools.removeRow(feedbackSelectionMatrix, 1); // linear y
-         MatrixTools.removeRow(feedbackSelectionMatrix, 0); // linear x
+         if (isDirectionFeedbackControlled[i])
+            MatrixTools.removeRow(accelerationSelectionMatrix, i);
+         else
+            MatrixTools.removeRow(feedbackSelectionMatrix, i);
       }
 
       spatialAccelerationCommand.setSelectionMatrix(accelerationSelectionMatrix);
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
       if (accelerationSelectionMatrix.getNumRows() + feedbackSelectionMatrix.getNumRows() != 6)
-         throw new RuntimeException("Trying to control too much.");
+         throw new RuntimeException("Trying to control too much or too little.");
 
       // update visualization
       frameViz.setToReferenceFrame(controlFrame);
