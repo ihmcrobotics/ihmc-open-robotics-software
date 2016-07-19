@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.gui;
+package us.ihmc.simulationconstructionset.gui.yoVariableSearch;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -31,21 +31,31 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesHolder;
+import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesPanel;
+import us.ihmc.simulationconstructionset.gui.CombinedVarPanel;
+import us.ihmc.simulationconstructionset.gui.DoubleClickListener;
+import us.ihmc.simulationconstructionset.gui.EntryBoxArrayTabbedPanel;
+import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
+import us.ihmc.simulationconstructionset.gui.RegularExpression;
+import us.ihmc.simulationconstructionset.gui.SelectedVariableHolder;
+import us.ihmc.simulationconstructionset.gui.YoEntryBox;
 
-public class VariableSearchPanel extends JPanel implements ChangeListener
+public class YoVariableSearchPanel extends JPanel implements ChangeListener
 {
    private static final long serialVersionUID = -3986327052893068969L;
    private static final int SCROLL_PANE_INCREMENT = 12;
+   private static final boolean USE_BOOKMARKS_PANEL = false;
 
    private final DataBuffer dataBuffer;
    private final JCheckBox showInitCheckBox;
-   private VarListVarPanel varPanel;
+   private YoVariableListPanel varPanel;
    private final JTextArea entryBoxDescriptionArea;
    private final YoEntryBox entryBox;
    private final SelectedVariableHolder holder;
    private JLabel label;
 
-   public VariableSearchPanel(SelectedVariableHolder holder, DataBuffer dataBuffer, GraphArrayPanel graphArrayPanel,
+   public YoVariableSearchPanel(SelectedVariableHolder holder, DataBuffer dataBuffer, GraphArrayPanel graphArrayPanel,
                               EntryBoxArrayTabbedPanel entryBoxArrayPanel, BookmarkedVariablesHolder bookmarkedVariablesHolder,
                               CombinedVarPanel combinedVarPanel)
    {
@@ -59,8 +69,8 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
       }
 
       // Setup a scroll panel for the VarPanel, then add it to the center of the display
-      this.varPanel = new VarListVarPanel("Search", holder,
-                                          new VarPanelJPopupMenu(graphArrayPanel, entryBoxArrayPanel, holder, combinedVarPanel, bookmarkedVariablesHolder),
+      this.varPanel = new YoVariableListPanel("Search", holder,
+                                          new YoVariablePanelJPopupMenu(graphArrayPanel, entryBoxArrayPanel, holder, combinedVarPanel, bookmarkedVariablesHolder),
                                           this);
       this.holder = varPanel.getVariableHolder();
       this.holder.addChangeListener(this);
@@ -72,19 +82,23 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
       searchResultScrollPane.setPreferredSize(new Dimension(60, 260));
       searchResultScrollPane.setBorder(new EtchedBorder());
 
-      BookmarkedVariablesPanel bookmarkedVariablesPanel = new BookmarkedVariablesPanel("Bookmarks", varPanel.selectedVariableHolder, bookmarkedVariablesHolder);
-      JScrollPane bookMarkScrollPane = new JScrollPane(bookmarkedVariablesPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-                                                       ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-      bookMarkScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_PANE_INCREMENT);
-      bookMarkScrollPane.getVerticalScrollBar().setBlockIncrement(SCROLL_PANE_INCREMENT);
-      bookMarkScrollPane.setPreferredSize(new Dimension(60, 40));
-      bookMarkScrollPane.setBorder(new EtchedBorder());
-
-      JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, searchResultScrollPane, bookMarkScrollPane);
-      splitPane.setResizeWeight(1);
-      splitPane.setBorder(null);
-      splitPane.setDividerSize(3);
-      splitPane.setDividerLocation(200);
+      JSplitPane splitPane = null;
+      if (USE_BOOKMARKS_PANEL)
+      {
+         BookmarkedVariablesPanel bookmarkedVariablesPanel = new BookmarkedVariablesPanel("Bookmarks", varPanel.selectedVariableHolder, bookmarkedVariablesHolder);
+         JScrollPane bookMarkScrollPane = new JScrollPane(bookmarkedVariablesPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+                                                          ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+         bookMarkScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_PANE_INCREMENT);
+         bookMarkScrollPane.getVerticalScrollBar().setBlockIncrement(SCROLL_PANE_INCREMENT);
+         bookMarkScrollPane.setPreferredSize(new Dimension(60, 40));
+         bookMarkScrollPane.setBorder(new EtchedBorder());
+   
+         splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, searchResultScrollPane, bookMarkScrollPane);
+         splitPane.setResizeWeight(1);
+         splitPane.setBorder(null);
+         splitPane.setDividerSize(3);
+         splitPane.setDividerLocation(200);
+      }
 
       // Setup the description panel & YoEntryBox deal
       entryBox = new YoEntryBox(null, holder);
@@ -142,7 +156,14 @@ public class VariableSearchPanel extends JPanel implements ChangeListener
       c.fill = GridBagConstraints.BOTH;
       c.gridwidth = 6;
       c.gridheight = 5;
-      this.add(splitPane, c);
+      if (USE_BOOKMARKS_PANEL)
+      {
+         this.add(splitPane, c);
+      }
+      else
+      {
+         this.add(searchResultScrollPane, c);
+      }
 
       c.weighty = 0.0;
       c.gridy += 5;

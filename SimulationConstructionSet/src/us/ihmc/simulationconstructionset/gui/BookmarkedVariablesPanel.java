@@ -8,22 +8,24 @@ import javax.swing.JMenuItem;
 
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariableListPanel;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanelJPopupMenu;
 
-public class BookmarkedVariablesPanel extends VarListVarPanel
+public class BookmarkedVariablesPanel extends YoVariableListPanel
 {
    private static final long serialVersionUID = 1390064658136845739L;
    private BookmarkedVariablesHolder bookmarkedVariablesHolder;
 
    public BookmarkedVariablesPanel(String name, SelectedVariableHolder holder, BookmarkedVariablesHolder bookmarkedVariablesHolder)
    {
-      super(new YoVariableList(name), holder, new VarPanelJPopupMenu(holder));
+      super(new YoVariableList(name), holder, new YoVariablePanelJPopupMenu(holder));
       this.bookmarkedVariablesHolder = bookmarkedVariablesHolder;
       initBookMarks();
    }
 
    public BookmarkedVariablesPanel(YoVariableList list, SelectedVariableHolder holder, BookmarkedVariablesHolder bookmarkedVariablesHolder)
    {
-      super(list, holder, new VarPanelJPopupMenu(holder));
+      super(list, holder, new YoVariablePanelJPopupMenu(holder));
       this.bookmarkedVariablesHolder = bookmarkedVariablesHolder;
       initBookMarks();
    }
@@ -31,7 +33,7 @@ public class BookmarkedVariablesPanel extends VarListVarPanel
    public BookmarkedVariablesPanel(YoVariableList list, SelectedVariableHolder holder, GraphArrayPanel graphArrayPanel, EntryBoxArrayTabbedPanel entryBoxArrayPanel,
                                    BookmarkedVariablesHolder bookmarkedVariablesHolder, CombinedVarPanel combinedVarPanel)
    {
-      super(list, holder, new VarPanelJPopupMenu(graphArrayPanel, entryBoxArrayPanel, holder, combinedVarPanel, bookmarkedVariablesHolder));
+      super(list, holder, new YoVariablePanelJPopupMenu(graphArrayPanel, entryBoxArrayPanel, holder, combinedVarPanel, bookmarkedVariablesHolder));
       this.bookmarkedVariablesHolder = bookmarkedVariablesHolder;
       initBookMarks();
    }
@@ -39,7 +41,7 @@ public class BookmarkedVariablesPanel extends VarListVarPanel
    public BookmarkedVariablesPanel(String name, SelectedVariableHolder holder, GraphArrayPanel graphArrayPanel, EntryBoxArrayTabbedPanel entryBoxArrayPanel,
                                    BookmarkedVariablesHolder bookmarkedVariablesHolder, CombinedVarPanel combinedVarPanel)
    {
-      super(new YoVariableList(name), holder, new VarPanelJPopupMenu(graphArrayPanel, entryBoxArrayPanel, holder, combinedVarPanel, bookmarkedVariablesHolder));
+      super(new YoVariableList(name), holder, new YoVariablePanelJPopupMenu(graphArrayPanel, entryBoxArrayPanel, holder, combinedVarPanel, bookmarkedVariablesHolder));
       this.bookmarkedVariablesHolder = bookmarkedVariablesHolder;
       initBookMarks();
    }
