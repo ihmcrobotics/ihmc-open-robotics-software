@@ -105,6 +105,9 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.AllDialogConstru
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.StandardAllDialogConstructorsGenerator;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTree;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariableListPanel;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanelJPopupMenu;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariableSearchPanel;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.SimpleFileReader;
 import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
@@ -530,7 +533,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
          myCombinedVarPanel = new CombinedVarPanel(new YoVariableDoubleClickListener(myDataBuffer, jFrame), jFrame, bookmarkedVariablesHolder,
                selectedVariableHolder, null, sim, rootRegistry);
-         VariableSearchPanel variableSearchPanel = new VariableSearchPanel(selectedVariableHolder, myDataBuffer, myGraphArrayPanel, myEntryBoxArrayPanel,
+         YoVariableSearchPanel variableSearchPanel = new YoVariableSearchPanel(selectedVariableHolder, myDataBuffer, myGraphArrayPanel, myEntryBoxArrayPanel,
                bookmarkedVariablesHolder, myCombinedVarPanel);
          myCombinedVarPanel.addVariableSearchPanel(variableSearchPanel);
 
@@ -799,7 +802,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
          // numericContentPane.add("Center",myGraphArrayPanel);
 
-         VarPanelJPopupMenu varPanelJPopupMenu = new VarPanelJPopupMenu(myGraphArrayPanel, myEntryBoxArrayPanel, selectedVariableHolder, myCombinedVarPanel,
+         YoVariablePanelJPopupMenu varPanelJPopupMenu = new YoVariablePanelJPopupMenu(myGraphArrayPanel, myEntryBoxArrayPanel, selectedVariableHolder, myCombinedVarPanel,
                bookmarkedVariablesHolder);
          myCombinedVarPanel.setVarPanelJPopupMenu(varPanelJPopupMenu);
       }
@@ -1641,9 +1644,9 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    {
       if (myCombinedVarPanel != null)
       {
-         VarPanelJPopupMenu varPanelJPopupMenu = new VarPanelJPopupMenu(myGraphArrayPanel, myEntryBoxArrayPanel, selectedVariableHolder, myCombinedVarPanel,
+         YoVariablePanelJPopupMenu varPanelJPopupMenu = new YoVariablePanelJPopupMenu(myGraphArrayPanel, myEntryBoxArrayPanel, selectedVariableHolder, myCombinedVarPanel,
                bookmarkedVariablesHolder);
-         VarListVarPanel panel = new VarListVarPanel(varList, selectedVariableHolder, varPanelJPopupMenu);
+         YoVariableListPanel panel = new YoVariableListPanel(varList, selectedVariableHolder, varPanelJPopupMenu);
          myCombinedVarPanel.addExtraVarPanel(panel);
 
          if (UPDATE_UI)

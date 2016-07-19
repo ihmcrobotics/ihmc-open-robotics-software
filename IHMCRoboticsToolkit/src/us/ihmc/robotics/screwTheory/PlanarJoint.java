@@ -36,11 +36,13 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       this.tauTrans = new FrameVector2d(afterJointFrame);
    }
 
+   @Override
    public ReferenceFrame getFrameAfterJoint()
    {
       return afterJointFrame;
    }
 
+   @Override
    public void getJointTwist(Twist twistToPack)
    {
       twistToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
@@ -49,6 +51,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       twistToPack.setLinearPartY(qdTrans.getY());
    }
 
+   @Override
    public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
@@ -57,6 +60,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       accelerationToPack.setLinearPartY(qddTrans.getY());
    }
 
+   @Override
    public void getDesiredJointAcceleration(SpatialAccelerationVector jointAcceleration)
    {
       jointAcceleration.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
@@ -65,6 +69,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       jointAcceleration.setLinearPartY(qddTransDesired.getY());
    }
 
+   @Override
    public void getTauMatrix(DenseMatrix64F matrix)
    {
       matrix.set(0, 0, tauRot);
@@ -72,6 +77,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       matrix.set(2, 0, tauTrans.getY());
    }
 
+   @Override
    public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
    {
       matrix.set(rowStart + 0, 0, qdRot);
@@ -79,6 +85,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       matrix.set(rowStart + 2, 0, qdTrans.getY());
    }
 
+   @Override
    public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       matrix.set(rowStart + 0, 0, qddRotDesired);
@@ -86,23 +93,27 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       matrix.set(rowStart + 2, 0, qddTransDesired.getY());
    }
 
+   @Override
    public void setDesiredAccelerationToZero()
    {
       qddRot = 0.0;
       qddTrans.set(0.0, 0.0);
    }
 
+   @Override
    public void setSuccessor(RigidBody successor)
    {
       this.successor = successor;
       setMotionSubspace();
    }
 
+   @Override
    public void updateMotionSubspace()
    {
       // empty
    }
 
+   @Override
    public void setTorqueFromWrench(Wrench jointWrench)
    {
       jointWrench.getBodyFrame().checkReferenceFrameMatch(successor.getBodyFixedFrame());
@@ -113,11 +124,13 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       jointWrench.changeFrame(successor.getBodyFixedFrame());
    }
 
+   @Override
    public int getDegreesOfFreedom()
    {
       return 3;
    }
 
+   @Override
    public void setDesiredAcceleration(DenseMatrix64F matrix, int rowStart)
    {
       qddRotDesired = matrix.get(rowStart + 0, 0);
@@ -292,6 +305,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       this.motionSubspace.compute();
    }
 
+   @Override
    public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
@@ -300,6 +314,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       matrix.set(index++, 0, qTrans.getY());
    }
 
+   @Override
    public void setConfiguration(DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
@@ -311,6 +326,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       afterJointFrame.setTranslationAndUpdate(qTrans);
    }
 
+   @Override
    public void setVelocity(DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
@@ -321,6 +337,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
    }
 
 
+   @Override
    public int getConfigurationMatrixSize()
    {
       return getDegreesOfFreedom();
@@ -338,6 +355,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       }
    }
 
+   @Override
    public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
    {
       PlanarJoint originalPlanarJoint = checkAndGetAsPlanarJoint(originalJoint);
@@ -351,6 +369,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       setTranslationalAcceleration(originalPlanarJoint.qddTrans.getVector());
    }
 
+   @Override
    public void setQddDesired(InverseDynamicsJoint originalJoint)
    {
       PlanarJoint originalPlanarJoint = checkAndGetAsPlanarJoint(originalJoint);
@@ -360,6 +379,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       
    }
 
+   @Override
    public void calculateJointStateChecksum(GenericCRC32 checksum)
    {
       checksum.update(qRot);
@@ -371,6 +391,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       checksum.update(qddTrans.getVector());
    }
 
+   @Override
    public void calculateJointDesiredChecksum(GenericCRC32 checksum)
    {
       checksum.update(qddRotDesired);

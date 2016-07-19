@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controllerCore;
+package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;

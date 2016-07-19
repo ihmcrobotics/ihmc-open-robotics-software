@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.gui;
+package us.ihmc.simulationconstructionset.gui.yoVariableSearch;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -32,8 +32,13 @@ import javax.swing.event.ChangeListener;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.simulationconstructionset.gui.DoubleClickListener;
+import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
+import us.ihmc.simulationconstructionset.gui.HorizontalSpinnerUI;
+import us.ihmc.simulationconstructionset.gui.SelectedVariableHolder;
+import us.ihmc.simulationconstructionset.gui.YoGraph;
 
-public abstract class VarPanel extends JPanel implements KeyListener, MouseListener, FocusListener, ComponentListener
+public abstract class YoVariablePanel extends JPanel implements KeyListener, MouseListener, FocusListener, ComponentListener
 {
    private static final long serialVersionUID = -5860355582880221731L;
 
@@ -44,7 +49,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
    private static final int NUMBER_WIDTH = 84;
 
    protected final SelectedVariableHolder selectedVariableHolder;
-   protected final VarPanelJPopupMenu varPanelJPopupMenu;
+   protected final YoVariablePanelJPopupMenu varPanelJPopupMenu;
 
    protected int selectedVariableIndex = -1;
    private boolean hasFocus = false;
@@ -60,9 +65,9 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
 
    private static boolean showNameSpace = false;
 
-   private final VariableSearchPanel searchPanel;
+   private final YoVariableSearchPanel searchPanel;
 
-   public VarPanel(String name, SelectedVariableHolder holder, VarPanelJPopupMenu varPanelJPopupMenu, VariableSearchPanel searchPanel)
+   public YoVariablePanel(String name, SelectedVariableHolder holder, YoVariablePanelJPopupMenu varPanelJPopupMenu, YoVariableSearchPanel searchPanel)
    {
       this.selectedVariableHolder = holder;
       this.setName(name);
@@ -84,23 +89,23 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       return showNameSpace;
    }
 
-   public VarPanel(YoVariableList list, SelectedVariableHolder holder, VarPanelJPopupMenu varPanelJPopupMenu)
+   public YoVariablePanel(YoVariableList list, SelectedVariableHolder holder, YoVariablePanelJPopupMenu varPanelJPopupMenu)
    {
       this(list.getName(), holder, varPanelJPopupMenu, null);
    }
 
-   public VarPanel(String name, SelectedVariableHolder holder, VarPanelJPopupMenu varPanelJPopupMenu)
+   public YoVariablePanel(String name, SelectedVariableHolder holder, YoVariablePanelJPopupMenu varPanelJPopupMenu)
    {
       this(name, holder, varPanelJPopupMenu, null);
    }
 
    protected abstract int getNumberOfYoVariables();
 
-   protected abstract YoVariable getYoVariable(int index);
+   protected abstract YoVariable<?> getYoVariable(int index);
 
-   protected abstract List<YoVariable> getAllYoVariablesCopy();
+   protected abstract List<YoVariable<?>> getAllYoVariablesCopy();
 
-   public abstract YoVariable getYoVariable(String string);
+   public abstract YoVariable<?> getYoVariable(String string);
 
    public abstract void addChangeListener(ChangeListener changeListener);
 
@@ -111,7 +116,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       this.addMouseMotionListener(new ToolTipMouseMotionListener());
       this.addKeyListener(this);
       this.setRequestFocusEnabled(true);
-      this.setTransferHandler(new VarPanelTransferHandler());
+      this.setTransferHandler(new YoVariablePanelTransferHandler());
       this.setMinimumSize(new Dimension(MINIMUM_TOTAL_WIDTH, SINGLE_ENTRY_HEIGHT));
       this.addComponentListener(this);
       selectedVariableHolder.addChangeListener(new UpdateUIChangeListener());
@@ -123,12 +128,13 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             textFields.clear();
 
-            List<YoVariable> allVariables = getAllYoVariablesCopy();
-            for (YoVariable variable : allVariables)
+            List<YoVariable<?>> allVariables = getAllYoVariablesCopy();
+            for (YoVariable<?> variable : allVariables)
             {
                addTextFieldForVariable(variable);
             }     
@@ -150,7 +156,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       showNameSpace = !showNameSpace;
    }
 
-   protected void addTextFieldForVariable(final YoVariable variable)
+   protected void addTextFieldForVariable(final YoVariable<?> variable)
    {
       JSpinner spinner = createSpinnerForVariable(variable);
 
@@ -175,7 +181,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       setPanelSize(getNumberOfYoVariables());
    }
 
-   private JSpinner createSpinnerForVariable(final YoVariable variable)
+   private JSpinner createSpinnerForVariable(final YoVariable<?> variable)
    {
       SpinnerNumberModel model = new SpinnerNumberModel();
       model.setStepSize(variable.getStepSize());
@@ -192,6 +198,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
          private static final double SHIFT_FACTOR = 0.1;
          private static final double CTRL_FACTOR = 10;
 
+         @Override
          public void mouseWheelMoved(MouseWheelEvent e)
          {
             double modifierFactor = (e.isShiftDown()) ? SHIFT_FACTOR : (e.isControlDown()) ? CTRL_FACTOR : 1;
@@ -216,6 +223,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       this.setPreferredSize(new Dimension(MINIMUM_TOTAL_WIDTH, SINGLE_ENTRY_HEIGHT * nVars));
    }
 
+   @Override
    public void paintComponent(Graphics graphics)
    {
       super.paintComponent(graphics);
@@ -230,10 +238,10 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       }
       else
       {
-         List<YoVariable> allVariables = getAllYoVariablesCopy();
+         List<YoVariable<?>> allVariables = getAllYoVariablesCopy();
          graphics.setColor(REGULAR_COLOR);
 
-         YoVariable selectedVariable = selectedVariableHolder.getSelectedVariable();
+         YoVariable<?> selectedVariable = selectedVariableHolder.getSelectedVariable();
          Rectangle rectangle = this.getVisibleRect();
          int minIndexOfVisibleVariables = getMinIndexOfVisibleVariables(rectangle);
          int maxIndexOfVisibleVariables = getMaxIndexOfVisibleVariables(rectangle);
@@ -243,7 +251,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
 
          for (int i = minIndexOfVisibleVariables; i < maxIndexOfVisibleVariables; i++)
          {
-            YoVariable v = allVariables.get(i);
+            YoVariable<?> v = allVariables.get(i);
             JTextField jTextField = null;
 
             synchronized (textFields)
@@ -288,7 +296,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       }
    }
 
-   private String formatName(Graphics graphics, int longestLengthAllowed, YoVariable v)
+   private String formatName(Graphics graphics, int longestLengthAllowed, YoVariable<?> v)
    {
       // fairly inefficient, could do a binary search instead
 
@@ -358,6 +366,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       return selectedVariableHolder;
    }
 
+   @Override
    public void mousePressed(MouseEvent event)
    {
       if (!this.isFocusOwner())
@@ -378,7 +387,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
             textFields.get(indexOfSelectedVariable).requestFocusInWindow();
          }
 
-         YoVariable selectedVariable = getClickedYoVariable(event.getY());
+         YoVariable<?> selectedVariable = getClickedYoVariable(event.getY());
 
          if (selectedVariable != null)
          {
@@ -392,7 +401,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       }
       else if (event.isMetaDown() &&!event.isAltDown())
       {
-         YoVariable selectedVariable = getClickedYoVariable(event.getY());
+         YoVariable<?> selectedVariable = getClickedYoVariable(event.getY());
 
          if (selectedVariable != null)
          {
@@ -403,7 +412,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       }
    }
 
-   private YoVariable getClickedYoVariable(int mouseY)
+   private YoVariable<?> getClickedYoVariable(int mouseY)
    {
       selectedVariableIndex = getIndexOfClickedVariable(mouseY);
 
@@ -426,18 +435,22 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       return -1;
    }
 
+   @Override
    public void mouseReleased(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseEntered(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseExited(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseClicked(MouseEvent evt)
    {
       int y = evt.getY();
@@ -460,7 +473,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
 
       if ((selectedVariableIndex >= 0) && (selectedVariableIndex < this.getNumberOfYoVariables()))
       {
-         YoVariable selectedVariable = getYoVariable(selectedVariableIndex);
+         YoVariable<?> selectedVariable = getYoVariable(selectedVariableIndex);
 
          setSelected(selectedVariable);
       }
@@ -468,7 +481,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       // See if double click:
       if (evt.getClickCount() == 2)
       {
-         YoVariable selectedVariable = selectedVariableHolder.getSelectedVariable();
+         YoVariable<?> selectedVariable = selectedVariableHolder.getSelectedVariable();
 
          if ((selectedVariable != null) && (doubleClickListener != null))
          {
@@ -485,14 +498,17 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       this.doubleClickListener = listener;
    }
 
+   @Override
    public void keyTyped(KeyEvent evt)
    {
    }
 
+   @Override
    public void keyReleased(KeyEvent evt)
    {
    }
 
+   @Override
    public void keyPressed(KeyEvent evt)
    {
       int code = evt.getKeyCode();
@@ -522,11 +538,12 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       this.repaint();
    }
 
-   private void setSelected(YoVariable var)
+   private void setSelected(YoVariable<?> var)
    {
       selectedVariableHolder.setSelectedVariable(var);
    }
 
+   @Override
    public void focusGained(FocusEvent e)
    {
       if (e.getSource().equals(this))
@@ -552,7 +569,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
             this.scrollRectToVisible(new Rectangle(0, focusedTextFieldYPositionOnPanel, spinner.getBounds().width, SINGLE_ENTRY_HEIGHT));
          }
 
-         YoVariable yoVariable = getYoVariable(indexOfFocusedTextField);
+         YoVariable<?> yoVariable = getYoVariable(indexOfFocusedTextField);
          if (yoVariable != null)
          {
             selectedVariableHolder.setSelectedVariable(yoVariable);
@@ -586,20 +603,24 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       return maxIndexOfVisibleVariables;
    }
 
+   @Override
    public void focusLost(FocusEvent e)
    {
       varPanelJPopupMenu.setVisible(false);
       hasFocus = false;
    }
 
+   @Override
    public void componentHidden(ComponentEvent e)
    {
    }
 
+   @Override
    public void componentMoved(ComponentEvent e)
    {
    }
 
+   @Override
    public void componentResized(ComponentEvent e)
    {
       synchronized (textFields)
@@ -616,15 +637,17 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
       }
    }
 
+   @Override
    public void componentShown(ComponentEvent e)
    {
    }
 
    private final class ToolTipMouseMotionListener implements MouseMotionListener
    {
+      @Override
       public void mouseMoved(MouseEvent event)
       {
-         YoVariable yoVariable = getClickedYoVariable(event.getY());
+         YoVariable<?> yoVariable = getClickedYoVariable(event.getY());
          if (yoVariable != null)
          {
             String displayText = yoVariable.getFullNameWithNameSpace();
@@ -647,6 +670,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
 
       }
 
+      @Override
       public void mouseDragged(MouseEvent e)
       {
       }
@@ -655,6 +679,7 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
 
    private final class UpdateUIChangeListener implements ChangeListener
    {
+      @Override
       public void stateChanged(ChangeEvent e)
       {
          updateUI();
@@ -665,17 +690,17 @@ public abstract class VarPanel extends JPanel implements KeyListener, MouseListe
    private final class SetYoVariableBasedOnTextFieldActionListener implements ChangeListener
    {
       private final JSpinner spinner;
-      private final YoVariable variable;
+      private final YoVariable<?> variable;
 
-      private SetYoVariableBasedOnTextFieldActionListener(JSpinner spinner, YoVariable variable)
+      private SetYoVariableBasedOnTextFieldActionListener(JSpinner spinner, YoVariable<?> variable)
       {
          this.spinner = spinner;
          this.variable = variable;
       }
 
+      @Override
       public void stateChanged(ChangeEvent e)
       {
-         JTextField textField = ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField();
          try
          {
             variable.setValueFromDouble(Double.parseDouble(spinner.getValue().toString()));

@@ -23,9 +23,9 @@ public class LLAQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWalking
    @Override
    @DeployableTestMethod(estimatedDuration = 30.0)
    @Test(timeout = 100000)
-   public void testWalkingDownRamp() throws IOException
+   public void testWalkingDownSlope() throws IOException
    {
-      super.testWalkingDownRamp();
+      super.testWalkingDownSlope();
    }
    
    @Override
@@ -39,9 +39,9 @@ public class LLAQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWalking
    @Override
    @DeployableTestMethod(estimatedDuration = 30.0)
    @Test(timeout = 100000)
-   public void testWalkingUpRamp() throws IOException
+   public void testWalkingUpSlope() throws IOException
    {
-      super.testWalkingUpRamp();
+      super.testWalkingUpSlope();
    }
    
    @Override
@@ -49,6 +49,6 @@ public class LLAQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWalking
    @Test(timeout = 100000)
    public void testWalkingOverAggressiveRamps() throws IOException
    {
-      super.testWalkingUpRamp();
+      super.testWalkingUpSlope();
    }
 }

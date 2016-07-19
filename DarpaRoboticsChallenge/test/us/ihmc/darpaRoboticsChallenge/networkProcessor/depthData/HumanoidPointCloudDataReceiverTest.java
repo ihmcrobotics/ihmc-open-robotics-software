@@ -38,7 +38,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 
-public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterface
+public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTestInterface
 {
    private static final int MINIMUM_SCANS_TO_RECIEVE = 10; // GPU Benchmark
    private static final float SCAN_TOLERANCE = 0.001f;

@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.behaviorTests.BehaviorDispatcherTest;
+import us.ihmc.darpaRoboticsChallenge.behaviorTests.HumanoidBehaviorDispatcherTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -13,7 +13,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 @DeployableTestClass(targets = TestPlanTarget.Flaky)
-public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
+public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
 {
    private final AtlasRobotModel robotModel;
 
