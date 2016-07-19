@@ -91,10 +91,10 @@ public class YoVariableListPanel extends YoVariablePanel
    public void removeVariable(YoVariable<?> v)
    {
       int indexOfVariableValueToRemove = varList.getIndexOfVariable(v);
-      if ((indexOfVariableValueToRemove >= 0) && (indexOfVariableValueToRemove < textFields.size()))
+      if ((indexOfVariableValueToRemove >= 0) && (indexOfVariableValueToRemove < getYoVariableSpinners().size()))
       {
          System.out.println("removing var");
-         Component field = textFields.remove(indexOfVariableValueToRemove);
+         Component field = getYoVariableSpinners().remove(indexOfVariableValueToRemove);
          this.remove(field);
       }
 
@@ -108,8 +108,8 @@ public class YoVariableListPanel extends YoVariablePanel
    public void removeAllVariables()
    {
       varList.removeAllVariables();
-      textFields.clear();
-      this.removeAll();
+      getYoVariableSpinners().clear();
+      removeAll();
 
       //    this.updateUI();
    }
