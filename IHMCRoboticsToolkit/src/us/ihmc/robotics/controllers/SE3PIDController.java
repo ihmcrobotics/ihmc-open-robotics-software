@@ -59,6 +59,12 @@ public class SE3PIDController
       positionController.reset();
    }
 
+   public void resetIntegrator()
+   {
+      orientationController.resetIntegrator();
+      positionController.resetIntegrator();
+   }
+
    public void compute(Twist twistToPack, FramePose desiredPose, Twist desiredTwist)
    {
       checkBodyFrames(desiredTwist, twistToPack);

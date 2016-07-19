@@ -71,7 +71,7 @@ public class QuadrupedComPositionController
    public void reset()
    {
       comPositionController.reset();
-      comPositionControllerGains.reset();
+      comPositionController.resetIntegrator();
    }
 
    public void compute(FrameVector comForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
