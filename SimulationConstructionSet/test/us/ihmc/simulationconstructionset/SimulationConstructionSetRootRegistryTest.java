@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.gui.CombinedVarPanel;
+import us.ihmc.simulationconstructionset.gui.YoVariableExplorerTabbedPane;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
 import us.ihmc.tools.testing.TestPlanTarget;
@@ -43,7 +43,7 @@ public class SimulationConstructionSetRootRegistryTest
       if (SHOW_GUI)
       {
          StandardSimulationGUI standardSimulationGUI = scs.getStandardSimulationGUI();
-         CombinedVarPanel combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
+         YoVariableExplorerTabbedPane combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
 
          // This also fails when the Search Panel doesn't come up...
          sleep(2000);  //+++JEP: Not sure why need this sleep, but it fails if we don't...
@@ -86,7 +86,7 @@ public class SimulationConstructionSetRootRegistryTest
       if (SHOW_GUI)
       {
          StandardSimulationGUI standardSimulationGUI = scs.getStandardSimulationGUI();
-         CombinedVarPanel combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
+         YoVariableExplorerTabbedPane combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
 
          sleep(2000);  //+++JEP: Not sure why need this sleep, but it fails if we don't...
          // This also fails when the Search Panel doesn't come up...
@@ -168,7 +168,7 @@ public class SimulationConstructionSetRootRegistryTest
   
          sleep(2000);  //+++JEP: Not sure why need this sleep, but it fails if we don't...
 
-         CombinedVarPanel combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
+         YoVariableExplorerTabbedPane combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
          combinedVarPanel.setVisibleVarPanel("root.TestAfterConstruction.RegistryBeforeConstructionOne");
 //         sleep(2000);
          

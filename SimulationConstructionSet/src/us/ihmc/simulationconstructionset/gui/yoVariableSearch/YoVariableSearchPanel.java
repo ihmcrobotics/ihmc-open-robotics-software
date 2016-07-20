@@ -33,7 +33,7 @@ import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
 import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesPanel;
-import us.ihmc.simulationconstructionset.gui.CombinedVarPanel;
+import us.ihmc.simulationconstructionset.gui.YoVariableExplorerTabbedPane;
 import us.ihmc.simulationconstructionset.gui.DoubleClickListener;
 import us.ihmc.simulationconstructionset.gui.EntryBoxArrayTabbedPanel;
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
@@ -47,9 +47,10 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
    private static final int SCROLL_PANE_INCREMENT = 12;
    private static final boolean USE_BOOKMARKS_PANEL = false;
 
+   private VariableSearchBox variableSearchBox;
    private final DataBuffer dataBuffer;
    private final JCheckBox showInitCheckBox;
-   private YoVariableListPanel varPanel;
+   private YoVariableListPanel yoVariableSearchResultsPanel;
    private final JTextArea entryBoxDescriptionArea;
    private final YoEntryBox entryBox;
    private final SelectedVariableHolder holder;
@@ -57,7 +58,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
 
    public YoVariableSearchPanel(SelectedVariableHolder holder, DataBuffer dataBuffer, GraphArrayPanel graphArrayPanel,
                               EntryBoxArrayTabbedPanel entryBoxArrayPanel, BookmarkedVariablesHolder bookmarkedVariablesHolder,
-                              CombinedVarPanel combinedVarPanel)
+                              YoVariableExplorerTabbedPane combinedVarPanel)
    {
       super(new BorderLayout());
 
@@ -69,13 +70,13 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
       }
 
       // Setup a scroll panel for the VarPanel, then add it to the center of the display
-      this.varPanel = new YoVariableListPanel("Search", holder,
+      this.yoVariableSearchResultsPanel = new YoVariableListPanel("Search", holder,
                                           new YoVariablePanelJPopupMenu(graphArrayPanel, entryBoxArrayPanel, holder, combinedVarPanel, bookmarkedVariablesHolder),
                                           this);
-      this.holder = varPanel.getVariableHolder();
+      this.holder = yoVariableSearchResultsPanel.getVariableHolder();
       this.holder.addChangeListener(this);
 
-      JScrollPane searchResultScrollPane = new JScrollPane(varPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+      JScrollPane searchResultScrollPane = new JScrollPane(yoVariableSearchResultsPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
                                                            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
       searchResultScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_PANE_INCREMENT);
       searchResultScrollPane.getVerticalScrollBar().setBlockIncrement(SCROLL_PANE_INCREMENT);
@@ -85,7 +86,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
       JSplitPane splitPane = null;
       if (USE_BOOKMARKS_PANEL)
       {
-         BookmarkedVariablesPanel bookmarkedVariablesPanel = new BookmarkedVariablesPanel("Bookmarks", varPanel.selectedVariableHolder, bookmarkedVariablesHolder);
+         BookmarkedVariablesPanel bookmarkedVariablesPanel = new BookmarkedVariablesPanel("Bookmarks", yoVariableSearchResultsPanel.selectedVariableHolder, bookmarkedVariablesHolder);
          JScrollPane bookMarkScrollPane = new JScrollPane(bookmarkedVariablesPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
                                                           ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
          bookMarkScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_PANE_INCREMENT);
@@ -146,9 +147,10 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
       showInitCheckBox = new JCheckBox("Show Variable Init Stacktrace", false);
       this.add(showInitCheckBox, c);
 
+      variableSearchBox = new VariableSearchBox();
       c.gridy++;
       c.gridwidth = 6;
-      this.add(new VariableSearchField(), c);
+      this.add(variableSearchBox, c);
 
       c.weighty = 1.0;
       c.gridx = 0;
@@ -174,7 +176,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
 
    public void setDoubleClickListener(DoubleClickListener listener)
    {
-      varPanel.setDoubleClickListener(listener);
+      yoVariableSearchResultsPanel.setDoubleClickListener(listener);
    }
 
    public boolean showInitStackTrace()
@@ -215,14 +217,14 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
       SwingUtilities.invokeLater(entryBoxChanger); // so that we don't interfere with paintComponent
    }
 
-   public class VariableSearchField extends JPanel implements ActionListener
+   public class VariableSearchBox extends JPanel implements ActionListener
    {
       private static final long serialVersionUID = 2584008799193548359L;
       private final JTextField searchTextField;
       private final Executor searchExecutor = Executors.newSingleThreadExecutor();
       private Searcher searcher;
 
-      public VariableSearchField()
+      public VariableSearchBox()
       {
          this.setLayout(new GridLayout(1, 1));
          searchTextField = new JTextField();
@@ -265,7 +267,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
          findMatchingVariablesRegularExpression();
       }
 
-      private void findMatchingVariablesRegularExpression()
+      public void findMatchingVariablesRegularExpression()
       {
          if (searcher != null)
          {
@@ -294,7 +296,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
             final ArrayList<YoVariable<?>> matchedVariables = search(searchText);
 
             if (!stopSearch)
-               varPanel.removeAllVariables();
+               yoVariableSearchResultsPanel.removeAllVariables();
 
             if (matchedVariables != null)
             {
@@ -302,7 +304,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
                {
                   if (stopSearch)
                      break;
-                  varPanel.addVariable(variable);
+                  yoVariableSearchResultsPanel.addVariable(variable);
                }
             }
          }
@@ -382,5 +384,10 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
             stopSearch = true;
          }
       }
+   }
+
+   public void refreshSearchPanelWidth()
+   {
+      yoVariableSearchResultsPanel.refreshPanelWidth();
    }
 }
