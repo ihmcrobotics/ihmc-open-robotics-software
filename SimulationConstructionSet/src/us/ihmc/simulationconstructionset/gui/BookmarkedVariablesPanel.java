@@ -31,7 +31,7 @@ public class BookmarkedVariablesPanel extends YoVariableListPanel
    }
 
    public BookmarkedVariablesPanel(YoVariableList list, SelectedVariableHolder holder, GraphArrayPanel graphArrayPanel, EntryBoxArrayTabbedPanel entryBoxArrayPanel,
-                                   BookmarkedVariablesHolder bookmarkedVariablesHolder, CombinedVarPanel combinedVarPanel)
+                                   BookmarkedVariablesHolder bookmarkedVariablesHolder, YoVariableExplorerTabbedPane combinedVarPanel)
    {
       super(list, holder, new YoVariablePanelJPopupMenu(graphArrayPanel, entryBoxArrayPanel, holder, combinedVarPanel, bookmarkedVariablesHolder));
       this.bookmarkedVariablesHolder = bookmarkedVariablesHolder;
@@ -39,7 +39,7 @@ public class BookmarkedVariablesPanel extends YoVariableListPanel
    }
 
    public BookmarkedVariablesPanel(String name, SelectedVariableHolder holder, GraphArrayPanel graphArrayPanel, EntryBoxArrayTabbedPanel entryBoxArrayPanel,
-                                   BookmarkedVariablesHolder bookmarkedVariablesHolder, CombinedVarPanel combinedVarPanel)
+                                   BookmarkedVariablesHolder bookmarkedVariablesHolder, YoVariableExplorerTabbedPane combinedVarPanel)
    {
       super(new YoVariableList(name), holder, new YoVariablePanelJPopupMenu(graphArrayPanel, entryBoxArrayPanel, holder, combinedVarPanel, bookmarkedVariablesHolder));
       this.bookmarkedVariablesHolder = bookmarkedVariablesHolder;

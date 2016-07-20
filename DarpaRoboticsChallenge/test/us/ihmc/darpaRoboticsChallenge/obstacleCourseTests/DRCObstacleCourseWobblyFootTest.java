@@ -93,7 +93,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 44.4)
+   @DeployableTestMethod(estimatedDuration = 44.4, targets = {TestPlanTarget.Flaky, TestPlanTarget.Video})
    @Test(timeout = 143110)
    public void testWalkingUpToRampWithShortStepsWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {

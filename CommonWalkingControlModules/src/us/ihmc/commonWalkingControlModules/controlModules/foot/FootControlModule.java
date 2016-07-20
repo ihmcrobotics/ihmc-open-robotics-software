@@ -242,6 +242,7 @@ public class FootControlModule
       moveViaWaypointsState.setWeight(defaultFootWeight);
       onToesState.setWeight(highFootWeight);
       supportState.setWeight(highFootWeight);
+      supportStateNew.setWeight(highFootWeight);
       holdPositionState.setWeight(defaultFootWeight);
       if (exploreFootPolygonState != null)
       {
@@ -255,6 +256,7 @@ public class FootControlModule
       moveViaWaypointsState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       onToesState.setWeights(highAngularFootWeight, highLinearFootWeight);
       supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
+      supportStateNew.setWeights(highAngularFootWeight, highLinearFootWeight);
       holdPositionState.setWeights(highAngularFootWeight, highLinearFootWeight);
       if (exploreFootPolygonState != null)
       {

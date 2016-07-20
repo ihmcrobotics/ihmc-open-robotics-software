@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 
 import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesHolder;
-import us.ihmc.simulationconstructionset.gui.CombinedVarPanel;
+import us.ihmc.simulationconstructionset.gui.YoVariableExplorerTabbedPane;
 import us.ihmc.simulationconstructionset.gui.EntryBoxArrayTabbedPanel;
 import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
@@ -24,7 +24,7 @@ public class YoVariablePanelJPopupMenu extends ForcedRepaintPopupMenu
    private final GraphArrayPanel graphArrayPanel;
    private final EntryBoxArrayTabbedPanel entryBoxArrayPanel;
    private final SelectedVariableHolder selectedVariableHolder;
-   private final CombinedVarPanel combinedVarPanel;
+   private final YoVariableExplorerTabbedPane combinedVarPanel;
    private final BookmarkedVariablesHolder bookmarkedVariablesHolder;
 
    private JMenuItem bookmarkVariable;
@@ -44,7 +44,7 @@ public class YoVariablePanelJPopupMenu extends ForcedRepaintPopupMenu
    }
 
    public YoVariablePanelJPopupMenu(GraphArrayPanel graphArrayPanel, EntryBoxArrayTabbedPanel entryBoxArrayPanel, SelectedVariableHolder selectedVariableHolder,
-         CombinedVarPanel combinedVarPanel, BookmarkedVariablesHolder bookmarkedVariablesHolder)
+         YoVariableExplorerTabbedPane combinedVarPanel, BookmarkedVariablesHolder bookmarkedVariablesHolder)
    {
       super();
       this.graphArrayPanel = graphArrayPanel;

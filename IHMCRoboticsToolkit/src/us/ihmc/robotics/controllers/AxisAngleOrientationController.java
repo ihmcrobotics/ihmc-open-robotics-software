@@ -79,6 +79,11 @@ public class AxisAngleOrientationController
       rateLimitedFeedbackAngularAction.reset();
    }
 
+   public void resetIntegrator()
+   {
+      rotationErrorCumulated.setToZero();
+   }
+
    public void compute(FrameVector output, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector currentAngularVelocity,
          FrameVector feedForward)
    {

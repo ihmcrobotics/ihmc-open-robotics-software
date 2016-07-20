@@ -55,6 +55,7 @@ import com.jme3.system.awt.AwtPanelsContext;
 import com.jme3.system.lwjgl.LwjglContext;
 import com.jme3.texture.plugins.AWTLoader;
 import com.jme3.util.SkyFactory;
+import com.jme3.util.SkyFactory.EnvMapType;
 
 import jme3dae.ColladaLoader;
 import jme3dae.collada14.ColladaDocumentV14;
@@ -248,10 +249,12 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       }
    }
 
+   @Override
    public void addRootNode(final Graphics3DNode rootNode)
    {
       enqueue(new Callable<JMEGraphics3DNode>()
       {
+         @Override
          public JMEGraphics3DNode call() throws Exception
          {
             synchronized (graphicsConch)
@@ -271,6 +274,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       viewportAdapters.add(viewportAdapter);
    }
 
+   @Override
    public ViewportAdapter createNewViewport(GraphicsDevice graphicsDevice, boolean isMainViewport, boolean isOffScreen)
    {
       if (isMainViewport)
@@ -290,6 +294,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return newViewport;
    }
 
+   @Override
    public void closeViewport(ViewportAdapter viewport)
    {
       ((JMEViewportAdapter) viewport).closeViewportAdapter();
@@ -300,6 +305,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       notifyRepaint();
    }
 
+   @Override
    public Object getGraphicsConch()
    {
       return graphicsConch;
@@ -410,10 +416,12 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       }
    }
 
+   @Override
    public void removeRootNode(final Graphics3DNode rootNode)
    {
       enqueue(new Callable<JMEGraphics3DNode>()
       {
+         @Override
          public JMEGraphics3DNode call() throws Exception
          {
             synchronized (graphicsConch)
@@ -493,11 +501,12 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       rootNode.addLight(light);
    }
 
+   @Override
    public void setupSky()
    {
       try
       {
-         Spatial sky = SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", false);
+         Spatial sky = SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", EnvMapType.CubeMap);
          sky.setLocalScale(1000);
          rootNode.attachChild(sky);
          notifyRepaint();
@@ -677,10 +686,12 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       }
    }
 
+   @Override
    public void setGroundVisible(final boolean isVisible)
    {
       enqueue(new Callable<Boolean>()
       {
+         @Override
          public Boolean call() throws Exception
          {
             if (isVisible != isTerrainVisible)
@@ -703,10 +714,12 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       notifyRepaint();
    }
 
+   @Override
    public void setHeightMap(final HeightMap heightMap)
    {
       enqueue(new Callable<JMEHeightMapTerrain>()
       {
+         @Override
          public JMEHeightMapTerrain call() throws Exception
          {
             if (terrain != null)
@@ -734,6 +747,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return jmeGraphicsNodes;
    }
 
+   @Override
    public void addSelectedListener(SelectedListener selectedListener)
    {
       this.selectedListenerHolder.addSelectedListener(selectedListener);
@@ -1124,6 +1138,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return list;
    }
 
+   @Override
    public void setBackgroundColor(final Color3f color)
    {
 //      enqueue(new Callable<Object>()
@@ -1141,6 +1156,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 //      });
    }
 
+   @Override
    public void setBackgroundImage(URL fileURL, Graphics3DBackgroundScaleMode backgroundScaleMode)
    {
       System.err.println(getClass().getSimpleName() + ": setBackgroundImage not implemented.");
@@ -1148,6 +1164,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       // TODO
    }
 
+   @Override
    public void setGroundAppearance(AppearanceDefinition app)
    {
       System.err.println(getClass().getSimpleName() + ": setGroundAppearance not implemented.");
@@ -1155,6 +1172,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       // TODO
    }
 
+   @Override
    public void addKeyListener(KeyListener keyListener)
    {
       keyListenerHolder.addKeyListener(keyListener);
@@ -1170,6 +1188,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return keyListenerHolder;
    }
 
+   @Override
    public void addMouseListener(MouseListener mouseListener)
    {
       mouseListenerHolder.addMouseListener(mouseListener);
@@ -1180,6 +1199,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return mouseListenerHolder;
    }
    
+   @Override
    public void addMouse3DListener(Mouse3DListener mouse3DListener)
    {
       mouse3DListenerHolder.addMouse3DListener(mouse3DListener);
@@ -1200,15 +1220,18 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return primaryLight;
    }
 
+   @Override
    public InputManager getInputManager()
    {
       return inputManager;
    }
 
+   @Override
    public void freezeFrame(final Graphics3DNode rootJoint)
    {
       enqueue(new Callable<Object>()
       {
+         @Override
          public Object call() throws Exception
          {
             JMEGraphics3DNode node = jmeGraphicsNodes.get(rootJoint);
@@ -1223,6 +1246,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    private boolean alreadyClosing = false;
    
+   @Override
    public void closeAndDispose()
    {
       if (alreadyClosing) return;
@@ -1315,6 +1339,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       primaryLight = null;
    }
 
+   @Override
    public JMEContextManager getContextManager()
    {
       return contextManager;
