@@ -20,6 +20,18 @@ public class CapturePointCalculator
       capturePointToPack.add(centerOfMassInWorld);
    }
 
+   public static void computeCapturePointVelocity(FrameVector2d capturePointVelocityToPack, FrameVector2d centerOfMassVelocityInWorld,
+         FrameVector2d centerOfMassAccelerationInWorld, double omega0)
+   {
+      centerOfMassVelocityInWorld.checkReferenceFrameMatch(worldFrame);
+      centerOfMassAccelerationInWorld.checkReferenceFrameMatch(worldFrame);
+
+      capturePointVelocityToPack.setToZero(worldFrame);
+      capturePointVelocityToPack.set(centerOfMassAccelerationInWorld);
+      capturePointVelocityToPack.scale(1.0 / omega0);
+      capturePointVelocityToPack.add(centerOfMassVelocityInWorld);
+   }
+
    public static double computeOmega0ConstantHeight(double g, double z)
    {
       return Math.sqrt(g / z);
