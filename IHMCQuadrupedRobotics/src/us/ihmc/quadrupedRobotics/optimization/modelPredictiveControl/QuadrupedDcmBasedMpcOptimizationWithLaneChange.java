@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.optimization.modelPredictiveControl;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolver;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.OASESConstrainedQPSolver;
+import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.QuadProgSolver;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMotionEstimator;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
@@ -33,7 +33,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
    private final QuadrupedTimedStepPressurePlanner timedStepPressurePlanner;
 
-   private final ConstrainedQPSolver qpSolver = new OASESConstrainedQPSolver(null);
+   private final ConstrainedQPSolver qpSolver = new QuadProgSolver(null);
    private final DenseMatrix64F qpSolutionVector = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F qpCostVector = new DenseMatrix64F(100, 1);
    private final DenseMatrix64F qpCostMatrix = new DenseMatrix64F(100, 100);
@@ -196,6 +196,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
          }
       }
       CommonOps.multTransA(A, b, b);
+      CommonOps.scale(-2, b, b);
    }
 
    private void initializeEqualityConstraints(QuadrantDependentList<ContactState> currentContactState, QuadrantDependentList<FramePoint> currentSolePosition)
@@ -277,6 +278,20 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       beq.set(0, 0, -CmSx0py0.get(0, 0));
       beq.set(1, 0, -CmSx0py0.get(1, 0));
       beq.set(2, 0, 1);
+
+      for (int i = 0; i < 3; i++)
+      {
+         // Normalize constraint if beq > 1.
+         if (Math.abs(beq.get(i, 0)) > 1.0)
+         {
+            for (int j = 0; j < Aeq.getNumCols(); j++)
+            {
+               Aeq.set(i, j, Aeq.get(i, j) / beq.get(i, 0));
+            }
+            beq.set(i, 0, 1.0);
+         }
+      }
+
    }
 
    private void initializeInequalityConstraints(QuadrupedMpcOptimizationWithLaneChangeSettings settings)
