@@ -20,6 +20,10 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    private final DoubleYoVariable xGaitStanceLengthInput;
    private final DoubleYoVariable xGaitStepGroundClearanceInput;
    private final DoubleYoVariable xGaitStepDurationInput;
+   
+   private final DoubleYoVariable comPositionEstimateX;
+   private final DoubleYoVariable comPositionEstimateY;
+   private final DoubleYoVariable comPositionEstimateZ;
 
    @SuppressWarnings("unchecked")
    public QuadrupedForceTestYoVariables(SimulationConstructionSet scs)
@@ -38,6 +42,10 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       xGaitStanceLengthInput = (DoubleYoVariable) scs.getVariable("stanceLengthInput");
       xGaitStepGroundClearanceInput = (DoubleYoVariable) scs.getVariable("stepGroundClearanceInput");
       xGaitStepDurationInput = (DoubleYoVariable) scs.getVariable("stepDurationInput");
+      
+      comPositionEstimateX = (DoubleYoVariable) scs.getVariable("comPositionEstimateX");
+      comPositionEstimateY = (DoubleYoVariable) scs.getVariable("comPositionEstimateY");
+      comPositionEstimateZ = (DoubleYoVariable) scs.getVariable("comPositionEstimateZ");
    }
 
    public EnumYoVariable<QuadrupedForceControllerRequestedEvent> getUserTrigger()
@@ -88,5 +96,20 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    public DoubleYoVariable getXGaitStepDurationInput()
    {
       return xGaitStepDurationInput;
+   }
+
+   public DoubleYoVariable getComPositionEstimateX()
+   {
+      return comPositionEstimateX;
+   }
+
+   public DoubleYoVariable getComPositionEstimateY()
+   {
+      return comPositionEstimateY;
+   }
+
+   public DoubleYoVariable getComPositionEstimateZ()
+   {
+      return comPositionEstimateZ;
    }
 }
