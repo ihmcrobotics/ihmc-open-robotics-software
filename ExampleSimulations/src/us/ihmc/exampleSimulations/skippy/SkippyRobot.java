@@ -5,11 +5,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.Robot;
-
+import us.ihmc.simulationconstructionset.*;
 
 /**
  * This class SkippyRobot is a public class that extends Robot. The class Robot is
@@ -25,66 +21,96 @@ public class SkippyRobot extends Robot
     * for each link.
     */
    public static final double
-         L1 = 1.0, L2 = 2.0, M1 = 1.0, M2 = 1.0, R1 = 0.1, R2 = 0.05, Iyy1 = 0.083, Iyy2 = 0.33;
-
+         L1 = 1.0, M1 = 1.0, R1 = 0.05, Iyy1 = 0.083,
+         L2 = 2.0, M2 = 1.0, R2 = 0.05, Iyy2 = 0.33,
+         L3 = 3.0, M3 = 1.0, R3 = 0.05, Iyy3 = 0.15;
 
    public SkippyRobot()
    {
-      super("Skippy"); // create and instance of Robot
+      super("Skippy"); // create an instance of Robot
 
       // Create joints and assign links. Pin joints have a single axis of rotation.
-      PinJoint pin1 = new PinJoint("joint1", new Vector3d(0.0, 0.0, 0.0), this, Axis.Y);
-      pin1.setInitialState(1.0, 0.0);
-      Link link1 = link1();
-      pin1.setLink(link1); // associate link1 with the joint pin1
-      this.addRootJoint(pin1);
+      FloatingPlanarJoint rootJoin = new FloatingPlanarJoint("joint1", this, 3);
+      Link leg = createLeg();
+      rootJoin.setLink(leg); // associate createLeg with the joint pin1
+      this.addRootJoint(rootJoin);
 
       /*
        *  The second joint is initiated with the offset vector (0.0,0.0,L1) since
        *  it should be placed a distance of L1 in the Z direction from the previous joint.
        */
-      Joint pin2 = new PinJoint("joint2", new Vector3d(0.0, 0.0, L1), this, Axis.Y);
-      Link link2 = link2();
-      pin2.setLink(link2);
-      pin1.addJoint(pin2);
+      Joint hip = new PinJoint("joint2", new Vector3d(0.0, 0.0, L1), this, Axis.Y);
+      Link torso = createTorso();
+      hip.setLink(torso);
+      rootJoin.addJoint(hip);
+
+      /*
+       *  The third joint is initiated with the offset vector (0.0,0.0,L1+L2) since
+       *  it should be placed a distance of L1+L2/2 in the Z direction from the previous joint.
+       */
+      Joint shoulders = new PinJoint("joint3", new Vector3d(0.0, 0.0, L1+L2/2), this, Axis.Y);
+      Link crossBar = createCrossbar();
+      shoulders.setLink(crossBar);
+      rootJoin.addJoint(shoulders);
    }
 
    /**
     * Create the first link for the SkippyRobot.
     */
-   private Link link1()
+   private Link createLeg()
    {
-      Link ret = new Link("link1");
-      ret.setMass(M1);
-      ret.setComOffset(0.0, 0.0, L1 / 2.0);
-      ret.setMomentOfInertia(0.0, Iyy1, 0.0);
+      Link leg = new Link("createLeg");
+      leg.setMass(M1);
+      leg.setComOffset(0.0, 0.0, L1 / 2.0);
+      leg.setMomentOfInertia(0.0, Iyy1, 0.0);
 
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCylinder(L1, R1, YoAppearance.Red());
+      linkGraphics.addCube(R1, R1, L1, YoAppearance.Crimson());
 
       // associate the linkGraphics object with the link object
-      ret.setLinkGraphics(linkGraphics);
+      leg.setLinkGraphics(linkGraphics);
 
-      return ret;
+      return leg;
    }
 
    /**
     * Create the second link for the SkippyRobot.
     */
-   private Link link2()
+   private Link createTorso()
    {
-      Link ret = new Link("link2");
-      ret.setMass(M2);
-      ret.setComOffset(0.0, 0.0, L2 / 2.0);
-      ret.setMomentOfInertia(0.0, Iyy2, 0.0);
+      Link torso = new Link("createTorso");
+      torso.setMass(M2);
+      torso.setComOffset(0.0, 0.0, L2 / 2.0);
+      torso.setMomentOfInertia(0.0, Iyy2, 0.0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCylinder(L2, R2, YoAppearance.Green());
+      linkGraphics.addCylinder(L2, R2, YoAppearance.LightSkyBlue());
 
-      ret.setLinkGraphics(linkGraphics);
+      torso.setLinkGraphics(linkGraphics);
 
-      return ret;
+      return torso;
+   }
+
+   /**
+    * Create the third link for the SkippyRobot.
+    */
+   private Link createCrossbar()
+   {
+      Link crossbar = new Link("createCrossbar");
+      crossbar.setMass(M3);
+      crossbar.setComOffset(0.0, 0.0, L3 / 2.0);
+      crossbar.setMomentOfInertia(0.0, Iyy3, 0.0);
+
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      linkGraphics.addCylinder(L3, R3, YoAppearance.DarkBlue());
+
+      // TODO need to rotate crossbar 90 deg
+       linkGraphics.rotate(Math.PI/2, Axis.Z);
+
+      crossbar.setLinkGraphics(linkGraphics);
+
+      return crossbar;
    }
 
 }
