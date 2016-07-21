@@ -7,16 +7,17 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.NullJoint;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
 
 public class BuildingPendulumRobot extends Robot
 {
 
    public static final double mass = 10.0;
-   private static final double length = 2.0;
+   private static final double length = 4.0;
    private static final double distance = 1.0;
-   public PinJoint pendulumJoint1;
-   public PinJoint pendulumJoint2;
 
    private static final double midAngle = Math.atan2(distance/2.0, length);
 
@@ -35,8 +36,8 @@ public class BuildingPendulumRobot extends Robot
       ceiling.setLinkGraphics(linkGraphics);
       rootJoint.setLink(ceiling);
 
-       pendulumJoint1 = new PinJoint("joint1", new Vector3d(distance/2.0, 0.0, 0.0), this, Axis.Y);
-       pendulumJoint2 = new PinJoint("joint2", new Vector3d(-distance/2.0, 0.0, 0.0), this, Axis.Y);
+      PinJoint pendulumJoint1 = new PinJoint("jointLeft", new Vector3d(-distance/2.0, 0.0, 0.0), this, Axis.Y);
+      PinJoint pendulumJoint2 = new PinJoint("jointRight", new Vector3d(distance/2.0, 0.0, 0.0), this, Axis.Y);
 
       pendulumJoint1.setLink(createLink("pendulum1"));
       rootJoint.addJoint(pendulumJoint1);
@@ -46,8 +47,8 @@ public class BuildingPendulumRobot extends Robot
       joints.put(RobotSide.LEFT, pendulumJoint1);
       joints.put(RobotSide.RIGHT, pendulumJoint2);
 
-      pendulumJoint1.setInitialState(Math.PI + 0.2, 0.0);
-      pendulumJoint2.setInitialState(Math.PI + 0.1, 0.0);
+      pendulumJoint1.setInitialState(getSwitchAngle(RobotSide.LEFT) - 0.2, 0.0);
+      pendulumJoint2.setInitialState(0.0, 0.0);
       this.addRootJoint(rootJoint);
    }
 
@@ -73,6 +74,18 @@ public class BuildingPendulumRobot extends Robot
    {
       PinJoint joint = joints.get(activeSide);
       return joint.getQ().getDoubleValue();
+   }
+
+   public void setPendulumAngle(RobotSide activeSide, double q)
+   {
+      PinJoint joint = joints.get(activeSide);
+      joint.setQ(q);
+   }
+
+   public void setPendulumVelocity(RobotSide activeSide, double qd)
+   {
+      PinJoint joint = joints.get(activeSide);
+      joint.setQd(qd);
    }
 
    public double getSwitchAngle(RobotSide activeSide)
