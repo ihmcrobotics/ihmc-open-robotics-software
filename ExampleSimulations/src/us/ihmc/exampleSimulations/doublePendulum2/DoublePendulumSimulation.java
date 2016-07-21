@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.doublePendulum;
+package us.ihmc.exampleSimulations.doublePendulum2;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
