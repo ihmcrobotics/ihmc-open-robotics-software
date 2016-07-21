@@ -6,6 +6,7 @@ import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
+import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
@@ -22,6 +23,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedDcmBasedStepController implements QuadrupedController
@@ -81,6 +83,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
    private final QuadrupedTaskSpaceController taskSpaceController;
 
    // planning
+   private final GroundPlaneEstimator groundPlaneEstimator;
+   private final QuadrantDependentList<FramePoint> groundPlanePositions;
    private final QuadrupedTimedStepPressurePlanner copPlanner;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
    private final ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory;
@@ -123,6 +127,12 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
+      groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
+      groundPlanePositions = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         groundPlanePositions.set(robotQuadrant, new FramePoint());
+      }
       copPlanner = new QuadrupedTimedStepPressurePlanner(timedStepController.getQueueCapacity());
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(timedStepController.getQueueCapacity(), gravity, inputProvider.getComPositionInput().getZ());
       dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
@@ -256,6 +266,14 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       }
       taskSpaceController.reset();
 
+      // initialize ground plane
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         groundPlanePositions.get(robotQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
+         groundPlanePositions.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+      }
+      groundPlaneEstimator.compute(groundPlanePositions);
+
       // initialize step queue
       ArrayList<QuadrupedTimedStep> steps = stepProvider.get();
       for (int i = 0; i < steps.size(); i++)
@@ -265,6 +283,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
             steps.get(i).getTimeInterval().shiftInterval(robotTimestamp.getDoubleValue());
             steps.get(i).setAbsolute(true);
          }
+         groundPlaneEstimator.projectZ(steps.get(i).getGoalPosition());
 
          if (!timedStepController.addStep(steps.get(i)))
          {
@@ -273,6 +292,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
             return;
          }
       }
+
       if (steps.size() == 0)
       {
          return;

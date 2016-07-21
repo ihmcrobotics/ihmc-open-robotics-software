@@ -93,6 +93,23 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       selectionMatrix.set(2, 5, 1.0);
    }
 
+   public void setSelectionMatrixForPlanarControl()
+   {
+      selectionMatrix.reshape(3, Twist.SIZE);
+      selectionMatrix.zero();
+      selectionMatrix.set(0, 1, 1.0);
+      selectionMatrix.set(1, 3, 1.0);
+      selectionMatrix.set(2, 5, 1.0);
+   }
+
+   public void setSelectionMatrixForPlanarLinearControl()
+   {
+      selectionMatrix.reshape(2, Twist.SIZE);
+      selectionMatrix.zero();
+      selectionMatrix.set(0, 3, 1.0);
+      selectionMatrix.set(1, 5, 1.0);
+   }
+
    @Override
    public void set(SpatialVelocityCommand other)
    {

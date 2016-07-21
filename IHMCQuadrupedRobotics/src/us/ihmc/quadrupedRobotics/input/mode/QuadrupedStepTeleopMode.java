@@ -40,7 +40,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private final DoubleParameter pitchScaleParameter = parameterFactory.createDouble("pitchScale", 0.15);
    private final DoubleParameter zdotScaleParameter = parameterFactory.createDouble("zdotScale", 0.25);
    private final DoubleParameter defaultComHeightParameter = parameterFactory.createDouble("defaultComHeight", 0.6);
-   private final DoubleParameter defaultGroundClearance = parameterFactory.createDouble("defaultGroundClearance", 0.1);
+   private final DoubleParameter defaultGroundClearance = parameterFactory.createDouble("defaultGroundClearance", 0.05);
    private final DoubleParameter xStrideMax = parameterFactory.createDouble("xStrideMax", 0.4);
    private final DoubleParameter yStrideMax = parameterFactory.createDouble("yStrideMax", 0.25);
    private final DoubleParameter yawRateScale = parameterFactory.createDouble("yawRateScale", 0.25);
@@ -53,8 +53,8 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private final IntegerParameter xGaitStepPlanSize = parameterFactory.createInteger("xGaitStepPlanSize", 8);
    private final DoubleParameter xGaitStanceWidth = parameterFactory.createDouble("xGaitStanceWidth", 0.25);
    private final DoubleParameter xGaitStanceLength = parameterFactory.createDouble("xGaitStanceWidth", 1.0);
-   private final DoubleArrayParameter xGaitStepDuration = parameterFactory.createDoubleArray("xGaitStepDuration", 0.75, 0.75);
-   private final DoubleArrayParameter xGaitEndDoubleSupportDuration = parameterFactory.createDoubleArray("xGaitEndDoubleSupportDuration", 0.75, 1.5);
+   private final DoubleArrayParameter xGaitStepDuration = parameterFactory.createDoubleArray("xGaitStepDuration", 0.5, 0.5);
+   private final DoubleArrayParameter xGaitEndDoubleSupportDuration = parameterFactory.createDoubleArray("xGaitEndDoubleSupportDuration", 1.0, 2.0);
    private final DoubleArrayParameter xGaitEndPhaseShift = parameterFactory.createDoubleArray("xGaitEndPhaseShift", 90, 135);
 
    private final PacketCommunicator packetCommunicator;

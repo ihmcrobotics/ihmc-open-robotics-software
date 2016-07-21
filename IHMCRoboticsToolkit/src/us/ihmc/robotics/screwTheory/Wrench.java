@@ -150,6 +150,7 @@ public class Wrench extends SpatialForceVector
       return twist.dot(this);
    }
 
+   @Override
    public String toString()
    {
       String ret = new String("Wrench exerted on " + bodyFrame + ", expressed in frame " + expressedInFrame + "\n" + "Torque part: " + angularPart + "\n"
