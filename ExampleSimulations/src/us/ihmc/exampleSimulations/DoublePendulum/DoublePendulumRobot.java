@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.DoublePendulum;
+package us.ihmc.exampleSimulations.doublePendulum;
 
 import javax.vecmath.Vector3d;
 

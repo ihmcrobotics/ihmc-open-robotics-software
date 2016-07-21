@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.DoublePendulum;
+package us.ihmc.exampleSimulations.linkExamples;
 
 //package us.ihmc.exampleSimulations.DoublePendulum;
 //package us.ihmc.exampleSimulations.linkExamples;
