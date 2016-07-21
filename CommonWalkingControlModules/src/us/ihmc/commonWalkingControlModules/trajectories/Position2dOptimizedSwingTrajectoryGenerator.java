@@ -5,7 +5,6 @@ import java.util.EnumMap;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -23,6 +22,7 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.waypoints.PolynomialOrder;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.XYPlaneFrom3PointsFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -63,9 +63,19 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements PositionTraj
    private final YoFrameVector desiredVelocity;
    private final YoFrameVector desiredAcceleration;
 
+   private final FramePoint tempPos = new FramePoint();
+   private final FramePoint tempVel = new FramePoint();
+   private final FramePoint tempAcc = new FramePoint();
+
    private final int markers = 30;
    private final BagOfBalls trajectoryViz;
    private final FramePoint ballPosition = new FramePoint();
+
+   private final XYPlaneFrom3PointsFrame swingFrame = new XYPlaneFrom3PointsFrame(trajectoryFrame, "swingFrame");
+   private final FramePoint trajectoryOrigin = new FramePoint();
+   private final FrameVector direction = new FrameVector();
+   private final FramePoint pointOnX = new FramePoint();
+   private final FramePoint pointOnY = new FramePoint();
 
    public Position2dOptimizedSwingTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry graphicsListRegistry, int maxIterations)
@@ -144,9 +154,6 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements PositionTraj
       waypointPositions.add();
    }
 
-   private ReferenceFrame swingFrame = null;
-   private final FramePoint trajectoryOrigin = new FramePoint();
-   private final FrameVector direction = new FrameVector();
    public void setEndpointConditions(FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalPosition, FrameVector finalVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
@@ -161,9 +168,13 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements PositionTraj
 
       // find the direction of the swing to reduce the dimensionality of the problem.
       trajectoryOrigin.setIncludingFrame(this.initialPosition);
+      pointOnX.setIncludingFrame(this.finalPosition);
+      pointOnX.setZ(trajectoryOrigin.getZ());
+      pointOnY.setIncludingFrame(trajectoryOrigin);
       direction.sub(this.finalPosition, this.initialPosition);
-      direction.setZ(0.0);
-      swingFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("swingFrame", this.initialPosition, Axis.X, direction); // TODO garbage
+      pointOnY.add(direction.getY(), -direction.getX(), 0.0);
+      swingFrame.setPoints(trajectoryOrigin, pointOnX, pointOnY);
+      swingFrame.update();
 
       this.initialPosition.changeFrame(swingFrame);
       this.initialVelocity.changeFrame(swingFrame);
@@ -269,28 +280,28 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements PositionTraj
       }
       this.activeSegment.set(activeSegment);
 
-      FramePoint pos = new FramePoint(swingFrame);
-      FramePoint vel = new FramePoint(swingFrame);
-      FramePoint acc = new FramePoint(swingFrame);
+      tempPos.setToZero(swingFrame);
+      tempVel.setToZero(swingFrame);
+      tempAcc.setToZero(swingFrame);
 
       for (int dimension = 0; dimension < Direction.values.length; dimension++)
       {
          Direction axis = Direction.values[dimension];
          YoPolynomial polynomial = trajectories.get(axis).get(activeSegment);
          polynomial.compute(time);
-         pos.set(axis, polynomial.getPosition());
-         vel.set(axis, polynomial.getVelocity());
-         acc.set(axis, polynomial.getAcceleration());
+         tempPos.set(axis, polynomial.getPosition());
+         tempVel.set(axis, polynomial.getVelocity());
+         tempAcc.set(axis, polynomial.getAcceleration());
       }
 
-      pos.changeFrame(trajectoryFrame);
-      vel.changeFrame(trajectoryFrame);
-      acc.changeFrame(trajectoryFrame);
-      vel.sub(trajectoryOrigin);
-      acc.sub(trajectoryOrigin);
-      desiredPosition.set(pos);
-      desiredVelocity.set(vel);
-      desiredAcceleration.set(acc);
+      tempPos.changeFrame(trajectoryFrame);
+      tempVel.changeFrame(trajectoryFrame);
+      tempAcc.changeFrame(trajectoryFrame);
+      tempVel.sub(trajectoryOrigin);
+      tempAcc.sub(trajectoryOrigin);
+      desiredPosition.set(tempPos);
+      desiredVelocity.set(tempVel);
+      desiredAcceleration.set(tempAcc);
    }
 
    @Override
