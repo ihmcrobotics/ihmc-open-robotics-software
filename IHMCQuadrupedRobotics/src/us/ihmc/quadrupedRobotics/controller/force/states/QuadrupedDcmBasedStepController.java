@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStepPressurePlanner;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajectory;
@@ -64,6 +65,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
    private final DoubleParameter contactPressureLowerLimitParameter = parameterFactory.createDouble("contactPressureLowerLimit", 50);
    private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDurationParameter", 0.5);
+   private final DoubleParameter minimumStepClearanceParameter = parameterFactory.createDouble("minimumStepClearance", 0.075);
+   private final DoubleParameter maximumStepStrideParameter = parameterFactory.createDouble("maximumStepStride", 1.0);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -98,6 +101,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final FramePoint dcmPositionWaypoint;
    private final PreallocatedQueue<QuadrupedTimedStep> stepPlan;
    private final YoFrameVector stepPlanAdjustment;
+   private final QuadrupedStepCrossoverProjection crossoverProjection;
 
    public QuadrupedDcmBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedControllerInputProviderInterface inputProvider, QuadrupedTimedStepInputProvider stepProvider)
@@ -148,6 +152,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       dcmPositionWaypoint = new FramePoint();
       stepPlan = new PreallocatedQueue<>(QuadrupedTimedStep.class, timedStepController.getQueueCapacity());
       stepPlanAdjustment = new YoFrameVector("stepPlanAdjustment", worldFrame, registry);
+      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
+            maximumStepStrideParameter.get());
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
@@ -293,9 +299,15 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
          // adjust goal positions in step controller queue
          for (int i = 0; i < timedStepController.getQueue().size(); i++)
          {
-            QuadrupedTimedStep step = timedStepController.getQueue().get(i);
-            step.getGoalPosition().add(stepPlanAdjustment.getFrameTuple().getVector());
-            groundPlaneEstimator.projectZ(step.getGoalPosition());
+            QuadrupedTimedStep timedStep = timedStepController.getQueue().get(i);
+            double currentTime = robotTimestamp.getDoubleValue();
+            double startTime = timedStep.getTimeInterval().getStartTime();
+            timedStep.getGoalPosition().add(stepPlanAdjustment.getFrameTuple().getVector());
+            if (startTime < currentTime)
+            {
+               crossoverProjection.project(timedStep, taskSpaceEstimates.getSolePosition());
+            }
+            groundPlaneEstimator.projectZ(timedStep.getGoalPosition());
          }
       }
    }
@@ -312,14 +324,23 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    @Override
    public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
    {
-      // adjust nominal step plan and trigger dcm trajectory update
+      // trigger dcm trajectory update
+      dcmTrajectoryReplanTrigger.set(true);
+
+      // adjust nominal step plan
       for (int i = 0; i < stepPlan.size(); i++)
       {
+         double currentTime = robotTimestamp.getDoubleValue();
+         double startTime = stepPlan.get(i).getTimeInterval().getStartTime();
+         double endTime = stepPlan.get(i).getTimeInterval().getEndTime();
          stepPlan.get(i).getGoalPosition().add(stepPlanAdjustment.getFrameTuple().getVector());
+         if (startTime < currentTime && currentTime < endTime)
+         {
+            crossoverProjection.project(stepPlan.get(i), taskSpaceEstimates.getSolePosition());
+         }
          groundPlaneEstimator.projectZ(stepPlan.get(i).getGoalPosition());
       }
       stepPlanAdjustment.setToZero();
-      dcmTrajectoryReplanTrigger.set(true);
    }
 
    public void halt()
