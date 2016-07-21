@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.doublePendulum;
+package us.ihmc.exampleSimulations.DoublePendulum;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
