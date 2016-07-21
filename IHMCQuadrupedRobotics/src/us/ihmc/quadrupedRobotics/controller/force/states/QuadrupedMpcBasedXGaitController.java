@@ -253,28 +253,6 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth / 2 + minimumStepClearanceParameter.get()));
    }
 
-   @Override
-   public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
-   {
-      // update ground plane estimate
-      groundPlanePositions.get(thisStepQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
-      groundPlanePositions.get(thisStepQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-      groundPlaneEstimator.compute(groundPlanePositions);
-
-      // update current step
-      RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
-      xGaitCurrentSteps.get(thisStepEnd).set(timedStepController.getCurrentStep(thisStepQuadrant));
-   }
-
-   @Override
-   public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
-   {
-      // update current step goal position
-      RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
-      if (thisStepQuadrant == xGaitCurrentSteps.get(thisStepEnd).getRobotQuadrant())
-         xGaitCurrentSteps.get(thisStepEnd).setGoalPosition(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
-   }
-
    private void updateStepPlan()
    {
       // compute xgait step plan
@@ -307,7 +285,6 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       }
    }
 
-
    private void computeStepAdjustmentAndCmpPosition()
    {
       double currentTime = robotTimestamp.getDoubleValue();
@@ -328,6 +305,28 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
          }
          groundPlaneEstimator.projectZ(step.getGoalPosition());
       }
+   }
+
+   @Override
+   public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
+   {
+      // update ground plane estimate
+      groundPlanePositions.get(thisStepQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
+      groundPlanePositions.get(thisStepQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+      groundPlaneEstimator.compute(groundPlanePositions);
+
+      // update current step
+      RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
+      xGaitCurrentSteps.get(thisStepEnd).set(timedStepController.getCurrentStep(thisStepQuadrant));
+   }
+
+   @Override
+   public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
+   {
+      // update current step goal position
+      RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
+      if (thisStepQuadrant == xGaitCurrentSteps.get(thisStepEnd).getRobotQuadrant())
+         xGaitCurrentSteps.get(thisStepEnd).setGoalPosition(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
    }
 
    @Override
