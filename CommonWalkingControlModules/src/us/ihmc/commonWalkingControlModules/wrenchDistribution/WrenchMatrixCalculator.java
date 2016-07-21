@@ -69,12 +69,17 @@ public class WrenchMatrixCalculator
 
    public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
+      this(toolbox, toolbox.getCenterOfMassFrame(), parentRegistry);
+   }
+
+   public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
+   {
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
 
       if (contactablePlaneBodies.size() > nContactableBodies)
          throw new RuntimeException("Unexpected number of contactable plane bodies: " + contactablePlaneBodies.size());
 
-      centerOfMassFrame = toolbox.getCenterOfMassFrame();
+      this.centerOfMassFrame = centerOfMassFrame;
 
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
