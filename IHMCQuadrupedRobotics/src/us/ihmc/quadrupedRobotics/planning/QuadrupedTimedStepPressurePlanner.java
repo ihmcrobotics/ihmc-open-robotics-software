@@ -286,14 +286,14 @@ public class QuadrupedTimedStepPressurePlanner
       normalizedPressureContributedByQueuedSteps[interval] = 0.0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         normalizedPressureContributedByQuadrant.get(robotQuadrant)[interval] = contactPressure.get(robotQuadrant).getValue();
+         normalizedPressureContributedByQuadrant.get(robotQuadrant)[interval] = contactPressure.get(robotQuadrant).doubleValue();
          if (isInitialContactState.get(robotQuadrant).booleanValue())
          {
-            normalizedPressureContributedByInitialContacts[interval] += contactPressure.get(robotQuadrant).getValue();
+            normalizedPressureContributedByInitialContacts[interval] += contactPressure.get(robotQuadrant).doubleValue();
          }
          else
          {
-            normalizedPressureContributedByQueuedSteps[interval] += contactPressure.get(robotQuadrant).getValue();
+            normalizedPressureContributedByQueuedSteps[interval] += contactPressure.get(robotQuadrant).doubleValue();
          }
       }
    }
