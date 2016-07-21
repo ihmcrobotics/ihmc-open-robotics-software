@@ -1,6 +1,5 @@
 package us.ihmc.exampleSimulations.buildingPendulum;
 
-import us.ihmc.exampleSimulations.DoublePendulum.DoublePendulumRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class BuildingPendulumSimulation
@@ -14,6 +13,7 @@ public class BuildingPendulumSimulation
 
       sim = new SimulationConstructionSet(buildingPendulumRobot);
       sim.setGroundVisible(false);
+      sim.setDT(0.00001, 400);
       sim.setCameraPosition(0, -40.0, 2.0);
 
       Thread myThread = new Thread(sim);
