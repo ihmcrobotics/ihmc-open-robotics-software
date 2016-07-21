@@ -9,12 +9,15 @@ import java.util.ArrayList;
 
 public class QuadrupedSoleWaypointList extends QuadrantDependentList<ArrayList<SoleWaypoint>>
 {
+   private QuadrantDependentList<Point3d> quadrantDependentSolePositionList;
+
    public QuadrupedSoleWaypointList()
    {
       for (RobotQuadrant quadrant : RobotQuadrant.values())
       {
          this.set(quadrant, new ArrayList<SoleWaypoint>());
       }
+      quadrantDependentSolePositionList = new QuadrantDependentList<>();
    }
 
    public QuadrupedSoleWaypointList(QuadrupedSoleWaypointList other)
@@ -57,6 +60,15 @@ public class QuadrupedSoleWaypointList extends QuadrantDependentList<ArrayList<S
    public int size(RobotQuadrant key)
    {
       return get(key).size();
+   }
+
+   public QuadrantDependentList<Point3d> getQuadrantDependantSolePosition(int index)
+   {
+      for (RobotQuadrant quadrant : RobotQuadrant.values())
+      {
+         quadrantDependentSolePositionList.set(quadrant, this.get(quadrant).get(index).getPosition());
+      }
+      return quadrantDependentSolePositionList;
    }
 
    public int getMaxSize()
