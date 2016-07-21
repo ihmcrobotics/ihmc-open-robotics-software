@@ -21,8 +21,12 @@ public class FallingObjectsRobot extends Robot {
 
         this.setGravity(0.0,0.0,-9.81);
 
-        for(int x = 0; x < 5; x++){
-            FloatingJoint j = createSphereJoint(x);
+        for(int x = 0; x < 6; x++){
+            FloatingJoint j;
+            if(x%2==0)
+                j = createRodJoint(x);
+            else
+                j = createSphereJoint(x);
             this.addRootJoint(j);
         }
 
@@ -33,6 +37,40 @@ public class FallingObjectsRobot extends Robot {
         groundModel.setGroundProfile3D(profile);
         this.setGroundContactModel(groundModel);
 
+    }
+    public FloatingJoint createRodJoint(int counter){
+        double radius = 0.03;
+        double length = Math.random()*1+0.5;
+        double mass = 12.0;
+
+        FloatingJoint j = new FloatingJoint("RodJoint"+counter, counter+"", new Vector3d(Math.random()*10-5,Math.random()*10-5,Math.random()*2+length), this);
+
+        Link l = new Link("RodLink");
+        l.setMass(mass);
+        l.setComOffset(0.0,0.0,length/2);
+        l.setMomentOfInertia((1.0/3.0)*mass*length*length,(1.0/3.0)*mass*length*length,0.001);
+        Graphics3DObject g = new Graphics3DObject();
+        g.addCylinder(length, radius);
+        l.setLinkGraphics(g);
+
+        j.setLink(l);
+
+        addRodContactLinks(j, counter, radius, length);
+
+        return j;
+    }
+    public void addRodContactLinks(FloatingJoint j, int counter, double radius, double length){
+        int iterator = 0;
+        int zCount = 0;
+        for(double z = 0; z <= length; z+= length/3){
+            for(double theta = 0; theta < Math.PI*2; theta += Math.PI*0.35){
+                GroundContactPoint gc1 = new GroundContactPoint("gc"+counter+iterator+zCount, new Vector3d(radius*Math.sin(theta),
+                        radius*Math.cos(theta), z), this);
+                j.addGroundContactPoint(gc1);
+                iterator++;
+            }
+            zCount++;
+        }
     }
     public FloatingJoint createSphereJoint(int counter){
         double radius = Math.random()*0.2+0.1;
