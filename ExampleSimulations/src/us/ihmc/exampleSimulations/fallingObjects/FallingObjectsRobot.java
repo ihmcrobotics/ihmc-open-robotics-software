@@ -14,9 +14,8 @@ import javax.vecmath.Vector3d;
 
 public class FallingObjectsRobot extends Robot {
 
-    //private static YoVariableRegistry registry = new YoVariableRegistry("FallingObjectsRobot");
-
     public FallingObjectsRobot(){
+
         super("FallingObjectsRobot");
 
         this.setGravity(0.0,0.0,-9.81);
@@ -39,6 +38,7 @@ public class FallingObjectsRobot extends Robot {
 
     }
     public FloatingJoint createRodJoint(int counter){
+
         double radius = 0.03;
         double length = Math.random()*1+0.5;
         double mass = 12.0;
@@ -58,8 +58,10 @@ public class FallingObjectsRobot extends Robot {
         addRodContactLinks(j, counter, radius, length);
 
         return j;
+
     }
     public void addRodContactLinks(FloatingJoint j, int counter, double radius, double length){
+
         int iterator = 0;
         int zCount = 0;
         for(double z = 0; z <= length; z+= length/3){
@@ -71,9 +73,11 @@ public class FallingObjectsRobot extends Robot {
             }
             zCount++;
         }
+
     }
     public FloatingJoint createSphereJoint(int counter){
-        double radius = Math.random()*0.2+0.1;
+
+        double radius = Math.random()*0.15+0.15;
         double mass = 1.0;
 
         FloatingJoint j = new FloatingJoint("SphereJoint"+counter, counter+"", new Vector3d(Math.random()*10-5,Math.random()*10-5,Math.random()*2+radius*2), this);
@@ -90,8 +94,10 @@ public class FallingObjectsRobot extends Robot {
         addSphereContactPoints(j, counter, radius);
 
         return j;
+
     }
     public void addSphereContactPoints(FloatingJoint j, int counter, double radius){
+
         int iterator = 0;
         for(double phi = 0; phi < Math.PI; phi += Math.PI/10.0){
             for(double theta = 0; theta < Math.PI*2.0; theta += Math.PI*0.35){
@@ -101,5 +107,6 @@ public class FallingObjectsRobot extends Robot {
                 iterator++;
             }
         }
+
     }
 }
