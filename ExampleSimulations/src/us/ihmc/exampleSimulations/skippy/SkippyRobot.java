@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.doublePendulum;
+package us.ihmc.exampleSimulations.skippy;
 
 import javax.vecmath.Vector3d;
 
@@ -11,26 +11,26 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 
 
-/** 
- * This class DoublePendulumRobot is a public class that extends Robot. The class Robot is
+/**
+ * This class SkippyRobot is a public class that extends Robot. The class Robot is
  * included in the Simulation Construction Set and has built in graphics, dynamics, etc.
- * Extending the class is an easy way to make a new type of robot, in this case a DoublePendulumRobot.
+ * Extending the class is an easy way to make a new type of robot, in this case a SkippyRobot.
  */
-public class DoublePendulumRobot extends Robot
+public class SkippyRobot extends Robot
 {
    private static final long serialVersionUID = -7671864179791904256L;
-	
-   /* L1 and L2 are the link lengths, M1 and M2 are the link masses, and R1 and R2 are the radii of the links, 
+
+   /* L1 and L2 are the link lengths, M1 and M2 are the link masses, and R1 and R2 are the radii of the links,
     * Iyy1 and Iyy2 are the moments of inertia of the links. The moments of inertia are defined about the COM
     * for each link.
     */
    public static final double
-      L1 = 1.0, L2 = 2.0, M1 = 1.0, M2 = 1.0, R1 = 0.1, R2 = 0.05, Iyy1 = 0.083, Iyy2 = 0.33;
+         L1 = 1.0, L2 = 2.0, M1 = 1.0, M2 = 1.0, R1 = 0.1, R2 = 0.05, Iyy1 = 0.083, Iyy2 = 0.33;
 
-   
-   public DoublePendulumRobot()
+
+   public SkippyRobot()
    {
-      super("DoublePendulum"); // create and instance of Robot
+      super("Skippy"); // create and instance of Robot
 
       // Create joints and assign links. Pin joints have a single axis of rotation.
       PinJoint pin1 = new PinJoint("joint1", new Vector3d(0.0, 0.0, 0.0), this, Axis.Y);
@@ -40,7 +40,7 @@ public class DoublePendulumRobot extends Robot
       this.addRootJoint(pin1);
 
       /*
-       *  The second joint is initiated with the offset vector (0.0,0.0,L1) since 
+       *  The second joint is initiated with the offset vector (0.0,0.0,L1) since
        *  it should be placed a distance of L1 in the Z direction from the previous joint.
        */
       Joint pin2 = new PinJoint("joint2", new Vector3d(0.0, 0.0, L1), this, Axis.Y);
@@ -49,9 +49,8 @@ public class DoublePendulumRobot extends Robot
       pin1.addJoint(pin2);
    }
 
-
    /**
-    * Create the first link for the DoublePendulumRobot.
+    * Create the first link for the SkippyRobot.
     */
    private Link link1()
    {
@@ -63,7 +62,7 @@ public class DoublePendulumRobot extends Robot
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCylinder(L1, R1, YoAppearance.Red());
-      
+
       // associate the linkGraphics object with the link object
       ret.setLinkGraphics(linkGraphics);
 
@@ -71,7 +70,7 @@ public class DoublePendulumRobot extends Robot
    }
 
    /**
-    * Create the second link for the DoublePendulumRobot.
+    * Create the second link for the SkippyRobot.
     */
    private Link link2()
    {

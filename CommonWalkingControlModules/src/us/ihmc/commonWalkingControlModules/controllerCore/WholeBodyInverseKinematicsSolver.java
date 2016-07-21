@@ -31,6 +31,7 @@ public class WholeBodyInverseKinematicsSolver
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
    private final Map<OneDoFJoint, DoubleYoVariable> jointVelocitiesSolution = new HashMap<>();
+   private final Map<OneDoFJoint, DoubleYoVariable> jointPositionsSolution = new HashMap<>();
 
    private final SixDoFJoint rootJoint;
    private final OneDoFJoint[] controlledOneDoFJoints;
@@ -53,7 +54,9 @@ public class WholeBodyInverseKinematicsSolver
       {
          OneDoFJoint joint = controlledOneDoFJoints[i];
          DoubleYoVariable jointVelocitySolution = new DoubleYoVariable("qd_qp_" + joint.getName(), registry);
+         DoubleYoVariable jointPositionSolution = new DoubleYoVariable("q_qp_" + joint.getName(), registry);
          jointVelocitiesSolution.put(joint, jointVelocitySolution);
+         jointPositionsSolution.put(joint, jointPositionSolution);
       }
 
       parentRegistry.addChild(registry);
@@ -96,11 +99,13 @@ public class WholeBodyInverseKinematicsSolver
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
          double desiredVelocity = jointVelocities.get(jointIndex, 0);
          lowLevelOneDoFJointDesiredDataHolder.setDesiredJointVelocity(joint, desiredVelocity);
+         jointVelocitiesSolution.get(joint).set(desiredVelocity);
 
          if (jointIndex > rootJointIndices[rootJointIndices.length - 1])
             jointIndex++; // Because of quaternion :/
          double desiredPosition = jointConfigurations.get(jointIndex, 0);
          lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition(joint, desiredPosition);
+         jointPositionsSolution.get(joint).set(desiredPosition);
       }
    }
 

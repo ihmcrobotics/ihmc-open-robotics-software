@@ -141,9 +141,8 @@ public class ICPProportionalController
       {
          rateLimitCMP(desiredCMP, desiredCMPPreviousValue, perfectCMP, previousPerfectCMP);
          rateLimitedCMPOutput.set(desiredCMP);
+         previousPerfectCMP.set(perfectCMP);
       }
-
-      previousPerfectCMP.set(perfectCMP);
 
       return desiredCMP;
    }
