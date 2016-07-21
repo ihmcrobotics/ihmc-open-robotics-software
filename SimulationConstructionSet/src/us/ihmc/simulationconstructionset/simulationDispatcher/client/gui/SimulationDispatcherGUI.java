@@ -33,9 +33,9 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.simulationconstructionset.gui.SelectedVariableHolder;
-import us.ihmc.simulationconstructionset.gui.VarListVarPanel;
-import us.ihmc.simulationconstructionset.gui.VarPanelJPopupMenu;
 import us.ihmc.simulationconstructionset.gui.ViewportPanel;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariableListPanel;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanelJPopupMenu;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchHostList;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationDispatcher;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationToDispatch;
@@ -52,7 +52,7 @@ public class SimulationDispatcherGUI
 
    private JPanel simContentPane, buttonPanel, hostContentPane;
 
-   private VarListVarPanel varPanel;
+   private YoVariableListPanel varPanel;
    private SelectedVariableHolder selectedVariableHolder = new SelectedVariableHolder();
 
    private DoneSimsPanel doneSimsPanel;
@@ -102,7 +102,7 @@ public class SimulationDispatcherGUI
 
       simContentPane = new JPanel(new BorderLayout());
 
-      varPanel = new VarListVarPanel("new panel", selectedVariableHolder, new VarPanelJPopupMenu(selectedVariableHolder));
+      varPanel = new YoVariableListPanel("new panel", selectedVariableHolder, new YoVariablePanelJPopupMenu(selectedVariableHolder));
 
 
 
@@ -403,7 +403,7 @@ public class SimulationDispatcherGUI
 
       ////////////////////////
 
-      varPanel = new VarListVarPanel(dispatchSim.getDescription(), selectedVariableHolder, new VarPanelJPopupMenu(selectedVariableHolder));
+      varPanel = new YoVariableListPanel(dispatchSim.getDescription(), selectedVariableHolder, new YoVariablePanelJPopupMenu(selectedVariableHolder));
 
       String[] vars = dispatchSim.getOutputStateVariableNames();
       for (int i = 0; i < vars.length; i++)

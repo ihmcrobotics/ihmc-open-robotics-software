@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.gui;
+package us.ihmc.simulationconstructionset.gui.yoVariableSearch;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
-public class VarPanelTransferable implements Transferable
+public class YoVariablePanelTransferable implements Transferable
 {
    private static DataFlavor abstractYoVariableDataFlavor = null;
 
@@ -28,6 +28,7 @@ public class VarPanelTransferable implements Transferable
       return abstractYoVariableDataFlavor;
    }
 
+   @Override
    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException
    {
       if ((flavor != null) && flavor.equals(getAbstractYoVariableDataFlavor()))
@@ -38,11 +39,13 @@ public class VarPanelTransferable implements Transferable
       return null;
    }
 
+   @Override
    public DataFlavor[] getTransferDataFlavors()
    {
       return new DataFlavor[] {getAbstractYoVariableDataFlavor()};
    }
 
+   @Override
    public boolean isDataFlavorSupported(DataFlavor flavor)
    {
       if ((flavor != null) && flavor.equals(getAbstractYoVariableDataFlavor()))

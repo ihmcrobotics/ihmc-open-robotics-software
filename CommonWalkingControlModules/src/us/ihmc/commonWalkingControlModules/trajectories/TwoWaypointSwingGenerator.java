@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 {
-   private static final int maxTimeIterations = 1;
+   private static final int maxTimeIterations = 2;
    private static final int numberWaypoints = 2;
    private static final double[] waypointProportions = new double[] {0.15, 0.85};
    private static final double defaultSwingHeight = 0.1;
@@ -136,12 +136,6 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
          }
          break;
       case PUSH_RECOVERY:
-         for (int i = 0; i < numberWaypoints; i++)
-         {
-            waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
-            waypointPositions.get(i).add(0.0, 0.0, swingHeight.getDoubleValue());
-         }
-         break;
       case BASIC:
       case DEFAULT:
          for (int i = 0; i < numberWaypoints; i++)

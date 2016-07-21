@@ -10,11 +10,11 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
    private boolean createSCSVideos = false;
    private boolean checkNothingChangedInSimulation = false;
    private boolean keepSCSUp = false;
-   
+
    public SimulationTestingParameters()
    {
    }
-   
+
    public static SimulationTestingParameters createFromEnvironmentVariables()
    {
       SimulationTestingParameters parametersToReturn = new SimulationTestingParameters();
@@ -32,14 +32,14 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
          Boolean runMultiThreaded = Boolean.parseBoolean(property);
          setRunMultiThreaded(runMultiThreaded);
       }
-      
+
       property = System.getProperty("use.perfect.sensors");
       if (property != null)
       {
          Boolean usePerfectSensors = Boolean.parseBoolean(property);
          setUsePefectSensors(usePerfectSensors);
       }
-      
+
       property = System.getProperty("create.scs.videos");
       if (property != null)
       {
@@ -53,7 +53,7 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
          Boolean checkNothingChanged = Boolean.parseBoolean(property);
          setCheckNothingChangedInSimulation(checkNothingChanged);
       }
-      
+
       property = System.getProperty("keep.scs.up");
       if (property != null)
       {
@@ -64,7 +64,7 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
       //Properties properties = System.getProperties();
       //System.out.println(properties.toString());
    }
-   
+
    public boolean getUsePefectSensors()
    {
       return usePefectSensors;
@@ -74,17 +74,17 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
    {
       this.usePefectSensors = usePefectSensors;
    }
-   
+
    public void setRunMultiThreaded(boolean runMultiThreaded)
    {
       this.runMultiThreaded = runMultiThreaded;
    }
-   
+
    public boolean getRunMultiThreaded()
    {
       return runMultiThreaded;
    }
-   
+
    public boolean getCreateSCSVideos()
    {
       return createSCSVideos;
@@ -104,7 +104,7 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
    {
       this.checkNothingChangedInSimulation = checkNothingChangedInSimulation;
    }
-   
+
    public boolean getKeepSCSUp()
    {
       return keepSCSUp;
@@ -114,15 +114,15 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
    {
       this.keepSCSUp = keepSCSUp;
    }
-   
+
    public String toString()
    {
       String st = super.toString();
-      st += "createSCSVideos: " + createSCSVideos + "\n";    
+      st += "createSCSVideos: " + createSCSVideos + "\n";
       st += "videoDir: " + System.getProperty("create.videos.dir") + "\n";
-      st += "checkNothingChangedInSimulation: " + checkNothingChangedInSimulation + "\n";    
-      st += "keepSCSUp: " + keepSCSUp + "\n";    
-      return st;   
+      st += "checkNothingChangedInSimulation: " + checkNothingChangedInSimulation + "\n";
+      st += "keepSCSUp: " + keepSCSUp + "\n";
+      return st;
    }
 
 }

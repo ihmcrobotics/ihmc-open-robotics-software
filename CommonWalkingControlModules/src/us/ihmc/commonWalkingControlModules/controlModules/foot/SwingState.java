@@ -47,8 +47,6 @@ public class SwingState extends AbstractUnconstrainedState
    private final boolean useNewSwingTrajectoyOptimization;
    private static final boolean CONTROL_TOE = false;
 
-   private final boolean visualizeSwingTrajectory = true;
-
    private final BooleanYoVariable replanTrajectory;
    private final YoVariableDoubleProvider swingTimeRemaining;
 
@@ -136,16 +134,16 @@ public class SwingState extends AbstractUnconstrainedState
       else
          maxSwingHeightFromStanceFoot = 0.0;
 
+      useNewSwingTrajectoyOptimization = walkingControllerParameters.useSwingTrajectoryOptimizer();
       swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider, initialConfigurationProvider,
             initialVelocityProvider, stanceConfigurationProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider, registry,
-            yoGraphicsListRegistry, maxSwingHeightFromStanceFoot, visualizeSwingTrajectory);
+            yoGraphicsListRegistry, maxSwingHeightFromStanceFoot, !useNewSwingTrajectoyOptimization);
       this.touchdownVelocityProvider = touchdownVelocityProvider;
       swingTrajectoryGeneratorNew = new TwoWaypointSwingGenerator(namePrefix + "SwingNew", maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
 
       ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
       ArrayList<PositionTrajectoryGenerator> pushRecoveryPositionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
 
-      useNewSwingTrajectoyOptimization = walkingControllerParameters.useSwingTrajectoryOptimizer();
       if (useNewSwingTrajectoyOptimization)
       {
          positionTrajectoryGenerators.add(swingTrajectoryGeneratorNew);
