@@ -12,13 +12,15 @@ public class QuadrupedTestBehaviors
 {
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
    {
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.STAND_READY));
       conductor.simulate();
 
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 2.0));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.1));
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getComPositionEstimateZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.05));
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.STAND));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
    }
 

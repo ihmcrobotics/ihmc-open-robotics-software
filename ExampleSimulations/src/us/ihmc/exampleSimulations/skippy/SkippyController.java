@@ -1,25 +1,25 @@
-package us.ihmc.exampleSimulations.doublePendulum;
+package us.ihmc.exampleSimulations.skippy;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 
-public class DoublePendulumController implements RobotController
+public class SkippyController implements RobotController
 {
-	
+
    // tau_* is torque, q_* is position, qd_* is velocity for joint *
    private DoubleYoVariable tau_joint1, tau_joint2, q_joint1, q_joint2, qd_joint1, qd_joint2;
    private DoubleYoVariable k1, k2, k3, k4; // these are the controller gain parameters
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("DoublePendulumController");
+   private final YoVariableRegistry registry = new YoVariableRegistry("SkippyController");
 
    private String name;
 
-   public DoublePendulumController(DoublePendulumRobot rob, String name)
+   public SkippyController(SkippyRobot rob, String name)
    {
       this.name = name;
-      
-	  // get variable references from the robot
+
+      // get variable references from the robot
       q_joint1 = (DoubleYoVariable)rob.getVariable("q_joint1");
       qd_joint1 = (DoubleYoVariable)rob.getVariable("qd_joint1");
       tau_joint1 = (DoubleYoVariable)rob.getVariable("tau_joint1");
@@ -52,14 +52,14 @@ public class DoublePendulumController implements RobotController
    {
       return registry;
    }
-   
+
    public String getName()
    {
       return name;
    }
-   
+
    public void initialize()
-   {      
+   {
    }
 
    public String getDescription()
