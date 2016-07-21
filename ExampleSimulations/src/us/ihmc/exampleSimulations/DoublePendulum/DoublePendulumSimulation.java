@@ -16,7 +16,7 @@ public class DoublePendulumSimulation
      // doublePendulum[0].pin1.setLimitStops(3,5,6,10);
 //      doublePendulum[0].pin1.setLimitStops(1,15,15,15);
 
-//      doublePendulum.setController(new DoublePendulumController(doublePendulum, "doublePendulumController"));
+     doublePendulum.setController(new DoublePendulumController(doublePendulum, "doublePendulumController"));
     //  doublePendulum[1].setController(new DoublePendulumController(doublePendulum[1],"doublePendulumController"));
      // sim = new SimulationConstructionSet(doublePendulum);
       sim = new SimulationConstructionSet(doublePendulum);
