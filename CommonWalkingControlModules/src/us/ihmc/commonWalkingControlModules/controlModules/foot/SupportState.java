@@ -73,6 +73,10 @@ public class SupportState extends AbstractFootControlState
    private final FramePoint2d cop = new FramePoint2d();
    private final FramePoint2d desiredCoP = new FramePoint2d();
 
+   // For testing:
+   private final BooleanYoVariable assumeCopOnEdge;
+   private final BooleanYoVariable assumeFootBarelyLoaded;
+
    public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.FULL, footControlHelper);
@@ -100,6 +104,9 @@ public class SupportState extends AbstractFootControlState
       desiredAngularVelocity.setToZero(worldFrame);
       desiredLinearAcceleration.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
+
+      assumeCopOnEdge = new BooleanYoVariable(prefix + "AssumeCopOnEdge", registry);
+      assumeFootBarelyLoaded = new BooleanYoVariable(prefix + "AssumeFootBarelyLoaded", registry);
 
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
@@ -149,6 +156,12 @@ public class SupportState extends AbstractFootControlState
       // determine foot state
       copOnEdge.set(footControlHelper.isCoPOnEdge());
       footBarelyLoaded.set(footSwitch.computeFootLoadPercentage() < footLoadThreshold.getDoubleValue());
+
+      if (assumeCopOnEdge.getBooleanValue())
+         copOnEdge.set(true);
+      if (assumeFootBarelyLoaded.getBooleanValue())
+         footBarelyLoaded.set(true);
+
       updateHoldPositionSetpoints();
 
       // update the control frame

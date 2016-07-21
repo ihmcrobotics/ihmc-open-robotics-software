@@ -48,6 +48,7 @@ public class BuildingPendulumRobot extends Robot
       joints.put(RobotSide.RIGHT, pendulumJoint2);
 
       pendulumJoint1.setInitialState(getSwitchAngle(RobotSide.LEFT) - 0.2, 0.0);
+
       pendulumJoint2.setInitialState(0.0, 0.0);
       this.addRootJoint(rootJoint);
    }
@@ -69,7 +70,11 @@ public class BuildingPendulumRobot extends Robot
       ret.setLinkGraphics(linkGraphics);
       return ret;
    }
-
+//   public SideDependentList getPoint(RobotSide activeSide)
+//   {
+//      PinJoint joint = joints.get(activeSide);
+//      return joint;
+//   }
    public double getPendulumAngle(RobotSide activeSide)
    {
       PinJoint joint = joints.get(activeSide);
@@ -88,6 +93,11 @@ public class BuildingPendulumRobot extends Robot
       joint.setQd(qd);
    }
 
+   public double getPendulumVelocity(RobotSide activeSide)
+   {
+      PinJoint joint = joints.get(activeSide);
+       return joint.getQD().getDoubleValue();
+   }
    public double getSwitchAngle(RobotSide activeSide)
    {
       if (activeSide == RobotSide.LEFT)

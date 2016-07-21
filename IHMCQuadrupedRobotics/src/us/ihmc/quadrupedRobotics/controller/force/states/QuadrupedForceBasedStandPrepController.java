@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -8,6 +9,7 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceCont
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.params.BooleanParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
@@ -44,6 +46,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 100, 100, 100);
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
+   private final BooleanParameter useForceFeedbackControl = parameterFactory.createBoolean("useForceFeedbackControl", true);
 
    // Task space controller
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
@@ -58,6 +61,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private FramePoint solePositionSetpoint;
    private final Vector3d zeroVelocity;
    private final double robotLength;
+   private SDFFullQuadrupedRobotModel fullRobotModel;
 
    public QuadrupedForceBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
    {
@@ -87,6 +91,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       hindLeftHipRollFrame.setToZero(referenceFrames.getLegAttachmentFrame(RobotQuadrant.HIND_LEFT));
       hindLeftHipRollFrame.changeFrame(referenceFrames.getBodyFrame());
       robotLength = frontLeftHipRollFrame.getX() - hindLeftHipRollFrame.getX();
+      fullRobotModel = environment.getFullRobotModel();
       environment.getParentRegistry().addChild(registry);
    }
 
@@ -115,9 +120,10 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
+         taskSpaceControllerSettings.setContactState(quadrant, ContactState.NO_CONTACT);
+         fullRobotModel.getOneDoFJointBeforeFoot(quadrant).setUseFeedBackForceControl(useForceFeedbackControl.get());
       }
       taskSpaceController.reset();
    }
