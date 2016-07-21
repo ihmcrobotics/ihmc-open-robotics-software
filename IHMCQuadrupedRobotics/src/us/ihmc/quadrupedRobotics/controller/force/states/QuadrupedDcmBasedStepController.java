@@ -25,6 +25,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -203,8 +204,13 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       comPositionController.compute(taskSpaceControllerCommands.getComForce(), comPositionControllerSetpoints, taskSpaceEstimates);
 
       // update desired body orientation, angular velocity, and torque
+      taskSpaceEstimates.getBodyOrientation().changeFrame(worldFrame);
+      double groundPitch = groundPlaneEstimator.getPitch(taskSpaceEstimates.getBodyOrientation().getYaw());
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(supportFrame);
       bodyOrientationControllerSetpoints.getBodyOrientation().set(inputProvider.getBodyOrientationInput());
+      bodyOrientationControllerSetpoints.getBodyOrientation().setYawPitchRoll(RotationTools.computeYaw(inputProvider.getBodyOrientationInput()),
+            RotationTools.computePitch(inputProvider.getBodyOrientationInput()) + groundPitch,
+            RotationTools.computeRoll(inputProvider.getBodyOrientationInput()));
       bodyOrientationControllerSetpoints.getBodyAngularVelocity().setToZero();
       bodyOrientationControllerSetpoints.getComTorqueFeedforward().setToZero();
       bodyOrientationController.compute(taskSpaceControllerCommands.getComTorque(), bodyOrientationControllerSetpoints, taskSpaceEstimates);
@@ -297,6 +303,10 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    @Override
    public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
    {
+      // update ground plane estimate
+      groundPlanePositions.get(thisStepQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
+      groundPlanePositions.get(thisStepQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+      groundPlaneEstimator.compute(groundPlanePositions);
    }
 
    @Override

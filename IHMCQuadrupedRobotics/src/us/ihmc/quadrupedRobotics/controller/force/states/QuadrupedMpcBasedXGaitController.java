@@ -94,7 +94,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final QuadrupedXGaitSettings xGaitSettings;
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final ArrayList<QuadrupedTimedStep> xGaitPreviewSteps;
-   private EndDependentList<QuadrupedTimedStep> xGaitCurrentSteps;
+   private final EndDependentList<QuadrupedTimedStep> xGaitCurrentSteps;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final FramePoint supportCentroid;
    private final FrameVector stepAdjustmentVector;
