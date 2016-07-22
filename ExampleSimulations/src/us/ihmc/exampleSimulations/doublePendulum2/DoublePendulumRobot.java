@@ -27,14 +27,27 @@ public class DoublePendulumRobot extends Robot
 
    public DoublePendulumRobot(String yoVariable)
    {
+
+
       super(yoVariable); // create and instance of Robot
+      FloatingPlanarJoint floatingPlanarJoint = new FloatingPlanarJoint(yoVariable,this);
+
+      Link ceiling = new Link("link1");
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      linkGraphics.addCube(5, 5, 0.1);
+      ceiling.setLinkGraphics(linkGraphics);
+      floatingPlanarJoint.setLink(ceiling);
+
+
+
       // Create joints and assign links. Pin joints have a single axis of rotation.
 
      // pin1.setLimitStops(0,12, 2, 3);
        pin1.setInitialState(0.01, 0.01);
       Link link1 = link1();
       pin1.setLink(link1); // associate link1 with the joint pin1
-      this.addRootJoint(pin1);
+      floatingPlanarJoint.addJoint(pin1);
+      this.addRootJoint(floatingPlanarJoint);
 
 
    }
