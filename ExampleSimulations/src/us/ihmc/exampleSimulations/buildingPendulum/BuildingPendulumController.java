@@ -15,9 +15,8 @@ public class BuildingPendulumController extends SimpleRobotController
 
    private double pendulumAngle;
    private double pendulumAngleSwitch;
-   private double angularChange = 2*Math.sin(BuildingPendulumRobot.distance/(2*BuildingPendulumRobot.length));
-  // private double angularChange = 2*Math.asin(BuildingPendulumRobot.distance/(2*BuildingPendulumRobot.length));
-   private double  velocity;
+   private double angularChange = 2*Math.asin(BuildingPendulumRobot.distance/(2*BuildingPendulumRobot.length));
+   private double velocity = 0.0;
 
 
    public BuildingPendulumController(BuildingPendulumRobot robot)
@@ -33,15 +32,13 @@ public class BuildingPendulumController extends SimpleRobotController
 
    public void setPendulumAngles()
    {
-      pendulumAngle =robot.getPendulumAngle(activeSide);
+      pendulumAngle = robot.getPendulumAngle(activeSide);
       pendulumAngleSwitch = robot.getSwitchAngle(activeSide);
    }
 
    public  void doControl()
    {
       setPendulumAngles();
-
-
 
       boolean atCenter;
       if (activeSide == RobotSide.LEFT)
@@ -51,27 +48,12 @@ public class BuildingPendulumController extends SimpleRobotController
 
       if (atCenter)
       {
+         // switch active side
          activeSide = activeSide.getOppositeSide();
+
+         // compute and set the state of the new active side
+         velocity = robot.getPendulumVelocity(activeSide.getOppositeSide()) * Math.cos(angularChange);
          robot.setPendulumAngle(activeSide, robot.getSwitchAngle(activeSide));
-
-
-
-         if (activeSide == RobotSide.LEFT)
-         {
-
-            //velocity =(-1)*(robot.getPendulumVelocity(activeSide.getOppositeSide())*Math.cos(angularChange));
-           // velocity =-0.5;//(-1)*(robot.getPendulumVelocity(activeSide.getOppositeSide())/2);
-            velocity =-(velocity-(robot.getPendulumVelocity(activeSide.getOppositeSide())*Math.cos(angularChange)));
-           // velocity =-(velocity-(robot.getPendulumVelocity(activeSide.getOppositeSide())/2));
-         }
-         else
-         {
-            //velocity =(robot.getPendulumVelocity(activeSide.getOppositeSide())*Math.cos(angularChange));
-           // velocity =0.5;//(robot.getPendulumVelocity(activeSide.getOppositeSide())/2);
-            velocity =(velocity-(robot.getPendulumVelocity(activeSide.getOppositeSide())*Math.cos(angularChange)));
-           // velocity =(velocity-(robot.getPendulumVelocity(activeSide.getOppositeSide())/2));
-         }
-
          robot.setPendulumVelocity(activeSide, velocity);
       }
 
