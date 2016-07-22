@@ -68,12 +68,12 @@ public class QuadrupedFootSwitchFactory
          jointTorqueBasedTouchdownDetector.setTorqueThreshold(jointTorqueTouchdownThreshold.get());
          touchdownDetectorBasedFootSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
 
-         JointVelocityFiniteDifferenceBasedTouchdownDetector jointVelocityFiniteDifferenceBasedTouchdownDetector = new JointVelocityFiniteDifferenceBasedTouchdownDetector(
-               fullRobotModel.get().getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), controllerThinksHasTouchedDown, registry);
-         jointVelocityFiniteDifferenceBasedTouchdownDetector.setFootInSwingThreshold(footInSwingVelocityThreshold.get());
-         jointVelocityFiniteDifferenceBasedTouchdownDetector.setTouchdownThreshold(jointVelocityTouchdownThreshold.get());
-
-         touchdownDetectorBasedFootSwitch.addTouchdownDetector(jointVelocityFiniteDifferenceBasedTouchdownDetector);
+//         JointVelocityFiniteDifferenceBasedTouchdownDetector jointVelocityFiniteDifferenceBasedTouchdownDetector = new JointVelocityFiniteDifferenceBasedTouchdownDetector(
+//               fullRobotModel.get().getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), controllerThinksHasTouchedDown, registry);
+//         jointVelocityFiniteDifferenceBasedTouchdownDetector.setFootInSwingThreshold(footInSwingVelocityThreshold.get());
+//         jointVelocityFiniteDifferenceBasedTouchdownDetector.setTouchdownThreshold(jointVelocityTouchdownThreshold.get());
+//
+//         touchdownDetectorBasedFootSwitch.addTouchdownDetector(jointVelocityFiniteDifferenceBasedTouchdownDetector);
 
          footSwitches.set(robotQuadrant, touchdownDetectorBasedFootSwitch);
       }
