@@ -26,6 +26,17 @@ import us.ihmc.robotics.referenceFrames.XYPlaneFrom3PointsFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
+/**
+ * Wrapper for TrajectoryPointOptimizer for the generation of swing trajectories. This is more efficient then
+ * using the PositionOptimizedTrajectoryGenerator since it assumes that the trajectory can be reduced to a
+ * two dimensional problem by smart choice of the reference frame the computation is done in. Use this class only
+ * if your swing lies in a plane.
+ *
+ * Aside from the reduction to two dimensions this class is similar to PositionOptimizedTrajectoryGenerator
+ *
+ * @author gwiedebach
+ *
+ */
 public class Position2dOptimizedSwingTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private static final int maxWaypoints = 12;
@@ -64,8 +75,8 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements PositionTraj
    private final YoFrameVector desiredAcceleration;
 
    private final FramePoint tempPos = new FramePoint();
-   private final FramePoint tempVel = new FramePoint();
-   private final FramePoint tempAcc = new FramePoint();
+   private final FrameVector tempVel = new FrameVector();
+   private final FrameVector tempAcc = new FrameVector();
 
    private final int markers = 30;
    private final BagOfBalls trajectoryViz;
@@ -297,8 +308,6 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements PositionTraj
       tempPos.changeFrame(trajectoryFrame);
       tempVel.changeFrame(trajectoryFrame);
       tempAcc.changeFrame(trajectoryFrame);
-      tempVel.sub(trajectoryOrigin);
-      tempAcc.sub(trajectoryOrigin);
       desiredPosition.set(tempPos);
       desiredVelocity.set(tempVel);
       desiredAcceleration.set(tempAcc);
