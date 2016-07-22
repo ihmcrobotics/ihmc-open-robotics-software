@@ -40,10 +40,6 @@ public class SkippyRobot extends Robot
 
       this.setGravity(0.0,0.0,-9.81);
 
-      GroundContactModel ground = new LinearGroundContactModel(this, 1422, 150.6, 50.0, 1000.0, this.getRobotsYoVariableRegistry());
-      GroundProfile3D profile = new FlatGroundProfile();
-      ground.setGroundProfile3D(profile);
-      this.setGroundContactModel(ground);
 
       // create GroundContactPoints to distinguish when robot touches the ground
       GroundContactPoint footContact = new GroundContactPoint("root", new Vector3d(0.0, 0.0, 0.0), this);
@@ -85,6 +81,11 @@ public class SkippyRobot extends Robot
       shoulder.setLink(crossBar);
       this.hip.addJoint(shoulder);
       shoulder.addGroundContactPoint(shoulderContact);
+
+      GroundContactModel ground = new LinearGroundContactModel(this, 1422, 150.6, 50.0, 1000.0, this.getRobotsYoVariableRegistry());
+      GroundProfile3D profile = new FlatGroundProfile();
+      ground.setGroundProfile3D(profile);
+      this.setGroundContactModel(ground);
    }
 
    /**
