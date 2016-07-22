@@ -88,6 +88,21 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements PositionTraj
    private final FramePoint pointOnX = new FramePoint();
    private final FramePoint pointOnY = new FramePoint();
 
+   public Position2dOptimizedSwingTrajectoryGenerator()
+   {
+      this("", new YoVariableRegistry(""));
+   }
+
+   public Position2dOptimizedSwingTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, parentRegistry, null, TrajectoryPointOptimizer.maxIterations);
+   }
+
+   public Position2dOptimizedSwingTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   {
+      this(namePrefix, parentRegistry, graphicsListRegistry, TrajectoryPointOptimizer.maxIterations);
+   }
+
    public Position2dOptimizedSwingTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry graphicsListRegistry, int maxIterations)
    {

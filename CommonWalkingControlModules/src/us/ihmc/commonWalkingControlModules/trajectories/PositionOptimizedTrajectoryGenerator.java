@@ -147,11 +147,11 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
          segments.add(new YoPolynomial(namePrefix + "Segment" + 0 + "Axis" + axis.getIndex(), order.getCoefficients(), registry));
          trajectories.put(axis, segments);
       }
-      segments.set(1);
 
       while (waypointTimes.size() < maxWaypoints)
          extendBySegment(registry);
 
+      reset();
       parentRegistry.addChild(registry);
 
       if (graphicsListRegistry != null)
@@ -167,6 +167,23 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
          trajectories.get(axis).add(new YoPolynomial(namePrefix + "Segment" + size + "Axis" + axis.getIndex(), order.getCoefficients(), registry));
       waypointTimes.add(new DoubleYoVariable(namePrefix + "WaypointTime" + size, registry));
       waypointPositions.add();
+   }
+
+   /**
+    * Resets the optimizer and removes all waypoints as well as previous start and end conditions.
+    */
+   public void reset()
+   {
+      initialPosition.setToNaN(trajectoryFrame);
+      initialVelocity.setToNaN(trajectoryFrame);
+      finalPosition.setToNaN(trajectoryFrame);
+      finalVelocity.setToNaN(trajectoryFrame);
+      segments.set(1);
+
+      this.waypointPositions.clear();
+      optimizer.setWaypoints(waypointPositions);
+      coefficients.clear();
+      coefficients.add();
    }
 
    /**
@@ -236,6 +253,9 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
    @Override
    public void initialize()
    {
+      if (initialPosition.containsNaN())
+         throw new RuntimeException("Does not have valid enpoint conditions. Did you call setEndpointConditions?");
+
       optimizer.compute(maxIterations.getIntegerValue());
 
       for (int i = 0; i < segments.getIntegerValue()-1; i++)
