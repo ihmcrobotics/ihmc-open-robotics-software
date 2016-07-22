@@ -4,8 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 
 public enum PolynomialOrder {
    ORDER3,
-   ORDER5,
-   ORDER7;
+   ORDER5;
+//   ORDER7;
 
    public int getCoefficients()
    {
@@ -15,8 +15,8 @@ public enum PolynomialOrder {
          return 4;
       case ORDER5:
          return 6;
-      case ORDER7:
-         return 8;
+//      case ORDER7:
+//         return 8;
       default:
          throw new RuntimeException("Unknown Polynomial Order");
       }
@@ -29,18 +29,18 @@ public enum PolynomialOrder {
 
       switch (this)
       {
-      case ORDER7:
-         hBlockToPack.set(blockSize-6, blockSize-6, 1764.0/11.0 * timeDifference(11, t0, t1));
-         hBlockToPack.set(blockSize-5, blockSize-6, 126.0       * timeDifference(10, t0, t1));
-         hBlockToPack.set(blockSize-4, blockSize-6, 280.0/3.0   * timeDifference(9,  t0, t1));
-         hBlockToPack.set(blockSize-3, blockSize-6, 63.0        * timeDifference(8,  t0, t1));
-         hBlockToPack.set(blockSize-2, blockSize-6, 36.0        * timeDifference(7,  t0, t1));
-         hBlockToPack.set(blockSize-1, blockSize-6, 14.0        * timeDifference(6,  t0, t1));
-         hBlockToPack.set(blockSize-5, blockSize-5, 100.0       * timeDifference(9,  t0, t1));
-         hBlockToPack.set(blockSize-4, blockSize-5, 75.0        * timeDifference(8,  t0, t1));
-         hBlockToPack.set(blockSize-3, blockSize-5, 360.0/7.0   * timeDifference(7,  t0, t1));
-         hBlockToPack.set(blockSize-2, blockSize-5, 30.0        * timeDifference(6,  t0, t1));
-         hBlockToPack.set(blockSize-1, blockSize-5, 12.0        * timeDifference(5,  t0, t1));
+//      case ORDER7:
+//         hBlockToPack.set(blockSize-6, blockSize-6, 1764.0/11.0 * timeDifference(11, t0, t1));
+//         hBlockToPack.set(blockSize-5, blockSize-6, 126.0       * timeDifference(10, t0, t1));
+//         hBlockToPack.set(blockSize-4, blockSize-6, 280.0/3.0   * timeDifference(9,  t0, t1));
+//         hBlockToPack.set(blockSize-3, blockSize-6, 63.0        * timeDifference(8,  t0, t1));
+//         hBlockToPack.set(blockSize-2, blockSize-6, 36.0        * timeDifference(7,  t0, t1));
+//         hBlockToPack.set(blockSize-1, blockSize-6, 14.0        * timeDifference(6,  t0, t1));
+//         hBlockToPack.set(blockSize-5, blockSize-5, 100.0       * timeDifference(9,  t0, t1));
+//         hBlockToPack.set(blockSize-4, blockSize-5, 75.0        * timeDifference(8,  t0, t1));
+//         hBlockToPack.set(blockSize-3, blockSize-5, 360.0/7.0   * timeDifference(7,  t0, t1));
+//         hBlockToPack.set(blockSize-2, blockSize-5, 30.0        * timeDifference(6,  t0, t1));
+//         hBlockToPack.set(blockSize-1, blockSize-5, 12.0        * timeDifference(5,  t0, t1));
       case ORDER5:
          hBlockToPack.set(blockSize-4, blockSize-4, 400.0/7.0   * timeDifference(7,  t0, t1));
          hBlockToPack.set(blockSize-3, blockSize-4, 40.0        * timeDifference(6,  t0, t1));
@@ -77,9 +77,9 @@ public enum PolynomialOrder {
       lineToPack.reshape(1, getCoefficients());
       switch (this)
       {
-      case ORDER7:
-         lineToPack.set(0, getCoefficients()-8, 1.0 * Math.pow(t, 7));
-         lineToPack.set(0, getCoefficients()-7, 1.0 * Math.pow(t, 6));
+//      case ORDER7:
+//         lineToPack.set(0, getCoefficients()-8, 1.0 * Math.pow(t, 7));
+//         lineToPack.set(0, getCoefficients()-7, 1.0 * Math.pow(t, 6));
       case ORDER5:
          lineToPack.set(0, getCoefficients()-6, 1.0 * Math.pow(t, 5));
          lineToPack.set(0, getCoefficients()-5, 1.0 * Math.pow(t, 4));
@@ -103,9 +103,9 @@ public enum PolynomialOrder {
 
       switch (this)
       {
-      case ORDER7:
-         lineToPack.set(0, getCoefficients()-8, 7.0 * Math.pow(t, 6));
-         lineToPack.set(0, getCoefficients()-7, 6.0 * Math.pow(t, 5));
+//      case ORDER7:
+//         lineToPack.set(0, getCoefficients()-8, 7.0 * Math.pow(t, 6));
+//         lineToPack.set(0, getCoefficients()-7, 6.0 * Math.pow(t, 5));
       case ORDER5:
          lineToPack.set(0, getCoefficients()-6, 5.0 * Math.pow(t, 4));
          lineToPack.set(0, getCoefficients()-5, 4.0 * Math.pow(t, 3));
@@ -130,9 +130,9 @@ public enum PolynomialOrder {
 
       switch (this)
       {
-      case ORDER7:
-         lineToPack.set(0, getCoefficients()-8, 7.0 * 6.0 * Math.pow(t, 5));
-         lineToPack.set(0, getCoefficients()-7, 6.0 * 5.0 * Math.pow(t, 4));
+//      case ORDER7:
+//         lineToPack.set(0, getCoefficients()-8, 7.0 * 6.0 * Math.pow(t, 5));
+//         lineToPack.set(0, getCoefficients()-7, 6.0 * 5.0 * Math.pow(t, 4));
       case ORDER5:
          lineToPack.set(0, getCoefficients()-6, 5.0 * 4.0 * Math.pow(t, 3));
          lineToPack.set(0, getCoefficients()-5, 4.0 * 3.0 * Math.pow(t, 2));
@@ -157,10 +157,10 @@ public enum PolynomialOrder {
 
       switch (this)
       {
-      case ORDER7:
-         lineToPack.set(0, getCoefficients()-8, 7.0 * 6.0 * 5.0 * Math.pow(t, 4));
-         lineToPack.set(0, getCoefficients()-7, 6.0 * 5.0 * 4.0 * Math.pow(t, 3));
-         isEndCondition = true;
+//      case ORDER7:
+//         lineToPack.set(0, getCoefficients()-8, 7.0 * 6.0 * 5.0 * Math.pow(t, 4));
+//         lineToPack.set(0, getCoefficients()-7, 6.0 * 5.0 * 4.0 * Math.pow(t, 3));
+//         isEndCondition = true;
       case ORDER5:
          lineToPack.set(0, getCoefficients()-6, 5.0 * 4.0 * 3.0 * Math.pow(t, 2));
          lineToPack.set(0, getCoefficients()-5, 4.0 * 3.0 * 2.0 * t);

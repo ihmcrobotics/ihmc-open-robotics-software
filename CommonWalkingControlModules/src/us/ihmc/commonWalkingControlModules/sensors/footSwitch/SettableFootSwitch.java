@@ -81,4 +81,10 @@ public class SettableFootSwitch implements FootSwitchInterface
       this.hasFootHitGround.set(hasFootHitGround);
    }
 
+   @Override
+   public void trustFootSwitch(boolean trustFootSwitch)
+   {
+
+   }
+
 }
