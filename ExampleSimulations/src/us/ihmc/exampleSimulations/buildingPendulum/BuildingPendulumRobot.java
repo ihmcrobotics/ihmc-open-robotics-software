@@ -30,6 +30,8 @@ public class BuildingPendulumRobot extends Robot
 
       NullJoint rootJoint = new NullJoint("CeilingJoint", new Vector3d(), this);
 
+
+
       Link ceiling = new Link("link1");
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCube(5, 5, 0.1);
@@ -45,10 +47,15 @@ public class BuildingPendulumRobot extends Robot
       pendulumJoint2.setLink(createLink("pendulum2"));
       rootJoint.addJoint(pendulumJoint2);
 
+
       joints.put(RobotSide.LEFT, pendulumJoint1);
       joints.put(RobotSide.RIGHT, pendulumJoint2);
+
       double startingAngle = ((distance/2)+1)/length;
-      pendulumJoint1.setInitialState(getSwitchAngle(RobotSide.LEFT) - startingAngle, 0.0);
+      double startl =getSwitchAngle(RobotSide.LEFT) - startingAngle;
+
+
+      pendulumJoint1.setInitialState(startl, 0.0);
 
       pendulumJoint2.setInitialState(0.0, 0.0);
       this.addRootJoint(rootJoint);

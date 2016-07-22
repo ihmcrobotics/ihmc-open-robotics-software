@@ -23,9 +23,12 @@ public class BuildingPendulumController extends SimpleRobotController
    {
       this.robot = robot;
 
+//      System.out.println("L----- "+robot.getPendulumAngle(RobotSide.LEFT));
+//      System.out.println("R----- "+robot.getPendulumAngle(RobotSide.RIGHT));
+
       if(robot.getPendulumAngle(RobotSide.LEFT)> robot.getPendulumAngle(RobotSide.RIGHT))
          activeSide = RobotSide.LEFT;
-      else
+      else if(robot.getPendulumAngle(RobotSide.LEFT)< robot.getPendulumAngle(RobotSide.RIGHT))
          activeSide = RobotSide.RIGHT;
 
    }
