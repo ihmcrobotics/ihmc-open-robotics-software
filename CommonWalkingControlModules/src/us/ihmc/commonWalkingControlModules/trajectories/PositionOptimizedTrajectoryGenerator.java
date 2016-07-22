@@ -25,12 +25,23 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
+/**
+ * This class is a wrapper for the TrajectoryPointOptimizer. It was made for trajectories in 3d space and
+ * creates third order trajectories. It can be used either to generate waypoint times as velocities, or it
+ * can serve as an actual trajectory with the optimization taking place when the trajectory is initialized.
+ *
+ * The trajectory is continuous in acceleration but does not have zero initial and final acceleration. The
+ * optimization finds waypoint times and velocities such that the overall squared acceleration is minimized.
+ *
+ * @author gwiedebach
+ *
+ */
 public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryGenerator
 {
-   private static final int maxWaypoints = 12;
-   private static final int dimensions = 3;
-   private static final PolynomialOrder order = PolynomialOrder.ORDER3;
-   private static final ReferenceFrame trajectoryFrame = ReferenceFrame.getWorldFrame();
+   public static final int maxWaypoints = 12;
+   public static final int dimensions = 3;
+   public static final PolynomialOrder order = PolynomialOrder.ORDER3;
+   public static final ReferenceFrame trajectoryFrame = ReferenceFrame.getWorldFrame();
 
    private final String namePrefix;
 
@@ -51,6 +62,7 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
    private final TDoubleArrayList initialVelocityArray = new TDoubleArrayList(dimensions);
    private final TDoubleArrayList finalPositionArray = new TDoubleArrayList(dimensions);
    private final TDoubleArrayList finalVelocityArray = new TDoubleArrayList(dimensions);
+   private final TDoubleArrayList waypointVelocity = new TDoubleArrayList(dimensions);
 
    private final YoVariableRegistry registry;
    private final BooleanYoVariable isDone;
@@ -66,8 +78,22 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
    private final BagOfBalls trajectoryViz;
    private final FramePoint ballPosition = new FramePoint();
 
-   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
-         int maxIterations)
+   public PositionOptimizedTrajectoryGenerator()
+   {
+      this("", new YoVariableRegistry(""));
+   }
+
+   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, parentRegistry, null, TrajectoryPointOptimizer.maxIterations);
+   }
+
+   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   {
+      this(namePrefix, parentRegistry, graphicsListRegistry, TrajectoryPointOptimizer.maxIterations);
+   }
+
+   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, int maxIterations)
    {
       this.namePrefix = namePrefix;
 
@@ -143,6 +169,14 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
       waypointPositions.add();
    }
 
+   /**
+    * Set the desired position and velocity at the start and end points of the trajectory.
+    *
+    * @param initialPosition
+    * @param initialVelocity
+    * @param finalPosition
+    * @param finalVelocity
+    */
    public void setEndpointConditions(FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalPosition, FrameVector finalVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
@@ -166,6 +200,11 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
       optimizer.setEndPoints(initialPositionArray, initialVelocityArray, finalPositionArray, finalVelocityArray);
    }
 
+   /**
+    * Set the positions of the waypoints on the trajectory.
+    *
+    * @param waypointPositions
+    */
    public void setWaypoints(ArrayList<FramePoint> waypointPositions)
    {
       if (waypointPositions.size() > maxWaypoints)
@@ -189,6 +228,11 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
       segments.set(waypointPositions.size() + 1);
    }
 
+   /**
+    * This method initialized the trajectory and does the optimization. This has to be called after setting the
+    * end point conditions and waypoints. It has to be called regardless of whether is class is used as an
+    * actual trajectory or just to compute optimal waypoint times and velocities.
+    */
    @Override
    public void initialize()
    {
@@ -208,6 +252,7 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
          }
       }
 
+      isDone.set(false);
       visualize();
    }
 
@@ -225,11 +270,26 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
       }
    }
 
+   /**
+    * Evaluates the trajectory at the given dimensionless time. Time is assumed to go from 0.0
+    * at the start of the trajectory to 1.0 at the end.
+    *
+    * @param time
+    */
    @Override
    public void compute(double time)
    {
+      isDone.set(time > 1.0);
+
+      if (isDone())
+      {
+         desiredPosition.setToZero(true);
+         desiredVelocity.setToZero(true);
+         desiredAcceleration.setToZero(true);
+         return;
+      }
+
       time = MathTools.clipToMinMax(time, 0.0, 1.0);
-      isDone.set(time == 1.0);
 
       int activeSegment = 0;
       for (int i = 0; i < segments.getIntegerValue()-1; i++)
@@ -251,6 +311,32 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
          desiredVelocity.set(axis, polynomial.getVelocity());
          desiredAcceleration.set(axis, polynomial.getAcceleration());
       }
+   }
+
+   /**
+    * Call this function after initialize to retrieve the optimal waypoint time for a given waypoint index.
+    *
+    * @param waypointIndex
+    * @return
+    */
+   public double getWaypointTime(int waypointIndex)
+   {
+      return optimizer.getWaypointTime(waypointIndex);
+   }
+
+   /**
+    * Call this function after initialize to retrieve the optimal waypoint velocity for a given waypoint
+    * index.
+    *
+    * @param waypointIndex
+    * @param waypointVelocityToPack
+    */
+   public void getWaypointVelocity(int waypointIndex, FrameVector waypointVelocityToPack)
+   {
+      optimizer.getWaypointVelocity(this.waypointVelocity, waypointIndex);
+      waypointVelocityToPack.setToZero(trajectoryFrame);
+      for (int d = 0; d < Direction.values.length; d++)
+         waypointVelocityToPack.set(Direction.values[d], this.waypointVelocity.get(d));
    }
 
    @Override
