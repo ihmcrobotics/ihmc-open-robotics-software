@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.planning;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+
 import javax.vecmath.Point3d;
 
 public class QuadrupedStanceDistanceCalculator
@@ -16,6 +17,16 @@ public class QuadrupedStanceDistanceCalculator
    {
       quadrupedDistanceMatrixA = new QuadrantDependentList<>();
       quadrupedDistanceMatrixB = new QuadrantDependentList<>();
+      for (RobotQuadrant quadrantA : RobotQuadrant.values())
+      {
+         quadrupedDistanceMatrixA.set(quadrantA, new QuadrantDependentList<MutableDouble>());
+         quadrupedDistanceMatrixB.set(quadrantA, new QuadrantDependentList<MutableDouble>());
+         for (RobotQuadrant quadrantB : RobotQuadrant.values())
+         {
+            quadrupedDistanceMatrixA.get(quadrantA).set(quadrantB, new MutableDouble(0.0));
+            quadrupedDistanceMatrixB.get(quadrantA).set(quadrantB, new MutableDouble(0.0));
+         }
+      }
       solePointA = new Point3d();
       solePointB = new Point3d();
    }
@@ -30,7 +41,8 @@ public class QuadrupedStanceDistanceCalculator
          for (RobotQuadrant quadrantB : RobotQuadrant.values())
          {
             double currentDifference = Math
-                  .abs(quadrupedDistanceMatrixA.get(quadrantA).get(quadrantB).doubleValue() - quadrupedDistanceMatrixB.get(quadrantA).get(quadrantB).doubleValue());
+                  .abs(quadrupedDistanceMatrixA.get(quadrantA).get(quadrantB).doubleValue() - quadrupedDistanceMatrixB.get(quadrantA).get(quadrantB)
+                        .doubleValue());
             if (currentDifference > maxDifference)
             {
                maxDifference = currentDifference;
@@ -50,14 +62,12 @@ public class QuadrupedStanceDistanceCalculator
    {
       for (RobotQuadrant quadrantA : RobotQuadrant.values())
       {
-         QuadrantDependentList<MutableDouble> quadrantDependentList = new QuadrantDependentList<>();
          for (RobotQuadrant quadrantB : RobotQuadrant.values())
          {
             solePointA.set(quadrupedSolePositionList.get(quadrantA));
             solePointB.set(quadrupedSolePositionList.get(quadrantB));
-            quadrantDependentList.set(quadrantB, new MutableDouble(solePointA.distance(solePointB)));
+            quadrupedDistanceMatrix.get(quadrantA).get(quadrantB).setValue(solePointA.distance(solePointB));
          }
-         quadrupedDistanceMatrix.set(quadrantA, quadrantDependentList);
       }
    }
 }
