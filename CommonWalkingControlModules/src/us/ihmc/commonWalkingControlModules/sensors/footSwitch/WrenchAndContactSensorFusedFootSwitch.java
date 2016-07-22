@@ -95,4 +95,10 @@ public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterfac
       
    }
 
+   @Override
+   public void trustFootSwitch(boolean trustFootSwitch)
+   {
+
+   }
+
 }

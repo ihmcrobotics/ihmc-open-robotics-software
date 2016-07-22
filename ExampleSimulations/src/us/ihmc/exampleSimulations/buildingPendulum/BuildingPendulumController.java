@@ -15,7 +15,9 @@ public class BuildingPendulumController extends SimpleRobotController
 
    private double pendulumAngle;
    private double pendulumAngleSwitch;
-   private double velocity = 2;
+   private double angularChange = 2*Math.asin(BuildingPendulumRobot.distance/(2*BuildingPendulumRobot.length));
+   private double  velocity=0.0;
+
 
    public BuildingPendulumController(BuildingPendulumRobot robot)
    {
@@ -38,6 +40,8 @@ public class BuildingPendulumController extends SimpleRobotController
    {
       setPendulumAngles();
 
+
+
       boolean atCenter;
       if (activeSide == RobotSide.LEFT)
          atCenter = pendulumAngle > pendulumAngleSwitch;
@@ -48,17 +52,8 @@ public class BuildingPendulumController extends SimpleRobotController
       {
          activeSide = activeSide.getOppositeSide();
          robot.setPendulumAngle(activeSide, robot.getSwitchAngle(activeSide));
-
-
-         if (activeSide == RobotSide.LEFT)
-         {
-            velocity = (-velocity*1)-(robot.getPendulumVelocity(activeSide.getOppositeSide())/2);
-
-         }
-         else
-         {
-            velocity = (velocity*1)-(robot.getPendulumVelocity(activeSide.getOppositeSide())/2);
-         }
+         
+         velocity =(robot.getPendulumVelocity(activeSide.getOppositeSide())*Math.cos(angularChange));
 
          robot.setPendulumVelocity(activeSide, velocity);
       }
