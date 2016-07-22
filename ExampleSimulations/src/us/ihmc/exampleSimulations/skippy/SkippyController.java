@@ -47,7 +47,6 @@ public class SkippyController implements RobotController
       tau_joint2.set(-k1.getDoubleValue() * q_joint1.getDoubleValue() - k2.getDoubleValue() * q_joint2.getDoubleValue() - k3.getDoubleValue() * qd_joint1.getDoubleValue() - k4.getDoubleValue() * qd_joint2.getDoubleValue());
    }
 
-
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
