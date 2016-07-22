@@ -16,6 +16,7 @@ public class BuildingPendulumRobot extends Robot
 {
 
    public static final double mass = 181.0;
+
    public static final double length = 7.6;
    public static final double distance = 1.0;
 
