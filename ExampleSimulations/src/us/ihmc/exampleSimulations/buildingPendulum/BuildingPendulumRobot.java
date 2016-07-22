@@ -15,9 +15,9 @@ import us.ihmc.simulationconstructionset.Robot;
 public class BuildingPendulumRobot extends Robot
 {
 
-   public static final double mass = 10.0;
-   private static final double length = 4.0;
-   private static final double distance = 1.0;
+   public static final double mass = 181.0;
+   public static final double length = 7.6;
+   public static final double distance = 1.0;
 
    private static final double midAngle = Math.atan2(distance/2.0, length);
 
@@ -46,8 +46,8 @@ public class BuildingPendulumRobot extends Robot
 
       joints.put(RobotSide.LEFT, pendulumJoint1);
       joints.put(RobotSide.RIGHT, pendulumJoint2);
-
-      pendulumJoint1.setInitialState(getSwitchAngle(RobotSide.LEFT) - 0.2, 0.0);
+      double startingAngle = ((distance/2)+1)/length;
+      pendulumJoint1.setInitialState(getSwitchAngle(RobotSide.LEFT) - startingAngle, 0.0);
 
       pendulumJoint2.setInitialState(0.0, 0.0);
       this.addRootJoint(rootJoint);
@@ -70,11 +70,6 @@ public class BuildingPendulumRobot extends Robot
       ret.setLinkGraphics(linkGraphics);
       return ret;
    }
-//   public SideDependentList getPoint(RobotSide activeSide)
-//   {
-//      PinJoint joint = joints.get(activeSide);
-//      return joint;
-//   }
    public double getPendulumAngle(RobotSide activeSide)
    {
       PinJoint joint = joints.get(activeSide);
