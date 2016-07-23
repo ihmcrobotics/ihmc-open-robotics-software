@@ -102,6 +102,11 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       case DO_NOTHING:
       case STAND_PREP:
       case STAND_READY:
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(false);
+         }
+
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.FRONT_LEFT).setFootContactState(false);
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.FRONT_RIGHT).setFootContactState(false);
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_LEFT).setFootContactState(false);
@@ -110,6 +115,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       default:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(true);
+
             if (controllerToolbox.getTaskSpaceController().getContactState(robotQuadrant) == ContactState.IN_CONTACT)
             {
                runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
@@ -222,6 +229,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             QuadrupedForceControllerState.STEP, QuadrupedForceControllerState.FALL);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FALL,
             QuadrupedForceControllerState.XGAIT, QuadrupedForceControllerState.FALL);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FALL,
+            QuadrupedForceControllerState.FREEZE, QuadrupedForceControllerState.FALL);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP,
             QuadrupedForceControllerState.FALL, QuadrupedForceControllerState.STAND_PREP);
       builder.addTransition(ControllerEvent.DONE, QuadrupedForceControllerState.FALL, QuadrupedForceControllerState.FREEZE);
