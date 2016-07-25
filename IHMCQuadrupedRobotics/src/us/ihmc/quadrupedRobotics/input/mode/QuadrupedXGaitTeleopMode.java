@@ -2,18 +2,23 @@ package us.ihmc.quadrupedRobotics.input.mode;
 
 import java.util.Map;
 
+import net.java.games.input.Event;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.quadrupedRobotics.communication.packets.*;
+import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedXGaitSettingsPacket;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.InputChannel;
-import us.ihmc.quadrupedRobotics.input.InputEvent;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
 public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
 {
@@ -71,7 +76,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
    }
 
    @Override
-   public void update(Map<InputChannel, Double> channels, QuadrupedTaskSpaceEstimator.Estimates estimates)
+   public void update(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimator.Estimates estimates)
    {
       double bodyYaw = 0.0;
       double bodyRoll = 0.0;
@@ -125,11 +130,11 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
    }
 
    @Override
-   public void onInputEvent(Map<InputChannel, Double> channels, QuadrupedTaskSpaceEstimator.Estimates estimates, InputEvent e)
+   public void onInputEvent(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimator.Estimates estimates, Event event)
    {
-      switch (e.getChannel())
+      switch (XBoxOneMapping.getMapping(event))
       {
-      case BUTTON_A:
+      case A:
          if (channels.get(InputChannel.BUTTON_A) > 0.5)
          {
             QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
@@ -137,7 +142,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             mode = XGaitInputMode.POSITION;
          }
          break;
-      case BUTTON_X:
+      case X:
          if (channels.get(InputChannel.BUTTON_X) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(180);
@@ -148,7 +153,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             mode = XGaitInputMode.VELOCITY;
          }
          break;
-      case BUTTON_Y:
+      case Y:
          if (channels.get(InputChannel.BUTTON_Y) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(90);
@@ -159,7 +164,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             mode = XGaitInputMode.VELOCITY;
          }
          break;
-      case BUTTON_B:
+      case B:
          if (channels.get(InputChannel.BUTTON_B) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(0);
@@ -170,7 +175,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             mode = XGaitInputMode.VELOCITY;
          }
          break;
-      case LEFT_BUTTON:
+      case LEFT_BUMPER:
          if (channels.get(InputChannel.LEFT_BUTTON) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() + deltaPhaseShiftParameter.get(), 0, 359));
@@ -178,7 +183,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             packetCommunicator.send(settingsPacket);
          }
          break;
-      case RIGHT_BUTTON:
+      case RIGHT_BUMPER:
          if (channels.get(InputChannel.RIGHT_BUTTON) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() - deltaPhaseShiftParameter.get(), 0, 359));
@@ -186,7 +191,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             packetCommunicator.send(settingsPacket);
          }
          break;
-      case D_PAD:
+      case DPAD:
          if (channels.get(InputChannel.D_PAD) == 0.5)
          {
             xGaitSettings.setStanceWidth(xGaitSettings.getStanceWidth() + deltaStanceWidthParameter.get());

@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import net.java.games.input.Event;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -16,8 +17,11 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedNeckJointPositionPacket;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.tools.inputDevices.joystick.Joystick;
+import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
+import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
-public class QuadrupedHeadTeleopNode implements InputEventCallback
+public class QuadrupedHeadTeleopNode implements JoystickEventListener
 {
    /**
     * Period at which to send control packets.
@@ -32,15 +36,15 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
    private final DoubleParameter distalNeckPitchScaleParameter = parameterFactory.createDouble("distalNeckPitchScale", 0.8);
    private final DoubleParameter distalNeckRollScaleParameter = parameterFactory.createDouble("distalNeckRollScale", 0.5);
 
-   private final PollingInputDevice device;
+   private final Joystick device;
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
    private final PacketCommunicator packetCommunicator;
-   private final Map<InputChannel, Double> channels = Collections.synchronizedMap(new EnumMap<InputChannel, Double>(InputChannel.class));
+   private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<XBoxOneMapping, Double>(XBoxOneMapping.class));
 
    private boolean teleopEnabled = true;
    private HashMap<QuadrupedJointName, Double> neckJointPositionSetpoints = new HashMap<>();
 
-   public QuadrupedHeadTeleopNode(String host, NetworkPorts port, NetClassList netClassList, PollingInputDevice device) throws IOException
+   public QuadrupedHeadTeleopNode(String host, NetworkPorts port, NetClassList netClassList, Joystick device) throws IOException
    {
 
       // TODO: Don't hardcode localhost
@@ -48,7 +52,7 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
       this.device = device;
 
       // Initialize all channels to zero.
-      for (InputChannel channel : InputChannel.values())
+      for (XBoxOneMapping channel : XBoxOneMapping.values)
       {
          channels.put(channel, 0.0);
       }
@@ -69,8 +73,10 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
       }, 0, (long) (DT * 1000), TimeUnit.MILLISECONDS);
 
       // Poll indefinitely.
-      device.registerCallback(this);
-      device.poll();
+//      device.registerCallback(this);
+//      device.poll();
+      device.addJoystickEventListener(this);
+      device.setPollInterval(10);
    }
 
    public void update()
@@ -105,33 +111,33 @@ public class QuadrupedHeadTeleopNode implements InputEventCallback
    }
 
    @Override
-   public void onInputEvent(InputEvent e)
+   public void processEvent(Event event)
    {
       // Store updated value in a cache so historical values for all channels can be used.
-      channels.put(e.getChannel(), e.getValue());
+      channels.put(XBoxOneMapping.getMapping(event), (double) event.getValue());
 
       // Handle events that should trigger once immediately after the event is triggered.
-      switch (e.getChannel())
+      switch (XBoxOneMapping.getMapping(event))
       {
-      case BUTTON_A:
+      case A:
          if (get(InputChannel.BUTTON_A) > 0.5)
          {
             teleopEnabled = true;
          }
          break;
-      case BUTTON_X:
+      case X:
          if (get(InputChannel.BUTTON_X) > 0.5)
          {
             teleopEnabled = false;
          }
          break;
-      case BUTTON_Y:
+      case Y:
          if (get(InputChannel.BUTTON_Y) > 0.5)
          {
             teleopEnabled = false;
          }
          break;
-      case BUTTON_B:
+      case B:
          if (get(InputChannel.BUTTON_B) > 0.5)
          {
             teleopEnabled = false;
