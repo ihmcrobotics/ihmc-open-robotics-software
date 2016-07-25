@@ -21,36 +21,36 @@ import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.utilities.ros.service.AddTwoIntsClient;
 import us.ihmc.utilities.ros.service.AddTwoIntsServer;
 
-@DeployableTestClass(targets = {TestPlanTarget.Flaky})
+@DeployableTestClass(targets = TestPlanTarget.Fast)
 public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
 {
-   
-   final static boolean USE_JAVA_ROSCORE=true;
+   final static boolean USE_JAVA_ROSCORE = true;
+
+   @Override
    @Before
    public void setUp()
    {
       super.setUp(USE_JAVA_ROSCORE);
    }
 
-	@DeployableTestMethod
-	@Test(timeout=5000)
-   public void lowlevelRosServiceClientTest  () throws URISyntaxException, InterruptedException
+   @DeployableTestMethod(estimatedDuration = 2.2)
+   @Test(timeout = 30000)
+   public void lowlevelRosServiceClientTest() throws URISyntaxException, InterruptedException
    {
       RosMainNode rosMainNode = new RosMainNode(rosMasterURI, "serviceClientTestNode");
       final RosServiceClient<AddTwoIntsRequest, AddTwoIntsResponse> serviceClient = new RosServiceClient<>(AddTwoInts._TYPE);
       final AddTwoIntsServer serviceServer = new AddTwoIntsServer();
       rosMainNode.attachServiceClient("/add_two_ints", serviceClient);
-      if(USE_JAVA_ROSCORE)
+      if (USE_JAVA_ROSCORE)
          rosMainNode.attachServiceServer("/add_two_ints", serviceServer);
       rosMainNode.execute();
 
       serviceClient.waitTillConnected();
-      
-      int nTry=100;
-      final CountDownLatch latch =new CountDownLatch(nTry);
-            
-      ServiceResponseListener<AddTwoIntsResponse> responseListener
-         = new ServiceResponseListener<AddTwoIntsResponse>()
+
+      int nTry = 100;
+      final CountDownLatch latch = new CountDownLatch(nTry);
+
+      ServiceResponseListener<AddTwoIntsResponse> responseListener = new ServiceResponseListener<AddTwoIntsResponse>()
       {
 
          @Override
@@ -66,41 +66,37 @@ public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
             throw new RosRuntimeException(e);
          }
       };
-      
 
-      for(int i=0;i<nTry;i++)
+      for (int i = 0; i < nTry; i++)
       {
          AddTwoIntsRequest request = serviceClient.getMessage();
          request.setA(i);
          request.setB(0);
          serviceClient.call(request, responseListener);
       }
-      assertTrue(latch.await(1, TimeUnit.SECONDS));
 
+      assertTrue(latch.await(1, TimeUnit.SECONDS));
    }
-	
-	
-	@DeployableTestMethod
-	@Test (timeout=5000)
+
+   @DeployableTestMethod(estimatedDuration = 2.7)
+   @Test(timeout = 30000)
    public void highLevelRosServiceClientTest() throws InterruptedException
    {
       RosMainNode rosMainNode = new RosMainNode(rosMasterURI, "serviceClientTestNode");
       final AddTwoIntsClient serviceClient = new AddTwoIntsClient();
       final AddTwoIntsServer serviceServer = new AddTwoIntsServer();
-      if(USE_JAVA_ROSCORE)
+      if (USE_JAVA_ROSCORE)
          rosMainNode.attachServiceServer("/add_two_ints", serviceServer);
       rosMainNode.attachServiceClient("/add_two_ints", serviceClient);
       rosMainNode.execute();
 
       serviceClient.waitTillConnected();
-      
-      int nTry=100;
-      for(int i=0;i<nTry;i++)
+
+      int nTry = 100;
+      for (int i = 0; i < nTry; i++)
       {
-         long answer=serviceClient.simpleCall(i, 0);
-         org.junit.Assert.assertEquals(i+0,answer);
+         long answer = serviceClient.simpleCall(i, 0);
+         org.junit.Assert.assertEquals(i + 0, answer);
       }
    }
-	
-	
 }

@@ -13,7 +13,6 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculatorTest.class,
-   us.ihmc.commonWalkingControlModules.controllerCore.VirtualModelControllerTest.class,
    us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolverTest.class,
    us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolverTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataTansformerTest.class,
@@ -37,7 +36,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.commonWalkingControlModules.trajectories.PushRecoveryTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGeneratorTest.class
+   us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGeneratorTest.class,
+   us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTest.class
 })
 
 public class CommonWalkingControlModulesAFastTestSuite

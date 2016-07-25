@@ -6,6 +6,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
+import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
@@ -120,6 +121,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.TestbedClientPacke
 import us.ihmc.humanoidRobotics.communication.packets.sensing.TestbedServerPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.UIConnectedPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
+import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.BlindWalkingPacket;
@@ -149,6 +151,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajec
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
@@ -210,6 +213,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(RobotSide.class);
       registerPacketField(Point3d.class);
       registerPacketField(Vector3d.class);
+      registerPacketField(Vector2f.class);
       registerPacketClass(DesiredSteeringAnglePacket.class);
 
       registerPacketClass(HandComplianceControlParametersMessage.class);
@@ -263,7 +267,13 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(SE3TrajectoryPointMessage.class);
       registerPacketField(SE3TrajectoryPointMessage[].class);
       registerPacketField(BodyPart.class);
-      
+
+      // Controller failure
+      registerPacketClass(WalkingControllerFailureStatusMessage.class);
+
+      // Valkyrie specific
+      registerPacketClass(ValkyrieLowLevelControlModeMessage.class);
+      registerPacketField(ValkyrieLowLevelControlModeMessage.ControlMode.class);
 
       // Handstep
       registerPacketClass(HandstepPacket.class);

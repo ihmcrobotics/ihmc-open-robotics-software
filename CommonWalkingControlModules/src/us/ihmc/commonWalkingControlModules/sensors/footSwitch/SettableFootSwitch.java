@@ -21,7 +21,7 @@ public class SettableFootSwitch implements FootSwitchInterface
       this.hasFootHitGround = new BooleanYoVariable(quadrant.getCamelCaseName() + "_SettableFootSwitch", registry);
       this.totalRobotWeight = totalRobotWeight;
       this.foot = foot;
-      hasFootHitGround.set(true);
+      hasFootHitGround.set(false);
       yoResolvedCoP = new YoFramePoint2d(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
    }
    
@@ -79,6 +79,12 @@ public class SettableFootSwitch implements FootSwitchInterface
    public void setFootContactState(boolean hasFootHitGround)
    {
       this.hasFootHitGround.set(hasFootHitGround);
+   }
+
+   @Override
+   public void trustFootSwitch(boolean trustFootSwitch)
+   {
+
    }
 
 }

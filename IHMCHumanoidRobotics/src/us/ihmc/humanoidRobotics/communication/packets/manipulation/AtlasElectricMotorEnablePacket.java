@@ -12,7 +12,7 @@ import us.ihmc.robotics.random.RandomTools;
  * Created by dstephen on 3/26/15.
  */
 @RosMessagePacket(documentation = "Specifies a specific electric motor in the Atlas forearm to power on or off.",
-      rosPackage = "ihmc_atlas",
+      rosPackage = "ihmc_atlas_ros",
       topic = "/control/enable_electric_motor")
 public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEnablePacket>
 {

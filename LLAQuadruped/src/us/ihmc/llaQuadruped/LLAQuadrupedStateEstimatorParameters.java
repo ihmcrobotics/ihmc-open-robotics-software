@@ -106,13 +106,37 @@ public class LLAQuadrupedStateEstimatorParameters implements StateEstimatorParam
    }
 
    @Override
-   public boolean useAccelerometerForEstimation()
+   public boolean enableIMUBiasCompensation()
    {
       return false;
    }
 
    @Override
-   public boolean estimateAccelerationBias()
+   public boolean enableIMUYawDriftCompensation()
+   {
+      return false;
+   }
+
+   @Override
+   public double getIMUBiasFilterFreqInHertz()
+   {
+      return 6.0e-3;
+   }
+
+   @Override
+   public double getIMUYawDriftFilterFreqInHertz()
+   {
+      return 1.0e-3;
+   }
+
+   @Override
+   public double getIMUBiasVelocityThreshold()
+   {
+      return 0.015;
+   }
+
+   @Override
+   public boolean useAccelerometerForEstimation()
    {
       return false;
    }
@@ -121,12 +145,6 @@ public class LLAQuadrupedStateEstimatorParameters implements StateEstimatorParam
    public boolean cancelGravityFromAccelerationMeasurement()
    {
       return false;
-   }
-
-   @Override
-   public double getAccelerationBiasFilterFreqInHertz()
-   {
-      return 0;
    }
 
    @Override
@@ -155,36 +173,6 @@ public class LLAQuadrupedStateEstimatorParameters implements StateEstimatorParam
 
    @Override
    public double getForceInPercentOfWeightThresholdToTrustFoot()
-   {
-      return 0;
-   }
-
-   @Override
-   public boolean estimateIMUDrift()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean compensateIMUDrift()
-   {
-      return false;
-   }
-
-   @Override
-   public double getIMUDriftFilterFreqInHertz()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getFootVelocityUsedForImuDriftFilterFreqInHertz()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getFootVelocityThresholdToEnableIMUDriftCompensation()
    {
       return 0;
    }
@@ -229,5 +217,11 @@ public class LLAQuadrupedStateEstimatorParameters implements StateEstimatorParam
    public FootSwitchType getFootSwitchType()
    {
       return null;
+   }
+
+   @Override
+   public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
+   {
+      return false;
    }
 }

@@ -18,7 +18,7 @@ public class FirstOrderFilteredYoVariableTest
 
    private final double DT = 0.001;
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 1.0)
 	@Test(timeout=300000)
    public void testHighPassAttenuationForSinusoidalInput()
    {
@@ -42,7 +42,7 @@ public class FirstOrderFilteredYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void testLowPassAttenuationForSinusoidalInput()
    {
@@ -66,7 +66,7 @@ public class FirstOrderFilteredYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testBandPassAttenuationForSinusoidalInput()
    {

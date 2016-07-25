@@ -18,6 +18,7 @@ import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -29,6 +30,7 @@ import java.util.Set;
 public class RosModule
 {
    private static final boolean DEBUG = false;
+   private static final boolean CREATE_ROS_ECHO_PUBLISHER = false;
 
    private static final String ROS_NODE_NAME = "networkProcessor/rosModule";
 
@@ -79,7 +81,8 @@ public class RosModule
 //      setupFootstepServiceClient();
 //      setupFootstepPathPlannerService();
 
-      setupROSEchoPublisher(rosMainNode, rosTopicPrefix);
+      if (CREATE_ROS_ECHO_PUBLISHER)
+         setupROSEchoPublisher(rosMainNode, rosTopicPrefix);
       
       try
       {
@@ -92,7 +95,8 @@ public class RosModule
       
       System.out.flush();
       rosMainNode.execute();
-      printIfDebug("Finished creating ROS Module.");
+      if (DEBUG)
+         PrintTools.debug("Finished creating ROS Module.");
    }
 
    private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, ObjectCommunicator localObjectCommunicator)
@@ -162,14 +166,4 @@ public class RosModule
          rosMainNode.attachPublisher(namespace + topic, publisher);
       }
    }
-
-
-   private void printIfDebug(String str)
-   {
-      if(DEBUG)
-      {
-         System.out.println("[DEBUG] " + str);
-      }
-   }
-   
 }

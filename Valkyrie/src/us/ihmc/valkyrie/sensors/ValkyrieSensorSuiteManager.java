@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.sensors;
 import java.io.IOException;
 import java.net.URI;
 
+import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -16,6 +17,8 @@ import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.ihmcPerception.depthData.SCSPointCloudLidarReceiver;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;

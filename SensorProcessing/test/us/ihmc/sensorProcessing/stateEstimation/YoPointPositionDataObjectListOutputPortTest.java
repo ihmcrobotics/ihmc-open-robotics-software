@@ -27,7 +27,7 @@ import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 public class YoPointPositionDataObjectListOutputPortTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.9)
+	@DeployableTestMethod(estimatedDuration = 1.0)
 	@Test(timeout = 30000)
    public void testRandom()
    {

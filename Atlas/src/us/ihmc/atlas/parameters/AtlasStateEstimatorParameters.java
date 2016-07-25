@@ -178,27 +178,45 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
+   public boolean enableIMUBiasCompensation()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean enableIMUYawDriftCompensation()
+   {
+      return true;
+   }
+
+   @Override
+   public double getIMUBiasFilterFreqInHertz()
+   {
+      return 6.0e-3;
+   }
+
+   @Override
+   public double getIMUYawDriftFilterFreqInHertz()
+   {
+      return 1.0e-3;
+   }
+
+   @Override
+   public double getIMUBiasVelocityThreshold()
+   {
+      return 0.015;
+   }
+
+   @Override
    public boolean useAccelerometerForEstimation()
    {
       return true;
    }
 
    @Override
-   public boolean estimateAccelerationBias()
-   {
-      return false;
-   }
-
-   @Override
    public boolean cancelGravityFromAccelerationMeasurement()
    {
       return true;
-   }
-
-   @Override
-   public double getAccelerationBiasFilterFreqInHertz()
-   {
-      return 5.3052e-4;
    }
 
    @Override
@@ -229,36 +247,6 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    public double getForceInPercentOfWeightThresholdToTrustFoot()
    {
       return 0.3;
-   }
-
-   @Override
-   public boolean estimateIMUDrift()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean compensateIMUDrift()
-   {
-      return true;
-   }
-
-   @Override
-   public double getIMUDriftFilterFreqInHertz()
-   {
-      return 0.024; //0.5332;
-   }
-
-   @Override
-   public double getFootVelocityUsedForImuDriftFilterFreqInHertz()
-   {
-      return 0.5332;
-   }
-
-   @Override
-   public double getFootVelocityThresholdToEnableIMUDriftCompensation()
-   {
-      return 0.03;
    }
 
    @Override
@@ -356,6 +344,12 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
 
    @Override
    public boolean requestFootForceSensorCalibrationAtStart()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
    {
       return false;
    }

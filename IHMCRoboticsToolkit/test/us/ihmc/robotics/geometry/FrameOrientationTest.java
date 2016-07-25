@@ -43,8 +43,8 @@ public class FrameOrientationTest
       testFrame = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.04)
-	@Test(timeout = 3000)
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
    public void testOrientationOrientation()
    {
       FrameOrientation original = new FrameOrientation(testFrame);
@@ -66,8 +66,8 @@ public class FrameOrientationTest
       assertEquals(original.getReferenceFrame(), test.getReferenceFrame());
    }
 	
-	@DeployableTestMethod(estimatedDuration = 0.01)
-	@Test(timeout = 3000)
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
 	public void testSetOrientationFromOneToTwo()
 	{
 	   Random random = new Random(1776L);
@@ -252,7 +252,7 @@ public class FrameOrientationTest
 //      fail("Not yet implemented");    // TODO
 //   }
 
-   @DeployableTestMethod(estimatedDuration = 0.4)
+   @DeployableTestMethod(estimatedDuration = 0.5)
    @Test(timeout=1000)
    public void testApplyTransform()
    {
@@ -299,7 +299,7 @@ public class FrameOrientationTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @DeployableTestMethod(estimatedDuration = 0.4)
    @Test(timeout=1000)
    public void testChangeFrame()
    {
@@ -346,8 +346,8 @@ public class FrameOrientationTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.001)
-	@Test(timeout = 3000)
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
    public void testChangeFrameCopy()
    {
       FrameOrientation origOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());

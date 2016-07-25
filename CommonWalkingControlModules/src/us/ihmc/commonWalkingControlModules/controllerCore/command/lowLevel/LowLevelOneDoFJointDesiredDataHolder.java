@@ -115,6 +115,15 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
       }
    }
 
+   public void setDesiredTorqueFromJoints(List<OneDoFJoint> joints)
+   {
+      for (int i = 0; i < joints.size(); i++)
+      {
+         OneDoFJoint joint = joints.get(i);
+         setDesiredJointTorque(joint, joint.getTau());
+      }
+   }
+
    public void setDesiredTorqueFromJoints(OneDoFJoint[] joints)
    {
       for (int i = 0; i < joints.length; i++)

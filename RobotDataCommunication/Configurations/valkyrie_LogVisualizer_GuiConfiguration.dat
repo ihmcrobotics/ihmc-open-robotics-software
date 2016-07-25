@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.doIHMCControlRatio</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.icpControlCMPOutputX,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.icpControlRateLimitedCMPOutputX</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,10 +25,10 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCControllerThread.actualControlDT</Variables>
+		<Variables>root.loggedmain.DRCControllerThread.actualControlDT,root.loggedmain.DRCControllerThread.controllerTimerCurrent</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
-			<ScalingMethod>1</ScalingMethod>
+			<ScalingMethod>0</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.icpControlCMPOutputY,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.icpControlRateLimitedCMPOutputY</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.desiredICPVelocityX,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.desiredICPVelocityY</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,13 +61,25 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.InverseDynamicsQPSolver.qpSolverTimerCurrent</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.InverseDynamicsQPSolver.numberOfIterations</Variables>
+		<GraphConfiguration>
+			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>5.5,</BaseLines>
 			<MaxScaling>1.0</MaxScaling>
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
@@ -81,27 +93,15 @@
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>2</Graph Array Window Size>
+<Graph Array Window Size>3</Graph Array Window Size>
 <Graph Array Window1>
-<ScreenID>2</ScreenID>
+<ScreenID>1</ScreenID>
 <WindowLocation>3840.0, 0.0</WindowLocation>
-<WindowSize>960.0, 1200.0</WindowSize>
+<WindowSize>954.0, 1165.0</WindowSize>
 <GraphGroup>
 	<Cols>4</Cols>
 	<Graph>
 		<Variables>valkyrie.qd_leftShoulderPitch</Variables>
-		<GraphConfiguration>
-			<Name>config7</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>valkyrie.qd_leftHipYaw</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -113,7 +113,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_rightHipYaw</Variables>
+		<Variables>valkyrie.qd_leftHipYaw</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -125,7 +125,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_rightShoulderPitch</Variables>
+		<Variables>valkyrie.qd_rightHipYaw</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -137,7 +137,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_leftShoulderRoll</Variables>
+		<Variables>valkyrie.qd_rightShoulderPitch</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -149,7 +149,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_leftHipRoll</Variables>
+		<Variables>valkyrie.qd_leftShoulderRoll</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -161,7 +161,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_rightHipRoll</Variables>
+		<Variables>valkyrie.qd_leftHipRoll</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -173,7 +173,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_rightShoulderRoll</Variables>
+		<Variables>valkyrie.qd_rightHipRoll</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -185,7 +185,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_leftShoulderYaw</Variables>
+		<Variables>valkyrie.qd_rightShoulderRoll</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -197,7 +197,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_leftHipPitch</Variables>
+		<Variables>valkyrie.qd_leftShoulderYaw</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -209,7 +209,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_rightHipPitch</Variables>
+		<Variables>valkyrie.qd_leftHipPitch</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -221,7 +221,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_rightShoulderYaw</Variables>
+		<Variables>valkyrie.qd_rightHipPitch</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -233,7 +233,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_leftElbowPitch</Variables>
+		<Variables>valkyrie.qd_rightShoulderYaw</Variables>
 		<GraphConfiguration>
 			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -245,7 +245,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_leftKneePitch</Variables>
+		<Variables>valkyrie.qd_leftElbowPitch</Variables>
 		<GraphConfiguration>
 			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -257,7 +257,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_rightKneePitch</Variables>
+		<Variables>valkyrie.qd_leftKneePitch</Variables>
 		<GraphConfiguration>
 			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -269,7 +269,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_rightElbowPitch</Variables>
+		<Variables>valkyrie.qd_rightKneePitch</Variables>
 		<GraphConfiguration>
 			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -281,7 +281,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_torsoYaw</Variables>
+		<Variables>valkyrie.qd_rightElbowPitch</Variables>
 		<GraphConfiguration>
 			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -293,7 +293,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_leftAnklePitch</Variables>
+		<Variables>valkyrie.qd_torsoYaw</Variables>
 		<GraphConfiguration>
 			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -305,7 +305,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_rightAnklePitch</Variables>
+		<Variables>valkyrie.qd_leftAnklePitch</Variables>
 		<GraphConfiguration>
 			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -317,7 +317,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_torsoPitch</Variables>
+		<Variables>valkyrie.qd_rightAnklePitch</Variables>
 		<GraphConfiguration>
 			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -329,7 +329,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>valkyrie.qd_torsoPitch</Variables>
 		<GraphConfiguration>
 			<Name>config27</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -341,7 +341,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_leftAnkleRoll</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -353,7 +353,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_rightAnkleRoll</Variables>
+		<Variables>valkyrie.qd_leftAnkleRoll</Variables>
 		<GraphConfiguration>
 			<Name>config29</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -365,9 +365,21 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>valkyrie.qd_torsoRoll</Variables>
+		<Variables>valkyrie.qd_rightAnkleRoll</Variables>
 		<GraphConfiguration>
 			<Name>config30</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>valkyrie.qd_torsoRoll</Variables>
+		<GraphConfiguration>
+			<Name>config31</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -379,24 +391,12 @@
 </GraphGroup>
 </Graph Array Window1><Graph Array Window2>
 <ScreenID>2</ScreenID>
-<WindowLocation>4800.0, 0.0</WindowLocation>
-<WindowSize>960.0, 1200.0</WindowSize>
+<WindowLocation>-2.0, -3.0</WindowLocation>
+<WindowSize>1924.0, 1172.0</WindowSize>
 <GraphGroup>
 	<Cols>4</Cols>
 	<Graph>
 		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftShoulderPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftShoulderPitch.leftShoulderPitchTauDesired</Variables>
-		<GraphConfiguration>
-			<Name>config31</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipYaw.leftHipYawTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config32</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -408,7 +408,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipYaw.rightHipYawTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipYaw.leftHipYawTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config33</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -420,7 +420,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightShoulderPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightShoulderPitch.rightShoulderPitchTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipYaw.rightHipYawTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config34</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -432,7 +432,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftShoulderRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftShoulderRoll.leftShoulderRollTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightShoulderPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightShoulderPitch.rightShoulderPitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config35</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -444,7 +444,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipRoll.leftHipRollTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftShoulderRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftShoulderRoll.leftShoulderRollTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config36</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -456,7 +456,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipRoll.rightHipRollTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipRoll.leftHipRollTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config37</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -468,7 +468,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightShoulderRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightShoulderRoll.rightShoulderRollTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipRoll.rightHipRollTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config38</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -480,7 +480,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftShoulderYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftShoulderYaw.leftShoulderYawTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightShoulderRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightShoulderRoll.rightShoulderRollTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config39</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -492,7 +492,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipPitch.leftHipPitchTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftShoulderYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftShoulderYaw.leftShoulderYawTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config40</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -504,7 +504,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipPitch.rightHipPitchTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftHipPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftHipPitch.leftHipPitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config41</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -516,7 +516,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightShoulderYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightShoulderYaw.rightShoulderYawTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightHipPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightHipPitch.rightHipPitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config42</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -528,7 +528,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftElbowPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftElbowPitch.leftElbowPitchTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightShoulderYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightShoulderYaw.rightShoulderYawTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config43</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -540,7 +540,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftKneePitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftKneePitch.leftKneePitchTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftElbowPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftElbowPitch.leftElbowPitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config44</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -552,7 +552,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightKneePitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightKneePitch.rightKneePitchTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftKneePitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftKneePitch.leftKneePitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config45</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -564,7 +564,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightElbowPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightElbowPitch.rightElbowPitchTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightKneePitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightKneePitch.rightKneePitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config46</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -576,7 +576,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoYaw.torsoYawTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightElbowPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightElbowPitch.rightElbowPitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config47</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -588,7 +588,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftAnklePitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnklePitch.leftAnklePitchTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoYaw,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoYaw.torsoYawTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config48</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -600,7 +600,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightAnklePitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnklePitch.rightAnklePitchTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftAnklePitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnklePitch.leftAnklePitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config49</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -612,7 +612,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoRoll.torsoRollTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightAnklePitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnklePitch.rightAnklePitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config50</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -624,7 +624,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoPitch.torsoPitchTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoRoll.torsoRollTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config51</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -636,7 +636,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftAnkleRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnkleRoll.leftAnkleRollTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_torsoPitch,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.torsoPitch.torsoPitchTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config52</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -648,7 +648,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightAnkleRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnkleRoll.rightAnkleRollTauDesired</Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_leftAnkleRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.leftAnkleRoll.leftAnkleRollTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config53</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -660,7 +660,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.raw_tau_rightAnkleRoll,root.loggedmain.DRCEstimatorThread.ValkyrieRosControlSensorReader.rightAnkleRoll.rightAnkleRollTauDesired</Variables>
 		<GraphConfiguration>
 			<Name>config54</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -671,8 +671,243 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config55</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
-</Graph Array Window2>
+</Graph Array Window2><Graph Array Window3>
+<ScreenID>1</ScreenID>
+<WindowLocation>3838.0, -3.0</WindowLocation>
+<WindowSize>1924.0, 1172.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config56</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config57</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistX,root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config58</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistY,root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config59</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityX,root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistX</Variables>
+		<GraphConfiguration>
+			<Name>config60</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityY,root.loggedmain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistY</Variables>
+		<GraphConfiguration>
+			<Name>config61</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorForceWorldFrameX,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchleftFootForceX</Variables>
+		<GraphConfiguration>
+			<Name>config62</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorForceWorldFrameX,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchrightFootForceX</Variables>
+		<GraphConfiguration>
+			<Name>config63</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorForceWorldFrameY,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchleftFootForceY</Variables>
+		<GraphConfiguration>
+			<Name>config64</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorForceWorldFrameY,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchrightFootForceY</Variables>
+		<GraphConfiguration>
+			<Name>config65</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorForceWorldFrameZ,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchleftFootForceZ</Variables>
+		<GraphConfiguration>
+			<Name>config66</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorForceWorldFrameZ,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchrightFootForceZ</Variables>
+		<GraphConfiguration>
+			<Name>config67</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorTorqueWorldFrameX,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchleftFootTorqueX</Variables>
+		<GraphConfiguration>
+			<Name>config68</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorTorqueWorldFrameX,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchrightFootTorqueX</Variables>
+		<GraphConfiguration>
+			<Name>config69</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorTorqueWorldFrameY,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchleftFootTorqueY</Variables>
+		<GraphConfiguration>
+			<Name>config70</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorTorqueWorldFrameY,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchrightFootTorqueY</Variables>
+		<GraphConfiguration>
+			<Name>config71</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.leftFootStateEstimatorWrenchBasedFootSwitch.leftFootStateEstimatorTorqueWorldFrameZ,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchleftFootTorqueZ</Variables>
+		<GraphConfiguration>
+			<Name>config72</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.loggedmain.DRCEstimatorThread.rightFootStateEstimatorWrenchBasedFootSwitch.rightFootStateEstimatorTorqueWorldFrameZ,root.loggedmain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WrenchVisualizer.DesiredExternalWrenchrightFootTorqueZ</Variables>
+		<GraphConfiguration>
+			<Name>config73</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window3>
 
 <Extra Panels>
 <Main Viewport>
@@ -681,9 +916,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>3.2161741801585464</Camera X>
- <Camera Y>-0.7298105383963283</Camera Y>
- <Camera Z>0.6504578891061402</Camera Z>
+ <Camera X>-1.493047384741231</Camera X>
+ <Camera Y>-5.7533985543819925</Camera Y>
+ <Camera Z>1.5106122014075778</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

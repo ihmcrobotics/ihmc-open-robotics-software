@@ -28,7 +28,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class BasicFootstepValidityMetricTest
 {
    private static final boolean DEBUG = true;
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testBasicValidityMetric(){
       SteppingParameters dummySteppingParameters = new DummySteppingParameters();

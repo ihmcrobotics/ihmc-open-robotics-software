@@ -44,8 +44,8 @@ public class ValkyrieArmControllerParameters extends ArmControllerParameters
       jointspaceControlGains.setZeta(zeta);
       jointspaceControlGains.setKi(ki);
       jointspaceControlGains.setMaximumIntegralError(maxIntegralError);
-      jointspaceControlGains.setMaximumAcceleration(maxAccel);
-      jointspaceControlGains.setMaximumJerk(maxJerk);
+      jointspaceControlGains.setMaximumFeedback(maxAccel);
+      jointspaceControlGains.setMaximumFeedbackRate(maxJerk);
       jointspaceControlGains.createDerivativeGainUpdater(true);
 
       return jointspaceControlGains;
@@ -67,8 +67,8 @@ public class ValkyrieArmControllerParameters extends ArmControllerParameters
       taskspaceControlGains.setDampingRatio(zeta);
       taskspaceControlGains.setIntegralGain(ki);
       taskspaceControlGains.setMaximumIntegralError(maxIntegralError);
-      taskspaceControlGains.setMaximumAcceleration(maxAccel);
-      taskspaceControlGains.setMaximumJerk(maxJerk);
+      taskspaceControlGains.setMaximumFeedback(maxAccel);
+      taskspaceControlGains.setMaximumFeedbackRate(maxJerk);
       taskspaceControlGains.createDerivativeGainUpdater(true);
 
       return taskspaceControlGains;

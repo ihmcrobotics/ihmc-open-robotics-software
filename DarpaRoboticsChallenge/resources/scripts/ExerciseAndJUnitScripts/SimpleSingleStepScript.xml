@@ -3,6 +3,8 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
+    <previousMessageId>0</previousMessageId>
+    <executionMode>OVERRIDE</executionMode>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>

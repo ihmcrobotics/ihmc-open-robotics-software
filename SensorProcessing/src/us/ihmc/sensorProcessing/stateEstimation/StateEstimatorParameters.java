@@ -36,13 +36,14 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
 
    public abstract double getCoPFilterFreqInHertz();
    
-   public abstract boolean useAccelerometerForEstimation();
-   
-   public abstract boolean estimateAccelerationBias();
+   public abstract boolean enableIMUBiasCompensation();
+   public abstract boolean enableIMUYawDriftCompensation();
+   public abstract double getIMUBiasFilterFreqInHertz();
+   public abstract double getIMUYawDriftFilterFreqInHertz();
+   public abstract double getIMUBiasVelocityThreshold();
 
+   public abstract boolean useAccelerometerForEstimation();
    public abstract boolean cancelGravityFromAccelerationMeasurement();
-   
-   public abstract double getAccelerationBiasFilterFreqInHertz();
 
    public abstract double getPelvisPositionFusingFrequency();
    public abstract double getPelvisLinearVelocityFusingFrequency();
@@ -51,16 +52,6 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
    public abstract double getDelayTimeForTrustingFoot();
    
    public abstract double getForceInPercentOfWeightThresholdToTrustFoot();
-   
-   public abstract boolean estimateIMUDrift();
-
-   public abstract boolean compensateIMUDrift();
-   
-   public abstract double getIMUDriftFilterFreqInHertz();
-   
-   public abstract double getFootVelocityUsedForImuDriftFilterFreqInHertz();
-   
-   public abstract double getFootVelocityThresholdToEnableIMUDriftCompensation();
 
    public abstract boolean useTwistForPelvisLinearStateEstimation();
 
@@ -75,4 +66,6 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
    public abstract double getContactThresholdHeight();
 
    public abstract FootSwitchType getFootSwitchType();
+
+   public abstract boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact();
 }

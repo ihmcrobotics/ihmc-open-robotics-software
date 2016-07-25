@@ -20,8 +20,8 @@ public class FourBarCalculatorWithDerivativesTest
    private static final double eps = 1e-7;
    private static final boolean PRINT = false;
 
-	@DeployableTestMethod
-	@Test(timeout = 300000)
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
    public void testSquare()
    {
       FourBarCalculatorWithDerivatives fourBar = new FourBarCalculatorWithDerivatives(1.0, 1.0, 1.0, 1.0);
@@ -32,8 +32,8 @@ public class FourBarCalculatorWithDerivativesTest
       assertEquals(PI / 2, fourBar.getAngleCDA(), eps);
    }
 
-	@DeployableTestMethod
-	@Test(timeout = 300000)
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
    public void testSquareDer()
    {
       FourBarCalculatorWithDerivatives fourBar = new FourBarCalculatorWithDerivatives(1.0, 1.0, 1.0, 1.0);
@@ -48,8 +48,8 @@ public class FourBarCalculatorWithDerivativesTest
       assertEquals(-1, fourBar.getAngleDtCDA(), eps);
    }
 
-	@DeployableTestMethod
-	@Test(timeout = 300000)
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
    public void testParallelogram()
    {
       FourBarCalculatorWithDerivatives fourBar = new FourBarCalculatorWithDerivatives(1.0, 1.0, 1.0, 1.0);
@@ -64,8 +64,8 @@ public class FourBarCalculatorWithDerivativesTest
       assertEquals(-1, fourBar.getAngleDtCDA(), eps);
    }
 
-	@DeployableTestMethod
-	@Test(timeout = 300000)
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
    public void testRandomQuadrilatteral()
    {
       Random rand = new Random(1986L);
@@ -107,8 +107,8 @@ public class FourBarCalculatorWithDerivativesTest
       assertEquals(D, fourBar.getAngleCDA(), eps);
    }
 
-	@DeployableTestMethod
-	@Test(timeout = 300000)
+	@DeployableTestMethod(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
    public void testRandomConvenientLinkageDerivatives()
    {
       Random rand = new Random(1986L);
@@ -147,8 +147,8 @@ public class FourBarCalculatorWithDerivativesTest
       }
    }
 
-	@DeployableTestMethod
-	@Test(timeout = 300000)
+	@DeployableTestMethod(estimatedDuration = 0.2)
+	@Test(timeout = 30000)
    public void testVelocitiesWithRandomQuadrilateral()
    {
       double eps = 1.0e-6;
@@ -259,8 +259,8 @@ public class FourBarCalculatorWithDerivativesTest
       }
    }
 
-	@DeployableTestMethod
-	@Test(timeout = 300000)
+	@DeployableTestMethod(estimatedDuration = 1.3)
+	@Test(timeout = 30000)
    public void testAccelerationsWithRandomQuadrilateral()
    {
       double eps = 1.0e-5;
@@ -348,8 +348,8 @@ public class FourBarCalculatorWithDerivativesTest
       }
    }
 	
-	@DeployableTestMethod
-   @Test(timeout = 300000)
+	@DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testMasterAngleComputations()
    {
 	   Random rand = new Random(1986L);

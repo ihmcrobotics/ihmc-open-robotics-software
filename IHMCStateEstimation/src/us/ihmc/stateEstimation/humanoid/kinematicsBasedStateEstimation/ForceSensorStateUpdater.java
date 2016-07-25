@@ -4,14 +4,17 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -30,7 +33,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class ForceSensorStateUpdater
+public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -53,6 +56,7 @@ public class ForceSensorStateUpdater
    private final SideDependentList<YoFrameVector> wristTorqueCalibrationOffsets;
 
    private final BooleanYoVariable calibrateFootForceSensors;
+   private final AtomicBoolean calibrateFootForceSensorsAtomic = new AtomicBoolean(false);
 
    private final SideDependentList<ForceSensorDefinition> footForceSensorDefinitions;
 
@@ -106,6 +110,16 @@ public class ForceSensorStateUpdater
          footTorqueCalibrationOffsets = new SideDependentList<>();
 
          calibrateFootForceSensors = new BooleanYoVariable("calibrateFootForceSensors", registry);
+         calibrateFootForceSensors.addVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               if (calibrateFootForceSensors.getBooleanValue())
+                  calibrateFootForceSensorsAtomic.set(true);
+            }
+         });
+
          calibrateFootForceSensors.set(stateEstimatorParameters.requestFootForceSensorCalibrationAtStart());
 
          for (RobotSide robotSide : RobotSide.values)
@@ -276,8 +290,11 @@ public class ForceSensorStateUpdater
 
    private void updateFootForceSensorState()
    {
-      if (calibrateFootForceSensors.getBooleanValue())
+      if (calibrateFootForceSensorsAtomic.getAndSet(false))
+      {
+         calibrateFootForceSensors.set(false);
          calibrateFootForceSensors();
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -385,6 +402,7 @@ public class ForceSensorStateUpdater
       wrenchToSubstractHandWeightTo.sub(wristWrenchDueToGravity);
    }
 
+   @Override
    public ForceSensorDataHolderReadOnly getForceSensorOutput()
    {
       if (outputForceSensorDataHolder == null)
@@ -401,5 +419,11 @@ public class ForceSensorStateUpdater
    public void setRequestWristForceSensorCalibrationSubscriber(RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber)
    {
       this.requestWristForceSensorCalibrationSubscriber = requestWristForceSensorCalibrationSubscriber;
+   }
+
+   @Override
+   public void requestFootForceSensorCalibrationAtomic()
+   {
+      calibrateFootForceSensorsAtomic.set(true);
    }
 }

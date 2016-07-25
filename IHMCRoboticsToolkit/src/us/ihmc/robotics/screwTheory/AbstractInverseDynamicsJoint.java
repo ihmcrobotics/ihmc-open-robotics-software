@@ -24,31 +24,37 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       predecessor.addChildJoint(this);
    }
 
+   @Override
    public final ReferenceFrame getFrameBeforeJoint()
    {
       return beforeJointFrame;
    }
 
+   @Override
    public final GeometricJacobian getMotionSubspace()
    {
       return motionSubspace;
    }
 
+   @Override
    public final RigidBody getPredecessor()
    {
       return predecessor;
    }
 
+   @Override
    public final RigidBody getSuccessor()
    {
       return successor;
    }
 
+   @Override
    public final String getName()
    {
       return name;
    }
 
+   @Override
    public final void updateFramesRecursively()
    {
       getFrameAfterJoint().update();
@@ -59,6 +65,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       }
    }
 
+   @Override
    public void getSuccessorTwist(Twist twistToPack)
    {
       getJointTwist(twistToPack);
@@ -71,6 +78,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       twistToPack.changeFrame(successorFrame);
    }
 
+   @Override
    public void getPredecessorTwist(Twist twistToPack)
    {
       getJointTwist(twistToPack);
@@ -84,6 +92,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       twistToPack.changeFrame(predecessorFrame);
    }
 
+   @Override
    public void getSuccessorAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       getJointAcceleration(accelerationToPack);
@@ -96,6 +105,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       accelerationToPack.changeFrameNoRelativeMotion(successorFrame);
    }
 
+   @Override
    public void getDesiredSuccessorAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       getDesiredJointAcceleration(accelerationToPack);
@@ -108,6 +118,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       accelerationToPack.changeFrameNoRelativeMotion(successorFrame);
    }
 
+   @Override
    public void getDesiredPredecessorAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       getDesiredJointAcceleration(accelerationToPack);
@@ -122,11 +133,13 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
    }
 
    
+   @Override
    public RigidBodyTransform getOffsetTransform3D()
    {
       return getFrameBeforeJoint().getTransformToParent();
    }
    
+   @Override
    public RigidBodyTransform getJointTransform3D()
    {
       return getFrameAfterJoint().getTransformToParent();

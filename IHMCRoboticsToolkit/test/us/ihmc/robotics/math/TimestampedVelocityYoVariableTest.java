@@ -27,7 +27,7 @@ public class TimestampedVelocityYoVariableTest
       velocityYoVariable = new TimestampedVelocityYoVariable("testVelVar", "", position, timestamp, registry, 1e-9);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHasNotBeenUpdated()
    {
@@ -35,7 +35,7 @@ public class TimestampedVelocityYoVariableTest
       assertEquals(0.0, val, 0.0);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHasBeenUpdatedOnce()
    {
@@ -46,7 +46,7 @@ public class TimestampedVelocityYoVariableTest
       assertEquals(0.0, val, 0.0);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHasBeenUpdatedTwice()
    {
@@ -58,7 +58,7 @@ public class TimestampedVelocityYoVariableTest
       assertEquals(position.getDoubleValue() / timestamp.getDoubleValue(), val, 0.0);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHasBeenUpdatedThreeTimes()
    {
@@ -73,7 +73,7 @@ public class TimestampedVelocityYoVariableTest
       assertEquals(1.0, val, 0.0);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHasBeenUpdatedThreeTimesNoChange()
    {

@@ -48,8 +48,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
 
    private DoubleYoVariable swingTime;
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 30.6)
+   @Test(timeout = 150000)
    /**
     * End to end test that makes sure the robot can recover from a push using upper body momentum
     *
@@ -64,8 +64,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertTrue(standAndPush());
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 21.5)
+   @Test(timeout = 110000)
    /**
     * End to end test that makes sure the robot falls during test if momentum is disabled
     *
@@ -80,8 +80,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertFalse(standAndPush());
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 34.3)
+   @Test(timeout = 170000)
    /**
     * End to end test that makes sure the robot can recover from a push using upper body momentum
     *
@@ -96,8 +96,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertTrue(stepAndPush());
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 23.2)
+   @Test(timeout = 120000)
    /**
     * End to end test that makes sure the robot falls during test if momentum is disabled
     *
@@ -112,8 +112,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertFalse(stepAndPush());
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 37.9)
+   @Test(timeout = 190000)
    /**
     * End to end test that makes sure the momentum recovery does not get triggered during
     * some normal steps

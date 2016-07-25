@@ -165,6 +165,18 @@ public class YoPolynomial
       setYoVariables();
    }
 
+   public void setQuarticUsingOneIntermediateVelocity(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zIntermediate0, double zIntermediate1, double zFinal, double zdIntermediate0, double zdIntermediate1)
+   {
+      reshape(5);
+      setPositionRow(0, t0, z0);
+      setPositionRow(1, tIntermediate0, zIntermediate0);
+      setPositionRow(2, tIntermediate1, zIntermediate1);
+      setVelocityRow(3, tIntermediate1, zdIntermediate1);
+      setPositionRow(4, tFinal, zFinal);
+      solveForCoefficients();
+      setYoVariables();
+   }
+
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf, double zdf, double zddf)
    {
       reshape(7);

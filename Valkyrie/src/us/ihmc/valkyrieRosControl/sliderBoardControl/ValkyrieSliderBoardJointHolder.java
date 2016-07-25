@@ -56,7 +56,7 @@ abstract class ValkyrieSliderBoardJointHolder
       jointCommand_function = new DoubleYoVariable(joint.getName() + "_tau_function", registry);
 
       if (valkyrieRosControlSliderBoard.torqueOffsetMap != null && valkyrieRosControlSliderBoard.torqueOffsetMap.containsKey(joint.getName()))
-         tau_offset.set(valkyrieRosControlSliderBoard.torqueOffsetMap.get(joint.getName()));
+         tau_offset.set(-valkyrieRosControlSliderBoard.torqueOffsetMap.get(joint.getName()));
    }
 
    abstract void update();

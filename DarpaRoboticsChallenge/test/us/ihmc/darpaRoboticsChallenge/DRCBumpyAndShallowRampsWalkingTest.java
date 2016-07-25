@@ -163,7 +163,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    }
 
 	// This has never worked. Would be nice if we can get it to work.")
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

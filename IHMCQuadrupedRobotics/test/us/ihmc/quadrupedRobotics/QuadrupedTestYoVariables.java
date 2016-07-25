@@ -1,16 +1,14 @@
 package us.ihmc.quadrupedRobotics;
 
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-public class QuadrupedTestYoVariables
+public abstract class QuadrupedTestYoVariables
 {
    private final DoubleYoVariable yoTime;
-   private final EnumYoVariable<QuadrupedForceControllerRequestedEvent> userTrigger;
-   private final EnumYoVariable<QuadrupedForceControllerState> forceControllerState;
    
    private final DoubleYoVariable yoComPositionInputX;
    private final DoubleYoVariable yoComPositionInputY;
@@ -32,13 +30,16 @@ public class QuadrupedTestYoVariables
    private final DoubleYoVariable robotBodyY;
    private final DoubleYoVariable robotBodyZ;
    private final DoubleYoVariable robotBodyYaw;
+
+   private final QuadrantDependentList<BooleanYoVariable> controllerFootSwitches = new QuadrantDependentList<>();
+   private final QuadrantDependentList<BooleanYoVariable> footSwitches = new QuadrantDependentList<>();
+   private final QuadrantDependentList<DoubleYoVariable> solePositionZs = new QuadrantDependentList<>();
    
-   @SuppressWarnings("unchecked")
+   private final BooleanYoVariable limitJointTorques;
+   
    public QuadrupedTestYoVariables(SimulationConstructionSet scs)
    {
       yoTime = (DoubleYoVariable) scs.getVariable("t");
-      userTrigger = (EnumYoVariable<QuadrupedForceControllerRequestedEvent>) scs.getVariable("usertrigger");
-      forceControllerState = (EnumYoVariable<QuadrupedForceControllerState>) scs.getVariable("forceControllerState");
       
       yoComPositionInputX = (DoubleYoVariable) scs.getVariable("comPositionInputX");
       yoComPositionInputY = (DoubleYoVariable) scs.getVariable("comPositionInputY");
@@ -60,16 +61,15 @@ public class QuadrupedTestYoVariables
       robotBodyY = (DoubleYoVariable) scs.getVariable("q_y");
       robotBodyZ = (DoubleYoVariable) scs.getVariable("q_z");
       robotBodyYaw = (DoubleYoVariable) scs.getVariable("q_yaw");
-   }
-
-   public EnumYoVariable<QuadrupedForceControllerRequestedEvent> getUserTrigger()
-   {
-      return userTrigger;
-   }
-
-   public EnumYoVariable<QuadrupedForceControllerState> getForceControllerState()
-   {
-      return forceControllerState;
+      
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         controllerFootSwitches.set(robotQuadrant, (BooleanYoVariable) scs.getVariable(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch_controllerThinksHasTouchedDown"));
+         footSwitches.set(robotQuadrant, (BooleanYoVariable) scs.getVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetected"));
+         solePositionZs.set(robotQuadrant, (DoubleYoVariable) scs.getVariable(robotQuadrant.getCamelCaseName() + "SolePositionZ"));
+      }
+      
+      limitJointTorques = (BooleanYoVariable) scs.getVariable("limitJointTorques");
    }
 
    public DoubleYoVariable getYoComPositionInputX()
@@ -170,5 +170,25 @@ public class QuadrupedTestYoVariables
    public DoubleYoVariable getYoTime()
    {
       return yoTime;
+   }
+
+   public QuadrantDependentList<BooleanYoVariable> getControllerFootSwitches()
+   {
+      return controllerFootSwitches;
+   }
+
+   public QuadrantDependentList<BooleanYoVariable> getFootSwitches()
+   {
+      return footSwitches;
+   }
+
+   public QuadrantDependentList<DoubleYoVariable> getSolePositionZs()
+   {
+      return solePositionZs;
+   }
+
+   public BooleanYoVariable getLimitJointTorques()
+   {
+      return limitJointTorques;
    }
 }

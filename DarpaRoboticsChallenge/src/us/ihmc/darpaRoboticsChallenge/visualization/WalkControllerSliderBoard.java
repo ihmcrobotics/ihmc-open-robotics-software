@@ -66,19 +66,12 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.setSlider(1, "desiredICPOffsetX", registry, -0.3, 0.3);
       sliderBoardConfigurationManager.setKnob(1, "desiredICPOffsetY", registry, -0.3, 0.3);
 
-      sliderBoardConfigurationManager.setKnob(9, "desiredICPEccentricity", registry, 0, .9);
-      sliderBoardConfigurationManager.setKnob(10, "desiredICPAngle", registry, -Math.PI, Math.PI);
+      sliderBoardConfigurationManager.setButton(2, "userUpdateDesiredPelvisPose", registry);
+      sliderBoardConfigurationManager.setButton(3, "userStreamPelvisOrientation", registry);
 
-      //      sliderBoardConfigurationManager.setSlider(3, "hipXJointStiffness", registry, 3000, 20000.0);
-      //      sliderBoardConfigurationManager.setSlider(4, "hipZJointStiffness", registry, 3000, 20000.0);
-      //      sliderBoardConfigurationManager.setSlider(5, "hipYJointStiffness", registry, 3000, 20000.0);
-      //      sliderBoardConfigurationManager.setSlider(6, "otherJointsStiffness", registry, 3000, 20000.0);
-
-      sliderBoardConfigurationManager.setKnob(2, "userSetDesiredPelvis", registry, 0.0, 1.0);
-
-      sliderBoardConfigurationManager.setSlider(2, "userDesiredPelvisYaw", registry, -0.8, 0.8);
-      sliderBoardConfigurationManager.setSlider(3, "userDesiredPelvisPitch", registry, -0.4, 0.4);
-      sliderBoardConfigurationManager.setSlider(4, "userDesiredPelvisRoll", registry, -0.3, 0.3);
+      sliderBoardConfigurationManager.setSlider(2, "userDesiredPelvisPoseYaw", registry, -0.8, 0.8);
+      sliderBoardConfigurationManager.setSlider(3, "userDesiredPelvisPosePitch", registry, -0.4, 0.4);
+      sliderBoardConfigurationManager.setSlider(4, "userDesiredPelvisPoseRoll", registry, -0.3, 0.3);
 
       sliderBoardConfigurationManager.setSlider(5, "userDesiredChestYaw", registry, -0.8, 0.8);
       sliderBoardConfigurationManager.setKnob(5, "userDesiredHeadYaw", registry, -0.8, 0.8);

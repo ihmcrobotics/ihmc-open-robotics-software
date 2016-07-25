@@ -44,7 +44,7 @@ public class HeadingAndVelocityEvaluationScriptTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.6)
+   @DeployableTestMethod(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testHeadingAndVelocityEvaluationScript()
    {

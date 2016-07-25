@@ -42,7 +42,7 @@ public class Cylinder3dTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @DeployableTestMethod(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testCommonShape3dFunctionality_2()
    {
@@ -63,7 +63,7 @@ public class Cylinder3dTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGettersAndSetters()
    {

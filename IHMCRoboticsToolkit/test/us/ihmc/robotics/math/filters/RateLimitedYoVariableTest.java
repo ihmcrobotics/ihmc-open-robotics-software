@@ -48,7 +48,7 @@ public class RateLimitedYoVariableTest
       rateLimitedYoVariable4 = new RateLimitedYoVariable("rateLimitedYoVariable4", registry, maxRate4, position4, dt4);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdate()
    {
@@ -63,7 +63,7 @@ public class RateLimitedYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdateWithNullPointerException()
    {
@@ -80,7 +80,7 @@ public class RateLimitedYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdateWithCurrentPositionParameter()
    {
@@ -113,7 +113,7 @@ public class RateLimitedYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdateWithCurrentPositionParameterExceedingMaxRate()
    {
@@ -174,7 +174,7 @@ public class RateLimitedYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdateWithMaxRateBeingNegative()
    {

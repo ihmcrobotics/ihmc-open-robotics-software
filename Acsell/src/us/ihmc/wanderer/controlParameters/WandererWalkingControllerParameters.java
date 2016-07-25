@@ -387,8 +387,8 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
 
       gains.setKp(kp);
       gains.setZeta(zeta);
-      gains.setMaximumAcceleration(maxAcceleration);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAcceleration);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -427,8 +427,8 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       gains.setDampingRatio(zeta);
       gains.setIntegralGain(ki);
       gains.setMaximumIntegralError(maxIntegralError);
-      gains.setMaximumAcceleration(maxAccel);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAccel);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -470,8 +470,8 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
 
       gains.setKp(kp);
       gains.setZeta(zeta);
-      gains.setMaximumAcceleration(maxAcceleration);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAcceleration);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -493,8 +493,8 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       gains.setDampingRatio(zeta);
       gains.setIntegralGain(ki);
       gains.setMaximumIntegralError(maxIntegralError);
-      gains.setMaximumAcceleration(maxAccel);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAccel);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -519,10 +519,10 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
+      gains.setPositionMaxFeedbackAndFeedbackRate(maxPositionAcceleration, maxPositionJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatios(zetaXYOrientation, zetaZOrientation);
-      gains.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
+      gains.setOrientationMaxFeedbackAndFeedbackRate(maxOrientationAcceleration, maxOrientationJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -546,10 +546,10 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -573,10 +573,10 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -599,10 +599,10 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
 
       gains.setPositionProportionalGains(kp, kp);
       gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;

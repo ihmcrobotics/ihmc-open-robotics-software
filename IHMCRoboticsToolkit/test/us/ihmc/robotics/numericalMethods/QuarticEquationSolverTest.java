@@ -70,7 +70,7 @@ public class QuarticEquationSolverTest
 
    }
    
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testQuarticEquationSolver()
    {

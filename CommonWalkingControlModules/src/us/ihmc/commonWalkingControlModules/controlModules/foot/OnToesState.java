@@ -70,7 +70,7 @@ public class OnToesState extends AbstractFootControlState
 
    public OnToesState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.TOES, footControlHelper, registry);
+      super(ConstraintType.TOES, footControlHelper);
 
       twistCalculator = momentumBasedController.getTwistCalculator();
 
@@ -159,7 +159,7 @@ public class OnToesState extends AbstractFootControlState
 
       orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       pointFeedbackControlCommand.set(desiredContactPointPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      
+
       setupSingleContactPoint();
    }
 
