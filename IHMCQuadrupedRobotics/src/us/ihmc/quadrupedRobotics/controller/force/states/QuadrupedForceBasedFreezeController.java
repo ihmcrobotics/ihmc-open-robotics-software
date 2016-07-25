@@ -18,6 +18,7 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class QuadrupedForceBasedFreezeController implements QuadrupedController
 {
@@ -85,13 +86,6 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       {
          taskSpaceControllerSettings.setContactState(quadrant, ContactState.NO_CONTACT);
       }
-      for (QuadrupedJointName jointName : QuadrupedJointName.values())
-      {
-         if (jointName.getRole().equals(JointRole.LEG))
-         {
-            fullRobotModel.getOneDoFJointByName(jointName).setUseFeedBackForceControl(useForceFeedbackControl.get());
-         }
-      }
       taskSpaceController.reset();
 
       // Initial sole position setpoints
@@ -99,6 +93,16 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       {
          solePositionControllerSetpoints.getSolePosition(quadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
          solePositionControllerSetpoints.getSolePosition(quadrant).changeFrame(bodyFrame);
+      }
+
+      // Initialize force feedback
+      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      {
+         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
+         {
+            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControl.get());
+         }
       }
    }
 
@@ -118,9 +122,10 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    {
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
-         if (jointName.getRole().equals(JointRole.LEG))
+         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            fullRobotModel.getOneDoFJointByName(jointName).setUseFeedBackForceControl(true);
+            oneDoFJoint.setUseFeedBackForceControl(true);
          }
       }
    }
