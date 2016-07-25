@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 {
-   private static final int maxTimeIterations = 2;
+   private static final int maxTimeIterations = 1;
    private static final int numberWaypoints = 2;
    private static final double[] waypointProportions = new double[] {0.15, 0.85};
    private static final double defaultSwingHeight = 0.1;
