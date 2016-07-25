@@ -55,6 +55,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 
    private boolean isUnderPositionControl = false;
    private boolean enabled = true;
+   private boolean useFeedBackForceControl = true;
    
    /**
     * Describes if a joint is online
@@ -497,5 +498,15 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    public void setOnline(boolean isOnline)
    {
       this.isOnline = isOnline;
+   }
+   
+   public boolean isUseFeedBackForceControl()
+   {
+      return useFeedBackForceControl;
+   }
+   
+   public void setUseFeedBackForceControl(boolean useFeedBackForceControl)
+   {
+      this.useFeedBackForceControl = useFeedBackForceControl;
    }
 }

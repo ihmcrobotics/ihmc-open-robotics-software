@@ -401,4 +401,10 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    {
       
    }
+
+   @Override
+   public void trustFootSwitch(boolean trustFootSwitch)
+   {
+
+   }
 }
