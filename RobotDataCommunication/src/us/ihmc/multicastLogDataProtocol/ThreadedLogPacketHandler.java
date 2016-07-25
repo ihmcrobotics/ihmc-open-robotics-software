@@ -1,5 +1,6 @@
 package us.ihmc.multicastLogDataProtocol;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -65,5 +66,11 @@ public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
    public void timeout()
    {
       handler.timeout();
+   }
+
+   @Override
+   public void connected(InetSocketAddress localAddress)
+   {
+      handler.connected(localAddress);
    }
 }
