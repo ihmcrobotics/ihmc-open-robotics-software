@@ -16,10 +16,6 @@ public class SkippyController implements RobotController
    private String name;
    private SkippyRobot robot;
 
-   private double integralTerm1 = 0.0;
-   private double integralTerm2 = 0.0;
-   private double integralTerm3 = 0.0;
-
    public SkippyController(SkippyRobot robot, String name)
    {
       this.name = name;
@@ -63,34 +59,19 @@ public class SkippyController implements RobotController
 
    public void doControl()
    {
+      // desired hip/shoulder positions
+      double q_hip_desired = 0.0;
+      double q_shoulder_desired = 0.0;
       // set the torques
-//      robot.getHipJoint().setTau(-k1.getDoubleValue() * q_foot_X.getDoubleValue()
-//                                       - k2.getDoubleValue() * q_hip.getDoubleValue()
-//                                       - k3.getDoubleValue() * qd_foot_X.getDoubleValue()
-//                                       - k4.getDoubleValue() * qd_hip.getDoubleValue());
-//      robot.getShoulderJoint().setTau(-k5.getDoubleValue() * q_hip.getDoubleValue()
-//                                            - k6.getDoubleValue() * q_shoulder.getDoubleValue()
-//                                            - k7.getDoubleValue() * qd_hip.getDoubleValue()
-//                                            - k8.getDoubleValue() * qd_shoulder.getDoubleValue());
 
-      double p = 100*(robot.getLegJoint().getQ().getDoubleValue()-0);
-      integralTerm1 += p*SkippySimulation.DT;
-      double d = 250*(0-robot.getLegJoint().getQD().getDoubleValue());
-
-      robot.getLegJoint().setTau(p+integralTerm1+d);
-
-      double p1 = 100*(robot.getHipJoint().getQ().getDoubleValue()-0);
-      integralTerm2 += p1*SkippySimulation.DT;
-      double d1 = 250*-1*robot.getHipJoint().getQD().getDoubleValue();
-
-      robot.getHipJoint().setTau(p1+integralTerm2+d1);
-
-      double p2 = 100*(robot.getShoulderJoint().getQ().getDoubleValue()-0);
-      integralTerm3 += p2*SkippySimulation.DT;
-      double d2 = 250*-1*robot.getShoulderJoint().getQD().getDoubleValue();
-
-      robot.getShoulderJoint().setTau(p2+integralTerm3+d2);
-
+      robot.getHipJoint().setTau(-k1.getDoubleValue() * q_foot_X.getDoubleValue()
+                                       - k2.getDoubleValue() * (q_hip.getDoubleValue() - q_hip_desired)
+                                       - k3.getDoubleValue() * qd_foot_X.getDoubleValue()
+                                       - k4.getDoubleValue() * qd_hip.getDoubleValue());
+      robot.getShoulderJoint().setTau(-k5.getDoubleValue() * q_hip.getDoubleValue()
+                                            - k6.getDoubleValue() * (q_shoulder.getDoubleValue() - q_shoulder_desired)
+                                            - k7.getDoubleValue() * qd_hip.getDoubleValue()
+                                            - k8.getDoubleValue() * qd_shoulder.getDoubleValue());
    }
 
    public YoVariableRegistry getYoVariableRegistry()
