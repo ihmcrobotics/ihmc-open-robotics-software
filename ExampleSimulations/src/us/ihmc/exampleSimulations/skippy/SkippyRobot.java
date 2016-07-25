@@ -19,8 +19,7 @@ import java.util.ArrayList;
 public class SkippyRobot extends Robot
 {
    private static final long serialVersionUID = -7671864179791904256L;
-   private Joint root;
-   private PinJoint foot;
+   private UniversalJoint foot;
    private PinJoint hip;
    private PinJoint shoulder;
    private ArrayList<GroundContactPoint> groundContactPoints = new ArrayList();
@@ -49,17 +48,12 @@ public class SkippyRobot extends Robot
       groundContactPoints.add(shoulderContact);
 
       // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
-      root = new FloatingPlanarJoint("root", this, 3);
-      root.changeOffsetVector(new Vector3d(0.0, 0.0, 0.0)); // initial position of root
-      Link linkRootToFoot = createLinkRootToFoot();
-      root.setLink(linkRootToFoot);
-      this.addRootJoint(root);
-
-      foot = new PinJoint("foot", new Vector3d(0.0, 0.0, 0.0), this, Axis.X);
+      foot = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, 0.0), this, Axis.X, Axis.Y);
+      foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.0)); // initial position
       foot.setInitialState(0.05, 0.0);
       Link leg = createLeg();
       foot.setLink(leg);
-      this.root.addJoint(foot);
+      this.addRootJoint(foot);
       foot.addGroundContactPoint(footContact);
 
       hip = new PinJoint("hip", new Vector3d(0.0, 0.0, L1), this, Axis.X);
@@ -78,23 +72,6 @@ public class SkippyRobot extends Robot
       GroundProfile3D profile = new FlatGroundProfile();
       ground.setGroundProfile3D(profile);
       this.setGroundContactModel(ground);
-   }
-
-   private Link createLinkRootToFoot()
-   {
-      Link linkRootToFoot = new Link("linkRootToFoot");
-      linkRootToFoot.setMass(0.0);
-      linkRootToFoot.setComOffset(0.0, 0.0, 0.0);
-      linkRootToFoot.setMomentOfInertia(0.0, 0.0, 0.0);
-
-      // create a LinkGraphics object to manipulate the visual representation of the link
-      Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCube(1e-10, 1e-10, 1e-10, YoAppearance.GhostWhite());
-
-      // associate the linkGraphics object with the link object
-      linkRootToFoot.setLinkGraphics(linkGraphics);
-
-      return linkRootToFoot;
    }
 
    private Link createLeg()
