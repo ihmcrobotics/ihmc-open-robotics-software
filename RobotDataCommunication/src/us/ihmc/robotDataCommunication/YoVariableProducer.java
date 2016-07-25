@@ -1,8 +1,12 @@
 package us.ihmc.robotDataCommunication;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.StandardProtocolFamily;
+import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
+import java.nio.channels.DatagramChannel;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
@@ -16,7 +20,8 @@ import us.ihmc.util.PeriodicThreadScheduler;
 
 public class YoVariableProducer implements Runnable
 {
-   private static final int SEND_BUFFER_LENGTH = 4096; //1024;
+   public static final int TIMESTAMP_HEADER  = 0xAFAF;
+   private static final int SEND_BUFFER_LENGTH = 1024;
    
    private final PeriodicThreadScheduler scheduler;
    
@@ -40,6 +45,9 @@ public class YoVariableProducer implements Runnable
    private final LogDataHeader logDataHeader = new LogDataHeader();
    private final CRC32 crc32 = new CRC32();
 
+   private final DatagramChannel channel;
+   private final ByteBuffer timestampBuffer = ByteBuffer.allocateDirect(12);
+   
    @SuppressWarnings("unchecked")
    public YoVariableProducer(PeriodicThreadScheduler scheduler, LogSessionBroadcaster session, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider,
          ConcurrentRingBuffer<FullStateBuffer> mainBuffer, Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers)
@@ -61,6 +69,41 @@ public class YoVariableProducer implements Runnable
       compressedBuffer = ByteBuffer.wrap(compressedBackingArray);
       compressedBufferDirect = ByteBuffer.allocateDirect(compressedBuffer.capacity());
       this.session = session;
+
+      timestampBuffer.putInt(0, TIMESTAMP_HEADER);
+
+      try
+      {
+         channel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true)
+               .setOption(StandardSocketOptions.IP_MULTICAST_IF, session.getInterface());
+         channel.configureBlocking(false);
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+
+   }
+   
+   public void publishTimestampRealtime(long timestamp)
+   {
+      timestampBuffer.putLong(4, timestamp);
+      for(int i = 0; i < server.getMaximumNumberOfConnections(); i++)
+      {
+         InetSocketAddress target = server.getUDPAddress(i);
+         if(target != null)
+         {
+            timestampBuffer.clear();
+            try
+            {
+               channel.send(timestampBuffer, target);
+            }
+            catch (IOException e)
+            {
+               System.out.println(e.getMessage());
+            }
+         }
+      }
    }
 
    private void updateBuffers(long timestamp)
@@ -100,13 +143,12 @@ public class YoVariableProducer implements Runnable
    public void run()
    {
 
-      if (mainBuffer.poll())
+      while (mainBuffer.poll())
       {
          FullStateBuffer fullStateBuffer;
 
-         while ((fullStateBuffer = mainBuffer.read()) != null)
+         if ((fullStateBuffer = mainBuffer.read()) != null)
          {
-
             writeBuffer.put(0, fullStateBuffer.getTimestamp());
             fullStateBuffer.getIntoBuffer(writeBuffer, 1);
             fullStateBuffer.getJointStatesInBuffer(writeBuffer, jointStateOffset + 1);

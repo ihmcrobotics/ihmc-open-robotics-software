@@ -2,10 +2,16 @@ package us.ihmc.robotDataCommunication;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
+import java.net.StandardProtocolFamily;
+import java.net.StandardSocketOptions;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
+import java.nio.channels.DatagramChannel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.CRC32;
@@ -26,6 +32,7 @@ import us.ihmc.tools.compression.SnappyUtils;
 public class YoVariableClient implements LogPacketHandler
 {
    private static final int RECEIVE_BUFFER_SIZE = 1024;
+   private static final int TIMEOUT = 1000;
 
    private final CRC32 crc32 = new CRC32();
    private final StreamingDataTCPClient streamingDataTCPClient;
@@ -40,7 +47,8 @@ public class YoVariableClient implements LogPacketHandler
    private ByteBuffer decompressed;
    private long previous;
    private ClientState state = ClientState.WAITING;
-
+   private TimestampListener timestampListener;
+   
    private enum ClientState
    {
       WAITING, RUNNING, STOPPED
@@ -156,13 +164,13 @@ public class YoVariableClient implements LogPacketHandler
    @Override
    public void timestampReceived(long timestamp)
    {
-      yoVariablesUpdatedListener.receivedTimestampOnly(timestamp);
    }
 
    @Override
    public void timeout()
    {
       threadedLogPacketHandler.shutdown();
+      timestampListener.interrupt();
       yoVariablesUpdatedListener.receiveTimedOut();
    }
    
@@ -250,5 +258,74 @@ public class YoVariableClient implements LogPacketHandler
    public void sendClearLogRequest()
    {
       logControlClient.sendClearLogRequest();
+   }
+
+   @Override
+   public void connected(InetSocketAddress localAddress)
+   {
+      System.out.println("Listening on " + localAddress);
+      timestampListener = new TimestampListener(localAddress);
+      timestampListener.start();
+   }
+   
+   
+   private class TimestampListener extends Thread
+   {
+      InetSocketAddress address;
+
+      public TimestampListener(InetSocketAddress localAddress)
+      {
+         super("TimestampListener");
+         
+         address = new InetSocketAddress(localAddress.getAddress(), localAddress.getPort());
+         
+      }
+      
+      @Override
+      public void run()
+      {
+         try
+         {
+            DatagramChannel channel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true).bind(address);
+            channel.configureBlocking(false);
+            Selector selector = Selector.open();
+            SelectionKey key = channel.register(selector, SelectionKey.OP_READ);
+            ByteBuffer receiveBuffer = ByteBuffer.allocateDirect(12);
+            System.out.println("Starting timestamp thread on " + address);
+            while(!interrupted())
+            {
+               if (selector.select(TIMEOUT) > 0)
+               {
+                  selector.selectedKeys().remove(key);
+                  if (key.isReadable())
+                  {
+                     receiveBuffer.clear();
+                     channel.receive(receiveBuffer);
+                     receiveBuffer.flip();
+                     
+                     if(receiveBuffer.getInt() == YoVariableProducer.TIMESTAMP_HEADER)
+                     {
+                        yoVariablesUpdatedListener.receivedTimestampOnly(receiveBuffer.getLong());
+                     }
+                     else
+                     {
+                        System.err.println("Received invalid timestamp, dropping");
+                     }
+                     
+                  }
+               }
+            }
+
+            System.out.println("Closing timestamp client");
+            channel.close();
+
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+            return;
+         }
+
+      }
    }
 }
