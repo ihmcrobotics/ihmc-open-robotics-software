@@ -127,7 +127,10 @@ public class SkippyRobot extends Robot
 
       return arms;
    }
-
+   public UniversalJoint getLegJoint()
+   {
+      return foot;
+   }
    public PinJoint getHipJoint()
    {
       return hip;
