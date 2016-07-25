@@ -16,6 +16,10 @@ public class SkippyController implements RobotController
    private String name;
    private SkippyRobot robot;
 
+   private double integralTerm = 0.0;
+   private double integralTerm2 = 0.0;
+   private double integralTerm3 = 0.0;
+
    public SkippyController(SkippyRobot robot, String name)
    {
       this.name = name;
@@ -72,6 +76,24 @@ public class SkippyController implements RobotController
                                             - k6.getDoubleValue() * (q_shoulder.getDoubleValue() - q_shoulder_desired)
                                             - k7.getDoubleValue() * qd_hip.getDoubleValue()
                                             - k8.getDoubleValue() * qd_shoulder.getDoubleValue());
+
+//      double positionError = (1)*(q_hip_desired-robot.getLegJoint().getQ().getDoubleValue());
+//      integralTerm += (0.1)*positionError*SkippySimulation.DT;
+//      double velocityError = (.01)*(0-robot.getLegJoint().getQD().getDoubleValue());
+//      robot.getLegJoint().setTau(positionError+integralTerm+velocityError);
+//
+//      positionError = (10)*(q_hip_desired-robot.getHipJoint().getQ().getDoubleValue());
+//      integralTerm3 += (1)*positionError*SkippySimulation.DT;
+//      velocityError = (.1)*(0-robot.getHipJoint().getQD().getDoubleValue());
+//      robot.getHipJoint().setTau(positionError+integralTerm3+velocityError);
+//
+//      positionError = (100)*(q_hip_desired-robot.getShoulderJoint().getQ().getDoubleValue());
+//      integralTerm2 += (10)*positionError*SkippySimulation.DT;
+//      velocityError = (1)*(0-robot.getShoulderJoint().getQD().getDoubleValue());
+//      robot.getShoulderJoint().setTau(positionError+integralTerm2+velocityError);
+//
+//      System.out.println(robot.getHipJoint().getQ() + " " + robot.getLegJoint().getQ());
+
    }
 
    public YoVariableRegistry getYoVariableRegistry()
