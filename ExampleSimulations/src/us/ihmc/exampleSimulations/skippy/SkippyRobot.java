@@ -28,9 +28,9 @@ public class SkippyRobot extends Robot
     * Iyy* are the moments of inertia of the links, which are defined about the COM for each link.
     */
    public static final double
-         L1 = 1.0, M1 = 1.0, R1 = 0.1, Iyy1 = 0.083, // Leg
-         L2 = 2.0, M2 = 1.0, R2 = 0.05, Iyy2 = 0.33, // Torso
-         L3 = 3.0, M3 = 0.5, R3 = 0.05, Iyy3 = 0.15; // Crossbar
+      L1 = 1.0, M1 = 1.0, R1 = 0.1, Iyy1 = (1.0/3.0)*M1*Math.pow(L1,2), // Leg
+      L2 = 2.0, M2 = 1.0, R2 = 0.05, Iyy2 = (1.0/3.0)*M2*Math.pow(L2,2), // Torso
+      L3 = 3.0, M3 = 0.5, R3 = 0.05, Iyy3 = (1.0/12.0)*M3*Math.pow(L3,2); // Crossbar
 
    public SkippyRobot()
    {
@@ -68,6 +68,7 @@ public class SkippyRobot extends Robot
       this.hip.addJoint(shoulder);
       shoulder.addGroundContactPoint(shoulderContact);
 
+
       GroundContactModel ground = new LinearGroundContactModel(this, 1422, 150.6, 50.0, 1000.0, this.getRobotsYoVariableRegistry());
       GroundProfile3D profile = new FlatGroundProfile();
       ground.setGroundProfile3D(profile);
@@ -100,6 +101,7 @@ public class SkippyRobot extends Robot
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCylinder(L2, R2, YoAppearance.LightSkyBlue());
+      linkGraphics.addSphere(0.10,YoAppearance.White());
 
       torso.setLinkGraphics(linkGraphics);
 
