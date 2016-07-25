@@ -34,13 +34,14 @@ import us.ihmc.robotics.time.ExecutionTimer;
  * The class can return waypoint times, polynomial coefficients for the trajectory segments, and
  * optimal velocities and accelerations at the knot points of the trajectory.
  *
+ * Algorithm based on "Minimum Snap Trajectory Generation and Control for Quadrotors" - Mellinger
  * @author gwiedebach
  *
  */
 public class TrajectoryPointOptimizer
 {
-   private static final int maxWaypoints = 12;
-   private static final int maxIterations = 20;
+   public static final int maxWaypoints = 12;
+   public static final int maxIterations = 20;
 
    private static final double regularizationWeight = 1E-10;
    private static final double epsilon = 1E-7;

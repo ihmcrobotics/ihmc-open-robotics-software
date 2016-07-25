@@ -2,9 +2,11 @@ package us.ihmc.multicastLogDataProtocol;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -17,7 +19,7 @@ public class MultiClientStreamingDataTCPServer extends Thread
 
    private final ClientHandler handlers[] = new ClientHandler[4];
    private final ServerSocketChannel server;
-
+   
    private ByteBuffer handshakeBuffer;
 
    public MultiClientStreamingDataTCPServer(int port, int dataSize, int bufferLength) throws IOException
@@ -182,7 +184,10 @@ public class MultiClientStreamingDataTCPServer extends Thread
       private long count;
       private int sendEveryNTicks;
       private SocketChannel client;
+      
 
+      private AtomicReference<InetSocketAddress> udpAddress = new AtomicReference<InetSocketAddress>(null);
+      
       private ClientHandler(final int dataSize, int bufferLength)
       {
          data = new ConcurrentRingBuffer<>(new Builder<ByteBuffer>()
@@ -263,6 +268,8 @@ public class MultiClientStreamingDataTCPServer extends Thread
 
             }
             System.out.println("Connection closed:  " + client);
+            
+            udpAddress.set(null);
             try
             {
                client.close();
@@ -295,6 +302,22 @@ public class MultiClientStreamingDataTCPServer extends Thread
             {
                this.client = client;
                this.sendEveryNTicks = sendEveryNTicks;
+               try
+               {
+                  SocketAddress socketAddress = client.getRemoteAddress();
+                  if(socketAddress instanceof InetSocketAddress)
+                  {
+                     this.udpAddress.set(new InetSocketAddress(((InetSocketAddress) socketAddress).getAddress(), ((InetSocketAddress) socketAddress).getPort()));
+                  }
+                  else
+                  {
+                     this.udpAddress = null;
+                  }
+               }
+               catch(Exception e)
+               {
+                  this.udpAddress.set(null);
+               }
                this.active = true;
                dataLock.notifyAll();
             }
@@ -327,7 +350,22 @@ public class MultiClientStreamingDataTCPServer extends Thread
             count++;
          }
       }
+      
+      public InetSocketAddress getUDPAddress()
+      {
+         return udpAddress.get();
+      }
 
+   }
+   
+   public InetSocketAddress getUDPAddress(int client)
+   {
+      return handlers[client].getUDPAddress();
+   }
+
+   public int getMaximumNumberOfConnections()
+   {
+      return handlers.length;
    }
 
 }
