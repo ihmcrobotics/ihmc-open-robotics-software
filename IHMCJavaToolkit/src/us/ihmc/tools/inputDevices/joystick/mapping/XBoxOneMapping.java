@@ -65,7 +65,7 @@ public enum XBoxOneMapping implements JoystickMapping
       mapValues(START, Identifier.Button._7, Identifier.Button._8, Identifier.Button.START);
       mapValues(XBOX_BUTTON, Identifier.Button._10, Identifier.Button._10, Identifier.Button.MODE);
       mapValues(LEFT_TRIGGER, Identifier.Axis.Z, Identifier.Axis.Z, Identifier.Axis.Z);
-      mapValues(RIGHT_TRIGGER, Identifier.Axis.Z, Identifier.Axis.RZ, Identifier.Axis.RZ);
+      mapValues(RIGHT_TRIGGER, Identifier.Axis.RZ, Identifier.Axis.RZ, Identifier.Axis.RZ);
       mapValues(LEFT_STICK_X, Identifier.Axis.X, Identifier.Axis.X, Identifier.Axis.X);
       mapValues(LEFT_STICK_Y, Identifier.Axis.Y, Identifier.Axis.Y, Identifier.Axis.Y);
       mapValues(RIGHT_STICK_X, Identifier.Axis.RX, Identifier.Axis.RX, Identifier.Axis.RX);

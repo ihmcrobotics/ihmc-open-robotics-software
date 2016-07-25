@@ -18,6 +18,7 @@ import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedNeckJointPositio
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
+import us.ihmc.tools.inputDevices.joystick.JoystickComponentFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
@@ -72,22 +73,31 @@ public class QuadrupedHeadTeleopNode implements JoystickEventListener
          }
       }, 0, (long) (DT * 1000), TimeUnit.MILLISECONDS);
 
-      // Poll indefinitely.
-//      device.registerCallback(this);
-//      device.poll();
+      configureJoystickFilters(device);
       device.addJoystickEventListener(this);
       device.setPollInterval(10);
    }
+
+   private void configureJoystickFilters(Joystick device)
+   {
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_TRIGGER, false, 0.05, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_TRIGGER, false, 0.05, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_STICK_X, true, 0.1, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_STICK_Y, true, 0.1, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_STICK_X, true, 0.1, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_STICK_Y, true, 0.1, 1));
+   }
+
 
    public void update()
    {
       try
       {
-         double distalNeckYaw = get(InputChannel.RIGHT_STICK_X) * distalNeckYawScaleParameter.get();
-         double distalNeckPitch = get(InputChannel.RIGHT_STICK_Y) * distalNeckPitchScaleParameter.get();
-         double distalNeckRoll = (get(InputChannel.RIGHT_TRIGGER) - get(InputChannel.LEFT_TRIGGER)) * distalNeckRollScaleParameter.get();
-         double proximalNeckYaw = get(InputChannel.LEFT_STICK_X) * proximalNeckYawScaleParameter.get();
-         double proximalNeckPitch = get(InputChannel.LEFT_STICK_Y) * proximalNeckPitchScaleParameter.get();
+         double distalNeckYaw = get(XBoxOneMapping.RIGHT_STICK_X) * distalNeckYawScaleParameter.get();
+         double distalNeckPitch = get(XBoxOneMapping.RIGHT_STICK_Y) * distalNeckPitchScaleParameter.get();
+         double distalNeckRoll = (get(XBoxOneMapping.RIGHT_TRIGGER) - get(XBoxOneMapping.LEFT_TRIGGER)) * distalNeckRollScaleParameter.get();
+         double proximalNeckYaw = get(XBoxOneMapping.LEFT_STICK_X) * proximalNeckYawScaleParameter.get();
+         double proximalNeckPitch = get(XBoxOneMapping.LEFT_STICK_Y) * proximalNeckPitchScaleParameter.get();
          double proximalNeckRoll = 0.0 * proximalNeckRollScaleParameter.get();
 
          neckJointPositionSetpoints.put(QuadrupedJointName.DISTAL_NECK_YAW, distalNeckYaw);
@@ -120,33 +130,35 @@ public class QuadrupedHeadTeleopNode implements JoystickEventListener
       switch (XBoxOneMapping.getMapping(event))
       {
       case A:
-         if (get(InputChannel.BUTTON_A) > 0.5)
+         if (get(XBoxOneMapping.A) > 0.5)
          {
             teleopEnabled = true;
          }
          break;
       case X:
-         if (get(InputChannel.BUTTON_X) > 0.5)
+         if (get(XBoxOneMapping.X) > 0.5)
          {
             teleopEnabled = false;
          }
          break;
       case Y:
-         if (get(InputChannel.BUTTON_Y) > 0.5)
+         if (get(XBoxOneMapping.Y) > 0.5)
          {
             teleopEnabled = false;
          }
          break;
       case B:
-         if (get(InputChannel.BUTTON_B) > 0.5)
+         if (get(XBoxOneMapping.B) > 0.5)
          {
             teleopEnabled = false;
          }
          break;
+      default:
+         break;
       }
    }
 
-   private double get(InputChannel channel)
+   private double get(XBoxOneMapping channel)
    {
       return channels.get(channel);
    }
