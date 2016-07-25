@@ -292,6 +292,11 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
                // TODO Auto-generated method stub
                
             }
+
+            @Override
+            public void trustFootSwitch(boolean trustFootSwitch)
+            {
+            }
          };
          
          footSwitches.put(contactableFoot.getRigidBody(), footSwitch);

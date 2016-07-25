@@ -199,6 +199,11 @@ public class LogDataProcessorHelper
             public void setFootContactState(boolean hasFootHitGround)
             {
             }
+
+            @Override
+            public void trustFootSwitch(boolean trustFootSwitch)
+            {
+            }
          };
 
          footSwitches.put(robotSide, footSwitch);

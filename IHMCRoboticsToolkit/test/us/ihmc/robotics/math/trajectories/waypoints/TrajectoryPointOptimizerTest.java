@@ -10,8 +10,6 @@ import org.junit.Test;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.trajectories.waypoints.PolynomialOrder;
-import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
 import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
@@ -143,6 +141,10 @@ public class TrajectoryPointOptimizerTest
          assertEquals(coefficients.get(0).get(i), expected[i], epsilon);
          assertEquals(coefficients.get(0).get(i), coefficients.get(1).get(i), epsilon);
       }
+
+      TDoubleArrayList waypointVelocity = new TDoubleArrayList();
+      optimizer.getWaypointVelocity(waypointVelocity, 0);
+      assertEquals(waypointVelocity.get(0), 1.5, epsilon);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -180,7 +182,7 @@ public class TrajectoryPointOptimizerTest
    public void testTrivialProblem()
    {
       int dimensions = 1;
-      PolynomialOrder order = PolynomialOrder.ORDER7;
+      PolynomialOrder order = PolynomialOrder.ORDER5;
       TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, order);
 
       TDoubleArrayList x0 = new TDoubleArrayList(dimensions);
@@ -200,7 +202,7 @@ public class TrajectoryPointOptimizerTest
       coefficients.add(new TDoubleArrayList(0));
       optimizer.getPolynomialCoefficients(coefficients, 0);
 
-      double[] expected = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0};
+      double[] expected = new double[] {0.0, 0.0, 0.0, 0.0, 1.0, 0.0};
       for (int i = 0; i < order.getCoefficients(); i++)
          assertEquals(expected[i], coefficients.get(0).get(i), epsilon);
    }
@@ -252,20 +254,20 @@ public class TrajectoryPointOptimizerTest
       assertTrue(waypointTimes.get(0) > 0.0);
    }
 
-   private void printResults(double[] waypointTimes, ArrayList<double[]> coefficients)
+   private void printResults(TDoubleArrayList waypointTimes, ArrayList<TDoubleArrayList> coefficients)
    {
       String timesString = "";
-      for (int i = 0; i < waypointTimes.length; i++)
+      for (int i = 0; i < waypointTimes.size(); i++)
       {
-         timesString += waypointTimes[i] + " ";
+         timesString += waypointTimes.get(i) + " ";
       }
       System.out.println("Waypoint Times: " + timesString);
-      for (double[] coeffs : coefficients)
+      for (TDoubleArrayList coeffs : coefficients)
       {
          String coeffString = "";
-         for (int i = 0; i < coeffs.length; i++)
+         for (int i = 0; i < coeffs.size(); i++)
          {
-            coeffString += coeffs[i] + " ";
+            coeffString += coeffs.get(i) + " ";
          }
          System.out.println("Polynomial Coefficients: " + coeffString);
       }
