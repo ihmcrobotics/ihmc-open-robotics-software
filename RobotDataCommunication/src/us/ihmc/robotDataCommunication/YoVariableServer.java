@@ -3,6 +3,7 @@ package us.ihmc.robotDataCommunication;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -21,6 +22,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataCommunication.jointState.JointHolder;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -51,6 +53,9 @@ public class YoVariableServer implements RobotVisualizer
    // Change data
    private final LinkedHashMap<YoVariableRegistry, ConcurrentRingBuffer<VariableChangedMessage>> variableChangeData = new LinkedHashMap<>();
       
+   private IntegerYoVariable skippedMainRegistryTicksDueFullBuffer;
+   private HashMap<YoVariableRegistry, IntegerYoVariable> skippedRegistryTicksDueFullBuffer = new HashMap<>();
+   
    // State
    private boolean started = false;
 
@@ -81,6 +86,12 @@ public class YoVariableServer implements RobotVisualizer
       if(started)
       {
          throw new RuntimeException("Server already started");
+      }
+      
+      skippedMainRegistryTicksDueFullBuffer = new IntegerYoVariable("skippedMainRegistryTicksDueFullBuffer", mainRegistry);
+      for(ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry> registry : variableData)
+      {
+         skippedRegistryTicksDueFullBuffer.put(registry.getLeft(), new IntegerYoVariable("skipped" + registry.getLeft().getName() +"RegistryTicksDueFullBuffer", mainRegistry));
       }
       
       handshakeBuilder = new YoVariableHandShakeBuilder(mainBodies, dt);
@@ -162,7 +173,7 @@ public class YoVariableServer implements RobotVisualizer
          {
             throw new RuntimeException("Cannot find root registry " + registry.getName());
          }
-         updateVariableBuffer(timestamp, ringBuffer);
+         updateVariableBuffer(timestamp, ringBuffer, registry);
       }
       updateChangedVariables(registry);
       
@@ -198,13 +209,17 @@ public class YoVariableServer implements RobotVisualizer
       buffer.flush();
    }
 
-   private void updateVariableBuffer(long timestamp, ConcurrentRingBuffer<? extends RegistryBuffer> ringBuffer)
+   private void updateVariableBuffer(long timestamp, ConcurrentRingBuffer<? extends RegistryBuffer> ringBuffer, YoVariableRegistry registry)
    {
       RegistryBuffer buffer = ringBuffer.next();
       if(buffer != null)
       {
          buffer.update(timestamp);
          ringBuffer.commit();
+      }
+      else
+      {
+         skippedRegistryTicksDueFullBuffer.get(registry).increment();
       }
    }
    private void updateMainVariableBuffer(long timestamp)
@@ -215,6 +230,11 @@ public class YoVariableServer implements RobotVisualizer
          buffer.update(timestamp, uid);
          mainBuffer.commit();
       }
+      else
+      {
+         skippedMainRegistryTicksDueFullBuffer.increment();
+      }
+      producer.publishTimestampRealtime(timestamp);
       uid++;
    }
    
@@ -233,5 +253,6 @@ public class YoVariableServer implements RobotVisualizer
       }
       mainRegistry = registry;
       mainDynamicGraphicObjectsListRegistry = yoGraphicsListRegistry;
+      
    }
 }

@@ -29,7 +29,12 @@ public class SkippyController implements RobotController
       qd_hip = (DoubleYoVariable)robot.getVariable("qd_hip");
 
       // set controller gains
-      // gains taken from Mark Spong (1995) "The Swing Up Control Problem for the Acrobot"
+      /* gains taken from Mark Spong (1995) "The Swing Up Control Problem for the Acrobot"
+         k1 = -242.52
+         k2 = -96.33
+         k3 = -104.59
+         k4 = -49.05
+       */
       k1 = new DoubleYoVariable("k1", registry);
       k1.set(-242.52);
       k2 = new DoubleYoVariable("k2", registry);
