@@ -53,8 +53,8 @@ public class SkippyRobot extends Robot
 
       // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
       foot = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, 0.0), this, Axis.X, Axis.Y);
-      foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.0)); // initial Cartesian position
-      foot.setInitialState(0.05, 0.0, 0.0, 0.0); // initial angle
+      foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.0)); // initial Cartesian position of foot
+      foot.setInitialState(0.05, 0.0, 0.0, 0.0); // initial position "q" of foot
       Link leg = createLeg();
       foot.setLink(leg);
       this.addRootJoint(foot);
@@ -70,7 +70,7 @@ public class SkippyRobot extends Robot
       shoulder = new PinJoint("shoulder", new Vector3d(0.0, 0.0, L2), this, Axis.Y);
       Link arms = createArms();
       shoulder.setLink(arms);
-      shoulder.setInitialState(0.5,0.0);
+      shoulder.setInitialState(0.05,0.0);
       shoulder.setDamping(0.3);
       this.hip.addJoint(shoulder);
       shoulder.addGroundContactPoint(shoulderContact);
