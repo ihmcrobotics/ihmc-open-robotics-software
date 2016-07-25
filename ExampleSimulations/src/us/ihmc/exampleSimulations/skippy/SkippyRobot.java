@@ -21,7 +21,7 @@ public class SkippyRobot extends Robot
    private static final long serialVersionUID = -7671864179791904256L;
    private Joint root;
    private Joint foot;
-   private Joint hip;
+   private PinJoint hip;
    private Joint shoulder;
    private ArrayList<GroundContactPoint> groundContactPoints = new ArrayList();
 
@@ -30,9 +30,12 @@ public class SkippyRobot extends Robot
     * for each link.
     */
    public static final double
-         L1 = 1.0, M1 = 1.0, R1 = 0.05, Iyy1 = 0.083,
-         L2 = 2.0, M2 = 1.0, R2 = 0.05, Iyy2 = 0.33,
-         L3 = 3.0, M3 = 1.0, R3 = 0.05, Iyy3 = 0.15;
+         L1 = 1.0, M1 = 1.0, R1 = 0.05,
+         L2 = 2.0, M2 = 1.0, R2 = 0.05,
+         L3 = 3.0, M3 = 1.0, R3 = 0.05,
+         Iyy1 = (1.0/3.0)*(M1+M2+M3)*Math.pow(L1+L2, 2),
+         Iyy2 = (1.0/3.0)*(M2+M3)*Math.pow(L2,2),
+         Iyy3 = (1.0/12.0)*M3*Math.pow(L3, 2);
 
    public SkippyRobot()
    {
@@ -81,6 +84,10 @@ public class SkippyRobot extends Robot
       shoulder.setLink(crossBar);
       this.hip.addJoint(shoulder);
       shoulder.addGroundContactPoint(shoulderContact);
+
+      ExternalForcePoint f = new ExternalForcePoint("ExtF", new Vector3d(0.0,L3,L1+L2), this);
+      f.setForce(5.0,0.0,0.0);
+      shoulder.addExternalForcePoint(f);
 
       GroundContactModel ground = new LinearGroundContactModel(this, 1422, 150.6, 50.0, 1000.0, this.getRobotsYoVariableRegistry());
       GroundProfile3D profile = new FlatGroundProfile();
