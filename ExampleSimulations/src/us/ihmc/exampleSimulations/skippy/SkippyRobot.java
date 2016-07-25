@@ -54,7 +54,7 @@ public class SkippyRobot extends Robot
       // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
       foot = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, 0.0), this, Axis.X, Axis.Y);
       foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.0)); // initial Cartesian position of foot
-      foot.setInitialState(0.5, 0.0, 0.0, 0.0); // initial position "q" of foot
+      foot.setInitialState(0.75, 0.0, 0.75, 0.0); // initial position "q" of foot
       Link leg = createLeg();
       foot.setLink(leg);
       this.addRootJoint(foot);
@@ -63,11 +63,11 @@ public class SkippyRobot extends Robot
       hip = new PinJoint("hip", new Vector3d(0.0, 0.0, L1), this, Axis.X);
       Link torso = createTorso();
       hip.setLink(torso);
-      hip.setInitialState(0.5,0.0);
+      hip.setInitialState(-2.5,0.0);
       this.foot.addJoint(hip);
       hip.addGroundContactPoint(hipContact);
 
-      shoulder = new PinJoint("shoulder", new Vector3d(0.0, 0.0, L2), this, Axis.Y);
+      shoulder = new PinJoint("shoulder", new Vector3d(0.0, 0.0, L2), this, Axis.Z);
       Link arms = createArms();
       shoulder.setLink(arms);
       shoulder.setInitialState(0.5,0.0);
@@ -88,7 +88,7 @@ public class SkippyRobot extends Robot
       Link leg = new Link("leg");
       leg.setMass(M1);
       leg.setComOffset(0.0, 0.0, L1 / 2.0);
-      leg.setMomentOfInertia(Iyy1, 99999, 0.0001);
+      leg.setMomentOfInertia(Iyy1, Iyy1, 0.0001);
 
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -121,7 +121,7 @@ public class SkippyRobot extends Robot
       Link arms = new Link("arms");
       arms.setMass(M3);
       arms.setComOffset(0.0, 0.0, L3 / 2.0);
-      arms.setMomentOfInertia(0.0001, Iyy3, 0.0001);
+      arms.setMomentOfInertia(0.0001, 0.0001, Iyy3);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.rotate(Math.toRadians(90), Axis.Y);
