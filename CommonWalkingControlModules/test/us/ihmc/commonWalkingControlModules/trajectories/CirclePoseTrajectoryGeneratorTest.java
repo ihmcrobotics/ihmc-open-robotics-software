@@ -117,8 +117,8 @@ public class CirclePoseTrajectoryGeneratorTest
       assertEquals(0.0, accelerationToPack.getZ(), EPSILON);
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    //TODO: implement a real test
    public void testGetPosition()
    {

@@ -46,7 +46,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       super.testSurfaceNormalGridForSmoothTerrainUsingHeightMap();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAllFlat()
    {
@@ -63,7 +63,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(0.0, height, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOne()
    {
@@ -99,7 +99,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(0.0, height, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testTwo()
    {
@@ -123,7 +123,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(1.0, height, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testThree()
    {
@@ -152,7 +152,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(1.0, height, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFour()
    {
@@ -183,7 +183,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       assertEquals(1.0, height, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(expected = RuntimeException.class,timeout=300000)
    public void testBadOrderingOne()
    {
@@ -191,7 +191,7 @@ public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
       new AlternatingSlopesGroundProfile(xSlopePairs);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(expected = RuntimeException.class, timeout=300000)
    public void testBadOrderingTwo()
    {

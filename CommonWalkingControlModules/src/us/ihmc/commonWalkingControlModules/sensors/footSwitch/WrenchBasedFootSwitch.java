@@ -27,6 +27,8 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 //TODO Probably make an EdgeSwitch interface that has all the HeelSwitch and ToeSwitch stuff
 public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 {
+   private static final double MIN_FORCE_TO_COMPUTE_COP = 5.0;
+
    private final DoubleYoVariable contactThresholdForce;
    private final DoubleYoVariable secondContactThresholdForce;
 
@@ -275,12 +277,22 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    public void updateCoP()
    {
       readSensorData(footWrench);
-      copResolver.resolveCenterOfPressureAndNormalTorque(resolvedCoP, footWrench, contactablePlaneBody.getSoleFrame());
-      yoResolvedCoP.set(resolvedCoP);
 
-      resolvedCoP3d.setToZero(resolvedCoP.getReferenceFrame());
-      resolvedCoP3d.setXY(resolvedCoP);
-      resolvedCoP3d.changeFrame(ReferenceFrame.getWorldFrame());
+      if (Math.abs(footWrench.getLinearPartZ()) < MIN_FORCE_TO_COMPUTE_COP)
+      {
+         yoResolvedCoP.setToNaN();
+         resolvedCoP3d.setToNaN(ReferenceFrame.getWorldFrame());
+         resolvedCoP.setToNaN();
+      }
+      else
+      {
+         copResolver.resolveCenterOfPressureAndNormalTorque(resolvedCoP, footWrench, contactablePlaneBody.getSoleFrame());
+         yoResolvedCoP.set(resolvedCoP);
+         
+         resolvedCoP3d.setToZero(resolvedCoP.getReferenceFrame());
+         resolvedCoP3d.setXY(resolvedCoP);
+         resolvedCoP3d.changeFrame(ReferenceFrame.getWorldFrame());
+      }
    }
 
    private Wrench footWrenchInBodyFixedFrame = new Wrench();
@@ -388,5 +400,11 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    public void setFootContactState(boolean hasFootHitGround)
    {
       
+   }
+
+   @Override
+   public void trustFootSwitch(boolean trustFootSwitch)
+   {
+
    }
 }

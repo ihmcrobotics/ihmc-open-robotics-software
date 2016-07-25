@@ -80,7 +80,7 @@ public abstract class MassMatrixCalculatorTest
       return kineticEnergy.get(0, 0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.6)
+	@DeployableTestMethod(estimatedDuration = 1.2)
 	@Test(timeout = 30000)
    public void compareMassMatrixCalculators()
    {

@@ -9,12 +9,14 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.factories.QuadrupedSimulationFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
@@ -44,8 +46,10 @@ public class LLAQuadrupedSimulationFactory
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
       QuadrupedSimulationInitialPositionParameters initialPositionParameters = new LLAQuadrupedSimulationInitialPositionParameters();
       QuadrupedGroundContactParameters groundContactParameters = new LLAQuadrupedGroundContactParameters();
+      ParameterRegistry.getInstance().loadFromResources("parameters/simulation.param");
       QuadrupedSensorInformation sensorInformation = new LLAQuadrupedSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = new LLAQuadrupedStateEstimatorParameters();
+      QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new LLAQuadrupedPositionBasedCrawlControllerParameters();
       
       SDFFullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       SDFRobot sdfRobot = modelFactory.createSdfRobot();
@@ -77,6 +81,7 @@ public class LLAQuadrupedSimulationFactory
       simulationFactory.setSensorInformation(sensorInformation);
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
+      simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
       
       return simulationFactory.createSimulation();
    }

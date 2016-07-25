@@ -13,7 +13,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 public class YoMinimumJerkTrajectoryTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@DeployableTestMethod(estimatedDuration = 0.6)
 	@Test(timeout = 30000)
    public void testRandomInitialFinalConditions()
    {
@@ -59,7 +59,7 @@ public class YoMinimumJerkTrajectoryTest
       return min + Math.random() * (max - min);
    }
    
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testTimeExtensionRuntime()
    {
@@ -112,7 +112,7 @@ public class YoMinimumJerkTrajectoryTest
       }
    }
 
-   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
+   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    @Test(timeout=300000)
    public void testTimeExtension()
    {

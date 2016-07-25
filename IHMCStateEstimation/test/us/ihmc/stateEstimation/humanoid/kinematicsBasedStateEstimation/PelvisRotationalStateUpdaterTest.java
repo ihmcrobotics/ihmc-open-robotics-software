@@ -44,7 +44,7 @@ public class PelvisRotationalStateUpdaterTest
 
    private final List<IMUSensorReadOnly> imuSensors = new ArrayList<>();
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructorWithOneIMU()
    {
@@ -63,7 +63,7 @@ public class PelvisRotationalStateUpdaterTest
       
       try
       {
-         new PelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, registry);
+         new PelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, null, 1.0e-3, registry);
       }
       catch (Exception e)
       {
@@ -72,7 +72,7 @@ public class PelvisRotationalStateUpdaterTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructorWithZeroIMUSensor()
    {
@@ -90,7 +90,7 @@ public class PelvisRotationalStateUpdaterTest
       PelvisRotationalStateUpdater pelvisRotationalStateUpdater;
       try
       {
-         pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, registry);
+         pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, null, 1.0e-3, registry);
       }
       catch (Exception e)
       {
@@ -101,7 +101,7 @@ public class PelvisRotationalStateUpdaterTest
          fail("RuntimeException expected, no orientation sensor attached to the sensor map.");
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testInitializeAndReadWithOneIMU()
    {
@@ -118,7 +118,7 @@ public class PelvisRotationalStateUpdaterTest
       
       SensorProcessing jointAndIMUSensorDataSource = buildSensorConfigurations(stateEstimatorSensorDefinitions, registry);
 
-      PelvisRotationalStateUpdater pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, registry);
+      PelvisRotationalStateUpdater pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, null, 1.0e-3, registry);
 
       
       Quat4d rotationExpected = new Quat4d();

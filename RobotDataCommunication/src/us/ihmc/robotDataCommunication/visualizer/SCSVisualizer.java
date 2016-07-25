@@ -3,10 +3,13 @@ package us.ihmc.robotDataCommunication.visualizer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.nio.ByteBuffer;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
@@ -46,7 +49,13 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    private final JButton disconnectButton = new JButton("Disconnect");
    private final JButton clearLogButton = new JButton("Clear log");
+   
+   private final DecimalFormat delayFormat = new DecimalFormat("0000");
+   private final JLabel delayValue = new JLabel();
 
+   
+   private volatile long lastTimestamp;
+   
    private int bufferSize;
    private boolean showGUI;
    private boolean hideViewport;
@@ -73,6 +82,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void receivedTimestampAndData(long timestamp, ByteBuffer buffer)
    {
+      long delay = TimeTools.nanoSecondsToMillis(lastTimestamp - timestamp);
+      delayValue.setText(delayFormat.format(delay));
+      
       if (recording)
       {
          for (int i = 0; i < jointUpdaters.size(); i++)
@@ -221,7 +233,11 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             }
          }
       });
-
+      
+      scs.addJLabel(new JLabel("Delay: "));
+      scs.addJLabel(delayValue);
+      scs.addJLabel(new JLabel("ms"));
+      
       YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
 
@@ -305,6 +321,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void receivedTimestampOnly(long timestamp)
    {
+      lastTimestamp = timestamp;
    }
 
    @Override

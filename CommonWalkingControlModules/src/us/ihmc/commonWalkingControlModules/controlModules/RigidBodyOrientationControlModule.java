@@ -68,9 +68,9 @@ public class RigidBodyOrientationControlModule
       axisAngleOrientationController.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
    }
 
-   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      axisAngleOrientationController.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      axisAngleOrientationController.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
    public void setMaxDerivativeError(double maxDerivativeError)

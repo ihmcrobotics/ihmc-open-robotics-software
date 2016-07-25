@@ -26,7 +26,7 @@ public class MultiplicativeDoubleGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetThrowsException()
    {
@@ -56,7 +56,7 @@ public class MultiplicativeDoubleGlobalParameterTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testMultiplicativeDoubleGlobalParameter()
    {
@@ -80,7 +80,7 @@ public class MultiplicativeDoubleGlobalParameterTest
       assertEquals(valueA * valueB, multiplicativeDoubleGlobalParameter.getValue(), eps);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testMultiplicativeDoubleGlobalParameterUpdate()
    {
@@ -117,7 +117,7 @@ public class MultiplicativeDoubleGlobalParameterTest
       assertEquals(valueA * valueB, multiplicativeDoubleGlobalParameter.getValue(), eps);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFamilyTree()
    {

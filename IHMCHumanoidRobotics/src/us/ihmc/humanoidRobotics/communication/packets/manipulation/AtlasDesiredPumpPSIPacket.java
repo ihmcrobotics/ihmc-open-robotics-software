@@ -12,7 +12,7 @@ import us.ihmc.communication.packets.PacketDestination;
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
 @RosMessagePacket(documentation = "Send a request to change the desired PSI of the Atlas hydraulic pump.",
-      rosPackage = "ihmc_atlas",
+      rosPackage = "ihmc_atlas_ros",
       topic = "/control/desired_pump_psi")
 public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
 {

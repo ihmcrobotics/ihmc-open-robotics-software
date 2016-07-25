@@ -153,4 +153,9 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
       
    }
 
+   @Override
+   public void connected(InetSocketAddress localAddress)
+   {
+   }
+
 }

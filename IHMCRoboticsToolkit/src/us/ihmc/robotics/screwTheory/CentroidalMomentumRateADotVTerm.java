@@ -18,8 +18,6 @@ public class CentroidalMomentumRateADotVTerm
    private final CentroidalMomentumMatrix centroidalMomentumMatrix;
    private final RigidBody rootBody;
    private final DenseMatrix64F v;
-   private final DenseMatrix64F tmpOmegaSkew;
-   private final DenseMatrix64F tmpVelSkew;
    private final double robotMass;
    private final DenseMatrix64F aDotV;
 
@@ -53,8 +51,6 @@ public class CentroidalMomentumRateADotVTerm
       comTwist.setToZero();
 
       this.comVelocityVector = new Vector3d();
-      this.tmpVelSkew = new DenseMatrix64F(3, 3);
-      this.tmpOmegaSkew = new DenseMatrix64F(3, 3);
       this.aDotV = new DenseMatrix64F(6, 1);
       this.tempSpatialAcceleration = new SpatialAccelerationVector();
       this.tempMomentum = new Momentum();
@@ -124,22 +120,6 @@ public class CentroidalMomentumRateADotVTerm
 
          CommonOps.add(aDotV, tempMomentum.toDenseMatrix(), aDotV);
       }
-   }
-
-   /**
-    * @param twist
-    * Create a 6x6 adjoint from a twist. See Vincent Duindam's thesis, Lemma 2.8(f)
-    * Method is depracated as the computation is now done without the creation a 6x6 matrix for efficiency. 
-    */
-   @Deprecated
-   private void createAdjointFromTwist(Twist twist, DenseMatrix64F matrixToPack)
-   {
-      MatrixTools.vectorToSkewSymmetricMatrix(tmpOmegaSkew, twist.getAngularPart());
-      MatrixTools.vectorToSkewSymmetricMatrix(tmpVelSkew, twist.getLinearPart());
-
-      MatrixTools.setMatrixBlock(matrixToPack, 0, 0, tmpOmegaSkew, 0, 0, 3, 3, 1.0); // top left block
-      MatrixTools.setMatrixBlock(matrixToPack, 3, 3, tmpOmegaSkew, 0, 0, 3, 3, 1.0); // bottom right block
-      MatrixTools.setMatrixBlock(matrixToPack, 3, 0, tmpVelSkew, 0, 0, 3, 3, 1.0); // bottom left block
    }
 
    /**

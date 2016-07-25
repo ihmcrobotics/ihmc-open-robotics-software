@@ -5,6 +5,8 @@ import java.awt.datatransfer.Transferable;
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanelTransferable;
+
 public class YoGraphTransferHandler extends TransferHandler
 {
    private static final long serialVersionUID = 6982364243920152679L;
@@ -38,7 +40,7 @@ public class YoGraphTransferHandler extends TransferHandler
    {
       if (c instanceof YoGraph)
       {
-         Transferable tip = new VarPanelTransferable();
+         Transferable tip = new YoVariablePanelTransferable();
 
          return tip;
       }

@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndChestTrajectoryMessageTest.class
+   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndFootTrajectoryMessageTest.class
 })
 
 public class ValkyrieCFastTestSuite

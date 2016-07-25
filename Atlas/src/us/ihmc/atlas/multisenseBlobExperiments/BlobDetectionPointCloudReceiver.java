@@ -9,14 +9,10 @@ import java.util.ArrayList;
 
 public class BlobDetectionPointCloudReceiver implements PointCloudDataReceiverInterface
 {
-   @Override public void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points,
+   @Override
+   public void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points,
          PointCloudSource... sources)
    {
       System.out.println(getClass().getSimpleName() + " - receiving point cloud");
-   }
-
-   @Override public ReferenceFrame getLidarFrame(String sensorNameInSdf)
-   {
-      return ReferenceFrame.getWorldFrame();
    }
 }

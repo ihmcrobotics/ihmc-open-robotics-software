@@ -444,8 +444,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       gains.setKp(kp);
       gains.setZeta(zeta);
-      gains.setMaximumAcceleration(maxAcceleration);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAcceleration);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -483,8 +483,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       gains.setProportionalGains(kpXY, kpZ);
       gains.setDampingRatio(zeta);
-      gains.setMaximumAcceleration(maxAccel);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAccel);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -503,8 +503,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       gains.setProportionalGain(kp);
       gains.setDampingRatio(zeta);
-      gains.setMaximumAcceleration(maxAccel);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAccel);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -523,8 +523,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       gains.setKp(kp);
       gains.setZeta(zeta);
-      gains.setMaximumAcceleration(maxAccel);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAccel);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -555,8 +555,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       gains.setKp(kp);
       gains.setZeta(zeta);
-      gains.setMaximumAcceleration(maxAcceleration);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAcceleration);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -578,8 +578,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       gains.setProportionalGains(kpXY, kpZ);
       gains.setDampingRatios(zetaXY, zetaZ);
-      gains.setMaximumAcceleration(maxAccel);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAccel);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.setMaxProportionalError(maxProportionalError);
       gains.createDerivativeGainUpdater(true);
 
@@ -609,10 +609,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
+      gains.setPositionMaxFeedbackAndFeedbackRate(maxPositionAcceleration, maxPositionJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
+      gains.setOrientationMaxFeedbackAndFeedbackRate(maxOrientationAcceleration, maxOrientationJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -627,7 +627,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double kpXY = 0.0; //100.0;
       double kpZ = 0.0;
       double zetaXYZ = realRobot ? 0.2 : 1.0;
-      double kpXYOrientation = realRobot ? 100.0 : 200.0;
+      double kpXYOrientation = realRobot ? 100.0 : 100.0;
       double kpZOrientation = realRobot ? 100.0 : 200.0;
       double zetaOrientation = realRobot ? 0.2 : 1.0;
       // Reduce maxPositionAcceleration from 10 to 6 to prevent too high acceleration when hitting joint limits.
@@ -639,10 +639,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -669,10 +669,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -696,10 +696,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       gains.setPositionProportionalGains(kp, kp);
       gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -993,5 +993,19 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public void useVirtualModelControlCore()
    {
       // once another mode is implemented, use this to change the default gains for virtual model control
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useSwingTrajectoryOptimizer()
+   {
+      return true;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useSupportState()
+   {
+      return false;
    }
 }

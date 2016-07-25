@@ -14,7 +14,7 @@ public class FilteredDiscreteVelocityYoVariableTest
 
    private static final double DT = 0.1;
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFilteredDiscreteVelocityNoDirectionChange()
    {
@@ -38,7 +38,7 @@ public class FilteredDiscreteVelocityYoVariableTest
       assertEquals(10, filteredDiscreteVelocityYoVariable.getDoubleValue(), 1e-7);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFilteredDiscreteVelocityWithDirectionChange()
    {

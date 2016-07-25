@@ -70,6 +70,9 @@ public class DRCSimulationFactory
 
    public static final boolean DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET = false;
    private static final boolean DO_SMOOTH_JOINT_TORQUES_AT_CONTROLLER_STATE_CHANGES = false;
+   private static final boolean ADD_ACTUAL_CMP_VIZ = true;
+
+   private final ActualCMPComputer cmpViz;
 
    private static final double gravity = -9.81;
 
@@ -125,6 +128,10 @@ public class DRCSimulationFactory
       simulatedRobot.setGravity(scsInitialSetup.getGravity());
       createRobotController(drcRobotModel, controllerFactory, globalDataProducer, simulatedRobot, scs, scsInitialSetup, robotInitialSetup);
 
+      cmpViz = new ActualCMPComputer(ADD_ACTUAL_CMP_VIZ, scs, simulatedRobot);
+      if (ADD_ACTUAL_CMP_VIZ)
+         simulatedRobot.setController(cmpViz);
+
       SimulatedRobotCenterOfMassVisualizer simulatedRobotCenterOfMassVisualizer = new SimulatedRobotCenterOfMassVisualizer(simulatedRobot, drcRobotModel.getSimulateDT());
       simulatedRobot.setController(simulatedRobotCenterOfMassVisualizer);
 
@@ -135,7 +142,7 @@ public class DRCSimulationFactory
       if (guiInitialSetup.isGuiShown())
       {
          VisualizerUtils.createOverheadPlotter(scs, guiInitialSetup.isShowOverheadView(), drcControllerThread.getDynamicGraphicObjectsListRegistry(),
-               drcEstimatorThread.getDynamicGraphicObjectsListRegistry());
+               drcEstimatorThread.getDynamicGraphicObjectsListRegistry(), cmpViz.getYoGraphicsListRegistry());
          guiInitialSetup.initializeGUI(scs, simulatedRobot, drcRobotModel);
       }
 
@@ -300,7 +307,7 @@ public class DRCSimulationFactory
             boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
             boolean isBackJoint = jointRole == JointRole.SPINE;
 
-            JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, isUpperBodyJoint, isBackJoint, drcRobotModel.getSimulateDT());
+            JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, isUpperBodyJoint, isBackJoint, false, drcRobotModel.getSimulateDT());
             simulatedRobot.setController(positionControlSimulator);
          }
       }

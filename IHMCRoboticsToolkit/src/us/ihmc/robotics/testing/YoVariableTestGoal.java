@@ -2,19 +2,24 @@ package us.ihmc.robotics.testing;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public abstract class YoVariableTestGoal implements VariableChangedListener
 {
-   private final YoVariable<?> yoVariable;
+   private final YoVariable<?>[] yoVariables;
    private boolean hasMetGoal = false;
    
-   private YoVariableTestGoal(YoVariable<?> yoVariable)
+   private YoVariableTestGoal(YoVariable<?>... yoVariables)
    {
-      this.yoVariable = yoVariable;
-      yoVariable.addVariableChangedListener(this);
+      this.yoVariables = yoVariables;
+      
+      for (YoVariable<?> yoVariable : yoVariables)
+      {
+         yoVariable.addVariableChangedListener(this);
+      }
    }
    
    @Override
@@ -38,9 +43,9 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
    
    public abstract boolean currentlyMeetsGoal();
    
-   public YoVariable<?> getYoVariable()
+   public YoVariable<?>[] getYoVariables()
    {
-      return yoVariable;
+      return yoVariables;
    }
 
    public static YoVariableTestGoal doubleWithinEpsilon(final DoubleYoVariable doubleYoVariable, final double goalValue, final double epsilon)
@@ -67,6 +72,18 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
       };
    }
    
+   public static YoVariableTestGoal deltaGreaterThan(final DoubleYoVariable minuend, final DoubleYoVariable subtrahend, final double difference)
+   {
+      return new YoVariableTestGoal(minuend, subtrahend)
+      {
+         @Override
+         public boolean currentlyMeetsGoal()
+         {
+            return minuend.getDoubleValue() - subtrahend.getDoubleValue() > difference;
+         }
+      };
+   }
+   
    public static YoVariableTestGoal doubleLessThan(final DoubleYoVariable doubleYoVariable, final double lessThan)
    {
       return new YoVariableTestGoal(doubleYoVariable)
@@ -87,6 +104,18 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
          public boolean currentlyMeetsGoal()
          {
             return enumYoVariable.getEnumValue().equals(enumValue);
+         }
+      };
+   }
+   
+   public static YoVariableTestGoal booleanEquals(final BooleanYoVariable booleanYoVariable, final boolean booleanValue)
+   {
+      return new YoVariableTestGoal(booleanYoVariable)
+      {
+         @Override
+         public boolean currentlyMeetsGoal()
+         {
+            return booleanYoVariable.getBooleanValue() == booleanValue;
          }
       };
    }

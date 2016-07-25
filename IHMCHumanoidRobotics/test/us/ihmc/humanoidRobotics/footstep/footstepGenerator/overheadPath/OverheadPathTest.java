@@ -67,7 +67,7 @@ public class OverheadPathTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void turningOverheadPath_PassingPiTest()
    {
@@ -99,7 +99,7 @@ public class OverheadPathTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void straightLineOverheadPath_UsageTest()
    {
@@ -139,7 +139,7 @@ public class OverheadPathTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void turnThenStraightOverheadPath_UsageAndHeadingOffsetTest()
    {
@@ -205,7 +205,7 @@ public class OverheadPathTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void turnStraightTurnOverheadPath_UsageAndHeadingOffsetTest()
    {
@@ -365,7 +365,7 @@ public class OverheadPathTest
       assertEquals("Should extrapolate to -1.0", -1.0,poseAtS.getYaw(), eps);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void straightPathInterpolationExtrapolationTest()
    {

@@ -18,7 +18,7 @@ import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class JoystickTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testCreateJoystick()
    {
@@ -50,8 +50,8 @@ public class JoystickTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 10000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testCreateVirtualJoystick()
    {
       final Object monitor = new Object();
@@ -99,7 +99,7 @@ public class JoystickTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFindNonExistentJoystick()
    {

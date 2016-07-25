@@ -1,8 +1,10 @@
 <object-stream>
   <long>1457583856439</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage>
-    <uniqueId>0</uniqueId>
+    <uniqueId>-1</uniqueId>
     <destination>0</destination>
+    <previousMessageId>0</previousMessageId>
+    <executionMode>OVERRIDE</executionMode>
     <trajectoryPoints>
       <us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage>
         <uniqueId>0</uniqueId>

@@ -24,7 +24,7 @@ public class VarGroupTest {
 		varGroup = new VarGroup("varGroup");
 	}
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testSetAndGetName() {
 		assertTrue("varGroup" == varGroup.getName());
@@ -37,7 +37,7 @@ public class VarGroupTest {
 				.getName());
 	}
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testAddGetAndRemoveSingleVariable() {
 		varGroup.addVar(variable1);
@@ -50,7 +50,7 @@ public class VarGroupTest {
 		assertTrue(0 == varGroupArray.length);
 	}
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testAddMultipleVariables() {
 		String[] variablesToBeAdded = { variable1, variable2, variable3,
@@ -65,7 +65,7 @@ public class VarGroupTest {
 
 	}
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testAddRemoveAndGetRegularExpressions() {
 		String[] regularExpressionsToBeAdded = { variable1, variable2,

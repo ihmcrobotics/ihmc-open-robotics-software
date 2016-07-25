@@ -33,7 +33,7 @@ public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<P
          + "\n - The trajectory point times are relative to the the last trajectory point time of the previous message."
          + "\n - The controller will queue the joint trajectory messages as a per joint basis."
          + " The first trajectory point has to be greater than zero.")
-   public ExecutionMode executionMode;
+   public ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    @RosExportedField(documentation = "Only needed when using QUEUE mode, it refers to the message Id to which this message should be queued to."
          + " It is used by the controller to ensure that no message has been lost on the way."
          + " If a message appears to be missing (previousMessageId different from the last message ID received by the controller), the motion is aborted."

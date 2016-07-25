@@ -26,8 +26,8 @@ public class EuclideanPositionController implements PositionController
    private final FrameVector derivativeTerm;
    private final FrameVector integralTerm;
 
-   private final YoFrameVector feedbackLinearAcceleration;
-   private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAcceleration;
+   private final YoFrameVector feedbackLinearAction;
+   private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAction;
 
    private final double dt;
 
@@ -61,23 +61,29 @@ public class EuclideanPositionController implements PositionController
       derivativeTerm = new FrameVector(bodyFrame);
       integralTerm = new FrameVector(bodyFrame);
 
-      feedbackLinearAcceleration = new YoFrameVector(prefix + "FeedbackLinearAcceleration", bodyFrame, registry);
-      rateLimitedFeedbackLinearAcceleration = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAcceleration", "",
-            registry, gains.getYoMaximumJerk(), dt, feedbackLinearAcceleration);
+      feedbackLinearAction = new YoFrameVector(prefix + "FeedbackLinearAction", bodyFrame, registry);
+      rateLimitedFeedbackLinearAction = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAction", "",
+            registry, gains.getYoMaximumFeedbackRate(), dt, feedbackLinearAction);
 
       parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
-      rateLimitedFeedbackLinearAcceleration.reset();
+      rateLimitedFeedbackLinearAction.reset();
+   }
+
+   public void resetIntegrator()
+   {
+      positionErrorCumulated.setToZero();
    }
 
    @Override
    public void compute(FrameVector output, FramePoint desiredPosition, FrameVector desiredVelocity, FrameVector currentVelocity, FrameVector feedForward)
    {
       computeProportionalTerm(desiredPosition);
-      computeDerivativeTerm(desiredVelocity, currentVelocity);
+      if (currentVelocity != null)
+         computeDerivativeTerm(desiredVelocity, currentVelocity);
       computeIntegralTerm();
       output.setToNaN(bodyFrame);
       output.add(proportionalTerm, derivativeTerm);
@@ -85,15 +91,15 @@ public class EuclideanPositionController implements PositionController
 
       // Limit the max acceleration of the feedback, but not of the feedforward...
       // JEP changed 150430 based on Atlas hitting limit stops.
-      double feedbackLinearAccelerationMagnitude = output.length();
-      if (feedbackLinearAccelerationMagnitude > gains.getMaximumAcceleration())
+      double feedbackLinearActionMagnitude = output.length();
+      if (feedbackLinearActionMagnitude > gains.getMaximumFeedback())
       {
-         output.scale(gains.getMaximumAcceleration() / feedbackLinearAccelerationMagnitude);
+         output.scale(gains.getMaximumFeedback() / feedbackLinearActionMagnitude);
       }
 
-      feedbackLinearAcceleration.set(output);
-      rateLimitedFeedbackLinearAcceleration.update();
-      rateLimitedFeedbackLinearAcceleration.getFrameTuple(output);
+      feedbackLinearAction.set(output);
+      rateLimitedFeedbackLinearAction.update();
+      rateLimitedFeedbackLinearAction.getFrameTuple(output);
 
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
@@ -199,9 +205,9 @@ public class EuclideanPositionController implements PositionController
       return bodyFrame;
    }
 
-   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      gains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      gains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
    public void setMaxDerivativeError(double maxDerivativeError)

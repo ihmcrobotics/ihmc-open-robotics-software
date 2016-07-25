@@ -14,7 +14,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 // moved to in development
 // this test is flaky because toe off is not triggered properly - the toe off condition needs to be fixed
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
 public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseSteppingStonesTest
 {
    @Override
@@ -30,8 +30,8 @@ public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseStep
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 52.4)
-   @Test(timeout = 260000)
+   @DeployableTestMethod(estimatedDuration = 48.9)
+   @Test(timeout = 240000)
    public void testWalkingOverEasySteppingStones() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOverEasySteppingStones();

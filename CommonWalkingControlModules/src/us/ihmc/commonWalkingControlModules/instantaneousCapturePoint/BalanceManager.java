@@ -85,6 +85,8 @@ public class BalanceManager
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
    private final FrameVector2d desiredCapturePointVelocity2d = new FrameVector2d();
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
+   /** CMP position according to the ICP planner */
+   private final FramePoint2d perfectCMP = new FramePoint2d();
 
    private final FramePoint2d adjustedDesiredCapturePoint2d = new FramePoint2d();
    private final YoFramePoint2d yoAdjustedDesiredCapturePoint = new YoFramePoint2d("adjustedDesiredICP", worldFrame, registry);
@@ -243,6 +245,7 @@ public class BalanceManager
       momentumBasedController.getCapturePoint(capturePoint2d);
 
       icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredCapturePoint2d, desiredCapturePointVelocity2d, capturePoint2d, yoTime.getDoubleValue());
+      icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
 
       pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d);
@@ -287,8 +290,10 @@ public class BalanceManager
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCapturePoint(adjustedDesiredCapturePoint2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
+      icpBasedLinearMomentumRateOfChangeControlModule.setPerfectCMP(perfectCMP);
       icpBasedLinearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
-      icpBasedLinearMomentumRateOfChangeControlModule.compute(desiredCMP);
+      yoDesiredCMP.getFramePoint2d(desiredCMP);
+      icpBasedLinearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP);
       yoDesiredCMP.set(desiredCMP);
    }
 
@@ -588,4 +593,8 @@ public class BalanceManager
       momentumBasedController.getCapturePoint(capturePointToPack);
    }
 
+   public void minimizeAngularMomentumRateZ(boolean enable)
+   {
+      icpBasedLinearMomentumRateOfChangeControlModule.minimizeAngularMomentumRateZ(enable);
+   }
 }

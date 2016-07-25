@@ -77,7 +77,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
    public ExploreFootPolygonState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.EXPLORE_POLYGON, footControlHelper, registry);
+      super(ConstraintType.EXPLORE_POLYGON, footControlHelper);
       String footName = contactableFoot.getName();
 
       explorationMethod = new EnumYoVariable<ExplorationMethod>(footName + "ExplorationMethod", registry, ExplorationMethod.class);

@@ -26,6 +26,7 @@ import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.FramePose;
@@ -45,8 +46,8 @@ public class ContactableValveRobotTest
 
    private YoVariableRegistry valveTestRegistry;
 
-   @DeployableTestMethod
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 2.3)
+   @Test(timeout = 30000)
    public void testValveIsClosing()
    {
       boolean isValveClosed = false;
@@ -73,7 +74,7 @@ public class ContactableValveRobotTest
       }
       catch (Exception e)
       {
-         System.err.println("Caught exception in SimulationTestHelper.simulateAndBlockAndCatchExceptions. Exception = " + e);
+         PrintTools.error(this, e.getMessage());
       }
 
       if (robots[1].getVariable("valveClosePercentage").getValueAsDouble() >= 99.0)
@@ -88,8 +89,8 @@ public class ContactableValveRobotTest
       blockingSimulationRunner.destroySimulation();
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testGetValveTransformToWorld()
    {
       Random random = new Random(1235125L);

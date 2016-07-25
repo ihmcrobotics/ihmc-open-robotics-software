@@ -7,8 +7,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CircularLongMapTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.005)
-   @Test(timeout = 100)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testFillingMap()
    {
       CircularLongMap map = new CircularLongMap(100);
@@ -39,8 +39,8 @@ public class CircularLongMapTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.005)
-   @Test(timeout = 100)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testMatchNearest()
    {
       CircularLongMap map = new CircularLongMap(100);
@@ -68,8 +68,8 @@ public class CircularLongMapTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.005)
-   @Test(timeout = 100)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testEdgeCases()
    {
       CircularLongMap map = new CircularLongMap(100);
