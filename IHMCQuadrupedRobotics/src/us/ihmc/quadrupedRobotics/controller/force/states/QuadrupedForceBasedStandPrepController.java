@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.partNames.JointRole;
+import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -123,7 +125,13 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.setContactState(quadrant, ContactState.NO_CONTACT);
-         fullRobotModel.getOneDoFJointBeforeFoot(quadrant).setUseFeedBackForceControl(useForceFeedbackControl.get());
+      }
+      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      {
+         if (jointName.getRole().equals(JointRole.LEG))
+         {
+            fullRobotModel.getOneDoFJointByName(jointName.name()).setUseFeedBackForceControl(useForceFeedbackControl.get());
+         }
       }
       taskSpaceController.reset();
    }

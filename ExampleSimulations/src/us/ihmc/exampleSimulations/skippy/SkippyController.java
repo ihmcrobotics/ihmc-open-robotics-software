@@ -59,13 +59,17 @@ public class SkippyController implements RobotController
 
    public void doControl()
    {
+      // desired hip/shoulder positions
+      double q_hip_desired = 0.0;
+      double q_shoulder_desired = 0.0;
       // set the torques
+
       robot.getHipJoint().setTau(-k1.getDoubleValue() * q_foot_X.getDoubleValue()
-                                       - k2.getDoubleValue() * q_hip.getDoubleValue()
+                                       - k2.getDoubleValue() * (q_hip.getDoubleValue() - q_hip_desired)
                                        - k3.getDoubleValue() * qd_foot_X.getDoubleValue()
                                        - k4.getDoubleValue() * qd_hip.getDoubleValue());
       robot.getShoulderJoint().setTau(-k5.getDoubleValue() * q_hip.getDoubleValue()
-                                            - k6.getDoubleValue() * q_shoulder.getDoubleValue()
+                                            - k6.getDoubleValue() * (q_shoulder.getDoubleValue() - q_shoulder_desired)
                                             - k7.getDoubleValue() * qd_hip.getDoubleValue()
                                             - k8.getDoubleValue() * qd_shoulder.getDoubleValue());
    }
