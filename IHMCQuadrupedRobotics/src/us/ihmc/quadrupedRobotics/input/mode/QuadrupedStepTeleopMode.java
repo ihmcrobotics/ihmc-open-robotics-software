@@ -16,7 +16,6 @@ import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator.Estimates;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.input.InputChannel;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
@@ -84,17 +83,17 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    public void update(Map<XBoxOneMapping, Double> channels, Estimates estimates)
    {
       double bodyRoll = 0.0;
-      double bodyPitch = channels.get(InputChannel.RIGHT_STICK_Y) * pitchScaleParameter.get();
-      double bodyYaw = channels.get(InputChannel.RIGHT_STICK_X) * yawScaleParameter.get();
+      double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * pitchScaleParameter.get();
+      double bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawScaleParameter.get();
       BodyOrientationPacket orientationPacket = new BodyOrientationPacket(bodyYaw, bodyPitch, bodyRoll);
       packetCommunicator.send(orientationPacket);
    
       double comZdot = 0.0;
-      if (channels.get(InputChannel.D_PAD) == 0.25)
+      if (channels.get(XBoxOneMapping.DPAD) == 0.25)
       {
          comZdot += zdotScaleParameter.get();
       }
-      if (channels.get(InputChannel.D_PAD) == 0.75)
+      if (channels.get(XBoxOneMapping.DPAD) == 0.75)
       {
          comZdot -= zdotScaleParameter.get();
       }
@@ -158,9 +157,9 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
          double xVelocityMax = 0.5 * xStrideMax.get() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
          double yVelocityMax = 0.5 * yStrideMax.get() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
          double yawRateMax = yawRateScale.get() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
-         double xVelocity = channels.get(InputChannel.LEFT_STICK_Y) * xVelocityMax;
-         double yVelocity = channels.get(InputChannel.LEFT_STICK_X) * yVelocityMax;
-         double yawRate = channels.get(InputChannel.RIGHT_STICK_X) * yawRateMax;
+         double xVelocity = channels.get(XBoxOneMapping.LEFT_STICK_Y) * xVelocityMax;
+         double yVelocity = channels.get(XBoxOneMapping.LEFT_STICK_X) * yVelocityMax;
+         double yawRate = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawRateMax;
          Vector3d planarVelocity = new Vector3d(xVelocity, yVelocity, yawRate);
          sendXGaitFootsteps(xGaitSettings, planarVelocity, xGaitStepPlanSize.get());
       }
