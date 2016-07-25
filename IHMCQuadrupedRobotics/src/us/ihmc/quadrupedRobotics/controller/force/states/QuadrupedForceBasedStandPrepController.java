@@ -22,6 +22,7 @@ import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 import javax.vecmath.Vector3d;
 
@@ -126,14 +127,17 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       {
          taskSpaceControllerSettings.setContactState(quadrant, ContactState.NO_CONTACT);
       }
+      taskSpaceController.reset();
+
+      // Initialize force feedback
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
-         if (jointName.getRole().equals(JointRole.LEG))
+         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            fullRobotModel.getOneDoFJointByName(jointName).setUseFeedBackForceControl(useForceFeedbackControl.get());
+            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControl.get());
          }
       }
-      taskSpaceController.reset();
    }
 
    @Override
@@ -150,9 +154,10 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    {
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
-         if (jointName.getRole().equals(JointRole.LEG))
+         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            fullRobotModel.getOneDoFJointByName(jointName).setUseFeedBackForceControl(true);
+            oneDoFJoint.setUseFeedBackForceControl(true);
          }
       }
    }
