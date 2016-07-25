@@ -49,7 +49,7 @@ public class SkippyController implements RobotController
    {
       // set the torques
       robot.getHipJoint().setTau(-k1.getDoubleValue() * q_foot.getDoubleValue() - k2.getDoubleValue() * q_hip.getDoubleValue() - k3.getDoubleValue() * qd_foot.getDoubleValue() - k4.getDoubleValue() * qd_hip.getDoubleValue());
-      robot.getShoulderJoint().setTau(0.0);
+      robot.getShoulderJoint().setTau(-k1.getDoubleValue() * q_foot.getDoubleValue() - k2.getDoubleValue() * q_hip.getDoubleValue() - k3.getDoubleValue() * qd_foot.getDoubleValue() - k4.getDoubleValue() * qd_hip.getDoubleValue());
    }
 
    public YoVariableRegistry getYoVariableRegistry()
