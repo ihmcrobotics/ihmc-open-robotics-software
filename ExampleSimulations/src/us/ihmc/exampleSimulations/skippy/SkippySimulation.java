@@ -4,6 +4,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class SkippySimulation
 {
+   public static final double DT = 0.001;
    private SimulationConstructionSet sim;
 
    public SkippySimulation()
@@ -13,6 +14,7 @@ public class SkippySimulation
 //      skippy.setController(new ExternalControlServer(skippy, "externalControlServer"));
 
       sim = new SimulationConstructionSet(skippy);
+      sim.setDT(DT, 20);
       sim.setGroundVisible(true);
       sim.setCameraPosition(0, -40.0, 2.0);
 
