@@ -66,6 +66,7 @@ public class SkippyController implements RobotController
    {
       // desired hip/shoulder positions
       double q_leg_desired = -0.2;
+      
       double q_leg_desired_2 = 0.0;
 
       double q_hip_desired = 0.4;
