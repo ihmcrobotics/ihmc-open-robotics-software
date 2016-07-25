@@ -143,7 +143,6 @@ public class HighLevelHumanoidControllerToolbox
 
    private final MomentumCalculator upperBodyMomentumCalculator;
    private final YoFrameVector yoUpperBodyAngularMomentum;
-   private final FramePoint2d cop = new FramePoint2d();
 
    private final FramePoint2d centerOfPressure = new FramePoint2d();
    private final YoFramePoint2d yoCenterOfPressure = new YoFramePoint2d("CenterOfPressure", worldFrame, registry);
@@ -476,26 +475,6 @@ public class HighLevelHumanoidControllerToolbox
       yoCapturePoint.setXY(capturePoint2d);
    }
 
-   private final FramePoint2d footCop = new FramePoint2d();
-   private void computeCop()
-   {
-      cop.setToZero(worldFrame);
-      double force = 0.0;
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footSwitches.get(robotSide).computeAndPackCoP(footCop);
-         if (footCop.containsNaN()) continue;
-         footCop.changeFrameAndProjectToXYPlane(worldFrame);
-
-         footSwitches.get(robotSide).computeAndPackFootWrench(footWrench);
-         double footForce = footWrench.getLinearPartZ();
-         force += footForce;
-         footCop.scale(footForce);
-         cop.add(footCop);
-      }
-      cop.scale(1.0 / force);
-   }
-
    private final FrameVector upperBodyAngularMomentum = new FrameVector();
    private final Momentum upperBodyMomentum = new Momentum();
    private void computeAngularMomentum()
@@ -514,7 +493,6 @@ public class HighLevelHumanoidControllerToolbox
       ReferenceFrame comFrame = upperBodyAngularMomentum.getReferenceFrame();
       localDesiredCapturePoint.setIncludingFrame(desiredCapturePoint);
       localDesiredCapturePoint.changeFrameAndProjectToXYPlane(comFrame);
-      cop.changeFrame(comFrame);
 
       double scaleFactor = momentumGain.getDoubleValue() * omega0.getDoubleValue() / (upperBodyMass * gravity);
 
@@ -1017,7 +995,7 @@ public class HighLevelHumanoidControllerToolbox
 
    public void getCop(FramePoint2d copToPack)
    {
-      copToPack.setIncludingFrame(cop);
+      yoCenterOfPressure.getFrameTuple2dIncludingFrame(copToPack);
    }
 
    public void getUpperBodyAngularMomentum(FrameVector upperBodyAngularMomentumToPack)
