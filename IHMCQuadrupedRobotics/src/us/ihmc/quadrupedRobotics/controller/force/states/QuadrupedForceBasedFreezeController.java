@@ -89,7 +89,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       {
          if (jointName.getRole().equals(JointRole.LEG))
          {
-            fullRobotModel.getOneDoFJointByName(jointName.name()).setUseFeedBackForceControl(useForceFeedbackControl.get());
+            fullRobotModel.getOneDoFJointByName(jointName).setUseFeedBackForceControl(useForceFeedbackControl.get());
          }
       }
       taskSpaceController.reset();
@@ -116,12 +116,11 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    @Override
    public void onExit()
    {
-      useForceFeedbackControl.set(true);
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
          if (jointName.getRole().equals(JointRole.LEG))
          {
-            fullRobotModel.getOneDoFJointByName(jointName.name()).setUseFeedBackForceControl(useForceFeedbackControl.get());
+            fullRobotModel.getOneDoFJointByName(jointName).setUseFeedBackForceControl(true);
          }
       }
    }
