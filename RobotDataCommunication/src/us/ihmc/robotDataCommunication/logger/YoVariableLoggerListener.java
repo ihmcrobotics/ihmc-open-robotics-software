@@ -31,7 +31,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private static final String indexFilename = "robotData.dat";
 
    private final Object synchronizer = new Object();
-
+   private final Object timestampUpdater = new Object();
+   
    private final boolean flushAggressivelyToDisk;
    
    private final File tempDirectory;
@@ -58,6 +59,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    
    private long currentIndex = 0;
 
+   private long lastReceivedTimestamp = Long.MIN_VALUE;
+   
    public YoVariableLoggerListener(File tempDirectory, File finalDirectory, String timestamp, AnnounceRequest request, YoVariableLoggerOptions options)
    {
       System.out.println(request);
@@ -155,6 +158,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
    public void receivedTimestampAndData(long timestamp, ByteBuffer buffer)
    {
+      receivedTimestampOnly(timestamp); // Call from here as backup for the UDP channel.
+      
       connected = true;
 
       synchronized (synchronizer)
@@ -379,9 +384,15 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    @Override
    public void receivedTimestampOnly(long timestamp)
    {
-      for (int i = 0; i < videoDataLoggers.size(); i++)
+      synchronized(timestampUpdater)
       {
-         videoDataLoggers.get(i).timestampChanged(timestamp);
+         if(timestamp > lastReceivedTimestamp) // Check if this a newer timestamp. UDP is out of order and the TCP packets also call this function
+         {
+            for (int i = 0; i < videoDataLoggers.size(); i++)
+            {
+               videoDataLoggers.get(i).timestampChanged(timestamp);
+            }
+         }
       }
    }
 
