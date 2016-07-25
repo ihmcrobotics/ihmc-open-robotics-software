@@ -49,8 +49,8 @@ public class SkippyRobot extends Robot
 
       // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
       foot = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, 0.0), this, Axis.X, Axis.Y);
-      foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.0)); // initial position
-      foot.setInitialState(0.05, 0.0);
+      foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.0)); // initial Cartesian position
+      foot.setInitialState(0.05, 0.0); // initial angle
       Link leg = createLeg();
       foot.setLink(leg);
       this.addRootJoint(foot);
@@ -63,8 +63,8 @@ public class SkippyRobot extends Robot
       hip.addGroundContactPoint(hipContact);
 
       shoulder = new PinJoint("shoulder", new Vector3d(0.0, 0.0, L2), this, Axis.Y);
-      Link crossBar = createCrossbar();
-      shoulder.setLink(crossBar);
+      Link arms = createArms();
+      shoulder.setLink(arms);
       this.hip.addJoint(shoulder);
       shoulder.addGroundContactPoint(shoulderContact);
 
@@ -106,30 +106,30 @@ public class SkippyRobot extends Robot
       return torso;
    }
 
-   private Link createCrossbar()
+   private Link createArms()
    {
-      Link crossbar = new Link("crossbar");
-      crossbar.setMass(M3);
-      crossbar.setComOffset(0.0, 0.0, L3 / 2.0);
-      crossbar.setMomentOfInertia(0.0, Iyy3, 0.0);
+      Link arms = new Link("arms");
+      arms.setMass(M3);
+      arms.setComOffset(0.0, 0.0, L3 / 2.0);
+      arms.setMomentOfInertia(0.0, Iyy3, 0.0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.rotate(Math.toRadians(90), Axis.Y);
       linkGraphics.translate(0.0, 0.0, -L3 / 2.0);
       linkGraphics.addCylinder(L3, R3, YoAppearance.DarkBlue());
 
-      crossbar.setLinkGraphics(linkGraphics);
+      arms.setLinkGraphics(linkGraphics);
 
-      return crossbar;
+      return arms;
    }
 
    public PinJoint getHipJoint()
    {
-      return (PinJoint) hip;
+      return hip;
    }
 
    public PinJoint getShoulderJoint()
    {
-      return (PinJoint) shoulder;
+      return shoulder;
    }
 }
