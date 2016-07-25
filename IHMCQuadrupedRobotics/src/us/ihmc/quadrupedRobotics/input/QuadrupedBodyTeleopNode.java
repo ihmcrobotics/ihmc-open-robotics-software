@@ -26,6 +26,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
+import us.ihmc.tools.inputDevices.joystick.JoystickComponentFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
@@ -114,11 +115,19 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
          }
       }, 0, (long) (DT * 1000), TimeUnit.MILLISECONDS);
 
-      // Poll indefinitely.
+      configureJoystickFilters(device);
       device.addJoystickEventListener(this);
       device.setPollInterval(10);
-//      device.registerCallback(this);
-//      device.poll();
+   }
+
+   private void configureJoystickFilters(Joystick device)
+   {
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_TRIGGER, false, 0.05, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_TRIGGER, false, 0.05, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_STICK_X, true, 0.1, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_STICK_Y, true, 0.1, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_STICK_X, true, 0.1, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_STICK_Y, true, 0.1, 1));
    }
 
    public void update()
@@ -130,31 +139,6 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
 
       server.update(robotDataReceiver.getSimTimestamp());
    }
-
-//   @Override
-//   public void onInputEvent(InputEvent e)
-//   {
-//      // Store updated value in a cache so historical values for all channels can be used.
-//      channels.put(e.getChannel(), e.getValue());
-//
-//      // Handle events that should trigger once immediately after the event is triggered.
-//      switch (e.getChannel())
-//      {
-//      case VIEW_BUTTON:
-//         activeTeleopMode.onExit();
-//         activeTeleopMode = stepTeleopMode;
-//         activeTeleopMode.onEntry();
-//         break;
-//      case MENU_BUTTON:
-//         activeTeleopMode.onExit();
-//         activeTeleopMode = xGaitTeleopMode;
-//         activeTeleopMode.onEntry();
-//         break;
-//      default:
-//         // Pass any non-mode-switching events down to the active mode.
-//         activeTeleopMode.onInputEvent(Collections.unmodifiableMap(channels), taskSpaceEstimates, e);
-//      }
-//   }
 
    @Override
    public void processEvent(Event event)
