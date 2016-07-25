@@ -8,7 +8,7 @@ public class SkippyController implements RobotController
 {
 
    // tau_* is torque, q_* is position, qd_* is velocity for joint *
-   private DoubleYoVariable q_foot, q_hip, q_shoulder, qd_foot, qd_hip, qd_shoulder;
+   private DoubleYoVariable q_foot_X, q_hip, q_shoulder, qd_foot_X, qd_hip, qd_shoulder;
    private DoubleYoVariable k1, k2, k3, k4, k5, k6, k7, k8; // controller gain parameters
 
    private final YoVariableRegistry registry = new YoVariableRegistry("SkippyController");
@@ -22,8 +22,8 @@ public class SkippyController implements RobotController
       this.robot = robot;
 
       // get variable references from the robot
-      q_foot = (DoubleYoVariable)robot.getVariable("q_foot");
-      qd_foot = (DoubleYoVariable)robot.getVariable("qd_foot");
+      q_foot_X = (DoubleYoVariable)robot.getVariable("q_foot_X");
+      qd_foot_X = (DoubleYoVariable)robot.getVariable("qd_foot_X");
 
       q_hip = (DoubleYoVariable)robot.getVariable("q_hip");
       qd_hip = (DoubleYoVariable)robot.getVariable("qd_hip");
@@ -60,8 +60,14 @@ public class SkippyController implements RobotController
    public void doControl()
    {
       // set the torques
-      robot.getHipJoint().setTau(-k1.getDoubleValue() * q_foot.getDoubleValue() - k2.getDoubleValue() * q_hip.getDoubleValue() - k3.getDoubleValue() * qd_foot.getDoubleValue() - k4.getDoubleValue() * qd_hip.getDoubleValue());
-      robot.getShoulderJoint().setTau(-k5.getDoubleValue() * q_hip.getDoubleValue() - k6.getDoubleValue() * q_shoulder.getDoubleValue() - k7.getDoubleValue() * qd_hip.getDoubleValue() - k8.getDoubleValue() * qd_shoulder.getDoubleValue());
+      robot.getHipJoint().setTau(-k1.getDoubleValue() * q_foot_X.getDoubleValue()
+                                       - k2.getDoubleValue() * q_hip.getDoubleValue()
+                                       - k3.getDoubleValue() * qd_foot_X.getDoubleValue()
+                                       - k4.getDoubleValue() * qd_hip.getDoubleValue());
+      robot.getShoulderJoint().setTau(-k5.getDoubleValue() * q_hip.getDoubleValue()
+                                            - k6.getDoubleValue() * q_shoulder.getDoubleValue()
+                                            - k7.getDoubleValue() * qd_hip.getDoubleValue()
+                                            - k8.getDoubleValue() * qd_shoulder.getDoubleValue());
    }
 
    public YoVariableRegistry getYoVariableRegistry()

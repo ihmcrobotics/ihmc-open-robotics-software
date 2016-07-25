@@ -111,7 +111,7 @@ public class SkippyRobot extends Robot
       Link arms = new Link("arms");
       arms.setMass(M3);
       arms.setComOffset(0.0, 0.0, L3 / 2.0);
-      arms.setMomentOfInertia(0.0, Iyy3, 0.0);
+      arms.setMomentOfInertia(Iyy3, 0.0, 0.0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.rotate(Math.toRadians(90), Axis.Y);
