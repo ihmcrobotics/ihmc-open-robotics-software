@@ -6,6 +6,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
 
@@ -190,6 +191,11 @@ public class GUICaptureViewer
 //               }
             }
          });
+      }
+
+      @Override
+      public void connected(InetSocketAddress localAddress)
+      {
       }
    }
 }

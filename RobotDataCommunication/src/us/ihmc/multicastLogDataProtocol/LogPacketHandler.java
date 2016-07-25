@@ -1,5 +1,6 @@
 package us.ihmc.multicastLogDataProtocol;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
 import us.ihmc.robotDataCommunication.LogDataHeader;
@@ -21,4 +22,7 @@ public interface LogPacketHandler
    public void newDataAvailable(LogDataHeader header, ByteBuffer buffer);
    
    public void timeout();
+
+
+   public void connected(InetSocketAddress localAddress);
 }
