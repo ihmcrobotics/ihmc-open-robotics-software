@@ -53,6 +53,15 @@ public class RandomTools
       return new Point3d(x, y, z);
    }
 
+   public static Point3d generateRandomPoint3d(Random random, double min, double max)
+   {
+      double x = generateRandomDoubleInRange(random, min, max);
+      double y = generateRandomDoubleInRange(random, min, max);
+      double z = generateRandomDoubleInRange(random, min, max);
+      
+      return new Point3d(x, y, z);
+   }
+   
    public static Point3d generateRandomPoint3d(Random random, double[] min, double[] max)
    {
       double x = generateRandomDoubleInRange(random, min[0], max[0]);

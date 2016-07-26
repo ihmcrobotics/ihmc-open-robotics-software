@@ -35,8 +35,8 @@ public class YoVariableValueDataCheckerTest
       simulationTestingParameters = null;
    }
 
-   @DeployableTestMethod(estimatedDuration = 2.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSimpleSmoothDerviativeNoExeeded()
    {
       Robot robot = new Robot("Derivative");
@@ -84,8 +84,8 @@ public class YoVariableValueDataCheckerTest
       assertTrue(!yoVariableValueDataChecker.isMinValueExeeded());
    }
    
-   @DeployableTestMethod(estimatedDuration = 2.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSimpleSmoothDerviativeNoExeededWithSecondDerivateProvided()
    {
       Robot robot = new Robot("Derivative");
@@ -140,8 +140,8 @@ public class YoVariableValueDataCheckerTest
       assertTrue(!yoVariableValueDataChecker.isDerivativeCompErrorOccurred());
    }
    
-   @DeployableTestMethod(estimatedDuration = 2.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSimpleSmoothDerviativeNoExeededWithSecondDerivateProvidedAndError()
    {
       Robot robot = new Robot("Derivative");
@@ -195,8 +195,8 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 2.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testSimpleSmoothDerviativeExceed()
    {
       Robot robot = new Robot("Derivative");
@@ -246,8 +246,8 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 2.0)
-   @Test(timeout = 300000, expected=RuntimeException.class)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000, expected=RuntimeException.class)
    public void testMinGreaterThanMax()
    {
       Robot robot = new Robot("Derivative");
@@ -274,8 +274,8 @@ public class YoVariableValueDataCheckerTest
       yoVariableValueDataChecker.setMinimumValue(2.0);
    }
    
-   @DeployableTestMethod(estimatedDuration = 2.0)
-   @Test(timeout = 300000, expected=RuntimeException.class)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000, expected=RuntimeException.class)
    public void testMaxGreaterThanMin() 
    {
       Robot robot = new Robot("Derivative");
@@ -301,8 +301,8 @@ public class YoVariableValueDataCheckerTest
    }
    
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
       public void testErrorThresholdOnDerivativeComparison()
    {
       Robot robot = new Robot("Derivative");
@@ -327,8 +327,8 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
       public void testMaximumDerivative()
    {
       Robot robot = new Robot("Derivative");
@@ -353,8 +353,8 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testMaximumSecondDerivative()
    {
       ValueDataCheckerParameters valueDataCheckerParametersOriginal = new ValueDataCheckerParameters();
@@ -367,8 +367,8 @@ public class YoVariableValueDataCheckerTest
       assertEquals(valueDataCheckerParametersOriginal.getMaximumSecondDerivative(), value, EPSILON);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
       public void testMaximumValue()
    {
       Robot robot = new Robot("Derivative");
@@ -394,8 +394,8 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    
    public void testMinimumValue()
    {
@@ -409,8 +409,8 @@ public class YoVariableValueDataCheckerTest
       assertFalse(valueDataCheckerParametersOriginal.getMinimumValue() == value);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000, expected=RuntimeException.class)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000, expected=RuntimeException.class)
    public void testSetMinGreaterThanMax()
    {
       Robot robot = new Robot("Derivative");
@@ -431,8 +431,8 @@ public class YoVariableValueDataCheckerTest
       yoVariableValueDataChecker.setMinimumValue(value + 1.0);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 300000, expected=RuntimeException.class)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000, expected=RuntimeException.class)
    public void testSetMaxLessThanMin()
    {
       Robot robot = new Robot("Derivative");

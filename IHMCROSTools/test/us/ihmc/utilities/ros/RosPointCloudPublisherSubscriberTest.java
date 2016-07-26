@@ -25,14 +25,14 @@ import us.ihmc.utilities.ros.types.PointType;
 @DeployableTestClass(targets=TestPlanTarget.Flaky)
 public class RosPointCloudPublisherSubscriberTest extends IHMCRosTestWithRosCore
 {
-   @DeployableTestMethod
-   @Test(timeout = 2000)
+   @DeployableTestMethod(estimatedDuration = 0.2)
+   @Test(timeout = 30000)
    public void testPubSubSinglePointXYZICloud() throws URISyntaxException, InterruptedException
    {
       testPubSubSingleCloud(PointType.XYZI);
    }
 
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 2000)
    public void testPubSubSinglePointXYZRGBCloud() throws URISyntaxException, InterruptedException
    {

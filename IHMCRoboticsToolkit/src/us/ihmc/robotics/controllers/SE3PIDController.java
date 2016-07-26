@@ -22,16 +22,16 @@ public class SE3PIDController
    private final AxisAngleOrientationController orientationController;
    private final FrameOrientation desiredOrientation = new FrameOrientation();
    private final FrameVector desiredAngularVelocity = new FrameVector();
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
+   private final FrameVector feedForwardAngularAction = new FrameVector();
    private final FrameVector currentAngularVelocity = new FrameVector();
-   private final FrameVector angularAccelerationFromOrientationController = new FrameVector();
+   private final FrameVector angularActionFromOrientationController = new FrameVector();
 
    private final EuclideanPositionController positionController;
    private final FramePoint desiredPosition = new FramePoint();
    private final FrameVector desiredVelocity = new FrameVector();
-   private final FrameVector feedForwardLinearAcceleration = new FrameVector();
+   private final FrameVector feedForwardLinearAction = new FrameVector();
    private final FrameVector currentVelocity = new FrameVector();
-   private final FrameVector accelerationFromPositionController = new FrameVector();
+   private final FrameVector actionFromPositionController = new FrameVector();
 
    public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry registry)
    {
@@ -59,6 +59,33 @@ public class SE3PIDController
       positionController.reset();
    }
 
+   public void resetIntegrator()
+   {
+      orientationController.resetIntegrator();
+      positionController.resetIntegrator();
+   }
+
+   public void compute(Twist twistToPack, FramePose desiredPose, Twist desiredTwist)
+   {
+      checkBodyFrames(desiredTwist, twistToPack);
+      checkBaseFrames(desiredTwist, twistToPack);
+      checkExpressedInFrames(desiredTwist, twistToPack);
+
+      twistToPack.setToZero(bodyFrame, desiredTwist.getBaseFrame(), bodyFrame);
+
+      desiredPose.getOrientationIncludingFrame(desiredOrientation);
+      desiredTwist.getAngularPart(desiredAngularVelocity);
+      desiredTwist.getAngularPart(feedForwardAngularAction);
+      orientationController.compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, null, feedForwardAngularAction);
+      twistToPack.setAngularPart(angularActionFromOrientationController.getVector());
+
+      desiredPose.getPositionIncludingFrame(desiredPosition);
+      desiredTwist.getLinearPart(desiredVelocity);
+      desiredTwist.getLinearPart(feedForwardLinearAction);
+      positionController.compute(actionFromPositionController, desiredPosition, desiredVelocity, null, feedForwardLinearAction);
+      twistToPack.setLinearPart(actionFromPositionController.getVector());
+   }
+
    public void compute(SpatialAccelerationVector spatialAccelerationToPack, FramePose desiredPose, Twist desiredTwist,
          SpatialAccelerationVector feedForwardAcceleration, Twist currentTwist)
    {
@@ -70,37 +97,52 @@ public class SE3PIDController
 
       desiredPose.getOrientationIncludingFrame(desiredOrientation);
       desiredTwist.getAngularPart(desiredAngularVelocity);
-      feedForwardAcceleration.getAngularPart(feedForwardAngularAcceleration);
+      feedForwardAcceleration.getAngularPart(feedForwardAngularAction);
       currentTwist.getAngularPart(currentAngularVelocity);
-      orientationController.compute(angularAccelerationFromOrientationController, desiredOrientation, desiredAngularVelocity, currentAngularVelocity, feedForwardAngularAcceleration);
-      spatialAccelerationToPack.setAngularPart(angularAccelerationFromOrientationController.getVector());
+      orientationController.compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, currentAngularVelocity, feedForwardAngularAction);
+      spatialAccelerationToPack.setAngularPart(angularActionFromOrientationController.getVector());
 
       desiredPose.getPositionIncludingFrame(desiredPosition);
       desiredTwist.getLinearPart(desiredVelocity);
-      feedForwardAcceleration.getLinearPart(feedForwardLinearAcceleration);
+      feedForwardAcceleration.getLinearPart(feedForwardLinearAction);
       currentTwist.getLinearPart(currentVelocity);
-      positionController.compute(accelerationFromPositionController, desiredPosition, desiredVelocity, currentVelocity, feedForwardLinearAcceleration);
-      spatialAccelerationToPack.setLinearPart(accelerationFromPositionController.getVector());
+      positionController.compute(actionFromPositionController, desiredPosition, desiredVelocity, currentVelocity, feedForwardLinearAction);
+      spatialAccelerationToPack.setLinearPart(actionFromPositionController.getVector());
+   }
+
+   private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
+      currentTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
+   }
+
+   private void checkBaseFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getBaseFrame().checkReferenceFrameMatch(currentTwist.getBaseFrame());
+   }
+
+   private void checkExpressedInFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
+      currentTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
    private void checkBodyFrames(Twist desiredTwist, SpatialAccelerationVector feedForwardAcceleration, Twist currentTwist)
    {
-      desiredTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
+      checkBodyFrames(desiredTwist, currentTwist);
       feedForwardAcceleration.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
-      currentTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
    private void checkBaseFrames(Twist desiredTwist, SpatialAccelerationVector feedForwardAcceleration, Twist currentTwist)
    {
+      checkBaseFrames(desiredTwist, currentTwist);
       desiredTwist.getBaseFrame().checkReferenceFrameMatch(feedForwardAcceleration.getBaseFrame());
-      desiredTwist.getBaseFrame().checkReferenceFrameMatch(currentTwist.getBaseFrame());
    }
 
    private void checkExpressedInFrames(Twist desiredTwist, SpatialAccelerationVector feedForwardAcceleration, Twist currentTwist)
    {
-      desiredTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
+      checkExpressedInFrames(desiredTwist, currentTwist);
       feedForwardAcceleration.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
-      currentTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
    public void setPositionProportionalGains(double kpx, double kpy, double kpz)
@@ -133,9 +175,9 @@ public class SE3PIDController
       orientationController.setIntegralGains(kix, kiy, kiz, maxIntegralError);
    }
 
-   public void setPositionMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setPositionMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      positionController.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      positionController.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
    public void setPositionMaxDerivativeError(double maxDerivativeError)
@@ -148,9 +190,9 @@ public class SE3PIDController
       positionController.setMaxProportionalError(maxProportionalError);
    }
 
-   public void setOrientationMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setOrientationMaxFeedbackAndFeedbackRate(double maxAcceleration, double maxFeedbackRate)
    {
-      orientationController.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      orientationController.setMaxFeedbackAndFeedbackRate(maxAcceleration, maxFeedbackRate);
    }
 
    public void setOrientationMaxDerivativeError(double maxDerivativeError)

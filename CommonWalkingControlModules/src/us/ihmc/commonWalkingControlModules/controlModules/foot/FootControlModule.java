@@ -42,6 +42,8 @@ public class FootControlModule
    private final YoVariableRegistry registry;
    private final ContactablePlaneBody contactableFoot;
 
+   private final boolean useNewSupportState;
+
    public enum ConstraintType
    {
       FULL, HOLD_POSITION, TOES, SWING, MOVE_VIA_WAYPOINTS, EXPLORE_POLYGON
@@ -68,6 +70,7 @@ public class FootControlModule
    private final OnToesState onToesState;
    private final FullyConstrainedState supportState;
    private final ExploreFootPolygonState exploreFootPolygonState;
+   private final SupportState supportStateNew;
 
    private final FootSwitchInterface footSwitch;
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
@@ -125,7 +128,12 @@ public class FootControlModule
       states.add(onToesState);
 
       supportState = new FullyConstrainedState(footControlHelper, registry);
-      states.add(supportState);
+      supportStateNew = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
+      useNewSupportState = walkingControllerParameters.useSupportState();
+      if (useNewSupportState)
+         states.add(supportStateNew);
+      else
+         states.add(supportState);
 
       if (walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
       {
@@ -143,7 +151,7 @@ public class FootControlModule
       swingState = new SwingState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
       states.add(swingState);
 
-      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, swingFootControlGains, registry);
+      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
       states.add(moveViaWaypointsState);
 
       setupStateMachine(states);
@@ -198,6 +206,9 @@ public class FootControlModule
          @Override
          public boolean checkCondition()
          {
+            if (useNewSupportState)
+               return true;
+
             if (alwaysHoldPosition.getBooleanValue())
                return false;
             if (isFootBarelyLoaded())
@@ -231,6 +242,7 @@ public class FootControlModule
       moveViaWaypointsState.setWeight(defaultFootWeight);
       onToesState.setWeight(highFootWeight);
       supportState.setWeight(highFootWeight);
+      supportStateNew.setWeight(highFootWeight);
       holdPositionState.setWeight(defaultFootWeight);
       if (exploreFootPolygonState != null)
       {
@@ -244,6 +256,7 @@ public class FootControlModule
       moveViaWaypointsState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       onToesState.setWeights(highAngularFootWeight, highLinearFootWeight);
       supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
+      supportStateNew.setWeights(highAngularFootWeight, highLinearFootWeight);
       holdPositionState.setWeights(highAngularFootWeight, highLinearFootWeight);
       if (exploreFootPolygonState != null)
       {
@@ -304,6 +317,11 @@ public class FootControlModule
    public ConstraintType getCurrentConstraintType()
    {
       return stateMachine.getCurrentStateEnum();
+   }
+
+   public void initialize()
+   {
+      stateMachine.setCurrentState(ConstraintType.FULL);
    }
 
    public void doControl()
@@ -411,7 +429,7 @@ public class FootControlModule
             resetCurrentState();
          break;
       case QUEUE:
-         boolean success = moveViaWaypointsState.queueHandTrajectoryCommand(command);
+         boolean success = moveViaWaypointsState.queueFootTrajectoryCommand(command);
          if (!success)
             moveViaWaypointsState.holdCurrentPosition();
          return;

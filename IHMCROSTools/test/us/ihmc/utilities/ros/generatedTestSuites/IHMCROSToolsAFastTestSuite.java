@@ -12,6 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
+   us.ihmc.utilities.ros.AddTwoIntsServiceTest.class,
+   us.ihmc.utilities.ros.ROSMessageFileCreatorTest.class,
    us.ihmc.utilities.ros.ROSMessageFolderExistsTest.class
 })
 

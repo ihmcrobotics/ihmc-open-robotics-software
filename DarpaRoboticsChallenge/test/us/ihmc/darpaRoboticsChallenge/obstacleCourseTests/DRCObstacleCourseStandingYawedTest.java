@@ -53,11 +53,11 @@ import us.ihmc.tools.thread.ThreadTools;
       }
 
 
-	@DeployableTestMethod(estimatedDuration = 19.1)
-	@Test(timeout = 95000)
+	@DeployableTestMethod(estimatedDuration = 18.4)
+	@Test(timeout = 92000)
       public void testStandingYawed() throws SimulationExceededMaximumTimeException
       {
-         BambooTools.reportTestStartedMessage();
+         BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
          DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
          
@@ -82,7 +82,7 @@ import us.ihmc.tools.thread.ThreadTools;
          drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
          
-         BambooTools.reportTestFinishedMessage();
+         BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
       }
       
       

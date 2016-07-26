@@ -244,6 +244,41 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
       return getTime();
    }
 
+   public double getOrientationQx()
+   {
+      return geometryObject.getOrientationQx();
+   }
+
+   public double getOrientationQy()
+   {
+      return geometryObject.getOrientationQy();
+   }
+
+   public double getOrientationQz()
+   {
+      return geometryObject.getOrientationQz();
+   }
+
+   public double getOrientationQs()
+   {
+      return geometryObject.getOrientationQs();
+   }
+
+   public double getAngularVelocityX()
+   {
+      return geometryObject.getAngularVelocityX();
+   }
+
+   public double getAngularVelocityY()
+   {
+      return geometryObject.getAngularVelocityY();
+   }
+
+   public double getAngularVelocityZ()
+   {
+      return geometryObject.getAngularVelocityZ();
+   }
+
    @Override
    public String toString()
    {

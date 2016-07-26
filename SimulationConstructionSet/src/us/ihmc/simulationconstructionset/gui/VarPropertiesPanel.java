@@ -204,6 +204,7 @@ public class VarPropertiesPanel extends JPanel implements ActionListener
       entry.setInverted(invertCheckBox.isSelected());      
    }
 
+   @Override
    public void actionPerformed(ActionEvent event)
    {
       if (event.getSource() == maxTextField)

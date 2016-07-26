@@ -32,8 +32,8 @@ public class DdoglegInverseKinematicsCalculatorTest
     * make sure there are no exceptions when you pass in an infeasible desired transform
     */
 
-	@DeployableTestMethod(estimatedDuration = 6.4)
-	@Test(timeout = 31842)
+	@DeployableTestMethod(estimatedDuration = 8.5)
+	@Test(timeout = 42000)
    public void testInfeasible()
    {
       Random random = new Random(1235125L);
@@ -77,7 +77,7 @@ public class DdoglegInverseKinematicsCalculatorTest
       printStatistics(iterationStatistics, timeStatistics);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@DeployableTestMethod(estimatedDuration = 1.0)
 	@Test(timeout = 30000)
    public void testForwardThenInverse()
    {

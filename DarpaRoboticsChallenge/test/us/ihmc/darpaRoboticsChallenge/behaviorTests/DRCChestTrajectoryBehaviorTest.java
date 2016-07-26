@@ -84,11 +84,11 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
-	@DeployableTestMethod(estimatedDuration = 16.4)
-   @Test(timeout = 49112)
+	@DeployableTestMethod(estimatedDuration = 32.5)
+   @Test(timeout = 160000)
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Quat4d desiredChestQuat = new Quat4d(RandomTools.generateRandomQuaternion(new Random(), 0.8 * MAX_ANGLE_TO_TEST_RAD));
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(1.0, desiredChestQuat);
@@ -97,7 +97,7 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
 
       assertTrue(chestOrientationBehavior.isDone());
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private ChestTrajectoryBehavior testChestOrientationBehavior(ChestTrajectoryMessage chestTrajectoryMessage) throws SimulationExceededMaximumTimeException

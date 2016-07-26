@@ -41,7 +41,7 @@ public class MathToolsTest
    {
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAngleFromZeroToTwoPi()
    {
@@ -186,7 +186,7 @@ public class MathToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.04)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void powWithIntegerTest()
    {
@@ -704,7 +704,7 @@ public class MathToolsTest
       /** @todo fill in the test code */
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testArePointsInOrderColinear2()
    {
@@ -753,7 +753,7 @@ public class MathToolsTest
       }
    }
 
-// @DeployableTestMethod
+// @DeployableTestMethod(estimatedDuration = 0.1)
 // @Test(timeout = 300000)
 // public void testDiff1()
 // {
@@ -766,7 +766,7 @@ public class MathToolsTest
 //              && actualReturn[1] == expectedReturn[1]);
 // }
 
-// @DeployableTestMethod
+// @DeployableTestMethod(estimatedDuration = 0.1)
 // @Test(timeout = 300000)
 // public void testDiffWithAlphaFilter()
 // {
@@ -779,7 +779,7 @@ public class MathToolsTest
 //
 // }
 
-// @DeployableTestMethod
+// @DeployableTestMethod(estimatedDuration = 0.1)
 // @Test(timeout = 300000)
 // public void testGetQuaternionFromTransform3D()
 // {
@@ -789,7 +789,7 @@ public class MathToolsTest
 //
 // }
 
-// @DeployableTestMethod
+// @DeployableTestMethod(estimatedDuration = 0.1)
 // @Test(timeout = 300000)
 // public void testLoadTransform() throws IOException
 // {
@@ -800,7 +800,7 @@ public class MathToolsTest
 //
 // }
 
-// @DeployableTestMethod
+// @DeployableTestMethod(estimatedDuration = 0.1)
 // @Test(timeout = 300000)
 // public void testSaveTransform()
 // {
@@ -810,7 +810,7 @@ public class MathToolsTest
 //
 // }
 
-// @DeployableTestMethod
+// @DeployableTestMethod(estimatedDuration = 0.1)
 // @Test(timeout = 300000)
 // public void testSplitArrayIntoEqualishParts()
 // {

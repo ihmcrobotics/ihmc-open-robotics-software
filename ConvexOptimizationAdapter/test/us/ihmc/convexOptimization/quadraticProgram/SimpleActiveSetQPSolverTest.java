@@ -155,7 +155,7 @@ public class SimpleActiveSetQPSolverTest
    }
 
    // Fails when conflicting constraints are active... Need to fix this case.
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testConflictingInequalityAndEqualityConstraintsIfActive()
    {

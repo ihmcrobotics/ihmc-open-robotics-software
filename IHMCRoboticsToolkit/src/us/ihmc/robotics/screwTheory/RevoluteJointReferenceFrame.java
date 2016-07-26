@@ -21,6 +21,7 @@ public class RevoluteJointReferenceFrame extends OneDoFJointReferenceFrame
       this.axis = axis.getVectorCopy();
    }
 
+   @Override
    public void setAndUpdate(double jointPosition)
    {
       this.angle = jointPosition;

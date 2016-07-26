@@ -140,7 +140,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
-      groundPlaneEstimator = new GroundPlaneEstimator();
+      groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
       groundPlanePositions = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -488,7 +488,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          dcmPositionEstimate.changeFrame(worldFrame);
          for (int i = 0; i < 2; i++)
          {
-            QuadrupedTimedStep step = timedStepController.getLatestStep(swingQuadrants[i]);
+            QuadrupedTimedStep step = timedStepController.getCurrentStep(swingQuadrants[i]);
             step.getGoalPosition().set(dcmPositionEstimate.getX() - dcmPositionSetpoint.getX(), dcmPositionEstimate.getY() - dcmPositionSetpoint.getY(), 0.0);
             step.getGoalPosition().add(timedStepGoalPositionAtSoS.get(swingQuadrants[i]));
          }

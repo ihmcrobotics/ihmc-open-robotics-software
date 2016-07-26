@@ -19,7 +19,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
 {
    protected final BoundingBox3d boundingBox;
    protected final Box3d box;
-   protected final AppearanceDefinition appearance;
+   public AppearanceDefinition appearance;
    private final Box3d.FaceName[] faceNames = Box3d.FaceName.values();
    protected Graphics3DObject linkGraphics;
 
@@ -133,6 +133,10 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
    {
       return boundingBox.getYMax();
    }
+
+   public double getZMin() { return boundingBox.getZMin();}
+
+   public double getZMax() { return boundingBox.getZMax();}
 
    public boolean isClose(double x, double y, double z)
    {

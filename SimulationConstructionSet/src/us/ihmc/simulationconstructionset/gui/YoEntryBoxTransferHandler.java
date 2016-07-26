@@ -5,6 +5,8 @@ import java.awt.datatransfer.Transferable;
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanelTransferable;
+
 public class YoEntryBoxTransferHandler extends TransferHandler
 {
    private static final long serialVersionUID = 4062923325804002945L;
@@ -38,7 +40,7 @@ public class YoEntryBoxTransferHandler extends TransferHandler
    {
       if (c instanceof YoEntryBox)
       {
-         Transferable tip = new VarPanelTransferable();
+         Transferable tip = new YoVariablePanelTransferable();
 
          return tip;
       }

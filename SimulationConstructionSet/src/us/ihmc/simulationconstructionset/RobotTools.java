@@ -197,7 +197,11 @@ public class RobotTools
          }
          
       }
-      
+           
+      public PinJoint findSCSPinJoint(InverseDynamicsJoint joint)
+      {
+         return (PinJoint) idToSCSJointMap.get(joint);
+      }
    }
 
    public static Joint addSCSJointUsingIDJoint(InverseDynamicsJoint idJoint, Robot scsRobot, boolean isRootJoint)

@@ -12,16 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndHeadTrajectoryMessageTest.class,
-   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndNeckDesiredAccelerationsMessageTest.class,
-   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndNeckTrajectoryMessageTest.class,
-   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndPelvisHeightTrajectoryMessageTest.class,
-   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToEndPelvisTrajectoryMessageTest.class,
-   us.ihmc.valkyrie.controllerAPI.ValkyrieEndToWholeBodyTrajectoryMessageTest.class,
-   us.ihmc.valkyrie.kinematics.transmissions.ComparePushRodTransmissionsTest.class,
-   us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobianTest.class,
-   us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmissionTest.class,
-   us.ihmc.valkyrie.kinematics.util.ClosedFormJacobianTest.class
+   us.ihmc.valkyrie.pushRecovery.ValkyriePushRecoveryTest.class,
+   us.ihmc.valkyrie.roughTerrainWalking.ValkyrieEndToEndCinderBlockFieldTest.class
 })
 
 public class ValkyrieGFastTestSuite

@@ -23,7 +23,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 1.7)
+	@DeployableTestMethod(estimatedDuration = 2.2)
 	@Test(timeout = 30000)
    public void testChangeFrameUsingNumericalDifferentiationVersusAnalytical()
    {
@@ -95,7 +95,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
    }
 
    // TODO: Figure out this test and get it to pass if it should.
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testAccelerationOfPointFixedInBodyFrameAlternative()
    {

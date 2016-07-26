@@ -12,8 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasFootstepListBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasHeadTrajectoryBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasObjectWeightBehaviorTest.class
 })
 

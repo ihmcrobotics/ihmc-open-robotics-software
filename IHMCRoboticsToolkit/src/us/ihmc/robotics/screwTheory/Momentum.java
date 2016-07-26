@@ -97,6 +97,7 @@ public class Momentum extends SpatialForceVector
       return ret;
    }
    
+   @Override
    public String toString()
    {
       String ret = new String("Momentum expressed in frame " + expressedInFrame + "\n" + "Angular part: " + angularPart + "\n"

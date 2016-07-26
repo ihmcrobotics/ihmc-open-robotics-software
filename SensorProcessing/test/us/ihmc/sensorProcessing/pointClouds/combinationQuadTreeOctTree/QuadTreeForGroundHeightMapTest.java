@@ -41,7 +41,7 @@ public class QuadTreeForGroundHeightMapTest
 {
    private static final boolean DO_ASSERTS = true;
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout = 300000)
    public void testPointsFromAFile() throws NumberFormatException, IOException
    {

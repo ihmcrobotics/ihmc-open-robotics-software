@@ -15,7 +15,7 @@ import us.ihmc.utilities.parameterOptimization.SimpleRandomGradientDecentParamet
 public class SimpleSimulationTest
 {
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 1.4)
 	@Test(timeout=300000)
    public void testSimpleSimulation()
    {

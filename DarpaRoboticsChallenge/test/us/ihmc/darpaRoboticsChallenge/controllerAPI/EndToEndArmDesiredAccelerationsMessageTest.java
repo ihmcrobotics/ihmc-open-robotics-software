@@ -37,11 +37,11 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 18.1)
+   @Test(timeout = 90000)
    public void testSimpleCommands() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
 

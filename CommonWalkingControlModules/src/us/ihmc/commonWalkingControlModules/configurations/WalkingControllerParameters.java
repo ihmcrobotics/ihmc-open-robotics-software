@@ -207,4 +207,31 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return Double.NaN;
    }
+
+   /**
+    * When true, some of the tracking performance will be degraded to reduce the generated angular momentum rate around
+    * the vertical axis during swing only.
+    * Useful when the robot has heavy legs and tends to slips during swing.
+    * @return
+    */
+   public boolean minimizeAngularMomentumRateZDuringSwing()
+   {
+      return false;
+   }
+
+   /**
+    * Determines whether the swing trajectory should be optimized (new feature to be tested with Atlas)
+    */
+   public boolean useSwingTrajectoryOptimizer()
+   {
+      return false;
+   }
+
+   /**
+    * Determined whether the robot should use the 'support state' or the 'fully constrained' & 'hold position' states (new feature to be tested with Atlas)
+    */
+   public boolean useSupportState()
+   {
+      return false;
+   }
 }

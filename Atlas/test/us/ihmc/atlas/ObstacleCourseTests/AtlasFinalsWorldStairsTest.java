@@ -71,17 +71,17 @@ public class AtlasFinalsWorldStairsTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 135.0)
-   @Test(timeout = 680000)
+	@DeployableTestMethod(estimatedDuration = 70.3, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+   @Test(timeout = 350000)
    public void testWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-      robotModel.addMoreFootContactPointsSimOnly();
+      robotModel.addMoreFootContactPointsSimOnly(10, 2, true);
       DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,
               robotModel);
@@ -115,7 +115,7 @@ public class AtlasFinalsWorldStairsTest
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 	@Ignore("Improve the feet stability.")
@@ -123,13 +123,13 @@ public class AtlasFinalsWorldStairsTest
    @Test(timeout = 151825)
    public void testFastWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-      robotModel.addMoreFootContactPointsSimOnly();
+      robotModel.addMoreFootContactPointsSimOnly(8, 3, false);
       DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,
             robotModel);
@@ -163,7 +163,7 @@ public class AtlasFinalsWorldStairsTest
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private ArrayList<Point2d> createPartialSupportPolygonForFoot(WalkingControllerParameters walkingControllerParameters)

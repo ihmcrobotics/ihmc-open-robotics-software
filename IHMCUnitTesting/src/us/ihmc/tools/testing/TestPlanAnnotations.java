@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 public class TestPlanAnnotations
 {
-   public static final double defaultEstimatedDuration = 1.0;
+   public static final Double defaultEstimatedDuration = 0.1;
    
    // TODO Rename to TestPlanClass?
    @Retention(RetentionPolicy.RUNTIME)
@@ -22,7 +22,7 @@ public class TestPlanAnnotations
    @Target(ElementType.METHOD)
    public @interface DeployableTestMethod
    {
-      double estimatedDuration() default defaultEstimatedDuration;
+      double estimatedDuration();
       TestPlanTarget[] targets() default {};
    }
 }

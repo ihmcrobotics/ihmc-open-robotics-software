@@ -48,8 +48,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
 
    private DoubleYoVariable swingTime;
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 30.6)
+   @Test(timeout = 150000)
    /**
     * End to end test that makes sure the robot can recover from a push using upper body momentum
     *
@@ -64,8 +64,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertTrue(standAndPush());
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 21.5)
+   @Test(timeout = 110000)
    /**
     * End to end test that makes sure the robot falls during test if momentum is disabled
     *
@@ -80,8 +80,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertFalse(standAndPush());
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 34.3)
+   @Test(timeout = 170000)
    /**
     * End to end test that makes sure the robot can recover from a push using upper body momentum
     *
@@ -96,8 +96,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertTrue(stepAndPush());
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 23.2)
+   @Test(timeout = 120000)
    /**
     * End to end test that makes sure the robot falls during test if momentum is disabled
     *
@@ -112,8 +112,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertFalse(stepAndPush());
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 37.9)
+   @Test(timeout = 190000)
    /**
     * End to end test that makes sure the momentum recovery does not get triggered during
     * some normal steps
@@ -128,10 +128,10 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       ControllerSpy controllerSpy = new ControllerSpy(drcSimulationTestHelper);
 
       FootstepDataListMessage message = new FootstepDataListMessage();
-      addFootstep(new Point3d(0.4, 0.15, 0.0), RobotSide.LEFT, message);
-      addFootstep(new Point3d(0.8, -0.15, 0.0), RobotSide.RIGHT, message);
-      addFootstep(new Point3d(0.8, 0.4, 0.0), RobotSide.LEFT, message);
-      addFootstep(new Point3d(0.8, 0.1, 0.0), RobotSide.RIGHT, message);
+      addFootstep(new Point3d(0.3, 0.15, -0.02), RobotSide.LEFT, message);
+      addFootstep(new Point3d(0.6, -0.15, -0.02), RobotSide.RIGHT, message);
+      addFootstep(new Point3d(0.6, 0.3, -0.02), RobotSide.LEFT, message);
+      addFootstep(new Point3d(0.6, 0.0, -0.02), RobotSide.RIGHT, message);
 
       drcSimulationTestHelper.send(message);
       double simulationTime = 1.0 * message.footstepDataList.size() + 2.0;
@@ -216,7 +216,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
 
    private void setupTest()
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       // create simulation test helper
       FlatGroundEnvironment emptyEnvironment = new FlatGroundEnvironment();

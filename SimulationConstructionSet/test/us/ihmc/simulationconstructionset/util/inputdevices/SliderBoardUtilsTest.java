@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class SliderBoardUtilsTest
 {
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSimpleConversion()
    {
@@ -46,7 +46,7 @@ public class SliderBoardUtilsTest
       assertEquals(intValue, sliderValue);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSimpleSquareConversion()
    {
@@ -97,7 +97,7 @@ public class SliderBoardUtilsTest
       assertEquals(intValue, sliderValue);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRandomConversions()
    {
@@ -117,7 +117,7 @@ public class SliderBoardUtilsTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRandomConversionsWithHires()
    {

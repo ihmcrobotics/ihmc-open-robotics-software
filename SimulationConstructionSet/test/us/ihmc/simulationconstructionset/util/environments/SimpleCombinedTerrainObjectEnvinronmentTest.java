@@ -21,7 +21,7 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
 {
    private static boolean SHOW_GUI = false;
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 2.0)
 	@Test(timeout=300000)
    public void testSimpleCombinedTerrainObjectEnvironment()
    {

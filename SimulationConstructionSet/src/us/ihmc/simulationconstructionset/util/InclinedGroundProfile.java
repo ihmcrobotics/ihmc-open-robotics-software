@@ -32,6 +32,7 @@ public class InclinedGroundProfile extends GroundProfileFromHeightMap
       this.boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double height = heightAt(x, y, z);
@@ -40,6 +41,7 @@ public class InclinedGroundProfile extends GroundProfileFromHeightMap
       return height;
    }
    
+   @Override
    public double heightAt(double x, double y, double z)
    {
       double height = 0.0;
@@ -63,9 +65,9 @@ public class InclinedGroundProfile extends GroundProfileFromHeightMap
       normal.normalize();
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
-
 }

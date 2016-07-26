@@ -19,7 +19,7 @@ public class Ellipsoid3dTest
    private static final double epsilon = 1e-4;    // This epsilon is meant small changes in coordinates. Use Ellipsoid3d's DEFAULT_EPSILON for error handling.
    private static final int iterations = 100;
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@DeployableTestMethod(estimatedDuration = 0.6)
 	@Test(timeout = 30000)
    public void testCommonShape3dFunctionality()
    {

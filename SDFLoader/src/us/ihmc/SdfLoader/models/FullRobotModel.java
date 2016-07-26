@@ -85,12 +85,22 @@ public interface FullRobotModel
    /** Returns all the one DoF joints that this robot has. */
    public abstract OneDoFJoint[] getOneDoFJoints();
 
+   /** Returns all one DoF joints, excluding joints that do not exist in the controller. */
+   public abstract OneDoFJoint[] getControllableOneDoFJoints();
+
    /**
     *  Gets all the one DoF joints that this robot has.
     *
     *  @param oneDoFJointsToPack {@code ArrayList<OneDoFJoint>} that will be packed will all the one DoF joints.
     */
    public abstract void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack);
+
+   /**
+    *  Gets all one DoF joints, excluding joints that do not exist in the controller.
+    *
+    *  @param oneDoFJointsToPack {@code ArrayList<OneDoFJoint>} that will be packed will the controllable one DoF joints.
+    */
+   public abstract void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack);
 
    /**
     * Returns all the IMUDefinitions corresponding to each IMU attached to this robot.

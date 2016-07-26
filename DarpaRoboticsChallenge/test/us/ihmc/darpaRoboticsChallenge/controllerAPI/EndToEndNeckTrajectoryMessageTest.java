@@ -35,11 +35,11 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 5.9)
-   @Test(timeout = 30000)
+   @DeployableTestMethod(estimatedDuration = 18.8)
+   @Test(timeout = 94000)
    public void testSingleWaypoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;

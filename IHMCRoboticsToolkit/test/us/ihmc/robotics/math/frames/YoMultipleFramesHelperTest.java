@@ -19,7 +19,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class YoMultipleFramesHelperTest
 {
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCommonUsageOfYoMultipleFramesHelper()
    {
@@ -53,7 +53,7 @@ public class YoMultipleFramesHelperTest
       assertTrue(frameB == referenceFrames.get(2));
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRepeatFrames()
    {
@@ -68,7 +68,7 @@ public class YoMultipleFramesHelperTest
       assertEquals("Should ignore repeat frames!", 1, helper.getNumberOfReferenceFramesRegistered());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testExceptions()
    {

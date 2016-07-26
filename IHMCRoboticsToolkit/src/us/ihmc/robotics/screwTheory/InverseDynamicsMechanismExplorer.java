@@ -129,11 +129,11 @@ public class InverseDynamicsMechanismExplorer
 
    }
 
+   @Override
    public String toString()
    {
       StringBuffer buffer = new StringBuffer();
       getRobotInformationAsStringBuffer(buffer);
       return buffer.toString();
    }
-
 }

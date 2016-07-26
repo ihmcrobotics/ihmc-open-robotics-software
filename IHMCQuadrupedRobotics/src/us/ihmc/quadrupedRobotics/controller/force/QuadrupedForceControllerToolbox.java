@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
+import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -18,6 +19,9 @@ public class QuadrupedForceControllerToolbox
    private final QuadrupedBodyOrientationController bodyOrientationController;
    private final QuadrupedSolePositionController solePositionController;
    private final QuadrupedTimedStepController timedStepController;
+   private final GroundPlaneEstimator groundPlaneEstimator;
+   private final QuadrupedFallDetector fallDetector;
+   private final QuadrupedSoleWaypointController soleWaypointController;
 
    public QuadrupedForceControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties, YoVariableRegistry registry)
    {
@@ -26,7 +30,7 @@ public class QuadrupedForceControllerToolbox
 
       // create controllers and estimators
       referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), physicalProperties);
-      taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(runtimeEnvironment.getFullRobotModel(), referenceFrames, registry);
+      taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(runtimeEnvironment.getFullRobotModel(), referenceFrames, registry, runtimeEnvironment.getGraphicsListRegistry());
       taskSpaceController = new QuadrupedTaskSpaceController(runtimeEnvironment.getFullRobotModel(), referenceFrames, runtimeEnvironment.getControlDT(), registry, runtimeEnvironment.getGraphicsListRegistry());
       linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassZUpFrame(), mass, gravity, 1.0, registry);
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassZUpFrame(), linearInvertedPendulumModel, registry, runtimeEnvironment.getGraphicsListRegistry());
@@ -35,6 +39,9 @@ public class QuadrupedForceControllerToolbox
       bodyOrientationController = new QuadrupedBodyOrientationController(referenceFrames.getBodyFrame(), runtimeEnvironment.getControlDT(), registry);
       solePositionController = new QuadrupedSolePositionController(referenceFrames.getFootReferenceFrames(), runtimeEnvironment.getControlDT(), registry);
       timedStepController = new QuadrupedTimedStepController(solePositionController, runtimeEnvironment.getRobotTimestamp(), registry, runtimeEnvironment.getGraphicsListRegistry());
+      groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
+      fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
+      soleWaypointController = new QuadrupedSoleWaypointController(referenceFrames.getBodyFrame(), runtimeEnvironment.getRobotTimestamp(), solePositionController, registry);
    }
 
    public QuadrupedReferenceFrames getReferenceFrames()
@@ -85,5 +92,20 @@ public class QuadrupedForceControllerToolbox
    public QuadrupedTimedStepController getTimedStepController()
    {
       return timedStepController;
+   }
+
+   public GroundPlaneEstimator getGroundPlaneEstimator()
+   {
+      return groundPlaneEstimator;
+   }
+
+   public QuadrupedFallDetector getFallDetector()
+   {
+      return fallDetector;
+   }
+
+   public QuadrupedSoleWaypointController getSoleWaypointController()
+   {
+      return soleWaypointController;
    }
 }

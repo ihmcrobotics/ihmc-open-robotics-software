@@ -28,6 +28,7 @@ import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
 import us.ihmc.robotics.stateMachines.StateMachineTools;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 
@@ -54,6 +55,9 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final AtomicReference<HighLevelState> fallbackControllerForFailureReference = new AtomicReference<>();
 
    private final HighLevelStateChangeStatusMessage highLevelStateChangeStatusMessage = new HighLevelStateChangeStatusMessage();
+
+   private final ExecutionTimer highLevelControllerTimer = new ExecutionTimer("activeHighLevelControllerTimer", 1.0, registry);
+   private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
 
    public HighLevelHumanoidControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
          WholeBodyControllerCore controllerCore, HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
@@ -169,10 +173,14 @@ public class HighLevelHumanoidControllerManager implements RobotController
       }
 
       stateMachine.checkTransitionConditions();
+      highLevelControllerTimer.startMeasurement();
       stateMachine.doAction();
+      highLevelControllerTimer.stopMeasurement();
       ControllerCoreCommand controllerCoreCommandList = stateMachine.getCurrentState().getControllerCoreCommand();
+      controllerCoreTimer.startMeasurement();
       controllerCore.submitControllerCoreCommand(controllerCoreCommandList);
       controllerCore.compute();
+      controllerCoreTimer.stopMeasurement();
       reportDesiredCenterOfPressureForEstimator();
    }
 

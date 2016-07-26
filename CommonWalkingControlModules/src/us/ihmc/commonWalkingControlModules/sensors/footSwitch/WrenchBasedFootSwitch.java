@@ -27,6 +27,8 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 //TODO Probably make an EdgeSwitch interface that has all the HeelSwitch and ToeSwitch stuff
 public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 {
+   private static final double MIN_FORCE_TO_COMPUTE_COP = 5.0;
+
    private final DoubleYoVariable contactThresholdForce;
    private final DoubleYoVariable secondContactThresholdForce;
 
@@ -35,7 +37,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final ForceSensorDataReadOnly forceSensorData;
    private final DoubleYoVariable footSwitchCoPThresholdFraction;
 
-   private final GlitchFilteredBooleanYoVariable isForceMagnitudePastThreshold;
+   private final BooleanYoVariable isForceMagnitudePastThreshold;
+   private final GlitchFilteredBooleanYoVariable filteredIsForceMagnitudePastThreshold;
    private final BooleanYoVariable isForceMagnitudePastSecondThreshold;
    private final BooleanYoVariable hasFootHitGround, isCoPPastThreshold;
    private final GlitchFilteredBooleanYoVariable filteredHasFootHitGround;
@@ -115,11 +118,12 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       }
 
       footForceMagnitude = new DoubleYoVariable(namePrefix + "FootForceMag", registry);
+      isForceMagnitudePastThreshold = new BooleanYoVariable(namePrefix + "ForcePastThreshold", registry);
       hasFootHitGround = new BooleanYoVariable(namePrefix + "FootHitGround", registry);
 
       //TODO: Tune and triple check glitch filtering and timing of the virtual switches.
       filteredHasFootHitGround = new GlitchFilteredBooleanYoVariable(namePrefix + "FilteredFootHitGround", registry, hasFootHitGround, 1);
-      isForceMagnitudePastThreshold = new GlitchFilteredBooleanYoVariable(namePrefix + "ForcePastThresh", registry, 2);
+      filteredIsForceMagnitudePastThreshold = new GlitchFilteredBooleanYoVariable(namePrefix + "FilteredForcePastThresh", registry, isForceMagnitudePastThreshold, 2);
       isForceMagnitudePastSecondThreshold = new BooleanYoVariable(namePrefix + "ForcePastSecondThresh", registry);
       isCoPPastThreshold = new BooleanYoVariable(namePrefix + "CoPPastThresh", registry);
 
@@ -168,11 +172,14 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    public boolean hasFootHitGround()
    {
       isForceMagnitudePastThreshold.set(isForceMagnitudePastThreshold());
+      filteredIsForceMagnitudePastThreshold.update();
+
       isForceMagnitudePastSecondThreshold.set(yoFootForceInFoot.getZ() > secondContactThresholdForce.getDoubleValue());
       isCoPPastThreshold.set(isCoPPastThreshold());
 
       hasFootHitGround.set(
-            (isForceMagnitudePastThreshold.getBooleanValue() && isCoPPastThreshold.getBooleanValue()) || isForceMagnitudePastSecondThreshold.getBooleanValue());
+            (filteredIsForceMagnitudePastThreshold.getBooleanValue() && isCoPPastThreshold.getBooleanValue()) ||
+                  isForceMagnitudePastSecondThreshold.getBooleanValue());
       //      hasFootHitGround.set(isForceMagnitudePastThreshold.getBooleanValue());
       filteredHasFootHitGround.update();
 
@@ -270,12 +277,22 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    public void updateCoP()
    {
       readSensorData(footWrench);
-      copResolver.resolveCenterOfPressureAndNormalTorque(resolvedCoP, footWrench, contactablePlaneBody.getSoleFrame());
-      yoResolvedCoP.set(resolvedCoP);
 
-      resolvedCoP3d.setToZero(resolvedCoP.getReferenceFrame());
-      resolvedCoP3d.setXY(resolvedCoP);
-      resolvedCoP3d.changeFrame(ReferenceFrame.getWorldFrame());
+      if (Math.abs(footWrench.getLinearPartZ()) < MIN_FORCE_TO_COMPUTE_COP)
+      {
+         yoResolvedCoP.setToNaN();
+         resolvedCoP3d.setToNaN(ReferenceFrame.getWorldFrame());
+         resolvedCoP.setToNaN();
+      }
+      else
+      {
+         copResolver.resolveCenterOfPressureAndNormalTorque(resolvedCoP, footWrench, contactablePlaneBody.getSoleFrame());
+         yoResolvedCoP.set(resolvedCoP);
+         
+         resolvedCoP3d.setToZero(resolvedCoP.getReferenceFrame());
+         resolvedCoP3d.setXY(resolvedCoP);
+         resolvedCoP3d.changeFrame(ReferenceFrame.getWorldFrame());
+      }
    }
 
    private Wrench footWrenchInBodyFixedFrame = new Wrench();
@@ -383,5 +400,11 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    public void setFootContactState(boolean hasFootHitGround)
    {
       
+   }
+
+   @Override
+   public void trustFootSwitch(boolean trustFootSwitch)
+   {
+
    }
 }

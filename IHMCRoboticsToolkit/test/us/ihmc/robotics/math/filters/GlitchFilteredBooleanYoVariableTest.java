@@ -37,7 +37,7 @@ public class GlitchFilteredBooleanYoVariableTest
       filteredVariable = null;
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructors_Set_Get()
    {
@@ -64,7 +64,7 @@ public class GlitchFilteredBooleanYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdate()
    {
@@ -120,7 +120,7 @@ public class GlitchFilteredBooleanYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCounter()
    {
@@ -137,7 +137,7 @@ public class GlitchFilteredBooleanYoVariableTest
       
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFiltering()
    {

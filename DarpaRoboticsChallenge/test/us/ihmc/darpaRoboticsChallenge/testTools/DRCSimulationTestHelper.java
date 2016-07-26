@@ -56,6 +56,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class DRCSimulationTestHelper
@@ -78,6 +79,7 @@ public class DRCSimulationTestHelper
 
    private final DRCNetworkModuleParameters networkProcessorParameters;
    private DRCSimulationStarter simulationStarter;
+   private Exception caughtException;
 
    public DRCSimulationTestHelper(String name, DRCObstacleCourseStartingLocation selectedLocation,
          SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
@@ -311,7 +313,8 @@ public class DRCSimulationTestHelper
       }
       catch (Exception e)
       {
-         System.err.println("Caught exception in " + getClass().getSimpleName() + ".simulateAndBlockAndCatchExceptions. Exception = /n" + e);
+         this.caughtException = e;
+         PrintTools.error(this, e.getMessage());
          return false;
       }
    }
@@ -391,6 +394,11 @@ public class DRCSimulationTestHelper
       //    exceptions.add("kp_");
 
       return exceptions;
+   }
+
+   public Exception getCaughtException()
+   {
+      return caughtException;
    }
 
    public void send(Packet<?> packet)

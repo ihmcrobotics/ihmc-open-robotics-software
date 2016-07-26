@@ -406,8 +406,6 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
 
       this.attachControllerListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
-
-      requestedDiagnostic.set(DiagnosticTask.KARATE_KID);
    }
 
    private void setupArmsInverseKinematics(FullHumanoidRobotModel fullRobotModel)

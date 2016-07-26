@@ -171,4 +171,10 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    public void setFootContactState(boolean hasFootHitGround)
    {
    }
+
+   @Override
+   public void trustFootSwitch(boolean trustFootSwitch)
+   {
+
+   }
 }

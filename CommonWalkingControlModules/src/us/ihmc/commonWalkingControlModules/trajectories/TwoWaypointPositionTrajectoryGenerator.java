@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -694,5 +693,12 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    public void hideVisualization()
    {
       // TODO Auto-generated method stub
+   }
+
+   public void informDone()
+   {
+      desiredPosition.setToZero(true);
+      desiredVelocity.setToZero(true);
+      desiredAcceleration.setToZero(true);
    }
 }

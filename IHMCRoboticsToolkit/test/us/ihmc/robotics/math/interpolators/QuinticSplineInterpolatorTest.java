@@ -20,7 +20,7 @@ public class QuinticSplineInterpolatorTest
     * made in Matlab.
     */
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testQuinticSplineInterpolator()
    {
@@ -78,7 +78,7 @@ public class QuinticSplineInterpolatorTest
     * timing parameters.
     */
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 1.0)
 	@Test(timeout=300000)
    public void testQuinticSplineCalculationSpeed() throws IOException
    {
@@ -150,7 +150,7 @@ public class QuinticSplineInterpolatorTest
 
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testTwoPointsQuinticSpline()
    {

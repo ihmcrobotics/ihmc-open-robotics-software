@@ -163,7 +163,7 @@ public class ComposableStateEstimatorEvaluator
             return false;
          }
 
-         public boolean estimateAccelerationBias()
+         public boolean enableIMUBiasCompensation()
          {
             return false;
          }
@@ -174,7 +174,7 @@ public class ComposableStateEstimatorEvaluator
             return true;
          }
 
-         public double getAccelerationBiasFilterFreqInHertz()
+         public double getIMUBiasFilterFreqInHertz()
          {
             return 0;
          }
@@ -199,29 +199,21 @@ public class ComposableStateEstimatorEvaluator
             return 0;
          }
 
-         public boolean estimateIMUDrift()
+         public boolean enableIMUYawDriftCompensation()
          {
             return false;
          }
 
-         public boolean compensateIMUDrift()
-         {
-            return false;
-         }
-
-         public double getIMUDriftFilterFreqInHertz()
+         public double getIMUYawDriftFilterFreqInHertz()
          {
             return 0;
          }
 
-         public double getFootVelocityUsedForImuDriftFilterFreqInHertz()
-         {
-            return 0;
-         }
 
-         public double getFootVelocityThresholdToEnableIMUDriftCompensation()
+         @Override
+         public double getIMUBiasVelocityThreshold()
          {
-            return 0;
+            return 0.015;
          }
 
          public boolean trustCoPAsNonSlippingContactPoint()
@@ -335,6 +327,13 @@ public class ComposableStateEstimatorEvaluator
          {
             // TODO Auto-generated method stub
             return null;
+         }
+
+         @Override
+         public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
+         {
+            // TODO Auto-generated method stub
+            return false;
          }
       };
 
