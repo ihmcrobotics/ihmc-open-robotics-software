@@ -2,6 +2,8 @@ package us.ihmc.exampleSimulations.skippy;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class SkippyController implements RobotController
@@ -15,6 +17,11 @@ public class SkippyController implements RobotController
 
    private String name;
    private SkippyRobot robot;
+
+   private static final double qLegDesiredX = 0.2;
+   private static final double qLegDesiredY = 0.0;
+   private static final double qHipDesired = -0.4;
+   private static final double qShoulderDesired = 1.0;
 
    private double integralTerm = 0.0;
    private double integralTermPart2 = 0.0;
@@ -64,12 +71,6 @@ public class SkippyController implements RobotController
 
    public void doControl()
    {
-      // desired leg/hip/shoulder positions
-      double qLegDesiredX = -0.2;
-      double qLegDesiredY = 0.0;
-
-      double qHipDesired = 0.4;
-      double qShoulderDesired = 0.2;
       // set the torques
 
 //      robot.getHipJoint().setTau(-k1.getDoubleValue() * q_foot_X.getDoubleValue()
@@ -80,30 +81,21 @@ public class SkippyController implements RobotController
 //                                            - k6.getDoubleValue() * (q_shoulder.getDoubleValue() - q_shoulder_desired)
 //                                            - k7.getDoubleValue() * qd_hip.getDoubleValue()
 //                                            - k8.getDoubleValue() * qd_shoulder.getDoubleValue());
-      double positionError = (5000)*((qLegDesiredX-robot.getLegJoint().getQ().getDoubleValue()));
-      integralTerm += (1)*positionError*SkippySimulation.DT;
-      double velocityError = (1000)*(0-robot.getLegJoint().getQD().getDoubleValue());
-      robot.getLegJoint().setTau(positionError+integralTerm+velocityError);
 
-      positionError = (5000)*((qLegDesiredY-robot.getLegJoint().getSecondJoint().getQ().getDoubleValue()));
-      integralTermPart2 += (1)*positionError*SkippySimulation.DT;
-      velocityError = (1000)*(0-robot.getLegJoint().getSecondJoint().getQD().getDoubleValue());
-      robot.getLegJoint().getSecondJoint().setTau(positionError+integralTerm+velocityError);
-//
-      positionError = (5000)*(qHipDesired-robot.getHipJoint().getQ().getDoubleValue());
-      integralTerm3 += (1)*positionError*SkippySimulation.DT;
-      velocityError = (1000)*(0-robot.getHipJoint().getQD().getDoubleValue());
-      robot.getHipJoint().setTau(positionError+integralTerm3+velocityError);
-//
-      positionError = (1000)*(qShoulderDesired-robot.getShoulderJoint().getQ().getDoubleValue());
-      integralTerm2 += (1)*positionError*SkippySimulation.DT;
-      velocityError = (10.1)*(0-robot.getShoulderJoint().getQD().getDoubleValue());
-      robot.getShoulderJoint().setTau(positionError+integralTerm2+velocityError);
-//
-      System.out.println(robot.getLegJoint().getQ() + " " + robot.getHipJoint().getQ() + " " + robot.getShoulderJoint().getQ());
-
+      positionJointsBasedOnError(robot.getLegJoint(), qLegDesiredX, integralTerm, 5000,1,1000);
+      positionJointsBasedOnError(robot.getLegJoint().getSecondJoint(), qLegDesiredY, integralTermPart2, 5000,1,1000);
+      positionJointsBasedOnError(robot.getHipJoint(), qHipDesired, integralTerm2, 5000,1,1000);
+      positionJointsBasedOnError(robot.getShoulderJoint(), qShoulderDesired, integralTerm3, 1000,1,10.1);
+      System.out.println();
    }
-
+   public void positionJointsBasedOnError(PinJoint joint, double desiredValue, double integralTerm, double k1, double k2, double k3)
+   {
+      double positionError = (k1)*((desiredValue-joint.getQ().getDoubleValue()));
+      integralTerm += (k2)*positionError*SkippySimulation.DT;
+      double velocityError = (k3)*(0-joint.getQD().getDoubleValue());
+      joint.setTau(positionError+integralTerm+velocityError);
+      System.out.print(joint.getName() + ": " + (joint.getQ().getDoubleValue() - desiredValue) + " ");
+   }
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
