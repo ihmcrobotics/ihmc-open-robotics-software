@@ -70,8 +70,8 @@ public class SkippyRobot extends Robot
       shoulder = new PinJoint("shoulder", new Vector3d(0.0, 0.0, TORSO_LENGTH), this, Axis.Y);
       Link arms = createArms();
       shoulder.setLink(arms);
-      shoulder.setInitialState(0.5,0.0);
-      shoulder.setDamping(0.3);
+      shoulder.setInitialState(Math.PI/4,0.0);
+      //shoulder.setDamping(0.3);
       this.hip.addJoint(shoulder);
       shoulder.addGroundContactPoint(shoulderContact);
       shoulder.addGroundContactPoint(leftContact);

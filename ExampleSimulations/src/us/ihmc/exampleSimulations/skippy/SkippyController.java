@@ -2,9 +2,10 @@ package us.ihmc.exampleSimulations.skippy;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+
+import java.util.ArrayList;
 
 public class SkippyController implements RobotController
 {
@@ -18,15 +19,14 @@ public class SkippyController implements RobotController
    private String name;
    private SkippyRobot robot;
 
-   private static final double qLegDesiredX = 0.2;
-   private static final double qLegDesiredY = 0.0;
-   private static final double qHipDesired = -0.4;
-   private static final double qShoulderDesired = 1.0;
+   private static ArrayList<double[]> desiredPositions;
 
-   private double integralTerm = 0.0;
-   private double integralTermPart2 = 0.0;
-   private double integralTerm2 = 0.0;
-   private double integralTerm3 = 0.0;
+   private double legIntegralTermX = 0.0;
+   private double legIntegralTermY = 0.0;
+   private double hipIntegralTerm = 0.0;
+   private double shoulderIntegralTerm = 0.0;
+
+   private static int timeCounter = 0;
 
    public SkippyController(SkippyRobot robot, String name)
    {
@@ -67,6 +67,15 @@ public class SkippyController implements RobotController
       k7.set(-104.59);
       k8 = new DoubleYoVariable("k8", registry);
       k8.set(-49.05);
+
+      desiredPositions = new ArrayList<double[]>();
+      //double[] position = {qLegDesiredX, qLegDesiredY, qHipDesired, qShoulderDesired} <- format
+      double[] firstSetOfPoints = {-Math.PI/3, 0.0, 2*Math.PI/3, 0.0};
+      double[] secondSetOfPoints = {Math.PI/3, 0.0, -2*Math.PI/3, 0.5};
+      double[] thirdSetOfPoints = {0.0, 0.0, 0.0, 0.0};
+      desiredPositions.add(firstSetOfPoints);
+      desiredPositions.add(secondSetOfPoints);
+      desiredPositions.add(thirdSetOfPoints);
    }
 
    public void doControl()
@@ -82,19 +91,34 @@ public class SkippyController implements RobotController
 //                                            - k7.getDoubleValue() * qd_hip.getDoubleValue()
 //                                            - k8.getDoubleValue() * qd_shoulder.getDoubleValue());
 
-      positionJointsBasedOnError(robot.getLegJoint(), qLegDesiredX, integralTerm, 5000,1,1000);
-      positionJointsBasedOnError(robot.getLegJoint().getSecondJoint(), qLegDesiredY, integralTermPart2, 5000,1,1000);
-      positionJointsBasedOnError(robot.getHipJoint(), qHipDesired, integralTerm2, 5000,1,1000);
-      positionJointsBasedOnError(robot.getShoulderJoint(), qShoulderDesired, integralTerm3, 1000,1,10.1);
-      System.out.println();
+      double interval = Math.round(SkippySimulation.TIME/desiredPositions.size()*100.0)/100.0;
+      double time = Math.round(robot.getTime()*(1/SkippySimulation.DT))/(1/SkippySimulation.DT);
+      System.out.println(interval + " " + time);
+
+      positionJointsBasedOnError(robot.getLegJoint(), desiredPositions.get(timeCounter)[0], legIntegralTermX, 15000, 1, 1000);
+      positionJointsBasedOnError(robot.getLegJoint().getSecondJoint(), desiredPositions.get(timeCounter)[1], legIntegralTermY, 15000, 1, 1000);
+      positionJointsBasedOnError(robot.getHipJoint(), desiredPositions.get(timeCounter)[2], hipIntegralTerm, 15000, 1, 1000);
+      positionJointsBasedOnError(robot.getShoulderJoint(), desiredPositions.get(timeCounter)[3], shoulderIntegralTerm, 15000, 1, 1000);
+      System.out.println(timeCounter);
+
+      if(time%interval==0 && time != 0.0)
+      {
+         timeCounter++;
+         legIntegralTermX = 0;
+         legIntegralTermY = 0;
+         hipIntegralTerm = 0;
+         shoulderIntegralTerm = 0;
+      }
+
+
    }
-   public void positionJointsBasedOnError(PinJoint joint, double desiredValue, double integralTerm, double k1, double k2, double k3)
+   public void positionJointsBasedOnError(PinJoint joint, double desiredValue, double integralTerm, double positionErrorGain, double integralErrorGain, double derivativeErrorGain)
    {
-      double positionError = (k1)*((desiredValue-joint.getQ().getDoubleValue()));
-      integralTerm += (k2)*positionError*SkippySimulation.DT;
-      double velocityError = (k3)*(0-joint.getQD().getDoubleValue());
-      joint.setTau(positionError+integralTerm+velocityError);
-      System.out.print(joint.getName() + ": " + (joint.getQ().getDoubleValue() - desiredValue) + " ");
+      double positionError = (positionErrorGain)*((desiredValue-joint.getQ().getDoubleValue()));
+      integralTerm += (integralErrorGain)*positionError*SkippySimulation.DT;
+      double derivativeError = (derivativeErrorGain)*(0-joint.getQD().getDoubleValue());
+      joint.setTau(positionError+integralTerm+derivativeError);
+      //System.out.print(joint.getName() + ": " + (joint.getQ().getDoubleValue() - desiredValue) + " ");
    }
    public YoVariableRegistry getYoVariableRegistry()
    {
