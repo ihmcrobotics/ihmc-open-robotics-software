@@ -46,7 +46,7 @@ public class ExplorationParameters
    private final DoubleYoVariable perpendicluarCopErrorThreshold;
    private final DoubleYoVariable copAllowedAreaOpeningAngle;
    private static final double defaultPerpendicluarCopErrorThreshold = 0.005;
-   private static final double defaultCopAllowedAreaOpeningAngle = 45.0 * Math.PI/180.0;
+   private static final double defaultCopAllowedAreaOpeningAngle = 30.0 * Math.PI/180.0;
 
    /** Parameters for the velocity based foothold detection */
    private final DoubleYoVariable stableLoRAngularVelocityThreshold;
@@ -69,7 +69,7 @@ public class ExplorationParameters
    private static final double defaultRecoverTime = 0.05;
    private static final double defaultTimeToGoToCorner = 0.3;
    private static final double defaultTimeToStayInCorner = 0.2;
-   private static final double defaultCopCommandWeight = 2000.0;
+   private static final double defaultCopCommandWeight = 1000.0;
    private static final double defaultTimeBeforeExploring = 1.5;
 
    public ExplorationParameters(YoVariableRegistry parentRegistry)
