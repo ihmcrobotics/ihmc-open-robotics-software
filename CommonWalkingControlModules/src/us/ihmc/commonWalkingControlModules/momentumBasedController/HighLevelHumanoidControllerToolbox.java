@@ -348,6 +348,7 @@ public class HighLevelHumanoidControllerToolbox
                GraphicType.DIAMOND, Color.BLACK , 0.005);
          yoGraphicsListRegistry.registerArtifact(graphicListName, copViz);
       }
+      yoCenterOfPressure.setToNaN();
    }
 
    public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
