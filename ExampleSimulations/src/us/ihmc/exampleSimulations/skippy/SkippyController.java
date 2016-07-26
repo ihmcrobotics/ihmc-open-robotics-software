@@ -91,17 +91,23 @@ public class SkippyController implements RobotController
 //                                            - k7.getDoubleValue() * qd_hip.getDoubleValue()
 //                                            - k8.getDoubleValue() * qd_shoulder.getDoubleValue());
 
+      PIDControl();
+
+
+   }
+
+   private void PIDControl()
+   {
       double interval = Math.round(SkippySimulation.TIME/desiredPositions.size()*100.0)/100.0;
       double time = Math.round(robot.getTime()*(1/SkippySimulation.DT))/(1/SkippySimulation.DT);
-      System.out.println(interval + " " + time);
 
       positionJointsBasedOnError(robot.getLegJoint(), desiredPositions.get(timeCounter)[0], legIntegralTermX, 15000, 1, 1000);
       positionJointsBasedOnError(robot.getLegJoint().getSecondJoint(), desiredPositions.get(timeCounter)[1], legIntegralTermY, 15000, 1, 1000);
       positionJointsBasedOnError(robot.getHipJoint(), desiredPositions.get(timeCounter)[2], hipIntegralTerm, 15000, 1, 1000);
       positionJointsBasedOnError(robot.getShoulderJoint(), desiredPositions.get(timeCounter)[3], shoulderIntegralTerm, 15000, 1, 1000);
-      System.out.println(timeCounter);
+      System.out.println();
 
-      if(time%interval==0 && time != 0.0)
+      if(time%interval==0 && time != 0.0 && timeCounter < desiredPositions.size())
       {
          timeCounter++;
          legIntegralTermX = 0;
@@ -109,16 +115,17 @@ public class SkippyController implements RobotController
          hipIntegralTerm = 0;
          shoulderIntegralTerm = 0;
       }
-
-
+      if(timeCounter==desiredPositions.size())
+         timeCounter = desiredPositions.size()-1;
    }
+
    public void positionJointsBasedOnError(PinJoint joint, double desiredValue, double integralTerm, double positionErrorGain, double integralErrorGain, double derivativeErrorGain)
    {
       double positionError = (positionErrorGain)*((desiredValue-joint.getQ().getDoubleValue()));
       integralTerm += (integralErrorGain)*positionError*SkippySimulation.DT;
       double derivativeError = (derivativeErrorGain)*(0-joint.getQD().getDoubleValue());
       joint.setTau(positionError+integralTerm+derivativeError);
-      //System.out.print(joint.getName() + ": " + (joint.getQ().getDoubleValue() - desiredValue) + " ");
+      System.out.print(joint.getName() + ": " + (joint.getQ().getDoubleValue() - desiredValue) + " ");
    }
    public YoVariableRegistry getYoVariableRegistry()
    {
