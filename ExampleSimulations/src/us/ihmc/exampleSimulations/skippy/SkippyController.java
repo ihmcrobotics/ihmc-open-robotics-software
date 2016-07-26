@@ -91,6 +91,7 @@ public class SkippyController implements RobotController
 //                                            - k7.getDoubleValue() * qd_hip.getDoubleValue()
 //                                            - k8.getDoubleValue() * qd_shoulder.getDoubleValue());
 
+      //start pid control
       PIDControl();
 
 
@@ -101,10 +102,10 @@ public class SkippyController implements RobotController
       double interval = Math.round(SkippySimulation.TIME/desiredPositions.size()*100.0)/100.0;
       double time = Math.round(robot.getTime()*(1/SkippySimulation.DT))/(1/SkippySimulation.DT);
 
-      positionJointsBasedOnError(robot.getLegJoint(), desiredPositions.get(timeCounter)[0], legIntegralTermX, 15000, 1, 1000);
-      positionJointsBasedOnError(robot.getLegJoint().getSecondJoint(), desiredPositions.get(timeCounter)[1], legIntegralTermY, 15000, 1, 1000);
-      positionJointsBasedOnError(robot.getHipJoint(), desiredPositions.get(timeCounter)[2], hipIntegralTerm, 15000, 1, 1000);
-      positionJointsBasedOnError(robot.getShoulderJoint(), desiredPositions.get(timeCounter)[3], shoulderIntegralTerm, 15000, 1, 1000);
+      positionJointsBasedOnError(robot.getLegJoint(), desiredPositions.get(timeCounter)[0], legIntegralTermX, 10000, 1, 1000);
+      positionJointsBasedOnError(robot.getLegJoint().getSecondJoint(), desiredPositions.get(timeCounter)[1], legIntegralTermY, 10000, 1, 1000);
+      positionJointsBasedOnError(robot.getHipJoint(), desiredPositions.get(timeCounter)[2], hipIntegralTerm, 10000, 1, 1000);
+      positionJointsBasedOnError(robot.getShoulderJoint(), desiredPositions.get(timeCounter)[3], shoulderIntegralTerm, 10000, 1, 1000);
       System.out.println();
 
       if(time%interval==0 && time != 0.0 && timeCounter < desiredPositions.size())
