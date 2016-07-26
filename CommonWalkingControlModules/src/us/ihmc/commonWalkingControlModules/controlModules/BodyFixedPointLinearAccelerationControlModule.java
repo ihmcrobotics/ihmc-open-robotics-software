@@ -78,7 +78,7 @@ public class BodyFixedPointLinearAccelerationControlModule
 
       feedbackLinearAcceleration = new YoFrameVector(namePrefix + "FeedbackLinearAcceleration", worldFrame, registry);
       rateLimitedFeedbackLinearAcceleration = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(namePrefix + "RateLimitedFeedbackLinearAcceleration", "",
-            registry, gains.getYoMaximumJerk(), dt, feedbackLinearAcceleration);
+            registry, gains.getYoMaximumFeedbackRate(), dt, feedbackLinearAcceleration);
 
       parentRegistry.addChild(registry);
    }
@@ -103,9 +103,9 @@ public class BodyFixedPointLinearAccelerationControlModule
       // Limit the max acceleration of the feedback, but not of the feedforward...
       // JEP changed 150430 based on Atlas hitting limit stops.
       double feedbackLinearAccelerationMagnitude = acceleration.length();
-      if (feedbackLinearAccelerationMagnitude > gains.getMaximumAcceleration())
+      if (feedbackLinearAccelerationMagnitude > gains.getMaximumFeedback())
       {
-         acceleration.scale(gains.getMaximumAcceleration() / feedbackLinearAccelerationMagnitude);
+         acceleration.scale(gains.getMaximumFeedback() / feedbackLinearAccelerationMagnitude);
       }
 
       feedbackLinearAcceleration.setAndMatchFrame(acceleration);

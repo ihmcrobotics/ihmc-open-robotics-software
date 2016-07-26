@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.util.BidirectionGroundContactModel;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
 public abstract class RobotContactPointParameters
@@ -84,13 +85,13 @@ public abstract class RobotContactPointParameters
                double y = (iy - 1.0) * dy - yOffset;
                String parentJointName = jointMap.getJointBeforeFootName(robotSide);
                RigidBodyTransform transformToParentJointFrame = soleToAnkleFrameTransforms.get(robotSide);
-               addSimulationContactPoint(parentJointName, transformToParentJointFrame, x, y);
+               addSimulationContactPoint(parentJointName, transformToParentJointFrame, x, y, 0.0);
             }
          }
       }
    }
 
-   protected void addMoreSimulationFootContactPoints(int nContactPointsX, int nContactPointsY, boolean useSoftGroundContactParameters)
+   protected void addMoreSimulationFootContactPoints(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly, boolean useSoftGroundContactParameters)
    {
       double dx = footLength / (nContactPointsX - 1.0);
       double xOffset = footLength / 2.0;
@@ -107,11 +108,17 @@ public abstract class RobotContactPointParameters
             {
                if ((ix == 1 || ix == nContactPointsX) && (iy == 1 || iy == nContactPointsY)) // Avoid adding corners a second time
                   continue;
+
+               if (edgePointsOnly && ix != 1 && ix != nContactPointsX && iy != 1 && iy != nContactPointsY) // Only put points along the edges
+                  continue;
+
                double x = (ix - 1) * dx - xOffset;
                double y = (iy - 1) * dy - yOffset;
+               double z = 0.005 * ((xOffset - Math.abs(x))/xOffset + (yOffset - Math.abs(y))/yOffset);
+
                String parentJointName = jointMap.getJointBeforeFootName(robotSide);
                RigidBodyTransform transformToParentJointFrame = soleToAnkleFrameTransforms.get(robotSide);
-               addSimulationContactPoint(parentJointName, transformToParentJointFrame, x, y);
+               addSimulationContactPoint(parentJointName, transformToParentJointFrame, x, y, z);
             }
          }
       }
@@ -136,9 +143,9 @@ public abstract class RobotContactPointParameters
          controllerFootGroundContactPoints.get(robotSide).clear();
    }
 
-   protected final void addSimulationContactPoint(String parentJointName, RigidBodyTransform transformToParentJointFrame, double contactPointX, double contactPointY)
+   protected final void addSimulationContactPoint(String parentJointName, RigidBodyTransform transformToParentJointFrame, double contactPointX, double contactPointY, double contactPointZ)
    {
-      Point3d contactPoint = new Point3d(contactPointX, contactPointY, 0.0);
+      Point3d contactPoint = new Point3d(contactPointX, contactPointY, contactPointZ);
       transformToParentJointFrame.transform(contactPoint);
       addSimulationContactPoint(parentJointName, contactPoint);
    }
@@ -217,6 +224,24 @@ public abstract class RobotContactPointParameters
          linearGroundContactModel.setZDamping(1500.0);
          linearGroundContactModel.setXYStiffness(50000.0);
          linearGroundContactModel.setXYDamping(2000.0);
+      }
+   }
+
+   public void setupGroundContactModelParameters(BidirectionGroundContactModel bidirectionGroundContactModel)
+   {
+      if (useSoftGroundContactParameters)
+      {
+         bidirectionGroundContactModel.setZStiffness(4000.0);
+         bidirectionGroundContactModel.setZDamping(750.0);
+         bidirectionGroundContactModel.setXYStiffness(50000.0);
+         bidirectionGroundContactModel.setXYDamping(1000.0);
+      }
+      else
+      {
+         bidirectionGroundContactModel.setZStiffness(2000.0);
+         bidirectionGroundContactModel.setZDamping(1500.0);
+         bidirectionGroundContactModel.setXYStiffness(50000.0);
+         bidirectionGroundContactModel.setXYDamping(2000.0);
       }
    }
 }

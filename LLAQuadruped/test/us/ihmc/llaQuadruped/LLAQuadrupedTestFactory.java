@@ -2,116 +2,148 @@ package us.ihmc.llaQuadruped;
 
 import java.io.IOException;
 
+import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
+import us.ihmc.communication.net.NetClassList;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
-import us.ihmc.quadrupedRobotics.QuadrupedTestAdministratorFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
-import us.ihmc.quadrupedRobotics.factories.QuadrupedControllerManagerFactory;
+import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.factories.QuadrupedSimulationFactory;
+import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
+import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
+import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
+import us.ihmc.tools.factories.FactoryTools;
+import us.ihmc.tools.factories.OptionalFactoryField;
+import us.ihmc.tools.factories.RequiredFactoryField;
 
-public class LLAQuadrupedTestFactory
+public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
 {
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private static final double SIMULATION_DT = 0.00006;
    private static final double SIMULATION_GRAVITY = -9.81;
    private static final int RECORD_FREQUENCY = (int) (0.01 / SIMULATION_DT);
+   private static final boolean USE_STATE_ESTIMATOR = false;
+   private static final boolean SHOW_PLOTTER = true;
+   private static final boolean USE_TRACK_AND_DOLLY = false;
+   private static final boolean USE_NETWORKING = false;
    
-   // Parameters
-   private LLAQuadrupedModelFactory modelFactory;
-   private LLAQuadrupedPhysicalProperties physicalProperties;
-   private LLAQuadrupedStandPrepParameters standPrepParameters;
-   private LLAQuadrupedGroundContactParameters groundContactParameters;
-   private LLAQuadrupedNetClassList netClassList;
+   private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
    
-   // Parameters getting moved soon
-   private RobotController headController;
-   private SimulationConstructionSetParameters scsParameters;
-   private SDFRobot sdfRobot;
-   private SDFFullQuadrupedRobotModel fullRobotModel;
-   private YoVariableRegistry robotYoVariableRegistry;
-   private YoGraphicsListRegistry yoGraphicsListRegistry;
-   private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
-   private QuadrupedReferenceFrames referenceFrames;
-   private DRCKinematicsBasedStateEstimator stateEstimator;
-   private SDFPerfectSimulatedOutputWriter sdfPerfectSimulatedOutputWriter;
-   private SDFQuadrupedPerfectSimulatedSensor sdfQuadrupedPerfectSimulatedSensor;
+   private final OptionalFactoryField<Boolean> useStateEstimator = new OptionalFactoryField<>("useStateEstimator");
+   private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
+   private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
+   private final OptionalFactoryField<String> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    
-   private void createSimulationParameters() throws IOException
+   @Override
+   public GoalOrientedTestConductor createTestConductor() throws IOException
    {
-      modelFactory = new LLAQuadrupedModelFactory();
-      sdfRobot = modelFactory.createSdfRobot();
-      fullRobotModel = modelFactory.createFullRobotModel();
-      robotYoVariableRegistry = sdfRobot.getRobotsYoVariableRegistry();
-      yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
-      yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
-      netClassList = new LLAQuadrupedNetClassList();
-      headController = null;
-      stateEstimator = null;
-      physicalProperties = new LLAQuadrupedPhysicalProperties();
-      standPrepParameters = new LLAQuadrupedStandPrepParameters();
-      groundContactParameters = new LLAQuadrupedGroundContactParameters();
-      scsParameters = new SimulationConstructionSetParameters();
+      FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
+      
+      QuadrupedModelFactory modelFactory = new LLAQuadrupedModelFactory();
+      QuadrupedPhysicalProperties physicalProperties = new LLAQuadrupedPhysicalProperties();
+      NetClassList netClassList = new LLAQuadrupedNetClassList();
+      QuadrupedSimulationInitialPositionParameters initialPositionParameters = new LLAQuadrupedSimulationInitialPositionParameters();
+      QuadrupedGroundContactParameters groundContactParameters = new LLAQuadrupedGroundContactParameters();
+      QuadrupedSensorInformation sensorInformation = new LLAQuadrupedSensorInformation();
       ParameterRegistry.getInstance().loadFromResources("parameters/simulation.param");
-
-      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
-      sdfPerfectSimulatedOutputWriter = new SDFPerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
-
-      sdfQuadrupedPerfectSimulatedSensor = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot, fullRobotModel, referenceFrames);
-   }
-
-   private QuadrupedControllerManagerFactory createControllerManagerFactory() throws IOException
-   {
-      QuadrupedControllerManagerFactory controllerManagerFactory = new QuadrupedControllerManagerFactory();
-      controllerManagerFactory.setControlDT(SIMULATION_DT);
-      controllerManagerFactory.setGravity(SIMULATION_GRAVITY);
-      controllerManagerFactory.setFullRobotModel(fullRobotModel);
-      controllerManagerFactory.setKryoNetClassList(netClassList);
-      controllerManagerFactory.setPhysicalProperties(physicalProperties);
-      controllerManagerFactory.setReferenceFrames(referenceFrames);
-      controllerManagerFactory.setRobotYoVariableRegistry(robotYoVariableRegistry);
-      controllerManagerFactory.setTimestampYoVariable(sdfRobot.getYoTime());
-      controllerManagerFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
-      controllerManagerFactory.setYoGraphicsListRegistryForDetachedOverhead(yoGraphicsListRegistryForDetachedOverhead);
-      return controllerManagerFactory;
-   }
-
-   private QuadrupedSimulationFactory createSimulationFactory()
-   {
+      StateEstimatorParameters stateEstimatorParameters = new LLAQuadrupedStateEstimatorParameters();
+      QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new LLAQuadrupedPositionBasedCrawlControllerParameters();
+      
+      SDFFullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
+      SDFRobot sdfRobot = modelFactory.createSdfRobot();
+      
+      SensorTimestampHolder timestampProvider = new LLAQuadrupedTimestampProvider(sdfRobot);
+      
+      QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
+      OutputWriter outputWriter = new SDFPerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
+      
+      if (usePushRobotController.hasBeenSet())
+      {
+         new PushRobotController(sdfRobot, usePushRobotController.get());
+      }
+      
       QuadrupedSimulationFactory simulationFactory = new QuadrupedSimulationFactory();
       simulationFactory.setControlDT(SIMULATION_DT);
       simulationFactory.setGravity(SIMULATION_GRAVITY);
       simulationFactory.setRecordFrequency(RECORD_FREQUENCY);
       simulationFactory.setGroundContactParameters(groundContactParameters);
-      simulationFactory.setHeadController(headController);
       simulationFactory.setModelFactory(modelFactory);
-      simulationFactory.setSCSParameters(scsParameters);
       simulationFactory.setSDFRobot(sdfRobot);
-      simulationFactory.setStateEstimator(stateEstimator);
-      simulationFactory.setSensorReader(sdfQuadrupedPerfectSimulatedSensor);
-      simulationFactory.setOutputWriter(sdfPerfectSimulatedOutputWriter);
-      simulationFactory.setShowPlotter(true);
-      simulationFactory.setUseTrackAndDolly(false);
-      simulationFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
-      simulationFactory.setYoGraphicsListRegistryForDetachedOverhead(yoGraphicsListRegistryForDetachedOverhead);
-      simulationFactory.setStandPrepParameters(standPrepParameters);
-      return simulationFactory;
+      simulationFactory.setSCSParameters(simulationTestingParameters);
+      simulationFactory.setOutputWriter(outputWriter);
+      simulationFactory.setShowPlotter(SHOW_PLOTTER);
+      simulationFactory.setUseTrackAndDolly(USE_TRACK_AND_DOLLY);
+      simulationFactory.setInitialPositionParameters(initialPositionParameters);
+      simulationFactory.setFullRobotModel(fullRobotModel);
+      simulationFactory.setPhysicalProperties(physicalProperties);
+      simulationFactory.setUseNetworking(USE_NETWORKING);
+      simulationFactory.setTimestampHolder(timestampProvider);
+      if (useStateEstimator.hasBeenSet())
+      {
+         simulationFactory.setUseStateEstimator(useStateEstimator.get());
+      }
+      else
+      {
+         simulationFactory.setUseStateEstimator(USE_STATE_ESTIMATOR);
+      }
+      simulationFactory.setStateEstimatorParameters(stateEstimatorParameters);
+      simulationFactory.setSensorInformation(sensorInformation);
+      simulationFactory.setReferenceFrames(referenceFrames);
+      simulationFactory.setNetClassList(netClassList);
+      simulationFactory.setControlMode(controlMode.get());
+      if (groundContactModelType.hasBeenSet())
+      {
+         simulationFactory.setGroundContactModelType(groundContactModelType.get());
+      }
+      if (providedGroundProfile3D.hasBeenSet())
+      {
+         simulationFactory.setGroundProfile3D(providedGroundProfile3D.get());
+      }
+      simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
+      return new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
    }
    
-   public QuadrupedTestAdministratorFactory createTestAdministratorFactory() throws IOException
+   @Override
+   public void setControlMode(QuadrupedControlMode controlMode)
    {
-      createSimulationParameters();
-      QuadrupedTestAdministratorFactory testAdministratorFactory = new QuadrupedTestAdministratorFactory();
-      testAdministratorFactory.setConrollerManagerFactory(createControllerManagerFactory());
-      testAdministratorFactory.setSimulationFactory(createSimulationFactory());
-      return testAdministratorFactory;
+      this.controlMode.set(controlMode);
+   }
+   
+   @Override
+   public void setGroundContactModelType(QuadrupedGroundContactModelType groundContactModelType)
+   {
+      this.groundContactModelType.set(groundContactModelType);
+   }
+   
+   @Override
+   public void setUseStateEstimator(boolean useStateEstimator)
+   {
+      this.useStateEstimator.set(useStateEstimator);
+   }
+   
+   @Override
+   public void setGroundProfile3D(GroundProfile3D groundProfile3D)
+   {
+      providedGroundProfile3D.set(groundProfile3D);
+   }
+   
+   @Override
+   public void setUsePushRobotController(String jointNameToPushOn)
+   {
+      this.usePushRobotController.set(jointNameToPushOn);
    }
 }

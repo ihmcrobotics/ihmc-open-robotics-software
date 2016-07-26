@@ -71,8 +71,10 @@ public class ICPPlanner
    private final YoFrameVector singleSupportFinalICPVelocity = new YoFrameVector(namePrefix + "SingleSupportFinalICPVelocity", worldFrame, registry);
 
    private final YoFramePoint desiredCentroidalMomentumPivotPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
+   private final YoFrameVector desiredCentroidalMomentumPivotVelocity = new YoFrameVector(namePrefix + "DesiredCentroidalMomentumVelocity", worldFrame, registry);
    private final YoFramePoint desiredCapturePointPosition = new YoFramePoint(namePrefix + "DesiredCapturePointPosition", worldFrame, registry);
    private final YoFrameVector desiredCapturePointVelocity = new YoFrameVector(namePrefix + "DesiredCapturePointVelocity", worldFrame, registry);
+   private final YoFrameVector desiredCapturePointAcceleration = new YoFrameVector(namePrefix + "DesiredCapturePointAcceleration", worldFrame, registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable(namePrefix + "Omega0", registry);
 
    private final BooleanYoVariable requestedHoldPosition = new BooleanYoVariable(namePrefix + "RequestedHoldPosition", registry);
@@ -585,12 +587,14 @@ public class ICPPlanner
          icpDoubleSupportTrajectoryGenerator.compute(timeInCurrentState);
          icpDoubleSupportTrajectoryGenerator.get(desiredCapturePointPosition);
          icpDoubleSupportTrajectoryGenerator.getVelocity(desiredCapturePointVelocity);
+         icpDoubleSupportTrajectoryGenerator.getAcceleration(desiredCapturePointAcceleration);
       }
       else if (useTwoConstantCMPsPerSupport.getBooleanValue())
       {
          icpSingleSupportTrajectoryGenerator.compute(timeInCurrentState);
          icpSingleSupportTrajectoryGenerator.get(desiredCapturePointPosition);
          icpSingleSupportTrajectoryGenerator.getVelocity(desiredCapturePointVelocity);
+         icpSingleSupportTrajectoryGenerator.getAcceleration(desiredCapturePointAcceleration);
       }
       else
       {
@@ -598,10 +602,9 @@ public class ICPPlanner
          singleSupportInitialICP.getFrameTupleIncludingFrame(tempICP);
          tempICP.changeFrame(worldFrame);
          timeInCurrentState = MathTools.clipToMinMax(timeInCurrentState, 0.0, singleSupportDuration.getDoubleValue());
-         CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP,
-               desiredCapturePointPosition);
-         CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP,
-               desiredCapturePointVelocity);
+         CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP, desiredCapturePointPosition);
+         CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP, desiredCapturePointVelocity);
+         CapturePointTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP, desiredCapturePointAcceleration);
       }
 
       decayDesiredVelocityIfNeeded(timeInCurrentState);
@@ -684,8 +687,25 @@ public class ICPPlanner
    public void getDesiredCentroidalMomentumPivotPosition(FramePoint desiredCentroidalMomentumPivotPositionToPack)
    {
       computeDesiredCentroidalMomentumPivot();
-
       desiredCentroidalMomentumPivotPosition.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
+   }
+
+   public void getDesiredCentroidalMomentumPivotPosition(FramePoint2d desiredCentroidalMomentumPivotPositionToPack)
+   {
+      computeDesiredCentroidalMomentumPivot();
+      desiredCentroidalMomentumPivotPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
+   }
+
+   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector desiredCentroidalMomentumPivotVelocityToPack)
+   {
+      CapturePointTools.computeDesiredCentroidalMomentumPivotVelocity(desiredCapturePointVelocity, desiredCapturePointAcceleration, omega0.getDoubleValue(), desiredCentroidalMomentumPivotVelocity);
+      desiredCentroidalMomentumPivotVelocity.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
+   }
+
+   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2d desiredCentroidalMomentumPivotVelocityToPack)
+   {
+      CapturePointTools.computeDesiredCentroidalMomentumPivotVelocity(desiredCapturePointVelocity, desiredCapturePointAcceleration, omega0.getDoubleValue(), desiredCentroidalMomentumPivotVelocity);
+      desiredCentroidalMomentumPivotVelocity.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
    }
 
    protected void computeTimeInCurrentState(double time)

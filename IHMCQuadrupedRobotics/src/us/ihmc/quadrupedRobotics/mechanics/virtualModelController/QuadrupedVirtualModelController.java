@@ -8,7 +8,6 @@ import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.util.LowPassFilter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -51,7 +50,6 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<GeometricJacobian> footJacobian;
    private final QuadrantDependentList<PointJacobian> soleJacobian;
    private final QuadrantDependentList<DenseMatrix64F> legEffortVector;
-   private final QuadrantDependentList<LowPassFilter[]> legEffortFilter;
    private final DenseMatrix64F virtualForceVector;
 
    private final YoGraphicsList yoGraphicsList;
@@ -66,7 +64,7 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<YoGraphicVector[]> yoJointTorqueGraphics;
 
    public QuadrupedVirtualModelController(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT,
-         YoVariableRegistry parentRegistry)
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
@@ -117,7 +115,6 @@ public class QuadrupedVirtualModelController
       footJacobian = new QuadrantDependentList<>();
       soleJacobian = new QuadrantDependentList<>();
       legEffortVector = new QuadrantDependentList<>();
-      legEffortFilter = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(robotQuadrant);
@@ -127,11 +124,6 @@ public class QuadrupedVirtualModelController
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
          soleJacobian.set(robotQuadrant, new PointJacobian());
          legEffortVector.set(robotQuadrant, new DenseMatrix64F(legJoints.get(robotQuadrant).length, 1));
-         legEffortFilter.set(robotQuadrant, new LowPassFilter[legJoints.get(robotQuadrant).length]);
-         for (int i = 0; i < legJoints.get(robotQuadrant).length; i++)
-         {
-            legEffortFilter.get(robotQuadrant)[i] = new LowPassFilter(controlDT, 0.5 / controlDT);
-         }
       }
       virtualForceVector = new DenseMatrix64F(3, 1);
 
@@ -175,6 +167,7 @@ public class QuadrupedVirtualModelController
          yoGraphicsList.add(yoSoleContactForceGraphic.get(robotQuadrant));
       }
 
+      graphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       parentRegistry.addChild(registry);
       this.reset();
    }
@@ -186,11 +179,6 @@ public class QuadrupedVirtualModelController
          soleVirtualForce.get(robotQuadrant).setToZero();
          soleContactForce.get(robotQuadrant).setToZero();
       }
-   }
-
-   public void registerGraphics(YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
    }
 
    public void setSoleVirtualForce(RobotQuadrant robotQuadrant, FrameVector virtualForce)
@@ -249,9 +237,8 @@ public class QuadrupedVirtualModelController
                      - settings.getJointPositionLimitDamping(jointName) * joint.getQd());
             tau = Math.min(Math.max(tau, -jointLimit.getTorqueLimit()), jointLimit.getTorqueLimit());
 
-            // filter desired joint torque and add damping
-            legEffortFilter.get(robotQuadrant)[index].setBreakFrequency(settings.getJointEffortBreakFrequency(jointName));
-            tau = legEffortFilter.get(robotQuadrant)[index].compute(tau) - settings.getJointDamping(jointName) * joint.getQd();
+            // compute joint damping
+            tau = tau - settings.getJointDamping(jointName) * joint.getQd();
 
             // update joint torques in full robot model
             joint.setTau(tau);

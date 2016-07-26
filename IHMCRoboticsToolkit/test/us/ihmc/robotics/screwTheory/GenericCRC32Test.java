@@ -28,7 +28,7 @@ public class GenericCRC32Test
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testUpdateLong()
    {
       Random random = new Random(4271L);

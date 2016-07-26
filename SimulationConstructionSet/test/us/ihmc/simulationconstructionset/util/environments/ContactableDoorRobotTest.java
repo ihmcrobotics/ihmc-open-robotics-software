@@ -12,6 +12,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -28,8 +29,8 @@ public class ContactableDoorRobotTest
    
    RigidBodyTransform doorToWorldTransform = new RigidBodyTransform();
    
-   @DeployableTestMethod
-   @Test(timeout = 100000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testPointIsClose()
    {      
       double epsilon = 1e-4;
@@ -49,7 +50,7 @@ public class ContactableDoorRobotTest
       assertTrue(door.isPointOnOrInside(diagonal));
    }
    
-   @DeployableTestMethod
+   @DeployableTestMethod(estimatedDuration = 1.4)
    @Test(timeout=300000)
    public void testDoorIsClosing()
    {
@@ -80,7 +81,7 @@ public class ContactableDoorRobotTest
       }
       catch (Exception e)
       {
-         System.err.println("Caught exception in SimulationTestHelper.simulateAndBlockAndCatchExceptions. Exception = " + e);
+         PrintTools.error(this, e.getMessage());
       }
        
       assertTrue(Math.abs(door.getHingeYaw()) < 1e-3);

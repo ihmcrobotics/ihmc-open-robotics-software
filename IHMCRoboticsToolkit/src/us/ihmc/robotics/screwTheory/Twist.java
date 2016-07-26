@@ -340,6 +340,7 @@ public class Twist extends SpatialMotionVector
    }
 
    ///CLOVER:OFF
+   @Override
    public String toString()
    {
       String ret = new String("Twist of " + bodyFrame + ", with respect to " + baseFrame + ", expressed in " + expressedInFrame + "\n" + "Linear part: "

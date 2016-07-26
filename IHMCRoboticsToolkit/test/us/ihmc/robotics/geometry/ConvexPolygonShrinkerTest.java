@@ -19,7 +19,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 public class ConvexPolygonShrinkerTest
 {
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleSquareConvexPolygonShrinking()
    {
@@ -49,7 +49,7 @@ public class ConvexPolygonShrinkerTest
       assertEquals(1, shrunkenPolygon.getNumberOfVertices());
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleTriangleConvexPolygonShrinking()
    {
@@ -78,7 +78,7 @@ public class ConvexPolygonShrinkerTest
    }
 
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleLineConvexPolygonShrinking()
    {
@@ -104,7 +104,7 @@ public class ConvexPolygonShrinkerTest
       assertEquals(1, shrunkenPolygon.getNumberOfVertices());
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimplePointConvexPolygonShrinking()
    {
@@ -121,7 +121,7 @@ public class ConvexPolygonShrinkerTest
       JUnitTools.assertTuple2dEquals(new Point2d(-1.0, 3.0), shrunkenPolygon.getVertexCCW(0), 1e-7);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testShrinkingRandomPolygonsAreCompletelyInsideOriginalPolygons()
    {

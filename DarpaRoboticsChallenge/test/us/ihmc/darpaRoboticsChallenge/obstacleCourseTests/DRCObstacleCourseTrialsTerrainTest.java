@@ -70,11 +70,11 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 94.2)
-   @Test(timeout = 470000)
+   @DeployableTestMethod(estimatedDuration = 57.4)
+   @Test(timeout = 290000)
    public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCSlopeTest", selectedLocation, simulationTestingParameters, getRobotModel());
@@ -98,14 +98,14 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 75.1)
-   @Test(timeout = 380000)
+   @DeployableTestMethod(estimatedDuration = 61.5)
+   @Test(timeout = 310000)
    public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCSlopeTest", selectedLocation, simulationTestingParameters, getRobotModel());
@@ -139,14 +139,14 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 36.4)
-   @Test(timeout = 180000)
+   @DeployableTestMethod(estimatedDuration = 40.4)
+   @Test(timeout = 200000)
    public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCZigzagHurdlesTest", selectedLocation, simulationTestingParameters, getRobotModel());
@@ -165,14 +165,14 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 47.7)
-   @Test(timeout = 240000)
+   @DeployableTestMethod(estimatedDuration = 30.4)
+   @Test(timeout = 150000)
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCZigzagHurdlesTest", selectedLocation, simulationTestingParameters, getRobotModel());
@@ -201,14 +201,14 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 66.9)
-   @Test(timeout = 330000)
+   @DeployableTestMethod(estimatedDuration = 49.8)
+   @Test(timeout = 250000)
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingOntoSlopesTest", selectedLocation, simulationTestingParameters, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -230,7 +230,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupCameraForWalkingOntoSlopes(SimulationConstructionSet scs)

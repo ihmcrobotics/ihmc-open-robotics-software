@@ -56,7 +56,7 @@ class Patterns:
 class CalibrationException(Exception):
     pass
 
-# TODO: Make pattern per-board?
+# TODO: Make pattern per-checkersBoard?
 class ChessboardInfo(object):
     def __init__(self, n_cols = 0, n_rows = 0, dim = 0.0):
         self.n_cols = n_cols
@@ -78,12 +78,12 @@ def _pdist(p1, p2):
     """
     return math.sqrt(math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2))
 
-def _get_outside_corners(corners, board):
+def _get_outside_corners(corners, checkersBoard):
     """
-    Return the four corners of the board as a whole, as (up_left, up_right, down_right, down_left).
+    Return the four corners of the checkersBoard as a whole, as (up_left, up_right, down_right, down_left).
     """
-    xdim = board.n_cols
-    ydim = board.n_rows
+    xdim = checkersBoard.n_cols
+    ydim = checkersBoard.n_rows
 
     if corners.shape[1] * corners.shape[0] != xdim * ydim:
         raise Exception("Invalid number of corners! %d corners. X: %d, Y: %d" % (corners.shape[1] * corners.shape[0],
@@ -96,7 +96,7 @@ def _get_outside_corners(corners, board):
 
     return (up_left, up_right, down_right, down_left)
 
-def _get_skew(corners, board):
+def _get_skew(corners, checkersBoard):
     """
     Get skew for given checkerboard detection. 
     Scaled to [0,1], which 0 = no skew, 1 = high skew
@@ -104,7 +104,7 @@ def _get_skew(corners, board):
     """
     # TODO Using three nearby interior corners might be more robust, outside corners occasionally
     # get mis-detected
-    up_left, up_right, down_right, _ = _get_outside_corners(corners, board)
+    up_left, up_right, down_right, _ = _get_outside_corners(corners, checkersBoard)
 
     def angle(a, b, c):
         """
@@ -117,13 +117,13 @@ def _get_skew(corners, board):
     skew = min(1.0, 2. * abs((math.pi / 2.) - angle(up_left, up_right, down_right)))
     return skew
 
-def _get_area(corners, board):
+def _get_area(corners, checkersBoard):
     """
     Get 2d image area of the detected checkerboard.
     The projected checkerboard is assumed to be a convex quadrilateral, and the area computed as
     |p X q|/2; see http://mathworld.wolfram.com/Quadrilateral.html.
     """
-    (up_left, up_right, down_right, down_left) = _get_outside_corners(corners, board)
+    (up_left, up_right, down_right, down_left) = _get_outside_corners(corners, checkersBoard)
     a = up_right - up_left
     b = down_right - up_right
     c = down_left - down_right
@@ -131,7 +131,7 @@ def _get_area(corners, board):
     q = a + b
     return abs(p[0]*q[1] - p[1]*q[0]) / 2.
 
-def _get_corners(img, board, refine = True, checkerboard_flags=0):
+def _get_corners(img, checkersBoard, refine = True, checkerboard_flags=0):
     """
     Get corners for a particular chessboard for an image
     """
@@ -141,7 +141,7 @@ def _get_corners(img, board, refine = True, checkerboard_flags=0):
         mono = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     else:
         mono = img
-    (ok, corners) = cv2.findChessboardCorners(mono, (board.n_cols, board.n_rows), flags = cv2.CALIB_CB_ADAPTIVE_THRESH |
+    (ok, corners) = cv2.findChessboardCorners(mono, (checkersBoard.n_cols, checkersBoard.n_rows), flags = cv2.CALIB_CB_ADAPTIVE_THRESH |
                                               cv2.CALIB_CB_NORMALIZE_IMAGE | checkerboard_flags)
     if not ok:
         return (ok, corners)
@@ -157,21 +157,21 @@ def _get_corners(img, board, refine = True, checkerboard_flags=0):
         # Use a radius of half the minimum distance between corners. This should be large enough to snap to the
         # correct corner, but not so large as to include a wrong corner in the search window.
         min_distance = float("inf")
-        for row in range(board.n_rows):
-            for col in range(board.n_cols - 1):
-                index = row*board.n_rows + col
+        for row in range(checkersBoard.n_rows):
+            for col in range(checkersBoard.n_cols - 1):
+                index = row*checkersBoard.n_rows + col
                 min_distance = min(min_distance, _pdist(corners[index, 0], corners[index + 1, 0]))
-        for row in range(board.n_rows - 1):
-            for col in range(board.n_cols):
-                index = row*board.n_rows + col
-                min_distance = min(min_distance, _pdist(corners[index, 0], corners[index + board.n_cols, 0]))
+        for row in range(checkersBoard.n_rows - 1):
+            for col in range(checkersBoard.n_cols):
+                index = row*checkersBoard.n_rows + col
+                min_distance = min(min_distance, _pdist(corners[index, 0], corners[index + checkersBoard.n_cols, 0]))
         radius = int(math.ceil(min_distance * 0.5))
         cv2.cornerSubPix(mono, corners, (radius,radius), (-1,-1),
                                       ( cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.1 ))
 
     return (ok, corners)
 
-def _get_circles(img, board, pattern):
+def _get_circles(img, checkersBoard, pattern):
     """
     Get circle centers for a symmetric or asymmetric grid
     """
@@ -186,13 +186,13 @@ def _get_circles(img, board, pattern):
     if pattern == Patterns.ACircles:
         flag = cv2.CALIB_CB_ASYMMETRIC_GRID
     mono_arr = numpy.array(mono)
-    (ok, corners) = cv2.findCirclesGrid(mono_arr, (board.n_cols, board.n_rows), flags=flag)
+    (ok, corners) = cv2.findCirclesGrid(mono_arr, (checkersBoard.n_cols, checkersBoard.n_rows), flags=flag)
 
     # In symmetric case, findCirclesGrid does not detect the target if it's turned sideways. So we try
     # again with dimensions swapped - not so efficient.
-    # TODO Better to add as second board? Corner ordering will change.
+    # TODO Better to add as second checkersBoard? Corner ordering will change.
     if not ok and pattern == Patterns.Circles:
-        (ok, corners) = cv2.findCirclesGrid(mono_arr, (board.n_rows, board.n_cols), flags=flag)
+        (ok, corners) = cv2.findCirclesGrid(mono_arr, (checkersBoard.n_rows, checkersBoard.n_cols), flags=flag)
 
     return (ok, corners)
 
@@ -254,21 +254,21 @@ class Calibrator(object):
         else:
             return self.br.imgmsg_to_cv2(msg, "mono8")
 
-    def get_parameters(self, corners, board, size):
+    def get_parameters(self, corners, checkersBoard, size):
         """
         Return list of parameters [X, Y, size, skew] describing the checkerboard view.
         """
         (width, height) = size
         Xs = corners[:,:,0]
         Ys = corners[:,:,1]
-        area = _get_area(corners, board)
+        area = _get_area(corners, checkersBoard)
         border = math.sqrt(area)
-        # For X and Y, we "shrink" the image all around by approx. half the board size.
+        # For X and Y, we "shrink" the image all around by approx. half the checkersBoard size.
         # Otherwise large boards are penalized because you can't get much X/Y variation.
         p_x = min(1.0, max(0.0, (numpy.mean(Xs) - border / 2) / (width  - border)))
         p_y = min(1.0, max(0.0, (numpy.mean(Ys) - border / 2) / (height - border)))
         p_size = math.sqrt(area / (width * height))
-        skew = _get_skew(corners, board)
+        skew = _get_skew(corners, checkersBoard)
         params = [p_x, p_y, p_size, skew]
         return params
 
@@ -336,7 +336,7 @@ class Calibrator(object):
         Check all boards. Return corners for first chessboard that it detects
         if given multiple size chessboards.
 
-        Returns (ok, corners, board)
+        Returns (ok, corners, checkersBoard)
         """
 
         for b in self._boards:
@@ -357,7 +357,7 @@ class Calibrator(object):
         detection is too expensive on large images, so it's better to do detection on
         the smaller display image and scale the corners back up to the correct size.
 
-        Returns (scrib, corners, downsampled_corners, board, (x_scale, y_scale)).
+        Returns (scrib, corners, downsampled_corners, checkersBoard, (x_scale, y_scale)).
         """
         # Scale the input image down to ~VGA size
         height = img.shape[0]
@@ -373,7 +373,7 @@ class Calibrator(object):
 
         if self.pattern == Patterns.Chessboard:
             # Detect checkerboard
-            (ok, downsampled_corners, board) = self.get_corners(scrib, refine = True)
+            (ok, downsampled_corners, checkersBoard) = self.get_corners(scrib, refine = True)
 
             # Scale corners back to full size image
             corners = None
@@ -396,7 +396,7 @@ class Calibrator(object):
                     corners = downsampled_corners
         else:
             # Circle grid detection is fast even on large images
-            (ok, corners, board) = self.get_corners(img)
+            (ok, corners, checkersBoard) = self.get_corners(img)
             # Scale corners to downsampled image for display
             downsampled_corners = None
             if ok:
@@ -407,7 +407,7 @@ class Calibrator(object):
                 else:
                     downsampled_corners = corners
 
-        return (scrib, corners, downsampled_corners, board, (x_scale, y_scale))
+        return (scrib, corners, downsampled_corners, checkersBoard, (x_scale, y_scale))
 
 
     def lrmsg(self, d, k, r, p):
@@ -645,12 +645,12 @@ class MonoCalibrator(Calibrator):
         Detect the checkerboard and compute the linear error.
         Mainly for use in tests.
         """
-        _, corners, _, board, _ = self.downsample_and_detect(image)
+        _, corners, _, checkersBoard, _ = self.downsample_and_detect(image)
         if corners is None:
             return None
 
         undistorted = self.undistort_points(corners)
-        return self.linear_error(undistorted, board)
+        return self.linear_error(undistorted, checkersBoard)
 
     @staticmethod
     def linear_error(corners, b):
@@ -692,7 +692,7 @@ class MonoCalibrator(Calibrator):
         linear_error = -1
 
         # Get display-image-to-be (scrib) and detection of the calibration target
-        scrib_mono, corners, downsampled_corners, board, (x_scale, y_scale) = self.downsample_and_detect(gray)
+        scrib_mono, corners, downsampled_corners, checkersBoard, (x_scale, y_scale) = self.downsample_and_detect(gray)
 
         if self.calibrated:
             # Show rectified image
@@ -707,25 +707,25 @@ class MonoCalibrator(Calibrator):
             if corners is not None:
                 # Report linear error
                 undistorted = self.undistort_points(corners)
-                linear_error = self.linear_error(undistorted, board)
+                linear_error = self.linear_error(undistorted, checkersBoard)
 
                 # Draw rectified corners
                 scrib_src = undistorted.copy()
                 scrib_src[:,:,0] /= x_scale
                 scrib_src[:,:,1] /= y_scale
-                cv2.drawChessboardCorners(scrib, (board.n_cols, board.n_rows), scrib_src, True)
+                cv2.drawChessboardCorners(scrib, (checkersBoard.n_cols, checkersBoard.n_rows), scrib_src, True)
 
         else:
             scrib = cv2.cvtColor(scrib_mono, cv2.COLOR_GRAY2BGR)
             if corners is not None:
                 # Draw (potentially downsampled) corners onto display image
-                cv2.drawChessboardCorners(scrib, (board.n_cols, board.n_rows), downsampled_corners, True)
+                cv2.drawChessboardCorners(scrib, (checkersBoard.n_cols, checkersBoard.n_rows), downsampled_corners, True)
 
                 # Add sample to database only if it's sufficiently different from any previous sample.
-                params = self.get_parameters(corners, board, (gray.shape[1], gray.shape[0]))
+                params = self.get_parameters(corners, checkersBoard, (gray.shape[1], gray.shape[0]))
                 if self.is_good_sample(params):
                     self.db.append((params, gray))
-                    self.good_corners.append((corners, board))
+                    self.good_corners.append((corners, checkersBoard))
                     print(("*** Added sample %d, p_x = %.3f, p_y = %.3f, p_size = %.3f, skew = %.3f" % tuple([len(self.db)] + params)))
 
         rv = MonoDrawable()
@@ -819,7 +819,7 @@ class StereoCalibrator(Calibrator):
         For a sequence of left and right images, find pairs of images where both
         left and right have a chessboard, and return  their corners as a list of pairs.
         """
-        # Pick out (corners, board) tuples
+        # Pick out (corners, checkersBoard) tuples
         lcorners = [ self.downsample_and_detect(i)[1:4:2] for i in limages]
         rcorners = [ self.downsample_and_detect(i)[1:4:2] for i in rimages]
         good = [(lco, rco, b) for ((lco, b), (rco, br)) in zip( lcorners, rcorners)
@@ -937,17 +937,17 @@ class StereoCalibrator(Calibrator):
         return numpy.sqrt(numpy.square(d).sum() / d.size)
 
     def chessboard_size_from_images(self, limage, rimage):
-        _, lcorners, _, board, _ = self.downsample_and_detect(limage)
-        _, rcorners, _, board, _ = self.downsample_and_detect(rimage)
+        _, lcorners, _, checkersBoard, _ = self.downsample_and_detect(limage)
+        _, rcorners, _, checkersBoard, _ = self.downsample_and_detect(rimage)
         if lcorners is None or rcorners is None:
             return None
 
         lundistorted = self.l.undistort_points(lcorners)
         rundistorted = self.r.undistort_points(rcorners)
 
-        return self.chessboard_size(lundistorted, rundistorted, board)
+        return self.chessboard_size(lundistorted, rundistorted, checkersBoard)
 
-    def chessboard_size(self, lcorners, rcorners, board, msg = None):
+    def chessboard_size(self, lcorners, rcorners, checkersBoard, msg = None):
         """
         Compute the square edge length from two sets of matching undistorted points
         given the current calibration.
@@ -964,15 +964,15 @@ class StereoCalibrator(Calibrator):
             return math.sqrt(sum([(c0 - c1) ** 2 for (c0, c1) in zip(p0, p1)]))
 
         # Compute the length from each horizontal and vertical line, and return the mean
-        cc = board.n_cols
-        cr = board.n_rows
+        cc = checkersBoard.n_cols
+        cr = checkersBoard.n_rows
         lengths = (
             [l2(pt3d[cc * r + 0], pt3d[cc * r + (cc - 1)]) / (cc - 1) for r in range(cr)] +
             [l2(pt3d[c + 0], pt3d[c + (cc * (cr - 1))]) / (cr - 1) for c in range(cc)])
         return sum(lengths) / len(lengths)
 
     def handle_msg(self, msg):
-        # TODO Various asserts that images have same dimension, same board detected...
+        # TODO Various asserts that images have same dimension, same checkersBoard detected...
         (lmsg, rmsg) = msg
         lgray = self.mkgray(lmsg)
         rgray = self.mkgray(rmsg)

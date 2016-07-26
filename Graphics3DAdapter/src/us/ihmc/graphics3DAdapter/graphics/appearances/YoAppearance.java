@@ -418,7 +418,7 @@ public class YoAppearance
    public static AppearanceDefinition Glass(double transparency)
    {
       AppearanceDefinition glass = SkyBlue();
-      makeTransparent(glass, 0.5);
+      makeTransparent(glass, transparency);//0.5);
 
       return glass;
    }

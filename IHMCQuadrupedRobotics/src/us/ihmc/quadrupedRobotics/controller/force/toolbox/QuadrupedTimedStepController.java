@@ -7,7 +7,6 @@ import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectory;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
@@ -43,6 +42,7 @@ public class QuadrupedTimedStepController
    private final DoubleParameter solePressureUpperLimitParameter = parameterFactory.createDouble("solePressureUpperLimit", 50);
    private final DoubleParameter soleCoefficientOfFrictionParameter = parameterFactory.createDouble("soleCoefficientOfFriction", 75);
    private final DoubleParameter minimumStepAdjustmentTimeParameter = parameterFactory.createDouble("minimumStepAdjustmentTime", 0.1);
+   private final DoubleParameter stepGoalOffsetZParameter = parameterFactory.createDouble("stepGoalOffsetZ", 0.0);
 
    // control variables
    private final DoubleYoVariable timestamp;
@@ -168,7 +168,7 @@ public class QuadrupedTimedStepController
       return stepQueue.capacity();
    }
 
-   public QuadrupedTimedStep getLatestStep(RobotEnd robotEnd)
+   public QuadrupedTimedStep getCurrentStep(RobotEnd robotEnd)
    {
       for (int i = 0; i < stepQueue.size(); i++)
       {
@@ -181,7 +181,7 @@ public class QuadrupedTimedStepController
       return null;
    }
 
-   public QuadrupedTimedStep getLatestStep(RobotQuadrant robotQuadrant)
+   public QuadrupedTimedStep getCurrentStep(RobotQuadrant robotQuadrant)
    {
       for (int i = 0; i < stepQueue.size(); i++)
       {
@@ -292,7 +292,7 @@ public class QuadrupedTimedStepController
       @Override
       public StepEvent process()
       {
-         QuadrupedTimedStep timedStep = getLatestStep(robotQuadrant);
+         QuadrupedTimedStep timedStep = getCurrentStep(robotQuadrant);
          if (timedStep != null)
          {
             double currentTime = timestamp.getDoubleValue();
@@ -336,10 +336,12 @@ public class QuadrupedTimedStepController
       public void onEntry()
       {
          // initialize swing trajectory
-         QuadrupedTimedStep timedStep = getLatestStep(robotQuadrant);
+         QuadrupedTimedStep timedStep = getCurrentStep(robotQuadrant);
          double groundClearance = timedStep.getGroundClearance();
          TimeInterval timeInterval = timedStep.getTimeInterval();
          timedStep.getGoalPosition(goalPosition);
+         goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         goalPosition.add(0.0, 0.0, stepGoalOffsetZParameter.get());
          FramePoint solePosition = solePositionEstimate.get(robotQuadrant);
          solePosition.changeFrame(goalPosition.getReferenceFrame());
          swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval);
@@ -353,13 +355,14 @@ public class QuadrupedTimedStepController
       @Override
       public StepEvent process()
       {
-         QuadrupedTimedStep timedStep = getLatestStep(robotQuadrant);
+         QuadrupedTimedStep timedStep = getCurrentStep(robotQuadrant);
          double currentTime = timestamp.getDoubleValue();
          double touchDownTime = timedStep.getTimeInterval().getEndTime();
 
          // current goal position
          timedStep.getGoalPosition(goalPosition);
          goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         goalPosition.add(0.0, 0.0, stepGoalOffsetZParameter.get());
 
          // compute swing trajectory
          if (touchDownTime - currentTime > minimumStepAdjustmentTimeParameter.get())

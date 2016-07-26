@@ -68,7 +68,7 @@ public class YoVariableTest
       variableChangedListeners = null;
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFullNameEndsWith()
    {
@@ -86,77 +86,77 @@ public class YoVariableTest
       assertFalse(yoVariable.fullNameEndsWithCaseInsensitive("Robot.testRegistry.variableOne"));
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testValidVariable()
    {
       new DoubleYoVariable("foobar","",null);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantHaveADot()
    {
       new DoubleYoVariable("foo.bar", "", null);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantHaveAComma()
    {
       new DoubleYoVariable("foo,bar", "", null);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantHaveACarrot()
    {
       new DoubleYoVariable("foo^bar", "", null);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCanHaveAClosingBracket()
    {
       new DoubleYoVariable("foo]bar", "", null);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCanHaveAnOpeningBracket()
    {
       new DoubleYoVariable("foo[bar", "", null);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantHaveABackSlash()
    {
       new DoubleYoVariable("foo\\bar", "", null);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantHaveAQuote()
    {
       new DoubleYoVariable("foo\"bar", "", null);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantHaveASpace()
    {
       new DoubleYoVariable("foo bar", "", null);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantHaveASlash()
    {
       new DoubleYoVariable("foo/bar", "", null);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetBooleanValue()
    {
@@ -168,7 +168,7 @@ public class YoVariableTest
       assert !booleanVariable.getBooleanValue();
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetDescription()
    {
@@ -178,7 +178,7 @@ public class YoVariableTest
       assertNotNull(yoVariable.getDescription());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetDoubleValue()
    {
@@ -190,7 +190,7 @@ public class YoVariableTest
 
    private enum FooEnum {ONE, TWO, THREE;}
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetEnumValue()
    {
@@ -201,14 +201,14 @@ public class YoVariableTest
       assertFalse(enumVariable.getEnumValue() == FooEnum.ONE);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetFullNameWithNameSpace()
    {
       assertEquals(yoVariable.getFullNameWithNameSpace(), "robot.testRegistry.variableOne");
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetIntegerValue()
    {
@@ -228,14 +228,14 @@ public class YoVariableTest
 //   {
 //   }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetName()
    {
       assertEquals(yoVariable.getName(), "variableOne");
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetName1()
    {
@@ -260,7 +260,7 @@ public class YoVariableTest
 //   }
 
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetYoVariableRegistry()
    {
@@ -293,7 +293,7 @@ public class YoVariableTest
 //      // Not testing
 //   }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testToString()
    {
@@ -314,7 +314,7 @@ public class YoVariableTest
       assertEquals("booleanYoVariable: false", booleanyoVariable.toString());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testValueEquals()
    {
@@ -351,7 +351,7 @@ public class YoVariableTest
 //      // Did a lot of constructing already. Not testing constructors.
 //   }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testNotifyVaribaleChangeListeners()
    {
@@ -387,7 +387,7 @@ public class YoVariableTest
       assertNull(hearNoEvil.getLastVariableChanged());
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAddVariableChangeListener()
    {
@@ -398,7 +398,7 @@ public class YoVariableTest
       yoVariable.removeVariableChangedListener(listener);
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRemoveAllVariableChangeListeners()
    {
@@ -427,7 +427,7 @@ public class YoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRemoveObserver()
    {
@@ -459,7 +459,7 @@ public class YoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRemoveObserverNonExistent1()
    {
@@ -475,7 +475,7 @@ public class YoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = NoSuchElementException.class)
    public void testRemoveObserverNonExistent2()
    {
@@ -493,7 +493,7 @@ public class YoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRecursiveCompareYoVariables() throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
    {

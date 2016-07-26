@@ -5,6 +5,7 @@ import javax.vecmath.Point3d;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedStep
@@ -61,6 +62,11 @@ public class QuadrupedStep
    public RobotQuadrant getRobotQuadrant()
    {
       return robotQuadrant;
+   }
+   
+   public RobotEnd getRobotEnd()
+   {
+      return robotQuadrant.getEnd();
    }
 
    public void setRobotQuadrant(RobotQuadrant robotQuadrant)

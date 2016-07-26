@@ -58,6 +58,12 @@ public class MomentumOptimizationSettings
       this.pelvisAngularWeight.set(pelvisAngularWeight);
    }
 
+   public void setHandTaskspaceControlWeights(Vector3d angular, Vector3d linear)
+   {
+      handAngularTaskspaceWeight.set(angular);
+      handLinearTaskspaceWeight.set(linear);
+   }
+
    public void setManipulationWeights(double jointspace, double taskspace, double userMode)
    {
       handJointspaceWeight = jointspace;
@@ -95,12 +101,17 @@ public class MomentumOptimizationSettings
    public void setMomentumWeight(double linearMomentumWeightX, double linearMomentumWeightY, double linearMomentumWeightZ, double angularMomentumWeightXY, double angularMomentumWeightZ)
    {
       linearMomentumWeight.set(linearMomentumWeightX, linearMomentumWeightY, linearMomentumWeightZ);
-      angularMomentumWeight.set(angularMomentumWeightXY, angularMomentumWeightXY, angularMomentumWeightZ);
+      setAngularMomentumWeight(angularMomentumWeightXY, angularMomentumWeightZ);
    }
 
    public void setMomentumWeight(double linearMomentumWeightXY, double linearMomentumWeightZ, double angularMomentumWeightXY, double angularMomentumWeightZ)
    {
       setMomentumWeight(linearMomentumWeightXY, linearMomentumWeightXY, linearMomentumWeightZ, angularMomentumWeightXY, angularMomentumWeightZ);
+   }
+
+   public void setAngularMomentumWeight(double angularMomentumWeightXY, double angularMomentumWeightZ)
+   {
+      angularMomentumWeight.set(angularMomentumWeightXY, angularMomentumWeightXY, angularMomentumWeightZ);
    }
 
    public void setRhoPlaneContactRegularization(double rhoWeight)

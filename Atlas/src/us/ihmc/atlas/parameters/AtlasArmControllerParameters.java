@@ -46,8 +46,8 @@ public class AtlasArmControllerParameters extends ArmControllerParameters
       jointspaceControlGains.setZeta(zeta);
       jointspaceControlGains.setKi(ki);
       jointspaceControlGains.setMaximumIntegralError(maxIntegralError);
-      jointspaceControlGains.setMaximumAcceleration(maxAccel);
-      jointspaceControlGains.setMaximumJerk(maxJerk);
+      jointspaceControlGains.setMaximumFeedback(maxAccel);
+      jointspaceControlGains.setMaximumFeedbackRate(maxJerk);
       jointspaceControlGains.createDerivativeGainUpdater(true);
 
       return jointspaceControlGains;
@@ -70,8 +70,8 @@ public class AtlasArmControllerParameters extends ArmControllerParameters
       taskspaceControlGains.setDampingRatio(zeta);
       taskspaceControlGains.setIntegralGain(ki);
       taskspaceControlGains.setMaximumIntegralError(maxIntegralError);
-      taskspaceControlGains.setMaximumAcceleration(maxAccel);
-      taskspaceControlGains.setMaximumJerk(maxJerk);
+      taskspaceControlGains.setMaximumFeedback(maxAccel);
+      taskspaceControlGains.setMaximumFeedbackRate(maxJerk);
       taskspaceControlGains.createDerivativeGainUpdater(true);
 
       return taskspaceControlGains;
@@ -91,8 +91,8 @@ public class AtlasArmControllerParameters extends ArmControllerParameters
 
       taskspaceControlGains.setOrientationProportionalGains(0.0, 0.0, 0.0);
       taskspaceControlGains.setOrientationDerivativeGains(kd, kd, kd);
-      taskspaceControlGains.setOrientationMaxAccelerationAndJerk(maxAccel, maxJerk);
-      taskspaceControlGains.setPositionMaxAccelerationAndJerk(maxAccel, maxJerk);
+      taskspaceControlGains.setOrientationMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
+      taskspaceControlGains.setPositionMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
       return taskspaceControlGains;
    }

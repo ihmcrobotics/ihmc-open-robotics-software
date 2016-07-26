@@ -29,6 +29,7 @@ public class DRCNetworkModuleParameters
    private boolean useDrillDetectionModule;
    private boolean useKinematicsToolbox = true;
    private boolean useKinematicsToolboxVisualizer = false;
+   private boolean useTextToSpeechModule = false;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
    
@@ -244,6 +245,16 @@ public class DRCNetworkModuleParameters
    public void setDrillDetectionModuleEnabled(boolean b)
    {
       useDrillDetectionModule = b;
+   }
+
+   public void enableTextToSpeechModule(boolean useTextToSpeechModule)
+   {
+      this.useTextToSpeechModule = useTextToSpeechModule;
+   }
+
+   public boolean isTextToSpeechModuleEnabled()
+   {
+      return useTextToSpeechModule;
    }
 
    public void setRosUri(URI rosURI)

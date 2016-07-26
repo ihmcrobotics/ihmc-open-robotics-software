@@ -96,7 +96,7 @@ public class DifferentiatorTest
       assertEquals(0.0, differentiator.val(), delta);
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
    @Test(timeout=300000,expected = RuntimeException.class)
    public void testTimeIntervalEqualZero()
    {
@@ -106,7 +106,7 @@ public class DifferentiatorTest
       // TODO 20120911 Khai-Long Ho Hoang: Differentiator class must be enhanced by a detection if time interval dt is equal zero.
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testTimeIntervalLessZero()
    {

@@ -5,6 +5,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
@@ -53,7 +54,8 @@ public class TestYoVariableConnection
          
          echoOut.set(echoIn.getIntegerValue());
          
-         server.update(++timestamp);
+         timestamp += TimeTools.milliSecondsToNanoSeconds(1);
+         server.update(timestamp);
          ThreadTools.sleep(1);
       }
    }

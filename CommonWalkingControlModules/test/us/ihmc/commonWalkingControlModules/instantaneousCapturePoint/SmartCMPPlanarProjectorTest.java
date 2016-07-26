@@ -14,7 +14,7 @@ public class SmartCMPPlanarProjectorTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testSimpleProjections()
    {
       YoVariableRegistry registry;

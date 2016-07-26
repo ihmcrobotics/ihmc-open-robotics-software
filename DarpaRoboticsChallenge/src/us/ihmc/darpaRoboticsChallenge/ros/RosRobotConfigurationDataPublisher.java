@@ -8,9 +8,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.ros.message.Time;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
-import us.ihmc.SdfLoader.models.FullRobotModelUtils;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.IMUPacket;
@@ -28,7 +28,6 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.*;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable
 {
@@ -52,7 +51,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final ArrayBlockingQueue<RobotConfigurationData> availableRobotConfigurationData = new ArrayBlockingQueue<RobotConfigurationData>(30);
-   private final DRCRobotJointMap jointMap;
+   private final SDFJointNameMap jointMap;
    private final int jointNameHash;
    
    private final SideDependentList<Integer> feetForceSensorIndexes = new SideDependentList<Integer>();
@@ -64,11 +63,11 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
    private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTransforms;
 
-   public RosRobotConfigurationDataPublisher(SDFFullHumanoidRobotModelFactory sdfFullRobotModelFactory, PacketCommunicator rosModulePacketCommunicator,
+   public RosRobotConfigurationDataPublisher(SDFFullRobotModelFactory sdfFullRobotModelFactory, PacketCommunicator rosModulePacketCommunicator,
          final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
-         DRCRobotJointMap jointMap, String rosNameSpace, RosTfPublisher tfPublisher)
+         SDFJointNameMap jointMap, String rosNameSpace, RosTfPublisher tfPublisher)
    {
-      SDFFullHumanoidRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
+      SDFFullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
       this.forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       this.imuDefinitions = fullRobotModel.getIMUDefinitions();
       this.rosMainNode = rosMainNode;
@@ -109,7 +108,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          }
       }
 
-      OneDoFJoint[] joints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
+      OneDoFJoint[] joints = fullRobotModel.getControllableOneDoFJoints();
       for (int i = 0; i < joints.length; i++)
       {
          nameList.add(joints[i].getName());

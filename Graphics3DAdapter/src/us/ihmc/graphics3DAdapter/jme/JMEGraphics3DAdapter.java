@@ -5,6 +5,8 @@ import java.net.URL;
 
 import javax.vecmath.Color3f;
 
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import us.ihmc.graphics3DAdapter.ContextManager;
 import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
@@ -172,4 +174,14 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
 		jmeRenderer.pause();
 		
 	}
+
+   public void addDirectionalLight(ColorRGBA color, Vector3f direction)
+   {
+      jmeRenderer.addDirectionalLight(color, direction);
+   }
+
+   public void setAmbientLightBrightness(float brightness)
+   {
+      jmeRenderer.setAmbientLightBrightness(brightness);
+   }
 }

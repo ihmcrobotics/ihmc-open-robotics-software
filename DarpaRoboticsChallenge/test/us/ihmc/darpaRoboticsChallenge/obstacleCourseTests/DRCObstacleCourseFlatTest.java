@@ -92,11 +92,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 16.8)
-	@Test(timeout = 84000)
+	@DeployableTestMethod(estimatedDuration = 15.3)
+	@Test(timeout = 77000)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -120,14 +120,14 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 18.1)
-	@Test(timeout = 91000)
+	@DeployableTestMethod(estimatedDuration = 19.0)
+	@Test(timeout = 95000)
    public void testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -161,14 +161,14 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 71.5)
-	@Test(timeout = 360000)
+	@DeployableTestMethod(estimatedDuration = 39.4)
+	@Test(timeout = 200000)
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       String name = "DRCSimpleFlatGroundScriptTest";
       
@@ -205,14 +205,14 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 	
-	  @DeployableTestMethod(estimatedDuration = 71.5)
-	   @Test(timeout = 360000)
+	  @DeployableTestMethod(estimatedDuration = 39.9)
+	   @Test(timeout = 200000)
 	   public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
 	   {
-	      BambooTools.reportTestStartedMessage();
+	      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 	      String name = "DRCSimpleScriptsTest";
 	      
 	      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
@@ -266,15 +266,15 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
 	      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 	      
-	      BambooTools.reportTestFinishedMessage();
+	      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 	   }
 	
 	
-	  @DeployableTestMethod(estimatedDuration = 71.5)
-	   @Test(timeout = 360000)
+	  @DeployableTestMethod(estimatedDuration = 29.1)
+	   @Test(timeout = 150000)
 	   public void testACoupleStepsUsingQueuedControllerCommands() throws SimulationExceededMaximumTimeException
 	   {
-	      BambooTools.reportTestStartedMessage();
+	      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
 	      String name = "DRCQueuedControllerCommandTest";
 	      
@@ -375,15 +375,15 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
 	      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 	      
-	      BambooTools.reportTestFinishedMessage();
+	      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 	   }
 
 	  
-     @DeployableTestMethod(estimatedDuration = 71.5)
-     @Test(timeout = 360000)
+     @DeployableTestMethod(estimatedDuration = 31.9)
+     @Test(timeout = 160000)
      public void testACoupleQueuedControllerCommands() throws SimulationExceededMaximumTimeException
      {
-        BambooTools.reportTestStartedMessage();
+        BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
         String name = "DRCQueuedControllerCommandTest";
         
@@ -490,15 +490,15 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
         drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
         
-        BambooTools.reportTestFinishedMessage();
+        BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
      }
      
      
-     @DeployableTestMethod(estimatedDuration = 71.5)
-     @Test(timeout = 360000)
+     @DeployableTestMethod(estimatedDuration = 38.5)
+     @Test(timeout = 190000)
      public void testACoupleMoreQueuedControllerCommands() throws SimulationExceededMaximumTimeException
      {
-        BambooTools.reportTestStartedMessage();
+        BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
         String name = "DRCQueuedControllerCommandTest";
         
@@ -556,15 +556,15 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
         drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
         
-        BambooTools.reportTestFinishedMessage();
+        BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
      }
 
 	  
-	@DeployableTestMethod(estimatedDuration = 64.5)
-	@Test(timeout = 320000)
+	@DeployableTestMethod(estimatedDuration = 52.3)
+	@Test(timeout = 260000)
    public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
@@ -606,7 +606,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void loadScriptFileInLeftSoleFrame(String scriptName)
@@ -617,11 +617,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       drcSimulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame);
    }
 
-	@DeployableTestMethod(estimatedDuration = 25.3)
-	@Test(timeout = 130000)
+	@DeployableTestMethod(estimatedDuration = 20.8)
+	@Test(timeout = 100000)
    public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
@@ -657,14 +657,14 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 49.0)
-	@Test(timeout = 250000)
+	@DeployableTestMethod(estimatedDuration = 42.8)
+	@Test(timeout = 210000)
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
@@ -692,14 +692,14 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 35.4)
-	@Test(timeout = 180000)
+	@DeployableTestMethod(estimatedDuration = 34.4)
+	@Test(timeout = 170000)
    public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
@@ -737,14 +737,14 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 44.0)
-	@Test(timeout = 220000)
+	@DeployableTestMethod(estimatedDuration = 33.1)
+	@Test(timeout = 170000)
    public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
@@ -784,7 +784,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    // TODO re-enable that test when we have polygon to polygon contact model for SCS
@@ -792,7 +792,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	@Test(timeout=300000)
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.TOP_OF_SLOPES;
 
@@ -813,7 +813,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    // @Test(timeout=300000)
@@ -836,7 +836,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	@Test(timeout=300000)
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCRotatedStepsInTheAirTest", selectedLocation, simulationTestingParameters, getRobotModel());
@@ -858,14 +858,14 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 49.8)
-	@Test(timeout = 250000)
+	@DeployableTestMethod(estimatedDuration = 39.0)
+	@Test(timeout = 190000)
    public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -892,14 +892,14 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 45.9)
-	@Test(timeout = 230000)
+	@DeployableTestMethod(estimatedDuration = 36.5)
+	@Test(timeout = 180000)
    public void testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -931,14 +931,14 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 39.4)
-	@Test(timeout = 200000)
+	@DeployableTestMethod(estimatedDuration = 65.6)
+	@Test(timeout = 330000)
    public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
@@ -981,7 +981,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupCameraForWalkingUpToRamp()

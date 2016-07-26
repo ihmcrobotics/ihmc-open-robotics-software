@@ -63,11 +63,11 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 94.2)
-   @Test(timeout = 470000)
+   @DeployableTestMethod(estimatedDuration = 167.7)
+   @Test(timeout = 840000)
    public void testWalkingOverCinderBlockField() throws Exception
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
       FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockFieldEnvironment.getCinderBlockPoses());

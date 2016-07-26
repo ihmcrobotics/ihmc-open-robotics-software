@@ -6,25 +6,32 @@ import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
+import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStepPressurePlanner;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedTimedStepInputProvider;
+import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedDcmBasedStepController implements QuadrupedController
+public class QuadrupedDcmBasedStepController implements QuadrupedController, QuadrupedTimedStepTransitionCallback
 {
    private final QuadrupedTimedStepInputProvider stepProvider;
    private final QuadrupedControllerInputProviderInterface inputProvider;
@@ -51,11 +58,14 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
    private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
    private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
+   private final DoubleParameter dcmPositionStepAdjustmentGainParameter = parameterFactory.createDouble("dcmPositionStepAdjustmentGain", 1.2);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 1);
    private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
    private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
    private final DoubleParameter contactPressureLowerLimitParameter = parameterFactory.createDouble("contactPressureLowerLimit", 50);
    private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDurationParameter", 0.5);
+   private final DoubleParameter minimumStepClearanceParameter = parameterFactory.createDouble("minimumStepClearance", 0.075);
+   private final DoubleParameter maximumStepStrideParameter = parameterFactory.createDouble("maximumStepStride", 1.0);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -81,16 +91,21 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
    private final QuadrupedTaskSpaceController taskSpaceController;
 
    // planning
+   private final GroundPlaneEstimator groundPlaneEstimator;
+   private final QuadrantDependentList<FramePoint> groundPlanePositions;
    private final QuadrupedTimedStepPressurePlanner copPlanner;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
+   private final BooleanYoVariable dcmTrajectoryReplanTrigger;
    private final ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory;
    private final FramePoint dcmPositionWaypoint;
+   private final PreallocatedQueue<QuadrupedTimedStep> stepPlan;
+   private final YoFrameVector stepPlanAdjustment;
+   private final QuadrupedStepCrossoverProjection crossoverProjection;
 
    public QuadrupedDcmBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedControllerInputProviderInterface inputProvider, QuadrupedTimedStepInputProvider stepProvider)
 
    {
-
       this.stepProvider = stepProvider;
       this.inputProvider = inputProvider;
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -123,21 +138,30 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
+      groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
+      groundPlanePositions = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         groundPlanePositions.set(robotQuadrant, new FramePoint());
+      }
       copPlanner = new QuadrupedTimedStepPressurePlanner(timedStepController.getQueueCapacity());
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(timedStepController.getQueueCapacity(), gravity, inputProvider.getComPositionInput().getZ());
+      dcmTrajectoryReplanTrigger = new BooleanYoVariable("dcmTrajectoryReplanTrigger", registry);
       dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
       dcmPositionWaypoint = new FramePoint();
+      stepPlan = new PreallocatedQueue<>(QuadrupedTimedStep.class, timedStepController.getQueueCapacity());
+      stepPlanAdjustment = new YoFrameVector("stepPlanAdjustment", worldFrame, registry);
+      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
+            maximumStepStrideParameter.get());
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
-   }
-
    private void removeSteps()
    {
+      while (stepPlan.dequeue())
+      {
+      }
       timedStepController.removeSteps();
    }
 
@@ -185,8 +209,13 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       comPositionController.compute(taskSpaceControllerCommands.getComForce(), comPositionControllerSetpoints, taskSpaceEstimates);
 
       // update desired body orientation, angular velocity, and torque
+      taskSpaceEstimates.getBodyOrientation().changeFrame(worldFrame);
+      double groundPitch = groundPlaneEstimator.getPitch(taskSpaceEstimates.getBodyOrientation().getYaw());
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(supportFrame);
       bodyOrientationControllerSetpoints.getBodyOrientation().set(inputProvider.getBodyOrientationInput());
+      bodyOrientationControllerSetpoints.getBodyOrientation().setYawPitchRoll(RotationTools.computeYaw(inputProvider.getBodyOrientationInput()),
+            RotationTools.computePitch(inputProvider.getBodyOrientationInput()) + groundPitch,
+            RotationTools.computeRoll(inputProvider.getBodyOrientationInput()));
       bodyOrientationControllerSetpoints.getBodyAngularVelocity().setToZero();
       bodyOrientationControllerSetpoints.getComTorqueFeedforward().setToZero();
       bodyOrientationController.compute(taskSpaceControllerCommands.getComTorque(), bodyOrientationControllerSetpoints, taskSpaceEstimates);
@@ -196,6 +225,13 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
 
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
+
+      // update step queue
+      if (dcmTrajectoryReplanTrigger.getBooleanValue())
+      {
+         computeDcmTrajectory();
+      }
+      computeStepAdjustment();
    }
 
    private void computeDcmSetpoints()
@@ -214,16 +250,101 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       }
    }
 
-   @Override
-   public ControllerEvent process()
+   private void computeDcmTrajectory()
    {
-      if (timedStepController.getQueueSize() == 0)
+      double currentTime = robotTimestamp.getDoubleValue();
+      int nIntervals = copPlanner.compute(timedStepController.getQueue().size(), timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(),
+            taskSpaceControllerSettings.getContactState(), currentTime);
+      dcmPositionWaypoint.setIncludingFrame(copPlanner.getCenterOfPressureAtStartOfInterval(nIntervals - 1));
+      dcmPositionWaypoint.changeFrame(ReferenceFrame.getWorldFrame());
+      dcmPositionWaypoint.add(0, 0, lipModel.getComHeight());
+      dcmTrajectory.setComHeight(lipModel.getComHeight());
+      dcmTrajectory.initializeTrajectory(nIntervals, copPlanner.getTimeAtStartOfInterval(), copPlanner.getCenterOfPressureAtStartOfInterval(),
+            copPlanner.getTimeAtStartOfInterval(nIntervals - 1), dcmPositionWaypoint);
+      dcmTrajectoryReplanTrigger.set(false);
+   }
+
+   private void computeStepAdjustment()
+   {
+      if (robotTimestamp.getDoubleValue() > dcmTransitionTrajectory.getEndTime())
       {
-         return ControllerEvent.DONE;
+         // compute step adjustment proportional to dcm tracking error
+         FramePoint dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
+         dcmPositionSetpoint.changeFrame(stepPlanAdjustment.getReferenceFrame());
+         dcmPositionEstimate.changeFrame(stepPlanAdjustment.getReferenceFrame());
+         stepPlanAdjustment.set(dcmPositionEstimate);
+         stepPlanAdjustment.sub(dcmPositionSetpoint);
+         stepPlanAdjustment.scale(dcmPositionStepAdjustmentGainParameter.get());
+         stepPlanAdjustment.setZ(0);
+
+         // adjust nominal step goal positions and update step controller queue
+         timedStepController.removeSteps();
+         for (int i = 0; i < stepPlan.size(); i++)
+         {
+            RobotQuadrant robotQuadrant = stepPlan.get(i).getRobotQuadrant();
+            double currentTime = robotTimestamp.getDoubleValue();
+            double startTime = stepPlan.get(i).getTimeInterval().getStartTime();
+            double endTime = stepPlan.get(i).getTimeInterval().getEndTime();
+            if (startTime < currentTime && currentTime < endTime)
+            {
+               QuadrupedTimedStep adjustedStep = timedStepController.getCurrentStep(robotQuadrant);
+               adjustedStep.getGoalPosition().set(stepPlan.get(i).getGoalPosition());
+               adjustedStep.getGoalPosition().add(stepPlanAdjustment.getFrameTuple().getVector());
+               crossoverProjection.project(adjustedStep, taskSpaceEstimates.getSolePosition());
+               groundPlaneEstimator.projectZ(adjustedStep.getGoalPosition());
+            }
+            else if (timedStepController.addStep(stepPlan.get(i)))
+            {
+               QuadrupedTimedStep adjustedStep = timedStepController.getQueue().getTail();
+               adjustedStep.getGoalPosition().add(stepPlanAdjustment.getFrameTuple().getVector());
+               groundPlaneEstimator.projectZ(adjustedStep.getGoalPosition());
+            }
+         }
       }
-      updateEstimates();
-      updateSetpoints();
-      return null;
+   }
+
+   private void updateStepPlan()
+   {
+      // update step plan to match adjusted goal positions
+      for (int i = 0; i < timedStepController.getQueue().size(); i++)
+      {
+         for (int j = 0; j < stepPlan.size(); j++)
+         {
+            QuadrupedTimedStep step = stepPlan.get(j);
+            QuadrupedTimedStep adjustedStep = timedStepController.getQueue().get(i);
+            if (step.getRobotQuadrant() == adjustedStep.getRobotQuadrant())
+            {
+               if (step.getTimeInterval().epsilonEquals(adjustedStep.getTimeInterval(), 0.01))
+                  step.set(adjustedStep);
+            }
+         }
+      }
+   }
+
+   @Override
+   public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
+   {
+      // update ground plane estimate
+      groundPlanePositions.get(thisStepQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
+      groundPlanePositions.get(thisStepQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+      groundPlaneEstimator.compute(groundPlanePositions);
+   }
+
+   @Override
+   public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
+   {
+      updateStepPlan();
+      dcmTrajectoryReplanTrigger.set(true);
+   }
+
+   public void halt()
+   {
+      removeSteps();
+   }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
    }
 
    @Override
@@ -250,6 +371,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
       bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
       timedStepController.reset();
+      timedStepController.registerStepTransitionCallback(this);
 
       // initialize task space controller
       taskSpaceControllerSettings.initialize();
@@ -263,6 +385,14 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
       }
       taskSpaceController.reset();
 
+      // initialize ground plane
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         groundPlanePositions.get(robotQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
+         groundPlanePositions.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+      }
+      groundPlaneEstimator.compute(groundPlanePositions);
+
       // initialize step queue
       ArrayList<QuadrupedTimedStep> steps = stepProvider.get();
       for (int i = 0; i < steps.size(); i++)
@@ -272,36 +402,46 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
             steps.get(i).getTimeInterval().shiftInterval(robotTimestamp.getDoubleValue());
             steps.get(i).setAbsolute(true);
          }
-
-         if (!timedStepController.addStep(steps.get(i)))
+         if (timedStepController.addStep(steps.get(i)))
+         {
+            stepPlan.enqueue();
+            stepPlan.getTail().set(steps.get(i));
+            groundPlaneEstimator.projectZ(stepPlan.getTail().getGoalPosition());
+         }
+         else
          {
             // only execute if all steps can be processed
             removeSteps();
             return;
          }
       }
-      if (steps.size() == 0)
+
+      if (stepPlan.size() == 0)
       {
          return;
       }
 
-      // compute dcm trajectory for desired step plan
-      double initialTime = robotTimestamp.getDoubleValue();
-      int nIntervals = copPlanner.compute(timedStepController.getQueueSize(), timedStepController.getQueue(), taskSpaceEstimates.getSolePosition(),
-            taskSpaceControllerSettings.getContactState(), initialTime);
-      dcmPositionWaypoint.setIncludingFrame(copPlanner.getCenterOfPressureAtStartOfInterval(nIntervals - 1));
-      dcmPositionWaypoint.changeFrame(ReferenceFrame.getWorldFrame());
-      dcmPositionWaypoint.add(0, 0, lipModel.getComHeight());
-      dcmTrajectory.setComHeight(lipModel.getComHeight());
-      dcmTrajectory.initializeTrajectory(nIntervals, copPlanner.getTimeAtStartOfInterval(), copPlanner.getCenterOfPressureAtStartOfInterval(),
-            copPlanner.getTimeAtStartOfInterval(nIntervals - 1), dcmPositionWaypoint);
-
       // compute dcm trajectory for initial transition
+      computeDcmTrajectory();
       double transitionEndTime = copPlanner.getTimeAtStartOfInterval(1);
       double transitionStartTime = Math.max(robotTimestamp.getDoubleValue(), transitionEndTime - initialTransitionDurationParameter.get());
       dcmTrajectory.computeTrajectory(transitionEndTime);
       dcmTrajectory.getPosition(dcmPositionWaypoint);
       dcmTransitionTrajectory.initializeTrajectory(dcmPositionEstimate, dcmPositionWaypoint, transitionStartTime, transitionEndTime);
+      computeDcmSetpoints();
+   }
+
+   @Override
+   public ControllerEvent process()
+   {
+      if (timedStepController.getQueue().size() == 0)
+      {
+         return ControllerEvent.DONE;
+      }
+      updateGains();
+      updateEstimates();
+      updateSetpoints();
+      return null;
    }
 
    @Override
@@ -309,5 +449,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController
    {
       // remove remaining steps from the queue
       removeSteps();
+      timedStepController.removeSteps();
+      timedStepController.registerStepTransitionCallback(null);
    }
 }

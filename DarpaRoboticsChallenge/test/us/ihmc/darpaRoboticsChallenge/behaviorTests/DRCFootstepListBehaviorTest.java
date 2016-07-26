@@ -104,11 +104,11 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       robotDataReceiver = drcBehaviorTestHelper.getRobotDataReceiver();
    }
 
-   @DeployableTestMethod(estimatedDuration = 31.9)
-   @Test(timeout = 95822)
+   @DeployableTestMethod(estimatedDuration = 31.2)
+   @Test(timeout = 160000)
    public void testTwoStepsForwards() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -157,14 +157,14 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          assertPosesAreWithinThresholds(desiredFootPoses.get(robotSide), finalFootPose);
       }
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @DeployableTestMethod(estimatedDuration = 31.9)
-   @Test(timeout = 95822)
+   @Test(timeout = 160000)
    public void testSideStepping() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -214,14 +214,14 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          assertPosesAreWithinThresholds(desiredFootPoses.get(robotSide), finalFootPose);
       }
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 31.9)
-   @Test(timeout = 95822)
+   @DeployableTestMethod(estimatedDuration = 26.1)
+   @Test(timeout = 130000)
    public void testStepLongerThanMaxStepLength() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -289,11 +289,11 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       return footStepsAreTooFarApart;
    }
 
-   @DeployableTestMethod(estimatedDuration = 31.9)
-   @Test(timeout = 95822)
+   @DeployableTestMethod(estimatedDuration = 50.1)
+   @Test(timeout = 250000)
    public void testStop() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -360,7 +360,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       }
       assertTrue(!footstepListBehavior.isDone());
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private FramePose2d createFootPoseOffsetFromCurrent(RobotSide robotSide, double xOffset, double yOffset)

@@ -84,7 +84,7 @@ import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
-   
+
    private final AtlasRobotVersion selectedVersion;
    private final DRCRobotModel.RobotTarget target;
 
@@ -229,9 +229,9 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       jointMap.getContactPointParameters().createHandContactPoints(useHighResolutionPointGrid);
    }
 
-   public void addMoreFootContactPointsSimOnly()
+   public void addMoreFootContactPointsSimOnly(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly)
    {
-      jointMap.getContactPointParameters().addMoreFootContactPointsSimOnly();
+      jointMap.getContactPointParameters().addMoreFootContactPointsSimOnly(nContactPointsX, nContactPointsY, edgePointsOnly);
    }
 
    @Override
@@ -503,7 +503,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       return walkingControllerParameters.getSliderBoardControlledNeckJointsWithLimits();
    }
-   
+
    @Override
    public SideDependentList<LinkedHashMap<String,ImmutablePair<Double,Double>>> getSliderBoardControlledFingerJointsWithLimits()
    {

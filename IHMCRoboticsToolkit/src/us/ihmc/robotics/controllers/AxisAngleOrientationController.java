@@ -7,10 +7,12 @@ import javax.vecmath.Quat4d;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.Twist;
 
 public class AxisAngleOrientationController
 {
@@ -28,12 +30,17 @@ public class AxisAngleOrientationController
    private final FrameVector proportionalTerm;
    private final FrameVector derivativeTerm;
    private final FrameVector integralTerm;
+   
+   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameVector desiredAngularVelocity = new FrameVector();
+   private final FrameVector feedForwardAngularAction = new FrameVector();
+   private final FrameVector angularActionFromOrientationController = new FrameVector();
 
    private final AxisAngle4d errorAngleAxis = new AxisAngle4d();
    private final Quat4d errorQuaternion = new Quat4d();
 
-   private final YoFrameVector feedbackAngularAcceleration;
-   private final RateLimitedYoFrameVector rateLimitedFeedbackAngularAcceleration;
+   private final YoFrameVector feedbackAngularAction;
+   private final RateLimitedYoFrameVector rateLimitedFeedbackAngularAction;
 
    private final double dt;
 
@@ -67,23 +74,29 @@ public class AxisAngleOrientationController
       derivativeTerm = new FrameVector(bodyFrame);
       integralTerm = new FrameVector(bodyFrame);
 
-      feedbackAngularAcceleration = new YoFrameVector(prefix + "FeedbackAngularAcceleration", bodyFrame, registry);
-      rateLimitedFeedbackAngularAcceleration = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackAngularAcceleration", "",
-            registry, gains.getYoMaximumJerk(), dt, feedbackAngularAcceleration);
+      feedbackAngularAction = new YoFrameVector(prefix + "FeedbackAngularAction", bodyFrame, registry);
+      rateLimitedFeedbackAngularAction = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackAngularAction", "",
+            registry, gains.getYoMaximumFeedbackRate(), dt, feedbackAngularAction);
 
       parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
-      rateLimitedFeedbackAngularAcceleration.reset();
+      rateLimitedFeedbackAngularAction.reset();
+   }
+
+   public void resetIntegrator()
+   {
+      rotationErrorCumulated.setToZero();
    }
 
    public void compute(FrameVector output, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector currentAngularVelocity,
          FrameVector feedForward)
    {
       computeProportionalTerm(desiredOrientation);
-      computeDerivativeTerm(desiredAngularVelocity, currentAngularVelocity);
+      if (currentAngularVelocity != null)
+         computeDerivativeTerm(desiredAngularVelocity, currentAngularVelocity);
       computeIntegralTerm();
 
       output.setToZero(proportionalTerm.getReferenceFrame());
@@ -93,19 +106,54 @@ public class AxisAngleOrientationController
 
       // Limit the max acceleration of the feedback, but not of the feedforward...
       // JEP changed 150430 based on Atlas hitting limit stops.
-      double feedbackAngularAccelerationMagnitude = output.length();
-      double maximumAcceleration = gains.getMaximumAcceleration();
-      if (feedbackAngularAccelerationMagnitude > maximumAcceleration)
+      double feedbackAngularActionMagnitude = output.length();
+      double maximumAction = gains.getMaximumFeedback();
+      if (feedbackAngularActionMagnitude > maximumAction)
       {
-         output.scale(maximumAcceleration / feedbackAngularAccelerationMagnitude);
+         output.scale(maximumAction / feedbackAngularActionMagnitude);
       }
 
-      feedbackAngularAcceleration.set(output);
-      rateLimitedFeedbackAngularAcceleration.update();
-      rateLimitedFeedbackAngularAcceleration.getFrameTuple(output);
+      feedbackAngularAction.set(output);
+      rateLimitedFeedbackAngularAction.update();
+      rateLimitedFeedbackAngularAction.getFrameTuple(output);
 
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
+   }
+   
+   /**
+    * Computes using Twists, ignores linear part
+    */
+   public void compute(Twist twistToPack, FramePose desiredPose, Twist desiredTwist)
+   {
+      checkBodyFrames(desiredTwist, twistToPack);
+      checkBaseFrames(desiredTwist, twistToPack);
+      checkExpressedInFrames(desiredTwist, twistToPack);
+
+      twistToPack.setToZero(bodyFrame, desiredTwist.getBaseFrame(), bodyFrame);
+
+      desiredPose.getOrientationIncludingFrame(desiredOrientation);
+      desiredTwist.getAngularPart(desiredAngularVelocity);
+      desiredTwist.getAngularPart(feedForwardAngularAction);
+      compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, null, feedForwardAngularAction);
+      twistToPack.setAngularPart(angularActionFromOrientationController.getVector());
+   }
+   
+   private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
+      currentTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
+   }
+
+   private void checkBaseFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getBaseFrame().checkReferenceFrameMatch(currentTwist.getBaseFrame());
+   }
+
+   private void checkExpressedInFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
+      currentTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
    private void computeProportionalTerm(FrameOrientation desiredOrientation)
@@ -202,9 +250,9 @@ public class AxisAngleOrientationController
       gains.setIntegralGains(integralGains, maxIntegralError);
    }
 
-   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      gains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      gains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
    public void setMaxDerivativeError(double maxDerivativeError)

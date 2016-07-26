@@ -19,7 +19,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.ConstantVectorProvider;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.SettablePositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
@@ -50,7 +49,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
    private final LongYoVariable numberOfQueuedCommands;
    private final CommandArrayDeque<FootTrajectoryCommand> commandQueue = new CommandArrayDeque<>(FootTrajectoryCommand.class);
 
-   public MoveViaWaypointsState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
+   public MoveViaWaypointsState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.MOVE_VIA_WAYPOINTS, footControlHelper, gains, registry);
 
@@ -64,15 +63,13 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       isTrajectoryStopped = new BooleanYoVariable(namePrefix + "IsTrajectoryStopped", registry);
       isPerformingTouchdown = new BooleanYoVariable(namePrefix + "IsPerformingTouchdown", registry);
 
-      VectorProvider touchdownVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, 0.0, 0.0, -0.3));
-      VectorProvider touchdownAccelerationProvider = new ConstantVectorProvider(new FrameVector(worldFrame, 0.0, 0.0, -1.0));
       positionTrajectoryForDisturbanceRecovery = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame, currentDesiredFootPosition,
             touchdownVelocityProvider, touchdownAccelerationProvider, touchdownInitialTimeProvider, registry);
 
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
-      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedArmTrajectoryCommands", registry);
+      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedFootTrajectoryCommands", registry);
       numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
    }
 
@@ -100,7 +97,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       initializeTrajectoryGenerators(command, initializeToCurrent, 0.0);
    }
 
-   public boolean queueHandTrajectoryCommand(FootTrajectoryCommand command)
+   public boolean queueFootTrajectoryCommand(FootTrajectoryCommand command)
    {
       if (!isReadyToHandleQueuedCommands.getBooleanValue())
       {
@@ -223,7 +220,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
          orientationTrajectoryGenerator.clear();
       }
 
-      int numberOfTrajectoryPoints = queueExcedingTrajectoryPointsIfNeeded(command);
+      int numberOfTrajectoryPoints = queueExceedingTrajectoryPointsIfNeeded(command);
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
@@ -235,7 +232,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       orientationTrajectoryGenerator.initialize();
    }
 
-   private int queueExcedingTrajectoryPointsIfNeeded(FootTrajectoryCommand command)
+   private int queueExceedingTrajectoryPointsIfNeeded(FootTrajectoryCommand command)
    {
       int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
 

@@ -73,14 +73,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
    // "This test is flaky. Sometimes it works, sometimes it doesn't due to threading of the various globalDataProducer and communicators. We need to be able to shut those off or make them not screw up the robot run.")
-   @DeployableTestMethod(targets = TestPlanTarget.Flaky)
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 48.6, targets = TestPlanTarget.Flaky)
+   @Test(timeout = 240000)
    public void testRunsTheSameWayTwiceJustStanding() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
-      
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
       simulationTestingParameters.setRunMultiThreaded(false);
       
       DRCSimulationTestHelper drcSimulationTestHelper1 = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation,  simulationTestingParameters, getRobotModel());
@@ -149,17 +149,17 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       drcSimulationTestHelper1.destroySimulation();
       drcSimulationTestHelper2.destroySimulation();
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
    
-	@DeployableTestMethod(estimatedDuration = 26.4)
+	@DeployableTestMethod(estimatedDuration = 25.7)
 	@Test(timeout = 130000)
    public void testWalkingOverSmallPlatformQuickly() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation,  simulationTestingParameters, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -192,17 +192,17 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 36.4)
-   @Test(timeout = 180000)
+	@DeployableTestMethod(estimatedDuration = 33.9)
+   @Test(timeout = 170000)
    public void testSidestepOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM_TURNED;
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation,  simulationTestingParameters, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -227,17 +227,17 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 40.4)
+	@DeployableTestMethod(estimatedDuration = 40.5)
    @Test(timeout = 200000)
    public void testSidestepOverSmallWall() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_WALL;
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation,  simulationTestingParameters, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -262,17 +262,17 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 40.9)
+	@DeployableTestMethod(estimatedDuration = 40.5)
    @Test(timeout = 200000)
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation,  simulationTestingParameters, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -307,19 +307,19 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 
 
-	@DeployableTestMethod(estimatedDuration = 27.4)
-	@Test(timeout = 140000)
+	@DeployableTestMethod(estimatedDuration = 25.6)
+	@Test(timeout = 130000)
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.MEDIUM_PLATFORM;
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", selectedLocation,  simulationTestingParameters, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -345,18 +345,18 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 23.6)
-	@Test(timeout = 120000)
+	@DeployableTestMethod(estimatedDuration = 26.0)
+	@Test(timeout = 130000)
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
-      
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", selectedLocation,  simulationTestingParameters, getRobotModel());
    
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -382,18 +382,18 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 37.2)
-	@Test(timeout = 190000)
+	@DeployableTestMethod(estimatedDuration = 35.4)
+	@Test(timeout = 180000)
 	public void testWalkingOffOfMediumPlatformSlowSteps() throws SimulationExceededMaximumTimeException
 	{
-	   BambooTools.reportTestStartedMessage();
+	   simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+	   BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
 	   DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
-	   simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 	   drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", selectedLocation,  simulationTestingParameters, getRobotModel());
 
 	   SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -439,7 +439,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 	   BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
 	   drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-	   BambooTools.reportTestFinishedMessage();
+	   BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 	}
 
 	private void setupCameraForWalkingOverSmallPlatform(SimulationConstructionSet scs)

@@ -30,8 +30,8 @@ public class YoPDGainsTest
 
           gains.setKd(kd);
           gains.setKp(kp);
-          gains.setMaximumAcceleration(maxAcc);
-          gains.setMaximumJerk(maxJerk);
+          gains.setMaximumFeedback(maxAcc);
+          gains.setMaximumFeedbackRate(maxJerk);
           gains.setZeta(zeta);
           gains.setPositionDeadband(deadband);
 
@@ -39,10 +39,10 @@ public class YoPDGainsTest
           assertEquals(kp, gains.getYoKp().getDoubleValue(), 1e-6);
           assertEquals(kd, gains.getKd(), 1e-6);
           assertEquals(kd, gains.getYoKd().getDoubleValue(), 1e-6);
-          assertEquals(maxAcc, gains.getMaximumAcceleration(), 1e-6);
-          assertEquals(maxAcc, gains.getYoMaximumAcceleration().getDoubleValue(), 1e-6);
-          assertEquals(maxJerk, gains.getMaximumJerk(), 1e-6);
-          assertEquals(maxJerk, gains.getYoMaximumJerk().getDoubleValue(), 1e-6);
+          assertEquals(maxAcc, gains.getMaximumFeedback(), 1e-6);
+          assertEquals(maxAcc, gains.getYoMaximumFeedback().getDoubleValue(), 1e-6);
+          assertEquals(maxJerk, gains.getMaximumFeedbackRate(), 1e-6);
+          assertEquals(maxJerk, gains.getYoMaximumFeedbackRate().getDoubleValue(), 1e-6);
           assertEquals(zeta, gains.getZeta(), 1e-6);
           assertEquals(zeta, gains.getYoZeta().getDoubleValue(), 1e-6);
           assertEquals(deadband, gains.getPositionDeadband().getDoubleValue(), 1e-6);
@@ -64,12 +64,12 @@ public class YoPDGainsTest
           double zeta = rand.nextDouble()*100;
 
           gains.setPDGains(kp, zeta);
-          gains.setMaximumAccelerationAndMaximumJerk(maxAcc, maxJerk);
+          gains.setMaximumFeedbackAndMaximumFeedbackRate(maxAcc, maxJerk);
           
           assertEquals(kp, gains.getKp(), 1e-6);
           assertEquals(0.0, gains.getKd(), 1e-6);
-          assertEquals(maxAcc, gains.getMaximumAcceleration(), 1e-6);
-          assertEquals(maxJerk, gains.getMaximumJerk(), 1e-6);
+          assertEquals(maxAcc, gains.getMaximumFeedback(), 1e-6);
+          assertEquals(maxJerk, gains.getMaximumFeedbackRate(), 1e-6);
           assertEquals(zeta, gains.getZeta(), 1e-6);
           assertEquals(0.0, gains.getPositionDeadband().getDoubleValue(), 1e-6);
       }

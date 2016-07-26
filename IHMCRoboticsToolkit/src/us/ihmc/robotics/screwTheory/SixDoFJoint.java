@@ -36,31 +36,37 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       this.jointAccelerationDesired = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
    }
    
+   @Override
    public SixDoFJointReferenceFrame getFrameAfterJoint()
    {
       return afterJointFrame;
    }
    
+   @Override
    public void getJointTwist(Twist twistToPack)
    {
       twistToPack.set(jointTwist);
    }
    
+   @Override
    public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.set(jointAcceleration);
    }
    
+   @Override
    public void getDesiredJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.set(jointAccelerationDesired);
    }
    
+   @Override
    public void getTauMatrix(DenseMatrix64F matrix)
    {
       successorWrench.getMatrix(matrix);
    }
    
+   @Override
    public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
    {
       jointTwist.getMatrix(matrix, rowStart);
@@ -86,16 +92,19 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       return jointTwist.getAngularPart();
    }
    
+   @Override
    public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       jointAccelerationDesired.getMatrix(matrix, rowStart);
    }
    
+   @Override
    public void setDesiredAccelerationToZero()
    {
       jointAccelerationDesired.setToZero();
    }
    
+   @Override
    public void setSuccessor(RigidBody successor)
    {
       this.successor = successor;
@@ -106,16 +115,19 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       this.successorWrench = new Wrench(successorFrame, successorFrame);
    }
    
+   @Override
    public void setTorqueFromWrench(Wrench jointWrench)
    {
       this.successorWrench.checkAndSet(jointWrench);
    }
    
+   @Override
    public int getDegreesOfFreedom()
    {
       return 6;
    }
    
+   @Override
    public void setDesiredAcceleration(DenseMatrix64F matrix, int rowStart)
    {
       jointAccelerationDesired.set(jointAccelerationDesired.getBodyFrame(), jointAccelerationDesired.getBaseFrame(),
@@ -283,11 +295,13 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       this.motionSubspace.compute();
    }
    
+   @Override
    public void updateMotionSubspace()
    {
       // empty
    }
    
+   @Override
    public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
@@ -299,6 +313,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       matrix.set(index++, 0, jointTranslation.getZ());
    }
    
+   @Override
    public void setConfiguration(DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
@@ -312,6 +327,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       this.afterJointFrame.setTranslation(jointTranslation);
    }
    
+   @Override
    public void setVelocity(DenseMatrix64F matrix, int rowStart)
    {
       jointTwist.set(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getExpressedInFrame(), matrix, rowStart);
@@ -342,6 +358,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       jointTwist.set(newTwist);
    }
    
+   @Override
    public int getConfigurationMatrixSize()
    {
       int positionSize = 3;
@@ -361,6 +378,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       }
    }
    
+   @Override
    public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
    {
       SixDoFJoint sixDoFOriginalJoint = checkAndGetAsSiXDoFJoint(originalJoint);
@@ -374,6 +392,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       jointAcceleration.setLinearPart(sixDoFOriginalJoint.jointAcceleration.getLinearPart());
    }
    
+   @Override
    public void setQddDesired(InverseDynamicsJoint originalJoint)
    {
       SixDoFJoint sixDoFOriginalJoint = checkAndGetAsSiXDoFJoint(originalJoint);
@@ -381,6 +400,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       jointAccelerationDesired.setLinearPart(sixDoFOriginalJoint.jointAccelerationDesired.getLinearPart());
    }
    
+   @Override
    public void calculateJointStateChecksum(GenericCRC32 checksum)
    {
       checksum.update(jointTranslation);
@@ -391,6 +411,7 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
       checksum.update(jointAcceleration.getLinearPart());
    }
    
+   @Override
    public void calculateJointDesiredChecksum(GenericCRC32 checksum)
    {
       checksum.update(jointAccelerationDesired.getAngularPart());

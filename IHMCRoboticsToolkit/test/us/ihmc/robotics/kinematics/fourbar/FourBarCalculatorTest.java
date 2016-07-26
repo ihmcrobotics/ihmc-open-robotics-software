@@ -14,8 +14,8 @@ public class FourBarCalculatorTest
    private FourbarLink outputLink, groundLink, inputLink, floatingLink;
    private FourbarProperties fourBarProperties;
       
-   @DeployableTestMethod
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSquare()
    {
       outputLink = new FourbarLink(1.0);

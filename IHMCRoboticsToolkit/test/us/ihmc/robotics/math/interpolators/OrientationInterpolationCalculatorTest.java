@@ -20,8 +20,8 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class OrientationInterpolationCalculatorTest
 {
 
-   @DeployableTestMethod
-   @Test(timeout = 300000)
+   @DeployableTestMethod(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
 
    /**
     * Numerically differentiate, then use OrientationInterpolationAngularVelocityCalculator, compare results.

@@ -66,11 +66,11 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 39.7)
-	@Test(timeout = 200000)
+	@DeployableTestMethod(estimatedDuration = 38.6)
+	@Test(timeout = 190000)
    public void testStepOnCinderBlocks() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest.xml";
 
@@ -105,15 +105,15 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 	
    
-	@DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 250000)
+	@DeployableTestMethod(estimatedDuration = 47.3)
+   @Test(timeout = 240000)
    public void testStepOnCinderBlocksSlowlyWithDisturbance() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest.xml";
 
@@ -155,7 +155,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       if (MOVE_ROBOT_FOR_VIZ) moveRobotOutOfWayForViz();
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void moveRobotOutOfWayForViz()
@@ -183,7 +183,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    //Note: this test will fail because of bounding box that needs to be "tuned"
    public void testStepOnAndOffCinderBlocks() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOver_LeftFootTest.xml";
 
@@ -217,7 +217,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupCameraForWalkingOverCinderBlocks(SimulationConstructionSet scs)
