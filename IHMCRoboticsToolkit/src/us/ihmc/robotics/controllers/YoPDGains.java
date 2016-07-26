@@ -7,9 +7,9 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public class YoPDGains implements PDGainsInterface
 {
-   private final DoubleYoVariable kp;
+   protected final DoubleYoVariable kp;
    private final DoubleYoVariable zeta;
-   private final DoubleYoVariable kd;
+   protected final DoubleYoVariable kd;
    private final DoubleYoVariable maximumOutput;
    private final DoubleYoVariable maximumFeedback;
    private final DoubleYoVariable maximumFeedbackRate;
