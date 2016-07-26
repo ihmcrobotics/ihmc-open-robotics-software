@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
@@ -31,6 +30,7 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.StateMachineTools;
 import us.ihmc.robotics.stateMachines.StateTransition;
