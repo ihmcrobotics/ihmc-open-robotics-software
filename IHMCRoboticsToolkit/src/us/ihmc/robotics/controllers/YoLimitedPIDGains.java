@@ -75,4 +75,19 @@ public class YoLimitedPIDGains extends YoPIDGains
    {
       return limitedKi;
    }
+
+   public RateLimitedYoVariable getLimitedYoKp()
+   {
+      return limitedKp;
+   }
+
+   public RateLimitedYoVariable getLimitedYoKd()
+   {
+      return limitedKd;
+   }
+
+   public RateLimitedYoVariable getLimitedYoKi()
+   {
+      return limitedKi;
+   }
 }
