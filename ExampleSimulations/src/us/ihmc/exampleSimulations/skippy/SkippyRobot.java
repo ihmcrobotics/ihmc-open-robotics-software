@@ -51,26 +51,37 @@ public class SkippyRobot extends Robot
       groundContactPoints.add(leftContact);
       groundContactPoints.add(rightContact);
 
-      // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
+
+       FloatingJoint j = new FloatingJoint("F", new Vector3d(0.0,0.0,0.0), this);
+       Link l = new Link("l");
+       l.setMass(5.0);  //5 seems to work well - other values make the jump too high/low
+       l.setMomentOfInertia(10,10,10);  //the smaller the value, the more realistic the jump (values still have to be realistic - not as small as 0.00001)
+       j.setLink(l);
+       j.addGroundContactPoint(footContact);
+       this.addRootJoint(j);
+
+
+       // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
       foot = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, 0.0), this, Axis.X, Axis.Y);
       foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.0)); // initial Cartesian position of foot
-      foot.setInitialState(0.75, 0.0, 0.75, 0.0); // initial position "q" of foot
+      foot.setInitialState(Math.PI/3, 0.0, 0.0, 0.0); // initial position "q" of foot
       Link leg = createLeg();
       foot.setLink(leg);
-      this.addRootJoint(foot);
-      foot.addGroundContactPoint(footContact);
+      //this.addRootJoint(foot);
+      //foot.addGroundContactPoint(footContact);
+       j.addJoint(foot);
 
       hip = new PinJoint("hip", new Vector3d(0.0, 0.0, LEG_LENGTH), this, Axis.X);
       Link torso = createTorso();
       hip.setLink(torso);
-      hip.setInitialState(-2.5,0.0);
+      hip.setInitialState(-2*Math.PI/3,0.0);
       this.foot.addJoint(hip);
       hip.addGroundContactPoint(hipContact);
 
       shoulder = new PinJoint("shoulder", new Vector3d(0.0, 0.0, TORSO_LENGTH), this, Axis.Y);
       Link arms = createArms();
       shoulder.setLink(arms);
-      shoulder.setInitialState(Math.PI/4,0.0);
+      shoulder.setInitialState(0.5,0.0);
       //shoulder.setDamping(0.3);
       this.hip.addJoint(shoulder);
       shoulder.addGroundContactPoint(shoulderContact);
