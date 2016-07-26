@@ -41,6 +41,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final GlitchFilteredBooleanYoVariable filteredIsForceMagnitudePastThreshold;
    private final BooleanYoVariable isForceMagnitudePastSecondThreshold;
    private final BooleanYoVariable hasFootHitGround, isCoPPastThreshold;
+   private final BooleanYoVariable trustFootSwitch, controllerDetectedTouchdown;
    private final GlitchFilteredBooleanYoVariable filteredHasFootHitGround;
 
    private final DoubleYoVariable footForceMagnitude;
@@ -121,6 +122,10 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       isForceMagnitudePastThreshold = new BooleanYoVariable(namePrefix + "ForcePastThreshold", registry);
       hasFootHitGround = new BooleanYoVariable(namePrefix + "FootHitGround", registry);
 
+      trustFootSwitch = new BooleanYoVariable(namePrefix + "TrustFootSwitch", registry);
+      controllerDetectedTouchdown = new BooleanYoVariable(namePrefix + "ControllerDetectedTouchdown", registry);
+      trustFootSwitch.set(true);
+
       //TODO: Tune and triple check glitch filtering and timing of the virtual switches.
       filteredHasFootHitGround = new GlitchFilteredBooleanYoVariable(namePrefix + "FilteredFootHitGround", registry, hasFootHitGround, 1);
       filteredIsForceMagnitudePastThreshold = new GlitchFilteredBooleanYoVariable(namePrefix + "FilteredForcePastThresh", registry, isForceMagnitudePastThreshold, 2);
@@ -183,7 +188,10 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       //      hasFootHitGround.set(isForceMagnitudePastThreshold.getBooleanValue());
       filteredHasFootHitGround.update();
 
-      return filteredHasFootHitGround.getBooleanValue();
+      if (trustFootSwitch.getBooleanValue())
+         return filteredHasFootHitGround.getBooleanValue();
+      else
+         return controllerDetectedTouchdown.getBooleanValue();
    }
 
    public void reset()
@@ -191,6 +199,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       pastThresholdFilter.set(false);
       heelHitGroundFilter.set(false);
       toeHitGroundFilter.set(false);
+      controllerDetectedTouchdown.set(false);
    }
 
    public void resetHeelSwitch()
@@ -399,12 +408,12 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    @Deprecated
    public void setFootContactState(boolean hasFootHitGround)
    {
-      
+      controllerDetectedTouchdown.set(hasFootHitGround);
    }
 
    @Override
    public void trustFootSwitch(boolean trustFootSwitch)
    {
-
+      this.trustFootSwitch.set(trustFootSwitch);
    }
 }
