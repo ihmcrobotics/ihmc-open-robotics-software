@@ -72,15 +72,12 @@ public class PartialFootholdControlModule
    private final IntegerYoVariable shrinkMaxLimit;
    private final IntegerYoVariable shrinkCounter;
 
-   private final IntegerYoVariable numberOfVerticesRemoved;
    private final IntegerYoVariable numberOfCellsOccupiedOnSideOfLine;
 
    private final IntegerYoVariable thresholdForCoPRegionOccupancy;
    private final DoubleYoVariable distanceFromLineOfRotationToComputeCoPOccupancy;
 
    private final BooleanYoVariable doPartialFootholdDetection;
-
-   private final IntegerYoVariable confusingCutIndex;
 
    private final FrameLine2d lineOfRotation;
 
@@ -100,6 +97,9 @@ public class PartialFootholdControlModule
    private final DoubleYoVariable unsafeArea;
    private final DoubleYoVariable minAreaToConsider;
    private final BooleanYoVariable unsafeAreaAboveThreshold;
+
+   private final BooleanYoVariable expectingLineContact;
+   private final FramePoint2d dummyDesiredCop = new FramePoint2d();
 
    public PartialFootholdControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -131,9 +131,6 @@ public class PartialFootholdControlModule
 
       shrinkCounter = new IntegerYoVariable(namePrefix + "ShrinkCounter", registry);
 
-      confusingCutIndex = new IntegerYoVariable(namePrefix + "ConfusingCutIndex", registry);
-
-      numberOfVerticesRemoved = new IntegerYoVariable(namePrefix + "NumberOfVerticesRemoved", registry);
       numberOfCellsOccupiedOnSideOfLine = new IntegerYoVariable(namePrefix + "NumberOfCellsOccupiedOnSideOfLine", registry);
 
       if (yoGraphicsListRegistry != null)
@@ -147,9 +144,6 @@ public class PartialFootholdControlModule
          YoArtifactPolygon yoShrunkPolygon = new YoArtifactPolygon(namePrefix + "ShrunkPolygon", yoShrunkFootPolygon, Color.CYAN, false);
          yoShrunkPolygon.setVisible(false);
          yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
-
-//         YoArtifactPolygon yoFullSupportGraphic = new YoArtifactPolygon(namePrefix + "FullSupportAfterShrinking", yoFullSupportAfterShrinking, Color.GREEN, false);
-//         yoGraphicsListRegistry.registerArtifact("FullSupportAfterShrinking", yoFullSupportGraphic);
       }
 
       footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, 40, 20, walkingControllerParameters, yoGraphicsListRegistry, registry);
@@ -169,6 +163,9 @@ public class PartialFootholdControlModule
 
       fitLineToCoPs = new BooleanYoVariable(namePrefix + "FitLineToCoPs", registry);
       fitLineToCoPs.set(false);
+
+      expectingLineContact = new BooleanYoVariable(namePrefix + "ExpectingLineContact", registry);
+      expectingLineContact.set(false);
 
       double dt = momentumBasedController.getControlDT();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
@@ -234,24 +231,16 @@ public class PartialFootholdControlModule
 
       if (triggerCutting)
       {
-         numberOfVerticesRemoved.set(ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, unsafePolygon, RobotSide.LEFT));
+         footholdState.set(PartialFootholdState.PARTIAL);
+         computeShrunkFoothold(desiredCenterOfPressure);
 
-         if (numberOfVerticesRemoved.getIntegerValue() <= 0)
+         if (expectingLineContact.getBooleanValue())
          {
-            confusingCutIndex.increment();
+            lineOfRotation.shiftToLeft(0.01);
+            lineOfRotation.negateDirection();
 
-//            System.out.println("\nCutting polygon but no vertices removed?");
-//            System.out.println("confusingCutIndex = " + confusingCutIndex.getIntegerValue());
-//            System.out.println("lineOfRotation = " + lineOfRotation);
-//            System.out.println("unsafePolygon = " + unsafePolygon);
-//            System.out.println("shrunkFootPolygon = " + shrunkFootPolygon);
-
-            doNothing();
-         }
-         else
-         {
-            footholdState.set(PartialFootholdState.PARTIAL);
-            computeShrunkFoothold(desiredCenterOfPressure);
+            dummyDesiredCop.setToNaN(unsafePolygon.getReferenceFrame());
+            computeShrunkFoothold(dummyDesiredCop);
          }
       }
       else
@@ -446,5 +435,14 @@ public class PartialFootholdControlModule
    public void turnOnCropping()
    {
       doPartialFootholdDetection.set(true);
+   }
+
+   public void informExplorationDone()
+   {
+      if (expectingLineContact.getBooleanValue())
+      {
+         requestLineFit();
+         turnOffCropping();
+      }
    }
 }

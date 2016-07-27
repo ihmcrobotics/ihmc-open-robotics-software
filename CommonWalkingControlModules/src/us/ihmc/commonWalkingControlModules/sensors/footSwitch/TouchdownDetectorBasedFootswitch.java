@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 
 import java.util.ArrayList;
 
