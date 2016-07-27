@@ -19,7 +19,7 @@ public class ExplorationParameters
    /** Parameters for the geometric foothold detection */
    private final DoubleYoVariable geometricDetectionAngleThreshold;
    private final DoubleYoVariable geometricDetectionPlanePointAlpha;
-   private final static double defaultGeometricDetectionAngleThreshold = 10.0 * Math.PI/180.0;
+   private final static double defaultGeometricDetectionAngleThreshold = 15.0 * Math.PI/180.0;
    private final static double defaultGeometricDetectionPlanePointAlpha = 0.99;
 
    /** Parameters for the cop occupancy grid */
