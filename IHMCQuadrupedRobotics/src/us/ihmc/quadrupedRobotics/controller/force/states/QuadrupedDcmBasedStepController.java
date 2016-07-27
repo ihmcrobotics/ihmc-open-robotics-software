@@ -21,9 +21,11 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajecto
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedTimedStepInputProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -61,6 +63,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
    private final DoubleParameter dcmPositionStepAdjustmentGainParameter = parameterFactory.createDouble("dcmPositionStepAdjustmentGain", 1.5);
+   private final DoubleParameter dcmPositionStepAdjustmentDeadbandParameter = parameterFactory.createDouble("dcmPositionStepAdjustmentDeadband", 0.0);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 1);
    private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
    private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
@@ -101,7 +104,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory;
    private final FramePoint dcmPositionWaypoint;
    private final PreallocatedQueue<QuadrupedTimedStep> stepPlan;
-   private final YoFrameVector stepPlanAdjustment;
+   private final YoFrameVector stepAdjustmentForControl;
+   private final YoFrameVector stepAdjustmentForPlanning;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
 
    public QuadrupedDcmBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
@@ -152,7 +156,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
       dcmPositionWaypoint = new FramePoint();
       stepPlan = new PreallocatedQueue<>(QuadrupedTimedStep.class, timedStepController.getQueueCapacity());
-      stepPlanAdjustment = new YoFrameVector("stepPlanAdjustment", worldFrame, registry);
+      stepAdjustmentForControl = new YoFrameVector("stepAdjustmentForControl", worldFrame, registry);
+      stepAdjustmentForPlanning = new YoFrameVector("stepAdjustmentForPlanning", worldFrame, registry);
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
 
@@ -262,14 +267,21 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    {
       if (robotTimestamp.getDoubleValue() > dcmTransitionTrajectory.getEndTime())
       {
-         // compute step adjustment proportional to dcm tracking error
+         // compute step adjustment for ongoing steps (proportional to dcm tracking error)
          FramePoint dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
-         dcmPositionSetpoint.changeFrame(stepPlanAdjustment.getReferenceFrame());
-         dcmPositionEstimate.changeFrame(stepPlanAdjustment.getReferenceFrame());
-         stepPlanAdjustment.set(dcmPositionEstimate);
-         stepPlanAdjustment.sub(dcmPositionSetpoint);
-         stepPlanAdjustment.scale(dcmPositionStepAdjustmentGainParameter.get());
-         stepPlanAdjustment.setZ(0);
+         dcmPositionSetpoint.changeFrame(stepAdjustmentForControl.getReferenceFrame());
+         dcmPositionEstimate.changeFrame(stepAdjustmentForControl.getReferenceFrame());
+         stepAdjustmentForControl.set(dcmPositionEstimate);
+         stepAdjustmentForControl.sub(dcmPositionSetpoint);
+         stepAdjustmentForControl.scale(dcmPositionStepAdjustmentGainParameter.get());
+         stepAdjustmentForControl.setZ(0);
+
+         // compute step adjustment for upcoming steps (apply horizontal deadband to reduce drift)
+         for (Direction direction : Direction.values2D())
+         {
+            double deadband = dcmPositionStepAdjustmentDeadbandParameter.get();
+            stepAdjustmentForPlanning.set(direction, MathTools.applyDeadband(stepAdjustmentForControl.get(direction), deadband));
+         }
 
          // adjust nominal step goal positions and update step controller queue
          timedStepController.removeSteps();
@@ -283,14 +295,14 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
             {
                QuadrupedTimedStep adjustedStep = timedStepController.getCurrentStep(robotQuadrant);
                adjustedStep.getGoalPosition().set(stepPlan.get(i).getGoalPosition());
-               adjustedStep.getGoalPosition().add(stepPlanAdjustment.getFrameTuple().getVector());
+               adjustedStep.getGoalPosition().add(stepAdjustmentForControl.getFrameTuple().getVector());
                crossoverProjection.project(adjustedStep, taskSpaceEstimates.getSolePosition());
                groundPlaneEstimator.projectZ(adjustedStep.getGoalPosition());
             }
             else if (timedStepController.addStep(stepPlan.get(i)))
             {
                QuadrupedTimedStep adjustedStep = timedStepController.getQueue().getTail();
-               adjustedStep.getGoalPosition().add(stepPlanAdjustment.getFrameTuple().getVector());
+               adjustedStep.getGoalPosition().add(stepAdjustmentForPlanning.getFrameTuple().getVector());
                groundPlaneEstimator.projectZ(adjustedStep.getGoalPosition());
             }
          }
