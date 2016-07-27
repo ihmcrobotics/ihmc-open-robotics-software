@@ -4,7 +4,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class SkippySimulation
 {
-   private SimulationConstructionSet sim;
+   public static final double DT = 0.0001;
+   public static final double TIME = 10;
+   private static SimulationConstructionSet sim;
 
    public SkippySimulation()
    {
@@ -14,6 +16,8 @@ public class SkippySimulation
 
       sim = new SimulationConstructionSet(skippy);
       sim.setGroundVisible(true);
+      sim.setDT(DT, 20);
+      sim.setSimulateDuration(TIME);
       sim.setCameraPosition(0, -40.0, 2.0);
 
       Thread myThread = new Thread(sim);
@@ -22,7 +26,7 @@ public class SkippySimulation
 
    /*
     * When your simulation is run, first the main method will be called.
-    * In creating a SkippySimulation, a SkippyRobot is first created, and then a Simulation Construction Set object is created with that robot.
+    * In creating a Skippy Simulation, a SkippyRobot is first created, and then a Simulation Construction Set object is created with that robot.
     * A Thread is then created using the SimulationConstructionSet object.
     * Finally the Thread is started, thereby starting your simulation.
     */

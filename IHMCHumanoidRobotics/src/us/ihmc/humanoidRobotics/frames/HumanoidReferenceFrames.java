@@ -56,7 +56,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    private final ReferenceFrame centerOfMassFrame;
 
-   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel) 
+   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel)
    {
       this.fullRobotModel = fullRobotModel;
 
@@ -124,7 +124,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          soleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, soleFrame, soleFrame.getName() + "ZUp"));
       }
 
-      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUp", pelvisZUpFrame, getFootFrame(RobotSide.LEFT), getFootFrame(RobotSide.RIGHT));
+      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUp", pelvisZUpFrame, getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
 
       //this is a frame that is directly between the 2 feet but faces forward instead of perpendicular to the line between the feet
       midFeetZUpWalkDirectionFrame = new ReferenceFrame("midFeetZUpWalkDirectionFrame", ReferenceFrame.getWorldFrame())
@@ -298,7 +298,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       return midFeetZUpFrame;
    }
    /**
-    * Return the ReferenceFrame located between the feet (to remove robot swaying left to right) 
+    * Return the ReferenceFrame located between the feet (to remove robot swaying left to right)
     * but under the pelvis (to remove forward and backwards swaying)
     */
    @Override
