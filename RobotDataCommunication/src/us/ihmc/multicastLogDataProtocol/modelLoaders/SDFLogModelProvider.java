@@ -21,7 +21,7 @@ public class SDFLogModelProvider implements LogModelProvider
       this(sdfParameters.getSdfModelName(), sdfParameters.getSdfAsInputStream(), sdfParameters.getResourceDirectories());
    }
 
-   public SDFLogModelProvider(String modelName, InputStream sdfFileAsStream, String[] resourceDirectories2)
+   public SDFLogModelProvider(String modelName, InputStream sdfFileAsStream, String[] resourceDirectories)
    {
       this.sdfModelName = modelName;
       
@@ -34,7 +34,7 @@ public class SDFLogModelProvider implements LogModelProvider
          throw new RuntimeException(e);
       }
       
-      this.resourceDirectories = new String[resourceDirectories2.length];
+      this.resourceDirectories = new String[resourceDirectories.length];
       System.arraycopy(resourceDirectories, 0, this.resourceDirectories, 0, resourceDirectories.length);
    }
 
