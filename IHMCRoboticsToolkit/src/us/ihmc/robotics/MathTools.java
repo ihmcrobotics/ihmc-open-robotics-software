@@ -732,4 +732,30 @@ public class MathTools
       
    }
 
+   /**
+    * Returns value - |deadband| if value is greater than |deadband|
+    * Returns value + |deadband| if value is less than -|deadband|
+    * Returns 0 if value is in the range [-deadband, deadband]
+    *
+    * @param value double
+    * @param deadband double
+    * @return double
+    */
+   public static double applyDeadband(double value, double deadband)
+   {
+      deadband = Math.abs(deadband);
+
+      if (value > deadband)
+      {
+         return value - deadband;
+      }
+      else if (value < -deadband)
+      {
+         return value + deadband;
+      }
+      else
+      {
+         return 0.0;
+      }
+   }
 }

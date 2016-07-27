@@ -179,6 +179,12 @@ public class BalanceManager
          perfectCMPArtifact.setVisible(false);
          yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCMPArtifact);
       }
+      yoCenterOfMass.setToNaN();
+      yoDesiredCapturePoint.setToNaN();
+      yoFinalDesiredICP.setToNaN();
+      yoDesiredCMP.setToNaN();
+      yoAchievedCMP.setToNaN();
+      yoPerfectCMP.setToNaN();
 
       parentRegistry.addChild(registry);
    }
