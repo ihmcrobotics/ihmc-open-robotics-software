@@ -654,10 +654,10 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
       upcomingSupport.clear(worldFrame);
       tempFootPolygon.setIncludingFrame(footA);
-      tempFootPolygon.changeFrame(worldFrame);
+      tempFootPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       upcomingSupport.addVertices(tempFootPolygon);
       tempFootPolygon.setIncludingFrame(footB);
-      tempFootPolygon.changeFrame(worldFrame);
+      tempFootPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       upcomingSupport.addVertices(tempFootPolygon);
       upcomingSupport.update();
 
