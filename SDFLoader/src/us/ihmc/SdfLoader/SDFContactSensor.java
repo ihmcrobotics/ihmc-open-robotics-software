@@ -2,7 +2,6 @@ package us.ihmc.SdfLoader;
 
 import us.ihmc.robotics.sensors.ContactSensorType;
 
-
 public class SDFContactSensor
 {
    private final String name;
@@ -13,12 +12,12 @@ public class SDFContactSensor
    {
       return name;
    }
-   
+
    public ContactSensorType getSensorType()
    {
       return type;
    }
-   
+
    public String getParentJointName()
    {
       return parentJointName;

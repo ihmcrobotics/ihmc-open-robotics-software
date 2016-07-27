@@ -87,6 +87,14 @@ public class StreamingDataTCPClient extends Thread
 
       ByteBuffer headerBuffer = ByteBuffer.allocateDirect(LogDataHeader.length());
 
+      try
+      {
+         updateHandler.connected((InetSocketAddress) connection.getLocalAddress());
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
       DATALOOP: while (running)
       {
          try

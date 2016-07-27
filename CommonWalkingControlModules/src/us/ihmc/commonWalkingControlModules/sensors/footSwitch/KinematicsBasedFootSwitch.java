@@ -15,8 +15,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.tools.io.logging.LogTools;
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 
 public class KinematicsBasedFootSwitch implements FootSwitchInterface
 {

@@ -1,14 +1,15 @@
 package us.ihmc.exampleSimulations.skippy;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
 
 /**
  * This class SkippyRobot is a public class that extends Robot. The class Robot is
@@ -18,65 +19,91 @@ import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 public class SkippyRobot extends Robot
 {
    private static final long serialVersionUID = -7671864179791904256L;
+   private UniversalJoint foot;
+   private PinJoint hip;
+   private PinJoint shoulder;
+   private ArrayList<GroundContactPoint> groundContactPoints = new ArrayList();
 
-   /* L1 and L2 are the link lengths, M1 and M2 are the link masses, and R1 and R2 are the radii of the links,
-    * Iyy1 and Iyy2 are the moments of inertia of the links. The moments of inertia are defined about the COM
-    * for each link.
+   /* L* are the link lengths, M* are the link masses, and R* are the radii of the links.
+    * Iyy* are the moments of inertia of the links, which are defined about the COM for each link.
     */
    public static final double
-         L1 = 1.0, M1 = 1.0, R1 = 0.05, Iyy1 = 0.083,
-         L2 = 2.0, M2 = 1.0, R2 = 0.05, Iyy2 = 0.33,
-         L3 = 3.0, M3 = 1.0, R3 = 0.05, Iyy3 = 0.15;
+           LEG_LENGTH = 1.0, LEG_MASS = 1.0, LEG_RADIUS = 0.1, LEG_MOI = (1.0/3.0)* LEG_MASS *Math.pow(LEG_LENGTH,2), // Leg
+           TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0/3.0)* TORSO_MASS *Math.pow(TORSO_LENGTH,2), // Torso
+           SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/12.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
 
    public SkippyRobot()
    {
-      super("Skippy"); // create an instance of Robot
+      super("Skippy");
 
-      this.setGravity(0.0,0.0,-9.81);
+      this.setGravity(0.0,0.0,-9.81); // Newtons
 
-      GroundContactModel groundModel = new LinearGroundContactModel(this, 1422, 150.6, 50.0, 1000.0, this.getRobotsYoVariableRegistry());
-      GroundProfile3D profile = new BumpyGroundProfile();
-      groundModel.setGroundProfile3D(profile);
-      this.setGroundContactModel(groundModel);
+      // Create GroundContactPoints to distinguish when robot touches the ground
+      GroundContactPoint footContact = new GroundContactPoint("rootContactPoint", new Vector3d(0.0, 0.0, 0.0), this);
+      GroundContactPoint hipContact = new GroundContactPoint("hipContactPoint", new Vector3d(0.0, 0.0, 0.0), this);
+      GroundContactPoint shoulderContact = new GroundContactPoint("shoulderContactPoint", new Vector3d(0.0, 0.0, 0.0), this);
+      GroundContactPoint leftContact = new GroundContactPoint("leftContactPoint", new Vector3d(-SHOULDER_LENGTH / 2.0, 0.0, 0.0), this);
+      GroundContactPoint rightContact = new GroundContactPoint("rightContactPoint", new Vector3d(SHOULDER_LENGTH / 2.0, 0.0, 0.0), this);
 
-      // Create joints and assign links. Pin joints have a single axis of rotation.
-      Joint rootJoint = new FloatingPlanarJoint("joint1", this, 3);
+      groundContactPoints.add(footContact);
+      groundContactPoints.add(hipContact);
+      groundContactPoints.add(shoulderContact);
+      groundContactPoints.add(leftContact);
+      groundContactPoints.add(rightContact);
+
+
+       FloatingJoint j = new FloatingJoint("F", new Vector3d(0.0,0.0,0.0), this);
+       Link l = new Link("l");
+       l.setMass(5.0);  //5 seems to work well - other values make the jump too high/low
+       l.setMomentOfInertia(10,10,10);  //the smaller the value, the more realistic the jump (values still have to be realistic - not as small as 0.00001)
+       j.setLink(l);
+       j.addGroundContactPoint(footContact);
+       this.addRootJoint(j);
+
+
+       // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
+      foot = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, 0.0), this, Axis.X, Axis.Y);
+      foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.0)); // initial Cartesian position of foot
+      foot.setInitialState(Math.PI/3, 0.0, 0.0, 0.0); // initial position "q" of foot
       Link leg = createLeg();
-      rootJoint.setLink(leg); // associate createLeg with the joint pin1
-      this.addRootJoint(rootJoint);
+      foot.setLink(leg);
+      //this.addRootJoint(foot);
+      //foot.addGroundContactPoint(footContact);
+       j.addJoint(foot);
 
-      /*
-       *  The second joint is initiated with the offset vector (0.0,0.0,L1) since
-       *  it should be placed a distance of L1 in the Z direction from the previous joint.
-       */
-      Joint hip = new PinJoint("joint2", new Vector3d(0.0, 0.0, L1), this, Axis.Y);
+      hip = new PinJoint("hip", new Vector3d(0.0, 0.0, LEG_LENGTH), this, Axis.X);
       Link torso = createTorso();
       hip.setLink(torso);
-      rootJoint.addJoint(hip);
+      hip.setInitialState(-2*Math.PI/3,0.0);
+      this.foot.addJoint(hip);
+      hip.addGroundContactPoint(hipContact);
 
-      /*
-       *  The third joint is initiated with the offset vector (0.0,0.0,L1+L2) since
-       *  it should be placed a distance of L1 + L2 / 2.0 in the Z direction from the previous joint.
-       */
-      Joint shoulders = new PinJoint("joint3", new Vector3d(0.0, 0.0, L1 + L2/ 2.0), this, Axis.Y);
-      Link crossBar = createCrossbar();
-      shoulders.setLink(crossBar);
-      rootJoint.addJoint(shoulders);
+      shoulder = new PinJoint("shoulder", new Vector3d(0.0, 0.0, TORSO_LENGTH), this, Axis.Y);
+      Link arms = createArms();
+      shoulder.setLink(arms);
+      shoulder.setInitialState(0.5,0.0);
+      //shoulder.setDamping(0.3);
+      this.hip.addJoint(shoulder);
+      shoulder.addGroundContactPoint(shoulderContact);
+      shoulder.addGroundContactPoint(leftContact);
+      shoulder.addGroundContactPoint(rightContact);
+
+      GroundContactModel ground = new LinearGroundContactModel(this, 1422, 150.6, 50.0, 1000.0, this.getRobotsYoVariableRegistry());
+      GroundProfile3D profile = new FlatGroundProfile();
+      ground.setGroundProfile3D(profile);
+      this.setGroundContactModel(ground);
    }
 
-   /**
-    * Create the first link for the SkippyRobot.
-    */
    private Link createLeg()
    {
-      Link leg = new Link("Leg");
-      leg.setMass(M1);
-      leg.setComOffset(0.0, 0.0, L1 / 2.0);
-      leg.setMomentOfInertia(0.0, Iyy1, 0.0);
+      Link leg = new Link("leg");
+      leg.setMass(LEG_MASS);
+      leg.setComOffset(0.0, 0.0, LEG_LENGTH / 2.0);
+      leg.setMomentOfInertia(LEG_MOI, LEG_MOI, 0.0001);
 
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCube(R1, R1, L1, YoAppearance.Crimson());
+      linkGraphics.addCube(LEG_RADIUS, LEG_RADIUS, LEG_LENGTH, YoAppearance.Crimson());
 
       // associate the linkGraphics object with the link object
       leg.setLinkGraphics(linkGraphics);
@@ -84,48 +111,49 @@ public class SkippyRobot extends Robot
       return leg;
    }
 
-   /**
-    * Create the second link for the SkippyRobot.
-    */
    private Link createTorso()
    {
-      Link torso = new Link("Torso");
-      torso.setMass(M2);
-      torso.setComOffset(0.0, 0.0, L2 / 2.0);
-      torso.setMomentOfInertia(0.0, Iyy2, 0.0);
+      Link torso = new Link("torso");
+      torso.setMass(TORSO_MASS);
+      torso.setComOffset(0.0, 0.0, TORSO_LENGTH / 2.0);
+      torso.setMomentOfInertia(TORSO_MOI, 0.0001, 0.0001);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCylinder(L2, R2, YoAppearance.LightSkyBlue());
+      linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.LightSkyBlue());
+      linkGraphics.addSphere(0.10,YoAppearance.White());
 
       torso.setLinkGraphics(linkGraphics);
 
       return torso;
    }
 
-   /**
-    * Create the third link for the SkippyRobot.
-    */
-   private Link createCrossbar()
+   private Link createArms()
    {
-      Link crossBar = new Link("CrossBar");
-      crossBar.setMass(M3);
-      crossBar.setComOffset(0.0, 0.0, -L3 / 2.0);
-      crossBar.setMomentOfInertia(0.0, Iyy3, 0.0);
+      Link arms = new Link("arms");
+      arms.setMass(SHOULDER_MASS);
+      arms.setComOffset(0.0, 0.0, SHOULDER_LENGTH / 2.0);
+      arms.setMomentOfInertia(0.0001, SHOULDER_MOI, 0.0001);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addSphere(R1, YoAppearance.Red());
-      linkGraphics.translate(0.0, 0.0, L1 + L2);
-      linkGraphics.addCylinder(L3 / 2.0, R3);
+      linkGraphics.rotate(Math.toRadians(90), Axis.Y);
+      linkGraphics.translate(0.0, 0.0, -SHOULDER_LENGTH / 2.0);
+      linkGraphics.addCylinder(SHOULDER_LENGTH, SHOULDER_RADIUS, YoAppearance.DarkBlue());
 
-      linkGraphics.identity();
-      linkGraphics.translate(L3, 0.0, -L3 / 2.0);
-      linkGraphics.rotate(-Math.PI / 2.0, Axis.Y);
-      linkGraphics.addCylinder(2.0 * L3, R3);
-      linkGraphics.addSphere(R3, YoAppearance.Red());
-      linkGraphics.translate(0.0, 0.0, 2.0 * L3);
-      linkGraphics.addSphere(R3, YoAppearance.Red());
+      arms.setLinkGraphics(linkGraphics);
 
-      return crossBar;
+      return arms;
+   }
+   public UniversalJoint getLegJoint()
+   {
+      return foot;
+   }
+   public PinJoint getHipJoint()
+   {
+      return hip;
    }
 
+   public PinJoint getShoulderJoint()
+   {
+      return shoulder;
+   }
 }

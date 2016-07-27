@@ -16,20 +16,28 @@ public class BuildingPendulumController extends SimpleRobotController
    private double pendulumAngle;
    private double pendulumAngleSwitch;
    private double angularChange = 2*Math.asin(BuildingPendulumRobot.distance/(2*BuildingPendulumRobot.length));
-   private double  velocity=0.0;
 
 
    public BuildingPendulumController(BuildingPendulumRobot robot)
    {
+      System.out.println("angularChange=" + angularChange);
+
+      for(RobotSide robotSide : RobotSide.values)
+         System.out.println(robotSide + ", switch angle =" + robot.getSwitchAngle(robotSide));
+
+      System.out.println("angularChange=" + angularChange);
+
       this.robot = robot;
 
 //      System.out.println("L----- "+robot.getPendulumAngle(RobotSide.LEFT));
 //      System.out.println("R----- "+robot.getPendulumAngle(RobotSide.RIGHT));
 
-      if(robot.getPendulumAngle(RobotSide.LEFT)> robot.getPendulumAngle(RobotSide.RIGHT))
-         activeSide = RobotSide.LEFT;
-      else if(robot.getPendulumAngle(RobotSide.LEFT)< robot.getPendulumAngle(RobotSide.RIGHT))
-         activeSide = RobotSide.RIGHT;
+      activeSide = RobotSide.LEFT;
+
+//      if(robot.getPendulumAngle(RobotSide.LEFT)> robot.getPendulumAngle(RobotSide.RIGHT))
+//         activeSide = RobotSide.LEFT;
+//      else if(robot.getPendulumAngle(RobotSide.LEFT)< robot.getPendulumAngle(RobotSide.RIGHT))
+//         activeSide = RobotSide.RIGHT;
 
    }
 
@@ -39,24 +47,30 @@ public class BuildingPendulumController extends SimpleRobotController
       pendulumAngleSwitch = robot.getSwitchAngle(activeSide);
    }
 
+   private boolean velocitythresholdMet(RobotSide activeSideToCheck)
+   {
+      double veloctiy = robot.getPendulumVelocity(activeSideToCheck);
+      return (activeSideToCheck.negateIfLeftSide(veloctiy) < 1e-3);
+   }
+
+
    public  void doControl()
    {
       setPendulumAngles();
 
-
-
       boolean atCenter;
       if (activeSide == RobotSide.LEFT)
-         atCenter = pendulumAngle > pendulumAngleSwitch;
+         atCenter = (pendulumAngle > pendulumAngleSwitch) && velocitythresholdMet(activeSide);
       else
-         atCenter = pendulumAngle < pendulumAngleSwitch;
+         atCenter = (pendulumAngle < pendulumAngleSwitch) && velocitythresholdMet(activeSide);
 
       if (atCenter)
       {
+         System.out.println("at center, time=" + robot.getTime() );
          activeSide = activeSide.getOppositeSide();
          robot.setPendulumAngle(activeSide, robot.getSwitchAngle(activeSide));
          
-         velocity =(robot.getPendulumVelocity(activeSide.getOppositeSide())*Math.cos(angularChange));
+         double velocity =  activeSide.negateIfLeftSide(0.8123); //(robot.getPendulumVelocity(activeSide.getOppositeSide())*Math.cos(angularChange));
 
          robot.setPendulumVelocity(activeSide, velocity);
       }
