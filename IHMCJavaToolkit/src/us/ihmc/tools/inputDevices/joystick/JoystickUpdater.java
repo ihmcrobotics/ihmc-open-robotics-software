@@ -3,7 +3,9 @@ package us.ihmc.tools.inputDevices.joystick;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
+import java.util.Map;
 
+import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
@@ -16,6 +18,7 @@ public class JoystickUpdater implements Runnable
    private final Object listnerConch = new Object();
    private final ArrayList<JoystickEventListener> listeners = new ArrayList<JoystickEventListener>();
    private final ArrayList<JoystickStatusListener> generalListenersList;
+   private final Map<Identifier, JoystickComponentFilter> componentFilterMap = new HashMap<>();
    
    private HashMap<String, Float> lastValues = new HashMap<String, Float>();
    private int pollIntervalMillis = 5;
@@ -58,6 +61,11 @@ public class JoystickUpdater implements Runnable
 
          while (queue.getNextEvent(event))
          {
+            if (componentFilterMap.containsKey(event.getComponent().getIdentifier()))
+            {
+               event.set(event.getComponent(), (float) componentFilterMap.get(event.getComponent().getIdentifier()).apply(event.getValue()), event.getNanos());
+            }
+            
             if (isNewValue(event))
             {
                if (DEBUG)
@@ -124,5 +132,10 @@ public class JoystickUpdater implements Runnable
    public void setPollIntervalMillis(int pollIntervalMillis)
    {
       this.pollIntervalMillis = pollIntervalMillis;
+   }
+   
+   public void setComponentFilter(JoystickComponentFilter componentFilter)
+   {
+      componentFilterMap.put(componentFilter.getIdentifier(), componentFilter);
    }
 }

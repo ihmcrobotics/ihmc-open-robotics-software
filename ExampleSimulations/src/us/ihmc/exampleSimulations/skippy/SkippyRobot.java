@@ -52,13 +52,13 @@ public class SkippyRobot extends Robot
       groundContactPoints.add(rightContact);
 
 
-       FloatingJoint j = new FloatingJoint("F", new Vector3d(0.0,0.0,0.0), this);
-       Link l = new Link("l");
-       l.setMass(5.0);  //5 seems to work well - other values make the jump too high/low
-       l.setMomentOfInertia(10,10,10);  //the smaller the value, the more realistic the jump (values still have to be realistic - not as small as 0.00001)
-       j.setLink(l);
-       j.addGroundContactPoint(footContact);
-       this.addRootJoint(j);
+       FloatingJoint mainJoint = new FloatingJoint("mainJoint", new Vector3d(0.0,0.0,0.0), this);
+       Link mainJointLink = new Link("mainJointLink");
+       mainJointLink.setMass(5);  //5 seems to work well - other values make the jump too high/low
+       mainJointLink.setMomentOfInertia(10,10,10);  //the smaller the value, the more realistic the jump (not as small as 0.00001)
+       mainJoint.setLink(mainJointLink);
+       mainJoint.addGroundContactPoint(footContact);
+       this.addRootJoint(mainJoint);
 
 
        // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
@@ -69,7 +69,7 @@ public class SkippyRobot extends Robot
       foot.setLink(leg);
       //this.addRootJoint(foot);
       //foot.addGroundContactPoint(footContact);
-       j.addJoint(foot);
+       mainJoint.addJoint(foot);
 
       hip = new PinJoint("hip", new Vector3d(0.0, 0.0, LEG_LENGTH), this, Axis.X);
       Link torso = createTorso();

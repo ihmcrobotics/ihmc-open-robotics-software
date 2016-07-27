@@ -2,18 +2,22 @@ package us.ihmc.quadrupedRobotics.input.mode;
 
 import java.util.Map;
 
+import net.java.games.input.Event;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.quadrupedRobotics.communication.packets.*;
+import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedXGaitSettingsPacket;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.input.InputChannel;
-import us.ihmc.quadrupedRobotics.input.InputEvent;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
 public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
 {
@@ -71,15 +75,15 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
    }
 
    @Override
-   public void update(Map<InputChannel, Double> channels, QuadrupedTaskSpaceEstimator.Estimates estimates)
+   public void update(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimator.Estimates estimates)
    {
       double bodyYaw = 0.0;
       double bodyRoll = 0.0;
-      double bodyPitch = channels.get(InputChannel.RIGHT_STICK_Y) * pitchScaleParameter.get();
+      double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * pitchScaleParameter.get();
       if (mode == XGaitInputMode.POSITION)
       {
-         bodyYaw = channels.get(InputChannel.RIGHT_STICK_X) * yawScaleParameter.get();
-         bodyRoll = -channels.get(InputChannel.LEFT_STICK_X) * rollScaleParameter.get();
+         bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawScaleParameter.get();
+         bodyRoll = -channels.get(XBoxOneMapping.LEFT_STICK_X) * rollScaleParameter.get();
       }
       BodyOrientationPacket orientationPacket = new BodyOrientationPacket(bodyYaw, bodyPitch, bodyRoll);
       packetCommunicator.send(orientationPacket);
@@ -93,9 +97,9 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       double yawRateMax = yawRateScaleParameter.get() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
       if (mode == XGaitInputMode.VELOCITY)
       {
-         xVelocity = channels.get(InputChannel.LEFT_STICK_Y) * xVelocityMax;
-         yVelocity = channels.get(InputChannel.LEFT_STICK_X) * yVelocityMax;
-         yawRate = channels.get(InputChannel.RIGHT_STICK_X) * yawRateMax;
+         xVelocity = channels.get(XBoxOneMapping.LEFT_STICK_Y) * xVelocityMax;
+         yVelocity = channels.get(XBoxOneMapping.LEFT_STICK_X) * yVelocityMax;
+         yawRate = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawRateMax;
       }
       PlanarVelocityPacket velocityPacket = new PlanarVelocityPacket(xVelocity, yVelocity, yawRate);
       packetCommunicator.send(velocityPacket);
@@ -103,42 +107,42 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       double comX = 0.0;
       double comY = 0.0;
       double comZdot = 0.0;
-      if (channels.get(InputChannel.D_PAD) == 0.25)
+      if (channels.get(XBoxOneMapping.DPAD) == 0.25)
       {
          comZdot += zRateParameter.get();
       }
-      if (channels.get(InputChannel.D_PAD) == 0.75)
+      if (channels.get(XBoxOneMapping.DPAD) == 0.75)
       {
          comZdot -= zRateParameter.get();
       }
       if (mode == XGaitInputMode.POSITION)
       {
-         comX = channels.get(InputChannel.LEFT_STICK_Y) * xScaleParameter.get();
+         comX = channels.get(XBoxOneMapping.LEFT_STICK_Y) * xScaleParameter.get();
       }
       ComPositionPacket comPositionPacket = new ComPositionPacket(comX, comY, comZ.update(comZdot));
       packetCommunicator.send(comPositionPacket);
 
-      double deltaTrigger = (channels.get(InputChannel.LEFT_TRIGGER) - channels.get(InputChannel.RIGHT_TRIGGER));
+      double deltaTrigger = (channels.get(XBoxOneMapping.LEFT_TRIGGER) - channels.get(XBoxOneMapping.RIGHT_TRIGGER));
       xGaitSettings.setEndDoubleSupportDuration(MathTools.clipToMinMax(xGaitSettings.getEndDoubleSupportDuration() + deltaTrigger * deltaDoubleSupportParameter.get(), 0, 1));
       QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
       packetCommunicator.send(settingsPacket);
    }
 
    @Override
-   public void onInputEvent(Map<InputChannel, Double> channels, QuadrupedTaskSpaceEstimator.Estimates estimates, InputEvent e)
+   public void onInputEvent(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimator.Estimates estimates, Event event)
    {
-      switch (e.getChannel())
+      switch (XBoxOneMapping.getMapping(event))
       {
-      case BUTTON_A:
-         if (channels.get(InputChannel.BUTTON_A) > 0.5)
+      case A:
+         if (channels.get(XBoxOneMapping.A) > 0.5)
          {
             QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
             packetCommunicator.send(eventPacket);
             mode = XGaitInputMode.POSITION;
          }
          break;
-      case BUTTON_X:
-         if (channels.get(InputChannel.BUTTON_X) > 0.5)
+      case X:
+         if (channels.get(XBoxOneMapping.X) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(180);
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -148,8 +152,8 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             mode = XGaitInputMode.VELOCITY;
          }
          break;
-      case BUTTON_Y:
-         if (channels.get(InputChannel.BUTTON_Y) > 0.5)
+      case Y:
+         if (channels.get(XBoxOneMapping.Y) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(90);
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -159,8 +163,8 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             mode = XGaitInputMode.VELOCITY;
          }
          break;
-      case BUTTON_B:
-         if (channels.get(InputChannel.BUTTON_B) > 0.5)
+      case B:
+         if (channels.get(XBoxOneMapping.B) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(0);
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -170,28 +174,28 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             mode = XGaitInputMode.VELOCITY;
          }
          break;
-      case LEFT_BUTTON:
-         if (channels.get(InputChannel.LEFT_BUTTON) > 0.5)
+      case LEFT_BUMPER:
+         if (channels.get(XBoxOneMapping.LEFT_BUMPER) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() + deltaPhaseShiftParameter.get(), 0, 359));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
             packetCommunicator.send(settingsPacket);
          }
          break;
-      case RIGHT_BUTTON:
-         if (channels.get(InputChannel.RIGHT_BUTTON) > 0.5)
+      case RIGHT_BUMPER:
+         if (channels.get(XBoxOneMapping.RIGHT_BUMPER) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() - deltaPhaseShiftParameter.get(), 0, 359));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
             packetCommunicator.send(settingsPacket);
          }
          break;
-      case D_PAD:
-         if (channels.get(InputChannel.D_PAD) == 0.5)
+      case DPAD:
+         if (channels.get(XBoxOneMapping.DPAD) == 0.5)
          {
             xGaitSettings.setStanceWidth(xGaitSettings.getStanceWidth() + deltaStanceWidthParameter.get());
          }
-         if (channels.get(InputChannel.D_PAD) == 1.0)
+         if (channels.get(XBoxOneMapping.DPAD) == 1.0)
          {
             xGaitSettings.setStanceWidth(xGaitSettings.getStanceWidth() - deltaStanceWidthParameter.get());
          }
