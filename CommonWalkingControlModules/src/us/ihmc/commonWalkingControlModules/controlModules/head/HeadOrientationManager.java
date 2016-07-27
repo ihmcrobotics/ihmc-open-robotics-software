@@ -177,8 +177,10 @@ public class HeadOrientationManager
    public void handleNeckTrajectoryCommand(NeckTrajectoryCommand command)
    {
       computeDesiredJointPositions(initialJointPositions);
-      jointspaceHeadControlState.handleNeckTrajectoryCommand(command, initialJointPositions);
-      requestedState.set(jointspaceHeadControlState.getStateEnum());
+      if(jointspaceHeadControlState.handleNeckTrajectoryCommand(command, initialJointPositions))
+      {
+          requestedState.set(jointspaceHeadControlState.getStateEnum());
+      }
    }
 
    public void handleNeckDesiredAccelerationsCommand(NeckDesiredAccelerationsCommand command)
