@@ -165,7 +165,7 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setQuarticUsingOneIntermediateVelocity(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zIntermediate0, double zIntermediate1, double zFinal, double zdIntermediate0, double zdIntermediate1)
+   public void setQuarticUsingOneIntermediateVelocity(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zIntermediate0, double zIntermediate1, double zFinal, double zdIntermediate1)
    {
       reshape(5);
       setPositionRow(0, t0, z0);
