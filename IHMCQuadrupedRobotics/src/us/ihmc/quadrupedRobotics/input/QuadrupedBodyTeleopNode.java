@@ -8,14 +8,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import net.java.games.input.Event;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.input.mode.QuadrupedTeleopMode;
 import us.ihmc.quadrupedRobotics.input.mode.QuadrupedStepTeleopMode;
+import us.ihmc.quadrupedRobotics.input.mode.QuadrupedTeleopMode;
 import us.ihmc.quadrupedRobotics.input.mode.QuadrupedXGaitTeleopMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotDataCommunication.YoVariableServer;
@@ -24,17 +25,21 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.inputDevices.joystick.Joystick;
+import us.ihmc.tools.inputDevices.joystick.JoystickComponentFilter;
+import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
+import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
-public class QuadrupedBodyTeleopNode implements InputEventCallback
+public class QuadrupedBodyTeleopNode implements JoystickEventListener
 {
    /**
     * Period at which to send control packets.
     */
    private static final double DT = 0.01;
 
-   private final PollingInputDevice device;
-   private final Map<InputChannel, Double> channels = Collections.synchronizedMap(new EnumMap<InputChannel, Double>(InputChannel.class));
+   private final Joystick device;
+   private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<XBoxOneMapping, Double>(XBoxOneMapping.class));
    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
    private final YoVariableServer server;
@@ -50,7 +55,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
    private final QuadrupedStepTeleopMode stepTeleopMode;
    private QuadrupedTeleopMode activeTeleopMode;
 
-   public QuadrupedBodyTeleopNode(String host, NetworkPorts port, NetClassList netClassList, PollingInputDevice device,
+   public QuadrupedBodyTeleopNode(String host, NetworkPorts port, NetClassList netClassList, Joystick device,
          SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedPhysicalProperties physicalProperties) throws IOException
    {
       this.device = device;
@@ -70,7 +75,7 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
       this.activeTeleopMode = xGaitTeleopMode;
 
       // Initialize all channels to zero.
-      for (InputChannel channel : InputChannel.values())
+      for (XBoxOneMapping channel : XBoxOneMapping.values)
       {
          channels.put(channel, 0.0);
       }
@@ -109,9 +114,19 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
          }
       }, 0, (long) (DT * 1000), TimeUnit.MILLISECONDS);
 
-      // Poll indefinitely.
-      device.registerCallback(this);
-      device.poll();
+      configureJoystickFilters(device);
+      device.addJoystickEventListener(this);
+      device.setPollInterval(10);
+   }
+
+   private void configureJoystickFilters(Joystick device)
+   {
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_TRIGGER, false, 0.05, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_TRIGGER, false, 0.05, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_STICK_X, true, 0.1, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_STICK_Y, true, 0.1, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_STICK_X, true, 0.1, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_STICK_Y, true, 0.1, 1));
    }
 
    public void update()
@@ -125,27 +140,27 @@ public class QuadrupedBodyTeleopNode implements InputEventCallback
    }
 
    @Override
-   public void onInputEvent(InputEvent e)
+   public void processEvent(Event event)
    {
       // Store updated value in a cache so historical values for all channels can be used.
-      channels.put(e.getChannel(), e.getValue());
+      channels.put(XBoxOneMapping.getMapping(event), (double) event.getValue());
 
       // Handle events that should trigger once immediately after the event is triggered.
-      switch (e.getChannel())
+      switch (XBoxOneMapping.getMapping(event))
       {
-      case VIEW_BUTTON:
+      case SELECT:
          activeTeleopMode.onExit();
          activeTeleopMode = stepTeleopMode;
          activeTeleopMode.onEntry();
          break;
-      case MENU_BUTTON:
+      case START:
          activeTeleopMode.onExit();
          activeTeleopMode = xGaitTeleopMode;
          activeTeleopMode.onEntry();
          break;
       default:
          // Pass any non-mode-switching events down to the active mode.
-         activeTeleopMode.onInputEvent(Collections.unmodifiableMap(channels), taskSpaceEstimates, e);
+         activeTeleopMode.onInputEvent(Collections.unmodifiableMap(channels), taskSpaceEstimates, event);
       }
    }
 }
