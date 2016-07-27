@@ -39,7 +39,6 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
    private static final double DT = 0.01;
 
    private final Joystick device;
-//   private final PollingInputDevice device;
    private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<XBoxOneMapping, Double>(XBoxOneMapping.class));
    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
