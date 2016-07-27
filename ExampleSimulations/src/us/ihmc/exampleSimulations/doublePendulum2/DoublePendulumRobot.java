@@ -16,49 +16,57 @@ import us.ihmc.simulationconstructionset.*;
 public class DoublePendulumRobot extends Robot
 {
    private static final long serialVersionUID = -7671864179791904256L;
-
-   /* L1 and L2 are the link lengths, M1 and M2 are the link masses, and R1 and R2 are the radii of the links,
-    * Iyy1 and Iyy2 are the moments of inertia of the links. The moments of inertia are defined about the COM
-    * for each link.
-    */
+   private double mass = 1.0;
+   private double length = 2.0;
    public static final double
-         L1 = 6.0,  M1 = 4.0,  R1 = 0.1,  Iyy1 = 0.083;
-   PinJoint pin1 = new PinJoint("joint1", new Vector3d(0.0, 0.0, 0.0), this, Axis.Y);
-
-   public DoublePendulumRobot(String yoVariable)
+         L1 = 1.0, L2 = 2.0, M1 = 1.0, M2 = 1.0, R1 = 0.1, R2 = 0.05, Iyy1 = 0.083, Iyy2 = 0.33;
+   public DoublePendulumRobot(String name)
    {
+      super(name);
+
+//      NullJoint nullJoint = new NullJoint("nullJoint", new Vector3d(0.0,0.0,2.0),this);
+//
+//
+//      Link ceiling = new Link("link1");
+//      Graphics3DObject linkGraphics = new Graphics3DObject();
+//      linkGraphics.addCube(5, 5, 0.1);
+//      ceiling.setLinkGraphics(linkGraphics);
+//      nullJoint.setLink(ceiling);
 
 
-      super(yoVariable); // create and instance of Robot
-      FloatingPlanarJoint floatingPlanarJoint = new FloatingPlanarJoint(yoVariable,this);
-
-      Link ceiling = new Link("link1");
-      Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCube(5, 5, 0.1);
-      ceiling.setLinkGraphics(linkGraphics);
-      floatingPlanarJoint.setLink(ceiling);
 
 
 
-      // Create joints and assign links. Pin joints have a single axis of rotation.
+      PinJoint pin1 = new PinJoint("joint1", new Vector3d(0.0, 0.0, 0.0), this, Axis.Y);
 
-     // pin1.setLimitStops(0,12, 2, 3);
-       pin1.setInitialState(0.01, 0.01);
+//      pin1.setInitialState(0.001, 0.00);
+//      pin1.setDamping(0.0001);
+
       Link link1 = link1();
       pin1.setLink(link1); // associate link1 with the joint pin1
-      floatingPlanarJoint.addJoint(pin1);
-      this.addRootJoint(floatingPlanarJoint);
+      //nullJoint.addJoint(pin1);
+      this.addRootJoint(pin1);
+
+
+      //this.addStaticLink(nullJoint);
+//      Joint pin2 = new PinJoint("joint2", new Vector3d(0.0, 0.0, L1), this, Axis.Y);
+//      Link link2 = link2();
+//      pin2.setLink(link2);
+//      pin1.addJoint(pin2);
+//
+//      Joint pin3 = new PinJoint("joint3", new Vector3d(0.0, 0.0, L2), this, Axis.Y);
+//      Link link3 = link1();
+//      pin3.setLink(link3);
+//      pin1.addJoint(pin3);
+
+     // this.addRootJoint(pin2);
+
 
 
    }
-
    /**
     * Create the first link for the DoublePendulumRobot.
     */
-   public void setLocation(double x, double y, double z)
-   {
-      pin1.changeOffsetVector(x,y,z);
-   }
    private Link link1()
    {
       Link ret = new Link("link1");
@@ -69,7 +77,19 @@ public class DoublePendulumRobot extends Robot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCylinder(L1, R1, YoAppearance.Red());
 
+
       // associate the linkGraphics object with the link object
+      ret.setLinkGraphics(linkGraphics);
+      return ret;
+   }
+   private Link link2()
+   {
+      Link ret = new Link("link2");
+      ret.setMass(M2);
+      ret.setComOffset(0.0, 0.0, L2 / 2.0);
+      ret.setMomentOfInertia(0.0, Iyy2, 0.0);
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      linkGraphics.addCylinder(L2, R2, YoAppearance.Green());
       ret.setLinkGraphics(linkGraphics);
       return ret;
    }

@@ -18,7 +18,7 @@ public class BuildingPendulumRobot extends Robot
    public static final double mass = 181.0;
 
    public static final double length = 7.6;
-   public static final double distance = 1.0;
+   public static final double distance = 3.0;
 
    private static final double midAngle = Math.atan2(distance/2.0, length);
 
@@ -104,8 +104,8 @@ public class BuildingPendulumRobot extends Robot
    public double getSwitchAngle(RobotSide activeSide)
    {
       if (activeSide == RobotSide.LEFT)
-         return - midAngle + Math.PI;
+         return - midAngle + (Math.PI);
       else
-         return midAngle + Math.PI;
+         return midAngle + (Math.PI);
    }
 }
