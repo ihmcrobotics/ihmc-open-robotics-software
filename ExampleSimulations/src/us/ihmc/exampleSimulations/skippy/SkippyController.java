@@ -70,7 +70,7 @@ public class SkippyController implements RobotController
 
       desiredPositions = new ArrayList<double[]>();
       //double[] position = {qLegDesiredX, qLegDesiredY, qHipDesired, qShoulderDesired} <- format
-      double[] firstSetOfPoints = {-Math.PI/3, 0.0, 2*Math.PI/3, 0.0};
+      double[] firstSetOfPoints = {-Math.PI/6, 0.0, 2*Math.PI/6, 0.0};
       double[] secondSetOfPoints = {Math.PI/3, 0.0, -2*Math.PI/3, 0.5};
       double[] thirdSetOfPoints = {0.0, 0.0, 0.0, 0.0};
       desiredPositions.add(firstSetOfPoints);
@@ -93,8 +93,15 @@ public class SkippyController implements RobotController
 
       //start pid control
       PIDControl();
+      //controlBalance();
 
+   }
 
+   private void controlBalance()
+   {
+
+      robot.getLegJoint().setTau(robot.getLegMass()*9.81*robot.getLegLength()/2*Math.sin(Math.PI-robot.getLegJoint().getQ().getDoubleValue()));
+      //robot.getHipJoint().setTau(robot.getHipMass()*9.81*robot.getHipLength()/2*Math.sin(Math.PI-(robot.getLegJoint().getQ().getDoubleValue()+robot.getHipJoint().getQ().getDoubleValue())));
    }
 
    private void PIDControl()
