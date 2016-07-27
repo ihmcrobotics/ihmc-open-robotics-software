@@ -92,39 +92,41 @@ public class SkippyController implements RobotController
 //                                            - k8.getDoubleValue() * qd_shoulder.getDoubleValue());
 
       //start pid control
-      PIDControl();
-      //controlBalance();
+      positionControl(-Math.PI/6, 0.0, 2*Math.PI/6, 0.0);
+      //balanceControl(Math.PI/6, 0.0);
 
    }
 
-   private void controlBalance()
+   private void balanceControl(double thetaX, double thetaY)
    {
+      double positionError = (10000)*(thetaX-robot.getLegJoint().getQ().getDoubleValue());
+      legIntegralTermX += (1)*(positionError*SkippySimulation.DT);
+      double derivativeError = (10000)*(0.0-robot.getLegJoint().getQD().getDoubleValue());
+      robot.setBalanceForceX(positionError+legIntegralTermX+derivativeError, 0.0, 0.0);
 
-      robot.getLegJoint().setTau(robot.getLegMass()*9.81*robot.getLegLength()/2*Math.sin(Math.PI-robot.getLegJoint().getQ().getDoubleValue()));
-      //robot.getHipJoint().setTau(robot.getHipMass()*9.81*robot.getHipLength()/2*Math.sin(Math.PI-(robot.getLegJoint().getQ().getDoubleValue()+robot.getHipJoint().getQ().getDoubleValue())));
    }
 
-   private void PIDControl()
+   private void positionControl(double desiredLegPositionX, double desiredLegPositionY, double desiredHipPosition, double desiredShoulderPosition)
    {
-      double interval = Math.round(SkippySimulation.TIME/desiredPositions.size()*100.0)/100.0;
-      double time = Math.round(robot.getTime()*(1/SkippySimulation.DT))/(1/SkippySimulation.DT);
+      //double interval = Math.round(SkippySimulation.TIME/desiredPositions.size()*100.0)/100.0;
+      //double time = Math.round(robot.getTime()*(1/SkippySimulation.DT))/(1/SkippySimulation.DT);
 
-      positionJointsBasedOnError(robot.getLegJoint(), desiredPositions.get(timeCounter)[0], legIntegralTermX, 10000, 1, 1000);
-      positionJointsBasedOnError(robot.getLegJoint().getSecondJoint(), desiredPositions.get(timeCounter)[1], legIntegralTermY, 10000, 1, 1000);
-      positionJointsBasedOnError(robot.getHipJoint(), desiredPositions.get(timeCounter)[2], hipIntegralTerm, 10000, 1, 1000);
-      positionJointsBasedOnError(robot.getShoulderJoint(), desiredPositions.get(timeCounter)[3], shoulderIntegralTerm, 10000, 1, 1000);
+      positionJointsBasedOnError(robot.getLegJoint(), desiredLegPositionX, legIntegralTermX, 10000, 1, 1000);
+      positionJointsBasedOnError(robot.getLegJoint().getSecondJoint(), desiredLegPositionY, legIntegralTermY, 10000, 1, 1000);
+      positionJointsBasedOnError(robot.getHipJoint(), desiredHipPosition, hipIntegralTerm, 10000, 1, 1000);
+      positionJointsBasedOnError(robot.getShoulderJoint(), desiredShoulderPosition, shoulderIntegralTerm, 10000, 1, 1000);
       System.out.println();
 
-      if(time%interval==0 && time != 0.0 && timeCounter < desiredPositions.size())
-      {
-         timeCounter++;
-         legIntegralTermX = 0;
-         legIntegralTermY = 0;
-         hipIntegralTerm = 0;
-         shoulderIntegralTerm = 0;
-      }
-      if(timeCounter==desiredPositions.size())
-         timeCounter = desiredPositions.size()-1;
+//      if(time%interval==0 && time != 0.0 && timeCounter < desiredPositions.size())
+//      {
+//         timeCounter++;
+//         legIntegralTermX = 0;
+//         legIntegralTermY = 0;
+//         hipIntegralTerm = 0;
+//         shoulderIntegralTerm = 0;
+//      }
+//      if(timeCounter==desiredPositions.size())
+//         timeCounter = desiredPositions.size()-1;
    }
 
    public void positionJointsBasedOnError(PinJoint joint, double desiredValue, double integralTerm, double positionErrorGain, double integralErrorGain, double derivativeErrorGain)
