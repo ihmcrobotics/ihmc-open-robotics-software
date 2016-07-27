@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
+package us.ihmc.robotics.sensors;
 
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

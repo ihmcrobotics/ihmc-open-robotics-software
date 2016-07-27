@@ -321,7 +321,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          String footControlNamespace = robotSide.getLowerCaseName() + "FootControlModule";
          String partialfootControlNamespace = footName + "PartialFootholdControlModule";
 
-         BooleanYoVariable autoCrop = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable(footName + "AutoCropToLineAfterExploration");
+         BooleanYoVariable autoCrop = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable(footName + "ExpectingLineContact");
          autoCropToLineAfterExploration.put(robotSide, autoCrop);
          BooleanYoVariable holdFlatDuringExploration = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable(footControlNamespace, footName + "DoHoldFootFlatOrientation");
          this.holdFlatDuringExploration.put(robotSide, holdFlatDuringExploration);

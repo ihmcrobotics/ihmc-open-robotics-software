@@ -134,6 +134,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
 //         YoArtifactPolygon yoProjectionArea = new YoArtifactPolygon("ProjectionArea", yoProjectionPolygon, Color.RED, false);
 //         yoGraphicsListRegistry.registerArtifact(graphicListName, yoProjectionArea);
       }
+      yoUnprojectedDesiredCMP.setToNaN();
    }
 
    public void setMomentumWeight(Vector3d angularWeight, Vector3d linearWeight)

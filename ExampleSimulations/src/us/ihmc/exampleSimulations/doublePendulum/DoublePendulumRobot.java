@@ -1,12 +1,14 @@
-package us.ihmc.exampleSimulations.doublePendulum2;
+package us.ihmc.exampleSimulations.doublePendulum;
 
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.YoVariableHolder;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
 
 /**
  * This class DoublePendulumRobot is a public class that extends Robot. The class Robot is
@@ -22,43 +24,30 @@ public class DoublePendulumRobot extends Robot
     * for each link.
     */
    public static final double
-         L1 = 6.0,  M1 = 4.0,  R1 = 0.1,  Iyy1 = 0.083;
-   PinJoint pin1 = new PinJoint("joint1", new Vector3d(0.0, 0.0, 0.0), this, Axis.Y);
+         L1 = 1.0, L2 = 2.0, M1 = 1.0, M2 = 1.0, R1 = 0.1, R2 = 0.05, Iyy1 = 0.083, Iyy2 = 0.33;
 
-   public DoublePendulumRobot(String yoVariable)
+   public DoublePendulumRobot()
    {
-
-
-      super(yoVariable); // create and instance of Robot
-      FloatingPlanarJoint floatingPlanarJoint = new FloatingPlanarJoint(yoVariable,this);
-
-      Link ceiling = new Link("link1");
-      Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCube(5, 5, 0.1);
-      ceiling.setLinkGraphics(linkGraphics);
-      floatingPlanarJoint.setLink(ceiling);
-
-
-
+      super("DoublePendulum"); // create an instance of Robot
       // Create joints and assign links. Pin joints have a single axis of rotation.
-
-     // pin1.setLimitStops(0,12, 2, 3);
-       pin1.setInitialState(0.01, 0.01);
+      PinJoint pin1 = new PinJoint("joint1", new Vector3d(0.0, 0.0, 0.0), this, Axis.Y);
+       pin1.setInitialState(0.05, 0.0);
       Link link1 = link1();
       pin1.setLink(link1); // associate link1 with the joint pin1
-      floatingPlanarJoint.addJoint(pin1);
-      this.addRootJoint(floatingPlanarJoint);
-
-
+      this.addRootJoint(pin1);
+      /*
+       *  The second joint is initiated with the offset vector (0.0,0.0,L1) since
+       *  it should be placed a distance of L1 in the Z direction from the previous joint.
+       */
+      Joint pin2 = new PinJoint("joint2", new Vector3d(0.0, 0.0, L1), this, Axis.Y);
+      Link link2 = link2();
+      pin2.setLink(link2);
+      pin1.addJoint(pin2);
    }
 
    /**
     * Create the first link for the DoublePendulumRobot.
     */
-   public void setLocation(double x, double y, double z)
-   {
-      pin1.changeOffsetVector(x,y,z);
-   }
    private Link link1()
    {
       Link ret = new Link("link1");
@@ -73,5 +62,18 @@ public class DoublePendulumRobot extends Robot
       ret.setLinkGraphics(linkGraphics);
       return ret;
    }
-
+   /**
+    * Create the second link for the DoublePendulumRobot.
+    */
+   private Link link2()
+   {
+      Link ret = new Link("link2");
+      ret.setMass(M2);
+      ret.setComOffset(0.0, 0.0, L2 / 2.0);
+      ret.setMomentOfInertia(0.0, Iyy2, 0.0);
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      linkGraphics.addCylinder(L2, R2, YoAppearance.Green());
+      ret.setLinkGraphics(linkGraphics);
+      return ret;
+   }
 }

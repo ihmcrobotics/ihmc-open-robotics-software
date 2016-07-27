@@ -76,6 +76,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       parentRegistry.addChild(registry);
    }
 
+   @Override
    public void compute(FrameVector stepAdjustmentVector, FramePoint cmpPositionSetpoint, PreallocatedQueue<QuadrupedTimedStep> queuedSteps,
          QuadrantDependentList<FramePoint> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint currentComPosition,
          FrameVector currentComVelocity, double currentTime, QuadrupedMpcOptimizationWithLaneChangeSettings settings)
