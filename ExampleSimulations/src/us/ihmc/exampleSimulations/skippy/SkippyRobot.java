@@ -33,6 +33,8 @@ public class SkippyRobot extends Robot
            TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0/3.0)* TORSO_MASS *Math.pow(TORSO_LENGTH,2), // Torso
            SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/12.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
 
+   private ExternalForcePoint balanceForceX, balanceForceY;
+
    public SkippyRobot()
    {
       super("Skippy");
@@ -83,6 +85,14 @@ public class SkippyRobot extends Robot
       Link arms = createArms();
       shoulder.setLink(arms);
       shoulder.setInitialState(0.0,0.0);
+
+      balanceForceX = new ExternalForcePoint("BalanceForceX", new Vector3d(0.0,0.0,0.0), this);
+      balanceForceX.setForce(0.0,0.0,0.0);
+      balanceForceY = new ExternalForcePoint("BalanceForceY", new Vector3d(0.0,0.0,0.0), this);
+      balanceForceY.setForce(0.0,0.0,0.0);
+      shoulder.addExternalForcePoint(balanceForceX);
+      shoulder.addExternalForcePoint(balanceForceY);
+
       //shoulder.setDamping(0.3);
       this.hip.addJoint(shoulder);
       shoulder.addGroundContactPoint(shoulderContact);
@@ -179,5 +189,14 @@ public class SkippyRobot extends Robot
    public double getShoulderLength()
    {
       return SHOULDER_LENGTH;
+   }
+
+   public void setBalanceForceX(double x, double y, double z)
+   {
+      balanceForceX.setForce(x, y, z);
+   }
+   public void setBalanceForceY(double x, double y, double z)
+   {
+      balanceForceY.setForce(x, y, z);
    }
 }
