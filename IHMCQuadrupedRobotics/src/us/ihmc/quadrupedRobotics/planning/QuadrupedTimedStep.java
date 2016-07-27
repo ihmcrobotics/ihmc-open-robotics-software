@@ -70,7 +70,7 @@ public class QuadrupedTimedStep extends QuadrupedStep
 
    public void getTimeInterval(TimeInterval timeInterval)
    {
-      timeInterval.get(this.timeInterval);
+      this.timeInterval.get(timeInterval);
    }
 
    public void setTimeInterval(TimeInterval timeInterval)
