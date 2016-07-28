@@ -1,9 +1,9 @@
 package us.ihmc.tools.inputDevices.joystick.mapping;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.lang3.SystemUtils;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
@@ -45,13 +45,9 @@ public enum XBoxOneMapping implements JoystickMapping
 
    public static final XBoxOneMapping[] values = values();
 
-   private static final Map<Identifier, XBoxOneMapping> windowsIdentifierToMapping = new HashMap<>(values.length);
-   private static final Map<Identifier, XBoxOneMapping> macIdentifierToMapping = new HashMap<>(values.length);
-   private static final Map<Identifier, XBoxOneMapping> linuxIdentifierToMapping = new HashMap<>(values.length);
-
-   private static final Map<XBoxOneMapping, Identifier> mappingToWindowsIdentifier = new HashMap<>(values.length);
-   private static final Map<XBoxOneMapping, Identifier> mappingToMacIdentifier = new HashMap<>(values.length);
-   private static final Map<XBoxOneMapping, Identifier> mappingToLinuxIdentifier = new HashMap<>(values.length);
+   private static final BiMap<Identifier, XBoxOneMapping> windowsBiMap = HashBiMap.create(values.length);
+   private static final BiMap<Identifier, XBoxOneMapping> macBiMap = HashBiMap.create(values.length);
+   private static final BiMap<Identifier, XBoxOneMapping> linuxBiMap = HashBiMap.create(values.length);
 
    static
    {
@@ -81,12 +77,9 @@ public enum XBoxOneMapping implements JoystickMapping
 
    private static void mapValues(XBoxOneMapping mapping, Identifier windowsIdentifier, Identifier macIdentifier, Identifier linuxIdentifier)
    {
-      windowsIdentifierToMapping.put(windowsIdentifier, mapping);
-      macIdentifierToMapping.put(macIdentifier, mapping);
-      linuxIdentifierToMapping.put(linuxIdentifier, mapping);
-      mappingToWindowsIdentifier.put(mapping, windowsIdentifier);
-      mappingToMacIdentifier.put(mapping, macIdentifier);
-      mappingToLinuxIdentifier.put(mapping, linuxIdentifier);
+      windowsBiMap.put(windowsIdentifier, mapping);
+      macBiMap.put(macIdentifier, mapping);
+      linuxBiMap.put(linuxIdentifier, mapping);
    }
 
    @Override
@@ -94,15 +87,15 @@ public enum XBoxOneMapping implements JoystickMapping
    {
       if (SystemUtils.IS_OS_WINDOWS)
       {
-         return mappingToWindowsIdentifier.get(this);
+         return windowsBiMap.inverse().get(this);
       }
       else if (SystemUtils.IS_OS_MAC)
       {
-         return mappingToMacIdentifier.get(this);
+         return macBiMap.inverse().get(this);
       }
       else if (SystemUtils.IS_OS_LINUX)
       {
-         return mappingToLinuxIdentifier.get(this);
+         return linuxBiMap.inverse().get(this);
       }
       else
       {
@@ -114,15 +107,15 @@ public enum XBoxOneMapping implements JoystickMapping
    {
       if (SystemUtils.IS_OS_WINDOWS)
       {
-         return windowsIdentifierToMapping.get(identifier);
+         return windowsBiMap.get(identifier);
       }
       else if (SystemUtils.IS_OS_MAC)
       {
-         return macIdentifierToMapping.get(identifier);
+         return macBiMap.get(identifier);
       }
       else if (SystemUtils.IS_OS_LINUX)
       {
-         return linuxIdentifierToMapping.get(identifier);
+         return linuxBiMap.get(identifier);
       }
       else
       {
