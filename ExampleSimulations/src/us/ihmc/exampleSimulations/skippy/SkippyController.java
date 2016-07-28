@@ -70,8 +70,8 @@ public class SkippyController implements RobotController
 
       desiredPositions = new ArrayList<double[]>();
       //double[] position = {qLegDesiredX, qLegDesiredY, qHipDesired, qShoulderDesired} <- format
-      double[] firstSetOfPoints = {-Math.PI/3, 0.0, 2*Math.PI/3, 0.0};
-      double[] secondSetOfPoints = {Math.PI/3, 0.0, -2*Math.PI/3, 0.5};
+      double[] firstSetOfPoints = {-Math.PI/6, 0.0, 2*Math.PI/6, 0.0};
+      double[] secondSetOfPoints = {Math.PI/4, 0.0, -2*Math.PI/4, 0.15};
       double[] thirdSetOfPoints = {0.0, 0.0, 0.0, 0.0};
       desiredPositions.add(firstSetOfPoints);
       desiredPositions.add(secondSetOfPoints);
@@ -92,12 +92,35 @@ public class SkippyController implements RobotController
 //                                            - k8.getDoubleValue() * qd_shoulder.getDoubleValue());
 
       //start pid control
-      PIDControl();
-
+      positionControl();
+      //positionControl(0.0,0.0,0.0,0.0);
+      //balanceControl(Math.PI/6, 0.0);
 
    }
 
-   private void PIDControl()
+   private void balanceControl(double thetaX, double thetaY)
+   {
+
+      double forceX, forceY;
+
+      double positionError = (10)*(thetaX-robot.getLegJoint().getQ().getDoubleValue());
+      legIntegralTermX += (1)*(positionError*SkippySimulation.DT);
+      double derivativeError = (10)*(0.0-robot.getLegJoint().getQD().getDoubleValue());
+      forceX = positionError+legIntegralTermX+derivativeError;
+
+      positionError = (10)*(thetaY-robot.getLegJoint().getSecondJoint().getQ().getDoubleValue());
+      legIntegralTermY += (1)*(positionError*SkippySimulation.DT);
+      derivativeError = (10)*(0.0-robot.getLegJoint().getSecondJoint().getQD().getDoubleValue());
+      forceY = positionError+legIntegralTermY+derivativeError;
+
+      //forceY = 0.0;
+      //forceX = 0.0;
+
+      robot.setBalanceForce(forceX,0.0,forceY);
+
+   }
+
+   private void positionControl()
    {
       double interval = Math.round(SkippySimulation.TIME/desiredPositions.size()*100.0)/100.0;
       double time = Math.round(robot.getTime()*(1/SkippySimulation.DT))/(1/SkippySimulation.DT);

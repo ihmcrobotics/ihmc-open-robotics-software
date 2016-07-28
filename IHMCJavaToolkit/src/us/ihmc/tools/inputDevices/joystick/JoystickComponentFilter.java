@@ -1,34 +1,36 @@
-package us.ihmc.quadrupedRobotics.input;
+package us.ihmc.tools.inputDevices.joystick;
 
-public class InputChannelConfig
+import net.java.games.input.Component.Identifier;
+import us.ihmc.tools.inputDevices.joystick.mapping.JoystickMapping;
+
+public class JoystickComponentFilter
 {
-   private final InputChannel channel;
+   private final JoystickMapping mapping;
+   
    private final boolean invert;
-
-   /**
-    * The percentage about zero within which the input value should be ignored.
-    */
-   private final double deadzone;
    private final int exponent;
+   
+   /** The percentage about zero within which the input value should be ignored. */
+   private final double deadzone;
 
-   public InputChannelConfig(InputChannel channel, boolean invert)
+   public JoystickComponentFilter(JoystickMapping channel, boolean invert)
    {
       this(channel, invert, 0.0);
    }
 
-   public InputChannelConfig(InputChannel channel, boolean invert, double deadzone)
+   public JoystickComponentFilter(JoystickMapping channel, boolean invert, double deadzone)
    {
       this(channel, invert, deadzone, 1);
    }
 
-   public InputChannelConfig(InputChannel channel, boolean invert, double deadzone, int exponent)
+   public JoystickComponentFilter(JoystickMapping channel, boolean invert, double deadzone, int exponent)
    {
       if (exponent % 2 == 0)
       {
          throw new IllegalArgumentException("Only odd functions are allowed");
       }
 
-      this.channel = channel;
+      this.mapping = channel;
       this.invert = invert;
       this.deadzone = deadzone;
       this.exponent = exponent;
@@ -50,8 +52,8 @@ public class InputChannelConfig
       return Math.pow((invert ? -1 : 1) * value, exponent);
    }
 
-   public InputChannel getChannel()
+   public Identifier getIdentifier()
    {
-      return channel;
+      return mapping.getIdentifier();
    }
 }

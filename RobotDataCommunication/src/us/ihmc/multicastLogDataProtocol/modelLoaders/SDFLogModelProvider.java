@@ -7,20 +7,27 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 
+import us.ihmc.SdfLoader.SDFParameters;
 import us.ihmc.tools.ClassLoaderTools;
 
 public class SDFLogModelProvider implements LogModelProvider
 {
-   private String modelName;
-   private byte[] model;
-   private String[] resourceDirectories;
+   private final String sdfModelName;
+   private final byte[] model;
+   private final String[] resourceDirectories;
    
-   public SDFLogModelProvider(String modelName, InputStream model, String[] resourceDirectories)
+   public SDFLogModelProvider(SDFParameters sdfParameters)
    {
-      this.modelName = modelName;
+      this(sdfParameters.getSdfModelName(), sdfParameters.getSdfAsInputStream(), sdfParameters.getResourceDirectories());
+   }
+
+   public SDFLogModelProvider(String modelName, InputStream sdfFileAsStream, String[] resourceDirectories)
+   {
+      this.sdfModelName = modelName;
+      
       try
       {
-         this.model = IOUtils.toByteArray(model);
+         this.model = IOUtils.toByteArray(sdfFileAsStream);
       }
       catch(IOException e)
       {
@@ -68,6 +75,6 @@ public class SDFLogModelProvider implements LogModelProvider
    @Override
    public String getModelName()
    {
-      return modelName;
+      return sdfModelName;
    }
 }

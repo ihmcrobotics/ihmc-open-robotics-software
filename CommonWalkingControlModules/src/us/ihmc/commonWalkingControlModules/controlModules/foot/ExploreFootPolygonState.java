@@ -12,7 +12,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -71,8 +70,6 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
    private final IntegerYoVariable yoCurrentCorner;
 
-   private final BooleanYoVariable autoCropToLineAfterExploration;
-
    private final DoubleYoVariable timeBeforeExploring;
 
    public ExploreFootPolygonState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
@@ -103,9 +100,6 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
       recoverTime = explorationParameters.getRecoverTime();
       timeBeforeExploring = explorationParameters.getTimeBeforeExploring();
-
-      autoCropToLineAfterExploration = new BooleanYoVariable(footName + "AutoCropToLineAfterExploration", registry);
-      autoCropToLineAfterExploration.set(false);
 
       timeToGoToCorner = explorationParameters.getTimeToGoToCorner();
       timeToGoToCorner.addVariableChangedListener(new VariableChangedListener()
@@ -322,11 +316,8 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             }
          }
 
-         if (autoCropToLineAfterExploration.getBooleanValue() && done)
-         {
-            partialFootholdControlModule.requestLineFit();
-            partialFootholdControlModule.turnOffCropping();
-         }
+         if (done)
+            partialFootholdControlModule.informExplorationDone();
 
          centerOfPressureCommand.setDesiredCoP(desiredCenterOfPressure.getPoint());
          copCommandWeightVector.set(copCommandWeight.getDoubleValue(), copCommandWeight.getDoubleValue());
