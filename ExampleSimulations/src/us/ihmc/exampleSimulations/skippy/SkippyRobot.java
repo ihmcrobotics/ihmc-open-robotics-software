@@ -20,6 +20,7 @@ import java.util.ArrayList;
 public class SkippyRobot extends Robot
 {
    private static final long serialVersionUID = -7671864179791904256L;
+   public static FloatingJoint mainJoint;
    private UniversalJoint foot;
    private PinJoint hip;
    private PinJoint shoulder;
@@ -31,7 +32,7 @@ public class SkippyRobot extends Robot
    public static final double
            LEG_LENGTH = 1.0, LEG_MASS = 1.0, LEG_RADIUS = 0.1, LEG_MOI = (1.0/3.0)* LEG_MASS *Math.pow(LEG_LENGTH,2), // Leg
            TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0/3.0)* TORSO_MASS *Math.pow(TORSO_LENGTH,2), // Torso
-           SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/12.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
+            SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/12.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
 
    private ExternalForcePoint balanceForce;
 
@@ -55,15 +56,24 @@ public class SkippyRobot extends Robot
       groundContactPoints.add(rightContact);
 
 
-       FloatingJoint mainJoint = new FloatingJoint("mainJoint", new Vector3d(0.0,0.0,0.0), this);
+       mainJoint = new FloatingJoint("mainJoint", new Vector3d(0.0,0.0,0.0), this);
        Link mainJointLink = new Link("mainJointLink");
-       mainJointLink.setMass(5);  //5 seems to work well - other values make the jump too high/low
-       mainJointLink.setMomentOfInertia(27.5,27.5,1000);  //the smaller the value, the more realistic the jump (not as small as 0.00001)
+       mainJointLink.setMass(0.5);  //5 seems to work well - other values make the jump too high/low
+       mainJointLink.setMomentOfInertia(111127.5,111127.5,1000);  //the smaller the value, the more realistic the jump (not as small as 0.00001)
       Graphics3DObject mainJointLinkGraphics = new Graphics3DObject();
       mainJointLinkGraphics.addCube(0.25,0.25,0.25,YoAppearance.White());
       mainJointLink.setLinkGraphics(mainJointLinkGraphics);
       mainJoint.setLink(mainJointLink);
        mainJoint.addGroundContactPoint(footContact);
+
+      GroundContactPoint footContact1 = new GroundContactPoint("footContact1", new Vector3d(0.125,0.125,0.0), this);
+      GroundContactPoint footContact2 = new GroundContactPoint("footContact2", new Vector3d(-0.125,0.125,0.0), this);
+      GroundContactPoint footContact3 = new GroundContactPoint("footContact3", new Vector3d(-0.125,-0.125,0.0), this);
+      GroundContactPoint footContact4 = new GroundContactPoint("footContact4", new Vector3d(0.125,-0.125,0.0), this);
+      mainJoint.addGroundContactPoint(footContact1);
+      mainJoint.addGroundContactPoint(footContact2);
+      mainJoint.addGroundContactPoint(footContact3);
+      mainJoint.addGroundContactPoint(footContact4);
        this.addRootJoint(mainJoint);
 
        // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
