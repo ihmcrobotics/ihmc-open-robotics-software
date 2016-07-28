@@ -1,13 +1,13 @@
 package us.ihmc.tools.inputDevices.joystick.mapping;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.lang3.SystemUtils;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 import net.java.games.input.Component;
-import net.java.games.input.Event;
 import net.java.games.input.Component.Identifier;
+import net.java.games.input.Event;
 
 public enum LogitechExtreme3DMapping implements JoystickMapping
 {
@@ -31,13 +31,9 @@ public enum LogitechExtreme3DMapping implements JoystickMapping
 
    public static final LogitechExtreme3DMapping[] values = values();
 
-   private static final Map<Identifier, LogitechExtreme3DMapping> windowsIdentifierToMapping = new HashMap<>(values.length);
-   private static final Map<Identifier, LogitechExtreme3DMapping> macIdentifierToMapping = new HashMap<>(values.length);
-   private static final Map<Identifier, LogitechExtreme3DMapping> linuxIdentifierToMapping = new HashMap<>(values.length);
-
-   private static final Map<LogitechExtreme3DMapping, Identifier> mappingToWindowsIdentifier = new HashMap<>(values.length);
-   private static final Map<LogitechExtreme3DMapping, Identifier> mappingToMacIdentifier = new HashMap<>(values.length);
-   private static final Map<LogitechExtreme3DMapping, Identifier> mappingToLinuxIdentifier = new HashMap<>(values.length);
+   private static final BiMap<Identifier, LogitechExtreme3DMapping> windowsBiMap = HashBiMap.create(values.length);
+   private static final BiMap<Identifier, LogitechExtreme3DMapping> macBiMap = HashBiMap.create(values.length);
+   private static final BiMap<Identifier, LogitechExtreme3DMapping> linuxBiMap = HashBiMap.create(values.length);
 
    static
    {
@@ -62,12 +58,9 @@ public enum LogitechExtreme3DMapping implements JoystickMapping
 
    private static void mapValues(LogitechExtreme3DMapping mapping, Identifier windowsIdentifier, Identifier macIdentifier, Identifier linuxIdentifier)
    {
-      windowsIdentifierToMapping.put(windowsIdentifier, mapping);
-      macIdentifierToMapping.put(macIdentifier, mapping);
-      linuxIdentifierToMapping.put(linuxIdentifier, mapping);
-      mappingToWindowsIdentifier.put(mapping, windowsIdentifier);
-      mappingToMacIdentifier.put(mapping, macIdentifier);
-      mappingToLinuxIdentifier.put(mapping, linuxIdentifier);
+      windowsBiMap.put(windowsIdentifier, mapping);
+      macBiMap.put(macIdentifier, mapping);
+      linuxBiMap.put(linuxIdentifier, mapping);
    }
 
    @Override
@@ -75,15 +68,15 @@ public enum LogitechExtreme3DMapping implements JoystickMapping
    {
       if (SystemUtils.IS_OS_WINDOWS)
       {
-         return mappingToWindowsIdentifier.get(this);
+         return windowsBiMap.inverse().get(this);
       }
       else if (SystemUtils.IS_OS_MAC)
       {
-         return mappingToMacIdentifier.get(this);
+         return macBiMap.inverse().get(this);
       }
       else if (SystemUtils.IS_OS_LINUX)
       {
-         return mappingToLinuxIdentifier.get(this);
+         return linuxBiMap.inverse().get(this);
       }
       else
       {
@@ -95,15 +88,15 @@ public enum LogitechExtreme3DMapping implements JoystickMapping
    {
       if (SystemUtils.IS_OS_WINDOWS)
       {
-         return windowsIdentifierToMapping.get(identifier);
+         return windowsBiMap.get(identifier);
       }
       else if (SystemUtils.IS_OS_MAC)
       {
-         return macIdentifierToMapping.get(identifier);
+         return macBiMap.get(identifier);
       }
       else if (SystemUtils.IS_OS_LINUX)
       {
-         return linuxIdentifierToMapping.get(identifier);
+         return linuxBiMap.get(identifier);
       }
       else
       {
