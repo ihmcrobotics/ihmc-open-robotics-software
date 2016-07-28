@@ -33,7 +33,7 @@ public class SkippyRobot extends Robot
            TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0/3.0)* TORSO_MASS *Math.pow(TORSO_LENGTH,2), // Torso
            SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/12.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
 
-   private ExternalForcePoint balanceForceX, balanceForceY;
+   private ExternalForcePoint balanceForce;
 
    public SkippyRobot()
    {
@@ -55,24 +55,27 @@ public class SkippyRobot extends Robot
       groundContactPoints.add(rightContact);
 
 
-//       FloatingJoint mainJoint = new FloatingJoint("mainJoint", new Vector3d(0.0,0.0,0.0), this);
-//       Link mainJointLink = new Link("mainJointLink");
-//       mainJointLink.setMass(1);  //5 seems to work well - other values make the jump too high/low
-//       mainJointLink.setMomentOfInertia(10,10,10);  //the smaller the value, the more realistic the jump (not as small as 0.00001)
-//       mainJoint.setLink(mainJointLink);
-//       mainJoint.addGroundContactPoint(footContact);
-//       this.addRootJoint(mainJoint);
-
+       FloatingJoint mainJoint = new FloatingJoint("mainJoint", new Vector3d(0.0,0.0,0.0), this);
+       Link mainJointLink = new Link("mainJointLink");
+       mainJointLink.setMass(5);  //5 seems to work well - other values make the jump too high/low
+       mainJointLink.setMomentOfInertia(27.5,27.5,1000);  //the smaller the value, the more realistic the jump (not as small as 0.00001)
+      Graphics3DObject mainJointLinkGraphics = new Graphics3DObject();
+      mainJointLinkGraphics.addCube(0.25,0.25,0.25,YoAppearance.White());
+      mainJointLink.setLinkGraphics(mainJointLinkGraphics);
+      mainJoint.setLink(mainJointLink);
+       mainJoint.addGroundContactPoint(footContact);
+       this.addRootJoint(mainJoint);
 
        // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
       foot = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, 0.0), this, Axis.X, Axis.Y);
-      foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.0)); // initial Cartesian position of foot
+      foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.2)); // initial Cartesian position of foot
       foot.setInitialState(Math.PI/6, 0.0, 0.0, 0.0); // initial position "q" of foot
       Link leg = createLeg();
       foot.setLink(leg);
-      this.addRootJoint(foot);
-      foot.addGroundContactPoint(footContact);
-       //mainJoint.addJoint(foot);
+      //this.addRootJoint(foot);
+      //foot.addGroundContactPoint(footContact);
+       mainJoint.addJoint(foot);
+
 
       hip = new PinJoint("hip", new Vector3d(0.0, 0.0, LEG_LENGTH), this, Axis.X);
       Link torso = createTorso();
@@ -86,12 +89,9 @@ public class SkippyRobot extends Robot
       shoulder.setLink(arms);
       shoulder.setInitialState(0.0,0.0);
 
-      balanceForceX = new ExternalForcePoint("BalanceForceX", new Vector3d(0.0,0.0,0.0), this);
-      balanceForceX.setForce(0.0,0.0,0.0);
-      balanceForceY = new ExternalForcePoint("BalanceForceY", new Vector3d(0.0,0.0,0.0), this);
-      balanceForceY.setForce(0.0,0.0,0.0);
-      shoulder.addExternalForcePoint(balanceForceX);
-      shoulder.addExternalForcePoint(balanceForceY);
+      balanceForce = new ExternalForcePoint("BalanceForce", this);
+      //balanceForce.setForce(0.0,0.0,0.0);
+      shoulder.addExternalForcePoint(balanceForce);
 
       //shoulder.setDamping(0.3);
       this.hip.addJoint(shoulder);
@@ -191,12 +191,8 @@ public class SkippyRobot extends Robot
       return SHOULDER_LENGTH;
    }
 
-   public void setBalanceForceX(double x, double y, double z)
+   public void setBalanceForce(double x, double y, double z)
    {
-      balanceForceX.setForce(x, y, z);
-   }
-   public void setBalanceForceY(double x, double y, double z)
-   {
-      balanceForceY.setForce(x, y, z);
+      balanceForce.setForce(x, y, z);
    }
 }
