@@ -20,7 +20,8 @@ public class LinkExampleSimulation2
    private SimulationConstructionSet sim;
    private static final double
          CUBE_L = 0.2, CUBE_W = 0.1, CUBE_H = 0.3;
-   private static final double SPHERE_R = 1.15;
+
+
    private static final double
          ELLIPSOID_RX = 0.1, ELLIPSOID_RY = 0.2, ELLIPSOID_RZ = 0.3;
    private static final double
@@ -36,8 +37,7 @@ public class LinkExampleSimulation2
    private static final double
          PYRAMID_CUBE_LX = 0.15, PYRAMID_CUBE_LY = 0.15, PYRAMID_CUBE_LZ = 0.08, PYRAMID_CUBE_LH = 0.15;
 
-   private static final double
-         OFFSET = 1.2, COORD_LENGTH = 0.5;
+
    private static final double WEDGE_X = 0.4, WEDGE_Y = 0.3, WEDGE_Z = 0.2;
 
    public LinkExampleSimulation2()
@@ -59,6 +59,10 @@ public class LinkExampleSimulation2
       new LinkExampleSimulation2();
    }
 
+
+   private static final double SPHERE_R = 1.15;
+   private static final double
+         OFFSET = 1.2, COORD_LENGTH = 0.5;
    private Link exampleShapes()
    {
       Link ret = new Link("example shapes");
@@ -66,7 +70,7 @@ public class LinkExampleSimulation2
       // Cube
       linkGraphics.addCoordinateSystem(COORD_LENGTH);
       linkGraphics.addCube(CUBE_L, CUBE_W, CUBE_H, YoAppearance.Teal());
-      // Sphere
+
       linkGraphics.translate(OFFSET, 0.0, 0.0);
       linkGraphics.addCoordinateSystem(COORD_LENGTH);
       linkGraphics.addSphere(SPHERE_R, YoAppearance.Aqua());
@@ -111,6 +115,7 @@ public class LinkExampleSimulation2
       // Extruded Polygon
       linkGraphics.translate(-2.0 * OFFSET, OFFSET, 0.0);
       linkGraphics.addCoordinateSystem(COORD_LENGTH);
+
       ArrayList<Point2d> polygonPoints = new ArrayList<Point2d>();
       polygonPoints.add(new Point2d());
       polygonPoints.add(new Point2d(0.4, 0.0));
