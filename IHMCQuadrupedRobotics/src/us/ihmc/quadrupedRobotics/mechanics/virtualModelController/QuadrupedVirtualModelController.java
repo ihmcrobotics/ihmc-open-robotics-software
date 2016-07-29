@@ -62,6 +62,7 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<YoFramePoint[]> yoJointTorqueGraphicPositions;
    private final QuadrantDependentList<BooleanYoVariable> yoJointTorqueGraphicsVisible;
    private final QuadrantDependentList<YoGraphicVector[]> yoJointTorqueGraphics;
+   private final FrameVector jointAxisTempVector = new FrameVector();
 
    public QuadrupedVirtualModelController(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
@@ -245,7 +246,11 @@ public class QuadrupedVirtualModelController
 
             // update joint torque vectors
             jointTorques.get(robotQuadrant)[index].setToZero(joint.getFrameBeforeJoint());
-            jointTorques.get(robotQuadrant)[index].set(tau * joint.getJointAxis().getX(), tau * joint.getJointAxis().getY(), tau * joint.getJointAxis().getZ());
+            joint.getJointAxis(jointAxisTempVector);
+            double x = tau * jointAxisTempVector.getX();
+            double y = tau * jointAxisTempVector.getY();
+            double z = tau * jointAxisTempVector.getZ();
+            jointTorques.get(robotQuadrant)[index].set(x, y, z);
             jointTorques.get(robotQuadrant)[index].changeFrame(worldFrame);
 
             index++;
