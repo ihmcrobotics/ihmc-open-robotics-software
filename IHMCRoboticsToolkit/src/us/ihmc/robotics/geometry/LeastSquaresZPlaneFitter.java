@@ -90,8 +90,9 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
          return Double.POSITIVE_INFINITY;
       }
 
-      for (Point3d point3d : pointList)
+      for (int i = 0; i < pointList.size(); i++)
       {
+         Point3d point3d = pointList.get(i);
          n++;
          x += point3d.x;
          y += point3d.y;
