@@ -53,8 +53,8 @@ public class QuadrupedTimedStepController
    private final QuadrantDependentList<FramePoint> solePositionEstimate;
 
    // graphics
-   private final BagOfBalls stepQueueVisualization;
    private final FramePoint stepQueueVisualizationPosition;
+   private final QuadrantDependentList<BagOfBalls> stepQueueVisualization;
    private static final QuadrantDependentList<AppearanceDefinition> stepQueueAppearance = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Blue(),
          YoAppearance.RGBColor(1, 0.5, 0.0), YoAppearance.RGBColor(0.0, 0.5, 1.0));
 
@@ -104,8 +104,14 @@ public class QuadrupedTimedStepController
       stepTransitionCallback = null;
 
       // graphics
-      stepQueueVisualization = BagOfBalls.createRainbowBag(stepQueue.capacity(), 0.015, "xGaitSteps", registry, graphicsListRegistry);
+      stepQueueVisualization = new QuadrantDependentList<>();
       stepQueueVisualizationPosition = new FramePoint();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         AppearanceDefinition appearance = stepQueueAppearance.get(robotQuadrant);
+         String prefix = "timedStepController" + robotQuadrant.getPascalCaseName() + "GoalPositions";
+         stepQueueVisualization.set(robotQuadrant, new BagOfBalls(stepQueue.capacity(), 0.015, prefix, appearance, registry, graphicsListRegistry));
+      }
       parentRegistry.addChild(registry);
    }
 
@@ -231,15 +237,19 @@ public class QuadrupedTimedStepController
 
    private void updateGraphics()
    {
+      for (int i = 0; i < stepQueue.capacity(); i++)
+      {
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            stepQueueVisualizationPosition.setToZero();
+            stepQueueVisualization.get(robotQuadrant).setBall(stepQueueVisualizationPosition, i);
+         }
+      }
       for (int i = 0; i < stepQueue.size(); i++)
       {
          stepQueue.get(i).getGoalPosition(stepQueueVisualizationPosition);
-         stepQueueVisualization.setBallLoop(stepQueueVisualizationPosition, stepQueueAppearance.get(stepQueue.get(i).getRobotQuadrant()));
-      }
-      stepQueueVisualizationPosition.setToZero();
-      for (int i = stepQueue.size(); i < stepQueue.capacity(); i++)
-      {
-         stepQueueVisualization.setBallLoop(stepQueueVisualizationPosition);
+         RobotQuadrant robotQuadrant = stepQueue.get(i).getRobotQuadrant();
+         stepQueueVisualization.get(robotQuadrant).setBallLoop(stepQueueVisualizationPosition);
       }
    }
 
