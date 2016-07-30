@@ -141,8 +141,9 @@ public class HighLevelHumanoidControllerToolbox
    protected final YoFramePoint yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
 
-   private final MomentumCalculator upperBodyMomentumCalculator;
-   private final YoFrameVector yoUpperBodyAngularMomentum;
+   private final MomentumCalculator momentumCalculator;
+   private final YoFrameVector yoAngularMomentum;
+   private final DoubleYoVariable totalMass = new DoubleYoVariable("TotalMass", registry);
 
    private final FramePoint2d centerOfPressure = new FramePoint2d();
    private final YoFramePoint2d yoCenterOfPressure = new YoFramePoint2d("CenterOfPressure", worldFrame, registry);
@@ -355,11 +356,10 @@ public class HighLevelHumanoidControllerToolbox
       }
       yoCenterOfPressure.setToNaN();
 
-      RigidBody chest = fullRobotModel.getChest();
-      upperBodyMass = TotalMassCalculator.computeSubTreeMass(chest);
-      upperBodyMomentumCalculator = new MomentumCalculator(twistCalculator, ScrewTools.computeSubtreeSuccessors(chest.getParentJoint()));
-      yoUpperBodyAngularMomentum = new YoFrameVector("UpperBodyAngularMomentum", centerOfMassFrame, registry);
-      momentumGain.set(0.0);
+      this.totalMass.set(totalMass);
+      momentumCalculator = new MomentumCalculator(twistCalculator, ScrewTools.computeSubtreeSuccessors(fullRobotModel.getElevator()));
+      yoAngularMomentum = new YoFrameVector("AngularMomentum", centerOfMassFrame, registry);
+      momentumGain.set(1.0);
    }
 
    public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
@@ -475,28 +475,27 @@ public class HighLevelHumanoidControllerToolbox
       yoCapturePoint.setXY(capturePoint2d);
    }
 
-   private final FrameVector upperBodyAngularMomentum = new FrameVector();
-   private final Momentum upperBodyMomentum = new Momentum();
+   private final FrameVector angularMomentum = new FrameVector();
+   private final Momentum robotMomentum = new Momentum();
    private void computeAngularMomentum()
    {
-      upperBodyMomentum.setToZero(centerOfMassFrame);
-      upperBodyMomentumCalculator.computeAndPack(upperBodyMomentum);
-      upperBodyMomentum.getAngularPartIncludingFrame(upperBodyAngularMomentum);
-      yoUpperBodyAngularMomentum.set(upperBodyAngularMomentum);
+      robotMomentum.setToZero(centerOfMassFrame);
+      momentumCalculator.computeAndPack(robotMomentum);
+      robotMomentum.getAngularPartIncludingFrame(angularMomentum);
+      yoAngularMomentum.set(angularMomentum);
    }
 
-   private final double upperBodyMass;
    private final FramePoint2d localDesiredCapturePoint = new FramePoint2d();
    private final DoubleYoVariable momentumGain = new DoubleYoVariable("MomentumGain", registry);
    public void getAdjustedDesiredCapturePoint(FramePoint2d desiredCapturePoint, FramePoint2d adjustedDesiredCapturePoint)
    {
-      ReferenceFrame comFrame = upperBodyAngularMomentum.getReferenceFrame();
+      ReferenceFrame comFrame = angularMomentum.getReferenceFrame();
       localDesiredCapturePoint.setIncludingFrame(desiredCapturePoint);
       localDesiredCapturePoint.changeFrameAndProjectToXYPlane(comFrame);
 
-      double scaleFactor = momentumGain.getDoubleValue() * omega0.getDoubleValue() / (upperBodyMass * gravity);
+      double scaleFactor = momentumGain.getDoubleValue() * omega0.getDoubleValue() / (totalMass.getDoubleValue() * gravity);
 
-      adjustedDesiredCapturePoint.setIncludingFrame(comFrame, upperBodyAngularMomentum.getY(), upperBodyAngularMomentum.getX());
+      adjustedDesiredCapturePoint.setIncludingFrame(comFrame, angularMomentum.getY(), angularMomentum.getX());
       adjustedDesiredCapturePoint.scale(scaleFactor);
       adjustedDesiredCapturePoint.add(localDesiredCapturePoint);
       adjustedDesiredCapturePoint.changeFrameAndProjectToXYPlane(desiredCapturePoint.getReferenceFrame());
@@ -1000,7 +999,7 @@ public class HighLevelHumanoidControllerToolbox
 
    public void getUpperBodyAngularMomentum(FrameVector upperBodyAngularMomentumToPack)
    {
-      upperBodyAngularMomentumToPack.setIncludingFrame(upperBodyAngularMomentum);
+      upperBodyAngularMomentumToPack.setIncludingFrame(angularMomentum);
    }
 
 }
