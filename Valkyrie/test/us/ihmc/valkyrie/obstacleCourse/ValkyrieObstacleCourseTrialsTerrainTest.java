@@ -23,6 +23,14 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
 
    @Override
+   protected DRCRobotModel getRobotModelWithAdditionalFootContactPoints()
+   {
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
+      robotModel.addMoreFootContactPointsSimOnly(5, 3, true);
+      return robotModel;
+   }
+
+   @Override
    public String getSimpleRobotName()
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);

@@ -5,6 +5,7 @@ import javax.vecmath.Point3d;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedStep
@@ -31,6 +32,7 @@ public class QuadrupedStep
    public QuadrupedStep(RobotQuadrant robotQuadrant, FramePoint goalPosition, double groundClearance)
    {
       this.robotQuadrant = robotQuadrant;
+      this.goalPosition = new Point3d();
       this.groundClearance = groundClearance;
       setGoalPosition(goalPosition);
    }
@@ -46,9 +48,8 @@ public class QuadrupedStep
    public void set(QuadrupedStep quadrupedStep)
    {
       this.robotQuadrant = quadrupedStep.robotQuadrant;
-      this.goalPosition = new Point3d();
+      this.goalPosition.set(quadrupedStep.goalPosition);
       this.groundClearance = quadrupedStep.groundClearance;
-      setGoalPosition(quadrupedStep.getGoalPosition());
    }
 
    public void get(QuadrupedStep quadrupedStep)
@@ -61,6 +62,11 @@ public class QuadrupedStep
    public RobotQuadrant getRobotQuadrant()
    {
       return robotQuadrant;
+   }
+   
+   public RobotEnd getRobotEnd()
+   {
+      return robotQuadrant.getEnd();
    }
 
    public void setRobotQuadrant(RobotQuadrant robotQuadrant)

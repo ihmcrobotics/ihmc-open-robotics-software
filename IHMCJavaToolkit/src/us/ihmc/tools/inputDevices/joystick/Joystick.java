@@ -155,6 +155,11 @@ public class Joystick
       joystickUpdater.setPollIntervalMillis(pollIntervalMillis);
    }
    
+   public void setComponentFilter(JoystickComponentFilter componentFilter)
+   {
+      joystickUpdater.setComponentFilter(componentFilter);
+   }
+
    public JoystickModel getModel()
    {
       return model;
@@ -259,7 +264,7 @@ public class Joystick
    {
       return controller.getType() == Controller.Type.STICK || controller.getType() == Controller.Type.GAMEPAD;
    }
-
+   
    public static void main(String[] args)
    {
       try

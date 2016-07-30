@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.partNames.JointRole;
+import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -20,6 +22,7 @@ import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 import javax.vecmath.Vector3d;
 
@@ -123,9 +126,18 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.setContactState(quadrant, ContactState.NO_CONTACT);
-         fullRobotModel.getOneDoFJointBeforeFoot(quadrant).setUseFeedBackForceControl(useForceFeedbackControl.get());
       }
       taskSpaceController.reset();
+
+      // Initialize force feedback
+      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      {
+         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
+         {
+            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControl.get());
+         }
+      }
    }
 
    @Override
@@ -140,6 +152,14 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    @Override
    public void onExit()
    {
+      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      {
+         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
+         {
+            oneDoFJoint.setUseFeedBackForceControl(true);
+         }
+      }
    }
 
    private void updateGains()

@@ -1,11 +1,11 @@
 package us.ihmc.quadrupedRobotics.model;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedRuntimeEnvironment

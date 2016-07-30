@@ -1,12 +1,14 @@
 package us.ihmc.SdfLoader;
 
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.nio.file.Path;
 
 public interface SDFParameters
 {
-
+   /** @deprecated Use getSdfModelPath() */
    String getSdfFilePath();
+   
+   Path getSdfModelPath();
 
    String getSdfModelName();
 
@@ -15,5 +17,4 @@ public interface SDFParameters
    String getResourceDirectory();
    
    InputStream getSdfAsInputStream();
-
 }
