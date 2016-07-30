@@ -13,7 +13,6 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class PelvisIMUBasedLinearStateCalculator
 {
@@ -67,7 +66,6 @@ public class PelvisIMUBasedLinearStateCalculator
       {
          imuProcessedOutput = null;
          imuBasedStateEstimationEnabled.set(false);
-         PrintTools.debug("set using the imu to false");
       }
       else
       {
@@ -75,7 +73,6 @@ public class PelvisIMUBasedLinearStateCalculator
             System.out.println(getClass().getSimpleName() + ": More than 1 IMU sensor, using only the first one: " + imuProcessedOutputs.get(0).getSensorName());
          imuProcessedOutput = imuProcessedOutputs.get(0);
          imuBasedStateEstimationEnabled.set(true);
-         PrintTools.debug("set using the imu to true");
       }
       
       if (imuBasedStateEstimationEnabled.getBooleanValue())
