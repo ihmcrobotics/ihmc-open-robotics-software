@@ -20,7 +20,8 @@ public enum LogSettings
    ETHERCAT(false),
    HAND(false),
    MINI_BEAST(false),
-   BABY_BEAST(true);
+   BABY_BEAST(true),
+   V2EXO(true);
 
    private final boolean log;
    private final InetAddress videoStream;

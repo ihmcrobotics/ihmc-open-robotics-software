@@ -4,10 +4,12 @@ import javax.vecmath.Matrix3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.Twist;
 
 public class EuclideanPositionController implements PositionController
 {
@@ -25,9 +27,15 @@ public class EuclideanPositionController implements PositionController
    private final FrameVector proportionalTerm;
    private final FrameVector derivativeTerm;
    private final FrameVector integralTerm;
+   
+   private final FramePoint desiredPosition = new FramePoint();
+   private final FrameVector desiredVelocity = new FrameVector();
+   private final FrameVector feedForwardLinearAction = new FrameVector();
+   private final FrameVector actionFromPositionController = new FrameVector();
 
    private final YoFrameVector feedbackLinearAction;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAction;
+   
 
    private final double dt;
 
@@ -103,6 +111,41 @@ public class EuclideanPositionController implements PositionController
 
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
+   }
+   
+   /**
+    * Computes linear portion of twist to pack
+    */
+   public void compute(Twist twistToPack, FramePose desiredPose, Twist desiredTwist)
+   {
+      checkBodyFrames(desiredTwist, twistToPack);
+      checkBaseFrames(desiredTwist, twistToPack);
+      checkExpressedInFrames(desiredTwist, twistToPack);
+
+      twistToPack.setToZero(bodyFrame, desiredTwist.getBaseFrame(), bodyFrame);
+
+      desiredPose.getPositionIncludingFrame(desiredPosition);
+      desiredTwist.getLinearPart(desiredVelocity);
+      desiredTwist.getLinearPart(feedForwardLinearAction);
+      compute(actionFromPositionController, desiredPosition, desiredVelocity, null, feedForwardLinearAction);
+      twistToPack.setLinearPart(actionFromPositionController.getVector());
+   }
+   
+   private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
+      currentTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
+   }
+
+   private void checkBaseFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getBaseFrame().checkReferenceFrameMatch(currentTwist.getBaseFrame());
+   }
+
+   private void checkExpressedInFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
+      currentTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
    private void computeProportionalTerm(FramePoint desiredPosition)

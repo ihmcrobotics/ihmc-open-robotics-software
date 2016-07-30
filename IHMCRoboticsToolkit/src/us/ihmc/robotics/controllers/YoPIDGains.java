@@ -6,7 +6,8 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class YoPIDGains extends YoPDGains
 {
-   private final DoubleYoVariable ki, maxIntegralError, integralLeakRatio;
+   protected final DoubleYoVariable ki;
+   private final DoubleYoVariable maxIntegralError, integralLeakRatio;
 
    public YoPIDGains(String suffix, YoVariableRegistry registry)
    {

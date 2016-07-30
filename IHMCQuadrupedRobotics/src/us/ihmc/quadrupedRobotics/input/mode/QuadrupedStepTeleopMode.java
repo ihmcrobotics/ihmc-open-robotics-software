@@ -5,16 +5,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.vecmath.Vector3d;
+
+import net.java.games.input.Event;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator.Estimates;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.input.InputChannel;
-import us.ihmc.quadrupedRobotics.input.InputEvent;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
@@ -28,8 +29,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
-import javax.vecmath.Vector3d;
+import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
 public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
 {
@@ -40,7 +40,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private final DoubleParameter pitchScaleParameter = parameterFactory.createDouble("pitchScale", 0.15);
    private final DoubleParameter zdotScaleParameter = parameterFactory.createDouble("zdotScale", 0.25);
    private final DoubleParameter defaultComHeightParameter = parameterFactory.createDouble("defaultComHeight", 0.6);
-   private final DoubleParameter defaultGroundClearance = parameterFactory.createDouble("defaultGroundClearance", 0.05);
+   private final DoubleParameter defaultGroundClearance = parameterFactory.createDouble("defaultGroundClearance", 0.10);
    private final DoubleParameter xStrideMax = parameterFactory.createDouble("xStrideMax", 0.4);
    private final DoubleParameter yStrideMax = parameterFactory.createDouble("yStrideMax", 0.25);
    private final DoubleParameter yawRateScale = parameterFactory.createDouble("yawRateScale", 0.25);
@@ -50,12 +50,12 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private final DoubleParameter singleStepSwingDuration = parameterFactory.createDouble("singleStepSwingDuration", 2.0);
 
    // xgait step parameters
-   private final IntegerParameter xGaitStepPlanSize = parameterFactory.createInteger("xGaitStepPlanSize", 8);
-   private final DoubleParameter xGaitStanceWidth = parameterFactory.createDouble("xGaitStanceWidth", 0.25);
+   private final IntegerParameter xGaitStepPlanSize = parameterFactory.createInteger("xGaitStepPlanSize", 12);
+   private final DoubleParameter xGaitStanceWidth = parameterFactory.createDouble("xGaitStanceWidth", 0.35);
    private final DoubleParameter xGaitStanceLength = parameterFactory.createDouble("xGaitStanceWidth", 1.0);
-   private final DoubleArrayParameter xGaitStepDuration = parameterFactory.createDoubleArray("xGaitStepDuration", 0.5, 0.5);
-   private final DoubleArrayParameter xGaitEndDoubleSupportDuration = parameterFactory.createDoubleArray("xGaitEndDoubleSupportDuration", 1.0, 2.0);
-   private final DoubleArrayParameter xGaitEndPhaseShift = parameterFactory.createDoubleArray("xGaitEndPhaseShift", 90, 135);
+   private final DoubleArrayParameter xGaitStepDuration = parameterFactory.createDoubleArray("xGaitStepDuration", 0.5, 0.4);
+   private final DoubleArrayParameter xGaitEndDoubleSupportDuration = parameterFactory.createDoubleArray("xGaitEndDoubleSupportDuration", 0.5, 0.2);
+   private final DoubleArrayParameter xGaitEndPhaseShift = parameterFactory.createDoubleArray("xGaitEndPhaseShift", 90, 180);
 
    private final PacketCommunicator packetCommunicator;
    private final QuadrupedReferenceFrames referenceFrames;
@@ -80,20 +80,20 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    }
 
    @Override
-   public void update(Map<InputChannel, Double> channels, QuadrupedTaskSpaceEstimator.Estimates estimates)
+   public void update(Map<XBoxOneMapping, Double> channels, Estimates estimates)
    {
       double bodyRoll = 0.0;
-      double bodyPitch = channels.get(InputChannel.RIGHT_STICK_Y) * pitchScaleParameter.get();
-      double bodyYaw = channels.get(InputChannel.RIGHT_STICK_X) * yawScaleParameter.get();
+      double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * pitchScaleParameter.get();
+      double bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawScaleParameter.get();
       BodyOrientationPacket orientationPacket = new BodyOrientationPacket(bodyYaw, bodyPitch, bodyRoll);
       packetCommunicator.send(orientationPacket);
-
+   
       double comZdot = 0.0;
-      if (channels.get(InputChannel.D_PAD) == 0.25)
+      if (channels.get(XBoxOneMapping.DPAD) == 0.25)
       {
          comZdot += zdotScaleParameter.get();
       }
-      if (channels.get(InputChannel.D_PAD) == 0.75)
+      if (channels.get(XBoxOneMapping.DPAD) == 0.75)
       {
          comZdot -= zdotScaleParameter.get();
       }
@@ -102,59 +102,64 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    }
 
    @Override
-   public void onInputEvent(Map<InputChannel, Double> channels, QuadrupedTaskSpaceEstimator.Estimates estimates, InputEvent e)
+   public void onInputEvent(Map<XBoxOneMapping, Double> channels, Estimates estimates, Event event)
    {
       // Each button steps a different foot. The step length is determined by the left stick forward/back.
-      RobotQuadrant quadrantToStep = null;
-      switch (e.getChannel())
+      RobotQuadrant quadrantToStep;
+      switch (XBoxOneMapping.getMapping(event))
       {
-      case BUTTON_X:
+      case X:
          quadrantToStep = RobotQuadrant.FRONT_LEFT;
          break;
-      case BUTTON_Y:
+      case Y:
          quadrantToStep = RobotQuadrant.FRONT_RIGHT;
          break;
-      case BUTTON_B:
+      case B:
          quadrantToStep = RobotQuadrant.HIND_RIGHT;
          break;
-      case BUTTON_A:
+      case A:
          quadrantToStep = RobotQuadrant.HIND_LEFT;
          break;
+      default:
+         quadrantToStep = null;
+         break;
       }
-
+   
       if (quadrantToStep != null)
       {
-         double xStride = xStrideMax.get() * channels.get(InputChannel.LEFT_STICK_Y);
-         double yStride = yStrideMax.get() * channels.get(InputChannel.LEFT_STICK_X);
+         double xStride = xStrideMax.get() * channels.get(XBoxOneMapping.LEFT_STICK_Y);
+         double yStride = yStrideMax.get() * channels.get(XBoxOneMapping.LEFT_STICK_X);
          sendSingleFootstep(quadrantToStep, xStride, yStride);
       }
-
-
-      Boolean triggeredXGait = false;
-      switch (e.getChannel())
+   
+      Boolean triggeredXGait;
+      switch (XBoxOneMapping.getMapping(event))
       {
-      case RIGHT_BUTTON:
+      case RIGHT_BUMPER:
          triggeredXGait = true;
          xGaitSettings.setStepDuration(xGaitStepDuration.get(0));
          xGaitSettings.setEndDoubleSupportDuration(xGaitEndDoubleSupportDuration.get(0));
          xGaitSettings.setEndPhaseShift(xGaitEndPhaseShift.get(0));
          break;
-      case LEFT_BUTTON:
+      case LEFT_BUMPER:
          triggeredXGait = true;
          xGaitSettings.setStepDuration(xGaitStepDuration.get(1));
          xGaitSettings.setEndDoubleSupportDuration(xGaitEndDoubleSupportDuration.get(1));
          xGaitSettings.setEndPhaseShift(xGaitEndPhaseShift.get(1));
          break;
+      default:
+         triggeredXGait = false;
+         break;
       }
-
+   
       if (triggeredXGait)
       {
          double xVelocityMax = 0.5 * xStrideMax.get() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
          double yVelocityMax = 0.5 * yStrideMax.get() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
          double yawRateMax = yawRateScale.get() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
-         double xVelocity = channels.get(InputChannel.LEFT_STICK_Y) * xVelocityMax;
-         double yVelocity = channels.get(InputChannel.LEFT_STICK_X) * yVelocityMax;
-         double yawRate = channels.get(InputChannel.RIGHT_STICK_X) * yawRateMax;
+         double xVelocity = channels.get(XBoxOneMapping.LEFT_STICK_Y) * xVelocityMax;
+         double yVelocity = channels.get(XBoxOneMapping.LEFT_STICK_X) * yVelocityMax;
+         double yawRate = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawRateMax;
          Vector3d planarVelocity = new Vector3d(xVelocity, yVelocity, yawRate);
          sendXGaitFootsteps(xGaitSettings, planarVelocity, xGaitStepPlanSize.get());
       }
