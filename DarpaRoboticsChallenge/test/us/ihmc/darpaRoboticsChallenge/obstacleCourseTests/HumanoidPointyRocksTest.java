@@ -265,6 +265,14 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       Quat4d desiredOrientation = new Quat4d();
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(RobotSide.RIGHT, 1.0, desiredPosition.getPoint(), desiredOrientation);
       drcSimulationTestHelper.send(footTrajectoryMessage);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
+
+      Vector3d rootVelocity = new Vector3d();
+      FloatingJoint rootJoint = robot.getRootJoint();
+      rootJoint.getVelocity(rootVelocity);
+      double push = 0.04;
+      rootVelocity.y = rootVelocity.y + push;
+      rootJoint.setVelocity(rootVelocity);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
       assertTrue(success);
