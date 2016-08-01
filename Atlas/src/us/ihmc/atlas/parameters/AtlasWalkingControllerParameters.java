@@ -568,8 +568,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 1.0; //80.0;
-      double kpZ = 1.0; //80.0;
+      double kpXY = 3.0; //80.0;
+      double kpZ = 10.0; //80.0;
       double zetaXY = realRobot ? 0.5 : 0.8;
       double zetaZ = realRobot ? 0.22 : 0.8;
       double maxAccel = realRobot ? 6.0 : 36.0;
