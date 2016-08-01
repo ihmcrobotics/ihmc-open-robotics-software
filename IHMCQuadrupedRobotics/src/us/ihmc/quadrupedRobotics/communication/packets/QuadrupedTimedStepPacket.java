@@ -5,26 +5,23 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class QuadrupedTimedStepPacket extends Packet<QuadrupedTimedStepPacket>
 {
-   public ArrayList<QuadrupedTimedStep> steps;
+   public final ArrayList<QuadrupedTimedStep> steps = new ArrayList<>();
 
    public QuadrupedTimedStepPacket()
    {
+      this(Collections.<QuadrupedTimedStep> emptyList());
+      
       setDestination(PacketDestination.CONTROLLER);
-      steps = new ArrayList<>();
    }
 
    public QuadrupedTimedStepPacket(List<QuadrupedTimedStep> steps)
    {
-      this();
-      this.steps = new ArrayList<>(steps.size());
-      for (int i = 0; i < steps.size(); i++)
-      {
-         this.steps.add(steps.get(i));
-      }
+      this.steps.addAll(steps);
    }
 
    public int size()
