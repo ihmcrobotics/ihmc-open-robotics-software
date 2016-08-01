@@ -212,7 +212,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP,
             QuadrupedForceControllerState.FREEZE, QuadrupedForceControllerState.STAND_PREP);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE,
-            QuadrupedForceControllerState.DO_NOTHING, QuadrupedForceControllerState.FREEZE);
+         QuadrupedForceControllerState.DO_NOTHING, QuadrupedForceControllerState.FREEZE);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE,
             QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.FREEZE);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE,
@@ -221,6 +221,12 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             QuadrupedForceControllerState.STAND_READY, QuadrupedForceControllerState.FREEZE);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE,
             QuadrupedForceControllerState.SOLE_WAYPOINT, QuadrupedForceControllerState.FREEZE);
+
+      // Trigger do nothing
+      for(QuadrupedForceControllerState state: QuadrupedForceControllerState.values()){
+         builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_DO_NOTHING,
+               state, QuadrupedForceControllerState.DO_NOTHING);
+      }
 
       // Fall triggered events
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FALL,

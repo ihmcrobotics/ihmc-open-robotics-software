@@ -6,6 +6,7 @@ import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSoleForceEstimator;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
@@ -33,7 +34,10 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
    private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
    private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
-   private final BooleanParameter useForceFeedbackControl = parameterFactory.createBoolean("useForceFeedbackControl", true);
+   private final BooleanParameter useForceFeedbackControlParameter = parameterFactory.createBoolean("useForceFeedbackControlParameter", true);
+   private final BooleanParameter useSetpointCompensationParameter = parameterFactory.createBoolean("useSetpointCompensation", true);
+   private final DoubleParameter maxSetpointCompensationParameter = parameterFactory.createDouble("maxSetpointCompensation", .05);
+   private final DoubleArrayParameter setpointCompensationValuesParameter = parameterFactory.createDoubleArray("setpointCompensationValues", 0, 0, 0);
 
    // Reference frames
    private final ReferenceFrame bodyFrame;
@@ -48,6 +52,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
+   private final QuadrupedSoleForceEstimator soleForceEstimator;
 
    private SDFFullQuadrupedRobotModel fullRobotModel;
 
@@ -63,6 +68,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       // Task space controller
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
+      soleForceEstimator = controllerToolbox.getSoleForceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       taskSpaceController = controllerToolbox.getTaskSpaceController();
@@ -88,22 +94,46 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       }
       taskSpaceController.reset();
 
+      // Initialize sole force estimator
+      soleForceEstimator.reset();
+
       // Initial sole position setpoints
+      soleForceEstimator.compute();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          solePositionControllerSetpoints.getSolePosition(quadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
          solePositionControllerSetpoints.getSolePosition(quadrant).changeFrame(bodyFrame);
+         if (useSetpointCompensationParameter.get())
+         {
+            setpointCompensationValuesParameter.set(0,
+                  Math.max(soleForceEstimator.getSoleForce(quadrant).getX() / solePositionProportionalGainsParameter.get(0),
+                        -maxSetpointCompensationParameter.get()));
+            setpointCompensationValuesParameter.set(1,
+                  Math.max(soleForceEstimator.getSoleForce(quadrant).getY() / solePositionProportionalGainsParameter.get(0),
+                        -maxSetpointCompensationParameter.get()));
+            setpointCompensationValuesParameter.set(2,
+                  Math.max(soleForceEstimator.getSoleForce(quadrant).getZ() / solePositionProportionalGainsParameter.get(0),
+                        -maxSetpointCompensationParameter.get()));
+            solePositionControllerSetpoints.getSolePosition(quadrant)
+                  .add(setpointCompensationValuesParameter.get(0), setpointCompensationValuesParameter.get(1), setpointCompensationValuesParameter.get(2));
+         }
+         else
+         {
+            setpointCompensationValuesParameter.set(0, 0);
+            setpointCompensationValuesParameter.set(1, 0);
+            setpointCompensationValuesParameter.set(2, 0);
+         }
       }
-
       // Initialize force feedback
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControl.get());
+            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControlParameter.get());
          }
       }
+
    }
 
    @Override
@@ -113,19 +143,19 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       updateEstimates();
       updateSetpoints();
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
-
       return null;
    }
 
    @Override
    public void onExit()
    {
+      useForceFeedbackControlParameter.set(true);
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(true);
+            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControlParameter.get());
          }
       }
    }
