@@ -72,17 +72,17 @@ public class FlamingoStanceState extends SingleSupportState
 
       boolean icpErrorIsTooLarge = balanceManager.getICPErrorMagnitude() > 0.05;
 
-      if (icpErrorIsTooLarge)
-      {
-         FrameConvexPolygon2d supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
-         FrameConvexPolygon2d combinedFootPolygon = failureDetectionControlModule.getCombinedFootPolygon();
-         if (!supportPolygonInWorld.isPointInside(capturePoint2d, 2.0e-2) && combinedFootPolygon.isPointInside(capturePoint2d))
-         {
-            feetManager.requestMoveStraightTouchdownForDisturbanceRecovery(swingSide);
-            initiateFootLoadingProcedure(swingSide);
-            balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
-         }
-      }
+//      if (icpErrorIsTooLarge)
+//      {
+//         FrameConvexPolygon2d supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+//         FrameConvexPolygon2d combinedFootPolygon = failureDetectionControlModule.getCombinedFootPolygon();
+//         if (!supportPolygonInWorld.isPointInside(capturePoint2d, 2.0e-2) && combinedFootPolygon.isPointInside(capturePoint2d))
+//         {
+//            feetManager.requestMoveStraightTouchdownForDisturbanceRecovery(swingSide);
+//            initiateFootLoadingProcedure(swingSide);
+//            balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
+//         }
+//      }
 
       walkingMessageHandler.clearFootTrajectory(supportSide);
    }

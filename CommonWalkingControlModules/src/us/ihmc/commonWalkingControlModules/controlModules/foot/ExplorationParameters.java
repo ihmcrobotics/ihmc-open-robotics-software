@@ -26,7 +26,7 @@ public class ExplorationParameters
    private final DoubleYoVariable copGridThresholdForOccupancy;
    private final DoubleYoVariable copGridDecayAlpha;
    private static final double defaultCopGridThresholdForOccupancy = 3.0;
-   private static final double defaultCopGridDecayAlpha = 0.997;
+   private static final double defaultCopGridDecayAlpha = 1.0;
 
    /** Parameters for the partial foothold control module */
    private final BooleanYoVariable useCopOccupancyGrid;
