@@ -495,7 +495,7 @@ public class HighLevelHumanoidControllerToolbox
 
       double scaleFactor = momentumGain.getDoubleValue() * omega0.getDoubleValue() / (totalMass.getDoubleValue() * gravity);
 
-      adjustedDesiredCapturePoint.setIncludingFrame(comFrame, angularMomentum.getY(), angularMomentum.getX());
+      adjustedDesiredCapturePoint.setIncludingFrame(comFrame, -angularMomentum.getY(), angularMomentum.getX());
       adjustedDesiredCapturePoint.scale(scaleFactor);
       adjustedDesiredCapturePoint.add(localDesiredCapturePoint);
       adjustedDesiredCapturePoint.changeFrameAndProjectToXYPlane(desiredCapturePoint.getReferenceFrame());
