@@ -33,6 +33,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -143,6 +144,7 @@ public class HighLevelHumanoidControllerToolbox
 
    private final MomentumCalculator momentumCalculator;
    private final YoFrameVector yoAngularMomentum;
+   private final AlphaFilteredYoFrameVector filteredYoAngularMomentum;
    private final DoubleYoVariable totalMass = new DoubleYoVariable("TotalMass", registry);
 
    private final FramePoint2d centerOfPressure = new FramePoint2d();
@@ -359,6 +361,9 @@ public class HighLevelHumanoidControllerToolbox
       this.totalMass.set(totalMass);
       momentumCalculator = new MomentumCalculator(twistCalculator, ScrewTools.computeSubtreeSuccessors(fullRobotModel.getElevator()));
       yoAngularMomentum = new YoFrameVector("AngularMomentum", centerOfMassFrame, registry);
+      DoubleYoVariable alpha = new DoubleYoVariable("filteredAngularMomentumAlpha", registry);
+      alpha.set(0.95);
+      filteredYoAngularMomentum = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filteredAngularMomentum", "", registry, alpha, yoAngularMomentum);
       momentumGain.set(1.0);
    }
 
@@ -483,12 +488,14 @@ public class HighLevelHumanoidControllerToolbox
       momentumCalculator.computeAndPack(robotMomentum);
       robotMomentum.getAngularPartIncludingFrame(angularMomentum);
       yoAngularMomentum.set(angularMomentum);
+      filteredYoAngularMomentum.update();
    }
 
    private final FramePoint2d localDesiredCapturePoint = new FramePoint2d();
    private final DoubleYoVariable momentumGain = new DoubleYoVariable("MomentumGain", registry);
    public void getAdjustedDesiredCapturePoint(FramePoint2d desiredCapturePoint, FramePoint2d adjustedDesiredCapturePoint)
    {
+      filteredYoAngularMomentum.getFrameTuple(angularMomentum);
       ReferenceFrame comFrame = angularMomentum.getReferenceFrame();
       localDesiredCapturePoint.setIncludingFrame(desiredCapturePoint);
       localDesiredCapturePoint.changeFrameAndProjectToXYPlane(comFrame);
