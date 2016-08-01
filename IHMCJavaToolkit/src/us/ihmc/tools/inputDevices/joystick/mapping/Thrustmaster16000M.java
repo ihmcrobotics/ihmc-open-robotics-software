@@ -1,13 +1,13 @@
 package us.ihmc.tools.inputDevices.joystick.mapping;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.lang3.SystemUtils;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 import net.java.games.input.Component;
-import net.java.games.input.Event;
 import net.java.games.input.Component.Identifier;
+import net.java.games.input.Event;
 
 public enum Thrustmaster16000M implements JoystickMapping
 {
@@ -39,13 +39,9 @@ public enum Thrustmaster16000M implements JoystickMapping
 
    public static final Thrustmaster16000M[] values = values();
 
-   private static final Map<Identifier, Thrustmaster16000M> windowsIdentifierToMapping = new HashMap<>(values.length);
-   private static final Map<Identifier, Thrustmaster16000M> macIdentifierToMapping = new HashMap<>(values.length);
-   private static final Map<Identifier, Thrustmaster16000M> linuxIdentifierToMapping = new HashMap<>(values.length);
-
-   private static final Map<Thrustmaster16000M, Identifier> mappingToWindowsIdentifier = new HashMap<>(values.length);
-   private static final Map<Thrustmaster16000M, Identifier> mappingToMacIdentifier = new HashMap<>(values.length);
-   private static final Map<Thrustmaster16000M, Identifier> mappingToLinuxIdentifier = new HashMap<>(values.length);
+   private static final BiMap<Identifier, Thrustmaster16000M> windowsBiMap = HashBiMap.create(values.length);
+   private static final BiMap<Identifier, Thrustmaster16000M> macBiMap = HashBiMap.create(values.length);
+   private static final BiMap<Identifier, Thrustmaster16000M> linuxBiMap = HashBiMap.create(values.length);
 
    static
    {
@@ -74,12 +70,9 @@ public enum Thrustmaster16000M implements JoystickMapping
 
    private static void mapValues(Thrustmaster16000M mapping, Identifier windowsIdentifier, Identifier macIdentifier, Identifier linuxIdentifier)
    {
-      windowsIdentifierToMapping.put(windowsIdentifier, mapping);
-      macIdentifierToMapping.put(macIdentifier, mapping);
-      linuxIdentifierToMapping.put(linuxIdentifier, mapping);
-      mappingToWindowsIdentifier.put(mapping, windowsIdentifier);
-      mappingToMacIdentifier.put(mapping, macIdentifier);
-      mappingToLinuxIdentifier.put(mapping, linuxIdentifier);
+      windowsBiMap.put(windowsIdentifier, mapping);
+      macBiMap.put(macIdentifier, mapping);
+      linuxBiMap.put(linuxIdentifier, mapping);
    }
 
    @Override
@@ -87,15 +80,15 @@ public enum Thrustmaster16000M implements JoystickMapping
    {
       if (SystemUtils.IS_OS_WINDOWS)
       {
-         return mappingToWindowsIdentifier.get(this);
+         return windowsBiMap.inverse().get(this);
       }
       else if (SystemUtils.IS_OS_MAC)
       {
-         return mappingToMacIdentifier.get(this);
+         return macBiMap.inverse().get(this);
       }
       else if (SystemUtils.IS_OS_LINUX)
       {
-         return mappingToLinuxIdentifier.get(this);
+         return linuxBiMap.inverse().get(this);
       }
       else
       {
@@ -107,15 +100,15 @@ public enum Thrustmaster16000M implements JoystickMapping
    {
       if (SystemUtils.IS_OS_WINDOWS)
       {
-         return windowsIdentifierToMapping.get(identifier);
+         return windowsBiMap.get(identifier);
       }
       else if (SystemUtils.IS_OS_MAC)
       {
-         return macIdentifierToMapping.get(identifier);
+         return macBiMap.get(identifier);
       }
       else if (SystemUtils.IS_OS_LINUX)
       {
-         return linuxIdentifierToMapping.get(identifier);
+         return linuxBiMap.get(identifier);
       }
       else
       {

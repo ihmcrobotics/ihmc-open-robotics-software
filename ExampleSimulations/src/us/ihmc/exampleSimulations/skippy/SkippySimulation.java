@@ -18,7 +18,7 @@ public class SkippySimulation
       sim.setGroundVisible(true);
       sim.setDT(DT, 20);
       sim.setSimulateDuration(TIME);
-      sim.setCameraPosition(0, -40.0, 2.0);
+      sim.setCameraPosition(-80, 0.0, 2.0);
 
       Thread myThread = new Thread(sim);
       myThread.start();
