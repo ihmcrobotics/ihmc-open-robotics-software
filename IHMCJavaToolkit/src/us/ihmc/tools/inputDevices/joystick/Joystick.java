@@ -3,6 +3,7 @@ package us.ihmc.tools.inputDevices.joystick;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.concurrent.ThreadFactory;
 
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
@@ -10,15 +11,17 @@ import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class Joystick
 {
+   private static final ThreadFactory namedThreadFactory = ThreadTools.getNamedThreadFactory(Joystick.class.getSimpleName());
+   
    private final ArrayList<JoystickStatusListener> statusListeners = new ArrayList<JoystickStatusListener>();
    private final HashSet<Identifier> identifiers = new HashSet<Identifier>();
    protected final Controller joystickController;
    private final JoystickUpdater joystickUpdater;
    private final JoystickModel model;
-   private Thread updaterThread;
 
    /**
     * Connects to the first joystick found on the system.
@@ -111,8 +114,7 @@ public class Joystick
 
    private void startThread()
    {
-      updaterThread = new Thread(joystickUpdater);
-      updaterThread.setPriority(Thread.NORM_PRIORITY);
+      Thread updaterThread = namedThreadFactory.newThread(joystickUpdater);
       updaterThread.start();
    }
    
@@ -155,6 +157,11 @@ public class Joystick
       joystickUpdater.setPollIntervalMillis(pollIntervalMillis);
    }
    
+   public void setComponentFilter(JoystickComponentFilter componentFilter)
+   {
+      joystickUpdater.setComponentFilter(componentFilter);
+   }
+
    public JoystickModel getModel()
    {
       return model;
@@ -259,7 +266,7 @@ public class Joystick
    {
       return controller.getType() == Controller.Type.STICK || controller.getType() == Controller.Type.GAMEPAD;
    }
-
+   
    public static void main(String[] args)
    {
       try

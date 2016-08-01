@@ -5,7 +5,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class SkippySimulation
 {
    public static final double DT = 0.0001;
-   private SimulationConstructionSet sim;
+   public static final double TIME = 10;
+   private static SimulationConstructionSet sim;
 
    public SkippySimulation()
    {
@@ -14,9 +15,10 @@ public class SkippySimulation
 //      skippy.setController(new ExternalControlServer(skippy, "externalControlServer"));
 
       sim = new SimulationConstructionSet(skippy);
-      sim.setDT(DT, 20);
       sim.setGroundVisible(true);
-      sim.setCameraPosition(0, -40.0, 2.0);
+      sim.setDT(DT, 20);
+      sim.setSimulateDuration(TIME);
+      sim.setCameraPosition(-80, 0.0, 2.0);
 
       Thread myThread = new Thread(sim);
       myThread.start();

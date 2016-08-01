@@ -10,7 +10,6 @@ import javax.vecmath.Tuple3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -26,6 +25,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.TimeTools;
@@ -129,7 +129,14 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       imuBiasStateEstimator.configureModuleParameters(stateEstimatorParameters);
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
-      pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, estimatorDT, registry);
+      if (imusToUse.size() > 0)
+      {
+         pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, estimatorDT, registry);
+      }
+      else
+      {
+         pelvisRotationalStateUpdater = null;
+      }
       
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, footSwitches, centerOfPressureDataHolderFromController, feet, gravitationalAcceleration, yoTime,
             stateEstimatorParameters, yoGraphicsListRegistry, registry);
@@ -180,7 +187,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       operatingMode.set(StateEstimatorMode.NORMAL);
 
       jointStateUpdater.initialize();
-      pelvisRotationalStateUpdater.initialize();
+      if (pelvisRotationalStateUpdater != null)
+      {
+         pelvisRotationalStateUpdater.initialize();
+      }
       if(forceSensorStateUpdater != null)
       {
          forceSensorStateUpdater.initialize();
@@ -213,7 +223,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       switch (operatingMode.getEnumValue())
       {
          case FROZEN:
-            pelvisRotationalStateUpdater.updateForFrozenState();
+            if (pelvisRotationalStateUpdater != null)
+            {
+               pelvisRotationalStateUpdater.updateForFrozenState();
+            }
             if(forceSensorStateUpdater != null)
             {
                forceSensorStateUpdater.updateForceSensorState();
@@ -223,7 +236,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
          case NORMAL:
          default:
-            pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
+            if (pelvisRotationalStateUpdater != null)
+            {
+               pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
+            }
             if(forceSensorStateUpdater != null)
             {
                forceSensorStateUpdater.updateForceSensorState();
