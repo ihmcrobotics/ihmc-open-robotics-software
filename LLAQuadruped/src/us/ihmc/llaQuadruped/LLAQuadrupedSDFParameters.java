@@ -1,20 +1,29 @@
 package us.ihmc.llaQuadruped;
 
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import us.ihmc.SdfLoader.SDFParameters;
+import us.ihmc.tools.io.resources.ResourceTools;
 
 public class LLAQuadrupedSDFParameters implements SDFParameters
 {
    private static final String SDF_MODEL_NAME = "llaQuadruped";
    private static final String RESOURCE_DIRECTORY = "models/";
    private static final String[] RESOURCE_DIRECTORIES = new String[] {RESOURCE_DIRECTORY};
-   private static final String SDF_FILE = RESOURCE_DIRECTORY + "lla_quadruped_description/model/sdf/" + SDF_MODEL_NAME + ".sdf";
+   private static final Path SDF_MODEL_PATH = Paths.get("models", "lla_quadruped_description", "model", "sdf", SDF_MODEL_NAME + ".sdf");
    
+   @Override
+   public Path getSdfModelPath()
+   {
+      return SDF_MODEL_PATH;
+   }
+
    @Override
    public String getSdfFilePath()
    {
-      return SDF_FILE;
+      return SDF_MODEL_PATH.toString();
    }
 
    @Override
@@ -38,6 +47,6 @@ public class LLAQuadrupedSDFParameters implements SDFParameters
    @Override
    public InputStream getSdfAsInputStream()
    {
-      return getClass().getClassLoader().getResourceAsStream(getSdfFilePath());
+      return ResourceTools.openStreamSystem(SDF_MODEL_PATH);
    }
 }

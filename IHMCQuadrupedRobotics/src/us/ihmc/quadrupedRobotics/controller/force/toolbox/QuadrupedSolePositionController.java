@@ -114,7 +114,7 @@ public class QuadrupedSolePositionController
 
    public void compute(QuadrantDependentList<FrameVector> soleForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
    {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          FramePoint solePositionSetpoint = setpoints.getSolePosition(robotQuadrant);
          FrameVector soleLinearVelocitySetpoint = setpoints.getSoleLinearVelocity(robotQuadrant);

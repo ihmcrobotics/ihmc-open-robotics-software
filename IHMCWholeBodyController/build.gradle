@@ -47,7 +47,7 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.5'
-    compile group: 'com.google.guava', name: 'guava', version: '17.0'
+    compile group: 'com.google.guava', name: 'guava', version: '18.0'
 
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
 	compile ihmc.getProjectDependency(":IHMCCommunication")

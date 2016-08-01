@@ -4,6 +4,7 @@ import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 public class SkippyRobot extends Robot
 {
    private static final long serialVersionUID = -7671864179791904256L;
+   public static FloatingJoint mainJoint;
    private UniversalJoint foot;
    private PinJoint hip;
    private PinJoint shoulder;
@@ -30,7 +32,9 @@ public class SkippyRobot extends Robot
    public static final double
            LEG_LENGTH = 1.0, LEG_MASS = 1.0, LEG_RADIUS = 0.1, LEG_MOI = (1.0/3.0)* LEG_MASS *Math.pow(LEG_LENGTH,2), // Leg
            TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0/3.0)* TORSO_MASS *Math.pow(TORSO_LENGTH,2), // Torso
-           SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/12.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
+            SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/12.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
+
+   private ExternalForcePoint balanceForce;
 
    public SkippyRobot()
    {
@@ -52,36 +56,53 @@ public class SkippyRobot extends Robot
       groundContactPoints.add(rightContact);
 
 
-       FloatingJoint mainJoint = new FloatingJoint("mainJoint", new Vector3d(0.0,0.0,0.0), this);
+       mainJoint = new FloatingJoint("mainJoint", new Vector3d(0.0,0.0,0.0), this);
        Link mainJointLink = new Link("mainJointLink");
-       mainJointLink.setMass(5);  //5 seems to work well - other values make the jump too high/low
-       mainJointLink.setMomentOfInertia(10,10,10);  //the smaller the value, the more realistic the jump (not as small as 0.00001)
-       mainJoint.setLink(mainJointLink);
+       mainJointLink.setMass(0.5);  //5 seems to work well - other values make the jump too high/low
+       mainJointLink.setMomentOfInertia(111127.5,111127.5,1000);  //the smaller the value, the more realistic the jump (not as small as 0.00001)
+      Graphics3DObject mainJointLinkGraphics = new Graphics3DObject();
+      mainJointLinkGraphics.addCube(0.25,0.25,0.25,YoAppearance.White());
+      mainJointLink.setLinkGraphics(mainJointLinkGraphics);
+      mainJoint.setLink(mainJointLink);
        mainJoint.addGroundContactPoint(footContact);
-       this.addRootJoint(mainJoint);
 
+      GroundContactPoint footContact1 = new GroundContactPoint("footContact1", new Vector3d(0.125,0.125,0.0), this);
+      GroundContactPoint footContact2 = new GroundContactPoint("footContact2", new Vector3d(-0.125,0.125,0.0), this);
+      GroundContactPoint footContact3 = new GroundContactPoint("footContact3", new Vector3d(-0.125,-0.125,0.0), this);
+      GroundContactPoint footContact4 = new GroundContactPoint("footContact4", new Vector3d(0.125,-0.125,0.0), this);
+      mainJoint.addGroundContactPoint(footContact1);
+      mainJoint.addGroundContactPoint(footContact2);
+      mainJoint.addGroundContactPoint(footContact3);
+      mainJoint.addGroundContactPoint(footContact4);
+       this.addRootJoint(mainJoint);
 
        // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
       foot = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, 0.0), this, Axis.X, Axis.Y);
-      foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.0)); // initial Cartesian position of foot
-      foot.setInitialState(Math.PI/3, 0.0, 0.0, 0.0); // initial position "q" of foot
+      foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.2)); // initial Cartesian position of foot
+      foot.setInitialState(Math.PI/6, 0.0, 0.0, 0.0); // initial position "q" of foot
       Link leg = createLeg();
       foot.setLink(leg);
       //this.addRootJoint(foot);
       //foot.addGroundContactPoint(footContact);
        mainJoint.addJoint(foot);
 
+
       hip = new PinJoint("hip", new Vector3d(0.0, 0.0, LEG_LENGTH), this, Axis.X);
       Link torso = createTorso();
       hip.setLink(torso);
-      hip.setInitialState(-2*Math.PI/3,0.0);
+      hip.setInitialState(-2*Math.PI/6,0.0);
       this.foot.addJoint(hip);
       hip.addGroundContactPoint(hipContact);
 
       shoulder = new PinJoint("shoulder", new Vector3d(0.0, 0.0, TORSO_LENGTH), this, Axis.Y);
       Link arms = createArms();
       shoulder.setLink(arms);
-      shoulder.setInitialState(0.5,0.0);
+      shoulder.setInitialState(0.0,0.0);
+
+      balanceForce = new ExternalForcePoint("BalanceForce", this);
+      //balanceForce.setForce(0.0,0.0,0.0);
+      shoulder.addExternalForcePoint(balanceForce);
+
       //shoulder.setDamping(0.3);
       this.hip.addJoint(shoulder);
       shoulder.addGroundContactPoint(shoulderContact);
@@ -147,13 +168,41 @@ public class SkippyRobot extends Robot
    {
       return foot;
    }
+   public double getLegMass()
+   {
+      return LEG_MASS;
+   }
+   public double getLegLength()
+   {
+      return LEG_LENGTH;
+   }
    public PinJoint getHipJoint()
    {
       return hip;
    }
-
+   public double getHipMass()
+   {
+      return TORSO_MASS;
+   }
+   public double getHipLength()
+   {
+      return TORSO_LENGTH;
+   }
    public PinJoint getShoulderJoint()
    {
       return shoulder;
+   }
+   public double getShoulderMass()
+   {
+      return SHOULDER_MASS;
+   }
+   public double getShoulderLength()
+   {
+      return SHOULDER_LENGTH;
+   }
+
+   public void setBalanceForce(double x, double y, double z)
+   {
+      balanceForce.setForce(x, y, z);
    }
 }
