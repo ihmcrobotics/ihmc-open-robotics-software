@@ -75,12 +75,12 @@ public class GlobalTimer
 
    public void startTimer()
    {
-      startTime.set((int) (System.nanoTime() - initialTimeNanos));
+      startTime.set(System.nanoTime() - initialTimeNanos);
    }
 
    public void stopTimer()
    {
-      stopTime.set((int) (System.nanoTime() - initialTimeNanos));
+      stopTime.set(System.nanoTime() - initialTimeNanos);
       duration.set((stopTime.getLongValue() - startTime.getLongValue()) * 1e-6);
       filteredDuration.update();
 
@@ -134,7 +134,7 @@ public class GlobalTimer
 
    public double getElapsedTime()
    {
-      int currentSysTime = (int) (System.nanoTime() - initialTimeNanos);
+      long currentSysTime = System.nanoTime() - initialTimeNanos;
       double currentTime = (currentSysTime - startTime.getLongValue()) * 1e-6;
       return currentTime;
    }
