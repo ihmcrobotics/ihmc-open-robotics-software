@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 
 import org.junit.After;
@@ -13,6 +15,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
@@ -57,14 +60,19 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
+      DoubleYoVariable frontLeftSolePositionX = (DoubleYoVariable) conductor.getScs().getVariable("frontLeftSolePositionX");
+      double commandedStepPositionX = frontLeftSolePositionX.getDoubleValue() + 0.2;
+      
       variables.getTimedStepQuadrant().set(RobotQuadrant.FRONT_LEFT);
       variables.getTimedStepGroundClearance().set(0.15);
       variables.getTimedStepDuration().set(0.6);
-      variables.getTimedStepGoalPositionX().set(0.6 + variables.getComPositionEstimateX().getDoubleValue());
+      variables.getTimedStepGoalPositionX().set(commandedStepPositionX);
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 3.0));
       conductor.simulate();
+      
+      assertEquals("Didn't step to correct location", commandedStepPositionX, frontLeftSolePositionX.getDoubleValue(), 1e-2);
       
       conductor.concludeTesting();
    }
