@@ -47,6 +47,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final List<AlphaFilteredYoVariable> yawRateBiasesInWorld = new ArrayList<>();
    private final List<DoubleYoVariable> yawBiasesInWorld = new ArrayList<>();
 
+   private final List<YoFrameVector> angularVelocitiesInWorld = new ArrayList<>();
    private final List<YoFrameVector> linearAccelerationsInWorld = new ArrayList<>();
    private final List<DoubleYoVariable> linearAccelerationMagnitudes = new ArrayList<>();
 
@@ -119,6 +120,8 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          yawRateBiasesInWorld.add(yawRateBiasInWorld);
          yawBiasesInWorld.add(new DoubleYoVariable("estimated" + sensorName + "YawBiasWorld", registry));
 
+         angularVelocitiesInWorld.add(new YoFrameVector("unprocessed" + sensorName + "AngularVelocityInWorld", worldFrame, registry));
+         
          linearAccelerationsInWorld.add(new YoFrameVector("unprocessed" + sensorName + "LinearAccelerationWorld", worldFrame, registry));
          linearAccelerationMagnitudes.add(new DoubleYoVariable("unprocessed" + sensorName + "LinearAccelerationMagnitude", registry));
 
@@ -250,6 +253,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
             angularVelocityBiasesInWorld.get(imuIndex).set(measurementBias);
 
             orientationMeasurement.transform(measurement, measurementInWorld);
+            angularVelocitiesInWorld.get(imuIndex).set(measurementInWorld);
             yawRateBiasesInWorld.get(imuIndex).update(measurementInWorld.getZ());
 
             imuSensor.getLinearAccelerationMeasurement(measurement);

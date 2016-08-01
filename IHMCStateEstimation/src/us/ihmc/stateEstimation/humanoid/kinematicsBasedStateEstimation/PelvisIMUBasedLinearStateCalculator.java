@@ -14,7 +14,6 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
-
 public class PelvisIMUBasedLinearStateCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -98,7 +97,8 @@ public class PelvisIMUBasedLinearStateCalculator
 
    public void enableEstimationModule(boolean enable)
    {
-      imuBasedStateEstimationEnabled.set(enable);
+      if (imuProcessedOutput != null)
+         imuBasedStateEstimationEnabled.set(enable);
    }
 
    public void cancelGravityFromAccelerationMeasurement(boolean cancel)
