@@ -6,6 +6,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 
 /**
@@ -30,7 +31,7 @@ public class GlobalTimer
 
    private final DoubleYoVariable timersAlpha;
 
-   private final IntegerYoVariable startTime, stopTime;
+   private final LongYoVariable startTime, stopTime;
    private final DoubleYoVariable duration, runningAvg;
    private final AlphaFilteredYoVariable filteredDuration;
 
@@ -45,8 +46,8 @@ public class GlobalTimer
       timersAlpha = new DoubleYoVariable("timersAlpha", registry);
       timersAlpha.set(0.97);
 
-      startTime = new IntegerYoVariable(timerName + "StartTimeNano", registry);
-      stopTime = new IntegerYoVariable(timerName + "StopTimeNano", registry);
+      startTime = new LongYoVariable(timerName + "StartTimeNano", registry);
+      stopTime = new LongYoVariable(timerName + "StopTimeNano", registry);
       duration = new DoubleYoVariable(timerName + "DurationMilli", registry);
       filteredDuration = new AlphaFilteredYoVariable(timerName + "FiltDurationMilli", registry, timersAlpha, duration);
       filteredDuration.update();
@@ -80,7 +81,7 @@ public class GlobalTimer
    public void stopTimer()
    {
       stopTime.set((int) (System.nanoTime() - initialTimeNanos));
-      duration.set((stopTime.getIntegerValue() - startTime.getIntegerValue()) * 1e-6);
+      duration.set((stopTime.getLongValue() - startTime.getLongValue()) * 1e-6);
       filteredDuration.update();
 
       if (COMPUTE_MEAN)
@@ -134,7 +135,7 @@ public class GlobalTimer
    public double getElapsedTime()
    {
       int currentSysTime = (int) (System.nanoTime() - initialTimeNanos);
-      double currentTime = (currentSysTime - startTime.getIntegerValue()) * 1e-6;
+      double currentTime = (currentSysTime - startTime.getLongValue()) * 1e-6;
       return currentTime;
    }
 
