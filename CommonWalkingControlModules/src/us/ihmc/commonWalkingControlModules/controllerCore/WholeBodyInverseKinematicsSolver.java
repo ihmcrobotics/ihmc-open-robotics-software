@@ -55,6 +55,8 @@ public class WholeBodyInverseKinematicsSolver
          OneDoFJoint joint = controlledOneDoFJoints[i];
          DoubleYoVariable jointVelocitySolution = new DoubleYoVariable("qd_qp_" + joint.getName(), registry);
          DoubleYoVariable jointPositionSolution = new DoubleYoVariable("q_qp_" + joint.getName(), registry);
+         jointVelocitySolution.set(Double.NaN);
+         jointPositionSolution.set(Double.NaN);
          jointVelocitiesSolution.put(joint, jointVelocitySolution);
          jointPositionsSolution.put(joint, jointPositionSolution);
       }
