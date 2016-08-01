@@ -374,7 +374,7 @@ public class QuadrupedSimulationFactory
       
       sdfRobot.get().setGravity(gravity.get());
       sdfRobot.get().setGroundContactModel(groundContactModel);
-      System.out.println("Total mass: " + totalMass);
+      PrintTools.info(this, sdfRobot.get().getName() + " total mass: " + totalMass);
    }
    
    public SimulationConstructionSet createSimulation() throws IOException
