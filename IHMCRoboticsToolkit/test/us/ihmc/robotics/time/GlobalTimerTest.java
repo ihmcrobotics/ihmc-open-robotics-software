@@ -46,6 +46,7 @@ public class GlobalTimerTest
    @Test(timeout = 30000)
    public void testgetElapsedTime2()
    {
+      GlobalTimer.clearTimers();
       GlobalTimer globalTimer = null;
       String timerName = "timer";
       
@@ -75,7 +76,7 @@ public class GlobalTimerTest
 
       ArrayList<GlobalTimer> listOfTimers = new ArrayList<>();
       globalTimer.getAlltimers(listOfTimers);
-      assertEquals(6, listOfTimers.size());
+      assertEquals(5, listOfTimers.size());
       
    }
 
