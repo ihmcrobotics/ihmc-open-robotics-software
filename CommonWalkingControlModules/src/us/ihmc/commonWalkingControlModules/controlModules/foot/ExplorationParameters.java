@@ -57,7 +57,7 @@ public class ExplorationParameters
    private static final double defaultStableLoRAngularVelocityThreshold = 10.0;
    private static final double defaultStableCoRLinearVelocityThreshold = 0.1;
    private static final double defaultAngularVelocityAroundLoRThreshold = 0.5;
-   private static final double defaultFootDropThreshold = -0.025;
+   private static final double defaultFootDropThreshold = -0.04;
    private static final double defaultAngularVelocityFilterBreakFrequency = 16.0;
 
    /** Parameters for foothold exploration state */
