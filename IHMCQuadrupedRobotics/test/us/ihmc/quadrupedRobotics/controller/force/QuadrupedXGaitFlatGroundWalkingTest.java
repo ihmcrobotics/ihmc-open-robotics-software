@@ -162,10 +162,10 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
-      variables.getYoPlanarVelocityInputX().set(-1.0);
-      variables.getYoPlanarVelocityInputZ().set(-0.5);
+      variables.getYoPlanarVelocityInputX().set(-0.6);
+      variables.getYoPlanarVelocityInputZ().set(-0.3);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 10.0));
+      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 15.0));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), -1.5));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI / 2, 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.3));
@@ -182,10 +182,10 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
-      variables.getYoPlanarVelocityInputX().set(-1.0);
-      variables.getYoPlanarVelocityInputZ().set(0.5);
+      variables.getYoPlanarVelocityInputX().set(-0.6);
+      variables.getYoPlanarVelocityInputZ().set(0.3);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 10.0));
+      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 15.0));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), -1.5));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI / 2, 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 0.0, 0.3));
