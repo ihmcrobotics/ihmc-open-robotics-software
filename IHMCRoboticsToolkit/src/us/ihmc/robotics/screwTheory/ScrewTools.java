@@ -433,6 +433,11 @@ public class ScrewTools
       return cloneJointPathAndFilter(createOneDoFJointPath(start, end), OneDoFJoint.class);
    }
 
+   public static OneDoFJoint[] cloneOneDoFJointPath(OneDoFJoint[] oneDoFJoints)
+   {
+      return cloneJointPathAndFilter(oneDoFJoints, OneDoFJoint.class);
+   }
+
    public static <T extends InverseDynamicsJoint> T[] cloneJointPathAndFilter(T[] joints, Class<T> clazz)
    {
       return filterJoints(cloneJointPath(joints), clazz);
