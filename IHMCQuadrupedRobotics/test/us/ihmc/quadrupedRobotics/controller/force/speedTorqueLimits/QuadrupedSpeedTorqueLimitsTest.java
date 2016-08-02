@@ -13,7 +13,9 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
@@ -59,6 +61,23 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
    public void testStandingLowerLimit()
    {
       double originalHeight = standupPrecisely();
+
+      lowerHeightUntilFailure(originalHeight);
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 30.0)
+   @Test(timeout = 30000)
+   public void testStandingOnThreeLegsLowerLimit()
+   {
+      double originalHeight = standupPrecisely();
+      
+      variables.getTimedStepQuadrant().set(RobotQuadrant.FRONT_LEFT);
+      variables.getTimedStepGroundClearance().set(0.2);
+      variables.getTimedStepDuration().set(30.0);
+      variables.getTimedStepGoalPositionX().set(variables.getSolePositionXs().get(RobotQuadrant.FRONT_LEFT).getDoubleValue());
+      variables.getTimedStepGoalPositionY().set(variables.getSolePositionYs().get(RobotQuadrant.FRONT_LEFT).getDoubleValue() + 0.2);
+      variables.getTimedStepGoalPositionZ().set(0.2);
+      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
 
       lowerHeightUntilFailure(originalHeight);
    }
