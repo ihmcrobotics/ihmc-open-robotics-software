@@ -109,10 +109,10 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
                   Math.max(soleForceEstimator.getSoleForce(quadrant).getX() / solePositionProportionalGainsParameter.get(0),
                         -maxSetpointCompensationParameter.get()));
             setpointCompensationValuesParameter.set(1,
-                  Math.max(soleForceEstimator.getSoleForce(quadrant).getY() / solePositionProportionalGainsParameter.get(0),
+                  Math.max(soleForceEstimator.getSoleForce(quadrant).getY() / solePositionProportionalGainsParameter.get(1),
                         -maxSetpointCompensationParameter.get()));
             setpointCompensationValuesParameter.set(2,
-                  Math.max(soleForceEstimator.getSoleForce(quadrant).getZ() / solePositionProportionalGainsParameter.get(0),
+                  Math.max(soleForceEstimator.getSoleForce(quadrant).getZ() / solePositionProportionalGainsParameter.get(2),
                         -maxSetpointCompensationParameter.get()));
             solePositionControllerSetpoints.getSolePosition(quadrant)
                   .add(setpointCompensationValuesParameter.get(0), setpointCompensationValuesParameter.get(1), setpointCompensationValuesParameter.get(2));
@@ -133,7 +133,6 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
             oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControlParameter.get());
          }
       }
-
    }
 
    @Override
