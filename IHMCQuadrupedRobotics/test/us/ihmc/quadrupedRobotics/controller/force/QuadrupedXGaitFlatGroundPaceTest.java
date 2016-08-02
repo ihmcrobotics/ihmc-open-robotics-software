@@ -87,7 +87,7 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
       }
       conductor.simulate();
       
-      conductor.concludeTesting();
+      conductor.concludeTesting(2);
    }
    
    @DeployableTestMethod(estimatedDuration = 20.0)
@@ -115,10 +115,17 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
       variables.getYoPlanarVelocityInputX().set(directionX * 0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 6.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), directionX * 0.3));
+      if(directionX < 0)
+      {
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), directionX * 0.3));
+      }
+      else
+      {
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), directionX * 0.3));
+      }
       conductor.simulate();
       
-      conductor.concludeTesting();
+      conductor.concludeTesting(2);
    }
    
    @DeployableTestMethod(estimatedDuration = 25.0)
@@ -169,6 +176,6 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), directionZ * Math.PI, 0.1));
       conductor.simulate();
       
-      conductor.concludeTesting();
+      conductor.concludeTesting(2);
    }
 }
