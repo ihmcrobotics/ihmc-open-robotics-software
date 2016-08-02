@@ -12,6 +12,7 @@ public interface AllDialogConstructorsHolder
    public abstract MediaCaptureDialogConstructor getMediaCaptureDialogConstructor();
    public abstract PlaybackPropertiesDialogConstructor getPlaybackPropertiesDialogConstructor();
    public abstract PrintGraphsDialogConstructor getPrintGraphsDialogConstructor();
+   public abstract ExportGraphsToFileConstructor getExportGraphsToFileConstructor();
    public abstract ResizeViewportDialogConstructor getResizeViewportDialogConstructor();
    public abstract SaveConfigurationDialogConstructor getSaveConfigurationDialogConstructor();
    public abstract SaveGraphConfigurationDialogConstructor getSaveGraphConfigurationDialogConstructor();
