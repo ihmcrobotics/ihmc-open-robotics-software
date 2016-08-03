@@ -103,20 +103,20 @@ public class Plotter extends JPanel
    }
 
    @Override
-   public void paintComponent(Graphics gO)
+   public void paintComponent(Graphics graphics)
    {
       long currentTime = System.currentTimeMillis();
       if ((currentTime - lastUpdate) > updateDelayInMillis)
       {
-         Graphics2D g = (Graphics2D) gO;
+         Graphics2D graphics2d = (Graphics2D) graphics;
 
          // get current size and determine scaling factor
-         Dimension d = this.getSize();
-         int height = (int) Math.round(d.getHeight());
-         int width = (int) Math.round(d.getWidth());
-         centerX = width / 2;
-         centerY = height / 2;
-         scaleFactor = height / scale;
+         Dimension panelSize = this.getSize();
+         int heightInPixels = (int) Math.round(panelSize.getHeight());
+         int widthInPixels = (int) Math.round(panelSize.getWidth());
+         centerX = widthInPixels / 2;
+         centerY = heightInPixels / 2;
+         scaleFactor = heightInPixels / scale;
 
          double headingOffset = 0.0;
 
@@ -125,7 +125,7 @@ public class Plotter extends JPanel
          centerY = centerY + (int) Math.round(offsetY * scaleFactor);
 
          // paint background
-         super.paintComponent(g);
+         super.paintComponent(graphics2d);
 
          // Paint all artifacts that want to be under grid (86)
          synchronized (artifacts)
@@ -136,7 +136,7 @@ public class Plotter extends JPanel
                {
                   if (artifact.getLevel() == 86)
                   {
-                     artifact.draw(g, centerX, centerY, headingOffset, scaleFactor);
+                     artifact.draw(graphics2d, centerX, centerY, headingOffset, scaleFactor);
                   }
                }
                else
@@ -151,17 +151,17 @@ public class Plotter extends JPanel
          // center the zoomed in area.
          if (backgroundImage != null)
          {
-            Coordinate ul = new Coordinate(upperLeftLongitude, upperLeftLatitude, Coordinate.METER);
-            Coordinate lr = new Coordinate(lowerRightLongitude, lowerRightLatitude, Coordinate.METER);
-            Coordinate pul = convertFromMetersToPixels(ul);
-            Coordinate plr = convertFromMetersToPixels(lr);
+            Coordinate upperLeft = new Coordinate(upperLeftLongitude, upperLeftLatitude, Coordinate.METER);
+            Coordinate lowerRight = new Coordinate(lowerRightLongitude, lowerRightLatitude, Coordinate.METER);
+            Coordinate upperLeftPixels = convertFromMetersToPixels(upperLeft);
+            Coordinate lowerRightPixels = convertFromMetersToPixels(lowerRight);
 
-            int ulx = (int) pul.getX();
-            int uly = (int) pul.getY();
-            int lrx = (int) plr.getX();
-            int lry = (int) plr.getY();
+            int upperLeftX = (int) upperLeftPixels.getX();
+            int upperLeftY = (int) upperLeftPixels.getY();
+            int lowerRightX = (int) lowerRightPixels.getX();
+            int lowerRightY = (int) lowerRightPixels.getY();
 
-            g.drawImage(backgroundImage, ulx, uly, lrx, lry, 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight(), this);
+            graphics2d.drawImage(backgroundImage, upperLeftX, upperLeftY, lowerRightX, lowerRightY, 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight(), this);
          }
          else
          {
@@ -178,37 +178,37 @@ public class Plotter extends JPanel
             }
 
             // paint grid lines
-            Coordinate ulCoord = convertFromPixelsToMeters(new Coordinate(0, 0, Coordinate.PIXEL));
-            Coordinate lrCoord = convertFromPixelsToMeters(new Coordinate(width, height, Coordinate.PIXEL));
+            Coordinate upperLeftCoodinate = convertFromPixelsToMeters(new Coordinate(0, 0, Coordinate.PIXEL));
+            Coordinate lowerRightCoordinate = convertFromPixelsToMeters(new Coordinate(widthInPixels, heightInPixels, Coordinate.PIXEL));
 
-            double minX = ulCoord.getX();
-            double maxX = lrCoord.getX();
-            double xDiff = maxX - minX;
-            int xCount = (int) Math.round(Math.ceil(xDiff / interval));
-            int xCountOffset = (int) Math.floor(minX / interval);
+            double upperLeftCoordinateX = upperLeftCoodinate.getX();
+            double lowerRightCoordinateX = lowerRightCoordinate.getX();
+            double deltaX = lowerRightCoordinateX - upperLeftCoordinateX;
+            int numberOfGridLinesX = (int) Math.round(Math.ceil(deltaX / interval));
+            int xCountOffset = (int) Math.floor(upperLeftCoordinateX / interval);
             double minXforPlotting = xCountOffset * interval;
 
-            for (int i = 0; i < xCount; i++)
+            for (int i = 0; i < numberOfGridLinesX; i++)
             {
                double distance = minXforPlotting + (i * interval);
 
                if ((i + xCountOffset) % 10 == 0)
-                  g.setColor(new Color(180, 190, 210));
+                  graphics2d.setColor(new Color(180, 190, 210));
                else if ((i + xCountOffset) % 5 == 0)
-                  g.setColor(new Color(180, 210, 230));
+                  graphics2d.setColor(new Color(180, 210, 230));
                else
-                  g.setColor(new Color(230, 240, 250));
+                  graphics2d.setColor(new Color(230, 240, 250));
 
                // get pixel from meter for positive
                Coordinate coord = convertFromMetersToPixels(new Coordinate(distance, distance, Coordinate.METER));
                int x = (int) Math.round(coord.getX());
 
                // draw line
-               g.drawLine(x, 0, x, height);
+               graphics2d.drawLine(x, 0, x, heightInPixels);
             }
 
-            double minY = lrCoord.getY();
-            double maxY = ulCoord.getY();
+            double minY = lowerRightCoordinate.getY();
+            double maxY = upperLeftCoodinate.getY();
             double yDiff = maxY - minY;
             int yCount = (int) Math.round(Math.ceil(yDiff / interval));
             int yCountOffset = (int) Math.floor(minY / interval);
@@ -219,23 +219,23 @@ public class Plotter extends JPanel
                double distance = minYforPlotting + (i * interval);
 
                if ((i + yCountOffset) % 10 == 0)
-                  g.setColor(new Color(180, 190, 210));
+                  graphics2d.setColor(new Color(180, 190, 210));
                else if ((i + yCountOffset) % 5 == 0)
-                  g.setColor(new Color(180, 210, 230));
+                  graphics2d.setColor(new Color(180, 210, 230));
                else
-                  g.setColor(new Color(230, 240, 250));
+                  graphics2d.setColor(new Color(230, 240, 250));
 
                // get pixel from meter for positive
                Coordinate coord = convertFromMetersToPixels(new Coordinate(distance, distance, Coordinate.METER));
                int y = (int) Math.round(coord.getY());
 
                // draw line
-               g.drawLine(0, y, width, y);
+               graphics2d.drawLine(0, y, widthInPixels, y);
             }
          }
 
          // paint grid centerline
-         g.setColor(Color.gray);
+         graphics2d.setColor(Color.gray);
 
          // get pixel from meter for positive
          Coordinate coord = convertFromMetersToPixels(new Coordinate(0, 0, Coordinate.METER));
@@ -243,8 +243,8 @@ public class Plotter extends JPanel
          int y0 = (int) Math.round(coord.getY());
 
          // draw line
-         g.drawLine(x0, 0, x0, height);
-         g.drawLine(0, y0, width, y0);
+         graphics2d.drawLine(x0, 0, x0, heightInPixels);
+         graphics2d.drawLine(0, y0, widthInPixels, y0);
 
          // Paint all artifacts history by level
          // (assumes 5 levels (0-4)
@@ -261,7 +261,7 @@ public class Plotter extends JPanel
                      {
                         if (artifact.getDrawHistory() && (artifact.getLevel() == i))
                         {
-                           artifact.drawHistory(g, centerX, centerY, scaleFactor);
+                           artifact.drawHistory(graphics2d, centerX, centerY, scaleFactor);
                         }
                      }
                      else
@@ -286,7 +286,7 @@ public class Plotter extends JPanel
                   {
                      if (artifact.getLevel() == i)
                      {
-                        artifact.draw(g, centerX, centerY, headingOffset, scaleFactor); // , _orientation);
+                        artifact.draw(graphics2d, centerX, centerY, headingOffset, scaleFactor); // , _orientation);
                      }
                   }
                   else
@@ -300,18 +300,18 @@ public class Plotter extends JPanel
          // paint selected destination
          if (SHOW_SELECTION)
          {
-            g.setColor(Color.red);
+            graphics2d.setColor(Color.red);
             int xSize = 8;
             int xX = centerX + ((int) Math.round(selectedX * scaleFactor));
             int yX = centerY - ((int) Math.round(selectedY * scaleFactor));
-            g.drawLine(xX - xSize, yX - xSize, xX + xSize, yX + xSize);
-            g.drawLine(xX - xSize, yX + xSize, xX + xSize, yX - xSize);
+            graphics2d.drawLine(xX - xSize, yX - xSize, xX + xSize, yX + xSize);
+            graphics2d.drawLine(xX - xSize, yX + xSize, xX + xSize, yX - xSize);
          }
 
          // paint selected area
          if (SHOW_SELECTION)
          {
-            g.setColor(Color.red);
+            graphics2d.setColor(Color.red);
             int areaX1Int = centerX + ((int) Math.round(area1X * scaleFactor));
             int areaY1Int = centerY - ((int) Math.round(area1Y * scaleFactor));
             int areaX2Int = centerX + ((int) Math.round(area2X * scaleFactor));
@@ -339,7 +339,7 @@ public class Plotter extends JPanel
                Ymin = areaY1Int;
             }
 
-            g.drawRect(Xmin, Ymin, (Xmax - Xmin), (Ymax - Ymin));
+            graphics2d.drawRect(Xmin, Ymin, (Xmax - Xmin), (Ymax - Ymin));
          }
 
          lastUpdate = currentTime;
