@@ -51,8 +51,8 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController("front_right_hip_roll");
-      pushOnShoulder(quadrupedTestFactory);
+      quadrupedTestFactory.setUsePushRobotController(true);
+      pushOnShoulder(quadrupedTestFactory, "front_right_hip_roll");
    }
    
    @DeployableTestMethod(estimatedDuration = 10.0)
@@ -62,8 +62,8 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController("hind_left_hip_roll");
-      pushOnShoulder(quadrupedTestFactory);
+      quadrupedTestFactory.setUsePushRobotController(true);
+      pushOnShoulder(quadrupedTestFactory, "hind_left_hip_roll");
    }
    
    @DeployableTestMethod(estimatedDuration = 10.0)
@@ -73,8 +73,8 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController("hind_right_hip_roll");
-      pushOnShoulder(quadrupedTestFactory);
+      quadrupedTestFactory.setUsePushRobotController(true);
+      pushOnShoulder(quadrupedTestFactory, "hind_right_hip_roll");
    }
    
    @DeployableTestMethod(estimatedDuration = 10.0)
@@ -84,15 +84,15 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController("front_left_hip_roll");
-      pushOnShoulder(quadrupedTestFactory);
+      quadrupedTestFactory.setUsePushRobotController(true);
+      pushOnShoulder(quadrupedTestFactory, "front_left_hip_roll");
    }
 
-   private void pushOnShoulder(QuadrupedTestFactory quadrupedTestFactory) throws IOException, AssertionFailedError
+   private void pushOnShoulder(QuadrupedTestFactory quadrupedTestFactory, String jointToPushOn) throws IOException, AssertionFailedError
    {
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      pusher = new PushRobotTestConductor(conductor.getScs());
+      pusher = new PushRobotTestConductor(conductor.getScs(), jointToPushOn);
       
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
@@ -154,10 +154,10 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController("head_roll");
+      quadrupedTestFactory.setUsePushRobotController(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      pusher = new PushRobotTestConductor(conductor.getScs());
+      pusher = new PushRobotTestConductor(conductor.getScs(), "head_roll");
       
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
@@ -181,10 +181,10 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUsePushRobotController("body");
+      quadrupedTestFactory.setUsePushRobotController(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-      pusher = new PushRobotTestConductor(conductor.getScs());
+      pusher = new PushRobotTestConductor(conductor.getScs(), "body");
       
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
