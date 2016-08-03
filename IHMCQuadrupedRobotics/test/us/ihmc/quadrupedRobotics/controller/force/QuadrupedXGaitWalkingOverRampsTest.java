@@ -112,18 +112,19 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
 
    private void walkSlope(double slope) throws IOException, AssertionFailedError
    {
-      InclinedGroundProfile groundProfile = new InclinedGroundProfile(-0.1);
+      InclinedGroundProfile groundProfile = new InclinedGroundProfile(slope);
       
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+      quadrupedTestFactory.setUseStateEstimator(false);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getYoComPositionInputZ().set(0.65);
+      variables.getYoComPositionInputZ().set(0.6);
       
       variables.getYoPlanarVelocityInputX().set(0.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));

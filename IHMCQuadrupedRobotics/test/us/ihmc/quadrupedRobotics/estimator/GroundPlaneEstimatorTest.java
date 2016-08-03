@@ -83,7 +83,7 @@ public class GroundPlaneEstimatorTest
    public void testPointsWithSamePitchAndDifferentPositionGetSameAnswer2()
    {
       double epsilon = 0.001;
-      Random random = new Random();
+      Random random = new Random(123123);
       
       GroundPlaneEstimator groundPlaneEstimator = new GroundPlaneEstimator();
       QuadrantDependentList<FramePoint> contactPoints = new QuadrantDependentList<>();

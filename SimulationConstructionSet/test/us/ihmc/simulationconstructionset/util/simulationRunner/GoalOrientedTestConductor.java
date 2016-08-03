@@ -187,7 +187,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       }
    }
 
-   public void concludeTesting()
+   public void concludeTesting(int additionalStackDepthForRelevantCallingMethod)
    {
       if (simulationTestingParameters.getKeepSCSUp())
       {
@@ -196,11 +196,16 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       
       if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots()[0].getName(), scs, 1);
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots()[0].getName(), scs, additionalStackDepthForRelevantCallingMethod);
       }
       
       ThreadTools.sleep(200);
       scs.closeAndDispose();
+   }
+   
+   public void concludeTesting()
+   {
+      concludeTesting(2);
    }
    
    public void addTimeLimit(DoubleYoVariable timeYoVariable, double timeLimit)

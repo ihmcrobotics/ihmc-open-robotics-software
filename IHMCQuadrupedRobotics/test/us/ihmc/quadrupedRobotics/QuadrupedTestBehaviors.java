@@ -18,7 +18,8 @@ public class QuadrupedTestBehaviors
 
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getComPositionEstimateZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.05));
+      conductor.addTimeLimit(variables.getYoTime(), 3.0);
+//      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getComPositionEstimateZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.05)); // doesn't work well when not flat ground - BS
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.STAND));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
