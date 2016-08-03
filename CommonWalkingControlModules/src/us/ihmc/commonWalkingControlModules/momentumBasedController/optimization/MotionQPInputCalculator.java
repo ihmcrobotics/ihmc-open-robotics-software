@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -82,6 +85,12 @@ public class MotionQPInputCalculator
 
    private final int numberOfDoFs;
 
+   private final Map<OneDoFJoint, DoubleYoVariable> timesUntilJointLimit = new HashMap<>();
+   private final Map<OneDoFJoint, DoubleYoVariable> requiredAccsToStopAtLimit = new HashMap<>();
+   private final Map<OneDoFJoint, DoubleYoVariable> jointVelocitiesForLimit = new HashMap<>();
+   private final Map<OneDoFJoint, DoubleYoVariable> upperLimits = new HashMap<>();
+   private final Map<OneDoFJoint, DoubleYoVariable> lowerLimits = new HashMap<>();
+
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator,
          JointIndexHandler jointIndexHandler, double controlDT, YoVariableRegistry parentRegistry)
    {
@@ -114,6 +123,22 @@ public class MotionQPInputCalculator
          jointsRangeOfMotion.set(jointIndex, 0, jointLimitUpper - jointLimitLower);
          jointLowerLimits.set(jointIndex, 0, jointLimitLower);
          jointUpperLimits.set(jointIndex, 0, jointLimitUpper);
+      }
+
+      OneDoFJoint[] controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
+      for (int i = 0; i < controlledOneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = controlledOneDoFJoints[i];
+         DoubleYoVariable jointAccelerationSolution = new DoubleYoVariable("timeUntilLimit_" + joint.getName(), registry);
+         timesUntilJointLimit.put(joint, jointAccelerationSolution);
+         DoubleYoVariable requiredAccToStopAtLimit = new DoubleYoVariable("accToStopAtLimit_" + joint.getName(), registry);
+         requiredAccsToStopAtLimit.put(joint, requiredAccToStopAtLimit);
+         DoubleYoVariable jointVelocityForLimit = new DoubleYoVariable("velocityForLimit_" + joint.getName(), registry);
+         jointVelocitiesForLimit.put(joint, jointVelocityForLimit);
+         DoubleYoVariable upperLimit = new DoubleYoVariable("upperLimit_" + joint.getName(), registry);
+         upperLimits.put(joint, upperLimit);
+         DoubleYoVariable lowerLimit = new DoubleYoVariable("lowerLimit_" + joint.getName(), registry);
+         lowerLimits.put(joint, lowerLimit);
       }
 
       parentRegistry.addChild(registry);
@@ -611,35 +636,96 @@ public class MotionQPInputCalculator
       return true;
    }
 
+//   public void computeJointAccelerationLimits(double absoluteMaximumJointAcceleration, DenseMatrix64F qDDotMinToPack, DenseMatrix64F qDDotMaxToPack)
+//   {
+//      CommonOps.fill(qDDotMinToPack, Double.NEGATIVE_INFINITY);
+//      CommonOps.fill(qDDotMaxToPack, Double.POSITIVE_INFINITY);
+//
+//      for (int i = 0; i < oneDoFJoints.length; i++)
+//      {
+//         OneDoFJoint joint = oneDoFJoints[i];
+//         int index = jointIndexHandler.getOneDoFJointIndex(joint);
+//         double jointLimitLower = jointLowerLimits.get(index, 0);
+//         double jointLimitUpper = jointUpperLimits.get(index, 0);
+//
+//         double qDDotMin = Double.NEGATIVE_INFINITY;
+//         double qDDotMax = Double.POSITIVE_INFINITY;
+//
+//         if (!Double.isInfinite(jointLimitLower))
+//         {
+//            double qDotMin = (jointLimitLower - joint.getQ()) / controlDT;
+//            qDDotMin = (qDotMin - joint.getQd()) / controlDT;
+//            qDDotMin = MathTools.clipToMinMax(qDDotMin, -absoluteMaximumJointAcceleration, 0.0);
+//            qDDotMinToPack.set(index, 0, qDDotMin);
+//         }
+//         if (!Double.isInfinite(jointLimitUpper))
+//         {
+//            double qDotMax = (jointLimitUpper - joint.getQ()) / controlDT;
+//            qDDotMax = (qDotMax - joint.getQd()) / controlDT;
+//            qDDotMax = MathTools.clipToMinMax(qDDotMax, -0.0, absoluteMaximumJointAcceleration);
+//            qDDotMaxToPack.set(index, 0, qDDotMax);
+//         }
+//      }
+//   }
+
    public void computeJointAccelerationLimits(double absoluteMaximumJointAcceleration, DenseMatrix64F qDDotMinToPack, DenseMatrix64F qDDotMaxToPack)
    {
-      CommonOps.fill(qDDotMinToPack, Double.NEGATIVE_INFINITY);
-      CommonOps.fill(qDDotMaxToPack, Double.POSITIVE_INFINITY);
+      CommonOps.fill(qDDotMinToPack, -absoluteMaximumJointAcceleration);
+      CommonOps.fill(qDDotMaxToPack, absoluteMaximumJointAcceleration);
+
+      double reasonableAccelerationLimit = 10.0;
+      double dt = 10.0 * controlDT;
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
          int index = jointIndexHandler.getOneDoFJointIndex(joint);
+
          double jointLimitLower = jointLowerLimits.get(index, 0);
          double jointLimitUpper = jointUpperLimits.get(index, 0);
 
+         // --- old limits
          double qDDotMin = Double.NEGATIVE_INFINITY;
          double qDDotMax = Double.POSITIVE_INFINITY;
-
          if (!Double.isInfinite(jointLimitLower))
          {
-            double qDotMin = (jointLimitLower - joint.getQ()) / controlDT;
-            qDDotMin = (qDotMin - joint.getQd()) / controlDT;
+            double qDotMin = (jointLimitLower - joint.getQ()) / dt;
+            qDDotMin = (qDotMin - joint.getQd()) / dt;
             qDDotMin = MathTools.clipToMinMax(qDDotMin, -absoluteMaximumJointAcceleration, 0.0);
             qDDotMinToPack.set(index, 0, qDDotMin);
          }
          if (!Double.isInfinite(jointLimitUpper))
          {
-            double qDotMax = (jointLimitUpper - joint.getQ()) / controlDT;
-            qDDotMax = (qDotMax - joint.getQd()) / controlDT;
+            double qDotMax = (jointLimitUpper - joint.getQ()) / dt;
+            qDDotMax = (qDotMax - joint.getQd()) / dt;
             qDDotMax = MathTools.clipToMinMax(qDDotMax, -0.0, absoluteMaximumJointAcceleration);
             qDDotMaxToPack.set(index, 0, qDDotMax);
          }
+         // ---
+
+         if (!joint.getName().equals("back_bkx") && !joint.getName().equals("back_bky"))
+            continue;
+
+         // --- new back limits
+         double qd = joint.getQd();
+         double activeLimit = qd < 0.0 ? jointLimitLower : jointLimitUpper;
+         double timeUntilLimit = 2.0 * (activeLimit - joint.getQ()) / qd;
+         timeUntilLimit = MathTools.clipToMinMax(timeUntilLimit, 0.01, 10.0);
+
+         double requiredAccelerationToStopAtLimit = -qd / timeUntilLimit;
+         requiredAccelerationToStopAtLimit = MathTools.clipToMinMax(requiredAccelerationToStopAtLimit, absoluteMaximumJointAcceleration - 10E-10);
+
+         DenseMatrix64F activeLimitSet = qd < 0.0 ? qDDotMinToPack : qDDotMaxToPack;
+         if (Math.abs(requiredAccelerationToStopAtLimit) > reasonableAccelerationLimit)
+            activeLimitSet.set(index, 0, requiredAccelerationToStopAtLimit);
+         // ---
+
+         // Debugging:
+         jointVelocitiesForLimit.get(joint).set(qd);
+         timesUntilJointLimit.get(joint).set(timeUntilLimit);
+         requiredAccsToStopAtLimit.get(joint).set(requiredAccelerationToStopAtLimit);
+         upperLimits.get(joint).set(jointLimitUpper);
+         lowerLimits.get(joint).set(jointLimitLower);
       }
    }
 
