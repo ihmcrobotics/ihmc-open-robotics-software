@@ -143,6 +143,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
       taskSpaceController.reset();
 
       // Initialize force feedback
+      useForceFeedbackControlParameter.set(false);
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
