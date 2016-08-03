@@ -55,7 +55,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
 
    public enum FallBehavior
    {
-      FREEZE, GO_HOME_Z, GO_HOME_XYZ
+      FREEZE, GO_HOME_Z, GO_HOME_XYZ, DO_NOTHING
    }
 
    private final EnumYoVariable<FallBehavior> fallBehavior = EnumYoVariable.create("fallBehavior", FallBehavior.class, registry);
@@ -119,6 +119,12 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
             break;
          case GO_HOME_Z:
             solePositionSetpoint.setZ(-stanceHeightParameter.get());
+            break;
+         case DO_NOTHING:
+            solePositionProportionalGainsParameter.set(0,0.0);
+            solePositionProportionalGainsParameter.set(1,0.0);
+            solePositionProportionalGainsParameter.set(2,0.0);
+            updateGains();
             break;
          }
          quadrupedSoleWaypointList.get(quadrant).get(1).set(solePositionSetpoint.getPoint(), zeroVelocity, trajectoryTimeParameter.get());
