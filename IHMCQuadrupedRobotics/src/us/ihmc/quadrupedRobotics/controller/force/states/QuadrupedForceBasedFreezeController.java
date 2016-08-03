@@ -124,6 +124,8 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
             setpointCompensationValuesParameter.set(2, 0);
          }
       }
+
+      useForceFeedbackControlParameter.set(false);
       // Initialize force feedback
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {

@@ -130,12 +130,13 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       taskSpaceController.reset();
 
       // Initialize force feedback
+      useForceFeedbackControlParameter.set(false);
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControl.get());
+            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControlParameter.get());
          }
       }
    }
@@ -152,6 +153,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    @Override
    public void onExit()
    {
+      /*
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
@@ -160,6 +162,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
             oneDoFJoint.setUseFeedBackForceControl(true);
          }
       }
+      */
    }
 
    private void updateGains()
