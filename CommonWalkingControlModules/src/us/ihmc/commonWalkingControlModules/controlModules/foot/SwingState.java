@@ -134,24 +134,28 @@ public class SwingState extends AbstractUnconstrainedState
       else
          maxSwingHeightFromStanceFoot = 0.0;
 
-      useNewSwingTrajectoyOptimization = walkingControllerParameters.useSwingTrajectoryOptimizer();
-      swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider, initialConfigurationProvider,
-            initialVelocityProvider, stanceConfigurationProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider, registry,
-            yoGraphicsListRegistry, maxSwingHeightFromStanceFoot, !useNewSwingTrajectoyOptimization);
       this.touchdownVelocityProvider = touchdownVelocityProvider;
-      swingTrajectoryGeneratorNew = new TwoWaypointSwingGenerator(namePrefix + "SwingNew", maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
 
       ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
       ArrayList<PositionTrajectoryGenerator> pushRecoveryPositionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
 
+      useNewSwingTrajectoyOptimization = walkingControllerParameters.useSwingTrajectoryOptimizer();
       if (useNewSwingTrajectoyOptimization)
       {
+         swingTrajectoryGeneratorNew = new TwoWaypointSwingGenerator(namePrefix + "SwingNew", maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
+         swingTrajectoryGenerator = null;
+
          positionTrajectoryGenerators.add(swingTrajectoryGeneratorNew);
          pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
                pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGeneratorNew, touchdownTrajectoryGenerator);
       }
       else
       {
+         swingTrajectoryGeneratorNew = null;
+         swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider, initialConfigurationProvider,
+               initialVelocityProvider, stanceConfigurationProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider, registry,
+               yoGraphicsListRegistry, maxSwingHeightFromStanceFoot, true);
+
          positionTrajectoryGenerators.add(swingTrajectoryGenerator);
          pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
                pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGenerator, touchdownTrajectoryGenerator);
@@ -239,9 +243,6 @@ public class SwingState extends AbstractUnconstrainedState
          swingTrajectoryGeneratorNew.setTrajectoryType(trajectoryParametersProvider.getTrajectoryParameters().getTrajectoryType());
          swingTrajectoryGeneratorNew.setSwingHeight(trajectoryParametersProvider.getTrajectoryParameters().getSwingHeight());
          swingTrajectoryGeneratorNew.setStanceFootPosition(stanceFootPosition);
-
-         // old one to compare output
-         swingTrajectoryGenerator.initialize();
       }
 
       positionTrajectoryGenerator.initialize();
@@ -276,9 +277,6 @@ public class SwingState extends AbstractUnconstrainedState
          positionTrajectoryGenerator.compute(time);
 
          positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-
-         if (useNewSwingTrajectoyOptimization)
-            swingTrajectoryGenerator.compute(time);
       }
       else
       {
@@ -399,7 +397,9 @@ public class SwingState extends AbstractUnconstrainedState
       swingTimeSpeedUpFactor.set(Double.NaN);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
 
-      swingTrajectoryGeneratorNew.informDone();
-      swingTrajectoryGenerator.informDone();
+      if (useNewSwingTrajectoyOptimization)
+         swingTrajectoryGeneratorNew.informDone();
+      else
+         swingTrajectoryGenerator.informDone();
    }
 }
