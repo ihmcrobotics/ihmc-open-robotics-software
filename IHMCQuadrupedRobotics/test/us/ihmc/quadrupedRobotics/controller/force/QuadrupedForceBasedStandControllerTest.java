@@ -39,6 +39,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    {
       conductor = null;
       variables = null;
+      pusher = null;
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }

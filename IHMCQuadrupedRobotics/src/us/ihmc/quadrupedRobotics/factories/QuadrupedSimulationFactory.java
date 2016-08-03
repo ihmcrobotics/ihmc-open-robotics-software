@@ -10,6 +10,7 @@ import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -103,10 +104,12 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
+   private final OptionalFactoryField<String> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    
    // TO CONSTRUCT
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
+   private PushRobotController pushRobotController;
    private SensorReader sensorReader;
    private QuadrantDependentList<ContactablePlaneBody> contactableFeet;
    private QuadrantDependentList<FootSwitchInterface> footSwitches;
@@ -128,6 +131,15 @@ public class QuadrupedSimulationFactory
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
       yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
+   }
+   
+   private void createPushRobotController()
+   {
+      if (usePushRobotController.hasBeenSet())
+      {
+         pushRobotController = new PushRobotController(sdfRobot.get(), usePushRobotController.get());
+         yoGraphicsListRegistry.registerYoGraphic("PushRobotController", pushRobotController.getForceVisualizer());
+      }
    }
 
    private void createSensorReader()
@@ -374,7 +386,7 @@ public class QuadrupedSimulationFactory
       
       sdfRobot.get().setGravity(gravity.get());
       sdfRobot.get().setGroundContactModel(groundContactModel);
-      System.out.println("Total mass: " + totalMass);
+      PrintTools.info(this, sdfRobot.get().getName() + " total mass: " + totalMass);
    }
    
    public SimulationConstructionSet createSimulation() throws IOException
@@ -382,6 +394,7 @@ public class QuadrupedSimulationFactory
       FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
       
       setupYoRegistries();
+      createPushRobotController();
       createSensorReader();
       createContactibleFeet();
       createFootSwitches();
@@ -545,5 +558,10 @@ public class QuadrupedSimulationFactory
    public void setGroundProfile3D(GroundProfile3D groundProfile3D)
    {
       providedGroundProfile3D.set(groundProfile3D);
+   }
+   
+   public void setUsePushRobotController(String nameOfJointToPushOn)
+   {
+      usePushRobotController.set(nameOfJointToPushOn);
    }
 }
