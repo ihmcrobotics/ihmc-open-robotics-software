@@ -530,22 +530,22 @@ public class Plotter extends JPanel
       return selectedY;
    }
 
-   public double getAreaX1()
+   public double getArea1X()
    {
       return area1X;
    }
 
-   public double getAreaY1()
+   public double getArea1Y()
    {
       return area1Y;
    }
 
-   public double getAreaX2()
+   public double getArea2X()
    {
       return area2X;
    }
 
-   public double getAreaY2()
+   public double getArea2Y()
    {
       return area2Y;
    }
@@ -573,8 +573,6 @@ public class Plotter extends JPanel
       int h = (int) Math.round(d.getHeight());
       Math.round(d.getWidth());
 
-      // _Xcenter = w/2;
-      // _Ycenter = h/2;
       scaleFactor = h / scale;
 
       // detemine plot size
@@ -591,16 +589,12 @@ public class Plotter extends JPanel
 
    private double unConvertXCoordinate(int coordinate)
    {
-      double x = new Integer(coordinate - centerX).doubleValue() / scaleFactor;
-
-      return x;
+      return new Integer(coordinate - centerX).doubleValue() / scaleFactor;
    }
 
    private double unConvertYCoordinate(int coordinate)
    {
-      double y = new Integer((centerY - coordinate)).doubleValue() / scaleFactor;
-
-      return y;
+      return new Integer((centerY - coordinate)).doubleValue() / scaleFactor;
    }
 
    private Coordinate convertFromMetersToPixels(Coordinate coordinate)
@@ -654,22 +648,22 @@ public class Plotter extends JPanel
       repaint();
    }
 
-   public void setXoffset(double x)
+   public void setOffsetX(double offsetX)
    {
-      offsetX = x;
+      this.offsetX = offsetX;
    }
 
-   public void setYoffset(double y)
+   public void setOffsetY(double offsetY)
    {
-      offsetY = y;
+      this.offsetY = offsetY;
    }
 
-   public double getXoffset()
+   public double getOffsetX()
    {
       return offsetX;
    }
 
-   public double getYoffset()
+   public double getOffsetY()
    {
       return offsetY;
    }
@@ -680,9 +674,9 @@ public class Plotter extends JPanel
       return preferredSize;
    }
 
-   public void setPreferredSize(int h, int w)
+   public void setPreferredSize(int width, int height)
    {
-      preferredSize = new Dimension(h, w);
+      preferredSize = new Dimension(width, height);
    }
 
    public void setDoubleClickListener(DoubleClickListener doubleClickListener)
@@ -758,26 +752,6 @@ public class Plotter extends JPanel
       return updateDelayInMillis;
    }
 
-   public static void main(String[] args)
-   {
-      // plotter
-      Plotter p = new Plotter();
-
-      JFrame f = new JFrame("Plotter Test");
-      f.addWindowListener(new WindowAdapter()
-      {
-         @Override
-         public void windowClosing(WindowEvent e)
-         {
-            System.exit(0);
-         }
-      });
-
-      f.getContentPane().add(p, BorderLayout.CENTER);
-      f.pack();
-      f.setVisible(true);
-   }
-
    private class PlotterMouseListener extends MouseInputAdapter
    {
       @Override
@@ -824,8 +798,8 @@ public class Plotter extends JPanel
             else if (buttonPressed == MouseEvent.BUTTON3)
             {
                Coordinate offset = convertFromPixelsToMeters(new Coordinate(e.getX(), e.getY(), Coordinate.PIXEL));
-               setXoffset(offset.getX());
-               setYoffset(offset.getY());
+               setOffsetX(offset.getX());
+               setOffsetY(offset.getY());
                repaint();
             }
          }
@@ -913,5 +887,25 @@ public class Plotter extends JPanel
       ret.add(plotterLegendPanel, "South");
 
       return ret;
+   }
+
+   public static void main(String[] args)
+   {
+      // plotter
+      Plotter p = new Plotter();
+   
+      JFrame f = new JFrame("Plotter Test");
+      f.addWindowListener(new WindowAdapter()
+      {
+         @Override
+         public void windowClosing(WindowEvent e)
+         {
+            System.exit(0);
+         }
+      });
+   
+      f.getContentPane().add(p, BorderLayout.CENTER);
+      f.pack();
+      f.setVisible(true);
    }
 }
