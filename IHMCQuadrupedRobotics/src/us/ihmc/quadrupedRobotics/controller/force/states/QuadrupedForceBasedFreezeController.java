@@ -17,7 +17,10 @@ import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -25,20 +28,24 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedFreezeController.class.getSimpleName());
 
+   // Parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
+   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 5.0);
    private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory
-         .createDoubleArray("solePositionProportionalGains", 20000, 20000, 20000);
-   private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
+         .createDoubleArray("solePositionProportionalGains", 5000, 5000, 5000);
+   private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 100, 100, 100);
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
    private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
    private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
-   private final BooleanParameter useForceFeedbackControlParameter = parameterFactory.createBoolean("useForceFeedbackControl", true);
+   private final BooleanParameter useForceFeedbackControlParameter = parameterFactory.createBoolean("useForceFeedbackControl", false);
    private final BooleanParameter useSetpointCompensationParameter = parameterFactory.createBoolean("useSetpointCompensation", true);
    private final DoubleParameter maxSetpointCompensationParameter = parameterFactory.createDouble("maxSetpointCompensation", .05);
-   private final DoubleArrayParameter setpointCompensationValuesParameter = parameterFactory.createDoubleArray("setpointCompensationValues", 0, 0, 0);
+   private final DoubleParameter setpointCompensationMultiplierParameter = parameterFactory.createDouble("setpointCompensationMultiplier", 1.1);
 
+   // Yo variables
+   private final QuadrantDependentList<DoubleYoVariable[]> yoSetpointCompensationList;
+   private final BooleanYoVariable yoUseForceFeedbackControl;
    // Reference frames
    private final ReferenceFrame bodyFrame;
 
@@ -61,6 +68,17 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       // Reference frames
       bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
 
+      // Yo variables
+      yoSetpointCompensationList = new QuadrantDependentList<>();
+      yoUseForceFeedbackControl = new BooleanYoVariable("useForceFeedbackControl", registry);
+      for (RobotQuadrant quadrant : RobotQuadrant.values())
+      {
+         DoubleYoVariable[] temp = new DoubleYoVariable[3];
+         temp[0] = new DoubleYoVariable(quadrant.getPascalCaseName() + "SetpointCompensation" + "X", registry);
+         temp[1] = new DoubleYoVariable(quadrant.getPascalCaseName() + "SetpointCompensation" + "Z", registry);
+         temp[2] = new DoubleYoVariable(quadrant.getPascalCaseName() + "SetpointCompensation" + "Y", registry);
+         yoSetpointCompensationList.set(quadrant, temp);
+      }
       // Feedback controller
       solePositionController = controllerToolbox.getSolePositionController();
       solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints();
@@ -105,34 +123,33 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
          solePositionControllerSetpoints.getSolePosition(quadrant).changeFrame(bodyFrame);
          if (useSetpointCompensationParameter.get())
          {
-            setpointCompensationValuesParameter.set(0,
-                  Math.max(soleForceEstimator.getSoleForce(quadrant).getX() / solePositionProportionalGainsParameter.get(0),
+            yoSetpointCompensationList.get(quadrant)[0].set(Math
+                  .max(setpointCompensationMultiplierParameter.get()*soleForceEstimator.getSoleForce(quadrant).getX() / solePositionProportionalGainsParameter.get(0),
                         -maxSetpointCompensationParameter.get()));
-            setpointCompensationValuesParameter.set(1,
-                  Math.max(soleForceEstimator.getSoleForce(quadrant).getY() / solePositionProportionalGainsParameter.get(1),
+            yoSetpointCompensationList.get(quadrant)[1].set(
+                  Math.max(setpointCompensationMultiplierParameter.get()*soleForceEstimator.getSoleForce(quadrant).getY() / solePositionProportionalGainsParameter.get(1),
                         -maxSetpointCompensationParameter.get()));
-            setpointCompensationValuesParameter.set(2,
-                  Math.max(soleForceEstimator.getSoleForce(quadrant).getZ() / solePositionProportionalGainsParameter.get(2),
+            yoSetpointCompensationList.get(quadrant)[2].set(
+                  Math.max(setpointCompensationMultiplierParameter.get()*soleForceEstimator.getSoleForce(quadrant).getZ() / solePositionProportionalGainsParameter.get(2),
                         -maxSetpointCompensationParameter.get()));
             solePositionControllerSetpoints.getSolePosition(quadrant)
-                  .add(setpointCompensationValuesParameter.get(0), setpointCompensationValuesParameter.get(1), setpointCompensationValuesParameter.get(2));
+                  .add(yoSetpointCompensationList.get(quadrant)[0].getDoubleValue(), yoSetpointCompensationList.get(quadrant)[1].getDoubleValue(), yoSetpointCompensationList.get(quadrant)[2].getDoubleValue());
          }
          else
          {
-            setpointCompensationValuesParameter.set(0, 0);
-            setpointCompensationValuesParameter.set(1, 0);
-            setpointCompensationValuesParameter.set(2, 0);
+            yoSetpointCompensationList.get(quadrant)[0].set(0);
+            yoSetpointCompensationList.get(quadrant)[1].set(0);
+            yoSetpointCompensationList.get(quadrant)[2].set(0);
          }
       }
-
-      useForceFeedbackControlParameter.set(false);
+      yoUseForceFeedbackControl.set(useForceFeedbackControlParameter.get());
       // Initialize force feedback
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControlParameter.get());
+            oneDoFJoint.setUseFeedBackForceControl(yoUseForceFeedbackControl.getBooleanValue());
          }
       }
    }
@@ -150,13 +167,13 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    @Override
    public void onExit()
    {
-      useForceFeedbackControlParameter.set(true);
+      yoUseForceFeedbackControl.set(true);
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControlParameter.get());
+            oneDoFJoint.setUseFeedBackForceControl(yoUseForceFeedbackControl.getBooleanValue());
          }
       }
    }
