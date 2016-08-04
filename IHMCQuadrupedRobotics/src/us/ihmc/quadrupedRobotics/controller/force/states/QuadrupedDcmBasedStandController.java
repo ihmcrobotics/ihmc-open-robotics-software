@@ -70,6 +70,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
+   private final QuadrupedSoleForceEstimator soleForceEstimator;
 
    // planning
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -106,6 +107,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       taskSpaceController = controllerToolbox.getTaskSpaceController();
+      soleForceEstimator = controllerToolbox.getSoleForceEstimator();
 
       // planning
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
@@ -145,6 +147,9 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
 
       // update ground plane estimate
       groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
+
+      // update sole force estimate
+      soleForceEstimator.compute();
    }
 
    private void updateSetpoints()
@@ -190,7 +195,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       updateGains();
       updateEstimates();
       updateSetpoints();
-      return null;
+      return detectFall() ? null : ControllerEvent.FAIL;
    }
 
    @Override
@@ -207,6 +212,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       comPositionController.reset();
       bodyOrientationControllerSetpoints.initialize(taskSpaceEstimates);
       bodyOrientationController.reset();
+      soleForceEstimator.reset();
 
       // initialize task space controller
       taskSpaceControllerSettings.initialize();
@@ -223,5 +229,19 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    @Override
    public void onExit()
    {
+   }
+
+   private boolean detectFall()
+   {
+      int numContacts = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (soleForceEstimator.getSoleContactForce(robotQuadrant).getZ() > contactPressureLowerLimitParameter.get())
+         {
+            numContacts += 1;
+         }
+      }
+      if (comPositionController.)
+         return (numContacts > 2);
    }
 }
