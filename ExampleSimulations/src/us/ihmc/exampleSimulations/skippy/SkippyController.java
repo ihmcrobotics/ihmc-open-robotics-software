@@ -75,9 +75,9 @@ public class SkippyController implements RobotController
       desiredPositions = new ArrayList<double[]>();
       //double[] position = {qLegDesiredX, qLegDesiredY, qHipDesired, qShoulderDesired} <- format
       double[] firstSetOfPoints = {0.0,0.0,0.0,0.0};
-      double[] secondSetOfPoints = {Math.PI/4, 0.0, -2*Math.PI/4, 0.15};
+      double[] secondSetOfPoints = {Math.PI/4, 0.0, -2*Math.PI/4, 0.0};
       double[] thirdSetOfPoints = {-Math.PI/4, 0.0, 2*Math.PI/4, 0.0};
-      desiredPositions.add(firstSetOfPoints);
+      //desiredPositions.add(firstSetOfPoints);
       desiredPositions.add(secondSetOfPoints);
       desiredPositions.add(thirdSetOfPoints);
    }
@@ -121,11 +121,11 @@ public class SkippyController implements RobotController
       double interval = Math.round(SkippySimulation.TIME/desiredPositions.size()*100.0)/100.0;
       double time = Math.round(robot.getTime()*(1/SkippySimulation.DT))/(1/SkippySimulation.DT);
 
-      positionJointsBasedOnError(robot.getLegJoint(),desiredPositions.get(timeCounter)[0], legIntegralTermX, 17000, 150, 1000, false);
-      positionJointsBasedOnError(robot.getLegJoint().getSecondJoint(), desiredPositions.get(timeCounter)[1], legIntegralTermY, 17000, 150, 1000, false);
-      positionJointsBasedOnError(robot.getHipJoint(), desiredPositions.get(timeCounter)[2], hipIntegralTerm, 17000, 150, 1000, false);
-      positionJointsBasedOnError(robot.getShoulderJoint(), desiredPositions.get(timeCounter)[3], shoulderIntegralTerm, 17000, 150, 1000, false);
-      System.out.println();
+      positionJointsBasedOnError(robot.getLegJoint(),desiredPositions.get(timeCounter)[0], legIntegralTermX, 20000, 150, 2000, true);
+      positionJointsBasedOnError(robot.getLegJoint().getSecondJoint(), desiredPositions.get(timeCounter)[1], legIntegralTermY, 20000, 150, 2000, false);
+      positionJointsBasedOnError(robot.getHipJoint(), desiredPositions.get(timeCounter)[2], hipIntegralTerm, 20000, 150, 2000, false);
+      positionJointsBasedOnError(robot.getShoulderJoint(), desiredPositions.get(timeCounter)[3], shoulderIntegralTerm, 20000, 150, 2000, false);
+      //System.out.println();
 
       if(time%interval==0 && time != 0.0 && timeCounter < desiredPositions.size())
       {
@@ -139,20 +139,23 @@ public class SkippyController implements RobotController
          timeCounter = desiredPositions.size()-1;
    }
 
-   public void positionJointsBasedOnError(PinJoint joint, double desiredValue, double integralTerm, double positionErrorGain, double integralErrorGain, double derivativeErrorGain, boolean first)
+   public void positionJointsBasedOnError(PinJoint joint, double desiredValue, double integralTerm, double positionErrorGain, double integralErrorGain, double derivativeErrorGain, boolean isBasedOnWorldCoordinates)
    {
-      //try to change position based on world coordinates
-      Matrix3d d = new Matrix3d();
-      joint.getRotationToWorld(d);
-      double a = Math.acos((d.getM11()));
-      if(d.getM11()<0)
-         a = a*1;
-      //if(first)
-      //   System.out.println((joint.getQ().getDoubleValue()) + " " + a);
-      if(!first)
-         a = joint.getQ().getDoubleValue();
 
-      double positionError = (positionErrorGain)*((desiredValue-a));
+
+      //try to change position based on angular position wrt xyz coordinate system
+      Matrix3d rotationMatrixForWorld = new Matrix3d();
+      joint.getRotationToWorld(rotationMatrixForWorld);
+      double rotationToWorld = Math.asin((rotationMatrixForWorld.getM21()));
+      if(rotationMatrixForWorld.getM11()<0)
+         rotationToWorld = rotationToWorld * -1;
+      if(isBasedOnWorldCoordinates)
+         System.out.println(joint.getName() + " " + (joint.getQ().getDoubleValue()) + " " + rotationToWorld);
+      else
+         rotationToWorld = joint.getQ().getDoubleValue();
+
+
+      double positionError = (positionErrorGain)*((desiredValue-rotationToWorld));
       integralTerm += (integralErrorGain)*positionError*SkippySimulation.DT;
       double derivativeError = (derivativeErrorGain)*(0-joint.getQD().getDoubleValue());
       joint.setTau(positionError+integralTerm+derivativeError);
