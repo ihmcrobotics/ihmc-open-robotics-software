@@ -40,7 +40,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private final DoubleParameter pitchScaleParameter = parameterFactory.createDouble("pitchScale", 0.15);
    private final DoubleParameter zdotScaleParameter = parameterFactory.createDouble("zdotScale", 0.25);
    private final DoubleParameter defaultComHeightParameter = parameterFactory.createDouble("defaultComHeight", 0.6);
-   private final DoubleParameter defaultGroundClearance = parameterFactory.createDouble("defaultGroundClearance", 0.10);
+   private final DoubleParameter defaultGroundClearance = parameterFactory.createDouble("defaultGroundClearance", 0.075);
    private final DoubleParameter xStrideMax = parameterFactory.createDouble("xStrideMax", 0.4);
    private final DoubleParameter yStrideMax = parameterFactory.createDouble("yStrideMax", 0.25);
    private final DoubleParameter yawRateScale = parameterFactory.createDouble("yawRateScale", 0.25);
@@ -50,11 +50,11 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private final DoubleParameter singleStepSwingDuration = parameterFactory.createDouble("singleStepSwingDuration", 2.0);
 
    // xgait step parameters
-   private final IntegerParameter xGaitStepPlanSize = parameterFactory.createInteger("xGaitStepPlanSize", 12);
-   private final DoubleParameter xGaitStanceWidth = parameterFactory.createDouble("xGaitStanceWidth", 0.35);
+   private final IntegerParameter xGaitStepPlanSize = parameterFactory.createInteger("xGaitStepPlanSize", 10);
+   private final DoubleParameter xGaitStanceWidth = parameterFactory.createDouble("xGaitStanceWidth", 0.25);
    private final DoubleParameter xGaitStanceLength = parameterFactory.createDouble("xGaitStanceWidth", 1.0);
-   private final DoubleArrayParameter xGaitStepDuration = parameterFactory.createDoubleArray("xGaitStepDuration", 0.5, 0.4);
-   private final DoubleArrayParameter xGaitEndDoubleSupportDuration = parameterFactory.createDoubleArray("xGaitEndDoubleSupportDuration", 0.5, 0.2);
+   private final DoubleArrayParameter xGaitStepDuration = parameterFactory.createDoubleArray("xGaitStepDuration", 0.5, 0.33);
+   private final DoubleArrayParameter xGaitEndDoubleSupportDuration = parameterFactory.createDoubleArray("xGaitEndDoubleSupportDuration", 1.0, 0.05);
    private final DoubleArrayParameter xGaitEndPhaseShift = parameterFactory.createDoubleArray("xGaitEndPhaseShift", 90, 180);
 
    private final PacketCommunicator packetCommunicator;
@@ -215,6 +215,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
       xGaitStepPlanner.computeInitialPlan(steps, planarVelocity, initialQuadrant, supportCentroid, initialStepStartTime, supportYaw, xGaitSettings);
       for (int i = 0; i < numberOfSteps; i++)
       {
+         steps.get(i).setGroundClearance(defaultGroundClearance.get());
          steps.get(i).setAbsolute(false);
       }
 
