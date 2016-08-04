@@ -1,12 +1,15 @@
 package us.ihmc.exampleSimulations.buildingPendulum;
 
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
 
 public class BuildingPendulumController extends SimpleRobotController
 {
+   public static String variableName = "MySliderBoardTest";
+
    private final BuildingPendulumRobot robot;
    private final BooleanYoVariable atCenter = new BooleanYoVariable("AtCenter", registry);
 
@@ -17,6 +20,8 @@ public class BuildingPendulumController extends SimpleRobotController
    private double pendulumAngleSwitch;
    private double angularChange = 2*Math.asin(BuildingPendulumRobot.distance/(2*BuildingPendulumRobot.length));
 
+
+   private final DoubleYoVariable mySliderBoardTest = new DoubleYoVariable(variableName, registry);
 
    public BuildingPendulumController(BuildingPendulumRobot robot)
    {
@@ -51,6 +56,7 @@ public class BuildingPendulumController extends SimpleRobotController
 
       if (atCenter)
       {
+
          activeSide = activeSide.getOppositeSide();
          robot.setPendulumAngle(activeSide, robot.getSwitchAngle(activeSide));
          
@@ -66,5 +72,9 @@ public class BuildingPendulumController extends SimpleRobotController
       // set yoVariables for debugging in SCS
       this.atCenter.set(atCenter);
       yoActiveSide.set(activeSide);
+
+      // try out new slider variable
+      if (mySliderBoardTest.getDoubleValue() <= -0.5)
+         System.out.println("small value...");
    }
 }
