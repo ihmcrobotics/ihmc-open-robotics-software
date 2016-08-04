@@ -81,9 +81,9 @@ public class QuadrupedSoleForceEstimator
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          yoSolePosition.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseName() + "SolePosition", worldFrame, registry));
-         yoSoleForce.set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseName() + "SoleForce", worldFrame, registry));
+         yoSoleForce.set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseName() + "SoleForceEstimate", worldFrame, registry));
          yoSoleForce.get(robotQuadrant).set(soleForce.get(robotQuadrant));
-         yoSoleContactForce.set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseName() + "SoleContactForce", worldFrame, registry));
+         yoSoleContactForce.set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseName() + "SoleContactForceEstimate", worldFrame, registry));
          yoJointTorques.set(robotQuadrant, new YoFrameVector[legJointNames.length]);
          for (int i = 0; i < legJointNames.length; i++)
          {
