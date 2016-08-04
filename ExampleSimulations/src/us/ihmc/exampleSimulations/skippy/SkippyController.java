@@ -6,10 +6,9 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.mathfunctions.Matrix;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import javax.vecmath.*;
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class SkippyController implements RobotController
 {
@@ -53,15 +52,33 @@ public class SkippyController implements RobotController
          k2 = -96.33
          k3 = -104.59
          k4 = -49.05
+
+         k1 = new DoubleYoVariable("k1", registry);
+         k1.set(-242.52);
+         k2 = new DoubleYoVariable("k2", registry);
+         k2.set(-96.33);
+         k3 = new DoubleYoVariable("k3", registry);
+         k3.set(-104.59);
+         k4 = new DoubleYoVariable("k4", registry);
+         k4.set(-49.05);
+
+         k5 = new DoubleYoVariable("k5", registry);
+         k5.set(-242.52);
+         k6 = new DoubleYoVariable("k6", registry);
+         k6.set(-96.33);
+         k7 = new DoubleYoVariable("k7", registry);
+         k7.set(-104.59);
+         k8 = new DoubleYoVariable("k8", registry);
+         k8.set(-49.05);
        */
       k1 = new DoubleYoVariable("k1", registry);
-      k1.set(-242.52);
+      k1.set(-7724.52);
       k2 = new DoubleYoVariable("k2", registry);
-      k2.set(-96.33);
+      k2.set(-5209.33);
       k3 = new DoubleYoVariable("k3", registry);
-      k3.set(-104.59);
+      k3.set(-720.59);
       k4 = new DoubleYoVariable("k4", registry);
-      k4.set(-49.05);
+      k4.set(-104.05);
 
       k5 = new DoubleYoVariable("k5", registry);
       k5.set(-242.52);
@@ -89,33 +106,71 @@ public class SkippyController implements RobotController
 
       //start pid control
       //System.out.println(this.robot.mainJoint.getQdy());
-      positionControl();
-      //positionControl(0.0,0.0,0.0,0.0);
-      //balanceControl(Math.PI/6, 0.0);
+      //positionControl();
+      balanceControl(-Math.PI, 0.0);
 
    }
 
-   private void balanceControl(double thetaX, double thetaY)
+   private void balanceControl(double hipDesired, double shoulderDesired)
    {
 
-      double forceX, forceY;
-
-      double positionError = (10)*(thetaX-robot.getLegJoint().getQ().getDoubleValue());
-      legIntegralTermX += (1)*(positionError*SkippySimulation.DT);
-      double derivativeError = (10)*(0.0-robot.getLegJoint().getQD().getDoubleValue());
-      forceX = positionError+legIntegralTermX+derivativeError;
-
-      positionError = (10)*(thetaY-robot.getLegJoint().getSecondJoint().getQ().getDoubleValue());
-      legIntegralTermY += (1)*(positionError*SkippySimulation.DT);
-      derivativeError = (10)*(0.0-robot.getLegJoint().getSecondJoint().getQD().getDoubleValue());
-      forceY = positionError+legIntegralTermY+derivativeError;
-
-      //forceY = 0.0;
-      //forceX = 0.0;
-
-      robot.setBalanceForce(forceX,0.0,forceY);
+      applyTorqueToHip(hipDesired);
+      //applyTorqueToShoulder(shoulderDesired);
 
    }
+   private void applyTorqueToHip(double hipDesired)
+   {
+      Point3d centerOfMass = new Point3d();
+      double robotMass = robot.computeCenterOfMass(robot.getLegJoint(), centerOfMass);
+      Point3d groundPoint = new Point3d();
+      robot.getGroundContactPoints().get(0).getPosition(groundPoint);
+      double planarDistance = Math.pow(Math.pow(centerOfMass.getY()-groundPoint.getY(), 2) + Math.pow(centerOfMass.getZ()-groundPoint.getZ(), 2), 0.5);
+      double angle = (Math.asin(centerOfMass.getY()/planarDistance));
+
+//      System.out.println(centerOfMass);
+//      System.out.println(angle);
+//      System.out.println(angle*180/Math.PI);
+//      if(true)
+//         return;
+
+      Vector3d linearMomentum = new Vector3d();
+      robot.computeLinearMomentum(linearMomentum);
+      double angleVel = Math.pow(Math.pow(linearMomentum.getY(), 2) + Math.pow(linearMomentum.getZ(), 2), 0.5)/robotMass;
+      angleVel = angleVel / planarDistance;
+
+      double hipAngle = Math.PI - robot.getHipJoint().getQ().getDoubleValue();
+      double hipAngleVel = robot.getHipJoint().getQD().getDoubleValue();
+
+      robot.getHipJoint().setTau(k1.getDoubleValue()*angle + k2.getDoubleValue()*angleVel + k3.getDoubleValue()*(hipDesired-hipAngle) + k4.getDoubleValue()*hipAngleVel);
+
+      System.out.println(centerOfMass);
+   }
+   private void applyTorqueToShoulder(double shoulderDesired)
+   {
+      Point3d centerOfMass = new Point3d();
+      double robotMass = robot.computeCenterOfMass(robot.getLegJoint().getSecondJoint(), centerOfMass);
+      Point3d groundPoint = new Point3d();
+      robot.getGroundContactPoints().get(0).getPosition(groundPoint);
+      double planarDistance = Math.pow(Math.pow(centerOfMass.getX()-groundPoint.getX(), 2) + Math.pow(centerOfMass.getZ()-groundPoint.getZ(), 2), 0.5);
+      double angle = (Math.asin(centerOfMass.getX()/planarDistance));
+
+      Vector3d linearMomentum = new Vector3d();
+      robot.computeLinearMomentum(linearMomentum);
+      double angleVel = Math.pow(Math.pow(linearMomentum.getX(), 2) + Math.pow(linearMomentum.getZ(), 2), 0.5)/robotMass;
+      angleVel = angleVel / planarDistance;
+
+      double hipAngle = Math.PI - robot.getShoulderJoint().getQ().getDoubleValue();
+      double hipAngleVel = robot.getShoulderJoint().getQD().getDoubleValue();
+
+      robot.getHipJoint().setTau(k1.getDoubleValue()*angle + k2.getDoubleValue()*angleVel + k3.getDoubleValue()*(shoulderDesired-hipAngle) + k4.getDoubleValue()*hipAngleVel);
+
+      System.out.println(shoulderDesired-hipAngle);
+   }
+   private double calculateDistanceBetweenPoints(Point3d a, Point3d b)
+   {
+      return a.distance(b);
+   }
+
 
    private void positionControl()
    {
@@ -142,8 +197,6 @@ public class SkippyController implements RobotController
 
    public void positionJointsBasedOnError(PinJoint joint, double desiredValue, double integralTerm, double positionErrorGain, double integralErrorGain, double derivativeErrorGain, boolean isBasedOnWorldCoordinates)
    {
-
-
       //try to change position based on angular position wrt xyz coordinate system
       Matrix3d rotationMatrixForWorld = new Matrix3d();
       joint.getRotationToWorld(rotationMatrixForWorld);

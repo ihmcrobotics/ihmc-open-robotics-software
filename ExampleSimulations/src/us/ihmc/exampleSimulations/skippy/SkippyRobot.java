@@ -57,6 +57,7 @@ public class SkippyRobot extends Robot
       GroundContactPoint leftContact = new GroundContactPoint("leftContactPoint", new Vector3d(-SHOULDER_LENGTH / 2.0, 0.0, 0.0), this);
       GroundContactPoint rightContact = new GroundContactPoint("rightContactPoint", new Vector3d(SHOULDER_LENGTH / 2.0, 0.0, 0.0), this);
 
+      groundContactPoints.add(footContact);
       groundContactPoints.add(footContact1);
       groundContactPoints.add(hipContact);
       groundContactPoints.add(shoulderContact);
@@ -64,41 +65,39 @@ public class SkippyRobot extends Robot
       groundContactPoints.add(rightContact);
 
 
-      mainJoint = new FloatingJoint("mainJoint", new Vector3d(0.0,0.0,0.0), this);
-      Link mainJointLink = new Link("mainJointLink");
-      mainJointLink.setMass(1.5);
-      mainJointLink.setMomentOfInertia(90,90,9990);
-      mainJoint.setLink(mainJointLink);
-      mainJoint.addGroundContactPoint(footContact);
-      this.addRootJoint(mainJoint);
+//      mainJoint = new FloatingJoint("mainJoint", new Vector3d(0.0,0.0,0.0), this);
+//      Link mainJointLink = new Link("mainJointLink");
+//      mainJointLink.setMass(1.5);
+//      mainJointLink.setMomentOfInertia(90,90,9990);
+//      mainJoint.setLink(mainJointLink);
+//      mainJoint.addGroundContactPoint(footContact);
+//      this.addRootJoint(mainJoint);
 //      Graphics3DObject mainJointLinkGraphics = new Graphics3DObject();
 //      mainJointLinkGraphics.addCube(0.25,0.25,0.25,YoAppearance.White());
 //      mainJointLink.setLinkGraphics(mainJointLinkGraphics);
-      mainJoint.addGroundContactPoint(footContact1);
-      mainJoint.addGroundContactPoint(footContact2);
-      mainJoint.addGroundContactPoint(footContact3);
-      mainJoint.addGroundContactPoint(footContact4);
-      mainJoint.addGroundContactPoint(footContact5);
-      mainJoint.addGroundContactPoint(footContact6);
-      mainJoint.addGroundContactPoint(footContact7);
-      mainJoint.addGroundContactPoint(footContact8);
+//      mainJoint.addGroundContactPoint(footContact1);
+//      mainJoint.addGroundContactPoint(footContact2);
+//      mainJoint.addGroundContactPoint(footContact3);
+//      mainJoint.addGroundContactPoint(footContact4);
+//      mainJoint.addGroundContactPoint(footContact5);
+//      mainJoint.addGroundContactPoint(footContact6);
+//      mainJoint.addGroundContactPoint(footContact7);
+//      mainJoint.addGroundContactPoint(footContact8);
 
 
 
        // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
       foot = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, 0.0), this, Axis.X, Axis.Y);
-      foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.0)); // initial Cartesian position of foot
-      foot.setInitialState(0.0, 0.0, 0.0, 0.0); // initial position "q" of foot
+      foot.setInitialState(Math.PI/4, 0.0, 0.0, 0.0); // initial position "q" of foot
       Link leg = createLeg();
       foot.setLink(leg);
-      //this.addRootJoint(foot);
-      //foot.addGroundContactPoint(footContact);
-      mainJoint.addJoint(foot);
+      this.addRootJoint(foot);
+      foot.addGroundContactPoint(footContact);
 
       hip = new PinJoint("hip", new Vector3d(0.0, 0.0, LEG_LENGTH), this, Axis.X);
       Link torso = createTorso();
       hip.setLink(torso);
-      hip.setInitialState(0.0,0.0);
+      hip.setInitialState(-2*Math.PI/4,0.0);
       this.foot.addJoint(hip);
       hip.addGroundContactPoint(hipContact);
 
@@ -112,7 +111,7 @@ public class SkippyRobot extends Robot
       shoulder.addExternalForcePoint(balanceForce);
 
       //shoulder.setDamping(0.3);
-      this.hip.addJoint(shoulder);
+      //this.hip.addJoint(shoulder);
       shoulder.addGroundContactPoint(shoulderContact);
       shoulder.addGroundContactPoint(leftContact);
       shoulder.addGroundContactPoint(rightContact);
@@ -204,13 +203,15 @@ public class SkippyRobot extends Robot
    {
       return SHOULDER_MASS;
    }
-   public double getShoulderLength()
-   {
+   public double getShoulderLength() {
       return SHOULDER_LENGTH;
    }
-
    public void setBalanceForce(double x, double y, double z)
    {
       balanceForce.setForce(x, y, z);
+   }
+   public ArrayList<GroundContactPoint> getGroundContactPoints()
+   {
+      return groundContactPoints;
    }
 }
