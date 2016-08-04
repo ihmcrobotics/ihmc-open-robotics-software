@@ -63,6 +63,28 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       double originalHeight = standupPrecisely();
 
       lowerHeightUntilFailure(originalHeight);
+
+      conductor.concludeTesting();
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 90.0)
+   @Test(timeout = 300000)
+   public void testStandingOnThreeLegsLowerLimit()
+   {
+      double originalHeight = standupPrecisely();
+      
+      variables.getTimedStepQuadrant().set(RobotQuadrant.FRONT_LEFT);
+      variables.getTimedStepGroundClearance().set(0.2);
+      variables.getTimedStepDuration().set(30.0);
+      variables.getTimedStepGoalPositionX().set(variables.getSolePositionXs().get(RobotQuadrant.FRONT_LEFT).getDoubleValue());
+      variables.getTimedStepGoalPositionY().set(variables.getSolePositionYs().get(RobotQuadrant.FRONT_LEFT).getDoubleValue() + 0.2);
+      variables.getTimedStepGoalPositionZ().set(0.2);
+      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
+
+      lowerHeightUntilFailure(originalHeight);
+      raiseHeightUntilFailure(originalHeight);
+
+      conductor.concludeTesting();
    }
    
    @DeployableTestMethod(estimatedDuration = 30.0)
@@ -95,6 +117,8 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.simulate();
 
       lowerHeightUntilFailure(originalHeight);
+
+      conductor.concludeTesting();
    }
 
    @DeployableTestMethod(estimatedDuration = 35.0)
@@ -112,6 +136,8 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       variables.getXGaitEndPhaseShiftInput().set(180.0);
 
       lowerHeightUntilFailure(originalHeight);
+
+      conductor.concludeTesting();
    }
 
    @DeployableTestMethod(estimatedDuration = 35.0)
@@ -129,6 +155,8 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       variables.getYoPlanarVelocityInputX().set(0.7);
 
       lowerHeightUntilFailure(originalHeight);
+
+      conductor.concludeTesting();
    }
 
    private double standupPrecisely() throws AssertionFailedError
@@ -167,7 +195,32 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
             break;
          }
       }
+   }
+   
+   private void raiseHeightUntilFailure(double originalHeight) throws AssertionFailedError
+   {
+      for (double heightDelta = 0.38 - originalHeight; (originalHeight + heightDelta) < originalHeight; heightDelta += 0.01)
+      {
+         variables.getYoComPositionInputZ().set(originalHeight + heightDelta);
 
-      conductor.concludeTesting();
+         variables.getLimitJointTorques().set(false);
+         conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getComPositionEstimateZ(), originalHeight + heightDelta, 0.01));
+         conductor.simulate();
+
+         try
+         {
+            variables.getLimitJointTorques().set(true);
+            conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+            conductor.addSustainGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getComPositionEstimateZ(), originalHeight + heightDelta, 0.01));
+            conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
+            conductor.simulate();
+         }
+         catch (AssertionFailedError assertionFailedError)
+         {
+            PrintTools.info("Failed to stand at " + variables.getYoComPositionInputZ().getDoubleValue());
+            break;
+         }
+      }
    }
 }

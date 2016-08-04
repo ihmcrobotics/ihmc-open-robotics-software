@@ -5,6 +5,7 @@ import java.net.BindException;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
@@ -104,12 +105,11 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
-   private final OptionalFactoryField<String> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
+   private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    
    // TO CONSTRUCT
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
-   private PushRobotController pushRobotController;
    private SensorReader sensorReader;
    private QuadrantDependentList<ContactablePlaneBody> contactableFeet;
    private QuadrantDependentList<FootSwitchInterface> footSwitches;
@@ -135,10 +135,17 @@ public class QuadrupedSimulationFactory
    
    private void createPushRobotController()
    {
-      if (usePushRobotController.hasBeenSet())
+      if (usePushRobotController.hasBeenSet() && usePushRobotController.get())
       {
-         pushRobotController = new PushRobotController(sdfRobot.get(), usePushRobotController.get());
-         yoGraphicsListRegistry.registerYoGraphic("PushRobotController", pushRobotController.getForceVisualizer());
+         PushRobotController bodyPushRobotController = new PushRobotController(sdfRobot.get(), "body", new Vector3d(0.0, -0.00057633, 0.0383928));
+         yoGraphicsListRegistry.registerYoGraphic("PushRobotControllers", bodyPushRobotController.getForceVisualizer());
+         
+         for (QuadrupedJointName quadrupedJointName : modelFactory.get().getQuadrupedJointNames())
+         {
+            String jointName = modelFactory.get().getSDFNameForJointName(quadrupedJointName);
+            PushRobotController jointPushRobotController = new PushRobotController(sdfRobot.get(), jointName, new Vector3d(0.0, 0.0, 0.0));
+            yoGraphicsListRegistry.registerYoGraphic("PushRobotControllers", jointPushRobotController.getForceVisualizer());
+         }
       }
    }
 
@@ -560,8 +567,8 @@ public class QuadrupedSimulationFactory
       providedGroundProfile3D.set(groundProfile3D);
    }
    
-   public void setUsePushRobotController(String nameOfJointToPushOn)
+   public void setUsePushRobotController(boolean usePushRobotController)
    {
-      usePushRobotController.set(nameOfJointToPushOn);
+      this.usePushRobotController.set(usePushRobotController);
    }
 }
