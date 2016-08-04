@@ -37,10 +37,10 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-         quadrupedTestFactory.setUsePushRobotController("neck_root_yaw");
+         quadrupedTestFactory.setUsePushRobotController(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-         pusher = new PushRobotTestConductor(conductor.getScs());
+         pusher = new PushRobotTestConductor(conductor.getScs(), "neck_root_yaw");
       }
       catch (IOException e)
       {
