@@ -80,6 +80,7 @@ public class SkippyController implements RobotController
       //desiredPositions.add(firstSetOfPoints);
       desiredPositions.add(secondSetOfPoints);
       desiredPositions.add(thirdSetOfPoints);
+      desiredPositions.add(firstSetOfPoints);
    }
 
    public void doControl()
@@ -147,8 +148,8 @@ public class SkippyController implements RobotController
       Matrix3d rotationMatrixForWorld = new Matrix3d();
       joint.getRotationToWorld(rotationMatrixForWorld);
       double rotationToWorld = Math.asin((rotationMatrixForWorld.getM21()));
-      if(rotationMatrixForWorld.getM11()<0)
-         rotationToWorld = rotationToWorld * -1;
+      //if(rotationMatrixForWorld.getM11()<0)
+      //   rotationToWorld = rotationToWorld * -1;
       if(isBasedOnWorldCoordinates)
          System.out.println(joint.getName() + " " + (joint.getQ().getDoubleValue()) + " " + rotationToWorld);
       else
