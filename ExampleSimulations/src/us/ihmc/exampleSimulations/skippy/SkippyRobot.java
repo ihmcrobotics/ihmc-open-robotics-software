@@ -111,7 +111,7 @@ public class SkippyRobot extends Robot
       shoulder.addExternalForcePoint(balanceForce);
 
       //shoulder.setDamping(0.3);
-      //this.hip.addJoint(shoulder);
+      this.hip.addJoint(shoulder);
       shoulder.addGroundContactPoint(shoulderContact);
       shoulder.addGroundContactPoint(leftContact);
       shoulder.addGroundContactPoint(rightContact);
