@@ -113,8 +113,8 @@ public class DrillDetectionUI
       soundDetectorGUI.add(boolPlotterPanel, boolPlotterLayout);
 
       boolPlotter = boolPlotterPanel.getPlotter();
-      boolPlotter.setXoffset(320);
-      boolPlotter.setYoffset(80);
+      boolPlotter.setOffsetX(320);
+      boolPlotter.setOffsetY(80);
       boolPlotter.setRange(200);
 
 
