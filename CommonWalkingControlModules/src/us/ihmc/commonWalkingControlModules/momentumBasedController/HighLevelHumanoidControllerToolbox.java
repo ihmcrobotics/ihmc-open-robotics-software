@@ -364,7 +364,7 @@ public class HighLevelHumanoidControllerToolbox
       DoubleYoVariable alpha = new DoubleYoVariable("filteredAngularMomentumAlpha", registry);
       alpha.set(0.95);
       filteredYoAngularMomentum = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filteredAngularMomentum", "", registry, alpha, yoAngularMomentum);
-      momentumGain.set(1.0);
+      momentumGain.set(0.5);
    }
 
    public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
