@@ -24,6 +24,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
+import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.YoGraph;
 
@@ -59,23 +60,44 @@ public class YoVariableExporter extends YoVariableLogReader
          MLInt64 timestamp = new MLInt64("timestamp", new int[] { elements, 1 });
          MLDouble robotTime = new MLDouble("robotTime", new int[] { elements, 1 });
          
-         ArrayList<DataHolder<?>> dataHolders = new ArrayList<>();
+         ArrayList<DataEntry> graphEntries = new ArrayList<>();
          
          for (YoGraph graph : gui.getGraphArrayPanel().getGraphsOnThisPanel())
          {
             for (DataEntry entry : graph.getEntriesOnThisGraph())
             {
-               YoVariable<?> variable = entry.getVariable();
-               int offset = variables.indexOf(variable);
-               if (offset == -1)
-               {
-                  System.err.println("Cannot export variable " + variable.getName() + " as it is calculated by the visualizer.");
-                  continue;
-               }
-               int dataBufferOffset = offset + 1;
-               dataHolders.add(createDataHolder(dataBufferOffset, elements, variable));
+               graphEntries.add(entry);
             }
          }
+         
+         for(GraphArrayWindow graphArrayWindow : gui.getGraphArrayWindows())
+         {
+            for (YoGraph graph : graphArrayWindow.getGraphArrayPanel().getGraphsOnThisPanel())
+            {
+               for (DataEntry entry : graph.getEntriesOnThisGraph())
+               {
+                  graphEntries.add(entry);
+               }
+            }   
+         }
+         
+         
+         ArrayList<DataHolder<?>> dataHolders = new ArrayList<>();
+         
+         for (DataEntry entry : graphEntries)
+         {
+            YoVariable<?> variable = entry.getVariable();
+            int offset = variables.indexOf(variable);
+            if (offset == -1)
+            {
+               System.err.println("Cannot export variable " + variable.getName() + " as it is calculated by the visualizer.");
+               continue;
+            }
+            int dataBufferOffset = offset + 1;
+            dataHolders.add(createDataHolder(dataBufferOffset, elements, variable));
+         }
+         
+         
          
          int step = elements / 90;
          

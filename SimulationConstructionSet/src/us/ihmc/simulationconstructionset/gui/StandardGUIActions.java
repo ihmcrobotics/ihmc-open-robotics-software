@@ -58,6 +58,7 @@ import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AboutAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.CameraPropertiesAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.DataBufferPropertiesAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ExportDataAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ExportGraphsToFileAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ExportSimulationTo3DMaxAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ExportSnapshotAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ImportDataAction;
@@ -89,6 +90,7 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.AllDialogConstru
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.CameraPropertiesDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.DataBufferPropertiesDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportDataDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportGraphsToFileConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportSimulationTo3DMaxDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportSnapshotDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
@@ -142,6 +144,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    private PlayAction playAction;
    private PlaybackPropertiesAction playbackPropertiesAction;
    private PrintGraphsAction printGraphsAction;
+   private ExportGraphsToFileAction exportGraphsToFileAction;
    private ResizeViewportAction resizeViewportAction;
    private JMenu runMenu;
 
@@ -256,6 +259,11 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       PrintGraphsDialogConstructor printGraphsDialogConstructor = allDialogConstructorsHolder.getPrintGraphsDialogConstructor();
       printGraphsAction = new PrintGraphsAction(printGraphsDialogConstructor);
       guiActions.add(printGraphsAction);
+      
+      exportGraphsToFileAction = new ExportGraphsToFileAction(allDialogConstructorsHolder.getExportGraphsToFileConstructor());
+      guiActions.add(exportGraphsToFileAction);
+      
+      
 
       // DataBuffer Menu Items:
       cropBufferAction = new CropBufferAction(allCommandsExecutor);
@@ -421,7 +429,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
 
    protected void createGraphWindowActions(StandardGUIActions actions, ZoomGraphCommandExecutor zoomGraphCommandExecutor,
          SaveGraphConfigurationDialogConstructor saveGraphConfigurationDialogConstructor, LoadGraphGroupDialogConstructor loadGraphGroupDialogConstructor,
-         PrintGraphsDialogConstructor printGraphsDialogConstructor)
+         PrintGraphsDialogConstructor printGraphsDialogConstructor, ExportGraphsToFileConstructor exportGraphsToFileConstructor)
    {
       // File Menu Items:
       exportAction = actions.exportAction;
@@ -470,6 +478,9 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
 
       printGraphsAction = new PrintGraphsAction(printGraphsDialogConstructor);
       guiActions.add(printGraphsAction);
+      
+      exportGraphsToFileAction = new ExportGraphsToFileAction(exportGraphsToFileConstructor);
+      guiActions.add(exportGraphsToFileAction);
 
       // DataBuffer Menu Items:
       cropBufferAction = actions.cropBufferAction;
@@ -537,7 +548,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       Action[] stepActions = new Action[] { setInPointAction, goInPointAction, stepBackwardAction, stepForwardAction, goOutPointAction, setOutPointAction };
       Action[] keyActions = new Action[] { setKeyAction, toggleKeyPointModeAction };
       Action[] playbackPropertiesActions = new Action[] {}; // playbackPropertiesAction};
-      Action[] graphsActions = new Action[] { zoomInAction, zoomOutAction, printGraphsAction };
+      Action[] graphsActions = new Action[] { zoomInAction, zoomOutAction, printGraphsAction, exportGraphsToFileAction };
       Action[] cameraActions = new Action[] {}; // cameraPropertiesAction;
       Action[] windowActions = new Action[] {};
       Action[] helpActions = new Action[] {};
@@ -646,6 +657,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       graphsMenu.add(zoomOutAction);
       graphsMenu.addSeparator();
       graphsMenu.add(printGraphsAction);
+      graphsMenu.add(exportGraphsToFileAction);
 
       // Data Buffer Menu:
       JMenu dataBufferMenu = new JMenu("Data Buffer");
@@ -810,7 +822,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       Action[] stepActions = new Action[] { setInPointAction, goInPointAction, stepBackwardAction, stepForwardAction, goOutPointAction, setOutPointAction };
       Action[] keyActions = new Action[] { setKeyAction, toggleKeyPointModeAction };
       Action[] playbackPropertiesActions = new Action[] {}; // playbackPropertiesAction};
-      Action[] graphsActions = new Action[] { zoomInAction, zoomOutAction, printGraphsAction };
+      Action[] graphsActions = new Action[] { zoomInAction, zoomOutAction, printGraphsAction, exportGraphsToFileAction };
       Action[] cameraActions = new Action[] {}; // cameraPropertiesAction;
       Action[] windowActions = new Action[] {};
       Action[] helpActions = new Action[] {};
@@ -875,6 +887,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       graphsMenu.add(zoomOutAction);
       graphsMenu.addSeparator();
       graphsMenu.add(printGraphsAction);
+      graphsMenu.add(exportGraphsToFileAction);
 
       // Data Buffer Menu:
       JMenu dataBufferMenu = new JMenu("Data Buffer");
@@ -1355,7 +1368,6 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
 
       playAction = null;
       playbackPropertiesAction = null;
-      printGraphsAction = null;
       resizeViewportAction = null;
 
       if (runMenu != null)
@@ -1407,6 +1419,12 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       {
          printGraphsAction.closeAndDispose();
          printGraphsAction = null;
+      }
+      
+      if (exportGraphsToFileAction != null)
+      {
+         exportGraphsToFileAction.closeAndDispose();
+         exportGraphsToFileAction = null;
       }
 
    }
