@@ -182,7 +182,7 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.enableTwistEstimation(stateEstimatorParameters.useTwistForPelvisLinearStateEstimation());
 
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, imuProcessedOutputs, imuBiasProvider, estimatorDT,
-            gravitationalAcceleration, registry);
+            gravitationalAcceleration, yoGraphicsListRegistry, registry);
       boolean cancelGravityFromAccelerationMeasurement = stateEstimatorParameters.cancelGravityFromAccelerationMeasurement();
       imuBasedLinearStateCalculator.cancelGravityFromAccelerationMeasurement(cancelGravityFromAccelerationMeasurement);
       imuBasedLinearStateCalculator.enableEstimationModule(stateEstimatorParameters.useAccelerometerForEstimation());
@@ -423,7 +423,7 @@ public class PelvisLinearStateUpdater
          }
       }
 
-      // Else if there is a foot with a force past the threshold trust the force and not the CoP      
+      // Else if there is a foot with a force past the threshold trust the force and not the CoP
       else
       {
          RigidBody trustedFoot = null;
