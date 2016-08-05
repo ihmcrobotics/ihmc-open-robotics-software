@@ -13,6 +13,8 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class PelvisIMUBasedLinearStateCalculator
 {
@@ -39,6 +41,8 @@ public class PelvisIMUBasedLinearStateCalculator
    private final YoFrameVector yoLinearAccelerationMeasurement;
 
    private final YoFrameVector imuOffsetInPelvisFrameAdjustmentHack;
+   private final YoGraphicReferenceFrame imuReferenceFrameViz;
+
    private final BooleanYoVariable imuBasedStateEstimationEnabled = new BooleanYoVariable("imuBasedStateEstimationEnabled", registry);
 
    private final ReferenceFrame measurementFrame;
@@ -55,7 +59,7 @@ public class PelvisIMUBasedLinearStateCalculator
    private final IMUBiasProvider imuBiasProvider;
 
    public PelvisIMUBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, IMUBiasProvider imuBiasProvider, double estimatorDT,
-         double gravitationalAcceleration, YoVariableRegistry parentRegistry)
+         double gravitationalAcceleration, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.imuBiasProvider = imuBiasProvider;
       this.estimatorDT = estimatorDT;
@@ -91,6 +95,8 @@ public class PelvisIMUBasedLinearStateCalculator
       yoLinearAccelerationMeasurementInWorld = new YoFrameVector("imuLinearAccelerationInWorld", worldFrame, registry);
 
       imuOffsetInPelvisFrameAdjustmentHack = new YoFrameVector("imuOffsetHack", rootJoint.getFrameAfterJoint(), registry);
+      imuReferenceFrameViz = new YoGraphicReferenceFrame(measurementFrame, parentRegistry, 1.5);
+      yoGraphicsListRegistry.registerYoGraphic("IMUReferenceFrame", imuReferenceFrameViz);
 
       setRootJointPositionImuOnlyToCurrent.set(true);
       alphaLeakIMUOnly.set(0.999);
@@ -216,5 +222,7 @@ public class PelvisIMUBasedLinearStateCalculator
 
       correctionTermToPack.setToZero(tempRootJointAngularVelocity.getReferenceFrame());
       correctionTermToPack.cross(tempRootJointAngularVelocity, measurementOffset);
+
+      imuReferenceFrameViz.update();
    }
 }
