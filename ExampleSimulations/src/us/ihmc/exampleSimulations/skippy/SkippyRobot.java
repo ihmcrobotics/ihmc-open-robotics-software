@@ -44,13 +44,13 @@ public class SkippyRobot extends Robot
       // Create GroundContactPoints to distinguish when robot touches the ground
       GroundContactPoint footContact = new GroundContactPoint("rootContactPoint", new Vector3d(0.0, 0.0, 0.0), this);
       GroundContactPoint footContact1 = new GroundContactPoint("rootContactPoint1", new Vector3d(-LEG_CUBE_LENGTH, 0.0, 0.0), this);
-      GroundContactPoint footContact2 = new GroundContactPoint("rootContactPoint2", new Vector3d(LEG_CUBE_LENGTH, 0.0, 0.0), this);
-      GroundContactPoint footContact3 = new GroundContactPoint("rootContactPoint3", new Vector3d(0.0, LEG_CUBE_LENGTH, 0.0), this);
-      GroundContactPoint footContact4 = new GroundContactPoint("rootContactPoint4", new Vector3d(0.0, -LEG_CUBE_LENGTH, 0.0), this);
-      GroundContactPoint footContact5 = new GroundContactPoint("rootContactPoint5", new Vector3d(-0.25, -LEG_CUBE_LENGTH, 0.0), this);
-      GroundContactPoint footContact6 = new GroundContactPoint("rootContactPoint6", new Vector3d(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, 0.0), this);
-      GroundContactPoint footContact7 = new GroundContactPoint("rootContactPoint7", new Vector3d(LEG_CUBE_LENGTH, -LEG_CUBE_LENGTH, 0.0), this);
-      GroundContactPoint footContact8 = new GroundContactPoint("rootContactPoint8", new Vector3d(-LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, 0.0), this);
+//      GroundContactPoint footContact2 = new GroundContactPoint("rootContactPoint2", new Vector3d(LEG_CUBE_LENGTH, 0.0, 0.0), this);
+//      GroundContactPoint footContact3 = new GroundContactPoint("rootContactPoint3", new Vector3d(0.0, LEG_CUBE_LENGTH, 0.0), this);
+//      GroundContactPoint footContact4 = new GroundContactPoint("rootContactPoint4", new Vector3d(0.0, -LEG_CUBE_LENGTH, 0.0), this);
+//      GroundContactPoint footContact5 = new GroundContactPoint("rootContactPoint5", new Vector3d(-0.25, -LEG_CUBE_LENGTH, 0.0), this);
+//      GroundContactPoint footContact6 = new GroundContactPoint("rootContactPoint6", new Vector3d(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, 0.0), this);
+//      GroundContactPoint footContact7 = new GroundContactPoint("rootContactPoint7", new Vector3d(LEG_CUBE_LENGTH, -LEG_CUBE_LENGTH, 0.0), this);
+//      GroundContactPoint footContact8 = new GroundContactPoint("rootContactPoint8", new Vector3d(-LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, 0.0), this);
 
       GroundContactPoint hipContact = new GroundContactPoint("hipContactPoint", new Vector3d(0.0, 0.0, 0.0), this);
       GroundContactPoint shoulderContact = new GroundContactPoint("shoulderContactPoint", new Vector3d(0.0, 0.0, 0.0), this);

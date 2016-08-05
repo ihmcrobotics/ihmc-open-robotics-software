@@ -26,7 +26,6 @@ public class RobotArmSimulation
       sliderBoardConfigurationManager.setSlider(2, "longstick1", controller.getYoVariableRegistry(), -1.026,2.574);
       sliderBoardConfigurationManager.setSlider(3, "longstick2", controller.getYoVariableRegistry(), -1.649,1.151);
       sliderBoardConfigurationManager.setSlider(4, "Turning2", controller.getYoVariableRegistry(), -0.578,2.722);
-
       sliderBoardConfigurationManager.setSlider(5, "longstick3", controller.getYoVariableRegistry(), -0.954,1.1346);
       sliderBoardConfigurationManager.setSlider(6, "Turning3", controller.getYoVariableRegistry(), -3.605,0.95);
       sliderBoardConfigurationManager.setSlider(7, "longstick4", controller.getYoVariableRegistry(), -0.65,0.823);
