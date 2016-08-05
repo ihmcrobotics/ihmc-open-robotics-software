@@ -72,7 +72,7 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 3.0));
       conductor.simulate();
       
-      assertEquals("Didn't step to correct location", commandedStepPositionX, frontLeftSolePositionX.getDoubleValue(), 1e-2);
+      assertEquals("Didn't step to correct location", commandedStepPositionX, frontLeftSolePositionX.getDoubleValue(), 3e-2);
       
       conductor.concludeTesting();
    }
