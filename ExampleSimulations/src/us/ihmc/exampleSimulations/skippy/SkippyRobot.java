@@ -97,7 +97,7 @@ public class SkippyRobot extends Robot
       hip = new PinJoint("hip", new Vector3d(0.0, 0.0, LEG_LENGTH), this, Axis.X);
       Link torso = createTorso();
       hip.setLink(torso);
-      hip.setInitialState(-2*Math.PI/4,0.0);
+      hip.setInitialState(-Math.PI/4,0.0);
       this.foot.addJoint(hip);
       hip.addGroundContactPoint(hipContact);
 
@@ -112,9 +112,9 @@ public class SkippyRobot extends Robot
 
       //shoulder.setDamping(0.3);
       this.hip.addJoint(shoulder);
-      shoulder.addGroundContactPoint(shoulderContact);
-      shoulder.addGroundContactPoint(leftContact);
-      shoulder.addGroundContactPoint(rightContact);
+      //shoulder.addGroundContactPoint(shoulderContact);
+      //shoulder.addGroundContactPoint(leftContact);
+      //shoulder.addGroundContactPoint(rightContact);
 
       GroundContactModel ground = new LinearGroundContactModel(this, 1422, 150.6, 50.0, 1000.0, this.getRobotsYoVariableRegistry());
       GroundProfile3D profile = new FlatGroundProfile();
