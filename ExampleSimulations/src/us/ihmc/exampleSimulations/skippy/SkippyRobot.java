@@ -29,7 +29,7 @@ public class SkippyRobot extends Robot
     * Iyy* are the moments of inertia of the links, which are defined about the COM for each link.
     */
    public static final double
-           LEG_LENGTH = 1.0, LEG_MASS = 1.0, LEG_CUBE_LENGTH = 0.1, LEG_MOI = (1.0/3.0)* LEG_MASS *Math.pow(LEG_LENGTH,2), // Leg
+           LEG_LENGTH = 1.0, LEG_MASS = 1.5, LEG_CUBE_LENGTH = 0.1, LEG_MOI = (1.0/3.0)* LEG_MASS *Math.pow(LEG_LENGTH,2), // Leg
            TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0/3.0)* TORSO_MASS *Math.pow(TORSO_LENGTH,2), // Torso
            SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/12.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
 
@@ -97,9 +97,9 @@ public class SkippyRobot extends Robot
       hip = new PinJoint("hip", new Vector3d(0.0, 0.0, LEG_LENGTH), this, Axis.X);
       Link torso = createTorso();
       hip.setLink(torso);
-      hip.setInitialState(-Math.PI/4,0.0);
+      hip.setInitialState(0.0,0.0);
       this.foot.addJoint(hip);
-      hip.addGroundContactPoint(hipContact);
+      //hip.addGroundContactPoint(hipContact);
 
       shoulder = new PinJoint("shoulder", new Vector3d(0.0, 0.0, TORSO_LENGTH), this, Axis.Y);
       Link arms = createArms();
