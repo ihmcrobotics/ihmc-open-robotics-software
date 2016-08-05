@@ -34,6 +34,7 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
    private LoadConfigurationDialogGenerator loadConfigurationDialogConstructor;
    private SaveGraphConfigurationDialogGenerator saveGraphConfigurationDialogConstructor;
    private LoadGraphGroupDialogConstructor loadGraphGroupDialogConstructor;
+   private ExportGraphsToFileGenerator exportGraphsToFileConstructor;
    private SaveRobotConfigurationDialogGenerator saveRobotConfigurationDialogConstructor;
    private ExportSimulationTo3DMaxDialogGenerator exportSimulationTo3DMaxDialogConstructor;
    
@@ -75,6 +76,7 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
       this.loadConfigurationDialogConstructor = new LoadConfigurationDialogGenerator(sim, frame, myGUI);
       this.saveGraphConfigurationDialogConstructor = new SaveGraphConfigurationDialogGenerator(sim, frame, myGraphArrayPanel);
       this.loadGraphGroupDialogConstructor = new LoadGraphGroupDialogGenerator(sim, myGUI, myGUI, frame, myGraphArrayPanel);
+      this.exportGraphsToFileConstructor = new ExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, myGUI);
 
       this.saveRobotConfigurationDialogConstructor = new SaveRobotConfigurationDialogGenerator(sim, frame);
       
@@ -158,6 +160,11 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
    public LoadGraphGroupDialogConstructor getLoadGraphGroupDialogConstructor()
    {
       return loadGraphGroupDialogConstructor;
+   }
+   
+   public ExportGraphsToFileConstructor getExportGraphsToFileConstructor()
+   {
+      return exportGraphsToFileConstructor;
    }
 
 
@@ -271,6 +278,12 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
       {
          aboutDialogConstructor.closeAndDispose();
          aboutDialogConstructor = null;
+      }
+      
+      if (exportGraphsToFileConstructor != null)
+      {
+         exportGraphsToFileConstructor.closeAndDispose();
+         exportGraphsToFileConstructor = null;
       }
       
       

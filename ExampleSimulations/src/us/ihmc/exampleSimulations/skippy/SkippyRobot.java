@@ -4,7 +4,6 @@ import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
@@ -21,7 +20,7 @@ public class SkippyRobot extends Robot
 {
    private static final long serialVersionUID = -7671864179791904256L;
    public static FloatingJoint mainJoint;
-   private UniversalJoint foot;
+   public static UniversalJoint foot;
    private PinJoint hip;
    private PinJoint shoulder;
    private ArrayList<GroundContactPoint> groundContactPoints = new ArrayList();
@@ -30,9 +29,9 @@ public class SkippyRobot extends Robot
     * Iyy* are the moments of inertia of the links, which are defined about the COM for each link.
     */
    public static final double
-           LEG_LENGTH = 1.0, LEG_MASS = 1.0, LEG_RADIUS = 0.1, LEG_MOI = (1.0/3.0)* LEG_MASS *Math.pow(LEG_LENGTH,2), // Leg
+           LEG_LENGTH = 1.0, LEG_MASS = 1.0, LEG_CUBE_LENGTH = 0.1, LEG_MOI = (1.0/3.0)* LEG_MASS *Math.pow(LEG_LENGTH,2), // Leg
            TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0/3.0)* TORSO_MASS *Math.pow(TORSO_LENGTH,2), // Torso
-            SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/12.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
+           SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/12.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
 
    private ExternalForcePoint balanceForce;
 
@@ -40,57 +39,65 @@ public class SkippyRobot extends Robot
    {
       super("Skippy");
 
-      this.setGravity(0.0,0.0,-9.81); // Newtons
+      this.setGravity(0.0,0.0,-9.81); // m/s^2
 
       // Create GroundContactPoints to distinguish when robot touches the ground
       GroundContactPoint footContact = new GroundContactPoint("rootContactPoint", new Vector3d(0.0, 0.0, 0.0), this);
+      GroundContactPoint footContact1 = new GroundContactPoint("rootContactPoint1", new Vector3d(-LEG_CUBE_LENGTH, 0.0, 0.0), this);
+//      GroundContactPoint footContact2 = new GroundContactPoint("rootContactPoint2", new Vector3d(LEG_CUBE_LENGTH, 0.0, 0.0), this);
+//      GroundContactPoint footContact3 = new GroundContactPoint("rootContactPoint3", new Vector3d(0.0, LEG_CUBE_LENGTH, 0.0), this);
+//      GroundContactPoint footContact4 = new GroundContactPoint("rootContactPoint4", new Vector3d(0.0, -LEG_CUBE_LENGTH, 0.0), this);
+//      GroundContactPoint footContact5 = new GroundContactPoint("rootContactPoint5", new Vector3d(-0.25, -LEG_CUBE_LENGTH, 0.0), this);
+//      GroundContactPoint footContact6 = new GroundContactPoint("rootContactPoint6", new Vector3d(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, 0.0), this);
+//      GroundContactPoint footContact7 = new GroundContactPoint("rootContactPoint7", new Vector3d(LEG_CUBE_LENGTH, -LEG_CUBE_LENGTH, 0.0), this);
+//      GroundContactPoint footContact8 = new GroundContactPoint("rootContactPoint8", new Vector3d(-LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, 0.0), this);
+
       GroundContactPoint hipContact = new GroundContactPoint("hipContactPoint", new Vector3d(0.0, 0.0, 0.0), this);
       GroundContactPoint shoulderContact = new GroundContactPoint("shoulderContactPoint", new Vector3d(0.0, 0.0, 0.0), this);
       GroundContactPoint leftContact = new GroundContactPoint("leftContactPoint", new Vector3d(-SHOULDER_LENGTH / 2.0, 0.0, 0.0), this);
       GroundContactPoint rightContact = new GroundContactPoint("rightContactPoint", new Vector3d(SHOULDER_LENGTH / 2.0, 0.0, 0.0), this);
 
       groundContactPoints.add(footContact);
+      groundContactPoints.add(footContact1);
       groundContactPoints.add(hipContact);
       groundContactPoints.add(shoulderContact);
       groundContactPoints.add(leftContact);
       groundContactPoints.add(rightContact);
 
 
-       mainJoint = new FloatingJoint("mainJoint", new Vector3d(0.0,0.0,0.0), this);
-       Link mainJointLink = new Link("mainJointLink");
-       mainJointLink.setMass(0.5);  //5 seems to work well - other values make the jump too high/low
-       mainJointLink.setMomentOfInertia(111127.5,111127.5,1000);  //the smaller the value, the more realistic the jump (not as small as 0.00001)
-      Graphics3DObject mainJointLinkGraphics = new Graphics3DObject();
-      mainJointLinkGraphics.addCube(0.25,0.25,0.25,YoAppearance.White());
-      mainJointLink.setLinkGraphics(mainJointLinkGraphics);
-      mainJoint.setLink(mainJointLink);
-       mainJoint.addGroundContactPoint(footContact);
+//      mainJoint = new FloatingJoint("mainJoint", new Vector3d(0.0,0.0,0.0), this);
+//      Link mainJointLink = new Link("mainJointLink");
+//      mainJointLink.setMass(1.5);
+//      mainJointLink.setMomentOfInertia(90,90,9990);
+//      mainJoint.setLink(mainJointLink);
+//      mainJoint.addGroundContactPoint(footContact);
+//      this.addRootJoint(mainJoint);
+//      Graphics3DObject mainJointLinkGraphics = new Graphics3DObject();
+//      mainJointLinkGraphics.addCube(0.25,0.25,0.25,YoAppearance.White());
+//      mainJointLink.setLinkGraphics(mainJointLinkGraphics);
+//      mainJoint.addGroundContactPoint(footContact1);
+//      mainJoint.addGroundContactPoint(footContact2);
+//      mainJoint.addGroundContactPoint(footContact3);
+//      mainJoint.addGroundContactPoint(footContact4);
+//      mainJoint.addGroundContactPoint(footContact5);
+//      mainJoint.addGroundContactPoint(footContact6);
+//      mainJoint.addGroundContactPoint(footContact7);
+//      mainJoint.addGroundContactPoint(footContact8);
 
-      GroundContactPoint footContact1 = new GroundContactPoint("footContact1", new Vector3d(0.125,0.125,0.0), this);
-      GroundContactPoint footContact2 = new GroundContactPoint("footContact2", new Vector3d(-0.125,0.125,0.0), this);
-      GroundContactPoint footContact3 = new GroundContactPoint("footContact3", new Vector3d(-0.125,-0.125,0.0), this);
-      GroundContactPoint footContact4 = new GroundContactPoint("footContact4", new Vector3d(0.125,-0.125,0.0), this);
-      mainJoint.addGroundContactPoint(footContact1);
-      mainJoint.addGroundContactPoint(footContact2);
-      mainJoint.addGroundContactPoint(footContact3);
-      mainJoint.addGroundContactPoint(footContact4);
-       this.addRootJoint(mainJoint);
+
 
        // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
       foot = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, 0.0), this, Axis.X, Axis.Y);
-      foot.changeOffsetVector(new Vector3d(0.0, 0.0, 0.2)); // initial Cartesian position of foot
-      foot.setInitialState(Math.PI/6, 0.0, 0.0, 0.0); // initial position "q" of foot
+      foot.setInitialState(Math.PI/4, 0.0, 0.0, 0.0); // initial position "q" of foot
       Link leg = createLeg();
       foot.setLink(leg);
-      //this.addRootJoint(foot);
-      //foot.addGroundContactPoint(footContact);
-       mainJoint.addJoint(foot);
-
+      this.addRootJoint(foot);
+      foot.addGroundContactPoint(footContact);
 
       hip = new PinJoint("hip", new Vector3d(0.0, 0.0, LEG_LENGTH), this, Axis.X);
       Link torso = createTorso();
       hip.setLink(torso);
-      hip.setInitialState(-2*Math.PI/6,0.0);
+      hip.setInitialState(-2*Math.PI/4,0.0);
       this.foot.addJoint(hip);
       hip.addGroundContactPoint(hipContact);
 
@@ -120,11 +127,11 @@ public class SkippyRobot extends Robot
       Link leg = new Link("leg");
       leg.setMass(LEG_MASS);
       leg.setComOffset(0.0, 0.0, LEG_LENGTH / 2.0);
-      leg.setMomentOfInertia(LEG_MOI, LEG_MOI, 0.0001);
+      leg.setMomentOfInertia(LEG_MOI, LEG_MOI, 0.00001);
 
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCube(LEG_RADIUS, LEG_RADIUS, LEG_LENGTH, YoAppearance.Crimson());
+      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Crimson());
 
       // associate the linkGraphics object with the link object
       leg.setLinkGraphics(linkGraphics);
@@ -196,13 +203,15 @@ public class SkippyRobot extends Robot
    {
       return SHOULDER_MASS;
    }
-   public double getShoulderLength()
-   {
+   public double getShoulderLength() {
       return SHOULDER_LENGTH;
    }
-
    public void setBalanceForce(double x, double y, double z)
    {
       balanceForce.setForce(x, y, z);
+   }
+   public ArrayList<GroundContactPoint> getGroundContactPoints()
+   {
+      return groundContactPoints;
    }
 }

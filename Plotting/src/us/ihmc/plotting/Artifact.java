@@ -17,7 +17,6 @@ public abstract class Artifact implements Plottable, Serializable
    private boolean recordHistory = false;
    private String label = null;
 
-
    public Artifact(String id)
    {
       this.id = id;
@@ -26,6 +25,7 @@ public abstract class Artifact implements Plottable, Serializable
    /**
     * Must provide a draw method for plotter to render artifact
     */
+   @Override
    public abstract void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor);
    public abstract void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor);
    public abstract void takeHistorySnapshot();
@@ -66,16 +66,19 @@ public abstract class Artifact implements Plottable, Serializable
       return recordHistory;
    }
 
+   @Override
    public String getID()
    {
       return id;
    }
 
+   @Override
    public String getType()
    {
       return type;
    }
 
+   @Override
    public int getLevel()
    {
       return level;
@@ -110,6 +113,7 @@ public abstract class Artifact implements Plottable, Serializable
       return getID();
    }
 
+   @Override
    public String toString()
    {
       return getID();
@@ -124,5 +128,4 @@ public abstract class Artifact implements Plottable, Serializable
    {
       return label;
    }
-
 }

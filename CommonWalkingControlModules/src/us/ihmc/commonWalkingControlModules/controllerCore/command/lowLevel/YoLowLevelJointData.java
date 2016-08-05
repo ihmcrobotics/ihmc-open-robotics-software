@@ -15,16 +15,16 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
    private final DoubleYoVariable desiredAcceleration;
    private final BooleanYoVariable resetIntegrators;
 
-   public YoLowLevelJointData(String namePrefix, YoVariableRegistry registry)
+   public YoLowLevelJointData(String namePrefix, YoVariableRegistry registry, String suffixString)
    {
       namePrefix += "LowLevel";
 
-      controlMode = new EnumYoVariable<>(namePrefix + "ControlMode", registry, LowLevelJointControlMode.class, true);
-      desiredTorque = new DoubleYoVariable(namePrefix + "DesiredTorque", registry);
-      desiredPosition = new DoubleYoVariable(namePrefix + "DesiredPosition", registry);
-      desiredVelocity = new DoubleYoVariable(namePrefix + "DesiredVelocity", registry);
-      desiredAcceleration = new DoubleYoVariable(namePrefix + "DesiredAcceleration", registry);
-      resetIntegrators = new BooleanYoVariable(namePrefix + "ResetIntegrators", registry);
+      controlMode = new EnumYoVariable<>(namePrefix + "ControlMode" + suffixString, registry, LowLevelJointControlMode.class, true);
+      desiredTorque = new DoubleYoVariable(namePrefix + "DesiredTorque" + suffixString, registry);
+      desiredPosition = new DoubleYoVariable(namePrefix + "DesiredPosition" + suffixString, registry);
+      desiredVelocity = new DoubleYoVariable(namePrefix + "DesiredVelocity" + suffixString, registry);
+      desiredAcceleration = new DoubleYoVariable(namePrefix + "DesiredAcceleration" + suffixString, registry);
+      resetIntegrators = new BooleanYoVariable(namePrefix + "ResetIntegrators" + suffixString, registry);
 
       clear();
    }
