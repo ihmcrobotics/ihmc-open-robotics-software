@@ -159,11 +159,11 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       Vector3d rootVelocity = new Vector3d();
       FloatingJoint rootJoint = drcSimulationTestHelper.getRobot().getRootJoint();
       rootJoint.getVelocity(rootVelocity);
-      double push = 0.26;
+      double push = 0.25;
       rootVelocity.x = rootVelocity.x + push;
       rootJoint.setVelocity(rootVelocity);
 
-      return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+      return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
    }
 
    private boolean stepAndPush() throws SimulationExceededMaximumTimeException
