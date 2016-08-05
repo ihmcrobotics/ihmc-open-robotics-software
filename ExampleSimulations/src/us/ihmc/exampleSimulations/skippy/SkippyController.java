@@ -195,7 +195,7 @@ public class SkippyController implements RobotController
       joint.setTau(positionError+integralTerm+derivativeError);
       //System.out.print(joint.getName() + ": " + (joint.getQ().getDoubleValue() - desiredValue));
    }
-   
+
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
