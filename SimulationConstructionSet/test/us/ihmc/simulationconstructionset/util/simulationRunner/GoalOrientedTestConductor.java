@@ -97,29 +97,17 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       for (YoVariableTestGoal goal : sustainGoals)
       {
          message.append("\nGoal sustained: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       for (YoVariableTestGoal goal : waypointGoals)
       {
          message.append("\nWaypoint met: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       for (YoVariableTestGoal goal : terminalGoals)
       {
          message.append("\nTerminal goal met: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       PrintTools.info(this, message.toString());
    }
@@ -131,29 +119,17 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       for (YoVariableTestGoal goal : sustainGoalsNotMeeting)
       {
          message.append("\nGoal not sustained: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       for (YoVariableTestGoal goal : waypointGoalsNotMet)
       {
          message.append("\nWaypoint not met: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       for (YoVariableTestGoal goal : terminalGoalsNotMeeting)
       {
          message.append("\nTerminal goal not met: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       
       assertionFailedMessage = message.toString();
@@ -187,7 +163,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       }
    }
 
-   public void concludeTesting()
+   public void concludeTesting(int additionalStackDepthForRelevantCallingMethod)
    {
       if (simulationTestingParameters.getKeepSCSUp())
       {
@@ -196,11 +172,16 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       
       if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots()[0].getName(), scs, 1);
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots()[0].getName(), scs, additionalStackDepthForRelevantCallingMethod);
       }
       
       ThreadTools.sleep(200);
       scs.closeAndDispose();
+   }
+   
+   public void concludeTesting()
+   {
+      concludeTesting(2);
    }
    
    public void addTimeLimit(DoubleYoVariable timeYoVariable, double timeLimit)

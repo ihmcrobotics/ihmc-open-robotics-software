@@ -180,6 +180,25 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
          }
       };
    }
+   
+   public ExportGraphsToFileConstructor getExportGraphsToFileConstructor()
+   {
+      return new ExportGraphsToFileConstructor()
+      {
+         
+         @Override
+         public void constructDialog()
+         {
+            
+         }
+         
+         @Override
+         public void closeAndDispose()
+         {
+            
+         }
+      };
+   }
 
 
    public ResizeViewportDialogConstructor getResizeViewportDialogConstructor()

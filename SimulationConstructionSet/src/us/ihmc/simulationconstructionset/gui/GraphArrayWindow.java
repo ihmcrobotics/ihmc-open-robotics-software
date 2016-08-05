@@ -16,12 +16,15 @@ import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.commands.AllCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.SelectGraphConfigurationCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ExportGraphsToFileAction;
 import us.ihmc.simulationconstructionset.gui.config.Configuration;
 import us.ihmc.simulationconstructionset.gui.config.ConfigurationList;
 import us.ihmc.simulationconstructionset.gui.config.GraphConfigurationList;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroup;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroupList;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroupSelector;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportGraphsToFileConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportGraphsToFileGenerator;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.LoadGraphGroupDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.LoadGraphGroupDialogGenerator;
@@ -88,7 +91,9 @@ public class GraphArrayWindow implements SelectGraphConfigurationCommandExecutor
       
       PrintGraphsDialogConstructor printGraphsDialogConstructor = new PrintGraphsDialogGenerator(myGraphArrayPanel);
 
-      windowGUIActions.createGraphWindowActions(mainGUIActions, myGraphArrayPanel, saveGraphConfigurationDialogConstructor,loadGraphGroupDialogConstructor, printGraphsDialogConstructor);
+      ExportGraphsToFileConstructor exportGraphsToFileConstructor = new ExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, sim.getStandardSimulationGUI());
+      
+      windowGUIActions.createGraphWindowActions(mainGUIActions, myGraphArrayPanel, saveGraphConfigurationDialogConstructor,loadGraphGroupDialogConstructor, printGraphsDialogConstructor, exportGraphsToFileConstructor);
       JPanel buttonPanel = windowGUIActions.createGraphWindowButtons();
       JMenuBar menuBar = windowGUIActions.createGraphWindowMenus();
 
