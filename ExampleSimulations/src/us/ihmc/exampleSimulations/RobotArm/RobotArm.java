@@ -96,152 +96,156 @@ public class RobotArm extends Robot
    private Link link1()
    {
       Link ret = new Link("link1");
-      double m = 150.0;
-      double h = 1.5;
-      double r = 0.1;
+      double mass = 150.0;
+      double height = 1.5;
+      double radius = 0.1;
 
-      ret.setMass(m);
-      ret.setComOffset(0.0, 0.0, h / 2.0);
-      ret.setMomentOfInertia(m*(3*r*r + h*h)/12.0, m*(3*r*r + h*h)/12.0, m*r*r/2.0);
+      ret.setMass(mass);
+      ret.setComOffset(0.0, 0.0, height / 2.0);
+      ret.setMomentOfInertia(mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0, mass*radius*radius/2.0);
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCylinder(h, r, YoAppearance.Red());
+      linkGraphics.addCylinder(height, radius, YoAppearance.Red());
 
       // associate the linkGraphics object with the link object
       ret.setLinkGraphics(linkGraphics);
       return ret;
    }
+
    /**
     * Create the second link for the DoublePendulumRobot.
     */
    private Link linkCircle()
    {
       Link ret = new Link("linkCircle");
-      double m = 100.0;
-      double h = 0.6;
-      double r = 0.35;
+      double mass = 100.0;
+      double height = 0.6;
+      double radius = 0.35;
 
-      ret.setMass(m);
-      ret.setComOffset(0.0, 0.0, h / 2.0);
-      ret.setMomentOfInertia(m*(3*r*r + h*h)/12.0, m*(3*r*r + h*h)/12.0, m*r*r/2.0);
+      ret.setMass(mass);
+      ret.setComOffset(0.0, 0.0, height / 2.0);
+      ret.setMomentOfInertia(mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0, mass*radius*radius/2.0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCylinder(h, r, YoAppearance.Blue());
+      linkGraphics.addCylinder(height, radius, YoAppearance.Blue());
 
       ret.setLinkGraphics(linkGraphics);
       return ret;
    }
+
    private Link link3()
    {
       Link ret = new Link("link3");
 
-      double m = 150.0;
-      double h = 0.5;
-      double r = 0.05;
+      double mass = 150.0;
+      double height = 0.5;
+      double radius = 0.05;
 
-      ret.setMass(m);
-      ret.setComOffset(h / 2.0, 0.0, 0.0);
-      ret.setMomentOfInertia(m*r*r/2.0,m*(3*r*r + h*h)/12.0, m*(3*r*r + h*h)/12.0);
+      ret.setMass(mass);
+      ret.setComOffset(height / 2.0, 0.0, 0.0);
+      ret.setMomentOfInertia(mass*radius*radius/2.0,mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0);
 
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.rotate(Math.PI/2.0, Axis.Y);
 
-      linkGraphics.addCylinder(h, r, YoAppearance.Red());
+      linkGraphics.addCylinder(height, radius, YoAppearance.Red());
 
 
 
       ret.setLinkGraphics(linkGraphics);
       return ret;
    }
+
    private Link link4()
    {
       Link ret = new Link("link4");
 
-      double m = 150.0;
-      double h = 0.5;
-      double r = 0.05;
+      double mass = 150.0;
+      double height = 0.5;
+      double radius = 0.05;
 
-      ret.setMass(m);
-      ret.setComOffset(h / 2.0, 0.0, 0.0);
-      ret.setMomentOfInertia(m*r*r/2.0,m*(3*r*r + h*h)/12.0, m*(3*r*r + h*h)/12.0);
+      ret.setMass(mass);
+      ret.setComOffset(height / 2.0, 0.0, 0.0);
+      ret.setMomentOfInertia(mass*radius*radius/2.0,mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.rotate(Math.PI/2.0, Axis.Y);
-      linkGraphics.addCylinder(h, r, YoAppearance.Blue());
+      linkGraphics.addCylinder(height, radius, YoAppearance.Blue());
       ret.setLinkGraphics(linkGraphics);
       return ret;
    }
+
    private Link link2()
    {
       Link ret = new Link("link2");
 
-      double m = 150.0;
-      double h = 1.5;
-      double r = 0.1;
+      double mass = 150.0;
+      double height = 1.5;
+      double radius = 0.1;
 
-      ret.setMass(m);
-      ret.setComOffset(h / 2.0, 0.0, 0.0);
+      ret.setMass(mass);
+      ret.setComOffset(height / 2.0, 0.0, 0.0);
 
-      ret.setMomentOfInertia(m*r*r/2.0,m*(3*r*r + h*h)/12.0, m*(3*r*r + h*h)/12.0);
+      ret.setMomentOfInertia(mass*radius*radius/2.0,mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0);
       Graphics3DObject linkGraphics = new Graphics3DObject();
        linkGraphics.rotate(Math.PI/2.0, Axis.Y);
-      linkGraphics.addCylinder(h, r, YoAppearance.Green());
+      linkGraphics.addCylinder(height, radius, YoAppearance.Green());
       ret.setLinkGraphics(linkGraphics);
       return ret;
    }
+
    private Link linkCircle2()
    {
       Link linkCircle2 = new Link("linkCircle2");
-      double m = 1.0;
-      double h = 0.2;
-      double r = 0.2;
+      double mass = 1.0;
+      double height = 0.2;
+      double radius = 0.2;
 
-      linkCircle2.setMass(m);
+      linkCircle2.setMass(mass);
       linkCircle2.setComOffset(0.0, 0.0, 0.0);
-      linkCircle2.setMomentOfInertia(m*r*r/2.0, m*(3*r*r + h*h)/12.0, m*(3*r*r + h*h)/12.0);
+      linkCircle2.setMomentOfInertia(mass*radius*radius/2.0, mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0);
       Graphics3DObject linkGraphics = new Graphics3DObject();
 
       linkGraphics.rotate(Math.PI/2.0, Axis.Y);
       linkGraphics.translate(0.0, 0.0, -0.1);
-      linkGraphics.addCylinder(h, r, YoAppearance.White());
+      linkGraphics.addCylinder(height, radius, YoAppearance.White());
       linkCircle2.setLinkGraphics(linkGraphics);
       return linkCircle2;
    }
+
    private Link linkCircle3()
    {
 
-      double m = 1.0;
-      double h = 0.2;
-      double r = 0.2;
-
-
+      double mass = 1.0;
+      double height = 0.2;
+      double radius = 0.2;
 
       Link linkCircle3 = new Link("linkCircle3");
-      linkCircle3.setMass(m);
+      linkCircle3.setMass(mass);
       linkCircle3.setComOffset(0.0, 0.0, 0.0);
-      linkCircle3.setMomentOfInertia(m*r*r/2.0, m*(3*r*r + h*h)/12.0, m*(3*r*r + h*h)/12.0);
+      linkCircle3.setMomentOfInertia(mass*radius*radius/2.0, mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0);
       Graphics3DObject linkGraphics = new Graphics3DObject();
 
       linkGraphics.rotate(Math.PI/2.0, Axis.Y);
       linkGraphics.translate(0.0, 0.0, -0.1);
-      linkGraphics.addCylinder(h, r, YoAppearance.White());
+      linkGraphics.addCylinder(height, radius, YoAppearance.White());
       linkCircle3.setLinkGraphics(linkGraphics);
       return linkCircle3;
    }
 
-   private void showCoordinatesRecursively(Joint joint, boolean drawEllipoids)
+   private void showCoordinatesRecursively(Joint joint, boolean drawEllipsoids)
    {
       Graphics3DObject linkGraphics = joint.getLink().getLinkGraphics();
       linkGraphics.identity();
       linkGraphics.addCoordinateSystem(1.6);
-      if (drawEllipoids)
+      if (drawEllipsoids)
       {
          joint.getLink().addEllipsoidFromMassProperties();
       }
       for (Joint child : joint.getChildrenJoints())
       {
-         showCoordinatesRecursively(child, drawEllipoids);
+         showCoordinatesRecursively(child, drawEllipsoids);
       }
    }
 
