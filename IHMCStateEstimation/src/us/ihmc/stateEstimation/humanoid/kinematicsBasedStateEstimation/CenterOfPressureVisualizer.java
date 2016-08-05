@@ -88,9 +88,9 @@ public class CenterOfPressureVisualizer
       }
    }
 
-   public void getOverallRawCoPPositionInWorld(YoFramePoint framePointToPack)
+   public void getOverallRawCoPPositionInWorld(FramePoint2d framePointToPack)
    {
-      framePointToPack.set(overallRawCoPPositionInWorld);
+      framePointToPack.set(overallRawCoPPositionInWorld.getX(), overallRawCoPPositionInWorld.getY());
    }
 
    public void hide()
