@@ -54,13 +54,13 @@ public class SkippyController implements RobotController
          k4 = -49.05
        */
       k1 = new DoubleYoVariable("k1", registry);
-      k1.set(757.5);
+      k1.set(1557.5);
       k2 = new DoubleYoVariable("k2", registry);
-      k2.set(-35.4);
+      k2.set(-3);
       k3 = new DoubleYoVariable("k3", registry);
-      k3.set(215.5);
+      k3.set(1555.5);
       k4 = new DoubleYoVariable("k4", registry);
-      k4.set(-15.4);
+      k4.set(-0.5);
 
       k5 = new DoubleYoVariable("k5", registry);
       k5.set(59);
@@ -92,7 +92,7 @@ public class SkippyController implements RobotController
       //start pid control
       //System.out.println(this.robot.mainJoint.getQdy());
       //positionControl();
-      balanceControl(0.0, 0.0);
+      balanceControl(Math.PI/6, 0.0);
    }
 
    private void balanceControl(double hipDesired, double shoulderDesired)
