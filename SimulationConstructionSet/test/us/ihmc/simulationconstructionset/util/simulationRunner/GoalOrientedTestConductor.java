@@ -97,29 +97,17 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       for (YoVariableTestGoal goal : sustainGoals)
       {
          message.append("\nGoal sustained: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       for (YoVariableTestGoal goal : waypointGoals)
       {
          message.append("\nWaypoint met: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       for (YoVariableTestGoal goal : terminalGoals)
       {
          message.append("\nTerminal goal met: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       PrintTools.info(this, message.toString());
    }
@@ -131,29 +119,17 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       for (YoVariableTestGoal goal : sustainGoalsNotMeeting)
       {
          message.append("\nGoal not sustained: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       for (YoVariableTestGoal goal : waypointGoalsNotMet)
       {
          message.append("\nWaypoint not met: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       for (YoVariableTestGoal goal : terminalGoalsNotMeeting)
       {
          message.append("\nTerminal goal not met: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       
       assertionFailedMessage = message.toString();
