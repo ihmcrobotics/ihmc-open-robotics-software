@@ -31,8 +31,6 @@ public class RobotArmSimulation
       sliderBoardConfigurationManager.setSlider(6, "Turning3", controller.getYoVariableRegistry(), -3.605,0.95);
       sliderBoardConfigurationManager.setSlider(7, "longStick4", controller.getYoVariableRegistry(), -0.65,0.823);
 
-
-
       Thread myThread = new Thread(sim);
       myThread.start();
    }
