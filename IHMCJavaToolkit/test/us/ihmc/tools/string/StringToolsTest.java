@@ -1,16 +1,14 @@
 package us.ihmc.tools.string;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
-import us.ihmc.tools.testing.TestPlanAnnotations;
 
-import static org.junit.Assert.*;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-/**
- * Created by Peter Neuhaus on 8/4/2016.
- */
 public class StringToolsTest
 {
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testString()
    {
