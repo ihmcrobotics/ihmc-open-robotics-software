@@ -40,49 +40,70 @@ public class RobotArm extends Robot
       circle.setLink(link1); // a
 //      rootJoint.addJoint(circle);
 //////////////////////////////////////////////////////
-      PinJoint stick1 = new PinJoint("stick1", new Vector3d(0.2, 0.0, 0.5), this, Axis.Y);
-            stick1.setInitialState(1.5, 0.0);
-            stick1.setDamping(damping);
-            circle.setLimitStops(-1.15,2.35,0,0);
-            Link link = link1();
-            stick1.setLink(link); // associate link1 with the joint pin1
-            circle.addJoint(stick1);
 
-      PinJoint stick2 = new PinJoint("stick2", new Vector3d(0.0, 0.0, 1.5), this, Axis.Y);
-            stick2.setInitialState(0.05, 0.0);
+      PinJoint stick1 = new PinJoint("stick1", new Vector3d(0.0, 0.2, 0.5), this, Axis.X);
+                 // stick1.setInitialState(1.5, 0.0);
+                  stick1.setDamping(damping);
+                  circle.setLimitStops(-1.15,2.35,0,0);
+                  Link link = link1();
+                  stick1.setLink(link); // associate link1 with the joint pin1
+                  circle.addJoint(stick1);
 
-            stick2.setDamping(damping);
-           circle.setLimitStops(-1.3,2.0,0,0);
-            Link link3 = link2();
-            stick2.setLink(link3); // associate link1 with the joint pin1
-            stick1.addJoint(stick2);
 
-      PinJoint circle2 = new PinJoint("circle2", new Vector3d(1.5, 0.0, 0.0), this, Axis.X);
-      circle2.setDamping(damping);
-            Link link2 = linkCircle2();
-            circle2.setLink(link2);
-            stick2.addJoint(circle2);
 
-      PinJoint stick3 = new PinJoint("stick3", new Vector3d(0.0, 0.0, 0.0), this, Axis.Y);
-             stick2.setInitialState(0.05, 0.0);
-             stick2.setDamping(damping);
-           // stick2.setLimitStops(-1.3,2.0,0,0);
-            Link link4 = link3();
-            stick3.setLink(link4); // associate link1 with the joint pin1
-           circle2.addJoint(stick3);
 
-      PinJoint circle3 = new PinJoint("circle3", new Vector3d(0.5, 0.0, 0.0), this, Axis.X);
-            Link link5 = linkCircle3();
-            //circle.setLimitStops(-1.7,2.1,0,0);
-            circle3.setDamping(damping);
-            circle3.setLink(link5);
-            stick3.addJoint(circle3);
 
-      PinJoint stick4 = new PinJoint("stick4", new Vector3d(0.0, 0.0, 0.0), this, Axis.Z);
-            Link link6 = link4();
-            stick4.setDamping(damping);
-            stick4.setLink(link6);
-            circle3.addJoint(stick4);
+
+
+
+
+     ///////////////////////////////////////////////////////////
+
+
+//      PinJoint stick1 = new PinJoint("stick1", new Vector3d(0.2, 0.0, 0.5), this, Axis.Y);
+//            stick1.setInitialState(1.5, 0.0);
+//            stick1.setDamping(damping);
+//            circle.setLimitStops(-1.15,2.35,0,0);
+//            Link link = link1();
+//            stick1.setLink(link); // associate link1 with the joint pin1
+//            circle.addJoint(stick1);
+//
+//      PinJoint stick2 = new PinJoint("stick2", new Vector3d(0.0, 0.0, 1.5), this, Axis.Y);
+//            stick2.setInitialState(0.05, 0.0);
+//
+//            stick2.setDamping(damping);
+//           circle.setLimitStops(-1.3,2.0,0,0);
+//            Link link3 = link2();
+//            stick2.setLink(link3); // associate link1 with the joint pin1
+//            stick1.addJoint(stick2);
+//
+//      PinJoint circle2 = new PinJoint("circle2", new Vector3d(1.5, 0.0, 0.0), this, Axis.X);
+//      circle2.setDamping(damping);
+//            Link link2 = linkCircle2();
+//            circle2.setLink(link2);
+//            stick2.addJoint(circle2);
+//
+//      PinJoint stick3 = new PinJoint("stick3", new Vector3d(0.0, 0.0, 0.0), this, Axis.Y);
+//             stick2.setInitialState(0.05, 0.0);
+//             stick2.setDamping(damping);
+//           // stick2.setLimitStops(-1.3,2.0,0,0);
+//            Link link4 = link3();
+//            stick3.setLink(link4); // associate link1 with the joint pin1
+//           circle2.addJoint(stick3);
+//
+//      PinJoint circle3 = new PinJoint("circle3", new Vector3d(0.5, 0.0, 0.0), this, Axis.X);
+//            Link link5 = linkCircle3();
+//            //circle.setLimitStops(-1.7,2.1,0,0);
+//            circle3.setDamping(damping);
+//            circle3.setLink(link5);
+//            stick3.addJoint(circle3);
+//
+//      PinJoint stick4 = new PinJoint("stick4", new Vector3d(0.0, 0.0, 0.0), this, Axis.Z);
+//            Link link6 = link4();
+//            stick4.setDamping(damping);
+//            stick4.setLink(link6);
+//            circle3.addJoint(stick4);
+
 
 
 
