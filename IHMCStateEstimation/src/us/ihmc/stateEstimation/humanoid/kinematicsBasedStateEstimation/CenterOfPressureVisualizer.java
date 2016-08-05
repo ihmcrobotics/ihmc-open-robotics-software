@@ -88,11 +88,6 @@ public class CenterOfPressureVisualizer
       }
    }
 
-   public void getOverallRawCoPPositionInWorld(FramePoint2d framePointToPack)
-   {
-      framePointToPack.set(overallRawCoPPositionInWorld.getX(), overallRawCoPPositionInWorld.getY());
-   }
-
    public void hide()
    {
       for (RigidBody rigidBody : footRigidBodies)
