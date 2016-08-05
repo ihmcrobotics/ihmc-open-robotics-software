@@ -69,7 +69,7 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly
              if (firstException)
              {
                 firstException = false;
-               System.err.println("Could not find the force sensor: " + forceSensorDefinition.getSensorName());
+               System.err.println(getClass().getSimpleName() + " Could not find the force sensor: " + forceSensorDefinition.getSensorName());
              }
           }
           else
