@@ -5,7 +5,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class SkippySimulation
 {
    public static final double DT = 0.0001;
-   public static final double TIME = 10;
+   public static final double TIME = 20;
    private static SimulationConstructionSet sim;
 
    public SkippySimulation()
