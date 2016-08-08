@@ -3,18 +3,25 @@ package us.ihmc.exampleSimulations.RobotArm;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.*;
 
 import javax.vecmath.Vector3d;
 
 public class RobotArm extends Robot
 {
-   // Lengths, masses, radii & moments of inertia (not used)
-   public static final double L1 = 1.0, L2 = 2.0, M1 = 1.0, M2 = 1.0, R1 = 0.1, R2 = 0.05, Iyy1 = 0.083, Iyy2 = 0.33;
-
-   // For multiple arms (not used)
-   private final SideDependentList<PinJoint> joints = new SideDependentList<>();
+   public static final double
+         angle1 = Math.toRadians(90),
+         angle2 = Math.toRadians(115),
+         angle3 = Math.toRadians(65),
+         angle4 = Math.toRadians(90),
+         angle5 = Math.toRadians(90),
+         angle6 = Math.toRadians(90),
+         angle7 = Math.toRadians(80);
+//   // Lengths, masses, radii & moments of inertia (not used)
+//   public static final double L1 = 1.0, L2 = 2.0, M1 = 1.0, M2 = 1.0, R1 = 0.1, R2 = 0.05, Iyy1 = 0.083, Iyy2 = 0.33;
+//
+//   // For multiple arms (not used)
+//   private final SideDependentList<PinJoint> joints = new SideDependentList<>();
 
    RobotArm()
    {
@@ -26,22 +33,23 @@ public class RobotArm extends Robot
 
       // Create joints and assign links. Pin joints have a single axis of rotation.
       PinJoint axis1 = new PinJoint("axis1", new Vector3d(0.0, 0.0, 0.0), this, Axis.Z);
-      axis1.setInitialState(1.55, 0.0);
+      axis1.setInitialState(Math.cos(angle1), Math.sin(angle1));
       axis1.setDamping(damping);
       axis1.setLimitStops(-0.25,3.15,0,0);
       Link link1 = linkCylinder1();
       axis1.setLink(link1);
 
       PinJoint axis2 = new PinJoint("axis2", new Vector3d(0.2, 0.0, 0.5), this, Axis.Y);
-      axis2.setInitialState(1.5, 0.0);
+      axis2.setInitialState(Math.cos(angle2), Math.sin(angle2));
       axis2.setDamping(damping);
       axis2.setLimitStops(-1.15,2.35,0,0);
       Link link2 = stick2();
       axis2.setLink(link2);
       axis1.addJoint(axis2);
 
+//      UniversalJoint axes34 = new UniversalJoint("axis3", "axis4", new Vector3d(0.0, 0.0, 1.5), this, Axis.Y, Axis.X);
       PinJoint axis3 = new PinJoint("axis3", new Vector3d(0.0, 0.0, 1.5), this, Axis.Y);
-      axis3.setInitialState(0.05, 0.0);
+      axis3.setInitialState(Math.cos(angle3), Math.sin(angle3));
       axis3.setDamping(damping);
       axis3.setLimitStops(-1.3,2.0,0,0);
       Link link3 = stick3();
@@ -49,20 +57,23 @@ public class RobotArm extends Robot
       axis2.addJoint(axis3);
 
       PinJoint axis4 = new PinJoint("axis4", new Vector3d(1.5, 0.0, 0.0), this, Axis.X);
+      axis4.setInitialState(Math.cos(angle4), Math.sin(angle4));
       axis4.setDamping(damping);
+      // axis4.setLimitStops(-1.3,2.0,0,0);
       Link link4 = linkCylinder4();
       axis4.setLink(link4);
       axis3.addJoint(axis4);
 
       PinJoint axis5 = new PinJoint("axis5", new Vector3d(0.0, 0.0, 0.0), this, Axis.Y);
-      axis3.setInitialState(0.05, 0.0);
-      axis3.setDamping(damping);
+      axis5.setInitialState(Math.cos(angle5), Math.sin(angle5));
+      axis5.setDamping(damping);
       // axis5.setLimitStops(-1.3,2.0,0,0);
       Link link5 = stick5();
       axis5.setLink(link5);
       axis4.addJoint(axis5);
 
       PinJoint axis6 = new PinJoint("axis6", new Vector3d(0.5, 0.0, 0.0), this, Axis.X);
+      axis6.setInitialState(Math.cos(angle6), Math.sin(angle6));
       axis6.setDamping(damping);
       // axis6.setLimitStops(-1.7,2.1,0,0);
       Link link6 = linkCylinder6();
@@ -70,13 +81,33 @@ public class RobotArm extends Robot
       axis5.addJoint(axis6);
 
       PinJoint axis7 = new PinJoint("axis7", new Vector3d(0.0, 0.0, 0.0), this, Axis.Z);
-      Link link7 = link5();
+      axis7.setInitialState(Math.cos(angle7), Math.sin(angle7));
       axis7.setDamping(damping);
+      // axis7.setLimitStops(-1.3,2.0,0,0);
+      Link link7 = link7();
       axis7.setLink(link7);
       axis6.addJoint(axis7);
 
       this.addRootJoint(axis1);
       // showCoordinatesRecursively(circle, true);
+   }
+
+   private Link linkCylinder1()
+   {
+      Link ret = new Link("linkCylinder1");
+      double mass = 100.0;
+      double height = 0.6;
+      double radius = 0.35;
+
+      ret.setMass(mass);
+      ret.setComOffset(0.0, 0.0, height / 2.0);
+      ret.setMomentOfInertia(mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0, mass*radius*radius/2.0);
+
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      linkGraphics.addCylinder(height, radius, YoAppearance.Blue());
+
+      ret.setLinkGraphics(linkGraphics);
+      return ret;
    }
 
    private Link stick2()
@@ -117,6 +148,25 @@ public class RobotArm extends Robot
       return ret;
    }
 
+   private Link linkCylinder4()
+   {
+      Link linkCircle2 = new Link("linkCylinder4");
+      double mass = 1.0;
+      double height = 0.2;
+      double radius = 0.2;
+
+      linkCircle2.setMass(mass);
+      linkCircle2.setComOffset(0.0, 0.0, 0.0);
+      linkCircle2.setMomentOfInertia(mass*radius*radius/2.0, mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0);
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+
+      linkGraphics.rotate(Math.PI/2.0, Axis.Y);
+      linkGraphics.translate(0.0, 0.0, -0.1);
+      linkGraphics.addCylinder(height, radius, YoAppearance.White());
+      linkCircle2.setLinkGraphics(linkGraphics);
+      return linkCircle2;
+   }
+
    private Link stick5()
    {
       Link ret = new Link("stick5");
@@ -138,62 +188,6 @@ public class RobotArm extends Robot
       return ret;
    }
 
-   private Link link5()
-   {
-      Link ret = new Link("link5");
-
-      double mass = 150.0;
-      double height = 0.5;
-      double radius = 0.05;
-
-      ret.setMass(mass);
-      ret.setComOffset(height / 2.0, 0.0, 0.0);
-      ret.setMomentOfInertia(mass*radius*radius/2.0,mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0);
-
-      Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.rotate(Math.PI/2.0, Axis.Y);
-      linkGraphics.addCylinder(height, radius, YoAppearance.Blue());
-      ret.setLinkGraphics(linkGraphics);
-      return ret;
-   }
-
-   private Link linkCylinder1()
-   {
-      Link ret = new Link("linkCylinder1");
-      double mass = 100.0;
-      double height = 0.6;
-      double radius = 0.35;
-
-      ret.setMass(mass);
-      ret.setComOffset(0.0, 0.0, height / 2.0);
-      ret.setMomentOfInertia(mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0, mass*radius*radius/2.0);
-
-      Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCylinder(height, radius, YoAppearance.Blue());
-
-      ret.setLinkGraphics(linkGraphics);
-      return ret;
-   }
-
-   private Link linkCylinder4()
-   {
-      Link linkCircle2 = new Link("linkCylinder4");
-      double mass = 1.0;
-      double height = 0.2;
-      double radius = 0.2;
-
-      linkCircle2.setMass(mass);
-      linkCircle2.setComOffset(0.0, 0.0, 0.0);
-      linkCircle2.setMomentOfInertia(mass*radius*radius/2.0, mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0);
-      Graphics3DObject linkGraphics = new Graphics3DObject();
-
-      linkGraphics.rotate(Math.PI/2.0, Axis.Y);
-      linkGraphics.translate(0.0, 0.0, -0.1);
-      linkGraphics.addCylinder(height, radius, YoAppearance.White());
-      linkCircle2.setLinkGraphics(linkGraphics);
-      return linkCircle2;
-   }
-
    private Link linkCylinder6()
    {
       double mass = 1.0;
@@ -211,6 +205,25 @@ public class RobotArm extends Robot
       linkGraphics.addCylinder(height, radius, YoAppearance.White());
       linkCircle3.setLinkGraphics(linkGraphics);
       return linkCircle3;
+   }
+
+   private Link link7()
+   {
+      Link ret = new Link("link7");
+
+      double mass = 150.0;
+      double height = 0.5;
+      double radius = 0.05;
+
+      ret.setMass(mass);
+      ret.setComOffset(height / 2.0, 0.0, 0.0);
+      ret.setMomentOfInertia(mass*radius*radius/2.0,mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0);
+
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      linkGraphics.rotate(Math.PI/2.0, Axis.Y);
+      linkGraphics.addCylinder(height, radius, YoAppearance.Blue());
+      ret.setLinkGraphics(linkGraphics);
+      return ret;
    }
 
    private void showCoordinatesRecursively(Joint joint, boolean drawEllipsoids)
