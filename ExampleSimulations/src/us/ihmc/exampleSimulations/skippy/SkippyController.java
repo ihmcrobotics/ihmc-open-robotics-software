@@ -55,13 +55,13 @@ public class SkippyController implements RobotController
          k4 = -49.05
        */
       k1 = new DoubleYoVariable("k1", registry);
-      k1.set(160);
+      k1.set(0);
       k2 = new DoubleYoVariable("k2", registry);
-      k2.set(60);
+      k2.set(-0);
       k3 = new DoubleYoVariable("k3", registry);
-      k3.set(20);
+      k3.set(0);
       k4 = new DoubleYoVariable("k4", registry);
-      k4.set(10);
+      k4.set(-0);
 
       k5 = new DoubleYoVariable("k5", registry);
       k5.set(0);
@@ -106,6 +106,9 @@ public class SkippyController implements RobotController
 
    private void applyTorqueToHip(double hipDesired)
    {
+      /*
+         angular pos of com wrt groundpoint
+       */
       Point3d centerOfMass = new Point3d();
       double robotMass = robot.computeCenterOfMass(centerOfMass);
       Point3d groundPoint = new Point3d();
@@ -123,21 +126,37 @@ public class SkippyController implements RobotController
 
       an.set(fromRadiansToDegrees(angle));
 
+      /*
+         angular vel of com wrt groundpoint
+       */
       Vector3d linearMomentum = new Vector3d();
       robot.computeLinearMomentum(linearMomentum);
-      double angleVel = Math.pow(Math.pow(linearMomentum.getY(), 2) + Math.pow(linearMomentum.getZ(), 2), 0.5)/robotMass;
-      angleVel = angleVel / planarDistance;
+
+      //1
+      Vector3d componentPerpendicular = new Vector3d(0, centerOfMass.getY(), centerOfMass.getZ());
+      componentPerpendicular.set(0, 1, -centerOfMass.getY()/centerOfMass.getZ());
+      componentPerpendicular.normalize();
+      double angleVel = componentPerpendicular.dot(linearMomentum) / componentPerpendicular.length();
+      angleVel = angleVel / robotMass;
+
+      //2
+      //double angleVel = Math.pow(Math.pow(linearMomentum.getY(), 2) + Math.pow(linearMomentum.getZ(), 2), 0.5)/robotMass;
+      //angleVel = angleVel / planarDistance;
+
+      //3
+      //double angleVel = (angle - prevAngleHip) / SkippySimulation.DT;
 
       if(angle < prevAngleHip && centerOfMass.getY() < 0)
          angleVel = angleVel * -1;
       else if(angle < prevAngleHip && centerOfMass.getY() > 0)
          angleVel = angleVel * -1;
-
-      //temporary..
-//      double angleVel = (angle - prevAngleHip) / SkippySimulation.DT;
       prevAngleHip = angle;
       vel.set(angleVel);
 
+
+      /*
+         angular pos/vel of hipjoint
+       */
       double[] hipAngleValues = calculateAnglePosAndDerOfJoint(robot.getHipJoint());
       double hipAngle = hipAngleValues[0];
       double hipAngleVel = hipAngleValues[1];
