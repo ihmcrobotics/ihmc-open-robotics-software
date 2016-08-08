@@ -52,7 +52,7 @@ public class RobotArm extends Robot
 //////////////////////////////////////////////////////
 
 
-      PinJoint stick1 = new PinJoint("stick1", new Vector3d(0.2, 0.0, 0.5), this, Axis.X);
+      PinJoint stick1 = new PinJoint("stick1", new Vector3d(0.2, 0.0, 0.5), this, Axis.Y);
             stick1.setInitialState(1.5, 0.0);
             stick1.setDamping(damping);
             circle.setLimitStops(-1.15,2.35,0,0);
@@ -97,7 +97,7 @@ public class RobotArm extends Robot
             circle3.addJoint(stick4);
 
       this.addRootJoint(circle);
-      showCoordinatesRecursively(circle, true);
+     // showCoordinatesRecursively(circle, true);
    }
 
    /**
@@ -111,7 +111,7 @@ public class RobotArm extends Robot
       double radius = 0.1;
 
       ret.setMass(mass);
-      ret.setComOffset(0.0, 0.0, height / 2.0);
+      ret.setComOffset( 0.0, 0.0, height / 2.0);
       ret.setMomentOfInertia(mass*(3*radius*radius + height*height)/12.0, mass*(3*radius*radius + height*height)/12.0, mass*radius*radius/2.0);
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
