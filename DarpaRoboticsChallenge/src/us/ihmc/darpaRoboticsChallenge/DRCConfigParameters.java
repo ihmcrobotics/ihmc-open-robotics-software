@@ -5,7 +5,7 @@ package us.ihmc.darpaRoboticsChallenge;
 @Deprecated
 public class DRCConfigParameters
 {
-   public static final boolean MAKE_SLIDER_BOARD = true;
+   public static final boolean MAKE_SLIDER_BOARD = false;
 
    // Log images from the primary camera
    public static boolean LOG_PRIMARY_CAMERA_IMAGES = false;
