@@ -16,7 +16,6 @@ public class RobotArmSimulation
       robotArm.setController(controller);
 
       sim = new SimulationConstructionSet(robotArm);
-     // sim = new SimulationConstructionSet();
       sim.setGroundVisible(false);
       sim.setDT(0.0000001, 10000);
       sim.setCameraFix(0.0, 0.0, 0.15);
