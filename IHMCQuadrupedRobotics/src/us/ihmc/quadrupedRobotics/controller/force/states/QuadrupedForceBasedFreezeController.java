@@ -41,7 +41,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final BooleanParameter useForceFeedbackControlParameter = parameterFactory.createBoolean("useForceFeedbackControl", false);
    private final BooleanParameter useSetpointCompensationParameter = parameterFactory.createBoolean("useSetpointCompensation", true);
    private final DoubleParameter maxSetpointCompensationParameter = parameterFactory.createDouble("maxSetpointCompensation", .05);
-   private final DoubleParameter setpointCompensationMultiplierParameter = parameterFactory.createDouble("setpointCompensationMultiplier", 1.1);
+   private final DoubleParameter setpointCompensationMultiplierZParameter = parameterFactory.createDouble("setpointCompensationMultiplierZ", 1.1);
 
    // Yo variables
    private final QuadrantDependentList<DoubleYoVariable[]> yoSetpointCompensationList;
@@ -124,13 +124,13 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
          if (useSetpointCompensationParameter.get())
          {
             yoSetpointCompensationList.get(quadrant)[0].set(Math
-                  .max(setpointCompensationMultiplierParameter.get()*soleForceEstimator.getSoleForce(quadrant).getX() / solePositionProportionalGainsParameter.get(0),
+                  .max(soleForceEstimator.getSoleForce(quadrant).getX() / solePositionProportionalGainsParameter.get(0),
                         -maxSetpointCompensationParameter.get()));
             yoSetpointCompensationList.get(quadrant)[1].set(
-                  Math.max(setpointCompensationMultiplierParameter.get()*soleForceEstimator.getSoleForce(quadrant).getY() / solePositionProportionalGainsParameter.get(1),
+                  Math.max(soleForceEstimator.getSoleForce(quadrant).getY() / solePositionProportionalGainsParameter.get(1),
                         -maxSetpointCompensationParameter.get()));
             yoSetpointCompensationList.get(quadrant)[2].set(
-                  Math.max(setpointCompensationMultiplierParameter.get()*soleForceEstimator.getSoleForce(quadrant).getZ() / solePositionProportionalGainsParameter.get(2),
+                  Math.max(setpointCompensationMultiplierZParameter.get()*soleForceEstimator.getSoleForce(quadrant).getZ() / solePositionProportionalGainsParameter.get(2),
                         -maxSetpointCompensationParameter.get()));
             solePositionControllerSetpoints.getSolePosition(quadrant)
                   .add(yoSetpointCompensationList.get(quadrant)[0].getDoubleValue(), yoSetpointCompensationList.get(quadrant)[1].getDoubleValue(), yoSetpointCompensationList.get(quadrant)[2].getDoubleValue());
