@@ -6,7 +6,7 @@ import us.ihmc.multicastLogDataProtocol.LogUtils;
 
 public enum LogSettings
 {
-   ATLAS_IAN(true, "239.255.25.1"),
+   ATLAS_IAN(true),
    ATLAS_NO_CAMERAS(true),
    VALKYRIE_IHMC(true, "239.255.25.2"),
    VALKYRIE_JSC(true, "239.255.25.2"),
@@ -14,7 +14,7 @@ public enum LogSettings
    STEPPR_IHMC(true, "239.255.25.3"),
    SIMULATION(false, "239.255.25.4"),
    BEHAVIOR(false),
-   KINEMATICS_TOOLBOX(true),
+   KINEMATICS_TOOLBOX(false),
    EXO_X1A(false),
    EXO_HOPPER(false),
    ETHERCAT(false),

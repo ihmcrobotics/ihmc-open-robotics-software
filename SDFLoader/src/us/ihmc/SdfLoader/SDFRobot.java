@@ -34,20 +34,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationconstructionset.CameraMount;
-import us.ihmc.simulationconstructionset.DummyOneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.IMUMount;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.JointWrenchSensor;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJointHolder;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SliderJoint;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.simulatedSensors.FeatherStoneJointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
@@ -70,7 +57,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    protected final FloatingJoint rootJoint;
    private final LinkedHashMap<String, SDFCamera> cameras = new LinkedHashMap<String, SDFCamera>();
    protected final LinkedHashMap<Joint, ArrayList<GroundContactPoint>> jointToGroundContactPointsMap = new LinkedHashMap<Joint, ArrayList<GroundContactPoint>>();
-
+   private boolean doDynamics = true;
 
    private final SDFDescriptionMutator descriptionMutator;
 
@@ -848,6 +835,20 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    protected void printIfDebug(String string)
    {
       if (DEBUG) System.out.println(string);
+   }
+
+   public void setDoDynamics(boolean doDynamics)
+   {
+      this.doDynamics = doDynamics;
+   }
+
+   @Override
+   public void doDynamicsAndIntegrate(double DT) throws UnreasonableAccelerationException
+   {
+      if(doDynamics)
+      {
+         super.doDynamicsAndIntegrate(DT);
+      }
    }
 
 }

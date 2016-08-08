@@ -140,7 +140,7 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
          @Override
          public String toString()
          {
-            return enumYoVariable.getName() + "  " + enumYoVariable.getEnumValue().name() + " == " + enumValue.name();
+            return getFormattedEnumYoVariable(enumYoVariable) + " == " + enumValue.name();
          }
       };
    }
@@ -158,9 +158,20 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
          @Override
          public String toString()
          {
-            return booleanYoVariable.getName() + "  " + booleanYoVariable.getBooleanValue() + " == " + booleanValue;
+            return getFormattedBooleanYoVariable(booleanYoVariable) + " == " + booleanValue;
          }
+
       };
+   }
+   
+   private static String getFormattedBooleanYoVariable(final BooleanYoVariable booleanYoVariable)
+   {
+      return booleanYoVariable.getName() + ":" + booleanYoVariable.getBooleanValue();
+   }
+   
+   private static <T extends Enum<T>> String getFormattedEnumYoVariable(final EnumYoVariable<T> enumYoVariable)
+   {
+      return enumYoVariable.getName() + ":" + enumYoVariable.getEnumValue().name();
    }
    
    public static String getFormattedDoubleYoVariable(DoubleYoVariable doubleYoVariable)

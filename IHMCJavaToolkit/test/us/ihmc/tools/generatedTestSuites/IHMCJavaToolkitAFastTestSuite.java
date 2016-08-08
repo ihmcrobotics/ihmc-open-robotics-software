@@ -48,6 +48,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.tools.search.strings.fuzzySearch.comparators.SortByResultTypeComparatorTest.class,
    us.ihmc.tools.search.strings.fuzzySearch.comparators.SortFuzzyMatchesDescendingByFuzzyDistanceComparatorTest.class,
    us.ihmc.tools.string.StringAndRegularExpressionMatcherTest.class,
+   us.ihmc.tools.string.StringToolsTest.class,
    us.ihmc.tools.taskExecutor.ParallelTaskTest.class,
    us.ihmc.tools.taskExecutor.PipeLineTest.class,
    us.ihmc.tools.taskExecutor.TaskExecutorTest.class,

@@ -1,14 +1,7 @@
 package us.ihmc.simulationconstructionset.dataExporter;
 
-import org.junit.Test;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.tools.testing.TestPlanAnnotations;
-import us.ihmc.tools.testing.TestPlanTarget;
+import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Vector3d;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -16,9 +9,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertTrue;
+import javax.vecmath.Vector3d;
 
-@TestPlanAnnotations.DeployableTestClass(targets = {TestPlanTarget.UI})
+import org.junit.Test;
+
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.tools.testing.TestPlanAnnotations;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanTarget;
+
+@DeployableTestClass(targets = {TestPlanTarget.UI})
 public class DataExporterGraphCreatorTest
 {
 
