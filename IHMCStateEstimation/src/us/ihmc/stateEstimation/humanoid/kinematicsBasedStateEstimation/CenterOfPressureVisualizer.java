@@ -88,11 +88,6 @@ public class CenterOfPressureVisualizer
       }
    }
 
-   public void getOverallRawCoPPositionInWorld(YoFramePoint framePointToPack)
-   {
-      framePointToPack.set(overallRawCoPPositionInWorld);
-   }
-
    public void hide()
    {
       for (RigidBody rigidBody : footRigidBodies)

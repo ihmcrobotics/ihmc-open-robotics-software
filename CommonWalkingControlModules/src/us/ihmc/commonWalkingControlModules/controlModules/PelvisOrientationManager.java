@@ -93,6 +93,10 @@ public class PelvisOrientationManager
    private final LongYoVariable numberOfQueuedCommands;
    private final CommandArrayDeque<PelvisOrientationTrajectoryCommand> commandQueue = new CommandArrayDeque<>(PelvisOrientationTrajectoryCommand.class);
 
+   private final BooleanYoVariable followSineWave = new BooleanYoVariable("FollowSineWave", registry);
+   private final DoubleYoVariable sineFrequency = new DoubleYoVariable("PelvisSineFrequence", registry);
+   private final DoubleYoVariable sineMagnitude = new DoubleYoVariable("PelvisSineMagnitude", registry);
+
    public PelvisOrientationManager(WalkingControllerParameters walkingControllerParameters, HighLevelHumanoidControllerToolbox momentumBasedController,
          YoVariableRegistry parentRegistry)
    {
@@ -149,6 +153,7 @@ public class PelvisOrientationManager
       isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedPelvisOrientationTrajectoryCommands", registry);
       numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
 
+      sineFrequency.set(1.0);
       parentRegistry.addChild(registry);
    }
 
@@ -208,7 +213,21 @@ public class PelvisOrientationManager
       desiredPelvisAngularAcceleration.set(tempAngularAcceleration);
       desiredPelvisFrame.update();
 
-      if (isTrajectoryStopped.getBooleanValue())
+      if (followSineWave.getBooleanValue())
+      {
+         double yaw = sineMagnitude.getDoubleValue() * Math.sin(yoTime.getDoubleValue() * sineFrequency.getDoubleValue() * 2.0 * Math.PI);
+         tempOrientation.setIncludingFrame(midFeetZUpFrame, yaw, 0.0, 0.0);
+
+         tempOrientation.changeFrame(worldFrame);
+         tempAngularVelocity.setToZero(worldFrame);
+         tempAngularAcceleration.setToZero(worldFrame);
+
+         desiredPelvisOrientation.set(tempOrientation);
+         desiredPelvisAngularVelocity.set(tempAngularVelocity);
+         desiredPelvisAngularAcceleration.set(tempAngularAcceleration);
+         desiredPelvisFrame.update();
+      }
+      else if (isTrajectoryStopped.getBooleanValue())
       {
          orientationOffsetTrajectoryGenerator.getOrientation(tempOrientation);
          tempAngularVelocity.setToZero();
@@ -231,7 +250,7 @@ public class PelvisOrientationManager
          orientationOffsetTrajectoryGenerator.getAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
       }
 
-      desiredPelvisOrientationOffset.set(tempOrientation);
+//      desiredPelvisOrientationOffset.set(tempOrientation);
 
       tempOrientation.changeFrame(worldFrame);
       tempAngularVelocity.changeFrame(worldFrame);
@@ -421,7 +440,7 @@ public class PelvisOrientationManager
       orientationOffsetTrajectoryGenerator.appendWaypoint(0.0, tempOrientation, tempAngularVelocity);
       orientationOffsetTrajectoryGenerator.initialize();
    }
-   
+
    public void setToHoldCurrentInWorldFrame()
    {
       setToHoldCurrent(worldFrame);
