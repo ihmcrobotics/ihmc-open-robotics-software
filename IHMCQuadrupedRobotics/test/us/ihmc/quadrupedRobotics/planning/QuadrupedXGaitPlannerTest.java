@@ -1,8 +1,13 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import static org.junit.Assert.assertTrue;
+import static us.ihmc.tools.testing.TestPlanTarget.Fast;
+
+import java.util.ArrayList;
+
+import javax.vecmath.Vector3d;
+
 import org.junit.Test;
-import static org.junit.Assert.*;
-import static us.ihmc.tools.testing.TestPlanTarget.*;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -10,11 +15,9 @@ import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.testing.TestPlanAnnotations;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-
-@TestPlanAnnotations.DeployableTestClass(targets = Fast)
+@DeployableTestClass(targets = Fast)
 public class QuadrupedXGaitPlannerTest
 {
    @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)

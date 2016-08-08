@@ -29,7 +29,7 @@ public class FormattingTools
    {
       double roundToSignificantFigures = roundToSignificantFigures(number, significantFigures);
 
-      if (roundToSignificantFigures >= 10)
+      if (roundToSignificantFigures >= Math.pow(10, significantFigures - 1))
          return String.valueOf((int) roundToSignificantFigures);
       else
          return String.valueOf(roundToSignificantFigures);

@@ -1,8 +1,5 @@
 package us.ihmc.tools.string;
 
-/**
- * Created by Peter Neuhaus on 8/4/2016.
- */
 public class StringTools
 {
    public static String getEveryUppercaseLetter(String string)

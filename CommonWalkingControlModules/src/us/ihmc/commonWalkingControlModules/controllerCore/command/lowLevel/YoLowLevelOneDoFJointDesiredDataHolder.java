@@ -9,6 +9,7 @@ import java.util.Map;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.tools.string.StringTools;
 
 public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJointDesiredDataHolderReadOnly
 {
@@ -17,7 +18,8 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public YoLowLevelOneDoFJointDesiredDataHolder(OneDoFJoint[] controlledJoints, YoVariableRegistry parentRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("LowLevelOneDoFJointDesiredData");
+
+      YoVariableRegistry registry = new YoVariableRegistry("LowLevelOneDoFJointDesiredData" + parentRegistry.getName());
       parentRegistry.addChild(registry);
 
       int capacity = controlledJoints.length;
@@ -29,7 +31,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
          OneDoFJoint joint = controlledJoints[i];
          jointsWithDesiredData.add(joint);
          String jointName = joint.getName();
-         YoLowLevelJointData jointData = new YoLowLevelJointData(jointName, registry);
+         YoLowLevelJointData jointData = new YoLowLevelJointData(jointName, registry, StringTools.getEveryUppercaseLetter(parentRegistry.getName()));
          lowLevelJointDataMap.put(jointName, jointData);
       }
    }
