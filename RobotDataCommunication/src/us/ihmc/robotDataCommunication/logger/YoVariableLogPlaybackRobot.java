@@ -131,8 +131,6 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
       scs.attachSimulationRewoundListener(this);
    }
 
-
-
    public long getInitialTimestamp()
    {
       return initialTimestamp;
@@ -210,7 +208,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
          for (int i = 0; i < variables.size(); i++)
          {
             YoVariable<?> variable = variables.get(i);
-            variable.setValueFromLongBits(logLongArray.get(), false);
+            variable.setValueFromLongBits(logLongArray.get(), true);
          }
 
          for (int i = 0; i < jointStates.size(); i++)
