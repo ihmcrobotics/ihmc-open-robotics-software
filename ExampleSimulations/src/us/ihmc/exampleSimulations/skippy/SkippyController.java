@@ -59,9 +59,9 @@ public class SkippyController implements RobotController
       k2 = new DoubleYoVariable("k2", registry);
       k2.set(-0);
       k3 = new DoubleYoVariable("k3", registry);
-      k3.set(0);
+      k3.set(40);
       k4 = new DoubleYoVariable("k4", registry);
-      k4.set(-0);
+      k4.set(-60);
 
       k5 = new DoubleYoVariable("k5", registry);
       k5.set(0);
@@ -95,7 +95,7 @@ public class SkippyController implements RobotController
       //System.out.println(this.robot.mainJoint.getQdy());
       //positionControl();
 
-      balanceControl(-Math.PI/6, Math.PI/12);
+      balanceControl(Math.PI/6, Math.PI/12);
    }
 
    private void balanceControl(double hipDesired, double shoulderDesired)
@@ -137,7 +137,7 @@ public class SkippyController implements RobotController
       componentPerpendicular.set(0, 1, -centerOfMass.getY()/centerOfMass.getZ());
       componentPerpendicular.normalize();
       double angleVel = componentPerpendicular.dot(linearMomentum) / componentPerpendicular.length();
-      angleVel = angleVel / robotMass;
+      angleVel = Math.abs(angleVel / robotMass);
 
       //2
       //double angleVel = Math.pow(Math.pow(linearMomentum.getY(), 2) + Math.pow(linearMomentum.getZ(), 2), 0.5)/robotMass;
@@ -160,10 +160,12 @@ public class SkippyController implements RobotController
       double[] hipAngleValues = calculateAnglePosAndDerOfJoint(robot.getHipJoint());
       double hipAngle = hipAngleValues[0];
       double hipAngleVel = hipAngleValues[1];
-      robot.getHipJoint().setTau(k1.getDoubleValue()*Math.sin(angle) + k2.getDoubleValue()*angleVel + k3.getDoubleValue()*(hipDesired-hipAngle) + k4.getDoubleValue()*hipAngleVel);
+      //an.set(hipAngle);
+      //vel.set(hipAngleVel);
+      robot.getHipJoint().setTau(k1.getDoubleValue()*(0-angle) + k2.getDoubleValue()*angleVel + k3.getDoubleValue()*(hipDesired-hipAngle) + k4.getDoubleValue()*hipAngleVel);
       //robot.getHipJoint().setTau(k1.getDoubleValue()*angle + k2.getDoubleValue()*angleVel);
       //robot.getHipJoint().setTau(k3.getDoubleValue()*(hipDesired-hipAngle) + k4.getDoubleValue()*hipAngleVel);
-      System.out.println(centerOfMass + " " + fromRadiansToDegrees(angle) + " " + angleVel + " " + (hipDesired-hipAngle) + " " + hipAngleVel + " " + robot.getHipJoint().getTau());
+      System.out.println(centerOfMass + " " + fromRadiansToDegrees(angle) + " " + angleVel + " " + fromRadiansToDegrees(hipAngle) + " " + hipAngleVel + " " + robot.getHipJoint().getTau());
    }
    private void applyTorqueToShoulder(double shoulderDesired)
    {
@@ -215,11 +217,13 @@ public class SkippyController implements RobotController
    private double[] calculateAnglePosAndDerOfJoint(PinJoint joint)
    {
       double[] finale = new double[2];
+      //double firstAngle = robot.getLegJoint().getQ().getDoubleValue()%(Math.PI*2);
+      //double angle = joint.getQ().getDoubleValue()+firstAngle;
+      //if(angle > Math.PI)
+      //   angle = Math.PI - angle;
+//
       double angle = joint.getQ().getDoubleValue();
-//      if(angle < 0)
-//         angle = Math.PI - angle*-1;
-//      else
-//         angle = Math.PI - angle;
+
       double angleVel = joint.getQD().getDoubleValue();
       //angle = (angle * 180/Math.PI)%360;
       finale[0] = angle;

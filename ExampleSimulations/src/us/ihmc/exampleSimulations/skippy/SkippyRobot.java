@@ -97,7 +97,7 @@ public class SkippyRobot extends Robot
       hip = new PinJoint("hip", new Vector3d(0.0, 0.0, LEG_LENGTH), this, Axis.X);
       Link torso = createTorso();
       hip.setLink(torso);
-      hip.setInitialState(0.0,0.0);
+      hip.setInitialState(Math.PI/6,0.0);
       this.foot.addJoint(hip);
       //hip.addGroundContactPoint(hipContact);
 
