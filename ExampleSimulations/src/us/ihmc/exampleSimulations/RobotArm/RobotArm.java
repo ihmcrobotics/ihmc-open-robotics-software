@@ -21,13 +21,13 @@ public class RobotArm extends Robot
 
    // Lengths (L*), masses (M*) & radii (R*)
    private static final double
-         L1 = 0.0254, M1 = 100.0, R1 = 0.03175,
-         L2 = 0.1524, M2 = 150.0, R2 = 0.0127,
+         L1 = 0.0254, M1 = 10.0, R1 = 0.03175,
+         L2 = 0.1524, M2 = 10.0, R2 = 0.0127,
 //         L3 = 0.0, M3 = 0.0, R3 = 0.0,
-         L4 = 0.2286, M4 = 1.0, R4 = 0.0127,
+         L4 = 0.2286, M4 = 10.0, R4 = 0.0127,
 //         L5 = 0.0, M5 = 0.0, R5 = 0.0,
-         L6 = 0.0508, M6 = 1.0, R6 = 0.0127,
-         L7 = 0.0635, M7 = 150.0, R7 = 0.0127;
+         L6 = 0.0508, M6 = 10.0, R6 = 0.0127,
+         L7 = 0.0635, M7 = 10.0, R7 = 0.0127;
 
    RobotArm()
    {
@@ -35,7 +35,7 @@ public class RobotArm extends Robot
        super("RobotArm");
 
       // Create damping to make the transitions smoother
-      double damping = 100.0;
+      double damping = 10.0;
 
       // Create axis 1 & base of 7Bot
       PinJoint axis1 = new PinJoint("axis1", new Vector3d(0.0, 0.0, 0.0), this, Axis.Z);
@@ -96,7 +96,7 @@ public class RobotArm extends Robot
       axis7.setLink(link7);
       axes56.addJoint(axis7);
 
-//      showCoordinatesRecursively(circle, true);
+    //  showCoordinatesRecursively(axis1, true);
    }
 
    private Link rotatingLink1()
