@@ -95,8 +95,15 @@ public class PelvisIMUBasedLinearStateCalculator
       yoLinearAccelerationMeasurementInWorld = new YoFrameVector("imuLinearAccelerationInWorld", worldFrame, registry);
 
       imuOffsetInPelvisFrameAdjustmentHack = new YoFrameVector("imuOffsetHack", rootJoint.getFrameAfterJoint(), registry);
-      imuReferenceFrameViz = new YoGraphicReferenceFrame(measurementFrame, parentRegistry, 1.5);
-      yoGraphicsListRegistry.registerYoGraphic("IMUReferenceFrame", imuReferenceFrameViz);
+      if (yoGraphicsListRegistry != null)
+      {
+         imuReferenceFrameViz = new YoGraphicReferenceFrame(measurementFrame, parentRegistry, 1.5);
+         yoGraphicsListRegistry.registerYoGraphic("IMUReferenceFrame", imuReferenceFrameViz);
+      }
+      else
+      {
+         imuReferenceFrameViz = null;
+      }
 
       setRootJointPositionImuOnlyToCurrent.set(true);
       alphaLeakIMUOnly.set(0.999);
@@ -223,6 +230,7 @@ public class PelvisIMUBasedLinearStateCalculator
       correctionTermToPack.setToZero(tempRootJointAngularVelocity.getReferenceFrame());
       correctionTermToPack.cross(tempRootJointAngularVelocity, measurementOffset);
 
-      imuReferenceFrameViz.update();
+      if (imuReferenceFrameViz != null)
+        imuReferenceFrameViz.update();
    }
 }
