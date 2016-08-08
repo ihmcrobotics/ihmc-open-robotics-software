@@ -55,13 +55,13 @@ public class SkippyController implements RobotController
          k4 = -49.05
        */
       k1 = new DoubleYoVariable("k1", registry);
-      k1.set(0);
+      k1.set(120);
       k2 = new DoubleYoVariable("k2", registry);
-      k2.set(-0);
+      k2.set(-60);
       k3 = new DoubleYoVariable("k3", registry);
       k3.set(40);
       k4 = new DoubleYoVariable("k4", registry);
-      k4.set(-60);
+      k4.set(-20);
 
       k5 = new DoubleYoVariable("k5", registry);
       k5.set(0);
@@ -217,12 +217,13 @@ public class SkippyController implements RobotController
    private double[] calculateAnglePosAndDerOfJoint(PinJoint joint)
    {
       double[] finale = new double[2];
-      //double firstAngle = robot.getLegJoint().getQ().getDoubleValue()%(Math.PI*2);
-      //double angle = joint.getQ().getDoubleValue()+firstAngle;
-      //if(angle > Math.PI)
-      //   angle = Math.PI - angle;
-//
-      double angle = joint.getQ().getDoubleValue();
+      double firstAngle = robot.getLegJoint().getQ().getDoubleValue()%(Math.PI*2);
+      if(firstAngle>Math.PI)
+         firstAngle = (Math.PI*2-firstAngle)*-1;
+      double angle = joint.getQ().getDoubleValue()+firstAngle;
+      //System.out.println(fromRadiansToDegrees(firstAngle) + " " + fromRadiansToDegrees(angle));
+
+      //double angle = joint.getQ().getDoubleValue();
 
       double angleVel = joint.getQD().getDoubleValue();
       //angle = (angle * 180/Math.PI)%360;
