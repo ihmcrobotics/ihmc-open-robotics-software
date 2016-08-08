@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 public class RobotArmController implements RobotController
 {
 
-   public static String variableName = "axis1";
+   public static String variableName1 = "axis1";
    public static String variableName2 = "axis2";
    public static String variableName3 = "axis3";
    public static String variableName4 = "axis4";
@@ -21,7 +21,7 @@ public class RobotArmController implements RobotController
    private DoubleYoVariable k1, k2, k3, k4; // these are the controller gain parameters
    private final YoVariableRegistry registry = new YoVariableRegistry("RobotArmController");
 
-   private final DoubleYoVariable axis1 = new DoubleYoVariable(variableName, registry);
+   private final DoubleYoVariable axis1 = new DoubleYoVariable(variableName1, registry);
    private final DoubleYoVariable axis2 = new DoubleYoVariable(variableName2, registry);
    private final DoubleYoVariable axis3 = new DoubleYoVariable(variableName3, registry);
    private final DoubleYoVariable axis4 = new DoubleYoVariable(variableName4, registry);

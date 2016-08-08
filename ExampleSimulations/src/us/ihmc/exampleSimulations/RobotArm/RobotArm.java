@@ -43,7 +43,7 @@ public class RobotArm extends Robot
       axis1.setDamping(damping);
       axis1.setLimitStops(-0.25,3.15,0,0);
 
-      Link link1 = linkCylinder1();
+      Link link1 = rotatingLink1();
       axis1.setLink(link1);
       this.addRootJoint(axis1);
 
@@ -53,7 +53,7 @@ public class RobotArm extends Robot
       axis2.setDamping(damping);
       axis2.setLimitStops(-1.15,2.35,0,0);
 
-      Link link2 = stick2();
+      Link link2 = translatingLink2();
       axis2.setLink(link2);
       axis1.addJoint(axis2);
 
@@ -69,7 +69,7 @@ public class RobotArm extends Robot
       axes34.getSecondJoint().setDamping(damping);
       axes34.getSecondJoint().setLimitStops(-1.3,2.0,0,0);
 
-      Link link4 = linkCylinder4();
+      Link link4 = translatingAndRotatingLink4();
       axes34.setLink(link4);
       axis2.addJoint(axes34);
 
@@ -83,7 +83,7 @@ public class RobotArm extends Robot
       axes56.getSecondJoint().setInitialState(Math.cos(angle6), Math.sin(angle6));
       axes56.getSecondJoint().setDamping(damping);
 
-      Link link6 = linkCylinder6();
+      Link link6 = rotatingLink6();
       axes56.setLink(link6);
       axes34.addJoint(axes56);
 
@@ -92,16 +92,16 @@ public class RobotArm extends Robot
       axis7.setInitialState(Math.cos(angle7), Math.sin(angle7));
       axis7.setDamping(damping);
 
-      Link link7 = link7();
+      Link link7 = translatingLink7();
       axis7.setLink(link7);
       axes56.addJoint(axis7);
 
 //      showCoordinatesRecursively(circle, true);
    }
 
-   private Link linkCylinder1()
+   private Link rotatingLink1()
    {
-      Link ret = new Link("linkCylinder1");
+      Link ret = new Link("rotatingLink1");
 
       ret.setMass(M1);
       ret.setComOffset(0.0, 0.0, L1 / 2.0);
@@ -114,9 +114,9 @@ public class RobotArm extends Robot
       return ret;
    }
 
-   private Link stick2()
+   private Link translatingLink2()
    {
-      Link ret = new Link("stick2");
+      Link ret = new Link("translatingLink2");
 
       ret.setMass(M2);
       ret.setComOffset( 0.0, 0.0, L2 / 2.0);
@@ -150,9 +150,9 @@ public class RobotArm extends Robot
 //      return ret;
 //   }
 
-   private Link linkCylinder4()
+   private Link translatingAndRotatingLink4()
    {
-      Link ret = new Link("linkCylinder4");
+      Link ret = new Link("translatingAndRotatingLink4");
 
       ret.setMass(M4);
       ret.setComOffset(0.0, 0.0, 0.0);
@@ -187,9 +187,9 @@ public class RobotArm extends Robot
 //      return ret;
 //   }
 
-   private Link linkCylinder6()
+   private Link rotatingLink6()
    {
-      Link ret = new Link("linkCylinder6");
+      Link ret = new Link("rotatingLink6");
 
       ret.setMass(M6);
       ret.setComOffset(0.0, 0.0, 0.0);
@@ -203,9 +203,9 @@ public class RobotArm extends Robot
       return ret;
    }
 
-   private Link link7()
+   private Link translatingLink7()
    {
-      Link ret = new Link("link7");
+      Link ret = new Link("translatingLink7");
 
       ret.setMass(M7);
       ret.setComOffset(L7 / 2.0, 0.0, 0.0);
