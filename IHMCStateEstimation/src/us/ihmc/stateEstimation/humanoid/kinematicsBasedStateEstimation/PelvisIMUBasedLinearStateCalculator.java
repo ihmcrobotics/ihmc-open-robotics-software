@@ -6,8 +6,11 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -40,8 +43,10 @@ public class PelvisIMUBasedLinearStateCalculator
    private final YoFrameVector yoLinearAccelerationMeasurementInWorld;
    private final YoFrameVector yoLinearAccelerationMeasurement;
 
-   private final YoFrameVector imuOffsetInPelvisFrameAdjustmentHack;
    private final YoGraphicReferenceFrame imuReferenceFrameViz;
+   private final FramePose measurementFramePose = new FramePose();
+   private final YoFramePose measurementFrameOffset;
+   private final PoseReferenceFrame offsetMeasurementFrame;
 
    private final BooleanYoVariable imuBasedStateEstimationEnabled = new BooleanYoVariable("imuBasedStateEstimationEnabled", registry);
 
@@ -94,11 +99,14 @@ public class PelvisIMUBasedLinearStateCalculator
       yoLinearAccelerationMeasurement = new YoFrameVector("imuLinearAcceleration", measurementFrame, registry);
       yoLinearAccelerationMeasurementInWorld = new YoFrameVector("imuLinearAccelerationInWorld", worldFrame, registry);
 
-      imuOffsetInPelvisFrameAdjustmentHack = new YoFrameVector("imuOffsetHack", rootJoint.getFrameAfterJoint(), registry);
+      offsetMeasurementFrame = new PoseReferenceFrame("imuLinearMeasurementFrame", measurementFrame);
+      measurementFrameOffset = new YoFramePose("imuOffsetHack", measurementFrame, registry);
+//      measurementFrameOffset.setXYZYawPitchRoll(new double[]{-0.0905, -0.000004, -0.0125, -0.78539816339, 3.14159265359, 0.0});
+
       if (yoGraphicsListRegistry != null)
       {
-         imuReferenceFrameViz = new YoGraphicReferenceFrame(measurementFrame, parentRegistry, 1.5);
-         yoGraphicsListRegistry.registerYoGraphic("IMUReferenceFrame", imuReferenceFrameViz);
+         imuReferenceFrameViz = new YoGraphicReferenceFrame(offsetMeasurementFrame, parentRegistry, 1.5);
+         yoGraphicsListRegistry.registerYoGraphic("IMULinearReferenceFrame", imuReferenceFrameViz);
       }
       else
       {
@@ -223,14 +231,15 @@ public class PelvisIMUBasedLinearStateCalculator
       rootJoint.getJointTwist(tempRootJointTwist);
       tempRootJointTwist.getAngularPart(tempRootJointAngularVelocity);
 
-      measurementOffset.setToZero(measurementFrame);
+      measurementFrameOffset.getFramePoseIncludingFrame(measurementFramePose);
+      offsetMeasurementFrame.setPoseAndUpdate(measurementFramePose);
+      if (imuReferenceFrameViz != null)
+         imuReferenceFrameViz.update();
+
+      measurementOffset.setToZero(offsetMeasurementFrame);
       measurementOffset.changeFrame(rootJoint.getFrameAfterJoint());
-      measurementOffset.add(imuOffsetInPelvisFrameAdjustmentHack.getFrameTuple());
 
       correctionTermToPack.setToZero(tempRootJointAngularVelocity.getReferenceFrame());
       correctionTermToPack.cross(tempRootJointAngularVelocity, measurementOffset);
-
-      if (imuReferenceFrameViz != null)
-        imuReferenceFrameViz.update();
    }
 }
