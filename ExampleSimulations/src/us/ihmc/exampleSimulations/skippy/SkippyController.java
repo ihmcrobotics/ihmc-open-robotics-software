@@ -55,9 +55,9 @@ public class SkippyController implements RobotController
          k4 = -49.05
        */
       k1 = new DoubleYoVariable("k1", registry);
-      k1.set(80);
+      k1.set(110);
       k2 = new DoubleYoVariable("k2", registry);
-      k2.set(-60);
+      k2.set(-35);
       k3 = new DoubleYoVariable("k3", registry);
       k3.set(30);
       k4 = new DoubleYoVariable("k4", registry);
@@ -95,7 +95,7 @@ public class SkippyController implements RobotController
       //System.out.println(this.robot.mainJoint.getQdy());
       //positionControl();
 
-      balanceControl(Math.PI/6, Math.PI/12);
+      balanceControl(0.0, Math.PI/12);
    }
 
    private void balanceControl(double hipDesired, double shoulderDesired)
@@ -221,10 +221,10 @@ public class SkippyController implements RobotController
       double firstAngle = robot.getLegJoint().getQ().getDoubleValue()%(Math.PI*2);
       if(firstAngle>Math.PI)
          firstAngle = (Math.PI*2-firstAngle)*-1;
-      double angle = joint.getQ().getDoubleValue()+firstAngle;
+      double angle = (joint.getQ().getDoubleValue())%(Math.PI*2)+firstAngle;
       if(angle > Math.PI)
          angle = angle - Math.PI*2;
-      an.set(fromRadiansToDegrees(angle));
+
       //System.out.println(fromRadiansToDegrees(firstAngle) + " " + fromRadiansToDegrees(angle));
 
       //double angle = joint.getQ().getDoubleValue();
