@@ -18,7 +18,7 @@ public class RobotArmController implements RobotController
    public static String variableName8 = "axis7Right";
 
    // tau_* is torque, q_* is position, qd_* is velocity for joint *
-   private DoubleYoVariable q_axis1, q_axis2, q_axis4, q_axis3, q_axis5, q_axis6, q_axis7Left, q_axis7Right;
+   private DoubleYoVariable q_axis1, q_axis2, q_axis4, q_axis3, q_axis5, q_axis6, q_axis7Left, q_gripLeft, q_axis7Right, q_gripRight;
    private DoubleYoVariable k1, k2, k3, k4; // these are the controller gain parameters
    private final YoVariableRegistry registry = new YoVariableRegistry("RobotArmController");
 
@@ -44,7 +44,9 @@ public class RobotArmController implements RobotController
       q_axis5 = (DoubleYoVariable) robot.getVariable("q_axis5");
       q_axis6 = (DoubleYoVariable) robot.getVariable("q_axis6");
       q_axis7Left = (DoubleYoVariable) robot.getVariable("q_axis7Left");
+//      q_gripLeft = (DoubleYoVariable) robot.getVariable("q_gripLeft");
       q_axis7Right = (DoubleYoVariable) robot.getVariable("q_axis7Right");
+//      q_gripRight = (DoubleYoVariable) robot.getVariable("q_gripRight");
    }
 
    public void doControl()
@@ -56,7 +58,9 @@ public class RobotArmController implements RobotController
       q_axis5.set(axis5.getDoubleValue());
       q_axis6.set(axis6.getDoubleValue());
       q_axis7Left.set(axis7Left.getDoubleValue());
+//      q_gripLeft.set(-axis7Left.getDoubleValue());
       q_axis7Right.set(-axis7Left.getDoubleValue());
+//      q_gripRight.set(axis7Left.getDoubleValue());
 
       // tau_joint1.set(0.0); // free bearing
       // set the torque at the controlled second joint

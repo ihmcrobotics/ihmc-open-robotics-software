@@ -87,23 +87,39 @@ public class RobotArm extends Robot
       axes56.setLink(link6);
       axes34.addJoint(axes56);
 
-      // Create axis 7 (left)
+      // Create axis 7 (left grip)
       PinJoint axis7Left = new PinJoint("axis7Left", new Vector3d(L6, 0.0, 0.0), this, Axis.Z);
       axis7Left.setInitialState(Math.cos(angle7), Math.sin(angle7));
       axis7Left.setDamping(damping);
 
-      Link link7Left = link7LeftGripper();
-      axis7Left.setLink(link7Left);
+      Link link7LeftBase = link7LeftBase();
+      axis7Left.setLink(link7LeftBase);
       axes56.addJoint(axis7Left);
-
-      // Create axis 7 (left)
+      
+//      PinJoint gripLeft = new PinJoint("gripLeft", new Vector3d(0.0, -L7 * Math.sin(angle7), 0.0), this, Axis.Z);
+////      gripLeft.setInitialState(Math.PI / 2 - Math.cos(angle7), Math.PI / 2 - Math.sin(angle7));
+//      gripLeft.setDamping(damping);
+//
+//      Link link7LeftTip = link7LeftTip();
+//      gripLeft.setLink(link7LeftTip);
+//      axis7Left.addJoint(gripLeft);
+      
+      // Create axis 7 (right grip)
       PinJoint axis7Right = new PinJoint("axis7Right", new Vector3d(L6, 0.0, 0.0), this, Axis.Z);
       axis7Right.setInitialState(Math.cos(angle7), Math.sin(angle7));
       axis7Right.setDamping(damping);
 
-      Link link7Right = link7RightGripper();
-      axis7Right.setLink(link7Right);
+      Link link7RightBase = link7RightBase();
+      axis7Right.setLink(link7RightBase);
       axes56.addJoint(axis7Right);
+
+//      PinJoint gripRight = new PinJoint("gripRight", new Vector3d(0.0, -L7 * Math.sin(angle7), 0.0), this, Axis.Z);
+////      gripRight.setInitialState(Math.PI / 2 - Math.cos(angle7), Math.PI / 2 - Math.sin(angle7));
+//      gripRight.setDamping(damping);
+//
+//      Link link7RightTip = link7RightTip();
+//      gripRight.setLink(link7RightTip);
+//      axis7Right.addJoint(gripRight);
 
       //  showCoordinatesRecursively(axis1, true);
    }
@@ -172,9 +188,9 @@ public class RobotArm extends Robot
       return ret;
    }
 
-   private Link link7LeftGripper()
+   private Link link7LeftBase()
    {
-      Link ret = new Link("link7LeftGripper");
+      Link ret = new Link("link7LeftBase");
 
       ret.setMass(M7);
       ret.setComOffset(L7 / 2.0, 0.0, 0.0);
@@ -189,9 +205,26 @@ public class RobotArm extends Robot
       return ret;
    }
 
-   private Link link7RightGripper()
+   private Link link7LeftTip()
    {
-      Link ret = new Link("link7RightGripper");
+      Link ret = new Link("link7LeftTip");
+
+      ret.setMass(M7);
+      ret.setComOffset(L7 / 2.0, 0.0, 0.0);
+      ret.setMomentOfInertia(M7 * R7 * R7 / 2.0, M7 * (3 * R7 * R7 + L7 * L7) / 12.0, M7 * (3 * R7 * R7 + L7 * L7) / 12.0);
+
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      linkGraphics.rotate(Math.PI / 2.0, Axis.Y);
+//      linkGraphics.rotate(Math.PI / 4.0, Axis.X);
+//      linkGraphics.translate(0.0, 0.0, -0.02);
+      linkGraphics.addCylinder(L7, R7, YoAppearance.White());
+      ret.setLinkGraphics(linkGraphics);
+      return ret;
+   }
+
+   private Link link7RightBase()
+   {
+      Link ret = new Link("link7RightBase");
 
       ret.setMass(M7);
       ret.setComOffset(L7 / 2.0, 0.0, 0.0);
@@ -201,6 +234,23 @@ public class RobotArm extends Robot
       linkGraphics.rotate(Math.PI / 2.0, Axis.Y);
       linkGraphics.rotate(Math.PI / 4.0, Axis.X);
       linkGraphics.translate(0.0, 0.0, -0.01);
+      linkGraphics.addCylinder(L7, R7, YoAppearance.Black());
+      ret.setLinkGraphics(linkGraphics);
+      return ret;
+   }
+
+   private Link link7RightTip()
+   {
+      Link ret = new Link("link7RightTip");
+
+      ret.setMass(M7);
+      ret.setComOffset(L7 / 2.0, 0.0, 0.0);
+      ret.setMomentOfInertia(M7 * R7 * R7 / 2.0, M7 * (3 * R7 * R7 + L7 * L7) / 12.0, M7 * (3 * R7 * R7 + L7 * L7) / 12.0);
+
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      linkGraphics.rotate(Math.PI / 2.0, Axis.Y);
+//      linkGraphics.rotate(-Math.PI / 4.0, Axis.X);
+//      linkGraphics.translate(0.0, 0.0, -0.04);
       linkGraphics.addCylinder(L7, R7, YoAppearance.Black());
       ret.setLinkGraphics(linkGraphics);
       return ret;
