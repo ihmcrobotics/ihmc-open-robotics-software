@@ -1,23 +1,33 @@
 package us.ihmc.exampleSimulations.skippy;
 
+import java.util.ArrayList;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.mathfunctions.Matrix;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-
-import javax.vecmath.*;
-import java.util.ArrayList;
-import java.util.Vector;
 
 public class SkippyController implements RobotController
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry("SkippyController");
 
    // tau_* is torque, q_* is position, qd_* is velocity for joint *
 //   private DoubleYoVariable q_foot_X, q_hip, q_shoulder, qd_foot_X, qd_hip, qd_shoulder;
-   private DoubleYoVariable k1, k2, k3, k4, k5, k6, k7, k8, an, vel; // controller gain parameters
+   private final DoubleYoVariable k1, k2, k3, k4, k5, k6, k7, k8, angleToCoMInYZPlane, angularVelocityToCoMYZPlane; // controller gain parameters
+   private final DoubleYoVariable planarDistance;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("SkippyController");
+
+   private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint footLocation = new YoFramePoint("foot", ReferenceFrame.getWorldFrame(), registry);
+
+   private final DoubleYoVariable robotMass = new DoubleYoVariable("robotMass", registry);
+   private final DoubleYoVariable q_d_hip = new DoubleYoVariable("q_d_hip", registry);
 
    private String name;
    private SkippyRobot robot;
@@ -55,13 +65,13 @@ public class SkippyController implements RobotController
          k4 = -49.05
        */
       k1 = new DoubleYoVariable("k1", registry);
-      k1.set(160);
+      k1.set(5000.0); //110);
       k2 = new DoubleYoVariable("k2", registry);
-      k2.set(60);
+      k2.set(300.0); //-35);
       k3 = new DoubleYoVariable("k3", registry);
-      k3.set(20);
+      k3.set(-30.0); //30);
       k4 = new DoubleYoVariable("k4", registry);
-      k4.set(10);
+      k4.set(-60.0); //-15);
 
       k5 = new DoubleYoVariable("k5", registry);
       k5.set(0);
@@ -72,9 +82,12 @@ public class SkippyController implements RobotController
       k8 = new DoubleYoVariable("k8", registry);
       k8.set(-15);
 
-      an = new DoubleYoVariable("an", registry);
-      vel = new DoubleYoVariable("vel", registry);
-      
+      q_d_hip.set(-1.7);
+
+      planarDistance = new DoubleYoVariable("planarDistance", registry);
+      angleToCoMInYZPlane = new DoubleYoVariable("angleToCoMYZPlane", registry);
+      angularVelocityToCoMYZPlane = new DoubleYoVariable("angularVelocityToCoMYZPlane", registry);
+
       //for show
       desiredPositions = new ArrayList<double[]>();
       //double[] position = {qLegDesiredX, qLegDesiredY, qHipDesired, qShoulderDesired} <- format
@@ -89,13 +102,16 @@ public class SkippyController implements RobotController
 
    public void doControl()
    {
+      computeCenterOfMass();
+      computeFootLocation();
+
       // set the torques
 
       //start pid control
       //System.out.println(this.robot.mainJoint.getQdy());
       //positionControl();
 
-      balanceControl(-Math.PI/6, Math.PI/12);
+      balanceControl(q_d_hip.getDoubleValue(), Math.PI/12.0);
    }
 
    private void balanceControl(double hipDesired, double shoulderDesired)
@@ -106,53 +122,77 @@ public class SkippyController implements RobotController
 
    private void applyTorqueToHip(double hipDesired)
    {
-      Point3d centerOfMass = new Point3d();
-      double robotMass = robot.computeCenterOfMass(centerOfMass);
-      Point3d groundPoint = new Point3d();
-      robot.getGroundContactPoints().get(0).getPosition(groundPoint);
-      double planarDistance = Math.pow(Math.pow(centerOfMass.getY()-groundPoint.getY(), 2) + Math.pow(centerOfMass.getZ()-groundPoint.getZ(), 2), 0.5);
-      double angle = (Math.asin(Math.abs(centerOfMass.getZ())/planarDistance));
+      /*
+         angular pos : angle created w/ com to groundpoint against vertical
+       */
 
-      if(centerOfMass.getZ()>0)
-         angle = Math.PI/2 - angle;
-      else
-         angle = Math.PI/2 + angle;
+      double footToComZ = centerOfMass.getZ()-footLocation.getZ();
+      double footToComY = centerOfMass.getY()-footLocation.getY();
 
-      if(centerOfMass.getY()<0)
-         angle = angle * -1;
+      planarDistance.set(Math.sqrt(Math.pow(centerOfMass.getY()-footLocation.getY(), 2) + Math.pow(footToComZ, 2)));
+      double angle = (Math.atan2(footToComY, footToComZ));
+      angleToCoMInYZPlane.set(fromRadiansToDegrees(angle));
 
-      an.set(fromRadiansToDegrees(angle));
-
+      /*
+         angular vel : angle created w/ com to groundpoint against vertical
+       */
       Vector3d linearMomentum = new Vector3d();
       robot.computeLinearMomentum(linearMomentum);
-      double angleVel = Math.pow(Math.pow(linearMomentum.getY(), 2) + Math.pow(linearMomentum.getZ(), 2), 0.5)/robotMass;
-      angleVel = angleVel / planarDistance;
 
-      if(angle < prevAngleHip && centerOfMass.getY() < 0)
-         angleVel = angleVel * -1;
-      else if(angle < prevAngleHip && centerOfMass.getY() > 0)
-         angleVel = angleVel * -1;
+      //1: projection vector
+      Vector3d componentPerpendicular = new Vector3d(0, centerOfMass.getY(), centerOfMass.getZ());
+      componentPerpendicular.set(0, 1, -centerOfMass.getY()/centerOfMass.getZ());
+      componentPerpendicular.normalize();
+      double angleVel = componentPerpendicular.dot(linearMomentum) / componentPerpendicular.length();
+      angleVel = angleVel / robotMass.getDoubleValue();
 
-      //temporary..
-//      double angleVel = (angle - prevAngleHip) / SkippySimulation.DT;
-      prevAngleHip = angle;
-      vel.set(angleVel);
+//      if(angle < prevAngleHip && centerOfMass.getY() < 0)
+//         angleVel = angleVel * -1;
+//      else if(angle < prevAngleHip && centerOfMass.getY() > 0)
+//         angleVel = angleVel * -1;
+//      prevAngleHip = angle;
 
+      //2: not used
+      //double angleVel = Math.pow(Math.pow(linearMomentum.getY(), 2) + Math.pow(linearMomentum.getZ(), 2), 0.5)/robotMass;
+      //angleVel = angleVel / planarDistance;
+
+      //3: average rate of change (buggy)
+      //double angleVel = (angle - prevAngleHip) / SkippySimulation.DT;
+
+      angularVelocityToCoMYZPlane.set(angleVel);
+
+
+      /*
+         angular pos/vel of hipjoint
+       */
       double[] hipAngleValues = calculateAnglePosAndDerOfJoint(robot.getHipJoint());
       double hipAngle = hipAngleValues[0];
       double hipAngleVel = hipAngleValues[1];
-      robot.getHipJoint().setTau(k1.getDoubleValue()*Math.sin(angle) + k2.getDoubleValue()*angleVel + k3.getDoubleValue()*(hipDesired-hipAngle) + k4.getDoubleValue()*hipAngleVel);
+
+      //torque set
+      robot.getHipJoint().setTau(k1.getDoubleValue()*(0.0-angle) + k2.getDoubleValue()*(0.0 - angleVel) + k3.getDoubleValue()*(hipDesired-hipAngle) + k4.getDoubleValue()*(0.0 - hipAngleVel));
       //robot.getHipJoint().setTau(k1.getDoubleValue()*angle + k2.getDoubleValue()*angleVel);
       //robot.getHipJoint().setTau(k3.getDoubleValue()*(hipDesired-hipAngle) + k4.getDoubleValue()*hipAngleVel);
-      System.out.println(centerOfMass + " " + fromRadiansToDegrees(angle) + " " + angleVel + " " + (hipDesired-hipAngle) + " " + hipAngleVel + " " + robot.getHipJoint().getTau());
+//      System.out.println(centerOfMass + " " + fromRadiansToDegrees(angle) + " " + angleVel + " " + fromRadiansToDegrees(hipAngle) + " " + hipAngleVel + " " + robot.getHipJoint().getTau());
    }
-   private void applyTorqueToShoulder(double shoulderDesired)
+
+   private void computeFootLocation()
    {
-      Point3d centerOfMass = new Point3d();
-      double robotMass = robot.computeCenterOfMass(centerOfMass);
       Point3d groundPoint = new Point3d();
       robot.getGroundContactPoints().get(0).getPosition(groundPoint);
-      double planarDistance = Math.pow(Math.pow(centerOfMass.getX()-groundPoint.getX(), 2) + Math.pow(centerOfMass.getZ()-groundPoint.getZ(), 2), 0.5);
+      footLocation.set(groundPoint);
+   }
+
+   private void computeCenterOfMass()
+   {
+      Point3d tempCenterOfMass = new Point3d();
+      robotMass.set(robot.computeCenterOfMass(tempCenterOfMass));
+      centerOfMass.set(tempCenterOfMass);
+   }
+
+   private void applyTorqueToShoulder(double shoulderDesired)
+   {
+      double planarDistance = Math.pow(Math.pow(centerOfMass.getX()-footLocation.getX(), 2) + Math.pow(centerOfMass.getZ()-footLocation.getZ(), 2), 0.5);
       double angle = (Math.asin(Math.abs(centerOfMass.getZ())/planarDistance));
 
       if(centerOfMass.getZ()>0)
@@ -163,7 +203,7 @@ public class SkippyController implements RobotController
       if(centerOfMass.getX()<0)
          angle = angle * -1;
 
-      an.set(fromRadiansToDegrees(angle));
+      //an.set(fromRadiansToDegrees(angle));
 
 //      System.out.println(centerOfMass);
 //      System.out.println(angle);
@@ -183,7 +223,7 @@ public class SkippyController implements RobotController
       //temporary..
       double angleVel = (angle - prevAngleHip) / SkippySimulation.DT;
       prevAngleHip = angle;
-      vel.set(angleVel);
+      angularVelocityToCoMYZPlane.set(angleVel);
 
       double[] shoulderAngleValues = calculateAnglePosAndDerOfJoint(robot.getShoulderJoint());
       double shoulderAngle = shoulderAngleValues[0];
@@ -191,16 +231,22 @@ public class SkippyController implements RobotController
       robot.getShoulderJoint().setTau(k1.getDoubleValue()*(angle) + k2.getDoubleValue()*angleVel + k3.getDoubleValue()*(shoulderDesired-shoulderAngle) + k4.getDoubleValue()*shoulderAngleVel);
       //robot.getHipJoint().setTau(k1.getDoubleValue()*angle + k2.getDoubleValue()*angleVel);
       //robot.getHipJoint().setTau(k3.getDoubleValue()*(hipDesired-hipAngle) + k4.getDoubleValue()*hipAngleVel);
-      System.out.println(centerOfMass + " " + (angle-prevAngleHip) + " " + fromRadiansToDegrees(angle) + " " + angleVel + " " + (shoulderDesired-shoulderAngle) + " " + shoulderAngleVel + " " + robot.getShoulderJoint().getTau());
+      //System.out.println(centerOfMass + " " + (angle-prevAngleHip) + " " + fromRadiansToDegrees(angle) + " " + angleVel + " " + (shoulderDesired-shoulderAngle) + " " + shoulderAngleVel + " " + robot.getShoulderJoint().getTau());
    }
    private double[] calculateAnglePosAndDerOfJoint(PinJoint joint)
    {
       double[] finale = new double[2];
-      double angle = joint.getQ().getDoubleValue();
-//      if(angle < 0)
-//         angle = Math.PI - angle*-1;
-//      else
-//         angle = Math.PI - angle;
+      double firstAngle = robot.getLegJoint().getQ().getDoubleValue()%(Math.PI*2);
+      if(firstAngle>Math.PI)
+         firstAngle = (Math.PI*2-firstAngle)*-1;
+      double angle = (joint.getQ().getDoubleValue())%(Math.PI*2)+firstAngle;
+      if(angle > Math.PI)
+         angle = angle - Math.PI*2;
+
+      //System.out.println(fromRadiansToDegrees(firstAngle) + " " + fromRadiansToDegrees(angle));
+
+      //double angle = joint.getQ().getDoubleValue();
+
       double angleVel = joint.getQD().getDoubleValue();
       //angle = (angle * 180/Math.PI)%360;
       finale[0] = angle;

@@ -26,7 +26,9 @@ import us.ihmc.plotting.shapes.LineArtifact;
 import us.ihmc.plotting.shapes.PointArtifact;
 import us.ihmc.plotting.shapes.PolygonArtifact;
 import us.ihmc.plotting.shapes.ShapeArtifact;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Line2d;
+import us.ihmc.tools.FormattingTools;
 
 public class Plotter extends JPanel
 {
@@ -36,8 +38,10 @@ public class Plotter extends JPanel
 
    // show selections
    private static final boolean SHOW_SELECTION = false;
+   private static final Color TEXT_COLOR = Color.WHITE;
 
    private boolean drawHistory = false;
+   private boolean showLabels = false;
 
    private long updateDelayInMillis = 0;
    private long lastUpdate = 0;
@@ -51,7 +55,7 @@ public class Plotter extends JPanel
    private int centerY;
    private double offsetX = 0.0;
    private double offsetY = 0.0;
-   private double scale = 20.0;
+   private double plotRange = 20.0;
    private double scaleFactor;
    private double upperLeftLongitude, upperLeftLatitude, lowerRightLongitude, lowerRightLatitude;
    private double selectedX = 0.0;
@@ -116,7 +120,7 @@ public class Plotter extends JPanel
          int widthInPixels = (int) Math.round(panelSize.getWidth());
          centerX = widthInPixels / 2;
          centerY = heightInPixels / 2;
-         scaleFactor = heightInPixels / scale;
+         scaleFactor = heightInPixels / plotRange;
 
          double headingOffset = 0.0;
 
@@ -166,11 +170,7 @@ public class Plotter extends JPanel
          else
          {
             // change grid line scale from 1m to 10cm ehn below 10m
-            double interval = 1.0;
-            if (getRange() < 10)
-            {
-               interval = 0.1;
-            }
+            double interval = Math.pow(10, MathTools.orderOfMagnitude(plotRange) - 1);
 
             if (overrideAutomaticInterval)
             {
@@ -205,16 +205,24 @@ public class Plotter extends JPanel
 
                // draw line
                graphics2d.drawLine(x, 0, x, heightInPixels);
+               
+               if (showLabels)
+               {
+                  Color tempColor = graphics2d.getColor();
+                  graphics2d.setColor(TEXT_COLOR);
+                  graphics2d.drawString(FormattingTools.getFormattedToSignificantFigures(distance, 2), x + 1, heightInPixels / 2 - 1);
+                  graphics2d.setColor(tempColor);
+               }
             }
 
-            double minY = lowerRightCoordinate.getY();
-            double maxY = upperLeftCoodinate.getY();
-            double yDiff = maxY - minY;
-            int yCount = (int) Math.round(Math.ceil(yDiff / interval));
-            int yCountOffset = (int) Math.floor(minY / interval);
+            double lowerRightCoordinateY = lowerRightCoordinate.getY();
+            double upperLeftCoordinateY = upperLeftCoodinate.getY();
+            double deltaY = upperLeftCoordinateY - lowerRightCoordinateY;
+            int numberOfGridLinesY = (int) Math.round(Math.ceil(deltaY / interval));
+            int yCountOffset = (int) Math.floor(lowerRightCoordinateY / interval);
             double minYforPlotting = yCountOffset * interval;
 
-            for (int i = 0; i < yCount; i++)
+            for (int i = 0; i < numberOfGridLinesY; i++)
             {
                double distance = minYforPlotting + (i * interval);
 
@@ -231,6 +239,14 @@ public class Plotter extends JPanel
 
                // draw line
                graphics2d.drawLine(0, y, widthInPixels, y);
+               
+               if (showLabels)
+               {
+                  Color tempColor = graphics2d.getColor();
+                  graphics2d.setColor(TEXT_COLOR);
+                  graphics2d.drawString(FormattingTools.getFormattedToSignificantFigures(distance, 2), widthInPixels / 2 + 1, y - 1);
+                  graphics2d.setColor(tempColor);
+               }
             }
          }
 
@@ -573,7 +589,7 @@ public class Plotter extends JPanel
       int h = (int) Math.round(d.getHeight());
       Math.round(d.getWidth());
 
-      scaleFactor = h / scale;
+      scaleFactor = h / plotRange;
 
       // detemine plot size
       Dimension plotD = plot.getSize();
@@ -623,7 +639,7 @@ public class Plotter extends JPanel
 
    public void setRangeLimit(int range, double origMapScale, double ullon, double ullat, double lrlon, double lrlat)
    {
-      scale = range;
+      plotRange = range;
       upperLeftLongitude = ullon;
       upperLeftLatitude = ullat;
       lowerRightLongitude = lrlon;
@@ -634,13 +650,13 @@ public class Plotter extends JPanel
 
    public void setRange(double range)
    {
-      scale = range;
+      plotRange = range;
       repaint();
    }
 
    public double getRange()
    {
-      return scale;
+      return plotRange;
    }
 
    public void setOrientation(int orientation)
@@ -752,6 +768,11 @@ public class Plotter extends JPanel
       return updateDelayInMillis;
    }
 
+   public void setShowLabels(boolean showLabels)
+   {
+      this.showLabels = showLabels;
+   }
+   
    private class PlotterMouseListener extends MouseInputAdapter
    {
       @Override
