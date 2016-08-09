@@ -1,8 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -34,6 +32,7 @@ public class CenterOfPressureVisualizer
    private final Wrench tempWrench = new Wrench();
    private final Map<RigidBody, FootSwitchInterface> footSwitches;
    private final Collection<RigidBody> footRigidBodies;
+   private final List<RigidBody> footList = new ArrayList<>();
 
    public CenterOfPressureVisualizer(Map<RigidBody, FootSwitchInterface> footSwitches,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -52,6 +51,8 @@ public class CenterOfPressureVisualizer
          YoGraphicPosition copDynamicGraphic = new YoGraphicPosition("Meas " + rigidBodyName + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
          YoArtifactPosition copArtifact = copDynamicGraphic.createArtifact();
          yoGraphicsListRegistry.registerArtifact("StateEstimator", copArtifact);
+
+         footList.add(rigidBody);
       }
 
       overallRawCoPPositionInWorld = new YoFramePoint("overallRawCoPPositionInWorld", worldFrame, registry);
@@ -70,8 +71,10 @@ public class CenterOfPressureVisualizer
          overallRawCoPPositionInWorld.setToZero();
          double totalFootForce = 0.0;
 
-         for (RigidBody rigidBody : footRigidBodies)
+         for (int i = 0; i < footList.size(); i++)
          {
+            RigidBody rigidBody = footList.get(i);
+
             footSwitches.get(rigidBody).computeAndPackCoP(tempRawCoP2d);
             tempRawCoP.setIncludingFrame(tempRawCoP2d.getReferenceFrame(), tempRawCoP2d.getX(), tempRawCoP2d.getY(), 0.0);
             tempRawCoP.changeFrame(worldFrame);
