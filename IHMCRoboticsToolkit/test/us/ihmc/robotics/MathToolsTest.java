@@ -686,7 +686,7 @@ public class MathToolsTest
    public void testLcm_2()
    {
       Random rand = new Random();
-      long c = MathTools.lcm(rand.nextLong());
+      MathTools.lcm(rand.nextLong());
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -891,5 +891,20 @@ public class MathToolsTest
       assertEquals(MathTools.applyDeadband(10.0, 5.0), 5.0, 1e-12);
       assertEquals(MathTools.applyDeadband(-10.0, 5.0), -5.0, 1e-12);
    }
-
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testOrderOfMagnitude()
+   {
+      assertEquals(-2, MathTools.orderOfMagnitude(-0.01));
+      assertEquals(-2, MathTools.orderOfMagnitude(0.01));
+      assertEquals(-1, MathTools.orderOfMagnitude(0.1));
+      assertEquals(-1, MathTools.orderOfMagnitude(0.9));
+      assertEquals(0, MathTools.orderOfMagnitude(1.0));
+      assertEquals(1, MathTools.orderOfMagnitude(10.0));
+      assertEquals(2, MathTools.orderOfMagnitude(100.0));
+      assertEquals(3, MathTools.orderOfMagnitude(1000.01));
+      assertEquals(3, MathTools.orderOfMagnitude(1000.0));
+      assertEquals(4, MathTools.orderOfMagnitude(10000.0));
+   }
 }
