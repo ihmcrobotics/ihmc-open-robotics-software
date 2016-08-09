@@ -415,18 +415,16 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       ArrayList<QuadrupedTimedStep> steps = stepProvider.get();
       for (int i = 0; i < steps.size(); i++)
       {
-         if (!steps.get(i).isAbsolute())
+         stepPlan.enqueue();
+         stepPlan.getTail().set(steps.get(i));
+         if (!stepPlan.getTail().isAbsolute())
          {
-            steps.get(i).getTimeInterval().shiftInterval(robotTimestamp.getDoubleValue());
-            steps.get(i).setAbsolute(true);
+            stepPlan.getTail().getTimeInterval().shiftInterval(robotTimestamp.getDoubleValue());
+            stepPlan.getTail().setAbsolute(true);
          }
-         if (timedStepController.addStep(steps.get(i)))
-         {
-            stepPlan.enqueue();
-            stepPlan.getTail().set(steps.get(i));
-            groundPlaneEstimator.projectZ(stepPlan.getTail().getGoalPosition());
-         }
-         else
+         groundPlaneEstimator.projectZ(stepPlan.getTail().getGoalPosition());
+
+         if (!timedStepController.addStep(stepPlan.get(i)))
          {
             // only execute if all steps can be processed
             removeSteps();
