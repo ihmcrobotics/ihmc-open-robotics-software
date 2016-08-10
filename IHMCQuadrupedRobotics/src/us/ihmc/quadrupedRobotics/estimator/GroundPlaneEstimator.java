@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.estimator;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -23,7 +24,7 @@ import java.util.List;
 
 public class GroundPlaneEstimator
 {
-   private final static int MAX_GROUND_PLANE_POINTS = 100;
+   public final static int MAX_GROUND_PLANE_POINTS = 100;
    private final Plane3d groundPlane = new Plane3d();
    private final Vector3d groundPlaneNormal = new Vector3d();
    private final Point3d groundPlanePoint = new Point3d();
@@ -41,6 +42,11 @@ public class GroundPlaneEstimator
 
    public GroundPlaneEstimator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
+      this(parentRegistry, graphicsListRegistry, YoAppearance.Glass());
+   }
+
+   public GroundPlaneEstimator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, AppearanceDefinition groundPlaneAppearance)
+   {
 
       if (parentRegistry != null)
       {
@@ -50,7 +56,7 @@ public class GroundPlaneEstimator
       if (graphicsListRegistry != null)
       {
          Graphics3DObject groundPlaneGraphic = new Graphics3DObject();
-         groundPlaneGraphic.addCylinder(0.005, 0.5, YoAppearance.Glass());
+         groundPlaneGraphic.addCylinder(0.005, 0.5, groundPlaneAppearance);
          YoGraphicShape yoGroundPlaneGraphic = new YoGraphicShape("groundPlaneEstimate", groundPlaneGraphic, yoGroundPlanePoint, yoGroundPlaneOrientation, 1.0);
          graphicsListRegistry.registerYoGraphic("groundPlaneEstimate", yoGroundPlaneGraphic);
       }
