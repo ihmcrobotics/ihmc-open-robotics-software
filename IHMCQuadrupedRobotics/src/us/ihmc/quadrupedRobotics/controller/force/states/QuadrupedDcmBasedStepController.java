@@ -64,6 +64,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
    private final DoubleParameter dcmPositionStepAdjustmentGainParameter = parameterFactory.createDouble("dcmPositionStepAdjustmentGain", 1.5);
    private final DoubleParameter dcmPositionStepAdjustmentDeadbandParameter = parameterFactory.createDouble("dcmPositionStepAdjustmentDeadband", 0.0);
+   private final DoubleParameter vrpPositionRateLimitParameter = parameterFactory.createDouble("vrpPositionRateLimit", Double.MAX_VALUE);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 1);
    private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
    private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
@@ -173,6 +174,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
 
    private void updateGains()
    {
+      dcmPositionController.setVrpPositionRateLimit(vrpPositionRateLimitParameter.get());
       dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
       dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
       dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
