@@ -69,23 +69,23 @@ public class SkippyController implements RobotController
       k1 = new DoubleYoVariable("k1", registry);
       k1.set(5000.0); //110);
       k2 = new DoubleYoVariable("k2", registry);
-      k2.set(300.0); //-35);
+      k2.set(500.0); //-35);
       k3 = new DoubleYoVariable("k3", registry);
       k3.set(-100.0); //30);
       k4 = new DoubleYoVariable("k4", registry);
       k4.set(-50.0); //-15);
 
       k5 = new DoubleYoVariable("k5", registry);
-      k5.set(-2500);
+      k5.set(-370.0);
       k6 = new DoubleYoVariable("k6", registry);
-      k6.set(-820.0);
+      k6.set(-20.0);
       k7 = new DoubleYoVariable("k7", registry);
-      k7.set(50.0);
+      k7.set(-0.0);
       k8 = new DoubleYoVariable("k8", registry);
-      k8.set(12.0);
+      k8.set(-0.0);
 
       q_d_hip.set(-0.7);
-      q_d_shoulder.set(Math.PI/12.0);
+      q_d_shoulder.set(0.0);
 
       planarDistanceYZPlane = new DoubleYoVariable("planarDistanceYZPlane", registry);
       planarDistanceXZPlane = new DoubleYoVariable("planarDistanceXZPlane", registry);
@@ -227,7 +227,7 @@ public class SkippyController implements RobotController
       double[] shoulderAngleValues = calculateAnglePosAndDerOfShoulderJoint(robot.getShoulderJoint());
       double shoulderAngle = shoulderAngleValues[0];
       double shoulderAngleVel = shoulderAngleValues[1];
-      qShoulderIncludingOffset.set(shoulderAngle);
+      qShoulderIncludingOffset.set((shoulderAngle));
 
       //torque set
       robot.getShoulderJoint().setTau(k5.getDoubleValue()*(0.0-angle) + k6.getDoubleValue()*(0.0 - angleVel) + k7.getDoubleValue()*(shoulderDesired-shoulderAngle) + k8.getDoubleValue()*(0.0 - shoulderAngleVel));
