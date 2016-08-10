@@ -80,8 +80,8 @@ public class QuadrupedHeadTeleopNode implements JoystickEventListener
 
    private void configureJoystickFilters(Joystick device)
    {
-      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_TRIGGER, false, 0.05, 1));
-      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_TRIGGER, false, 0.05, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_TRIGGER, false, 0.05, 1, 1.0));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_TRIGGER, false, 0.05, 1, 1.0));
       device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_STICK_X, true, 0.1, 1));
       device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_STICK_Y, true, 0.1, 1));
       device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_STICK_X, true, 0.1, 1));
