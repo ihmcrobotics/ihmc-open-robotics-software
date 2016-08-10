@@ -96,7 +96,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       }
 
       // Initialize force feedback
-      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      for (QuadrupedJointName jointName : QuadrupedJointName.values)
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
@@ -120,7 +120,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    @Override
    public void onExit()
    {
-      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      for (QuadrupedJointName jointName : QuadrupedJointName.values)
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
