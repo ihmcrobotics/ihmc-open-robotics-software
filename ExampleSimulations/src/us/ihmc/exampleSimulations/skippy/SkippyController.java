@@ -76,15 +76,15 @@ public class SkippyController implements RobotController
       k4.set(-50.0); //-15);
 
       k5 = new DoubleYoVariable("k5", registry);
-      k5.set(-385.0);
+      k5.set(-4385.0);
       k6 = new DoubleYoVariable("k6", registry);
-      k6.set(-20);
+      k6.set(-322);
       k7 = new DoubleYoVariable("k7", registry);
-      k7.set(-6.0);
+      k7.set(-116.0);
       k8 = new DoubleYoVariable("k8", registry);
-      k8.set(-0.73);
+      k8.set(-35.73);
 
-      q_d_hip.set(-0.7);
+      q_d_hip.set(-0.3);
       q_d_shoulder.set(0.0);
 
       planarDistanceYZPlane = new DoubleYoVariable("planarDistanceYZPlane", registry);
@@ -230,7 +230,7 @@ public class SkippyController implements RobotController
       qShoulderIncludingOffset.set((shoulderAngle));
 
       //torque set
-      robot.getShoulderJoint().setTau(k5.getDoubleValue()*(0.0-angle) + k6.getDoubleValue()*(0.0 - angleVel) + k7.getDoubleValue()*(shoulderDesired-shoulderAngle) + k8.getDoubleValue()*(0.0 - shoulderAngleVel));
+      robot.getShoulderJoint().setTau(k5.getDoubleValue()*Math.sin(0.0-angle) + k6.getDoubleValue()*(0.0 - angleVel) + k7.getDoubleValue()*(shoulderDesired-shoulderAngle) + k8.getDoubleValue()*(0.0 - shoulderAngleVel));
    }
 
    private double[] calculateAnglePosAndDerOfHipJoint(PinJoint joint)
