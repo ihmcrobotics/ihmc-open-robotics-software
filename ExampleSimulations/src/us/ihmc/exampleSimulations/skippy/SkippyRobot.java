@@ -4,6 +4,7 @@ import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
@@ -88,7 +89,7 @@ public class SkippyRobot extends Robot
 
        // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
       foot = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, 0.0), this, Axis.X, Axis.Y);
-      foot.setInitialState(Math.PI/7.0, 0.0, 0.0, 0.0); // initial position "q" of foot
+      foot.setInitialState(Math.PI/7.0, 0.0, Math.PI/24, 0.0); // initial position "q" of foot
       Link leg = createLeg();
       foot.setLink(leg);
       this.addRootJoint(foot);
@@ -104,7 +105,7 @@ public class SkippyRobot extends Robot
       shoulder = new PinJoint("shoulder", new Vector3d(0.0, 0.0, TORSO_LENGTH), this, Axis.Y);
       Link arms = createArms();
       shoulder.setLink(arms);
-      shoulder.setInitialState(0.0,0.0);
+      shoulder.setInitialState(Math.PI/6,0.0);
 
       balanceForce = new ExternalForcePoint("BalanceForce", this);
       //balanceForce.setForce(0.0,0.0,0.0);

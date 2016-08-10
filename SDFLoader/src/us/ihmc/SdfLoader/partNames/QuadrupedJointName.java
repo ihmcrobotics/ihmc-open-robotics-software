@@ -29,7 +29,9 @@ public enum QuadrupedJointName
    HIND_RIGHT_HIP_PITCH,
    HIND_RIGHT_KNEE_PITCH,
    HIND_RIGHT_ANKLE_PITCH;
-
+   
+   public static final QuadrupedJointName[] values = values();
+   
    public JointRole getRole()
    {
       switch (this)
@@ -115,6 +117,8 @@ public enum QuadrupedJointName
             return FRONT_LEFT_HIP_PITCH;
          case KNEE:
             return FRONT_LEFT_KNEE_PITCH;
+         case ANKLE_PITCH:
+            return FRONT_LEFT_ANKLE_PITCH;
          }
          break;
       case FRONT_RIGHT:
@@ -126,6 +130,8 @@ public enum QuadrupedJointName
             return FRONT_RIGHT_HIP_PITCH;
          case KNEE:
             return FRONT_RIGHT_KNEE_PITCH;
+         case ANKLE_PITCH:
+            return FRONT_RIGHT_ANKLE_PITCH;
          }
          break;
       case HIND_RIGHT:
@@ -137,6 +143,8 @@ public enum QuadrupedJointName
             return HIND_RIGHT_HIP_PITCH;
          case KNEE:
             return HIND_RIGHT_KNEE_PITCH;
+         case ANKLE_PITCH:
+            return HIND_RIGHT_ANKLE_PITCH;
          }
          break;
       case HIND_LEFT:
@@ -148,6 +156,8 @@ public enum QuadrupedJointName
             return HIND_LEFT_HIP_PITCH;
          case KNEE:
             return HIND_LEFT_KNEE_PITCH;
+         case ANKLE_PITCH:
+            return HIND_LEFT_ANKLE_PITCH;
          }
          break;
       }

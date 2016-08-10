@@ -200,4 +200,9 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
       // Delay call to onEntry until beginning of next process().
       needToCallOnEntry = true;
    }
+   
+   public FiniteStateMachineState<E> getState(S state)
+   {
+      return states.get(state);
+   }
 }
