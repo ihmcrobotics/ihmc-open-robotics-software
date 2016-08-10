@@ -19,8 +19,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
    private final SimulationConstructionSet scs;
    private final SimulationTestingParameters simulationTestingParameters;
    
-   // Yo variables
-   private final DoubleYoVariable yoTime;
+   private boolean yoTimeChangedListenerActive = false;
    
    private List<YoVariableTestGoal> sustainGoals = new ArrayList<>();
    private List<YoVariableTestGoal> waypointGoals = new ArrayList<>();
@@ -38,7 +37,8 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       this.scs = scs;
       this.simulationTestingParameters = simulationTestingParameters;
       
-      yoTime = (DoubleYoVariable) scs.getVariable("t");
+      DoubleYoVariable yoTime = (DoubleYoVariable) scs.getVariable("t");
+      yoTime.addVariableChangedListener(this);
       
       scs.startOnAThread();
    }
@@ -46,48 +46,51 @@ public class GoalOrientedTestConductor implements VariableChangedListener
    @Override
    public void variableChanged(YoVariable<?> v)
    {
-      sustainGoalsNotMeeting.clear();
-      waypointGoalsNotMet.clear();
-      terminalGoalsNotMeeting.clear();
-      
-      for (int i = 0; i < sustainGoals.size(); i++)
+      if (yoTimeChangedListenerActive)
       {
-         if (!sustainGoals.get(i).currentlyMeetsGoal())
+         sustainGoalsNotMeeting.clear();
+         waypointGoalsNotMet.clear();
+         terminalGoalsNotMeeting.clear();
+         
+         for (int i = 0; i < sustainGoals.size(); i++)
          {
-            sustainGoalsNotMeeting.add(sustainGoals.get(i));
+            if (!sustainGoals.get(i).currentlyMeetsGoal())
+            {
+               sustainGoalsNotMeeting.add(sustainGoals.get(i));
+            }
          }
-      }
-      
-      for (int i = 0; i < waypointGoals.size(); i++)
-      {
-         if (!waypointGoals.get(i).hasMetGoal())
+         
+         for (int i = 0; i < waypointGoals.size(); i++)
          {
-            waypointGoalsNotMet.add(waypointGoals.get(i));
+            if (!waypointGoals.get(i).hasMetGoal())
+            {
+               waypointGoalsNotMet.add(waypointGoals.get(i));
+            }
          }
-      }
-
-      for (int i = 0; i < terminalGoals.size(); i++)
-      {
-         if (!terminalGoals.get(i).currentlyMeetsGoal())
+   
+         for (int i = 0; i < terminalGoals.size(); i++)
          {
-            terminalGoalsNotMeeting.add(terminalGoals.get(i));
+            if (!terminalGoals.get(i).currentlyMeetsGoal())
+            {
+               terminalGoalsNotMeeting.add(terminalGoals.get(i));
+            }
          }
-      }
-      
-      if (sustainGoalsNotMeeting.size() > 0)
-      {
-         createAssertionFailedException();
-         stop();
-      }
-      else if (terminalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.size() > 0)
-      {
-         createAssertionFailedException();
-         stop();
-      }
-      else if (terminalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.isEmpty())
-      {
-         createSuccessMessage();
-         stop();
+         
+         if (sustainGoalsNotMeeting.size() > 0)
+         {
+            createAssertionFailedException();
+            stop();
+         }
+         else if (terminalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.size() > 0)
+         {
+            createAssertionFailedException();
+            stop();
+         }
+         else if (terminalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.isEmpty())
+         {
+            createSuccessMessage();
+            stop();
+         }
       }
    }
    
@@ -137,7 +140,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
    
    private void stop()
    {
-      yoTime.removeVariableChangedListener(this);
+      yoTimeChangedListenerActive = false;
       
       sustainGoals.clear();
       waypointGoals.clear();
@@ -148,7 +151,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
    public void simulate() throws AssertionFailedError
    {
       assertionFailedMessage = null;
-      yoTime.addVariableChangedListener(this);
+      yoTimeChangedListenerActive = true;
       
       scs.simulate();
       
