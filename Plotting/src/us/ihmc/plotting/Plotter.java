@@ -5,11 +5,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +31,8 @@ import us.ihmc.tools.FormattingTools;
 
 public class Plotter extends JPanel
 {
+   private static final boolean SHOW_LABELS_BY_DEFAULT = false;
+   
    private static final long serialVersionUID = 3113130298799362369L;
 
    private final ArrayList<ArtifactsChangedListener> artifactsChangedListeners = new ArrayList<ArtifactsChangedListener>();
@@ -41,7 +42,7 @@ public class Plotter extends JPanel
    private static final Color TEXT_COLOR = Color.WHITE;
 
    private boolean drawHistory = false;
-   private boolean showLabels = false;
+   private boolean showLabels = SHOW_LABELS_BY_DEFAULT;
 
    private long updateDelayInMillis = 0;
    private long lastUpdate = 0;
@@ -51,12 +52,14 @@ public class Plotter extends JPanel
    private Dimension preferredSize = new Dimension(275, 275);
    private final HashMap<String, Artifact> artifacts = new HashMap<String, Artifact>();
 
+   private Rectangle visibleRectangle = new Rectangle();
+   
    private int centerX;
    private int centerY;
    private double offsetX = 0.0;
    private double offsetY = 0.0;
    private double plotRange = 20.0;
-   private double scaleFactor;
+   private double metersToPixels;
    private double upperLeftLongitude, upperLeftLatitude, lowerRightLongitude, lowerRightLatitude;
    private double selectedX = 0.0;
    private double selectedY = 0.0;
@@ -115,18 +118,18 @@ public class Plotter extends JPanel
          Graphics2D graphics2d = (Graphics2D) graphics;
 
          // get current size and determine scaling factor
-         Dimension panelSize = this.getSize();
-         int heightInPixels = (int) Math.round(panelSize.getHeight());
-         int widthInPixels = (int) Math.round(panelSize.getWidth());
+         computeVisibleRect(visibleRectangle);
+         int heightInPixels = (int) Math.round(visibleRectangle.getHeight());
+         int widthInPixels = (int) Math.round(visibleRectangle.getWidth());
          centerX = widthInPixels / 2;
          centerY = heightInPixels / 2;
-         scaleFactor = heightInPixels / plotRange;
+         metersToPixels = heightInPixels / plotRange;
 
          double headingOffset = 0.0;
 
          // set current offset
-         centerX = centerX - (int) Math.round(offsetX * scaleFactor);
-         centerY = centerY + (int) Math.round(offsetY * scaleFactor);
+         centerX = centerX - (int) Math.round(offsetX * metersToPixels);
+         centerY = centerY + (int) Math.round(offsetY * metersToPixels);
 
          // paint background
          super.paintComponent(graphics2d);
@@ -140,7 +143,7 @@ public class Plotter extends JPanel
                {
                   if (artifact.getLevel() == 86)
                   {
-                     artifact.draw(graphics2d, centerX, centerY, headingOffset, scaleFactor);
+                     artifact.draw(graphics2d, centerX, centerY, headingOffset, metersToPixels);
                   }
                }
                else
@@ -170,7 +173,7 @@ public class Plotter extends JPanel
          else
          {
             // change grid line scale from 1m to 10cm ehn below 10m
-            double interval = Math.pow(10, MathTools.orderOfMagnitude(plotRange) - 1);
+            double interval = Math.pow(10, MathTools.orderOfMagnitude(25.0 / metersToPixels) + 1);
 
             if (overrideAutomaticInterval)
             {
@@ -277,7 +280,7 @@ public class Plotter extends JPanel
                      {
                         if (artifact.getDrawHistory() && (artifact.getLevel() == i))
                         {
-                           artifact.drawHistory(graphics2d, centerX, centerY, scaleFactor);
+                           artifact.drawHistory(graphics2d, centerX, centerY, metersToPixels);
                         }
                      }
                      else
@@ -302,7 +305,7 @@ public class Plotter extends JPanel
                   {
                      if (artifact.getLevel() == i)
                      {
-                        artifact.draw(graphics2d, centerX, centerY, headingOffset, scaleFactor); // , _orientation);
+                        artifact.draw(graphics2d, centerX, centerY, headingOffset, metersToPixels); // , _orientation);
                      }
                   }
                   else
@@ -318,8 +321,8 @@ public class Plotter extends JPanel
          {
             graphics2d.setColor(Color.red);
             int xSize = 8;
-            int xX = centerX + ((int) Math.round(selectedX * scaleFactor));
-            int yX = centerY - ((int) Math.round(selectedY * scaleFactor));
+            int xX = centerX + ((int) Math.round(selectedX * metersToPixels));
+            int yX = centerY - ((int) Math.round(selectedY * metersToPixels));
             graphics2d.drawLine(xX - xSize, yX - xSize, xX + xSize, yX + xSize);
             graphics2d.drawLine(xX - xSize, yX + xSize, xX + xSize, yX - xSize);
          }
@@ -328,10 +331,10 @@ public class Plotter extends JPanel
          if (SHOW_SELECTION)
          {
             graphics2d.setColor(Color.red);
-            int areaX1Int = centerX + ((int) Math.round(area1X * scaleFactor));
-            int areaY1Int = centerY - ((int) Math.round(area1Y * scaleFactor));
-            int areaX2Int = centerX + ((int) Math.round(area2X * scaleFactor));
-            int areaY2Int = centerY - ((int) Math.round(area2Y * scaleFactor));
+            int areaX1Int = centerX + ((int) Math.round(area1X * metersToPixels));
+            int areaY1Int = centerY - ((int) Math.round(area1Y * metersToPixels));
+            int areaX2Int = centerX + ((int) Math.round(area2X * metersToPixels));
+            int areaY2Int = centerY - ((int) Math.round(area2Y * metersToPixels));
             int Xmin, Xmax, Ymin, Ymax;
             if (areaX1Int > areaX2Int)
             {
@@ -581,36 +584,14 @@ public class Plotter extends JPanel
       repaint();
    }
 
-   @SuppressWarnings("unused")
-   private Point convertCoordinates(JPanel plot, Point2D.Double pt)
-   {
-      // get current size and determine scaling factor
-      Dimension d = this.getSize();
-      int h = (int) Math.round(d.getHeight());
-      Math.round(d.getWidth());
-
-      scaleFactor = h / plotRange;
-
-      // detemine plot size
-      Dimension plotD = plot.getSize();
-      int plotH = (int) Math.round(plotD.getHeight());
-      int plotW = (int) Math.round(plotD.getWidth());
-
-      // place plot so bottom is cenetered at location
-      int xnew = (int) Math.round((pt.x * scaleFactor) - (plotW / 2));
-      int ynew = (int) Math.round((h - (pt.y * scaleFactor)) - (plotH));
-
-      return new Point(xnew, ynew);
-   }
-
    private double unConvertXCoordinate(int coordinate)
    {
-      return new Integer(coordinate - centerX).doubleValue() / scaleFactor;
+      return new Integer(coordinate - centerX).doubleValue() / metersToPixels;
    }
 
    private double unConvertYCoordinate(int coordinate)
    {
-      return new Integer((centerY - coordinate)).doubleValue() / scaleFactor;
+      return new Integer((centerY - coordinate)).doubleValue() / metersToPixels;
    }
 
    private Coordinate convertFromMetersToPixels(Coordinate coordinate)
@@ -618,9 +599,9 @@ public class Plotter extends JPanel
       double x = coordinate.getX();
       double y = coordinate.getY();
 
-      x = new Double(centerX + ((int) Math.round(x * scaleFactor))).doubleValue();
+      x = new Double(centerX + ((int) Math.round(x * metersToPixels))).doubleValue();
 
-      y = new Double(centerY - ((int) Math.round(y * scaleFactor))).doubleValue();
+      y = new Double(centerY - ((int) Math.round(y * metersToPixels))).doubleValue();
 
       return new Coordinate(x, y, Coordinate.PIXEL);
    }
@@ -630,9 +611,9 @@ public class Plotter extends JPanel
       double x = coordinate.getX();
       double y = coordinate.getY();
 
-      x = (x - new Integer(centerX).doubleValue()) / scaleFactor;
+      x = (x - new Integer(centerX).doubleValue()) / metersToPixels;
 
-      y = ((new Integer(centerY).doubleValue()) - y) / scaleFactor;
+      y = ((new Integer(centerY).doubleValue()) - y) / metersToPixels;
 
       return new Coordinate(x, y, Coordinate.METER);
    }
@@ -692,7 +673,7 @@ public class Plotter extends JPanel
 
    public void setPreferredSize(int width, int height)
    {
-      preferredSize = new Dimension(width, height);
+      preferredSize.setSize(width, height);
    }
 
    public void setDoubleClickListener(DoubleClickListener doubleClickListener)
@@ -867,7 +848,12 @@ public class Plotter extends JPanel
 
    public void showInNewWindow()
    {
-      JFrame frame = new JFrame("Plotter");
+      showInNewWindow("Plotter");
+   }
+   
+   public void showInNewWindow(String title)
+   {
+      JFrame frame = new JFrame(title);
       frame.getContentPane().add(this, BorderLayout.CENTER);
       frame.pack();
       frame.setVisible(true);
