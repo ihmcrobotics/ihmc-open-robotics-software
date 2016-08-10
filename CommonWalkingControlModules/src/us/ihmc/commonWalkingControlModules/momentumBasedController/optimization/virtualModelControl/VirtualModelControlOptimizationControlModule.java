@@ -62,8 +62,8 @@ public class VirtualModelControlOptimizationControlModule
       contactablePlaneBodies = toolbox.getContactablePlaneBodies();
 
       WrenchMatrixCalculator wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
-      groundContactForceOptimization = new GroundContactForceOptimizationControlModule(wrenchMatrixCalculator, toolbox.getMomentumOptimizationSettings(),
-            parentRegistry, toolbox.getYoGraphicsListRegistry());
+      groundContactForceOptimization = new GroundContactForceOptimizationControlModule(wrenchMatrixCalculator, contactablePlaneBodies,
+            toolbox.getMomentumOptimizationSettings(), parentRegistry, toolbox.getYoGraphicsListRegistry());
 
       double gravityZ = toolbox.getGravityZ();
 
@@ -125,7 +125,7 @@ public class VirtualModelControlOptimizationControlModule
       {
          try
          {
-            groundReactionWrenches.putAll(groundContactForceOptimization.compute());
+            groundContactForceOptimization.compute(groundReactionWrenches);
          }
          catch (NoConvergenceException e)
          {

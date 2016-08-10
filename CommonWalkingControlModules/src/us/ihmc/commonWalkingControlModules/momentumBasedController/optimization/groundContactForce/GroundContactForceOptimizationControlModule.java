@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -18,7 +19,9 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.io.printing.PrintTools;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GroundContactForceOptimizationControlModule
 {
@@ -29,6 +32,7 @@ public class GroundContactForceOptimizationControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
+   private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
 
    private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMinGCFOptimization", registry);
 
@@ -48,10 +52,11 @@ public class GroundContactForceOptimizationControlModule
    private final DenseMatrix64F momentumJacobian = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F momentumWeight = new DenseMatrix64F(Wrench.SIZE, 1);
 
-   public GroundContactForceOptimizationControlModule(WrenchMatrixCalculator wrenchMatrixCalculator, MomentumOptimizationSettings momentumOptimizationSettings,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public GroundContactForceOptimizationControlModule(WrenchMatrixCalculator wrenchMatrixCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies,
+         MomentumOptimizationSettings momentumOptimizationSettings, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.wrenchMatrixCalculator = wrenchMatrixCalculator;
+      this.contactablePlaneBodies = contactablePlaneBodies;
       int rhoSize = WholeBodyControlCoreToolbox.rhoSize;
 
       if (VISUALIZE_RHO_BASIS_VECTORS)
@@ -82,7 +87,8 @@ public class GroundContactForceOptimizationControlModule
       qpSolver.reset();
    }
 
-   public Map<RigidBody, Wrench> compute() throws NoConvergenceException
+   private Map<RigidBody, Wrench> solutionWrenches;
+   public void compute(Map<RigidBody, Wrench> groundReactionWrenchesToPack) throws NoConvergenceException
    {
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
       qpSolver.addRegularization();
@@ -123,7 +129,17 @@ public class GroundContactForceOptimizationControlModule
       if (noConvergenceException != null)
          throw noConvergenceException;
 
-      return wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
+      solutionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
+      for (int i = 0; i < contactablePlaneBodies.size(); i++)
+      {
+         RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
+         Wrench solutionWrench = solutionWrenches.get(rigidBody);
+
+         if (groundReactionWrenchesToPack.containsKey(rigidBody))
+            groundReactionWrenchesToPack.get(rigidBody).set(solutionWrench);
+         else
+            groundReactionWrenchesToPack.put(rigidBody, solutionWrench);
+      }
    }
 
    private void setupRhoTasks()
