@@ -17,6 +17,7 @@ import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueueSorter;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -51,7 +52,6 @@ public class QuadrupedTimedStepController
    private final DoubleParameter stepGoalOffsetZParameter = parameterFactory.createDouble("stepGoalOffsetZ", 0.0);
 
    // control variables
-   private final double controlDT;
    private final DoubleYoVariable timestamp;
    private final QuadrantDependentList<QuadrupedSolePositionController> solePositionController;
    private final QuadrantDependentList<QuadrupedSolePositionController.Setpoints> solePositionControllerSetpoints;
@@ -82,11 +82,10 @@ public class QuadrupedTimedStepController
    private final QuadrantDependentList<FiniteStateMachine<StepState, StepEvent>> stepStateMachine;
    private QuadrupedTimedStepTransitionCallback stepTransitionCallback;
 
-   public QuadrupedTimedStepController(QuadrantDependentList<QuadrupedSolePositionController> solePositionController, double controlDT,
-         DoubleYoVariable timestamp, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public QuadrupedTimedStepController(QuadrantDependentList<QuadrupedSolePositionController> solePositionController, DoubleYoVariable timestamp,
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       // control variables
-      this.controlDT = controlDT;
       this.timestamp = timestamp;
       this.solePositionController = solePositionController;
       this.solePositionControllerSetpoints = new QuadrantDependentList<>();
@@ -122,7 +121,7 @@ public class QuadrupedTimedStepController
          stateMachineBuilder.addTransition(StepEvent.UNLOAD, StepState.SUPPORT, StepState.UNLOAD);
          stateMachineBuilder.addTransition(StepEvent.LIFT_OFF, StepState.UNLOAD, StepState.SWING);
          stateMachineBuilder.addTransition(StepEvent.TOUCH_DOWN, StepState.SWING, StepState.LOAD);
-         stepStateMachine.set(robotQuadrant, stateMachineBuilder.build(StepState.LOAD));
+         stepStateMachine.set(robotQuadrant, stateMachineBuilder.build(StepState.SUPPORT));
       }
       stepTransitionCallback = null;
 
@@ -297,7 +296,6 @@ public class QuadrupedTimedStepController
    private class LoadState implements FiniteStateMachineState<StepEvent>
    {
       private double initialTime;
-      private double loadingRate;
       private RobotQuadrant robotQuadrant;
 
       public LoadState(RobotQuadrant robotQuadrant)
@@ -308,41 +306,26 @@ public class QuadrupedTimedStepController
       @Override
       public void onEntry()
       {
-         // reset contact pressure limits
-         if (loadDurationParameter.get() > 0.001)
-         {
-            contactForceLimits.setPressureLowerLimit(robotQuadrant, contactPressureLowerLimitParameter.get());
-            contactForceLimits.setPressureUpperLimit(robotQuadrant, contactPressureLowerLimitParameter.get());
-         }
-         else
-         {
-            contactForceLimits.setPressureLowerLimit(robotQuadrant, contactPressureLowerLimitParameter.get());
-            contactForceLimits.setPressureUpperLimit(robotQuadrant, contactPressureUpperLimitParameter.get());
-         }
-
-         // compute loading rate
-         double maximumLoad = contactPressureUpperLimitParameter.get();
-         double minimumLoad = contactPressureLowerLimitParameter.get();
-         loadingRate = Math.max((maximumLoad - minimumLoad) / Math.max(loadDurationParameter.get(), 0.001), 0.0);
          initialTime = timestamp.getDoubleValue();
       }
 
       @Override
       public StepEvent process()
       {
-         double currentTime = timestamp.getDoubleValue();
-         double loadTime = initialTime + loadDurationParameter.get();
-         if (currentTime > loadTime)
+         double elapsedTime = timestamp.getDoubleValue() - initialTime;
+         double loadDuration = Math.max(loadDurationParameter.get(), 0.001);
+
+         if (elapsedTime > loadDuration)
          {
             return StepEvent.TIMEOUT;
          }
 
          // ramp up contact pressure
-         double pressureUpperLimit = contactForceLimits.getPressureUpperLimit(robotQuadrant);
-         pressureUpperLimit = pressureUpperLimit + loadingRate * controlDT;
-         pressureUpperLimit = Math.min(pressureUpperLimit, contactPressureUpperLimitParameter.get());
+         double alpha = MathTools.clipToMinMax(Math.pow(elapsedTime / loadDuration, 2.0), 0.0, 1.0);
+         double pressureLowerLimit = alpha * contactPressureLowerLimitParameter.get();
+         double pressureUpperLimit = alpha * contactPressureUpperLimitParameter.get();
+         contactForceLimits.setPressureLowerLimit(robotQuadrant, pressureLowerLimit);
          contactForceLimits.setPressureUpperLimit(robotQuadrant, pressureUpperLimit);
-
          return null;
       }
 
@@ -364,6 +347,9 @@ public class QuadrupedTimedStepController
       @Override
       public void onEntry()
       {
+         // reset contact pressure limits
+         contactForceLimits.setPressureLowerLimit(robotQuadrant, contactPressureLowerLimitParameter.get());
+         contactForceLimits.setPressureUpperLimit(robotQuadrant, contactPressureUpperLimitParameter.get());
       }
 
       @Override
@@ -394,7 +380,7 @@ public class QuadrupedTimedStepController
 
    private class UnloadState implements FiniteStateMachineState<StepEvent>
    {
-      private double unloadingRate;
+      private double initialTime;
       private RobotQuadrant robotQuadrant;
 
       public UnloadState(RobotQuadrant robotQuadrant)
@@ -405,19 +391,15 @@ public class QuadrupedTimedStepController
       @Override
       public void onEntry()
       {
-         // reset contact pressure limits
-         contactForceLimits.setPressureLowerLimit(robotQuadrant, contactPressureLowerLimitParameter.get());
-         contactForceLimits.setPressureUpperLimit(robotQuadrant, contactPressureUpperLimitParameter.get());
-
-         // compute unloading rate
-         double maximumLoad = contactPressureUpperLimitParameter.get();
-         double minimumLoad = contactPressureLowerLimitParameter.get();
-         unloadingRate = Math.max((maximumLoad - minimumLoad) / Math.max(unloadDurationParameter.get(), 0.001), 0.0);
+         initialTime = timestamp.getDoubleValue();
       }
 
       @Override
       public StepEvent process()
       {
+         double elapsedTime = timestamp.getDoubleValue() - initialTime;
+         double unloadDuration = unloadDurationParameter.get();
+
          QuadrupedTimedStep timedStep = getCurrentStep(robotQuadrant);
          if (timedStep != null)
          {
@@ -438,11 +420,11 @@ public class QuadrupedTimedStepController
          }
 
          // ramp up contact pressure
-         double pressureUpperLimit = contactForceLimits.getPressureUpperLimit(robotQuadrant);
-         pressureUpperLimit = pressureUpperLimit - unloadingRate * controlDT;
-         pressureUpperLimit = Math.max(pressureUpperLimit, contactPressureLowerLimitParameter.get());
+         double alpha = MathTools.clipToMinMax(1.0 - Math.pow(elapsedTime / unloadDuration, 0.5), 0.0, 1.0);
+         double pressureLowerLimit = alpha * contactPressureLowerLimitParameter.get();
+         double pressureUpperLimit = alpha * contactPressureUpperLimitParameter.get();
+         contactForceLimits.setPressureLowerLimit(robotQuadrant, pressureLowerLimit);
          contactForceLimits.setPressureUpperLimit(robotQuadrant, pressureUpperLimit);
-
          return null;
       }
 
