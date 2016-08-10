@@ -180,7 +180,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public boolean enableIMUBiasCompensation()
    {
-      return false;
+      return true;
    }
 
    @Override
