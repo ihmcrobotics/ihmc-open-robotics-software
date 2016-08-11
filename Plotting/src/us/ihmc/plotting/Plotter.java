@@ -64,19 +64,9 @@ public class Plotter extends JPanel
    private PlotterPoint upperLeftCorner = new PlotterPoint(transform);
    private PlotterPoint lowerRightCorner = new PlotterPoint(transform);
    private PlotterPoint selected = new PlotterPoint(transform);
-   
-   // rectangle area selection
-   private double area1X = 0.0;
-   private double area1Y = 0.0;
-   private double area2X = 0.0;
-   private double area2Y = 0.0;
-   private double area1XTemp = 0.0;
-   private double area1YTemp = 0.0;
+   private PlotterPoint selectionAreaStart = new PlotterPoint(transform);
+   private PlotterPoint selectionAreaEnd = new PlotterPoint(transform);
 
-   // drag tracking
-   private int buttonPressed;
-   private int dragStartY;
-   // double click listener
    private DoubleClickListener doubleClickListener;
 
    private PolygonArtifact polygonArtifact;
@@ -329,31 +319,27 @@ public class Plotter extends JPanel
          if (SHOW_SELECTION)
          {
             graphics2d.setColor(Color.red);
-            int areaX1Int = center.getInPixelsX() + transform.scaleMetersToPixels(area1X);
-            int areaY1Int = center.getInPixelsY() - transform.scaleMetersToPixels(area1Y);
-            int areaX2Int = center.getInPixelsX() + transform.scaleMetersToPixels(area2X);
-            int areaY2Int = center.getInPixelsY() - transform.scaleMetersToPixels(area2Y);
             int Xmin, Xmax, Ymin, Ymax;
-            if (areaX1Int > areaX2Int)
+            if (selectionAreaStart.getInPixelsX() > selectionAreaEnd.getInPixelsX())
             {
-               Xmax = areaX1Int;
-               Xmin = areaX2Int;
+               Xmax = selectionAreaStart.getInPixelsX();
+               Xmin = selectionAreaEnd.getInPixelsX();
             }
             else
             {
-               Xmax = areaX2Int;
-               Xmin = areaX1Int;
+               Xmax = selectionAreaEnd.getInPixelsX();
+               Xmin = selectionAreaStart.getInPixelsX();
             }
 
-            if (areaY1Int > areaY2Int)
+            if (selectionAreaStart.getInPixelsY() > selectionAreaEnd.getInPixelsY())
             {
-               Ymax = areaY1Int;
-               Ymin = areaY2Int;
+               Ymax = selectionAreaStart.getInPixelsY();
+               Ymin = selectionAreaEnd.getInPixelsY();
             }
             else
             {
-               Ymax = areaY2Int;
-               Ymin = areaY1Int;
+               Ymax = selectionAreaEnd.getInPixelsY();
+               Ymin = selectionAreaStart.getInPixelsY();
             }
 
             graphics2d.drawRect(Xmin, Ymin, (Xmax - Xmin), (Ymax - Ymin));
@@ -549,22 +535,22 @@ public class Plotter extends JPanel
 
    public double getArea1X()
    {
-      return area1X;
+      return selectionAreaStart.getInMetersX();
    }
 
    public double getArea1Y()
    {
-      return area1Y;
+      return selectionAreaStart.getInMetersY();
    }
 
    public double getArea2X()
    {
-      return area2X;
+      return selectionAreaEnd.getInMetersX();
    }
 
    public double getArea2Y()
    {
-      return area2Y;
+      return selectionAreaEnd.getInMetersY();
    }
 
    public ArrayList<Point2d> getPolygon()
@@ -747,6 +733,9 @@ public class Plotter extends JPanel
    
    private class PlotterMouseListener extends MouseInputAdapter
    {
+      private int buttonPressed;
+      private int dragStartY;
+      
       @Override
       public void mouseClicked(MouseEvent e)
       {
@@ -766,6 +755,7 @@ public class Plotter extends JPanel
          if (buttonPressed == MouseEvent.BUTTON1)
          {
             selected.setInPixels(e.getX(), e.getY());
+            selectionAreaStart.setInPixels(e.getX(), e.getY());
          }
          else if (buttonPressed == MouseEvent.BUTTON3)
          {
@@ -805,10 +795,7 @@ public class Plotter extends JPanel
       {
          if (buttonPressed == MouseEvent.BUTTON1)
          {
-            area1X = area1XTemp;
-            area1Y = area1YTemp;
-            area2X = unConvertXCoordinate(e.getX());
-            area2Y = unConvertYCoordinate(e.getY());
+            selectionAreaEnd.setInPixels(e.getX(), e.getY());
          }
          else if (buttonPressed == MouseEvent.BUTTON3)
          {
