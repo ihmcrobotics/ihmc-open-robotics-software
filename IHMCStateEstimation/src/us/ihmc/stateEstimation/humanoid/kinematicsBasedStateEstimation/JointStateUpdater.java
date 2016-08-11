@@ -1,5 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -31,6 +32,10 @@ public class JointStateUpdater
    private OneDoFJoint[] oneDoFJoints;
    private final SensorOutputMapReadOnly sensorMap;
    private final IMUBasedJointVelocityEstimator iMUBasedJointVelocityEstimator;
+
+   private HeadIMUSubscriber headIMUSubscriber = null;
+   private final IMUPacket imuPacket = new IMUPacket();
+   private final BooleanYoVariable recievedHeadIMUPacket = new BooleanYoVariable("RecievedHeadIMUPacket", registry);
 
    private final BooleanYoVariable enableIMUBasedJointVelocityEstimator = new BooleanYoVariable("enableIMUBasedJointVelocityEstimator", registry);
 
@@ -97,12 +102,12 @@ public class JointStateUpdater
          {
             PrintTools.warn("Pelvis IMU is null.");
          }
-         
+
          if(chestIMU == null)
          {
             PrintTools.warn("Pelvis IMU is null.");
          }
-         
+
          return null;
       }
    }
@@ -114,6 +119,12 @@ public class JointStateUpdater
 
    public void updateJointState()
    {
+      // TODO: use this IMU measurement on Atlas to correct the back joint velocities.
+      if (headIMUSubscriber != null && headIMUSubscriber.getPacket(imuPacket))
+         recievedHeadIMUPacket.set(true);
+      else
+         recievedHeadIMUPacket.set(false);
+
       if (iMUBasedJointVelocityEstimator != null)
       {
          iMUBasedJointVelocityEstimator.compute();
@@ -127,7 +138,7 @@ public class JointStateUpdater
          double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);
          double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
          boolean jointEnabledIndicator = sensorMap.isJointEnabled(oneDoFJoint);
-         
+
          oneDoFJoint.setQ(positionSensorData);
          oneDoFJoint.setEnabled(jointEnabledIndicator);
 
@@ -145,5 +156,10 @@ public class JointStateUpdater
       rootBody.updateFramesRecursively();
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
+   }
+
+   public void addHeadIMUSubscriber(HeadIMUSubscriber headIMUSubscriber)
+   {
+      this.headIMUSubscriber = headIMUSubscriber;
    }
 }
