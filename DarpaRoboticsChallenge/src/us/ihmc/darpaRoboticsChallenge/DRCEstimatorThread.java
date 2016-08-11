@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFoo
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
+import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
@@ -62,6 +63,7 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.HeadIMUSubscriber;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -135,11 +137,21 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
       sensorRawOutputMapReadOnly = sensorReader.getSensorRawOutputMapReadOnly();
+
       if (sensorReaderFactory.useStateEstimator())
       {
          drcStateEstimator = createStateEstimator(estimatorFullRobotModel, sensorInformation, sensorOutputMapReadOnly, gravity, stateEstimatorParameters,
                contactPointParameters, forceSensorDataHolderForEstimator, contactSensorHolder, centerOfPressureDataHolderFromController,
                robotMotionStatusFromController, yoGraphicsListRegistry, estimatorRegistry);
+
+         String headIMUName = sensorInformation.getHeadIMUName();
+         IMUDefinition imuDefinition = null;
+         if (headIMUName != null)
+         {
+            for (IMUDefinition definition : imuDefinitions)
+               if (definition.getName().equals(headIMUName))
+                  imuDefinition = definition;
+         }
 
          if (globalDataProducer != null)
          {
@@ -150,6 +162,15 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
             drcStateEstimator.setOperatingModeSubscriber(stateEstimatorModeSubscriber);
             drcStateEstimator.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
+
+            if (imuDefinition != null)
+            {
+               HeadIMUSubscriber headIMUSubscriber = new HeadIMUSubscriber(imuDefinition, null);
+               dataProducer.attachListener(IMUPacket.class, headIMUSubscriber);
+               drcStateEstimator.setHeadIMUSubscriber(headIMUSubscriber);
+            }
+            else
+               System.err.println("Did not find IMU definition for: " + headIMUName);
          }
 
          estimatorController.addRobotController(drcStateEstimator);
@@ -232,7 +253,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          sensorReader.read();
 
          estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
-         
+
          if(globalDataProducer != null)
          {
             globalDataProducer.setRobotTime(estimatorTime.getLongValue());
@@ -319,7 +340,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
       Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
@@ -330,7 +351,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          //         double footSwitchCoPThresholdFraction = 0.01;
          double footSwitchCoPThresholdFraction = stateEstimatorParameters.getFootSwitchCoPThresholdFraction();
          double contactThresholdForce = stateEstimatorParameters.getContactThresholdForce();
-         
+
          RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
          bipedFeetMap.put(foot, bipedFeet.get(robotSide));
 
@@ -359,7 +380,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          }
 
       }
-    
+
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
 
       // Create the sensor readers and state estimator here:
@@ -397,6 +418,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    {
       if (drcStateEstimator != null)
          drcStateEstimator.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+   }
+
+   public void setHeadIMUSubscriber(HeadIMUSubscriber headIMUSubscriber)
+   {
+      if (drcStateEstimator != null)
+         drcStateEstimator.setHeadIMUSubscriber(headIMUSubscriber);
    }
 
    public List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()

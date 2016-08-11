@@ -45,7 +45,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = true;
 
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
-   
+
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final DoubleYoVariable yoTime = new DoubleYoVariable("t_stateEstimator", registry);
@@ -137,7 +137,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       {
          pelvisRotationalStateUpdater = null;
       }
-      
+
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, footSwitches, centerOfPressureDataHolderFromController, feet, gravitationalAcceleration, yoTime,
             stateEstimatorParameters, yoGraphicsListRegistry, registry);
 
@@ -406,5 +406,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public ForceSensorCalibrationModule getForceSensorCalibrationModule()
    {
       return forceSensorStateUpdater;
+   }
+
+   public void setHeadIMUSubscriber(HeadIMUSubscriber headIMUSubscriber)
+   {
+      jointStateUpdater.addHeadIMUSubscriber(headIMUSubscriber);
    }
 }
