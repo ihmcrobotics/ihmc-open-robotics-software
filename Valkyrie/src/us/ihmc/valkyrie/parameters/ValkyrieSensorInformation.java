@@ -29,7 +29,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    public static final String[] forceSensorNames;
    private static final SideDependentList<String> feetForceSensorNames;
    private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTranformsForRos = new ArrayList<ImmutableTriple<String,String,RigidBodyTransform>>();
-  
+
    static
    {
       feetForceSensorNames = new SideDependentList<String>("leftAnkleRoll", "rightAnkleRoll");
@@ -76,7 +76,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       contactSensors.get(RobotSide.RIGHT).put("rightAnkleRoll",new LinkedHashMap<String,ContactSensorType>());
       contactSensors.get(RobotSide.RIGHT).get("rightAnkleRoll").put(footContactSensorNames.get(RobotSide.RIGHT), ContactSensorType.SOLE);
 
-      //@TODO Need a bit more work before multiple contact sensors can be added to a single rigid body.      
+      //@TODO Need a bit more work before multiple contact sensors can be added to a single rigid body.
 //      contactSensors.get(RobotSide.RIGHT).get("RightAnkle").put("RightToeContactSensor", ContactSensorType.TOE);
 //      contactSensors.get(RobotSide.RIGHT).get("RightAnkle").put("RightHeelContactSensor", ContactSensorType.HEEL);
    }
@@ -141,7 +141,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String lidarBaseFrame = multisense_namespace + "/head_root";
    private static final String lidarEndFrame = "/head_hokuyo_frame";
    private static final String baseTfName = "upperNeckPitchLink";
-   
+
    private ImmutableTriple<String, String, RigidBodyTransform> neckToLeftCameraTransform = new ImmutableTriple<>(baseTfName, multisense_namespace + "left_camera_optical_frame", new RigidBodyTransform(new Quat4d(0.997858923235, -4.00478664636e-18, -0.0654031292802, -6.1101236817e-17), new Vector3d(0.183847013385, -0.035, 0.0773367157227)));
    private ImmutableTriple<String, String, RigidBodyTransform> neckToRightCameraTransform = new ImmutableTriple<>(baseTfName, multisense_namespace + "left_camera_optical_frame", new RigidBodyTransform(new Quat4d(0.997858923235, -4.00478664636e-18, -0.0654031292802, -6.1101236817e-17), new Vector3d(0.183847013385, 0.035, 0.0773367157227)));
 
@@ -163,7 +163,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 
       /* Unit B: imuUSBSerialIds.put(rearPelvisIMUSensor, 623347094); */
       /* Unit B: imuUSBSerialIds.put(middlePelvisIMUSensor, 623347092); */
-	   
+
 	   /*Unit C:*/ imuUSBSerialIds.put(rearPelvisIMUSensor, 422047095);
 	   /*Unit C:*/ imuUSBSerialIds.put(middlePelvisIMUSensor, 422047093);
 	   /*Unit C:*/ imuUSBSerialIds.put(leftTrunkIMUSensor, 623347099);
@@ -372,5 +372,12 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       ImmutableTriple<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new ImmutableTriple<String, String, RigidBodyTransform>("upperNeckPitchLink", "multisense/head_root",
             staticTransform);
       staticTranformsForRos.add(headToHeadRootStaticTransform);
+   }
+
+   @Override
+   public String getHeadIMUName()
+   {
+      // TODO Auto-generated method stub
+      return null;
    }
 }
