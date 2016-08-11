@@ -9,6 +9,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 import javax.vecmath.Point3d;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SCSPointCloudVisualizer implements RewoundListener
 {
@@ -25,7 +26,7 @@ public class SCSPointCloudVisualizer implements RewoundListener
 
    }
 
-   public void addPoints(ArrayList<Point3d> points)
+   public void addPoints(List<Point3d> points)
    {
       if(!disableGraphics)
       {
