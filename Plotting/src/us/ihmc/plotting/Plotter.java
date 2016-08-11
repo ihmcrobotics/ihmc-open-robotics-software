@@ -77,10 +77,10 @@ public class Plotter extends JPanel
    public Plotter()
    {
       // Initialize class variables
-      this.setDoubleBuffered(true);
+      setDoubleBuffered(true);
 
       // Set LayoutManager to null
-      this.setLayout(null);
+      setLayout(null);
 
       // simpane
       Border raisedBevel = BorderFactory.createRaisedBevelBorder();
@@ -91,8 +91,8 @@ public class Plotter extends JPanel
       super.setBackground(new Color(180, 220, 240));
 
       PlotterMouseListener myListener = new PlotterMouseListener();
-      this.addMouseListener(myListener);
-      this.addMouseMotionListener(myListener);
+      addMouseListener(myListener);
+      addMouseMotionListener(myListener);
       
       addComponentListener(new ComponentAdapter()
       {
@@ -165,79 +165,71 @@ public class Plotter extends JPanel
          else
          {
             // change grid line scale from 1m to 10cm ehn below 10m
-            double interval = Math.pow(10, MathTools.orderOfMagnitude(transform.scalePixelsToMeters(25)) + 1);
+            double gridSize = Math.pow(10, MathTools.orderOfMagnitude(transform.scalePixelsToMeters(25)) + 1);
 
             if (overrideAutomaticInterval)
             {
-               interval = manualOverideInterval;
+               gridSize = manualOverideInterval;
             }
-
-            // paint grid lines
-//            Coordinate upperLeftCoodinate = convertFromPixelsToMeters(new Coordinate(0, 0, Coordinate.PIXEL));
-//            Coordinate lowerRightCoordinate = convertFromPixelsToMeters(new Coordinate(visibleRectangle.getWidth(), visibleRectangle.getHeight(), Coordinate.PIXEL));
-
-//            double upperLeftCoordinateX = upperLeftCoodinate.getX();
-//            double lowerRightCoordinateX = lowerRightCoordinate.getX();
-//            double deltaX = lowerRightCoordinateX - upperLeftCoordinateX;
-            int numberOfGridLinesX = (int) Math.round(Math.ceil((int) visibleRectangle.getWidth() / interval));
-            int xCountOffset = (int) Math.floor(upperLeftCorner.getInMetersX() / interval);
-            double minXforPlotting = xCountOffset * interval;
-
-            for (int i = 0; i < numberOfGridLinesX; i++)
+            
+            double overShoot = upperLeftCorner.getInMetersX() % gridSize;
+            for (double gridX = upperLeftCorner.getInMetersX() - overShoot; gridX < lowerRightCorner.getInMetersX(); gridX += gridSize)
             {
-               double distance = minXforPlotting + (i * interval);
-
-               if ((i + xCountOffset) % 10 == 0)
+               int nthGridLineFromOrigin = (int) Math.abs(gridX / gridSize);
+               
+               if (nthGridLineFromOrigin % 10 == 0)
+               {
                   graphics2d.setColor(new Color(180, 190, 210));
-               else if ((i + xCountOffset) % 5 == 0)
+               }
+               else if (nthGridLineFromOrigin % 5 == 0)
+               {
                   graphics2d.setColor(new Color(180, 210, 230));
+               }
                else
+               {
                   graphics2d.setColor(new Color(230, 240, 250));
-
-               // get pixel from meter for positive
-               Coordinate coord = convertFromMetersToPixels(new Coordinate(distance, distance, Coordinate.METER));
-               int x = (int) Math.round(coord.getX());
+               }
 
                // draw line
+               int x = transform.transformMetersToPixelsX(gridX);
                graphics2d.drawLine(x, 0, x, (int) visibleRectangle.getHeight());
                
                if (showLabels)
                {
                   Color tempColor = graphics2d.getColor();
                   graphics2d.setColor(TEXT_COLOR);
-                  graphics2d.drawString(FormattingTools.getFormattedToSignificantFigures(distance, 2), x + 1, (int) visibleRectangle.getHeight() / 2 - 1);
+                  graphics2d.drawString(FormattingTools.getFormattedToSignificantFigures(gridX, 2), x + 1, center.getInPixelsY() - 1);
                   graphics2d.setColor(tempColor);
                }
             }
 
-            double lowerRightCoordinateY = lowerRightCorner.getInMetersY();
-            double upperLeftCoordinateY = upperLeftCorner.getInMetersY();
-            double deltaY = upperLeftCoordinateY - lowerRightCoordinateY;
-            int numberOfGridLinesY = (int) Math.round(Math.ceil(deltaY / interval));
-            int yCountOffset = (int) Math.floor(lowerRightCoordinateY / interval);
-            double minYforPlotting = yCountOffset * interval;
-            
-            for (int i = 0; i < numberOfGridLinesY; i++)
+            overShoot = lowerRightCorner.getInMetersY() % gridSize;
+            for (double gridY = lowerRightCorner.getInMetersY() - overShoot; gridY < upperLeftCorner.getInMetersY(); gridY += gridSize)
             {
-               double distance = minYforPlotting + (i * interval);
-
-               if ((i + yCountOffset) % 10 == 0)
+               int nthGridLineFromOrigin = (int) Math.abs(gridY / gridSize);
+               
+               if (nthGridLineFromOrigin % 10 == 0)
+               {
                   graphics2d.setColor(new Color(180, 190, 210));
-               else if ((i + yCountOffset) % 5 == 0)
+               }
+               else if (nthGridLineFromOrigin % 5 == 0)
+               {
                   graphics2d.setColor(new Color(180, 210, 230));
+               }
                else
+               {
                   graphics2d.setColor(new Color(230, 240, 250));
-
-               int y = transform.transformMetersToPixelsY(distance);
+               }
 
                // draw line
+               int y = transform.transformMetersToPixelsY(gridY);
                graphics2d.drawLine(0, y, (int) visibleRectangle.getWidth(), y);
                
                if (showLabels)
                {
                   Color tempColor = graphics2d.getColor();
                   graphics2d.setColor(TEXT_COLOR);
-                  graphics2d.drawString(FormattingTools.getFormattedToSignificantFigures(distance, 2), (int) visibleRectangle.getWidth() / 2 + 1, y - 1);
+                  graphics2d.drawString(FormattingTools.getFormattedToSignificantFigures(gridY, 2), center.getInPixelsX() + 1, y - 1);
                   graphics2d.setColor(tempColor);
                }
             }
@@ -566,16 +558,6 @@ public class Plotter extends JPanel
       this.removeArtifactsStartingWith("polygon");
       polygonArtifact = null;
       repaint();
-   }
-
-   private double unConvertXCoordinate(int coordinate)
-   {
-      return transform.scalePixelsToMeters(coordinate - center.getInPixelsX());
-   }
-
-   private double unConvertYCoordinate(int coordinate)
-   {
-      return transform.scalePixelsToMeters(center.getInPixelsY() - coordinate);
    }
 
    private Coordinate convertFromMetersToPixels(Coordinate coordinate)
