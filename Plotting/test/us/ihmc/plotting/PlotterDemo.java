@@ -19,6 +19,9 @@ public class PlotterDemo
       plotter.addArtifact(new LineArtifact("03", new Point2d(2, 0), new Point2d(3, 1)));
       
       plotter.showInNewWindow();
+      
+//      plotter.setOffsetX(2.5);
+//      plotter.setOffsetY(-6.0);
    }
    
    public static void main(String[] args)

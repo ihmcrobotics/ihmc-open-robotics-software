@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -20,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.event.MouseInputAdapter;
 import javax.vecmath.Point2d;
+import javax.vecmath.Point2i;
 
 import us.ihmc.plotting.shapes.LineArtifact;
 import us.ihmc.plotting.shapes.PointArtifact;
@@ -38,7 +41,7 @@ public class Plotter extends JPanel
    private final ArrayList<ArtifactsChangedListener> artifactsChangedListeners = new ArrayList<ArtifactsChangedListener>();
 
    // show selections
-   private static final boolean SHOW_SELECTION = false;
+   private static final boolean SHOW_SELECTION = true;
    private static final Color TEXT_COLOR = Color.WHITE;
 
    private boolean drawHistory = false;
@@ -52,20 +55,16 @@ public class Plotter extends JPanel
    private Dimension preferredSize = new Dimension(275, 275);
    private final HashMap<String, Artifact> artifacts = new HashMap<String, Artifact>();
 
-   private Rectangle visibleRectangle = new Rectangle();
-   
+   private Rectangle visibleRectangle = new Rectangle(275, 275);
    private PlotterTransform transform = new PlotterTransform();
-   
-   private int centerX;
-   private int centerY;
-   private double offsetX = 0.0;
-   private double offsetY = 0.0;
+   private Point2i centerOfPanelToMetersOriginInPixels = new Point2i();
    private double plotRange = 20.0;
-//   private double metersToPixels;
-   private double upperLeftLongitude, upperLeftLatitude, lowerRightLongitude, lowerRightLatitude;
-   private double selectedX = 0.0;
-   private double selectedY = 0.0;
-
+   
+   private PlotterPoint center = new PlotterPoint(transform);
+   private PlotterPoint upperLeftCorner = new PlotterPoint(transform);
+   private PlotterPoint lowerRightCorner = new PlotterPoint(transform);
+   private PlotterPoint selected = new PlotterPoint(transform);
+   
    // rectangle area selection
    private double area1X = 0.0;
    private double area1Y = 0.0;
@@ -104,6 +103,30 @@ public class Plotter extends JPanel
       PlotterMouseListener myListener = new PlotterMouseListener();
       this.addMouseListener(myListener);
       this.addMouseMotionListener(myListener);
+      
+      addComponentListener(new ComponentAdapter()
+      {
+         @Override
+         public void componentShown(ComponentEvent e)
+         {
+            updateTransform();
+         }
+         
+         @Override
+         public void componentResized(ComponentEvent e)
+         {
+            updateTransform();
+         }
+      });
+   }
+   
+   private void updateTransform()
+   {
+      // get current size and determine scaling factor
+      computeVisibleRect(visibleRectangle);
+      double smallerDimension = visibleRectangle.getHeight() <= visibleRectangle.getWidth() ? visibleRectangle.getHeight() : visibleRectangle.getWidth();
+      transform.setMetersToPixels(smallerDimension / plotRange);
+      transform.setPixelOriginToMetersOriginInPixels((int) (visibleRectangle.getWidth() / 2.0) + centerOfPanelToMetersOriginInPixels.getX(), (int) (visibleRectangle.getHeight() / 2.0) + centerOfPanelToMetersOriginInPixels.getY());
    }
 
    @Override
@@ -114,21 +137,11 @@ public class Plotter extends JPanel
       {
          Graphics2D graphics2d = (Graphics2D) graphics;
 
-         // get current size and determine scaling factor
-         computeVisibleRect(visibleRectangle);
-         int heightInPixels = (int) Math.round(visibleRectangle.getHeight());
-         int widthInPixels = (int) Math.round(visibleRectangle.getWidth());
-         centerX = widthInPixels / 2;
-         centerY = heightInPixels / 2;
+         center.setInMeters(0.0, 0.0);
+         upperLeftCorner.setInPixels(0, 0);
+         lowerRightCorner.setInPixels((int) visibleRectangle.getWidth(), (int) visibleRectangle.getHeight());
          
-         double smallerDimension = visibleRectangle.getHeight() <= visibleRectangle.getWidth() ? visibleRectangle.getHeight() : visibleRectangle.getWidth();
-         transform.setMetersToPixels(smallerDimension / plotRange);
-
          double headingOffset = 0.0;
-
-         // set current offset
-         centerX = centerX - transform.transformMetersToPixels(offsetX);
-         centerY = centerY + transform.transformMetersToPixels(offsetY);
 
          // paint background
          super.paintComponent(graphics2d);
@@ -142,7 +155,7 @@ public class Plotter extends JPanel
                {
                   if (artifact.getLevel() == 86)
                   {
-                     artifact.draw(graphics2d, centerX, centerY, headingOffset, transform.getMetersToPixels());
+                     artifact.draw(graphics2d, center.getInPixelsX(), center.getInPixelsY(), headingOffset, transform.getMetersToPixels());
                   }
                }
                else
@@ -157,22 +170,12 @@ public class Plotter extends JPanel
          // center the zoomed in area.
          if (backgroundImage != null)
          {
-            Coordinate upperLeft = new Coordinate(upperLeftLongitude, upperLeftLatitude, Coordinate.METER);
-            Coordinate lowerRight = new Coordinate(lowerRightLongitude, lowerRightLatitude, Coordinate.METER);
-            Coordinate upperLeftPixels = convertFromMetersToPixels(upperLeft);
-            Coordinate lowerRightPixels = convertFromMetersToPixels(lowerRight);
-
-            int upperLeftX = (int) upperLeftPixels.getX();
-            int upperLeftY = (int) upperLeftPixels.getY();
-            int lowerRightX = (int) lowerRightPixels.getX();
-            int lowerRightY = (int) lowerRightPixels.getY();
-
-            graphics2d.drawImage(backgroundImage, upperLeftX, upperLeftY, lowerRightX, lowerRightY, 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight(), this);
+            graphics2d.drawImage(backgroundImage, upperLeftCorner.getInPixelsX(), upperLeftCorner.getInPixelsY(), lowerRightCorner.getInPixelsX(), lowerRightCorner.getInPixelsY(), 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight(), this);
          }
          else
          {
             // change grid line scale from 1m to 10cm ehn below 10m
-            double interval = Math.pow(10, MathTools.orderOfMagnitude(transform.transformPixelsToMeters(25)) + 1);
+            double interval = Math.pow(10, MathTools.orderOfMagnitude(transform.scalePixelsToMeters(25)) + 1);
 
             if (overrideAutomaticInterval)
             {
@@ -180,14 +183,14 @@ public class Plotter extends JPanel
             }
 
             // paint grid lines
-            Coordinate upperLeftCoodinate = convertFromPixelsToMeters(new Coordinate(0, 0, Coordinate.PIXEL));
-            Coordinate lowerRightCoordinate = convertFromPixelsToMeters(new Coordinate(widthInPixels, heightInPixels, Coordinate.PIXEL));
+//            Coordinate upperLeftCoodinate = convertFromPixelsToMeters(new Coordinate(0, 0, Coordinate.PIXEL));
+//            Coordinate lowerRightCoordinate = convertFromPixelsToMeters(new Coordinate(visibleRectangle.getWidth(), visibleRectangle.getHeight(), Coordinate.PIXEL));
 
-            double upperLeftCoordinateX = upperLeftCoodinate.getX();
-            double lowerRightCoordinateX = lowerRightCoordinate.getX();
-            double deltaX = lowerRightCoordinateX - upperLeftCoordinateX;
-            int numberOfGridLinesX = (int) Math.round(Math.ceil(deltaX / interval));
-            int xCountOffset = (int) Math.floor(upperLeftCoordinateX / interval);
+//            double upperLeftCoordinateX = upperLeftCoodinate.getX();
+//            double lowerRightCoordinateX = lowerRightCoordinate.getX();
+//            double deltaX = lowerRightCoordinateX - upperLeftCoordinateX;
+            int numberOfGridLinesX = (int) Math.round(Math.ceil((int) visibleRectangle.getWidth() / interval));
+            int xCountOffset = (int) Math.floor(upperLeftCorner.getInMetersX() / interval);
             double minXforPlotting = xCountOffset * interval;
 
             for (int i = 0; i < numberOfGridLinesX; i++)
@@ -206,24 +209,24 @@ public class Plotter extends JPanel
                int x = (int) Math.round(coord.getX());
 
                // draw line
-               graphics2d.drawLine(x, 0, x, heightInPixels);
+               graphics2d.drawLine(x, 0, x, (int) visibleRectangle.getHeight());
                
                if (showLabels)
                {
                   Color tempColor = graphics2d.getColor();
                   graphics2d.setColor(TEXT_COLOR);
-                  graphics2d.drawString(FormattingTools.getFormattedToSignificantFigures(distance, 2), x + 1, heightInPixels / 2 - 1);
+                  graphics2d.drawString(FormattingTools.getFormattedToSignificantFigures(distance, 2), x + 1, (int) visibleRectangle.getHeight() / 2 - 1);
                   graphics2d.setColor(tempColor);
                }
             }
 
-            double lowerRightCoordinateY = lowerRightCoordinate.getY();
-            double upperLeftCoordinateY = upperLeftCoodinate.getY();
+            double lowerRightCoordinateY = lowerRightCorner.getInMetersY();
+            double upperLeftCoordinateY = upperLeftCorner.getInMetersY();
             double deltaY = upperLeftCoordinateY - lowerRightCoordinateY;
             int numberOfGridLinesY = (int) Math.round(Math.ceil(deltaY / interval));
             int yCountOffset = (int) Math.floor(lowerRightCoordinateY / interval);
             double minYforPlotting = yCountOffset * interval;
-
+            
             for (int i = 0; i < numberOfGridLinesY; i++)
             {
                double distance = minYforPlotting + (i * interval);
@@ -235,18 +238,16 @@ public class Plotter extends JPanel
                else
                   graphics2d.setColor(new Color(230, 240, 250));
 
-               // get pixel from meter for positive
-               Coordinate coord = convertFromMetersToPixels(new Coordinate(distance, distance, Coordinate.METER));
-               int y = (int) Math.round(coord.getY());
+               int y = transform.transformMetersToPixelsY(distance);
 
                // draw line
-               graphics2d.drawLine(0, y, widthInPixels, y);
+               graphics2d.drawLine(0, y, (int) visibleRectangle.getWidth(), y);
                
                if (showLabels)
                {
                   Color tempColor = graphics2d.getColor();
                   graphics2d.setColor(TEXT_COLOR);
-                  graphics2d.drawString(FormattingTools.getFormattedToSignificantFigures(distance, 2), widthInPixels / 2 + 1, y - 1);
+                  graphics2d.drawString(FormattingTools.getFormattedToSignificantFigures(distance, 2), (int) visibleRectangle.getWidth() / 2 + 1, y - 1);
                   graphics2d.setColor(tempColor);
                }
             }
@@ -261,8 +262,8 @@ public class Plotter extends JPanel
          int y0 = (int) Math.round(coord.getY());
 
          // draw line
-         graphics2d.drawLine(x0, 0, x0, heightInPixels);
-         graphics2d.drawLine(0, y0, widthInPixels, y0);
+         graphics2d.drawLine(x0, 0, x0, (int) visibleRectangle.getHeight());
+         graphics2d.drawLine(0, y0, (int) visibleRectangle.getWidth(), y0);
 
          // Paint all artifacts history by level
          // (assumes 5 levels (0-4)
@@ -279,7 +280,7 @@ public class Plotter extends JPanel
                      {
                         if (artifact.getDrawHistory() && (artifact.getLevel() == i))
                         {
-                           artifact.drawHistory(graphics2d, centerX, centerY, transform.getMetersToPixels());
+                           artifact.drawHistory(graphics2d, center.getInPixelsX(), center.getInPixelsY(), transform.getMetersToPixels());
                         }
                      }
                      else
@@ -304,7 +305,7 @@ public class Plotter extends JPanel
                   {
                      if (artifact.getLevel() == i)
                      {
-                        artifact.draw(graphics2d, centerX, centerY, headingOffset, transform.getMetersToPixels()); // , _orientation);
+                        artifact.draw(graphics2d, center.getInPixelsX(), center.getInPixelsY(), headingOffset, transform.getMetersToPixels()); // , _orientation);
                      }
                   }
                   else
@@ -320,20 +321,18 @@ public class Plotter extends JPanel
          {
             graphics2d.setColor(Color.red);
             int xSize = 8;
-            int xX = centerX + transform.transformMetersToPixels(selectedX);
-            int yX = centerY - transform.transformMetersToPixels(selectedY);
-            graphics2d.drawLine(xX - xSize, yX - xSize, xX + xSize, yX + xSize);
-            graphics2d.drawLine(xX - xSize, yX + xSize, xX + xSize, yX - xSize);
+            graphics2d.drawLine(selected.getInPixelsX() - xSize, selected.getInPixelsY() - xSize, selected.getInPixelsX() + xSize, selected.getInPixelsY() + xSize);
+            graphics2d.drawLine(selected.getInPixelsX() - xSize, selected.getInPixelsY() + xSize, selected.getInPixelsX() + xSize, selected.getInPixelsY() - xSize);
          }
 
          // paint selected area
          if (SHOW_SELECTION)
          {
             graphics2d.setColor(Color.red);
-            int areaX1Int = centerX + transform.transformMetersToPixels(area1X);
-            int areaY1Int = centerY - transform.transformMetersToPixels(area1Y);
-            int areaX2Int = centerX + transform.transformMetersToPixels(area2X);
-            int areaY2Int = centerY - transform.transformMetersToPixels(area2Y);
+            int areaX1Int = center.getInPixelsX() + transform.scaleMetersToPixels(area1X);
+            int areaY1Int = center.getInPixelsY() - transform.scaleMetersToPixels(area1Y);
+            int areaX2Int = center.getInPixelsX() + transform.scaleMetersToPixels(area2X);
+            int areaY2Int = center.getInPixelsY() - transform.scaleMetersToPixels(area2Y);
             int Xmin, Xmax, Ymin, Ymax;
             if (areaX1Int > areaX2Int)
             {
@@ -540,12 +539,12 @@ public class Plotter extends JPanel
 
    public double getSelectedX()
    {
-      return selectedX;
+      return selected.getInMetersX();
    }
 
    public double getSelectedY()
    {
-      return selectedY;
+      return selected.getInMetersY();
    }
 
    public double getArea1X()
@@ -585,12 +584,12 @@ public class Plotter extends JPanel
 
    private double unConvertXCoordinate(int coordinate)
    {
-      return transform.transformPixelsToMeters(coordinate - centerX);
+      return transform.scalePixelsToMeters(coordinate - center.getInPixelsX());
    }
 
    private double unConvertYCoordinate(int coordinate)
    {
-      return transform.transformPixelsToMeters(centerY - coordinate);
+      return transform.scalePixelsToMeters(center.getInPixelsY() - coordinate);
    }
 
    private Coordinate convertFromMetersToPixels(Coordinate coordinate)
@@ -598,37 +597,24 @@ public class Plotter extends JPanel
       double x = coordinate.getX();
       double y = coordinate.getY();
 
-      x = (double) centerX + transform.transformMetersToPixels(x);
-      y = (double) centerY - transform.transformMetersToPixels(y);
+      x = (double) center.getInPixelsX() + transform.scaleMetersToPixels(x);
+      y = (double) center.getInPixelsY() - transform.scaleMetersToPixels(y);
 
       return new Coordinate(x, y, Coordinate.PIXEL);
-   }
-
-   private Coordinate convertFromPixelsToMeters(Coordinate coordinate)
-   {
-      double x = coordinate.getX();
-      double y = coordinate.getY();
-
-      x = transform.transformPixelsToMeters((int) x - centerX);
-      y = transform.transformPixelsToMeters(centerY - (int) y);
-
-      return new Coordinate(x, y, Coordinate.METER);
    }
 
    public void setRangeLimit(int range, double origMapScale, double ullon, double ullat, double lrlon, double lrlat)
    {
       plotRange = range;
-      upperLeftLongitude = ullon;
-      upperLeftLatitude = ullat;
-      lowerRightLongitude = lrlon;
-      lowerRightLatitude = lrlat;
 
+      updateTransform();
       repaint();
    }
 
    public void setRange(double range)
    {
       plotRange = range;
+      updateTransform();
       repaint();
    }
 
@@ -649,22 +635,24 @@ public class Plotter extends JPanel
 
    public void setOffsetX(double offsetX)
    {
-      this.offsetX = offsetX;
+      centerOfPanelToMetersOriginInPixels.setX(transform.scaleMetersToPixels(offsetX));
+      updateTransform();
    }
 
    public void setOffsetY(double offsetY)
    {
-      this.offsetY = offsetY;
+      centerOfPanelToMetersOriginInPixels.setY(-transform.scaleMetersToPixels(offsetY));
+      updateTransform();
    }
 
    public double getOffsetX()
    {
-      return offsetX;
+      return transform.scalePixelsToMeters(centerOfPanelToMetersOriginInPixels.getX());
    }
 
    public double getOffsetY()
    {
-      return offsetY;
+      return -transform.scalePixelsToMeters(centerOfPanelToMetersOriginInPixels.getY());
    }
 
    @Override
@@ -676,6 +664,7 @@ public class Plotter extends JPanel
    public void setPreferredSize(int width, int height)
    {
       preferredSize.setSize(width, height);
+      updateTransform();
    }
 
    public void setDoubleClickListener(DoubleClickListener doubleClickListener)
@@ -776,13 +765,11 @@ public class Plotter extends JPanel
 
          if (buttonPressed == MouseEvent.BUTTON1)
          {
-            selectedX = unConvertXCoordinate(e.getX());
-            selectedY = unConvertYCoordinate(e.getY());
+            selected.setInPixels(e.getX(), e.getY());
          }
          else if (buttonPressed == MouseEvent.BUTTON3)
          {
-            selectedX = unConvertXCoordinate(e.getX());
-            selectedY = unConvertYCoordinate(e.getY());
+            selected.setInPixels(e.getX(), e.getY());
          }
          else if (buttonPressed == MouseEvent.BUTTON2)
          {
@@ -801,9 +788,13 @@ public class Plotter extends JPanel
             }
             else if (buttonPressed == MouseEvent.BUTTON3)
             {
-               Coordinate offset = convertFromPixelsToMeters(new Coordinate(e.getX(), e.getY(), Coordinate.PIXEL));
-               setOffsetX(offset.getX());
-               setOffsetY(offset.getY());
+               int deltaXInPixelsFromOrigin = e.getX() - transform.getPixelOriginToMetersOriginInPixels().getX();
+               int deltaYInPixelsFromOrigin = e.getY() - transform.getPixelOriginToMetersOriginInPixels().getY();
+               
+               centerOfPanelToMetersOriginInPixels.setX(centerOfPanelToMetersOriginInPixels.getX() + deltaXInPixelsFromOrigin);
+               centerOfPanelToMetersOriginInPixels.setY(centerOfPanelToMetersOriginInPixels.getY() + deltaYInPixelsFromOrigin);
+               
+               updateTransform();
                repaint();
             }
          }
@@ -859,6 +850,7 @@ public class Plotter extends JPanel
       frame.getContentPane().add(this, BorderLayout.CENTER);
       frame.pack();
       frame.setVisible(true);
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
    }
 
    public void addArtifactsChangedListener(ArtifactsChangedListener artifactsChangedListener)
