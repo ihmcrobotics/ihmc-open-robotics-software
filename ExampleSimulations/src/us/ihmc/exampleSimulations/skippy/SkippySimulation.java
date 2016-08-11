@@ -10,15 +10,17 @@ public class SkippySimulation
 
    public SkippySimulation()
    {
-      SkippyRobot skippy = new SkippyRobot();
-      skippy.setController(new SkippyController(skippy,"skippyController"));
+      int robotType = 1;
+
+      SkippyRobot skippy = new SkippyRobot(robotType);
+      skippy.setController(new SkippyController(skippy, robotType, "skippyController"));
 //      skippy.setController(new ExternalControlServer(skippy, "externalControlServer"));
 
       sim = new SimulationConstructionSet(skippy);
       sim.setGroundVisible(true);
       sim.setDT(DT, 20);
       sim.setSimulateDuration(TIME);
-      sim.setCameraPosition(-80, 0.0, -2.0);
+      sim.setCameraPosition(-40.0, 0.0, 0.2);
 
       Thread myThread = new Thread(sim);
       myThread.start();
