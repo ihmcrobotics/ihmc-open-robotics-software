@@ -78,7 +78,7 @@ public class SkippyController implements RobotController
       k5 = new DoubleYoVariable("k5", registry);
       k5.set(-1900);
       k6 = new DoubleYoVariable("k6", registry);
-      k6.set(-500.0);
+      k6.set(-490.0);
       k7 = new DoubleYoVariable("k7", registry);
       k7.set(-86.0);
       k8 = new DoubleYoVariable("k8", registry);
