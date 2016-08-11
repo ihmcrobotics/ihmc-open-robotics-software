@@ -968,7 +968,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       ArrayList<Graphics3DNode> ret = new ArrayList<>(staticLinkGraphics.size());
       for (Graphics3DObject linkGraphics : staticLinkGraphics)
       {
-         ret.add(this.addStaticLinkGraphics(linkGraphics));
+         ret.add(addStaticLinkGraphics(linkGraphics));
       }
 
       return ret;
