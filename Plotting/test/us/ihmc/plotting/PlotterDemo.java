@@ -20,8 +20,8 @@ public class PlotterDemo
       
       plotter.showInNewWindow();
       
-//      plotter.setOffsetX(2.5);
-//      plotter.setOffsetY(-6.0);
+      plotter.setOffsetX(2.5);
+      plotter.setOffsetY(-3.0);
    }
    
    public static void main(String[] args)
