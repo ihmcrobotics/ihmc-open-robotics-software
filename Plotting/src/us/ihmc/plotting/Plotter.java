@@ -9,8 +9,6 @@ import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -237,15 +235,8 @@ public class Plotter extends JPanel
 
          // paint grid centerline
          graphics2d.setColor(Color.gray);
-
-         // get pixel from meter for positive
-         Coordinate coord = convertFromMetersToPixels(new Coordinate(0, 0, Coordinate.METER));
-         int x0 = (int) Math.round(coord.getX());
-         int y0 = (int) Math.round(coord.getY());
-
-         // draw line
-         graphics2d.drawLine(x0, 0, x0, (int) visibleRectangle.getHeight());
-         graphics2d.drawLine(0, y0, (int) visibleRectangle.getWidth(), y0);
+         graphics2d.drawLine(center.getInPixelsX(), 0, center.getInPixelsX(), (int) visibleRectangle.getHeight());
+         graphics2d.drawLine(0, center.getInPixelsY(), (int) visibleRectangle.getWidth(), center.getInPixelsY());
 
          // Paint all artifacts history by level
          // (assumes 5 levels (0-4)
@@ -560,17 +551,6 @@ public class Plotter extends JPanel
       repaint();
    }
 
-   private Coordinate convertFromMetersToPixels(Coordinate coordinate)
-   {
-      double x = coordinate.getX();
-      double y = coordinate.getY();
-
-      x = (double) center.getInPixelsX() + transform.scaleMetersToPixels(x);
-      y = (double) center.getInPixelsY() - transform.scaleMetersToPixels(y);
-
-      return new Coordinate(x, y, Coordinate.PIXEL);
-   }
-
    public void setRangeLimit(int range, double origMapScale, double ullon, double ullat, double lrlon, double lrlat)
    {
       plotRange = range;
@@ -857,25 +837,5 @@ public class Plotter extends JPanel
       ret.add(plotterLegendPanel, "South");
 
       return ret;
-   }
-
-   public static void main(String[] args)
-   {
-      // plotter
-      Plotter p = new Plotter();
-   
-      JFrame f = new JFrame("Plotter Test");
-      f.addWindowListener(new WindowAdapter()
-      {
-         @Override
-         public void windowClosing(WindowEvent e)
-         {
-            System.exit(0);
-         }
-      });
-   
-      f.getContentPane().add(p, BorderLayout.CENTER);
-      f.pack();
-      f.setVisible(true);
    }
 }
