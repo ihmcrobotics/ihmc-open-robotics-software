@@ -19,6 +19,8 @@ import java.util.ArrayList;
  */
 public class SkippyRobot extends Robot
 {
+   private static final boolean SHOW_MOI_ELLIPSOIDS = true;
+
    private static final long serialVersionUID = -7671864179791904256L;
    public static FloatingJoint mainJoint;
    public static UniversalJoint foot;
@@ -30,9 +32,9 @@ public class SkippyRobot extends Robot
     * Iyy* are the moments of inertia of the links, which are defined about the COM for each link.
     */
    public static final double
-           LEG_LENGTH = 1.0, LEG_MASS = 1.5, LEG_CUBE_LENGTH = 0.1, LEG_MOI = (1.0/3.0)* LEG_MASS *Math.pow(LEG_LENGTH,2), // Leg
-           TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0/3.0)* TORSO_MASS *Math.pow(TORSO_LENGTH,2), // Torso
-           SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/12.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
+           LEG_LENGTH = 1.0, LEG_MASS = 1.5, LEG_CUBE_LENGTH = 0.1, LEG_MOI = (1.0/4.0)* LEG_MASS *Math.pow(LEG_LENGTH,2), // Leg
+           TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0/4.0)* TORSO_MASS *Math.pow(TORSO_LENGTH,2), // Torso
+           SHOULDER_LENGTH = 4.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/4.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
 
    private ExternalForcePoint balanceForce;
 
@@ -137,6 +139,11 @@ public class SkippyRobot extends Robot
       // associate the linkGraphics object with the link object
       leg.setLinkGraphics(linkGraphics);
 
+      if (SHOW_MOI_ELLIPSOIDS)
+      {
+         leg.addEllipsoidFromMassProperties(YoAppearance.Gold());
+      }
+
       return leg;
    }
 
@@ -145,13 +152,18 @@ public class SkippyRobot extends Robot
       Link torso = new Link("torso");
       torso.setMass(TORSO_MASS);
       torso.setComOffset(0.0, 0.0, TORSO_LENGTH / 2.0);
-      torso.setMomentOfInertia(TORSO_MOI, 0.0001, 0.0001);
+      torso.setMomentOfInertia(TORSO_MOI, TORSO_MOI, 0.0001);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.LightSkyBlue());
       linkGraphics.addSphere(0.10,YoAppearance.White());
 
       torso.setLinkGraphics(linkGraphics);
+
+      if (SHOW_MOI_ELLIPSOIDS)
+      {
+         torso.addEllipsoidFromMassProperties(YoAppearance.Gold());
+      }
 
       return torso;
    }
@@ -160,15 +172,19 @@ public class SkippyRobot extends Robot
    {
       Link arms = new Link("arms");
       arms.setMass(SHOULDER_MASS);
-      arms.setComOffset(0.0, 0.0, SHOULDER_LENGTH / 2.0);
-      arms.setMomentOfInertia(0.0001, SHOULDER_MOI, 0.0001);
+      arms.setComOffset(0.0, 0.0, 0.0);
+      arms.setMomentOfInertia(0.0001, SHOULDER_MOI, SHOULDER_MOI);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.rotate(Math.toRadians(90), Axis.Y);
       linkGraphics.translate(0.0, 0.0, -SHOULDER_LENGTH / 2.0);
       linkGraphics.addCylinder(SHOULDER_LENGTH, SHOULDER_RADIUS, YoAppearance.DarkBlue());
-
       arms.setLinkGraphics(linkGraphics);
+
+      if (SHOW_MOI_ELLIPSOIDS)
+      {
+         arms.addEllipsoidFromMassProperties(YoAppearance.Gold());
+      }
 
       return arms;
    }
