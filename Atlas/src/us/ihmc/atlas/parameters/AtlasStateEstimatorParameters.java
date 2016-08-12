@@ -357,12 +357,12 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public double getCenterOfMassVelocityFusingFrequency()
    {
-      return 0.4261;
+      return 5.0;
    }
 
    @Override
    public boolean useGroundReactionForcesToComputeCenterOfMassVelocity()
    {
-      return true;
+      return false;
    }
 }
