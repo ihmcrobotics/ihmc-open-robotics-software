@@ -4,8 +4,10 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -50,12 +52,17 @@ public class DivergentComponentOfMotionController
    YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
    ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-   YoFramePoint yoDcmPositionSetpoint = new YoFramePoint("dcmPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
-   YoFrameVector yoDcmVelocitySetpoint = new YoFrameVector("dcmVelocitySetpoint", ReferenceFrame.getWorldFrame(), registry);
    YoFramePoint yoIcpPositionSetpoint = new YoFramePoint("icpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
    YoFrameVector yoIcpVelocitySetpoint = new YoFrameVector("icpVelocitySetpoint", ReferenceFrame.getWorldFrame(), registry);
    YoFramePoint yoVrpPositionSetpoint = new YoFramePoint("vrpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
    YoFramePoint yoCmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
+   YoFramePoint yoDcmPositionSetpoint = new YoFramePoint("dcmPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
+   YoFrameVector yoDcmVelocitySetpoint = new YoFrameVector("dcmVelocitySetpoint", ReferenceFrame.getWorldFrame(), registry);
+
+   DoubleYoVariable yoVrpPositionRateLimit;
+   RateLimitedYoVariable yoVrpPositionSetpointX;
+   RateLimitedYoVariable yoVrpPositionSetpointY;
+   RateLimitedYoVariable yoVrpPositionSetpointZ;
 
    public DivergentComponentOfMotionController(ReferenceFrame comZUpFrame, double controlDT, LinearInvertedPendulumModel lipModel,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
@@ -71,6 +78,12 @@ public class DivergentComponentOfMotionController
       pidController[1] = new PIDController("dcmPositionY", registry);
       pidController[2] = new PIDController("dcmPositionZ", registry);
       pidControllerGains = new YoEuclideanPositionGains("dcmPosition", registry);
+
+      yoVrpPositionRateLimit = new DoubleYoVariable("vrpPositionRateLimit", registry);
+      yoVrpPositionRateLimit.set(Double.MAX_VALUE);
+      yoVrpPositionSetpointX = new RateLimitedYoVariable("vrpPositionSetpointXInComZUpFrame", registry, yoVrpPositionRateLimit, controlDT);
+      yoVrpPositionSetpointY = new RateLimitedYoVariable("vrpPositionSetpointYInComZUpFrame", registry, yoVrpPositionRateLimit, controlDT);
+      yoVrpPositionSetpointZ = new RateLimitedYoVariable("vrpPositionSetpointZInComZUpFrame", registry, yoVrpPositionRateLimit, controlDT);
 
       YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition("icpPositionSetpoint", yoIcpPositionSetpoint, 0.025, YoAppearance.Blue());
       YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition("cmpPositionSetpoint", yoCmpPositionSetpoint, 0.025, YoAppearance.Chartreuse());
@@ -99,11 +112,19 @@ public class DivergentComponentOfMotionController
       {
          pidController[i].resetIntegrator();
       }
+      yoVrpPositionSetpointX.reset();
+      yoVrpPositionSetpointY.reset();
+      yoVrpPositionSetpointZ.reset();
    }
 
    public YoEuclideanPositionGains getGains()
    {
       return pidControllerGains;
+   }
+
+   public void setVrpPositionRateLimit(double vrpPositionRateLimit)
+   {
+      yoVrpPositionRateLimit.set(vrpPositionRateLimit);
    }
 
    public void compute(FrameVector comForceCommand, Setpoints setpoints, FramePoint dcmPositionEstimate)
@@ -136,6 +157,12 @@ public class DivergentComponentOfMotionController
             .compute(dcmPositionEstimate.getY(), dcmPositionSetpoint.getY(), 0, 0, controlDT)));
       vrpPositionSetpoint.setZ(dcmPositionEstimate.getZ() - 1 / omega * (dcmVelocitySetpoint.getZ() + pidController[2]
             .compute(dcmPositionEstimate.getZ(), dcmPositionSetpoint.getZ(), 0, 0, controlDT)));
+      yoVrpPositionSetpointX.update(vrpPositionSetpoint.getX());
+      yoVrpPositionSetpointY.update(vrpPositionSetpoint.getY());
+      yoVrpPositionSetpointZ.update(vrpPositionSetpoint.getZ());
+      vrpPositionSetpoint.setX(yoVrpPositionSetpointX.getDoubleValue());
+      vrpPositionSetpoint.setY(yoVrpPositionSetpointY.getDoubleValue());
+      vrpPositionSetpoint.setZ(yoVrpPositionSetpointZ.getDoubleValue());
       cmpPositionSetpoint.set(vrpPositionSetpoint);
       cmpPositionSetpoint.add(0, 0, -lipModel.getComHeight());
       lipModel.computeComForce(comForceCommand, cmpPositionSetpoint);

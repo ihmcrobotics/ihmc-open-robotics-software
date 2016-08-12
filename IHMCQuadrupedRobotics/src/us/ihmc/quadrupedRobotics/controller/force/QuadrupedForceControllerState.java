@@ -11,5 +11,7 @@ public enum QuadrupedForceControllerState
    STEP,
    XGAIT,
    FALL,
-   SOLE_WAYPOINT
+   SOLE_WAYPOINT;
+   
+   public static QuadrupedForceControllerState[] values = values();
 }

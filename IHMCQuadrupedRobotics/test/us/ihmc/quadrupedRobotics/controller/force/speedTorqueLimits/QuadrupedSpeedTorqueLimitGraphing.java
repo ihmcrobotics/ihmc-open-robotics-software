@@ -12,6 +12,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -21,7 +22,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
    private QuadrupedForceTestYoVariables variables;
    private PushRobotTestConductor pusher;
    
-   public void createSimulation() throws IOException
+   public SimulationConstructionSet createSimulation() throws IOException
    {
       QuadrupedTestFactory testFactory = createQuadrupedTestFactory();
       testFactory.setControlMode(QuadrupedControlMode.FORCE);
@@ -31,6 +32,8 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
       conductor = testFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       pusher = new PushRobotTestConductor(conductor.getScs(), "body");
+      
+      return conductor.getScs();
    }
    
    public void trotAroundSuperAggressively()
