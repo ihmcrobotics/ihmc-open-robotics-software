@@ -93,12 +93,12 @@ public class SkippyController implements RobotController
       }
       else if(robotType == 1)
       {
-         k1.set(2000.0); //110);
-         k2.set(15.0); //-35);
-         k3.set(-0.0); //30);
-         k4.set(-0.0); //-15);
+         k1.set(10000.0); //110);
+         k2.set(250.0); //-35);
+         k3.set(-600); //30);
+         k4.set(0.0); //-15);
 
-         k5.set(-600.0);
+         k5.set(-0.0);
          k6.set(-0.0);
          k7.set(-0.0);
          k8.set(-0.0);
@@ -207,7 +207,7 @@ public class SkippyController implements RobotController
          hipAngleValues = calculateAnglePosAndDerOfHipJointSkippy(robot.getHipJointSkippy());
       hipAngle = hipAngleValues[0];
       hipAngleVel = hipAngleValues[1];
-      qHipIncludingOffset.set(fromRadiansToDegrees(hipAngle));
+      qHipIncludingOffset.set((hipAngle));
 
       //torque set
       if(robotType == 0)
@@ -220,7 +220,7 @@ public class SkippyController implements RobotController
 
          double tau = k1.getDoubleValue() * (0.0 - angle) + k2.getDoubleValue() * (0.0 - angleVel) + k3.getDoubleValue() * (hipDesired - hipAngle) + k4.getDoubleValue() * (0.0 - hipAngleVel);
          Vector3d point2 = createVectorInDirectionOfHipJointAlongHip();
-         Vector3d forceDirectionVector = new Vector3d(0, 1, point2.getY()/point2.getZ()*-1);
+         Vector3d forceDirectionVector = new Vector3d(0, 1.0, point2.getY()/point2.getZ()*-1.0);
          forceDirectionVector.normalize();
          forceDirectionVector.scale(tau/robot.getHipLength()/2);
          robot.setRootJointForce(forceDirectionVector.getX(), forceDirectionVector.getY(), forceDirectionVector.getZ());
