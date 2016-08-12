@@ -93,12 +93,12 @@ public class SkippyController implements RobotController
       }
       else if(robotType == 1)
       {
-         k1.set(0.0); //110);
-         k2.set(0.0); //-35);
+         k1.set(2000.0); //110);
+         k2.set(15.0); //-35);
          k3.set(-0.0); //30);
          k4.set(-0.0); //-15);
 
-         k5.set(-0.0);
+         k5.set(-600.0);
          k6.set(-0.0);
          k7.set(-0.0);
          k8.set(-0.0);

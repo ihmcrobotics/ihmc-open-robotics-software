@@ -10,6 +10,7 @@ public class SkippySimulation
 
    public SkippySimulation()
    {
+      //0 - acrobot, 1 - skippy
       int robotType = 1;
 
       SkippyRobot skippy = new SkippyRobot(robotType);

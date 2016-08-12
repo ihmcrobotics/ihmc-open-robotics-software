@@ -10,6 +10,7 @@ import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
+import java.util.Vector;
 
 /**
  * This class SkippyRobot is a public class that extends Robot. The class Robot is
@@ -44,7 +45,7 @@ public class SkippyRobot extends Robot
    public static final double
            LEG_LENGTH = 1.0, LEG_MASS = 1.5, LEG_CUBE_LENGTH = 0.1, LEG_MOI = (1.0/4.0)* LEG_MASS *Math.pow(LEG_LENGTH,2), // Leg
            TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0/4.0)* TORSO_MASS *Math.pow(TORSO_LENGTH,2), // Torso
-           SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/2.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
+           SHOULDER_LENGTH = 2.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/1.3)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
 
    private ExternalForcePoint balanceForce;
 
@@ -106,6 +107,8 @@ public class SkippyRobot extends Robot
       else if(typeOfRobot==1)
       {
          rootJoint = new FloatingJoint("rootJoint", new Vector3d(0.0, 0.0, LEG_LENGTH + TORSO_LENGTH/2), this);
+         //double offsetAngle = Math.PI/6;
+         //rootJoint.setPosition(convertHipJointAngleToVector(offsetAngle));
          rootJointForce = new ExternalForcePoint("rootJointForce", new Vector3d(0.0, 0.0, TORSO_LENGTH/2), this);
          rootJoint.addExternalForcePoint(rootJointForce);
          Link torso = createTorsoSkippy();
@@ -143,6 +146,21 @@ public class SkippyRobot extends Robot
       GroundProfile3D profile = new FlatGroundProfile();
       ground.setGroundProfile3D(profile);
       this.setGroundContactModel(ground);
+   }
+
+   private Vector3d convertHipJointAngleToVector(double angle)
+   {
+      //hipjoint only on YZ plane
+      double dz = TORSO_LENGTH/2.0 - TORSO_LENGTH/2.0 * Math.cos(Math.abs(angle));
+      double dy = TORSO_LENGTH/2.0 - TORSO_LENGTH/2.0 * Math.sin(Math.abs(angle));
+      if(angle < 0)
+         dy = dy * -1;
+
+      Vector3d newPosition = new Vector3d();
+      this.getHipJointSkippy().getPosition(newPosition);
+      newPosition.setY(newPosition.getY()+dy);
+      newPosition.setZ(newPosition.getZ()+dz);
+      return newPosition;
    }
 
    private Link createLegAcrobot()
