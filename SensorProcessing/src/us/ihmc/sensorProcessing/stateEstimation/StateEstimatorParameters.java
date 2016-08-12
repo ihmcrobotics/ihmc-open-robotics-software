@@ -47,6 +47,7 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
 
    public abstract double getPelvisPositionFusingFrequency();
    public abstract double getPelvisLinearVelocityFusingFrequency();
+   public abstract double getCenterOfMassVelocityFusingFrequency();
    public abstract double getPelvisVelocityBacklashSlopTime();
    
    public abstract double getDelayTimeForTrustingFoot();
@@ -68,4 +69,6 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
    public abstract FootSwitchType getFootSwitchType();
 
    public abstract boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact();
+   
+   public abstract boolean useGroundReactionForcesToComputeCenterOfMassVelocity();
 }
