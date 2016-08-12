@@ -10,7 +10,7 @@ public class SkippySimulation
 
    public SkippySimulation()
    {
-      int robotType = 0;
+      int robotType = 1;
 
       SkippyRobot skippy = new SkippyRobot(robotType);
       skippy.setController(new SkippyController(skippy, robotType, "skippyController"));
