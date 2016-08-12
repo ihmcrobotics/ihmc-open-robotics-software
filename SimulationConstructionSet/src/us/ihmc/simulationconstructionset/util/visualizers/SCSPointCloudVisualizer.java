@@ -8,16 +8,14 @@ import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 import javax.vecmath.Point3d;
-import java.util.ArrayList;
 import java.util.List;
 
 public class SCSPointCloudVisualizer implements RewoundListener
 {
-   private final double VOXEL_SIZE = 0.01;
-   private final ArrayList<Graphics3DNode> nodes = new ArrayList<>();
-
+   private final double VOXEL_SIZE = 0.1;
    private final SimulationConstructionSet scs;
 
+   private Graphics3DNode rootNode;
    private boolean disableGraphics = false;
 
    public SCSPointCloudVisualizer(SimulationConstructionSet scs)
@@ -37,19 +35,18 @@ public class SCSPointCloudVisualizer implements RewoundListener
             Graphics3DNode cubeNode = scs.addStaticLinkGraphics(testCubeGraphicObject, Graphics3DNodeType.VISUALIZATION);
             cubeNode.translate(point.getX(), point.getY(), point.getZ());
 
-            nodes.add(cubeNode);
+            if(rootNode == null)
+               rootNode = cubeNode;
+            else
+               rootNode.addChild(cubeNode);
          }
       }
    }
 
    public void clear()
    {
-      for(Graphics3DNode node : nodes)
-      {
-         scs.removeGraphics3dNode(node);
-      }
-
-      nodes.clear();
+      scs.removeGraphics3dNode(rootNode);
+      rootNode = null;
    }
 
    @Override
