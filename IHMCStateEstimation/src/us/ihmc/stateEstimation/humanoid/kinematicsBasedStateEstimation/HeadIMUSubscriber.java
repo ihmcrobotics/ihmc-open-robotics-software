@@ -3,12 +3,11 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Quat4d;
-import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.IMUPacket;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
@@ -31,19 +30,18 @@ public class HeadIMUSubscriber extends SimpleRobotController implements PacketCo
    private final AtomicReference<IMUPacket> packet = new AtomicReference<IMUPacket>(null);
 
    private final IMUMount imuMount;
+   private final DoubleYoVariable robotTime;
    private final IMUPacket tempPacket = new IMUPacket();
 
-   private final Vector3f angularVelocityF = new Vector3f();
-   private final Quat4f orientationF = new Quat4f();
-   private final Vector3f linearAccelerationF = new Vector3f();
    private final Vector3d linearAcceleration = new Vector3d();
    private final Quat4d orientation = new Quat4d();
    private final Vector3d angularVelocity = new Vector3d();
 
-   public HeadIMUSubscriber(IMUDefinition imuDefinition, IMUMount imuMount)
+   public HeadIMUSubscriber(IMUDefinition imuDefinition, IMUMount imuMount, DoubleYoVariable time)
    {
       this.imuDefinition = imuDefinition;
       this.imuMount = imuMount;
+      this.robotTime = time;
    }
 
    @Override
@@ -62,6 +60,7 @@ public class HeadIMUSubscriber extends SimpleRobotController implements PacketCo
       dataToPack.angularVelocity.set(packet.angularVelocity);
       dataToPack.linearAcceleration.set(packet.linearAcceleration);
       dataToPack.orientation.set(packet.orientation);
+      dataToPack.time = packet.time;
       return true;
    }
 
@@ -80,11 +79,11 @@ public class HeadIMUSubscriber extends SimpleRobotController implements PacketCo
       imuMount.getOrientation(orientation);
       imuMount.getAngularVelocityInBody(angularVelocity);
 
-      linearAccelerationF.set(linearAcceleration);
-      orientationF.set(orientation);
-      angularVelocityF.set(angularVelocity);
+      tempPacket.linearAcceleration.set(linearAcceleration);
+      tempPacket.orientation.set(orientation);
+      tempPacket.angularVelocity.set(angularVelocity);
+      tempPacket.time = robotTime.getDoubleValue();
 
-      tempPacket.set(linearAccelerationF, orientationF, angularVelocityF);
       this.packet.set(tempPacket);
    }
 
