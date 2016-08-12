@@ -15,6 +15,7 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajecto
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsProvider;
+import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -57,7 +58,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
    private final DoubleParameter comPositionGravityCompensationParameter = parameterFactory.createDouble("comPositionGravityCompensation", 1);
    private final DoubleArrayParameter comForceCommandWeightsParameter = parameterFactory.createDoubleArray("comForceCommandWeights", 1, 1, 1);
    private final DoubleArrayParameter comTorqueCommandWeightsParameter = parameterFactory.createDoubleArray("comTorqueCommandWeights", 1, 1, 1);
-   private final DoubleArrayParameter dcmPositionProportionalGainsParameter = parameterFactory.createDoubleArray("dcmPositionProportionalGains", 1, 1, 0);
+   private final DoubleArrayParameter dcmPositionProportionalGainsParameter = parameterFactory.createDoubleArray("dcmPositionProportionalGains", 1.5, 1.5, 0);
    private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
    private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
@@ -107,7 +108,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
    private final YoFrameVector stepAdjustmentForControl;
    private final YoFrameVector stepAdjustmentForPlanning;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
-   private final ArrayList<QuadrupedTimedStep> stepPlan;
+   private final PreallocatedQueue<QuadrupedTimedStep> stepPlan;
 
    // xgait planner
    private double bodyYawSetpoint;
@@ -173,11 +174,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
       stepAdjustmentForPlanning = new YoFrameVector("stepAdjustmentForPlanning", worldFrame, registry);
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
-      stepPlan = new ArrayList<>();
-      for (int i = 0; i < NUMBER_OF_PREVIEW_STEPS + 2; i++)
-      {
-         stepPlan.add(new QuadrupedTimedStep());
-      }
+      stepPlan = new PreallocatedQueue<>(QuadrupedTimedStep.class, NUMBER_OF_PREVIEW_STEPS + 2);
 
       // xgait planner
       supportCentroid = new FramePoint();
@@ -305,14 +302,19 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
       Vector3d inputVelocity = inputProvider.getPlanarVelocityInput();
       xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, xGaitCurrentSteps, inputVelocity, currentTime, bodyYawSetpoint, xGaitSettings);
 
-      int stepIndex = 0;
+      stepPlan.clear();
       for (RobotEnd robotEnd : RobotEnd.values)
       {
-         stepPlan.get(stepIndex++).set(xGaitCurrentSteps.get(robotEnd));
+         stepPlan.enqueue();
+         stepPlan.getTail().set(xGaitCurrentSteps.get(robotEnd));
       }
       for (int i = 0; i < xGaitPreviewSteps.size(); i++)
       {
-         stepPlan.get(stepIndex++).set(xGaitPreviewSteps.get(i));
+         if (!haltFlag.getBooleanValue() || xGaitPreviewSteps.get(i).getTimeInterval().getEndTime() < haltTime.getDoubleValue())
+         {
+            stepPlan.enqueue();
+            stepPlan.getTail().set(xGaitPreviewSteps.get(i));
+         }
       }
    }
 
