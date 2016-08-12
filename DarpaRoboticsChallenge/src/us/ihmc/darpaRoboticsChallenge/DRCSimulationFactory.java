@@ -31,6 +31,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -368,11 +369,13 @@ public class DRCSimulationFactory
 
       int ticksPerSend = (int) (1.0 / (headIMUMeasurmentRate * robotModel.getSimulateDT()));
 
+      DoubleYoVariable time = simulatedRobot.getYoTime();
+
       if (dataProducer != null)
-         robot.setController(new SimulatedIMUSensor(imuMount, dataProducer), ticksPerSend);
+         robot.setController(new SimulatedIMUSensor(imuMount, dataProducer, time), ticksPerSend);
       else
       {
-         HeadIMUSubscriber headIMUSubscriber = new HeadIMUSubscriber(imuDefinition, imuMount);
+         HeadIMUSubscriber headIMUSubscriber = new HeadIMUSubscriber(imuDefinition, imuMount, time);
          robot.setController(headIMUSubscriber, ticksPerSend);
          drcEstimatorThread.setHeadIMUSubscriber(headIMUSubscriber);
       }

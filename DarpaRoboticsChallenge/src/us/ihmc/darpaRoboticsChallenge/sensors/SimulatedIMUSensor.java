@@ -1,14 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge.sensors;
 
 import javax.vecmath.Quat4d;
-import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
 
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 
@@ -26,20 +25,20 @@ public class SimulatedIMUSensor implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final IMUMount imuMount;
+   private final DoubleYoVariable robotTime;
    private final GlobalDataProducer dataProducer;
 
-   private final Vector3f angularVelocityF = new Vector3f();
-   private final Quat4f orientationF = new Quat4f();
-   private final Vector3f linearAccelerationF = new Vector3f();
    private final Vector3d linearAcceleration = new Vector3d();
    private final Quat4d orientation = new Quat4d();
    private final Vector3d angularVelocity = new Vector3d();
+
    private final IMUPacket imuPacket = new IMUPacket();
 
-   public SimulatedIMUSensor(IMUMount imuMount, GlobalDataProducer dataProducer)
+   public SimulatedIMUSensor(IMUMount imuMount, GlobalDataProducer dataProducer, DoubleYoVariable time)
    {
       this.imuMount = imuMount;
       this.dataProducer = dataProducer;
+      this.robotTime = time;
    }
 
    @Override
@@ -72,11 +71,10 @@ public class SimulatedIMUSensor implements RobotController
       imuMount.getOrientation(orientation);
       imuMount.getAngularVelocityInBody(angularVelocity);
 
-      linearAccelerationF.set(linearAcceleration);
-      orientationF.set(orientation);
-      angularVelocityF.set(angularVelocity);
-
-      imuPacket.set(linearAccelerationF, orientationF, angularVelocityF);
+      imuPacket.linearAcceleration.set(linearAcceleration);
+      imuPacket.orientation.set(orientation);
+      imuPacket.angularVelocity.set(angularVelocity);
+      imuPacket.time = robotTime.getDoubleValue();
       imuPacket.setDestination(PacketDestination.SENSOR_MANAGER);
       dataProducer.queueDataToSend(imuPacket);
    }

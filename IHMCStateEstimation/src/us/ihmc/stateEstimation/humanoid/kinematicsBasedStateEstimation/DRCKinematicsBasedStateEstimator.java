@@ -218,6 +218,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          operatingMode.set(stateEstimatorModeSubscriber.getRequestedOperatingMode());
       }
 
+      jointStateUpdater.checkForIMUPacket(yoTime.getDoubleValue());
       jointStateUpdater.updateJointState();
 
       switch (operatingMode.getEnumValue())
