@@ -699,7 +699,8 @@ public class Plotter extends JPanel
    private class PlotterMouseListener extends MouseInputAdapter
    {
       private int buttonPressed;
-      private int dragStartY;
+      private PlotterPoint middleMouseDragStart = new PlotterPoint(transform);
+      private PlotterPoint middleMouseDragEnd = new PlotterPoint(transform);
       
       @Override
       public void mouseClicked(MouseEvent e)
@@ -728,7 +729,7 @@ public class Plotter extends JPanel
          }
          else if (buttonPressed == MouseEvent.BUTTON2)
          {
-            dragStartY = e.getY();
+            middleMouseDragStart.setInPixels(e.getX(), e.getY());
          }
 
          // check for double-clicks
@@ -767,18 +768,22 @@ public class Plotter extends JPanel
          }
          else if (buttonPressed == MouseEvent.BUTTON2)
          {
-            int yDifferenceFromStartOfDrag = -(e.getY() - dragStartY);
-            double scaledYChange = new Double(yDifferenceFromStartOfDrag * 0.5);
-            if (getRange() < 10)
-               scaledYChange = new Double(yDifferenceFromStartOfDrag * 0.01);
-            double newRange = getRange() + scaledYChange;
-            if (newRange < 0.1)
-            {
-               newRange = 0.1;
-            }
+            middleMouseDragEnd.setInPixels(e.getX(), e.getY());
+            
+            int deltaDragY = middleMouseDragEnd.getInPixelsY() - middleMouseDragStart.getInPixelsY();
+            double scaledYChange = getRange() < 10 ? deltaDragY * 0.01 : deltaDragY * 0.5;
+            
+            double newRange = Math.max(getRange() + scaledYChange, 0.1);
 
+            double initialOffsetX = getOffsetX();
+            double initialOffsetY = getOffsetY();
+            
             setRange(newRange);
-            dragStartY = e.getY();
+            
+            setOffsetX(initialOffsetX);
+            setOffsetY(initialOffsetY);
+            
+            middleMouseDragStart.setInPixels(e.getX(), e.getY());
          }
 
          repaint();
