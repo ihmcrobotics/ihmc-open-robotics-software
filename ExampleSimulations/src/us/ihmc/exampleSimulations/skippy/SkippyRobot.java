@@ -116,7 +116,7 @@ public class SkippyRobot extends Robot
          this.addRootJoint(rootJoint);
 
          shoulder = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH/2), this, Axis.Y);
-         shoulder.setInitialState(Math.PI/12, 0.0);
+         shoulder.setInitialState(0*Math.PI/12, 0.0);
          Link arms = createArmsAcrobot();
          shoulder.setLink(arms);
          GroundContactPoint shoulderContactPointLeft = new GroundContactPoint("shoulderContactPointLeft", new Vector3d(-SHOULDER_LENGTH/2, 0.0, 0.0), this);
@@ -126,7 +126,7 @@ public class SkippyRobot extends Robot
          rootJoint.addJoint(shoulder);
 
          foot = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, -TORSO_LENGTH/2), this, Axis.X, Axis.Y);
-         foot.setInitialState((Math.PI+Math.PI/12), 0.0, 0*Math.PI/12, 0.0);
+         foot.setInitialState((Math.PI+Math.PI/12), 0.0, 0*Math.PI/24, 0.0);
          Link leg = createLegSkippy();
          foot.setLink(leg);
          GroundContactPoint rootContactPoint = new GroundContactPoint("rootContactPoint", new Vector3d(0.0, 0.0, 0.0), this);
