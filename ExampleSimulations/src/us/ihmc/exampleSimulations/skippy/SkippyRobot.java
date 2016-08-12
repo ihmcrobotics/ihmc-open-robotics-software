@@ -45,8 +45,8 @@ public class SkippyRobot extends Robot
    public static final double
            LEG_LENGTH = 1.0, LEG_MASS = 1.5, LEG_CUBE_LENGTH = 0.1, LEG_MOI = (1.0/4.0)* LEG_MASS *Math.pow(LEG_LENGTH,2), // Leg
            TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0/4.0)* TORSO_MASS *Math.pow(TORSO_LENGTH,2), // Torso
-           SHOULDER_LENGTH = 4.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/4.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
-
+           SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0/2.0)* SHOULDER_MASS *Math.pow(SHOULDER_LENGTH,2); // Crossbar
+   //4, 1/4
    private ExternalForcePoint balanceForce;
 
    public SkippyRobot(int typeOfRobot)
@@ -126,7 +126,7 @@ public class SkippyRobot extends Robot
          rootJoint.addJoint(shoulder);
 
          foot = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, -TORSO_LENGTH/2), this, Axis.X, Axis.Y);
-         foot.setInitialState((Math.PI+Math.PI/12), 0.0, 0*Math.PI/24, 0.0);
+         foot.setInitialState((Math.PI+Math.PI/12), 0.0, 0*Math.PI/12, 0.0);
          Link leg = createLegSkippy();
          foot.setLink(leg);
          GroundContactPoint rootContactPoint = new GroundContactPoint("rootContactPoint", new Vector3d(0.0, 0.0, 0.0), this);
