@@ -165,7 +165,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
             if (imuDefinition != null)
             {
-               HeadIMUSubscriber headIMUSubscriber = new HeadIMUSubscriber(imuDefinition, null);
+               HeadIMUSubscriber headIMUSubscriber = new HeadIMUSubscriber(imuDefinition, null, null);
                dataProducer.attachListener(IMUPacket.class, headIMUSubscriber);
                drcStateEstimator.setHeadIMUSubscriber(headIMUSubscriber);
             }
