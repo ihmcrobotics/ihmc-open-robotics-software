@@ -23,6 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.sensors.SimulatedIMUSensor;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
@@ -30,14 +31,17 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -50,6 +54,7 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.HeadIMUSubscriber;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
@@ -75,6 +80,8 @@ public class DRCSimulationFactory
    private final ActualCMPComputer cmpViz;
 
    private static final double gravity = -9.81;
+
+   private static final double headIMUMeasurmentRate = 400.0;
 
    private final SimulationConstructionSet scs;
    private final SDFHumanoidRobot simulatedRobot;
@@ -248,6 +255,8 @@ public class DRCSimulationFactory
       }
       drcEstimatorThread.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
 
+      addSimulatedHeadIMUSensor(drcRobotModel, simulatedRobot, globalDataProducer);
+
       drcControllerThread = new DRCControllerThread(drcRobotModel, drcRobotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer, drcOutputWriter,
             globalDataProducer, yoVariableServer, gravity, drcRobotModel.getEstimatorDT());
 
@@ -326,6 +335,51 @@ public class DRCSimulationFactory
       }
 
       simulatedRobot.setController(simulatedDRCRobotTimeProvider);
+   }
+
+   private void addSimulatedHeadIMUSensor(DRCRobotModel robotModel, SDFHumanoidRobot robot, HumanoidGlobalDataProducer dataProducer)
+   {
+      String headIMUName = robotModel.getSensorInformation().getHeadIMUName();
+      IMUMount imuMount = null;
+      IMUDefinition imuDefinition = null;
+
+      if (headIMUName != null)
+      {
+         ArrayList<IMUMount> imuMounts = new ArrayList<>();
+         robot.getIMUMounts(imuMounts);
+         for (IMUMount mount : imuMounts)
+         {
+            if (mount.getName().equals(headIMUName))
+               imuMount = mount;
+         }
+
+         IMUDefinition[] imuDefinitions = threadDataSynchronizer.getEstimatorFullRobotModel().getIMUDefinitions();
+         for (IMUDefinition definition : imuDefinitions)
+         {
+            if (definition.getName().equals(headIMUName))
+               imuDefinition = definition;
+         }
+      }
+
+      if (imuMount == null || imuDefinition == null)
+      {
+         System.err.println("Was not able to add head IMU sensor: " + headIMUName);
+         return;
+      }
+
+      int ticksPerSend = (int) (1.0 / (headIMUMeasurmentRate * robotModel.getSimulateDT()));
+
+      DoubleYoVariable time = simulatedRobot.getYoTime();
+
+      if (dataProducer != null)
+         robot.setController(new SimulatedIMUSensor(imuMount, dataProducer, time), ticksPerSend);
+      else
+      {
+         HeadIMUSubscriber headIMUSubscriber = new HeadIMUSubscriber(imuDefinition, imuMount, time);
+         robot.setController(headIMUSubscriber, ticksPerSend);
+         drcEstimatorThread.setHeadIMUSubscriber(headIMUSubscriber);
+      }
+
    }
 
    private static void initializeEstimatorToActual(DRCEstimatorThread drcStateEstimator, DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup,

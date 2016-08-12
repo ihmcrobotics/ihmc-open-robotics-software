@@ -17,6 +17,7 @@ import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -39,8 +40,8 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final ReferenceFrame bodyFrame;
 
    // Feedback controller
-   private final QuadrupedSolePositionController solePositionController;
-   private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
+   private final QuadrantDependentList<QuadrupedSolePositionController> solePositionController;
+   private final QuadrantDependentList<QuadrupedSolePositionController.Setpoints> solePositionControllerSetpoints;
 
    // Task space controller
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
@@ -58,7 +59,11 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
 
       // Feedback controller
       solePositionController = controllerToolbox.getSolePositionController();
-      solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints();
+      solePositionControllerSetpoints = new QuadrantDependentList<>();
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         solePositionControllerSetpoints.set(quadrant, new QuadrupedSolePositionController.Setpoints(quadrant));
+      }
 
       // Task space controller
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
@@ -77,8 +82,11 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       updateEstimates();
 
       // Initialize sole position controller
-      solePositionControllerSetpoints.initialize(taskSpaceEstimates);
-      solePositionController.reset();
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         solePositionController.get(quadrant).reset();
+         solePositionControllerSetpoints.get(quadrant).initialize(taskSpaceEstimates);
+      }
 
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
@@ -91,12 +99,12 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       // Initial sole position setpoints
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         solePositionControllerSetpoints.getSolePosition(quadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
-         solePositionControllerSetpoints.getSolePosition(quadrant).changeFrame(bodyFrame);
+         solePositionControllerSetpoints.get(quadrant).getSolePosition().setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
+         solePositionControllerSetpoints.get(quadrant).getSolePosition().changeFrame(bodyFrame);
       }
 
       // Initialize force feedback
-      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      for (QuadrupedJointName jointName : QuadrupedJointName.values)
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
@@ -120,7 +128,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    @Override
    public void onExit()
    {
-      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      for (QuadrupedJointName jointName : QuadrupedJointName.values)
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
@@ -134,9 +142,9 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    {
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         solePositionController.getGains(quadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
-         solePositionController.getGains(quadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
-         solePositionController.getGains(quadrant).setDerivativeGains(solePositionDerivativeGainsParameter.get());
+         solePositionController.get(quadrant).getGains().setProportionalGains(solePositionProportionalGainsParameter.get());
+         solePositionController.get(quadrant).getGains().setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
+         solePositionController.get(quadrant).getGains().setDerivativeGains(solePositionDerivativeGainsParameter.get());
       }
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
@@ -150,7 +158,11 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
 
    private void updateSetpoints()
    {
-      solePositionController.compute(taskSpaceControllerCommands.getSoleForce(), solePositionControllerSetpoints, taskSpaceEstimates);
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         solePositionController.get(quadrant)
+               .compute(taskSpaceControllerCommands.getSoleForce(quadrant), solePositionControllerSetpoints.get(quadrant), taskSpaceEstimates);
+      }
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 }

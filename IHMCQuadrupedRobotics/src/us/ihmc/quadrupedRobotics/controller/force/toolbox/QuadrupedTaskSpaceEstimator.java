@@ -44,6 +44,23 @@ public class QuadrupedTaskSpaceEstimator
          }
       }
 
+      public void set(Estimates other)
+      {
+         this.bodyOrientation.setIncludingFrame(other.bodyOrientation);
+         this.bodyPosition.setIncludingFrame(other.bodyPosition);
+         this.bodyLinearVelocity.setIncludingFrame(other.bodyLinearVelocity);
+         this.bodyAngularVelocity.setIncludingFrame(other.bodyAngularVelocity);
+         this.comPosition.setIncludingFrame(other.comPosition);
+         this.comVelocity.setIncludingFrame(other.comVelocity);
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            this.soleOrientation.get(robotQuadrant).setIncludingFrame(other.soleOrientation.get(robotQuadrant));
+            this.solePosition.get(robotQuadrant).setIncludingFrame(other.solePosition.get(robotQuadrant));
+            this.soleAngularVelocity.get(robotQuadrant).setIncludingFrame(other.soleAngularVelocity.get(robotQuadrant));
+            this.soleLinearVelocity.get(robotQuadrant).setIncludingFrame(other.soleLinearVelocity.get(robotQuadrant));
+         }
+      }
+
       public FrameOrientation getBodyOrientation()
       {
          return bodyOrientation;

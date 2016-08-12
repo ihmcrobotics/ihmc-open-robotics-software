@@ -2,6 +2,9 @@ package us.ihmc.plotting;
 
 import java.io.Serializable;
 
+/**
+ * @deprecated Basically don't ever use this class.
+ */
 public class Coordinate implements Serializable
 {
    private static final long serialVersionUID = 6493703987669931932L;

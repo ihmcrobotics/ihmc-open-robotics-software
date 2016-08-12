@@ -22,6 +22,8 @@ import us.ihmc.simulationconstructionset.videos.ExportVideo;
 
 public class StandardAllDialogConstructorsGenerator implements AllDialogConstructorsHolder
 {
+   private static final boolean USE_CSV_INSTEAD_OF_MATLAB = false;
+   
    private ExportDataDialogConstructor exportDataDialogConstructor;
    private ImportDataDialogConstructor importDataDialogConstructor;
    
@@ -34,7 +36,7 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
    private LoadConfigurationDialogGenerator loadConfigurationDialogConstructor;
    private SaveGraphConfigurationDialogGenerator saveGraphConfigurationDialogConstructor;
    private LoadGraphGroupDialogConstructor loadGraphGroupDialogConstructor;
-   private ExportGraphsToFileGenerator exportGraphsToFileConstructor;
+   private ExportGraphsToFileConstructor exportGraphsToFileConstructor;
    private SaveRobotConfigurationDialogGenerator saveRobotConfigurationDialogConstructor;
    private ExportSimulationTo3DMaxDialogGenerator exportSimulationTo3DMaxDialogConstructor;
    
@@ -76,7 +78,17 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
       this.loadConfigurationDialogConstructor = new LoadConfigurationDialogGenerator(sim, frame, myGUI);
       this.saveGraphConfigurationDialogConstructor = new SaveGraphConfigurationDialogGenerator(sim, frame, myGraphArrayPanel);
       this.loadGraphGroupDialogConstructor = new LoadGraphGroupDialogGenerator(sim, myGUI, myGUI, frame, myGraphArrayPanel);
-      this.exportGraphsToFileConstructor = new ExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, myGUI);
+      
+      ExportGraphsToFileConstructor exportGraphsToFileConstructor;
+      if (USE_CSV_INSTEAD_OF_MATLAB)
+      {
+         exportGraphsToFileConstructor = new CsvExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, myGUI);
+      }
+      else
+      {
+         exportGraphsToFileConstructor = new MatlabExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, myGUI);
+      }
+      this.exportGraphsToFileConstructor = exportGraphsToFileConstructor;
 
       this.saveRobotConfigurationDialogConstructor = new SaveRobotConfigurationDialogGenerator(sim, frame);
       
