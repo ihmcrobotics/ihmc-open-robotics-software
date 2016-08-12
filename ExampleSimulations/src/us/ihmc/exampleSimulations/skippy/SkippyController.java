@@ -93,14 +93,14 @@ public class SkippyController implements RobotController
       }
       else if(robotType == 1)
       {
-         k1.set(0.0); //110);
-         k2.set(0.0); //-35);
-         k3.set(-0.0); //30);
-         k4.set(-0.0); //-15);
+         k1.set(10000.0); //110);
+         k2.set(250.0); //-35);
+         k3.set(-600); //30);
+         k4.set(0.0); //-15);
 
          k5.set(-0.0);
          k6.set(-0.0);
-         k7.set(-50.0);
+         k7.set(-0.0);
          k8.set(-0.0);
       }
 
@@ -207,7 +207,7 @@ public class SkippyController implements RobotController
          hipAngleValues = calculateAnglePosAndDerOfHipJointSkippy(robot.getHipJointSkippy());
       hipAngle = hipAngleValues[0];
       hipAngleVel = hipAngleValues[1];
-      qHipIncludingOffset.set(fromRadiansToDegrees(hipAngle));
+      qHipIncludingOffset.set((hipAngle));
 
       //torque set
       if(robotType == 0)
@@ -220,7 +220,7 @@ public class SkippyController implements RobotController
 
          double tau = k1.getDoubleValue() * (0.0 - angle) + k2.getDoubleValue() * (0.0 - angleVel) + k3.getDoubleValue() * (hipDesired - hipAngle) + k4.getDoubleValue() * (0.0 - hipAngleVel);
          Vector3d point2 = createVectorInDirectionOfHipJointAlongHip();
-         Vector3d forceDirectionVector = new Vector3d(0, 1, point2.getY()/point2.getZ()*-1);
+         Vector3d forceDirectionVector = new Vector3d(0, 1.0, point2.getY()/point2.getZ()*-1.0);
          forceDirectionVector.normalize();
          forceDirectionVector.scale(tau/robot.getHipLength()/2);
          robot.setRootJointForce(forceDirectionVector.getX(), forceDirectionVector.getY(), forceDirectionVector.getZ());
@@ -362,14 +362,18 @@ public class SkippyController implements RobotController
    {
       double[] finale = new double[2];
 
-      Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
+      Vector3d horizontalVector = new Vector3d(1.0, 0.0, 0.0);
       Vector3d shoulderVector = createVectorInDirectionOfShoulderJointAlongShoulder();
-      verticalVector.setY(0);
+      horizontalVector.setY(0);
       shoulderVector.setY(0);
 
-      double cosineTheta = (verticalVector.dot(shoulderVector)/(verticalVector.length()*shoulderVector.length()));
-      double angle = Math.acos(cosineTheta);
-      if(shoulderVector.getX()<0)
+      double cosineTheta = (horizontalVector.dot(shoulderVector)/(horizontalVector.length()*shoulderVector.length()));
+      double angle = Math.abs(Math.acos(cosineTheta));
+
+      Vector3d shoulderJointPosition = new Vector3d();
+      joint.getTranslationToWorld(shoulderJointPosition);
+
+      if(robot.getGroundContactPoints().get(2).getZ()<shoulderJointPosition.getZ())
          angle = angle * -1;
 
       double angleVel = robot.getShoulderJoint().getQD().getDoubleValue();
