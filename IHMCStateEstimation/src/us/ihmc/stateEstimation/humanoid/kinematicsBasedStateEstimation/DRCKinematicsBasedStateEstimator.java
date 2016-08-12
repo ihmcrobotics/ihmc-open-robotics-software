@@ -203,6 +203,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    @Override
    public void doControl()
    {
+      pelvisLinearStateUpdater.computeTotalGroundReactionForce();
+
       if(reinitializeStateEstimator.getBooleanValue())
       {
          reinitializeStateEstimator.set(false);

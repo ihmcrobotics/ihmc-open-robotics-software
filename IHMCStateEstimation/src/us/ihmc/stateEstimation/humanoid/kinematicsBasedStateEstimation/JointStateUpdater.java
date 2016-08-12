@@ -157,13 +157,16 @@ public class JointStateUpdater
    public void checkForIMUPacket(double time)
    {
       if (headIMUSubscriber == null)
+      {
          recievedHeadIMUPacket.set(false);
-      if (!headIMUSubscriber.getPacket(imuPacket))
-         recievedHeadIMUPacket.set(false);
-      recievedHeadIMUPacket.set(true);
-
-      if (!recievedHeadIMUPacket.getBooleanValue())
          return;
+      }
+      if (!headIMUSubscriber.getPacket(imuPacket))
+      {
+         recievedHeadIMUPacket.set(false);
+         return;
+      }
+      recievedHeadIMUPacket.set(true);
 
       headIMUDelay.set(time - imuPacket.time);
    }
