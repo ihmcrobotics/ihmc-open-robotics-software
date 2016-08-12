@@ -11,6 +11,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -48,6 +49,7 @@ public class QuadrupedStateEstimatorFactory
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
       robotMotionStatusFromController.setCurrentRobotMotionStatus(RobotMotionStatus.IN_MOTION);
       ForceSensorDataHolder forceSensorDataHolderToUpdate = null;
+      CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate = new CenterOfMassDataHolder();
       CenterOfPressureDataHolder centerOfPressureDataHolder = null;
 
       Map<RigidBody, ContactablePlaneBody> feetMap = new HashMap<RigidBody, ContactablePlaneBody>();
@@ -66,6 +68,7 @@ public class QuadrupedStateEstimatorFactory
       
       DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters.get(),
                                                                                              sensorOutputMapReadOnly.get(), forceSensorDataHolderToUpdate,
+                                                                                             estimatorCenterOfMassDataHolderToUpdate,
                                                                                              imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
                                                                                              centerOfPressureDataHolder , robotMotionStatusFromController, feetMap,
                                                                                              yoGraphicsListRegistry.get());
