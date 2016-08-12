@@ -100,7 +100,7 @@ public class SkippyController implements RobotController
 
          k5.set(-0.0);
          k6.set(-0.0);
-         k7.set(-50.0);
+         k7.set(-0.0);
          k8.set(-0.0);
       }
 
@@ -362,14 +362,18 @@ public class SkippyController implements RobotController
    {
       double[] finale = new double[2];
 
-      Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
+      Vector3d horizontalVector = new Vector3d(1.0, 0.0, 0.0);
       Vector3d shoulderVector = createVectorInDirectionOfShoulderJointAlongShoulder();
-      verticalVector.setY(0);
+      horizontalVector.setY(0);
       shoulderVector.setY(0);
 
-      double cosineTheta = (verticalVector.dot(shoulderVector)/(verticalVector.length()*shoulderVector.length()));
-      double angle = Math.acos(cosineTheta);
-      if(shoulderVector.getX()<0)
+      double cosineTheta = (horizontalVector.dot(shoulderVector)/(horizontalVector.length()*shoulderVector.length()));
+      double angle = Math.abs(Math.acos(cosineTheta));
+
+      Vector3d shoulderJointPosition = new Vector3d();
+      joint.getTranslationToWorld(shoulderJointPosition);
+
+      if(robot.getGroundContactPoints().get(2).getZ()<shoulderJointPosition.getZ())
          angle = angle * -1;
 
       double angleVel = robot.getShoulderJoint().getQD().getDoubleValue();
