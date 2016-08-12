@@ -29,6 +29,8 @@ public class SkippyController implements RobotController
 
    private final DoubleYoVariable robotMass = new DoubleYoVariable("robotMass", registry);
    private final DoubleYoVariable qHipIncludingOffset = new DoubleYoVariable("qHipIncludingOffset", registry);
+   private final DoubleYoVariable qDHipIncludingOffset = new DoubleYoVariable("qDHipIncludingOffset", registry);
+   private final DoubleYoVariable qDShoulderIncludingOffset = new DoubleYoVariable("qDShoulderIncludingOffset", registry);
    private final DoubleYoVariable q_d_hip = new DoubleYoVariable("q_d_hip", registry);
    private final DoubleYoVariable qShoulderIncludingOffset = new DoubleYoVariable("qShoulderIncludingOffset", registry);
    private final DoubleYoVariable q_d_shoulder = new DoubleYoVariable("q_d_shoulder", registry);
@@ -45,7 +47,6 @@ public class SkippyController implements RobotController
    private double shoulderIntegralTerm = 0.0;
 
    private static int timeCounter = 0;
-   private static double prevAngleHip = -Math.PI+Math.PI/6;
 
    public SkippyController(SkippyRobot robot, int robotType, String name)
    {
@@ -90,22 +91,23 @@ public class SkippyController implements RobotController
          k6.set(-490.0);
          k7.set(-60.0);
          k8.set(-45.0);
+         q_d_hip.set(-0.6);  //some values don't work too well - angles that result in a more balanced model work better
+         q_d_shoulder.set(1.2);
       }
       else if(robotType == 1)
       {
-         k1.set(10000.0); //110);
-         k2.set(250.0); //-35);
-         k3.set(-600); //30);
-         k4.set(0.0); //-15);
+         k1.set(4500.0); //110);
+         k2.set(56.0); //-35);
+         k3.set(-6.0); //30);
+         k4.set(-0.8); //-15);
 
          k5.set(-0.0);
          k6.set(-0.0);
          k7.set(-0.0);
          k8.set(-0.0);
+         q_d_hip.set(0.6);
+         q_d_shoulder.set(0.0);
       }
-
-      q_d_hip.set(-0.6);
-      q_d_shoulder.set(0.0);
 
       planarDistanceYZPlane = new DoubleYoVariable("planarDistanceYZPlane", registry);
       planarDistanceXZPlane = new DoubleYoVariable("planarDistanceXZPlane", registry);
@@ -208,6 +210,7 @@ public class SkippyController implements RobotController
       hipAngle = hipAngleValues[0];
       hipAngleVel = hipAngleValues[1];
       qHipIncludingOffset.set((hipAngle));
+      qDHipIncludingOffset.set(hipAngleVel);
 
       //torque set
       if(robotType == 0)
@@ -220,9 +223,9 @@ public class SkippyController implements RobotController
 
          double tau = k1.getDoubleValue() * (0.0 - angle) + k2.getDoubleValue() * (0.0 - angleVel) + k3.getDoubleValue() * (hipDesired - hipAngle) + k4.getDoubleValue() * (0.0 - hipAngleVel);
          Vector3d point2 = createVectorInDirectionOfHipJointAlongHip();
-         Vector3d forceDirectionVector = new Vector3d(0, 1.0, point2.getY()/point2.getZ()*-1.0);
+         Vector3d forceDirectionVector = new Vector3d(0, 1.0, point2.getY()/point2.getZ()*1.0);
          forceDirectionVector.normalize();
-         forceDirectionVector.scale(tau/robot.getHipLength()/2);
+         forceDirectionVector.scale(tau/(robot.getHipLength()/2.0));
          robot.setRootJointForce(forceDirectionVector.getX(), forceDirectionVector.getY(), forceDirectionVector.getZ());
       }
    }
@@ -285,7 +288,8 @@ public class SkippyController implements RobotController
          shoulderAngleValues = calculateAnglePosAndDerOfShoulderJointSkippy(robot.getShoulderJoint());
       shoulderAngle = shoulderAngleValues[0];
       shoulderAngleVel = shoulderAngleValues[1];
-      qShoulderIncludingOffset.set(fromRadiansToDegrees(shoulderAngle));
+      qShoulderIncludingOffset.set((shoulderAngle));
+      qDShoulderIncludingOffset.set(shoulderAngleVel);
 
       double shoulderAngleError = AngleTools.computeAngleDifferenceMinusPiToPi(shoulderDesired, shoulderAngle);
       robot.getShoulderJoint().setTau(k5.getDoubleValue()*Math.sin(0.0-angle) + k6.getDoubleValue()*(0.0 - angleVel) + k7.getDoubleValue()*(shoulderAngleError) + k8.getDoubleValue()*(0.0 - shoulderAngleVel));
