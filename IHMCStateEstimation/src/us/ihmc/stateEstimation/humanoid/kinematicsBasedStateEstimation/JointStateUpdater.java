@@ -3,6 +3,7 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -36,6 +37,7 @@ public class JointStateUpdater
    private HeadIMUSubscriber headIMUSubscriber = null;
    private final IMUPacket imuPacket = new IMUPacket();
    private final BooleanYoVariable recievedHeadIMUPacket = new BooleanYoVariable("RecievedHeadIMUPacket", registry);
+   private final DoubleYoVariable headIMUDelay = new DoubleYoVariable("HeadIMUDelay", registry);
 
    private final BooleanYoVariable enableIMUBasedJointVelocityEstimator = new BooleanYoVariable("enableIMUBasedJointVelocityEstimator", registry);
 
@@ -119,12 +121,6 @@ public class JointStateUpdater
 
    public void updateJointState()
    {
-      // TODO: use this IMU measurement on Atlas to correct the back joint velocities.
-      if (headIMUSubscriber != null && headIMUSubscriber.getPacket(imuPacket))
-         recievedHeadIMUPacket.set(true);
-      else
-         recievedHeadIMUPacket.set(false);
-
       if (iMUBasedJointVelocityEstimator != null)
       {
          iMUBasedJointVelocityEstimator.compute();
@@ -156,6 +152,20 @@ public class JointStateUpdater
       rootBody.updateFramesRecursively();
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
+   }
+
+   public void checkForIMUPacket(double time)
+   {
+      if (headIMUSubscriber == null)
+         recievedHeadIMUPacket.set(false);
+      if (!headIMUSubscriber.getPacket(imuPacket))
+         recievedHeadIMUPacket.set(false);
+      recievedHeadIMUPacket.set(true);
+
+      if (!recievedHeadIMUPacket.getBooleanValue())
+         return;
+
+      headIMUDelay.set(time - imuPacket.time);
    }
 
    public void addHeadIMUSubscriber(HeadIMUSubscriber headIMUSubscriber)
