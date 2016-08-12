@@ -91,6 +91,8 @@ public class SkippyController implements RobotController
          k6.set(-490.0);
          k7.set(-60.0);
          k8.set(-45.0);
+         q_d_hip.set(-0.6);  //some values don't work too well - angles that result in a more balanced model work better
+         q_d_shoulder.set(1.2);
       }
       else if(robotType == 1)
       {
@@ -103,10 +105,9 @@ public class SkippyController implements RobotController
          k6.set(-0.0);
          k7.set(-0.0);
          k8.set(-0.0);
+         q_d_hip.set(0.6);
+         q_d_shoulder.set(0.0);
       }
-
-      q_d_hip.set(0.6);
-      q_d_shoulder.set(0.0);
 
       planarDistanceYZPlane = new DoubleYoVariable("planarDistanceYZPlane", registry);
       planarDistanceXZPlane = new DoubleYoVariable("planarDistanceXZPlane", registry);
@@ -287,7 +288,7 @@ public class SkippyController implements RobotController
          shoulderAngleValues = calculateAnglePosAndDerOfShoulderJointSkippy(robot.getShoulderJoint());
       shoulderAngle = shoulderAngleValues[0];
       shoulderAngleVel = shoulderAngleValues[1];
-      qShoulderIncludingOffset.set(fromRadiansToDegrees(shoulderAngle));
+      qShoulderIncludingOffset.set((shoulderAngle));
       qDShoulderIncludingOffset.set(shoulderAngleVel);
 
       double shoulderAngleError = AngleTools.computeAngleDifferenceMinusPiToPi(shoulderDesired, shoulderAngle);
