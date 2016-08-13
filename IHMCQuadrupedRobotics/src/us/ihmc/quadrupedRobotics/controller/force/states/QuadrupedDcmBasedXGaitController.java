@@ -58,7 +58,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
    private final DoubleParameter comPositionGravityCompensationParameter = parameterFactory.createDouble("comPositionGravityCompensation", 1);
    private final DoubleArrayParameter comForceCommandWeightsParameter = parameterFactory.createDoubleArray("comForceCommandWeights", 1, 1, 1);
    private final DoubleArrayParameter comTorqueCommandWeightsParameter = parameterFactory.createDoubleArray("comTorqueCommandWeights", 1, 1, 1);
-   private final DoubleArrayParameter dcmPositionProportionalGainsParameter = parameterFactory.createDoubleArray("dcmPositionProportionalGains", 1.5, 1.5, 0);
+   private final DoubleArrayParameter dcmPositionProportionalGainsParameter = parameterFactory.createDoubleArray("dcmPositionProportionalGains", 1, 1, 0);
    private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
    private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
@@ -107,7 +107,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
    private final FramePoint dcmPositionWaypoint;
    private final YoFrameVector stepAdjustmentForControl;
    private final YoFrameVector stepAdjustmentForPlanning;
-   private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final PreallocatedQueue<QuadrupedTimedStep> stepPlan;
 
    // xgait planner
@@ -172,8 +171,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
       dcmPositionWaypoint = new FramePoint();
       stepAdjustmentForControl = new YoFrameVector("stepAdjustmentForControl", worldFrame, registry);
       stepAdjustmentForPlanning = new YoFrameVector("stepAdjustmentForPlanning", worldFrame, registry);
-      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
-            maximumStepStrideParameter.get());
       stepPlan = new PreallocatedQueue<>(QuadrupedTimedStep.class, NUMBER_OF_PREVIEW_STEPS + 2);
 
       // xgait planner
@@ -369,32 +366,24 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
 
          // adjust nominal step goal positions and update step controller queue
          timedStepController.removeSteps();
-         for (RobotEnd robotEnd : RobotEnd.values)
+         for (int i = 0; i < stepPlan.size(); i++)
          {
-            RobotQuadrant robotQuadrant = xGaitCurrentSteps.get(robotEnd).getRobotQuadrant();
-            if (timedStepController.getCurrentStep(robotQuadrant) != null)
+            RobotQuadrant robotQuadrant = stepPlan.get(i).getRobotQuadrant();
+            double currentTime = robotTimestamp.getDoubleValue();
+            double startTime = stepPlan.get(i).getTimeInterval().getStartTime();
+            double endTime = stepPlan.get(i).getTimeInterval().getEndTime();
+            if (startTime < currentTime && currentTime < endTime)
             {
                QuadrupedTimedStep adjustedStep = timedStepController.getCurrentStep(robotQuadrant);
-               adjustedStep.getGoalPosition().set(xGaitCurrentSteps.get(robotEnd).getGoalPosition());
+               adjustedStep.getGoalPosition().set(stepPlan.get(i).getGoalPosition());
                adjustedStep.getGoalPosition().add(stepAdjustmentForControl.getFrameTuple().getVector());
-               crossoverProjection.project(adjustedStep, taskSpaceEstimates.getSolePosition());
                groundPlaneEstimator.projectZ(adjustedStep.getGoalPosition());
             }
-            else
+            else if (timedStepController.addStep(stepPlan.get(i)))
             {
-               timedStepController.addStep(xGaitCurrentSteps.get(robotEnd));
-            }
-         }
-         for (int i = 0; i < xGaitPreviewSteps.size(); i++)
-         {
-            if (!haltFlag.getBooleanValue() || xGaitPreviewSteps.get(i).getTimeInterval().getEndTime() < haltTime.getDoubleValue())
-            {
-               if (timedStepController.addStep(xGaitPreviewSteps.get(i)))
-               {
-                  QuadrupedTimedStep adjustedStep = timedStepController.getQueue().getTail();
-                  adjustedStep.getGoalPosition().add(stepAdjustmentForPlanning.getFrameTuple().getVector());
-                  groundPlaneEstimator.projectZ(adjustedStep.getGoalPosition());
-               }
+               QuadrupedTimedStep adjustedStep = timedStepController.getQueue().getTail();
+               adjustedStep.getGoalPosition().add(stepAdjustmentForPlanning.getFrameTuple().getVector());
+               groundPlaneEstimator.projectZ(adjustedStep.getGoalPosition());
             }
          }
       }
@@ -409,19 +398,19 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
       groundPlaneEstimator.compute(groundPlanePositions);
 
       // update current step
-      RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
-      xGaitCurrentSteps.get(thisStepEnd).set(timedStepController.getCurrentStep(thisStepQuadrant));
+      for (int i = 0; i < xGaitPreviewSteps.size(); i++)
+      {
+         if (xGaitPreviewSteps.get(i).getRobotQuadrant() == thisStepQuadrant)
+         {
+            xGaitCurrentSteps.get(thisStepQuadrant.getEnd()).set(xGaitPreviewSteps.get(i));
+            break;
+         }
+      }
    }
 
    @Override
    public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
    {
-      // update current step goal position
-      RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
-      if (thisStepQuadrant == xGaitCurrentSteps.get(thisStepEnd).getRobotQuadrant())
-      {
-         xGaitCurrentSteps.get(thisStepEnd).set(timedStepController.getCurrentStep(thisStepEnd));
-      }
    }
 
    @Override
