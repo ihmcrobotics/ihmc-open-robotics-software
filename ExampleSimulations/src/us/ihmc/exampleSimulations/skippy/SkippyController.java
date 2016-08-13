@@ -99,8 +99,7 @@ public class SkippyController implements RobotController
          k1.set(4500.0); //110);
          k2.set(56.0); //-35);
          k3.set(-6.0); //30);
-         k4.set(-0.8); //-15);
-
+         k4.set(-0.9); //-15);
          k5.set(-0.0);
          k6.set(-0.0);
          k7.set(-0.0);
