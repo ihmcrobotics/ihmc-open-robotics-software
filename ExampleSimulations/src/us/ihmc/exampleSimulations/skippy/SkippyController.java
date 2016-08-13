@@ -91,8 +91,8 @@ public class SkippyController implements RobotController
          k6.set(-490.0);
          k7.set(-60.0);
          k8.set(-45.0);
-         q_d_hip.set(-0.6);  //some values don't work too well - angles that result in a more balanced model work better
-         q_d_shoulder.set(1.2);
+         q_d_hip.set(-0.0);  //some values don't work too well - angles that result in a more balanced model work better
+         q_d_shoulder.set(0.0);
       }
       else if(robotType == 1)
       {
