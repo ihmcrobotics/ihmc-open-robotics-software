@@ -35,6 +35,7 @@ public class ZUpFrame extends ReferenceFrame
    private final Point3d originPoint3d = new Point3d();
    private final RigidBodyTransform nonZUpToWorld = new RigidBodyTransform();
 
+   @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
       origin.getReferenceFrame().getTransformToDesiredFrame(nonZUpToWorld, worldFrame);
