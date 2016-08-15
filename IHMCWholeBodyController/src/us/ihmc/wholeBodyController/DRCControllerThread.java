@@ -20,6 +20,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -66,6 +67,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ForceSensorDataHolderReadOnly forceSensorDataHolderForController;
+   private final CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
 
    private final ThreadDataSynchronizerInterface threadDataSynchronizer;
@@ -127,6 +129,15 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
 
       forceSensorDataHolderForController = threadDataSynchronizer.getControllerForceSensorDataHolder();
+      if (robotModel.getWalkingControllerParameters().useCenterOfMassVelocityFromEstimator())
+      {
+         centerOfMassDataHolderForController = threadDataSynchronizer.getControllerCenterOfMassDataHolder();         
+      }
+      else
+      {
+         centerOfMassDataHolderForController = null;
+      }
+
       centerOfPressureDataHolderForEstimator = threadDataSynchronizer.getControllerCenterOfPressureDataHolder();
 
       outputWriter.setFullRobotModel(controllerFullRobotModel, threadDataSynchronizer.getControllerRawJointSensorDataHolderMap());
@@ -151,7 +162,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       InverseDynamicsJoint[] arrayOfJointsToIgnore = listOfJointsToIgnore.toArray(new InverseDynamicsJoint[] {});
 
       robotController = createMomentumBasedController(controllerFullRobotModel, outputProcessor,
-            controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, threadDataSynchronizer.getControllerContactSensorHolder(),
+            controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, centerOfMassDataHolderForController,
+            threadDataSynchronizer.getControllerContactSensorHolder(),
             centerOfPressureDataHolderForEstimator, yoGraphicsListRegistry, registry, arrayOfJointsToIgnore);
 
       createControllerRobotMotionStatusUpdater(controllerFactory, threadDataSynchronizer.getControllerRobotMotionStatusHolder());
@@ -191,7 +203,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private ModularRobotController createMomentumBasedController(SDFFullHumanoidRobotModel controllerModel, OutputProcessor outputProcessor,
          MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT, double gravity,
-         ForceSensorDataHolderReadOnly forceSensorDataHolderForController, ContactSensorHolder contactSensorHolder,
+         ForceSensorDataHolderReadOnly forceSensorDataHolderForController, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
+         ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
          InverseDynamicsJoint... jointsToIgnore)
    {
@@ -210,7 +223,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
 
       RobotController robotController = controllerFactory.getController(controllerModel, controlDT, gravity, yoTime, yoGraphicsListRegistry,
-            forceSensorDataHolderForController, contactSensorHolder, centerOfPressureDataHolderForEstimator, jointsToIgnore);
+            forceSensorDataHolderForController, centerOfMassDataHolder, contactSensorHolder, centerOfPressureDataHolderForEstimator, jointsToIgnore);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
       modularRobotController.addRobotController(robotController);
