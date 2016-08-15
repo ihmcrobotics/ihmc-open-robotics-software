@@ -6,6 +6,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -37,7 +38,7 @@ public class SkippyController implements RobotController
 
    private String name;
    private SkippyRobot robot;
-   private int robotType;
+   private RobotType robotType;
 
    private static ArrayList<double[]> desiredPositions;
 
@@ -48,7 +49,7 @@ public class SkippyController implements RobotController
 
    private static int timeCounter = 0;
 
-   public SkippyController(SkippyRobot robot, int robotType, String name)
+   public SkippyController(SkippyRobot robot, RobotType robotType, String name)
    {
       this.name = name;
       this.robot = robot;
@@ -80,7 +81,7 @@ public class SkippyController implements RobotController
       k7 = new DoubleYoVariable("k7", registry);
       k8 = new DoubleYoVariable("k8", registry);
 
-      if(robotType == 0)
+      if(robotType == RobotType.TIPPY)
       {
          k1.set(3600.0); //110);
          k2.set(1100.0); //-35);
@@ -94,7 +95,7 @@ public class SkippyController implements RobotController
          q_d_hip.set(-0.0);  //some values don't work too well - angles that result in a more balanced model work better
          q_d_shoulder.set(0.0);
       }
-      else if(robotType == 1)
+      else if(robotType == RobotType.SKIPPY)
       {
          k1.set(4500.0); //110);
          k2.set(56.0); //-35);
@@ -203,9 +204,9 @@ public class SkippyController implements RobotController
       double hipAngleVel = 0;
       double[] hipAngleValues = new double[2];
 
-      if(robotType == 0)
+      if(robotType == RobotType.TIPPY)
          hipAngleValues = calculateAnglePosAndDerOfHipJointAcrobot(robot.getHipJointAcrobot());
-      else if(robotType == 1)
+      else if(robotType == RobotType.SKIPPY)
          hipAngleValues = calculateAnglePosAndDerOfHipJointSkippy(robot.getHipJointSkippy());
       hipAngle = hipAngleValues[0];
       hipAngleVel = hipAngleValues[1];
@@ -213,11 +214,11 @@ public class SkippyController implements RobotController
       qDHipIncludingOffset.set(hipAngleVel);
 
       //torque set
-      if(robotType == 0)
+      if(robotType == RobotType.TIPPY)
       {
          robot.getHipJointAcrobot().setTau(k1.getDoubleValue() * (0.0 - angle) + k2.getDoubleValue() * (0.0 - angleVel) + k3.getDoubleValue() * (hipDesired - hipAngle) + k4.getDoubleValue() * (0.0 - hipAngleVel));
       }
-      else if(robotType == 1)
+      else if(robotType == RobotType.SKIPPY)
       {
          //torque ~> force ; probably will create a method for this
 
@@ -282,9 +283,9 @@ public class SkippyController implements RobotController
       double shoulderAngleVel = 0;
       double[] shoulderAngleValues = new double[2];
 
-      if(robotType == 0)
+      if(robotType == RobotType.TIPPY)
          shoulderAngleValues = calculateAnglePosAndDerOfShoulderJointAcrobot(robot.getShoulderJoint());
-      else if(robotType == 1)
+      else if(robotType == RobotType.SKIPPY)
          shoulderAngleValues = calculateAnglePosAndDerOfShoulderJointSkippy(robot.getShoulderJoint());
       shoulderAngle = shoulderAngleValues[0];
       shoulderAngleVel = shoulderAngleValues[1];
