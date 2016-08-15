@@ -21,7 +21,6 @@ public class SCSPointCloudVisualizer implements RewoundListener
    public SCSPointCloudVisualizer(SimulationConstructionSet scs)
    {
       this.scs = scs;
-
    }
 
    public void addPoints(List<Point3d> points)
