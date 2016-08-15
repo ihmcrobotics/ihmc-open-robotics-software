@@ -123,16 +123,16 @@ public class SkippyRobot extends Robot
          // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
          footJointIfTippy = new UniversalJoint("foot_X", "foot_Y", new Vector3d(0.0, 0.0, 0.0), this, Axis.X, Axis.Y);
          footJointIfTippy.setInitialState(-Math.PI / 7.0, 0.0, initialBodySidewaysLean, 0.0); // initial position "q" of foot
-         Link leg = createLegAcrobot();
+         Link leg = createLegTippy();
          footJointIfTippy.setLink(leg);
          this.addRootJoint(footJointIfTippy);
          footJointIfTippy.addGroundContactPoint(footContact);
 
          //Negative X axis so that corresponds with Tippy, which makes joints from the foot up, rather than the torso outward.
          hipJoint = new PinJoint("hipJoint", new Vector3d(0.0, 0.0, LEG_LENGTH), this, new Vector3d(-1.0, 0.0, 0.0));
-         Link torso = createTorsoAcrobot();
+         Link torso = createTorsoTippy();
          hipJoint.setLink(torso);
-         hipJoint.setInitialState(-2.0 * Math.PI / 8.0, 0.0);
+         hipJoint.setInitialState(-2.0 * Math.PI / 3.0, 0.0);
 
          bodyPoint = new KinematicPoint("bodyPoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2.0), this);
          hipJoint.addKinematicPoint(bodyPoint);
@@ -141,7 +141,7 @@ public class SkippyRobot extends Robot
          //hip.addGroundContactPoint(hipContact);
 
          shoulderJoint = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH), this, Axis.Y);
-         Link arms = createArmsAcrobot();
+         Link arms = createArmsTippy();
          shoulderJoint.setLink(arms);
          shoulderJoint.setInitialState(initialShoulderJointAngle, 0.0);
 
@@ -161,8 +161,6 @@ public class SkippyRobot extends Robot
       else if (typeOfRobot == RobotType.SKIPPY)
       {
          rootJointIfSkippy = new FloatingJoint("rootJoint", new Vector3d(0.0, 0.0, 0.0), this);
-         //double offsetAngle = Math.PI/6;
-         //rootJoint.setPosition(convertHipJointAngleToVector(offsetAngle));
          rootJointForce = new ExternalForcePoint("rootJointForce", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2), this);
          rootJointIfSkippy.addExternalForcePoint(rootJointForce);
          Link torso = createTorsoSkippy();
@@ -180,7 +178,7 @@ public class SkippyRobot extends Robot
 
          shoulderJoint = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2), this, Axis.Y);
          shoulderJoint.setInitialState(initialShoulderJointAngle, 0.0);
-         Link arms = createArmsAcrobot();
+         Link arms = createArmsTippy();
          shoulderJoint.setLink(arms);
          GroundContactPoint shoulderContactPointLeft = new GroundContactPoint("shoulderContactPointLeft", new Vector3d(-SHOULDER_LENGTH / 2, 0.0, 0.0), this);
          GroundContactPoint shoulderContactPointRight = new GroundContactPoint("shoulderContactPointRight", new Vector3d(SHOULDER_LENGTH / 2, 0.0, 0.0), this);
@@ -227,22 +225,7 @@ public class SkippyRobot extends Robot
       this.setGroundContactModel(ground);
    }
 
-   private Vector3d convertHipJointAngleToVector(double angle)
-   {
-      //hipjoint only on YZ plane
-      double dz = TORSO_LENGTH / 2.0 - TORSO_LENGTH / 2.0 * Math.cos(Math.abs(angle));
-      double dy = TORSO_LENGTH / 2.0 - TORSO_LENGTH / 2.0 * Math.sin(Math.abs(angle));
-      if (angle < 0)
-         dy = dy * -1;
-
-      Vector3d newPosition = new Vector3d();
-      this.getHipJointSkippy().getPosition(newPosition);
-      newPosition.setY(newPosition.getY() + dy);
-      newPosition.setZ(newPosition.getZ() + dz);
-      return newPosition;
-   }
-
-   private Link createLegAcrobot()
+   private Link createLegTippy()
    {
       Link leg = new Link("leg");
       leg.setMass(LEG_MASS);
@@ -288,7 +271,7 @@ public class SkippyRobot extends Robot
       return leg;
    }
 
-   private Link createTorsoAcrobot()
+   private Link createTorsoTippy()
    {
       Link torso = new Link("torso");
       torso.setMass(TORSO_MASS);
@@ -330,7 +313,7 @@ public class SkippyRobot extends Robot
       return torso;
    }
 
-   private Link createArmsAcrobot()
+   private Link createArmsTippy()
    {
       Link arms = new Link("arms");
       arms.setMass(SHOULDER_MASS);
@@ -366,7 +349,7 @@ public class SkippyRobot extends Robot
       return LEG_LENGTH;
    }
 
-   public PinJoint getHipJointAcrobot()
+   public PinJoint getHipJointTippy()
    {
       return hipJoint;
    }
