@@ -42,8 +42,8 @@ public class FormattingTools
          return 0;
       }
 
-      final double d = Math.ceil(Math.log10(number < 0 ? -number : number));
-      final int power = significantFigures - (int) d;
+      final double log10 = Math.ceil(Math.log10(Math.abs(number)));
+      final int power = significantFigures - (int) log10;
 
       final double magnitude = Math.pow(10, power);
       final long shifted = Math.round(number * magnitude);

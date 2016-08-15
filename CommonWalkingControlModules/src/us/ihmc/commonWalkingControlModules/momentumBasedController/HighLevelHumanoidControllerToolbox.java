@@ -52,6 +52,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -142,14 +143,18 @@ public class HighLevelHumanoidControllerToolbox
    private final FramePoint2d centerOfPressure = new FramePoint2d();
    private final YoFramePoint2d yoCenterOfPressure = new YoFramePoint2d("CenterOfPressure", worldFrame, registry);
 
+   private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
+   
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
+         CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
          SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ, double omega0,
          TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT,
          ArrayList<Updatable> updatables, YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
+      this.centerOfMassDataHolder = centerOfMassDataHolder;
       this.robotJacobianHolder = robotJacobianHolder;
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
@@ -448,7 +453,15 @@ public class HighLevelHumanoidControllerToolbox
    private void computeCapturePoint()
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
-      centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
+      
+      if (centerOfMassDataHolder != null)
+      {
+         centerOfMassDataHolder.getCenterOfMassVelocity(centerOfMassVelocity);
+      }
+      else
+      {
+         centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
+      }
 
       centerOfMassPosition.changeFrame(worldFrame);
       centerOfMassVelocity.changeFrame(worldFrame);

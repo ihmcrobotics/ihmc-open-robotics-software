@@ -47,6 +47,7 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -229,7 +230,8 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    }
 
    public RobotController getController(FullHumanoidRobotModel fullRobotModel, double controlDT, double gravity, DoubleYoVariable yoTime,
-         YoGraphicsListRegistry yoGraphicsListRegistry, ForceSensorDataHolderReadOnly forceSensorDataHolder, ContactSensorHolder contactSensorHolder,
+         YoGraphicsListRegistry yoGraphicsListRegistry, ForceSensorDataHolderReadOnly forceSensorDataHolder, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
+         ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, InverseDynamicsJoint... jointsToIgnore)
    {
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -256,7 +258,8 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       double omega0 = walkingControllerParameters.getOmega0();
-      momentumBasedController = new HighLevelHumanoidControllerToolbox(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches, wristForceSensors, yoTime,
+      momentumBasedController = new HighLevelHumanoidControllerToolbox(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches, 
+            centerOfMassDataHolder, wristForceSensors, yoTime,
             gravityZ, omega0, twistCalculator, feet, handContactableBodies, controlDT, updatables, yoGraphicsListRegistry, jointsToIgnore);
       momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
