@@ -1,11 +1,11 @@
 package us.ihmc.tools;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
-import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class FormattingToolsTest
@@ -74,5 +74,13 @@ public class FormattingToolsTest
 
       resultingFormattedString = FormattingTools.underscoredToCamelCase("1234_@$%_BCDF", true);
       assertTrue(resultingFormattedString.equals("1234@$%Bcdf"));
+   }
+	
+	@DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testFormatToSignificantFigures()
+   {
+      assertEquals("not equal", 100, FormattingTools.roundToSignificantFigures(123.45, 1), 1e-12);
+      assertEquals("not equal", 120, FormattingTools.roundToSignificantFigures(123.45, 2), 1e-12);
    }
 }

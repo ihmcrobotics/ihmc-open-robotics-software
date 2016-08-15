@@ -1011,4 +1011,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       return false;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useCenterOfMassVelocityFromEstimator()
+   {
+      return false;
+   }
 }

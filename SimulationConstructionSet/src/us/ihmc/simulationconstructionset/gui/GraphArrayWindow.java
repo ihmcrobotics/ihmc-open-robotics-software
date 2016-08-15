@@ -16,18 +16,18 @@ import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.commands.AllCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.SelectGraphConfigurationCommandExecutor;
-import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ExportGraphsToFileAction;
 import us.ihmc.simulationconstructionset.gui.config.Configuration;
 import us.ihmc.simulationconstructionset.gui.config.ConfigurationList;
 import us.ihmc.simulationconstructionset.gui.config.GraphConfigurationList;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroup;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroupList;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroupSelector;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.CsvExportGraphsToFileGenerator;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportGraphsToFileConstructor;
-import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportGraphsToFileGenerator;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.LoadGraphGroupDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.LoadGraphGroupDialogGenerator;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.MatlabExportGraphsToFileGenerator;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.PrintGraphsDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.PrintGraphsDialogGenerator;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveGraphConfigurationDialogConstructor;
@@ -35,6 +35,8 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveGraphConfigu
 
 public class GraphArrayWindow implements SelectGraphConfigurationCommandExecutor, GraphGroupSelector
 {
+   private static final boolean USE_CSV_INSTEAD_OF_MATLAB = false;
+   
    protected final GraphArrayPanel myGraphArrayPanel;
    private final JFrame frame;
    private final String name;
@@ -91,7 +93,15 @@ public class GraphArrayWindow implements SelectGraphConfigurationCommandExecutor
       
       PrintGraphsDialogConstructor printGraphsDialogConstructor = new PrintGraphsDialogGenerator(myGraphArrayPanel);
 
-      ExportGraphsToFileConstructor exportGraphsToFileConstructor = new ExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, sim.getStandardSimulationGUI());
+      ExportGraphsToFileConstructor exportGraphsToFileConstructor;
+      if (USE_CSV_INSTEAD_OF_MATLAB)
+      {
+         exportGraphsToFileConstructor = new CsvExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, sim.getStandardSimulationGUI());
+      }
+      else
+      {
+         exportGraphsToFileConstructor = new MatlabExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, sim.getStandardSimulationGUI());
+      }
       
       windowGUIActions.createGraphWindowActions(mainGUIActions, myGraphArrayPanel, saveGraphConfigurationDialogConstructor,loadGraphGroupDialogConstructor, printGraphsDialogConstructor, exportGraphsToFileConstructor);
       JPanel buttonPanel = windowGUIActions.createGraphWindowButtons();

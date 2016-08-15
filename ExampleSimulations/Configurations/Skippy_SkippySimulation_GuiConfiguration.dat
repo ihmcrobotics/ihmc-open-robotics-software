@@ -72,13 +72,37 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.Skippy.q_shoulder</Variables>
+		<GraphConfiguration>
+			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.Skippy.qd_shoulder</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
 <EntryBoxTab>
 <Title>
 Tab0
 </Title>
-<Entry Boxes>root.Skippy.SkippyController.k1,root.Skippy.SkippyController.k2,root.Skippy.SkippyController.k3,root.Skippy.SkippyController.k4,root.Skippy.SkippyController.q_d_hip,root.Skippy.q_hip</Entry Boxes>
+<Entry Boxes>root.Skippy.SkippyController.k1,root.Skippy.SkippyController.k2,root.Skippy.SkippyController.k3,root.Skippy.SkippyController.k4,root.Skippy.SkippyController.q_d_hip,root.Skippy.q_hip,root.Skippy.SkippyController.q_d_shoulder,root.Skippy.q_shoulder</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -95,31 +119,7 @@ Tab0
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.angleToCoMYZPlane</Variables>
-		<GraphConfiguration>
-			<Name>config7</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.SkippyController.angularVelocityToCoMYZPlane</Variables>
-		<GraphConfiguration>
-			<Name>config8</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.SkippyController.centerOfMassY</Variables>
+		<Variables>root.Skippy.SkippyController.angleToCoMYZPlane,root.Skippy.SkippyController.angleToCoMXZPlane</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -131,7 +131,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.centerOfMassZ</Variables>
+		<Variables>root.Skippy.SkippyController.angularVelocityToCoMYZPlane,root.Skippy.SkippyController.angularVelocityToCoMXZPlane</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -143,9 +143,45 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.tau_hip</Variables>
+		<Variables>root.Skippy.SkippyController.centerOfMassY</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.Skippy.SkippyController.centerOfMassZ</Variables>
+		<GraphConfiguration>
+			<Name>config12</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.Skippy.tau_hip</Variables>
+		<GraphConfiguration>
+			<Name>config13</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.Skippy.q_foot_X,root.Skippy.q_foot_Y</Variables>
+		<GraphConfiguration>
+			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -164,9 +200,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-14.535667301599863</Camera X>
- <Camera Y>-1.9958274254910517</Camera Y>
- <Camera Z>0.4097845052696294</Camera Z>
+ <Camera X>-11.78759016444696</Camera X>
+ <Camera Y>16.730951457872212</Camera Y>
+ <Camera Z>3.1967139336658494</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -190,8 +226,8 @@ Tab0
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-0.028684497245702545</Fix X>
-<Fix Y>-5.595196487008304E-16</Fix Y>
-<Fix Z>1.208083844816336</Fix Z>
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.6</Fix Z>
 </Fix Position>
 </Canvas 1>
