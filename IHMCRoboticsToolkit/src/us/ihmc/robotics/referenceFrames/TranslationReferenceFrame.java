@@ -18,13 +18,14 @@ public class TranslationReferenceFrame extends ReferenceFrame
       originVector = new FrameVector(parentFrame);
    }
 
+   @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {      
       transformToParent.setIdentity();
       transformToParent.setTranslation(originVector.getVector());
    }
 
-   public void updateTranslation(FrameTuple frameVector)
+   public void updateTranslation(FrameTuple<?, ?> frameVector)
    {      
       originVector.set(frameVector);
       this.update();
@@ -36,4 +37,3 @@ public class TranslationReferenceFrame extends ReferenceFrame
       this.update();
    }
 }  
-
