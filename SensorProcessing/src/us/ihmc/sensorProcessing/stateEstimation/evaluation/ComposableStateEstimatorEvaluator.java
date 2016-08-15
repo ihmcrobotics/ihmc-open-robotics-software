@@ -335,6 +335,18 @@ public class ComposableStateEstimatorEvaluator
             // TODO Auto-generated method stub
             return false;
          }
+
+         @Override
+         public double getCenterOfMassVelocityFusingFrequency()
+         {
+            return 0.4261;
+         }
+
+         @Override
+         public boolean useGroundReactionForcesToComputeCenterOfMassVelocity()
+         {
+            return false;
+         }
       };
 
       JointAndIMUSensorMap sensorMap = null; // simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader().getJointAndIMUSensorMap();
