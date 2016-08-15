@@ -37,6 +37,7 @@ public class XYPlaneFrom3PointsFrame extends ReferenceFrame
       this.p3.changeFrame(parentFrame);
    }
 
+   @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
       eX.sub(p2.getPoint(), p1.getPoint());
