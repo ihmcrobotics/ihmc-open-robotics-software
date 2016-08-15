@@ -182,7 +182,7 @@ public class SkippyController implements RobotController
 
       planarDistanceYZPlane.set(Math.sqrt(Math.pow(centerOfMass.getY()-footLocation.getY(), 2) + Math.pow(footToComZ, 2)));
       double angle = (Math.atan2(footToComY, footToComZ));
-      angleToCoMInYZPlane.set(fromRadiansToDegrees(angle));
+      angleToCoMInYZPlane.set(angle);
 
       /*
          angular vel : angle created w/ com to groundpoint against vertical
@@ -205,7 +205,7 @@ public class SkippyController implements RobotController
 
       angularVelocityToCoMYZPlane.set(angleVel);
       angularVelocityToCoMYZPlane2.update();
-
+      double angularVelocityForControl = angularVelocityToCoMYZPlane.getDoubleValue();
 
       /*
          angular pos/vel of hipjoint
@@ -226,13 +226,13 @@ public class SkippyController implements RobotController
       //torque set
       if(robotType == RobotType.TIPPY)
       {
-         robot.getHipJointAcrobot().setTau(k1.getDoubleValue() * (0.0 - angle) + k2.getDoubleValue() * (0.0 - angleVel) + k3.getDoubleValue() * (hipDesired - hipAngle) + k4.getDoubleValue() * (0.0 - hipAngleVel));
+         robot.getHipJointAcrobot().setTau(k1.getDoubleValue() * (0.0 - angle) + k2.getDoubleValue() * (0.0 - angularVelocityForControl) + k3.getDoubleValue() * (hipDesired - hipAngle) + k4.getDoubleValue() * (0.0 - hipAngleVel));
       }
       else if(robotType == RobotType.SKIPPY)
       {
          //torque ~> force ; probably will create a method for this
 
-         double tau = k1.getDoubleValue() * (0.0 - angle) + k2.getDoubleValue() * (0.0 - angleVel) + k3.getDoubleValue() * (hipDesired - hipAngle) + k4.getDoubleValue() * (0.0 - hipAngleVel);
+         double tau = k1.getDoubleValue() * (0.0 - angle) + k2.getDoubleValue() * (0.0 - angularVelocityForControl) + k3.getDoubleValue() * (hipDesired - hipAngle) + k4.getDoubleValue() * (0.0 - hipAngleVel);
          Vector3d point2 = createVectorInDirectionOfHipJointAlongHip();
          Vector3d forceDirectionVector = new Vector3d(0, 1.0, point2.getY()/point2.getZ()*1.0);
          forceDirectionVector.normalize();
@@ -262,7 +262,7 @@ public class SkippyController implements RobotController
 
       planarDistanceXZPlane.set(Math.sqrt(Math.pow(footToComX, 2) + Math.pow(footToComZ, 2)));
       double angle = (Math.atan2(footToComX, footToComZ));
-      angleToCoMInXZPlane.set(fromRadiansToDegrees(angle));
+      angleToCoMInXZPlane.set(angle);
 
       /*
          angular vel : angle created w/ com to groundpoint against vertical
@@ -285,6 +285,7 @@ public class SkippyController implements RobotController
 
       angularVelocityToCoMXZPlane.set(angleVel);
       angularVelocityToCoMXZPlane2.update();
+      double angularVelocityForControl = angularVelocityToCoMXZPlane.getDoubleValue();
 
 
       /*
@@ -304,7 +305,7 @@ public class SkippyController implements RobotController
       qDShoulderIncludingOffset.set(shoulderAngleVel);
 
       double shoulderAngleError = AngleTools.computeAngleDifferenceMinusPiToPi(shoulderDesired, shoulderAngle);
-      robot.getShoulderJoint().setTau(k5.getDoubleValue()*Math.sin(0.0-angle) + k6.getDoubleValue()*(0.0 - angleVel) + k7.getDoubleValue()*(shoulderAngleError) + k8.getDoubleValue()*(0.0 - shoulderAngleVel));
+      robot.getShoulderJoint().setTau(k5.getDoubleValue()*Math.sin(0.0-angle) + k6.getDoubleValue()*(0.0 - angularVelocityForControl) + k7.getDoubleValue()*(shoulderAngleError) + k8.getDoubleValue()*(0.0 - shoulderAngleVel));
 
    }
 
