@@ -10,8 +10,11 @@ import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -29,8 +32,11 @@ public class SkippyController implements RobotController
    private final DoubleYoVariable alphaAngularVelocity;
    private final FilteredVelocityYoVariable angularVelocityToCoMYZPlane2, angularVelocityToCoMXZPlane2;
 
+   private final YoFramePoint bodyLocation = new YoFramePoint("body", ReferenceFrame.getWorldFrame(), registry);
+
    private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint footLocation = new YoFramePoint("foot", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector footToCoMInBodyFrame;
 
    private final DoubleYoVariable robotMass = new DoubleYoVariable("robotMass", registry);
    private final DoubleYoVariable qHipIncludingOffset = new DoubleYoVariable("qHipIncludingOffset", registry);
@@ -59,15 +65,8 @@ public class SkippyController implements RobotController
       this.robot = robot;
       this.robotType = robotType;
 
-      // get variable references from the robot
-//      q_foot_X = (DoubleYoVariable)robot.getVariable("q_foot_X");
-//      qd_foot_X = (DoubleYoVariable)robot.getVariable("qd_foot_X");
-//
-//      q_hip = (DoubleYoVariable)robot.getVariable("q_hip");
-//      qd_hip = (DoubleYoVariable)robot.getVariable("qd_hip");
-//
-//      qHipIncludingOffset = (DoubleYoVariable)robot.getVariable("qHipIncludingOffset");
-//      qd_shoulder = (DoubleYoVariable)robot.getVariable("qd_shoulder");
+      footToCoMInBodyFrame = new YoFrameVector("footToCoMInBody", robot.updateAndGetBodyFrame(), registry);
+//      footToCoMInBodyFrame = new YoFrameVector("footToCoMInBody", ReferenceFrame.getWorldFrame(), registry);
 
       // set controller gains
       /* gains taken from Mark Spong (1995) "The Swing Up Control Problem for the Acrobot"
@@ -87,7 +86,7 @@ public class SkippyController implements RobotController
 
 
       k1.set(-3600.0); //110);
-      k2.set(-1100.0); //-35);
+      k2.set(-1500.0); //-35);
       k3.set(-170.0); //30);
       k4.set(-130.0); //-15);
 
@@ -98,37 +97,6 @@ public class SkippyController implements RobotController
 
       q_d_hip.set(-0.6);  //some values don't work too well - angles that result in a more balanced model work better
       q_d_shoulder.set(0.0);
-
-
-//      if(robotType == RobotType.TIPPY)
-//      {
-//         k1.set(3600.0); //110);
-//         k2.set(1100.0); //-35);
-//         k3.set(-170.0); //30);
-//         k4.set(-130.0); //-15);
-//
-//         k5.set(-1900);
-//         k6.set(-490.0);
-//         k7.set(-60.0);
-//         k8.set(-45.0);
-//
-//         q_d_hip.set(robotType.negateIfTippy(0.6));  //some values don't work too well - angles that result in a more balanced model work better
-//         q_d_shoulder.set(0.0);
-//      }
-//      else if(robotType == RobotType.SKIPPY)
-//      {
-//         k1.set(4500.0); //110);
-//         k2.set(56.0); //-35);
-//         k3.set(-6.0); //30);
-//         k4.set(-0.9); //-15);
-//
-//         k5.set(2150.0);
-//         k6.set(150.0);
-//         k7.set(15.0);
-//         k8.set(-2.0);
-//         q_d_hip.set(0.6);
-//         q_d_shoulder.set(0.0);
-//      }
 
       planarDistanceYZPlane = new DoubleYoVariable("planarDistanceYZPlane", registry);
       planarDistanceXZPlane = new DoubleYoVariable("planarDistanceXZPlane", registry);
@@ -154,17 +122,43 @@ public class SkippyController implements RobotController
       desiredPositions.add(firstSetOfPoints);
    }
 
+
    public void doControl()
    {
       computeCenterOfMass();
-      footLocation.set(robot.computeFootLocation());
+      computeFootToCenterOfMassLocation();
+
       balanceControl(q_d_hip.getDoubleValue(), q_d_shoulder.getDoubleValue());
 
-      // set the torques
-
-      //start pid control
-      //System.out.println(this.robot.mainJoint.getQdy());
       //positionControl();
+   }
+
+
+   private final FramePoint tempFootLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint tempCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FrameVector tempFootToCoM = new FrameVector(ReferenceFrame.getWorldFrame());
+
+   private void computeFootToCenterOfMassLocation()
+   {
+      ReferenceFrame bodyFrame = robot.updateAndGetBodyFrame();
+
+      FramePoint bodyPoint = new FramePoint(bodyFrame);
+      bodyPoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+      bodyLocation.set(bodyPoint);
+
+      footLocation.set(robot.computeFootLocation());
+
+      footLocation.getFrameTupleIncludingFrame(tempFootLocation);
+      centerOfMass.getFrameTupleIncludingFrame(tempCoMLocation);
+
+      tempFootLocation.changeFrame(bodyFrame);
+      tempCoMLocation.changeFrame(bodyFrame);
+
+      tempFootToCoM.setIncludingFrame(tempCoMLocation);
+      tempFootToCoM.sub(tempFootLocation);
+
+      footToCoMInBodyFrame.set(tempFootToCoM);
    }
 
    private void balanceControl(double hipDesired, double shoulderDesired)
@@ -186,8 +180,11 @@ public class SkippyController implements RobotController
          angular pos : angle created w/ com to groundpoint against vertical
        */
 
-      double footToComZ = centerOfMass.getZ()-footLocation.getZ();
-      double footToComY = centerOfMass.getY()-footLocation.getY();
+//      double footToComZ = centerOfMass.getZ()-footLocation.getZ();
+//      double footToComY = centerOfMass.getY()-footLocation.getY();
+
+      double footToComZ = footToCoMInBodyFrame.getZ();
+      double footToComY = footToCoMInBodyFrame.getY();
 
       planarDistanceYZPlane.set(Math.sqrt(Math.pow(centerOfMass.getY()-footLocation.getY(), 2) + Math.pow(footToComZ, 2)));
       double angle = (Math.atan2(footToComY, footToComZ));
@@ -214,7 +211,7 @@ public class SkippyController implements RobotController
 
       angularVelocityToCoMYZPlane.set(angleVel);
       angularVelocityToCoMYZPlane2.update();
-      double angularVelocityForControl = angularVelocityToCoMYZPlane.getDoubleValue();
+      double angularVelocityForControl = angularVelocityToCoMYZPlane2.getDoubleValue();
 
       /*
          angular pos/vel of hipjoint
@@ -266,8 +263,11 @@ public class SkippyController implements RobotController
          angular pos : angle created w/ com to groundpoint against vertical
        */
 
-      double footToComZ = centerOfMass.getZ()-footLocation.getZ();
-      double footToComX = centerOfMass.getX()-footLocation.getX();
+//      double footToComZ = centerOfMass.getZ()-footLocation.getZ();
+//      double footToComX = centerOfMass.getX()-footLocation.getX();
+
+      double footToComZ = footToCoMInBodyFrame.getZ();
+      double footToComX = footToCoMInBodyFrame.getX();
 
       planarDistanceXZPlane.set(Math.sqrt(Math.pow(footToComX, 2) + Math.pow(footToComZ, 2)));
       double angle = (Math.atan2(footToComX, footToComZ));
@@ -294,7 +294,7 @@ public class SkippyController implements RobotController
 
       angularVelocityToCoMXZPlane.set(angleVel);
       angularVelocityToCoMXZPlane2.update();
-      double angularVelocityForControl = angularVelocityToCoMXZPlane.getDoubleValue();
+      double angularVelocityForControl = angularVelocityToCoMXZPlane2.getDoubleValue();
 
 
       /*
