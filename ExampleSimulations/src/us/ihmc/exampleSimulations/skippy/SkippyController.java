@@ -10,6 +10,7 @@ import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -24,6 +25,9 @@ public class SkippyController implements RobotController
 //   private DoubleYoVariable q_foot_X, q_hip, qHipIncludingOffset, qd_foot_X, qd_hip, qd_shoulder;
    private final DoubleYoVariable k1, k2, k3, k4, k5, k6, k7, k8, angleToCoMInYZPlane, angleToCoMInXZPlane, angularVelocityToCoMYZPlane, angularVelocityToCoMXZPlane; // controller gain parameters
    private final DoubleYoVariable planarDistanceYZPlane, planarDistanceXZPlane;
+
+   private final DoubleYoVariable alphaAngularVelocity;
+   private final FilteredVelocityYoVariable angularVelocityToCoMYZPlane2, angularVelocityToCoMXZPlane2;
 
    private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint footLocation = new YoFramePoint("foot", ReferenceFrame.getWorldFrame(), registry);
@@ -49,7 +53,7 @@ public class SkippyController implements RobotController
 
    private static int timeCounter = 0;
 
-   public SkippyController(SkippyRobot robot, RobotType robotType, String name)
+   public SkippyController(SkippyRobot robot, RobotType robotType, String name, double controlDT)
    {
       this.name = name;
       this.robot = robot;
@@ -116,6 +120,11 @@ public class SkippyController implements RobotController
       angleToCoMInXZPlane = new DoubleYoVariable("angleToCoMXZPlane", registry);
       angularVelocityToCoMYZPlane = new DoubleYoVariable("angularVelocityToCoMYZPlane", registry);
       angularVelocityToCoMXZPlane = new DoubleYoVariable("angularVelocityToCoMXZPlane", registry);
+
+      alphaAngularVelocity = new DoubleYoVariable("alphaAngularVelocity", registry);
+      alphaAngularVelocity.set(0.8);
+      angularVelocityToCoMYZPlane2 = new FilteredVelocityYoVariable("angularVelocityToCoMYZPlane2", "", alphaAngularVelocity, angleToCoMInYZPlane, controlDT, registry);
+      angularVelocityToCoMXZPlane2 = new FilteredVelocityYoVariable("angularVelocityToCoMXZPlane2", "", alphaAngularVelocity, angleToCoMInXZPlane, controlDT, registry);
 
       //for show
       desiredPositions = new ArrayList<double[]>();
@@ -195,6 +204,7 @@ public class SkippyController implements RobotController
       //double angleVel = (angle - prevAngleHip) / SkippySimulation.DT;
 
       angularVelocityToCoMYZPlane.set(angleVel);
+      angularVelocityToCoMYZPlane2.update();
 
 
       /*
@@ -274,6 +284,7 @@ public class SkippyController implements RobotController
       //double angleVel = (angle - prevAngleHip) / SkippySimulation.DT;
 
       angularVelocityToCoMXZPlane.set(angleVel);
+      angularVelocityToCoMXZPlane2.update();
 
 
       /*

@@ -6,6 +6,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class SkippySimulation
 {
    public static final double DT = 0.0001;
+   public static final double controlDT = 0.0001;
    public static final double TIME = 10.0;
    private static SimulationConstructionSet sim;
 
@@ -15,7 +16,7 @@ public class SkippySimulation
       RobotType robotType = RobotType.TIPPY;
 
       SkippyRobot skippy = new SkippyRobot(robotType);
-      skippy.setController(new SkippyController(skippy, robotType, "skippyController"));
+      skippy.setController(new SkippyController(skippy, robotType, "skippyController", controlDT));
 //      skippy.setController(new ExternalControlServer(skippy, "externalControlServer"));
 
       sim = new SimulationConstructionSet(skippy);
