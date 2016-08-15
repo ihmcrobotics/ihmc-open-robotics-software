@@ -1,7 +1,14 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import javax.vecmath.Vector3d;
+
+import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -31,6 +38,12 @@ public class JointStateUpdater
    private OneDoFJoint[] oneDoFJoints;
    private final SensorOutputMapReadOnly sensorMap;
    private final IMUBasedJointVelocityEstimator iMUBasedJointVelocityEstimator;
+
+   private HeadIMUSubscriber headIMUSubscriber = null;
+   private final IMUPacket imuPacket = new IMUPacket();
+   private final BooleanYoVariable recievedHeadIMUPacket = new BooleanYoVariable("RecievedHeadIMUPacket", registry);
+   private final DoubleYoVariable headIMUDelay = new DoubleYoVariable("HeadIMUDelay", registry);
+   private final YoFrameVector headIMULinearAcceleration = new YoFrameVector("HeadIMULinearAcceleration", ReferenceFrame.getWorldFrame(), registry);
 
    private final BooleanYoVariable enableIMUBasedJointVelocityEstimator = new BooleanYoVariable("enableIMUBasedJointVelocityEstimator", registry);
 
@@ -97,12 +110,12 @@ public class JointStateUpdater
          {
             PrintTools.warn("Pelvis IMU is null.");
          }
-         
+
          if(chestIMU == null)
          {
             PrintTools.warn("Pelvis IMU is null.");
          }
-         
+
          return null;
       }
    }
@@ -127,7 +140,7 @@ public class JointStateUpdater
          double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);
          double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
          boolean jointEnabledIndicator = sensorMap.isJointEnabled(oneDoFJoint);
-         
+
          oneDoFJoint.setQ(positionSensorData);
          oneDoFJoint.setEnabled(jointEnabledIndicator);
 
@@ -145,5 +158,33 @@ public class JointStateUpdater
       rootBody.updateFramesRecursively();
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
+   }
+
+   private final FrameVector headIMULinearAccelerationTemp = new FrameVector();
+   private final Vector3d linearAcceleration = new Vector3d();
+   public void checkForIMUPacket(double time)
+   {
+      if (headIMUSubscriber == null)
+      {
+         recievedHeadIMUPacket.set(false);
+         return;
+      }
+      if (!headIMUSubscriber.getPacket(imuPacket))
+      {
+         recievedHeadIMUPacket.set(false);
+         return;
+      }
+      recievedHeadIMUPacket.set(true);
+
+      headIMUDelay.set(time - imuPacket.time);
+      linearAcceleration.set(imuPacket.linearAcceleration);
+      headIMULinearAccelerationTemp.setIncludingFrame(headIMUSubscriber.getImuDefinition().getIMUFrame(), linearAcceleration);
+      headIMULinearAccelerationTemp.changeFrame(ReferenceFrame.getWorldFrame());
+      headIMULinearAcceleration.set(headIMULinearAccelerationTemp);
+   }
+
+   public void addHeadIMUSubscriber(HeadIMUSubscriber headIMUSubscriber)
+   {
+      this.headIMUSubscriber = headIMUSubscriber;
    }
 }

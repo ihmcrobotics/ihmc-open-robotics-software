@@ -3,23 +3,36 @@ package us.ihmc.quadrupedRobotics.controller.force;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
-import us.ihmc.quadrupedRobotics.controller.force.states.*;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedDcmBasedStandController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedDcmBasedStepController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedDoNothingController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFallController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFreezeController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedJointInitializationController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedSoleWaypointController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedMpcBasedXGaitController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.params.BooleanParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.params.ParameterPacketListener;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.providers.*;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedTimedStepInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsProvider;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineYoVariableTrigger;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -77,6 +90,24 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       this.stateMachine = buildStateMachine(runtimeEnvironment, inputProvider);
       this.userEventTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerRequestedEvent.class);
       this.runtimeEnvironment = runtimeEnvironment;
+
+   }
+   
+   /**
+    * Hack for realtime controllers to run all states a lot of times. This hopefully kicks in the JIT compiler and avoids expensive interpeted code paths
+    */
+   public void warmup(int iterations)
+   {
+      for(int i = 0; i < iterations; i++)
+      {
+         for(QuadrupedForceControllerState state : QuadrupedForceControllerState.values)
+         {
+            FiniteStateMachineState<ControllerEvent> stateImpl = stateMachine.getState(state);
+            stateImpl.onEntry();
+            stateImpl.process();
+            stateImpl.onExit();
+         }
+      }
    }
 
    @Override
@@ -203,6 +234,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             QuadrupedForceControllerState.STAND_READY, QuadrupedForceControllerState.STAND);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND,
             QuadrupedForceControllerState.FREEZE, QuadrupedForceControllerState.STAND);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND,
+            QuadrupedForceControllerState.SOLE_WAYPOINT, QuadrupedForceControllerState.STAND);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STEP,
             QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.STEP);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT,
@@ -221,6 +254,10 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             QuadrupedForceControllerState.STAND_READY, QuadrupedForceControllerState.FREEZE);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE,
             QuadrupedForceControllerState.SOLE_WAYPOINT, QuadrupedForceControllerState.FREEZE);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_DO_NOTHING,
+            QuadrupedForceControllerState.SOLE_WAYPOINT, QuadrupedForceControllerState.DO_NOTHING);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_DO_NOTHING,
+            QuadrupedForceControllerState.FREEZE, QuadrupedForceControllerState.DO_NOTHING);
 
       // Fall triggered events
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FALL,
@@ -242,6 +279,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             QuadrupedForceControllerState.FREEZE, QuadrupedForceControllerState.SOLE_WAYPOINT);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_SOLE_WAYPOINT,
             QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.SOLE_WAYPOINT);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_SOLE_WAYPOINT,
+            QuadrupedForceControllerState.DO_NOTHING, QuadrupedForceControllerState.SOLE_WAYPOINT);
       builder.addTransition(ControllerEvent.DONE, QuadrupedForceControllerState.SOLE_WAYPOINT, QuadrupedForceControllerState.FREEZE);
       builder.addTransition(ControllerEvent.FAIL, QuadrupedForceControllerState.SOLE_WAYPOINT, QuadrupedForceControllerState.FREEZE);
 

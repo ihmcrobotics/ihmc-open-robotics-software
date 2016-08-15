@@ -17,6 +17,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -31,11 +32,13 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
    public UpdatableHighLevelHumanoidControllerToolbox(SimulationConstructionSet scs,
          FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
+         CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
          SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ, double omega0, TwistCalculator twistCalculator,
          SideDependentList<ContactableFoot> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT, ArrayList<Updatable> updatables,
          YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
-      super(fullRobotModel, robotJacobianHolder, referenceFrames, footSwitches, wristForceSensors, yoTime, gravityZ, omega0, twistCalculator, feet, hands, controlDT,
+      super(fullRobotModel, robotJacobianHolder, referenceFrames, footSwitches, centerOfMassDataHolder,
+            wristForceSensors, yoTime, gravityZ, omega0, twistCalculator, feet, hands, controlDT,
             updatables, yoGraphicsListRegistry, jointsToIgnore);
 
       String capturePointNameSpace = HighLevelHumanoidControllerToolbox.class.getSimpleName();
