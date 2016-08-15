@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.skippy;
 
+import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class SkippySimulation
@@ -11,7 +12,7 @@ public class SkippySimulation
    public SkippySimulation()
    {
       //0 - acrobot, 1 - skippy
-      int robotType = 1;
+      RobotType robotType = RobotType.TIPPY;
 
       SkippyRobot skippy = new SkippyRobot(robotType);
       skippy.setController(new SkippyController(skippy, robotType, "skippyController"));

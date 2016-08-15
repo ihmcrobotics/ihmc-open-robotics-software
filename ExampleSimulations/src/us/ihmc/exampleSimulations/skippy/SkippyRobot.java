@@ -25,7 +25,12 @@ public class SkippyRobot extends Robot
 
    private ArrayList<GroundContactPoint> groundContactPoints = new ArrayList();
 
-   private int robotType = 0;
+   private RobotType robotType;
+
+   public enum RobotType
+   {
+      TIPPY, SKIPPY
+   }
 
    //acrobot
    private PinJoint hip;
@@ -49,14 +54,14 @@ public class SkippyRobot extends Robot
    //4, 1/4
    private ExternalForcePoint balanceForce;
 
-   public SkippyRobot(int typeOfRobot)
+   public SkippyRobot(RobotType typeOfRobot)
    {
       super("Skippy");
       robotType = typeOfRobot;
 
       this.setGravity(0.0,0.0,-9.81); // m/s^2
 
-      if(typeOfRobot==0)
+      if(typeOfRobot==RobotType.TIPPY)
       {
          // Create GroundContactPoints to distinguish when robot touches the ground
          GroundContactPoint footContact = new GroundContactPoint("rootContactPoint", new Vector3d(0.0, 0.0, 0.0), this);
@@ -104,7 +109,7 @@ public class SkippyRobot extends Robot
          //shoulder.addGroundContactPoint(leftContact);
          //shoulder.addGroundContactPoint(rightContact);
       }
-      else if(typeOfRobot==1)
+      else if(typeOfRobot==RobotType.SKIPPY)
       {
          rootJoint = new FloatingJoint("rootJoint", new Vector3d(0.0, 0.0, LEG_LENGTH + TORSO_LENGTH/2), this);
          //double offsetAngle = Math.PI/6;
