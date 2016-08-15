@@ -44,6 +44,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -217,8 +218,12 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
             logDataProcessorHelper.getDesiredCoP(feetMap.get(foot), centerOfPressureToPack);
          }
       };
+      
+      CenterOfMassDataHolder centerOfMassDataHolderToUpdate = new CenterOfMassDataHolder();
+
       DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            postProcessedSensors, null, imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitchMap, centerOfPressureDataHolder, new RobotMotionStatusHolder(), bipedFeetMap, yoGraphicsListRegistry);
+            postProcessedSensors, null, centerOfMassDataHolderToUpdate,
+            imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitchMap, centerOfPressureDataHolder, new RobotMotionStatusHolder(), bipedFeetMap, yoGraphicsListRegistry);
       return stateEstimator;
    }
 
