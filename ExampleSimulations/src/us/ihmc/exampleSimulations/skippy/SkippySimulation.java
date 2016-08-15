@@ -13,7 +13,7 @@ public class SkippySimulation
    public SkippySimulation()
    {
       //0 - acrobot, 1 - skippy
-      RobotType robotType = RobotType.TIPPY;
+      RobotType robotType = RobotType.SKIPPY;
 
       SkippyRobot skippy = new SkippyRobot(robotType);
       skippy.setController(new SkippyController(skippy, robotType, "skippyController", controlDT));
