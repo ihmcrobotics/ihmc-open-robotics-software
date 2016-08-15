@@ -299,4 +299,16 @@ public class WandererStateEstimatorParameters implements StateEstimatorParameter
    {
       return false;
    }
+   
+   @Override
+   public double getCenterOfMassVelocityFusingFrequency()
+   {
+      return 0.4261;
+   }
+
+   @Override
+   public boolean useGroundReactionForcesToComputeCenterOfMassVelocity()
+   {
+      return false;
+   }
 }
