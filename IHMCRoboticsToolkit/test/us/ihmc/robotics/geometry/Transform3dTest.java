@@ -3402,18 +3402,21 @@ public class Transform3dTest
 		Vector3d vector = new Vector3d();
 		Vector3d vector2 = new Vector3d();
 		Transform3d transform = new Transform3d();
+		double scale;
 
 		for (int i = 0; i < nTests; i++)
 		{
 			createRandomTransformationMatrix(matrix, random);
 			transform.set(matrix);
 			transform.getRotation(rotationMatrix);
+			transform.setScale(scale = (random.nextDouble() - 0.5) * 50.0);
 
 			randomizeVector(random, vector);
 			vector2.set(vector);
 
 			MatrixTools.mult(rotationMatrix, vector);
 			transform.transform(vector2);
+			vector2.scale(1.0 / scale);
 
 			JUnitTools.assertVector3dEquals("", vector, vector2, 1e-12);
 		}
