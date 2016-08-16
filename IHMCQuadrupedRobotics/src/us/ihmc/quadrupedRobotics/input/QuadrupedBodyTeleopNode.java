@@ -72,7 +72,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
       this.stepTeleopMode = new QuadrupedStepTeleopMode(packetCommunicator, referenceFrames);
 
       // Set the default teleop mode.
-      this.activeTeleopMode = stepTeleopMode;
+      this.activeTeleopMode = xGaitTeleopMode;
 
       // Initialize all channels to zero.
       for (XBoxOneMapping channel : XBoxOneMapping.values)
