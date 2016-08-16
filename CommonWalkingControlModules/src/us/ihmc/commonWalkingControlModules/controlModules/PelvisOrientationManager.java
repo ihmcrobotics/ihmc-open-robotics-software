@@ -93,9 +93,9 @@ public class PelvisOrientationManager
    private final LongYoVariable numberOfQueuedCommands;
    private final CommandArrayDeque<PelvisOrientationTrajectoryCommand> commandQueue = new CommandArrayDeque<>(PelvisOrientationTrajectoryCommand.class);
 
-   private final BooleanYoVariable followSineWave = new BooleanYoVariable("FollowSineWave", registry);
-   private final DoubleYoVariable sineFrequency = new DoubleYoVariable("PelvisSineFrequence", registry);
-   private final DoubleYoVariable sineMagnitude = new DoubleYoVariable("PelvisSineMagnitude", registry);
+   private final BooleanYoVariable followPelvisYawSineWave = new BooleanYoVariable("followPelvisYawSineWave", registry);
+   private final DoubleYoVariable pelvisYawSineFrequence = new DoubleYoVariable("pelvisYawSineFrequence", registry);
+   private final DoubleYoVariable pelvisYawSineMagnitude = new DoubleYoVariable("pelvisYawSineMagnitude", registry);
 
    public PelvisOrientationManager(WalkingControllerParameters walkingControllerParameters, HighLevelHumanoidControllerToolbox momentumBasedController,
          YoVariableRegistry parentRegistry)
@@ -153,7 +153,7 @@ public class PelvisOrientationManager
       isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedPelvisOrientationTrajectoryCommands", registry);
       numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
 
-      sineFrequency.set(1.0);
+      pelvisYawSineFrequence.set(1.0);
       parentRegistry.addChild(registry);
    }
 
@@ -213,9 +213,9 @@ public class PelvisOrientationManager
       desiredPelvisAngularAcceleration.set(tempAngularAcceleration);
       desiredPelvisFrame.update();
 
-      if (followSineWave.getBooleanValue())
+      if (followPelvisYawSineWave.getBooleanValue())
       {
-         double yaw = sineMagnitude.getDoubleValue() * Math.sin(yoTime.getDoubleValue() * sineFrequency.getDoubleValue() * 2.0 * Math.PI);
+         double yaw = pelvisYawSineMagnitude.getDoubleValue() * Math.sin(yoTime.getDoubleValue() * pelvisYawSineFrequence.getDoubleValue() * 2.0 * Math.PI);
          tempOrientation.setIncludingFrame(midFeetZUpFrame, yaw, 0.0, 0.0);
 
          tempOrientation.changeFrame(worldFrame);
