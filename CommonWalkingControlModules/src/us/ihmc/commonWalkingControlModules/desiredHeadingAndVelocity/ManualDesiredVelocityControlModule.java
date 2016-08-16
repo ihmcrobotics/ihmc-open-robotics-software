@@ -26,7 +26,7 @@ public class ManualDesiredVelocityControlModule implements DesiredVelocityContro
    @Override
    public void getDesiredVelocity(FrameVector2d desiredVelocityToPack)
    {
-      desiredVelocity.getFrameVector2d(desiredVelocityToPack);
+      desiredVelocity.getFrameTuple2d(desiredVelocityToPack);
    }
 
    @Override
