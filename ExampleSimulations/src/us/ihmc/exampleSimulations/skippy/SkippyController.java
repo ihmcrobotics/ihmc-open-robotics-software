@@ -86,7 +86,7 @@ public class SkippyController implements RobotController
       k7.set(-60.0);
       k8.set(-45.0);
 
-      q_d_hip.set(-0.6);  //some values don't work too well - angles that result in a more balanced model work better
+      q_d_hip.set(0.6);  //some values don't work too well - angles that result in a more balanced model work better
       q_d_shoulder.set(0.0);
 
       planarDistanceYZPlane = new DoubleYoVariable("planarDistanceYZPlane", registry);
@@ -157,12 +157,44 @@ public class SkippyController implements RobotController
       footToCoMInBodyFrame.set(tempFootToCoM);
    }
 
+   private static boolean initialFloat = true;
    private static boolean continueForce = true;
+   private static double[] yawPitchRoll = new double[2];
+   private static double hipAngle = 0.0;
+   private static double shoulderAngle = 0.0;
 
    private void balanceControl(double hipDesired, double shoulderDesired)
    {
-      applyTorqueToHip(hipDesired);
-      applyTorqueToShoulder(shoulderDesired);
+
+      if(robot.footGroundContactPoint.isInContact() && continueForce)
+      {
+         robot.glueDownToGroundPoint.setForce(0.0, 0.0, 455.0);
+         yawPitchRoll = robot.getHipJointSkippy().getYawPitchRoll();
+         hipAngle = robot.getHipJointTippy().getQ().getDoubleValue();
+         shoulderAngle = robot.getShoulderJoint().getQ().getDoubleValue();
+      }
+      else if(robot.footGroundContactPoint.isInContact() && continueForce == false)
+      {
+         initialFloat = false;
+         applyTorqueToHip(hipDesired);
+         applyTorqueToShoulder(shoulderDesired);
+      }
+      else if(initialFloat == true)
+      {
+         continueForce = false;
+         robot.glueDownToGroundPoint.setForce(0.0, 0.0, 0.0);
+         robot.getShoulderJoint().setQ(shoulderAngle);
+         robot.getShoulderJoint().setTau(0.0);
+         robot.getHipJointTippy().setTau(0.0);
+         robot.getHipJointTippy().setQ(hipAngle);
+         robot.getHipJointSkippy().setYawPitchRoll(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
+      }
+      else
+      {
+         robot.glueDownToGroundPoint.setForce(0.0, 0.0, -655.0);
+         applyTorqueToHip(hipDesired);
+         applyTorqueToShoulder(shoulderDesired);
+      }
 
    }
 
