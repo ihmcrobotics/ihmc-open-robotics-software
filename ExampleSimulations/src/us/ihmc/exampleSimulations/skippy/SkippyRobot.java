@@ -76,6 +76,7 @@ public class SkippyRobot extends Robot
    private final PinJoint hipJoint;
 
    private final KinematicPoint bodyPoint;
+   public static ExternalForcePoint glueDownToGroundPoint;
 
    private final DoubleYoVariable yaw = new DoubleYoVariable("yaw", this.getRobotsYoVariableRegistry());
 
@@ -200,7 +201,7 @@ public class SkippyRobot extends Robot
          GroundContactPoint hipContactPoint = new GroundContactPoint("hipContactPoint", new Vector3d(0.0, 0.0, 0.0), this);
          hipJoint.addGroundContactPoint(hipContactPoint);
 
-         ExternalForcePoint glueDownToGroundPoint = new GroundContactPoint("glueDownToGroundPoint", new Vector3d(0.0, 0.0, -LEG_LENGTH), this);
+         glueDownToGroundPoint = new GroundContactPoint("glueDownToGroundPoint", new Vector3d(0.0, 0.0, -LEG_LENGTH), this);
          hipJoint.addExternalForcePoint(glueDownToGroundPoint);
          //         glueDownToGroundPoint.setForce(new Vector3d(0.0, 0.0, -8000.0));
 
