@@ -34,7 +34,8 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    private final double estimatorDT;
 
    private final double jointVelocitySlopTimeForBacklashCompensation;
-   private static final double backXBacklashSlopTime = 0.4;
+   private static final double backXBacklashSlopTime = 0.08;
+   private static final double backXAlphaFilterBreakFrequency = 10.0;
 
    private final double defaultFilterBreakFrequency;
    private final double defaultFilterBreakFrequencyArm;
