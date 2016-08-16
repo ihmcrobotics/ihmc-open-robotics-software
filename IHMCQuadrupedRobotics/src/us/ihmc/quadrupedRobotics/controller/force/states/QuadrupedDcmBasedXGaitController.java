@@ -16,7 +16,6 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajecto
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
-import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -72,6 +71,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
    private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDuration", 0.25);
    private final DoubleParameter haltTransitionDurationParameter = parameterFactory.createDouble("haltTransitionDuration", 1.0);
    private final DoubleParameter minimumStepClearanceParameter = parameterFactory.createDouble("minimumStepClearance", 0.075);
+   private final DoubleParameter maximumStepStrideParameter = parameterFactory.createDouble("maximumStepStride", 1.0);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -108,6 +108,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
    private final YoFrameVector stepAdjustmentForControl;
    private final YoFrameVector stepAdjustmentForPlanning;
    private final YoFrameVector accumulatedStepAdjustmentForPlanning;
+   private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final PreallocatedQueue<QuadrupedTimedStep> stepPlan;
 
    // xgait planner
@@ -175,6 +176,8 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
       stepAdjustmentForControl = new YoFrameVector("stepAdjustmentForControl", worldFrame, registry);
       stepAdjustmentForPlanning = new YoFrameVector("stepAdjustmentForPlanning", worldFrame, registry);
       accumulatedStepAdjustmentForPlanning = new YoFrameVector("accumulatedStepAdjustmentForPlanning", worldFrame, registry);
+      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
+            maximumStepStrideParameter.get());
       stepPlan = new PreallocatedQueue<>(QuadrupedTimedStep.class, NUMBER_OF_PREVIEW_STEPS + 2);
 
       // xgait planner
@@ -409,6 +412,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
                {
                   adjustedStep.getGoalPosition().set(stepPlan.get(i).getGoalPosition());
                   adjustedStep.getGoalPosition().add(stepAdjustmentForControl.getFrameTuple().getVector());
+                  crossoverProjection.project(adjustedStep, taskSpaceEstimates.getSolePosition());
                   groundPlaneEstimator.projectZ(adjustedStep.getGoalPosition());
                }
             }
