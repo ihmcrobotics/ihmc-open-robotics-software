@@ -76,7 +76,7 @@ public class SkippyController implements RobotController
       k7 = new DoubleYoVariable("k7", registry);
       k8 = new DoubleYoVariable("k8", registry);
 
-      k1.set(-3600.0); //110);
+      k1.set(-4600.0); //110);
       k2.set(-1500.0); //-35);
       k3.set(-170.0); //30);
       k4.set(-130.0); //-15);
@@ -157,10 +157,13 @@ public class SkippyController implements RobotController
       footToCoMInBodyFrame.set(tempFootToCoM);
    }
 
+   private static boolean continueForce = true;
+
    private void balanceControl(double hipDesired, double shoulderDesired)
    {
       applyTorqueToHip(hipDesired);
       applyTorqueToShoulder(shoulderDesired);
+
    }
 
    private void computeCenterOfMass()
