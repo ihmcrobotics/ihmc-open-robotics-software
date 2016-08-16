@@ -39,7 +39,7 @@ public class SkippyRobot extends Robot
 
    private final TransformReferenceFrame bodyZUpFrame;
 
-   private final GroundContactPoint footGroundContactPoint;
+   public final GroundContactPoint footGroundContactPoint;
 
    private final ArrayList<GroundContactPoint> groundContactPoints = new ArrayList();
 
@@ -174,7 +174,7 @@ public class SkippyRobot extends Robot
 
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.setRotationEulerAndZeroTranslation(-Math.PI / 7.0 + 2.0 * Math.PI / 8.0, -initialBodySidewaysLean, intialYawIfSkippy);
-         transform.setTranslation(new Vector3d(0.0, 0.0, 1.85));
+         transform.setTranslation(new Vector3d(0.0, 0.0, 1.85-0.0875));
          rootJointIfSkippy.setRotationAndTranslation(transform);
 
          shoulderJoint = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2), this, Axis.Y);
