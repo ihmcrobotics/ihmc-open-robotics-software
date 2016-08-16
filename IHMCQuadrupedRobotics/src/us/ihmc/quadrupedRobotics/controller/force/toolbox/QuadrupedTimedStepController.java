@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
+import us.ihmc.commonWalkingControlModules.controlModules.foot.PartialFootholdControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.SupportState;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -119,6 +120,7 @@ public class QuadrupedTimedStepController
          stateMachineBuilder.addState(StepState.SWING, new SwingState(robotQuadrant));
          stateMachineBuilder.addTransition(StepEvent.TIMEOUT, StepState.LOAD, StepState.SUPPORT);
          stateMachineBuilder.addTransition(StepEvent.UNLOAD, StepState.SUPPORT, StepState.UNLOAD);
+         stateMachineBuilder.addTransition(StepEvent.LIFT_OFF, StepState.SUPPORT, StepState.SWING);
          stateMachineBuilder.addTransition(StepEvent.LIFT_OFF, StepState.UNLOAD, StepState.SWING);
          stateMachineBuilder.addTransition(StepEvent.TOUCH_DOWN, StepState.SWING, StepState.LOAD);
          stepStateMachine.set(robotQuadrant, stateMachineBuilder.build(StepState.SUPPORT));
@@ -360,10 +362,20 @@ public class QuadrupedTimedStepController
          {
             double currentTime = timestamp.getDoubleValue();
             double unloadTime = timedStep.getTimeInterval().getStartTime() - unloadDurationParameter.get();
+            double liftOffTime = timedStep.getTimeInterval().getStartTime();
             double touchDownTime = timedStep.getTimeInterval().getEndTime();
 
             // trigger unload event
-            if (currentTime >= unloadTime && currentTime < touchDownTime)
+            if (currentTime >= liftOffTime && currentTime < touchDownTime)
+            {
+               if (stepTransitionCallback != null)
+               {
+                  stepTransitionCallback.onLiftOff(robotQuadrant, contactState);
+               }
+               contactState.set(robotQuadrant, ContactState.NO_CONTACT);
+               return StepEvent.LIFT_OFF;
+            }
+            else if (currentTime >= unloadTime && currentTime < touchDownTime)
             {
                return StepEvent.UNLOAD;
             }
