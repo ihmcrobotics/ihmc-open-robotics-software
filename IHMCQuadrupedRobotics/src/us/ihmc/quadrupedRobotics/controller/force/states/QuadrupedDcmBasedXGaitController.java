@@ -16,6 +16,7 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajecto
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
+import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -71,7 +72,6 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
    private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDuration", 0.25);
    private final DoubleParameter haltTransitionDurationParameter = parameterFactory.createDouble("haltTransitionDuration", 1.0);
    private final DoubleParameter minimumStepClearanceParameter = parameterFactory.createDouble("minimumStepClearance", 0.075);
-   private final DoubleParameter maximumStepStrideParameter = parameterFactory.createDouble("maximumStepStride", 1.0);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -107,6 +107,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
    private final FramePoint dcmPositionWaypoint;
    private final YoFrameVector stepAdjustmentForControl;
    private final YoFrameVector stepAdjustmentForPlanning;
+   private final YoFrameVector accumulatedStepAdjustmentForPlanning;
    private final PreallocatedQueue<QuadrupedTimedStep> stepPlan;
 
    // xgait planner
@@ -121,6 +122,8 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
    // inputs
    private final DoubleYoVariable haltTime = new DoubleYoVariable("haltTime", registry);
    private final BooleanYoVariable haltFlag = new BooleanYoVariable("haltFlag", registry);
+   private final BooleanYoVariable onLiftOffTriggered = new BooleanYoVariable("onLiftOffTriggered", registry);
+   private final BooleanYoVariable onTouchDownTriggered = new BooleanYoVariable("onTouchDownTriggered", registry);
 
    public QuadrupedDcmBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedControllerInputProviderInterface inputProvider, QuadrupedXGaitSettingsProvider settingsProvider)
@@ -171,6 +174,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
       dcmPositionWaypoint = new FramePoint();
       stepAdjustmentForControl = new YoFrameVector("stepAdjustmentForControl", worldFrame, registry);
       stepAdjustmentForPlanning = new YoFrameVector("stepAdjustmentForPlanning", worldFrame, registry);
+      accumulatedStepAdjustmentForPlanning = new YoFrameVector("accumulatedStepAdjustmentForPlanning", worldFrame, registry);
       stepPlan = new PreallocatedQueue<>(QuadrupedTimedStep.class, NUMBER_OF_PREVIEW_STEPS + 2);
 
       // xgait planner
@@ -276,6 +280,18 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
 
       // update dcm trajectory
       computeDcmTrajectory();
+
+      // update accumulated step adjustment
+      if (onLiftOffTriggered.getBooleanValue())
+      {
+         onLiftOffTriggered.set(false);
+      }
+      if (onTouchDownTriggered.getBooleanValue())
+      {
+         onTouchDownTriggered.set(false);
+         accumulatedStepAdjustmentForPlanning.add(stepAdjustmentForPlanning.getFrameTuple().getVector());
+         accumulatedStepAdjustmentForPlanning.setZ(0);
+      }
    }
 
    private void updateXGaitSettings()
@@ -294,16 +310,29 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
 
    private void computeStepPlan()
    {
-      // compute xgait step plan
       double currentTime = robotTimestamp.getDoubleValue();
+
+      // update xgait current steps
+      for (int i = 0; i < xGaitPreviewSteps.size(); i++)
+      {
+         QuadrupedTimedStep xGaitPreviewStep = xGaitPreviewSteps.get(i);
+         if (xGaitPreviewStep.getTimeInterval().getStartTime() <= currentTime)
+         {
+            xGaitCurrentSteps.get(xGaitPreviewStep.getRobotEnd()).set(xGaitPreviewStep);
+         }
+      }
+
+      // update xgait preview steps
       Vector3d inputVelocity = inputProvider.getPlanarVelocityInput();
       xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, xGaitCurrentSteps, inputVelocity, currentTime, bodyYawSetpoint, xGaitSettings);
 
+      // update step plan
       stepPlan.clear();
       for (RobotEnd robotEnd : RobotEnd.values)
       {
          stepPlan.enqueue();
          stepPlan.getTail().set(xGaitCurrentSteps.get(robotEnd));
+         stepPlan.getTail().getGoalPosition().add(accumulatedStepAdjustmentForPlanning.getFrameTuple().getVector());
       }
       for (int i = 0; i < xGaitPreviewSteps.size(); i++)
       {
@@ -311,6 +340,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
          {
             stepPlan.enqueue();
             stepPlan.getTail().set(xGaitPreviewSteps.get(i));
+            stepPlan.getTail().getGoalPosition().add(accumulatedStepAdjustmentForPlanning.getFrameTuple().getVector());
          }
       }
    }
@@ -375,9 +405,12 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
             if (startTime < currentTime && currentTime < endTime)
             {
                QuadrupedTimedStep adjustedStep = timedStepController.getCurrentStep(robotQuadrant);
-               adjustedStep.getGoalPosition().set(stepPlan.get(i).getGoalPosition());
-               adjustedStep.getGoalPosition().add(stepAdjustmentForControl.getFrameTuple().getVector());
-               groundPlaneEstimator.projectZ(adjustedStep.getGoalPosition());
+               if (adjustedStep != null)
+               {
+                  adjustedStep.getGoalPosition().set(stepPlan.get(i).getGoalPosition());
+                  adjustedStep.getGoalPosition().add(stepAdjustmentForControl.getFrameTuple().getVector());
+                  groundPlaneEstimator.projectZ(adjustedStep.getGoalPosition());
+               }
             }
             else if (timedStepController.addStep(stepPlan.get(i)))
             {
@@ -397,26 +430,23 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
       groundPlanePositions.get(thisStepQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
       groundPlaneEstimator.compute(groundPlanePositions);
 
-      // update current step
-      for (int i = 0; i < xGaitPreviewSteps.size(); i++)
-      {
-         if (xGaitPreviewSteps.get(i).getRobotQuadrant() == thisStepQuadrant)
-         {
-            xGaitCurrentSteps.get(thisStepQuadrant.getEnd()).set(xGaitPreviewSteps.get(i));
-            break;
-         }
-      }
+      onLiftOffTriggered.set(true);
    }
 
    @Override
    public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
    {
+      onTouchDownTriggered.set(true);
    }
 
    @Override
    public void onEntry()
    {
+      // initialize state
       haltFlag.set(false);
+      onLiftOffTriggered.set(false);
+      onTouchDownTriggered.set(false);
+      accumulatedStepAdjustmentForPlanning.setToZero();
 
       // initialize estimates
       lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
@@ -463,13 +493,15 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
          groundPlaneEstimator.projectZ(xGaitPreviewSteps.get(i).getGoalPosition());
          RobotEnd robotEnd = xGaitPreviewSteps.get(i).getRobotQuadrant().getEnd();
          xGaitCurrentSteps.get(robotEnd).set(xGaitPreviewSteps.get(i));
-         timedStepController.addStep(xGaitCurrentSteps.get(robotEnd));
       }
 
       // compute step plan
       computeStepPlan();
 
-      // compute dcm trajectory for initial transition
+      // compute step adjustment
+      computeStepAdjustment();
+
+      // compute dcm trajectory
       computeDcmTrajectory();
       double transitionEndTime = copPlanner.getTimeAtStartOfInterval(1);
       double transitionStartTime = Math.max(robotTimestamp.getDoubleValue(), transitionEndTime - initialTransitionDurationParameter.get());
