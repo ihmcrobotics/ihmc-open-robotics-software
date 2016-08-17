@@ -404,13 +404,25 @@ public class HandControlModule
          boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.JOINTSPACE;
          success = jointspaceControlState.handleArmTrajectoryCommand(command, initializeToCurrent);
          if (success)
+         {
             requestedState.set(jointspaceControlState.getStateEnum());
-         return;
+         }
+         else
+         {
+        	 PrintTools.warn("Can't execute arm trajectory! "+command.getRobotSide());
+        	 return;
+         }
       case QUEUE:
          success = jointspaceControlState.queueArmTrajectoryCommand(command);
          if (!success)
+         {
             holdPositionInJointspace();
-         return;
+         }
+         else
+         {
+        	 PrintTools.warn("Can't execute arm trajectory! "+command.getRobotSide());
+        	 return;
+         }
       default:
          PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
          return;
