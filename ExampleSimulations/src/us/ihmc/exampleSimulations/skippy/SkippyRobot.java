@@ -74,6 +74,7 @@ public class SkippyRobot extends Robot
    //all
    private final PinJoint shoulderJoint;
    private final PinJoint hipJoint;
+   public final DoubleYoVariable t;
 
    private final KinematicPoint bodyPoint;
 
@@ -92,14 +93,16 @@ public class SkippyRobot extends Robot
    private ExternalForcePoint balanceForce;
    public static ExternalForcePoint glueDownToGroundPoint;
 
-   private final double initialBodySidewaysLean = Math.PI / 48.0;
+   private final double initialBodySidewaysLean = 0.0 * Math.PI / 48.0;
    private final double initialShoulderJointAngle = 0.0 * Math.PI / 6.0;
-   private final double intialYawIfSkippy = Math.PI * 0.8;
+   private final double intialYawIfSkippy = 0.0* Math.PI * 0.8;
 
    public SkippyRobot(RobotType typeOfRobot)
    {
       super("Skippy");
       robotType = typeOfRobot;
+
+      t = (DoubleYoVariable)getVariable("t");
 
       this.setGravity(0.0, 0.0, -9.81); // m/s^2
 
@@ -174,8 +177,8 @@ public class SkippyRobot extends Robot
          this.addRootJoint(rootJointIfSkippy);
 
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setRotationEulerAndZeroTranslation(-Math.PI / 7.0 + 2.0 * Math.PI / 8.0, -initialBodySidewaysLean, intialYawIfSkippy);
-         transform.setTranslation(new Vector3d(0.0, 0.0, 2.0-0.15975));
+         transform.setRotationEulerAndZeroTranslation(Math.PI / 7.0 - 2.0 * Math.PI / 8.0, -initialBodySidewaysLean, intialYawIfSkippy);
+         transform.setTranslation(new Vector3d(0.0, 0.0, 2.0-0.15975+0.0032));
          rootJointIfSkippy.setRotationAndTranslation(transform);
 
          shoulderJoint = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2), this, Axis.Y);
@@ -191,7 +194,7 @@ public class SkippyRobot extends Robot
          rootJointIfSkippy.addJoint(shoulderJoint);
 
          hipJoint = new PinJoint("hip", new Vector3d(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis.X);
-         hipJoint.setInitialState(-2.0 * Math.PI / 8.0, 0.0);
+         hipJoint.setInitialState(2.0 * Math.PI / 8.0, 0.0);
          Link leg = createLegSkippy();
          hipJoint.setLink(leg);
 
