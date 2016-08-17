@@ -44,7 +44,7 @@ public class SkippyController implements RobotController
 
    private enum SkippyStatus
    {
-      JUMP_FORWARD,
+      JUMP_FORWARD,  //change initialBodySidewaysLean in SkippyRobot.java to 0.0
       JUMP_SIDEWAYS,
       BALANCE,
       POSITION
@@ -128,7 +128,7 @@ public class SkippyController implements RobotController
       if(skippyStatus == SkippyStatus.BALANCE)
       {
          q_d_hip.set(0.6);
-         q_d_shoulder.set(0.0);
+         q_d_shoulder.set(0.2);
       }
       else if(skippyStatus == SkippyStatus.JUMP_FORWARD)
       {
@@ -627,7 +627,8 @@ public class SkippyController implements RobotController
          }
          else if(direction == SkippyStatus.JUMP_SIDEWAYS)
          {
-            return false;
+            double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
+            return time < 9.69 && time > 9.67;
          }
          else
             return false;
@@ -651,7 +652,8 @@ public class SkippyController implements RobotController
          }
          else if(direction == SkippyStatus.JUMP_SIDEWAYS)
          {
-            return false;
+            double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
+            return time < 21.30 && time > 21.28;
          }
          else
             return false;

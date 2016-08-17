@@ -167,7 +167,7 @@ public class SkippyRobot extends Robot
          hipJoint = new PinJoint("hipJoint", new Vector3d(0.0, 0.0, LEG_LENGTH), this, new Vector3d(-1.0, 0.0, 0.0));
          Link torso = createTorsoTippy();
          hipJoint.setLink(torso);
-         hipJoint.setInitialState(-2.0 * Math.PI / 3.0, 0.0);
+         hipJoint.setInitialState(- Math.PI / 6.0, 0.0);
 
          bodyPoint = new KinematicPoint("bodyPoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2.0), this);
          hipJoint.addKinematicPoint(bodyPoint);
