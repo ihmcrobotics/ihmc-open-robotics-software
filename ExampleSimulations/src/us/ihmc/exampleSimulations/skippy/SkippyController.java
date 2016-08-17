@@ -149,8 +149,7 @@ public class SkippyController implements RobotController
       computeCenterOfMass();
       computeFootToCenterOfMassLocation();
 
-      balanceControl(q_d_hip.getDoubleValue(), q_d_shoulder.getDoubleValue());
-
+      balanceControl();
       //positionControl();
    }
 
@@ -158,7 +157,14 @@ public class SkippyController implements RobotController
    private final FramePoint tempFootLocation = new FramePoint(ReferenceFrame.getWorldFrame());
    private final FramePoint tempCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
    private final FrameVector tempFootToCoM = new FrameVector(ReferenceFrame.getWorldFrame());
-   
+
+   private void computeCenterOfMass()
+   {
+      Point3d tempCenterOfMass = new Point3d();
+      robotMass.set(robot.computeCenterOfMass(tempCenterOfMass));
+      centerOfMass.set(tempCenterOfMass);
+   }
+
    private void computeFootToCenterOfMassLocation()
    {
       ReferenceFrame bodyFrame = robot.updateAndGetBodyFrame();
@@ -182,59 +188,12 @@ public class SkippyController implements RobotController
       footToCoMInBodyFrame.set(tempFootToCoM);
    }
 
-   private void balanceControl(double hipDesired, double shoulderDesired)
+   private void balanceControl()
    {
       stateMachine.doAction();
       stateMachine.checkTransitionConditions();
-//      if(robot.getTime() < 4.0)
-//      {
-//
-//      }
-//      else if(robot.getTime() < 11.0)
-//      {
-//         q_d_hip.set(1.6);
-//      }
-//      else if(robot.getTime() < 11.37)
-//      {
-//         k1.set(0.0);
-//         k2.set(0.0);
-//         k3.set(300);
-//         k4.set(30);
-//
-//         q_d_hip.set(0.45);
-//      }
-//      else if(robot.getTime() < 11.98)
-//      {
-//         q_d_hip.set(-1.3);
-//      }
-//
-//      else
-//      {
-//         k1.set(-3600.0); //110);
-//         k2.set(-1500.0); //-35);
-//         k3.set(-170.0); //30);
-//         k4.set(-130.0); //-15);
-//
-//         k5.set(-1900);
-//         k6.set(-490.0);
-//         k7.set(-60.0);
-//         k8.set(-45.0);
-//
-//         q_d_hip.set(-0.3);
-//         q_d_shoulder.set(0.0);
-//         //robot.glueDownToGroundPoint.setForce(0.0, 0.0, -450.0);
-//      }
-//
-//      applyTorqueToHip(hipDesired);
-//      applyTorqueToShoulder(shoulderDesired);
-
-   }
-
-   private void computeCenterOfMass()
-   {
-      Point3d tempCenterOfMass = new Point3d();
-      robotMass.set(robot.computeCenterOfMass(tempCenterOfMass));
-      centerOfMass.set(tempCenterOfMass);
+      applyTorqueToHip(q_d_hip.getDoubleValue());
+      applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
    }
 
    private void applyTorqueToHip(double hipDesired)
@@ -478,6 +437,7 @@ public class SkippyController implements RobotController
       return radians * 180 / Math.PI;
    }
 
+
    private void positionControl()
    {
       double interval = Math.round(SkippySimulation.TIME/desiredPositions.size()*100.0)/100.0;
@@ -540,6 +500,9 @@ public class SkippyController implements RobotController
    {
       return getName();
    }
+
+
+
 
    /*
       STATE MACHINES
@@ -622,7 +585,7 @@ public class SkippyController implements RobotController
       }
       public boolean checkCondition()
       {
-         double time = robot.t.getDoubleValue();
+         double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
          return time < 4.01 && time > 3.99;
       }
    }
@@ -634,7 +597,7 @@ public class SkippyController implements RobotController
       }
       public boolean checkCondition()
       {
-         double time = robot.t.getDoubleValue();
+         double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
          return time < 11.01 && time > 10.99;
       }
    }
@@ -646,7 +609,7 @@ public class SkippyController implements RobotController
       }
       public boolean checkCondition()
       {
-         double time = robot.t.getDoubleValue();
+         double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
          return time < 11.38 && time > 11.36;
       }
    }
@@ -658,7 +621,7 @@ public class SkippyController implements RobotController
       }
       public boolean checkCondition()
       {
-         double time = robot.t.getDoubleValue();
+         double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
          return time < 11.99 && time > 11.97;
       }
    }
@@ -670,10 +633,11 @@ public class SkippyController implements RobotController
       }
       public boolean checkCondition()
       {
-         double time = robot.t.getDoubleValue();
+         double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
          return time < 20.01 && time > 19.99;
       }
    }
+
 
    private class BalanceState extends State<States>
    {
@@ -683,8 +647,7 @@ public class SkippyController implements RobotController
       }
       public void doAction()
       {
-         applyTorqueToHip(q_d_hip.getDoubleValue());
-         applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
+         q_d_hip.set(0.6);
       }
       public void doTransitionIntoAction()
       {
@@ -705,8 +668,6 @@ public class SkippyController implements RobotController
       public void doAction()
       {
          q_d_hip.set(1.6);
-         applyTorqueToHip(q_d_hip.getDoubleValue());
-         applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
       }
       public void doTransitionIntoAction()
       {
@@ -731,9 +692,6 @@ public class SkippyController implements RobotController
          k3.set(300.0);
          k4.set(30.0);
          q_d_hip.set(0.45);
-
-         applyTorqueToHip(q_d_hip.getDoubleValue());
-         applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
       }
       public void doTransitionIntoAction()
       {
@@ -754,9 +712,6 @@ public class SkippyController implements RobotController
       public void doAction()
       {
          q_d_hip.set(-1.3);
-
-         applyTorqueToHip(q_d_hip.getDoubleValue());
-         applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
       }
       public void doTransitionIntoAction()
       {
@@ -781,11 +736,8 @@ public class SkippyController implements RobotController
          k3.set(-170.0);
          k4.set(-130.0);
 
-         q_d_hip.set(-0.3);
+         q_d_hip.set(0.6);
          q_d_shoulder.set(0.0);
-
-         applyTorqueToHip(q_d_hip.getDoubleValue());
-         applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
       }
       public void doTransitionIntoAction()
       {
