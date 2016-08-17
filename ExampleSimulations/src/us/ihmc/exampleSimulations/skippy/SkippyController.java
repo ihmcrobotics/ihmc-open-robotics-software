@@ -161,49 +161,84 @@ public class SkippyController implements RobotController
       footToCoMInBodyFrame.set(tempFootToCoM);
    }
 
-   private static boolean initialFloat = true;
-   private static boolean continueForce = true;
-   private static double[] yawPitchRoll = new double[2];
-   private static double hipAngle = 0.0;
-   private static double shoulderAngle = 0.0;
-   private static int counter = 0;
-   private static double lowestPoint = 0.0;
+   private static double incrementTime = 3.0;
 
    private void balanceControl(double hipDesired, double shoulderDesired)
    {
-      if(counter==0) {
-         hipAngle = robot.getHipJointTippy().getQ().getDoubleValue();
-         yawPitchRoll = robot.getHipJointSkippy().getYawPitchRoll();
-      }
-
-      if(counter<=100)
+      if(robot.getTime() < 4.0)
       {
-         robot.glueDownToGroundPoint.setForce(0.0, 0.0, 6150.0);
+
+      }
+      else if(robot.getTime() < 9.0)
+      {
+         q_d_hip.set(-1.1);
+      }
+      else if(robot.getTime() < 9.5)
+      {
+         k1.set(0.0);
+         k2.set(0.0);
+         k3.set(300);
+         k4.set(30);
+
+      }
+      else if(robot.getTime() < 9.76)
+      {
+         q_d_hip.set(0.0);
+      }
+      else if(robot.getTime() < 10.35)
+      {
+         q_d_hip.set(0.65);
       }
 
       else
       {
-         robot.glueDownToGroundPoint.setForce(0.0, 0.0, 0.0);
-         if(robot.footGroundContactPoint.isInContact() == false && initialFloat)
-         {
-            robot.getHipJointTippy().setQ(hipAngle);
-            robot.getShoulderJoint().setQ(0.0);
-            //robot.getHipJointSkippy().setYawPitchRoll(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
-            robot.getHipJointSkippy().setAngularAccelerationInBody(new Vector3d(0.0, 0.0, 0.0));
-            //robot.getHipJointSkippy().setVelocity(0.0, 0.0, 0.0);
-         }
-         else
-         {
-            initialFloat = false;
-            //robot.glueDownToGroundPoint.setForce(0.0, 0.0, -450.0);
-            applyTorqueToHip(hipDesired);
-            applyTorqueToShoulder(shoulderDesired);
-         }
-      }
-      counter += 1;
+         k1.set(-3600.0);
+         k2.set(-1500.0);
+         k3.set(-170.0);
+         k4.set(-130.0);
 
+         q_d_hip.set(-0.4);
+
+      }
+      applyTorqueToHip(hipDesired);
+      applyTorqueToShoulder(shoulderDesired);
 
    }
+
+//   private void balanceControl2(double hipDesired, double shoulderDesired)
+//   {
+//      if(counter==0) {
+//         hipAngle = robot.getHipJointTippy().getQ().getDoubleValue();
+//         yawPitchRoll = robot.getHipJointSkippy().getYawPitchRoll();
+//      }
+//
+//      if(counter<=100)
+//      {
+//         robot.glueDownToGroundPoint.setForce(0.0, 0.0, 6150.0);
+//      }
+//
+//      else
+//      {
+//         robot.glueDownToGroundPoint.setForce(0.0, 0.0, 0.0);
+//         if(robot.footGroundContactPoint.isInContact() == false && initialFloat)
+//         {
+//            robot.getHipJointTippy().setQ(hipAngle);
+//            robot.getShoulderJoint().setQ(0.0);
+//            //robot.getHipJointSkippy().setYawPitchRoll(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
+//            robot.getHipJointSkippy().setAngularAccelerationInBody(new Vector3d(0.0, 0.0, 0.0));
+//            //robot.getHipJointSkippy().setVelocity(0.0, 0.0, 0.0);
+//         }
+//         else
+//         {
+//            initialFloat = false;
+//            //robot.glueDownToGroundPoint.setForce(0.0, 0.0, -450.0);
+//            applyTorqueToHip(hipDesired);
+//            applyTorqueToShoulder(shoulderDesired);
+//         }
+//      }
+//      counter += 1;
+//
+//   }
 
    private void computeCenterOfMass()
    {
