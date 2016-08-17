@@ -12,10 +12,12 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -37,6 +39,7 @@ public class SkippyController implements RobotController
    private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint footLocation = new YoFramePoint("foot", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector footToCoMInBodyFrame;
+   private final ExternalForcePoint forceToCOM;
 
    private final DoubleYoVariable robotMass = new DoubleYoVariable("robotMass", registry);
    private final DoubleYoVariable qHipIncludingOffset = new DoubleYoVariable("qHipIncludingOffset", registry);
@@ -66,6 +69,7 @@ public class SkippyController implements RobotController
       this.robotType = robotType;
 
       footToCoMInBodyFrame = new YoFrameVector("footToCoMInBody", robot.updateAndGetBodyFrame(), registry);
+      forceToCOM = new ExternalForcePoint("FORCETOCOM", robot);
 
       k1 = new DoubleYoVariable("k1", registry);
       k2 = new DoubleYoVariable("k2", registry);
@@ -157,11 +161,84 @@ public class SkippyController implements RobotController
       footToCoMInBodyFrame.set(tempFootToCoM);
    }
 
+   private static double incrementTime = 3.0;
+
    private void balanceControl(double hipDesired, double shoulderDesired)
    {
+      if(robot.getTime() < 4.0)
+      {
+
+      }
+      else if(robot.getTime() < 9.0)
+      {
+         q_d_hip.set(-1.1);
+      }
+      else if(robot.getTime() < 9.5)
+      {
+         k1.set(0.0);
+         k2.set(0.0);
+         k3.set(300);
+         k4.set(30);
+
+      }
+      else if(robot.getTime() < 9.76)
+      {
+         q_d_hip.set(0.0);
+      }
+      else if(robot.getTime() < 10.35)
+      {
+         q_d_hip.set(0.65);
+      }
+
+      else
+      {
+         k1.set(-3600.0);
+         k2.set(-1500.0);
+         k3.set(-170.0);
+         k4.set(-130.0);
+
+         q_d_hip.set(-0.4);
+
+      }
       applyTorqueToHip(hipDesired);
       applyTorqueToShoulder(shoulderDesired);
+
    }
+
+//   private void balanceControl2(double hipDesired, double shoulderDesired)
+//   {
+//      if(counter==0) {
+//         hipAngle = robot.getHipJointTippy().getQ().getDoubleValue();
+//         yawPitchRoll = robot.getHipJointSkippy().getYawPitchRoll();
+//      }
+//
+//      if(counter<=100)
+//      {
+//         robot.glueDownToGroundPoint.setForce(0.0, 0.0, 6150.0);
+//      }
+//
+//      else
+//      {
+//         robot.glueDownToGroundPoint.setForce(0.0, 0.0, 0.0);
+//         if(robot.footGroundContactPoint.isInContact() == false && initialFloat)
+//         {
+//            robot.getHipJointTippy().setQ(hipAngle);
+//            robot.getShoulderJoint().setQ(0.0);
+//            //robot.getHipJointSkippy().setYawPitchRoll(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
+//            robot.getHipJointSkippy().setAngularAccelerationInBody(new Vector3d(0.0, 0.0, 0.0));
+//            //robot.getHipJointSkippy().setVelocity(0.0, 0.0, 0.0);
+//         }
+//         else
+//         {
+//            initialFloat = false;
+//            //robot.glueDownToGroundPoint.setForce(0.0, 0.0, -450.0);
+//            applyTorqueToHip(hipDesired);
+//            applyTorqueToShoulder(shoulderDesired);
+//         }
+//      }
+//      counter += 1;
+//
+//   }
 
    private void computeCenterOfMass()
    {
