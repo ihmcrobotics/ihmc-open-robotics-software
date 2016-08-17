@@ -34,7 +34,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
    private final DoubleParameter pitchScaleParameter = parameterFactory.createDouble("pitchScale", 0.15);
    private final DoubleParameter yawScaleParameter = parameterFactory.createDouble("yawScale", 0.15);
    private final DoubleParameter yawRateScaleParameter = parameterFactory.createDouble("yawRateScale", 0.25);
-   private final DoubleParameter zRateParameter = parameterFactory.createDouble("zRateParameter", 0.5);
+   private final DoubleParameter zRateParameter = parameterFactory.createDouble("zRateParameter", 0.1);
    private final DoubleParameter xStrideMaxParameter = parameterFactory.createDouble("xStrideMax", 0.55);
    private final DoubleParameter yStrideMaxParameter = parameterFactory.createDouble("yStrideMax", 0.4);
    private final DoubleParameter deltaPhaseShiftParameter = parameterFactory.createDouble("deltaPhaseShiftParameter", 22.5);

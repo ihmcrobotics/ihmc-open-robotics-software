@@ -76,6 +76,13 @@ public class PreallocatedQueue<T>
       return false;
    }
 
+   public void clear()
+   {
+      while (dequeue())
+      {
+      }
+   }
+
    public T get(int index)
    {
       if (index >= size)
