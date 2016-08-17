@@ -1,11 +1,14 @@
 package us.ihmc.exampleSimulations.skippy;
 
+import java.awt.*;
 import java.util.ArrayList;
 
+import javax.swing.*;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.controlModules.foot.SupportState;
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -17,13 +20,28 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.stateMachines.*;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class SkippyController implements RobotController
 {
+
+   private enum States
+   {
+      BALANCE,
+      PREPARE,
+      LIFTOFF,
+      REPOSITION,
+      RECOVER
+   }
+
+   private final StateMachine<States> stateMachine;
+
    private final YoVariableRegistry registry = new YoVariableRegistry("SkippyController");
 
    // tau_* is torque, q_* is position, qd_* is velocity for joint *
@@ -90,7 +108,7 @@ public class SkippyController implements RobotController
       k7.set(-60.0);
       k8.set(-45.0);
 
-      q_d_hip.set(-0.6);  //some values don't work too well - angles that result in a more balanced model work better
+      q_d_hip.set(0.6);  //some values don't work too well - angles that result in a more balanced model work better
       q_d_shoulder.set(0.0);
 
       planarDistanceYZPlane = new DoubleYoVariable("planarDistanceYZPlane", registry);
@@ -107,6 +125,9 @@ public class SkippyController implements RobotController
 
       //createPositionsForShowForPositionControl();
 
+      stateMachine = new StateMachine<States>("stateMachine", "stateMachineTime", States.class, robot.t, registry);
+      setUpStateMachines();
+      createStateMachineWindow();
    }
 
    public void createPositionsForShowForPositionControl()
@@ -161,84 +182,53 @@ public class SkippyController implements RobotController
       footToCoMInBodyFrame.set(tempFootToCoM);
    }
 
-   private static double incrementTime = 3.0;
-
    private void balanceControl(double hipDesired, double shoulderDesired)
    {
-      if(robot.getTime() < 4.0)
-      {
-
-      }
-      else if(robot.getTime() < 9.0)
-      {
-         q_d_hip.set(-1.1);
-      }
-      else if(robot.getTime() < 9.5)
-      {
-         k1.set(0.0);
-         k2.set(0.0);
-         k3.set(300);
-         k4.set(30);
-
-      }
-      else if(robot.getTime() < 9.76)
-      {
-         q_d_hip.set(0.0);
-      }
-      else if(robot.getTime() < 10.35)
-      {
-         q_d_hip.set(0.65);
-      }
-
-      else
-      {
-         k1.set(-3600.0);
-         k2.set(-1500.0);
-         k3.set(-170.0);
-         k4.set(-130.0);
-
-         q_d_hip.set(-0.4);
-
-      }
-      applyTorqueToHip(hipDesired);
-      applyTorqueToShoulder(shoulderDesired);
-
-   }
-
-//   private void balanceControl2(double hipDesired, double shoulderDesired)
-//   {
-//      if(counter==0) {
-//         hipAngle = robot.getHipJointTippy().getQ().getDoubleValue();
-//         yawPitchRoll = robot.getHipJointSkippy().getYawPitchRoll();
-//      }
-//
-//      if(counter<=100)
+      stateMachine.doAction();
+      stateMachine.checkTransitionConditions();
+//      if(robot.getTime() < 4.0)
 //      {
-//         robot.glueDownToGroundPoint.setForce(0.0, 0.0, 6150.0);
+//
+//      }
+//      else if(robot.getTime() < 11.0)
+//      {
+//         q_d_hip.set(1.6);
+//      }
+//      else if(robot.getTime() < 11.37)
+//      {
+//         k1.set(0.0);
+//         k2.set(0.0);
+//         k3.set(300);
+//         k4.set(30);
+//
+//         q_d_hip.set(0.45);
+//      }
+//      else if(robot.getTime() < 11.98)
+//      {
+//         q_d_hip.set(-1.3);
 //      }
 //
 //      else
 //      {
-//         robot.glueDownToGroundPoint.setForce(0.0, 0.0, 0.0);
-//         if(robot.footGroundContactPoint.isInContact() == false && initialFloat)
-//         {
-//            robot.getHipJointTippy().setQ(hipAngle);
-//            robot.getShoulderJoint().setQ(0.0);
-//            //robot.getHipJointSkippy().setYawPitchRoll(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
-//            robot.getHipJointSkippy().setAngularAccelerationInBody(new Vector3d(0.0, 0.0, 0.0));
-//            //robot.getHipJointSkippy().setVelocity(0.0, 0.0, 0.0);
-//         }
-//         else
-//         {
-//            initialFloat = false;
-//            //robot.glueDownToGroundPoint.setForce(0.0, 0.0, -450.0);
-//            applyTorqueToHip(hipDesired);
-//            applyTorqueToShoulder(shoulderDesired);
-//         }
-//      }
-//      counter += 1;
+//         k1.set(-3600.0); //110);
+//         k2.set(-1500.0); //-35);
+//         k3.set(-170.0); //30);
+//         k4.set(-130.0); //-15);
 //
-//   }
+//         k5.set(-1900);
+//         k6.set(-490.0);
+//         k7.set(-60.0);
+//         k8.set(-45.0);
+//
+//         q_d_hip.set(-0.3);
+//         q_d_shoulder.set(0.0);
+//         //robot.glueDownToGroundPoint.setForce(0.0, 0.0, -450.0);
+//      }
+//
+//      applyTorqueToHip(hipDesired);
+//      applyTorqueToShoulder(shoulderDesired);
+
+   }
 
    private void computeCenterOfMass()
    {
@@ -549,5 +539,256 @@ public class SkippyController implements RobotController
    public String getDescription()
    {
       return getName();
+   }
+
+   /*
+      STATE MACHINES
+    */
+
+   private void setUpStateMachines()
+   {
+      //states
+      State<States> balanceState = new BalanceState();
+      State<States> prepareState = new PrepareState();
+      State<States> liftoffState = new LiftoffState();
+      State<States> repositionState = new RepositionState();
+      State<States> recoverState = new RecoverState();
+
+      //transitions
+      StateTransitionCondition balanceTransitionCondition = new BalanceTransitionCondition();
+      StateTransitionCondition prepareTransitionCondition = new PrepareTransitionCondition();
+      StateTransitionCondition liftoffTransitionCondition = new LiftoffTransitionCondition();
+      StateTransitionCondition repositionTransitionCondition = new RepositionTransitionCondition();
+      StateTransitionCondition recoverTransitionCondition = new RecoverTransitionCondition();
+
+      StateTransition<States> balanceToPrepare = new StateTransition<States>(States.PREPARE, balanceTransitionCondition);
+      balanceState.addStateTransition(balanceToPrepare);
+
+      StateTransition<States> prepareToLiftoff = new StateTransition<States>(States.LIFTOFF, prepareTransitionCondition);
+      prepareState.addStateTransition(prepareToLiftoff);
+
+      StateTransition<States> liftoffToReposition = new StateTransition<States>(States.REPOSITION, liftoffTransitionCondition);
+      liftoffState.addStateTransition(liftoffToReposition);
+
+      StateTransition<States> repositionToRecover = new StateTransition<States>(States.RECOVER, repositionTransitionCondition);
+      repositionState.addStateTransition(repositionToRecover);
+
+      StateTransition<States> recoverToBalance = new StateTransition<States>(States.BALANCE, recoverTransitionCondition);
+      recoverState.addStateTransition(recoverToBalance);
+
+      stateMachine.addState(balanceState);
+      stateMachine.addState(prepareState);
+      stateMachine.addState(liftoffState);
+      stateMachine.addState(repositionState);
+      stateMachine.addState(recoverState);
+
+      stateMachine.setCurrentState(States.BALANCE);
+   }
+
+   public void createStateMachineWindow()
+   {
+      EventDispatchThreadHelper.invokeAndWait(new Runnable()
+      {
+         public void run()
+         {
+            createStateMachineWindowLocal();
+         }
+      });
+   }
+
+   public void createStateMachineWindowLocal()
+   {
+      JFrame frame = new JFrame("Skippy Jump State Machine");
+      Container contentPane = frame.getContentPane();
+      contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
+
+      StateMachinesJPanel<States> stateMachinePanel = new StateMachinesJPanel<States>(stateMachine, true);
+
+      frame.getContentPane().add(stateMachinePanel);
+
+      frame.pack();
+      frame.setSize(450, 300);
+      frame.setAlwaysOnTop(false);
+      frame.setVisible(true);
+
+      stateMachine.attachStateChangedListener(stateMachinePanel);
+   }
+
+   public class BalanceTransitionCondition implements StateTransitionCondition
+   {
+      public BalanceTransitionCondition()
+      {
+
+      }
+      public boolean checkCondition()
+      {
+         return robot.t.getDoubleValue() == 4.0;
+      }
+   }
+   public class PrepareTransitionCondition implements StateTransitionCondition
+   {
+      public PrepareTransitionCondition()
+      {
+
+      }
+      public boolean checkCondition()
+      {
+         return robot.t.getDoubleValue() == 11.0;
+      }
+   }
+   public class LiftoffTransitionCondition implements StateTransitionCondition
+   {
+      public LiftoffTransitionCondition()
+      {
+
+      }
+      public boolean checkCondition()
+      {
+         return robot.t.getDoubleValue() == 11.37;
+      }
+   }
+   public class RepositionTransitionCondition implements StateTransitionCondition
+   {
+      public RepositionTransitionCondition()
+      {
+
+      }
+      public boolean checkCondition()
+      {
+         return robot.t.getDoubleValue() == 11.98;
+      }
+   }
+   public class RecoverTransitionCondition implements StateTransitionCondition
+   {
+      public RecoverTransitionCondition()
+      {
+
+      }
+      public boolean checkCondition()
+      {
+         return robot.t.getDoubleValue() == 20.0;
+      }
+   }
+
+   private class BalanceState extends State<States>
+   {
+      public BalanceState()
+      {
+         super(States.BALANCE);
+      }
+      public void doAction()
+      {
+         applyTorqueToHip(q_d_hip.getDoubleValue());
+         applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
+      }
+      public void doTransitionIntoAction()
+      {
+
+      }
+      public void doTransitionOutOfAction()
+      {
+
+      }
+   }
+
+   private class PrepareState extends State<States>
+   {
+      public PrepareState()
+      {
+         super(States.PREPARE);
+      }
+      public void doAction()
+      {
+         q_d_hip.set(1.6);
+         applyTorqueToHip(q_d_hip.getDoubleValue());
+         applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
+      }
+      public void doTransitionIntoAction()
+      {
+
+      }
+      public void doTransitionOutOfAction()
+      {
+
+      }
+   }
+
+   private class LiftoffState extends State<States>
+   {
+      public LiftoffState()
+      {
+         super(States.LIFTOFF);
+      }
+      public void doAction()
+      {
+         k1.set(0.0);
+         k2.set(0.0);
+         k3.set(300.0);
+         k4.set(30.0);
+         q_d_hip.set(0.45);
+
+         applyTorqueToHip(q_d_hip.getDoubleValue());
+         applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
+      }
+      public void doTransitionIntoAction()
+      {
+
+      }
+      public void doTransitionOutOfAction()
+      {
+
+      }
+   }
+
+   private class RepositionState extends State<States>
+   {
+      public RepositionState()
+      {
+         super(States.REPOSITION);
+      }
+      public void doAction()
+      {
+         q_d_hip.set(-1.3);
+
+         applyTorqueToHip(q_d_hip.getDoubleValue());
+         applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
+      }
+      public void doTransitionIntoAction()
+      {
+
+      }
+      public void doTransitionOutOfAction()
+      {
+
+      }
+   }
+
+   private class RecoverState extends State<States>
+   {
+      public RecoverState()
+      {
+         super(States.RECOVER);
+      }
+      public void doAction()
+      {
+         k1.set(-3600.0);
+         k2.set(-1500.0);
+         k3.set(-170.0);
+         k4.set(-130.0);
+
+         q_d_hip.set(-0.3);
+         q_d_shoulder.set(0.0);
+
+         applyTorqueToHip(q_d_hip.getDoubleValue());
+         applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
+      }
+      public void doTransitionIntoAction()
+      {
+
+      }
+      public void doTransitionOutOfAction()
+      {
+
+      }
    }
 }
