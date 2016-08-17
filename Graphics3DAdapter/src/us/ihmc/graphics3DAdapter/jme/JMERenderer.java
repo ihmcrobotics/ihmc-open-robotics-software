@@ -575,6 +575,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
       updateCameras();
       count++;
+
+      updateGraphics(tpf);
    }
 
    /**
