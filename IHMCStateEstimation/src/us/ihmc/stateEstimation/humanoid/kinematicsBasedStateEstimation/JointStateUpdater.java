@@ -1,9 +1,14 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -38,6 +43,7 @@ public class JointStateUpdater
    private final IMUPacket imuPacket = new IMUPacket();
    private final BooleanYoVariable recievedHeadIMUPacket = new BooleanYoVariable("RecievedHeadIMUPacket", registry);
    private final DoubleYoVariable headIMUDelay = new DoubleYoVariable("HeadIMUDelay", registry);
+   private final YoFrameVector headIMULinearAcceleration = new YoFrameVector("HeadIMULinearAcceleration", ReferenceFrame.getWorldFrame(), registry);
 
    private final BooleanYoVariable enableIMUBasedJointVelocityEstimator = new BooleanYoVariable("enableIMUBasedJointVelocityEstimator", registry);
 
@@ -154,6 +160,8 @@ public class JointStateUpdater
       spatialAccelerationCalculator.compute();
    }
 
+   private final FrameVector headIMULinearAccelerationTemp = new FrameVector();
+   private final Vector3d linearAcceleration = new Vector3d();
    public void checkForIMUPacket(double time)
    {
       if (headIMUSubscriber == null)
@@ -169,6 +177,10 @@ public class JointStateUpdater
       recievedHeadIMUPacket.set(true);
 
       headIMUDelay.set(time - imuPacket.time);
+      linearAcceleration.set(imuPacket.linearAcceleration);
+      headIMULinearAccelerationTemp.setIncludingFrame(headIMUSubscriber.getImuDefinition().getIMUFrame(), linearAcceleration);
+      headIMULinearAccelerationTemp.changeFrame(ReferenceFrame.getWorldFrame());
+      headIMULinearAcceleration.set(headIMULinearAccelerationTemp);
    }
 
    public void addHeadIMUSubscriber(HeadIMUSubscriber headIMUSubscriber)

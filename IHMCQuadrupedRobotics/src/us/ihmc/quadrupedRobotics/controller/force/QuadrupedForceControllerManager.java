@@ -9,15 +9,7 @@ import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerE
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedDcmBasedStandController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedDcmBasedStepController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedDoNothingController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFallController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFreezeController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedJointInitializationController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedSoleWaypointController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedMpcBasedXGaitController;
+import us.ihmc.quadrupedRobotics.controller.force.states.*;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.params.BooleanParameter;
@@ -196,7 +188,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       final QuadrupedController standController = new QuadrupedDcmBasedStandController(runtimeEnvironment, controllerToolbox, inputProvider);
       final QuadrupedDcmBasedStepController stepController = new QuadrupedDcmBasedStepController(runtimeEnvironment, controllerToolbox, inputProvider,
             timedStepProvider);
-      final QuadrupedMpcBasedXGaitController xGaitController = new QuadrupedMpcBasedXGaitController(runtimeEnvironment, controllerToolbox, inputProvider,
+      final QuadrupedDcmBasedXGaitController xGaitController = new QuadrupedDcmBasedXGaitController(runtimeEnvironment, controllerToolbox, inputProvider,
             xGaitSettingsProvider);
       final QuadrupedController fallController = new QuadrupedForceBasedFallController(runtimeEnvironment, controllerToolbox);
       final QuadrupedController soleWaypointController = new QuadrupedForceBasedSoleWaypointController(runtimeEnvironment, controllerToolbox,

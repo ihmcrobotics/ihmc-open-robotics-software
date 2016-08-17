@@ -72,9 +72,9 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
       return point2d;
    }
 
-   public final void getFrameTuple2d(FrameTuple2d<?, ?> frameTuple2d)
+   public final void getFrameTuple2d(FrameTuple2d<?, ?> frameTuple2dToPack)
    {
-      frameTuple2d.set(getFrameTuple2d());
+      frameTuple2dToPack.set(getFrameTuple2d());
    }
 
    public final T getFrameTuple2d()
@@ -93,26 +93,14 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
       return new FramePoint2d(getFrameTuple2d());
    }
    
-   public final void getFrameVector2d(FrameVector2d frameVector2dToPack)
+   public final void getFrameTuple2dIncludingFrame(FrameTuple2d<?, ?> frameTuple2dToPack)
    {
-      T frameTuple2d = getFrameTuple2d();
-      frameVector2dToPack.setIncludingFrame(frameTuple2d.getReferenceFrame(), frameTuple2d.getX(), frameTuple2d.getY());
-   }
-   
-   public final void getFramePoint2d(FramePoint2d framePoint2dToPack)
-   {
-      T frameTuple2d = getFrameTuple2d();
-      framePoint2dToPack.setIncludingFrame(frameTuple2d.getReferenceFrame(), frameTuple2d.getX(), frameTuple2d.getY());
+      frameTuple2dToPack.setIncludingFrame(getFrameTuple2d());
    }
 
-   public final void getFrameTuple2dIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
+   public final void getFrameTupleIncludingFrame(FrameTuple<?, ?> frameTupleToPack)
    {
-      frameTuple2d.setIncludingFrame(getFrameTuple2d());
-   }
-
-   public final void getFrameTupleIncludingFrame(FrameTuple<?, ?> frameTuple)
-   {
-      frameTuple.setXYIncludingFrame(getFrameTuple2d());
+      frameTupleToPack.setXYIncludingFrame(getFrameTuple2d());
    }
 
    public final double getX()
