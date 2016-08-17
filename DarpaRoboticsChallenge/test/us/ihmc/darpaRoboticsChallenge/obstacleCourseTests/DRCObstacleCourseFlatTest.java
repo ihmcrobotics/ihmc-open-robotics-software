@@ -52,7 +52,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -75,7 +75,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-     
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -119,7 +119,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -138,7 +138,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
-      
+
       DoubleYoVariable offsetHeightAboveGround = (DoubleYoVariable) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("LookAheadCoMHeightTrajectoryGenerator", "offsetHeightAboveGround");
       offsetHeightAboveGround.set(0.15);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -160,7 +160,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -171,10 +171,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       String name = "DRCSimpleFlatGroundScriptTest";
-      
+
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, selectedLocation, simulationTestingParameters, getRobotModel());
       SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp();
@@ -190,7 +190,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.5);
-      
+
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
       loadScriptFileInLeftSoleFrame(scriptName);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(16.0);
@@ -204,57 +204,57 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-	
+
 	  @DeployableTestMethod(estimatedDuration = 39.9)
 	   @Test(timeout = 200000)
 	   public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
 	   {
 	      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 	      String name = "DRCSimpleScriptsTest";
-	      
+
 	      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
 	      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-	      
+
 	      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, selectedLocation, simulationTestingParameters, getRobotModel());
 	      setupCameraForWalkingUpToRamp();
 
 	      ThreadTools.sleep(1000);
-	      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1); //1.0);	      
-	      
-	      
+	      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1); //1.0);
+
+
 	      SDFFullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
          ReferenceFrame leftSoleFrame = controllerFullRobotModel.getSoleFrame(RobotSide.LEFT);
          ReferenceFrame rightSoleFrame = controllerFullRobotModel.getSoleFrame(RobotSide.RIGHT);
-	      
-	      
+
+
 	      FramePoint leftSole = new FramePoint(leftSoleFrame);
 	      leftSole.changeFrame(ReferenceFrame.getWorldFrame());
 	      System.out.println("leftSole = " + leftSole);
-	      
+
 	      String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleSingleStepScript.xml";
 	      InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-	      drcSimulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame); 
+	      drcSimulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame);
 	      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
 
 	      scriptName = "scripts/ExerciseAndJUnitScripts/SimpleSingleHandTrajectoryScript.xml";
 	      scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-	      drcSimulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame); 
+	      drcSimulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame);
 	      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
 	      scriptName = "scripts/ExerciseAndJUnitScripts/SimpleSingleFootTrajectoryScript.xml";
 	      scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-	      drcSimulationTestHelper.loadScriptFile(scriptInputStream, rightSoleFrame); 
+	      drcSimulationTestHelper.loadScriptFile(scriptInputStream, rightSoleFrame);
 	      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
 	      scriptName = "scripts/ExerciseAndJUnitScripts/SimpleSinglePelvisHeightScript.xml";
 	      scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-         drcSimulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame); 
+         drcSimulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame);
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
-	      
+
 
 	      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
 	      drcSimulationTestHelper.checkNothingChanged();
@@ -265,11 +265,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
 	      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
 	      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-	      
+
 	      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 	   }
-	
-	
+
+
 	  @DeployableTestMethod(estimatedDuration = 29.1)
 	   @Test(timeout = 150000)
 	   public void testACoupleStepsUsingQueuedControllerCommands() throws SimulationExceededMaximumTimeException
@@ -277,10 +277,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
 	      String name = "DRCQueuedControllerCommandTest";
-	      
+
 	      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
 	      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-	      
+
 	      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, selectedLocation, simulationTestingParameters, getRobotModel());
 	      ConcurrentLinkedQueue<Command<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
 
@@ -288,13 +288,13 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
 	      ThreadTools.sleep(1000);
 	      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-	      
+
 //	      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
 //	      walk.set(true);
-	      
+
 	      FootstepDataListCommand footstepList = new FootstepDataListCommand();
          FootstepDataControllerCommand footstepCommand = new FootstepDataControllerCommand();
-         
+
          Point3d position = new Point3d(0.0, 0.2, 0.0);
          Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
@@ -322,14 +322,14 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
          footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.RIGHT);
          footstepList.addFootstep(footstepCommand);
-	      
+
 	      queuedControllerCommands.add(footstepList);
-	      
-	      
-	      
+
+
+
 	      footstepList = new FootstepDataListCommand();
          footstepCommand = new FootstepDataControllerCommand();
-         
+
          position = new Point3d(1.0, 0.2, 0.0);
          orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
@@ -358,10 +358,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
          footstepCommand.setRobotSide(RobotSide.RIGHT);
          footstepList.addFootstep(footstepCommand);
 
-         
+
          queuedControllerCommands.add(footstepList);
 
-	      
+
 	      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
 
 
@@ -374,11 +374,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
 	      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
 	      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-	      
+
 	      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 	   }
 
-	  
+
      @DeployableTestMethod(estimatedDuration = 31.9)
      @Test(timeout = 160000)
      public void testACoupleQueuedControllerCommands() throws SimulationExceededMaximumTimeException
@@ -386,10 +386,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
         String name = "DRCQueuedControllerCommandTest";
-        
+
         FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
         DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-        
+
         drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, selectedLocation, simulationTestingParameters, getRobotModel());
         ConcurrentLinkedQueue<Command<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
 
@@ -397,13 +397,13 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
-        
+
 //      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
 //      walk.set(true);
-        
+
         FootstepDataListCommand footstepList = new FootstepDataListCommand();
         FootstepDataControllerCommand footstepCommand = new FootstepDataControllerCommand();
-        
+
         Point3d position = new Point3d(0.3, 0.2, 0.0);
         Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
@@ -417,9 +417,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
         footstepCommand.setRobotSide(RobotSide.RIGHT);
         footstepList.addFootstep(footstepCommand);
-        
+
         queuedControllerCommands.add(footstepList);
-        
+
         // Some chest motions. These will continue during the steps to come afterwards:
         ChestTrajectoryCommand chestCommand = new ChestTrajectoryCommand();
         FrameSO3TrajectoryPointList chestTrajectoryPointList = new FrameSO3TrajectoryPointList();
@@ -433,7 +433,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         // Some more steps:
         footstepList = new FootstepDataListCommand();
         footstepCommand = new FootstepDataControllerCommand();
-        
+
         position = new Point3d(0.65, 0.2, 0.0);
         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
@@ -464,19 +464,19 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
         queuedControllerCommands.add(footstepList);
         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0);
-        
+
         FootTrajectoryCommand footTrajectoryCommand = new FootTrajectoryCommand();
-        
+
         FrameSE3TrajectoryPointList footPointList = new FrameSE3TrajectoryPointList();
         footPointList.addTrajectoryPoint(0.2, new Point3d(1.1, -0.2, 0.25), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
         footPointList.addTrajectoryPoint(0.5, new Point3d(1.1, -0.2, 0.35), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
         footPointList.addTrajectoryPoint(1.0, new Point3d(1.1, -0.2, 0.25), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
         footPointList.addTrajectoryPoint(2.0, new Point3d(1.1, -0.2, 0.35), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
-        
+
         footTrajectoryCommand.setIncludingFrame(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
         queuedControllerCommands.add(footTrajectoryCommand);
-        
+
         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
 
@@ -489,11 +489,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
         BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
         drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-        
+
         BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
      }
-     
-     
+
+
      @DeployableTestMethod(estimatedDuration = 38.5)
      @Test(timeout = 190000)
      public void testACoupleMoreQueuedControllerCommands() throws SimulationExceededMaximumTimeException
@@ -501,10 +501,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
         String name = "DRCQueuedControllerCommandTest";
-        
+
         FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
         DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-        
+
         drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, selectedLocation, simulationTestingParameters, getRobotModel());
         ConcurrentLinkedQueue<Command<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
 
@@ -512,37 +512,37 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
         ThreadTools.sleep(1000);
         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
-        
+
 //      BooleanYoVariable walk = (BooleanYoVariable) robot.getVariable("walk");
 //      walk.set(true);
-        
+
         FootTrajectoryCommand footTrajectoryCommand = new FootTrajectoryCommand();
-        
+
         FrameSE3TrajectoryPointList footPointList = new FrameSE3TrajectoryPointList();
         footPointList.addTrajectoryPoint(1.0, new Point3d(0.0, -0.2, 0.25), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
         footPointList.addTrajectoryPoint(2.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
         footPointList.addTrajectoryPoint(3.0, new Point3d(0.0, -0.2, 0.25), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
         footPointList.addTrajectoryPoint(4.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
-        
+
         footTrajectoryCommand.setIncludingFrame(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
         queuedControllerCommands.add(footTrajectoryCommand);
-        
+
         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
-        
-        
+
+
         footTrajectoryCommand = new FootTrajectoryCommand();
-        
+
         footPointList = new FrameSE3TrajectoryPointList();
         footPointList.addTrajectoryPoint(1.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.1, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
         footPointList.addTrajectoryPoint(2.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.0, 0.1, 0.0, 1.0), new Vector3d(), new Vector3d());
         footPointList.addTrajectoryPoint(3.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.0, 0.0, 0.1, 1.0), new Vector3d(), new Vector3d());
         footPointList.addTrajectoryPoint(4.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.0, 0.1, 0.0, 1.0), new Vector3d(), new Vector3d());
-        
+
         footTrajectoryCommand.setIncludingFrame(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
         queuedControllerCommands.add(footTrajectoryCommand);
-        
+
         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
 
 
@@ -555,33 +555,33 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
         BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
         drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-        
+
         BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
      }
 
-	  
+
 	@DeployableTestMethod(estimatedDuration = 52.3)
 	@Test(timeout = 260000)
    public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      
+
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", selectedLocation, simulationTestingParameters, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp();
-      
+
       int ticksPerPerturbation = 10;
       OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * (ticksPerPerturbation));
       oscillateFeetPerturber.setTranslationMagnitude(new double[]{0.008, 0.011, 0.004});
       oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[]{0.012, 0.047, 0.009});
-      
+
       oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.LEFT, new double[]{1.0, 2.5, 3.3});
       oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.RIGHT, new double[]{2.0, 0.5, 1.3});
-      
+
       oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.LEFT, new double[]{5.0, 0.5, 0.3});
       oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[]{0.2, 3.4, 1.11});
 
@@ -589,11 +589,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      
+
       // Load script file:
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
       loadScriptFileInLeftSoleFrame(scriptName);
-      
+
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(16.0);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
@@ -605,7 +605,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -630,15 +630,15 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp();
-      
+
       int ticksPerPerturbation = 10;
       OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * (ticksPerPerturbation));
       oscillateFeetPerturber.setTranslationMagnitude(new double[]{0.01, 0.015, 0.005});
       oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[]{0.017, 0.012, 0.011});
-      
+
       oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.LEFT, new double[]{5.0, 2.5, 3.3});
       oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.RIGHT, new double[]{2.0, 6.5, 1.3});
-      
+
       oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.LEFT, new double[]{5.0, 0.5, 7.3});
       oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[]{0.2, 3.4, 1.11});
 
@@ -656,7 +656,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -669,17 +669,17 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCLongStepsMaxHeightPauseAndRestartTest", selectedLocation, simulationTestingParameters, getRobotModel());
       setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
-      
+
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongStepsMaxHeightPauseAndRestart_LeftFootTest.xml";
       loadScriptFileInLeftSoleFrame(scriptName);
-      
+
       success = success & drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
@@ -691,7 +691,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -704,7 +704,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCLongStepsMaxHeightPauseAndRestartTest", selectedLocation, simulationTestingParameters, getRobotModel());
 
       SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
@@ -723,7 +723,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml";
       loadScriptFileInLeftSoleFrame(scriptName);
-      
+
       slipOnEachStepPerturber.setSlipNextStep(true);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
 
@@ -736,7 +736,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -749,7 +749,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSideStepsWithSlippingTest", selectedLocation, simulationTestingParameters, getRobotModel());
 
       SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
@@ -760,17 +760,17 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       slipRandomOnEachStepPerturber.setSlipAfterStepTimeDeltaRange(0.01, 1.0);
       slipRandomOnEachStepPerturber.setSlipPercentSlipPerTickRange(0.02, 1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.0);
-      
+
       robot.setController(slipRandomOnEachStepPerturber, 10);
 
       setupCameraForSideStepSlipping();
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-      
+
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml";
       loadScriptFileInLeftSoleFrame(scriptName);
-      
+
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.5);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
 
@@ -783,7 +783,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -830,7 +830,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    // }
    // }
 
-   
+
    // Added for fixing DRC-866. Does not work for fast walking
 	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.InDevelopment)
 	@Test(timeout=300000)
@@ -877,7 +877,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-      
+
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingUpToRampShortSteps(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
@@ -891,7 +891,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -925,7 +925,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
-      
+
       Point3d center = new Point3d(3.1200570722246437, 0.017275273114368033, 0.8697236867426688);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
@@ -957,7 +957,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       drcSimulationTestHelper.send(footstepDataList);
 
       final DoubleYoVariable pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet);
-      
+
       SimulationDoneCriterion checkPelvisOrientationError = new SimulationDoneCriterion()
       {
          @Override
@@ -975,7 +975,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
-      
+
       Point3d center = new Point3d(0.125, 0.03, 0.78);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
@@ -1007,14 +1007,14 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
-   
+
    private FootstepDataListMessage createFootstepsForRotatedStepInTheAir(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {
             {
-               {0.4, 0.10, 0.15},
-               {0.6, 0.0, 0.0, 0.8}
+               {0.4, 0.10, 0.10},
+               {0.4, 0.0, 0.0, 0.8}
             },
             {
                {0.48, -0.10329823409587219, 0.08400000000000005},
@@ -1036,7 +1036,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       double swingTrajectoryTime = 1.0;
       return scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime);
    }
-   
+
    private FootstepDataListMessage createFootstepsForWalkingUpToRampShortSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
@@ -1220,10 +1220,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
-   
+
    protected abstract Vector3d getFootSlipVector();
 
    protected abstract double getFootSlipTimeDeltaAfterTouchdown();
-   
+
    protected abstract DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs);
 }
