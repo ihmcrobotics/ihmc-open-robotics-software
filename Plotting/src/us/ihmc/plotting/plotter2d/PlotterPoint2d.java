@@ -61,7 +61,7 @@ public class PlotterPoint2d extends FramePoint2d
       if (getReferenceFrame() instanceof PixelsReferenceFrame)
       {
          changeFrame(ReferenceFrame.getWorldFrame());
-         scale(metersReferenceFrame.getConversionToMeters());
+         scale(metersReferenceFrame.getConversionToMeters().getX(), metersReferenceFrame.getConversionToMeters().getY());
       }
       
       super.changeFrame(metersReferenceFrame);
@@ -72,7 +72,7 @@ public class PlotterPoint2d extends FramePoint2d
       if (getReferenceFrame() instanceof MetersReferenceFrame)
       {
          changeFrame(ReferenceFrame.getWorldFrame());
-         scale(pixelsReferenceFrame.getConversionToPixels());
+         scale(pixelsReferenceFrame.getConversionToPixels().getX(), pixelsReferenceFrame.getConversionToPixels().getY());
       }
       
       super.changeFrame(pixelsReferenceFrame);

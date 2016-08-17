@@ -1,5 +1,7 @@
 package us.ihmc.plotting.plotter2d.frames;
 
+import javax.vecmath.Vector2d;
+
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -28,7 +30,7 @@ public abstract class PixelsReferenceFrame extends PlotterReferenceFrame
       super(frameName, parentFrame, PlotterFrameSpace.PIXELS, spaceConverter);
    }
 
-   public double getConversionToPixels()
+   public Vector2d getConversionToPixels()
    {
       return getSpaceConverter().getConversionToSpace(PlotterFrameSpace.PIXELS);
    }

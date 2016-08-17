@@ -1,6 +1,7 @@
 package us.ihmc.plotting.plotter2d;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
@@ -127,10 +128,20 @@ public class Plotter2dTest
    {
       PlotterSpaceConverter spaceConverter = new PlotterSpaceConverter()
       {
+         private Vector2d scaleVector = new Vector2d();
+         
          @Override
-         public double getConversionToSpace(PlotterFrameSpace plotterFrameType)
+         public Vector2d getConversionToSpace(PlotterFrameSpace plotterFrameType)
          {
-            return plotterFrameType == PlotterFrameSpace.METERS ? 0.1 : 10.0;
+            if (plotterFrameType == PlotterFrameSpace.METERS)
+            {
+               scaleVector.set(0.1, 0.2);
+            }
+            else
+            {
+               scaleVector.set(10.0, 5.0);
+            }
+            return scaleVector;
          }
       };
       
@@ -142,7 +153,7 @@ public class Plotter2dTest
          }
       };
       
-      PixelsReferenceFrame screenFrame = new PixelsReferenceFrame("screenFrame", ReferenceFrame.getWorldFrame(), spaceConverter)
+      PixelsReferenceFrame screenFrame = new PixelsReferenceFrame("screenFrame", pixelsFrame, spaceConverter)
       {
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -174,12 +185,12 @@ public class Plotter2dTest
       point.changeFrame(pixelsFrame);
       
       System.out.println(point);
-      JUnitTools.assertPoint2dEquals("Point not equal", new Point2d(10.0, 50.0), point.getPoint(), 1e-7);
+      JUnitTools.assertPoint2dEquals("Point not equal", new Point2d(10.0, 25.0), point.getPoint(), 1e-7);
       
       point.changeFrame(screenFrame);
       
       System.out.println(point);
-      JUnitTools.assertPoint2dEquals("Point not equal", new Point2d(40.0, 50.0), point.getPoint(), 1e-7);
+      JUnitTools.assertPoint2dEquals("Point not equal", new Point2d(40.0, 75.0), point.getPoint(), 1e-7);
       
       point.changeFrame(metersFrame);
       
