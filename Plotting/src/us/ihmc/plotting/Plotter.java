@@ -22,6 +22,7 @@ import javax.swing.event.MouseInputAdapter;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point2i;
 
+import us.ihmc.plotting.plotter2d.PlotterColors;
 import us.ihmc.plotting.shapes.LineArtifact;
 import us.ihmc.plotting.shapes.PointArtifact;
 import us.ihmc.plotting.shapes.PolygonArtifact;
@@ -40,7 +41,7 @@ public class Plotter extends JPanel
 
    // show selections
    private static final boolean SHOW_SELECTION = false;
-   private static final Color TEXT_COLOR = Color.WHITE;
+   private static final Color TEXT_COLOR = PlotterColors.LABEL_COLOR;
 
    private boolean drawHistory = false;
    private boolean showLabels = SHOW_LABELS_BY_DEFAULT;
@@ -88,7 +89,7 @@ public class Plotter extends JPanel
       Border compound = BorderFactory.createCompoundBorder(raisedBevel, loweredBevel);
       setBorder(compound);
 
-      super.setBackground(new Color(180, 220, 240));
+      super.setBackground(PlotterColors.BACKGROUND);
 
       PlotterMouseListener myListener = new PlotterMouseListener();
       addMouseListener(myListener);
@@ -180,15 +181,15 @@ public class Plotter extends JPanel
                
                if (nthGridLineFromOrigin % 10 == 0)
                {
-                  graphics2d.setColor(new Color(180, 190, 210));
+                  graphics2d.setColor(PlotterColors.GRID_EVERY_10);
                }
                else if (nthGridLineFromOrigin % 5 == 0)
                {
-                  graphics2d.setColor(new Color(180, 210, 230));
+                  graphics2d.setColor(PlotterColors.GRID_EVERY_5);
                }
                else
                {
-                  graphics2d.setColor(new Color(230, 240, 250));
+                  graphics2d.setColor(PlotterColors.GRID_EVERY_1);
                }
 
                // draw line
@@ -211,15 +212,15 @@ public class Plotter extends JPanel
                
                if (nthGridLineFromOrigin % 10 == 0)
                {
-                  graphics2d.setColor(new Color(180, 190, 210));
+                  graphics2d.setColor(PlotterColors.GRID_EVERY_10);
                }
                else if (nthGridLineFromOrigin % 5 == 0)
                {
-                  graphics2d.setColor(new Color(180, 210, 230));
+                  graphics2d.setColor(PlotterColors.GRID_EVERY_5);
                }
                else
                {
-                  graphics2d.setColor(new Color(230, 240, 250));
+                  graphics2d.setColor(PlotterColors.GRID_EVERY_1);
                }
 
                // draw line
@@ -237,7 +238,7 @@ public class Plotter extends JPanel
          }
 
          // paint grid centerline
-         graphics2d.setColor(Color.gray);
+         graphics2d.setColor(PlotterColors.GRID_AXIS);
          graphics2d.drawLine(metersOrigin.getInPixelsX(), 0, metersOrigin.getInPixelsX(), (int) visibleRectangle.getHeight());
          graphics2d.drawLine(0, metersOrigin.getInPixelsY(), (int) visibleRectangle.getWidth(), metersOrigin.getInPixelsY());
 
@@ -295,7 +296,7 @@ public class Plotter extends JPanel
          // paint selected destination
          if (SHOW_SELECTION)
          {
-            graphics2d.setColor(Color.red);
+            graphics2d.setColor(PlotterColors.SELECTION);
             int xSize = 8;
             graphics2d.drawLine(selected.getInPixelsX() - xSize, selected.getInPixelsY() - xSize, selected.getInPixelsX() + xSize, selected.getInPixelsY() + xSize);
             graphics2d.drawLine(selected.getInPixelsX() - xSize, selected.getInPixelsY() + xSize, selected.getInPixelsX() + xSize, selected.getInPixelsY() - xSize);
@@ -304,7 +305,7 @@ public class Plotter extends JPanel
          // paint selected area
          if (SHOW_SELECTION)
          {
-            graphics2d.setColor(Color.red);
+            graphics2d.setColor(PlotterColors.SELECTION);
             int Xmin, Xmax, Ymin, Ymax;
             if (selectionAreaStart.getInPixelsX() > selectionAreaEnd.getInPixelsX())
             {
