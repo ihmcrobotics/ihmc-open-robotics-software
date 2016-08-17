@@ -29,8 +29,8 @@ import us.ihmc.tools.io.printing.PrintTools;
 public class LogSessionBroadcaster extends Thread
 {
    public static final byte[] announceGroupAddress = { (byte) 239, (byte) 255, (byte) 24, (byte) 1 };
-   private final int GROUP_REQUEST_TIMEOUT = 100;
-   private final int GROUP_REQUEST_ATTEMPTS = 10;
+   private final int GROUP_REQUEST_TIMEOUT = 50;
+   private final int GROUP_REQUEST_ATTEMPTS = 5;
    private final int GROUP_ANNOUNCE_RATE = 500;
 
    private final NetworkInterface iface;
