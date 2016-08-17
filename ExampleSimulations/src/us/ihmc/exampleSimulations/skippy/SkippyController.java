@@ -622,7 +622,8 @@ public class SkippyController implements RobotController
       }
       public boolean checkCondition()
       {
-         return robot.t.getDoubleValue() == 4.0;
+         double time = robot.t.getDoubleValue();
+         return time < 4.01 && time > 3.99;
       }
    }
    public class PrepareTransitionCondition implements StateTransitionCondition
@@ -633,7 +634,8 @@ public class SkippyController implements RobotController
       }
       public boolean checkCondition()
       {
-         return robot.t.getDoubleValue() == 11.0;
+         double time = robot.t.getDoubleValue();
+         return time < 11.01 && time > 10.99;
       }
    }
    public class LiftoffTransitionCondition implements StateTransitionCondition
@@ -644,7 +646,8 @@ public class SkippyController implements RobotController
       }
       public boolean checkCondition()
       {
-         return robot.t.getDoubleValue() == 11.37;
+         double time = robot.t.getDoubleValue();
+         return time < 11.38 && time > 11.36;
       }
    }
    public class RepositionTransitionCondition implements StateTransitionCondition
@@ -655,7 +658,8 @@ public class SkippyController implements RobotController
       }
       public boolean checkCondition()
       {
-         return robot.t.getDoubleValue() == 11.98;
+         double time = robot.t.getDoubleValue();
+         return time < 11.99 && time > 11.97;
       }
    }
    public class RecoverTransitionCondition implements StateTransitionCondition
@@ -666,7 +670,8 @@ public class SkippyController implements RobotController
       }
       public boolean checkCondition()
       {
-         return robot.t.getDoubleValue() == 20.0;
+         double time = robot.t.getDoubleValue();
+         return time < 20.01 && time > 19.99;
       }
    }
 
