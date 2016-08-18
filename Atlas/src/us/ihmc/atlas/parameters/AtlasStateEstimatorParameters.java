@@ -34,8 +34,8 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    private final double estimatorDT;
 
    private final double jointVelocitySlopTimeForBacklashCompensation;
-   private static final double backXBacklashSlopTime = 0.08;
-   private static final double backXAlphaFilterBreakFrequency = 10.0;
+   private static final double backXBacklashSlopTime = 0.03;
+   private static final double backXAlphaFilterBreakFrequency = 16.0;
 
    private final double defaultFilterBreakFrequency;
    private final double defaultFilterBreakFrequencyArm;
@@ -92,7 +92,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       String[] armAndBackJoints = new String[armJointNames.length + backXName.length];
       System.arraycopy(armJointNames, 0, armAndBackJoints, 0, armJointNames.length);
       System.arraycopy(backXName, 0, armAndBackJoints, armJointNames.length, backXName.length);
-      DoubleYoVariable backXFilter = sensorProcessing.createAlphaFilter("backXAlphaFilter", defaultFilterBreakFrequency);
+      DoubleYoVariable backXFilter = sensorProcessing.createAlphaFilter("backXAlphaFilter", backXAlphaFilterBreakFrequency);
       DoubleYoVariable backXSlopTime = new DoubleYoVariable("backXSlopTime", registry);
       backXSlopTime.set(backXBacklashSlopTime);
       
