@@ -3,7 +3,6 @@ package us.ihmc.exampleSimulations.skippy;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
@@ -27,10 +26,17 @@ import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
 /**
- * This class SkippyRobot is a public class that extends Robot. The class Robot is
- * included in the Simulation Construction Set and has built in graphics, dynamics, etc.
- * Extending the class is an easy way to make a new type of robot, in this case a SkippyRobot.
+ *
+ * SkippyRobot is the extension of Robot that serves as the main robot for the Skippy Simulation.
+ *
+ * The simulation models Skippy, a simple theoretical robot developed by Roy Featherstone:
+ *    http://royfeatherstone.org/skippy/index.html
+ *
+ * Other variations of Skippy also have been created, including a model resembling an Acrobot; different
+ * controllers have also been implemented for positioning/jumping.
+ *
  */
+
 public class SkippyRobot extends Robot
 {
    private static final boolean SHOW_MOI_ELLIPSOIDS = true;
@@ -45,9 +51,17 @@ public class SkippyRobot extends Robot
 
    private final RobotType robotType;
 
+    /**
+     * Skippy: A simple robot with two degrees of freedom, balanced on a single point
+     *   - Skippy is used for JUMPING_FORWARD, JUMPING_SIDEWAYS and BALANCE (see: SkippyController.java)
+     * Tippy: A variation of Skippy rooted to the ground
+     *   - Tippy is used for BALANCE (see: SkippyController.java)
+     */
+
    public enum RobotType
    {
-      TIPPY, SKIPPY;
+      TIPPY,
+      SKIPPY;
 
       public double negateIfTippy(double value)
       {
@@ -64,7 +78,28 @@ public class SkippyRobot extends Robot
       }
    }
 
-   // Tippy Only
+   /**
+    *
+    * Robot Outline:
+    *
+    *    There are three major parts to Tippy/Skippy:
+    *       1. LEGs
+    *       2. TORSO
+    *       3. SHOULDER
+    *
+    *    The following is specific terminology for each robot:
+    *       Tippy:
+    *          LEG - Referred to as FOOT interchangeably, represented by a UniversalJoint (footJointIfTippy)
+    *          TORSO - Referred to as HIP interchangeably, represented by a PinJoint (hipJoint)
+    *          SHOULDER - Referred to as ARM interchangeably, represented by a PinJoint (shoulderJoint)
+    *       Skippy:
+    *          LEG - Referred to as FOOT interchangeably, represented by a PinJoint (hipJoint)
+    *          TORSO - Referred to as HIP interchangeably, represented by a FloatingJoint (rootJointIfSkippy)
+    *          SHOULDER - Referred to as ARM interchangeably, represented by a PinJoint (shoulderJoint)
+    *
+    */
+
+   //tippy
    private final UniversalJoint footJointIfTippy;
 
    //skippy
@@ -75,31 +110,29 @@ public class SkippyRobot extends Robot
    private final PinJoint shoulderJoint;
    private final PinJoint hipJoint;
 
+   public final DoubleYoVariable t;  //used for JUMP controller
+
    private final KinematicPoint bodyPoint;
 
    private final DoubleYoVariable yaw = new DoubleYoVariable("yaw", this.getRobotsYoVariableRegistry());
 
-   /*
-    * L* are the link lengths, M* are the link masses, and R* are the radii of
-    * the links. Iyy* are the moments of inertia of the links, which are defined
-    * about the COM for each link.
-    */
    public static final double LEG_LENGTH = 1.0, LEG_MASS = 1.5, LEG_CUBE_LENGTH = 0.1, LEG_MOI = (1.0 / 4.0) * LEG_MASS * Math.pow(LEG_LENGTH, 2), // Leg
          TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0 / 4.0) * TORSO_MASS * Math.pow(TORSO_LENGTH, 2), // Torso
          SHOULDER_LENGTH = 3.0, SHOULDER_MASS = 0.5, SHOULDER_RADIUS = 0.05, SHOULDER_MOI = (1.0 / 2.0) * SHOULDER_MASS * Math.pow(SHOULDER_LENGTH, 2); // Crossbar
-   //4, 1/4
 
    private ExternalForcePoint balanceForce;
    public static ExternalForcePoint glueDownToGroundPoint;
 
-   private final double initialBodySidewaysLean = Math.PI / 48.0;
+   private final double initialBodySidewaysLean = 0.0 * Math.PI / 48.0;
    private final double initialShoulderJointAngle = 0.0 * Math.PI / 6.0;
-   private final double intialYawIfSkippy = Math.PI * 0.8;
+   private final double initialYawIfSkippy = 0.0* Math.PI * 0.8;
 
    public SkippyRobot(RobotType typeOfRobot)
    {
       super("Skippy");
       robotType = typeOfRobot;
+
+      t = (DoubleYoVariable)getVariable("t");
 
       this.setGravity(0.0, 0.0, -9.81); // m/s^2
 
@@ -134,7 +167,7 @@ public class SkippyRobot extends Robot
          hipJoint = new PinJoint("hipJoint", new Vector3d(0.0, 0.0, LEG_LENGTH), this, new Vector3d(-1.0, 0.0, 0.0));
          Link torso = createTorsoTippy();
          hipJoint.setLink(torso);
-         hipJoint.setInitialState(-2.0 * Math.PI / 3.0, 0.0);
+         hipJoint.setInitialState(- Math.PI / 6.0, 0.0);
 
          bodyPoint = new KinematicPoint("bodyPoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2.0), this);
          hipJoint.addKinematicPoint(bodyPoint);
@@ -148,14 +181,10 @@ public class SkippyRobot extends Robot
          shoulderJoint.setInitialState(initialShoulderJointAngle, 0.0);
 
          balanceForce = new ExternalForcePoint("BalanceForce", this);
-         //balanceForce.setForce(0.0,0.0,0.0);
          shoulderJoint.addExternalForcePoint(balanceForce);
 
          //shoulder.setDamping(0.3);
          this.hipJoint.addJoint(shoulderJoint);
-         //shoulder.addGroundContactPoint(shoulderContact);
-         //shoulder.addGroundContactPoint(leftContact);
-         //shoulder.addGroundContactPoint(rightContact);
 
          rootJointIfSkippy = null;
       }
@@ -174,8 +203,8 @@ public class SkippyRobot extends Robot
          this.addRootJoint(rootJointIfSkippy);
 
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setRotationEulerAndZeroTranslation(-Math.PI / 7.0 + 2.0 * Math.PI / 8.0, -initialBodySidewaysLean, intialYawIfSkippy);
-         transform.setTranslation(new Vector3d(0.0, 0.0, 2.0-0.15975));
+         transform.setRotationEulerAndZeroTranslation(Math.PI / 7.0 - 2.0 * Math.PI / 8.0, -initialBodySidewaysLean, initialYawIfSkippy);
+         transform.setTranslation(new Vector3d(0.0, 0.0, 2.0-0.15975+0.0032));
          rootJointIfSkippy.setRotationAndTranslation(transform);
 
          shoulderJoint = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2), this, Axis.Y);
@@ -191,10 +220,9 @@ public class SkippyRobot extends Robot
          rootJointIfSkippy.addJoint(shoulderJoint);
 
          hipJoint = new PinJoint("hip", new Vector3d(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis.X);
-         hipJoint.setInitialState(-2.0 * Math.PI / 8.0, 0.0);
+         hipJoint.setInitialState(2.0 * Math.PI / 8.0, 0.0);
          Link leg = createLegSkippy();
          hipJoint.setLink(leg);
-
 
 
          GroundContactPoint footContactPoint = new GroundContactPoint("gc_foot", new Vector3d(0.0, 0.0, -LEG_LENGTH), this);
