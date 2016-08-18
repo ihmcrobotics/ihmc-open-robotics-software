@@ -156,14 +156,14 @@ public class InverseDynamicsQPBoundCalculator
       {
          double qDotMin = (jointLimitLower - joint.getQ()) / controlDT;
          qDDotMin = (qDotMin - joint.getQd()) / controlDT;
-         qDDotMin = MathTools.clipToMinMax(qDDotMin, -absoluteMaximumJointAcceleration, absoluteMaximumJointAcceleration);
+         qDDotMin = MathTools.clipToMinMax(qDDotMin, -absoluteMaximumJointAcceleration, 0.0);
          qDDotMinToPack.set(index, 0, qDDotMin);
       }
       if (!Double.isInfinite(jointLimitUpper))
       {
          double qDotMax = (jointLimitUpper - joint.getQ()) / controlDT;
          qDDotMax = (qDotMax - joint.getQd()) / controlDT;
-         qDDotMax = MathTools.clipToMinMax(qDDotMax, -absoluteMaximumJointAcceleration, absoluteMaximumJointAcceleration);
+         qDDotMax = MathTools.clipToMinMax(qDDotMax, -0.0, absoluteMaximumJointAcceleration);
          qDDotMaxToPack.set(index, 0, qDDotMax);
       }
    }
