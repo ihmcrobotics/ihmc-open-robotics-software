@@ -45,7 +45,6 @@ public class SkippyController implements RobotController
    private enum SkippyStatus
    {
       JUMP_FORWARD,  //change initialBodySidewaysLean in SkippyRobot.java to 0.0
-      JUMP_SIDEWAYS,
       BALANCE,
       POSITION
    }
@@ -134,11 +133,6 @@ public class SkippyController implements RobotController
       {
          q_d_hip.set(0.6);
          q_d_shoulder.set(0.0);
-      }
-      else if(skippyStatus == SkippyStatus.JUMP_SIDEWAYS)
-      {
-         q_d_hip.set(0.0);
-         q_d_shoulder.set(0.6);
       }
 
       planarDistanceYZPlane = new DoubleYoVariable("planarDistanceYZPlane", registry);
@@ -625,11 +619,6 @@ public class SkippyController implements RobotController
             double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
             return time < 4.01 && time > 3.99;
          }
-         else if(direction == SkippyStatus.JUMP_SIDEWAYS)
-         {
-            double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
-            return time < 9.69 && time > 9.67;
-         }
          else
             return false;
          }
@@ -649,11 +638,6 @@ public class SkippyController implements RobotController
          {
             double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
             return time < 11.01 && time > 10.99;
-         }
-         else if(direction == SkippyStatus.JUMP_SIDEWAYS)
-         {
-            double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
-            return time < 21.30 && time > 21.28;
          }
          else
             return false;
@@ -675,10 +659,6 @@ public class SkippyController implements RobotController
             double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
             return time < 11.38 && time > 11.36;
          }
-         else if(direction == SkippyStatus.JUMP_SIDEWAYS)
-         {
-            return false;
-         }
          else
             return false;
       }
@@ -698,10 +678,6 @@ public class SkippyController implements RobotController
          {
             double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
             return time < 11.99 && time > 11.97;
-         }
-         else if(direction == SkippyStatus.JUMP_SIDEWAYS)
-         {
-            return false;
          }
          else
             return false;
@@ -723,8 +699,6 @@ public class SkippyController implements RobotController
             double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
             return time < 20.01 && time > 19.99;
          }
-         else if(direction == SkippyStatus.JUMP_SIDEWAYS)
-            return false;
          return false;
       }
    }
@@ -744,10 +718,6 @@ public class SkippyController implements RobotController
       {
          if(direction == SkippyStatus.JUMP_FORWARD)
             q_d_hip.set(0.6);
-         else if(direction == SkippyStatus.JUMP_SIDEWAYS)
-         {
-
-         }
       }
       public void doTransitionIntoAction()
       {
@@ -773,10 +743,6 @@ public class SkippyController implements RobotController
       {
          if(direction == SkippyStatus.JUMP_FORWARD)
             q_d_hip.set(1.6);
-         else if(direction == SkippyStatus.JUMP_SIDEWAYS)
-         {
-
-         }
 
       }
       public void doTransitionIntoAction()
@@ -809,10 +775,6 @@ public class SkippyController implements RobotController
             k4.set(30.0);
             q_d_hip.set(0.45);
          }
-         else if(direction == SkippyStatus.JUMP_SIDEWAYS)
-         {
-
-         }
 
       }
       public void doTransitionIntoAction()
@@ -839,10 +801,6 @@ public class SkippyController implements RobotController
       {
          if(direction == SkippyStatus.JUMP_FORWARD)
             q_d_hip.set(-1.3);
-         else if(direction == SkippyStatus.JUMP_SIDEWAYS)
-         {
-
-         }
 
       }
       public void doTransitionIntoAction()
@@ -876,10 +834,6 @@ public class SkippyController implements RobotController
 
             q_d_hip.set(0.6);
             q_d_shoulder.set(0.0);
-         }
-         else if(direction == SkippyStatus.JUMP_SIDEWAYS)
-         {
-
          }
 
       }
