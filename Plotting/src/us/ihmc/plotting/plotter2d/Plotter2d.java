@@ -10,6 +10,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
@@ -28,7 +29,6 @@ import us.ihmc.plotting.plotter2d.frames.PlotterFrameSpace;
 import us.ihmc.plotting.plotter2d.frames.PlotterSpaceConverter;
 import us.ihmc.plotting.shapes.LineArtifact;
 import us.ihmc.plotting.shapes.PointArtifact;
-import us.ihmc.plotting.shapes.PolygonArtifact;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -38,6 +38,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * TODO Make plotter not extend JPanel.
+ * TODO Deprecate archaic methods
  * TODO Factor out artifacts.
  * TODO Fix Artifact interface.
  */
@@ -59,12 +60,11 @@ public class Plotter2d extends JPanel
    private final Rectangle visibleRectangle = new Rectangle();
    private final Dimension preferredSize = new Dimension(275, 275);
    private final Vector2d gridSizePixels = new Vector2d();
-   private PolygonArtifact polygonArtifact;
+   private BufferedImage backgroundImage = null;
    
    private final PlotterSpaceConverter spaceConverter;
    private final PixelsReferenceFrame pixelsFrame;
    private final PixelsReferenceFrame screenFrame;
-//   private final PixelsReferenceFrame centerFrame;
    private final MetersReferenceFrame metersFrame;
    
    private final PlotterPoint2d screenPosition;
@@ -119,15 +119,6 @@ public class Plotter2d extends JPanel
             transformToParent.setTranslation(screenPosition.getX(), screenPosition.getY(), 0.0);
          }
       };
-//      centerFrame = new PixelsReferenceFrame("centerFrame", pixelsFrame, spaceConverter)
-//      {
-//         @Override
-//         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-//         {
-//            transformToParent.setRotationEulerAndZeroTranslation(0.0, Math.PI, Math.PI);
-//            transformToParent.setTranslation(visibleRectangle.getWidth() / 2.0, -(visibleRectangle.getHeight() / 2.0), 0.0);
-//         }
-//      };
       metersFrame = new MetersReferenceFrame("metersFrame", ReferenceFrame.getWorldFrame(), spaceConverter)
       {
          @Override
@@ -168,7 +159,6 @@ public class Plotter2d extends JPanel
       
       pixelsFrame.update();
       screenFrame.update();
-//      centerFrame.update();
       metersFrame.update();
       
       upperLeftCorner.setIncludingFrame(screenFrame, 0.0, 0.0);
@@ -177,6 +167,25 @@ public class Plotter2d extends JPanel
       origin.setIncludingFrame(metersFrame, 0.0, 0.0);
    }
    
+   public void setScale(double pixelsPerMeterX, double pixelsPerMeterY)
+   {
+      focusPoint.changeFrame(metersFrame);
+      metersToPixels.set(pixelsPerMeterX, pixelsPerMeterY);
+      
+      centerOnFocusPoint();
+   }
+   
+   private void centerOnFocusPoint()
+   {
+      focusPoint.changeFrame(pixelsFrame);
+      
+      screenPosition.changeFrame(pixelsFrame);
+      screenPosition.set(focusPoint);
+      screenPosition.add(-visibleRectangle.getWidth() / 2.0, visibleRectangle.getHeight() / 2.0);
+      
+      updateFrames();
+   }
+
    @Override
    protected void paintComponent(Graphics graphics)
    {
@@ -387,17 +396,6 @@ public class Plotter2d extends JPanel
       private int buttonPressed;
       private PlotterPoint2d middleMouseDragStart = new PlotterPoint2d(screenFrame);
       private PlotterPoint2d middleMouseDragEnd = new PlotterPoint2d(screenFrame);
-      
-      @Override
-      public void mouseClicked(MouseEvent e)
-      {
-         if (buttonPressed == MouseEvent.BUTTON1)
-         {
-            removeArtifact("path");
-            removeArtifact("polygon");
-            polygonArtifact = null;
-         }
-      }
 
       @Override
       public void mousePressed(MouseEvent e)
@@ -456,16 +454,7 @@ public class Plotter2d extends JPanel
             double scaledXChange = metersToPixels.getX() < 10 ? deltaDragY * 0.01 : deltaDragY * 0.5;
             double scaledYChange = metersToPixels.getY() < 10 ? deltaDragY * 0.01 : deltaDragY * 0.5;
             
-            focusPoint.changeFrame(metersFrame);
-            metersToPixels.setX(metersToPixels.getX() + scaledXChange);
-            metersToPixels.setY(metersToPixels.getY() + scaledYChange);
-            focusPoint.changeFrame(pixelsFrame);
-            
-            screenPosition.changeFrame(pixelsFrame);
-            screenPosition.set(focusPoint);
-            screenPosition.add(-visibleRectangle.getWidth() / 2.0, visibleRectangle.getHeight() / 2.0);
-            
-            updateFrames();
+            setScale(metersToPixels.getX() + scaledXChange, metersToPixels.getY() + scaledYChange);
             
             middleMouseDragStart.set(middleMouseDragEnd);
             
@@ -510,6 +499,34 @@ public class Plotter2d extends JPanel
    {
       preferredSize.setSize(width, height);
    }
+
+   public void setFocusPointY(double focusPointY)
+   {
+      focusPoint.changeFrame(metersFrame);
+      focusPoint.setY(focusPointY);
+      
+      centerOnFocusPoint();
+   }
+   
+   public void setFocusPointX(double focusPointX)
+   {
+      focusPoint.changeFrame(metersFrame);
+      focusPoint.setX(focusPointX);
+      
+      centerOnFocusPoint();
+   }
+   
+   public double getFocusPointX()
+   {
+      focusPoint.changeFrame(metersFrame);
+      return focusPoint.getX();
+   }
+   
+   public double getFocusPointY()
+   {
+      focusPoint.changeFrame(metersFrame);
+      return focusPoint.getY();
+   }
    
    public void showInNewWindow()
    {
@@ -523,6 +540,94 @@ public class Plotter2d extends JPanel
       frame.pack();
       frame.setVisible(true);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+   }
+   
+   // BEGIN ARCHAIC METHODS //
+   
+   public double getSelectedX()
+   {
+      selected.changeFrame(metersFrame);
+      return selected.getX();
+   }
+
+   public double getSelectedY()
+   {
+      selected.changeFrame(metersFrame);
+      return selected.getY();
+   }
+   
+   public void setShowLabels(boolean showLabels)
+   {
+      this.showLabels = showLabels;
+   }
+
+   public void setBackgroundImage(BufferedImage backgroundImage)
+   {
+      this.backgroundImage = backgroundImage;
+      repaint();
+   }
+
+   @Deprecated
+   public void setRangeLimit(int range, double origMapScale, double ullon, double ullat, double lrlon, double lrlat)
+   {
+      setRange(range);
+   }
+
+   @Deprecated
+   public void setRange(double range)
+   {
+      if (isShowing())
+      {
+         double smallestDimension = Math.min(visibleRectangle.getWidth(), visibleRectangle.getHeight());
+         double newPixelsPerMeter = smallestDimension / range;
+         setScale(newPixelsPerMeter, newPixelsPerMeter);
+      }
+      else
+      {
+         metersToPixels.set(range, range);
+      }
+   }
+
+   @Deprecated
+   public double getRange()
+   {
+      if (visibleRectangle.getWidth() <= visibleRectangle.getHeight())
+      {
+         return metersToPixels.getX() * visibleRectangle.getWidth();
+      }
+      else
+      {
+         return metersToPixels.getY() * visibleRectangle.getHeight();
+      }
+   }
+
+   public void setDrawHistory(boolean drawHistory)
+   {
+      this.showHistory = drawHistory;
+   }
+
+   @Deprecated
+   public void setOffsetX(double focusPointX)
+   {
+      setFocusPointX(focusPointX);
+   }
+
+   @Deprecated
+   public void setOffsetY(double focusPointY)
+   {
+      setFocusPointY(focusPointY);
+   }
+
+   @Deprecated
+   public double getOffsetX()
+   {
+      return getFocusPointX();
+   }
+
+   @Deprecated
+   public double getOffsetY()
+   {
+      return getFocusPointY();
    }
    
    // BEGIN ARTIFACT GARBAGE //
