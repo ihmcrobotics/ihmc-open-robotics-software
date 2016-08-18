@@ -89,10 +89,6 @@ public class InverseDynamicsQPBoundCalculator
          case DEFAULT:
             computeVelocityLimitDefault(joint, qDotMinToPack, qDotMaxToPack);
             break;
-         case RESTRICTIVE:
-            computeVelocityLimitDefault(joint, qDotMinToPack, qDotMaxToPack);
-            computeVelocityLimitRestrictive(joint, qDotMinToPack, qDotMaxToPack);
-            break;
          case NONE:
             break;
          default:
@@ -110,11 +106,6 @@ public class InverseDynamicsQPBoundCalculator
       double jointLimitUpper = jointUpperLimits.get(index, 0);
       if (!Double.isInfinite(jointLimitUpper))
          qDotMaxToPack.set(index, 0, (jointLimitUpper - joint.getQ()) / controlDT);
-   }
-
-   private void computeVelocityLimitRestrictive(OneDoFJoint joint, DenseMatrix64F qDotMinToPack, DenseMatrix64F qDotMaxToPack)
-   {
-      // TODO Auto-generated method stub
    }
 
    public void computeJointAccelerationLimits(double absoluteMaximumJointAcceleration, DenseMatrix64F qDDotMinToPack, DenseMatrix64F qDDotMaxToPack)
