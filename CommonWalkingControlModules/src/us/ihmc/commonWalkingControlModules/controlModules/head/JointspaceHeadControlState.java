@@ -47,10 +47,16 @@ public class JointspaceHeadControlState extends HeadControlState
       parentRegistry.addChild(registry);
    }
 
-   public void handleNeckTrajectoryCommand(NeckTrajectoryCommand command, double[] initialJointPositions)
+   public boolean handleNeckTrajectoryCommand(NeckTrajectoryCommand command, double[] initialJointPositions)
    {
       if (!ControllerCommandValidationTools.checkNeckTrajectoryCommand(jointsOriginal, command))
-         return;
+      {
+         if (jointsOriginal.length != command.getNumberOfJoints())
+            System.err.println("Wrong number of neck joints: expected " + jointsOriginal.length + " got " + command.getNumberOfJoints());
+         else
+            System.err.println("Neck comamnd out of joint limits!");
+         return false;
+      }
 
       int numberOfJoints = command.getNumberOfJoints();
 
@@ -69,6 +75,8 @@ public class JointspaceHeadControlState extends HeadControlState
          trajectoryGenerator.appendWaypoints(jointTrajectory);
          trajectoryGenerator.initialize();
       }
+
+      return true;
    }
 
    @Override
