@@ -147,7 +147,7 @@ public class JMEPointCloudGenerator
    
    public Node generatePointCloudGraph(Point3f[] pointCoordinates3d)
    {
-      return generatePointCloudGraph(pointCoordinates3d, null);
+      return generatePointCloudGraph(pointCoordinates3d, (ColorRGBA[]) null);
    }
    
    public Node generatePointCloudGraph(Point3f[] pointCoordinates3d, ColorRGBA[] colorsRGBA)
@@ -234,5 +234,32 @@ public class JMEPointCloudGenerator
       colors.rewind();
 
       return generatePointCloudGraph(coords, colors);
+   }
+
+   public Node generatePointCloudGraph(Point3f[] pointCloud, Collection<ColorRGBA> colorsRGBA) throws Exception
+   {
+      if (colorsRGBA == null)
+         throw new Exception("point cloud colors must not be null!");
+
+      if (pointCloud.length != colorsRGBA.size())
+         throw new Exception("There should be a color value for each point, if colors are used!");
+
+      FloatBuffer pointBuffer = BufferUtils.createFloatBuffer(3 * pointCloud.length);
+      for(Point3f point : pointCloud)
+      {
+         pointBuffer.put(point.x);
+         pointBuffer.put(point.y);
+         pointBuffer.put(point.z);
+      }
+      pointBuffer.rewind();
+
+      FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(4 * colorsRGBA.size());
+      for (ColorRGBA colorRGBA : colorsRGBA)
+      {
+         colorBuffer.put(colorRGBA.getColorArray());
+      }
+      colorBuffer.rewind();
+
+      return generatePointCloudGraph(pointBuffer, colorBuffer);
    }
 }
