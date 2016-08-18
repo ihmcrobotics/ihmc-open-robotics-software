@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.q_shoulder</Variables>
+		<Variables>root.Skippy.SkippyController.hipPlaneControlMode,root.Skippy.SkippyController.shoulderPlaneControlMode</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.qd_shoulder</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -102,7 +102,7 @@
 <Title>
 Tab0
 </Title>
-<Entry Boxes>root.Skippy.SkippyController.k1,root.Skippy.SkippyController.k2,root.Skippy.SkippyController.k3,root.Skippy.SkippyController.k4,root.Skippy.SkippyController.q_d_hip,root.Skippy.q_hip,root.Skippy.SkippyController.q_d_shoulder,root.Skippy.q_shoulder</Entry Boxes>
+<Entry Boxes>root.Skippy.SkippyController.k1,root.Skippy.SkippyController.k2,root.Skippy.SkippyController.k3,root.Skippy.SkippyController.k4,root.Skippy.SkippyController.q_d_hip,root.Skippy.SkippyController.q_d_shoulder,root.Skippy.SkippyController.hipPlaneControlMode,root.Skippy.SkippyController.shoulderPlaneControlMode</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -179,7 +179,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.q_foot_X,root.Skippy.q_foot_Y</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -195,14 +195,14 @@ Tab0
 
 <Extra Panels>
 <Main Viewport>
-
+Plotter,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-11.78759016444696</Camera X>
- <Camera Y>16.730951457872212</Camera Y>
- <Camera Z>3.1967139336658494</Camera Z>
+ <Camera X>40.0</Camera X>
+ <Camera Y>0.0</Camera Y>
+ <Camera Z>0.2</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

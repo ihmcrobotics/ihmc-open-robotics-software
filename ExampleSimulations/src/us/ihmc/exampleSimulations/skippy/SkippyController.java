@@ -1,16 +1,18 @@
 package us.ihmc.exampleSimulations.skippy;
 
-import java.awt.*;
-import java.util.ArrayList;
+import java.awt.Container;
 
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -18,12 +20,19 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.stateMachines.*;
+import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.StateMachine;
+import us.ihmc.robotics.stateMachines.StateMachinesJPanel;
+import us.ihmc.robotics.stateMachines.StateTransition;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SkippyController implements RobotController
 {
@@ -60,6 +69,12 @@ public class SkippyController implements RobotController
       RECOVER
    }
 
+   private enum SkippyPlaneControlMode
+   {
+      BALANCE,
+      POSITION
+   }
+
    private StateMachine<States> stateMachine;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("SkippyController");
@@ -87,6 +102,10 @@ public class SkippyController implements RobotController
    private final DoubleYoVariable qShoulderIncludingOffset = new DoubleYoVariable("qShoulderIncludingOffset", registry);
    private final DoubleYoVariable q_d_shoulder = new DoubleYoVariable("q_d_shoulder", registry);
 
+   private final EnumYoVariable<SkippyPlaneControlMode> hipPlaneControlMode = new EnumYoVariable<SkippyPlaneControlMode>("hipPlaneControlMode", registry, SkippyPlaneControlMode.class);
+   private final EnumYoVariable<SkippyPlaneControlMode> shoulderPlaneControlMode = new EnumYoVariable<SkippyPlaneControlMode>("shoulderPlaneControlMode", registry, SkippyPlaneControlMode.class);
+
+
    private String name;
    private SkippyRobot robot;
    private RobotType robotType;
@@ -96,7 +115,7 @@ public class SkippyController implements RobotController
    private double hipIntegralTerm = 0.0;
    private double shoulderIntegralTerm = 0.0;
 
-   public SkippyController(SkippyRobot robot, RobotType robotType, String name, double controlDT)
+   public SkippyController(SkippyRobot robot, RobotType robotType, String name, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistries)
    {
       this.name = name;
       this.robot = robot;
@@ -114,15 +133,8 @@ public class SkippyController implements RobotController
       k7 = new DoubleYoVariable("k7", registry);
       k8 = new DoubleYoVariable("k8", registry);
 
-      k1.set(-3600.0);
-      k2.set(-1500.0);
-      k3.set(-170.0);
-      k4.set(-130.0);
-
-      k5.set(-1900);
-      k6.set(-490.0);
-      k7.set(-60.0);
-      k8.set(-45.0);
+      hipPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
+      shoulderPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
 
       if(skippyStatus == SkippyStatus.BALANCE)
       {
@@ -153,6 +165,10 @@ public class SkippyController implements RobotController
          setUpStateMachines();
          createStateMachineWindow();
       }
+
+      YoGraphicPosition comPositionYoGraphic = new YoGraphicPosition("CenterOfMass", centerOfMass, 0.02, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
+      yoGraphicsListRegistries.registerYoGraphic("ICP", comPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("ICP", comPositionYoGraphic.createArtifact());
    }
 
    public void doControl()
@@ -166,6 +182,41 @@ public class SkippyController implements RobotController
          positionControl();
       else
          jumpControl();
+
+      setParametersForControlModes();
+   }
+
+   private void setParametersForControlModes()
+   {
+      switch(shoulderPlaneControlMode.getEnumValue())
+      {
+      case BALANCE:
+      {
+         setShoulderPlaneParametersForBalancing();
+         break;
+      }
+
+      case POSITION:
+      {
+         setShoulderPlaneParametersForPositionControl();
+         break;
+      }
+      }
+
+      switch(hipPlaneControlMode.getEnumValue())
+      {
+      case BALANCE:
+      {
+         setHipPlaneParametersForBalancing();
+         break;
+      }
+
+      case POSITION:
+      {
+         setHipPlaneParametersForPositionControl();
+         break;
+      }
+      }
    }
 
 
@@ -212,8 +263,7 @@ public class SkippyController implements RobotController
       stateMachine.doAction();
       stateMachine.checkTransitionConditions();
 
-      applyTorqueToHip(q_d_hip.getDoubleValue());
-      applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
+      balanceControl();
    }
 
 
@@ -544,25 +594,25 @@ public class SkippyController implements RobotController
       State<States> recoverState = new RecoverState(skippyStatus);
 
       //transitions
-      StateTransitionCondition balanceTransitionCondition = new BalanceTransitionCondition(skippyStatus);
-      StateTransitionCondition prepareTransitionCondition = new PrepareTransitionCondition(skippyStatus);
-      StateTransitionCondition liftoffTransitionCondition = new LiftoffTransitionCondition(skippyStatus);
-      StateTransitionCondition repositionTransitionCondition = new RepositionTransitionCondition(skippyStatus);
-      StateTransitionCondition recoverTransitionCondition = new RecoverTransitionCondition(skippyStatus);
+      StateTransitionCondition balanceToPrepareTransitionCondition = new BalanceToPrepareTransitionCondition(skippyStatus);
+      StateTransitionCondition prepareToLiftoffTransitionCondition = new PrepareToLiftoffTransitionCondition(skippyStatus);
+      StateTransitionCondition liftoffToRepositionTransitionCondition = new LiftoffToRepositionTransitionCondition(skippyStatus);
+      StateTransitionCondition repositionToRecoverTransitionCondition = new RepositionToRecoverTransitionCondition(skippyStatus);
+      StateTransitionCondition recoverToBalanceTransitionCondition = new RecoverToBalanceTransitionCondition(skippyStatus);
 
-      StateTransition<States> balanceToPrepare = new StateTransition<States>(States.PREPARE, balanceTransitionCondition);
+      StateTransition<States> balanceToPrepare = new StateTransition<States>(States.PREPARE, balanceToPrepareTransitionCondition);
       balanceState.addStateTransition(balanceToPrepare);
 
-      StateTransition<States> prepareToLiftoff = new StateTransition<States>(States.LIFTOFF, prepareTransitionCondition);
+      StateTransition<States> prepareToLiftoff = new StateTransition<States>(States.LIFTOFF, prepareToLiftoffTransitionCondition);
       prepareState.addStateTransition(prepareToLiftoff);
 
-      StateTransition<States> liftoffToReposition = new StateTransition<States>(States.REPOSITION, liftoffTransitionCondition);
+      StateTransition<States> liftoffToReposition = new StateTransition<States>(States.REPOSITION, liftoffToRepositionTransitionCondition);
       liftoffState.addStateTransition(liftoffToReposition);
 
-      StateTransition<States> repositionToRecover = new StateTransition<States>(States.RECOVER, repositionTransitionCondition);
+      StateTransition<States> repositionToRecover = new StateTransition<States>(States.RECOVER, repositionToRecoverTransitionCondition);
       repositionState.addStateTransition(repositionToRecover);
 
-      StateTransition<States> recoverToBalance = new StateTransition<States>(States.BALANCE, recoverTransitionCondition);
+      StateTransition<States> recoverToBalance = new StateTransition<States>(States.BALANCE, recoverToBalanceTransitionCondition);
       recoverState.addStateTransition(recoverToBalance);
 
       stateMachine.addState(balanceState);
@@ -603,12 +653,44 @@ public class SkippyController implements RobotController
       stateMachine.attachStateChangedListener(stateMachinePanel);
    }
 
-   public class BalanceTransitionCondition implements StateTransitionCondition
+   private void setHipPlaneParametersForPositionControl()
+   {
+      k1.set(0.0);
+      k2.set(0.0);
+      k3.set(300.0);
+      k4.set(30.0);
+   }
+
+   private void setShoulderPlaneParametersForPositionControl()
+   {
+      k5.set(0.0);
+      k6.set(0.0);
+      k7.set(300.0);
+      k8.set(30.0);
+   }
+
+   private void setShoulderPlaneParametersForBalancing()
+   {
+      k5.set(-1900);
+      k6.set(-490.0);
+      k7.set(-60.0);
+      k8.set(-45.0);
+   }
+
+   private void setHipPlaneParametersForBalancing()
+   {
+      k1.set(-3600.0);
+      k2.set(-1500.0);
+      k3.set(-170.0);
+      k4.set(-130.0);
+   }
+
+   public class BalanceToPrepareTransitionCondition implements StateTransitionCondition
    {
 
       private final SkippyStatus direction;
 
-      public BalanceTransitionCondition(SkippyStatus direction)
+      public BalanceToPrepareTransitionCondition(SkippyStatus direction)
       {
          this.direction = direction;
       }
@@ -623,12 +705,12 @@ public class SkippyController implements RobotController
             return false;
          }
    }
-   public class PrepareTransitionCondition implements StateTransitionCondition
+   public class PrepareToLiftoffTransitionCondition implements StateTransitionCondition
    {
 
       private final SkippyStatus direction;
 
-      public PrepareTransitionCondition(SkippyStatus direction)
+      public PrepareToLiftoffTransitionCondition(SkippyStatus direction)
       {
          this.direction = direction;
       }
@@ -643,12 +725,12 @@ public class SkippyController implements RobotController
             return false;
       }
    }
-   public class LiftoffTransitionCondition implements StateTransitionCondition
+   public class LiftoffToRepositionTransitionCondition implements StateTransitionCondition
    {
 
       private final SkippyStatus direction;
 
-      public LiftoffTransitionCondition(SkippyStatus direction)
+      public LiftoffToRepositionTransitionCondition(SkippyStatus direction)
       {
          this.direction = direction;
       }
@@ -663,12 +745,12 @@ public class SkippyController implements RobotController
             return false;
       }
    }
-   public class RepositionTransitionCondition implements StateTransitionCondition
+   public class RepositionToRecoverTransitionCondition implements StateTransitionCondition
    {
 
       private final SkippyStatus direction;
 
-      public RepositionTransitionCondition(SkippyStatus direction)
+      public RepositionToRecoverTransitionCondition(SkippyStatus direction)
       {
          this.direction = direction;
       }
@@ -683,12 +765,12 @@ public class SkippyController implements RobotController
             return false;
       }
    }
-   public class RecoverTransitionCondition implements StateTransitionCondition
+   public class RecoverToBalanceTransitionCondition implements StateTransitionCondition
    {
 
       private final SkippyStatus direction;
 
-      public RecoverTransitionCondition(SkippyStatus direction)
+      public RecoverToBalanceTransitionCondition(SkippyStatus direction)
       {
          this.direction = direction;
       }
@@ -716,12 +798,10 @@ public class SkippyController implements RobotController
       }
       public void doAction()
       {
-         if(direction == SkippyStatus.JUMP_FORWARD)
-            q_d_hip.set(0.6);
       }
       public void doTransitionIntoAction()
       {
-
+         q_d_hip.set(0.6);
       }
       public void doTransitionOutOfAction()
       {
@@ -741,13 +821,11 @@ public class SkippyController implements RobotController
       }
       public void doAction()
       {
-         if(direction == SkippyStatus.JUMP_FORWARD)
-            q_d_hip.set(1.6);
-
       }
       public void doTransitionIntoAction()
       {
-
+         if(direction == SkippyStatus.JUMP_FORWARD)
+            q_d_hip.set(1.6);
       }
       public void doTransitionOutOfAction()
       {
@@ -767,20 +845,13 @@ public class SkippyController implements RobotController
       }
       public void doAction()
       {
-         if(direction == SkippyStatus.JUMP_FORWARD)
-         {
-            k1.set(0.0);
-            k2.set(0.0);
-            k3.set(300.0);
-            k4.set(30.0);
-            q_d_hip.set(0.45);
-         }
-
       }
       public void doTransitionIntoAction()
       {
-
+         hipPlaneControlMode.set(SkippyPlaneControlMode.POSITION);
+         q_d_hip.set(0.45);
       }
+
       public void doTransitionOutOfAction()
       {
 
@@ -799,13 +870,10 @@ public class SkippyController implements RobotController
       }
       public void doAction()
       {
-         if(direction == SkippyStatus.JUMP_FORWARD)
-            q_d_hip.set(-1.3);
-
       }
       public void doTransitionIntoAction()
       {
-
+         q_d_hip.set(-1.3);
       }
       public void doTransitionOutOfAction()
       {
@@ -825,21 +893,14 @@ public class SkippyController implements RobotController
       }
       public void doAction()
       {
-         if(direction == SkippyStatus.JUMP_FORWARD)
-         {
-            k1.set(-3600.0);
-            k2.set(-1500.0);
-            k3.set(-170.0);
-            k4.set(-130.0);
-
-            q_d_hip.set(0.6);
-            q_d_shoulder.set(0.0);
-         }
-
       }
       public void doTransitionIntoAction()
       {
+         hipPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
+         shoulderPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
 
+         q_d_hip.set(0.6);
+         q_d_shoulder.set(0.0);
       }
       public void doTransitionOutOfAction()
       {
