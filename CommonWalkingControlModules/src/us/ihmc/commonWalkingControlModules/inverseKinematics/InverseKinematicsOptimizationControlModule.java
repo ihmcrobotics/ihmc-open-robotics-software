@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
@@ -28,6 +29,7 @@ public class InverseKinematicsOptimizationControlModule
    private final InverseKinematicsQPSolver qpSolver;
    private final MotionQPInput motionQPInput;
    private final MotionQPInputCalculator motionQPInputCalculator;
+   private final InverseDynamicsQPBoundCalculator boundCalculator;
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final int numberOfDoFs;
@@ -47,7 +49,8 @@ public class InverseKinematicsOptimizationControlModule
       double controlDT = toolbox.getControlDT();
       GeometricJacobianHolder geometricJacobianHolder = toolbox.getGeometricJacobianHolder();
       TwistCalculator twistCalculator = toolbox.getTwistCalculator();
-      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, controlDT, registry);
+      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, registry);
+      boundCalculator = new InverseDynamicsQPBoundCalculator(jointIndexHandler, controlDT, registry);
 
       qDotMin = new DenseMatrix64F(numberOfDoFs, 1);
       qDotMax = new DenseMatrix64F(numberOfDoFs, 1);
@@ -68,7 +71,7 @@ public class InverseKinematicsOptimizationControlModule
       NoConvergenceException noConvergenceException = null;
 
       computePrivilegedJointVelocities();
-      motionQPInputCalculator.computeJointVelocityLimits(qDotMin, qDotMax);
+      boundCalculator.computeJointVelocityLimits(qDotMin, qDotMax);
       qpSolver.setMaxJointVelocities(qDotMax);
       qpSolver.setMinJointVelocities(qDotMin);
 
@@ -158,6 +161,6 @@ public class InverseKinematicsOptimizationControlModule
 
    private void submitJointLimitReductionCommand(JointLimitReductionCommand command)
    {
-      motionQPInputCalculator.submitJointLimitReductionCommand(command);
+      boundCalculator.submitJointLimitReductionCommand(command);
    }
 }

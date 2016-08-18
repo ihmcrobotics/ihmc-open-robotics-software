@@ -234,13 +234,21 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return false;
    }
-   
+
    /**
-    * 
+    *
     * Determined whether the robot should use the velocity to be computed in the estimator, or just compute it from the robot state in the controller (new feature to be tested with Atlas)
     */
    public boolean useCenterOfMassVelocityFromEstimator()
    {
       return false;
+   }
+
+   /**
+    * Returns a list of joint that should use the more restrictive joint limit enforcement in the QP
+    */
+   public String[] getJointsWithRestrictiveLimits()
+   {
+      return new String[0];
    }
 }
