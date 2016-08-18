@@ -1018,4 +1018,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       return false;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public String[] getJointsWithRestrictiveLimits()
+   {
+      String bkxName = jointMap.getSpineJointName(SpineJointName.SPINE_ROLL);
+      String bkyName = jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);
+      String[] joints = {bkxName, bkyName};
+      return joints;
+   }
 }

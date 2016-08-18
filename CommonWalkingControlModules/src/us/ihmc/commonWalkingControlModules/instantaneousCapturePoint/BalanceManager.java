@@ -298,7 +298,7 @@ public class BalanceManager
       icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       icpBasedLinearMomentumRateOfChangeControlModule.setPerfectCMP(perfectCMP);
       icpBasedLinearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
-      yoDesiredCMP.getFramePoint2d(desiredCMP);
+      yoDesiredCMP.getFrameTuple2d(desiredCMP);
       icpBasedLinearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP);
       yoDesiredCMP.set(desiredCMP);
    }

@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
@@ -51,6 +52,7 @@ public class InverseDynamicsOptimizationControlModule
    private final InverseDynamicsQPSolver qpSolver;
    private final MotionQPInput motionQPInput;
    private final MotionQPInputCalculator motionQPInputCalculator;
+   private final InverseDynamicsQPBoundCalculator boundCalculator;
    private final ExternalWrenchHandler externalWrenchHandler;
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
@@ -101,8 +103,8 @@ public class InverseDynamicsOptimizationControlModule
       motionQPInput = new MotionQPInput(numberOfDoFs);
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
 
-      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, controlDT,
-            registry);
+      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, registry);
+      boundCalculator = new InverseDynamicsQPBoundCalculator(jointIndexHandler, controlDT, registry);
 
       absoluteMaximumJointAcceleration.set(200.0);
       qDDotMinMatrix = new DenseMatrix64F(numberOfDoFs, 1);
@@ -195,7 +197,7 @@ public class InverseDynamicsOptimizationControlModule
 
    private void computeJointAccelerationLimits()
    {
-      motionQPInputCalculator.computeJointAccelerationLimits(absoluteMaximumJointAcceleration.getDoubleValue(), qDDotMinMatrix, qDDotMaxMatrix);
+      boundCalculator.computeJointAccelerationLimits(absoluteMaximumJointAcceleration.getDoubleValue(), qDDotMinMatrix, qDDotMaxMatrix);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -278,7 +280,12 @@ public class InverseDynamicsOptimizationControlModule
 
    public void submitJointLimitReductionCommand(JointLimitReductionCommand command)
    {
-      motionQPInputCalculator.submitJointLimitReductionCommand(command);
+      boundCalculator.submitJointLimitReductionCommand(command);
+   }
+
+   public void submitJointLimitEnforcementMethodCommand(JointLimitEnforcementMethodCommand command)
+   {
+      boundCalculator.submitJointLimitEnforcementMethodCommand(command);
    }
 
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)

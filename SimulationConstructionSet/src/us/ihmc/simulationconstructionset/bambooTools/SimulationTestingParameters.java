@@ -5,11 +5,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 public class SimulationTestingParameters extends SimulationConstructionSetParameters
 {
    private boolean runMultiThreaded = true;
-   private boolean usePefectSensors = false;
+   private boolean usePefectSensors = true;
 
    private boolean createSCSVideos = false;
    private boolean checkNothingChangedInSimulation = false;
-   private boolean keepSCSUp = false;
+   private boolean keepSCSUp = true;
 
    public SimulationTestingParameters()
    {

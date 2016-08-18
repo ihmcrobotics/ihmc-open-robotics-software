@@ -22,6 +22,7 @@ import javax.swing.event.MouseInputAdapter;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point2i;
 
+import us.ihmc.plotting.plotter2d.PlotterColors;
 import us.ihmc.plotting.shapes.LineArtifact;
 import us.ihmc.plotting.shapes.PointArtifact;
 import us.ihmc.plotting.shapes.PolygonArtifact;
@@ -40,7 +41,7 @@ public class Plotter extends JPanel
 
    // show selections
    private static final boolean SHOW_SELECTION = false;
-   private static final Color TEXT_COLOR = Color.WHITE;
+   private static final Color TEXT_COLOR = PlotterColors.LABEL_COLOR;
 
    private boolean drawHistory = false;
    private boolean showLabels = SHOW_LABELS_BY_DEFAULT;
@@ -69,8 +70,6 @@ public class Plotter extends JPanel
 
    private DoubleClickListener doubleClickListener;
 
-   private PolygonArtifact polygonArtifact;
-
    private boolean overrideAutomaticInterval = false;
    private double manualOverideInterval = 1.0;
 
@@ -88,7 +87,7 @@ public class Plotter extends JPanel
       Border compound = BorderFactory.createCompoundBorder(raisedBevel, loweredBevel);
       setBorder(compound);
 
-      super.setBackground(new Color(180, 220, 240));
+      super.setBackground(PlotterColors.BACKGROUND);
 
       PlotterMouseListener myListener = new PlotterMouseListener();
       addMouseListener(myListener);
@@ -180,15 +179,15 @@ public class Plotter extends JPanel
                
                if (nthGridLineFromOrigin % 10 == 0)
                {
-                  graphics2d.setColor(new Color(180, 190, 210));
+                  graphics2d.setColor(PlotterColors.GRID_EVERY_10);
                }
                else if (nthGridLineFromOrigin % 5 == 0)
                {
-                  graphics2d.setColor(new Color(180, 210, 230));
+                  graphics2d.setColor(PlotterColors.GRID_EVERY_5);
                }
                else
                {
-                  graphics2d.setColor(new Color(230, 240, 250));
+                  graphics2d.setColor(PlotterColors.GRID_EVERY_1);
                }
 
                // draw line
@@ -211,15 +210,15 @@ public class Plotter extends JPanel
                
                if (nthGridLineFromOrigin % 10 == 0)
                {
-                  graphics2d.setColor(new Color(180, 190, 210));
+                  graphics2d.setColor(PlotterColors.GRID_EVERY_10);
                }
                else if (nthGridLineFromOrigin % 5 == 0)
                {
-                  graphics2d.setColor(new Color(180, 210, 230));
+                  graphics2d.setColor(PlotterColors.GRID_EVERY_5);
                }
                else
                {
-                  graphics2d.setColor(new Color(230, 240, 250));
+                  graphics2d.setColor(PlotterColors.GRID_EVERY_1);
                }
 
                // draw line
@@ -237,7 +236,7 @@ public class Plotter extends JPanel
          }
 
          // paint grid centerline
-         graphics2d.setColor(Color.gray);
+         graphics2d.setColor(PlotterColors.GRID_AXIS);
          graphics2d.drawLine(metersOrigin.getInPixelsX(), 0, metersOrigin.getInPixelsX(), (int) visibleRectangle.getHeight());
          graphics2d.drawLine(0, metersOrigin.getInPixelsY(), (int) visibleRectangle.getWidth(), metersOrigin.getInPixelsY());
 
@@ -295,7 +294,7 @@ public class Plotter extends JPanel
          // paint selected destination
          if (SHOW_SELECTION)
          {
-            graphics2d.setColor(Color.red);
+            graphics2d.setColor(PlotterColors.SELECTION);
             int xSize = 8;
             graphics2d.drawLine(selected.getInPixelsX() - xSize, selected.getInPixelsY() - xSize, selected.getInPixelsX() + xSize, selected.getInPixelsY() + xSize);
             graphics2d.drawLine(selected.getInPixelsX() - xSize, selected.getInPixelsY() + xSize, selected.getInPixelsX() + xSize, selected.getInPixelsY() - xSize);
@@ -304,7 +303,7 @@ public class Plotter extends JPanel
          // paint selected area
          if (SHOW_SELECTION)
          {
-            graphics2d.setColor(Color.red);
+            graphics2d.setColor(PlotterColors.SELECTION);
             int Xmin, Xmax, Ymin, Ymax;
             if (selectionAreaStart.getInPixelsX() > selectionAreaEnd.getInPixelsX())
             {
@@ -346,17 +345,6 @@ public class Plotter extends JPanel
          backgroundImage = bgi;
          repaint();
       }
-   }
-
-   public void setManualGidInterval(double intervalInMeters)
-   {
-      this.manualOverideInterval = intervalInMeters;
-      this.overrideAutomaticInterval = true;
-   }
-
-   public void disableManualGridIntervalOverride()
-   {
-      this.overrideAutomaticInterval = false;
    }
 
    public void updateArtifacts(Vector<Artifact> artifacts)
@@ -519,41 +507,6 @@ public class Plotter extends JPanel
       return selected.getInMetersY();
    }
 
-   public double getArea1X()
-   {
-      return selectionAreaStart.getInMetersX();
-   }
-
-   public double getArea1Y()
-   {
-      return selectionAreaStart.getInMetersY();
-   }
-
-   public double getArea2X()
-   {
-      return selectionAreaEnd.getInMetersX();
-   }
-
-   public double getArea2Y()
-   {
-      return selectionAreaEnd.getInMetersY();
-   }
-
-   public ArrayList<Point2d> getPolygon()
-   {
-      if (polygonArtifact == null)
-         return null;
-
-      return polygonArtifact.getPoints();
-   }
-
-   public void clearPolygon()
-   {
-      this.removeArtifactsStartingWith("polygon");
-      polygonArtifact = null;
-      repaint();
-   }
-
    public void setRangeLimit(int range, double origMapScale, double ullon, double ullat, double lrlon, double lrlat)
    {
       plotRange = range;
@@ -577,11 +530,6 @@ public class Plotter extends JPanel
    public double getRange()
    {
       return plotRange;
-   }
-
-   public void setOrientation(int orientation)
-   {
-      repaint();
    }
 
    public void setOffsetX(double offsetX)
@@ -618,79 +566,6 @@ public class Plotter extends JPanel
       updateTransform();
    }
 
-   public void setDoubleClickListener(DoubleClickListener doubleClickListener)
-   {
-      this.doubleClickListener = doubleClickListener;
-   }
-
-   public void update(String objectID, ShapeArtifact shapeArtifact)
-   {
-      if (shapeArtifact == null)
-      {
-         removeArtifact(objectID);
-      }
-      else
-      {
-         if (shapeArtifact.getCoordinate() == null)
-         {
-            removeArtifact(shapeArtifact.getID());
-         }
-         else
-         {
-            ShapeArtifact targetArtifact = (ShapeArtifact) getArtifact(objectID);
-            if (targetArtifact == null)
-            {
-               addArtifact(shapeArtifact);
-            }
-            else
-            {
-               updateArtifact(shapeArtifact);
-            }
-         }
-      }
-
-      repaint();
-   }
-
-   public void update(String objectID, PolygonArtifact polygonArtifact)
-   {
-      if (polygonArtifact == null)
-      {
-         removeArtifact(objectID);
-      }
-      else
-      {
-         if (polygonArtifact.getPoints().size() == 0)
-         {
-            removeArtifact(polygonArtifact.getID());
-         }
-         else
-         {
-            ShapeArtifact targetArtifact = (ShapeArtifact) getArtifact(objectID);
-            if (targetArtifact == null)
-            {
-               addArtifact(polygonArtifact);
-            }
-            else
-            {
-               updateArtifact(polygonArtifact);
-            }
-         }
-      }
-
-      repaint();
-   }
-
-   public void setUpdateDelayInMillis(long timeInMillis)
-   {
-      updateDelayInMillis = timeInMillis;
-   }
-
-   public long getUpdateDelayInMillis()
-   {
-      return updateDelayInMillis;
-   }
-
    public void setShowLabels(boolean showLabels)
    {
       this.showLabels = showLabels;
@@ -701,17 +576,6 @@ public class Plotter extends JPanel
       private int buttonPressed;
       private PlotterPoint middleMouseDragStart = new PlotterPoint(transform);
       private PlotterPoint middleMouseDragEnd = new PlotterPoint(transform);
-      
-      @Override
-      public void mouseClicked(MouseEvent e)
-      {
-         if (buttonPressed == MouseEvent.BUTTON1)
-         {
-            removeArtifact("path");
-            removeArtifact("polygon");
-            polygonArtifact = null;
-         }
-      }
 
       @Override
       public void mousePressed(MouseEvent e)
