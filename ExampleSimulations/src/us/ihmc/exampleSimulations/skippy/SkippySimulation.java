@@ -2,6 +2,8 @@ package us.ihmc.exampleSimulations.skippy;
 
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SkippySimulation
 {
@@ -16,14 +18,23 @@ public class SkippySimulation
       RobotType robotType = RobotType.SKIPPY;
 
       SkippyRobot skippy = new SkippyRobot(robotType);
-      skippy.setController(new SkippyController(skippy, robotType, "skippyController", controlDT));
-//      skippy.setController(new ExternalControlServer(skippy, "externalControlServer"));
+
 
       sim = new SimulationConstructionSet(skippy);
       sim.setGroundVisible(true);
       sim.setDT(DT, 100);
       sim.setSimulateDuration(TIME);
       sim.setCameraPosition(40.0, 0.0, 0.2);
+
+
+      boolean showOverheadView = true;
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+
+      skippy.setController(new SkippyController(skippy, robotType, "skippyController", controlDT, yoGraphicsListRegistry));
+//    skippy.setController(new ExternalControlServer(skippy, "externalControlServer"));
+
+      VisualizerUtils.createOverheadPlotter(sim, showOverheadView, yoGraphicsListRegistry);
+      sim.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       Thread myThread = new Thread(sim);
       myThread.start();
