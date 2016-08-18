@@ -6,20 +6,21 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GroundTruthinator
 {
-
+   ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ArrayList<GroundTruthinatorSensor> sensors = new ArrayList<>();
-
+   private final ArrayList<FrameVector> estimatedCableVectors = new ArrayList<FrameVector>();
+   private final ArrayList<FrameVector> correctionVectors = new ArrayList<FrameVector>();
 
    public void addSensor(GroundTruthinatorSensor sensor)
    {
       this.sensors.add(sensor);
    }
-
 
    public void addSensor(Point3d sensorPosition, Point3d attachmentPosition)
    {
@@ -27,7 +28,6 @@ public class GroundTruthinator
       addSensor(sensor);
 
    }
-
 
    public int getNumberOfSensors()
    {
@@ -39,29 +39,91 @@ public class GroundTruthinator
       return sensors.get(sensorIndex);
    }
 
-
-   public void estimateObjectPose(FramePose estimatedPose)
+   /** Assumes sensed cable lengths are set before calling this
+    *
+    */
+   public void estimateObjectPose(FramePose estimatedPose, double epsilon)
    {
-      estimatedPose.setToZero(ReferenceFrame.getWorldFrame());
+      estimateObjectPose(estimatedPose, 0.999, epsilon);
+   }
 
+   public void estimateObjectPose(FramePose estimatedPose, double rate, double epsilon)
+   {
+      System.out.println(".");
+      int numberOfSensors = getNumberOfSensors();
+
+      // Initial guess at zero.
+//      estimatedPose.setToZero(ReferenceFrame.getWorldFrame());
+
+      computeEstimatedCableLengthsFromObjectPose(estimatedPose);
+
+      double[] errorCableLengths = getErrorCableLengths();
+
+      correctionVectors.clear();
+
+      FrameVector averageCorrectionVector = new FrameVector(worldFrame);
+
+      double squaredError = 0.0;
+
+      for (int i=0; i<numberOfSensors; i++)
+      {
+         FrameVector correctionVector = new FrameVector(estimatedCableVectors.get(i));
+         correctionVector.normalize();
+         double errorCableLength = errorCableLengths[i];
+         squaredError += errorCableLength * errorCableLength;
+
+         correctionVector.scale(errorCableLength);
+
+         averageCorrectionVector.add(correctionVector);
+      }
+
+
+      averageCorrectionVector.scale(1.0 / ((double) numberOfSensors));
+
+      averageCorrectionVector.scale(rate);
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.setTranslation(averageCorrectionVector.getVector());
+
+      estimatedPose.applyTransform(transform);
+
+      if (squaredError > epsilon) estimateObjectPose(estimatedPose, rate * 0.999, epsilon);
+   }
+
+   private double[] getErrorCableLengths()
+   {
+      int numberOfSensors = getNumberOfSensors();
+
+      double[] ret = new double[numberOfSensors];
+
+      for (int i=0; i<numberOfSensors; i++)
+      {
+         GroundTruthinatorSensor sensor = sensors.get(i);
+         ret[i] = sensor.getSensedCableLength() - sensor.getEstimatedCableLength();
+      }
+
+      return ret;
    }
 
 
    private final Point3d sensorPositionInWorldFrame = new Point3d();
    private final Point3d attachmentPositionInRobotFrame = new Point3d();
    private final Point3d attachmentPositionInWorldFrame = new Point3d();
-   private final Vector3d cableVector = new Vector3d();
    private final RigidBodyTransform transform = new RigidBodyTransform();
 
-   public void computeCableLengthsFromObjectPose(FramePose objectPoseInWorld)
+   public void computeEstimatedCableLengthsFromObjectPose(FramePose estimatedObjectPoseInWorld)
    {
-      objectPoseInWorld.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      objectPoseInWorld.getRigidBodyTransform(transform);
+      estimatedCableVectors.clear();
+
+      estimatedObjectPoseInWorld.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      estimatedObjectPoseInWorld.getRigidBodyTransform(transform);
 
       int numberOfSensors = getNumberOfSensors();
 
-      for (int i=0; i<numberOfSensors; i++)
+      for (int i = 0; i < numberOfSensors; i++)
       {
+         FrameVector cableVector = new FrameVector(ReferenceFrame.getWorldFrame());
+         estimatedCableVectors.add(cableVector);
+
          GroundTruthinatorSensor sensor = getSensor(i);
 
          sensor.getSensorPositionInWorldFrame(sensorPositionInWorldFrame);
@@ -73,7 +135,29 @@ public class GroundTruthinator
          cableVector.sub(attachmentPositionInWorldFrame, sensorPositionInWorldFrame);
          double cableLength = cableVector.length();
 
-         sensor.setCableLength(cableLength);
+         sensor.setEstimatedCableLength(cableLength);
       }
+   }
+
+   public void setSensedCableLengths(double[] sensedCableLengths)
+   {
+      for (int i=0; i<getNumberOfSensors(); i++)
+      {
+         GroundTruthinatorSensor sensor = sensors.get(i);
+         sensor.setSensedCableLength(sensedCableLengths[i]);
+      }
+   }
+
+   public double[] getEstimatedCableLengths()
+   {
+      int numberOfSensors = getNumberOfSensors();
+      double[] ret = new double[numberOfSensors];
+
+      for (int i=0; i<numberOfSensors; i++)
+      {
+         ret[i] = sensors.get(i).getEstimatedCableLength();
+      }
+
+      return ret;
    }
 }

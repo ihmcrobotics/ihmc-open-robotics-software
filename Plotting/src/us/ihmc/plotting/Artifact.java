@@ -2,7 +2,10 @@ package us.ihmc.plotting;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.io.Serializable;
+
+import javax.vecmath.Vector2d;
 
 public abstract class Artifact implements Plottable, Serializable
 {
@@ -27,7 +30,15 @@ public abstract class Artifact implements Plottable, Serializable
     */
    @Override
    public abstract void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor);
+   public void draw(Graphics2D g, int Xcenter, int Ycenter, double headingOffset, Vector2d scaleFactor)
+   {
+      draw(g, Xcenter, Ycenter, headingOffset, scaleFactor.getX());
+   }
    public abstract void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor);
+   public void drawHistory(Graphics2D g, int Xcenter, int Ycenter, double headingOffset, Vector2d scaleFactor)
+   {
+      draw(g, Xcenter, Ycenter, headingOffset, scaleFactor.getX());
+   }
    public abstract void takeHistorySnapshot();
    public abstract void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor);
 
