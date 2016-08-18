@@ -106,13 +106,12 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    @Override
    public void onExit()
    {
-      useForceFeedbackControlParameter.set(true);
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControlParameter.get());
+            oneDoFJoint.setUseFeedBackForceControl(true);
          }
       }
    }
