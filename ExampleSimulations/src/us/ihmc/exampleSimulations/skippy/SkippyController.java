@@ -11,6 +11,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -30,6 +31,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.util.globalParameters.SystemOutGlobalParameterChangedListener;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -39,7 +41,7 @@ public class SkippyController implements RobotController
 
     /**
      *
-     *   Outline of SkippyStatus:
+     *   Outline of SkippyToDo:
      *      JUMP_FORWARD: If Skippy model is selected, robot will jump/balance in y direction (shoulder's rotation axis)
      *      JUMP_SIDEWAYS: If Skippy model is selected, robot will jump/balance in x direction (torso's rotation axis)
      *      BALANCE: If Skippy/Tippy model is selected, robot will balance
@@ -51,19 +53,18 @@ public class SkippyController implements RobotController
      *
      */
 
-   private enum SkippyStatus
+   private enum SkippyToDo
    {
       JUMP_FORWARD,  //change initialBodySidewaysLean in SkippyRobot.java to 0.0
       BALANCE,
       POSITION
    }
 
-   private final SkippyStatus skippyStatus = SkippyStatus.JUMP_FORWARD;
-
    private enum States
    {
       BALANCE,
       PREPARE,
+      LEAN,
       LIFTOFF,
       REPOSITION,
       RECOVER
@@ -90,6 +91,23 @@ public class SkippyController implements RobotController
    private final YoFramePoint bodyLocation = new YoFramePoint("body", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector centerOfMassVelocity = new YoFrameVector("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector angularMomentum = new YoFrameVector("angularMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector linearMomentum = new YoFrameVector("linearMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector lastAngularMomentum = new YoFrameVector("lastAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector lastLinearMomentum = new YoFrameVector("lastLinearMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector rateOfChangeOfAngularMomentum = new YoFrameVector("rateOfChangeOfAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector rateOfChangeOfLinearMomentum = new YoFrameVector("rateOfChangeOfLinearMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector cmpTauHipJoint = new YoFrameVector("cmpTauHipJoint", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector cmpTauShoulderJoint = new YoFrameVector("cmpTauShoulderJoint", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector cmpFromIcpTauHipJoint = new YoFrameVector("cmpFromIcpTauHipJoint", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector cmpFromIcpTauShoulderJoint = new YoFrameVector("cmpFromIcpTauShoulderJoint", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector tempForTorqueProjections = new YoFrameVector("tempForTorqueProjections", ReferenceFrame.getWorldFrame(), registry);
+   
+
+   private final YoFramePoint instantaneousCapturePoint = new YoFramePoint("instantaneousCapturePoint", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint centroidalMomentPivot = new YoFramePoint("centroidalMomentPivot", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint centroidalMomentPivotFromIcp = new YoFramePoint("centroidalMomentPivotFromIcp", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint footLocation = new YoFramePoint("foot", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector footToCoMInBodyFrame;
    private final ExternalForcePoint forceToCOM;
@@ -102,6 +120,17 @@ public class SkippyController implements RobotController
    private final DoubleYoVariable qShoulderIncludingOffset = new DoubleYoVariable("qShoulderIncludingOffset", registry);
    private final DoubleYoVariable q_d_shoulder = new DoubleYoVariable("q_d_shoulder", registry);
 
+   private final FramePoint tempFootLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint tempCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FrameVector tempFootToCoM = new FrameVector(ReferenceFrame.getWorldFrame());
+
+   private final FramePoint lastCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FrameVector footToLastCoMLocation = new FrameVector(ReferenceFrame.getWorldFrame());
+   DoubleYoVariable z0 = new DoubleYoVariable("z0",registry);
+   private BooleanYoVariable useICPController = new BooleanYoVariable("useICPController",registry);
+   DoubleYoVariable kCapture = new DoubleYoVariable("kCapture",registry);
+     
+   private final EnumYoVariable<SkippyToDo> skippyToDo = new EnumYoVariable<SkippyToDo>("SkippyToDo", registry, SkippyToDo.class);
    private final EnumYoVariable<SkippyPlaneControlMode> hipPlaneControlMode = new EnumYoVariable<SkippyPlaneControlMode>("hipPlaneControlMode", registry, SkippyPlaneControlMode.class);
    private final EnumYoVariable<SkippyPlaneControlMode> shoulderPlaneControlMode = new EnumYoVariable<SkippyPlaneControlMode>("shoulderPlaneControlMode", registry, SkippyPlaneControlMode.class);
 
@@ -121,6 +150,9 @@ public class SkippyController implements RobotController
       this.robot = robot;
       this.robotType = robotType;
 
+      z0.set(1.0);
+      useICPController.set(false);
+      
       footToCoMInBodyFrame = new YoFrameVector("footToCoMInBody", robot.updateAndGetBodyFrame(), registry);
       forceToCOM = new ExternalForcePoint("FORCETOCOM", robot);
 
@@ -133,15 +165,16 @@ public class SkippyController implements RobotController
       k7 = new DoubleYoVariable("k7", registry);
       k8 = new DoubleYoVariable("k8", registry);
 
+      skippyToDo.set(SkippyToDo.JUMP_FORWARD);
       hipPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
       shoulderPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
 
-      if(skippyStatus == SkippyStatus.BALANCE)
+      if(skippyToDo.getEnumValue() == SkippyToDo.BALANCE)
       {
          q_d_hip.set(0.6);
-         q_d_shoulder.set(0.2);
+         q_d_shoulder.set(0.0);
       }
-      else if(skippyStatus == SkippyStatus.JUMP_FORWARD)
+      else if(skippyToDo.getEnumValue() == SkippyToDo.JUMP_FORWARD)
       {
          q_d_hip.set(0.6);
          q_d_shoulder.set(0.0);
@@ -159,31 +192,70 @@ public class SkippyController implements RobotController
       angularVelocityToCoMYZPlane2 = new FilteredVelocityYoVariable("angularVelocityToCoMYZPlane2", "", alphaAngularVelocity, angleToCoMInYZPlane, controlDT, registry);
       angularVelocityToCoMXZPlane2 = new FilteredVelocityYoVariable("angularVelocityToCoMXZPlane2", "", alphaAngularVelocity, angleToCoMInXZPlane, controlDT, registry);
 
-      if(skippyStatus != SkippyStatus.BALANCE && skippyStatus != SkippyStatus.POSITION)
+      if(skippyToDo.getEnumValue() != SkippyToDo.BALANCE && skippyToDo.getEnumValue() != SkippyToDo.POSITION || true)
       {
          stateMachine = new StateMachine<States>("stateMachine", "stateMachineTime", States.class, robot.t, registry);
          setUpStateMachines();
          createStateMachineWindow();
       }
 
-      YoGraphicPosition comPositionYoGraphic = new YoGraphicPosition("CenterOfMass", centerOfMass, 0.02, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
-      yoGraphicsListRegistries.registerYoGraphic("ICP", comPositionYoGraphic);
-      yoGraphicsListRegistries.registerArtifact("ICP", comPositionYoGraphic.createArtifact());
+      YoGraphicPosition comPositionYoGraphic = new YoGraphicPosition("CenterOfMass", centerOfMass, 0.006, YoAppearance.Black(), GraphicType.CROSS);
+
+      yoGraphicsListRegistries.registerYoGraphic("instantaneousCapturePoint", comPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", comPositionYoGraphic.createArtifact());
+      /*
+       * New variables for ICP and CMP graphing
+       */
+      YoGraphicPosition icpPositionYoGraphic = new YoGraphicPosition("InstantaneousCapturePoint", instantaneousCapturePoint, 0.01, YoAppearance.Blue(),
+            GraphicType.ROTATED_CROSS);
+      yoGraphicsListRegistries.registerYoGraphic("instantaneousCapturePoint", icpPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", icpPositionYoGraphic.createArtifact());
+
+
+      YoGraphicPosition footPositionYoGraphic = new YoGraphicPosition("Foot", footLocation, 0.006, YoAppearance.DarkBlue(), GraphicType.SOLID_BALL);
+      yoGraphicsListRegistries.registerYoGraphic("instantaneousCapturePoint", footPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", footPositionYoGraphic.createArtifact());
+      
+      YoGraphicPosition cmpPositionYoGraphic = new YoGraphicPosition("CentroidalMomentPoint", centroidalMomentPivot, 0.01, YoAppearance.Red(),
+    		  GraphicType.CROSS);
+      yoGraphicsListRegistries.registerYoGraphic("instantaneousCapturePoint", cmpPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", cmpPositionYoGraphic.createArtifact());
+      
+      YoGraphicPosition cmpFromIcpPositionYoGraphic = new YoGraphicPosition("CentroidalMomentPivotFromICP", centroidalMomentPivotFromIcp, 0.0125, YoAppearance.DarkMagenta(),
+    		  GraphicType.CROSS);
+      yoGraphicsListRegistries.registerYoGraphic("instantaneousCapturePoint", cmpFromIcpPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", cmpFromIcpPositionYoGraphic.createArtifact());
    }
 
    public void doControl()
    {
       computeCenterOfMass();
       computeFootToCenterOfMassLocation();
-
-      if(skippyStatus == SkippyStatus.BALANCE)
-         balanceControl();
-      else if(skippyStatus == SkippyStatus.POSITION)
-         positionControl();
-      else
-         jumpControl();
-
       setParametersForControlModes();
+      computeInstantaneousCapturePoint();
+//      computeCenterOfMass();
+      computeFootToCenterOfMassLocation();
+      /*
+       * useICPController default value false
+       */
+      if(!useICPController.getBooleanValue()){
+         if (skippyToDo.getEnumValue() == SkippyToDo.BALANCE)
+            balanceControl();
+         else if (skippyToDo.getEnumValue() == SkippyToDo.POSITION)
+            positionControl();
+         else
+            jumpControl();
+      }
+      else{
+         newIcpCmpBalanceController();
+      }
+
+   }
+
+   private void newIcpCmpBalanceController()
+   {
+      // TODO Auto-generated method stub
+      
    }
 
    private void setParametersForControlModes()
@@ -219,18 +291,128 @@ public class SkippyController implements RobotController
       }
    }
 
-
-   private final FramePoint tempFootLocation = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FramePoint tempCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FrameVector tempFootToCoM = new FrameVector(ReferenceFrame.getWorldFrame());
-
    private void computeCenterOfMass()
    {
       Point3d tempCenterOfMass = new Point3d();
-      robotMass.set(robot.computeCenterOfMass(tempCenterOfMass));
+      Vector3d tempComVelocity = new Vector3d();
+      Vector3d tempAngularMomentum = new Vector3d();
+
+      double totalMass = robot.computeCOMMomentum(tempCenterOfMass, tempComVelocity, tempAngularMomentum);
       centerOfMass.set(tempCenterOfMass);
+      linearMomentum.set(tempComVelocity);
+      angularMomentum.set(tempAngularMomentum);
+      tempComVelocity.scale(1.0 / totalMass);
+      centerOfMassVelocity.set(tempComVelocity);
+      /*
+       * Compute rate of change of CoM linear and angular momentum
+       */
+      double deltaT = (double)SkippySimulation.DT;
+      rateOfChangeOfLinearMomentum.set(linearMomentum);
+      rateOfChangeOfLinearMomentum.sub(lastLinearMomentum);
+      rateOfChangeOfLinearMomentum.scale(1/deltaT);
+      rateOfChangeOfAngularMomentum.set(angularMomentum);
+      rateOfChangeOfAngularMomentum.sub(lastAngularMomentum);
+      rateOfChangeOfAngularMomentum.scale(1/deltaT);
+//      System.out.println(robot.getTime()+"\n"+"Last   :"+lastAngularMomentum);
+//      System.out.println("Actual :"+angularMomentum);
+//      System.out.println("Linear :"+rateOfChangeOfLinearMomentum);
+//      System.out.println("Angular:"+rateOfChangeOfAngularMomentum);
+      lastLinearMomentum.set(linearMomentum);
+      lastAngularMomentum.set(angularMomentum);
+      /*
+       * CMP1 from CoM angular momentum rate of change being equal to the torque 
+       * 	on CoM from reaction forces (view check notes)
+       */
+      Vector3d reactionForce = new Vector3d();
+      robot.computeFootContactForce(reactionForce);
+      centroidalMomentPivot.setX((+rateOfChangeOfAngularMomentum.getY() - centerOfMass.getX()*reactionForce.getZ() 
+    		  + centerOfMass.getZ()*reactionForce.getX())/reactionForce.getZ());
+      centroidalMomentPivot.setY((-rateOfChangeOfAngularMomentum.getX() + centerOfMass.getY()*reactionForce.getZ() 
+    		  - centerOfMass.getZ()*reactionForce.getY())/reactionForce.getZ());
+      centroidalMomentPivot.setZ(0.0);
+      /*
+       * Initialize shoulder and hip joint torques
+       */
+      cmpTauShoulderJoint.set(rateOfChangeOfAngularMomentum);
+      cmpTauHipJoint.set(rateOfChangeOfAngularMomentum);
+      torqueProjectionsFromCoMToHipAndShoulderJoints(cmpTauShoulderJoint, cmpTauHipJoint);
+      /*
+       * CMP2 = ICP - kCapture*(ICP - Foot)     footLocation.set(robot.computeFootLocation());
+       */
+      kCapture.set(0.9);
+      Point3d tempCMP = new Point3d();
+      Point3d tempFootLocation = new Point3d();
+      instantaneousCapturePoint.get(tempCMP);
+      tempFootLocation = robot.computeFootLocation();
+      tempCMP.sub(tempFootLocation);
+      tempCMP.scale(kCapture.getDoubleValue());
+      tempCMP.add(instantaneousCapturePoint.getPoint3dCopy());
+      centroidalMomentPivotFromIcp.set(tempCMP);
+      /*
+       * CoM position vector to CMP
+       */
+      Vector3d cmpToCoM = new Vector3d();
+      centerOfMass.get(cmpToCoM);
+      cmpToCoM.sub(centroidalMomentPivotFromIcp.getVector3dCopy());
+      Vector3d torqueFromReactionToCoM = new Vector3d();
+      torqueFromReactionToCoM.cross(cmpToCoM, reactionForce);
+      System.out.println(torqueFromReactionToCoM);//reactionForce);
+      /*
+       * Initialize shoulder and hip joint torques
+       */
+      cmpFromIcpTauShoulderJoint.set(torqueFromReactionToCoM);
+      cmpFromIcpTauHipJoint.set(torqueFromReactionToCoM);
+      torqueProjectionsFromCoMToHipAndShoulderJoints(cmpFromIcpTauShoulderJoint,cmpFromIcpTauHipJoint);
+
    }
 
+/**
+ * Compute torque projections from CoM on shoulder and hip joints 
+ */
+public void torqueProjectionsFromCoMToHipAndShoulderJoints(YoFrameVector shoulderJointTorque, YoFrameVector hipJointTorque) {
+	/*
+       * Get joints axis vectors for torque projections
+       */
+      Vector3d tempHipJointAxis = new Vector3d();
+      Vector3d tempShoulderJointAxis = new Vector3d();
+      robot.getHipJoint().getJointAxis(tempHipJointAxis);
+      robot.getShoulderJoint().getJointAxis(tempShoulderJointAxis);
+      /*
+       * Joint axis unit vectors
+       */
+      double tempHipJointAxisModulus = Math.sqrt(tempHipJointAxis.dot(tempHipJointAxis));
+      double tempShoulderJointAxisModulus = Math.sqrt(tempShoulderJointAxis.dot(tempShoulderJointAxis));
+      tempHipJointAxis.scale(1/tempHipJointAxisModulus);
+      tempShoulderJointAxis.scale(1/tempShoulderJointAxisModulus);
+      /*
+       * Torque projections on shoulder and hip joints
+       */
+      tempForTorqueProjections.setVector(tempHipJointAxis);
+      double tempTauHipJointModulus = hipJointTorque.dot(tempForTorqueProjections);
+//      double tempTauHipJointModulus = cmpTauHipJoint.dot(tempForTorqueProjections);
+      tempForTorqueProjections.setVector(tempShoulderJointAxis);
+      double tempTauShoulderJointModulus = shoulderJointTorque.dot(tempForTorqueProjections);
+//      double tempTauShoulderJointModulus = cmpTauShoulderJoint.dot(tempForTorqueProjections);
+      tempHipJointAxis.scale(tempTauHipJointModulus);
+      tempShoulderJointAxis.scale(tempTauShoulderJointModulus);
+      hipJointTorque.set(tempHipJointAxis);
+      shoulderJointTorque.set(tempShoulderJointAxis);
+//      cmpTauHipJoint.set(tempHipJointAxis);
+//      cmpTauShoulderJoint.set(tempShoulderJointAxis);
+}
+
+   private void computeInstantaneousCapturePoint()
+   {
+      double w0 = Math.sqrt(z0.getDoubleValue() / Math.abs(robot.getGravityt()));
+
+      instantaneousCapturePoint.set(centerOfMassVelocity);
+      instantaneousCapturePoint.scaleAdd(w0, centerOfMass);
+      instantaneousCapturePoint.setZ(0.0);
+   }
+   
+   private void computeCMP(){
+      
+   };
    private void computeFootToCenterOfMassLocation()
    {
       ReferenceFrame bodyFrame = robot.updateAndGetBodyFrame();
@@ -244,6 +426,9 @@ public class SkippyController implements RobotController
 
       footLocation.getFrameTupleIncludingFrame(tempFootLocation);
       centerOfMass.getFrameTupleIncludingFrame(tempCoMLocation);
+
+      footToLastCoMLocation.set(tempFootToCoM.getVectorCopy());
+      lastCoMLocation.set(tempCoMLocation);
 
       tempFootLocation.changeFrame(bodyFrame);
       tempCoMLocation.changeFrame(bodyFrame);
@@ -587,24 +772,29 @@ public class SkippyController implements RobotController
    private void setUpStateMachines()
    {
       //states
-      State<States> balanceState = new BalanceState(skippyStatus);
-      State<States> prepareState = new PrepareState(skippyStatus);
-      State<States> liftoffState = new LiftoffState(skippyStatus);
-      State<States> repositionState = new RepositionState(skippyStatus);
-      State<States> recoverState = new RecoverState(skippyStatus);
+      State<States> balanceState = new BalanceState(skippyToDo.getEnumValue());
+      State<States> prepareState = new PrepareState(skippyToDo.getEnumValue());
+      State<States> leanState = new LeanState(skippyToDo.getEnumValue());
+      State<States> liftoffState = new LiftoffState(skippyToDo.getEnumValue());
+      State<States> repositionState = new RepositionState(skippyToDo.getEnumValue());
+      State<States> recoverState = new RecoverState(skippyToDo.getEnumValue());
 
       //transitions
-      StateTransitionCondition balanceToPrepareTransitionCondition = new BalanceToPrepareTransitionCondition(skippyStatus);
-      StateTransitionCondition prepareToLiftoffTransitionCondition = new PrepareToLiftoffTransitionCondition(skippyStatus);
-      StateTransitionCondition liftoffToRepositionTransitionCondition = new LiftoffToRepositionTransitionCondition(skippyStatus);
-      StateTransitionCondition repositionToRecoverTransitionCondition = new RepositionToRecoverTransitionCondition(skippyStatus);
-      StateTransitionCondition recoverToBalanceTransitionCondition = new RecoverToBalanceTransitionCondition(skippyStatus);
+      StateTransitionCondition balanceToPrepareTransitionCondition = new BalanceToPrepareTransitionCondition();
+      StateTransitionCondition prepareToLeanTransitionCondition = new PrepareToLeanTransitionCondition(skippyToDo.getEnumValue());
+      StateTransitionCondition leanToLiftoffTransitionCondition = new LeanToLiftoffTransitionCondition(skippyToDo.getEnumValue());
+      StateTransitionCondition liftoffToRepositionTransitionCondition = new LiftoffToRepositionTransitionCondition(skippyToDo.getEnumValue());
+      StateTransitionCondition repositionToRecoverTransitionCondition = new RepositionToRecoverTransitionCondition(skippyToDo.getEnumValue());
+      StateTransitionCondition recoverToBalanceTransitionCondition = new RecoverToBalanceTransitionCondition(skippyToDo.getEnumValue());
 
       StateTransition<States> balanceToPrepare = new StateTransition<States>(States.PREPARE, balanceToPrepareTransitionCondition);
       balanceState.addStateTransition(balanceToPrepare);
 
-      StateTransition<States> prepareToLiftoff = new StateTransition<States>(States.LIFTOFF, prepareToLiftoffTransitionCondition);
-      prepareState.addStateTransition(prepareToLiftoff);
+      StateTransition<States> prepareToLean = new StateTransition<States>(States.LEAN, prepareToLeanTransitionCondition);
+      prepareState.addStateTransition(prepareToLean);
+
+      StateTransition<States> leanToLiftoff = new StateTransition<States>(States.LIFTOFF, leanToLiftoffTransitionCondition);
+      leanState.addStateTransition(leanToLiftoff);
 
       StateTransition<States> liftoffToReposition = new StateTransition<States>(States.REPOSITION, liftoffToRepositionTransitionCondition);
       liftoffState.addStateTransition(liftoffToReposition);
@@ -617,6 +807,7 @@ public class SkippyController implements RobotController
 
       stateMachine.addState(balanceState);
       stateMachine.addState(prepareState);
+      stateMachine.addState(leanState);
       stateMachine.addState(liftoffState);
       stateMachine.addState(repositionState);
       stateMachine.addState(recoverState);
@@ -687,39 +878,55 @@ public class SkippyController implements RobotController
 
    public class BalanceToPrepareTransitionCondition implements StateTransitionCondition
    {
-
-      private final SkippyStatus direction;
-
-      public BalanceToPrepareTransitionCondition(SkippyStatus direction)
+      public BalanceToPrepareTransitionCondition()
       {
-         this.direction = direction;
       }
       public boolean checkCondition()
       {
-         if(direction == SkippyStatus.JUMP_FORWARD)
+         if(skippyToDo.getEnumValue() == SkippyToDo.JUMP_FORWARD)
          {
-            double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
-            return time < 4.01 && time > 3.99;
+            double time = stateMachine.timeInCurrentState();
+            return time >= 4.0;
          }
          else
             return false;
          }
    }
-   public class PrepareToLiftoffTransitionCondition implements StateTransitionCondition
+   public class PrepareToLeanTransitionCondition implements StateTransitionCondition
    {
 
-      private final SkippyStatus direction;
+      private final SkippyToDo direction;
 
-      public PrepareToLiftoffTransitionCondition(SkippyStatus direction)
+      public PrepareToLeanTransitionCondition(SkippyToDo direction)
       {
          this.direction = direction;
       }
       public boolean checkCondition()
       {
-         if(direction == SkippyStatus.JUMP_FORWARD)
+         if(direction == SkippyToDo.JUMP_FORWARD)
          {
-            double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
-            return time < 11.01 && time > 10.99;
+            double time = stateMachine.timeInCurrentState();
+            return time < 7.01 && time > 6.99;
+         }
+         else
+            return false;
+      }
+   }
+   public class LeanToLiftoffTransitionCondition implements StateTransitionCondition
+   {
+
+      private final SkippyToDo direction;
+
+      public LeanToLiftoffTransitionCondition(SkippyToDo direction)
+      {
+         this.direction = direction;
+      }
+      public boolean checkCondition()
+      {
+         if(direction == SkippyToDo.JUMP_FORWARD)
+         {
+            double time = stateMachine.timeInCurrentState();
+            return true; //time > 0.2;
          }
          else
             return false;
@@ -728,58 +935,58 @@ public class SkippyController implements RobotController
    public class LiftoffToRepositionTransitionCondition implements StateTransitionCondition
    {
 
-      private final SkippyStatus direction;
+      private final SkippyToDo direction;
 
-      public LiftoffToRepositionTransitionCondition(SkippyStatus direction)
+      public LiftoffToRepositionTransitionCondition(SkippyToDo direction)
       {
          this.direction = direction;
       }
       public boolean checkCondition()
       {
-         if(direction == SkippyStatus.JUMP_FORWARD)
+         if(direction == SkippyToDo.JUMP_FORWARD)
          {
-            double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
-            return time < 11.38 && time > 11.36;
+            double time = stateMachine.timeInCurrentState();
+            return time < 0.36 && time > 0.35;
          }
          else
             return false;
+
+//         Vector3d angMom = new Vector3d();
+//         robot.computeAngularMomentum(angMom);
+//         return angMom.length() < 0.01;
+
       }
    }
    public class RepositionToRecoverTransitionCondition implements StateTransitionCondition
    {
 
-      private final SkippyStatus direction;
+      private final SkippyToDo direction;
 
-      public RepositionToRecoverTransitionCondition(SkippyStatus direction)
+      public RepositionToRecoverTransitionCondition(SkippyToDo direction)
       {
          this.direction = direction;
       }
       public boolean checkCondition()
       {
-         if(direction == SkippyStatus.JUMP_FORWARD)
-         {
-            double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
-            return time < 11.99 && time > 11.97;
-         }
-         else
-            return false;
+         double time = stateMachine.timeInCurrentState();
+         return time < 0.60 && time > 0.59;
       }
    }
    public class RecoverToBalanceTransitionCondition implements StateTransitionCondition
    {
 
-      private final SkippyStatus direction;
+      private final SkippyToDo direction;
 
-      public RecoverToBalanceTransitionCondition(SkippyStatus direction)
+      public RecoverToBalanceTransitionCondition(SkippyToDo direction)
       {
          this.direction = direction;
       }
       public boolean checkCondition()
       {
-         if(direction == SkippyStatus.JUMP_FORWARD)
+         if(direction == SkippyToDo.JUMP_FORWARD)
          {
-            double time = robot.t.getDoubleValue() % SkippySimulation.TIME;
-            return time < 20.01 && time > 19.99;
+            double time = stateMachine.timeInCurrentState();
+            return time < 4.01 && time > 3.99;
          }
          return false;
       }
@@ -789,15 +996,16 @@ public class SkippyController implements RobotController
    private class BalanceState extends State<States>
    {
 
-      private final SkippyStatus direction;
+      private final SkippyToDo direction;
 
-      public BalanceState(SkippyStatus direction)
+      public BalanceState(SkippyToDo direction)
       {
          super(States.BALANCE);
          this.direction = direction;
       }
       public void doAction()
       {
+         q_d_hip.set(0.6);
       }
       public void doTransitionIntoAction()
       {
@@ -812,9 +1020,9 @@ public class SkippyController implements RobotController
    private class PrepareState extends State<States>
    {
 
-      private final SkippyStatus direction;
+      private final SkippyToDo direction;
 
-      public PrepareState(SkippyStatus direction)
+      public PrepareState(SkippyToDo direction)
       {
          super(States.PREPARE);
          this.direction = direction;
@@ -824,8 +1032,34 @@ public class SkippyController implements RobotController
       }
       public void doTransitionIntoAction()
       {
-         if(direction == SkippyStatus.JUMP_FORWARD)
+         if(direction == SkippyToDo.JUMP_FORWARD)
             q_d_hip.set(1.6);
+      }
+      public void doTransitionOutOfAction()
+      {
+
+      }
+   }
+
+   private class LeanState extends State<States>
+   {
+      private final SkippyToDo direction;
+
+      public LeanState(SkippyToDo direction)
+      {
+         super(States.LEAN);
+         this.direction = direction;
+      }
+      public void doAction()
+      {
+      }
+      public void doTransitionIntoAction()
+      {
+         if(direction == SkippyToDo.JUMP_FORWARD)
+         {
+            hipPlaneControlMode.set(SkippyPlaneControlMode.POSITION);
+            q_d_hip.set(1.4);
+         }
       }
       public void doTransitionOutOfAction()
       {
@@ -836,9 +1070,9 @@ public class SkippyController implements RobotController
    private class LiftoffState extends State<States>
    {
 
-      private final SkippyStatus direction;
+      private final SkippyToDo direction;
 
-      public LiftoffState(SkippyStatus direction)
+      public LiftoffState(SkippyToDo direction)
       {
          super(States.LIFTOFF);
          this.direction = direction;
@@ -848,7 +1082,6 @@ public class SkippyController implements RobotController
       }
       public void doTransitionIntoAction()
       {
-         hipPlaneControlMode.set(SkippyPlaneControlMode.POSITION);
          q_d_hip.set(0.45);
       }
 
@@ -861,9 +1094,9 @@ public class SkippyController implements RobotController
    private class RepositionState extends State<States>
    {
 
-      private final SkippyStatus direction;
+      private final SkippyToDo direction;
 
-      public RepositionState(SkippyStatus direction)
+      public RepositionState(SkippyToDo direction)
       {
          super(States.REPOSITION);
          this.direction = direction;
@@ -884,9 +1117,9 @@ public class SkippyController implements RobotController
    private class RecoverState extends State<States>
    {
 
-      private final SkippyStatus direction;
+      private final SkippyToDo direction;
 
-      public RecoverState(SkippyStatus direction)
+      public RecoverState(SkippyToDo direction)
       {
          super(States.RECOVER);
          this.direction = direction;
@@ -899,8 +1132,9 @@ public class SkippyController implements RobotController
          hipPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
          shoulderPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
 
-         q_d_hip.set(0.6);
+         q_d_hip.set(-0.9);
          q_d_shoulder.set(0.0);
+         //robot.glueDownToGroundPoint.setForce(0.0, 0.0, -1450.0);
       }
       public void doTransitionOutOfAction()
       {

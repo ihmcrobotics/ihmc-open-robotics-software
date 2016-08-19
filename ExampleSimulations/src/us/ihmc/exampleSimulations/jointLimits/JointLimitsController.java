@@ -2,10 +2,14 @@ package us.ihmc.exampleSimulations.jointLimits;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
 
 public class JointLimitsController extends SimpleRobotController
 {
+   private static final double maxAbsJointVelocity = 9.0; // rad/s
+   private static final double jointLimitDistanceForMaxVelocity = 30.0; // degree
+
    private final JointLimitsRobot robot;
 
    private final DoubleYoVariable magnitude = new DoubleYoVariable("Magnitude", registry);
@@ -23,7 +27,13 @@ public class JointLimitsController extends SimpleRobotController
    private final DoubleYoVariable qddMin = new DoubleYoVariable("QDDMin", registry);
    private final DoubleYoVariable qddMaxAbs = new DoubleYoVariable("QDDMaxAbs", registry);
 
-   public JointLimitsController(JointLimitsRobot robot)
+   private final DoubleYoVariable filterAlpha = new DoubleYoVariable("FilterAlpha", registry);
+   private final AlphaFilteredYoVariable lowerLimitFiltered = new AlphaFilteredYoVariable("LowerLimitFiltered", registry, filterAlpha);
+   private final AlphaFilteredYoVariable upperLimitFiltered = new AlphaFilteredYoVariable("UpperLimitFiltered", registry, filterAlpha);
+
+   private final DoubleYoVariable slope = new DoubleYoVariable("Slope", registry);
+
+   public JointLimitsController(JointLimitsRobot robot, double controlDT)
    {
       this.robot = robot;
 
@@ -33,6 +43,9 @@ public class JointLimitsController extends SimpleRobotController
 
       lowerLimit.set(robot.getLowerLimit());
       upperLimit.set(robot.getUpperLimit());
+
+      filterAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(10.0, controlDT));
+      slope.set(maxAbsJointVelocity / Math.pow((jointLimitDistanceForMaxVelocity * Math.PI/180.0), 2.0));
 
       qddMaxAbs.set(10.0);
    }
@@ -60,7 +73,7 @@ public class JointLimitsController extends SimpleRobotController
       qddMin.set(-qddMaxAbs.getDoubleValue());
 
       // --- do limiting here ---
-      double timeHorizon = 0.05;
+      double timeHorizon = 0.02;
       double absoluteMaximumJointAcceleration = qddMaxAbs.getDoubleValue();
       double maxBreakAcceleration = 4.0;
       if (!Double.isInfinite(lowerLimit.getDoubleValue()))
@@ -69,10 +82,12 @@ public class JointLimitsController extends SimpleRobotController
          double distance = robot.getQ() - lowerLimit.getDoubleValue();
          distance = Math.max(0.0, distance);
 
-         double qDotMin = -Math.pow(distance, 2) / timeHorizon;
+         double qDotMin = -Math.pow(distance, 2) * slope.getDoubleValue();
          double qDDotMin = (qDotMin - robot.getQd()) / timeHorizon;
          qDDotMin = MathTools.clipToMinMax(qDDotMin, -absoluteMaximumJointAcceleration, maxBreakAcceleration);
-         qddMin.set(qDDotMin);
+
+         lowerLimitFiltered.update(qDDotMin);
+         qddMin.set(lowerLimitFiltered.getDoubleValue());
       }
       if (!Double.isInfinite(upperLimit.getDoubleValue()))
       {
@@ -80,10 +95,12 @@ public class JointLimitsController extends SimpleRobotController
          double distance = upperLimit.getDoubleValue() - robot.getQ();
          distance = Math.max(0.0, distance);
 
-         double qDotMax = Math.pow(distance, 2) / timeHorizon;
+         double qDotMax = Math.pow(distance, 2) * slope.getDoubleValue();
          double qDDotMax = (qDotMax - robot.getQd()) / timeHorizon;
          qDDotMax = MathTools.clipToMinMax(qDDotMax, -maxBreakAcceleration, absoluteMaximumJointAcceleration);
-         qddMax.set(qDDotMax);
+
+         upperLimitFiltered.update(qDDotMax);
+         qddMax.set(upperLimitFiltered.getDoubleValue());
       }
       // ---
 

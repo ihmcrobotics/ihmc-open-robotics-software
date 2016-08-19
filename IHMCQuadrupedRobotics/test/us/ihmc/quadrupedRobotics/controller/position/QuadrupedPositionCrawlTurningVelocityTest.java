@@ -55,13 +55,13 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 150.0, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+   @DeployableTestMethod(estimatedDuration = 150.0, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
    @Test(timeout = 600000)
    public void testTurnInPlaceRegularSpeed() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputZ().set(0.2);
+      variables.getYoPlanarVelocityInputZ().set(0.15);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 45.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyYaw(), 1.0));
@@ -77,11 +77,11 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputZ().set(0.2);
+      variables.getYoPlanarVelocityInputZ().set(0.05);
       variables.getSwingDuration().set(2.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 45.0));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyYaw(), 0.4));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyYaw(), 0.3));
       conductor.simulate();
       
       conductor.concludeTesting();
@@ -100,7 +100,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
          variables.getYoPlanarVelocityInputX().set(-random.nextDouble() * 0.25);
          variables.getYoPlanarVelocityInputZ().set(0.0);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-         conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + random.nextDouble() * 5.0 + 15.0));
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + random.nextDouble() * 2.0 + 2.0));
          conductor.simulate();
          
          variables.getYoPlanarVelocityInputX().set(0.0);
@@ -112,7 +112,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
          variables.getYoPlanarVelocityInputX().set(0.0);
          variables.getYoPlanarVelocityInputZ().set(random.nextDouble() * 0.2 - 0.1);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-         conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + random.nextDouble() * 5.0 + 15.0));
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + random.nextDouble() * 3.0 + 4.0));
          conductor.simulate();
       }
       

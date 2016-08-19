@@ -1,28 +1,41 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import ihmc_msgs.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
+
+import ihmc_msgs.ArmTrajectoryRosMessage;
+import ihmc_msgs.ChestTrajectoryRosMessage;
+import ihmc_msgs.FootTrajectoryRosMessage;
+import ihmc_msgs.FootstepDataListRosMessage;
+import ihmc_msgs.FootstepDataRosMessage;
+import ihmc_msgs.HandTrajectoryRosMessage;
+import ihmc_msgs.PelvisTrajectoryRosMessage;
+import ihmc_msgs.Point2dRosMessage;
+import ihmc_msgs.WholeBodyTrajectoryRosMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.*;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.utilities.ros.msgToPacket.converter.RosEnumConversionException;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
 public class IHMCROSTranslationRuntimeTools
 {
