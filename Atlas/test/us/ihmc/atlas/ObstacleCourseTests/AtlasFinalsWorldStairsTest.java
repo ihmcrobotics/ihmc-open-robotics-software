@@ -93,7 +93,7 @@ public class AtlasFinalsWorldStairsTest
       SixDoFJointReferenceFrame rootFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint pelvisPosition = new FramePoint(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.15);
+      PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.125);
       drcSimulationTestHelper.send(message);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
