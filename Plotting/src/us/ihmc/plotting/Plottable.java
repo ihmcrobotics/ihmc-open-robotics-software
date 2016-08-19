@@ -14,5 +14,5 @@ public interface Plottable
 
    public String getType(); // boo
 
-   public int getLevel();
+   public int getLevel(); // boo
 }
