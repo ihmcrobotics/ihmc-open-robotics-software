@@ -73,6 +73,20 @@ public class TransformablePoint3d extends Point3d implements GeometryObject<Tran
    {
       // Check one axis at a time for efficiency when false, but end up comparing distance in the end.
 
+      if (Double.isNaN(getX()) && !Double.isNaN(other.getX()))
+         return false;
+      if (Double.isNaN(getY()) && !Double.isNaN(other.getY()))
+         return false;
+      if (Double.isNaN(getZ()) && !Double.isNaN(other.getZ()))
+         return false;
+      
+      if (!Double.isNaN(getX()) && Double.isNaN(other.getX()))
+         return false;
+      if (!Double.isNaN(getY()) && Double.isNaN(other.getY()))
+         return false;
+      if (!Double.isNaN(getZ()) && Double.isNaN(other.getZ()))
+         return false;
+      
       double epsilonSquared = epsilon * epsilon;
       double xDiffSquared = (getX() - other.getX()) * (getX() - other.getX());
       if (xDiffSquared > epsilonSquared)
