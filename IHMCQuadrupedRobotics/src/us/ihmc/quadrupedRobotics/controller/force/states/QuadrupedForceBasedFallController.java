@@ -1,5 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.partNames.JointRole;
+import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -21,6 +24,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 import javax.vecmath.Vector3d;
 
@@ -68,6 +72,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    private final QuadrupedReferenceFrames referenceFrames;
    private final FramePoint solePositionSetpoint;
    private final Vector3d zeroVelocity;
+   private SDFFullQuadrupedRobotModel fullRobotModel;
 
    public QuadrupedForceBasedFallController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
    {
@@ -88,6 +93,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
       yoPositionControllerGains = new YoEuclideanPositionGains("positionControllerGains", registry);
+      fullRobotModel = environment.getFullRobotModel();
       environment.getParentRegistry().addChild(registry);
    }
 
@@ -106,7 +112,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
          {
          case GO_HOME_XYZ:
             solePositionSetpoint.set(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.get() / 2.0),
-                  quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
+                                     quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
             solePositionSetpoint.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(), -stanceHeightParameter.get());
             break;
          case GO_HOME_Z:
@@ -127,6 +133,16 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
       }
       taskSpaceController.reset();
+
+      // Initialize force feedback
+      for (QuadrupedJointName jointName : QuadrupedJointName.values)
+      {
+         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
+         {
+            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControl.get());
+         }
+      }
    }
 
    @Override
@@ -141,6 +157,14 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    @Override
    public void onExit()
    {
+      for (QuadrupedJointName jointName : QuadrupedJointName.values)
+      {
+         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
+         {
+            oneDoFJoint.setUseFeedBackForceControl(true);
+         }
+      }
    }
 
    private void updateGains()
