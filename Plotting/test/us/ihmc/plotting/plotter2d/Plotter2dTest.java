@@ -8,6 +8,7 @@ import javax.vecmath.Vector2d;
 
 import org.junit.Test;
 
+import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.plotter2d.frames.MetersReferenceFrame;
 import us.ihmc.plotting.plotter2d.frames.PixelsReferenceFrame;
 import us.ihmc.plotting.plotter2d.frames.PlotterFrameSpace;
@@ -100,7 +101,7 @@ public class Plotter2dTest
    @Test(timeout = 30000)
    public void testBuildAPlotterAndCallSomeStuff()
    {
-      Plotter2d plotter = new Plotter2d();
+      Plotter plotter = new Plotter();
       plotter.setPreferredSize(800, 600);
       
       plotter.setScale(10.0, 10.0);

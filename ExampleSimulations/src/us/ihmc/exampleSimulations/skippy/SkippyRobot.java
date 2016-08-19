@@ -466,8 +466,4 @@ public class SkippyRobot extends Robot
       this.bodyZUpFrame.setTransformAndUpdate(transform);
       return bodyZUpFrame;
    }
-   
-   public double getGravityt(){
-      return this.getGravityZ();
-   }
 }
