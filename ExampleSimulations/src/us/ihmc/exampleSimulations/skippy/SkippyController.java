@@ -746,7 +746,8 @@ public class SkippyController implements RobotController
          if(direction == SkippyToDo.JUMP_FORWARD)
          {
             double time = stateMachine.timeInCurrentState();
-            return time < 0.1 && time > 0.09;
+            //return time < 0.0 && time > 0.09;
+            return true;
          }
          else
             return false;
