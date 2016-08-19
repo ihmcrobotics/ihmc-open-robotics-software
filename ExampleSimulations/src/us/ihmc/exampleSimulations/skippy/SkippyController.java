@@ -6,6 +6,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
@@ -90,6 +91,7 @@ public class SkippyController implements RobotController
    private final YoFramePoint bodyLocation = new YoFramePoint("body", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint instantaneousCapturePoint = new YoFramePoint("instantaneousCapturePoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint footLocation = new YoFramePoint("foot", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector footToCoMInBodyFrame;
    private final ExternalForcePoint forceToCOM;
@@ -167,15 +169,29 @@ public class SkippyController implements RobotController
       }
 
       YoGraphicPosition comPositionYoGraphic = new YoGraphicPosition("CenterOfMass", centerOfMass, 0.02, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
-      yoGraphicsListRegistries.registerYoGraphic("ICP", comPositionYoGraphic);
-      yoGraphicsListRegistries.registerArtifact("ICP", comPositionYoGraphic.createArtifact());
+      
+      yoGraphicsListRegistries.registerYoGraphic("instantaneousCapturePoint", comPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", comPositionYoGraphic.createArtifact());
+      /*
+       * New variables for ICP computing
+       */
+      YoGraphicPosition icpPositionYoGraphic = new YoGraphicPosition("InstantaneousCapturePoint", instantaneousCapturePoint, 0.03, YoAppearance.DarkBlue(),
+            GraphicType.BALL_WITH_ROTATED_CROSS);
+      yoGraphicsListRegistries.registerYoGraphic("instantaneousCapturePoint", icpPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", icpPositionYoGraphic.createArtifact());
    }
 
    public void doControl()
    {
       computeCenterOfMass();
       computeFootToCenterOfMassLocation();
+      /*
+       * New method for ICP computing
+       */
+      computeInstantaneousCapturePoint();
 
+      computeCenterOfMass();
+      computeFootToCenterOfMassLocation();
       if(skippyStatus == SkippyStatus.BALANCE)
          balanceControl();
       else if(skippyStatus == SkippyStatus.POSITION)
@@ -224,6 +240,10 @@ public class SkippyController implements RobotController
    private final FramePoint tempCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
    private final FrameVector tempFootToCoM = new FrameVector(ReferenceFrame.getWorldFrame());
 
+   private final FramePoint lastCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FrameVector footToLastCoMLocation = new FrameVector(ReferenceFrame.getWorldFrame());
+   DoubleYoVariable z0 = new DoubleYoVariable("z0",registry);
+
    private void computeCenterOfMass()
    {
       Point3d tempCenterOfMass = new Point3d();
@@ -231,6 +251,19 @@ public class SkippyController implements RobotController
       centerOfMass.set(tempCenterOfMass);
    }
 
+   private void computeInstantaneousCapturePoint()
+   {
+      z0.set(1.0);
+      Point3d tempInstantaneousCapturePoint = new Point3d();
+      double w0 = Math.sqrt(1/Math.abs(robot.getGravityt()));
+      Vector3d coMSpeed = new Vector3d(footToCoMInBodyFrame.getVector3dCopy());
+      coMSpeed.sub(footToLastCoMLocation.getVector());
+      coMSpeed.scale(z0.getDoubleValue() /SkippySimulation.DT);
+      coMSpeed.scale(w0);
+      robot.computeCenterOfMass(tempInstantaneousCapturePoint);
+      tempInstantaneousCapturePoint.add(tempInstantaneousCapturePoint,coMSpeed);
+      instantaneousCapturePoint.set(tempInstantaneousCapturePoint);
+   }
    private void computeFootToCenterOfMassLocation()
    {
       ReferenceFrame bodyFrame = robot.updateAndGetBodyFrame();
@@ -244,7 +277,13 @@ public class SkippyController implements RobotController
 
       footLocation.getFrameTupleIncludingFrame(tempFootLocation);
       centerOfMass.getFrameTupleIncludingFrame(tempCoMLocation);
-
+      /*
+       * *****NEW*****
+       * Variable to compute CoM speed
+       */
+      footToLastCoMLocation.set(tempFootToCoM.getVectorCopy());
+      lastCoMLocation.set(tempCoMLocation);  
+      
       tempFootLocation.changeFrame(bodyFrame);
       tempCoMLocation.changeFrame(bodyFrame);
 
