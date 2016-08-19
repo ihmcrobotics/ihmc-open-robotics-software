@@ -11,6 +11,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -91,6 +92,12 @@ public class SkippyController implements RobotController
    private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector centerOfMassVelocity = new YoFrameVector("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector angularMomentum = new YoFrameVector("angularMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector linearMomentum = new YoFrameVector("linearMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector lastAngularMomentum = new YoFrameVector("lastAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector lastLinearMomentum = new YoFrameVector("lastLinearMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector rateOfChangeOfAngularMomentum = new YoFrameVector("rateOfChangeOfAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector rateOfChangeOfLinearMomentum = new YoFrameVector("rateOfChangeOfLinearMomentum", ReferenceFrame.getWorldFrame(), registry);
+   
 
    private final YoFramePoint instantaneousCapturePoint = new YoFramePoint("instantaneousCapturePoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint footLocation = new YoFramePoint("foot", ReferenceFrame.getWorldFrame(), registry);
@@ -105,6 +112,15 @@ public class SkippyController implements RobotController
    private final DoubleYoVariable qShoulderIncludingOffset = new DoubleYoVariable("qShoulderIncludingOffset", registry);
    private final DoubleYoVariable q_d_shoulder = new DoubleYoVariable("q_d_shoulder", registry);
 
+   private final FramePoint tempFootLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint tempCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FrameVector tempFootToCoM = new FrameVector(ReferenceFrame.getWorldFrame());
+
+   private final FramePoint lastCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FrameVector footToLastCoMLocation = new FrameVector(ReferenceFrame.getWorldFrame());
+   DoubleYoVariable z0 = new DoubleYoVariable("z0",registry);
+   private BooleanYoVariable useICPController = new BooleanYoVariable("useICPController",registry);
+     
    private final EnumYoVariable<SkippyToDo> skippyToDo = new EnumYoVariable<SkippyToDo>("SkippyToDo", registry, SkippyToDo.class);
    private final EnumYoVariable<SkippyPlaneControlMode> hipPlaneControlMode = new EnumYoVariable<SkippyPlaneControlMode>("hipPlaneControlMode", registry, SkippyPlaneControlMode.class);
    private final EnumYoVariable<SkippyPlaneControlMode> shoulderPlaneControlMode = new EnumYoVariable<SkippyPlaneControlMode>("shoulderPlaneControlMode", registry, SkippyPlaneControlMode.class);
@@ -125,6 +141,9 @@ public class SkippyController implements RobotController
       this.robot = robot;
       this.robotType = robotType;
 
+      z0.set(1.0);
+      useICPController.set(false);
+      
       footToCoMInBodyFrame = new YoFrameVector("footToCoMInBody", robot.updateAndGetBodyFrame(), registry);
       forceToCOM = new ExternalForcePoint("FORCETOCOM", robot);
 
@@ -184,7 +203,7 @@ public class SkippyController implements RobotController
       yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", icpPositionYoGraphic.createArtifact());
 
 
-      YoGraphicPosition footPositionYoGraphic = new YoGraphicPosition("Foot", footLocation, 0.006, YoAppearance.Purple(), GraphicType.BALL);
+      YoGraphicPosition footPositionYoGraphic = new YoGraphicPosition("Foot", footLocation, 0.006, YoAppearance.DarkBlue(), GraphicType.SOLID_BALL);
       yoGraphicsListRegistries.registerYoGraphic("instantaneousCapturePoint", footPositionYoGraphic);
       yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", footPositionYoGraphic.createArtifact());
    }
@@ -194,20 +213,30 @@ public class SkippyController implements RobotController
       computeCenterOfMass();
       computeFootToCenterOfMassLocation();
       setParametersForControlModes();
-      /*
-       * New method for ICP computing
-       */
       computeInstantaneousCapturePoint();
-
       computeCenterOfMass();
       computeFootToCenterOfMassLocation();
-      if(skippyToDo.getEnumValue() == SkippyToDo.BALANCE)
-         balanceControl();
-      else if(skippyToDo.getEnumValue() == SkippyToDo.POSITION)
-         positionControl();
-      else
-         jumpControl();
+      /*
+       * useICPController default value false
+       */
+      if(!useICPController.getBooleanValue()){
+         if (skippyToDo.getEnumValue() == SkippyToDo.BALANCE)
+            balanceControl();
+         else if (skippyToDo.getEnumValue() == SkippyToDo.POSITION)
+            positionControl();
+         else
+            jumpControl();
+      }
+      else{
+         newIcpCmpBalanceController();
+      }
 
+   }
+
+   private void newIcpCmpBalanceController()
+   {
+      // TODO Auto-generated method stub
+      
    }
 
    private void setParametersForControlModes()
@@ -243,15 +272,6 @@ public class SkippyController implements RobotController
       }
    }
 
-
-   private final FramePoint tempFootLocation = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FramePoint tempCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FrameVector tempFootToCoM = new FrameVector(ReferenceFrame.getWorldFrame());
-
-   private final FramePoint lastCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FrameVector footToLastCoMLocation = new FrameVector(ReferenceFrame.getWorldFrame());
-   DoubleYoVariable z0 = new DoubleYoVariable("z0",registry);
-
    private void computeCenterOfMass()
    {
       Point3d tempCenterOfMass = new Point3d();
@@ -260,20 +280,37 @@ public class SkippyController implements RobotController
 
       double totalMass = robot.computeCOMMomentum(tempCenterOfMass, tempComVelocity, tempAngularMomentum);
       centerOfMass.set(tempCenterOfMass);
+      linearMomentum.set(tempComVelocity);
+      angularMomentum.set(tempAngularMomentum);
+      /*
+       * Compute rate of change of linear and angular momentum
+       */
+      double deltaT = (double)SkippySimulation.DT;
+      rateOfChangeOfLinearMomentum.set(linearMomentum);
+      rateOfChangeOfLinearMomentum.sub(lastLinearMomentum);
+      rateOfChangeOfLinearMomentum.scale(1/deltaT);
+      rateOfChangeOfAngularMomentum.set(angularMomentum);
+      rateOfChangeOfAngularMomentum.sub(lastAngularMomentum);
+      rateOfChangeOfAngularMomentum.scale(1/deltaT);
+      System.out.println(lastLinearMomentum+" "+linearMomentum+" "+rateOfChangeOfLinearMomentum);
+      lastLinearMomentum.set(tempComVelocity);
+      lastAngularMomentum.set(tempAngularMomentum);
       tempComVelocity.scale(1.0 / totalMass);
       centerOfMassVelocity.set(tempComVelocity);
-      angularMomentum.set(tempAngularMomentum);
    }
 
    private void computeInstantaneousCapturePoint()
    {
-      z0.set(1.0);
       double w0 = Math.sqrt(z0.getDoubleValue() / Math.abs(robot.getGravityt()));
 
       instantaneousCapturePoint.set(centerOfMassVelocity);
       instantaneousCapturePoint.scaleAdd(w0, centerOfMass);
       instantaneousCapturePoint.setZ(0.0);
    }
+   
+   private void computeCMP(){
+      
+   };
    private void computeFootToCenterOfMassLocation()
    {
       ReferenceFrame bodyFrame = robot.updateAndGetBodyFrame();
