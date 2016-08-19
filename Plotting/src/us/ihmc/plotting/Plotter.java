@@ -45,7 +45,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 @SuppressWarnings("serial")
 public class Plotter extends JPanel
 {
-   private static final boolean SHOW_LABELS_BY_DEFAULT = false;
+   private static final boolean SHOW_LABELS_BY_DEFAULT = false; // this comment is for nathan
    private static final boolean SHOW_SELECTION_BY_DEFAULT = false;
    private static final boolean SHOW_HISTORY_BY_DEFAULT = false;
    
