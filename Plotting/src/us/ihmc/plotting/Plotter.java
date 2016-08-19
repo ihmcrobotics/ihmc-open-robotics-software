@@ -218,59 +218,70 @@ public class Plotter extends JPanel
          }
       });
       
-      // change grid line scale from 1m to 10cm ehn below 10m
-      gridSizePixels.set(calculateGridSizePixels(metersToPixels.getX()), calculateGridSizePixels(metersToPixels.getY()));
-      
-      upperLeftCorner.changeFrame(pixelsFrame);
-      lowerRightCorner.changeFrame(pixelsFrame);
-      
-      double overShoot = upperLeftCorner.getX() % gridSizePixels.getX();
-      for (double gridX = upperLeftCorner.getX() - overShoot; gridX < lowerRightCorner.getX(); gridX += gridSizePixels.getX())
+      if (backgroundImage != null)
       {
-         drawGuy.changeFrame(pixelsFrame);
-         drawGuy.set(upperLeftCorner);
-         drawGuy.setX(gridX);
-         
-         int nthGridLineFromOrigin = (int) (Math.abs(drawGuy.getX()) / gridSizePixels.getX());
-         applyColorForGridline(graphics2d, nthGridLineFromOrigin);
-
-         drawGuy.changeFrame(screenFrame);
-         graphics2d.drawLine((int) Math.round(drawGuy.getX()), 0, (int) Math.round(drawGuy.getX()), (int) visibleRectangle.getHeight());
-         
-         if (showLabels)
-         {
-            Color tempColor = graphics2d.getColor();
-            graphics2d.setColor(PlotterColors.LABEL_COLOR);
-            drawGuy.changeFrame(metersFrame);
-            String labelString = FormattingTools.getFormattedToSignificantFigures(drawGuy.getX(), 2);
-            drawGuy.changeFrame(screenFrame);
-            graphics2d.drawString(labelString, (int) Math.round(drawGuy.getX()) + 1, (int) Math.round(origin.getY()) - 1);
-            graphics2d.setColor(tempColor);
-         }
+         graphics2d.drawImage(backgroundImage, (int) Math.round(upperLeftCorner.getX()),
+                                               (int) Math.round(upperLeftCorner.getY()),
+                                               (int) Math.round(lowerRightCorner.getX()),
+                                               (int) Math.round(lowerRightCorner.getY()),
+                                               0, 0, backgroundImage.getWidth(), backgroundImage.getHeight(), this);
       }
-      
-      overShoot = lowerRightCorner.getY() % gridSizePixels.getY();
-      for (double gridY = lowerRightCorner.getY() - overShoot; gridY < upperLeftCorner.getY(); gridY += gridSizePixels.getY())
+      else
       {
-         drawGuy.changeFrame(pixelsFrame);
-         drawGuy.set(upperLeftCorner);
-         drawGuy.setY(gridY);
+         // change grid line scale from 1m to 10cm ehn below 10m
+         gridSizePixels.set(calculateGridSizePixels(metersToPixels.getX()), calculateGridSizePixels(metersToPixels.getY()));
          
-         int nthGridLineFromOrigin = (int) (Math.abs(drawGuy.getY()) / gridSizePixels.getY());
-         applyColorForGridline(graphics2d, nthGridLineFromOrigin);
-
-         drawGuy.changeFrame(screenFrame);
-         graphics2d.drawLine(0, (int) Math.round(drawGuy.getY()), (int) visibleRectangle.getWidth(), (int) Math.round(drawGuy.getY()));
+         upperLeftCorner.changeFrame(pixelsFrame);
+         lowerRightCorner.changeFrame(pixelsFrame);
          
-         if (showLabels)
+         double overShoot = upperLeftCorner.getX() % gridSizePixels.getX();
+         for (double gridX = upperLeftCorner.getX() - overShoot; gridX < lowerRightCorner.getX(); gridX += gridSizePixels.getX())
          {
-            Color tempColor = graphics2d.getColor();
-            graphics2d.setColor(PlotterColors.LABEL_COLOR);
-            drawGuy.changeFrame(metersFrame);
-            String labelString = FormattingTools.getFormattedToSignificantFigures(drawGuy.getY(), 2);
+            drawGuy.changeFrame(pixelsFrame);
+            drawGuy.set(upperLeftCorner);
+            drawGuy.setX(gridX);
+            
+            int nthGridLineFromOrigin = (int) (Math.abs(drawGuy.getX()) / gridSizePixels.getX());
+            applyColorForGridline(graphics2d, nthGridLineFromOrigin);
+   
             drawGuy.changeFrame(screenFrame);
-            graphics2d.drawString(labelString, (int) Math.round(origin.getX()) + 1, (int) Math.round(drawGuy.getY()) - 1);
-            graphics2d.setColor(tempColor);
+            graphics2d.drawLine((int) Math.round(drawGuy.getX()), 0, (int) Math.round(drawGuy.getX()), (int) visibleRectangle.getHeight());
+            
+            if (showLabels)
+            {
+               Color tempColor = graphics2d.getColor();
+               graphics2d.setColor(PlotterColors.LABEL_COLOR);
+               drawGuy.changeFrame(metersFrame);
+               String labelString = FormattingTools.getFormattedToSignificantFigures(drawGuy.getX(), 2);
+               drawGuy.changeFrame(screenFrame);
+               graphics2d.drawString(labelString, (int) Math.round(drawGuy.getX()) + 1, (int) Math.round(origin.getY()) - 1);
+               graphics2d.setColor(tempColor);
+            }
+         }
+         
+         overShoot = lowerRightCorner.getY() % gridSizePixels.getY();
+         for (double gridY = lowerRightCorner.getY() - overShoot; gridY < upperLeftCorner.getY(); gridY += gridSizePixels.getY())
+         {
+            drawGuy.changeFrame(pixelsFrame);
+            drawGuy.set(upperLeftCorner);
+            drawGuy.setY(gridY);
+            
+            int nthGridLineFromOrigin = (int) (Math.abs(drawGuy.getY()) / gridSizePixels.getY());
+            applyColorForGridline(graphics2d, nthGridLineFromOrigin);
+   
+            drawGuy.changeFrame(screenFrame);
+            graphics2d.drawLine(0, (int) Math.round(drawGuy.getY()), (int) visibleRectangle.getWidth(), (int) Math.round(drawGuy.getY()));
+            
+            if (showLabels)
+            {
+               Color tempColor = graphics2d.getColor();
+               graphics2d.setColor(PlotterColors.LABEL_COLOR);
+               drawGuy.changeFrame(metersFrame);
+               String labelString = FormattingTools.getFormattedToSignificantFigures(drawGuy.getY(), 2);
+               drawGuy.changeFrame(screenFrame);
+               graphics2d.drawString(labelString, (int) Math.round(origin.getX()) + 1, (int) Math.round(drawGuy.getY()) - 1);
+               graphics2d.setColor(tempColor);
+            }
          }
       }
       
