@@ -63,6 +63,7 @@ public class FootControlModule
    private final BooleanYoVariable holdPositionIfCopOnEdge;
    /** For testing purpose only. */
    private final BooleanYoVariable alwaysHoldPosition;
+   private final BooleanYoVariable neverHoldPosition;
 
    private final HoldPositionState holdPositionState;
    private final SwingState swingState;
@@ -104,7 +105,7 @@ public class FootControlModule
       holdPositionIfCopOnEdge = new BooleanYoVariable(namePrefix + "HoldPositionIfCopOnEdge", registry);
       holdPositionIfCopOnEdge.set(walkingControllerParameters.doFancyOnToesControl());
       alwaysHoldPosition = new BooleanYoVariable(namePrefix + "AlwaysHoldPosition", registry);
-      alwaysHoldPosition.set(false);
+      neverHoldPosition = new BooleanYoVariable(namePrefix + "NeverHoldPosition", registry);
 
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
@@ -130,10 +131,16 @@ public class FootControlModule
       supportState = new FullyConstrainedState(footControlHelper, registry);
       supportStateNew = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
       useNewSupportState = walkingControllerParameters.useSupportState();
+      holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
       if (useNewSupportState)
+      {
          states.add(supportStateNew);
+      }
       else
+      {
          states.add(supportState);
+         states.add(holdPositionState);
+      }
 
       if (walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
       {
@@ -144,9 +151,6 @@ public class FootControlModule
       {
          exploreFootPolygonState = null;
       }
-
-      holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
-      states.add(holdPositionState);
 
       swingState = new SwingState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
       states.add(swingState);
@@ -193,6 +197,9 @@ public class FootControlModule
          {
             if (alwaysHoldPosition.getBooleanValue())
                return true;
+            if (neverHoldPosition.getBooleanValue())
+               return false;
+
             if (isFootBarelyLoaded())
                return true;
             if (holdPositionIfCopOnEdge.getBooleanValue())
@@ -211,6 +218,9 @@ public class FootControlModule
 
             if (alwaysHoldPosition.getBooleanValue())
                return false;
+            if (neverHoldPosition.getBooleanValue())
+               return true;
+
             if (isFootBarelyLoaded())
                return false;
             return !footControlHelper.isCoPOnEdge();
@@ -293,7 +303,7 @@ public class FootControlModule
          if (constraintType == ConstraintType.HOLD_POSITION)
             System.out.println("Warning: HOLD_POSITION state is handled internally.");
 
-         if (isFootBarelyLoaded())
+         if (isFootBarelyLoaded() && !useNewSupportState)
             constraintType = ConstraintType.HOLD_POSITION;
          else
             constraintType = ConstraintType.FULL;
