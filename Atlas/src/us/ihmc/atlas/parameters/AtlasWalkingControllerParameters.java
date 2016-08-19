@@ -1006,7 +1006,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean useSupportState()
    {
-      return false;
+      return true;
    }
 
    /** {@inheritDoc} */
@@ -1014,5 +1014,15 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public boolean useCenterOfMassVelocityFromEstimator()
    {
       return false;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String[] getJointsWithRestrictiveLimits()
+   {
+      String bkxName = jointMap.getSpineJointName(SpineJointName.SPINE_ROLL);
+      String bkyName = jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);
+      String[] joints = {bkxName, bkyName};
+      return joints;
    }
 }
