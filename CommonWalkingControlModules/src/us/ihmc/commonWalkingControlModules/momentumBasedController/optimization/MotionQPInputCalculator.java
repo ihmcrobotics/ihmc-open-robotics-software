@@ -8,14 +8,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -50,10 +48,6 @@ public class MotionQPInputCalculator
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final OneDoFJoint[] oneDoFJoints;
 
-   private final DenseMatrix64F jointsRangeOfMotion;
-   private final DenseMatrix64F jointLowerLimits;
-   private final DenseMatrix64F jointUpperLimits;
-
    private final FramePoint tempBodyFixedPoint = new FramePoint();
    private final FrameVector pPointVelocity = new FrameVector();
    private final DenseMatrix64F tempPPointMatrixVelocity = new DenseMatrix64F(3, 1);
@@ -73,8 +67,6 @@ public class MotionQPInputCalculator
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
 
-   private final double controlDT;
-
    private final JointIndexHandler jointIndexHandler;
 
    private final DenseMatrix64F allTaskJacobian;
@@ -83,12 +75,11 @@ public class MotionQPInputCalculator
    private final int numberOfDoFs;
 
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator,
-         JointIndexHandler jointIndexHandler, double controlDT, YoVariableRegistry parentRegistry)
+         JointIndexHandler jointIndexHandler, YoVariableRegistry parentRegistry)
    {
       this.geometricJacobianHolder = geometricJacobianHolder;
       this.jointIndexHandler = jointIndexHandler;
       this.jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
-      this.controlDT = controlDT;
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       pointJacobianConvectiveTermCalculator = new PointJacobianConvectiveTermCalculator(twistCalculator);
       centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), centerOfMassFrame, registry);
@@ -99,22 +90,6 @@ public class MotionQPInputCalculator
       secondaryTaskJointsWeight.set(1.0); // TODO Needs to be rethought, it doesn't seem to be that useful.
       nullspaceProjectionAlpha.set(0.005);
       nullspaceCalculator = new DampedLeastSquaresNullspaceCalculator(numberOfDoFs, nullspaceProjectionAlpha.getDoubleValue());
-
-      jointsRangeOfMotion = new DenseMatrix64F(numberOfDoFs, 1);
-      jointLowerLimits = new DenseMatrix64F(numberOfDoFs, 1);
-      jointUpperLimits = new DenseMatrix64F(numberOfDoFs, 1);
-
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         OneDoFJoint joint = oneDoFJoints[i];
-         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
-         double jointLimitLower = joint.getJointLimitLower();
-         double jointLimitUpper = joint.getJointLimitUpper();
-
-         jointsRangeOfMotion.set(jointIndex, 0, jointLimitUpper - jointLimitLower);
-         jointLowerLimits.set(jointIndex, 0, jointLimitLower);
-         jointUpperLimits.set(jointIndex, 0, jointLimitUpper);
-      }
 
       parentRegistry.addChild(registry);
    }
@@ -129,20 +104,6 @@ public class MotionQPInputCalculator
    public void updatePrivilegedConfiguration(PrivilegedConfigurationCommand command)
    {
       privilegedConfigurationHandler.submitPrivilegedConfigurationCommand(command);
-   }
-
-   public void submitJointLimitReductionCommand(JointLimitReductionCommand command)
-   {
-      for (int commandJointIndex = 0; commandJointIndex < command.getNumberOfJoints(); commandJointIndex++)
-      {
-         OneDoFJoint joint = command.getJoint(commandJointIndex);
-         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
-         double originalJointLimitLower = joint.getJointLimitLower();
-         double originalJointLimitUpper = joint.getJointLimitUpper();
-         double limitReduction = command.getJointLimitReductionFactor(commandJointIndex) * jointsRangeOfMotion.get(jointIndex, 0);
-         jointLowerLimits.set(jointIndex, 0, originalJointLimitLower + limitReduction);
-         jointUpperLimits.set(jointIndex, 0, originalJointLimitUpper - limitReduction);
-      }
    }
 
    public boolean computePrivilegedJointAccelerations(MotionQPInput motionQPInputToPack)
@@ -609,56 +570,6 @@ public class MotionQPInputCalculator
       recordTaskJacobian(motionQPInputToPack.taskJacobian);
 
       return true;
-   }
-
-   public void computeJointAccelerationLimits(double absoluteMaximumJointAcceleration, DenseMatrix64F qDDotMinToPack, DenseMatrix64F qDDotMaxToPack)
-   {
-      CommonOps.fill(qDDotMinToPack, Double.NEGATIVE_INFINITY);
-      CommonOps.fill(qDDotMaxToPack, Double.POSITIVE_INFINITY);
-
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         OneDoFJoint joint = oneDoFJoints[i];
-         int index = jointIndexHandler.getOneDoFJointIndex(joint);
-         double jointLimitLower = jointLowerLimits.get(index, 0);
-         double jointLimitUpper = jointUpperLimits.get(index, 0);
-
-         double qDDotMin = Double.NEGATIVE_INFINITY;
-         double qDDotMax = Double.POSITIVE_INFINITY;
-
-         if (!Double.isInfinite(jointLimitLower))
-         {
-            double qDotMin = (jointLimitLower - joint.getQ()) / controlDT;
-            qDDotMin = (qDotMin - joint.getQd()) / controlDT;
-            qDDotMin = MathTools.clipToMinMax(qDDotMin, -absoluteMaximumJointAcceleration, 0.0);
-            qDDotMinToPack.set(index, 0, qDDotMin);
-         }
-         if (!Double.isInfinite(jointLimitUpper))
-         {
-            double qDotMax = (jointLimitUpper - joint.getQ()) / controlDT;
-            qDDotMax = (qDotMax - joint.getQd()) / controlDT;
-            qDDotMax = MathTools.clipToMinMax(qDDotMax, -0.0, absoluteMaximumJointAcceleration);
-            qDDotMaxToPack.set(index, 0, qDDotMax);
-         }
-      }
-   }
-
-   public void computeJointVelocityLimits(DenseMatrix64F qDotMinToPack, DenseMatrix64F qDotMaxToPack)
-   {
-      CommonOps.fill(qDotMinToPack, Double.NEGATIVE_INFINITY);
-      CommonOps.fill(qDotMaxToPack, Double.POSITIVE_INFINITY);
-
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         OneDoFJoint joint = oneDoFJoints[i];
-         int index = jointIndexHandler.getOneDoFJointIndex(joint);
-         double jointLimitLower = jointLowerLimits.get(index, 0);
-         if (!Double.isInfinite(jointLimitLower))
-            qDotMinToPack.set(index, 0, (jointLimitLower - joint.getQ()) / controlDT);
-         double jointLimitUpper = jointUpperLimits.get(index, 0);
-         if (!Double.isInfinite(jointLimitUpper))
-            qDotMaxToPack.set(index, 0, (jointLimitUpper - joint.getQ()) / controlDT);
-      }
    }
 
    private void recordTaskJacobian(DenseMatrix64F taskJacobian)

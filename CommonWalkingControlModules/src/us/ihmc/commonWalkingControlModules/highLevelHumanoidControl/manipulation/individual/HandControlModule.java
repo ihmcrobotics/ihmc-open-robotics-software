@@ -369,11 +369,16 @@ public class HandControlModule
          success = taskspaceControlState.handleHandTrajectoryCommand(command, handControlFrame, initializeToCurrent);
          if (success)
             requestedState.set(taskspaceControlState.getStateEnum());
+         else
+            PrintTools.warn(this, "Can't execute HandTrajectoryCommand! " + command.getRobotSide());
          return;
       case QUEUE:
          success = taskspaceControlState.queueHandTrajectoryCommand(command);
          if (!success)
+         {
             holdPositionInJointspace();
+            PrintTools.warn(this, "Can't execute HandTrajectoryCommand! " + command.getRobotSide());
+         }
          return;
       default:
          PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
@@ -405,11 +410,16 @@ public class HandControlModule
          success = jointspaceControlState.handleArmTrajectoryCommand(command, initializeToCurrent);
          if (success)
             requestedState.set(jointspaceControlState.getStateEnum());
+         else
+            PrintTools.warn(this, "Can't execute ArmTrajectoryCommand! " + command.getRobotSide());
          return;
       case QUEUE:
          success = jointspaceControlState.queueArmTrajectoryCommand(command);
          if (!success)
+         {
             holdPositionInJointspace();
+            PrintTools.warn(this, "Can't execute ArmTrajectoryCommand! " + command.getRobotSide());
+         }
          return;
       default:
          PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
@@ -432,6 +442,8 @@ public class HandControlModule
          boolean success = userControlModeState.handleArmDesiredAccelerationsMessage(command);
          if (success)
             requestedState.set(userControlModeState.getStateEnum());
+         else
+            PrintTools.warn(this, "Can't execute ArmDesiredAccelerationsCommand! " + command.getRobotSide());
          return;
       default:
          throw new RuntimeException("Unknown ArmControlMode: " + command.getArmControlMode());

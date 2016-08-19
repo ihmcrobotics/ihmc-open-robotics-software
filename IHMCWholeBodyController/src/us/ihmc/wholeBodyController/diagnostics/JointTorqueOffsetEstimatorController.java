@@ -30,6 +30,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
 public class JointTorqueOffsetEstimatorController extends HighLevelBehavior implements RobotController, JointTorqueOffsetEstimator
@@ -65,6 +66,8 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
+   private final BooleanYoVariable hasReachedMaximumTorqueOffset = new BooleanYoVariable("hasReachedMaximumTorqueOffset", registry);
+
    public JointTorqueOffsetEstimatorController(HighLevelHumanoidControllerToolbox highLevelControllerToolbox, TorqueOffsetPrinter torqueOffsetPrinter)
    {
       super(HighLevelState.CALIBRATION);
@@ -81,7 +84,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
 
       ditherAmplitude.set(0.3);
       ditherFrequency.set(5.0);
-      maximumTorqueOffset.set(3.0);
+      maximumTorqueOffset.set(5.0);
 
       estimateTorqueOffset.set(false);
       transferTorqueOffsets.set(false);
@@ -177,6 +180,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
    @Override
    public void initialize()
    {
+      hasReachedMaximumTorqueOffset.set(false);
    }
 
    @Override
@@ -241,6 +245,11 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
       if (diagnosticsWhenHangingHelper != null)
       {
          tau = diagnosticsWhenHangingHelper.getTorqueToApply(tau, estimateTorqueOffset.getBooleanValue(), maximumTorqueOffset.getDoubleValue());
+         if (hasReachedMaximumTorqueOffset.getBooleanValue() && Math.abs(diagnosticsWhenHangingHelper.getTorqueOffset()) == maximumTorqueOffset.getDoubleValue())
+         {
+            PrintTools.warn(this, "Reached maximum torque for at least one joint.");
+            hasReachedMaximumTorqueOffset.set(true);
+         }
       }
 
       double ditherTorque = ditherAmplitude.getDoubleValue() * Math.sin(2.0 * Math.PI * ditherFrequency.getDoubleValue() * timeInCurrentState);
