@@ -137,6 +137,7 @@ public class SupportState extends AbstractFootControlState
       super.doTransitionOutOfAction();
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
+      frameViz.hide();
    }
 
    @Override
