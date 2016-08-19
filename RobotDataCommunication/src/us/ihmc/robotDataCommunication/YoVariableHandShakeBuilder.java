@@ -182,6 +182,10 @@ public class YoVariableHandShakeBuilder
 
             for (String enumType : enumTypes)
             {
+               if(enumType == null)
+               {
+                  enumType = "null";
+               }
                yoVariableDefinition.addEnumValues(enumType);
             }
             yoVariableDefinition.setAllowNullValues(((EnumYoVariable<?>) variable).getAllowNullValue());

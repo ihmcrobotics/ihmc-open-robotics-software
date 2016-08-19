@@ -115,15 +115,6 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public boolean epsilonEquals(TransformableQuat4d other, double epsilon)
    {
       //TODO: Not sure if this is the best for epsilonEquals. Also, not sure how to handle the negative equal cases...
-      if (Double.isNaN(getW()) && !Double.isNaN(other.getW())) return false;
-      if (Double.isNaN(getX()) && !Double.isNaN(other.getX())) return false;
-      if (Double.isNaN(getY()) && !Double.isNaN(other.getY())) return false;
-      if (Double.isNaN(getZ()) && !Double.isNaN(other.getZ())) return false;
-      
-      if (!Double.isNaN(getW()) && Double.isNaN(other.getW())) return false;
-      if (!Double.isNaN(getX()) && Double.isNaN(other.getX())) return false;
-      if (!Double.isNaN(getY()) && Double.isNaN(other.getY())) return false;
-      if (!Double.isNaN(getZ()) && Double.isNaN(other.getZ())) return false;
       
       if (Math.abs(getW() - other.getW()) > epsilon) return false;
       if (Math.abs(getX() - other.getX()) > epsilon) return false;

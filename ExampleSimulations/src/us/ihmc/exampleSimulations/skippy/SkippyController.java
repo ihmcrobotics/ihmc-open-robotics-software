@@ -287,10 +287,7 @@ public class SkippyController implements RobotController
 
       footLocation.getFrameTupleIncludingFrame(tempFootLocation);
       centerOfMass.getFrameTupleIncludingFrame(tempCoMLocation);
-      /*
-       * *****NEW*****
-       * Variable to compute CoM speed
-       */
+
       footToLastCoMLocation.set(tempFootToCoM.getVectorCopy());
       lastCoMLocation.set(tempCoMLocation);
 
