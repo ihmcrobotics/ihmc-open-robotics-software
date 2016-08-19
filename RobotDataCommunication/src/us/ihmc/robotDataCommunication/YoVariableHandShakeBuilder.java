@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.plotting.Artifact;
+import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake;
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage;
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage;
@@ -182,6 +182,10 @@ public class YoVariableHandShakeBuilder
 
             for (String enumType : enumTypes)
             {
+               if(enumType == null)
+               {
+                  enumType = "null";
+               }
                yoVariableDefinition.addEnumValues(enumType);
             }
             yoVariableDefinition.setAllowNullValues(((EnumYoVariable<?>) variable).getAllowNullValue());
