@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -29,7 +30,6 @@ import us.ihmc.plotting.plotter2d.frames.PlotterFrameSpace;
 import us.ihmc.plotting.plotter2d.frames.PlotterSpaceConverter;
 import us.ihmc.plotting.shapes.LineArtifact;
 import us.ihmc.plotting.shapes.PointArtifact;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -369,22 +369,15 @@ public class Plotter extends JPanel
 
    private double calculateGridSizePixels(double pixelsPerMeter)
    {
-      double medianGridWidthInPixels = 100.0;
+      double medianGridWidthInPixels = Toolkit.getDefaultToolkit().getScreenResolution();
       double desiredMeters = medianGridWidthInPixels / pixelsPerMeter;
-//      System.out.print(" desiredMeters: " + desiredMeters);
       double decimalPlace = Math.log10(desiredMeters);
-//      System.out.print(" decimalPlace: " + decimalPlace);
       double orderOfMagnitude = Math.floor(decimalPlace);
-//      System.out.print(" orderOfMagnitude: " + orderOfMagnitude);
       double nextOrderOfMagnitude = Math.pow(10, orderOfMagnitude + 1);
-//      System.out.print(" nextOrderOfMagnitude: " + nextOrderOfMagnitude);
       double percentageToNextOrderOfMagnitude = desiredMeters / nextOrderOfMagnitude;
-//      System.out.print(" percentageToNextOrderOfMagnitude: " + percentageToNextOrderOfMagnitude);
       
       double remainder = percentageToNextOrderOfMagnitude % 0.5;
-//      System.out.print(" remainder: " + remainder);
       double roundToNearestPoint5 = remainder >= 0.25 ? percentageToNextOrderOfMagnitude + (0.5 - remainder) : percentageToNextOrderOfMagnitude - remainder;
-//      System.out.print(" roundToNearestPoint5: " + roundToNearestPoint5);
       
       double gridSizeMeters;
       if (roundToNearestPoint5 > 0.0)
@@ -395,11 +388,7 @@ public class Plotter extends JPanel
       {
          gridSizeMeters = Math.pow(10, orderOfMagnitude);
       }
-//      System.out.print(" gridSizeMeters: " + gridSizeMeters);
       double gridSizePixels = gridSizeMeters * pixelsPerMeter;
-//      System.out.print(" gridSizePixels: " + gridSizePixels);
-      
-//      System.out.println();
       
       return gridSizePixels;
    }
