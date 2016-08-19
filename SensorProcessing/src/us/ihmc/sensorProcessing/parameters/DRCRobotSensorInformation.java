@@ -45,6 +45,4 @@ public interface DRCRobotSensorInformation
    public boolean isMultisenseHead();
 
    public ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> getStaticTransformsForRos();
-
-   public String getHeadIMUName();
 }

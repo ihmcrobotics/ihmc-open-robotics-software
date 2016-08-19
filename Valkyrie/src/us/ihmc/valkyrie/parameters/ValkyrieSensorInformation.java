@@ -373,11 +373,4 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
             staticTransform);
       staticTranformsForRos.add(headToHeadRootStaticTransform);
    }
-
-   @Override
-   public String getHeadIMUName()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
 }
