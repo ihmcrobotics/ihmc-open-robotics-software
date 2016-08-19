@@ -6,7 +6,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
@@ -90,6 +89,9 @@ public class SkippyController implements RobotController
    private final YoFramePoint bodyLocation = new YoFramePoint("body", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector centerOfMassVelocity = new YoFrameVector("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector angularMomentum = new YoFrameVector("angularMomentum", ReferenceFrame.getWorldFrame(), registry);
+
    private final YoFramePoint instantaneousCapturePoint = new YoFramePoint("instantaneousCapturePoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint footLocation = new YoFramePoint("foot", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector footToCoMInBodyFrame;
@@ -169,17 +171,22 @@ public class SkippyController implements RobotController
          createStateMachineWindow();
       }
 
-      YoGraphicPosition comPositionYoGraphic = new YoGraphicPosition("CenterOfMass", centerOfMass, 0.02, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
-      
+      YoGraphicPosition comPositionYoGraphic = new YoGraphicPosition("CenterOfMass", centerOfMass, 0.006, YoAppearance.Black(), GraphicType.CROSS);
+
       yoGraphicsListRegistries.registerYoGraphic("instantaneousCapturePoint", comPositionYoGraphic);
       yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", comPositionYoGraphic.createArtifact());
       /*
        * New variables for ICP computing
        */
-      YoGraphicPosition icpPositionYoGraphic = new YoGraphicPosition("InstantaneousCapturePoint", instantaneousCapturePoint, 0.03, YoAppearance.DarkBlue(),
-            GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition icpPositionYoGraphic = new YoGraphicPosition("InstantaneousCapturePoint", instantaneousCapturePoint, 0.01, YoAppearance.Blue(),
+            GraphicType.ROTATED_CROSS);
       yoGraphicsListRegistries.registerYoGraphic("instantaneousCapturePoint", icpPositionYoGraphic);
       yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", icpPositionYoGraphic.createArtifact());
+
+
+      YoGraphicPosition footPositionYoGraphic = new YoGraphicPosition("Foot", footLocation, 0.006, YoAppearance.Purple(), GraphicType.BALL);
+      yoGraphicsListRegistries.registerYoGraphic("instantaneousCapturePoint", footPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", footPositionYoGraphic.createArtifact());
    }
 
    public void doControl()
@@ -248,22 +255,24 @@ public class SkippyController implements RobotController
    private void computeCenterOfMass()
    {
       Point3d tempCenterOfMass = new Point3d();
-      robotMass.set(robot.computeCenterOfMass(tempCenterOfMass));
+      Vector3d tempComVelocity = new Vector3d();
+      Vector3d tempAngularMomentum = new Vector3d();
+
+      double totalMass = robot.computeCOMMomentum(tempCenterOfMass, tempComVelocity, tempAngularMomentum);
       centerOfMass.set(tempCenterOfMass);
+      tempComVelocity.scale(1.0 / totalMass);
+      centerOfMassVelocity.set(tempComVelocity);
+      angularMomentum.set(tempAngularMomentum);
    }
 
    private void computeInstantaneousCapturePoint()
    {
       z0.set(1.0);
-      Point3d tempInstantaneousCapturePoint = new Point3d();
-      double w0 = Math.sqrt(1/Math.abs(robot.getGravityt()));
-      Vector3d coMSpeed = new Vector3d(footToCoMInBodyFrame.getVector3dCopy());
-      coMSpeed.sub(footToLastCoMLocation.getVector());
-      coMSpeed.scale(z0.getDoubleValue() /SkippySimulation.DT);
-      coMSpeed.scale(w0);
-      robot.computeCenterOfMass(tempInstantaneousCapturePoint);
-      tempInstantaneousCapturePoint.add(tempInstantaneousCapturePoint,coMSpeed);
-      instantaneousCapturePoint.set(tempInstantaneousCapturePoint);
+      double w0 = Math.sqrt(z0.getDoubleValue() / Math.abs(robot.getGravityt()));
+
+      instantaneousCapturePoint.set(centerOfMassVelocity);
+      instantaneousCapturePoint.scaleAdd(w0, centerOfMass);
+      instantaneousCapturePoint.setZ(0.0);
    }
    private void computeFootToCenterOfMassLocation()
    {
@@ -283,8 +292,8 @@ public class SkippyController implements RobotController
        * Variable to compute CoM speed
        */
       footToLastCoMLocation.set(tempFootToCoM.getVectorCopy());
-      lastCoMLocation.set(tempCoMLocation);  
-      
+      lastCoMLocation.set(tempCoMLocation);
+
       tempFootLocation.changeFrame(bodyFrame);
       tempCoMLocation.changeFrame(bodyFrame);
 
@@ -635,7 +644,7 @@ public class SkippyController implements RobotController
       State<States> recoverState = new RecoverState(skippyToDo.getEnumValue());
 
       //transitions
-      StateTransitionCondition balanceToPrepareTransitionCondition = new BalanceToPrepareTransitionCondition(skippyToDo.getEnumValue());
+      StateTransitionCondition balanceToPrepareTransitionCondition = new BalanceToPrepareTransitionCondition();
       StateTransitionCondition prepareToLeanTransitionCondition = new PrepareToLeanTransitionCondition(skippyToDo.getEnumValue());
       StateTransitionCondition leanToLiftoffTransitionCondition = new LeanToLiftoffTransitionCondition(skippyToDo.getEnumValue());
       StateTransitionCondition liftoffToRepositionTransitionCondition = new LiftoffToRepositionTransitionCondition(skippyToDo.getEnumValue());
@@ -733,19 +742,15 @@ public class SkippyController implements RobotController
 
    public class BalanceToPrepareTransitionCondition implements StateTransitionCondition
    {
-
-      private final SkippyToDo direction;
-
-      public BalanceToPrepareTransitionCondition(SkippyToDo direction)
+      public BalanceToPrepareTransitionCondition()
       {
-         this.direction = direction;
       }
       public boolean checkCondition()
       {
-         if(direction == SkippyToDo.JUMP_FORWARD)
+         if(skippyToDo.getEnumValue() == SkippyToDo.JUMP_FORWARD)
          {
             double time = stateMachine.timeInCurrentState();
-            return time < 4.01 && time > 3.99;
+            return time >= 4.0;
          }
          else
             return false;
@@ -785,8 +790,7 @@ public class SkippyController implements RobotController
          if(direction == SkippyToDo.JUMP_FORWARD)
          {
             double time = stateMachine.timeInCurrentState();
-            //return time < 0.0 && time > 0.09;
-            return true;
+            return true; //time > 0.2;
          }
          else
             return false;
@@ -918,8 +922,7 @@ public class SkippyController implements RobotController
          if(direction == SkippyToDo.JUMP_FORWARD)
          {
             hipPlaneControlMode.set(SkippyPlaneControlMode.POSITION);
-            q_d_hip.set(1.25);
-
+            q_d_hip.set(1.4);
          }
       }
       public void doTransitionOutOfAction()
