@@ -118,8 +118,8 @@ public class PlotterPanel extends JPanel
          {
             double newX = plotter.getSelectedX();
             double newY = plotter.getSelectedY();
-            plotter.setOffsetX(newX);
-            plotter.setOffsetY(newY);
+            plotter.setFocusPointX(newX);
+            plotter.setFocusPointY(newY);
          }
       });
       menu.add(menuItem);
