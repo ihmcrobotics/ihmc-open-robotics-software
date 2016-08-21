@@ -8,8 +8,8 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.PlotterGraphics;
+import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;

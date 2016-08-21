@@ -1,4 +1,4 @@
-package us.ihmc.plotting;
+package us.ihmc.plotting.artifact;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -6,6 +6,8 @@ import java.awt.Graphics2D;
 import java.io.Serializable;
 
 import javax.vecmath.Vector2d;
+
+import us.ihmc.plotting.Plottable;
 
 public abstract class Artifact implements Plottable, Serializable
 {

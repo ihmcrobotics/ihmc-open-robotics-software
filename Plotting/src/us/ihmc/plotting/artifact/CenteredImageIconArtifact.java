@@ -1,10 +1,8 @@
-package us.ihmc.plotting.shapes;
+package us.ihmc.plotting.artifact;
 
 import java.awt.Graphics;
 
 import javax.swing.ImageIcon;
-
-import us.ihmc.plotting.Artifact;
 
 public class CenteredImageIconArtifact extends Artifact
 {

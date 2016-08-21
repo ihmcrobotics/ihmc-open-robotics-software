@@ -2,7 +2,7 @@ package us.ihmc.plotting;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.plotting.shapes.LineArtifact;
+import us.ihmc.plotting.artifact.LineArtifact;
 
 public class PlotterDemo
 {
