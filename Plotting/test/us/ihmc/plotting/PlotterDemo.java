@@ -20,8 +20,8 @@ public class PlotterDemo
       
       plotter.showInNewWindow();
       
-      plotter.setOffsetX(2.5);
-      plotter.setOffsetY(-3.0);
+      plotter.setFocusPointX(2.5);
+      plotter.setFocusPointY(-3.0);
    }
    
    public static void main(String[] args)
