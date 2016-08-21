@@ -13,9 +13,6 @@ import us.ihmc.plotting.Artifact;
 
 public class PolyLine extends Artifact implements Serializable
 {
-   /**
-    * 
-    */
    private static final long serialVersionUID = -8244299057847713312L;
    private ArrayList<Point2d> points;
    private int lineThickness = 1;
@@ -41,10 +38,10 @@ public class PolyLine extends Artifact implements Serializable
       this.lineThickness = pixels;
    }
 
-
    /**
     * Must provide a draw method for plotter to render artifact
     */
+   @Override
    public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
@@ -65,15 +62,18 @@ public class PolyLine extends Artifact implements Serializable
       }
    }
 
+   @Override
    public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
    }
    
+   @Override
    public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
    
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
