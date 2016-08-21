@@ -1,4 +1,4 @@
-package us.ihmc.plotting.shapes;
+package us.ihmc.plotting.artifact;
 
 import java.awt.BasicStroke;
 import java.awt.Graphics;
@@ -9,7 +9,6 @@ import java.io.Serializable;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.plotting.Artifact;
 import us.ihmc.robotics.geometry.Line2d;
 
 public class LineArtifact extends Artifact implements Serializable

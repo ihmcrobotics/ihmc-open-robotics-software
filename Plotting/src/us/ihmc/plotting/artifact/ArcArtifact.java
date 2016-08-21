@@ -1,12 +1,10 @@
-package us.ihmc.plotting.shapes;
+package us.ihmc.plotting.artifact;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
-
-import us.ihmc.plotting.Artifact;
 
 public class ArcArtifact extends Artifact
 {

@@ -26,7 +26,7 @@ import org.jfree.data.time.TimeSeriesCollection;
 
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
-import us.ihmc.plotting.shapes.PointArtifact;
+import us.ihmc.plotting.artifact.PointArtifact;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.gui.FFTPlotter;

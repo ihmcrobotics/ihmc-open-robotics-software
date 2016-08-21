@@ -12,7 +12,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
-import us.ihmc.plotting.Artifact;
+import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake;
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage;
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition;

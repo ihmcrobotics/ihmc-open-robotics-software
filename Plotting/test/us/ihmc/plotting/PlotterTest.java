@@ -4,7 +4,7 @@ import javax.vecmath.Point2d;
 
 import org.junit.Test;
 
-import us.ihmc.plotting.shapes.LineArtifact;
+import us.ihmc.plotting.artifact.LineArtifact;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class PlotterTest
