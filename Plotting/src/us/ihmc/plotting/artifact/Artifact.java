@@ -7,10 +7,12 @@ import java.io.Serializable;
 
 import javax.vecmath.Vector2d;
 
-import us.ihmc.plotting.Plottable;
-
-public abstract class Artifact implements Plottable, Serializable
+public abstract class Artifact implements Serializable
 {
+   public static int X_Y = 0;
+   public static int X_Z = 1;
+   public static int Y_Z = 2;
+   
    private static final long serialVersionUID = -463773605470590581L;
    protected final String id;
    protected String type;
@@ -30,7 +32,6 @@ public abstract class Artifact implements Plottable, Serializable
    /**
     * Must provide a draw method for plotter to render artifact
     */
-   @Override
    public abstract void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor);
    public void draw(Graphics2D g, int Xcenter, int Ycenter, double headingOffset, Vector2d scaleFactor)
    {
@@ -79,19 +80,16 @@ public abstract class Artifact implements Plottable, Serializable
       return recordHistory;
    }
 
-   @Override
    public String getID()
    {
       return id;
    }
 
-   @Override
    public String getType()
    {
       return type;
    }
 
-   @Override
    public int getLevel()
    {
       return level;
