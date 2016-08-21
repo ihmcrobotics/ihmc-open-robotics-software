@@ -8,7 +8,6 @@ import us.ihmc.plotting.Artifact;
 
 public class CenteredImageIconArtifact extends Artifact
 {
-
    private static final long serialVersionUID = 8946412004186672487L;
    private ImageIcon imageIcon;
    
@@ -28,6 +27,7 @@ public class CenteredImageIconArtifact extends Artifact
       return imageIcon.getIconWidth();
    }
 
+   @Override
    public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
@@ -39,16 +39,19 @@ public class CenteredImageIconArtifact extends Artifact
       }
    }
 
+   @Override
    public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");

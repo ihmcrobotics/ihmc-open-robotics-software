@@ -8,9 +8,6 @@ import us.ihmc.plotting.Artifact;
 
 public class TextArtifact extends Artifact
 {
-   /**
-    *
-    */
    private static final long serialVersionUID = 4004880709697051705L;
    private double x1;
    private double y1;
@@ -78,6 +75,7 @@ public class TextArtifact extends Artifact
    /**
     * Must provide a draw method for plotter to render artifact
     */
+   @Override
    public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       int x1 = Xcenter + xPixelOffset +((int)Math.round(this.x1 * scaleFactor));
@@ -88,28 +86,24 @@ public class TextArtifact extends Artifact
       g.setFont(font);
 
       g.drawString(text, x1, y1);
-
    }
 
+   @Override
    public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       int x1 = Xcenter + ((int)Math.round(this.x1 * scaleFactor));
       int y1 = Ycenter - ((int)Math.round(this.y1 * scaleFactor));
 
-
       g.setColor(color);
       g.setFont(font);
 
       g.drawString(text, x1, y1);
-
    }
 
    public void save(PrintWriter printWriter)
    {
       printWriter.println(x1 + " " + y1 + " " + id);
    }
-
-
 
    public TextArtifact getCopy()
    {
@@ -119,14 +113,15 @@ public class TextArtifact extends Artifact
       return cirlceCopy;
    }
    
+   @Override
    public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
    
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
    }
-
 }
