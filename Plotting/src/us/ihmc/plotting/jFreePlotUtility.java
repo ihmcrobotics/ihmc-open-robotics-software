@@ -20,22 +20,10 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 /**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2008</p>
- *
- * <p>Company: </p>
- *
  * @author Seyed Hossein Tamaddoni
- * @version 1.0
  */
 public class jFreePlotUtility extends JFrame
 {
-   /**
-    * 
-    */
    private static final long serialVersionUID = 2986192525063918143L;
 
    public jFreePlotUtility(String figureName)
@@ -181,6 +169,4 @@ public class jFreePlotUtility extends JFrame
 
       return dataset;
    }
-
-
 }
