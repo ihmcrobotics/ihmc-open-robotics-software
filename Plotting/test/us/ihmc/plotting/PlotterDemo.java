@@ -11,7 +11,7 @@ public class PlotterDemo
       Plotter plotter = new Plotter();
       plotter.setPreferredSize(800, 600);
       
-      plotter.setRange(10.0);
+      plotter.setViewRange(10.0);
       plotter.setShowLabels(true);
       
       plotter.addArtifact(new LineArtifact("01", new Point2d(0, 0), new Point2d(1, 1)));
