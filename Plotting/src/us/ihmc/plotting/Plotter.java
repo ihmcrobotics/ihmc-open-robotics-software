@@ -664,30 +664,6 @@ public class Plotter
       this.showHistory = drawHistory;
    }
 
-   @Deprecated
-   public void setOffsetX(double focusPointX)
-   {
-      setFocusPointX(focusPointX);
-   }
-
-   @Deprecated
-   public void setOffsetY(double focusPointY)
-   {
-      setFocusPointY(focusPointY);
-   }
-
-   @Deprecated
-   public double getOffsetX()
-   {
-      return getFocusPointX();
-   }
-
-   @Deprecated
-   public double getOffsetY()
-   {
-      return getFocusPointY();
-   }
-   
    public void update()
    {
       panel.repaint();
