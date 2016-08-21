@@ -131,8 +131,10 @@ public class SimulationOverheadPlotter implements PlaybackListener
    {
       if (trackBodyCB.isSelected())
       {
-         if (xVariableToTrack != null) plotter.setOffsetX(xVariableToTrack.getDoubleValue());
-         if (yVariableToTrack != null) plotter.setOffsetY(yVariableToTrack.getDoubleValue());
+         if (xVariableToTrack != null)
+            plotter.setFocusPointX(xVariableToTrack.getDoubleValue());
+         if (yVariableToTrack != null)
+            plotter.setFocusPointY(yVariableToTrack.getDoubleValue());
       }
    }
 
