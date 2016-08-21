@@ -185,7 +185,7 @@ public class ComCopResidual implements FunctionNtoM
    {
       PlotterPanel plotterPanel = new PlotterPanel();
       Plotter plotter = plotterPanel.getPlotter();
-      plotter.setRangeLimit(1, 2, -.2, .2, .2, -.2);
+      plotter.setViewRange(1.0);
       if (frameTitle == null)
       {
          frameTitle = "Plotter Panel " + plotterPanelId;

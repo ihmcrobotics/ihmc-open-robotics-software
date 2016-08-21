@@ -40,6 +40,7 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO Deprecate archaic methods
  * TODO Factor out artifacts.
  * TODO Fix Artifact interface.
+ * TODO Remove PlotterPanel
  */
 @SuppressWarnings("serial")
 public class Plotter
@@ -583,10 +584,17 @@ public class Plotter
     */
    public void setViewRange(double viewRangeInX, double viewRangeInY)
    {
-      setScale(visibleRectangle.getWidth() / viewRangeInX, visibleRectangle.getHeight() / viewRangeInY);
+      if (isInitialized())
+      {
+         setScale(visibleRectangle.getWidth() / viewRangeInX, visibleRectangle.getHeight() / viewRangeInY);
+      }
+      else
+      {
+         setScale(getPreferredSize().getWidth() / viewRangeInX, getPreferredSize().getHeight() / viewRangeInY);
+      }
    }
    
-   public void setRange(double rangeInSmallestDimension)
+   public void setViewRange(double minimumViewRange)
    {
       double smallestDimension;
       if (isInitialized())
@@ -597,8 +605,18 @@ public class Plotter
       {
          smallestDimension = Math.min(getPreferredSize().getWidth(), getPreferredSize().getHeight());
       }
-      double newPixelsPerMeter = smallestDimension / rangeInSmallestDimension;
+      double newPixelsPerMeter = smallestDimension / minimumViewRange;
       setScale(newPixelsPerMeter, newPixelsPerMeter);
+   }
+   
+   public void setScale(double pixelsPerMeter)
+   {
+      setScale(pixelsPerMeter, pixelsPerMeter);
+   }
+
+   public void setShowLabels(boolean showLabels)
+   {
+      this.showLabels = showLabels;
    }
 
    public void showInNewWindow()
@@ -615,8 +633,6 @@ public class Plotter
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
    }
    
-   // BEGIN ARCHAIC METHODS //
-   
    public double getSelectedX()
    {
       selected.changeFrame(metersFrame);
@@ -629,25 +645,13 @@ public class Plotter
       return selected.getY();
    }
    
-   public void setShowLabels(boolean showLabels)
-   {
-      this.showLabels = showLabels;
-   }
-
    public void setBackgroundImage(BufferedImage backgroundImage)
    {
       this.backgroundImage = backgroundImage;
       panel.repaint();
    }
 
-   @Deprecated
-   public void setRangeLimit(int range, double origMapScale, double ullon, double ullat, double lrlon, double lrlat)
-   {
-      setRange(range);
-   }
-
-   @Deprecated
-   public double getRange()
+   public double getViewRange()
    {
       if (visibleRectangle.getWidth() <= visibleRectangle.getHeight())
       {
