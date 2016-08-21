@@ -9,10 +9,11 @@ import javax.vecmath.Vector2d;
 import org.junit.Test;
 
 import us.ihmc.plotting.Plotter;
-import us.ihmc.plotting.plotter2d.frames.MetersReferenceFrame;
-import us.ihmc.plotting.plotter2d.frames.PixelsReferenceFrame;
-import us.ihmc.plotting.plotter2d.frames.PlotterFrameSpace;
-import us.ihmc.plotting.plotter2d.frames.PlotterSpaceConverter;
+import us.ihmc.plotting.PlotterPoint2d;
+import us.ihmc.plotting.frames.MetersReferenceFrame;
+import us.ihmc.plotting.frames.PixelsReferenceFrame;
+import us.ihmc.plotting.frames.PlotterFrameSpace;
+import us.ihmc.plotting.frames.PlotterSpaceConverter;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
