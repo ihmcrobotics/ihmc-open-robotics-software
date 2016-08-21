@@ -105,13 +105,13 @@ public class SimulationOverheadPlotter implements PlaybackListener
 
    public JPanel getJPanel()
    {
-      return plotter;
+      return plotter.getJPanel();
    }
 
    public JPanel getJPanelWithCheckBoxes()
    {
       JPanel jPanel = new JPanel(new BorderLayout());
-      jPanel.add(plotter, BorderLayout.CENTER);
+      jPanel.add(plotter.getJPanel(), BorderLayout.CENTER);
       jPanel.add(trackBodyCB, BorderLayout.NORTH);
       return jPanel;
    }
@@ -124,7 +124,7 @@ public class SimulationOverheadPlotter implements PlaybackListener
    public void update()
    {
       recenterIfTrackingIsSelected();
-      plotter.repaint();
+      plotter.update();
    }
 
    private void recenterIfTrackingIsSelected()
