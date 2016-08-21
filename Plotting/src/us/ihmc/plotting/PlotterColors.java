@@ -1,4 +1,4 @@
-package us.ihmc.plotting.plotter2d;
+package us.ihmc.plotting;
 
 import java.awt.Color;
 
