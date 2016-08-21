@@ -14,9 +14,6 @@ import us.ihmc.plotting.Coordinate;
 
 public class PointArtifact extends Artifact implements Serializable
 {
-   /**
-    *
-    */
    private static final long serialVersionUID = -1676323503716482842L;
    private final Vector<Point2d> _sonarHistory = new Vector<Point2d>();
    private int _historyLength = 1;
@@ -39,7 +36,6 @@ public class PointArtifact extends Artifact implements Serializable
 
       setPoint(point);
    }
-
 
    public PointArtifact(String id, int history)
    {
@@ -165,6 +161,7 @@ public class PointArtifact extends Artifact implements Serializable
    /**
     * Must provide a draw method for plotter to render artifact
     */
+   @Override
    public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       Vector<Double> xMedianFliter = new Vector<Double>();
@@ -243,11 +240,10 @@ public class PointArtifact extends Artifact implements Serializable
       // " " + xMean + " " + yMean + " " + xStdDev + " " + yStdDev);
    }
 
-
+   @Override
    public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
    }
-
 
    public void save(PrintWriter printWriter)
    {
@@ -258,11 +254,13 @@ public class PointArtifact extends Artifact implements Serializable
       }
    }
 
+   @Override
    public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");

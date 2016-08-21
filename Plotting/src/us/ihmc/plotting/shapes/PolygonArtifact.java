@@ -13,9 +13,6 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
 public class PolygonArtifact extends Artifact
 {
-   /**
-    *
-    */
    private static final long serialVersionUID = -1874963815283452026L;
    private ArrayList<Point2d> points = new ArrayList<Point2d>();
    private boolean FILL_POLYGON = false;
@@ -90,7 +87,6 @@ public class PolygonArtifact extends Artifact
       setPoints(points);
    }
 
-
    public void setPoints(List<Point2d> points)
    {
       this.points.clear();
@@ -124,15 +120,16 @@ public class PolygonArtifact extends Artifact
       return points.size();
    }
 
+   @Override
    public String getID()
    {
       return id;
    }
 
-
    /**
     * Must provide a draw method for plotter to render artifact
     */
+   @Override
    public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       ArrayList<Point2d> pointsCopy = new ArrayList<>(points);
@@ -172,17 +169,19 @@ public class PolygonArtifact extends Artifact
       }
    }
 
-
+   @Override
    public void drawLegend(Graphics g, int xCenter, int yCenter, double scaleFactor)
    {
       g.drawString("Polygon", xCenter, yCenter);
    }
 
+   @Override
    public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
