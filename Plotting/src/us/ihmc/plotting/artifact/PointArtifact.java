@@ -1,4 +1,4 @@
-package us.ihmc.plotting.shapes;
+package us.ihmc.plotting.artifact;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -9,7 +9,6 @@ import java.util.Vector;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Coordinate;
 
 public class PointArtifact extends Artifact implements Serializable

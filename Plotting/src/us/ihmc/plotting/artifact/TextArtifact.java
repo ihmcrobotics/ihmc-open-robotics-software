@@ -1,10 +1,8 @@
-package us.ihmc.plotting.shapes;
+package us.ihmc.plotting.artifact;
 
 import java.awt.Font;
 import java.awt.Graphics;
 import java.io.PrintWriter;
-
-import us.ihmc.plotting.Artifact;
 
 public class TextArtifact extends Artifact
 {

@@ -1,4 +1,4 @@
-package us.ihmc.plotting.shapes;
+package us.ihmc.plotting.artifact;
 
 import java.awt.BasicStroke;
 import java.awt.Graphics;
@@ -8,8 +8,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
-
-import us.ihmc.plotting.Artifact;
 
 public class PolyLine extends Artifact implements Serializable
 {

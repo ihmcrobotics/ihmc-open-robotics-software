@@ -20,6 +20,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.plotting.artifact.ArtifactsChangedListener;
+
 public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListener
 {
    private static final long serialVersionUID = 6578501007583079034L;

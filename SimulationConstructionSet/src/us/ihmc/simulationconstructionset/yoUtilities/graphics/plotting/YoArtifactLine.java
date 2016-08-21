@@ -5,8 +5,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
-import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.PlotterGraphics;
+import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 
 public class YoArtifactLine extends Artifact

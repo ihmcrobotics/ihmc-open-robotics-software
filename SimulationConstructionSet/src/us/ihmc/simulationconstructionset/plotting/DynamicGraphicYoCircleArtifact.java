@@ -3,8 +3,8 @@ package us.ihmc.simulationconstructionset.plotting;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Drawing2DTools;
+import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
