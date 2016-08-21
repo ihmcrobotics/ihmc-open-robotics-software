@@ -296,7 +296,7 @@ public class PlotterPanel extends JPanel
          }
 
          p.getPlotter().setBackgroundImage(image);
-         p.getPlotter().setRangeLimit(20, (double) (image.getWidth() / 20.0), -10.0, 10.0, 10.0, -10.0);
+         p.getPlotter().setViewRange(20);
       }
 
       JFrame f = new JFrame("Plotter Panel");

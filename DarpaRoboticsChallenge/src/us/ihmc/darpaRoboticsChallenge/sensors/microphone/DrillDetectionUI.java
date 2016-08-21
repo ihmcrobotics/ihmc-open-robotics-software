@@ -115,7 +115,7 @@ public class DrillDetectionUI
       boolPlotter = boolPlotterPanel.getPlotter();
       boolPlotter.setFocusPointX((double) 320);
       boolPlotter.setFocusPointY((double) 80);
-      boolPlotter.setRange(200);
+      boolPlotter.setViewRange(200);
 
 
       JFreeChart bandGraph = ChartFactory.createTimeSeriesChart("Band Magnitudes", "Time", "Magnitude(dB)", dataset, true, false, false);
