@@ -13,7 +13,7 @@ public class Plotter2dDemo
       plotter.setPreferredSize(800, 600);
       
       plotter.setScale(10.0, 10.0);
-      plotter.setRange(1.0);
+      plotter.setViewRange(1.0);
       plotter.setShowLabels(true);
       
       plotter.addArtifact(new LineArtifact("01", new Point2d(0, 0), new Point2d(1, 1)));

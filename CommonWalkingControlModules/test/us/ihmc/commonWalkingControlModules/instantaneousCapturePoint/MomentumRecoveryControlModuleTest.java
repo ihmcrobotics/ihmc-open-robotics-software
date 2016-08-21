@@ -508,7 +508,7 @@ public class MomentumRecoveryControlModuleTest
    private void showPlotter(YoGraphicsListRegistry yoGraphicsListRegistry, String windowName)
    {
       Plotter plotter = new Plotter();
-      plotter.setRange(1.0);
+      plotter.setViewRange(1.0);
 
       ArrayList<ArtifactList> artifactLists = new ArrayList<>();
       yoGraphicsListRegistry.getRegisteredArtifactLists(artifactLists);
