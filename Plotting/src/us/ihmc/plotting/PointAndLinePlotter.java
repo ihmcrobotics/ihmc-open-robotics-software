@@ -16,15 +16,9 @@ import javax.vecmath.Point2d;
 
 /**
  * <p>ComSpline is used to test the natural cubic spline generator</p>
- *
- * @author Learning Locomotion Team
- * @version 2.0
  */
 public class PointAndLinePlotter extends JPanel
 {
-   /**
-    * 
-    */
    private static final long serialVersionUID = 3112685871773037198L;
    @SuppressWarnings("unused")
    private int DEFAULT_OVAL_SIZE = 4;
@@ -44,41 +38,10 @@ public class PointAndLinePlotter extends JPanel
    {
    }
 
-   public PointAndLinePlotter(Point2d[] points, int ovalSize)
-   {
-      init(points, ovalSize, Color.BLACK);
-   }
-
-   public PointAndLinePlotter(ArrayList<Point2d> points, int ovalSize)
-   {
-      Point2d[] arrayPoints = new Point2d[points.size()];
-
-      points.toArray(arrayPoints);
-
-      init(arrayPoints, ovalSize, Color.BLACK);
-   }
-
-   public PointAndLinePlotter(double[] points, int ovalSize)
-   {
-      Point2d[] arrayOfPoints = new Point2d[points.length];
-
-      double numberOfPoints = points.length;
-
-      for (int i = 0; i < points.length; i++)
-      {
-         arrayOfPoints[i] = new Point2d();
-         arrayOfPoints[i].y = points[i];
-         arrayOfPoints[i].x = (double) (i + 1.0) / numberOfPoints;
-      }
-
-      init(arrayOfPoints, ovalSize, Color.BLACK);
-   }
-
    public void setAxisSquare(boolean squareAxes)
    {
       this.squareAxes = squareAxes;
    }
-
 
    private void init(Point2d[] points, int ovalSize, Color color)
    {
@@ -100,6 +63,7 @@ public class PointAndLinePlotter extends JPanel
       JFrame f = new JFrame("Spline");
       f.addWindowListener(new WindowAdapter()
       {
+         @Override
          public void windowClosing(WindowEvent e)
          {
             System.exit(0);
@@ -160,12 +124,11 @@ public class PointAndLinePlotter extends JPanel
       }
    }
 
-
+   @Override
    public void update(Graphics g)
    {
       paint(g);
    }
-
 
    public void addPoints(Point2d[] newPoints, Color color, int ovalSize)
    {
@@ -197,7 +160,6 @@ public class PointAndLinePlotter extends JPanel
       }
    }
 
-
    public void addPoint(Point2d newPoint, Color color, int ovalSize)
    {
       ArrayList<Point2d> newPoints = new ArrayList<Point2d>();
@@ -222,40 +184,10 @@ public class PointAndLinePlotter extends JPanel
       addPointsWithoutRepaint(newPointsCopy, color, ovalSize);
    }
 
-
-// public Color getLegColor(LegName legName)
-// {
-//    switch (legName)
-//    {
-//       case FRONT_LEFT:
-//       {
-//          return Color.YELLOW;
-//       }
-//       case FRONT_RIGHT:
-//       {
-//          return Color.ORANGE;
-//       }
-//       case HIND_RIGHT:
-//       {
-//          return Color.BLUE;
-//       }
-//       case HIND_LEFT:
-//       {
-//          return Color.BLACK;
-//       }
-//    }
-//
-//    return Color.MAGENTA;
-// }
-//
-
-
-
-
+   @Override
    public void paint(Graphics g)
    {
       calcuateScaleAndWindowSize();
-
 
       // Clear screen and set colors
       setBackground(Color.white);
@@ -278,10 +210,6 @@ public class PointAndLinePlotter extends JPanel
             g.fillOval(plotXY.x - ovalSize / 2, plotXY.y - ovalSize / 2, ovalSize, ovalSize);
          }
       }
-
-
-      // Plot points
-
    }
 
    private Point getPlotXY(Point2d point)
