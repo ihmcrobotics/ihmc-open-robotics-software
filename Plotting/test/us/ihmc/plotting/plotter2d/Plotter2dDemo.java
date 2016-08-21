@@ -23,7 +23,7 @@ public class Plotter2dDemo
       plotter.showInNewWindow();
 //      plotter.setRange(15.0);
       
-//      plotter.setScale(40.0, 20.0);
+      plotter.setScale(40.0, 20.0);
 //      plotter.setFocusPointX(-5.0);
 //      plotter.setFocusPointY(10.0);
    }

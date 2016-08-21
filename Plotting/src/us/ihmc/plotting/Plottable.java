@@ -12,7 +12,7 @@ public interface Plottable
 
    public String getID();
 
-   public String getType(); // boo
+   public String getType();
 
-   public int getLevel(); // boo
+   public int getLevel();
 }
