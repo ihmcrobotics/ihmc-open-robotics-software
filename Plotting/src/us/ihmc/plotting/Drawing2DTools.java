@@ -73,5 +73,4 @@ public class Drawing2DTools
       g.drawLine((x - (radius / 2)), y, (x + (radius / 2)), y);
       g.drawLine(x, (y - (radius / 2)), x, (y + (radius / 2)));
    }
-
 }

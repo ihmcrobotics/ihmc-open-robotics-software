@@ -8,6 +8,9 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
+import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.plotting.artifact.ArtifactsChangedListener;
+
 public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListener
 {
    private static final long serialVersionUID = -8268027977270506164L;

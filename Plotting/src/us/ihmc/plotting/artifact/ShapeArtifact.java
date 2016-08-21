@@ -1,11 +1,10 @@
-package us.ihmc.plotting.shapes;
+package us.ihmc.plotting.artifact;
 
 import java.awt.Graphics;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
-import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Coordinate;
 import us.ihmc.plotting.Pose;
 

@@ -1,4 +1,4 @@
-package us.ihmc.plotting.shapes;
+package us.ihmc.plotting.artifact;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.plotting.Artifact;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 

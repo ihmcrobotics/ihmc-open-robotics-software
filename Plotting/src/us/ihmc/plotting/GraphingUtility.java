@@ -25,8 +25,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 /**
- * User: mjohnson
- * Date: 6/6/12
+ * @author mjohnson
  */
 public class GraphingUtility
 {
