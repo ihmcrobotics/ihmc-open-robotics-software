@@ -22,12 +22,10 @@ import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.plotting.plotter2d.PlotterColors;
-import us.ihmc.plotting.plotter2d.PlotterPoint2d;
-import us.ihmc.plotting.plotter2d.frames.MetersReferenceFrame;
-import us.ihmc.plotting.plotter2d.frames.PixelsReferenceFrame;
-import us.ihmc.plotting.plotter2d.frames.PlotterFrameSpace;
-import us.ihmc.plotting.plotter2d.frames.PlotterSpaceConverter;
+import us.ihmc.plotting.frames.MetersReferenceFrame;
+import us.ihmc.plotting.frames.PixelsReferenceFrame;
+import us.ihmc.plotting.frames.PlotterFrameSpace;
+import us.ihmc.plotting.frames.PlotterSpaceConverter;
 import us.ihmc.plotting.shapes.LineArtifact;
 import us.ihmc.plotting.shapes.PointArtifact;
 import us.ihmc.robotics.geometry.Line2d;

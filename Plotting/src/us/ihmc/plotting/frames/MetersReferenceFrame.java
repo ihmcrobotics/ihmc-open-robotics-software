@@ -1,4 +1,4 @@
-package us.ihmc.plotting.plotter2d.frames;
+package us.ihmc.plotting.frames;
 
 import javax.vecmath.Vector2d;
 

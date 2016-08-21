@@ -1,4 +1,4 @@
-package us.ihmc.plotting.plotter2d.frames;
+package us.ihmc.plotting.frames;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
