@@ -48,7 +48,6 @@ public class CircleArtifact extends Artifact
       return x;
    }
 
-
    public double getY()
    {
       return y;
@@ -57,6 +56,7 @@ public class CircleArtifact extends Artifact
    /**
     * Must provide a draw method for plotter to render artifact
     */
+   @Override
    public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       int x = Xcenter + ((int)Math.round(this.x * scaleFactor));
@@ -74,6 +74,7 @@ public class CircleArtifact extends Artifact
       }
    }
 
+   @Override
    public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       int x = Xcenter;
@@ -129,11 +130,13 @@ public class CircleArtifact extends Artifact
       return cirlceCopy;
    }
    
+   @Override
    public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");

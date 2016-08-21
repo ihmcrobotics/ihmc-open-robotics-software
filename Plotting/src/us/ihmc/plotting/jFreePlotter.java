@@ -1,17 +1,7 @@
 package us.ihmc.plotting;
 
-
 /**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2008</p>
- *
- * <p>Company: </p>
- *
  * @author Seyed Hossein Tamaddoni
- * @version 1.0
  */
 public class jFreePlotter
 {
@@ -206,7 +196,7 @@ public class jFreePlotter
 
       jFreePlotUtility plot = new jFreePlotUtility(FIGURENAME);
       plot.createXYLineChart(xDATA, yDATA, TITLE, XLABEL[0], YLABEL[0], WIDTH, HEIGHT, ISXAXISLOGARITHMIC, ISYAXISLOGARITHMIC);
-      packAndShow(plot);;
+      packAndShow(plot);
    }
 
    public void plotCombinedXYLineChart()

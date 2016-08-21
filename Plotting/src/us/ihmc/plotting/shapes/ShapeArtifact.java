@@ -45,6 +45,7 @@ public class ShapeArtifact extends Artifact
    /**
     * Must provide a draw method for plotter to render artifact
     */
+   @Override
    public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (pose == null)
@@ -79,6 +80,7 @@ public class ShapeArtifact extends Artifact
 
    }
 
+   @Override
    public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       int x = Xcenter;
@@ -104,8 +106,6 @@ public class ShapeArtifact extends Artifact
          g.drawRect((x - (w / 2)), (y - (h / 2)), w, h);
       }
    }
-
-
 
    public void save(PrintWriter printWriter)
    {
@@ -146,14 +146,15 @@ public class ShapeArtifact extends Artifact
       return shapeCopy;
    }
    
+   @Override
    public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
    
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
    }
-
 }

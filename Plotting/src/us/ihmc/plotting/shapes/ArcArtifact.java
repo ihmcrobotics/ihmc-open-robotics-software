@@ -62,6 +62,7 @@ public class ArcArtifact extends Artifact
       return y;
    }
 
+   @Override
    public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       int x = Xcenter + ((int) Math.round(this.x * scaleFactor));
@@ -75,19 +76,21 @@ public class ArcArtifact extends Artifact
       g2d.setStroke(new BasicStroke(lineThickness));
       g.drawArc((x - (d / 2)), (y - (d / 2)), d, d, (int) startAngle, (int) arcAngle);
       g2d.setStroke(currentStroke);
-
    }
 
+   @Override
    public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");

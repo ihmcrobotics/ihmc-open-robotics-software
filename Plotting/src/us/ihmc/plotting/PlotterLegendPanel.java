@@ -8,23 +8,8 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2008</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListener
 {
-   /**
-    *
-    */
    private static final long serialVersionUID = -8268027977270506164L;
    private ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
 
@@ -33,7 +18,6 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
       super.setBackground(new Color(180, 220, 240));
    }
 
-
    public void setArtifacts(ArrayList<Artifact> artifacts)
    {
       this.artifacts.clear();
@@ -41,6 +25,7 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
       repaint();
    }
 
+   @Override
    public void paintComponent(Graphics g)
    {
       super.paintComponent(g);
@@ -64,9 +49,7 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
 
          double scale = 500;
          
-         
          // TODO: Get the desired scale factor from the artifact itself.
-         
          if (artifact.getID().equals("FinalDesiredSwing"))
          {
             scale = 200;
@@ -96,6 +79,7 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
       }
    }
 
+   @Override
    public void artifactsChanged(ArrayList<Artifact> newArtifacts)
    {
       setArtifacts(newArtifacts);
