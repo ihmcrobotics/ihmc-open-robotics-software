@@ -62,7 +62,7 @@ public class PlotterPanel extends JPanel
       gridBagConstraints.gridheight = 5;
       gridBagConstraints.weightx = 1;
       gridBagConstraints.weighty = 1;
-      this.add(plotter, gridBagConstraints);
+      this.add(plotter.getJPanel(), gridBagConstraints);
    }
 
    public boolean isRobotCentric()

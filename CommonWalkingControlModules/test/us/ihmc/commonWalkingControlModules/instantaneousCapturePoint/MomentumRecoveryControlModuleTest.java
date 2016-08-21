@@ -531,7 +531,7 @@ public class MomentumRecoveryControlModuleTest
 
       frame.add(scrollPane, BorderLayout.EAST);
       frame.add(doneBox, BorderLayout.SOUTH);
-      frame.add(plotter, BorderLayout.CENTER);
+      frame.add(plotter.getJPanel(), BorderLayout.CENTER);
 
       frame.setSize(preferredSize);
       frame.setVisible(true);
