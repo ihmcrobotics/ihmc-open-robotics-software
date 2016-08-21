@@ -45,7 +45,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 @SuppressWarnings("serial")
 public class Plotter extends JPanel
 {
-   private static final boolean SHOW_LABELS_BY_DEFAULT = false; // this comment is for nathan
+   private static final boolean SHOW_LABELS_BY_DEFAULT = true;
    private static final boolean SHOW_SELECTION_BY_DEFAULT = false;
    private static final boolean SHOW_HISTORY_BY_DEFAULT = false;
    
@@ -440,6 +440,8 @@ public class Plotter extends JPanel
       private int buttonPressed;
       private PlotterPoint2d middleMouseDragStart = new PlotterPoint2d(screenFrame);
       private PlotterPoint2d middleMouseDragEnd = new PlotterPoint2d(screenFrame);
+      private PlotterPoint2d rightMouseDragStart = new PlotterPoint2d(screenFrame);
+      private PlotterPoint2d rightMouseDragEnd = new PlotterPoint2d(screenFrame);
 
       @Override
       public void mousePressed(MouseEvent e)
@@ -457,13 +459,9 @@ public class Plotter extends JPanel
          }
          else if (buttonPressed == MouseEvent.BUTTON3)
          {
-            selected.setIncludingFrame(screenFrame, e.getX(), e.getY());
-         }
-
-         // check for double-clicks
-         if (e.getClickCount() > 1)
-         {
-            if (buttonPressed == MouseEvent.BUTTON3)
+            rightMouseDragStart.setIncludingFrame(screenFrame, e.getX(), e.getY());
+            
+            if (e.getClickCount() > 1)
             {
                focusPoint.setIncludingFrame(screenFrame, e.getX(), e.getY());
                centerOnFocusPoint();
@@ -501,7 +499,17 @@ public class Plotter extends JPanel
          }
          else if (buttonPressed == MouseEvent.BUTTON3)
          {
-            // do nothing
+            rightMouseDragEnd.setIncludingFrame(screenFrame, e.getX(), e.getY());
+            
+            focusPoint.changeFrame(screenFrame);
+            
+            rightMouseDragEnd.sub(rightMouseDragStart);
+            rightMouseDragEnd.negate();
+            focusPoint.add(rightMouseDragEnd);
+            centerOnFocusPoint();
+            repaint();
+            
+            rightMouseDragStart.setIncludingFrame(screenFrame, e.getX(), e.getY());
          }
       }
    }
