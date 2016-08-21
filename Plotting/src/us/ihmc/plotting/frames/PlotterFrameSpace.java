@@ -1,4 +1,4 @@
-package us.ihmc.plotting.plotter2d.frames;
+package us.ihmc.plotting.frames;
 
 public enum PlotterFrameSpace
 {
