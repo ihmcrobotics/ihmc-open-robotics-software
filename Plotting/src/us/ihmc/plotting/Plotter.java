@@ -41,6 +41,7 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO Factor out artifacts.
  * TODO Fix Artifact interface.
  * TODO Remove PlotterPanel
+ * TODO Show labels at sides
  */
 @SuppressWarnings("serial")
 public class Plotter
