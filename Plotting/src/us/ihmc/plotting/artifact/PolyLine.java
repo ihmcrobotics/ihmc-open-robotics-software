@@ -2,16 +2,14 @@ package us.ihmc.plotting.artifact;
 
 import java.awt.BasicStroke;
 import java.awt.Stroke;
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
 
-public class PolyLine extends Artifact implements Serializable
+public class PolyLine extends Artifact
 {
-   private static final long serialVersionUID = -8244299057847713312L;
    private ArrayList<Point2d> points;
    private int lineThickness = 1;
 

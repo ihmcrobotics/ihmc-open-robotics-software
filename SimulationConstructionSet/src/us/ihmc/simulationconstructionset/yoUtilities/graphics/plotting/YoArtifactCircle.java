@@ -17,8 +17,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 
 public class YoArtifactCircle extends Artifact implements RemoteYoGraphic
 {
-   private static final long serialVersionUID = -1824071784539220859L;
-
    private final ArrayList<double[]> historicalData = new ArrayList<double[]>();
 
    private DoubleYoVariable x;

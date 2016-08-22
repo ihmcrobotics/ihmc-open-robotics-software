@@ -9,7 +9,6 @@ import us.ihmc.plotting.Graphics2DAdapter;
 
 public class CircleArtifact extends Artifact
 {
-   private static final long serialVersionUID = -8129731194060916363L;
    private double x;
    private double y;
    private double diameter;
