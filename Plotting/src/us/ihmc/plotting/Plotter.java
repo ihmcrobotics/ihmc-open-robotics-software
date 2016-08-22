@@ -462,26 +462,26 @@ public class Plotter
       private PlotterPoint2d rightMouseDragEnd = new PlotterPoint2d(screenFrame);
 
       @Override
-      public void mousePressed(MouseEvent e)
+      public void mousePressed(MouseEvent mouseEvent)
       {
-         buttonPressed = e.getButton();
+         buttonPressed = mouseEvent.getButton();
 
          if (buttonPressed == MouseEvent.BUTTON1)
          {
-            selected.setIncludingFrame(screenFrame, e.getX(), e.getY());
-            selectionAreaStart.setIncludingFrame(screenFrame, e.getX(), e.getY());
+            selected.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
+            selectionAreaStart.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
          }
          else if (buttonPressed == MouseEvent.BUTTON2)
          {
-            middleMouseDragStart.setIncludingFrame(screenFrame, e.getX(), e.getY());
+            middleMouseDragStart.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
          }
          else if (buttonPressed == MouseEvent.BUTTON3)
          {
-            rightMouseDragStart.setIncludingFrame(screenFrame, e.getX(), e.getY());
+            rightMouseDragStart.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
             
-            if (e.getClickCount() > 1)
+            if (mouseEvent.getClickCount() > 1)
             {
-               focusPoint.setIncludingFrame(screenFrame, e.getX(), e.getY());
+               focusPoint.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
                centerOnFocusPoint();
                panel.repaint();
             }
@@ -489,18 +489,18 @@ public class Plotter
       }
 
       @Override
-      public void mouseDragged(MouseEvent e)
+      public void mouseDragged(MouseEvent mouseEvent)
       {
          if (buttonPressed == MouseEvent.BUTTON1)
          {
             selectionAreaEnd.changeFrame(screenFrame);
-            selectionAreaEnd.set(e.getX(), e.getY());
+            selectionAreaEnd.set(mouseEvent.getX(), mouseEvent.getY());
             
             panel.repaint();
          }
          else if (buttonPressed == MouseEvent.BUTTON2)
          {
-            middleMouseDragEnd.setIncludingFrame(screenFrame, e.getX(), e.getY());
+            middleMouseDragEnd.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
             
             double deltaDragY = middleMouseDragStart.getY() - middleMouseDragEnd.getY();
             
@@ -517,7 +517,7 @@ public class Plotter
          }
          else if (buttonPressed == MouseEvent.BUTTON3)
          {
-            rightMouseDragEnd.setIncludingFrame(screenFrame, e.getX(), e.getY());
+            rightMouseDragEnd.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
             
             focusPoint.changeFrame(screenFrame);
             
@@ -527,7 +527,7 @@ public class Plotter
             centerOnFocusPoint();
             panel.repaint();
             
-            rightMouseDragStart.setIncludingFrame(screenFrame, e.getX(), e.getY());
+            rightMouseDragStart.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
          }
       }
    }
