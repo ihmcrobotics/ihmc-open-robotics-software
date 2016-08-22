@@ -1,4 +1,4 @@
-package us.ihmc.plotting;
+package us.ihmc.plotting.jfree;
 
 /**
  * @author Seyed Hossein Tamaddoni
