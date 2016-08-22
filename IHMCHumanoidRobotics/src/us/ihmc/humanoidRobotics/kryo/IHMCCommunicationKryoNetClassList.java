@@ -191,6 +191,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(TestbedServerPacket.class);
       registerPacketClass(JointConfigurationData.class);
 
+      registerPacketClass(IMUPacket.class);
       registerPacketField(IMUPacket[].class);
       registerPacketField(IMUPacket.class);
 
