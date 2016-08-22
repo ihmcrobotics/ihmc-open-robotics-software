@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
@@ -9,6 +9,7 @@ import javax.vecmath.Point3d;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Drawing2DTools;
+import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -60,14 +61,14 @@ public class YoArtifactCircle extends Artifact implements RemoteYoGraphic
    private static final int MIN_RADIUS = 5;
    private static final int MAX_RADIUS = 25;
 
-   public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       double adjustedRadius = Math.round(4.0 * radius.getDoubleValue() * scaleFactor);
       adjustedRadius = MathTools.clipToMinMax(adjustedRadius, MIN_RADIUS, MAX_RADIUS);
       draw(graphics, Xcenter, Ycenter, (int) adjustedRadius);
    }
 
-   public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
       {
@@ -82,7 +83,7 @@ public class YoArtifactCircle extends Artifact implements RemoteYoGraphic
    }
 
    
-   private void draw(Graphics graphics, double xWorld, double yWorld, int Xcenter, int Ycenter, double radius,  double scaleFactor)
+   private void draw(Graphics2DAdapter graphics2d, double xWorld, double yWorld, int Xcenter, int Ycenter, double radius,  double scaleFactor)
    {
       if (Double.isNaN(xWorld) || Double.isNaN(yWorld))
          return;
@@ -91,16 +92,16 @@ public class YoArtifactCircle extends Artifact implements RemoteYoGraphic
       int y = (int) (-yWorld * scaleFactor) + Ycenter;
       int adjustedRadius = (int) (2.0 * radius * scaleFactor);
 
-      draw(graphics, x, y, adjustedRadius);
+      draw(graphics2d, x, y, adjustedRadius);
    }
 
 
-   private void draw(Graphics graphics, int x, int y, int radius)
+   private void draw(Graphics2DAdapter graphics, int x, int y, int radius)
    {
       Drawing2DTools.drawEmptyCircle(graphics, x, y, radius, color);
    }
    
-   public void drawHistory(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       synchronized(historicalData)
       {

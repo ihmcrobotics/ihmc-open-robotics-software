@@ -1,8 +1,9 @@
 package us.ihmc.plotting.artifact;
 
 import java.awt.Font;
-import java.awt.Graphics;
 import java.io.PrintWriter;
+
+import us.ihmc.plotting.Graphics2DAdapter;
 
 public class TextArtifact extends Artifact
 {
@@ -74,28 +75,28 @@ public class TextArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       int x1 = Xcenter + xPixelOffset +((int)Math.round(this.x1 * scaleFactor));
       int y1 = Ycenter - yPixelOffset - ((int)Math.round(this.y1 * scaleFactor));
 
 
-      g.setColor(color);
-      g.setFont(font);
+      graphics2d.setColor(color);
+      graphics2d.setFont(font);
 
-      g.drawString(text, x1, y1);
+      graphics2d.drawString(text, x1, y1);
    }
 
    @Override
-   public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       int x1 = Xcenter + ((int)Math.round(this.x1 * scaleFactor));
       int y1 = Ycenter - ((int)Math.round(this.y1 * scaleFactor));
 
-      g.setColor(color);
-      g.setFont(font);
+      graphics2d.setColor(color);
+      graphics2d.setFont(font);
 
-      g.drawString(text, x1, y1);
+      graphics2d.drawString(text, x1, y1);
    }
 
    public void save(PrintWriter printWriter)
@@ -112,7 +113,7 @@ public class TextArtifact extends Artifact
    }
    
    @Override
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

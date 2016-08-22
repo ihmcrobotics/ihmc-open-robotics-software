@@ -43,7 +43,6 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO Show labels at sides
  * TODO Kill Pose and Coordinate
  * TODO Rewrite PlotterGraphics
- * TODO CTRL XY zoom
  * TODO ALT rotation
  */
 @SuppressWarnings("serial")
@@ -63,6 +62,8 @@ public class Plotter
    
    private final PlotterMouseAdapter mouseAdapter;
    private final PlotterComponentAdapter componentAdapter;
+   
+   private final Graphics2DAdapter graphics2dAdapter;
    
    private final Vector2d metersToPixels = new Vector2d(50.0, 50.0);
    private final Rectangle visibleRectangle = new Rectangle();
@@ -97,11 +98,10 @@ public class Plotter
          @Override
          protected void paintComponent(Graphics graphics)
          {
+            graphics2dAdapter.setGraphics2d((Graphics2D) graphics);
             updateFrames();
-            
             super.paintComponent(graphics);
-            
-            Plotter.this.paintComponent((Graphics2D) graphics);
+            Plotter.this.paintComponent(graphics2dAdapter);
          }
          
          @Override
@@ -175,6 +175,8 @@ public class Plotter
       
       updateFrames();
       
+      graphics2dAdapter = new Graphics2DAdapter(metersFrame, pixelsFrame);
+      
       panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), BorderFactory.createLoweredBevelBorder()));
       panel.setBackground(PlotterColors.BACKGROUND);
       
@@ -230,7 +232,7 @@ public class Plotter
       return visibleRectangle.getWidth() > 0.0;
    }
 
-   private void paintComponent(final Graphics2D graphics2d)
+   private void paintComponent(final Graphics2DAdapter graphics2d)
    {
       origin.changeFrame(screenFrame);
       forAllArtifacts(86, new ArtifactIterator()
@@ -244,7 +246,7 @@ public class Plotter
       
       if (backgroundImage != null)
       {
-         graphics2d.drawImage(backgroundImage, (int) Math.round(upperLeftCorner.getX()),
+         graphics2dAdapter.drawImage(backgroundImage, (int) Math.round(upperLeftCorner.getX()),
                                                (int) Math.round(upperLeftCorner.getY()),
                                                (int) Math.round(lowerRightCorner.getX()),
                                                (int) Math.round(lowerRightCorner.getY()),
@@ -417,7 +419,7 @@ public class Plotter
       return gridSizePixels;
    }
 
-   private void applyColorForGridline(final Graphics2D graphics2d, int nthGridLineFromOrigin)
+   private void applyColorForGridline(final Graphics2DAdapter graphics2d, int nthGridLineFromOrigin)
    {
       if (nthGridLineFromOrigin % 10 == 0)
       {
@@ -537,8 +539,17 @@ public class Plotter
             focusPoint.changeFrame(screenFrame);
             
             rightMouseDragEnd.sub(rightMouseDragStart);
-            rightMouseDragEnd.negate();
-            focusPoint.add(rightMouseDragEnd);
+
+//            if (mouseEvent.isAltDown())
+//            {
+//               screenRotation += 0.01 * (double) mouseEvent.getX();
+//            }
+//            else
+//            {
+               rightMouseDragEnd.negate();
+               focusPoint.add(rightMouseDragEnd);
+//            }
+            
             centerOnFocusPoint();
             panel.repaint();
             
@@ -698,10 +709,15 @@ public class Plotter
    {
       return panel;
    }
+   
+   public Graphics2DAdapter getGraphics2DAdapter()
+   {
+      return graphics2dAdapter;
+   }
 
    public PlotterLegendPanel createPlotterLegendPanel()
    {
-      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel();
+      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel(graphics2dAdapter);
       addArtifactsChangedListener(plotterLegendPanel);
       return plotterLegendPanel;
    }
@@ -709,7 +725,7 @@ public class Plotter
    public JPanel createAndAttachPlotterLegendPanel()
    {
       JPanel flashyNewJayPanel = new JPanel();
-      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel();
+      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel(graphics2dAdapter);
       addArtifactsChangedListener(plotterLegendPanel);
       flashyNewJayPanel.setLayout(new BorderLayout());
       flashyNewJayPanel.add(panel, "Center");

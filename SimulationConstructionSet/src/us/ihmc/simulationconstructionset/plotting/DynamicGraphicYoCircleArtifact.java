@@ -1,9 +1,9 @@
 package us.ihmc.simulationconstructionset.plotting;
 
 import java.awt.Color;
-import java.awt.Graphics;
 
 import us.ihmc.plotting.Drawing2DTools;
+import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -35,19 +35,19 @@ public class DynamicGraphicYoCircleArtifact extends Artifact
       this.color = color;
    }
 
-   public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       double radius = Math.round(2.0 * this.radius.getDoubleValue() * scaleFactor);
       radius = MathTools.clipToMinMax(radius, MIN_RADIUS, MAX_RADIUS);
       draw(graphics, Xcenter, Ycenter, (int) radius);
    }
 
-   public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       draw(graphics, center.getX(), center.getY(), Xcenter, Ycenter, scaleFactor);
    }
    
-   private void draw(Graphics graphics, double xWorld, double yWorld, int Xcenter, int Ycenter, double scaleFactor)
+   private void draw(Graphics2DAdapter graphics, double xWorld, double yWorld, int Xcenter, int Ycenter, double scaleFactor)
    {
       int x = (int) (xWorld * scaleFactor) + Xcenter;
       int y = (int) (-yWorld * scaleFactor) + Ycenter;
@@ -56,7 +56,7 @@ public class DynamicGraphicYoCircleArtifact extends Artifact
       draw(graphics, x, y, radius);
    }
 
-   private void draw(Graphics graphics, int x, int y, int radius)
+   private void draw(Graphics2DAdapter graphics, int x, int y, int radius)
    {
       if (isFilledCircle)
       {
@@ -68,7 +68,7 @@ public class DynamicGraphicYoCircleArtifact extends Artifact
       }
    }
    
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

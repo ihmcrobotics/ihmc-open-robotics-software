@@ -2,8 +2,6 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
@@ -11,6 +9,7 @@ import javax.vecmath.Vector2d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
+import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
 import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -78,14 +77,14 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
    }
 
    @Override
-   public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
       {
          graphics.setColor(color);
 
          if (stroke != null)
-            ((Graphics2D) graphics).setStroke(stroke);
+            graphics.setStroke(stroke);
 
          plotterGraphics.setCenter(Xcenter, Ycenter);
          plotterGraphics.setScale(scaleFactor);
@@ -151,11 +150,11 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
    }
 
    @Override
-   public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(color);
       if (stroke != null)
-         ((Graphics2D) graphics).setStroke(stroke);
+         graphics.setStroke(stroke);
 
 //      plotterGraphics.setCenter(Xcenter, Ycenter);
 //      plotterGraphics.setScale(scaleFactor);
@@ -164,7 +163,7 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
    }
 
    @Override
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

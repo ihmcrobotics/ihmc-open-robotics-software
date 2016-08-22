@@ -1,11 +1,11 @@
 package us.ihmc.plotting.artifact;
 
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.io.Serializable;
 
 import javax.vecmath.Vector2d;
+
+import us.ihmc.plotting.Graphics2DAdapter;
 
 public abstract class Artifact implements Serializable
 {
@@ -32,18 +32,18 @@ public abstract class Artifact implements Serializable
    /**
     * Must provide a draw method for plotter to render artifact
     */
-   public abstract void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor);
-   public void draw(Graphics2D g, int Xcenter, int Ycenter, double headingOffset, Vector2d scaleFactor)
+   public abstract void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor);
+   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, Vector2d scaleFactor)
    {
-      draw(g, Xcenter, Ycenter, headingOffset, scaleFactor.getX());
+      draw(graphics2d, Xcenter, Ycenter, headingOffset, scaleFactor.getX());
    }
-   public abstract void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor);
-   public void drawHistory(Graphics2D g, int Xcenter, int Ycenter, double headingOffset, Vector2d scaleFactor)
+   public abstract void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor);
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, Vector2d scaleFactor)
    {
-      draw(g, Xcenter, Ycenter, headingOffset, scaleFactor.getX());
+      draw(graphics2d, Xcenter, Ycenter, headingOffset, scaleFactor.getX());
    }
    public abstract void takeHistorySnapshot();
-   public abstract void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor);
+   public abstract void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor);
 
    public void setType(String type)
    {
