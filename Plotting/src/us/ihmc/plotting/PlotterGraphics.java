@@ -10,18 +10,6 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.LineSegment2d;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2008</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class PlotterGraphics
 {
    @SuppressWarnings("unused")
@@ -30,7 +18,7 @@ public class PlotterGraphics
    private int xCenter, yCenter;
    private double xScale, yScale;
 
-// private int width, height;
+   // private int width, height;
 
    public PlotterGraphics()
    {
@@ -58,16 +46,15 @@ public class PlotterGraphics
       this.yScale = scale;
    }
 
-// public void setWidth(int width)
-// {
-//     this.width = width;
-// }
-//
-// public void setHeight(int height)
-// {
-//     this.height = height;
-// }
-
+   // public void setWidth(int width)
+   // {
+   //     this.width = width;
+   // }
+   //
+   // public void setHeight(int height)
+   // {
+   //     this.height = height;
+   // }
 
    public void drawLineGivenStartAndVector(Graphics graphics, double x0, double y0, double vx, double vy)
    {
@@ -107,7 +94,6 @@ public class PlotterGraphics
    {
       drawLineSegment(graphics, lineSegment.getEndpointsCopy());
    }
-
 
    public void drawLineSegment(Graphics graphics, Point2d[] endPoints)
    {
@@ -156,7 +142,7 @@ public class PlotterGraphics
 
       if (nPoints < 1)
          return;
-      
+
       int[] xPoints = new int[nPoints];
       int[] yPoints = new int[nPoints];
 
@@ -189,7 +175,6 @@ public class PlotterGraphics
       graphics.drawPolygon(xPoints, yPoints, nPoints);
    }
 
-
    public void fillPolygon(Graphics graphics, double[][] polygonPoints, int nPoints)
    {
       int[] xPoints = new int[nPoints];
@@ -214,7 +199,7 @@ public class PlotterGraphics
    public void fillPolygon(Graphics graphics, ConvexPolygon2d polygon)
    {
       int nPoints = polygon.getNumberOfVertices();
-      
+
       if (nPoints < 1)
          return;
 
@@ -231,7 +216,6 @@ public class PlotterGraphics
 
       graphics.fillPolygon(xPoints, yPoints, nPoints);
    }
-
 
    public void fillPolygon(Graphics graphics, ArrayList<Point2d> polygonPoints)
    {
@@ -251,8 +235,6 @@ public class PlotterGraphics
       graphics.fillPolygon(xPoints, yPoints, nPoints);
    }
 
-
-
    public void fillPolygon(Graphics graphics, Point2d[] polygonPoints)
    {
       int nPoints = polygonPoints.length;
@@ -271,13 +253,10 @@ public class PlotterGraphics
       graphics.fillPolygon(xPoints, yPoints, nPoints);
    }
 
-
-
-// private double intToDouble(int value, double center, double scale, int extent)
-// {
-//    return (value - extent/2) / scale + center;
-// }
-
+   // private double intToDouble(int value, double center, double scale, int extent)
+   // {
+   //    return (value - extent/2) / scale + center;
+   // }
 
    private int xDoubleToInt(double x)
    {
@@ -288,5 +267,4 @@ public class PlotterGraphics
    {
       return ((int) (-y * yScale + yCenter));
    }
-
 }
