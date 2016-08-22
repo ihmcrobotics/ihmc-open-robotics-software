@@ -40,8 +40,8 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO Deprecate archaic methods
  * TODO Factor out artifacts.
  * TODO Fix Artifact interface.
- * TODO Remove PlotterPanel
  * TODO Show labels at sides
+ * TODO Kill Pose and Coordinate
  */
 @SuppressWarnings("serial")
 public class Plotter
