@@ -52,10 +52,12 @@ public class Plotter
    private static final boolean SHOW_LABELS_BY_DEFAULT = true;
    private static final boolean SHOW_SELECTION_BY_DEFAULT = false;
    private static final boolean SHOW_HISTORY_BY_DEFAULT = false;
+   private static final boolean ENABLE_XY_ZOOM_BY_DEFAULT = false;
    
    private boolean showLabels = SHOW_LABELS_BY_DEFAULT;
    private boolean showSelection = SHOW_SELECTION_BY_DEFAULT;
    private boolean showHistory = SHOW_HISTORY_BY_DEFAULT;
+   private boolean xyZoomEnabled = ENABLE_XY_ZOOM_BY_DEFAULT;
    
    private final JPanel panel;
    
@@ -507,8 +509,17 @@ public class Plotter
             middleMouseDragEnd.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
             
             double deltaDragY = middleMouseDragStart.getY() - middleMouseDragEnd.getY();
+            double deltaDragX = middleMouseDragStart.getX() - middleMouseDragEnd.getX();
             
-            double scaledXChange = 1.0 + (deltaDragY * 0.005);
+            double scaledXChange;
+            if (xyZoomEnabled && mouseEvent.isControlDown())
+            {
+               scaledXChange = 1.0 + (deltaDragX * 0.005);
+            }
+            else
+            {
+               scaledXChange = 1.0 + (deltaDragY * 0.005);
+            }
             double scaledYChange = 1.0 + (deltaDragY * 0.005);
             
             focusPoint.setIncludingFrame(screenFrame, visibleRectangle.getWidth() / 2.0, visibleRectangle.getHeight() / 2.0);
@@ -622,6 +633,11 @@ public class Plotter
    public void setShowLabels(boolean showLabels)
    {
       this.showLabels = showLabels;
+   }
+   
+   public void setXYZoomEnabled(boolean xyZoomEnabled)
+   {
+      this.xyZoomEnabled = xyZoomEnabled;
    }
 
    public void showInNewWindow()
