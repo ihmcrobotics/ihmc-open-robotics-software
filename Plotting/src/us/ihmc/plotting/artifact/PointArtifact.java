@@ -2,7 +2,6 @@ package us.ihmc.plotting.artifact;
 
 import java.awt.Color;
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -11,9 +10,8 @@ import javax.vecmath.Point2d;
 import us.ihmc.plotting.Coordinate;
 import us.ihmc.plotting.Graphics2DAdapter;
 
-public class PointArtifact extends Artifact implements Serializable
+public class PointArtifact extends Artifact
 {
-   private static final long serialVersionUID = -1676323503716482842L;
    private final Vector<Point2d> _sonarHistory = new Vector<Point2d>();
    private int _historyLength = 1;
    private Color historyColor = Color.blue;

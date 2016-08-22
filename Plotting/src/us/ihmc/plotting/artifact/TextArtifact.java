@@ -7,7 +7,6 @@ import us.ihmc.plotting.Graphics2DAdapter;
 
 public class TextArtifact extends Artifact
 {
-   private static final long serialVersionUID = 4004880709697051705L;
    private double x1;
    private double y1;
    private String text;
