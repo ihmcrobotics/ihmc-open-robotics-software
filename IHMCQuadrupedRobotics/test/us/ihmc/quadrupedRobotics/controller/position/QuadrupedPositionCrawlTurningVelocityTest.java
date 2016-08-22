@@ -95,7 +95,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      for (int i = 0; i < 6; i++)
+      for (int i = 0; i < 3; i++)
       {
          variables.getYoPlanarVelocityInputX().set(-random.nextDouble() * 0.25);
          variables.getYoPlanarVelocityInputZ().set(0.0);
