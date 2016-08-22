@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.qd_hip</Variables>
+		<Variables>root.Skippy.SkippyController.rateOfChangeOfAngularMomentumX,root.Skippy.SkippyController.rateOfChangeOfLinearMomentumX</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.rateOfChangeOfAngularMomentumX,root.Skippy.SkippyController.rateOfChangeOfAngularMomentumZ,root.Skippy.SkippyController.rateOfChangeOfLinearMomentumX</Variables>
+		<Variables>root.Skippy.gc_foot_fX,root.Skippy.gc_foot_fY,root.Skippy.gc_foot_fZ,root.Skippy.gc_foot_fs</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.angularMomentumX,root.Skippy.SkippyController.angularMomentumY,root.Skippy.SkippyController.angularMomentumZ</Variables>
+		<Variables>root.Skippy.SkippyController.angularMomentumX,root.Skippy.SkippyController.angularMomentumY,root.Skippy.SkippyController.angularMomentumZ,root.Skippy.SkippyController.lastAngularMomentumX</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
