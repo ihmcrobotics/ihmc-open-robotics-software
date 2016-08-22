@@ -1,8 +1,8 @@
 package us.ihmc.plotting.artifact;
 
-import java.awt.Graphics;
-
 import javax.swing.ImageIcon;
+
+import us.ihmc.plotting.Graphics2DAdapter;
 
 public class CenteredImageIconArtifact extends Artifact
 {
@@ -26,19 +26,19 @@ public class CenteredImageIconArtifact extends Artifact
    }
 
    @Override
-   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
       {
          int xPosition = Xcenter - imageIcon.getIconWidth()/2;
          int yPosition = Ycenter - imageIcon.getIconHeight()/2;
          
-         g.drawImage(imageIcon.getImage(), xPosition, yPosition, null);
+         graphics2d.drawImage(imageIcon.getImage(), xPosition, yPosition, null);
       }
    }
 
    @Override
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
@@ -50,7 +50,7 @@ public class CenteredImageIconArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

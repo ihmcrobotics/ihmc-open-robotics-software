@@ -1,10 +1,11 @@
 package us.ihmc.plotting.artifact;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
+
+import us.ihmc.plotting.Graphics2DAdapter;
 
 public class CircleArtifact extends Artifact
 {
@@ -55,38 +56,38 @@ public class CircleArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       int x = Xcenter + ((int)Math.round(this.x * scaleFactor));
       int y = Ycenter - ((int)Math.round(this.y * scaleFactor));
 
-      g.setColor(color);
+      graphics2d.setColor(color);
       int d = (int) ((this.diameter * scaleFactor));
       if (fill)
       {
-         g.fillOval((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics2d.fillOval((x - (d / 2)), (y - (d / 2)), d, d);
       }
       else
       {
-         g.drawOval((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics2d.drawOval((x - (d / 2)), (y - (d / 2)), d, d);
       }
    }
 
    @Override
-   public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       int x = Xcenter;
       int y = Ycenter;
 
-      g.setColor(color);
+      graphics2d.setColor(color);
       int d = (int) ((this.diameter * scaleFactor));
       if (fill)
       {
-         g.fillOval((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics2d.fillOval((x - (d / 2)), (y - (d / 2)), d, d);
       }
       else
       {
-         g.drawOval((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics2d.drawOval((x - (d / 2)), (y - (d / 2)), d, d);
       }
    }
 
@@ -129,7 +130,7 @@ public class CircleArtifact extends Artifact
    }
    
    @Override
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

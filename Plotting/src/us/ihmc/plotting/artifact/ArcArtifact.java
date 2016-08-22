@@ -2,9 +2,9 @@ package us.ihmc.plotting.artifact;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Stroke;
+
+import us.ihmc.plotting.Graphics2DAdapter;
 
 public class ArcArtifact extends Artifact
 {
@@ -61,29 +61,28 @@ public class ArcArtifact extends Artifact
    }
 
    @Override
-   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       int x = Xcenter + ((int) Math.round(this.x * scaleFactor));
       int y = Ycenter - ((int) Math.round(this.y * scaleFactor));
 
-      g.setColor(color);
+      graphics2d.setColor(color);
       int d = (int) ((this.diameter * scaleFactor));
 
-      Graphics2D g2d = (Graphics2D) g;
-      Stroke currentStroke = g2d.getStroke();
-      g2d.setStroke(new BasicStroke(lineThickness));
-      g.drawArc((x - (d / 2)), (y - (d / 2)), d, d, (int) startAngle, (int) arcAngle);
-      g2d.setStroke(currentStroke);
+      Stroke currentStroke = graphics2d.getStroke();
+      graphics2d.setStroke(new BasicStroke(lineThickness));
+      graphics2d.drawArc((x - (d / 2)), (y - (d / 2)), d, d, (int) startAngle, (int) arcAngle);
+      graphics2d.setStroke(currentStroke);
    }
 
    @Override
-   public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
    @Override
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

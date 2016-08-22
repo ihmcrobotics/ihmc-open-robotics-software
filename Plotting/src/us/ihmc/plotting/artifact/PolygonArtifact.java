@@ -1,12 +1,12 @@
 package us.ihmc.plotting.artifact;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
@@ -129,7 +129,7 @@ public class PolygonArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       ArrayList<Point2d> pointsCopy = new ArrayList<>(points);
       int nPoints = pointsCopy.size();
@@ -140,7 +140,7 @@ public class PolygonArtifact extends Artifact
       {
          int x = Xcenter + (int) Math.round(pointsCopy.get(0).x * scaleFactor);
          int y = Ycenter - (int) Math.round(pointsCopy.get(0).y * scaleFactor);
-         g.fillOval(x, y, 4, 4);
+         graphics2d.fillOval(x, y, 4, 4);
       }
       else
       {
@@ -155,27 +155,27 @@ public class PolygonArtifact extends Artifact
             }
          }
 
-         g.setColor(color);
+         graphics2d.setColor(color);
 
          if (FILL_POLYGON)
          {
-            g.fillPolygon(xPoints, yPoints, nPoints);
+            graphics2d.fillPolygon(xPoints, yPoints, nPoints);
          }
          else
          {
-            g.drawPolygon(xPoints, yPoints, nPoints);
+            graphics2d.drawPolygon(xPoints, yPoints, nPoints);
          }
       }
    }
 
    @Override
-   public void drawLegend(Graphics g, int xCenter, int yCenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics2d, int xCenter, int yCenter, double scaleFactor)
    {
-      g.drawString("Polygon", xCenter, yCenter);
+      graphics2d.drawString("Polygon", xCenter, yCenter);
    }
 
    @Override
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

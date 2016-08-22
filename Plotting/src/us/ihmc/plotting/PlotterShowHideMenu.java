@@ -3,6 +3,7 @@ package us.ihmc.plotting;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -157,12 +158,14 @@ public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListe
       @Override
       protected void paintComponent(Graphics g)
       {
+         plotter.getGraphics2DAdapter().setGraphics2d((Graphics2D) g);
+         
          super.paintComponent(g);
 
 //         double size = 0.7 * Math.min(this.getWidth(), this.getHeight());
 //         double scale = size / artifact.getScale();
          double scale = 500.0;
-         artifact.drawLegend(g, this.getWidth()/2, this.getHeight()/2, scale);
+         artifact.drawLegend(plotter.getGraphics2DAdapter(), this.getWidth()/2, this.getHeight()/2, scale);
       }
    }
 
