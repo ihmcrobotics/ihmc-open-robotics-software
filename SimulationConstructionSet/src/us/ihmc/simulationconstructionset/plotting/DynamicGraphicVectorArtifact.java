@@ -18,7 +18,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 
 public class DynamicGraphicVectorArtifact extends Artifact
 {
-   private static final long serialVersionUID = 2379549723591744368L;
    private final YoGraphicVector dynamicGraphicVector;
    private final PlotterGraphics plotterGraphics = new PlotterGraphics();
    private final Color3f color = new Color3f();

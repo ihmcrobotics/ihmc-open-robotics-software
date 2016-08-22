@@ -2,7 +2,6 @@ package us.ihmc.plotting.artifact;
 
 import java.awt.BasicStroke;
 import java.awt.Stroke;
-import java.io.Serializable;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
@@ -10,9 +9,8 @@ import javax.vecmath.Vector2d;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.robotics.geometry.Line2d;
 
-public class LineArtifact extends Artifact implements Serializable
+public class LineArtifact extends Artifact
 {
-   private static final long serialVersionUID = -4292453853922762342L;
    private final Point2d point1 = new Point2d();
    private final Point2d point2 = new Point2d(0.01, 0.01);
    private int lineThickness = 1;

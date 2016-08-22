@@ -19,8 +19,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 
 public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
 {
-   private static final long serialVersionUID = 1595929952165656135L;
-
    private final YoFrameConvexPolygon2d yoConvexPolygon2d;
    private final ConvexPolygon2d convexPolygon2d = new ConvexPolygon2d();
 

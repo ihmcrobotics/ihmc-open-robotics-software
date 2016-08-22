@@ -20,8 +20,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.
 
 public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
 {
-   private static final long serialVersionUID = -1824071784539220859L;
-   
    private final ArrayList<double[]> historicalPositions = new ArrayList<double[]>();
 
    private final DoubleYoVariable x;

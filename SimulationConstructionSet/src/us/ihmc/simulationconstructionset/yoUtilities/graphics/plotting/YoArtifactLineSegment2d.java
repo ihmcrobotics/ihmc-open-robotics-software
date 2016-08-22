@@ -21,8 +21,6 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
 {
    private static final double[] CONSTANTS = new double[] {};
 
-   private static final long serialVersionUID = -2067732984899803547L;
-
    private final DoubleYoVariable[] variables = new DoubleYoVariable[4];
    private final DoubleYoVariable startX;
    private final DoubleYoVariable endX;

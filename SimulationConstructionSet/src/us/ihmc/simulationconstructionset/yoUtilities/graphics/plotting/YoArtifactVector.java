@@ -17,8 +17,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoArtifactVector extends Artifact
 {
-   private static final long serialVersionUID = 374256294846738354L;
-
    private final PlotterGraphics plotterGraphics = new PlotterGraphics();
    private final Color3f color;
    private final YoFramePoint2d basePoint;

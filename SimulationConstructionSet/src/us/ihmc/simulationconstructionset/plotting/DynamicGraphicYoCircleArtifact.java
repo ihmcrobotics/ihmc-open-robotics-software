@@ -11,8 +11,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
 public class DynamicGraphicYoCircleArtifact extends Artifact
 {
-   private static final long serialVersionUID = -2167502158140538192L;
-
    private final YoFramePoint2d center;
    private final DoubleYoVariable radius;
    private Boolean isFilledCircle = false;

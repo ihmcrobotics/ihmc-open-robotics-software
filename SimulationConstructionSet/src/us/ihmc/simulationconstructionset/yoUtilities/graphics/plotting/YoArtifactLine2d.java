@@ -10,7 +10,6 @@ import us.ihmc.robotics.math.frames.YoFrameLine2d;
 
 public class YoArtifactLine2d extends Artifact
 {
-   private static final long serialVersionUID = 5741633846461834438L;
    private final YoFrameLine2d yoFrameLine2d;
    private final PlotterGraphics plotterGraphics = new PlotterGraphics();
    private final Color color;
