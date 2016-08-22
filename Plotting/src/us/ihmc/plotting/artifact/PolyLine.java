@@ -46,10 +46,10 @@ public class PolyLine extends Artifact implements Serializable
       {
          for (int i = 0; i < points.size(); i++)
          {
-            int x1 = Xcenter + ((int)Math.round(points.get(i - 1).x * scaleFactor));
-            int y1 = Ycenter - ((int)Math.round(points.get(i - 1).y * scaleFactor));
-            int x2 = Xcenter + ((int)Math.round(points.get(i).x * scaleFactor));
-            int y2 = Ycenter - ((int)Math.round(points.get(i).y * scaleFactor));
+            int x1 = Xcenter + ((int) Math.round(points.get(i - 1).x * scaleFactor));
+            int y1 = Ycenter - ((int) Math.round(points.get(i - 1).y * scaleFactor));
+            int x2 = Xcenter + ((int) Math.round(points.get(i).x * scaleFactor));
+            int y2 = Ycenter - ((int) Math.round(points.get(i).y * scaleFactor));
             graphics2d.setColor(color);
             Stroke currentStroke = graphics2d.getStroke();
             graphics2d.setStroke(new BasicStroke(lineThickness));
@@ -63,13 +63,13 @@ public class PolyLine extends Artifact implements Serializable
    public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
    }
-   
+
    @Override
    public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
-   
+
    @Override
    public void takeHistorySnapshot()
    {

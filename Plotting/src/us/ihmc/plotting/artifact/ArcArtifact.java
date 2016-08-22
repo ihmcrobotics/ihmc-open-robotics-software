@@ -54,7 +54,6 @@ public class ArcArtifact extends Artifact
       return x;
    }
 
-
    public double getY()
    {
       return y;

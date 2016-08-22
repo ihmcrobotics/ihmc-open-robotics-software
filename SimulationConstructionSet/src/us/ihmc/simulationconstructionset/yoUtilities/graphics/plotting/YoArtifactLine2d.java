@@ -25,6 +25,7 @@ public class YoArtifactLine2d extends Artifact
       this.color = color;
    }
 
+   @Override
    public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
@@ -45,6 +46,7 @@ public class YoArtifactLine2d extends Artifact
       }
    }
 
+   @Override
    public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(color);
@@ -53,20 +55,21 @@ public class YoArtifactLine2d extends Artifact
       if (stroke != null)
          graphics.setStroke(stroke);
 
-//      plotterGraphics.setCenter(Xcenter, Ycenter);
-//      plotterGraphics.setScale(scaleFactor);
-//      plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.0);
+      //      plotterGraphics.setCenter(Xcenter, Ycenter);
+      //      plotterGraphics.setScale(scaleFactor);
+      //      plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.0);
       graphics.drawLine(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
    }
 
+   @Override
    public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
    }
-
 }
