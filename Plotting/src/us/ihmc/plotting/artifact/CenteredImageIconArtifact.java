@@ -6,7 +6,6 @@ import us.ihmc.plotting.Graphics2DAdapter;
 
 public class CenteredImageIconArtifact extends Artifact
 {
-   private static final long serialVersionUID = 8946412004186672487L;
    private ImageIcon imageIcon;
    
    public CenteredImageIconArtifact(String filepath)

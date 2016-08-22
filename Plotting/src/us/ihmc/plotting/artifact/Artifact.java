@@ -1,19 +1,17 @@
 package us.ihmc.plotting.artifact;
 
 import java.awt.Color;
-import java.io.Serializable;
 
 import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
 
-public abstract class Artifact implements Serializable
+public abstract class Artifact
 {
    public static int X_Y = 0;
    public static int X_Z = 1;
    public static int Y_Z = 2;
    
-   private static final long serialVersionUID = -463773605470590581L;
    protected final String id;
    protected String type;
    protected int level;

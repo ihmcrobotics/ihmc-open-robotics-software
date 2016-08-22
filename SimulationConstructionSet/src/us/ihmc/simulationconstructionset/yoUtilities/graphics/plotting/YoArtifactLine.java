@@ -10,7 +10,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 
 public class YoArtifactLine extends Artifact
 {
-   private static final long serialVersionUID = 5741633846461834438L;
    private final YoFramePoint p1;
    private final YoFramePoint p2;
    private final PlotterGraphics plotterGraphics = new PlotterGraphics();
