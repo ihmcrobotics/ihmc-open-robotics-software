@@ -61,7 +61,7 @@ public class ShapeArtifact extends Artifact
       int h = (int) (height * scaleFactor);
       if (getType().equals("fillcircle"))
       {
-         graphics2d.fillOval((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.drawOvalFilled((x - (w / 2)), (y - (h / 2)), w, h);
       }
       else if (getType().equals("circle"))
       {
@@ -69,11 +69,11 @@ public class ShapeArtifact extends Artifact
       }
       else if (getType().equals("fillrectangle"))
       {
-         graphics2d.fillRect((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.drawRectangleFilled((x - (w / 2)), (y - (h / 2)), w, h);
       }
       else if (getType().equals("rectangle"))
       {
-         graphics2d.drawRect((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.drawRectangle((x - (w / 2)), (y - (h / 2)), w, h);
       }
    }
 
@@ -88,7 +88,7 @@ public class ShapeArtifact extends Artifact
       int h = (int) (height * scaleFactor);
       if (getType().equals("fillcircle"))
       {
-         graphics2d.fillOval((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.drawOvalFilled((x - (w / 2)), (y - (h / 2)), w, h);
       }
       else if (getType().equals("circle"))
       {
@@ -96,11 +96,11 @@ public class ShapeArtifact extends Artifact
       }
       else if (getType().equals("fillrectangle"))
       {
-         graphics2d.fillRect((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.drawRectangleFilled((x - (w / 2)), (y - (h / 2)), w, h);
       }
       else if (getType().equals("rectangle"))
       {
-         graphics2d.drawRect((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.drawRectangle((x - (w / 2)), (y - (h / 2)), w, h);
       }
    }
 

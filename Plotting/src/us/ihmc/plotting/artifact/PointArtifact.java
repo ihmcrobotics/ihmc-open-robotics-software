@@ -179,12 +179,12 @@ public class PointArtifact extends Artifact implements Serializable
                if (i == (_sonarHistory.size() - 1))
                {
                   graphics2d.setColor(color);
-                  graphics2d.fillOval(x, y, size, size);
+                  graphics2d.drawOvalFilled(x, y, size, size);
                }
                else
                {
                   graphics2d.setColor(historyColor);
-                  graphics2d.fillOval(x, y, (int) (size * 0.7), (int) (size * 0.7));
+                  graphics2d.drawOvalFilled(x, y, (int) (size * 0.7), (int) (size * 0.7));
                }
 
                // save for median and mean

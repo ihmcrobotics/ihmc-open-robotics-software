@@ -386,7 +386,7 @@ public class Plotter
             Ymin = selectionAreaStart.getY();
          }
 
-         graphics2d.drawRect((int) Math.round(Xmin),
+         graphics2d.drawRectangle((int) Math.round(Xmin),
                              (int) Math.round(Ymin),
                              (int) Math.round(Xmax - Xmin),
                              (int) Math.round(Ymax - Ymin));
