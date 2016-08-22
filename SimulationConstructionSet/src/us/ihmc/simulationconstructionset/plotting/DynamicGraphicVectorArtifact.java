@@ -104,7 +104,7 @@ public class DynamicGraphicVectorArtifact extends Artifact
 
       int[] x = {Xcenter + 20, Xcenter + 20, Xcenter + 25};
       int[] y = {Ycenter + 5, Ycenter - 5, Ycenter};
-      graphics.fillPolygon(x, y, 3);
+      graphics.drawPolygonFilled(x, y, 3);
    }
 
    @Override

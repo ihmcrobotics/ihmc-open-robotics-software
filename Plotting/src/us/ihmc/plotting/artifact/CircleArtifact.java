@@ -65,7 +65,7 @@ public class CircleArtifact extends Artifact
       int d = (int) ((this.diameter * scaleFactor));
       if (fill)
       {
-         graphics2d.fillOval((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics2d.drawOvalFilled((x - (d / 2)), (y - (d / 2)), d, d);
       }
       else
       {
@@ -83,7 +83,7 @@ public class CircleArtifact extends Artifact
       int d = (int) ((this.diameter * scaleFactor));
       if (fill)
       {
-         graphics2d.fillOval((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics2d.drawOvalFilled((x - (d / 2)), (y - (d / 2)), d, d);
       }
       else
       {
