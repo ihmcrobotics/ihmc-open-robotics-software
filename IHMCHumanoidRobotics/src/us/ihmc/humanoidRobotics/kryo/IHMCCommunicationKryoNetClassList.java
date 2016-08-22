@@ -166,9 +166,10 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.v2Exoskeleton.communication.PilotInterfacePacket;
 
 public class IHMCCommunicationKryoNetClassList extends NetClassList
-{
+{   
    public IHMCCommunicationKryoNetClassList()
    {
       registerPacketClass(Packet.class);
@@ -314,7 +315,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(WalkingStatusMessage.class);
       registerPacketClass(TrajectoryType.class);
 
-
       registerPacketField(ArrayList.class);
       registerPacketField(FootstepStatus.Status.class);
       registerPacketField(WalkingStatusMessage.Status.class);
@@ -330,7 +330,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(DepthDataTree.class);
       registerPacketField(LidarState.class);
 
-
       registerPacketField(int[].class);
       registerPacketField(float[].class);
       registerPacketField(Quat4f.class);
@@ -341,8 +340,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(RigidBodyTransform.class);
       registerPacketField(RigidBodyTransform[].class);
       registerPacketClass(StampedPosePacket.class);
-
-      registerPacketClass(IMUPacket.class);
 
       //Mocap
       registerPacketClass(DetectedObjectPacket.class);
@@ -355,7 +352,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Recording
       registerPacketClass(EndOfScriptCommand.class);
 
-
       // Driving
       registerPacketClass(LowLevelDrivingCommand.class);
       registerPacketClass(LowLevelDrivingStatus.class);
@@ -366,7 +362,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(ManualHandControlPacket.class);
       registerPacketClass(HandPowerCyclePacket.class);
       registerPacketClass(HandJointAnglePacket.class);
-
 
       registerPacketClass(BDIBehaviorCommandPacket.class);
       registerPacketField(BDIRobotBehavior.class);
@@ -460,7 +455,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketField(RobotMotionStatus.class);
 
-
       registerPacketField(AuxiliaryRobotData.class);
       registerPacketField(AtlasAuxiliaryRobotData.class);
       registerPacketField(long[].class);
@@ -482,5 +476,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(TextToSpeechPacket.class);
       registerPacketField(VideoSource.class);
 
+      //Exoskeleton
+      registerPacketClass(PilotInterfacePacket.class);
+      
    }
 }
