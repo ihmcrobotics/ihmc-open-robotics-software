@@ -21,9 +21,6 @@ public class PointArtifact extends Artifact implements Serializable
    int _meanFilterSize = 999;
    private int size = 10;
 
-   @SuppressWarnings("unused")
-   private long _startTime;
-
    public PointArtifact(String id)
    {
       this(id, 1);
@@ -41,7 +38,7 @@ public class PointArtifact extends Artifact implements Serializable
       super(id);
       setType("point");
       setLevel(2);
-      _startTime = System.currentTimeMillis();
+      System.currentTimeMillis();
       _historyLength = history;
       color = Color.red;
    }
@@ -89,7 +86,6 @@ public class PointArtifact extends Artifact implements Serializable
 
       return _sonarHistory.get(0);
    }
-
 
    public void setHistoryLength(int length)
    {
@@ -184,12 +180,12 @@ public class PointArtifact extends Artifact implements Serializable
                {
                   graphics2d.setColor(color);
                   graphics2d.fillOval(x, y, size, size);
-               } else
+               }
+               else
                {
                   graphics2d.setColor(historyColor);
                   graphics2d.fillOval(x, y, (int) (size * 0.7), (int) (size * 0.7));
                }
-
 
                // save for median and mean
                if (i >= (_sonarHistory.size() - _medianFilterSize))
@@ -211,27 +207,24 @@ public class PointArtifact extends Artifact implements Serializable
       // paint median
 
       /*
-       *                double xMedian = getMedian(xMeanFilter);
-       *                double yMedian = getMedian(yMeanFilter);
-       *                int x = Xcenter + (new Double(xMedian* scaleFactor).intValue());
-       *                int y = Ycenter - (new Double(yMedian* scaleFactor).intValue());
-       *                g.setColor(Color.black);
-       *                g.drawOval(x -10, y-10, 20, 20);
+       * double xMedian = getMedian(xMeanFilter); double yMedian =
+       * getMedian(yMeanFilter); int x = Xcenter + (new Double(xMedian*
+       * scaleFactor).intValue()); int y = Ycenter - (new Double(yMedian*
+       * scaleFactor).intValue()); g.setColor(Color.black); g.drawOval(x -10,
+       * y-10, 20, 20);
        */
 
       // paint mean
 
       /*
-       *                double xMean = getMean(xMeanFilter);
-       *                double yMean = getMean(yMeanFilter);
-       *                double xStdDev = getStdDev(xMeanFilter, xMean);
-       *                double yStdDev = getStdDev(yMeanFilter, yMean);
-       *                x = Xcenter + (new Double(xMean* scaleFactor).intValue());
-       *                y = Ycenter - (new Double(yMean* scaleFactor).intValue());
-       *                g.setColor(Color.blue);
-       *                int xSD = new Double(xStdDev*scaleFactor).intValue();
-       *                int ySD = new Double(yStdDev*scaleFactor).intValue();
-       *                g.drawOval((x - (xSD/2)), (y - (ySD/2)), xSD, ySD);
+       * double xMean = getMean(xMeanFilter); double yMean =
+       * getMean(yMeanFilter); double xStdDev = getStdDev(xMeanFilter, xMean);
+       * double yStdDev = getStdDev(yMeanFilter, yMean); x = Xcenter + (new
+       * Double(xMean* scaleFactor).intValue()); y = Ycenter - (new
+       * Double(yMean* scaleFactor).intValue()); g.setColor(Color.blue); int xSD
+       * = new Double(xStdDev*scaleFactor).intValue(); int ySD = new
+       * Double(yStdDev*scaleFactor).intValue(); g.drawOval((x - (xSD/2)), (y -
+       * (ySD/2)), xSD, ySD);
        */
 
       // System.out.println("gps " + coordinate.getX() + " " + coordinate.getY() +

@@ -9,24 +9,23 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
-
 public class DynamicGraphicYoCircleArtifact extends Artifact
 {
    private static final long serialVersionUID = -2167502158140538192L;
-   
+
    private final YoFramePoint2d center;
    private final DoubleYoVariable radius;
    private Boolean isFilledCircle = false;
-   
+
    private static final int MIN_RADIUS = 5;
    private static final int MAX_RADIUS = 25;
 
    public DynamicGraphicYoCircleArtifact(String name, YoFramePoint2d center, DoubleYoVariable radius, Color color, Boolean isFilledCircle)
    {
       this(name, center, radius, color);
-      this.isFilledCircle = isFilledCircle;      
+      this.isFilledCircle = isFilledCircle;
    }
-   
+
    public DynamicGraphicYoCircleArtifact(String name, YoFramePoint2d center, DoubleYoVariable radius, Color color)
    {
       super(name);
@@ -35,6 +34,7 @@ public class DynamicGraphicYoCircleArtifact extends Artifact
       this.color = color;
    }
 
+   @Override
    public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       double radius = Math.round(2.0 * this.radius.getDoubleValue() * scaleFactor);
@@ -42,11 +42,12 @@ public class DynamicGraphicYoCircleArtifact extends Artifact
       draw(graphics, Xcenter, Ycenter, (int) radius);
    }
 
+   @Override
    public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       draw(graphics, center.getX(), center.getY(), Xcenter, Ycenter, scaleFactor);
    }
-   
+
    private void draw(Graphics2DAdapter graphics, double xWorld, double yWorld, int Xcenter, int Ycenter, double scaleFactor)
    {
       int x = (int) (xWorld * scaleFactor) + Xcenter;
@@ -67,15 +68,16 @@ public class DynamicGraphicYoCircleArtifact extends Artifact
          Drawing2DTools.drawEmptyCircle(graphics, x, y, radius, color);
       }
    }
-   
+
+   @Override
    public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
-   
+
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
    }
-
 }

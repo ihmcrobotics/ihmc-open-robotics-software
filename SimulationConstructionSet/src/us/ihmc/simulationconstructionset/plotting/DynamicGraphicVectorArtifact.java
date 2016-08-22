@@ -16,7 +16,6 @@ import us.ihmc.plotting.PlotterGraphics;
 import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 
-
 public class DynamicGraphicVectorArtifact extends Artifact
 {
    private static final long serialVersionUID = 2379549723591744368L;
@@ -38,14 +37,15 @@ public class DynamicGraphicVectorArtifact extends Artifact
       super(name);
       this.dynamicGraphicVector = dynamicGraphicVector;
 
-//      dynamicGraphicVector.getAppearance().getMaterial().getAmbientColor(color);
+      //      dynamicGraphicVector.getAppearance().getMaterial().getAmbientColor(color);
       AppearanceDefinition appearance = dynamicGraphicVector.getAppearance();
-      if(appearance instanceof YoAppearanceRGBColor)
+      if (appearance instanceof YoAppearanceRGBColor)
       {
          color.set(((YoAppearanceRGBColor) appearance).getRed(), ((YoAppearanceRGBColor) appearance).getGreen(), ((YoAppearanceRGBColor) appearance).getBlue());
       }
    }
 
+   @Override
    public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       graphics.setColor(new Color(color.getX(), color.getY(), color.getZ()));
@@ -58,12 +58,12 @@ public class DynamicGraphicVectorArtifact extends Artifact
 
       endPoint.set(basePoint);
       endPoint.add(vector);
-      
+
       arrowHeadPoints = getArrowHeadPoints(vector, endPoint);
 
       plotterGraphics.setCenter(Xcenter, Ycenter);
       plotterGraphics.setScale(scaleFactor);
-      
+
       plotterGraphics.drawLineSegment(graphics, basePoint.getX(), basePoint.getY(), endPoint.getX(), endPoint.getY());
       plotterGraphics.fillPolygon(graphics, arrowHeadPoints);
    }
@@ -71,7 +71,7 @@ public class DynamicGraphicVectorArtifact extends Artifact
    private ArrayList<Point2d> getArrowHeadPoints(Vector2d vector, Point2d endPoint)
    {
       ArrayList<Point2d> ret = new ArrayList<Point2d>();
-      
+
       Vector2d arrowHeadVector = new Vector2d(vector);
       arrowHeadVector.normalize();
       arrowHeadVector.scale(ARROW_HEAD_HEIGHT);
@@ -91,29 +91,31 @@ public class DynamicGraphicVectorArtifact extends Artifact
       Point2d arrowHeadRightCorner = new Point2d(endPoint);
       arrowHeadRightCorner.sub(arrowHeadLateralVector);
       ret.add(arrowHeadRightCorner);
-      
+
       return ret;
    }
 
+   @Override
    public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(new Color(color.getX(), color.getY(), color.getZ()));
 
       graphics.drawLine(Xcenter, Ycenter, Xcenter + 20, Ycenter);
 
-      int[] x = { Xcenter + 20, Xcenter + 20, Xcenter + 25 };
-      int[] y = { Ycenter + 5, Ycenter - 5, Ycenter };
+      int[] x = {Xcenter + 20, Xcenter + 20, Xcenter + 25};
+      int[] y = {Ycenter + 5, Ycenter - 5, Ycenter};
       graphics.fillPolygon(x, y, 3);
    }
 
+   @Override
    public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
    }
-
 }

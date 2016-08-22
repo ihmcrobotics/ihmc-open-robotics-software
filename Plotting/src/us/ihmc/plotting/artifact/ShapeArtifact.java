@@ -24,7 +24,7 @@ public class ShapeArtifact extends Artifact
       this.height = height;
       this.width = width;
    }
-   
+
    public void setPose(Pose pose)
    {
       this.pose = pose;
@@ -34,7 +34,6 @@ public class ShapeArtifact extends Artifact
    {
       return pose;
    }
-
 
    public Pose getPose()
    {
@@ -54,8 +53,8 @@ public class ShapeArtifact extends Artifact
          return;
       }
 
-      int x = Xcenter + ((int)Math.round(pose.getX() * scaleFactor));
-      int y = Ycenter - ((int)Math.round(pose.getY() * scaleFactor));
+      int x = Xcenter + ((int) Math.round(pose.getX() * scaleFactor));
+      int y = Ycenter - ((int) Math.round(pose.getY() * scaleFactor));
 
       graphics2d.setColor(color);
       int w = (int) (width * scaleFactor);
@@ -76,7 +75,6 @@ public class ShapeArtifact extends Artifact
       {
          graphics2d.drawRect((x - (w / 2)), (y - (h / 2)), w, h);
       }
-
    }
 
    @Override
@@ -144,13 +142,13 @@ public class ShapeArtifact extends Artifact
 
       return shapeCopy;
    }
-   
+
    @Override
    public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
-   
+
    @Override
    public void takeHistorySnapshot()
    {
