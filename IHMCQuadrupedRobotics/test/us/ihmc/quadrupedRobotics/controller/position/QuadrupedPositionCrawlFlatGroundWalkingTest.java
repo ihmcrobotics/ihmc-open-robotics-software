@@ -60,7 +60,7 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputX().set(0.25);
+      variables.getYoPlanarVelocityInputX().set(0.2);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 25.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 1.5));
@@ -90,7 +90,7 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputX().set(-0.25);
+      variables.getYoPlanarVelocityInputX().set(-0.2);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 25.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -1.5));
@@ -120,8 +120,8 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputX().set(0.25);
-      variables.getYoPlanarVelocityInputZ().set(0.2);
+      variables.getYoPlanarVelocityInputX().set(0.2);
+      variables.getYoPlanarVelocityInputZ().set(0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 30.0));
       conductor.simulate();
@@ -135,8 +135,8 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputX().set(-0.25);
-      variables.getYoPlanarVelocityInputZ().set(-0.2);
+      variables.getYoPlanarVelocityInputX().set(-0.2);
+      variables.getYoPlanarVelocityInputZ().set(-0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 30.0));
       conductor.simulate();
@@ -150,8 +150,8 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputX().set(-0.25);
-      variables.getYoPlanarVelocityInputZ().set(0.2);
+      variables.getYoPlanarVelocityInputX().set(-0.2);
+      variables.getYoPlanarVelocityInputZ().set(0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 30.0));
       conductor.simulate();
@@ -165,8 +165,8 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputX().set(-0.25);
-      variables.getYoPlanarVelocityInputZ().set(-0.2);
+      variables.getYoPlanarVelocityInputX().set(-0.2);
+      variables.getYoPlanarVelocityInputZ().set(-0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 30.0));
       conductor.simulate();
