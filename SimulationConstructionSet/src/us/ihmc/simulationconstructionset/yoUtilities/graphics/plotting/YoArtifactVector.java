@@ -45,6 +45,7 @@ public class YoArtifactVector extends Artifact
       this.color = color;
    }
 
+   @Override
    public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
@@ -92,6 +93,7 @@ public class YoArtifactVector extends Artifact
       return ret;
    }
 
+   @Override
    public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(new Color(color.getX(), color.getY(), color.getZ()));
@@ -103,14 +105,15 @@ public class YoArtifactVector extends Artifact
       graphics.fillPolygon(x, y, 3);
    }
 
+   @Override
    public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
    }
-
 }

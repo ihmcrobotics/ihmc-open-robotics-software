@@ -27,6 +27,7 @@ public class YoArtifactLine extends Artifact
       this.color = color;
    }
 
+   @Override
    public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
@@ -47,6 +48,7 @@ public class YoArtifactLine extends Artifact
       }
    }
 
+   @Override
    public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(color);
@@ -60,14 +62,15 @@ public class YoArtifactLine extends Artifact
       plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.1);
    }
 
+   @Override
    public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
    }
-
 }

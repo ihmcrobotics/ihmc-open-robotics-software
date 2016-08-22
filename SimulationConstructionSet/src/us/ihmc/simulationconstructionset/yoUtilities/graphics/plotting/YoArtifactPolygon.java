@@ -57,6 +57,7 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
       return new BasicStroke(pixels);
    }
 
+   @Override
    public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(color);
@@ -67,6 +68,7 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
       graphics.drawString(name, x, y);
    }
 
+   @Override
    public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
@@ -107,21 +109,25 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
       }
    }
 
+   @Override
    public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public RemoteGraphicType getRemoteGraphicType()
    {
       return RemoteGraphicType.POLYGON_ARTIFACT;
    }
 
+   @Override
    public YoVariable<?>[] getVariables()
    {
       YoVariable<?>[] vars = new YoVariable[1 + 2 * yoConvexPolygon2d.getMaxNumberOfVertices()];
@@ -137,16 +143,19 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
       return vars;
    }
 
+   @Override
    public double[] getConstants()
    {
       return new double[] { fill ? 1 : 0 };
    }
 
+   @Override
    public AppearanceDefinition getAppearance()
    {
       return new YoAppearanceRGBColor(color, 0.0);
    }
 
+   @Override
    public String getName()
    {
       return getID();

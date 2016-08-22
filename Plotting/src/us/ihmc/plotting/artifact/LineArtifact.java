@@ -38,7 +38,6 @@ public class LineArtifact extends Artifact implements Serializable
       this.point2.set(point2);
    }
 
-
    public void setLine(Line2d line)
    {
       line.getTwoPointsOnLine(point1, point2);
@@ -61,7 +60,6 @@ public class LineArtifact extends Artifact implements Serializable
       lineThickness = pixels;
    }
 
-
    /**
     * Must provide a draw method for plotter to render artifact
     */
@@ -70,10 +68,10 @@ public class LineArtifact extends Artifact implements Serializable
    {
       if (isVisible)
       {
-         int x1 = Xcenter + ((int)Math.round(point1.x * scaleFactor));
-         int y1 = Ycenter - ((int)Math.round(point1.y * scaleFactor));
-         int x2 = Xcenter + ((int)Math.round(point2.x * scaleFactor));
-         int y2 = Ycenter - ((int)Math.round(point2.y * scaleFactor));
+         int x1 = Xcenter + ((int) Math.round(point1.x * scaleFactor));
+         int y1 = Ycenter - ((int) Math.round(point1.y * scaleFactor));
+         int x2 = Xcenter + ((int) Math.round(point2.x * scaleFactor));
+         int y2 = Ycenter - ((int) Math.round(point2.y * scaleFactor));
          graphics2d.setColor(color);
          Stroke currentStroke = graphics2d.getStroke();
          graphics2d.setStroke(new BasicStroke(lineThickness));
