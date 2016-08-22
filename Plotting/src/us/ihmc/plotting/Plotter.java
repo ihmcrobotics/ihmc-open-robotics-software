@@ -39,9 +39,12 @@ import us.ihmc.tools.io.printing.PrintTools;
 /**
  * TODO Deprecate archaic methods
  * TODO Factor out artifacts.
- * TODO Fix Artifact interface.
+ * TODO Fix Artifact interface to use meters.
  * TODO Show labels at sides
  * TODO Kill Pose and Coordinate
+ * TODO Rewrite PlotterGraphics
+ * TODO CTRL XY zoom
+ * TODO ALT rotation
  */
 @SuppressWarnings("serial")
 public class Plotter
@@ -70,6 +73,7 @@ public class Plotter
    private final PixelsReferenceFrame screenFrame;
    private final MetersReferenceFrame metersFrame;
    
+   private double screenRotation = Math.PI;
    private final PlotterPoint2d screenPosition;
    private final PlotterPoint2d upperLeftCorner;
    private final PlotterPoint2d lowerRightCorner;
@@ -142,7 +146,7 @@ public class Plotter
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             screenPosition.changeFrame(pixelsFrame);
-            transformToParent.setRotationEulerAndZeroTranslation(0.0, Math.PI, Math.PI);
+            transformToParent.setRotationEulerAndZeroTranslation(0.0, Math.PI, screenRotation);
             transformToParent.setTranslation(screenPosition.getX(), screenPosition.getY(), 0.0);
          }
       };
