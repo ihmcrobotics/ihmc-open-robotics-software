@@ -1,7 +1,6 @@
 package us.ihmc.plotting.artifact;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -10,6 +9,7 @@ import java.util.Vector;
 import javax.vecmath.Point2d;
 
 import us.ihmc.plotting.Coordinate;
+import us.ihmc.plotting.Graphics2DAdapter;
 
 public class PointArtifact extends Artifact implements Serializable
 {
@@ -161,7 +161,7 @@ public class PointArtifact extends Artifact implements Serializable
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       Vector<Double> xMedianFliter = new Vector<Double>();
       Vector<Double> yMedianFliter = new Vector<Double>();
@@ -182,12 +182,12 @@ public class PointArtifact extends Artifact implements Serializable
                int y = Ycenter - ((int) Math.round(coordinate.y * scaleFactor)) - (size / 2);
                if (i == (_sonarHistory.size() - 1))
                {
-                  g.setColor(color);
-                  g.fillOval(x, y, size, size);
+                  graphics2d.setColor(color);
+                  graphics2d.fillOval(x, y, size, size);
                } else
                {
-                  g.setColor(historyColor);
-                  g.fillOval(x, y, (int) (size * 0.7), (int) (size * 0.7));
+                  graphics2d.setColor(historyColor);
+                  graphics2d.fillOval(x, y, (int) (size * 0.7), (int) (size * 0.7));
                }
 
 
@@ -240,7 +240,7 @@ public class PointArtifact extends Artifact implements Serializable
    }
 
    @Override
-   public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
    }
 
@@ -254,7 +254,7 @@ public class PointArtifact extends Artifact implements Serializable
    }
 
    @Override
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

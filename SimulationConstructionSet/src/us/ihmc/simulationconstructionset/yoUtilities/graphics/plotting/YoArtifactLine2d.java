@@ -2,9 +2,8 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 
+import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
 import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.math.frames.YoFrameLine2d;
@@ -26,13 +25,13 @@ public class YoArtifactLine2d extends Artifact
       this.color = color;
    }
 
-   public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
       {
          graphics.setColor(color);
          if (stroke != null)
-            ((Graphics2D) graphics).setStroke(stroke);
+            graphics.setStroke(stroke);
 
          double x0 = yoFrameLine2d.getX0();
          double y0 = yoFrameLine2d.getY0();
@@ -46,13 +45,13 @@ public class YoArtifactLine2d extends Artifact
       }
    }
 
-   public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(color);
 
       //    int pixels = 2;
       if (stroke != null)
-         ((Graphics2D) graphics).setStroke(stroke);
+         graphics.setStroke(stroke);
 
 //      plotterGraphics.setCenter(Xcenter, Ycenter);
 //      plotterGraphics.setScale(scaleFactor);
@@ -60,7 +59,7 @@ public class YoArtifactLine2d extends Artifact
       graphics.drawLine(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
    }
 
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
