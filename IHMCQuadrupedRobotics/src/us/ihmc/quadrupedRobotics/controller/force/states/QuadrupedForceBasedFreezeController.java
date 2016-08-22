@@ -28,12 +28,11 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedFreezeController.class.getSimpleName());
 
-   // Parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 5.0);
+   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
    private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory
-         .createDoubleArray("solePositionProportionalGains", 5000, 5000, 5000);
-   private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 100, 100, 100);
+         .createDoubleArray("solePositionProportionalGains", 20000, 20000, 20000);
+   private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
    private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
@@ -41,7 +40,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final BooleanParameter useForceFeedbackControlParameter = parameterFactory.createBoolean("useForceFeedbackControl", false);
    private final BooleanParameter useSetpointCompensationParameter = parameterFactory.createBoolean("useSetpointCompensation", true);
    private final DoubleParameter maxSetpointCompensationParameter = parameterFactory.createDouble("maxSetpointCompensation", .05);
-   private final DoubleParameter setpointCompensationMultiplierZParameter = parameterFactory.createDouble("setpointCompensationMultiplierZ", 1.1);
+   private final DoubleParameter setpointCompensationMultiplierZParameter = parameterFactory.createDouble("setpointCompensationMultiplierZ", 1.0);
 
    // Yo variables
    private final QuadrantDependentList<DoubleYoVariable[]> yoSetpointCompensationList;
@@ -50,8 +49,8 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final ReferenceFrame bodyFrame;
 
    // Feedback controller
-   private final QuadrupedSolePositionController solePositionController;
-   private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
+   private final QuadrantDependentList<QuadrupedSolePositionController> solePositionController;
+   private final QuadrantDependentList<QuadrupedSolePositionController.Setpoints> solePositionControllerSetpoints;
 
    // Task space controller
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
@@ -81,7 +80,11 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       }
       // Feedback controller
       solePositionController = controllerToolbox.getSolePositionController();
-      solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints();
+      solePositionControllerSetpoints = new QuadrantDependentList<>();
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         solePositionControllerSetpoints.set(quadrant, new QuadrupedSolePositionController.Setpoints(quadrant));
+      }
 
       // Task space controller
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
@@ -101,8 +104,11 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       updateEstimates();
 
       // Initialize sole position controller
-      solePositionControllerSetpoints.initialize(taskSpaceEstimates);
-      solePositionController.reset();
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         solePositionController.get(quadrant).reset();
+         solePositionControllerSetpoints.get(quadrant).initialize(taskSpaceEstimates);
+      }
 
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
@@ -119,8 +125,10 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       soleForceEstimator.compute();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         solePositionControllerSetpoints.getSolePosition(quadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
-         solePositionControllerSetpoints.getSolePosition(quadrant).changeFrame(bodyFrame);
+         solePositionControllerSetpoints.get(quadrant).getSolePosition().setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
+         solePositionControllerSetpoints.get(quadrant).getSolePosition().changeFrame(bodyFrame);
+         solePositionControllerSetpoints.get(quadrant).getSolePosition().setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
+         solePositionControllerSetpoints.get(quadrant).getSolePosition().changeFrame(bodyFrame);
          if (useSetpointCompensationParameter.get())
          {
             yoSetpointCompensationList.get(quadrant)[0].set(Math
@@ -132,7 +140,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
             yoSetpointCompensationList.get(quadrant)[2].set(
                   Math.max(setpointCompensationMultiplierZParameter.get()*soleForceEstimator.getSoleForce(quadrant).getZ() / solePositionProportionalGainsParameter.get(2),
                         -maxSetpointCompensationParameter.get()));
-            solePositionControllerSetpoints.getSolePosition(quadrant)
+            solePositionControllerSetpoints.get(quadrant).getSolePosition()
                   .add(yoSetpointCompensationList.get(quadrant)[0].getDoubleValue(), yoSetpointCompensationList.get(quadrant)[1].getDoubleValue(), yoSetpointCompensationList.get(quadrant)[2].getDoubleValue());
          }
          else
@@ -161,6 +169,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       updateEstimates();
       updateSetpoints();
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
+
       return null;
    }
 
@@ -182,9 +191,9 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    {
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         solePositionController.getGains(quadrant).setProportionalGains(solePositionProportionalGainsParameter.get());
-         solePositionController.getGains(quadrant).setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
-         solePositionController.getGains(quadrant).setDerivativeGains(solePositionDerivativeGainsParameter.get());
+         solePositionController.get(quadrant).getGains().setProportionalGains(solePositionProportionalGainsParameter.get());
+         solePositionController.get(quadrant).getGains().setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
+         solePositionController.get(quadrant).getGains().setDerivativeGains(solePositionDerivativeGainsParameter.get());
       }
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
@@ -198,7 +207,11 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
 
    private void updateSetpoints()
    {
-      solePositionController.compute(taskSpaceControllerCommands.getSoleForce(), solePositionControllerSetpoints, taskSpaceEstimates);
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         solePositionController.get(quadrant)
+               .compute(taskSpaceControllerCommands.getSoleForce(quadrant), solePositionControllerSetpoints.get(quadrant), taskSpaceEstimates);
+      }
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
    }
 }
