@@ -1,11 +1,11 @@
 package us.ihmc.plotting.artifact;
 
-import java.awt.Graphics;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
 import us.ihmc.plotting.Coordinate;
+import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.Pose;
 
 public class ShapeArtifact extends Artifact
@@ -45,7 +45,7 @@ public class ShapeArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (pose == null)
       {
@@ -57,52 +57,52 @@ public class ShapeArtifact extends Artifact
       int x = Xcenter + ((int)Math.round(pose.getX() * scaleFactor));
       int y = Ycenter - ((int)Math.round(pose.getY() * scaleFactor));
 
-      g.setColor(color);
+      graphics2d.setColor(color);
       int w = (int) (width * scaleFactor);
       int h = (int) (height * scaleFactor);
       if (getType().equals("fillcircle"))
       {
-         g.fillOval((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.fillOval((x - (w / 2)), (y - (h / 2)), w, h);
       }
       else if (getType().equals("circle"))
       {
-         g.drawOval((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.drawOval((x - (w / 2)), (y - (h / 2)), w, h);
       }
       else if (getType().equals("fillrectangle"))
       {
-         g.fillRect((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.fillRect((x - (w / 2)), (y - (h / 2)), w, h);
       }
       else if (getType().equals("rectangle"))
       {
-         g.drawRect((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.drawRect((x - (w / 2)), (y - (h / 2)), w, h);
       }
 
    }
 
    @Override
-   public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       int x = Xcenter;
       int y = Ycenter;
 
-      g.setColor(color);
+      graphics2d.setColor(color);
       int w = (int) (width * scaleFactor);
       int h = (int) (height * scaleFactor);
       if (getType().equals("fillcircle"))
       {
-         g.fillOval((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.fillOval((x - (w / 2)), (y - (h / 2)), w, h);
       }
       else if (getType().equals("circle"))
       {
-         g.drawOval((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.drawOval((x - (w / 2)), (y - (h / 2)), w, h);
       }
       else if (getType().equals("fillrectangle"))
       {
-         g.fillRect((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.fillRect((x - (w / 2)), (y - (h / 2)), w, h);
       }
       else if (getType().equals("rectangle"))
       {
-         g.drawRect((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics2d.drawRect((x - (w / 2)), (y - (h / 2)), w, h);
       }
    }
 
@@ -146,7 +146,7 @@ public class ShapeArtifact extends Artifact
    }
    
    @Override
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

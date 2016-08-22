@@ -1,13 +1,13 @@
 package us.ihmc.plotting.artifact;
 
 import java.awt.BasicStroke;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
+
+import us.ihmc.plotting.Graphics2DAdapter;
 
 public class PolyLine extends Artifact implements Serializable
 {
@@ -40,7 +40,7 @@ public class PolyLine extends Artifact implements Serializable
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
       {
@@ -50,23 +50,22 @@ public class PolyLine extends Artifact implements Serializable
             int y1 = Ycenter - ((int)Math.round(points.get(i - 1).y * scaleFactor));
             int x2 = Xcenter + ((int)Math.round(points.get(i).x * scaleFactor));
             int y2 = Ycenter - ((int)Math.round(points.get(i).y * scaleFactor));
-            g.setColor(color);
-            Graphics2D g2d = (Graphics2D) g;
-            Stroke currentStroke = g2d.getStroke();
-            g2d.setStroke(new BasicStroke(lineThickness));
-            g.drawLine(x1, y1, x2, y2);
-            g2d.setStroke(currentStroke);
+            graphics2d.setColor(color);
+            Stroke currentStroke = graphics2d.getStroke();
+            graphics2d.setStroke(new BasicStroke(lineThickness));
+            graphics2d.drawLine(x1, y1, x2, y2);
+            graphics2d.setStroke(currentStroke);
          }
       }
    }
 
    @Override
-   public void drawLegend(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
    }
    
    @Override
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

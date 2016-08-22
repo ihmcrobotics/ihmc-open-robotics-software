@@ -1,6 +1,5 @@
 package us.ihmc.plotting;
 
-import java.awt.Graphics;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
@@ -12,9 +11,6 @@ import us.ihmc.robotics.geometry.LineSegment2d;
 
 public class PlotterGraphics
 {
-   @SuppressWarnings("unused")
-   private Graphics graphics;
-
    private int xCenter, yCenter;
    private double xScale, yScale;
 
@@ -56,7 +52,7 @@ public class PlotterGraphics
    //     this.height = height;
    // }
 
-   public void drawLineGivenStartAndVector(Graphics graphics, double x0, double y0, double vx, double vy)
+   public void drawLineGivenStartAndVector(Graphics2DAdapter graphics, double x0, double y0, double vx, double vy)
    {
       double bigNumber = 2000.0 / xScale;
       vx = vx * bigNumber;
@@ -71,7 +67,7 @@ public class PlotterGraphics
       drawLineSegment(graphics, farX0, farY0, farX1, farY1);
    }
 
-   public void drawLine(Graphics graphics, Line2d line2d)
+   public void drawLine(Graphics2DAdapter graphics, Line2d line2d)
    {
       Vector2d vector2d = new Vector2d();
       line2d.getNormalizedVector(vector2d);
@@ -90,22 +86,22 @@ public class PlotterGraphics
       drawLineSegment(graphics, farPoint1, farPoint2);
    }
 
-   public void drawLineSegment(Graphics graphics, LineSegment2d lineSegment)
+   public void drawLineSegment(Graphics2DAdapter graphics, LineSegment2d lineSegment)
    {
       drawLineSegment(graphics, lineSegment.getEndpointsCopy());
    }
 
-   public void drawLineSegment(Graphics graphics, Point2d[] endPoints)
+   public void drawLineSegment(Graphics2DAdapter graphics, Point2d[] endPoints)
    {
       drawLineSegment(graphics, endPoints[0], endPoints[1]);
    }
 
-   public void drawLineSegment(Graphics graphics, Point2d point1, Point2d point2)
+   public void drawLineSegment(Graphics2DAdapter graphics, Point2d point1, Point2d point2)
    {
       drawLineSegment(graphics, point1.x, point1.y, point2.x, point2.y);
    }
 
-   public void drawLineSegment(Graphics graphics, double x1, double y1, double x2, double y2)
+   public void drawLineSegment(Graphics2DAdapter graphics, double x1, double y1, double x2, double y2)
    {
       int x1Int = xDoubleToInt(x1);
       int y1Int = yDoubleToInt(y1);
@@ -115,7 +111,7 @@ public class PlotterGraphics
       graphics.drawLine(x1Int, y1Int, x2Int, y2Int);
    }
 
-   public void drawPolygon(Graphics graphics, double[][] polygonPoints, int nPoints)
+   public void drawPolygon(Graphics2DAdapter graphics, double[][] polygonPoints, int nPoints)
    {
       int[] xPoints = new int[nPoints];
       int[] yPoints = new int[nPoints];
@@ -129,14 +125,14 @@ public class PlotterGraphics
       graphics.drawPolygon(xPoints, yPoints, nPoints);
    }
 
-   public void drawPolygon(Graphics graphics, double[][] polygonPoints)
+   public void drawPolygon(Graphics2DAdapter graphics, double[][] polygonPoints)
    {
       int nPoints = polygonPoints.length;
 
       drawPolygon(graphics, polygonPoints, nPoints);
    }
 
-   public void drawPolygon(Graphics graphics, ConvexPolygon2d polygon)
+   public void drawPolygon(Graphics2DAdapter graphics, ConvexPolygon2d polygon)
    {
       int nPoints = polygon.getNumberOfVertices();
 
@@ -157,7 +153,7 @@ public class PlotterGraphics
       graphics.drawPolygon(xPoints, yPoints, nPoints);
    }
 
-   public void drawPolygon(Graphics graphics, Point2d[] polygonPoints)
+   public void drawPolygon(Graphics2DAdapter graphics, Point2d[] polygonPoints)
    {
       int nPoints = polygonPoints.length;
 
@@ -175,7 +171,7 @@ public class PlotterGraphics
       graphics.drawPolygon(xPoints, yPoints, nPoints);
    }
 
-   public void fillPolygon(Graphics graphics, double[][] polygonPoints, int nPoints)
+   public void fillPolygon(Graphics2DAdapter graphics, double[][] polygonPoints, int nPoints)
    {
       int[] xPoints = new int[nPoints];
       int[] yPoints = new int[nPoints];
@@ -189,14 +185,14 @@ public class PlotterGraphics
       graphics.fillPolygon(xPoints, yPoints, nPoints);
    }
 
-   public void fillPolygon(Graphics graphics, double[][] polygonPoints)
+   public void fillPolygon(Graphics2DAdapter graphics, double[][] polygonPoints)
    {
       int nPoints = polygonPoints.length;
 
       fillPolygon(graphics, polygonPoints, nPoints);
    }
 
-   public void fillPolygon(Graphics graphics, ConvexPolygon2d polygon)
+   public void fillPolygon(Graphics2DAdapter graphics, ConvexPolygon2d polygon)
    {
       int nPoints = polygon.getNumberOfVertices();
 
@@ -217,7 +213,7 @@ public class PlotterGraphics
       graphics.fillPolygon(xPoints, yPoints, nPoints);
    }
 
-   public void fillPolygon(Graphics graphics, ArrayList<Point2d> polygonPoints)
+   public void fillPolygon(Graphics2DAdapter graphics, ArrayList<Point2d> polygonPoints)
    {
       int nPoints = polygonPoints.size();
 
@@ -235,7 +231,7 @@ public class PlotterGraphics
       graphics.fillPolygon(xPoints, yPoints, nPoints);
    }
 
-   public void fillPolygon(Graphics graphics, Point2d[] polygonPoints)
+   public void fillPolygon(Graphics2DAdapter graphics, Point2d[] polygonPoints)
    {
       int nPoints = polygonPoints.length;
 
