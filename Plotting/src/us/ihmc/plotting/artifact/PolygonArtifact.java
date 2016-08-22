@@ -140,7 +140,7 @@ public class PolygonArtifact extends Artifact
       {
          int x = Xcenter + (int) Math.round(pointsCopy.get(0).x * scaleFactor);
          int y = Ycenter - (int) Math.round(pointsCopy.get(0).y * scaleFactor);
-         graphics2d.fillOval(x, y, 4, 4);
+         graphics2d.drawOvalFilled(x, y, 4, 4);
       }
       else
       {
@@ -159,7 +159,7 @@ public class PolygonArtifact extends Artifact
 
          if (FILL_POLYGON)
          {
-            graphics2d.fillPolygon(xPoints, yPoints, nPoints);
+            graphics2d.drawPolygonFilled(xPoints, yPoints, nPoints);
          }
          else
          {

@@ -13,7 +13,7 @@ public class Drawing2DTools
    public static void drawFilledCircle(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)
    {
       graphics2d.setColor(color);
-      graphics2d.fillOval((x - (radius / 2)), (y - (radius / 2)), radius, radius);
+      graphics2d.drawOvalFilled((x - (radius / 2)), (y - (radius / 2)), radius, radius);
    }
 
    public static void drawCircleWithCross(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)
