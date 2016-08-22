@@ -182,7 +182,7 @@ public class PlotterGraphics
          yPoints[i] = yDoubleToInt(polygonPoints[i][1]);
       }
 
-      graphics.fillPolygon(xPoints, yPoints, nPoints);
+      graphics.drawPolygonFilled(xPoints, yPoints, nPoints);
    }
 
    public void fillPolygon(Graphics2DAdapter graphics, double[][] polygonPoints)
@@ -210,7 +210,7 @@ public class PlotterGraphics
          yPoints[i] = yDoubleToInt(point2d.y);
       }
 
-      graphics.fillPolygon(xPoints, yPoints, nPoints);
+      graphics.drawPolygonFilled(xPoints, yPoints, nPoints);
    }
 
    public void fillPolygon(Graphics2DAdapter graphics, ArrayList<Point2d> polygonPoints)
@@ -228,7 +228,7 @@ public class PlotterGraphics
          yPoints[i] = yDoubleToInt(point2d.y);
       }
 
-      graphics.fillPolygon(xPoints, yPoints, nPoints);
+      graphics.drawPolygonFilled(xPoints, yPoints, nPoints);
    }
 
    public void fillPolygon(Graphics2DAdapter graphics, Point2d[] polygonPoints)
@@ -246,7 +246,7 @@ public class PlotterGraphics
          yPoints[i] = yDoubleToInt(point2d.y);
       }
 
-      graphics.fillPolygon(xPoints, yPoints, nPoints);
+      graphics.drawPolygonFilled(xPoints, yPoints, nPoints);
    }
 
    // private double intToDouble(int value, double center, double scale, int extent)
