@@ -9,13 +9,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@TestSuiteTarget(TestPlanTarget.UI)
 @SuiteClasses
 ({
    us.ihmc.plotting.PlotterTest.class
 })
 
-public class PlottingAFastTestSuite
+public class PlottingAUITestSuite
 {
    public static void main(String[] args)
    {

@@ -15,8 +15,11 @@ import us.ihmc.plotting.frames.PlotterSpaceConverter;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
+@DeployableTestClass(targets = TestPlanTarget.UI)
 public class PlotterTest
 {
    @DeployableTestMethod(estimatedDuration = 0.1)
