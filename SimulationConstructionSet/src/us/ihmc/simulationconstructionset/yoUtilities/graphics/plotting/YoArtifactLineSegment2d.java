@@ -11,13 +11,11 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
-import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 
-public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
+public class YoArtifactLineSegment2d extends YoArtifact
 {
    private static final double[] CONSTANTS = new double[] {};
 

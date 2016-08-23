@@ -10,15 +10,13 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Drawing2DTools;
 import us.ihmc.plotting.Graphics2DAdapter;
-import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 
-public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
+public class YoArtifactPosition extends YoArtifact
 {
    private final ArrayList<double[]> historicalPositions = new ArrayList<double[]>();
 
