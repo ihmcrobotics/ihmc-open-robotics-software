@@ -2,8 +2,6 @@ package us.ihmc.plotting.artifact;
 
 import java.awt.Color;
 
-import javax.vecmath.Vector2d;
-
 import us.ihmc.plotting.Graphics2DAdapter;
 
 public abstract class Artifact
@@ -29,17 +27,7 @@ public abstract class Artifact
 
    public abstract void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor);
    
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, Vector2d scaleFactor)
-   {
-      draw(graphics2d, Xcenter, Ycenter, headingOffset, scaleFactor.getX());
-   }
-   
    public abstract void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor);
-   
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, Vector2d scaleFactor)
-   {
-      draw(graphics2d, Xcenter, Ycenter, headingOffset, scaleFactor.getX());
-   }
    
    public abstract void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor);
    
