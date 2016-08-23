@@ -54,6 +54,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       {
          private static final long serialVersionUID = -8828178814213025690L;
 
+         @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
          }
@@ -73,6 +74,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       {
          private static final long serialVersionUID = -6427490298776551499L;
 
+         @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
          }
@@ -185,6 +187,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       {
          private static final long serialVersionUID = 5370847059108953557L;
 
+         @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
          }
@@ -232,6 +235,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       {
          private static final long serialVersionUID = 4694374344134623529L;
 
+         @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
          }
@@ -597,6 +601,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       }
    }
 
+   @Override
    public String toString()
    {
       return frameName; // + "\nTransform to Parent = " + this.transformToParent;

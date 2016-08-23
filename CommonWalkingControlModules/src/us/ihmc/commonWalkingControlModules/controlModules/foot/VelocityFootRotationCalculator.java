@@ -227,7 +227,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
 //      yoCoPErrorFiltered.update(copError2d);
 //      yoCoPErrorPerpendicularToRotation.set(yoCoPErrorFiltered.cross(footAngularVelocityUnitVector));
 
-      yoFootAngularVelocityFiltered.getFrameVector2d(footAngularVelocityUnitVector);
+      yoFootAngularVelocityFiltered.getFrameTuple2dIncludingFrame(footAngularVelocityUnitVector);
       footAngularVelocityUnitVector.normalize();
 
       yoCoRPositionFiltered.update(centerOfPressure);

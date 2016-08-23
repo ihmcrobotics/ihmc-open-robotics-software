@@ -52,8 +52,8 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
 
    public void setAngularMomentumRateOfChange(FrameVector angularMomentumRateOfChange)
    {
-      selectionMatrix.reshape(6, SpatialMotionVector.SIZE);
-      selectionMatrix.set(CommonOps.identity(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE));
+      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      CommonOps.setIdentity(selectionMatrix);
 
       momentumRate.reshape(selectionMatrix.getNumCols(), 1);
       MatrixTools.setDenseMatrixFromTuple3d(momentumRate, angularMomentumRateOfChange.getVector(), 0, 0);

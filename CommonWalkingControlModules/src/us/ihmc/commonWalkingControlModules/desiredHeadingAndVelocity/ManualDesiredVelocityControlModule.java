@@ -10,23 +10,23 @@ public class ManualDesiredVelocityControlModule implements DesiredVelocityContro
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoFrameVector2d desiredVelocity;
-   
+
    public ManualDesiredVelocityControlModule(ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       desiredVelocity = new YoFrameVector2d("desiredVelocity", "", referenceFrame, registry);
       parentRegistry.addChild(registry);
    }
-   
+
    public void setDesiredVelocity(FrameVector2d newDesiredVelocity)
    {
       newDesiredVelocity.changeFrame(desiredVelocity.getReferenceFrame());
-      desiredVelocity.set(newDesiredVelocity);  
+      desiredVelocity.set(newDesiredVelocity);
    }
 
    @Override
    public void getDesiredVelocity(FrameVector2d desiredVelocityToPack)
    {
-      desiredVelocity.getFrameVector2d(desiredVelocityToPack);
+      desiredVelocity.getFrameTuple2dIncludingFrame(desiredVelocityToPack);
    }
 
    @Override

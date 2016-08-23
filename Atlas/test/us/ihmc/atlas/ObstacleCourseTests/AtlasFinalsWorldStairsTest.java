@@ -190,7 +190,7 @@ public class AtlasFinalsWorldStairsTest
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
 
-      Point3d startingLocation = new Point3d(1.0, -13.5, 0);
+      Point3d startingLocation = new Point3d(1.0, -13.5, 0.02);
       double directionYaw = -90.0;
       RotationTools.computeQuaternionFromYawAndZNormal(directionYaw / 180.0 * Math.PI, verticalVector, orientation);
 
