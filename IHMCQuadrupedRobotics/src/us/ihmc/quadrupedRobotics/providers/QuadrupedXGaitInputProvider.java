@@ -10,7 +10,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class QuadrupedXGaitSettingsProvider
+public class QuadrupedXGaitInputProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -41,7 +41,7 @@ public class QuadrupedXGaitSettingsProvider
    private final DoubleYoVariable yoEndDoubleSupportDuration;
    private final DoubleYoVariable yoEndPhaseShift;
 
-   public QuadrupedXGaitSettingsProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
+   public QuadrupedXGaitInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
    {
       yoStanceLength = new DoubleYoVariable("stanceLengthInput", registry);
       yoStanceWidth = new DoubleYoVariable("stanceWidthInput", registry);

@@ -1,7 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import java.util.ArrayList;
-
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -12,11 +10,14 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
-import us.ihmc.quadrupedRobotics.planning.*;
+import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStepPressurePlanner;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedTimedStepInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedStepInputProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -30,9 +31,11 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
+import java.util.ArrayList;
+
 public class QuadrupedDcmBasedStepController implements QuadrupedController, QuadrupedTimedStepTransitionCallback
 {
-   private final QuadrupedTimedStepInputProvider stepProvider;
+   private final QuadrupedStepInputProvider stepProvider;
    private final QuadrupedControllerInputProviderInterface inputProvider;
    private final DoubleYoVariable robotTimestamp;
    private final double controlDT;
@@ -106,7 +109,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final PreallocatedQueue<QuadrupedTimedStep> stepPlan;
 
    public QuadrupedDcmBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
-         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedTimedStepInputProvider stepProvider)
+         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedStepInputProvider stepProvider)
 
    {
       this.stepProvider = stepProvider;

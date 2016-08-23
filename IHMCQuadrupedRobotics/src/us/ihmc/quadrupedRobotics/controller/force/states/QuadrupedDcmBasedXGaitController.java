@@ -14,7 +14,7 @@ import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitInputProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -35,7 +35,7 @@ import java.util.ArrayList;
 
 public class QuadrupedDcmBasedXGaitController implements QuadrupedController, QuadrupedTimedStepTransitionCallback
 {
-   private final QuadrupedXGaitSettingsProvider settingsProvider;
+   private final QuadrupedXGaitInputProvider settingsProvider;
    private final QuadrupedControllerInputProviderInterface inputProvider;
    private final DoubleYoVariable robotTimestamp;
    private final double controlDT;
@@ -127,7 +127,7 @@ public class QuadrupedDcmBasedXGaitController implements QuadrupedController, Qu
    private final BooleanYoVariable onTouchDownTriggered = new BooleanYoVariable("onTouchDownTriggered", registry);
 
    public QuadrupedDcmBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
-         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedXGaitSettingsProvider settingsProvider)
+         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedXGaitInputProvider settingsProvider)
    {
       this.settingsProvider = settingsProvider;
       this.inputProvider = inputProvider;

@@ -15,7 +15,7 @@ import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitInputProvider;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 public class QuadrupedMpcBasedXGaitController implements QuadrupedController, QuadrupedTimedStepTransitionCallback
 {
    private final QuadrupedControllerInputProviderInterface inputProvider;
-   private final QuadrupedXGaitSettingsProvider settingsProvider;
+   private final QuadrupedXGaitInputProvider settingsProvider;
    private final DoubleYoVariable robotTimestamp;
    private final double controlDT;
    private final double gravity;
@@ -104,7 +104,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final BooleanYoVariable haltFlag = new BooleanYoVariable("haltFlag", registry);
 
    public QuadrupedMpcBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
-         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedXGaitSettingsProvider settingsProvider)
+         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedXGaitInputProvider settingsProvider)
    {
       this.inputProvider = inputProvider;
       this.settingsProvider = settingsProvider;
