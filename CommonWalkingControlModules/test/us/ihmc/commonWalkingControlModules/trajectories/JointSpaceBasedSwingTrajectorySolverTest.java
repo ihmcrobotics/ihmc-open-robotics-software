@@ -283,7 +283,7 @@ public class JointSpaceBasedSwingTrajectorySolverTest
          }
       });
 
-      f.getContentPane().add(p, BorderLayout.CENTER);
+      f.getContentPane().add(p.getJPanel(), BorderLayout.CENTER);
       f.pack();
       f.setVisible(true);
    }
@@ -311,7 +311,7 @@ public class JointSpaceBasedSwingTrajectorySolverTest
          }
       });
 
-      f.getContentPane().add(p, BorderLayout.CENTER);
+      f.getContentPane().add(p.getJPanel(), BorderLayout.CENTER);
       f.pack();
       f.setVisible(true);
    }

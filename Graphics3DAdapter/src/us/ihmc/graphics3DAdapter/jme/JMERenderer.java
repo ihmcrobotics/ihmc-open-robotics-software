@@ -60,10 +60,7 @@ import com.jme3.util.SkyFactory.EnvMapType;
 import jme3dae.ColladaLoader;
 import jme3dae.collada14.ColladaDocumentV14;
 import jme3dae.materials.FXBumpMaterialGenerator;
-import us.ihmc.graphics3DAdapter.GPULidarListener;
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
-import us.ihmc.graphics3DAdapter.HeightMap;
+import us.ihmc.graphics3DAdapter.*;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
@@ -163,6 +160,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    private DirectionalLight primaryLight;
    private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
+
+   private ArrayList<Updatable> updatables = new ArrayList<Updatable>();    // things we want to move automatically
 
    public JMERenderer(RenderType renderType)
    {
@@ -576,6 +575,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
       updateCameras();
       count++;
+
+      updateGraphics(tpf);
    }
 
    /**
@@ -1409,5 +1410,39 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    public void pause() 
    {
       this.lazyRendering = true;
+   }
+
+   protected synchronized void updateGraphics(float tpf)
+   {
+      for (Updatable updatable : updatables)
+      {
+         updatable.simpleUpdate(tpf);
+      }
+   }
+
+   public synchronized void registerUpdatable(final Updatable updatable)
+   {
+      enqueue(new Callable<Object>()
+      {
+         public Object call() throws Exception
+         {
+            updatables.add(updatable);
+
+            return null;
+         }
+      });
+   }
+
+   public synchronized void removeUpdatable(final Updatable updatable)
+   {
+      enqueue(new Callable<Object>()
+      {
+         public Object call() throws Exception
+         {
+            updatables.remove(updatable);
+
+            return null;
+         }
+      });
    }
 }

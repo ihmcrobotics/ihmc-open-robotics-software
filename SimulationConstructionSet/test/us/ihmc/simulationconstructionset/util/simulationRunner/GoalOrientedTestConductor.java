@@ -19,8 +19,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
    private final SimulationConstructionSet scs;
    private final SimulationTestingParameters simulationTestingParameters;
    
-   // Yo variables
-   private final DoubleYoVariable yoTime;
+   private boolean yoTimeChangedListenerActive = false;
    
    private List<YoVariableTestGoal> sustainGoals = new ArrayList<>();
    private List<YoVariableTestGoal> waypointGoals = new ArrayList<>();
@@ -38,7 +37,8 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       this.scs = scs;
       this.simulationTestingParameters = simulationTestingParameters;
       
-      yoTime = (DoubleYoVariable) scs.getVariable("t");
+      DoubleYoVariable yoTime = (DoubleYoVariable) scs.getVariable("t");
+      yoTime.addVariableChangedListener(this);
       
       scs.startOnAThread();
    }
@@ -46,48 +46,51 @@ public class GoalOrientedTestConductor implements VariableChangedListener
    @Override
    public void variableChanged(YoVariable<?> v)
    {
-      sustainGoalsNotMeeting.clear();
-      waypointGoalsNotMet.clear();
-      terminalGoalsNotMeeting.clear();
-      
-      for (int i = 0; i < sustainGoals.size(); i++)
+      if (yoTimeChangedListenerActive)
       {
-         if (!sustainGoals.get(i).currentlyMeetsGoal())
+         sustainGoalsNotMeeting.clear();
+         waypointGoalsNotMet.clear();
+         terminalGoalsNotMeeting.clear();
+         
+         for (int i = 0; i < sustainGoals.size(); i++)
          {
-            sustainGoalsNotMeeting.add(sustainGoals.get(i));
+            if (!sustainGoals.get(i).currentlyMeetsGoal())
+            {
+               sustainGoalsNotMeeting.add(sustainGoals.get(i));
+            }
          }
-      }
-      
-      for (int i = 0; i < waypointGoals.size(); i++)
-      {
-         if (!waypointGoals.get(i).hasMetGoal())
+         
+         for (int i = 0; i < waypointGoals.size(); i++)
          {
-            waypointGoalsNotMet.add(waypointGoals.get(i));
+            if (!waypointGoals.get(i).hasMetGoal())
+            {
+               waypointGoalsNotMet.add(waypointGoals.get(i));
+            }
          }
-      }
-
-      for (int i = 0; i < terminalGoals.size(); i++)
-      {
-         if (!terminalGoals.get(i).currentlyMeetsGoal())
+   
+         for (int i = 0; i < terminalGoals.size(); i++)
          {
-            terminalGoalsNotMeeting.add(terminalGoals.get(i));
+            if (!terminalGoals.get(i).currentlyMeetsGoal())
+            {
+               terminalGoalsNotMeeting.add(terminalGoals.get(i));
+            }
          }
-      }
-      
-      if (sustainGoalsNotMeeting.size() > 0)
-      {
-         createAssertionFailedException();
-         stop();
-      }
-      else if (terminalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.size() > 0)
-      {
-         createAssertionFailedException();
-         stop();
-      }
-      else if (terminalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.isEmpty())
-      {
-         createSuccessMessage();
-         stop();
+         
+         if (sustainGoalsNotMeeting.size() > 0)
+         {
+            createAssertionFailedException();
+            stop();
+         }
+         else if (terminalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.size() > 0)
+         {
+            createAssertionFailedException();
+            stop();
+         }
+         else if (terminalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.isEmpty())
+         {
+            createSuccessMessage();
+            stop();
+         }
       }
    }
    
@@ -97,29 +100,17 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       for (YoVariableTestGoal goal : sustainGoals)
       {
          message.append("\nGoal sustained: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       for (YoVariableTestGoal goal : waypointGoals)
       {
          message.append("\nWaypoint met: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       for (YoVariableTestGoal goal : terminalGoals)
       {
          message.append("\nTerminal goal met: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       PrintTools.info(this, message.toString());
    }
@@ -131,29 +122,17 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       for (YoVariableTestGoal goal : sustainGoalsNotMeeting)
       {
          message.append("\nGoal not sustained: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       for (YoVariableTestGoal goal : waypointGoalsNotMet)
       {
          message.append("\nWaypoint not met: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       for (YoVariableTestGoal goal : terminalGoalsNotMeeting)
       {
          message.append("\nTerminal goal not met: ");
-         for (YoVariable<?> yoVariable : goal.getYoVariables())
-         {
-            yoVariable.getNameAndValueString(message);
-            message.append("  ");
-         }
+         message.append(goal.toString());
       }
       
       assertionFailedMessage = message.toString();
@@ -161,7 +140,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
    
    private void stop()
    {
-      yoTime.removeVariableChangedListener(this);
+      yoTimeChangedListenerActive = false;
       
       sustainGoals.clear();
       waypointGoals.clear();
@@ -172,7 +151,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
    public void simulate() throws AssertionFailedError
    {
       assertionFailedMessage = null;
-      yoTime.addVariableChangedListener(this);
+      yoTimeChangedListenerActive = true;
       
       scs.simulate();
       
@@ -187,7 +166,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       }
    }
 
-   public void concludeTesting()
+   public void concludeTesting(int additionalStackDepthForRelevantCallingMethod)
    {
       if (simulationTestingParameters.getKeepSCSUp())
       {
@@ -196,11 +175,16 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       
       if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots()[0].getName(), scs, 1);
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots()[0].getName(), scs, additionalStackDepthForRelevantCallingMethod);
       }
       
       ThreadTools.sleep(200);
       scs.closeAndDispose();
+   }
+   
+   public void concludeTesting()
+   {
+      concludeTesting(2);
    }
    
    public void addTimeLimit(DoubleYoVariable timeYoVariable, double timeLimit)

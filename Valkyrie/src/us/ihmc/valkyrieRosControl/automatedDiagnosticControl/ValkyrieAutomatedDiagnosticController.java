@@ -246,6 +246,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
 
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       ForceSensorDataHolder forceSensorDataHolderToUpdate = new ForceSensorDataHolder(Arrays.asList(forceSensorDefinitions));
+      CenterOfMassDataHolder centerOfMassDataHolderToUpdate = new CenterOfMassDataHolder();
 
       Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
       Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
@@ -273,7 +274,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
 
       // Create the sensor readers and state estimator here:
       DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap, null,
+            sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, centerOfMassDataHolderToUpdate,
+            imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap, null,
             new RobotMotionStatusHolder(), bipedFeetMap, yoGraphicsListRegistry);
 
       registry.addChild(stateEstimator.getYoVariableRegistry());

@@ -9,6 +9,7 @@ public class JoystickComponentFilter
    
    private final boolean invert;
    private final int exponent;
+   private final double restToZeroCorrection;
    
    /** The percentage about zero within which the input value should be ignored. */
    private final double deadzone;
@@ -25,6 +26,11 @@ public class JoystickComponentFilter
 
    public JoystickComponentFilter(JoystickMapping channel, boolean invert, double deadzone, int exponent)
    {
+      this(channel, invert, deadzone, exponent, 0.0);
+   }
+   
+   public JoystickComponentFilter(JoystickMapping channel, boolean invert, double deadzone, int exponent, double restToZeroCorrection)
+   {
       if (exponent % 2 == 0)
       {
          throw new IllegalArgumentException("Only odd functions are allowed");
@@ -34,10 +40,13 @@ public class JoystickComponentFilter
       this.invert = invert;
       this.deadzone = deadzone;
       this.exponent = exponent;
+      this.restToZeroCorrection = restToZeroCorrection;
    }
 
    public double apply(double value)
    {
+      value += restToZeroCorrection;
+      
       // If the value is within the deadzone, ignore it. Otherwise, offset the value to the deadzone limit and rescale
       // it to full scale.
       if (Math.abs(value) < deadzone)

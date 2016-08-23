@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
@@ -40,6 +41,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -55,6 +58,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
@@ -111,6 +115,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final WalkingCommandConsumer commandConsumer;
 
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
@@ -167,6 +172,12 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       double coPErrorThreshold = walkingControllerParameters.getCoPErrorThresholdForHighCoPDamping();
       boolean enableHighCoPDamping = highCoPDampingDuration > 0.0 && !Double.isInfinite(coPErrorThreshold);
       momentumBasedController.setHighCoPDampingParameters(enableHighCoPDamping, highCoPDampingDuration, coPErrorThreshold);
+
+      JointLimitParameters limitParameters = new JointLimitParameters();
+      String[] jointNamesRestrictiveLimits = walkingControllerParameters.getJointsWithRestrictiveLimits(limitParameters);
+      OneDoFJoint[] jointsWithRestrictiveLimit = ScrewTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints, jointNamesRestrictiveLimits), OneDoFJoint.class);
+      for (OneDoFJoint joint : jointsWithRestrictiveLimit)
+         jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
    }
 
    private void setupStateMachine()
@@ -604,6 +615,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       planeContactStateCommandPool.clear();
 
       controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
+      controllerCoreCommand.addInverseDynamicsCommand(jointLimitEnforcementMethodCommand);
 
       boolean isHighCoPDampingNeeded = momentumBasedController.estimateIfHighCoPDampingNeeded(footDesiredCoPs);
 

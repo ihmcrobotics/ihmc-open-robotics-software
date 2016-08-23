@@ -34,6 +34,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorData;
@@ -75,6 +76,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final RobotVisualizer robotVisualizer;
    private final SDFFullHumanoidRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
+   private final CenterOfMassDataHolder centerOfMassDataHolderForEstimator;
    private final ContactSensorHolder contactSensorHolder;
    private final ModularRobotController estimatorController;
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -115,6 +117,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       rootFrame = rootJoint.getFrameAfterJoint();
 
       forceSensorDataHolderForEstimator = threadDataSynchronizer.getEstimatorForceSensorDataHolder();
+      centerOfMassDataHolderForEstimator = threadDataSynchronizer.getEstimatorCenterOfMassDataHolder();
       ContactSensorHolder estimatorContactSensorHolder = threadDataSynchronizer.getEstimatorContactSensorHolder();
       contactSensorHolder = estimatorContactSensorHolder;
 
@@ -135,10 +138,13 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
       sensorRawOutputMapReadOnly = sensorReader.getSensorRawOutputMapReadOnly();
+
       if (sensorReaderFactory.useStateEstimator())
       {
          drcStateEstimator = createStateEstimator(estimatorFullRobotModel, sensorInformation, sensorOutputMapReadOnly, gravity, stateEstimatorParameters,
-               contactPointParameters, forceSensorDataHolderForEstimator, contactSensorHolder, centerOfPressureDataHolderFromController,
+               contactPointParameters, forceSensorDataHolderForEstimator,
+               centerOfMassDataHolderForEstimator, contactSensorHolder,
+               centerOfPressureDataHolderFromController,
                robotMotionStatusFromController, yoGraphicsListRegistry, estimatorRegistry);
 
          if (globalDataProducer != null)
@@ -232,7 +238,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          sensorReader.read();
 
          estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
-         
+
          if(globalDataProducer != null)
          {
             globalDataProducer.setRobotTime(estimatorTime.getLongValue());
@@ -301,7 +307,9 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    private DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullHumanoidRobotModel estimatorFullRobotModel, DRCRobotSensorInformation sensorInformation,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
-         RobotContactPointParameters contactPointParamaters, ForceSensorDataHolder estimatorForceSensorDataHolderToUpdate, ContactSensorHolder contactSensorHolder,
+         RobotContactPointParameters contactPointParamaters, ForceSensorDataHolder estimatorForceSensorDataHolderToUpdate,
+         CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
+         ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderFromController, RobotMotionStatusHolder robotMotionStatusFromController,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
@@ -319,7 +327,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
       Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
@@ -330,7 +338,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          //         double footSwitchCoPThresholdFraction = 0.01;
          double footSwitchCoPThresholdFraction = stateEstimatorParameters.getFootSwitchCoPThresholdFraction();
          double contactThresholdForce = stateEstimatorParameters.getContactThresholdForce();
-         
+
          RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
          bipedFeetMap.put(foot, bipedFeet.get(robotSide));
 
@@ -359,12 +367,13 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          }
 
       }
-    
+
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
 
       // Create the sensor readers and state estimator here:
       DRCKinematicsBasedStateEstimator drcStateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            sensorOutputMapReadOnly, estimatorForceSensorDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
+            sensorOutputMapReadOnly, estimatorForceSensorDataHolderToUpdate, estimatorCenterOfMassDataHolderToUpdate,
+            imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
             centerOfPressureDataHolderFromController, robotMotionStatusFromController, bipedFeetMap, yoGraphicsListRegistry);
 
       return drcStateEstimator;

@@ -76,6 +76,8 @@ public class DRCSimulationFactory
 
    private static final double gravity = -9.81;
 
+   private static final double headIMUMeasurmentRate = 400.0;
+
    private final SimulationConstructionSet scs;
    private final SDFHumanoidRobot simulatedRobot;
    private final MomentumBasedControllerFactory controllerFactory;

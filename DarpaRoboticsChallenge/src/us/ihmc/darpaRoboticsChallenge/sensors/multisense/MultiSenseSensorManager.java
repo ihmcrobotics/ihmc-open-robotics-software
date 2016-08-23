@@ -7,7 +7,10 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
-import us.ihmc.ihmcPerception.camera.*;
+import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
+import us.ihmc.ihmcPerception.camera.CameraLogger;
+import us.ihmc.ihmcPerception.camera.RosCameraCompressedImageReceiver;
+import us.ihmc.ihmcPerception.camera.VideoPacketHandler;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.ihmcPerception.depthData.PointCloudSource;
 import us.ihmc.ihmcPerception.depthData.RosPointCloudReceiver;
@@ -70,7 +73,7 @@ public class MultiSenseSensorManager
       System.out.println("initialise parameteres--------------------------------------------------------------------------------");
       if(multiSenseParamaterSetter != null)
       {
-         multiSenseParamaterSetter.initializeParameterListeners(); 
+         multiSenseParamaterSetter.initializeParameterListeners();
 //         multiSenseParamaterSetter.setLidarSpindleSpeed(lidarParamaters.getLidarSpindleVelocity());
       }
    }
@@ -80,7 +83,7 @@ public class MultiSenseSensorManager
       if(multiSenseParamaterSetter != null)
       {
          multiSenseParamaterSetter.setMultisenseResolution(rosMainNode);
-   
+
          multiSenseParamaterSetter.setupNativeROSCommunicator(lidarSpindleVelocity);
       }
    }

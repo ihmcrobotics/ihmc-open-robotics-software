@@ -731,6 +731,11 @@ public class MathTools
       tuple3d.setZ(roundToGivenPrecision(tuple3d.getZ(), precision));
       
    }
+   
+   public static int orderOfMagnitude(double number)
+   {
+      return (int) Math.floor(Math.log10(Math.abs(number)));
+   }
 
    /**
     * Returns value - |deadband| if value is greater than |deadband|
