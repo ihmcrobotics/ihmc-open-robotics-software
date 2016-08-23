@@ -26,20 +26,31 @@ import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
 import java.util.Map;
 
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+
 import us.ihmc.plotting.frames.MetersReferenceFrame;
 import us.ihmc.plotting.frames.PixelsReferenceFrame;
 
 public class Graphics2DAdapter
 {
    private final MetersReferenceFrame metersFrame;
-   private final PixelsReferenceFrame pixelsFrame;
+   private final PixelsReferenceFrame screenFrame;
+   
+   private final PlotterPoint2d[] pointBin = new PlotterPoint2d[1];
+   private final Vector2d[] vectorBin = new Vector2d[pointBin.length];
    
    private Graphics2D graphics2d;
    
-   public Graphics2DAdapter(MetersReferenceFrame metersFrame, PixelsReferenceFrame pixelsFrame)
+   public Graphics2DAdapter(MetersReferenceFrame metersFrame, PixelsReferenceFrame screenFrame)
    {
       this.metersFrame = metersFrame;
-      this.pixelsFrame = pixelsFrame;
+      this.screenFrame = screenFrame;
+      
+      for (int i = 0; i < pointBin.length; i++)
+      {
+         pointBin[i] = new PlotterPoint2d(metersFrame);
+      }
    }
    
    public void setGraphics2d(Graphics2D graphics2d)
@@ -52,6 +63,11 @@ public class Graphics2DAdapter
       return graphics2d;
    }
 
+   private int pixelate(double continuous)
+   {
+      return (int) Math.round(continuous);
+   }
+
    public void drawLine(int x1, int y1, int x2, int y2)
    {
       graphics2d.drawLine(x1, y1, x2, y2);
@@ -62,11 +78,20 @@ public class Graphics2DAdapter
       graphics2d.drawPolyline(xPoints, yPoints, nPoints);
    }
 
+   @Deprecated
    public void drawOval(int x, int y, int width, int height)
    {
       graphics2d.drawOval(x, y, width, height);
    }
-
+   
+   public void drawOval(Point2d center, Vector2d radii)
+   {
+      pointBin[0].setIncludingFrame(metersFrame, center);
+      pointBin[0].add(-radii.getX(), radii.getY());
+      pointBin[0].changeFrame(screenFrame);
+      graphics2d.drawOval(pixelate(pointBin[0].getX()), pixelate(pointBin[0].getX()), pixelate(radii.getX() * 2.0), pixelate(radii.getY() * 2.0));
+   }
+   
    public void drawOvalFilled(int x, int y, int width, int height)
    {
       graphics2d.fillOval(x, y, width, height);
