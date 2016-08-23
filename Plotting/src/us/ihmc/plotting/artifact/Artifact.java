@@ -27,21 +27,23 @@ public abstract class Artifact
       this.id = id;
    }
 
-   /**
-    * Must provide a draw method for plotter to render artifact
-    */
    public abstract void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor);
+   
    public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, Vector2d scaleFactor)
    {
       draw(graphics2d, Xcenter, Ycenter, headingOffset, scaleFactor.getX());
    }
+   
    public abstract void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor);
+   
    public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, Vector2d scaleFactor)
    {
       draw(graphics2d, Xcenter, Ycenter, headingOffset, scaleFactor.getX());
    }
-   public abstract void takeHistorySnapshot();
+   
    public abstract void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor);
+   
+   public abstract void takeHistorySnapshot();
 
    public void setType(String type)
    {
