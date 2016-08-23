@@ -624,7 +624,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootSE3Gains gains = new YoFootSE3Gains("HoldFoot", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 0.0; //100.0;
+      double kpXY = 100.0;
       double kpZ = 0.0;
       double zetaXYZ = realRobot ? 0.2 : 1.0;
       double kpXYOrientation = realRobot ? 100.0 : 100.0;
@@ -1006,7 +1006,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean useSupportState()
    {
-      return false;
+      return true;
    }
 
    /** {@inheritDoc} */
