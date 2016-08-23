@@ -655,13 +655,20 @@ public class Plotter
 
    public void showInNewWindow()
    {
-      showInNewWindow("Plotter");
+      showInNewWindow("Plotter", false);
    }
    
-   public void showInNewWindow(String title)
+   public void showInNewWindow(String title, boolean showLegend)
    {
       JFrame frame = new JFrame(title);
-      frame.getContentPane().add(panel, BorderLayout.CENTER);
+      if (showLegend)
+      {
+         frame.getContentPane().add(createAndAttachPlotterLegendPanel(), BorderLayout.CENTER);
+      }
+      else
+      {
+         frame.getContentPane().add(panel, BorderLayout.CENTER);
+      }
       frame.pack();
       frame.setVisible(true);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -728,6 +735,7 @@ public class Plotter
    {
       JPanel flashyNewJayPanel = new JPanel();
       PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel(graphics2dAdapter);
+      plotterLegendPanel.setPreferredSize(new Dimension(500, 500));
       addArtifactsChangedListener(plotterLegendPanel);
       flashyNewJayPanel.setLayout(new BorderLayout());
       flashyNewJayPanel.add(panel, "Center");
