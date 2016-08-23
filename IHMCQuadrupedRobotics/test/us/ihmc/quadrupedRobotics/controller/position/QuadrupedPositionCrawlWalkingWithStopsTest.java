@@ -65,7 +65,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
       
       for(int i = 0; i < 6; i++)
       {
-         variables.getYoPlanarVelocityInputX().set(0.25);
+         variables.getYoPlanarVelocityInputX().set(0.2);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + random.nextDouble() * 3.0 + 5.0));
          conductor.simulate();
@@ -89,7 +89,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
       
       for(int i = 0; i < 6; i++)
       {
-         variables.getYoPlanarVelocityInputX().set(0.15);
+         variables.getYoPlanarVelocityInputX().set(0.1);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + random.nextDouble() * 3.0 + 5.0));
          conductor.simulate();
@@ -137,7 +137,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
       
       for(int i = 0; i < 6; i++)
       {
-         variables.getYoPlanarVelocityInputX().set(-0.25);
+         variables.getYoPlanarVelocityInputX().set(-0.2);
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + random.nextDouble() * 3.0 + 5.0));
          conductor.simulate();
