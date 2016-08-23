@@ -10,7 +10,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactCircle;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactOval;
 
 public class YoArtifactDemo
 {
@@ -34,7 +34,7 @@ public class YoArtifactDemo
       plotter.addArtifact(new LineArtifact("01", new Point2d(0, 0), new Point2d(1, 1)));
       plotter.addArtifact(new LineArtifact("02", new Point2d(1, 1), new Point2d(2, 0)));
       plotter.addArtifact(new LineArtifact("03", new Point2d(2, 0), new Point2d(3, 1)));
-      plotter.addArtifact(new YoArtifactCircle("circle", center, radii, Color.RED));
+      plotter.addArtifact(new YoArtifactOval("circle", center, radii, Color.RED));
       
       plotter.showInNewWindow("plotterDemo", true);
       
