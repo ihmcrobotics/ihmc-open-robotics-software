@@ -16,7 +16,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 
-public class YoArtifactCircle extends Artifact implements RemoteYoGraphic
+public class YoArtifactOval extends Artifact implements RemoteYoGraphic
 {
    private static final int LEGEND_DIAMETER = 10;
    
@@ -30,7 +30,7 @@ public class YoArtifactCircle extends Artifact implements RemoteYoGraphic
    private final Point2d center = new Point2d();
    private final Vector2d radii = new Vector2d();
 
-   public YoArtifactCircle(String name, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable radius, Color color)
+   public YoArtifactOval(String name, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable radius, Color color)
    {
       super(name);
       this.centerX = x;
@@ -40,7 +40,7 @@ public class YoArtifactCircle extends Artifact implements RemoteYoGraphic
       this.color = color;
    }
 
-   public YoArtifactCircle(String name, YoFramePoint center, DoubleYoVariable radius, Color color)
+   public YoArtifactOval(String name, YoFramePoint center, DoubleYoVariable radius, Color color)
    {
       super(name);
       this.centerX = center.getYoX();
@@ -50,7 +50,7 @@ public class YoArtifactCircle extends Artifact implements RemoteYoGraphic
       this.color = color;
    }
    
-   public YoArtifactCircle(String name, YoFramePoint2d center, YoFrameVector2d radii, Color color)
+   public YoArtifactOval(String name, YoFramePoint2d center, YoFrameVector2d radii, Color color)
    {
       super(name);
       this.centerX = center.getYoX();
