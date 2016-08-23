@@ -17,7 +17,7 @@ public class InverseDynamicsQPBoundCalculator
 {
    private static final double maxAbsJointVelocity = 9.0; // rad/s
    private static final double jointLimitDistanceForMaxVelocity = 30.0; // degree
-   private static final double jointLimitFilterBreakFrequency = Double.POSITIVE_INFINITY; // 1/s
+   private static final double jointLimitFilterBreakFrequency = 20.0; // 1/s
    private static final double velocityControlGain = 50.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
