@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.controller.force.states;
+package us.ihmc.quadrupedRobotics.controller.forceDevelopment.states;
 
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
