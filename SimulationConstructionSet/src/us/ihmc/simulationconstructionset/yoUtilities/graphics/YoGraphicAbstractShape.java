@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.plotting.Artifact;
+import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

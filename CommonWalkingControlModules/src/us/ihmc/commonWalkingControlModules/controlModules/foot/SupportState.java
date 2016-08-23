@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -22,8 +21,8 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -55,8 +54,8 @@ public class SupportState extends AbstractFootControlState
 
    private final FootSwitchInterface footSwitch;
 
-   private final ControlFrame controlFrame;
-   private final ControlFrame desiredSoleFrame;
+   private final PoseReferenceFrame controlFrame;
+   private final PoseReferenceFrame desiredSoleFrame;
    private final YoGraphicReferenceFrame frameViz;
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
@@ -73,6 +72,9 @@ public class SupportState extends AbstractFootControlState
    private final FramePoint2d cop = new FramePoint2d();
    private final FramePoint2d desiredCoP = new FramePoint2d();
 
+   private final FramePoint footPosition = new FramePoint();
+   private final FrameOrientation footOrientation = new FrameOrientation();
+
    // For testing:
    private final BooleanYoVariable assumeCopOnEdge;
    private final BooleanYoVariable assumeFootBarelyLoaded;
@@ -85,8 +87,8 @@ public class SupportState extends AbstractFootControlState
       parentRegistry.addChild(registry);
 
       footSwitch = footControlHelper.getMomentumBasedController().getFootSwitches().get(robotSide);
-      controlFrame = new ControlFrame(prefix + "HoldPositionFrame", contactableFoot.getSoleFrame());
-      desiredSoleFrame = new ControlFrame(prefix + "DesiredSoleFrame", worldFrame);
+      controlFrame = new PoseReferenceFrame(prefix + "HoldPositionFrame", contactableFoot.getSoleFrame());
+      desiredSoleFrame = new PoseReferenceFrame(prefix + "DesiredSoleFrame", worldFrame);
 
       footBarelyLoaded = new BooleanYoVariable(prefix + "BarelyLoaded", registry);
       copOnEdge = new BooleanYoVariable(prefix + "CopOnEdge", registry);
@@ -135,6 +137,7 @@ public class SupportState extends AbstractFootControlState
       super.doTransitionOutOfAction();
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
+      frameViz.hide();
    }
 
    @Override
@@ -170,8 +173,7 @@ public class SupportState extends AbstractFootControlState
          cop2d.setToZero(contactableFoot.getSoleFrame());
       framePosition.setXYIncludingFrame(cop2d);
       frameOrientation.setToZero(contactableFoot.getSoleFrame());
-      controlFrame.setTransformToParent(framePosition, frameOrientation);
-      controlFrame.update();
+      controlFrame.setPoseAndUpdate(framePosition, frameOrientation);
 
       // assemble acceleration command
       footAcceleration.setToZero(controlFrame, rootBody.getBodyFixedFrame(), controlFrame);
@@ -230,19 +232,35 @@ public class SupportState extends AbstractFootControlState
 
    private void updateHoldPositionSetpoints()
    {
-      if (!footBarelyLoaded.getBooleanValue())
+      footPosition.setToZero(contactableFoot.getSoleFrame());
+      footOrientation.setToZero(contactableFoot.getSoleFrame());
+      footPosition.changeFrame(worldFrame);
+      footOrientation.changeFrame(worldFrame);
+
+      desiredPosition.checkReferenceFrameMatch(footPosition);
+      desiredOrientation.checkReferenceFrameMatch(footOrientation);
+
+      if (footBarelyLoaded.getBooleanValue() && copOnEdge.getBooleanValue())
       {
-         desiredPosition.setToZero(contactableFoot.getSoleFrame());
-         desiredPosition.changeFrame(worldFrame);
+         desiredPosition.setZ(footPosition.getZ());
       }
-      if (!copOnEdge.getBooleanValue())
+      else if (footBarelyLoaded.getBooleanValue())
       {
-         desiredOrientation.setToZero(contactableFoot.getSoleFrame());
-         desiredOrientation.changeFrame(worldFrame);
+         desiredPosition.setZ(footPosition.getZ());
+         desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), footOrientation.getPitch(), footOrientation.getRoll());
+      }
+      else if (copOnEdge.getBooleanValue())
+      {
+         desiredPosition.set(footPosition);
+         desiredOrientation.setYawPitchRoll(footOrientation.getYaw(), desiredOrientation.getPitch(), desiredOrientation.getRoll());
+      }
+      else
+      {
+         desiredPosition.set(footPosition);
+         desiredOrientation.set(footOrientation);
       }
 
-      desiredSoleFrame.setTransformToParent(desiredPosition, desiredOrientation);
-      desiredSoleFrame.update();
+      desiredSoleFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
    }
 
    @Override
@@ -267,32 +285,6 @@ public class SupportState extends AbstractFootControlState
    {
       spatialAccelerationCommand.setWeights(angular, linear);
       spatialFeedbackControlCommand.setWeightsForSolver(angular, linear);
-   }
-
-   private class ControlFrame extends ReferenceFrame
-   {
-      private static final long serialVersionUID = 648565974908207845L;
-      private final Quat4d localQuaternion = new Quat4d();
-      private final Vector3d localTranslation = new Vector3d();
-
-      public ControlFrame(String frameName, ReferenceFrame parentFrame)
-      {
-         super(frameName, parentFrame, false, false, false);
-      }
-
-      public void setTransformToParent(FramePoint framePosition, FrameOrientation frameOrientation)
-      {
-         parentFrame.checkReferenceFrameMatch(framePosition.getReferenceFrame());
-         parentFrame.checkReferenceFrameMatch(frameOrientation.getReferenceFrame());
-         frameOrientation.getQuaternion(localQuaternion);
-         framePosition.get(localTranslation);
-      }
-
-      @Override
-      protected void updateTransformToParent(RigidBodyTransform transformToParent)
-      {
-         transformToParent.set(localQuaternion, localTranslation);
-      }
    }
 
 }

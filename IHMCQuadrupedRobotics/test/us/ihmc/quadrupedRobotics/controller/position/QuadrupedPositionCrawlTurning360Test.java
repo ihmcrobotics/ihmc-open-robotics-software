@@ -59,20 +59,20 @@ public abstract class QuadrupedPositionCrawlTurning360Test implements QuadrupedM
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputZ().set(-0.5);
+      variables.getYoPlanarVelocityInputZ().set(-0.2);
       
       int numSpins = 1;
       for (int i = 0; i < numSpins; i++)
       {
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-         conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 10.0));
-         conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI / 4.0, 1e-2));
+         conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 50.0));
+//         conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI / 4.0, 1e-2));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI / 2.0, 1e-2));
          conductor.simulate();
-
+//
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-         conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 10.0));
-         conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI / 4.0, 1e-2));
+         conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 50.0));
+//         conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI / 4.0, 1e-2));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), 0.0, 1e-2));
          conductor.simulate();
       }
@@ -86,20 +86,20 @@ public abstract class QuadrupedPositionCrawlTurning360Test implements QuadrupedM
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputZ().set(0.5);
+      variables.getYoPlanarVelocityInputZ().set(0.2);
       
       int numSpins = 1;
       for (int i = 0; i < numSpins; i++)
       {
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 10.0));
-         conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI / 4.0, 1e-2));
+//         conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI / 4.0, 1e-2));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), Math.PI / 2.0, 1e-2));
          conductor.simulate();
 
          conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
          conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 10.0));
-         conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI / 4.0, 1e-2));
+//         conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI / 4.0, 1e-2));
          conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), 0.0, 1e-2));
          conductor.simulate();
       }

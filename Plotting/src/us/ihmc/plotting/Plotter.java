@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -21,15 +22,14 @@ import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.plotting.plotter2d.PlotterColors;
-import us.ihmc.plotting.plotter2d.PlotterPoint2d;
-import us.ihmc.plotting.plotter2d.frames.MetersReferenceFrame;
-import us.ihmc.plotting.plotter2d.frames.PixelsReferenceFrame;
-import us.ihmc.plotting.plotter2d.frames.PlotterFrameSpace;
-import us.ihmc.plotting.plotter2d.frames.PlotterSpaceConverter;
-import us.ihmc.plotting.shapes.LineArtifact;
-import us.ihmc.plotting.shapes.PointArtifact;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.plotting.artifact.ArtifactsChangedListener;
+import us.ihmc.plotting.artifact.LineArtifact;
+import us.ihmc.plotting.artifact.PointArtifact;
+import us.ihmc.plotting.frames.MetersReferenceFrame;
+import us.ihmc.plotting.frames.PixelsReferenceFrame;
+import us.ihmc.plotting.frames.PlotterFrameSpace;
+import us.ihmc.plotting.frames.PlotterSpaceConverter;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -37,24 +37,33 @@ import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
 /**
- * TODO Make plotter not extend JPanel.
  * TODO Deprecate archaic methods
  * TODO Factor out artifacts.
- * TODO Fix Artifact interface.
+ * TODO Fix Artifact interface to use meters.
+ * TODO Show labels at sides
+ * TODO Kill Pose and Coordinate
+ * TODO Rewrite PlotterGraphics
+ * TODO ALT rotation
  */
 @SuppressWarnings("serial")
-public class Plotter extends JPanel
+public class Plotter
 {
-   private static final boolean SHOW_LABELS_BY_DEFAULT = false;
+   private static final boolean SHOW_LABELS_BY_DEFAULT = true;
    private static final boolean SHOW_SELECTION_BY_DEFAULT = false;
    private static final boolean SHOW_HISTORY_BY_DEFAULT = false;
+   private static final boolean ENABLE_XY_ZOOM_BY_DEFAULT = false;
    
    private boolean showLabels = SHOW_LABELS_BY_DEFAULT;
    private boolean showSelection = SHOW_SELECTION_BY_DEFAULT;
    private boolean showHistory = SHOW_HISTORY_BY_DEFAULT;
+   private boolean xyZoomEnabled = ENABLE_XY_ZOOM_BY_DEFAULT;
+   
+   private final JPanel panel;
    
    private final PlotterMouseAdapter mouseAdapter;
    private final PlotterComponentAdapter componentAdapter;
+   
+   private final Graphics2DAdapter graphics2dAdapter;
    
    private final Vector2d metersToPixels = new Vector2d(50.0, 50.0);
    private final Rectangle visibleRectangle = new Rectangle();
@@ -67,6 +76,7 @@ public class Plotter extends JPanel
    private final PixelsReferenceFrame screenFrame;
    private final MetersReferenceFrame metersFrame;
    
+   private double screenRotation = Math.PI;
    private final PlotterPoint2d screenPosition;
    private final PlotterPoint2d upperLeftCorner;
    private final PlotterPoint2d lowerRightCorner;
@@ -83,6 +93,30 @@ public class Plotter extends JPanel
    
    public Plotter()
    {
+      panel = new JPanel()
+      {
+         @Override
+         protected void paintComponent(Graphics graphics)
+         {
+            graphics2dAdapter.setGraphics2d((Graphics2D) graphics);
+            updateFrames();
+            super.paintComponent(graphics);
+            Plotter.this.paintComponent(graphics2dAdapter);
+         }
+         
+         @Override
+         public Dimension getPreferredSize()
+         {
+            return Plotter.this.preferredSize;
+         }
+         
+         @Override
+         public void setPreferredSize(Dimension preferredSize)
+         {
+            Plotter.this.preferredSize.setSize(preferredSize);
+         }
+      };
+      
       spaceConverter = new PlotterSpaceConverter()
       {
          private Vector2d scaleVector = new Vector2d();
@@ -114,7 +148,7 @@ public class Plotter extends JPanel
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             screenPosition.changeFrame(pixelsFrame);
-            transformToParent.setRotationEulerAndZeroTranslation(0.0, Math.PI, Math.PI);
+            transformToParent.setRotationEulerAndZeroTranslation(0.0, Math.PI, screenRotation);
             transformToParent.setTranslation(screenPosition.getX(), screenPosition.getY(), 0.0);
          }
       };
@@ -141,20 +175,22 @@ public class Plotter extends JPanel
       
       updateFrames();
       
-      setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), BorderFactory.createLoweredBevelBorder()));
-      setBackground(PlotterColors.BACKGROUND);
+      graphics2dAdapter = new Graphics2DAdapter(metersFrame, pixelsFrame);
+      
+      panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), BorderFactory.createLoweredBevelBorder()));
+      panel.setBackground(PlotterColors.BACKGROUND);
       
       mouseAdapter = new PlotterMouseAdapter();
       componentAdapter = new PlotterComponentAdapter();
       
-      addMouseListener(mouseAdapter);
-      addMouseMotionListener(mouseAdapter);
-      addComponentListener(componentAdapter);
+      panel.addMouseListener(mouseAdapter);
+      panel.addMouseMotionListener(mouseAdapter);
+      panel.addComponentListener(componentAdapter);
    }
    
    private void updateFrames()
    {
-      computeVisibleRect(visibleRectangle);
+      panel.computeVisibleRect(visibleRectangle);
       
       pixelsFrame.update();
       screenFrame.update();
@@ -196,18 +232,8 @@ public class Plotter extends JPanel
       return visibleRectangle.getWidth() > 0.0;
    }
 
-   @Override
-   protected void paintComponent(Graphics graphics)
+   private void paintComponent(final Graphics2DAdapter graphics2d)
    {
-      paintComponent((Graphics2D) graphics);
-   }
-   
-   private void paintComponent(final Graphics2D graphics2d)
-   {
-      updateFrames();
-      
-      super.paintComponent(graphics2d);
-      
       origin.changeFrame(screenFrame);
       forAllArtifacts(86, new ArtifactIterator()
       {
@@ -220,11 +246,11 @@ public class Plotter extends JPanel
       
       if (backgroundImage != null)
       {
-         graphics2d.drawImage(backgroundImage, (int) Math.round(upperLeftCorner.getX()),
+         graphics2dAdapter.drawImage(backgroundImage, (int) Math.round(upperLeftCorner.getX()),
                                                (int) Math.round(upperLeftCorner.getY()),
                                                (int) Math.round(lowerRightCorner.getX()),
                                                (int) Math.round(lowerRightCorner.getY()),
-                                               0, 0, backgroundImage.getWidth(), backgroundImage.getHeight(), this);
+                                               0, 0, backgroundImage.getWidth(), backgroundImage.getHeight(), panel);
       }
       else
       {
@@ -360,7 +386,7 @@ public class Plotter extends JPanel
             Ymin = selectionAreaStart.getY();
          }
 
-         graphics2d.drawRect((int) Math.round(Xmin),
+         graphics2d.drawRectangle((int) Math.round(Xmin),
                              (int) Math.round(Ymin),
                              (int) Math.round(Xmax - Xmin),
                              (int) Math.round(Ymax - Ymin));
@@ -369,22 +395,15 @@ public class Plotter extends JPanel
 
    private double calculateGridSizePixels(double pixelsPerMeter)
    {
-      double medianGridWidthInPixels = 100.0;
+      double medianGridWidthInPixels = Toolkit.getDefaultToolkit().getScreenResolution();
       double desiredMeters = medianGridWidthInPixels / pixelsPerMeter;
-//      System.out.print(" desiredMeters: " + desiredMeters);
       double decimalPlace = Math.log10(desiredMeters);
-//      System.out.print(" decimalPlace: " + decimalPlace);
       double orderOfMagnitude = Math.floor(decimalPlace);
-//      System.out.print(" orderOfMagnitude: " + orderOfMagnitude);
       double nextOrderOfMagnitude = Math.pow(10, orderOfMagnitude + 1);
-//      System.out.print(" nextOrderOfMagnitude: " + nextOrderOfMagnitude);
       double percentageToNextOrderOfMagnitude = desiredMeters / nextOrderOfMagnitude;
-//      System.out.print(" percentageToNextOrderOfMagnitude: " + percentageToNextOrderOfMagnitude);
       
       double remainder = percentageToNextOrderOfMagnitude % 0.5;
-//      System.out.print(" remainder: " + remainder);
       double roundToNearestPoint5 = remainder >= 0.25 ? percentageToNextOrderOfMagnitude + (0.5 - remainder) : percentageToNextOrderOfMagnitude - remainder;
-//      System.out.print(" roundToNearestPoint5: " + roundToNearestPoint5);
       
       double gridSizeMeters;
       if (roundToNearestPoint5 > 0.0)
@@ -395,16 +414,12 @@ public class Plotter extends JPanel
       {
          gridSizeMeters = Math.pow(10, orderOfMagnitude);
       }
-//      System.out.print(" gridSizeMeters: " + gridSizeMeters);
       double gridSizePixels = gridSizeMeters * pixelsPerMeter;
-//      System.out.print(" gridSizePixels: " + gridSizePixels);
-      
-//      System.out.println();
       
       return gridSizePixels;
    }
 
-   private void applyColorForGridline(final Graphics2D graphics2d, int nthGridLineFromOrigin)
+   private void applyColorForGridline(final Graphics2DAdapter graphics2d, int nthGridLineFromOrigin)
    {
       if (nthGridLineFromOrigin % 10 == 0)
       {
@@ -451,55 +466,62 @@ public class Plotter extends JPanel
       private int buttonPressed;
       private PlotterPoint2d middleMouseDragStart = new PlotterPoint2d(screenFrame);
       private PlotterPoint2d middleMouseDragEnd = new PlotterPoint2d(screenFrame);
+      private PlotterPoint2d rightMouseDragStart = new PlotterPoint2d(screenFrame);
+      private PlotterPoint2d rightMouseDragEnd = new PlotterPoint2d(screenFrame);
 
       @Override
-      public void mousePressed(MouseEvent e)
+      public void mousePressed(MouseEvent mouseEvent)
       {
-         buttonPressed = e.getButton();
+         buttonPressed = mouseEvent.getButton();
 
          if (buttonPressed == MouseEvent.BUTTON1)
          {
-            selected.setIncludingFrame(screenFrame, e.getX(), e.getY());
-            selectionAreaStart.setIncludingFrame(screenFrame, e.getX(), e.getY());
+            selected.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
+            selectionAreaStart.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
          }
          else if (buttonPressed == MouseEvent.BUTTON2)
          {
-            middleMouseDragStart.setIncludingFrame(screenFrame, e.getX(), e.getY());
+            middleMouseDragStart.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
          }
          else if (buttonPressed == MouseEvent.BUTTON3)
          {
-            selected.setIncludingFrame(screenFrame, e.getX(), e.getY());
-         }
-
-         // check for double-clicks
-         if (e.getClickCount() > 1)
-         {
-            if (buttonPressed == MouseEvent.BUTTON3)
+            rightMouseDragStart.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
+            
+            if (mouseEvent.getClickCount() > 1)
             {
-               focusPoint.setIncludingFrame(screenFrame, e.getX(), e.getY());
+               focusPoint.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
                centerOnFocusPoint();
-               repaint();
+               panel.repaint();
             }
          }
       }
 
       @Override
-      public void mouseDragged(MouseEvent e)
+      public void mouseDragged(MouseEvent mouseEvent)
       {
          if (buttonPressed == MouseEvent.BUTTON1)
          {
             selectionAreaEnd.changeFrame(screenFrame);
-            selectionAreaEnd.set(e.getX(), e.getY());
+            selectionAreaEnd.set(mouseEvent.getX(), mouseEvent.getY());
             
-            repaint();
+            panel.repaint();
          }
          else if (buttonPressed == MouseEvent.BUTTON2)
          {
-            middleMouseDragEnd.setIncludingFrame(screenFrame, e.getX(), e.getY());
+            middleMouseDragEnd.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
             
             double deltaDragY = middleMouseDragStart.getY() - middleMouseDragEnd.getY();
+            double deltaDragX = middleMouseDragStart.getX() - middleMouseDragEnd.getX();
             
-            double scaledXChange = 1.0 + (deltaDragY * 0.005);
+            double scaledXChange;
+            if (xyZoomEnabled && mouseEvent.isControlDown())
+            {
+               scaledXChange = 1.0 + (deltaDragX * 0.005);
+            }
+            else
+            {
+               scaledXChange = 1.0 + (deltaDragY * 0.005);
+            }
             double scaledYChange = 1.0 + (deltaDragY * 0.005);
             
             focusPoint.setIncludingFrame(screenFrame, visibleRectangle.getWidth() / 2.0, visibleRectangle.getHeight() / 2.0);
@@ -508,11 +530,30 @@ public class Plotter extends JPanel
             
             middleMouseDragStart.set(middleMouseDragEnd);
             
-            repaint();
+            panel.repaint();
          }
          else if (buttonPressed == MouseEvent.BUTTON3)
          {
-            // do nothing
+            rightMouseDragEnd.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
+            
+            focusPoint.changeFrame(screenFrame);
+            
+            rightMouseDragEnd.sub(rightMouseDragStart);
+
+//            if (mouseEvent.isAltDown())
+//            {
+//               screenRotation += 0.01 * (double) mouseEvent.getX();
+//            }
+//            else
+//            {
+               rightMouseDragEnd.negate();
+               focusPoint.add(rightMouseDragEnd);
+//            }
+            
+            centerOnFocusPoint();
+            panel.repaint();
+            
+            rightMouseDragStart.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
          }
       }
    }
@@ -523,21 +564,13 @@ public class Plotter extends JPanel
       public void componentResized(ComponentEvent componentEvent)
       {
          centerOnFocusPoint();
-         repaint();
+         panel.repaint();
       }
    }
    
-   @Override
    public Dimension getPreferredSize()
    {
       return preferredSize;
-   }
-   
-   @Override
-   @Deprecated
-   public void setPreferredSize(Dimension preferredSize)
-   {
-      this.preferredSize.setSize(preferredSize);
    }
    
    public void setPreferredSize(int width, int height)
@@ -578,10 +611,17 @@ public class Plotter extends JPanel
     */
    public void setViewRange(double viewRangeInX, double viewRangeInY)
    {
-      setScale(visibleRectangle.getWidth() / viewRangeInX, visibleRectangle.getHeight() / viewRangeInY);
+      if (isInitialized())
+      {
+         setScale(visibleRectangle.getWidth() / viewRangeInX, visibleRectangle.getHeight() / viewRangeInY);
+      }
+      else
+      {
+         setScale(getPreferredSize().getWidth() / viewRangeInX, getPreferredSize().getHeight() / viewRangeInY);
+      }
    }
    
-   public void setRange(double rangeInSmallestDimension)
+   public void setViewRange(double minimumViewRange)
    {
       double smallestDimension;
       if (isInitialized())
@@ -592,8 +632,23 @@ public class Plotter extends JPanel
       {
          smallestDimension = Math.min(getPreferredSize().getWidth(), getPreferredSize().getHeight());
       }
-      double newPixelsPerMeter = smallestDimension / rangeInSmallestDimension;
+      double newPixelsPerMeter = smallestDimension / minimumViewRange;
       setScale(newPixelsPerMeter, newPixelsPerMeter);
+   }
+   
+   public void setScale(double pixelsPerMeter)
+   {
+      setScale(pixelsPerMeter, pixelsPerMeter);
+   }
+
+   public void setShowLabels(boolean showLabels)
+   {
+      this.showLabels = showLabels;
+   }
+   
+   public void setXYZoomEnabled(boolean xyZoomEnabled)
+   {
+      this.xyZoomEnabled = xyZoomEnabled;
    }
 
    public void showInNewWindow()
@@ -604,13 +659,11 @@ public class Plotter extends JPanel
    public void showInNewWindow(String title)
    {
       JFrame frame = new JFrame(title);
-      frame.getContentPane().add(this, BorderLayout.CENTER);
+      frame.getContentPane().add(panel, BorderLayout.CENTER);
       frame.pack();
       frame.setVisible(true);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
    }
-   
-   // BEGIN ARCHAIC METHODS //
    
    public double getSelectedX()
    {
@@ -624,25 +677,13 @@ public class Plotter extends JPanel
       return selected.getY();
    }
    
-   public void setShowLabels(boolean showLabels)
-   {
-      this.showLabels = showLabels;
-   }
-
    public void setBackgroundImage(BufferedImage backgroundImage)
    {
       this.backgroundImage = backgroundImage;
-      repaint();
+      panel.repaint();
    }
 
-   @Deprecated
-   public void setRangeLimit(int range, double origMapScale, double ullon, double ullat, double lrlon, double lrlat)
-   {
-      setRange(range);
-   }
-
-   @Deprecated
-   public double getRange()
+   public double getViewRange()
    {
       if (visibleRectangle.getWidth() <= visibleRectangle.getHeight())
       {
@@ -659,33 +700,24 @@ public class Plotter extends JPanel
       this.showHistory = drawHistory;
    }
 
-   @Deprecated
-   public void setOffsetX(double focusPointX)
+   public void update()
    {
-      setFocusPointX(focusPointX);
+      panel.repaint();
    }
-
-   @Deprecated
-   public void setOffsetY(double focusPointY)
+   
+   public JPanel getJPanel()
    {
-      setFocusPointY(focusPointY);
+      return panel;
    }
-
-   @Deprecated
-   public double getOffsetX()
+   
+   public Graphics2DAdapter getGraphics2DAdapter()
    {
-      return getFocusPointX();
-   }
-
-   @Deprecated
-   public double getOffsetY()
-   {
-      return getFocusPointY();
+      return graphics2dAdapter;
    }
 
    public PlotterLegendPanel createPlotterLegendPanel()
    {
-      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel();
+      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel(graphics2dAdapter);
       addArtifactsChangedListener(plotterLegendPanel);
       return plotterLegendPanel;
    }
@@ -693,10 +725,10 @@ public class Plotter extends JPanel
    public JPanel createAndAttachPlotterLegendPanel()
    {
       JPanel flashyNewJayPanel = new JPanel();
-      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel();
+      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel(graphics2dAdapter);
       addArtifactsChangedListener(plotterLegendPanel);
       flashyNewJayPanel.setLayout(new BorderLayout());
-      flashyNewJayPanel.add(this, "Center");
+      flashyNewJayPanel.add(panel, "Center");
       flashyNewJayPanel.add(plotterLegendPanel, "South");
       return flashyNewJayPanel;
    }
@@ -713,7 +745,7 @@ public class Plotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void updateArtifact(Artifact newArtifact)
@@ -724,7 +756,7 @@ public class Plotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void updateArtifactNoRePaint(Artifact newArtifact)
@@ -763,7 +795,7 @@ public class Plotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void addArtifactNoRepaint(Artifact newArtifact)
@@ -808,7 +840,7 @@ public class Plotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void removeArtifact(String id)
@@ -819,7 +851,7 @@ public class Plotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void removeArtifactNoRepaint(String id)
@@ -850,7 +882,7 @@ public class Plotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void addArtifactsChangedListener(ArtifactsChangedListener artifactsChangedListener)

@@ -2,16 +2,14 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 
-import us.ihmc.plotting.Artifact;
+import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
+import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 
 public class YoArtifactLine extends Artifact
 {
-   private static final long serialVersionUID = 5741633846461834438L;
    private final YoFramePoint p1;
    private final YoFramePoint p2;
    private final PlotterGraphics plotterGraphics = new PlotterGraphics();
@@ -28,13 +26,14 @@ public class YoArtifactLine extends Artifact
       this.color = color;
    }
 
-   public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   @Override
+   public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
       {
          graphics.setColor(color);
          if (stroke != null)
-            ((Graphics2D) graphics).setStroke(stroke);
+            graphics.setStroke(stroke);
 
          double x1 = p1.getX();
          double y1 = p1.getY();
@@ -48,27 +47,29 @@ public class YoArtifactLine extends Artifact
       }
    }
 
-   public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   @Override
+   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(color);
 
       //    int pixels = 2;
       if (stroke != null)
-         ((Graphics2D) graphics).setStroke(stroke);
+         graphics.setStroke(stroke);
 
       plotterGraphics.setCenter(Xcenter, Ycenter);
       plotterGraphics.setScale(scaleFactor);
       plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.1);
    }
 
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   @Override
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
    }
-
 }
