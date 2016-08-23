@@ -9,6 +9,7 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.LineSegment2d;
 
+@Deprecated
 public class PlotterGraphics
 {
    private int xCenter, yCenter;
