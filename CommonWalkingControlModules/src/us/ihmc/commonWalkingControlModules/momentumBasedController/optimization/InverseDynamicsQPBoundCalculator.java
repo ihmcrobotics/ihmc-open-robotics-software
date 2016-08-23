@@ -15,34 +15,26 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class InverseDynamicsQPBoundCalculator
 {
-   private static final double maxAbsJointVelocity = 9.0; // rad/s
-   private static final double jointLimitDistanceForMaxVelocity = 30.0; // degree
-   private static final double jointLimitFilterBreakFrequency = 20.0; // 1/s
-   private static final double velocityControlGain = 50.0;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final DenseMatrix64F jointsRangeOfMotion;
    private final DenseMatrix64F jointLowerLimits;
    private final DenseMatrix64F jointUpperLimits;
    private final HashMap<OneDoFJoint, JointLimitEnforcement> jointLimitTypes = new HashMap<>();
+   private final HashMap<OneDoFJoint, JointLimitParameters> jointLimitParameters = new HashMap<>();
 
+   private final HashMap<OneDoFJoint, DoubleYoVariable> filterAlphas = new HashMap<>();
    private final HashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredLowerLimits = new HashMap<>();
    private final HashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredUpperLimits = new HashMap<>();
-
-   private final DoubleYoVariable filterAlpha = new DoubleYoVariable("jointLimitFilterAlpha", registry);
-   private final DoubleYoVariable velocityGain = new DoubleYoVariable("limitVelocityGain", registry);
 
    private final JointIndexHandler jointIndexHandler;
    private final OneDoFJoint[] oneDoFJoints;
 
    private final double controlDT;
-   private final double slope;
 
    public InverseDynamicsQPBoundCalculator(JointIndexHandler jointIndexHandler, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
-      this.slope = maxAbsJointVelocity / Math.pow((jointLimitDistanceForMaxVelocity * Math.PI/180.0), 2.0);
       this.jointIndexHandler = jointIndexHandler;
 
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
@@ -50,9 +42,6 @@ public class InverseDynamicsQPBoundCalculator
       jointsRangeOfMotion = new DenseMatrix64F(numberOfDoFs , 1);
       jointLowerLimits = new DenseMatrix64F(numberOfDoFs, 1);
       jointUpperLimits = new DenseMatrix64F(numberOfDoFs, 1);
-
-      filterAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointLimitFilterBreakFrequency, controlDT));
-      velocityGain.set(velocityControlGain);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -65,9 +54,13 @@ public class InverseDynamicsQPBoundCalculator
          jointLowerLimits.set(jointIndex, 0, jointLimitLower);
          jointUpperLimits.set(jointIndex, 0, jointLimitUpper);
          jointLimitTypes.put(joint, JointLimitEnforcement.DEFAULT);
+         jointLimitParameters.put(joint, new JointLimitParameters());
 
+         DoubleYoVariable filterAlpha = new DoubleYoVariable("joint_limit_filter_alpha_" + joint.getName(), parentRegistry);
+         filterAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(Double.POSITIVE_INFINITY, controlDT));
          AlphaFilteredYoVariable filteredLowerLimit = new AlphaFilteredYoVariable("qdd_min_filter_" + joint.getName(), registry, filterAlpha);
          AlphaFilteredYoVariable filteredUpperLimit = new AlphaFilteredYoVariable("qdd_max_filter_" + joint.getName(), registry, filterAlpha);
+         filterAlphas.put(joint, filterAlpha);
          filteredLowerLimits.put(joint, filteredLowerLimit);
          filteredUpperLimits.put(joint, filteredUpperLimit);
       }
@@ -95,6 +88,12 @@ public class InverseDynamicsQPBoundCalculator
       {
          OneDoFJoint joint = command.getJoint(idx);
          jointLimitTypes.put(joint, command.getJointLimitReductionFactor(idx));
+         JointLimitParameters params = command.getJointLimitParameters(idx);
+         if (params != null)
+         {
+            jointLimitParameters.get(joint).set(params);
+            filterAlphas.get(joint).set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(params.getJointLimitFilterBreakFrequency(), controlDT));
+         }
       }
    }
 
@@ -192,6 +191,9 @@ public class InverseDynamicsQPBoundCalculator
       double qDDotMin = -absoluteMaximumJointAcceleration;
       double qDDotMax = absoluteMaximumJointAcceleration;
 
+      JointLimitParameters params = jointLimitParameters.get(joint);
+      double slope = params.getMaxAbsJointVelocity() / Math.pow(params.getJointLimitDistanceForMaxVelocity(), 2.0);
+
       // --- do limiting here ---
       double maxBreakAcceleration = 0.99 * absoluteMaximumJointAcceleration;
       if (!Double.isInfinite(jointLimitLower))
@@ -200,7 +202,7 @@ public class InverseDynamicsQPBoundCalculator
          distance = Math.max(0.0, distance);
 
          double qDotMin = - Math.pow(distance, 2) * slope;
-         qDDotMin = (qDotMin - joint.getQd()) * velocityGain.getDoubleValue();
+         qDDotMin = (qDotMin - joint.getQd()) * params.getVelocityControlGain();
          qDDotMin = MathTools.clipToMinMax(qDDotMin, -absoluteMaximumJointAcceleration, maxBreakAcceleration);
       }
       if (!Double.isInfinite(jointLimitUpper))
@@ -209,7 +211,7 @@ public class InverseDynamicsQPBoundCalculator
          distance = Math.max(0.0, distance);
 
          double qDotMax = Math.pow(distance, 2) * slope;
-         qDDotMax = (qDotMax - joint.getQd()) * velocityGain.getDoubleValue();
+         qDDotMax = (qDotMax - joint.getQd()) * params.getVelocityControlGain();
          qDDotMax = MathTools.clipToMinMax(qDDotMax, -maxBreakAcceleration, absoluteMaximumJointAcceleration);
       }
       // ---
