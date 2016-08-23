@@ -142,11 +142,4 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    {
       return null;
    }
-
-   @Override
-   public String getHeadIMUName()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
 }

@@ -32,13 +32,16 @@ import javax.vecmath.Vector2d;
 import us.ihmc.plotting.frames.MetersReferenceFrame;
 import us.ihmc.plotting.frames.PixelsReferenceFrame;
 
+/**
+ * Everything not deprecated is in meters.
+ */
 public class Graphics2DAdapter
 {
    private final MetersReferenceFrame metersFrame;
    private final PixelsReferenceFrame screenFrame;
    
    private final PlotterPoint2d[] pointBin = new PlotterPoint2d[1];
-   private final Vector2d[] vectorBin = new Vector2d[pointBin.length];
+   private final PlotterVector2d[] vectorBin = new PlotterVector2d[pointBin.length];
    
    private Graphics2D graphics2d;
    
@@ -50,6 +53,7 @@ public class Graphics2DAdapter
       for (int i = 0; i < pointBin.length; i++)
       {
          pointBin[i] = new PlotterPoint2d(metersFrame);
+         vectorBin[i] = new PlotterVector2d(metersFrame);
       }
    }
    
@@ -86,157 +90,191 @@ public class Graphics2DAdapter
    
    public void drawOval(Point2d center, Vector2d radii)
    {
-      pointBin[0].setIncludingFrame(metersFrame, center);
-      pointBin[0].add(-radii.getX(), radii.getY());
-      pointBin[0].changeFrame(screenFrame);
-      graphics2d.drawOval(pixelate(pointBin[0].getX()), pixelate(pointBin[0].getX()), pixelate(radii.getX() * 2.0), pixelate(radii.getY() * 2.0));
+      PlotterPoint2d centerFramePoint = pointBin[0];
+      PlotterVector2d radiiFrameVector = vectorBin[0];
+      centerFramePoint.setIncludingFrame(metersFrame, center);
+      radiiFrameVector.setIncludingFrame(metersFrame, radii);
+      centerFramePoint.add(-radiiFrameVector.getX(), radiiFrameVector.getY());
+      centerFramePoint.changeFrame(screenFrame);
+      radiiFrameVector.changeFrame(screenFrame);
+      graphics2d.drawOval(pixelate(centerFramePoint.getX()), pixelate(centerFramePoint.getY()), pixelate(2.0 * radiiFrameVector.getX()), -pixelate(2.0 * radiiFrameVector.getY()));
    }
    
+   @Deprecated
    public void drawOvalFilled(int x, int y, int width, int height)
    {
       graphics2d.fillOval(x, y, width, height);
    }
 
+   @Deprecated
    public void drawRectangle(int x, int y, int width, int height)
    {
       graphics2d.drawRect(x, y, width, height);
    }
 
+   @Deprecated
    public void drawRectangleFilled(int x, int y, int width, int height)
    {
       graphics2d.fillRect(x, y, width, height);
    }
 
+   @Deprecated
    public void drawRectangle3D(int x, int y, int width, int height, boolean raised)
    {
       graphics2d.draw3DRect(x, y, width, height, raised);
    }
 
+   @Deprecated
    public void drawRectangle3DFilled(int x, int y, int width, int height, boolean raised)
    {
       graphics2d.fill3DRect(x, y, width, height, raised);
    }
 
+   @Deprecated
    public void drawRectangleRounded(int x, int y, int width, int height, int arcWidth, int arcHeight)
    {
       graphics2d.drawRoundRect(x, y, width, height, arcWidth, arcHeight);
    }
 
+   @Deprecated
    public void drawRectangleRoundedFilled(int x, int y, int width, int height, int arcWidth, int arcHeight)
    {
       graphics2d.fillRoundRect(x, y, width, height, arcWidth, arcHeight);
    }
 
+   @Deprecated
    public void drawPolygonFilled(int[] xPoints, int[] yPoints, int nPoints)
    {
       graphics2d.fillPolygon(xPoints, yPoints, nPoints);
    }
 
+   @Deprecated
    public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints)
    {
       graphics2d.drawPolygon(xPoints, yPoints, nPoints);
    }
 
+   @Deprecated
    public void drawPolygonFilled(Polygon p)
    {
       graphics2d.fillPolygon(p);
    }
 
+   @Deprecated
    public void drawPolygon(Polygon p)
    {
       graphics2d.drawPolygon(p);
    }
 
+   @Deprecated
    public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle)
    {
       graphics2d.drawArc(x, y, width, height, startAngle, arcAngle);
    }
 
+   @Deprecated
    public void drawArcFilled(int x, int y, int width, int height, int startAngle, int arcAngle)
    {
       graphics2d.fillArc(x, y, width, height, startAngle, arcAngle);
    }
 
+   @Deprecated
    public void drawString(String str, int x, int y)
    {
       graphics2d.drawString(str, x, y);
    }
 
+   @Deprecated
    public void drawString(String str, float x, float y)
    {
       graphics2d.drawString(str, x, y);
    }
 
+   @Deprecated
    public void drawString(AttributedCharacterIterator iterator, int x, int y)
    {
       graphics2d.drawString(iterator, x, y);
    }
 
+   @Deprecated
    public void drawString(AttributedCharacterIterator iterator, float x, float y)
    {
       graphics2d.drawString(iterator, x, y);
    }
 
+   @Deprecated
    public void drawGlyphVector(GlyphVector g, float x, float y)
    {
       graphics2d.drawGlyphVector(g, x, y);
    }
 
+   @Deprecated
    public void drawBytes(byte[] data, int offset, int length, int x, int y)
    {
       graphics2d.drawBytes(data, offset, length, x, y);
    }
 
+   @Deprecated
    public void drawChars(char[] data, int offset, int length, int x, int y)
    {
       graphics2d.drawChars(data, offset, length, x, y);
    }
 
+   @Deprecated
    public void drawRenderedImage(RenderedImage img, AffineTransform xform)
    {
       graphics2d.drawRenderedImage(img, xform);
    }
 
+   @Deprecated
    public void drawRenderableImage(RenderableImage img, AffineTransform xform)
    {
       graphics2d.drawRenderableImage(img, xform);
    }
 
+   @Deprecated
    public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs)
    {
       return graphics2d.drawImage(img, xform, obs);
    }
 
+   @Deprecated
    public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y)
    {
       graphics2d.drawImage(img, op, x, y);
    }
 
+   @Deprecated
    public boolean drawImage(Image img, int x, int y, ImageObserver observer)
    {
       return graphics2d.drawImage(img, x, y, observer);
    }
 
+   @Deprecated
    public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer)
    {
       return graphics2d.drawImage(img, x, y, bgcolor, observer);
    }
 
+   @Deprecated
    public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer)
    {
       return graphics2d.drawImage(img, x, y, width, height, observer);
    }
 
+   @Deprecated
    public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer)
    {
       return graphics2d.drawImage(img, x, y, width, height, bgcolor, observer);
    }
 
+   @Deprecated
    public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, ImageObserver observer)
    {
       return graphics2d.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, observer);
    }
 
+   @Deprecated
    public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor, ImageObserver observer)
    {
       return graphics2d.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, bgcolor, observer);
@@ -247,106 +285,85 @@ public class Graphics2DAdapter
       return graphics2d.create();
    }
 
+   @Deprecated
    public Graphics create(int x, int y, int width, int height)
    {
       return graphics2d.create(x, y, width, height);
    }
 
+   @Deprecated
    public void clearRectangle(int x, int y, int width, int height)
    {
       graphics2d.clearRect(x, y, width, height);
    }
 
+   @Deprecated
    public void clipRectangle(int x, int y, int width, int height)
    {
       graphics2d.clipRect(x, y, width, height);
    }
 
+   @Deprecated
    public void setClip(int x, int y, int width, int height)
    {
       graphics2d.setClip(x, y, width, height);
    }
 
+   @Deprecated
    public void copyArea(int x, int y, int width, int height, int dx, int dy)
    {
       graphics2d.copyArea(x, y, width, height, dx, dy);
    }
 
+   @Deprecated
    public boolean hitClip(int x, int y, int width, int height)
    {
       return graphics2d.hitClip(x, y, width, height);
    }
 
+   @Deprecated
    public void setClip(Shape clip)
    {
       graphics2d.setClip(clip);
    }
 
+   @Deprecated
    public boolean hit(Rectangle rect, Shape s, boolean onStroke)
    {
       return graphics2d.hit(rect, s, onStroke);
    }
 
+   @Deprecated
    public Rectangle getClipBounds(Rectangle r)
    {
       return graphics2d.getClipBounds(r);
    }
 
+   @Deprecated
    public void clip(Shape s)
    {
       graphics2d.clip(s);
    }
 
-   public void translate(int x, int y)
-   {
-      graphics2d.translate(x, y);
-   }
-
-   public void rotate(double theta)
-   {
-      graphics2d.rotate(theta);
-   }
-
-   public void translate(double tx, double ty)
-   {
-      graphics2d.translate(tx, ty);
-   }
-
-   public void rotate(double theta, double x, double y)
-   {
-      graphics2d.rotate(theta, x, y);
-   }
-
-   public void scale(double sx, double sy)
-   {
-      graphics2d.scale(sx, sy);
-   }
-
-   public void shear(double shx, double shy)
-   {
-      graphics2d.shear(shx, shy);
-   }
-
-   public void transform(AffineTransform Tx)
-   {
-      graphics2d.transform(Tx);
-   }
-
+   @Deprecated
    public void setTransform(AffineTransform Tx)
    {
       graphics2d.setTransform(Tx);
    }
 
+   @Deprecated
    public AffineTransform getTransform()
    {
       return graphics2d.getTransform();
    }
 
+   @Deprecated
    public Shape getClip()
    {
       return graphics2d.getClip();
    }
 
+   @Deprecated
    public Rectangle getClipBounds()
    {
       return graphics2d.getClipBounds();
