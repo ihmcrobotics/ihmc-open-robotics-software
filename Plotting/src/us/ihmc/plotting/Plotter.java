@@ -240,7 +240,7 @@ public class Plotter
          @Override
          public void drawArtifact(Artifact artifact)
          {
-            artifact.draw(graphics2d, (int) Math.round(origin.getX()), (int) Math.round(origin.getY()), 0.0, metersToPixels);
+            artifact.draw(graphics2d, (int) Math.round(origin.getX()), (int) Math.round(origin.getY()), 0.0, metersToPixels.getX());
          }
       });
       
@@ -327,7 +327,7 @@ public class Plotter
             {
                if (showHistory && artifact.getDrawHistory())
                {
-                  artifact.drawHistory(graphics2d, (int) Math.round(origin.getX()), (int) Math.round(origin.getY()), 0.0, metersToPixels);
+                  artifact.drawHistory(graphics2d, (int) Math.round(origin.getX()), (int) Math.round(origin.getY()), metersToPixels.getX());
                }
             }
          });
@@ -340,7 +340,7 @@ public class Plotter
             @Override
             public void drawArtifact(Artifact artifact)
             {
-               artifact.draw(graphics2d, (int) Math.round(origin.getX()), (int) Math.round(origin.getY()), 0.0, metersToPixels);
+               artifact.draw(graphics2d, (int) Math.round(origin.getX()), (int) Math.round(origin.getY()), 0.0, metersToPixels.getX());
             }
          });
       }
