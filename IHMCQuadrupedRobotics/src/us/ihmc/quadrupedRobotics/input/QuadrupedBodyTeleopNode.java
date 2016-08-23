@@ -72,7 +72,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
       this.stepTeleopMode = new QuadrupedStepTeleopMode(packetCommunicator, referenceFrames);
 
       // Set the default teleop mode.
-      this.activeTeleopMode = stepTeleopMode;
+      this.activeTeleopMode = xGaitTeleopMode;
 
       // Initialize all channels to zero.
       for (XBoxOneMapping channel : XBoxOneMapping.values)
@@ -121,8 +121,8 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
 
    private void configureJoystickFilters(Joystick device)
    {
-      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_TRIGGER, false, 0.05, 1));
-      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_TRIGGER, false, 0.05, 1));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_TRIGGER, false, 0.05, 1, 1.0));
+      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_TRIGGER, false, 0.05, 1, 1.0));
       device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_STICK_X, true, 0.1, 1));
       device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_STICK_Y, true, 0.1, 1));
       device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_STICK_X, true, 0.1, 1));

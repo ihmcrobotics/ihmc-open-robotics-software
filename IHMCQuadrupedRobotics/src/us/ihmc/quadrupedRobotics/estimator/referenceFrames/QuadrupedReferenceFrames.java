@@ -76,7 +76,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 
       bodyZUpFrame = new ZUpFrame(worldFrame, bodyFrame, "bodyZUpFrame");
 
-      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      for (QuadrupedJointName jointName : QuadrupedJointName.values)
       {
          OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
          if (joint != null)

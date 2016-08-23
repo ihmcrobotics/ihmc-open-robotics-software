@@ -87,22 +87,22 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 30.0)
-   @Test(timeout = 30000)
-   public void testStandingOnThreeLegsLowerLimit()
-   {
-      double originalHeight = standupPrecisely();
-      
-      variables.getTimedStepQuadrant().set(RobotQuadrant.FRONT_LEFT);
-      variables.getTimedStepGroundClearance().set(0.2);
-      variables.getTimedStepDuration().set(30.0);
-      variables.getTimedStepGoalPositionX().set(variables.getSolePositionXs().get(RobotQuadrant.FRONT_LEFT).getDoubleValue());
-      variables.getTimedStepGoalPositionY().set(variables.getSolePositionYs().get(RobotQuadrant.FRONT_LEFT).getDoubleValue() + 0.2);
-      variables.getTimedStepGoalPositionZ().set(0.2);
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
-
-      lowerHeightUntilFailure(originalHeight);
-   }
+//   @DeployableTestMethod(estimatedDuration = 30.0)
+//   @Test(timeout = 30000)
+//   public void testStandingOnThreeLegsLowerLimit()
+//   {
+//      double originalHeight = standupPrecisely();
+//
+//      variables.getTimedStepQuadrant().set(RobotQuadrant.FRONT_LEFT);
+//      variables.getTimedStepGroundClearance().set(0.2);
+//      variables.getTimedStepDuration().set(30.0);
+//      variables.getTimedStepGoalPositionX().set(variables.getSolePositionXs().get(RobotQuadrant.FRONT_LEFT).getDoubleValue());
+//      variables.getTimedStepGoalPositionY().set(variables.getSolePositionYs().get(RobotQuadrant.FRONT_LEFT).getDoubleValue() + 0.2);
+//      variables.getTimedStepGoalPositionZ().set(0.2);
+//      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
+//
+//      lowerHeightUntilFailure(originalHeight);
+//   }
 
    @DeployableTestMethod(estimatedDuration = 35.0)
    @Test(timeout = 30000)

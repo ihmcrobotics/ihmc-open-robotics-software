@@ -1,17 +1,29 @@
 package us.ihmc.valkyrieRosControl;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
+import javax.vecmath.Vector3d;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RevoluteJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.valkyrieRosControl.XMLJoints.XMLJointWithTorqueOffset;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
 import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
@@ -56,13 +68,15 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
          }
       }
 
-      File file = new File(TORQUE_OFFSET_FILE);
-      Map<String, Double> oldTorqueOffsets = loadTorqueOffsetsFromFile();
       try
       {
+         Path torqueOffsetFilePath = Paths.get(TORQUE_OFFSET_FILE);
+         Files.createDirectories(torqueOffsetFilePath.getParent());
+         File file = torqueOffsetFilePath.toFile();
+         Map<String, Double> oldTorqueOffsets = loadTorqueOffsetsFromFile();
          exportTorqueOffsetsToFile(file, buildXMLJoints(jointTorqueOffsetEstimator, oldTorqueOffsets));
       }
-      catch (JAXBException e)
+      catch (JAXBException | IOException e)
       {
          e.printStackTrace();
       }
@@ -85,7 +99,7 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
          String position = Double.toString(joint.getQ());
          
          double jointTorqueOffsetToExport = jointTorqueOffsetEstimator.getEstimatedJointTorqueOffset(joint);
-         if (oldTorqueOffsets.containsKey(jointName))
+         if (oldTorqueOffsets != null && oldTorqueOffsets.containsKey(jointName))
          {
             jointTorqueOffsetToExport += oldTorqueOffsets.get(jointName);
          }
@@ -152,4 +166,54 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
          return null;
       }
    }
+
+   public static void main(String[] args)
+   {
+      ValkyrieTorqueOffsetPrinter printer = new ValkyrieTorqueOffsetPrinter();
+      
+      List<RevoluteJoint> revoluteJoints = new ArrayList<>();
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("elevatorFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
+      RigidBody rootBody = new RigidBody("elevator", elevatorFrame);
+      final Random random = new Random();
+      Vector3d[] jointAxes = new Vector3d[random.nextInt(10)];
+      for (int i = 0; i < jointAxes.length; i++)
+         jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
+      ScrewTestTools.createRandomChainRobot("blop", revoluteJoints, rootBody, jointAxes, random);
+      final List<OneDoFJoint> oneDoFJoints = new ArrayList<>();
+      for (RevoluteJoint revoluteJoint : revoluteJoints)
+         oneDoFJoints.add(revoluteJoint);
+      
+      JointTorqueOffsetEstimator jointTorqueOffsetEstimator = new JointTorqueOffsetEstimator()
+      {
+         @Override
+         public void resetEstimatedJointTorqueOffset(OneDoFJoint joint)
+         {
+         }
+         
+         @Override
+         public boolean hasTorqueOffsetForJoint(OneDoFJoint joint)
+         {
+            return oneDoFJoints.contains(joint);
+         }
+         
+         @Override
+         public List<OneDoFJoint> getOneDoFJoints()
+         {
+            return oneDoFJoints;
+         }
+         
+         @Override
+         public double getEstimatedJointTorqueOffset(OneDoFJoint joint)
+         {
+            return random.nextDouble();
+         }
+         
+         @Override
+         public void enableJointTorqueOffsetEstimationAtomic(boolean enable)
+         {
+         }
+      };
+      printer.printTorqueOffsets(jointTorqueOffsetEstimator);
+   }
+   
 }

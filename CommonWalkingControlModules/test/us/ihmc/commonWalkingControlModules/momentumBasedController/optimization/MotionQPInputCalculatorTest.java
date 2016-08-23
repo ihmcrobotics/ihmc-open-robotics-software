@@ -51,17 +51,17 @@ public class MotionQPInputCalculatorTest
          Vector3d[] jointAxes = new Vector3d[numberOfJoints];
          for (int i = 0; i < numberOfJoints; i++)
             jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
-         
+
          ScrewTestTools.createRandomChainRobot("blop", joints, elevator, jointAxes, random);
          ScrewTestTools.setRandomPositions(joints, random);
          ScrewTestTools.setRandomVelocities(joints, random);
          joints.get(0).getPredecessor().updateFramesRecursively();
-         
+
          RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
          FramePoint bodyFixedPointToControl = FramePoint.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
          FrameVector desiredLinearAcceleration = FrameVector.generateRandomFrameVector(random, elevatorFrame);
-         
-         
+
+
          YoVariableRegistry registry = new YoVariableRegistry("Dummy");
          ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
          GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
@@ -70,32 +70,32 @@ public class MotionQPInputCalculatorTest
          InverseDynamicsJoint[] jointsToOptimizeFor = new InverseDynamicsJoint[numberOfJoints];
          joints.toArray(jointsToOptimizeFor);
          JointIndexHandler jointIndexHandler = new JointIndexHandler(jointsToOptimizeFor);
-         
-         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, 0.0, registry);
-         
+
+         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, registry);
+
          PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
          pointAccelerationCommand.set(elevator, endEffector);
          pointAccelerationCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
          pointAccelerationCommand.setLinearAcceleration(desiredLinearAcceleration);
-         
+
          MotionQPInput motionQPInput = new MotionQPInput(numberOfJoints);
          motionQPInputCalculator.convertPointAccelerationCommand(pointAccelerationCommand, motionQPInput);
-         
+
          LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
          DenseMatrix64F jInverse = new DenseMatrix64F(numberOfJoints, 6);
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.invert(jInverse);
-         
+
          DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfJoints, 1);
          CommonOps.mult(jInverse, motionQPInput.taskObjective, jointAccelerations);
-         
+
          ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
-         
+
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, true);
          spatialAccelerationCalculator.compute();
          FrameVector actualLinearAcceleration = new FrameVector();
          spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(actualLinearAcceleration, elevator, endEffector, bodyFixedPointToControl);
-         
+
          assertTrue(actualLinearAcceleration.epsilonEquals(desiredLinearAcceleration, 1.0-7));
       }
    }
@@ -112,7 +112,7 @@ public class MotionQPInputCalculatorTest
          Vector3d[] jointAxes = new Vector3d[numberOfJoints];
          for (int i = 0; i < numberOfJoints; i++)
             jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
-         
+
          ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
          List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
          RigidBody elevator = randomFloatingChain.getElevator();
@@ -120,12 +120,12 @@ public class MotionQPInputCalculatorTest
          ScrewTestTools.setRandomPositions(joints, random);
          ScrewTestTools.setRandomVelocities(joints, random);
          joints.get(0).getPredecessor().updateFramesRecursively();
-         
+
          RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
          FramePoint bodyFixedPointToControl = FramePoint.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
          FrameVector desiredLinearAcceleration = FrameVector.generateRandomFrameVector(random, elevator.getBodyFixedFrame());
-         
-         
+
+
          YoVariableRegistry registry = new YoVariableRegistry("Dummy");
          ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
          GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
@@ -133,33 +133,33 @@ public class MotionQPInputCalculatorTest
          twistCalculator.compute();
          InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
          JointIndexHandler jointIndexHandler = new JointIndexHandler(jointsToOptimizeFor);
-         
-         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, 0.0, registry);
-         
+
+         MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, registry);
+
          PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
          pointAccelerationCommand.set(elevator, endEffector);
          pointAccelerationCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
          pointAccelerationCommand.setLinearAcceleration(desiredLinearAcceleration);
-         
+
          int numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
          MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
          motionQPInputCalculator.convertPointAccelerationCommand(pointAccelerationCommand, motionQPInput);
-         
+
          LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
          DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.invert(jInverse);
-         
+
          DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
          CommonOps.mult(jInverse, motionQPInput.taskObjective, jointAccelerations);
-         
+
          ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
-         
+
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, true);
          spatialAccelerationCalculator.compute();
          FrameVector actualLinearAcceleration = new FrameVector();
          spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(actualLinearAcceleration, elevator, endEffector, bodyFixedPointToControl);
-         
+
          assertTrue(actualLinearAcceleration.epsilonEquals(desiredLinearAcceleration, 1.0-7));
       }
    }

@@ -79,6 +79,7 @@ public class DoubleYoVariable extends YoVariable<DoubleYoVariable>
     *
     * @return String representation
     */
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();
@@ -229,21 +230,25 @@ public class DoubleYoVariable extends YoVariable<DoubleYoVariable>
     *
     * @param stringBuffer StringBuffer to which the value will be appended
     */
+   @Override
    public void getValueString(StringBuffer stringBuffer)
    {
       getValueStringFromDouble(stringBuffer, val);
    }
 
+   @Override
    public void getValueStringFromDouble(StringBuffer stringBuffer, double doubleValue)
    {
       DOUBLE_FORMAT.format(doubleValue, stringBuffer, FIELD_POSITION); // Add the variable value to it
    }
 
+   @Override
    public double getValueAsDouble()
    {
       return getDoubleValue();
    }
 
+   @Override
    public void setValueFromDouble(double value, boolean notifyListeners)
    {
       set(value, notifyListeners);

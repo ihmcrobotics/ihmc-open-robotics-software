@@ -7,9 +7,11 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class PushRobotTestConductor
 {
+   private final String jointName;
    private final DoubleYoVariable pushDuration;
    private final DoubleYoVariable pushMagnitude;
    private final YoFrameVector pushDirection;
@@ -21,6 +23,8 @@ public class PushRobotTestConductor
    
    public PushRobotTestConductor(SimulationConstructionSet scs, String jointName)
    {
+      this.jointName = jointName;
+      
       pushDuration = (DoubleYoVariable) scs.getVariable(jointName + "_pushDuration");
       pushMagnitude = (DoubleYoVariable) scs.getVariable(jointName + "_pushMagnitude");
       pushTimeSwitch = (DoubleYoVariable) scs.getVariable(jointName + "_pushTimeSwitch");
@@ -38,6 +42,8 @@ public class PushRobotTestConductor
    
    public void applyForce(Vector3d direction, double magnitude, double duration)
    {
+      PrintTools.info("\nPushing " + jointName + " direction: " + direction + " magnitude: " + magnitude + "(N) for " + duration + "(s)");
+      
       pushDuration.set(duration);
       pushDelay.set(0.0);
       pushDirection.set(direction);

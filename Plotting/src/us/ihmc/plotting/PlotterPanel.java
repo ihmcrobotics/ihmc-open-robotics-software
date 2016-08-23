@@ -229,26 +229,16 @@ public class PlotterPanel extends JPanel
    {
       if (e.getActionCommand().equals("X-Y"))
       {
-         plotter.setOrientation(Plottable.X_Y);
+//         plotter.setOrientation(Plottable.X_Y);
       }
       else if (e.getActionCommand().equals("X-Z"))
       {
-         plotter.setOrientation(Plottable.X_Z);
+//         plotter.setOrientation(Plottable.X_Z);
       }
       else if (e.getActionCommand().equals("Y-Z"))
       {
-         plotter.setOrientation(Plottable.Y_Z);
+//         plotter.setOrientation(Plottable.Y_Z);
       }
-   }
-
-   public void setUpdateDelayInMillis(long timeInMillis)
-   {
-      plotter.setUpdateDelayInMillis(timeInMillis);
-   }
-
-   public long getUpdateDelayInMillis()
-   {
-      return plotter.getUpdateDelayInMillis();
    }
 
    /**
