@@ -9,14 +9,12 @@ import javax.vecmath.Vector2d;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Graphics2DAdapter;
-import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 
-public class YoArtifactOval extends Artifact implements RemoteYoGraphic
+public class YoArtifactOval extends YoArtifact
 {
    private static final int LEGEND_DIAMETER = 10;
    

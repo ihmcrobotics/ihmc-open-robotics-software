@@ -7,15 +7,16 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
-import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoArtifactVector extends Artifact
+public class YoArtifactVector extends YoArtifact
 {
    private final PlotterGraphics plotterGraphics = new PlotterGraphics();
    private final Color3f color;
@@ -113,5 +114,29 @@ public class YoArtifactVector extends Artifact
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
+   }
+
+   @Override
+   public RemoteGraphicType getRemoteGraphicType()
+   {
+      return null;
+   }
+
+   @Override
+   public YoVariable<?>[] getVariables()
+   {
+      return null;
+   }
+
+   @Override
+   public double[] getConstants()
+   {
+      return null;
+   }
+
+   @Override
+   public AppearanceDefinition getAppearance()
+   {
+      return null;
    }
 }

@@ -9,15 +9,13 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
-import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 
-public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
+public class YoArtifactPolygon extends YoArtifact
 {
    private final YoFrameConvexPolygon2d yoConvexPolygon2d;
    private final ConvexPolygon2d convexPolygon2d = new ConvexPolygon2d();
