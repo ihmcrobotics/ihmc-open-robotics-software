@@ -29,23 +29,23 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
    protected ArrayList<ColorRGBA> colors;
    protected ColorRGBA defaultColor;
    protected boolean newCloudAvailable = false;
-   protected JMEPointCloudGenerator uiJMEPointCloudGenerator;
+   protected JMEPointCloudGenerator pointCloudGenerator;
    protected ArrayList<ColorRGBA> colorList = new ArrayList<ColorRGBA>();
    private Random random = new Random();
 
    protected final AtomicReference<Point3f[]> pointSource = new AtomicReference<>();
 
-   public JMELidarSpriteGenerator(JMERenderer basicJMEInterface)
+   public JMELidarSpriteGenerator(JMERenderer jmeRenderer)
    {
-      this(basicJMEInterface, null);
+      this(jmeRenderer, null);
    }
 
-   public JMELidarSpriteGenerator(JMERenderer basicJMEInterface, ColorRGBA colorRGBA)
+   public JMELidarSpriteGenerator(JMERenderer jmeRenderer, ColorRGBA colorRGBA)
    {
       super("JMELidarFINALVisualizer");
 
-      this.jmeRenderer = basicJMEInterface;
-      uiJMEPointCloudGenerator = new JMEPointCloudGenerator(basicJMEInterface.getAssetManager());
+      this.jmeRenderer = jmeRenderer;
+      pointCloudGenerator = new JMEPointCloudGenerator(jmeRenderer.getAssetManager());
 
       defaultColor = colorRGBA;
    }
@@ -107,7 +107,7 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
 
    public void setResolution(float resolution)
    {
-      uiJMEPointCloudGenerator.setSizeCM(resolution);
+      pointCloudGenerator.setSizeCM(resolution);
    }
 
    public void updatePoints(Point3f[] source)
@@ -142,7 +142,7 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
             try
             {
                // System.out.println("making graph");
-               Node pointCloud = uiJMEPointCloudGenerator.generatePointCloudGraph(pointSource, colors);
+               Node pointCloud = pointCloudGenerator.generatePointCloudGraph(pointSource, colors);
 
                pointCloudGeometry = (pointCloud.getChildren().size() > 0) ? (Geometry) pointCloud.getChild(0) : null;
                pointCloud.setShadowMode(ShadowMode.CastAndReceive);
