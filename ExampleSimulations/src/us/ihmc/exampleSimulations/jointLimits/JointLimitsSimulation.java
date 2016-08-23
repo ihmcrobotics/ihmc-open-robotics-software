@@ -11,7 +11,7 @@ public class JointLimitsSimulation
    public JointLimitsSimulation()
    {
       JointLimitsRobot robot = new JointLimitsRobot();
-      robot.setController(new JointLimitsController(robot));
+      robot.setController(new JointLimitsController(robot, simulateDT));
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(64000);
