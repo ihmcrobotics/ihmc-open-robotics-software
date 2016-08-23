@@ -101,6 +101,7 @@ public class Coordinate implements Serializable
       return false;
    }
 
+   @Override
    public String toString()
    {
       return "(" + getX() + ", " + getY() + ", " + getZ() + ")";

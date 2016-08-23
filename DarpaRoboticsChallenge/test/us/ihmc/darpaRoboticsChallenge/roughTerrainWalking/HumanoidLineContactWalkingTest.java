@@ -475,7 +475,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       yoGraphicsListRegistry.registerArtifact("SupportRight", new YoArtifactPolygon("SupportRight", supportPolygons.get(RobotSide.RIGHT), Color.BLACK, false));
 
       scs.addYoVariableRegistry(registry);
-      yoGraphicsListRegistry.addArtifactListsToPlotter((Plotter) scs.getExtraPanel("Plotter"));
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       drcSimulationTestHelper.addRobotControllerOnControllerThread(new VizUpdater());
    }
 
