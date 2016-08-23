@@ -9,7 +9,6 @@ import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
@@ -17,7 +16,6 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.blackfly.BlackFlyParameterSetter;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.ihmcPerception.ScsIMUDataForwarder;
 import us.ihmc.ihmcPerception.camera.FisheyeCameraReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -91,9 +89,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
             robotConfigurationDataBuffer, false);
 
       cameraDataReceiver.registerCameraListener(visionPoseEstimator);
-
-      ScsIMUDataForwarder scsImuDataReciever = new ScsIMUDataForwarder(sensorSuitePacketCommunicator);
-      sensorSuitePacketCommunicator.attachListener(IMUPacket.class, scsImuDataReciever);
    }
 
    @Override
