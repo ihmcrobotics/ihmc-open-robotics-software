@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.plotting;
+package us.ihmc.simulationconstructionset.gui;
 
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
