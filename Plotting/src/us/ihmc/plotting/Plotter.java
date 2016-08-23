@@ -175,7 +175,7 @@ public class Plotter
       
       updateFrames();
       
-      graphics2dAdapter = new Graphics2DAdapter(metersFrame, pixelsFrame);
+      graphics2dAdapter = new Graphics2DAdapter(metersFrame, screenFrame);
       
       panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), BorderFactory.createLoweredBevelBorder()));
       panel.setBackground(PlotterColors.BACKGROUND);
@@ -264,6 +264,7 @@ public class Plotter
          for (double gridX = upperLeftCorner.getX() - overShoot; gridX < lowerRightCorner.getX(); gridX += gridSizePixels.getX())
          {
             drawGuy.changeFrame(pixelsFrame);
+            upperLeftCorner.changeFrame(pixelsFrame);
             drawGuy.set(upperLeftCorner);
             drawGuy.setX(gridX);
             
@@ -289,6 +290,7 @@ public class Plotter
          for (double gridY = lowerRightCorner.getY() - overShoot; gridY < upperLeftCorner.getY(); gridY += gridSizePixels.getY())
          {
             drawGuy.changeFrame(pixelsFrame);
+            upperLeftCorner.changeFrame(pixelsFrame);
             drawGuy.set(upperLeftCorner);
             drawGuy.setY(gridY);
             
