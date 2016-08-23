@@ -19,5 +19,5 @@ public interface QuadrupedTestFactory
    
    public void setGroundProfile3D(GroundProfile3D groundProfile3D);
 
-   void setUsePushRobotController(String jointNameToPushOn);
+   public void setUsePushRobotController(boolean usePushRobotController);
 }

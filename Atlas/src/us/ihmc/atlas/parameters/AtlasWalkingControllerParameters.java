@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParame
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
@@ -623,7 +624,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootSE3Gains gains = new YoFootSE3Gains("HoldFoot", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 0.0; //100.0;
+      double kpXY = 100.0;
       double kpZ = 0.0;
       double zetaXYZ = realRobot ? 0.2 : 1.0;
       double kpXYOrientation = realRobot ? 100.0 : 100.0;
@@ -1005,6 +1006,28 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean useSupportState()
    {
+      return true;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useCenterOfMassVelocityFromEstimator()
+   {
       return false;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String[] getJointsWithRestrictiveLimits(JointLimitParameters jointLimitParametersToPack)
+   {
+      jointLimitParametersToPack.setMaxAbsJointVelocity(9.0);
+      jointLimitParametersToPack.setJointLimitDistanceForMaxVelocity(30.0 * Math.PI/180.0);
+      jointLimitParametersToPack.setJointLimitFilterBreakFrequency(20.0);
+      jointLimitParametersToPack.setVelocityControlGain(50.0);
+
+      String bkxName = jointMap.getSpineJointName(SpineJointName.SPINE_ROLL);
+      String bkyName = jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);
+      String[] joints = {bkxName, bkyName};
+      return joints;
    }
 }

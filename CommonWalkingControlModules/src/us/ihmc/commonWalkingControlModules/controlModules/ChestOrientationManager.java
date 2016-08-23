@@ -49,6 +49,8 @@ public class ChestOrientationManager
    private final ReferenceFrame pelvisZUpFrame;
    private final ReferenceFrame chestFrame;
 
+   private final FrameOrientation tempOrientation = new FrameOrientation();
+
    private final FrameOrientation desiredOrientation = new FrameOrientation();
    private final FrameVector desiredAngularVelocity = new FrameVector();
    private final FrameVector feedForwardAngularAcceleration = new FrameVector();
@@ -64,6 +66,10 @@ public class ChestOrientationManager
    private final BooleanYoVariable isReadyToHandleQueuedCommands;
    private final LongYoVariable numberOfQueuedCommands;
    private final CommandArrayDeque<ChestTrajectoryCommand> commandQueue = new CommandArrayDeque<>(ChestTrajectoryCommand.class);
+
+   private final BooleanYoVariable followChestRollSineWave = new BooleanYoVariable("followChestRollSineWave", registry);
+   private final DoubleYoVariable chestRollSineFrequency = new DoubleYoVariable("chestRollSineFrequency", registry);
+   private final DoubleYoVariable chestRollSineMagnitude = new DoubleYoVariable("chestRollSineMagnitude", registry);
 
    public ChestOrientationManager(HighLevelHumanoidControllerToolbox momentumBasedController, YoOrientationPIDGainsInterface gains, Vector3d angularWeight,
          double trajectoryTime, YoVariableRegistry parentRegistry)
@@ -133,7 +139,21 @@ public class ChestOrientationManager
          isTrackingOrientation.set(!isTrajectoryDone);
       }
 
-      orientationTrajectoryGenerator.getOrientation(desiredOrientation);
+
+      if (followChestRollSineWave.getBooleanValue())
+      {
+         double roll = chestRollSineMagnitude.getDoubleValue() * Math.sin(yoTime.getDoubleValue() * chestRollSineFrequency.getDoubleValue() * 2.0 * Math.PI);
+         tempOrientation.setIncludingFrame(pelvisZUpFrame, 0.0, 0.0, roll);
+         tempOrientation.changeFrame(worldFrame);
+
+         desiredOrientation.set(tempOrientation);
+      }
+
+      else
+      {
+         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
+      }
+
       desiredAngularVelocity.setToZero(worldFrame);
       feedForwardAngularAcceleration.setToZero(worldFrame);
       orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);

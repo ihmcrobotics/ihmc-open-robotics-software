@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
@@ -233,5 +234,22 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public boolean useSupportState()
    {
       return false;
+   }
+
+   /**
+    *
+    * Determined whether the robot should use the velocity to be computed in the estimator, or just compute it from the robot state in the controller (new feature to be tested with Atlas)
+    */
+   public boolean useCenterOfMassVelocityFromEstimator()
+   {
+      return false;
+   }
+
+   /**
+    * Returns a list of joint that should use the more restrictive joint limit enforcement in the QP
+    */
+   public String[] getJointsWithRestrictiveLimits(JointLimitParameters jointLimitParametersToPack)
+   {
+      return new String[0];
    }
 }

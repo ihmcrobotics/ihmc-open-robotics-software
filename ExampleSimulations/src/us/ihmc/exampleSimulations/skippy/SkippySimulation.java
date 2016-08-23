@@ -1,24 +1,40 @@
 package us.ihmc.exampleSimulations.skippy;
 
+import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SkippySimulation
 {
    public static final double DT = 0.0001;
-   public static final double TIME = 10;
+   public static final double controlDT = 0.0001;
+   public static final double TIME = 15;//25.0;//60.0;
    private static SimulationConstructionSet sim;
 
    public SkippySimulation()
    {
-      SkippyRobot skippy = new SkippyRobot();
-      skippy.setController(new SkippyController(skippy,"skippyController"));
-//      skippy.setController(new ExternalControlServer(skippy, "externalControlServer"));
+      //0 - acrobot, 1 - skippy
+      RobotType robotType = RobotType.SKIPPY;
+
+      SkippyRobot skippy = new SkippyRobot(robotType);
+
 
       sim = new SimulationConstructionSet(skippy);
       sim.setGroundVisible(true);
-      sim.setDT(DT, 20);
+      sim.setDT(DT, 100);
       sim.setSimulateDuration(TIME);
-      sim.setCameraPosition(-80, 0.0, 2.0);
+      sim.setCameraPosition(40.0, 0.0, 0.2);
+
+
+      boolean showOverheadView = true;
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+
+      skippy.setController(new SkippyController(skippy, robotType, "skippyController", controlDT, yoGraphicsListRegistry));
+//    skippy.setController(new ExternalControlServer(skippy, "externalControlServer"));
+
+      VisualizerUtils.createOverheadPlotter(sim, showOverheadView, yoGraphicsListRegistry);
+      sim.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       Thread myThread = new Thread(sim);
       myThread.start();

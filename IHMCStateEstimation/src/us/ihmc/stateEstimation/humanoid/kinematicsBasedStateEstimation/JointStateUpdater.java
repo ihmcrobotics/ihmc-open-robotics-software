@@ -97,12 +97,12 @@ public class JointStateUpdater
          {
             PrintTools.warn("Pelvis IMU is null.");
          }
-         
+
          if(chestIMU == null)
          {
             PrintTools.warn("Pelvis IMU is null.");
          }
-         
+
          return null;
       }
    }
@@ -127,7 +127,7 @@ public class JointStateUpdater
          double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);
          double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
          boolean jointEnabledIndicator = sensorMap.isJointEnabled(oneDoFJoint);
-         
+
          oneDoFJoint.setQ(positionSensorData);
          oneDoFJoint.setEnabled(jointEnabledIndicator);
 

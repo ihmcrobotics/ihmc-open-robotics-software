@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
@@ -9,19 +8,16 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
-import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Drawing2DTools;
+import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 
-public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
+public class YoArtifactPosition extends YoArtifact
 {
-   private static final long serialVersionUID = -1824071784539220859L;
-   
    private final ArrayList<double[]> historicalPositions = new ArrayList<double[]>();
 
    private final DoubleYoVariable x;
@@ -62,7 +58,7 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
    private static final int MAX_RADIUS = 25;
 
    @Override
-   public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       double radius = Math.round(4.0 * scale * scaleFactor);
       radius = MathTools.clipToMinMax(radius, MIN_RADIUS, MAX_RADIUS);
@@ -70,7 +66,7 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
    }
 
    @Override
-   public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
       {
@@ -90,7 +86,7 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
       y.set(point2d.getY());
    }
    
-   private void draw(Graphics graphics, double xWorld, double yWorld, int Xcenter, int Ycenter, double scaleFactor)
+   private void draw(Graphics2DAdapter graphics, double xWorld, double yWorld, int Xcenter, int Ycenter, double scaleFactor)
    {
       if (Double.isNaN(xWorld) || Double.isNaN(yWorld))
          return;
@@ -102,7 +98,7 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
       draw(graphics, x, y, radius);
    }
 
-   private void draw(Graphics graphics, int x, int y, int radius)
+   private void draw(Graphics2DAdapter graphics, int x, int y, int radius)
    {
       YoGraphicPosition.GraphicType type = graphicType;
       switch (type)
@@ -162,7 +158,7 @@ public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
    }
    
    @Override
-   public void drawHistory(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       synchronized(historicalPositions)
       {

@@ -19,18 +19,18 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 
-import gnu.trove.list.array.TByteArrayList;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.tools.io.files.FileTools;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class LogSessionBroadcaster extends Thread
 {
    public static final byte[] announceGroupAddress = { (byte) 239, (byte) 255, (byte) 24, (byte) 1 };
-   private final int GROUP_REQUEST_TIMEOUT = 100;
-   private final int GROUP_REQUEST_ATTEMPTS = 10;
+   private final int GROUP_REQUEST_TIMEOUT = 50;
+   private final int GROUP_REQUEST_ATTEMPTS = 5;
    private final int GROUP_ANNOUNCE_RATE = 500;
 
    private final NetworkInterface iface;
@@ -63,7 +63,7 @@ public class LogSessionBroadcaster extends Thread
       try
       {
          this.iface = NetworkInterface.getByInetAddress(controlAddress.getAddress());
-         System.out.println("Announcing logging session on: " + iface);
+         PrintTools.info(this, "Announcing logging session on: " + iface);
          this.controlAddress = controlAddress;
          this.dataAddress = dataAddress;
          this.logSettings = logSettings;
@@ -304,7 +304,7 @@ public class LogSessionBroadcaster extends Thread
    {
       dataPort = LogDataProtocolSettings.LOG_DATA_PORT_RANGE_START + (new Random().nextInt(253) + 1);
 
-      System.out.println("Trying port " + dataPort);
+      PrintTools.info("Trying port " + dataPort);
    }
 
    public static void main(String[] args) throws SocketException, IOException, InterruptedException

@@ -116,11 +116,16 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
             if (errorMessage != null)
             {
                reportInvalidMessage(messageClass, errorMessage);
+               PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate:"); 
+               PrintTools.error(ControllerNetworkSubscriber.this, errorMessage); 
                return;
             }
 
             if (messageFilter.get() != null && !messageFilter.get().isMessageValid(message))
+            {
+               PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate filter!"); 
                return;
+            }
 
             controllerCommandInputManager.submitMessage(message);
          }

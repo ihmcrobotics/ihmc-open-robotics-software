@@ -4,7 +4,7 @@ import java.awt.Color;
 
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.plotting.Artifact;
+import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -227,7 +227,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
 //      yoCoPErrorFiltered.update(copError2d);
 //      yoCoPErrorPerpendicularToRotation.set(yoCoPErrorFiltered.cross(footAngularVelocityUnitVector));
 
-      yoFootAngularVelocityFiltered.getFrameVector2d(footAngularVelocityUnitVector);
+      yoFootAngularVelocityFiltered.getFrameTuple2dIncludingFrame(footAngularVelocityUnitVector);
       footAngularVelocityUnitVector.normalize();
 
       yoCoRPositionFiltered.update(centerOfPressure);
