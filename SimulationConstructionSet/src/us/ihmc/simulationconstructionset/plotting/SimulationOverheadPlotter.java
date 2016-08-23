@@ -29,7 +29,7 @@ public class SimulationOverheadPlotter implements PlaybackListener
 
    public SimulationOverheadPlotter()
    {
-      plotter.setRange(1.0);
+      plotter.setViewRange(1.0);
       buildMenuBar();
 
       plotterShowHideMenu = new PlotterShowHideMenu(plotter);
@@ -105,13 +105,13 @@ public class SimulationOverheadPlotter implements PlaybackListener
 
    public JPanel getJPanel()
    {
-      return plotter;
+      return plotter.getJPanel();
    }
 
    public JPanel getJPanelWithCheckBoxes()
    {
       JPanel jPanel = new JPanel(new BorderLayout());
-      jPanel.add(plotter, BorderLayout.CENTER);
+      jPanel.add(plotter.getJPanel(), BorderLayout.CENTER);
       jPanel.add(trackBodyCB, BorderLayout.NORTH);
       return jPanel;
    }
@@ -124,15 +124,17 @@ public class SimulationOverheadPlotter implements PlaybackListener
    public void update()
    {
       recenterIfTrackingIsSelected();
-      plotter.repaint();
+      plotter.update();
    }
 
    private void recenterIfTrackingIsSelected()
    {
       if (trackBodyCB.isSelected())
       {
-         if (xVariableToTrack != null) plotter.setOffsetX(xVariableToTrack.getDoubleValue());
-         if (yVariableToTrack != null) plotter.setOffsetY(yVariableToTrack.getDoubleValue());
+         if (xVariableToTrack != null)
+            plotter.setFocusPointX(xVariableToTrack.getDoubleValue());
+         if (yVariableToTrack != null)
+            plotter.setFocusPointY(yVariableToTrack.getDoubleValue());
       }
    }
 
