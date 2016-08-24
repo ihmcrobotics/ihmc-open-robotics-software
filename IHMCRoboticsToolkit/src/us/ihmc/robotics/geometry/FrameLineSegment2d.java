@@ -8,16 +8,7 @@ import javax.vecmath.Vector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
  * @author Twan Koolen
- * @version 1.0
  */
 public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, LineSegment2d>
 {
@@ -182,6 +173,7 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       this.lineSegment.set(x0, y0, x1, y1);
    }
 
+   @Override
    public void set(FrameLineSegment2d lineSegment)
    {
       checkReferenceFrameMatch(lineSegment);
@@ -492,6 +484,7 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       return new FrameLineSegment2d(randomPoint1, randomPoint2);
    }
 
+   @Override
    public void setToNaN()
    {
       lineSegment.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
