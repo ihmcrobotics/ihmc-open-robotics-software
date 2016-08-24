@@ -11,7 +11,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -28,19 +27,17 @@ public class YoArtifactVector extends YoArtifact
    private final static double ARROW_HEAD_WIDTH = 0.08;
    private final static double ARROW_HEAD_HEIGHT = 0.12;
 
-   public YoArtifactVector(String name, YoFramePoint2d basePoint, YoFrameVector2d vector, Color3f color)
-   {
-      super(name);
-      this.basePoint = basePoint;
-      this.vector = vector;
-      this.color = color;
-   }
-
    public YoArtifactVector(String name, DoubleYoVariable basePointX, DoubleYoVariable basePointY, DoubleYoVariable vectorX, DoubleYoVariable vectorY, Color3f color)
    {
-      super(name);
-      this.basePoint = new YoFramePoint2d(basePointX, basePointY, ReferenceFrame.getWorldFrame());
-      this.vector = new YoFrameVector2d(vectorX, vectorY, ReferenceFrame.getWorldFrame());
+      this(name, new YoFramePoint2d(basePointX, basePointY, ReferenceFrame.getWorldFrame()),
+                 new YoFrameVector2d(vectorX, vectorY, ReferenceFrame.getWorldFrame()), color);
+   }
+
+   public YoArtifactVector(String name, YoFramePoint2d basePoint, YoFrameVector2d vector, Color3f color)
+   {
+      super(name, basePoint.getYoX(), basePoint.getYoY(), vector.getYoX(), vector.getYoY());
+      this.basePoint = basePoint;
+      this.vector = vector;
       this.color = color;
    }
 
@@ -118,12 +115,6 @@ public class YoArtifactVector extends YoArtifact
 
    @Override
    public RemoteGraphicType getRemoteGraphicType()
-   {
-      return null;
-   }
-
-   @Override
-   public YoVariable<?>[] getVariables()
    {
       return null;
    }

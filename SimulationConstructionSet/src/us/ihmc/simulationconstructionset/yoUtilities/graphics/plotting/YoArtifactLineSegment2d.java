@@ -19,7 +19,6 @@ public class YoArtifactLineSegment2d extends YoArtifact
 {
    private static final double[] CONSTANTS = new double[] {};
 
-   private final DoubleYoVariable[] variables = new DoubleYoVariable[4];
    private final DoubleYoVariable startX;
    private final DoubleYoVariable endX;
    private final DoubleYoVariable startY;
@@ -55,7 +54,7 @@ public class YoArtifactLineSegment2d extends YoArtifact
 
    public YoArtifactLineSegment2d(String name, DoubleYoVariable startX, DoubleYoVariable startY, DoubleYoVariable endX, DoubleYoVariable endY, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
-      super(name);
+      super(name, startX, startY, endX, endY);
       this.startX = startX;
       this.endX = endX;
       this.startY = startY;
@@ -63,13 +62,7 @@ public class YoArtifactLineSegment2d extends YoArtifact
       this.color = color;
       this.arrowHeadWidth = arrowHeadWidth;
       this.arrowHeadHeight = arrowHeadHeight;
-
-      variables[0] = startX;
-      variables[1] = endX;
-      variables[2] = startY;
-      variables[3] = endY;
-
-      drawArrow = true;
+      this.drawArrow = true;
    }
 
    @Override
@@ -152,9 +145,6 @@ public class YoArtifactLineSegment2d extends YoArtifact
       if (stroke != null)
          graphics.setStroke(stroke);
 
-      //      plotterGraphics.setCenter(Xcenter, Ycenter);
-      //      plotterGraphics.setScale(scaleFactor);
-      //      plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.1);
       graphics.drawLine(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
    }
 
@@ -174,12 +164,6 @@ public class YoArtifactLineSegment2d extends YoArtifact
    public RemoteGraphicType getRemoteGraphicType()
    {
       return RemoteGraphicType.LINE_SEGMENT_2D_ARTIFACT;
-   }
-
-   @Override
-   public DoubleYoVariable[] getVariables()
-   {
-      return variables;
    }
 
    @Override

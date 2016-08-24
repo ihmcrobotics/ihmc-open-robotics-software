@@ -30,12 +30,7 @@ public class YoArtifactPolygon extends YoArtifact
 
    public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill)
    {
-      super(name);
-      this.yoConvexPolygon2d = yoConvexPolygon2d;
-      this.color = color;
-      this.fill = fill;
-      this.pixels = 2;
-      stroke = createStroke();
+      this(name, yoConvexPolygon2d, color, fill, 2);
    }
 
    public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill, int lineWidth)
