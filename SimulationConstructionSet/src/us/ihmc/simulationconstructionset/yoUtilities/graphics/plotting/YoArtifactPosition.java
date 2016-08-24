@@ -32,7 +32,7 @@ public class YoArtifactPosition extends YoArtifact
    
    public YoArtifactPosition(String name, DoubleYoVariable x, DoubleYoVariable y, YoGraphicPosition.GraphicType type, Color color, double scale)
    {
-      super(name);
+      super(name, x, y);
       this.x = x;
       this.y = y;
       
@@ -157,6 +157,16 @@ public class YoArtifactPosition extends YoArtifact
       }
    }
    
+   public DoubleYoVariable getYoX()
+   {
+      return x;
+   }
+   
+   public DoubleYoVariable getYoY()
+   {
+      return y;
+   }
+   
    @Override
    public void drawHistory(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
@@ -177,13 +187,7 @@ public class YoArtifactPosition extends YoArtifact
    {
       return RemoteGraphicType.POSITION_ARTIFACT;
    }
-   
-   @Override
-   public DoubleYoVariable[] getVariables() 
-   {
-      return new DoubleYoVariable[]{x, y};
-   }
-
+ 
    @Override
    public double[] getConstants() 
    {
