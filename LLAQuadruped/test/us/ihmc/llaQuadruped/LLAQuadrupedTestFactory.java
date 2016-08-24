@@ -20,7 +20,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
+import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -56,7 +56,7 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
       QuadrupedPhysicalProperties physicalProperties = new LLAQuadrupedPhysicalProperties();
       NetClassList netClassList = new LLAQuadrupedNetClassList();
       QuadrupedSimulationInitialPositionParameters initialPositionParameters = new LLAQuadrupedSimulationInitialPositionParameters();
-      QuadrupedGroundContactParameters groundContactParameters = new LLAQuadrupedGroundContactParameters();
+      GroundContactParameters groundContactParameters = new LLAQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new LLAQuadrupedSensorInformation();
       ParameterRegistry.getInstance().loadFromResources("parameters/simulation.param");
       StateEstimatorParameters stateEstimatorParameters = new LLAQuadrupedStateEstimatorParameters();
