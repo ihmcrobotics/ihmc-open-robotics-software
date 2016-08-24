@@ -79,6 +79,9 @@ public class SupportState extends AbstractFootControlState
    private final BooleanYoVariable assumeCopOnEdge;
    private final BooleanYoVariable assumeFootBarelyLoaded;
 
+   // For line contact walking and balancing:
+   private final BooleanYoVariable holdFootOrientationFlat;
+
    public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.FULL, footControlHelper);
@@ -109,6 +112,7 @@ public class SupportState extends AbstractFootControlState
 
       assumeCopOnEdge = new BooleanYoVariable(prefix + "AssumeCopOnEdge", registry);
       assumeFootBarelyLoaded = new BooleanYoVariable(prefix + "AssumeFootBarelyLoaded", registry);
+      holdFootOrientationFlat = new BooleanYoVariable(prefix + "HoldFlatOrientation", registry);
 
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
@@ -259,6 +263,9 @@ public class SupportState extends AbstractFootControlState
          desiredPosition.set(footPosition);
          desiredOrientation.set(footOrientation);
       }
+
+      if (holdFootOrientationFlat.getBooleanValue())
+         desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), 0.0, 0.0);
 
       desiredSoleFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
    }
