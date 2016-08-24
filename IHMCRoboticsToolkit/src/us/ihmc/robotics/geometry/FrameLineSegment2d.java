@@ -104,13 +104,6 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       this.lineSegment.set(endpoint0, endpoint1);
    }
 
-   // TODO change to setIncludingFrame
-   public void setAndChangeFrame(FramePoint2d endpoint0, FramePoint2d endpoint1)
-   {
-      this.referenceFrame = endpoint0.getReferenceFrame();
-      set(endpoint0, endpoint1);
-   }
-
    public void setFirstEndPoint(FramePoint2d firstEndPointToPack)
    {
       firstEndPointToPack.checkReferenceFrameMatch(referenceFrame);
