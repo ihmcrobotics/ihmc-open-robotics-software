@@ -14,7 +14,7 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStepPressurePlanner;
-import us.ihmc.quadrupedRobotics.planning.stepInput.QuadrupedStepInputPlanner;
+import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStream;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
@@ -35,7 +35,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 public class QuadrupedDcmBasedStepController implements QuadrupedController, QuadrupedTimedStepTransitionCallback
 {
    private final QuadrupedPostureInputProviderInterface postureProvider;
-   private final QuadrupedStepInputPlanner stepPlanner;
+   private final QuadrupedStepStream stepStream;
    private final DoubleYoVariable robotTimestamp;
    private final double controlDT;
    private final double gravity;
@@ -120,10 +120,10 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final BooleanYoVariable onTouchDownTriggered = new BooleanYoVariable("onTouchDownTriggered", registry);
 
    public QuadrupedDcmBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
-         QuadrupedPostureInputProviderInterface postureProvider, QuadrupedStepInputPlanner stepPlanner)
+         QuadrupedPostureInputProviderInterface postureProvider, QuadrupedStepStream stepStream)
    {
       this.postureProvider = postureProvider;
-      this.stepPlanner = stepPlanner;
+      this.stepStream = stepStream;
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
@@ -212,8 +212,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private void updateSetpoints()
    {
       // update step planner
-      stepPlanner.compute();
-      stepPlanner.getBodyOrientation(bodyOrientationReference);
+      stepStream.process();
+      stepStream.getBodyOrientation(bodyOrientationReference);
 
       // update desired horizontal com forces
       computeDcmSetpoints();
@@ -306,12 +306,12 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    {
       // update step plan
       stepPlan.clear();
-      for (int i = 0; i < stepPlanner.getStepQueue().size(); i++)
+      for (int i = 0; i < stepStream.getSteps().size(); i++)
       {
-         if (!haltFlag.getBooleanValue() || stepPlanner.getStepQueue().get(i).getTimeInterval().getEndTime() < haltTime.getDoubleValue())
+         if (!haltFlag.getBooleanValue() || stepStream.getSteps().get(i).getTimeInterval().getEndTime() < haltTime.getDoubleValue())
          {
             stepPlan.enqueue();
-            stepPlan.getTail().set(stepPlanner.getStepQueue().get(i));
+            stepPlan.getTail().set(stepStream.getSteps().get(i));
             stepPlan.getTail().getGoalPosition().add(accumulatedStepAdjustmentForPlanning.getFrameTuple().getVector());
          }
       }
@@ -425,8 +425,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       groundPlaneEstimator.compute(groundPlanePositions);
 
       // initialize step plan
-      stepPlanner.initialize();
-      stepPlanner.compute();
+      stepStream.onEntry();
+      stepStream.process();
 
       // compute absolute step adjustment
       computeAbsoluteStepAdjustment();
