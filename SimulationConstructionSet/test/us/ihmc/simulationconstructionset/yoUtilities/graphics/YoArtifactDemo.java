@@ -34,10 +34,10 @@ public class YoArtifactDemo
       radii.set(1.0, 0.7);
       
       YoFrameLineSegment2d lineSegment = new YoFrameLineSegment2d("segmentGuy", "", ReferenceFrame.getWorldFrame(), registry);
-      lineSegment.getYoX0().set(1.0);
-      lineSegment.getYoY0().set(1.0);
-      lineSegment.getYoX1().set(2.0);
-      lineSegment.getYoY1().set(2.0);
+      lineSegment.getYoFirstEndpointX().set(1.0);
+      lineSegment.getYoFirstEndpointY().set(1.0);
+      lineSegment.getYoSecondEndpointX().set(2.0);
+      lineSegment.getYoSecondEndpointY().set(2.0);
       
       plotter.addArtifact(new LineArtifact("01", new Point2d(0, 0), new Point2d(1, 1)));
       plotter.addArtifact(new LineArtifact("02", new Point2d(1, 1), new Point2d(2, 0)));

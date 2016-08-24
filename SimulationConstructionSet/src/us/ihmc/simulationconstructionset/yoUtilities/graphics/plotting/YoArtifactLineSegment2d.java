@@ -54,7 +54,7 @@ public class YoArtifactLineSegment2d extends YoArtifact
    
    public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d lineSegment, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
-      super(name, lineSegment.getYoX0(), lineSegment.getYoY0(), lineSegment.getYoX1(), lineSegment.getYoY1());
+      super(name, lineSegment.getYoFirstEndpointX(), lineSegment.getYoFirstEndpointY(), lineSegment.getYoSecondEndpointX(), lineSegment.getYoSecondEndpointY());
       this.lineSegment = lineSegment;
       this.color = color;
       this.drawArrow = true;
@@ -64,7 +64,7 @@ public class YoArtifactLineSegment2d extends YoArtifact
 
    public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d lineSegment, Color color)
    {
-      super(name, lineSegment.getYoX0(), lineSegment.getYoY0(), lineSegment.getYoX1(), lineSegment.getYoY1());
+      super(name, lineSegment.getYoFirstEndpointX(), lineSegment.getYoFirstEndpointY(), lineSegment.getYoSecondEndpointX(), lineSegment.getYoSecondEndpointY());
       this.lineSegment = lineSegment;
       this.color = color;
       this.drawArrow = false;
@@ -85,11 +85,11 @@ public class YoArtifactLineSegment2d extends YoArtifact
          plotterGraphics.setCenter(Xcenter, Ycenter);
          plotterGraphics.setScale(scaleFactor);
 
-         plotterGraphics.drawLineSegment(graphics, lineSegment.getX0(), lineSegment.getY0(), lineSegment.getX1(), lineSegment.getY1());
+         plotterGraphics.drawLineSegment(graphics, lineSegment.getFirstEndpointX(), lineSegment.getFirstEndpointY(), lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
 
          if (drawArrow)
          {
-            computeArrowHeadPoints(arrowHeadPoints, lineSegment.getX0(), lineSegment.getY0(), lineSegment.getX1(), lineSegment.getY1());
+            computeArrowHeadPoints(arrowHeadPoints, lineSegment.getFirstEndpointX(), lineSegment.getFirstEndpointY(), lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
             plotterGraphics.fillPolygon(graphics, arrowHeadPoints);
          }
       }

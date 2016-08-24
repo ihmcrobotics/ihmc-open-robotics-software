@@ -655,7 +655,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       double xSNext = Double.NaN;
       if (nextContactFramePosition != null)
       {
-         Line2d line2d = new Line2d(projectionSegment.getFirstEndPointCopy(), projectionSegment.getSecondEndPointCopy());
+         Line2d line2d = new Line2d(projectionSegment.getFirstEndpointCopy(), projectionSegment.getSecondEndpointCopy());
          Point2d nextPoint2d = new Point2d(nextContactFramePosition.getX(), nextContactFramePosition.getY());
          line2d.orthogonalProjectionCopy(nextPoint2d);
          xSNext = projectionSegment.percentageAlongLineSegment(nextPoint2d) * projectionSegment.length();
@@ -972,8 +972,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private void getPartialDerivativesWithRespectToS(LineSegment2d segment, double[] partialDerivativesToPack)
    {
-      double dsdx = (segment.getX1() - segment.getX0()) / segment.length();
-      double dsdy = (segment.getY1() - segment.getY0()) / segment.length();
+      double dsdx = (segment.getSecondEndpointX() - segment.getFirstEndpointX()) / segment.length();
+      double dsdy = (segment.getSecondEndpointY() - segment.getFirstEndpointY()) / segment.length();
 
       partialDerivativesToPack[0] = dsdx;
       partialDerivativesToPack[1] = dsdy;
