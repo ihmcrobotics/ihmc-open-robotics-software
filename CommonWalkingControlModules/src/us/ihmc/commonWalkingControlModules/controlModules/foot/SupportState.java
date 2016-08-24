@@ -60,8 +60,8 @@ public class SupportState extends AbstractFootControlState
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
-   private final DenseMatrix64F accelerationSelectionMatrix = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F feedbackSelectionMatrix = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F accelerationSelectionMatrix = new DenseMatrix64F(dofs, dofs);
+   private final DenseMatrix64F feedbackSelectionMatrix = new DenseMatrix64F(dofs, dofs);
 
    private final FramePoint2d cop2d = new FramePoint2d();
    private final FramePoint framePosition = new FramePoint();
@@ -193,9 +193,9 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       // set selection matrices
-      accelerationSelectionMatrix.reshape(6, 6);
+      accelerationSelectionMatrix.reshape(dofs, dofs);
       CommonOps.setIdentity(accelerationSelectionMatrix);
-      feedbackSelectionMatrix.reshape(6, 6);
+      feedbackSelectionMatrix.reshape(dofs, dofs);
       CommonOps.setIdentity(feedbackSelectionMatrix);
 
       for (int i = 0; i < dofs; i++)
@@ -223,7 +223,7 @@ public class SupportState extends AbstractFootControlState
 
       spatialAccelerationCommand.setSelectionMatrix(accelerationSelectionMatrix);
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
-      if (accelerationSelectionMatrix.getNumRows() + feedbackSelectionMatrix.getNumRows() != 6)
+      if (accelerationSelectionMatrix.getNumRows() + feedbackSelectionMatrix.getNumRows() != dofs)
          throw new RuntimeException("Trying to control too much or too little.");
 
       // update visualization
