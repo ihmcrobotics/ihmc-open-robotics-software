@@ -24,6 +24,7 @@ public class InverseDynamicsQPBoundCalculator
    private final HashMap<OneDoFJoint, JointLimitParameters> jointLimitParameters = new HashMap<>();
 
    private final HashMap<OneDoFJoint, DoubleYoVariable> filterAlphas = new HashMap<>();
+   private final HashMap<OneDoFJoint, DoubleYoVariable> velocityGains = new HashMap<>();
    private final HashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredLowerLimits = new HashMap<>();
    private final HashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredUpperLimits = new HashMap<>();
 
@@ -63,6 +64,9 @@ public class InverseDynamicsQPBoundCalculator
          filterAlphas.put(joint, filterAlpha);
          filteredLowerLimits.put(joint, filteredLowerLimit);
          filteredUpperLimits.put(joint, filteredUpperLimit);
+         
+         DoubleYoVariable velocityGain = new DoubleYoVariable("joint_limit_velocity_gain_" + joint.getName(), registry);
+         velocityGains.put(joint, velocityGain);
       }
 
       parentRegistry.addChild(registry);
@@ -93,6 +97,7 @@ public class InverseDynamicsQPBoundCalculator
          {
             jointLimitParameters.get(joint).set(params);
             filterAlphas.get(joint).set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(params.getJointLimitFilterBreakFrequency(), controlDT));
+            velocityGains.get(joint).set(params.getVelocityControlGain());
          }
       }
    }
@@ -202,7 +207,7 @@ public class InverseDynamicsQPBoundCalculator
          distance = Math.max(0.0, distance);
 
          double qDotMin = - Math.pow(distance, 2) * slope;
-         qDDotMin = (qDotMin - joint.getQd()) * params.getVelocityControlGain();
+         qDDotMin = (qDotMin - joint.getQd()) * velocityGains.get(joint).getDoubleValue();
          qDDotMin = MathTools.clipToMinMax(qDDotMin, -absoluteMaximumJointAcceleration, maxBreakAcceleration);
       }
       if (!Double.isInfinite(jointLimitUpper))
@@ -211,7 +216,7 @@ public class InverseDynamicsQPBoundCalculator
          distance = Math.max(0.0, distance);
 
          double qDotMax = Math.pow(distance, 2) * slope;
-         qDDotMax = (qDotMax - joint.getQd()) * params.getVelocityControlGain();
+         qDDotMax = (qDotMax - joint.getQd()) * velocityGains.get(joint).getDoubleValue();
          qDDotMax = MathTools.clipToMinMax(qDDotMax, -maxBreakAcceleration, absoluteMaximumJointAcceleration);
       }
       // ---
