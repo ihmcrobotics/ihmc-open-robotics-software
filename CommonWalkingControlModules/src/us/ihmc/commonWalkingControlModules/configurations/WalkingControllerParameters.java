@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
@@ -247,7 +248,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    /**
     * Returns a list of joint that should use the more restrictive joint limit enforcement in the QP
     */
-   public String[] getJointsWithRestrictiveLimits()
+   public String[] getJointsWithRestrictiveLimits(JointLimitParameters jointLimitParametersToPack)
    {
       return new String[0];
    }

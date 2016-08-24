@@ -42,6 +42,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceMana
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -113,8 +114,10 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final StatusMessageOutputManager statusOutputManager;
    private final WalkingCommandConsumer commandConsumer;
 
-   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
+   private final BooleanYoVariable limitCommandSent = new BooleanYoVariable("limitCommandSent", registry);
+   
+   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
@@ -172,10 +175,11 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       boolean enableHighCoPDamping = highCoPDampingDuration > 0.0 && !Double.isInfinite(coPErrorThreshold);
       momentumBasedController.setHighCoPDampingParameters(enableHighCoPDamping, highCoPDampingDuration, coPErrorThreshold);
 
-      String[] jointNamesRestrictiveLimits = walkingControllerParameters.getJointsWithRestrictiveLimits();
+      JointLimitParameters limitParameters = new JointLimitParameters();
+      String[] jointNamesRestrictiveLimits = walkingControllerParameters.getJointsWithRestrictiveLimits(limitParameters);
       OneDoFJoint[] jointsWithRestrictiveLimit = ScrewTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints, jointNamesRestrictiveLimits), OneDoFJoint.class);
       for (OneDoFJoint joint : jointsWithRestrictiveLimit)
-         jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE);
+         jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
    }
 
    private void setupStateMachine()
@@ -613,7 +617,11 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       planeContactStateCommandPool.clear();
 
       controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
-      controllerCoreCommand.addInverseDynamicsCommand(jointLimitEnforcementMethodCommand);
+      if (!limitCommandSent.getBooleanValue())
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(jointLimitEnforcementMethodCommand);
+         limitCommandSent.set(true);
+      }
 
       boolean isHighCoPDampingNeeded = momentumBasedController.estimateIfHighCoPDampingNeeded(footDesiredCoPs);
 

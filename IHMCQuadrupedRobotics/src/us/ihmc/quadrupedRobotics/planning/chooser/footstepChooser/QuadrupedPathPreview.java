@@ -15,7 +15,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactCircle;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactOval;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
 public class QuadrupedPathPreview
@@ -35,7 +35,7 @@ public class QuadrupedPathPreview
 
    private final DoubleYoVariable inscribedCircleRadius = new DoubleYoVariable("inscribedCircleRadius", registry);
    private final YoFramePoint[] circleCenters = new YoFramePoint[iterations]; //new YoFramePoint("circleCenter", ReferenceFrame.getWorldFrame(), registry);
-   private final YoArtifactCircle[] inscribedCircles = new YoArtifactCircle[iterations];//new YoArtifactCircle("inscribedCircle", circleCenter, inscribedCircleRadius, Color.BLACK);
+   private final YoArtifactOval[] inscribedCircles = new YoArtifactOval[iterations];//new YoArtifactCircle("inscribedCircle", circleCenter, inscribedCircleRadius, Color.BLACK);
 
    private final YoFrameConvexPolygon2d[] commonSupportPolygons = new YoFrameConvexPolygon2d[iterations];
    private final YoArtifactPolygon[] commonSupportArtifactPolygons = new YoArtifactPolygon[iterations];
@@ -68,7 +68,7 @@ public class QuadrupedPathPreview
          yoGraphicsListRegistry.registerArtifact(polygonName, commonSupportArtifactPolygons[i]);
 
          circleCenters[i] = new YoFramePoint("circleCenter" + i, ReferenceFrame.getWorldFrame(), registry);
-         inscribedCircles[i] = new YoArtifactCircle("inscribedCircle" + i, circleCenters[i], inscribedCircleRadius, Color.BLACK);
+         inscribedCircles[i] = new YoArtifactOval("inscribedCircle" + i, circleCenters[i], inscribedCircleRadius, Color.BLACK);
          yoGraphicsListRegistry.registerArtifact(polygonName, inscribedCircles[i]);
       }
 

@@ -8,10 +8,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
-import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.PlotterShowHideMenu;
+import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
+import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
@@ -63,8 +63,8 @@ public class VisualizerUtils
                {
                   if (artifact.getID() == variableNameToTrack)
                   {
-                     plotter.setXVariableToTrack(((YoArtifactPosition) artifact).getVariables()[0]);
-                     plotter.setYVariableToTrack(((YoArtifactPosition) artifact).getVariables()[1]);
+                     plotter.setXVariableToTrack(((YoArtifactPosition) artifact).getYoX());
+                     plotter.setYVariableToTrack(((YoArtifactPosition) artifact).getYoY());
                   }
                }
             }
@@ -116,8 +116,8 @@ public class VisualizerUtils
                {
                   if (artifact.getID() == variableNameToTrack)
                   {
-                     plotter.setXVariableToTrack(((YoArtifactPosition) artifact).getVariables()[0]);
-                     plotter.setYVariableToTrack(((YoArtifactPosition) artifact).getVariables()[1]);
+                     plotter.setXVariableToTrack(((YoArtifactPosition) artifact).getYoX());
+                     plotter.setYVariableToTrack(((YoArtifactPosition) artifact).getYoY());
                   }
                }
             }

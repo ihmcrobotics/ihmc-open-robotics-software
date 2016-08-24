@@ -2,6 +2,7 @@ package us.ihmc.plotting;
 
 import java.io.Serializable;
 
+@Deprecated
 public class Pose extends Coordinate implements Serializable
 {
    private static final long serialVersionUID = 3781748456290298303L;
@@ -12,14 +13,6 @@ public class Pose extends Coordinate implements Serializable
    public Pose(double x, double y, double yaw, int unit)
    {
       super(x, y, unit);
-      this.yaw = yaw;
-   }
-
-   public Pose(double roll, double pitch, double yaw)
-   {
-      super();
-      this.roll = roll;
-      this.pitch = pitch;
       this.yaw = yaw;
    }
 
@@ -67,6 +60,7 @@ public class Pose extends Coordinate implements Serializable
       return true;
    }
 
+   @Override
    public String toString()
    {
       return "(" + getX() + ", " + getY() + ", " + getZ() + ", " + getRoll() + ", " + getPitch() + ", " + getYaw() + ")";

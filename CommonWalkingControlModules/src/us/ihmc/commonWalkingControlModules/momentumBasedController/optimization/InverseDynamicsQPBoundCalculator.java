@@ -9,6 +9,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class InverseDynamicsQPBoundCalculator
@@ -19,6 +21,12 @@ public class InverseDynamicsQPBoundCalculator
    private final DenseMatrix64F jointLowerLimits;
    private final DenseMatrix64F jointUpperLimits;
    private final HashMap<OneDoFJoint, JointLimitEnforcement> jointLimitTypes = new HashMap<>();
+   private final HashMap<OneDoFJoint, JointLimitParameters> jointLimitParameters = new HashMap<>();
+
+   private final HashMap<OneDoFJoint, DoubleYoVariable> filterAlphas = new HashMap<>();
+   private final HashMap<OneDoFJoint, DoubleYoVariable> velocityGains = new HashMap<>();
+   private final HashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredLowerLimits = new HashMap<>();
+   private final HashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredUpperLimits = new HashMap<>();
 
    private final JointIndexHandler jointIndexHandler;
    private final OneDoFJoint[] oneDoFJoints;
@@ -47,6 +55,18 @@ public class InverseDynamicsQPBoundCalculator
          jointLowerLimits.set(jointIndex, 0, jointLimitLower);
          jointUpperLimits.set(jointIndex, 0, jointLimitUpper);
          jointLimitTypes.put(joint, JointLimitEnforcement.DEFAULT);
+         jointLimitParameters.put(joint, new JointLimitParameters());
+
+         DoubleYoVariable filterAlpha = new DoubleYoVariable("joint_limit_filter_alpha_" + joint.getName(), parentRegistry);
+         filterAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(Double.POSITIVE_INFINITY, controlDT));
+         AlphaFilteredYoVariable filteredLowerLimit = new AlphaFilteredYoVariable("qdd_min_filter_" + joint.getName(), registry, filterAlpha);
+         AlphaFilteredYoVariable filteredUpperLimit = new AlphaFilteredYoVariable("qdd_max_filter_" + joint.getName(), registry, filterAlpha);
+         filterAlphas.put(joint, filterAlpha);
+         filteredLowerLimits.put(joint, filteredLowerLimit);
+         filteredUpperLimits.put(joint, filteredUpperLimit);
+         
+         DoubleYoVariable velocityGain = new DoubleYoVariable("joint_limit_velocity_gain_" + joint.getName(), registry);
+         velocityGains.put(joint, velocityGain);
       }
 
       parentRegistry.addChild(registry);
@@ -72,6 +92,13 @@ public class InverseDynamicsQPBoundCalculator
       {
          OneDoFJoint joint = command.getJoint(idx);
          jointLimitTypes.put(joint, command.getJointLimitReductionFactor(idx));
+         JointLimitParameters params = command.getJointLimitParameters(idx);
+         if (params != null)
+         {
+            jointLimitParameters.get(joint).set(params);
+            filterAlphas.get(joint).set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(params.getJointLimitFilterBreakFrequency(), controlDT));
+            velocityGains.get(joint).set(params.getVelocityControlGain());
+         }
       }
    }
 
@@ -169,16 +196,18 @@ public class InverseDynamicsQPBoundCalculator
       double qDDotMin = -absoluteMaximumJointAcceleration;
       double qDDotMax = absoluteMaximumJointAcceleration;
 
+      JointLimitParameters params = jointLimitParameters.get(joint);
+      double slope = params.getMaxAbsJointVelocity() / Math.pow(params.getJointLimitDistanceForMaxVelocity(), 2.0);
+
       // --- do limiting here ---
-      double timeHorizon = 5.0 * controlDT;
       double maxBreakAcceleration = 0.99 * absoluteMaximumJointAcceleration;
       if (!Double.isInfinite(jointLimitLower))
       {
          double distance = joint.getQ() - jointLimitLower;
          distance = Math.max(0.0, distance);
 
-         double qDotMin = - Math.pow(distance, 2) / timeHorizon;
-         qDDotMin = (qDotMin - joint.getQd()) / timeHorizon;
+         double qDotMin = - Math.pow(distance, 2) * slope;
+         qDDotMin = (qDotMin - joint.getQd()) * velocityGains.get(joint).getDoubleValue();
          qDDotMin = MathTools.clipToMinMax(qDDotMin, -absoluteMaximumJointAcceleration, maxBreakAcceleration);
       }
       if (!Double.isInfinite(jointLimitUpper))
@@ -186,13 +215,15 @@ public class InverseDynamicsQPBoundCalculator
          double distance = jointLimitUpper - joint.getQ();
          distance = Math.max(0.0, distance);
 
-         double qDotMax = Math.pow(distance, 2) / timeHorizon;
-         qDDotMax = (qDotMax - joint.getQd()) / timeHorizon;
+         double qDotMax = Math.pow(distance, 2) * slope;
+         qDDotMax = (qDotMax - joint.getQd()) * velocityGains.get(joint).getDoubleValue();
          qDDotMax = MathTools.clipToMinMax(qDDotMax, -maxBreakAcceleration, absoluteMaximumJointAcceleration);
       }
       // ---
 
-      qDDotMinToPack.set(index, 0, qDDotMin);
-      qDDotMaxToPack.set(index, 0, qDDotMax);
+      filteredLowerLimits.get(joint).update(qDDotMin);
+      filteredUpperLimits.get(joint).update(qDDotMax);
+      qDDotMinToPack.set(index, 0, filteredLowerLimits.get(joint).getDoubleValue());
+      qDDotMaxToPack.set(index, 0, filteredUpperLimits.get(joint).getDoubleValue());
    }
 }
