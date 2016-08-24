@@ -44,6 +44,8 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO Kill Pose and Coordinate
  * TODO Rewrite PlotterGraphics
  * TODO ALT rotation
+ * TODO LineSegments unified
+ * TODO Lines unified
  */
 @SuppressWarnings("serial")
 public class Plotter

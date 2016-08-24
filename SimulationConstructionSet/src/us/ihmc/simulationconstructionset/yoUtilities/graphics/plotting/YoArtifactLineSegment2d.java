@@ -12,57 +12,62 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoArtifactLineSegment2d extends YoArtifact
 {
+   private static final BasicStroke STROKE = new BasicStroke(2);
    private static final double[] CONSTANTS = new double[] {};
 
-   private final DoubleYoVariable startX;
-   private final DoubleYoVariable endX;
-   private final DoubleYoVariable startY;
-   private final DoubleYoVariable endY;
+   private final YoFrameLineSegment2d lineSegment;
+   
+   private final LineSegment2d tempLineSegment = new LineSegment2d();
+   
    private final PlotterGraphics plotterGraphics = new PlotterGraphics();
    private final Color color;
-   private static final int pixels = 2;
-   private static final BasicStroke stroke = new BasicStroke(pixels);
 
-   private boolean drawArrow = false;
-   private final double arrowHeadWidth;
-   private final double arrowHeadHeight;
+   private final boolean drawArrow;
+   private double arrowHeadWidth;
+   private double arrowHeadHeight;
 
-   public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d yoFrameLineSegment2d, Color color)
-   {
-      this(name, yoFrameLineSegment2d, color, Double.NaN, Double.NaN);
-   }
-
-   public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d yoFrameLineSegment2d, Color color, double arrowHeadWidth, double arrowHeadHeight)
-   {
-      this(name, yoFrameLineSegment2d.getYoX0(), yoFrameLineSegment2d.getYoY0(), yoFrameLineSegment2d.getYoX1(), yoFrameLineSegment2d.getYoY1(), color, arrowHeadWidth, arrowHeadHeight);
-   }
-
-   public YoArtifactLineSegment2d(String name, YoFramePoint2d startPoint, YoFramePoint2d endPoint, Color color)
-   {
-      this(name, startPoint.getYoX(), startPoint.getYoY(), endPoint.getYoX(), endPoint.getYoY(), color, Double.NaN, Double.NaN);
-   }
+   private ArrayList<Point2d> arrowHeadPoints = null;
+   private Vector2d arrowHeadVector = null;
+   private Vector2d arrowHeadLateralVector = null;
 
    public YoArtifactLineSegment2d(String name, YoFramePoint2d startPoint, YoFramePoint2d endPoint, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
       this(name, startPoint.getYoX(), startPoint.getYoY(), endPoint.getYoX(), endPoint.getYoY(), color, arrowHeadWidth, arrowHeadHeight);
    }
 
-   public YoArtifactLineSegment2d(String name, DoubleYoVariable startX, DoubleYoVariable startY, DoubleYoVariable endX, DoubleYoVariable endY, Color color, double arrowHeadWidth, double arrowHeadHeight)
+   private YoArtifactLineSegment2d(String name, DoubleYoVariable startX, DoubleYoVariable startY, DoubleYoVariable endX, DoubleYoVariable endY, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
-      super(name, startX, startY, endX, endY);
-      this.startX = startX;
-      this.endX = endX;
-      this.startY = startY;
-      this.endY = endY;
+      this(name, new YoFrameLineSegment2d(startX, startY, endX, endY, ReferenceFrame.getWorldFrame()), color, arrowHeadWidth, arrowHeadHeight);
+   }
+   
+   public YoArtifactLineSegment2d(String name, YoFramePoint2d start, YoFramePoint2d end, Color color)
+   {
+      this(name, new YoFrameLineSegment2d(start.getYoX(), start.getYoY(), end.getYoX(), end.getYoY(), ReferenceFrame.getWorldFrame()), color);
+   }
+   
+   public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d lineSegment, Color color, double arrowHeadWidth, double arrowHeadHeight)
+   {
+      super(name, lineSegment.getYoX0(), lineSegment.getYoY0(), lineSegment.getYoX1(), lineSegment.getYoY1());
+      this.lineSegment = lineSegment;
       this.color = color;
+      this.drawArrow = true;
       this.arrowHeadWidth = arrowHeadWidth;
       this.arrowHeadHeight = arrowHeadHeight;
-      this.drawArrow = true;
+   }
+
+   public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d lineSegment, Color color)
+   {
+      super(name, lineSegment.getYoX0(), lineSegment.getYoY0(), lineSegment.getYoX1(), lineSegment.getYoY1());
+      this.lineSegment = lineSegment;
+      this.color = color;
+      this.drawArrow = false;
    }
 
    @Override
@@ -72,33 +77,23 @@ public class YoArtifactLineSegment2d extends YoArtifact
       {
          graphics.setColor(color);
 
-         if (stroke != null)
-            graphics.setStroke(stroke);
+         if (STROKE != null)
+            graphics.setStroke(STROKE);
 
+         
+         
          plotterGraphics.setCenter(Xcenter, Ycenter);
          plotterGraphics.setScale(scaleFactor);
 
-         double x0 = startX.getDoubleValue();
-         double x1 = endX.getDoubleValue();
-         double y0 = startY.getDoubleValue();
-         double y1 = endY.getDoubleValue();
-
-         if (startX.isNaN() || endX.isNaN() || startY.isNaN() || endY.isNaN())
-            return;
-
-         plotterGraphics.drawLineSegment(graphics, x0, y0, x1, y1);
+         plotterGraphics.drawLineSegment(graphics, lineSegment.getX0(), lineSegment.getY0(), lineSegment.getX1(), lineSegment.getY1());
 
          if (drawArrow)
          {
-            computeArrowHeadPoints(arrowHeadPoints, x0, y0, x1, y1);
+            computeArrowHeadPoints(arrowHeadPoints, lineSegment.getX0(), lineSegment.getY0(), lineSegment.getX1(), lineSegment.getY1());
             plotterGraphics.fillPolygon(graphics, arrowHeadPoints);
          }
       }
    }
-
-   private ArrayList<Point2d> arrowHeadPoints = null;
-   private Vector2d arrowHeadVector = null;
-   private Vector2d arrowHeadLateralVector = null;
 
    private void computeArrowHeadPoints(ArrayList<Point2d> arrowHeadPointsToPack, double x0, double y0, double x1, double y1)
    {
@@ -142,8 +137,8 @@ public class YoArtifactLineSegment2d extends YoArtifact
    public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(color);
-      if (stroke != null)
-         graphics.setStroke(stroke);
+      if (STROKE != null)
+         graphics.setStroke(STROKE);
 
       graphics.drawLine(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
    }
