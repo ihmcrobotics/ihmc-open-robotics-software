@@ -28,10 +28,10 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       endpoints[1] = new TransformablePoint2d(Double.MAX_VALUE, Double.MAX_VALUE);
    }
 
-   public LineSegment2d(double x0, double y0, double x1, double y1)
+   public LineSegment2d(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
    {
-      endpoints[0] = new TransformablePoint2d(x0, y0);
-      endpoints[1] = new TransformablePoint2d(x1, y1);
+      endpoints[0] = new TransformablePoint2d(firstEndpointX, firstEndpointY);
+      endpoints[1] = new TransformablePoint2d(secondEndpointX, secondEndpointY);
       checkEndpointsDistinct(endpoints);
    }
 
@@ -65,12 +65,12 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       endpoint1.set(endpoints[1]);
    }
    
-   public Point2d getStartPoint()
+   public Point2d getFirstEndpoint()
    {
       return endpoints[0];
    }
    
-   public Point2d getEndPoint()
+   public Point2d getSecondEndpoint()
    {
       return endpoints[1];
    }
@@ -80,32 +80,32 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       return endpoints;
    }
 
-   public Point2d getFirstEndPointCopy()
+   public Point2d getFirstEndpointCopy()
    {
       return new Point2d(endpoints[0]);
    }
 
-   public Point2d getSecondEndPointCopy()
+   public Point2d getSecondEndpointCopy()
    {
       return new Point2d(endpoints[1]);
    }
 
-   public double getX0()
+   public double getFirstEndpointX()
    {
       return endpoints[0].x;
    }
 
-   public double getY0()
+   public double getFirstEndpointY()
    {
       return endpoints[0].y;
    }
 
-   public double getX1()
+   public double getSecondEndpointX()
    {
       return endpoints[1].x;
    }
 
-   public double getY1()
+   public double getSecondEndpointY()
    {
       return endpoints[1].y;
    }
@@ -125,10 +125,10 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       checkEndpointsDistinct(endpoints);
    }
 
-   public void set(double x0, double y0, double x1, double y1)
+   public void set(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
    {
-      endpoints[0].set(x0, y0);
-      endpoints[1].set(x1, y1);
+      endpoints[0].set(firstEndpointX, firstEndpointY);
+      endpoints[1].set(secondEndpointX, secondEndpointY);
       checkEndpointsDistinct(endpoints);
    }
 
@@ -362,8 +362,8 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
    
    public void intersectionWith(LineSegment2d lineSegment, Point2d intersectionToPack)
    {
-      intersectionToPack.set(intersectionWithLineSegment(lineSegment.getX0(), lineSegment.getY0(),
-                                                         lineSegment.getX1(), lineSegment.getY1()));
+      intersectionToPack.set(intersectionWithLineSegment(lineSegment.getFirstEndpointX(), lineSegment.getFirstEndpointY(),
+                                                         lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY()));
    }
    
    private Point2d intersectionWithLineSegment(double x0, double y0, double x1, double y1)

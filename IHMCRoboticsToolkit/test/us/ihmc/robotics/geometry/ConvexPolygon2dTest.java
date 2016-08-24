@@ -2254,10 +2254,10 @@ public class ConvexPolygon2dTest
          assertEquals(0.0, polygonWithTwoPoints.getArea(), epsilon);
          LineSegment2d aroundTheCornerEdge0 = polygonWithTwoPoints.getAroundTheCornerEdgesCopy(arbitraryPoint0)[0];
          LineSegment2d aroundTheCornerEdge1 = polygonWithTwoPoints.getAroundTheCornerEdgesCopy(arbitraryPoint0)[1];
-         assertEqualsInEitherOrder(pointThatDefinesThePolygon0, pointThatDefinesThePolygon1, aroundTheCornerEdge0.getFirstEndPointCopy(),
-               aroundTheCornerEdge0.getSecondEndPointCopy());
-         assertEqualsInEitherOrder(pointThatDefinesThePolygon0, pointThatDefinesThePolygon1, aroundTheCornerEdge1.getFirstEndPointCopy(),
-               aroundTheCornerEdge1.getSecondEndPointCopy());
+         assertEqualsInEitherOrder(pointThatDefinesThePolygon0, pointThatDefinesThePolygon1, aroundTheCornerEdge0.getFirstEndpointCopy(),
+               aroundTheCornerEdge0.getSecondEndpointCopy());
+         assertEqualsInEitherOrder(pointThatDefinesThePolygon0, pointThatDefinesThePolygon1, aroundTheCornerEdge1.getFirstEndpointCopy(),
+               aroundTheCornerEdge1.getSecondEndpointCopy());
          Point2d minPoint = new Point2d(Math.min(pointThatDefinesThePolygon0.getX(), pointThatDefinesThePolygon1.getX()), Math.min(
                pointThatDefinesThePolygon0.getY(), pointThatDefinesThePolygon1.getY()));
          Point2d maxPoint = new Point2d(Math.max(pointThatDefinesThePolygon0.getX(), pointThatDefinesThePolygon1.getX()), Math.max(
