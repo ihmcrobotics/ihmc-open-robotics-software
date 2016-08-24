@@ -36,15 +36,14 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
       stepQueue.clear();
       for (int i = 0; i < steps.size(); i++)
       {
-         if (steps.get(i).getTimeInterval().getEndTime() <= currentTime)
+         double timeShift = steps.get(i).isAbsolute() ? 0.0 : currentTime;
+         double touchdownTime = steps.get(i).getTimeInterval().getEndTime();
+         if (touchdownTime + timeShift >= currentTime)
          {
             stepQueue.enqueue();
             stepQueue.getTail().set(steps.get(i));
-            if (!stepQueue.getTail().isAbsolute())
-            {
-               stepQueue.getTail().getTimeInterval().shiftInterval(currentTime);
-               stepQueue.getTail().setAbsolute(true);
-            }
+            stepQueue.getTail().getTimeInterval().shiftInterval(timeShift);
+            stepQueue.getTail().setAbsolute(true);
          }
       }
    }
