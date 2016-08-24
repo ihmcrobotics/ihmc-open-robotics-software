@@ -16,10 +16,11 @@ import us.ihmc.quadrupedRobotics.params.BooleanParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.params.ParameterPacketListener;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.quadrupedRobotics.planning.stepInput.QuadrupedMultiStepInputPlanner;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedStepInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedMultiStepInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitInputProvider;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
@@ -43,7 +44,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
    private final QuadrupedControllerInputProviderInterface inputProvider;
-   private final QuadrupedStepInputProvider timedStepProvider;
+   private final QuadrupedMultiStepInputProvider multiStepInputProvider;
+   private final QuadrupedMultiStepInputPlanner multiStepInputPlanner;
    private final QuadrupedXGaitInputProvider xGaitSettingsProvider;
    private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
 
@@ -56,9 +58,14 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
    public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties) throws IOException
    {
+      this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry);
+      this.runtimeEnvironment = runtimeEnvironment;
+
       // Initialize input providers.
       inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
-      timedStepProvider = new QuadrupedStepInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      multiStepInputProvider = new QuadrupedMultiStepInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      multiStepInputPlanner = new QuadrupedMultiStepInputPlanner(multiStepInputProvider, controllerToolbox.getReferenceFrames(),
+            runtimeEnvironment.getRobotTimestamp());
       xGaitSettingsProvider = new QuadrupedXGaitInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
       soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
 
@@ -78,11 +85,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
          ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
       }
 
-      this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry);
       this.stateMachine = buildStateMachine(runtimeEnvironment, inputProvider);
       this.userEventTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerRequestedEvent.class);
-      this.runtimeEnvironment = runtimeEnvironment;
-
    }
    
    /**
@@ -187,7 +191,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       final QuadrupedController freezeController = new QuadrupedForceBasedFreezeController(runtimeEnvironment, controllerToolbox);
       final QuadrupedController standController = new QuadrupedDcmBasedStandController(runtimeEnvironment, controllerToolbox, inputProvider);
       final QuadrupedDcmBasedStepController stepController = new QuadrupedDcmBasedStepController(runtimeEnvironment, controllerToolbox, inputProvider,
-            timedStepProvider);
+            multiStepInputPlanner);
       final QuadrupedDcmBasedXGaitController xGaitController = new QuadrupedDcmBasedXGaitController(runtimeEnvironment, controllerToolbox, inputProvider,
             xGaitSettingsProvider);
       final QuadrupedController fallController = new QuadrupedForceBasedFallController(runtimeEnvironment, controllerToolbox);
