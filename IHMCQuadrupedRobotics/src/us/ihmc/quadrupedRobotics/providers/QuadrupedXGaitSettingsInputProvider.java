@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.providers;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.packets.*;
+import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
@@ -10,7 +11,10 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class QuadrupedXGaitInputProvider
+import javax.vecmath.Vector3d;
+import java.util.concurrent.atomic.AtomicReference;
+
+public class QuadrupedXGaitSettingsInputProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -41,7 +45,7 @@ public class QuadrupedXGaitInputProvider
    private final DoubleYoVariable yoEndDoubleSupportDuration;
    private final DoubleYoVariable yoEndPhaseShift;
 
-   public QuadrupedXGaitInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
+   public QuadrupedXGaitSettingsInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
    {
       yoStanceLength = new DoubleYoVariable("stanceLengthInput", registry);
       yoStanceWidth = new DoubleYoVariable("stanceWidthInput", registry);
@@ -78,7 +82,7 @@ public class QuadrupedXGaitInputProvider
       parentRegistry.addChild(registry);
    }
 
-   public void getXGaitSettings(QuadrupedXGaitSettings xGaitSettings)
+   public void getSettings(QuadrupedXGaitSettings xGaitSettings)
    {
       xGaitSettings.setStanceLength(yoStanceLength.getDoubleValue());
       xGaitSettings.setStanceWidth(yoStanceWidth.getDoubleValue());
