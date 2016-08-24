@@ -87,7 +87,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
       String[] armJointNames = createArmJointNames();
-      
+
       String[] backXName = new String[] {jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)};
       String[] armAndBackJoints = new String[armJointNames.length + backXName.length];
       System.arraycopy(armJointNames, 0, armAndBackJoints, 0, armJointNames.length);
@@ -95,7 +95,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       DoubleYoVariable backXFilter = sensorProcessing.createAlphaFilter("backXAlphaFilter", backXAlphaFilterBreakFrequency);
       DoubleYoVariable backXSlopTime = new DoubleYoVariable("backXSlopTime", registry);
       backXSlopTime.set(backXBacklashSlopTime);
-      
+
       DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", defaultFilterBreakFrequency);
       DoubleYoVariable wristForceAlphaFilter = sensorProcessing.createAlphaFilter("wristForceAlphaFilter", defaultFilterBreakFrequency);
       DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
