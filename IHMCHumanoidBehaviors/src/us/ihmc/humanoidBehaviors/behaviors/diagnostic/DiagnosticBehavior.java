@@ -1741,7 +1741,6 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitFootPose(true, robotSide, footPose);
 
       submitChestHomeCommand(true);
-      submitPelvisHomeCommand(true);
 
       // Put the foot back on the ground
       submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
