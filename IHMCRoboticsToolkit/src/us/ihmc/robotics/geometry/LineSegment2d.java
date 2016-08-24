@@ -20,7 +20,7 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
    private final Point2d tempPoint2d = new Point2d();
    
    private final Vector2d tempVector2dOne = new Vector2d(); 
-   private final Vector2d tempVector2dTwo = new Vector2d(); 
+   private final Vector2d tempVector2dTwo = new Vector2d();
 
    public LineSegment2d()
    {
@@ -142,6 +142,7 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
    }
 
+   @Override
    public void set(LineSegment2d lineSegment)
    {
       endpoints[0].set(lineSegment.endpoints[0]);
@@ -339,51 +340,6 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
       return pointIsOnLine && isBetweenEndpoints(x, y, 0.0);
    }
-
-// public boolean containsEpsilon(Point2d point, double epsilon)
-// {
-//    // Dot product squared should be the product of the lengths and the vector to the point should be shorter than the segment length,
-//
-//    double vx1 = endpoints[1].x - endpoints[0].x;
-//    double vy1 = endpoints[1].y - endpoints[0].y;
-//
-//    double vx2 = point.x - endpoints[0].x;
-//    double vy2 = point.y - endpoints[0].y;
-//
-//    double dotProduct = vx1 * vx2 + vy1 * vy2;
-//
-//    double length1Squared = (vx1 * vx1 + vy1 * vy1);
-//    double length2Squared = (vx2 * vx2 + vy2 * vy2);
-//
-//    if (dotProduct < epsilon) return false;
-//
-//    if (dotProduct*dotProduct > length1Squared * length2Squared -epsilon) return false;
-//
-//    if (length2Squared > length1Squared - epsilon) return false;
-//
-//    return true;
-
-//    // 1. Cross product should be zero-ish (point is on the line through the endpoints):
-//    double crossProduct = (endpoints[1].x - endpoints[0].x) * (point.y - endpoints[0].y) -
-//        (point.x - endpoints[0].x) * (endpoints[1].y - endpoints[0].y);
-//    if (Math.abs(crossProduct) > epsilon)
-//    {
-//       return false;
-//    }
-//
-//    // 2. Projection should be between the endpoints:
-//    double dotProduct = (endpoints[1].x - endpoints[0].x) * (point.x - endpoints[0].x) +
-//        (endpoints[1].y - endpoints[0].y) * (point.y - endpoints[0].y);
-//    double length1 = (endpoints[1].x - endpoints[0].x) * (endpoints[1].x - endpoints[0].x) + (endpoints[1].y - endpoints[0].y) * (endpoints[1].y - endpoints[0].y);
-//    double length2 = (point.x - endpoints[0].x) * (point.x - endpoints[0].x) + (point.y - endpoints[0].y) * (point.y - endpoints[0].y);
-//    double projectionLength = dotProduct / (length1 * length2);
-//    if (projectionLength > length1 || projectionLength < 0)
-//    {
-//       return false;
-//    }
-//
-//    return true;
-// }
 
    private final double[] tempAlphaBeta = new double[2];
    
@@ -824,5 +780,4 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
       return false;
    }
-
 }

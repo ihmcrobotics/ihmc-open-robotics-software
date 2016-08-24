@@ -7,13 +7,17 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-//Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
-//since they contain YoVariables.
+/**
+ * Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
+ * since they contain YoVariables.
+ */
 public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
 {
-   private final DoubleYoVariable x0, y0, x1, y1; // This is where the data is stored. All operations must act on these numbers.
+   /** This is where the data is stored. All operations must act on these numbers. */
+   private final DoubleYoVariable x0, y0, x1, y1;
    private final ReferenceFrame referenceFrame;
-   protected FrameLineSegment2d frameLineSegment; // This is only for assistance. The data is stored in the YoVariables, not in here!
+   /** This is only for assistance. The data is stored in the YoVariables, not in here! */
+   protected FrameLineSegment2d frameLineSegment;
 
    public YoFrameLineSegment2d(String namePrefix, String nameSuffix, ReferenceFrame frame, YoVariableRegistry registry)
    {
