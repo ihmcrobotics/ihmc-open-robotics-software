@@ -18,7 +18,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedStepInputProvider
+public class QuadrupedMultiStepInputProvider
 {
    private final AtomicReference<QuadrupedTimedStepPacket> timedStepPacket;
    
@@ -27,7 +27,7 @@ public class QuadrupedStepInputProvider
    private final DoubleYoVariable yoTimedStepGroundClearance;
    private final YoFramePoint yoTimedStepGoalPosition;
 
-   public QuadrupedStepInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry registry)
+   public QuadrupedMultiStepInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry registry)
    {
       timedStepPacket = new AtomicReference<>(new QuadrupedTimedStepPacket());
 
