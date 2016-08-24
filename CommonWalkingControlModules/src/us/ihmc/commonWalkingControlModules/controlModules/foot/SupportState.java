@@ -114,6 +114,8 @@ public class SupportState extends AbstractFootControlState
       assumeFootBarelyLoaded = new BooleanYoVariable(prefix + "AssumeFootBarelyLoaded", registry);
       holdFootOrientationFlat = new BooleanYoVariable(prefix + "HoldFlatOrientation", registry);
 
+      holdFootOrientationFlat.set(true);
+
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
       if (graphicsListRegistry != null)
