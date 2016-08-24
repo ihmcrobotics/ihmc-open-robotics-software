@@ -1023,8 +1023,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       jointLimitParametersToPack.setMaxAbsJointVelocity(9.0);
       jointLimitParametersToPack.setJointLimitDistanceForMaxVelocity(30.0 * Math.PI/180.0);
-      jointLimitParametersToPack.setJointLimitFilterBreakFrequency(20.0);
-      jointLimitParametersToPack.setVelocityControlGain(50.0);
+      jointLimitParametersToPack.setJointLimitFilterBreakFrequency(15.0);
+      jointLimitParametersToPack.setVelocityControlGain(30.0);
 
       String bkxName = jointMap.getSpineJointName(SpineJointName.SPINE_ROLL);
       String bkyName = jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);

@@ -114,8 +114,10 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final StatusMessageOutputManager statusOutputManager;
    private final WalkingCommandConsumer commandConsumer;
 
-   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
+   private final BooleanYoVariable limitCommandSent = new BooleanYoVariable("limitCommandSent", registry);
+   
+   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
@@ -615,7 +617,11 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       planeContactStateCommandPool.clear();
 
       controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
-      controllerCoreCommand.addInverseDynamicsCommand(jointLimitEnforcementMethodCommand);
+      if (!limitCommandSent.getBooleanValue())
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(jointLimitEnforcementMethodCommand);
+         limitCommandSent.set(true);
+      }
 
       boolean isHighCoPDampingNeeded = momentumBasedController.estimateIfHighCoPDampingNeeded(footDesiredCoPs);
 
