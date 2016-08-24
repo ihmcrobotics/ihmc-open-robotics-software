@@ -76,7 +76,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final BooleanYoVariable reinitializeStateEstimator = new BooleanYoVariable("reinitializeStateEstimator", registry);
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
-         SensorOutputMapReadOnly sensorOutputMapReadOnly, ForceSensorDataHolder forceSensorDataHolderToUpdate, 
+         SensorOutputMapReadOnly sensorOutputMapReadOnly, ForceSensorDataHolder forceSensorDataHolderToUpdate,
          CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate, String[] imuSensorsToUseInStateEstimator,
          double gravitationalAcceleration, Map<RigidBody, FootSwitchInterface> footSwitches,
          CenterOfPressureDataHolder centerOfPressureDataHolderFromController, RobotMotionStatusHolder robotMotionStatusFromController,
@@ -140,7 +140,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          pelvisRotationalStateUpdater = null;
       }
 
-      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, footSwitches, 
+      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, footSwitches,
             estimatorCenterOfMassDataHolderToUpdate,
             centerOfPressureDataHolderFromController, feet, gravitationalAcceleration, yoTime,
             stateEstimatorParameters, yoGraphicsListRegistry, registry);
@@ -222,7 +222,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          operatingMode.set(stateEstimatorModeSubscriber.getRequestedOperatingMode());
       }
 
-      jointStateUpdater.checkForIMUPacket(yoTime.getDoubleValue());
       jointStateUpdater.updateJointState();
 
       switch (operatingMode.getEnumValue())
@@ -411,10 +410,5 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public ForceSensorCalibrationModule getForceSensorCalibrationModule()
    {
       return forceSensorStateUpdater;
-   }
-
-   public void setHeadIMUSubscriber(HeadIMUSubscriber headIMUSubscriber)
-   {
-      jointStateUpdater.addHeadIMUSubscriber(headIMUSubscriber);
    }
 }

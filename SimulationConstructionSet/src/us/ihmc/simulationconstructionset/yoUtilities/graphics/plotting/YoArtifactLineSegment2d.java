@@ -2,8 +2,6 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
@@ -11,20 +9,16 @@ import javax.vecmath.Vector2d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
-import us.ihmc.plotting.Artifact;
+import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 
-public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
+public class YoArtifactLineSegment2d extends YoArtifact
 {
    private static final double[] CONSTANTS = new double[] {};
 
-   private static final long serialVersionUID = -2067732984899803547L;
-
-   private final DoubleYoVariable[] variables = new DoubleYoVariable[4];
    private final DoubleYoVariable startX;
    private final DoubleYoVariable endX;
    private final DoubleYoVariable startY;
@@ -60,7 +54,7 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
 
    public YoArtifactLineSegment2d(String name, DoubleYoVariable startX, DoubleYoVariable startY, DoubleYoVariable endX, DoubleYoVariable endY, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
-      super(name);
+      super(name, startX, startY, endX, endY);
       this.startX = startX;
       this.endX = endX;
       this.startY = startY;
@@ -68,24 +62,18 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
       this.color = color;
       this.arrowHeadWidth = arrowHeadWidth;
       this.arrowHeadHeight = arrowHeadHeight;
-
-      variables[0] = startX;
-      variables[1] = endX;
-      variables[2] = startY;
-      variables[3] = endY;
-
-      drawArrow = true;
+      this.drawArrow = true;
    }
 
    @Override
-   public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
       {
          graphics.setColor(color);
 
          if (stroke != null)
-            ((Graphics2D) graphics).setStroke(stroke);
+            graphics.setStroke(stroke);
 
          plotterGraphics.setCenter(Xcenter, Ycenter);
          plotterGraphics.setScale(scaleFactor);
@@ -151,20 +139,17 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
    }
 
    @Override
-   public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(color);
       if (stroke != null)
-         ((Graphics2D) graphics).setStroke(stroke);
+         graphics.setStroke(stroke);
 
-//      plotterGraphics.setCenter(Xcenter, Ycenter);
-//      plotterGraphics.setScale(scaleFactor);
-//      plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.1);
       graphics.drawLine(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
    }
 
    @Override
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
@@ -179,12 +164,6 @@ public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
    public RemoteGraphicType getRemoteGraphicType()
    {
       return RemoteGraphicType.LINE_SEGMENT_2D_ARTIFACT;
-   }
-
-   @Override
-   public DoubleYoVariable[] getVariables()
-   {
-      return variables;
    }
 
    @Override

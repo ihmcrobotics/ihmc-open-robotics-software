@@ -37,7 +37,7 @@ public class FormattingTools
 
    public static double roundToSignificantFigures(double number, int significantFigures)
    {
-      if (number == 0)
+      if (Math.abs(number) < 1e-10)
       {
          return 0;
       }

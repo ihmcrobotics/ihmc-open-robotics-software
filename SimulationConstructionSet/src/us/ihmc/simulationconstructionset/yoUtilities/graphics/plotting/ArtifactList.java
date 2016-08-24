@@ -2,8 +2,8 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.util.ArrayList;
 
-import us.ihmc.plotting.Artifact;
 import us.ihmc.plotting.Plotter;
+import us.ihmc.plotting.artifact.Artifact;
 
 public class ArtifactList
 {

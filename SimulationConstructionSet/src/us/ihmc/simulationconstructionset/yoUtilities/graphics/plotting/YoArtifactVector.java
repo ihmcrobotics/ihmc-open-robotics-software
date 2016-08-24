@@ -1,24 +1,22 @@
 package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.util.ArrayList;
 
 import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.plotting.Artifact;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoArtifactVector extends Artifact
+public class YoArtifactVector extends YoArtifact
 {
-   private static final long serialVersionUID = 374256294846738354L;
-
    private final PlotterGraphics plotterGraphics = new PlotterGraphics();
    private final Color3f color;
    private final YoFramePoint2d basePoint;
@@ -29,23 +27,22 @@ public class YoArtifactVector extends Artifact
    private final static double ARROW_HEAD_WIDTH = 0.08;
    private final static double ARROW_HEAD_HEIGHT = 0.12;
 
+   public YoArtifactVector(String name, DoubleYoVariable basePointX, DoubleYoVariable basePointY, DoubleYoVariable vectorX, DoubleYoVariable vectorY, Color3f color)
+   {
+      this(name, new YoFramePoint2d(basePointX, basePointY, ReferenceFrame.getWorldFrame()),
+                 new YoFrameVector2d(vectorX, vectorY, ReferenceFrame.getWorldFrame()), color);
+   }
+
    public YoArtifactVector(String name, YoFramePoint2d basePoint, YoFrameVector2d vector, Color3f color)
    {
-      super(name);
+      super(name, basePoint.getYoX(), basePoint.getYoY(), vector.getYoX(), vector.getYoY());
       this.basePoint = basePoint;
       this.vector = vector;
       this.color = color;
    }
 
-   public YoArtifactVector(String name, DoubleYoVariable basePointX, DoubleYoVariable basePointY, DoubleYoVariable vectorX, DoubleYoVariable vectorY, Color3f color)
-   {
-      super(name);
-      this.basePoint = new YoFramePoint2d(basePointX, basePointY, ReferenceFrame.getWorldFrame());
-      this.vector = new YoFrameVector2d(vectorX, vectorY, ReferenceFrame.getWorldFrame());
-      this.color = color;
-   }
-
-   public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   @Override
+   public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
    {
       if (isVisible)
       {
@@ -92,7 +89,8 @@ public class YoArtifactVector extends Artifact
       return ret;
    }
 
-   public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   @Override
+   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(new Color(color.getX(), color.getY(), color.getZ()));
 
@@ -100,17 +98,36 @@ public class YoArtifactVector extends Artifact
 
       int[] x = { Xcenter + 20, Xcenter + 20, Xcenter + 25 };
       int[] y = { Ycenter + 5, Ycenter - 5, Ycenter };
-      graphics.fillPolygon(x, y, 3);
+      graphics.drawPolygonFilled(x, y, 3);
    }
 
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   @Override
+   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
    public void takeHistorySnapshot()
    {
       throw new RuntimeException("Not implemented!");
    }
 
+   @Override
+   public RemoteGraphicType getRemoteGraphicType()
+   {
+      return null;
+   }
+
+   @Override
+   public double[] getConstants()
+   {
+      return null;
+   }
+
+   @Override
+   public AppearanceDefinition getAppearance()
+   {
+      return null;
+   }
 }

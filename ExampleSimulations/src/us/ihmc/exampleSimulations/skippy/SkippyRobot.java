@@ -1,9 +1,12 @@
 package us.ihmc.exampleSimulations.skippy;
 
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
+import com.vividsolutions.jts.math.Vector3D;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -123,7 +126,7 @@ public class SkippyRobot extends Robot
    private ExternalForcePoint balanceForce;
    public static ExternalForcePoint glueDownToGroundPoint;
 
-   private final double initialBodySidewaysLean = 0.0 * Math.PI / 48.0;
+   private final double initialBodySidewaysLean = 0.1 * Math.PI / 48.0;
    private final double initialShoulderJointAngle = 0.0 * Math.PI / 6.0;
    private final double initialYawIfSkippy = 0.0* Math.PI * 0.8;
 
@@ -390,7 +393,7 @@ public class SkippyRobot extends Robot
    {
       return rootJointIfSkippy;
    }
-
+   
    public void setRootJointForce(double x, double y, double z)
    {
       rootJointForce.setForce(x, y, z);
@@ -409,6 +412,11 @@ public class SkippyRobot extends Robot
    public PinJoint getShoulderJoint()
    {
       return shoulderJoint;
+   }
+
+   public PinJoint getHipJoint()
+   {
+      return hipJoint;
    }
 
    public double getShoulderMass()
@@ -434,6 +442,10 @@ public class SkippyRobot extends Robot
    public Point3d computeFootLocation()
    {
       return footGroundContactPoint.getPositionPoint();
+   }
+   
+   public void computeFootContactForce(Vector3d tempForce){
+	  footGroundContactPoint.getForce(tempForce);
    }
 
    private RigidBodyTransform transform = new RigidBodyTransform();
@@ -465,5 +477,9 @@ public class SkippyRobot extends Robot
 
       this.bodyZUpFrame.setTransformAndUpdate(transform);
       return bodyZUpFrame;
+   }
+   
+   public double getGravityt(){
+      return this.getGravityZ();
    }
 }

@@ -963,12 +963,15 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
-   public void addStaticLinkGraphics(ArrayList<Graphics3DObject> staticLinkGraphics)
+   public ArrayList<Graphics3DNode> addStaticLinkGraphics(ArrayList<Graphics3DObject> staticLinkGraphics)
    {
+      ArrayList<Graphics3DNode> ret = new ArrayList<>(staticLinkGraphics.size());
       for (Graphics3DObject linkGraphics : staticLinkGraphics)
       {
-         this.addStaticLinkGraphics(linkGraphics);
+         ret.add(addStaticLinkGraphics(linkGraphics));
       }
+
+      return ret;
    }
 
    /**

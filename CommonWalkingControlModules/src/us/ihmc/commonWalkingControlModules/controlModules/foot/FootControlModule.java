@@ -131,10 +131,16 @@ public class FootControlModule
       supportState = new FullyConstrainedState(footControlHelper, registry);
       supportStateNew = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
       useNewSupportState = walkingControllerParameters.useSupportState();
+      holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
       if (useNewSupportState)
+      {
          states.add(supportStateNew);
+      }
       else
+      {
          states.add(supportState);
+         states.add(holdPositionState);
+      }
 
       if (walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
       {
@@ -145,9 +151,6 @@ public class FootControlModule
       {
          exploreFootPolygonState = null;
       }
-
-      holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
-      states.add(holdPositionState);
 
       swingState = new SwingState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
       states.add(swingState);
@@ -196,6 +199,7 @@ public class FootControlModule
                return true;
             if (neverHoldPosition.getBooleanValue())
                return false;
+
             if (isFootBarelyLoaded())
                return true;
             if (holdPositionIfCopOnEdge.getBooleanValue())
@@ -216,6 +220,7 @@ public class FootControlModule
                return false;
             if (neverHoldPosition.getBooleanValue())
                return true;
+
             if (isFootBarelyLoaded())
                return false;
             return !footControlHelper.isCoPOnEdge();
@@ -298,7 +303,7 @@ public class FootControlModule
          if (constraintType == ConstraintType.HOLD_POSITION)
             System.out.println("Warning: HOLD_POSITION state is handled internally.");
 
-         if (isFootBarelyLoaded())
+         if (isFootBarelyLoaded() && !useNewSupportState)
             constraintType = ConstraintType.HOLD_POSITION;
          else
             constraintType = ConstraintType.FULL;

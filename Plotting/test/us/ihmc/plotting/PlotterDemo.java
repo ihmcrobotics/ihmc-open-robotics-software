@@ -2,7 +2,7 @@ package us.ihmc.plotting;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.plotting.shapes.LineArtifact;
+import us.ihmc.plotting.artifact.LineArtifact;
 
 public class PlotterDemo
 {
@@ -11,7 +11,9 @@ public class PlotterDemo
       Plotter plotter = new Plotter();
       plotter.setPreferredSize(800, 600);
       
-      plotter.setRange(10.0);
+      plotter.setViewRange(10.0);
+      plotter.setXYZoomEnabled(true);
+//      plotter.setViewRange(1.0);
       plotter.setShowLabels(true);
       
       plotter.addArtifact(new LineArtifact("01", new Point2d(0, 0), new Point2d(1, 1)));
@@ -20,8 +22,9 @@ public class PlotterDemo
       
       plotter.showInNewWindow();
       
-      plotter.setOffsetX(2.5);
-      plotter.setOffsetY(-3.0);
+//      plotter.setScale(40.0, 20.0);
+//      plotter.setFocusPointX(2.5);
+//      plotter.setFocusPointY(-3.0);
    }
    
    public static void main(String[] args)

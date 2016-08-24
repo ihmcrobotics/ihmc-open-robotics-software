@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -25,7 +26,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
@@ -41,12 +41,19 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private OffsetAndYawRobotInitialSetup location = new OffsetAndYawRobotInitialSetup(new Vector3d(0.0, 0.0, 0.0), 0.0);
    private DRCSimulationTestHelper drcSimulationTestHelper;
+   private PushRobotController pushController;
 
    private BooleanYoVariable allowUpperBodyMomentumInSingleSupport;
    private BooleanYoVariable allowUpperBodyMomentumInDoubleSupport;
    private BooleanYoVariable allowUsingHighMomentumWeight;
 
    private DoubleYoVariable swingTime;
+
+   private static final double doubleSupportPushMagnitude = 1100.0;
+   private static final double doubleSupportPushDuration = 0.05;
+
+   private static final double singleSupportPushMagnitude = 600.0;
+   private static final double singleSupportPushDuration = 0.05;
 
    @DeployableTestMethod(estimatedDuration = 30.6)
    @Test(timeout = 150000)
@@ -154,15 +161,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    private boolean standAndPush() throws SimulationExceededMaximumTimeException
    {
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-
-      // push the robot
-      Vector3d rootVelocity = new Vector3d();
-      FloatingJoint rootJoint = drcSimulationTestHelper.getRobot().getRootJoint();
-      rootJoint.getVelocity(rootVelocity);
-      double push = 0.25;
-      rootVelocity.x = rootVelocity.x + push;
-      rootJoint.setVelocity(rootVelocity);
-
+      pushController.applyForce(new Vector3d(1.0, 0.0, 0.0), doubleSupportPushMagnitude, doubleSupportPushDuration);
       return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
    }
 
@@ -190,13 +189,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 
       // push the robot
-      Vector3d rootVelocity = new Vector3d();
-      FloatingJoint rootJoint = drcSimulationTestHelper.getRobot().getRootJoint();
-      rootJoint.getVelocity(rootVelocity);
-      double push = -0.15;
-      rootVelocity.y = rootVelocity.y + push;
-      rootJoint.setVelocity(rootVelocity);
-
+      pushController.applyForce(new Vector3d(0.0, -1.0, 0.0), singleSupportPushMagnitude, singleSupportPushDuration);
       return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
    }
 
@@ -231,6 +224,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       };
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, className, startingLocation, simulationTestingParameters, robotModel);
+      pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), drcSimulationTestHelper.getRobot().getRootJoint().getName(), new Vector3d(0.0, 0.0, 0.15));
 
       allowUpperBodyMomentumInSingleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
       allowUpperBodyMomentumInDoubleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");
