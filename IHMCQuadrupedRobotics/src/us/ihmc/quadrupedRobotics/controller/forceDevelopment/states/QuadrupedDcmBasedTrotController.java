@@ -15,7 +15,9 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseForwardDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewisePeriodicDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
@@ -32,7 +34,9 @@ import javax.vecmath.Point3d;
 
 public class QuadrupedDcmBasedTrotController implements QuadrupedController
 {
-   private final QuadrupedControllerInputProviderInterface inputProvider;
+   private final QuadrupedPostureInputProviderInterface inputProvider;
+   private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
+   private final QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider;
    private final DoubleYoVariable robotTimestamp;
    private final double controlDT;
    private final double gravity;
@@ -107,10 +111,13 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
    private final FiniteStateMachine<TrotState, TrotEvent> trotStateMachine;
 
    public QuadrupedDcmBasedTrotController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
-         QuadrupedControllerInputProviderInterface inputProvider)
+         QuadrupedPostureInputProviderInterface inputProvider, QuadrupedPlanarVelocityInputProvider planarVelocityProvider,
+         QuadrupedXGaitSettingsInputProvider xGaitSettingsInputProvider)
 
    {
       this.inputProvider = inputProvider;
+      this.planarVelocityProvider = planarVelocityProvider;
+      this.xGaitSettingsProvider = xGaitSettingsInputProvider;
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
@@ -200,7 +207,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       // update desired body orientation, angular velocity, and torque
       if (trotStateMachine.getState() != TrotState.QUAD_SUPPORT)
       {
-         bodyYawSetpoint += inputProvider.getPlanarVelocityInput().getZ() * controlDT;
+         bodyYawSetpoint += planarVelocityProvider.get().getZ() * controlDT;
       }
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(worldFrame);
       bodyOrientationControllerSetpoints.getBodyOrientation().setYawPitchRoll(bodyYawSetpoint,
@@ -289,9 +296,9 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       nominalCmpPositionAtSoS.add(taskSpaceEstimates.getSolePosition(frontSupportQuadrant));
       nominalCmpPositionAtSoS.scale(0.5);
 
-      double bodyYaw = bodyYawSetpoint + inputProvider.getPlanarVelocityInput().getZ() * doubleSupportDurationParameter.get();
-      double xStride = inputProvider.getPlanarVelocityInput().getX() * doubleSupportDurationParameter.get();
-      double yStride = inputProvider.getPlanarVelocityInput().getY() * doubleSupportDurationParameter.get();
+      double bodyYaw = bodyYawSetpoint + planarVelocityProvider.get().getZ() * doubleSupportDurationParameter.get();
+      double xStride = planarVelocityProvider.get().getX() * doubleSupportDurationParameter.get();
+      double yStride = planarVelocityProvider.get().getY() * doubleSupportDurationParameter.get();
       double xOffset = Math.cos(bodyYaw) * xStride - Math.sin(bodyYaw) * yStride;
       double yOffset = Math.sin(bodyYaw) * xStride + Math.cos(bodyYaw) * yStride;
       nominalCmpPositionAtEoS.setIncludingFrame(nominalCmpPositionAtSoS);
@@ -303,7 +310,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          FramePoint nominalDcmPositionAtEoS)
    {
       double timeAtEoS = doubleSupportDurationParameter.get();
-      double relativeYawAtEoS = inputProvider.getPlanarVelocityInput().getZ() * timeAtEoS;
+      double relativeYawAtEoS = planarVelocityProvider.get().getZ() * timeAtEoS;
       nominalPeriodicDcmTrajectory.setComHeight(inputProvider.getComPositionInput().getZ());
       nominalPeriodicDcmTrajectory.initializeTrajectory(0.0, nominalCmpPositionAtSoS, timeAtEoS, nominalCmpPositionAtEoS, relativeYawAtEoS);
       nominalPeriodicDcmTrajectory.computeTrajectory(0.0);
@@ -453,7 +460,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
 
          // compute desired body yaw at end of step
          double bodyYawAtSoS = bodyYawSetpoint;
-         double bodyYawAtEoS = bodyYawAtSoS + inputProvider.getPlanarVelocityInput().getZ() * doubleSupportDurationParameter.get();
+         double bodyYawAtEoS = bodyYawAtSoS + planarVelocityProvider.get().getZ() * doubleSupportDurationParameter.get();
 
          for (int i = 0; i < 2; i++)
          {

@@ -4,9 +4,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-public interface QuadrupedControllerInputProviderInterface
+public interface QuadrupedPostureInputProviderInterface
 {
-
    Point3d getComPositionInput();
 
    Vector3d getComVelocityInput();
@@ -14,7 +13,4 @@ public interface QuadrupedControllerInputProviderInterface
    Quat4d getBodyOrientationInput();
 
    Vector3d getBodyAngularRateInput();
-
-   Vector3d getPlanarVelocityInput();
-
 }

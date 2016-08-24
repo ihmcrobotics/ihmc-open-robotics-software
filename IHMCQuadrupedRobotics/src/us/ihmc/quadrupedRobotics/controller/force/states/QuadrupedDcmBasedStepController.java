@@ -17,7 +17,7 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStepPressurePlanner;
 import us.ihmc.quadrupedRobotics.planning.stepInput.QuadrupedStepInputPlanner;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -34,7 +34,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedDcmBasedStepController implements QuadrupedController, QuadrupedTimedStepTransitionCallback
 {
-   private final QuadrupedControllerInputProviderInterface inputProvider;
+   private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedStepInputPlanner stepPlanner;
    private final DoubleYoVariable robotTimestamp;
    private final double controlDT;
@@ -120,9 +120,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final BooleanYoVariable onTouchDownTriggered = new BooleanYoVariable("onTouchDownTriggered", registry);
 
    public QuadrupedDcmBasedStepController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
-         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedStepInputPlanner stepPlanner)
+         QuadrupedPostureInputProviderInterface postureProvider, QuadrupedStepInputPlanner stepPlanner)
    {
-      this.inputProvider = inputProvider;
+      this.postureProvider = postureProvider;
       this.stepPlanner = stepPlanner;
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       this.controlDT = runtimeEnvironment.getControlDT();
@@ -163,7 +163,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
          groundPlanePositions.set(robotQuadrant, new FramePoint());
       }
       copPlanner = new QuadrupedTimedStepPressurePlanner(timedStepController.getQueueCapacity());
-      dcmTrajectory = new PiecewiseReverseDcmTrajectory(timedStepController.getQueueCapacity(), gravity, inputProvider.getComPositionInput().getZ());
+      dcmTrajectory = new PiecewiseReverseDcmTrajectory(timedStepController.getQueueCapacity(), gravity, postureProvider.getComPositionInput().getZ());
       dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
       dcmPositionWaypoint = new FramePoint();
       stepAdjustmentForControl = new YoFrameVector("stepAdjustmentForControl", worldFrame, registry);
@@ -200,7 +200,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private void updateEstimates()
    {
       // update model
-      lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
+      lipModel.setComHeight(postureProvider.getComPositionInput().getZ());
 
       // update task space estimates
       taskSpaceEstimator.compute(taskSpaceEstimates);
@@ -222,9 +222,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
 
       // update desired com position, velocity, and vertical force
       comPositionControllerSetpoints.getComPosition().changeFrame(supportFrame);
-      comPositionControllerSetpoints.getComPosition().set(inputProvider.getComPositionInput());
+      comPositionControllerSetpoints.getComPosition().set(postureProvider.getComPositionInput());
       comPositionControllerSetpoints.getComVelocity().changeFrame(supportFrame);
-      comPositionControllerSetpoints.getComVelocity().set(inputProvider.getComVelocityInput());
+      comPositionControllerSetpoints.getComVelocity().set(postureProvider.getComVelocityInput());
       comPositionControllerSetpoints.getComForceFeedforward().changeFrame(supportFrame);
       comPositionControllerSetpoints.getComForceFeedforward().set(taskSpaceControllerCommands.getComForce());
       comPositionControllerSetpoints.getComForceFeedforward().setZ(comPositionGravityCompensationParameter.get() * mass * gravity);
@@ -233,7 +233,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       // update desired body orientation, angular velocity, and torque
       bodyOrientationReferenceFrame.update();
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(bodyOrientationReferenceFrame);
-      bodyOrientationControllerSetpoints.getBodyOrientation().set(inputProvider.getBodyOrientationInput());
+      bodyOrientationControllerSetpoints.getBodyOrientation().set(postureProvider.getBodyOrientationInput());
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(worldFrame);
       double bodyOrientationYaw = bodyOrientationControllerSetpoints.getBodyOrientation().getYaw();
       double bodyOrientationPitch = bodyOrientationControllerSetpoints.getBodyOrientation().getPitch();
@@ -394,7 +394,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       accumulatedStepAdjustmentForPlanning.setToZero();
 
       // initialize estimates
-      lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
+      lipModel.setComHeight(postureProvider.getComPositionInput().getZ());
       updateEstimates();
 
       // initialize feedback controllers

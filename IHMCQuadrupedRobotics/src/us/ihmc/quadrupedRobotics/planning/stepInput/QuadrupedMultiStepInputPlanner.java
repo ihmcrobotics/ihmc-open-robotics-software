@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.planning.stepInput;
 
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedMultiStepInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedTimedStepInputProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -13,13 +13,13 @@ public class QuadrupedMultiStepInputPlanner implements QuadrupedStepInputPlanner
 {
    private static int MAXIMUM_STEP_QUEUE_SIZE = 100;
 
-   private final QuadrupedMultiStepInputProvider multiStepInputProvider;
+   private final QuadrupedTimedStepInputProvider multiStepInputProvider;
    private final QuadrupedReferenceFrames referenceFrames;
    private final DoubleYoVariable timestamp;
    private final PreallocatedQueue<QuadrupedTimedStep> stepQueue;
    private final FrameOrientation bodyOrientation;
 
-   public QuadrupedMultiStepInputPlanner(QuadrupedMultiStepInputProvider multiStepInputProvider, QuadrupedReferenceFrames referenceFrames, DoubleYoVariable timestamp)
+   public QuadrupedMultiStepInputPlanner(QuadrupedTimedStepInputProvider multiStepInputProvider, QuadrupedReferenceFrames referenceFrames, DoubleYoVariable timestamp)
    {
       this.multiStepInputProvider = multiStepInputProvider;
       this.referenceFrames = referenceFrames;

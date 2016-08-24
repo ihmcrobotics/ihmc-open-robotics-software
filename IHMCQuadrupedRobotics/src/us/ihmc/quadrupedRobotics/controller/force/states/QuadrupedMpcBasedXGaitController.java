@@ -14,8 +14,9 @@ import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.*;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -29,8 +30,9 @@ import java.util.ArrayList;
 
 public class QuadrupedMpcBasedXGaitController implements QuadrupedController, QuadrupedTimedStepTransitionCallback
 {
-   private final QuadrupedControllerInputProviderInterface inputProvider;
-   private final QuadrupedXGaitInputProvider settingsProvider;
+   private final QuadrupedPostureInputProviderInterface postureProvider;
+   private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
+   private final QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider;
    private final DoubleYoVariable robotTimestamp;
    private final double controlDT;
    private final double gravity;
@@ -104,10 +106,12 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final BooleanYoVariable haltFlag = new BooleanYoVariable("haltFlag", registry);
 
    public QuadrupedMpcBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
-         QuadrupedControllerInputProviderInterface inputProvider, QuadrupedXGaitInputProvider settingsProvider)
+         QuadrupedPostureInputProviderInterface postureProvider, QuadrupedPlanarVelocityInputProvider planarVelocityProvider,
+         QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider)
    {
-      this.inputProvider = inputProvider;
-      this.settingsProvider = settingsProvider;
+      this.postureProvider = postureProvider;
+      this.planarVelocityProvider = planarVelocityProvider;
+      this.xGaitSettingsProvider = xGaitSettingsProvider;
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
@@ -198,7 +202,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private void updateEstimates()
    {
       // update model
-      lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
+      lipModel.setComHeight(postureProvider.getComPositionInput().getZ());
 
       // update task space estimates
       taskSpaceEstimator.compute(taskSpaceEstimates);
@@ -212,21 +216,21 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 
       // update desired com position, velocity, and vertical force
       comPositionControllerSetpoints.getComPosition().changeFrame(supportFrame);
-      comPositionControllerSetpoints.getComPosition().set(inputProvider.getComPositionInput());
+      comPositionControllerSetpoints.getComPosition().set(postureProvider.getComPositionInput());
       comPositionControllerSetpoints.getComVelocity().changeFrame(supportFrame);
-      comPositionControllerSetpoints.getComVelocity().set(inputProvider.getComVelocityInput());
+      comPositionControllerSetpoints.getComVelocity().set(postureProvider.getComVelocityInput());
       comPositionControllerSetpoints.getComForceFeedforward().changeFrame(supportFrame);
       comPositionControllerSetpoints.getComForceFeedforward().set(taskSpaceControllerCommands.getComForce());
       comPositionControllerSetpoints.getComForceFeedforward().setZ(comPositionGravityCompensationParameter.get() * mass * gravity);
       comPositionController.compute(taskSpaceControllerCommands.getComForce(), comPositionControllerSetpoints, taskSpaceEstimates);
 
       // update desired body orientation, angular velocity, and torque
-      bodyYawSetpoint += inputProvider.getPlanarVelocityInput().getZ() * controlDT;
+      bodyYawSetpoint += planarVelocityProvider.get().getZ() * controlDT;
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(worldFrame);
       bodyOrientationControllerSetpoints.getBodyOrientation()
-            .setYawPitchRoll(RotationTools.computeYaw(inputProvider.getBodyOrientationInput()) + bodyYawSetpoint,
-                  RotationTools.computePitch(inputProvider.getBodyOrientationInput()) + groundPlaneEstimator.getPitch(bodyYawSetpoint),
-                  RotationTools.computeRoll(inputProvider.getBodyOrientationInput()));
+            .setYawPitchRoll(RotationTools.computeYaw(postureProvider.getBodyOrientationInput()) + bodyYawSetpoint,
+                  RotationTools.computePitch(postureProvider.getBodyOrientationInput()) + groundPlaneEstimator.getPitch(bodyYawSetpoint),
+                  RotationTools.computeRoll(postureProvider.getBodyOrientationInput()));
       bodyOrientationControllerSetpoints.getBodyAngularVelocity().setToZero();
       bodyOrientationControllerSetpoints.getComTorqueFeedforward().setToZero();
       bodyOrientationController.compute(taskSpaceControllerCommands.getComTorque(), bodyOrientationControllerSetpoints, taskSpaceEstimates);
@@ -240,12 +244,12 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 
    private void updateXGaitSettings()
    {
-      settingsProvider.getXGaitSettings(xGaitSettings);
+      xGaitSettingsProvider.getSettings(xGaitSettings);
 
       // increase stance dimensions to prevent self collisions
-      double strideRotation = inputProvider.getPlanarVelocityInput().getZ() * xGaitSettings.getStepDuration();
-      double strideLength = Math.abs(2 * inputProvider.getPlanarVelocityInput().getX() * xGaitSettings.getStepDuration());
-      double strideWidth = Math.abs(2 * inputProvider.getPlanarVelocityInput().getY() * xGaitSettings.getStepDuration());
+      double strideRotation = planarVelocityProvider.get().getZ() * xGaitSettings.getStepDuration();
+      double strideLength = Math.abs(2 * planarVelocityProvider.get().getX() * xGaitSettings.getStepDuration());
+      double strideWidth = Math.abs(2 * planarVelocityProvider.get().getY() * xGaitSettings.getStepDuration());
       strideLength += Math.abs(xGaitSettings.getStanceWidth() / 2 * Math.sin(2 * strideRotation));
       strideWidth += Math.abs(xGaitSettings.getStanceLength() / 2 * Math.sin(2 * strideRotation));
       xGaitSettings.setStanceLength(Math.max(xGaitSettings.getStanceLength(), strideLength / 2 + minimumStepClearanceParameter.get()));
@@ -256,7 +260,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    {
       // compute xgait step plan
       double currentTime = robotTimestamp.getDoubleValue();
-      Vector3d inputVelocity = inputProvider.getPlanarVelocityInput();
+      Vector3d inputVelocity = planarVelocityProvider.get();
       xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, xGaitCurrentSteps, inputVelocity, currentTime, bodyYawSetpoint, xGaitSettings);
    }
 
@@ -371,7 +375,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       // initialize step plan
       updateXGaitSettings();
       double initialTime = robotTimestamp.getDoubleValue() + initialTransitionDurationParameter.get();
-      Vector3d initialVelocity = inputProvider.getPlanarVelocityInput();
+      Vector3d initialVelocity = planarVelocityProvider.get();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
       xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, initialVelocity, initialQuadrant, supportCentroid, initialTime, bodyYawSetpoint, xGaitSettings);
       for (int i = 0; i < 2; i++)
