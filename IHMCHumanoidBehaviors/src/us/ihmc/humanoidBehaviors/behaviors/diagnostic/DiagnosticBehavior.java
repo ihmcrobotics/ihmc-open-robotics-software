@@ -68,8 +68,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
-import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -1983,7 +1981,8 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation(), yaw, pitch, roll);
       desiredPelvisOrientation.changeFrame(worldFrame);
-      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, desiredPelvisOrientation.getQuaternion());
+      Quat4d desiredQuaternion = new Quat4d(desiredPelvisOrientation.getQuaternion());
+      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, desiredQuaternion);
       PelvisOrientationTrajectoryTask task = new PelvisOrientationTrajectoryTask(message, yoTime, pelvisOrientationTrajectoryBehavior, sleepTime);
 
       if (parallelize)
@@ -2004,8 +2003,9 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredPelvisPose.setPosition(dx, dy, dz);
       desiredPelvisPose.setYawPitchRoll(yaw, pitch, roll);
       desiredPelvisPose.changeFrame(worldFrame);
-      TransformablePoint3d position = desiredPelvisPose.getGeometryObject().getPoint();
-      TransformableQuat4d orientation = desiredPelvisPose.getGeometryObject().getOrientation();
+      Point3d position = new Point3d();
+      Quat4d orientation = new Quat4d();
+      desiredPelvisPose.getPose(position, orientation);
       PelvisTrajectoryMessage message = new PelvisTrajectoryMessage(trajectoryTime.getDoubleValue(), position, orientation);
       PelvisTrajectoryTask task = new PelvisTrajectoryTask(message, yoTime, pelvisTrajectoryBehavior, sleepTimeBetweenPoses.getDoubleValue());
       if (parallelize)
