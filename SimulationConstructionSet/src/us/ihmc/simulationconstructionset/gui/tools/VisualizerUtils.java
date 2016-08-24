@@ -63,8 +63,8 @@ public class VisualizerUtils
                {
                   if (artifact.getID() == variableNameToTrack)
                   {
-                     plotter.setXVariableToTrack(((YoArtifactPosition) artifact).getVariables()[0]);
-                     plotter.setYVariableToTrack(((YoArtifactPosition) artifact).getVariables()[1]);
+                     plotter.setXVariableToTrack(((YoArtifactPosition) artifact).getYoX());
+                     plotter.setYVariableToTrack(((YoArtifactPosition) artifact).getYoY());
                   }
                }
             }
@@ -116,8 +116,8 @@ public class VisualizerUtils
                {
                   if (artifact.getID() == variableNameToTrack)
                   {
-                     plotter.setXVariableToTrack(((YoArtifactPosition) artifact).getVariables()[0]);
-                     plotter.setYVariableToTrack(((YoArtifactPosition) artifact).getVariables()[1]);
+                     plotter.setXVariableToTrack(((YoArtifactPosition) artifact).getYoX());
+                     plotter.setYVariableToTrack(((YoArtifactPosition) artifact).getYoY());
                   }
                }
             }

@@ -6,7 +6,6 @@ import java.awt.Color;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 
 public class YoArtifactLine extends YoArtifact
@@ -21,7 +20,7 @@ public class YoArtifactLine extends YoArtifact
 
    public YoArtifactLine(String name, YoFramePoint p1, YoFramePoint p2, Color color)
    {
-      super(name);
+      super(name, p1.getYoX(), p1.getYoY(), p2.getYoX(), p2.getYoY());
       this.p1 = p1;
       this.p2 = p2;
       this.color = color;
@@ -82,12 +81,6 @@ public class YoArtifactLine extends YoArtifact
 
    @Override
    public RemoteGraphicType getRemoteGraphicType()
-   {
-      return null;
-   }
-
-   @Override
-   public YoVariable<?>[] getVariables()
    {
       return null;
    }

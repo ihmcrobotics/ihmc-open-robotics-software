@@ -28,33 +28,28 @@ public class YoArtifactOval extends YoArtifact
    private final Point2d center = new Point2d();
    private final Vector2d radii = new Vector2d();
 
-   public YoArtifactOval(String name, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable radius, Color color)
+   public YoArtifactOval(String name, DoubleYoVariable centerX, DoubleYoVariable centerY, DoubleYoVariable radius, Color color)
    {
-      super(name);
-      this.centerX = x;
-      this.centerY = y;
-      this.radiusX = radius;
-      this.radiusY = radius;
-      this.color = color;
+      this(name, centerX, centerY, radius, radius, color);
    }
 
    public YoArtifactOval(String name, YoFramePoint center, DoubleYoVariable radius, Color color)
    {
-      super(name);
-      this.centerX = center.getYoX();
-      this.centerY = center.getYoY();
-      this.radiusX = radius;
-      this.radiusY = radius;
-      this.color = color;
+      this(name, center.getYoX(), center.getYoY(), radius, radius, color);
    }
    
    public YoArtifactOval(String name, YoFramePoint2d center, YoFrameVector2d radii, Color color)
    {
-      super(name);
-      this.centerX = center.getYoX();
-      this.centerY = center.getYoY();
-      this.radiusX = radii.getYoX();
-      this.radiusY = radii.getYoY();
+      this(name, center.getYoX(), center.getYoY(), radii.getYoX(), radii.getYoY(), color);
+   }
+   
+   public YoArtifactOval(String name, DoubleYoVariable centerX, DoubleYoVariable centerY, DoubleYoVariable radiusX, DoubleYoVariable radiusY, Color color)
+   {
+      super(name, centerX, centerY, radiusX, radiusY);
+      this.centerX = centerX;
+      this.centerY = centerY;
+      this.radiusX = radiusX;
+      this.radiusY = radiusY;
       this.color = color;
    }
 
@@ -74,7 +69,6 @@ public class YoArtifactOval extends YoArtifact
    @Override
    public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY, double scaleFactor)
    {
-      update();
       graphics.setColor(color);
       graphics.drawOval(centerX, centerY, LEGEND_DIAMETER, LEGEND_DIAMETER);
    }
@@ -116,12 +110,6 @@ public class YoArtifactOval extends YoArtifact
    public RemoteGraphicType getRemoteGraphicType()
    {
       return RemoteGraphicType.CIRCLE_ARTIFACT;
-   }
-
-   @Override
-   public DoubleYoVariable[] getVariables()
-   {
-      return new DoubleYoVariable[] {centerX, centerY, radiusX, radiusY};
    }
 
    @Override
