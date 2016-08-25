@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.stateEstimation;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public interface StateEstimatorParameters extends SensorProcessingConfiguration
+public abstract class StateEstimatorParameters implements SensorProcessingConfiguration
 {
    public abstract boolean isRunningOnRealRobot();
    
@@ -57,8 +57,11 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
    public abstract boolean useTwistForPelvisLinearStateEstimation();
 
    public abstract double getPelvisLinearVelocityAlphaNewTwist();
-   
-   public abstract boolean createFusedIMUSensor();
+
+   public boolean createFusedIMUSensor()
+   {
+      return false;
+   }
 
    public abstract double getContactThresholdForce();
 
