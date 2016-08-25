@@ -51,6 +51,8 @@ public class QuadrupedPlanarVelocityInputProvider
             }
          });
       }
+
+      parentRegistry.addChild(registry);
    }
 
    public Vector3d get()
