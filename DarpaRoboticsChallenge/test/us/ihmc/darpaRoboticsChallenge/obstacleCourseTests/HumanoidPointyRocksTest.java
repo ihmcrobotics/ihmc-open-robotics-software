@@ -22,6 +22,7 @@ import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -36,7 +37,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
-import us.ihmc.plotting.Plotter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -82,6 +82,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
+   private PushRobotController pushController;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -214,7 +215,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 45.0, targets = {TestPlanTarget.InDevelopment})
+   @DeployableTestMethod(estimatedDuration = 45.0, targets = {TestPlanTarget.Fast})
    @Test(timeout = 300000)
    public void testBalanceOnLine() throws SimulationExceededMaximumTimeException
    {
@@ -223,6 +224,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), drcSimulationTestHelper.getRobot().getRootJoint().getName(), new Vector3d(0.0, 0.0, 0.15));
       ThreadTools.sleep(1000);
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, 1.5, 0.0, defaultChickenPercentage);
       BooleanYoVariable doFootExplorationInTransferToStanding = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
@@ -256,8 +258,12 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       // take one step forward onto a line contact
       FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(RobotSide.LEFT), 0.0, 0.0, 0.0);
-      ArrayList<Point2d> contacts = generateContactPointsForRotatedLineOfContact(0.01, 0.0);
-      success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, RobotSide.LEFT, contacts, stepLocation, jointNames, true);
+      double lineWidth = 0.01;
+      ArrayList<Point2d> contacts = generateContactPointsForRotatedLineOfContact(lineWidth, 0.0);
+      double offset = -0.04;
+      for (Point2d contact : contacts)
+         contact.y += offset;
+      success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, RobotSide.LEFT, contacts , stepLocation, jointNames, true);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       FramePoint desiredPosition = new FramePoint(fullRobotModel.getSoleFrame(RobotSide.RIGHT), 0.0, 0.0, 0.15);
@@ -265,16 +271,16 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       Quat4d desiredOrientation = new Quat4d();
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(RobotSide.RIGHT, 1.0, desiredPosition.getPoint(), desiredOrientation);
       drcSimulationTestHelper.send(footTrajectoryMessage);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
 
-      Vector3d rootVelocity = new Vector3d();
-      FloatingJoint rootJoint = robot.getRootJoint();
-      rootJoint.getVelocity(rootVelocity);
-      double push = 0.04;
-      rootVelocity.y = rootVelocity.y + push;
-      rootJoint.setVelocity(rootVelocity);
+      pushController.applyForce(new Vector3d(0.0, 1.0, 0.0), 200.0, 0.025);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+      Point3d center = new Point3d(0.0, 0.15, 0.8);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.2);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
       assertTrue(success);
    }
 
@@ -977,16 +983,22 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       return ret;
    }
 
-   private boolean takeAStepOntoNewFootGroundContactPoints(SDFHumanoidRobot robot,
-         SDFFullHumanoidRobotModel fullRobotModel, RobotSide robotSide,
-         ArrayList<Point2d> contactPointsInAnkleFrame, FramePoint placeToStep,
-         SideDependentList<String> jointNames, boolean setPredictedContactPoints)
+   private boolean takeAStepOntoNewFootGroundContactPoints(SDFHumanoidRobot robot, SDFFullHumanoidRobotModel fullRobotModel, RobotSide robotSide,
+         ArrayList<Point2d> contactPointsInAnkleFrame, FramePoint placeToStep, SideDependentList<String> jointNames, boolean setPredictedContactPoints)
          throws SimulationExceededMaximumTimeException
+   {
+      return takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, contactPointsInAnkleFrame, contactPointsInAnkleFrame, placeToStep,
+            jointNames, setPredictedContactPoints);
+   }
+
+   private boolean takeAStepOntoNewFootGroundContactPoints(SDFHumanoidRobot robot, SDFFullHumanoidRobotModel fullRobotModel, RobotSide robotSide,
+         ArrayList<Point2d> contactPointsInAnkleFrame, ArrayList<Point2d> predictedContactPointsInAnkleFrame, FramePoint placeToStep,
+         SideDependentList<String> jointNames, boolean setPredictedContactPoints) throws SimulationExceededMaximumTimeException
    {
       String jointName = jointNames.get(robotSide);
 
       FootstepDataListMessage message = new FootstepDataListMessage();
-      FootstepDataMessage footstepData = createFootstepDataMessage(fullRobotModel, robotSide, contactPointsInAnkleFrame, placeToStep, setPredictedContactPoints);
+      FootstepDataMessage footstepData = createFootstepDataMessage(fullRobotModel, robotSide, predictedContactPointsInAnkleFrame, placeToStep, setPredictedContactPoints);
       message.add(footstepData);
 
       drcSimulationTestHelper.send(message);
