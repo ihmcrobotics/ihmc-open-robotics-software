@@ -59,7 +59,7 @@ public class WholeBodyControlCoreToolbox
    private final JointIndexHandler jointIndexHandler;
 
    public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, RigidBody[] controlledBodies, InverseDynamicsJoint[] controlledJoints, MomentumOptimizationSettings momentumOptimizationSettings,
-         CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder,
+         ReferenceFrames referenceFrames, double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder,
          TwistCalculator twistCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry registry)
    {
