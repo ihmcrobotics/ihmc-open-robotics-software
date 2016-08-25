@@ -471,8 +471,11 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
 
    public void halt()
    {
-      haltFlag.set(true);
-      haltTime.set(robotTimestamp.getDoubleValue() + haltTransitionDurationParameter.get());
+      if (haltFlag.getBooleanValue() == false)
+      {
+         haltFlag.set(true);
+         haltTime.set(robotTimestamp.getDoubleValue() + haltTransitionDurationParameter.get());
+      }
    }
 
    public YoVariableRegistry getYoVariableRegistry()
