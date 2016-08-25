@@ -53,6 +53,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private static final boolean DEBUG = false;
 
+   private static final boolean PROCESS_GO_HOME_COMMANDS = false;
+
    private boolean VISUALIZE = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -949,6 +951,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public void handleGoHomeCommand(GoHomeCommand command)
    {
+      if (!PROCESS_GO_HOME_COMMANDS)
+         return;
       if (!command.getRequest(BodyPart.PELVIS))
          return;
 
