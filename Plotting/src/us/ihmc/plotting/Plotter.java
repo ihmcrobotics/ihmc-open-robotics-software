@@ -274,7 +274,7 @@ public class Plotter
             applyColorForGridline(graphics2d, nthGridLineFromOrigin);
    
             drawGuy.changeFrame(screenFrame);
-            graphics2d.drawLine((int) Math.round(drawGuy.getX()), 0, (int) Math.round(drawGuy.getX()), (int) visibleRectangle.getHeight());
+            graphics2d.drawLineSegment((int) Math.round(drawGuy.getX()), 0, (int) Math.round(drawGuy.getX()), (int) visibleRectangle.getHeight());
             
             if (showLabels)
             {
@@ -300,7 +300,7 @@ public class Plotter
             applyColorForGridline(graphics2d, nthGridLineFromOrigin);
    
             drawGuy.changeFrame(screenFrame);
-            graphics2d.drawLine(0, (int) Math.round(drawGuy.getY()), (int) visibleRectangle.getWidth(), (int) Math.round(drawGuy.getY()));
+            graphics2d.drawLineSegment(0, (int) Math.round(drawGuy.getY()), (int) visibleRectangle.getWidth(), (int) Math.round(drawGuy.getY()));
             
             if (showLabels)
             {
@@ -317,8 +317,8 @@ public class Plotter
       
       // paint grid centerline
       graphics2d.setColor(PlotterColors.GRID_AXIS);
-      graphics2d.drawLine((int) Math.round(origin.getX()), 0, (int) Math.round(origin.getX()), (int) visibleRectangle.getHeight());
-      graphics2d.drawLine(0, (int) Math.round(origin.getY()), (int) visibleRectangle.getWidth(), (int) Math.round(origin.getY()));
+      graphics2d.drawLineSegment((int) Math.round(origin.getX()), 0, (int) Math.round(origin.getX()), (int) visibleRectangle.getHeight());
+      graphics2d.drawLineSegment(0, (int) Math.round(origin.getY()), (int) visibleRectangle.getWidth(), (int) Math.round(origin.getY()));
       
       for (int artifactLevel = 0; artifactLevel < 5; artifactLevel++)
       {
@@ -353,11 +353,11 @@ public class Plotter
          selected.changeFrame(screenFrame);
          graphics2d.setColor(PlotterColors.SELECTION);
          double crossSize = 8.0;
-         graphics2d.drawLine((int) Math.round(selected.getX() - crossSize),
+         graphics2d.drawLineSegment((int) Math.round(selected.getX() - crossSize),
                              (int) Math.round(selected.getY() - crossSize),
                              (int) Math.round(selected.getX() + crossSize),
                              (int) Math.round(selected.getY() + crossSize));
-         graphics2d.drawLine((int) Math.round(selected.getX() - crossSize),
+         graphics2d.drawLineSegment((int) Math.round(selected.getX() - crossSize),
                              (int) Math.round(selected.getY() + crossSize),
                              (int) Math.round(selected.getX() + crossSize),
                              (int) Math.round(selected.getY() - crossSize));

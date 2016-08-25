@@ -72,7 +72,7 @@ public class Graphics2DAdapter
       return (int) Math.round(continuous);
    }
 
-   public void drawLine(int x1, int y1, int x2, int y2)
+   public void drawLineSegment(int x1, int y1, int x2, int y2)
    {
       graphics2d.drawLine(x1, y1, x2, y2);
    }
