@@ -105,8 +105,39 @@ public class PelvisRotationalStateUpdater
    public void initialize()
    {
       rotationFrozenOffset.setIdentity();
-
       updateRootJointOrientationAndAngularVelocity();
+   }
+
+   public void initializeForFrozenState()
+   {
+      rotationFrozenOffset.setIdentity();
+
+      // R_{measurementFrame}^{world}
+      imuProcessedOutput.getOrientationMeasurement(orientationMeasurement);
+      transformFromMeasurementFrameToWorld.setRotationAndZeroTranslation(orientationMeasurement);
+
+      // R_{root}^{measurementFrame}
+      rootJointFrame.getTransformToDesiredFrame(transformFromRootJointFrameToMeasurementFrame, measurementFrame);
+
+      // R_{root}^{world} = R_{estimationLink}^{world} * R_{root}^{estimationLink}
+      transformFromRootJointFrameToWorld.multiply(transformFromMeasurementFrameToWorld, transformFromRootJointFrameToMeasurementFrame);
+      transformFromRootJointFrameToWorld.getRotation(rotationFromRootJointFrameToWorld);
+      
+      double initialYaw = RotationTools.computeYaw(rotationFromRootJointFrameToWorld);
+
+      rootJointYawOffsetFromFrozenState.set(initialYaw);
+      rotationFrozenOffset.rotZ(initialYaw);
+
+      yoRootJointFrameQuaternion.setToZero();
+      yoRootJointFrameOrientation.setToZero();
+
+      yoRootJointFrameQuaternion.get(rotationFromRootJointFrameToWorld);
+      rootJoint.setRotation(rotationFromRootJointFrameToWorld);
+
+      // Set the rootJoint twist to zero.
+      rootJoint.getJointTwist(twistRootBodyRelativeToWorld);
+      twistRootBodyRelativeToWorld.setToZero();
+      rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
    }
 
    private final Matrix3d rotationFrozenOffset = new Matrix3d();
