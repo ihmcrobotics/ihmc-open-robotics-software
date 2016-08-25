@@ -212,7 +212,7 @@ public class SkippyController implements RobotController
       yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", icpPositionYoGraphic.createArtifact());
 
 
-      YoGraphicPosition footPositionYoGraphic = new YoGraphicPosition("Foot", footLocation, 0.006, YoAppearance.DarkBlue(), GraphicType.SOLID_BALL);
+      YoGraphicPosition footPositionYoGraphic = new YoGraphicPosition("Foot", footLocation, 0.006, YoAppearance.DarkBlue(), GraphicType.BALL);
       yoGraphicsListRegistries.registerYoGraphic("instantaneousCapturePoint", footPositionYoGraphic);
       yoGraphicsListRegistries.registerArtifact("instantaneousCapturePoint", footPositionYoGraphic.createArtifact());
       
@@ -313,10 +313,6 @@ public class SkippyController implements RobotController
       rateOfChangeOfAngularMomentum.set(angularMomentum);
       rateOfChangeOfAngularMomentum.sub(lastAngularMomentum);
       rateOfChangeOfAngularMomentum.scale(1/deltaT);
-//      System.out.println(robot.getTime()+"\n"+"Last   :"+lastAngularMomentum);
-//      System.out.println("Actual :"+angularMomentum);
-//      System.out.println("Linear :"+rateOfChangeOfLinearMomentum);
-//      System.out.println("Angular:"+rateOfChangeOfAngularMomentum);
       lastLinearMomentum.set(linearMomentum);
       lastAngularMomentum.set(angularMomentum);
       /*
@@ -356,7 +352,6 @@ public class SkippyController implements RobotController
       cmpToCoM.sub(centroidalMomentPivotFromIcp.getVector3dCopy());
       Vector3d torqueFromReactionToCoM = new Vector3d();
       torqueFromReactionToCoM.cross(cmpToCoM, reactionForce);
-      System.out.println(torqueFromReactionToCoM);//reactionForce);
       /*
        * Initialize shoulder and hip joint torques
        */
