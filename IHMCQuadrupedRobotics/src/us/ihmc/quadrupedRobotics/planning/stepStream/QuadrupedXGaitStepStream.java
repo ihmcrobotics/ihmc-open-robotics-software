@@ -111,6 +111,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
          RobotEnd robotEnd = xGaitPreviewSteps.get(i).getRobotQuadrant().getEnd();
          xGaitCurrentSteps.get(robotEnd).set(xGaitPreviewSteps.get(i));
       }
+      this.process();
    }
 
    @Override
@@ -156,6 +157,12 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
             stepQueue.getTail().set(xGaitPreviewSteps.get(i));
          }
       }
+   }
+
+   @Override
+   public void onExit()
+   {
+
    }
 
    @Override

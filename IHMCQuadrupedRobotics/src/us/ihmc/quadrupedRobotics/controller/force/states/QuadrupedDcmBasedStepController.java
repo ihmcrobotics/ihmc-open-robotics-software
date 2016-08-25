@@ -211,10 +211,6 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
 
    private void updateSetpoints()
    {
-      // update step planner
-      stepStream.process();
-      stepStream.getBodyOrientation(bodyOrientationReference);
-
       // update desired horizontal com forces
       computeDcmSetpoints();
       dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
@@ -231,6 +227,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       comPositionController.compute(taskSpaceControllerCommands.getComForce(), comPositionControllerSetpoints, taskSpaceEstimates);
 
       // update desired body orientation, angular velocity, and torque
+      stepStream.getBodyOrientation(bodyOrientationReference);
       bodyOrientationReferenceFrame.update();
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(bodyOrientationReferenceFrame);
       bodyOrientationControllerSetpoints.getBodyOrientation().set(postureProvider.getBodyOrientationInput());
@@ -387,6 +384,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    @Override
    public void onEntry()
    {
+      // initialize step stream
+      stepStream.onEntry();
+
       // initialize state
       haltFlag.set(false);
       onLiftOffTriggered.set(false);
@@ -424,10 +424,6 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       }
       groundPlaneEstimator.compute(groundPlanePositions);
 
-      // initialize step plan
-      stepStream.onEntry();
-      stepStream.process();
-
       // compute absolute step adjustment
       computeAbsoluteStepAdjustment();
 
@@ -451,6 +447,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       {
          return ControllerEvent.DONE;
       }
+      stepStream.process();
       updateGains();
       updateEstimates();
       updateSetpoints();
@@ -460,6 +457,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    @Override
    public void onExit()
    {
+      // clean up step stream
+      stepStream.onExit();
+
       // remove remaining steps from the queue
       timedStepController.removeSteps();
       timedStepController.registerStepTransitionCallback(null);

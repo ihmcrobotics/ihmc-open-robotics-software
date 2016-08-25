@@ -46,12 +46,19 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
             stepQueue.getTail().setAbsolute(true);
          }
       }
+      bodyOrientation.setToZero(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
    }
 
    @Override
    public void process()
    {
       bodyOrientation.setToZero(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
+   }
+
+   @Override
+   public void onExit()
+   {
+
    }
 
    @Override
