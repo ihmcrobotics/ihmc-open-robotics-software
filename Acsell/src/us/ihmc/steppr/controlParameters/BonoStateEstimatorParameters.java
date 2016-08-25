@@ -218,12 +218,6 @@ public class BonoStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public boolean createFusedIMUSensor()
-   {
-      return false;
-   }
-
-   @Override
    public double getContactThresholdForce()
    {
       return 120.0;

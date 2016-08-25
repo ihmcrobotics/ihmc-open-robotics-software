@@ -190,12 +190,6 @@ public class LLAQuadrupedStateEstimatorParameters extends StateEstimatorParamete
    }
 
    @Override
-   public boolean createFusedIMUSensor()
-   {
-      return false;
-   }
-
-   @Override
    public double getContactThresholdForce()
    {
       return 0;

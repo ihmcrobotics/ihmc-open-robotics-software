@@ -57,8 +57,11 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    public abstract boolean useTwistForPelvisLinearStateEstimation();
 
    public abstract double getPelvisLinearVelocityAlphaNewTwist();
-   
-   public abstract boolean createFusedIMUSensor();
+
+   public boolean createFusedIMUSensor()
+   {
+      return false;
+   }
 
    public abstract double getContactThresholdForce();
 
