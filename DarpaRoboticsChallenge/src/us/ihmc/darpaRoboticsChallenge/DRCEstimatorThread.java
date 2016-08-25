@@ -17,6 +17,7 @@ import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLoca
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
@@ -406,6 +407,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    {
       if (drcStateEstimator != null)
          drcStateEstimator.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+   }
+
+   public void requestStateEstimatorMode(StateEstimatorMode stateEstimatorMode)
+   {
+      if (drcStateEstimator != null)
+         drcStateEstimator.requestStateEstimatorMode(stateEstimatorMode);
    }
 
    public List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()

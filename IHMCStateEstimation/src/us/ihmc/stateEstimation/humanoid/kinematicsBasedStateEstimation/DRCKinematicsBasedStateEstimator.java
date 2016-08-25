@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
@@ -50,6 +51,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final DoubleYoVariable yoTime = new DoubleYoVariable("t_stateEstimator", registry);
+   private final AtomicReference<StateEstimatorMode> atomicOperationMode = new AtomicReference<>(null);
    private final EnumYoVariable<StateEstimatorMode> operatingMode = new EnumYoVariable<>("stateEstimatorOperatingMode", registry, StateEstimatorMode.class, false);
 
    private final FusedIMUSensor fusedIMUSensor;
@@ -164,6 +166,11 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       if (visualizeMeasurementFrames)
          setupDynamicGraphicObjects(yoGraphicsListRegistry, imusToDisplay);
+
+      if (stateEstimatorParameters.requestFrozenModeAtStart())
+         operatingMode.set(StateEstimatorMode.FROZEN);
+      else
+         operatingMode.set(StateEstimatorMode.NORMAL);
    }
 
    private void setupDynamicGraphicObjects(YoGraphicsListRegistry yoGraphicsListRegistry, List<? extends IMUSensorReadOnly> imuProcessedOutputs)
@@ -188,12 +195,13 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       if (fusedIMUSensor != null)
          fusedIMUSensor.update();
 
-      operatingMode.set(StateEstimatorMode.NORMAL);
-
       jointStateUpdater.initialize();
       if (pelvisRotationalStateUpdater != null)
       {
-         pelvisRotationalStateUpdater.initialize();
+         if (operatingMode.getEnumValue() == StateEstimatorMode.FROZEN)
+            pelvisRotationalStateUpdater.initializeForFrozenState();
+         else
+            pelvisRotationalStateUpdater.initialize();
       }
       if(forceSensorStateUpdater != null)
       {
@@ -221,6 +229,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       {
          operatingMode.set(stateEstimatorModeSubscriber.getRequestedOperatingMode());
       }
+
+      if (atomicOperationMode.get() != null)
+         operatingMode.set(atomicOperationMode.getAndSet(null));
 
       jointStateUpdater.updateJointState();
 
@@ -410,5 +421,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public ForceSensorCalibrationModule getForceSensorCalibrationModule()
    {
       return forceSensorStateUpdater;
+   }
+
+   public void requestStateEstimatorMode(StateEstimatorMode stateEstimatorMode)
+   {
+      atomicOperationMode.set(stateEstimatorMode);
    }
 }

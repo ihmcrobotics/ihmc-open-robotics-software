@@ -94,7 +94,7 @@ public class YoArtifactVector extends YoArtifact
    {
       graphics.setColor(new Color(color.getX(), color.getY(), color.getZ()));
 
-      graphics.drawLine(Xcenter, Ycenter, Xcenter + 20, Ycenter);
+      graphics.drawLineSegment(Xcenter, Ycenter, Xcenter + 20, Ycenter);
 
       int[] x = { Xcenter + 20, Xcenter + 20, Xcenter + 25 };
       int[] y = { Ycenter + 5, Ycenter - 5, Ycenter };

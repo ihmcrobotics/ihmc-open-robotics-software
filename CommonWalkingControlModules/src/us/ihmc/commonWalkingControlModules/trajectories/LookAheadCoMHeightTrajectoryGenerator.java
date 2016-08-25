@@ -53,6 +53,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private static final boolean DEBUG = false;
 
+   private static final boolean PROCESS_GO_HOME_COMMANDS = false;
+
    private boolean VISUALIZE = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -655,7 +657,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       double xSNext = Double.NaN;
       if (nextContactFramePosition != null)
       {
-         Line2d line2d = new Line2d(projectionSegment.getFirstEndPointCopy(), projectionSegment.getSecondEndPointCopy());
+         Line2d line2d = new Line2d(projectionSegment.getFirstEndpointCopy(), projectionSegment.getSecondEndpointCopy());
          Point2d nextPoint2d = new Point2d(nextContactFramePosition.getX(), nextContactFramePosition.getY());
          line2d.orthogonalProjectionCopy(nextPoint2d);
          xSNext = projectionSegment.percentageAlongLineSegment(nextPoint2d) * projectionSegment.length();
@@ -949,6 +951,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public void handleGoHomeCommand(GoHomeCommand command)
    {
+      if (!PROCESS_GO_HOME_COMMANDS)
+         return;
       if (!command.getRequest(BodyPart.PELVIS))
          return;
 
@@ -972,8 +976,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private void getPartialDerivativesWithRespectToS(LineSegment2d segment, double[] partialDerivativesToPack)
    {
-      double dsdx = (segment.getX1() - segment.getX0()) / segment.length();
-      double dsdy = (segment.getY1() - segment.getY0()) / segment.length();
+      double dsdx = (segment.getSecondEndpointX() - segment.getFirstEndpointX()) / segment.length();
+      double dsdy = (segment.getSecondEndpointY() - segment.getFirstEndpointY()) / segment.length();
 
       partialDerivativesToPack[0] = dsdx;
       partialDerivativesToPack[1] = dsdy;

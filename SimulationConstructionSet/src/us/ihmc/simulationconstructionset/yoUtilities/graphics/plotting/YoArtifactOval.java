@@ -13,20 +13,19 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoArtifactOval extends YoArtifact
 {
    private static final int LEGEND_DIAMETER = 10;
    
-   private DoubleYoVariable centerX;
-   private DoubleYoVariable centerY;
-   private DoubleYoVariable radiusX;
-   private DoubleYoVariable radiusY;
+   private final YoFramePoint2d center;
+   private final YoFrameVector2d radii;
    
    private final ArrayList<double[]> historicalData = new ArrayList<double[]>();
 
-   private final Point2d center = new Point2d();
-   private final Vector2d radii = new Vector2d();
+   private final Point2d tempCenter = new Point2d();
+   private final Vector2d tempRadii = new Vector2d();
 
    public YoArtifactOval(String name, DoubleYoVariable centerX, DoubleYoVariable centerY, DoubleYoVariable radius, Color color)
    {
@@ -38,18 +37,17 @@ public class YoArtifactOval extends YoArtifact
       this(name, center.getYoX(), center.getYoY(), radius, radius, color);
    }
    
-   public YoArtifactOval(String name, YoFramePoint2d center, YoFrameVector2d radii, Color color)
+   private YoArtifactOval(String name, DoubleYoVariable centerX, DoubleYoVariable centerY, DoubleYoVariable radiusX, DoubleYoVariable radiusY, Color color)
    {
-      this(name, center.getYoX(), center.getYoY(), radii.getYoX(), radii.getYoY(), color);
+      this(name, new YoFramePoint2d(centerX, centerY, ReferenceFrame.getWorldFrame()),
+                 new YoFrameVector2d(radiusX, radiusY, ReferenceFrame.getWorldFrame()), color);
    }
    
-   public YoArtifactOval(String name, DoubleYoVariable centerX, DoubleYoVariable centerY, DoubleYoVariable radiusX, DoubleYoVariable radiusY, Color color)
+   public YoArtifactOval(String name, YoFramePoint2d center, YoFrameVector2d radii, Color color)
    {
-      super(name, centerX, centerY, radiusX, radiusY);
-      this.centerX = centerX;
-      this.centerY = centerY;
-      this.radiusX = radiusX;
-      this.radiusY = radiusY;
+      super(name, center.getYoX(), center.getYoY(), radii.getYoX(), radii.getYoY());
+      this.center = center;
+      this.radii = radii;
       this.color = color;
    }
 
@@ -60,7 +58,6 @@ public class YoArtifactOval extends YoArtifact
       {
          synchronized (historicalData)
          {
-            update();
             historicalData.add(new double[] {center.getX(), center.getY(), radii.getX(), radii.getY()});
          }
       }
@@ -78,9 +75,10 @@ public class YoArtifactOval extends YoArtifact
    {
       if (isVisible)
       {
-         update();
+         center.get(tempCenter);
+         radii.get(tempRadii);
          graphics.setColor(color);
-         graphics.drawOval(center, radii);
+         graphics.drawOval(tempCenter, tempRadii);
       }
    }
 
@@ -91,19 +89,13 @@ public class YoArtifactOval extends YoArtifact
       {
          for (double[] data : historicalData)
          {
-            center.set(data[0], data[1]);
-            radii.set(data[2], data[3]);
+            tempCenter.set(data[0], data[1]);
+            tempRadii.set(data[2], data[3]);
 
             graphics.setColor(color);
-            graphics.drawOval(center, radii);
+            graphics.drawOval(tempCenter, tempRadii);
          }
       }
-   }
-
-   private void update()
-   {
-      center.set(centerX.getDoubleValue(), centerY.getDoubleValue());
-      radii.set(radiusX.getDoubleValue(), radiusY.getDoubleValue());
    }
 
    @Override

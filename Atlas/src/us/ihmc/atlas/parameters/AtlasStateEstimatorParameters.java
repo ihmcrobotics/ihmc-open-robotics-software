@@ -27,7 +27,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class AtlasStateEstimatorParameters implements StateEstimatorParameters
+public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 {
    private final boolean runningOnRealRobot;
 
@@ -287,12 +287,6 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
-   public boolean createFusedIMUSensor()
-   {
-      return false;
-   }
-
-   @Override
    public double getContactThresholdForce()
    {
       return 120.0;
@@ -359,6 +353,12 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    public boolean requestFootForceSensorCalibrationAtStart()
    {
       return false;
+   }
+
+   @Override
+   public boolean requestFrozenModeAtStart()
+   {
+      return runningOnRealRobot;
    }
 
    @Override

@@ -109,7 +109,7 @@ public class PlotterGraphics
       int x2Int = xDoubleToInt(x2);
       int y2Int = yDoubleToInt(y2);
 
-      graphics.drawLine(x1Int, y1Int, x2Int, y2Int);
+      graphics.drawLineSegment(x1Int, y1Int, x2Int, y2Int);
    }
 
    public void drawPolygon(Graphics2DAdapter graphics, double[][] polygonPoints, int nPoints)

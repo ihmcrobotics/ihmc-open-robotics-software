@@ -40,7 +40,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
+import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
@@ -90,7 +90,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<Boolean> showPlotter = new RequiredFactoryField<>("showPlotter");
    private final RequiredFactoryField<QuadrupedModelFactory> modelFactory = new RequiredFactoryField<>("modelFactory");
    private final RequiredFactoryField<SimulationConstructionSetParameters> scsParameters = new RequiredFactoryField<>("scsParameters");
-   private final RequiredFactoryField<QuadrupedGroundContactParameters> groundContactParameters = new RequiredFactoryField<>("groundContactParameters");
+   private final RequiredFactoryField<GroundContactParameters> groundContactParameters = new RequiredFactoryField<>("groundContactParameters");
    private final RequiredFactoryField<QuadrupedSimulationInitialPositionParameters> initialPositionParameters = new RequiredFactoryField<>("initialPositionParameters");
    private final RequiredFactoryField<OutputWriter> outputWriter = new RequiredFactoryField<>("outputWriter");
    private final RequiredFactoryField<Boolean> useNetworking = new RequiredFactoryField<>("useNetworking");
@@ -482,7 +482,7 @@ public class QuadrupedSimulationFactory
       this.groundContactModelType.set(groundContactModelType);
    }
    
-   public void setGroundContactParameters(QuadrupedGroundContactParameters groundContactParameters)
+   public void setGroundContactParameters(GroundContactParameters groundContactParameters)
    {
       this.groundContactParameters.set(groundContactParameters);
    }
