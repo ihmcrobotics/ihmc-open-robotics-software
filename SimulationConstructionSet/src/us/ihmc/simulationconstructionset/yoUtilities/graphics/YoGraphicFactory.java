@@ -84,7 +84,7 @@ public class YoGraphicFactory
 
       case LINE_SEGMENT_2D_ARTIFACT:
          
-         YoFrameLineSegment2d segment = new YoFrameLineSegment2d((DoubleYoVariable) vars[0], (DoubleYoVariable) vars[2], (DoubleYoVariable) vars[1], (DoubleYoVariable) vars[3],
+         YoFrameLineSegment2d segment = new YoFrameLineSegment2d((DoubleYoVariable) vars[0], (DoubleYoVariable) vars[1], (DoubleYoVariable) vars[2], (DoubleYoVariable) vars[3],
                ReferenceFrame.getWorldFrame());
          
          return new YoArtifactLineSegment2d(name, segment, appearance.getColor().get());
