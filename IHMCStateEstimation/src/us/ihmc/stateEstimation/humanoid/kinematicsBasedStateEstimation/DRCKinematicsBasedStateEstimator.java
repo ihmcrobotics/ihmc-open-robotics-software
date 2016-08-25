@@ -166,6 +166,11 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       if (visualizeMeasurementFrames)
          setupDynamicGraphicObjects(yoGraphicsListRegistry, imusToDisplay);
+
+      if (stateEstimatorParameters.requestFrozenModeAtStart())
+         operatingMode.set(StateEstimatorMode.FROZEN);
+      else
+         operatingMode.set(StateEstimatorMode.NORMAL);
    }
 
    private void setupDynamicGraphicObjects(YoGraphicsListRegistry yoGraphicsListRegistry, List<? extends IMUSensorReadOnly> imuProcessedOutputs)
@@ -189,8 +194,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    {
       if (fusedIMUSensor != null)
          fusedIMUSensor.update();
-
-      operatingMode.set(StateEstimatorMode.NORMAL);
 
       jointStateUpdater.initialize();
       if (pelvisRotationalStateUpdater != null)
