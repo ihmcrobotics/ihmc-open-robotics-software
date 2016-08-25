@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.stateEstimation;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public interface StateEstimatorParameters extends SensorProcessingConfiguration
+public abstract class StateEstimatorParameters implements SensorProcessingConfiguration
 {
    public abstract boolean isRunningOnRealRobot();
    

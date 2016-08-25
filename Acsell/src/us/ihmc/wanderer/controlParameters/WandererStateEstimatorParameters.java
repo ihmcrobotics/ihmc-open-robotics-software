@@ -15,7 +15,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.wanderer.hardware.WandererJoint;
 
-public class WandererStateEstimatorParameters implements StateEstimatorParameters
+public class WandererStateEstimatorParameters extends StateEstimatorParameters
 {
    private final boolean runningOnRealRobot;
 
