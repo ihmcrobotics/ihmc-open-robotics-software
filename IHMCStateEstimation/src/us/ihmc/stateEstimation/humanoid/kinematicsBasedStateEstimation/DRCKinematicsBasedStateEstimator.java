@@ -198,7 +198,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       jointStateUpdater.initialize();
       if (pelvisRotationalStateUpdater != null)
       {
-         pelvisRotationalStateUpdater.initialize();
+         if (operatingMode.getEnumValue() == StateEstimatorMode.FROZEN)
+            pelvisRotationalStateUpdater.initializeForFrozenState();
+         else
+            pelvisRotationalStateUpdater.initialize();
       }
       if(forceSensorStateUpdater != null)
       {
