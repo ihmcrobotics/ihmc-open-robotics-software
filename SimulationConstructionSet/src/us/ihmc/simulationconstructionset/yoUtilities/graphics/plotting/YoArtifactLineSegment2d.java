@@ -140,7 +140,7 @@ public class YoArtifactLineSegment2d extends YoArtifact
       if (STROKE != null)
          graphics.setStroke(STROKE);
 
-      graphics.drawLine(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
+      graphics.drawLineSegment(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
    }
 
    @Override
