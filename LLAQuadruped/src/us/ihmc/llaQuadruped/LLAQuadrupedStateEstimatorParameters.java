@@ -8,7 +8,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
-public class LLAQuadrupedStateEstimatorParameters implements StateEstimatorParameters
+public class LLAQuadrupedStateEstimatorParameters extends StateEstimatorParameters
 {
    @Override
    public void configureSensorProcessing(SensorProcessing sensorProcessing)
