@@ -22,6 +22,7 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class WholeBodyControlCoreToolbox
@@ -40,7 +41,7 @@ public class WholeBodyControlCoreToolbox
    private final RigidBody[] controlledBodies;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
-   private final CommonHumanoidReferenceFrames referenceFrames;
+   private final ReferenceFrames referenceFrames;
    private final double gravityZ;
    private final double totalRobotMass;
 
@@ -58,7 +59,7 @@ public class WholeBodyControlCoreToolbox
    private final JointIndexHandler jointIndexHandler;
 
    public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, RigidBody[] controlledBodies, InverseDynamicsJoint[] controlledJoints, MomentumOptimizationSettings momentumOptimizationSettings,
-         CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder,
+         ReferenceFrames referenceFrames, double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder,
          TwistCalculator twistCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry registry)
    {
@@ -155,11 +156,6 @@ public class WholeBodyControlCoreToolbox
    public double getControlDT()
    {
       return controlDT;
-   }
-
-   public CommonHumanoidReferenceFrames getReferenceFrames()
-   {
-      return referenceFrames;
    }
 
    public ReferenceFrame getCenterOfMassFrame()

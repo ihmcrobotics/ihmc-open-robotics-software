@@ -57,7 +57,7 @@ public class YoArtifactLine2d extends YoArtifact
       //      plotterGraphics.setCenter(Xcenter, Ycenter);
       //      plotterGraphics.setScale(scaleFactor);
       //      plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.0);
-      graphics.drawLine(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
+      graphics.drawLineSegment(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
    }
 
    @Override

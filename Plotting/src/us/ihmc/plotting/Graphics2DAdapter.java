@@ -31,6 +31,8 @@ import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.frames.MetersReferenceFrame;
 import us.ihmc.plotting.frames.PixelsReferenceFrame;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.LineSegment2d;
 
 /**
  * Everything not deprecated is in meters.
@@ -40,8 +42,9 @@ public class Graphics2DAdapter
    private final MetersReferenceFrame metersFrame;
    private final PixelsReferenceFrame screenFrame;
    
-   private final PlotterPoint2d[] pointBin = new PlotterPoint2d[1];
+   private final PlotterPoint2d[] pointBin = new PlotterPoint2d[10];
    private final PlotterVector2d[] vectorBin = new PlotterVector2d[pointBin.length];
+   private final int[][] tempPoints = new int[2][pointBin.length];
    
    private Graphics2D graphics2d;
    
@@ -72,11 +75,24 @@ public class Graphics2DAdapter
       return (int) Math.round(continuous);
    }
 
-   public void drawLine(int x1, int y1, int x2, int y2)
+   @Deprecated
+   public void drawLineSegment(int x1, int y1, int x2, int y2)
    {
       graphics2d.drawLine(x1, y1, x2, y2);
    }
+   
+   public void drawLineSegment(LineSegment2d lineSegment)
+   {
+      PlotterPoint2d firstEndpoint = pointBin[0];
+      PlotterPoint2d secondEndpoint = pointBin[1];
+      firstEndpoint.setIncludingFrame(metersFrame, lineSegment.getFirstEndpoint());
+      secondEndpoint.setIncludingFrame(metersFrame, lineSegment.getSecondEndpoint());
+      firstEndpoint.changeFrame(screenFrame);
+      secondEndpoint.changeFrame(screenFrame);
+      graphics2d.drawLine(pixelate(firstEndpoint.getX()), pixelate(firstEndpoint.getY()), pixelate(secondEndpoint.getX()), pixelate(secondEndpoint.getY()));
+   }
 
+   @Deprecated
    public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints)
    {
       graphics2d.drawPolyline(xPoints, yPoints, nPoints);
@@ -158,6 +174,19 @@ public class Graphics2DAdapter
    public void drawPolygonFilled(Polygon p)
    {
       graphics2d.fillPolygon(p);
+   }
+   
+   public void drawPolygonFilled(ConvexPolygon2d convexPolygon2d)
+   {
+      for (int i = 0; i < convexPolygon2d.getNumberOfVertices(); i++)
+      {
+         pointBin[i].setIncludingFrame(metersFrame, convexPolygon2d.getVertex(i));
+         pointBin[i].changeFrame(screenFrame);
+         tempPoints[0][i] = pixelate(pointBin[i].getX());
+         tempPoints[1][i] = pixelate(pointBin[i].getY());
+      }
+      
+      graphics2d.fillPolygon(tempPoints[0], tempPoints[1], convexPolygon2d.getNumberOfVertices());
    }
 
    @Deprecated

@@ -26,7 +26,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
-public class ValkyrieStateEstimatorParameters implements StateEstimatorParameters
+public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 {
    private final boolean runningOnRealRobot;
 
@@ -305,12 +305,6 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public double getPelvisLinearVelocityAlphaNewTwist()
    {
       return 0.15;
-   }
-
-   @Override
-   public boolean createFusedIMUSensor()
-   {
-      return false;
    }
 
    @Override

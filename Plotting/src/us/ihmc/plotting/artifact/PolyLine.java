@@ -51,7 +51,7 @@ public class PolyLine extends Artifact
             graphics2d.setColor(color);
             Stroke currentStroke = graphics2d.getStroke();
             graphics2d.setStroke(new BasicStroke(lineThickness));
-            graphics2d.drawLine(x1, y1, x2, y2);
+            graphics2d.drawLineSegment(x1, y1, x2, y2);
             graphics2d.setStroke(currentStroke);
          }
       }

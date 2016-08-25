@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.simulation;
 
-public interface QuadrupedGroundContactParameters
+public interface GroundContactParameters
 {
    public double getZStiffness();
    

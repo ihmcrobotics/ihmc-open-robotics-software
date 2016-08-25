@@ -1,8 +1,8 @@
 package us.ihmc.llaQuadruped.simulation;
 
-import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactParameters;
+import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 
-public class LLAQuadrupedGroundContactParameters implements QuadrupedGroundContactParameters
+public class LLAQuadrupedGroundContactParameters implements GroundContactParameters
 {
    @Override
    public double getZStiffness()
