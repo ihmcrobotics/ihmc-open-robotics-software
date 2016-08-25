@@ -79,6 +79,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       stepStreamMultiplexer = new QuadrupedStepStreamMultiplexer<>();
       stepStreamMultiplexer.addStepStream(QuadrupedForceControllerState.XGAIT, xGaitStepStream);
       stepStreamMultiplexer.addStepStream(QuadrupedForceControllerState.STEP, preplannedStepStream);
+      stepStreamMultiplexer.selectStepStream(QuadrupedForceControllerState.STEP);
 
       GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
 
