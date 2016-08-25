@@ -228,7 +228,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
 
       // update desired body orientation, angular velocity, and torque
       stepStream.getBodyOrientation(bodyOrientationReference);
-      bodyOrientationReferenceFrame.update();
+      bodyOrientationReference.changeFrame(bodyOrientationReferenceFrame.getParent());
+      bodyOrientationReferenceFrame.setOrientationAndUpdate(bodyOrientationReference);
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(bodyOrientationReferenceFrame);
       bodyOrientationControllerSetpoints.getBodyOrientation().set(postureProvider.getBodyOrientationInput());
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(worldFrame);
@@ -430,14 +431,17 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       // compute relative step adjustment
       computeRelativeStepAdjustment();
 
-      // compute dcm trajectory
-      computeDcmTrajectory();
-      double transitionEndTime = copPlanner.getTimeAtStartOfInterval(1);
-      double transitionStartTime = Math.max(robotTimestamp.getDoubleValue(), transitionEndTime - initialTransitionDurationParameter.get());
-      dcmTrajectory.computeTrajectory(transitionEndTime);
-      dcmTrajectory.getPosition(dcmPositionWaypoint);
-      dcmTransitionTrajectory.initializeTrajectory(dcmPositionEstimate, dcmPositionWaypoint, transitionStartTime, transitionEndTime);
-      computeDcmSetpoints();
+      if (timedStepController.getQueueSize() > 0)
+      {
+         // compute dcm trajectory
+         computeDcmTrajectory();
+         double transitionEndTime = copPlanner.getTimeAtStartOfInterval(1);
+         double transitionStartTime = Math.max(robotTimestamp.getDoubleValue(), transitionEndTime - initialTransitionDurationParameter.get());
+         dcmTrajectory.computeTrajectory(transitionEndTime);
+         dcmTrajectory.getPosition(dcmPositionWaypoint);
+         dcmTransitionTrajectory.initializeTrajectory(dcmPositionEstimate, dcmPositionWaypoint, transitionStartTime, transitionEndTime);
+         computeDcmSetpoints();
+      }
    }
 
    @Override
