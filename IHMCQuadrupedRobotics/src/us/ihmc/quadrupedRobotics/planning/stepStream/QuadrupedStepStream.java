@@ -7,7 +7,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 public interface QuadrupedStepStream
 {
    /**
-    * Reinitialize the step stream.
+    * Initialize the step stream.
     */
    void onEntry();
 
@@ -15,6 +15,11 @@ public interface QuadrupedStepStream
     * Update the step queue and body orientation at each time step.
     */
    void process();
+
+   /**
+    * Cleanup.
+    */
+   void onExit();
 
    /**
     * Get the queue of ongoing and upcoming steps.
