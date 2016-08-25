@@ -28,6 +28,11 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
 
    public abstract boolean requestFootForceSensorCalibrationAtStart();
 
+   public boolean requestFrozenModeAtStart()
+   {
+      return false;
+   }
+
    public abstract SideDependentList<String> getFootForceSensorNames();
 
    // Parameters related to the kinematics based state estimator

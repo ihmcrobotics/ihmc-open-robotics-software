@@ -356,6 +356,12 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
+   public boolean requestFrozenModeAtStart()
+   {
+      return runningOnRealRobot;
+   }
+
+   @Override
    public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
    {
       return false;
