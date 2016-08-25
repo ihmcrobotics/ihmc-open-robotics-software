@@ -482,4 +482,5 @@ public class SkippyRobot extends Robot
    public double getGravityt(){
       return this.getGravityZ();
    }
+
 }

@@ -39,9 +39,9 @@
 <WindowLocation>-1928.0, 85.0</WindowLocation>
 <WindowSize>1936.0, 1176.0</WindowSize>
 <GraphGroup>
-	<Cols>1</Cols>
+	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.cmpTauHipJointX,root.Skippy.SkippyController.cmpTauHipJointY,root.Skippy.SkippyController.cmpTauHipJointZ</Variables>
+		<Variables>root.Skippy.SkippyController.tauHipJointX,root.Skippy.SkippyController.tauHipJointY,root.Skippy.SkippyController.tauHipJointZ</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -53,7 +53,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.cmpTauShoulderJointX,root.Skippy.SkippyController.cmpTauShoulderJointY,root.Skippy.SkippyController.cmpTauShoulderJointZ</Variables>
+		<Variables>root.Skippy.SkippyController.shoulderToCmpPositionVectorX,root.Skippy.SkippyController.shoulderToCmpPositionVectorY,root.Skippy.SkippyController.shoulderToCmpPositionVectorZ</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -65,7 +65,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.cmpFromIcpTauHipJointX,root.Skippy.SkippyController.cmpFromIcpTauHipJointY,root.Skippy.SkippyController.cmpFromIcpTauHipJointZ</Variables>
+		<Variables>root.Skippy.SkippyController.hipToCmpPositionVectorX,root.Skippy.SkippyController.hipToCmpPositionVectorY,root.Skippy.SkippyController.hipToCmpPositionVectorZ</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -77,9 +77,33 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.cmpFromIcpTauShoulderJointX,root.Skippy.SkippyController.cmpFromIcpTauShoulderJointY,root.Skippy.SkippyController.cmpFromIcpTauShoulderJointZ</Variables>
+		<Variables>root.Skippy.SkippyController.shoulderJointUnitVectorX,root.Skippy.SkippyController.shoulderJointUnitVectorY,root.Skippy.SkippyController.shoulderJointUnitVectorZ</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.Skippy.SkippyController.hipJointUnitVectorX,root.Skippy.SkippyController.hipJointUnitVectorY,root.Skippy.SkippyController.hipJointUnitVectorZ</Variables>
+		<GraphConfiguration>
+			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.Skippy.SkippyController.tauShoulderJointX,root.Skippy.SkippyController.tauShoulderJointY,root.Skippy.SkippyController.tauShoulderJointZ</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
