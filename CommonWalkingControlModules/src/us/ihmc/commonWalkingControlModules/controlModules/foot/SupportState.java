@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -30,15 +31,13 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReference
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
- * This foot state will determine which degrees of freedom should be controlled and which should be
- * left unconstrained and holds the position of the ones that are free.
+ * This is the active foot state when the foot is in flat support. Usually the command to the QP
+ * should be a zero acceleration command. When the foot is barely loaded or the CoP gets close
+ * to the edges of the foot polygon some of the directions start becoming feedback controlled. E.g.
+ * when barely loaded x and y position as well as foot yaw are controlled to remain constant.
  *
- * E.g. when barely loaded the x, y, and yaw coordinates of the foot should be controlled, while
- * z, roll, and pitch should be unconstrained. If the CoP is close to and edge of the foot polygon
- * rotation towards the outside of the edge should be controlled while other DoFs should be free.
- *
- * This is a combination of the original HoldPositionState and the FullyConstrainedState with smart
- * choice of selection matrices.
+ * The state also contains the ability to shift the CoP around within the foothold in case the
+ * support area needs to be explored.
  */
 public class SupportState extends AbstractFootControlState
 {
@@ -82,6 +81,14 @@ public class SupportState extends AbstractFootControlState
    // For line contact walking and balancing:
    private final BooleanYoVariable holdFootOrientationFlat;
 
+   // For foothold exploration:
+   private final ExplorationHelper explorationHelper;
+   private final PartialFootholdControlModule partialFootholdControlModule;
+   private final BooleanYoVariable requestFootholdExploration;
+   private final DoubleYoVariable recoverTime;
+   private final DoubleYoVariable timeBeforeExploring;
+   private final InverseDynamicsCommandList inverseDymamicsCommandsList = new InverseDynamicsCommandList();
+
    public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.FULL, footControlHelper);
@@ -114,7 +121,11 @@ public class SupportState extends AbstractFootControlState
       assumeFootBarelyLoaded = new BooleanYoVariable(prefix + "AssumeFootBarelyLoaded", registry);
       holdFootOrientationFlat = new BooleanYoVariable(prefix + "HoldFlatOrientation", registry);
 
-      holdFootOrientationFlat.set(false);
+      explorationHelper = new ExplorationHelper(contactableFoot, footControlHelper, prefix, registry);
+      partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
+      requestFootholdExploration = new BooleanYoVariable(prefix + "RequestFootholdExploration", registry);
+      recoverTime = footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry).getRecoverTime();
+      timeBeforeExploring = footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry).getTimeBeforeExploring();
 
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
@@ -144,23 +155,36 @@ public class SupportState extends AbstractFootControlState
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
       frameViz.hide();
+      explorationHelper.stopExploring();
    }
 
    @Override
    public void doSpecificAction()
    {
       // handle partial foothold detection
-      PartialFootholdControlModule partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
-      if (partialFootholdControlModule != null)
+      boolean recoverTimeHasPassed = getTimeInCurrentState() > recoverTime.getDoubleValue();
+      boolean contactStateHasChanged = false;
+      if (partialFootholdControlModule != null && recoverTimeHasPassed)
       {
          footSwitch.computeAndPackCoP(cop);
          momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
          partialFootholdControlModule.compute(desiredCoP, cop);
          YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
-         boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
+         contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
          if (contactStateHasChanged)
             contactState.notifyContactStateHasChanged();
       }
+
+      // foothold exploration
+      boolean timeBeforeExploringHasPassed = getTimeInCurrentState() > timeBeforeExploring.getDoubleValue();
+      if (requestFootholdExploration.getBooleanValue() && timeBeforeExploringHasPassed)
+      {
+         explorationHelper.startExploring();
+         requestFootholdExploration.set(false);
+      }
+      if (partialFootholdControlModule != null && !timeBeforeExploringHasPassed)
+         partialFootholdControlModule.clearCoPGrid();
+      explorationHelper.compute(getTimeInCurrentState(), contactStateHasChanged);
 
       // determine foot state
       copOnEdge.set(footControlHelper.isCoPOnEdge());
@@ -272,10 +296,18 @@ public class SupportState extends AbstractFootControlState
       desiredSoleFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
    }
 
+   public void requestFootholdExploration()
+   {
+      requestFootholdExploration.set(true);
+   }
+
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return spatialAccelerationCommand;
+      inverseDymamicsCommandsList.clear();
+      inverseDymamicsCommandsList.addCommand(spatialAccelerationCommand);
+      inverseDymamicsCommandsList.addCommand(explorationHelper.getCommand());
+      return inverseDymamicsCommandsList;
    }
 
    @Override

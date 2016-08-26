@@ -132,6 +132,11 @@ public class FootControlModule
       supportStateNew = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
       useNewSupportState = walkingControllerParameters.useSupportState();
       holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
+      if (!useNewSupportState && walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
+         exploreFootPolygonState = new ExploreFootPolygonState(footControlHelper, holdPositionFootControlGains, registry);
+      else
+         exploreFootPolygonState = null;
+
       if (useNewSupportState)
       {
          states.add(supportStateNew);
@@ -140,16 +145,8 @@ public class FootControlModule
       {
          states.add(supportState);
          states.add(holdPositionState);
-      }
-
-      if (walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
-      {
-         exploreFootPolygonState = new ExploreFootPolygonState(footControlHelper, holdPositionFootControlGains, registry);
-         states.add(exploreFootPolygonState);
-      }
-      else
-      {
-         exploreFootPolygonState = null;
+         if (exploreFootPolygonState != null)
+            states.add(exploreFootPolygonState);
       }
 
       swingState = new SwingState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
@@ -488,7 +485,10 @@ public class FootControlModule
 
    public void initializeFootExploration()
    {
-      setContactState(ConstraintType.EXPLORE_POLYGON);
+      if (useNewSupportState)
+         supportStateNew.requestFootholdExploration();
+      else
+         setContactState(ConstraintType.EXPLORE_POLYGON);
    }
 
    public void setAllowFootholdAdjustments(boolean allow)
