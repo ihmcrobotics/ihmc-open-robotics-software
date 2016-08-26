@@ -107,15 +107,15 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
 		
 		double separationAngleFromVertical=Math.PI/2-0.5*(0.5*Math.PI+ wallInclination );
 
-		intersection.y=y;
-		intersection.z=heightAt(x,y,z); // should be zero
+		intersection.setY(y);
+		intersection.setZ(heightAt(x,y,z)); // should be zero
 		
 		// left wall (positive y)
 		if ((y>0)&&(y>yMaxCorridor-z*Math.tan(separationAngleFromVertical)))
 		{
 			double r=Math.cos( wallInclination )*(getAbsWallY(z)-y);
-			intersection.z=z-r*Math.sin( wallInclination );
-			intersection.y=y+r*Math.cos( wallInclination );
+			intersection.setZ(z-r*Math.sin( wallInclination ));
+			intersection.setY(y+r*Math.cos( wallInclination ));
 		}
 		
 		// center
@@ -128,11 +128,11 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
 		if ((y<0)&&(y<yMinCorridor+z*Math.tan(separationAngleFromVertical)))
 		{
 			double r=Math.cos( wallInclination )*(getAbsWallY(z)+y);
-			intersection.z=z-r*Math.sin( wallInclination );
-			intersection.y=y-r*Math.cos( wallInclination );
+			intersection.setZ(z-r*Math.sin( wallInclination ));
+			intersection.setY(y-r*Math.cos( wallInclination ));
 		}
 		
-		intersection.x = x;
+		intersection.setX(x);
 	}
 
 	/**
@@ -161,13 +161,13 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
       if ((y > yMaxCorridor) && (y < wallEndY))
       {
          
-         normal.y = -1.0;
-         normal.z = Math.tan( wallInclination );
+         normal.setY(-1.0);
+         normal.setZ(Math.tan( wallInclination ));
          
          if (height >= maxWallHeight)
          {
-            normal.y = 0.0;
-            normal.z = 1.0;
+            normal.setY(0.0);
+            normal.setZ(1.0);
          }
          
       }
@@ -175,27 +175,27 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
       //Corridor Ground
       else if ((y < yMaxCorridor) && (y > yMinCorridor))
       {
-         normal.y = 0.0;
-         normal.z = 1.0;
+         normal.setY(0.0);
+         normal.setZ(1.0);
       }
       //Right Wall
       else if ((y > -wallEndY) && (y < yMinCorridor))
       {
-         normal.y = 1.0;
-         normal.z = Math.tan( wallInclination );
+         normal.setY(1.0);
+         normal.setZ(Math.tan( wallInclination ));
          if (height >= maxWallHeight)
          {
-            normal.y = 0.0;
-            normal.z = 1.0;
+            normal.setY(0.0);
+            normal.setZ(1.0);
          }
       }
       //Rest of the surrounding ground
       else
       {
-         normal.y = 0.0;
-         normal.z = 1.0;
+         normal.setY(0.0);
+         normal.setZ(1.0);
       }
-      normal.x = 0.0;
+      normal.setX(0.0);
       normal.normalize();
    }
 	

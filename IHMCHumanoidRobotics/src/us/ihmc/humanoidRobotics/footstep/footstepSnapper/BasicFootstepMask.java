@@ -66,7 +66,7 @@ public class BasicFootstepMask implements InclusionFunction<Point3d>
 
    public void setPositionAndYaw(Point2d position, double yaw)
    {
-      this.position.set(position.x, position.y);
+      this.position.set(position.getX(), position.getY());
       this.yaw = yaw;
       initialized = true;
    }
@@ -88,8 +88,8 @@ public class BasicFootstepMask implements InclusionFunction<Point3d>
    {
       if (!initialized)
          return false;
-      double x = inputPoint.x - position.x;
-      double y = inputPoint.y - position.y;
+      double x = inputPoint.getX() - position.getX();
+      double y = inputPoint.getY() - position.getY();
       double cos = Math.cos(yaw);
       double sin = Math.sin(yaw);
       double xInFoot = x * cos + y * sin;

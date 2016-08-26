@@ -90,15 +90,15 @@ public class SDFConversionsHelper
          double iyy = Double.parseDouble(sdfInertia.getIyy());
          double iyz = Double.parseDouble(sdfInertia.getIyz());
          double izz = Double.parseDouble(sdfInertia.getIzz());
-         inertia.m00 = ixx;
-         inertia.m01 = ixy;
-         inertia.m02 = ixz;
-         inertia.m10 = ixy;
-         inertia.m11 = iyy;
-         inertia.m12 = iyz;
-         inertia.m20 = ixz;
-         inertia.m21 = iyz;
-         inertia.m22 = izz;
+         inertia.setM00(ixx);
+         inertia.setM01(ixy);
+         inertia.setM02(ixz);
+         inertia.setM10(ixy);
+         inertia.setM11(iyy);
+         inertia.setM12(iyz);
+         inertia.setM20(ixz);
+         inertia.setM21(iyz);
+         inertia.setM22(izz);
       }
       return inertia;
    }

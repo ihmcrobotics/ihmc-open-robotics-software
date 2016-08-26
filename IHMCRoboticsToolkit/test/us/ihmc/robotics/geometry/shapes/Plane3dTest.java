@@ -35,12 +35,12 @@ public class Plane3dTest
    public void testEmptyConstructor()
    {
       Plane3d plane = new Plane3d();
-      assertTrue(plane.getNormalCopy().x == 0.0);
-      assertTrue(plane.getNormalCopy().y == 0.0);
-      assertTrue(plane.getNormalCopy().z == 1.0);
-      assertTrue(plane.getPointCopy().x == 0.0);
-      assertTrue(plane.getPointCopy().y == 0.0);
-      assertTrue(plane.getPointCopy().z == 0.0);
+      assertTrue(plane.getNormalCopy().getX() == 0.0);
+      assertTrue(plane.getNormalCopy().getY() == 0.0);
+      assertTrue(plane.getNormalCopy().getZ() == 1.0);
+      assertTrue(plane.getPointCopy().getX() == 0.0);
+      assertTrue(plane.getPointCopy().getY() == 0.0);
+      assertTrue(plane.getPointCopy().getZ() == 0.0);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)

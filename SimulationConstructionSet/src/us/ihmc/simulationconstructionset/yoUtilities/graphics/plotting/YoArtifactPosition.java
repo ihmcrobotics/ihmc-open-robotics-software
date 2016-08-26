@@ -71,7 +71,7 @@ public class YoArtifactPosition extends YoArtifact
       if (isVisible)
       {
          getPosition(position);
-         draw(graphics, position.x, position.y, Xcenter, Ycenter, scaleFactor);
+         draw(graphics, position.getX(), position.getY(), Xcenter, Ycenter, scaleFactor);
       }
    }
    

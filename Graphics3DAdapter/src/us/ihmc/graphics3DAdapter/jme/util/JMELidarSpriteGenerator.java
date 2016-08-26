@@ -199,7 +199,7 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
             Point3f nearest = getNearestIntersection(origin, dir, getLidarResolution(), geom.getWorldTransform());
             if (nearest != null)
             {
-               CollisionResult collRes = new CollisionResult(geom, new com.jme3.math.Vector3f(nearest.x, nearest.y, nearest.z), origin.distance(nearest), 0);
+               CollisionResult collRes = new CollisionResult(geom, new com.jme3.math.Vector3f(nearest.getX(), nearest.getY(), nearest.getZ()), origin.distance(nearest), 0);
                collRes.setContactNormal(new com.jme3.math.Vector3f(0, 0, 1));
                results.addCollision(collRes);
 
@@ -234,18 +234,18 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
 
       for (Point3f p1 : points)
       {
-         com.jme3.math.Vector3f p = new com.jme3.math.Vector3f(p1.x, p1.y, p1.z);
+         com.jme3.math.Vector3f p = new com.jme3.math.Vector3f(p1.getX(), p1.getY(), p1.getZ());
          pointTransform.transformVector(p, p);
 
-         dx = origin.x - p.x;
-         dy = origin.y - p.y;
-         dz = origin.z - p.z;
+         dx = origin.getX() - p.x;
+         dy = origin.getY() - p.y;
+         dz = origin.getZ() - p.z;
 
-         dot = dx * direction.x + dy * direction.y + dz * direction.z;
+         dot = dx * direction.getX() + dy * direction.getY() + dz * direction.getZ();
 
-         dx = dx - dot * direction.x;
-         dy = dy - dot * direction.y;
-         dz = dz - dot * direction.z;
+         dx = dx - dot * direction.getX();
+         dy = dy - dot * direction.getY();
+         dz = dz - dot * direction.getZ();
 
          distanceToLine = (dx * dx + dy * dy + dz * dz);
 

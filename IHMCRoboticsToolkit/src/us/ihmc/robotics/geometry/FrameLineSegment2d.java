@@ -217,8 +217,8 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
 
    public FramePoint2d midpoint()
    {
-      double x = (lineSegment.endpoints[0].x + lineSegment.endpoints[1].x) / 2.0;
-      double y = (lineSegment.endpoints[0].y + lineSegment.endpoints[1].y) / 2.0;
+      double x = (lineSegment.endpoints[0].getX() + lineSegment.endpoints[1].getX()) / 2.0;
+      double y = (lineSegment.endpoints[0].getY() + lineSegment.endpoints[1].getY()) / 2.0;
 
       return new FramePoint2d(referenceFrame, x, y);
    }

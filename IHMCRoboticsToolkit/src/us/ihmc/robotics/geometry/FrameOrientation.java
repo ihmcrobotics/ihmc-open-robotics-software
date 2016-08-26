@@ -230,7 +230,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
 
    public boolean containsNaN()
    {
-      return Double.isNaN(quaternion.x) || Double.isNaN(quaternion.y) || Double.isNaN(quaternion.z) || Double.isNaN(quaternion.w);
+      return Double.isNaN(quaternion.getX()) || Double.isNaN(quaternion.getY()) || Double.isNaN(quaternion.getZ()) || Double.isNaN(quaternion.getW());
    }
 
    public void getQuaternion(Quat4d quat4d)
@@ -358,10 +358,10 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
 
    public double dot(Quat4d quaternion)
    {
-      double dot = this.quaternion.x * quaternion.x;
-      dot += this.quaternion.y * quaternion.y;
-      dot += this.quaternion.z * quaternion.z;
-      dot += this.quaternion.w * quaternion.w;
+      double dot = this.quaternion.getX() * quaternion.getX();
+      dot += this.quaternion.getY() * quaternion.getY();
+      dot += this.quaternion.getZ() * quaternion.getZ();
+      dot += this.quaternion.getW() * quaternion.getW();
       
       return dot;
    }
@@ -382,22 +382,22 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
 
    public double getQx()
    {
-      return quaternion.x;
+      return quaternion.getX();
    }
 
    public double getQy()
    {
-      return quaternion.y;
+      return quaternion.getY();
    }
 
    public double getQz()
    {
-      return quaternion.z;
+      return quaternion.getZ();
    }
 
    public double getQs()
    {
-      return quaternion.w;
+      return quaternion.getW();
    }
 
    public boolean epsilonEquals(FrameOrientation frameOrientation, double epsilon)
@@ -426,7 +426,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
 
    public double normSquared()
    {
-      return quaternion.x * quaternion.x + quaternion.y * quaternion.y + quaternion.z * quaternion.z + quaternion.w * quaternion.w;
+      return quaternion.getX() * quaternion.getX() + quaternion.getY() * quaternion.getY() + quaternion.getZ() * quaternion.getZ() + quaternion.getW() * quaternion.getW();
    }
 
    @Override

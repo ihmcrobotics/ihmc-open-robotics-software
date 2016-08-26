@@ -199,8 +199,8 @@ public class ReachabilitySphereMapCalculator
                         {
                            orientation.changeFrame(jacobian.getEndEffectorFrame());
                            orientation.getAxisAngle(orientationError);
-                           orientationErrorAsVector.set(orientationError.x, orientationError.y, orientationError.z);
-                           orientationErrorAsVector.scale(orientationError.angle);
+                           orientationErrorAsVector.set(orientationError.getX(), orientationError.getY(), orientationError.getZ());
+                           orientationErrorAsVector.scale(orientationError.getAngle());
                            modifiableVoxelLocation.changeFrame(jacobian.getEndEffectorFrame());
                            modifiableVoxelLocation.get(positionError);
 

@@ -111,10 +111,10 @@ public class LineSegment2dTest
          if ((x1 != x2) || (y1 != y2))
          {
             LineSegment2d test = new LineSegment2d(x1, y1, x2, y2);
-            assertEquals(test.getFirstEndpointCopy().x, x1, 0.001);
-            assertEquals(test.getFirstEndpointCopy().y, y1, 0.001);
-            assertEquals(test.getSecondEndpointCopy().x, x2, 0.001);
-            assertEquals(test.getSecondEndpointCopy().y, y2, 0.001);
+            assertEquals(test.getFirstEndpointCopy().getX(), x1, 0.001);
+            assertEquals(test.getFirstEndpointCopy().getY(), y1, 0.001);
+            assertEquals(test.getSecondEndpointCopy().getX(), x2, 0.001);
+            assertEquals(test.getSecondEndpointCopy().getY(), y2, 0.001);
          }
       }
 
@@ -259,8 +259,8 @@ public class LineSegment2dTest
       assertEquals(pointsCopy[1], segment1Point2);
 
       // make sure that chaning the copy does not change the origional
-      pointsCopy[0].set(pointsCopy[0].x - 10.0, pointsCopy[0].y - 10.0);
-      pointsCopy[1].set(pointsCopy[1].x - 10.0, pointsCopy[1].y - 10.0);
+      pointsCopy[0].set(pointsCopy[0].getX() - 10.0, pointsCopy[0].getY() - 10.0);
+      pointsCopy[1].set(pointsCopy[1].getX() - 10.0, pointsCopy[1].getY() - 10.0);
 
       assertFalse(pointsCopy[0].equals(testSegment1.getFirstEndpointCopy()));
       assertFalse(pointsCopy[1].equals(testSegment1.getSecondEndpointCopy()));
@@ -286,8 +286,8 @@ public class LineSegment2dTest
       assertEquals(pointsCopy[1], segment1Point2);
 
       // make sure that chaning the copy does not change the origional
-      pointsCopy[0].set(pointsCopy[0].x - 10.0, pointsCopy[0].y - 10.0);
-      pointsCopy[1].set(pointsCopy[1].x - 10.0, pointsCopy[1].y - 10.0);
+      pointsCopy[0].set(pointsCopy[0].getX() - 10.0, pointsCopy[0].getY() - 10.0);
+      pointsCopy[1].set(pointsCopy[1].getX() - 10.0, pointsCopy[1].getY() - 10.0);
 
       assertEquals(pointsCopy[0], testSegment1.getFirstEndpointCopy());
       assertEquals(pointsCopy[1], testSegment1.getSecondEndpointCopy());
@@ -303,7 +303,7 @@ public class LineSegment2dTest
 
 
       // make sure that chaning the copy does not change the origional
-      pointCopy.set(pointCopy.x - 10.0, pointCopy.y - 10.0);
+      pointCopy.set(pointCopy.getX() - 10.0, pointCopy.getY() - 10.0);
 
 
       assertFalse(pointCopy.equals(segment1Point1));
@@ -320,7 +320,7 @@ public class LineSegment2dTest
 
 
       // make sure that chaning the copy does not change the origional
-      pointCopy.set(pointCopy.x - 10.0, pointCopy.y - 10.0);
+      pointCopy.set(pointCopy.getX() - 10.0, pointCopy.getY() - 10.0);
 
 
       assertFalse(pointCopy.equals(segment1Point2));
@@ -333,8 +333,8 @@ public class LineSegment2dTest
    {
       Point2d[] pointsCopy = testSegment1.getEndpointsCopy();
 
-      pointsCopy[0].set(pointsCopy[0].x - 10.0, pointsCopy[0].y - 10.0);
-      pointsCopy[1].set(pointsCopy[1].x - 10.0, pointsCopy[1].y - 10.0);
+      pointsCopy[0].set(pointsCopy[0].getX() - 10.0, pointsCopy[0].getY() - 10.0);
+      pointsCopy[1].set(pointsCopy[1].getX() - 10.0, pointsCopy[1].getY() - 10.0);
 
       testSegment1.set(pointsCopy[0], pointsCopy[1]);
 
@@ -361,10 +361,10 @@ public class LineSegment2dTest
    {
       Point2d[] pointsCopy = testSegment1.getEndpointsCopy();
 
-      pointsCopy[0].set(pointsCopy[0].x - 10.0, pointsCopy[0].y - 10.0);
-      pointsCopy[1].set(pointsCopy[1].x - 10.0, pointsCopy[1].y - 10.0);
+      pointsCopy[0].set(pointsCopy[0].getX() - 10.0, pointsCopy[0].getY() - 10.0);
+      pointsCopy[1].set(pointsCopy[1].getX() - 10.0, pointsCopy[1].getY() - 10.0);
 
-      testSegment1.set(pointsCopy[0].x, pointsCopy[0].y, pointsCopy[1].x, pointsCopy[1].y);
+      testSegment1.set(pointsCopy[0].getX(), pointsCopy[0].getY(), pointsCopy[1].getX(), pointsCopy[1].getY());
 
       assertEquals(pointsCopy[0], testSegment1.getFirstEndpointCopy());
       assertEquals(pointsCopy[1], testSegment1.getSecondEndpointCopy());
@@ -372,7 +372,7 @@ public class LineSegment2dTest
       try
       {
          pointsCopy[0] = pointsCopy[1];
-         testSegment1.set(pointsCopy[0].x, pointsCopy[0].y, pointsCopy[1].x, pointsCopy[1].y);
+         testSegment1.set(pointsCopy[0].getX(), pointsCopy[0].getY(), pointsCopy[1].getX(), pointsCopy[1].getY());
       }
       catch (Exception e)
       {
@@ -390,8 +390,8 @@ public class LineSegment2dTest
 
 
 
-      pointsCopy[0].set(pointsCopy[0].x - 10.0, pointsCopy[0].y - 10.0);
-      pointsCopy[1].set(pointsCopy[1].x - 10.0, pointsCopy[1].y - 10.0);
+      pointsCopy[0].set(pointsCopy[0].getX() - 10.0, pointsCopy[0].getY() - 10.0);
+      pointsCopy[1].set(pointsCopy[1].getX() - 10.0, pointsCopy[1].getY() - 10.0);
 
       testSegment1.set(pointsCopy);
 

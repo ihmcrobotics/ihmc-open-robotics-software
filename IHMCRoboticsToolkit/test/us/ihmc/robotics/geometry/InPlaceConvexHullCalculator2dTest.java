@@ -143,8 +143,8 @@ public class InPlaceConvexHullCalculator2dTest
       double[][] data = new double[2][points.size()];
       for (int i = 0; i < points.size(); i++)
       {
-         data[0][i] = points.get(i).x;
-         data[1][i] = points.get(i).y;
+         data[0][i] = points.get(i).getX();
+         data[1][i] = points.get(i).getY();
       }
 
       JFreeChart jfreechart = ChartFactory

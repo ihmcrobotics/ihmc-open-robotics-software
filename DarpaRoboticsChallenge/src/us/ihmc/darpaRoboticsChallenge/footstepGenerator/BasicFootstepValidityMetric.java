@@ -41,10 +41,10 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
 
       Vector3d stepVector = new Vector3d(prospectiveFootstep.getLocation());
       stepVector.sub(stanceFootstep.getLocation());
-      double stepLengthInStanceFrame = Math.cos(stanceYaw) * stepVector.x + Math.sin(stanceYaw) * stepVector.y;
-      double stepWidthInStanceFrame = Math.cos(stanceYaw) * stepVector.y - Math.sin(stanceYaw) * stepVector.x;
+      double stepLengthInStanceFrame = Math.cos(stanceYaw) * stepVector.getX() + Math.sin(stanceYaw) * stepVector.getY();
+      double stepWidthInStanceFrame = Math.cos(stanceYaw) * stepVector.getY() - Math.sin(stanceYaw) * stepVector.getX();
       stepWidthInStanceFrame *= sign;
-      double zDiff = stepVector.z;
+      double zDiff = stepVector.getZ();
       if (zDiff > steppingParameters.getMaxStepUp() + EPSILON || -1*zDiff + EPSILON > steppingParameters.getMaxStepDown()){
          return false;
       }
@@ -105,10 +105,10 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
 
       Vector3d stepVector = new Vector3d(prospectiveFootstep.getLocation());
       stepVector.sub(stanceFootstep.getLocation());
-      double stepLengthInStanceFrame = Math.cos(stanceYaw) * stepVector.x + Math.sin(stanceYaw) * stepVector.y;
-      double stepWidthInStanceFrame = Math.cos(stanceYaw) * stepVector.y - Math.sin(stanceYaw) * stepVector.x;
+      double stepLengthInStanceFrame = Math.cos(stanceYaw) * stepVector.getX() + Math.sin(stanceYaw) * stepVector.getY();
+      double stepWidthInStanceFrame = Math.cos(stanceYaw) * stepVector.getY() - Math.sin(stanceYaw) * stepVector.getX();
       stepWidthInStanceFrame *= sign;
-      double zDiff = stepVector.z;
+      double zDiff = stepVector.getZ();
       double swingHeightInRelationToStanceFoot = previousFootstep.getLocation().getZ() + prospectiveFootstep.getSwingHeight() - stanceFootstep.getLocation().getZ();
 
       boolean stricterBoundaries = false;

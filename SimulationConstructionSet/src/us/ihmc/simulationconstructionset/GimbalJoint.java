@@ -36,18 +36,18 @@ public class GimbalJoint extends PinJoint
 
       // Set the child r_in value:
 
-      joint2.physics.r_in.x = 0.0;
-      joint2.physics.r_in.y = 0.0;
-      joint2.physics.r_in.z = 0.0;
+      joint2.physics.r_in.setX(0.0);
+      joint2.physics.r_in.setY(0.0);
+      joint2.physics.r_in.setZ(0.0);
 
       // joint2.addJoint(joint3); // This crashes.  Instead add the joint manually:
 
       joint3.parentJoint = joint2;
       joint2.childrenJoints.add(joint3);
 
-      joint3.physics.r_in.x = 0.0;
-      joint3.physics.r_in.y = 0.0;
-      joint3.physics.r_in.z = 0.0;
+      joint3.physics.r_in.setX(0.0);
+      joint3.physics.r_in.setY(0.0);
+      joint3.physics.r_in.setZ(0.0);
    }
 
 

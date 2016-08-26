@@ -88,9 +88,9 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       
       this.mass = mass;           
       
-      this.widthX = boxDimensions.x;
-      this.depthY = boxDimensions.y;
-      this.heightZ = boxDimensions.z;
+      this.widthX = boxDimensions.getX();
+      this.depthY = boxDimensions.getY();
+      this.heightZ = boxDimensions.getZ();
             
       this.handleOffset = handleOffset;
       this.handleHingeRadius = handleHingeRadius;
@@ -112,7 +112,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       
       for(RobotSide robotSide : RobotSide.values())
       {
-         Vector3d offset = new Vector3d(handleOffset.x, 0.5*depthY + robotSide.negateIfLeftSide(0.5*depthY + handleDoorSeparation), handleOffset.y);
+         Vector3d offset = new Vector3d(handleOffset.getX(), 0.5*depthY + robotSide.negateIfLeftSide(0.5*depthY + handleDoorSeparation), handleOffset.getY());
          handlePoses.put(robotSide, new PoseReferenceFrame(robotSide.getCamelCaseNameForStartOfExpression() + "HandleFrame",
                new FramePose(doorFrame, new Point3d(offset), new AxisAngle4d())));
       }
@@ -139,7 +139,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    private void createHandle()
    {
       // create handle
-      handlePinJoint = new PinJoint("handlePinJoint", new Vector3d(handleOffset.x, 0.0, handleOffset.y), this, Axis.Y);
+      handlePinJoint = new PinJoint("handlePinJoint", new Vector3d(handleOffset.getX(), 0.0, handleOffset.getY()), this, Axis.Y);
       
       // handle link
       handleLink = new Link("handleHorizontalLink");

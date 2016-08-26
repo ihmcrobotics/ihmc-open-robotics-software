@@ -250,8 +250,8 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 
 	private boolean approximatelyEqual(FootstepDataMessage currentLocation, FootstepDataMessage checkAgainst){
 		if (currentLocation == null) return false;
-		double xDiff = currentLocation.location.x - checkAgainst.location.x;
-		double yDiff = currentLocation.location.y - checkAgainst.location.y;
+		double xDiff = currentLocation.location.getX() - checkAgainst.location.getX();
+		double yDiff = currentLocation.location.getY() - checkAgainst.location.getY();
 		if (currentLocation.robotSide != checkAgainst.robotSide) return false;
 		if (Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff,2)) > 0.05) return false;
 		if (Math.abs(RotationTools.computeYaw(currentLocation.orientation) - RotationTools.computeYaw(checkAgainst.orientation)) > Math.PI/16) return false;

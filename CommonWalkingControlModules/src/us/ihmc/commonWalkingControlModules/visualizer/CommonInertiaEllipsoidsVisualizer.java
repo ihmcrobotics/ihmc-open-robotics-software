@@ -222,9 +222,9 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
       Vector3d principalMomentsOfInertiaToPack = new Vector3d();
       InertiaTools.computePrincipalMomentsOfInertia(inertia, rotationMatrix3d, principalMomentsOfInertiaToPack);
 
-      double a = 5.0 * principalMomentsOfInertiaToPack.x / mass;
-      double b = 5.0 * principalMomentsOfInertiaToPack.y / mass;
-      double c = 5.0 * principalMomentsOfInertiaToPack.z / mass;
+      double a = 5.0 * principalMomentsOfInertiaToPack.getX() / mass;
+      double b = 5.0 * principalMomentsOfInertiaToPack.getY() / mass;
+      double c = 5.0 * principalMomentsOfInertiaToPack.getZ() / mass;
       double rx = Math.sqrt(0.5 * (-a + b + c));
       double ry = Math.sqrt(0.5 * (a - b + c));
       double rz = Math.sqrt(0.5 * (a + b - c));

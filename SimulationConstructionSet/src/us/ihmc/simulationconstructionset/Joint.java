@@ -825,9 +825,9 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    public void getXYZToWorld(DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z)
    {
       getTranslationToWorld(tempVector3d);
-      x.set(tempVector3d.x);
-      y.set(tempVector3d.y);
-      z.set(tempVector3d.z);
+      x.set(tempVector3d.getX());
+      y.set(tempVector3d.getY());
+      z.set(tempVector3d.getZ());
    }
 
    /**
@@ -841,7 +841,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    public void getYawPitchRollToWorld(DoubleYoVariable yaw, DoubleYoVariable pitch, DoubleYoVariable roll)
    {
       getRotationToWorld(tempQuat4d);
-      double q_x = tempQuat4d.x, q_y = tempQuat4d.y, q_z = tempQuat4d.z, q_w = tempQuat4d.w;
+      double q_x = tempQuat4d.getX(), q_y = tempQuat4d.getY(), q_z = tempQuat4d.getZ(), q_w = tempQuat4d.getW();
 
       yaw.set(Math.atan2(2.0 * q_x * q_y + 2.0 * q_z * q_w, 1.0 - 2.0 * q_y * q_y - 2.0 * q_z * q_z));
       pitch.set(Math.asin(-2.0 * q_x * q_z + 2.0 * q_w * q_y));
@@ -854,7 +854,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
       double[] rotation = new double[3];
 
       getRotationToWorld(tempQuat4d);
-      double q_x = tempQuat4d.x, q_y = tempQuat4d.y, q_z = tempQuat4d.z, q_w = tempQuat4d.w;
+      double q_x = tempQuat4d.getX(), q_y = tempQuat4d.getY(), q_z = tempQuat4d.getZ(), q_w = tempQuat4d.getW();
 
       rotation[2] = Math.atan2(2.0 * q_x * q_y + 2.0 * q_z * q_w, 1.0 - 2.0 * q_y * q_y - 2.0 * q_z * q_z);
       rotation[1] = Math.asin(-2.0 * q_x * q_z + 2.0 * q_w * q_y);

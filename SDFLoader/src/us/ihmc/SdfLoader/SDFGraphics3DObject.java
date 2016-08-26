@@ -155,7 +155,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
                
                AxisAngle4d planeRotation = GeometryTools.getRotationBasedOnNormal(normal);
                rotate(planeRotation);
-               addCube(size.x, size.y, 0.005, getDefaultAppearanceIfNull(appearance));
+               addCube(size.getX(), size.getY(), 0.005, getDefaultAppearanceIfNull(appearance));
             }
             else if(geometry.getHeightMap() != null)
             {

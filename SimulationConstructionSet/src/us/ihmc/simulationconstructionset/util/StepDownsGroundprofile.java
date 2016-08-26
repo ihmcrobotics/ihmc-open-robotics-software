@@ -71,9 +71,9 @@ public class StepDownsGroundprofile extends GroundProfileFromHeightMap
    public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
    {
       double dzdx = 0.0;
-      normal.x = -dzdx;
-      normal.y = 0.0;
-      normal.z = 1.0;
+      normal.setX(-dzdx);
+      normal.setY(0.0);
+      normal.setZ(1.0);
 
       normal.normalize();
    }

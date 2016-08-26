@@ -49,9 +49,9 @@ public class GeoregressionConversionToolsTest
          Point3D_F64 georegressionTransformResultPoint = new Point3D_F64();
          SePointOps_F64.transform(georegressionTransform, georegressionPoint, georegressionTransformResultPoint);
          
-         assertEquals(georegressionTransformResultPoint.x, vecmathPoint.x, eps);
-         assertEquals(georegressionTransformResultPoint.y, vecmathPoint.y, eps);
-         assertEquals(georegressionTransformResultPoint.z, vecmathPoint.z, eps);
+         assertEquals(georegressionTransformResultPoint.x, vecmathPoint.getX(), eps);
+         assertEquals(georegressionTransformResultPoint.y, vecmathPoint.getY(), eps);
+         assertEquals(georegressionTransformResultPoint.z, vecmathPoint.getZ(), eps);
       }
    }
 
@@ -82,9 +82,9 @@ public class GeoregressionConversionToolsTest
          Point3D_F64 georegressionTransformResultPoint = new Point3D_F64();
          SePointOps_F64.transform(georegressionTransform, georegressionPoint, georegressionTransformResultPoint);
          
-         assertEquals(georegressionTransformResultPoint.x, vecmathPoint.x, eps);
-         assertEquals(georegressionTransformResultPoint.y, vecmathPoint.y, eps);
-         assertEquals(georegressionTransformResultPoint.z, vecmathPoint.z, eps);
+         assertEquals(georegressionTransformResultPoint.x, vecmathPoint.getX(), eps);
+         assertEquals(georegressionTransformResultPoint.y, vecmathPoint.getY(), eps);
+         assertEquals(georegressionTransformResultPoint.z, vecmathPoint.getZ(), eps);
       }
    }
 

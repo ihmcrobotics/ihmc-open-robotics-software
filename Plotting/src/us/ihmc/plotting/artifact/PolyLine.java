@@ -44,10 +44,10 @@ public class PolyLine extends Artifact
       {
          for (int i = 0; i < points.size(); i++)
          {
-            int x1 = Xcenter + ((int) Math.round(points.get(i - 1).x * scaleFactor));
-            int y1 = Ycenter - ((int) Math.round(points.get(i - 1).y * scaleFactor));
-            int x2 = Xcenter + ((int) Math.round(points.get(i).x * scaleFactor));
-            int y2 = Ycenter - ((int) Math.round(points.get(i).y * scaleFactor));
+            int x1 = Xcenter + ((int) Math.round(points.get(i - 1).getX() * scaleFactor));
+            int y1 = Ycenter - ((int) Math.round(points.get(i - 1).getY() * scaleFactor));
+            int x2 = Xcenter + ((int) Math.round(points.get(i).getX() * scaleFactor));
+            int y2 = Ycenter - ((int) Math.round(points.get(i).getY() * scaleFactor));
             graphics2d.setColor(color);
             Stroke currentStroke = graphics2d.getStroke();
             graphics2d.setStroke(new BasicStroke(lineThickness));

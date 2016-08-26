@@ -223,9 +223,9 @@ public class RosTools
 
    private static void packQuat4dToGeometry_msgsQuaternion(Quat4d quat, Quaternion orientation)
    {
-      orientation.setW(quat.w);
-      orientation.setX(quat.x);
-      orientation.setY(quat.y);
-      orientation.setZ(quat.z);
+      orientation.setW(quat.getW());
+      orientation.setX(quat.getX());
+      orientation.setY(quat.getY());
+      orientation.setZ(quat.getZ());
    }
  }

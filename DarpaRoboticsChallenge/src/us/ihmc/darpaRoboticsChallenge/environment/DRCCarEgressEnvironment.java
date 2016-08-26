@@ -31,13 +31,13 @@ public class DRCCarEgressEnvironment implements CommonAvatarEnvironmentInterface
    public DRCCarEgressEnvironment()
    {
       RigidBodyTransform locationStep = new RigidBodyTransform();
-      locationStep.setTranslation(new Vector3d(edgeOfStepX + 0.5 * stepDimensions.x, edgeOfStepY + 0.5 * stepDimensions.y, stepDimensions.z / 2.0));
-      Box3d stepBox = new Box3d(locationStep, stepDimensions.x, stepDimensions.y, stepDimensions.z);
+      locationStep.setTranslation(new Vector3d(edgeOfStepX + 0.5 * stepDimensions.getX(), edgeOfStepY + 0.5 * stepDimensions.getY(), stepDimensions.getZ() / 2.0));
+      Box3d stepBox = new Box3d(locationStep, stepDimensions.getX(), stepDimensions.getY(), stepDimensions.getZ());
       terrain.addTerrainObject(new RotatableCinderBlockTerrainObject(stepBox, YoAppearance.DarkGray()));   
       
       RigidBodyTransform locationCar = new RigidBodyTransform();
-      locationCar.setTranslation(new Vector3d(edgeOfStepX + 0.5 * stepDimensions.x, edgeOfStepY + stepDimensions.y + 0.5 * carDimensions.y, carDimensions.z / 2.0));
-      Box3d carBox = new Box3d(locationCar, carDimensions.x, carDimensions.y, carDimensions.z);      
+      locationCar.setTranslation(new Vector3d(edgeOfStepX + 0.5 * stepDimensions.getX(), edgeOfStepY + stepDimensions.getY() + 0.5 * carDimensions.getY(), carDimensions.getZ() / 2.0));
+      Box3d carBox = new Box3d(locationCar, carDimensions.getX(), carDimensions.getY(), carDimensions.getZ());      
       terrain.addTerrainObject(new RotatableCinderBlockTerrainObject(carBox, YoAppearance.DarkGray()));   
       
       terrain.addTerrainObject(setUpGround("ground"));

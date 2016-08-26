@@ -191,18 +191,18 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
 
       extractTandR(actualTransform, actualT, actualR);
       
-      if (Math.abs(actualT.x - desiredT.x) > acceptTolLoc)
+      if (Math.abs(actualT.getX() - desiredT.getX()) > acceptTolLoc)
          return false;
-      if (Math.abs(actualT.y - desiredT.y) > acceptTolLoc)
+      if (Math.abs(actualT.getY() - desiredT.getY()) > acceptTolLoc)
          return false;
-      if (Math.abs(actualT.z - desiredT.z) > acceptTolLoc)
+      if (Math.abs(actualT.getZ() - desiredT.getZ()) > acceptTolLoc)
          return false;
 
-      if (UtilAngle.dist(actualR.x, desiredR.x) > acceptTolAngle)
+      if (UtilAngle.dist(actualR.getX(), desiredR.getX()) > acceptTolAngle)
          return false;
-      if (UtilAngle.dist(actualR.y, desiredR.y) > acceptTolAngle)
+      if (UtilAngle.dist(actualR.getY(), desiredR.getY()) > acceptTolAngle)
          return false;
-      if (UtilAngle.dist(actualR.z, desiredR.z) > acceptTolAngle)
+      if (UtilAngle.dist(actualR.getZ(), desiredR.getZ()) > acceptTolAngle)
          return false;
 
       return true;
@@ -277,15 +277,15 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
 
          extractTandR(actualTransform, actualT, actualR);
 
-         functions[index+0] = actualT.x - desiredT.x;
-         functions[index+1] = actualT.y - desiredT.y;
-         functions[index+2] = actualT.z - desiredT.z;
+         functions[index+0] = actualT.getX() - desiredT.getX();
+         functions[index+1] = actualT.getY() - desiredT.getY();
+         functions[index+2] = actualT.getZ() - desiredT.getZ();
 
          if (solveOrientation)
          {
-            functions[index+3] = orientationDiscount * UtilAngle.minus(actualR.x, desiredR.x);
-            functions[index+4] = orientationDiscount * UtilAngle.minus(actualR.y, desiredR.y);
-            functions[index+5] = orientationDiscount * UtilAngle.minus(actualR.z, desiredR.z);
+            functions[index+3] = orientationDiscount * UtilAngle.minus(actualR.getX(), desiredR.getX());
+            functions[index+4] = orientationDiscount * UtilAngle.minus(actualR.getY(), desiredR.getY());
+            functions[index+5] = orientationDiscount * UtilAngle.minus(actualR.getZ(), desiredR.getZ());
          }
       }
    }
@@ -299,9 +299,9 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
       MatrixTools.matrix3DToDenseMatrix(rotationMatrix, m, 0, 0);
 
       RotationMatrixGenerator.matrixToEulerXYZ(m, euler);
-      R.x = euler[0];
-      R.y = euler[1];
-      R.z = euler[2];
+      R.setX(euler[0]);
+      R.setY(euler[1]);
+      R.setZ(euler[2]);
    }
 
    @Override

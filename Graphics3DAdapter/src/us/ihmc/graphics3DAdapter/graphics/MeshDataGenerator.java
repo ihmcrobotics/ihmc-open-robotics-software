@@ -126,7 +126,7 @@ public class MeshDataGenerator
       for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
       {
          Point2d vertex = convexPolygon.getVertex(i);
-         points[i] = new Point3f((float) vertex.x, (float) vertex.y, 0.0f);
+         points[i] = new Point3f((float) vertex.getX(), (float) vertex.getY(), 0.0f);
       }
 
       return Polygon(points);

@@ -1013,10 +1013,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    public static Quat4d findQuat4d(String nameSpace, String prefix, String suffix, SimulationConstructionSet scs)
    {
       Quat4d quat4d = new Quat4d();
-      quat4d.x = scs.getVariable(nameSpace, YoFrameVariableNameTools.createQxName(prefix, suffix)).getValueAsDouble();
-      quat4d.y = scs.getVariable(nameSpace, YoFrameVariableNameTools.createQyName(prefix, suffix)).getValueAsDouble();
-      quat4d.z = scs.getVariable(nameSpace, YoFrameVariableNameTools.createQzName(prefix, suffix)).getValueAsDouble();
-      quat4d.w = scs.getVariable(nameSpace, YoFrameVariableNameTools.createQsName(prefix, suffix)).getValueAsDouble();
+      quat4d.setX(scs.getVariable(nameSpace, YoFrameVariableNameTools.createQxName(prefix, suffix)).getValueAsDouble());
+      quat4d.setY(scs.getVariable(nameSpace, YoFrameVariableNameTools.createQyName(prefix, suffix)).getValueAsDouble());
+      quat4d.setZ(scs.getVariable(nameSpace, YoFrameVariableNameTools.createQzName(prefix, suffix)).getValueAsDouble());
+      quat4d.setW(scs.getVariable(nameSpace, YoFrameVariableNameTools.createQsName(prefix, suffix)).getValueAsDouble());
       return quat4d;
    }
 
@@ -1043,9 +1043,9 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    public static Tuple3d findTuple3d(String nameSpace, String prefix, String suffix, SimulationConstructionSet scs)
    {
       Tuple3d tuple3d = new Point3d();
-      tuple3d.x = scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix)).getValueAsDouble();
-      tuple3d.y = scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix)).getValueAsDouble();
-      tuple3d.z = scs.getVariable(nameSpace, YoFrameVariableNameTools.createZName(prefix, suffix)).getValueAsDouble();
+      tuple3d.setX(scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix)).getValueAsDouble());
+      tuple3d.setY(scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix)).getValueAsDouble());
+      tuple3d.setZ(scs.getVariable(nameSpace, YoFrameVariableNameTools.createZName(prefix, suffix)).getValueAsDouble());
       return tuple3d;
    }
 
@@ -1072,8 +1072,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    public static Tuple2d findTuple2d(String nameSpace, String prefix, String suffix, SimulationConstructionSet scs)
    {
       Tuple2d tuple2d = new Point2d();
-      tuple2d.x = scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix)).getValueAsDouble();
-      tuple2d.y = scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix)).getValueAsDouble();
+      tuple2d.setX(scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix)).getValueAsDouble());
+      tuple2d.setY(scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix)).getValueAsDouble());
       return tuple2d;
    }
 

@@ -55,25 +55,25 @@ public class CollisionExampleController implements RobotController
       qd_ball2_wz = (DoubleYoVariable) rob.getVariable("qd_ball2_wz");
 
 
-      I1_world.m00 = CollisionExampleRobot.Ixx1;
-      I1_world.m01 = 0.0;
-      I1_world.m02 = 0.0;
-      I1_world.m10 = 0.0;
-      I1_world.m11 = CollisionExampleRobot.Iyy1;
-      I1_world.m12 = 0.0;
-      I1_world.m20 = 0.0;
-      I1_world.m21 = 0.0;
-      I1_world.m22 = CollisionExampleRobot.Izz1;
+      I1_world.setM00(CollisionExampleRobot.Ixx1);
+      I1_world.setM01(0.0);
+      I1_world.setM02(0.0);
+      I1_world.setM10(0.0);
+      I1_world.setM11(CollisionExampleRobot.Iyy1);
+      I1_world.setM12(0.0);
+      I1_world.setM20(0.0);
+      I1_world.setM21(0.0);
+      I1_world.setM22(CollisionExampleRobot.Izz1);
 
-      I2_world.m00 = CollisionExampleRobot.Ixx2;
-      I2_world.m01 = 0.0;
-      I2_world.m02 = 0.0;
-      I2_world.m10 = 0.0;
-      I2_world.m11 = CollisionExampleRobot.Iyy2;
-      I2_world.m12 = 0.0;
-      I2_world.m20 = 0.0;
-      I2_world.m21 = 0.0;
-      I2_world.m22 = CollisionExampleRobot.Izz2;
+      I2_world.setM00(CollisionExampleRobot.Ixx2);
+      I2_world.setM01(0.0);
+      I2_world.setM02(0.0);
+      I2_world.setM10(0.0);
+      I2_world.setM11(CollisionExampleRobot.Iyy2);
+      I2_world.setM12(0.0);
+      I2_world.setM20(0.0);
+      I2_world.setM21(0.0);
+      I2_world.setM22(CollisionExampleRobot.Izz2);
 
       q_ball1_x.set(1.0);
       q_ball1_y.set(-0.3);
@@ -119,7 +119,7 @@ public class CollisionExampleController implements RobotController
    private void computeRotation(Matrix3d rot, Vector3d vec)
    {
       // Z axis points in opposite direction of vec...
-      Vector3d zAxis = new Vector3d(-vec.x, -vec.y, -vec.z);
+      Vector3d zAxis = new Vector3d(-vec.getX(), -vec.getY(), -vec.getZ());
       zAxis.normalize();
 
       Vector3d yAxis = new Vector3d(0.0, 0.0, 1.0);
@@ -135,15 +135,15 @@ public class CollisionExampleController implements RobotController
 
       yAxis.cross(zAxis, xAxis);
 
-      rot.m00 = xAxis.x;
-      rot.m01 = yAxis.x;
-      rot.m02 = zAxis.x;
-      rot.m10 = xAxis.y;
-      rot.m11 = yAxis.y;
-      rot.m12 = zAxis.y;
-      rot.m20 = xAxis.z;
-      rot.m21 = yAxis.z;
-      rot.m22 = zAxis.z;
+      rot.setM00(xAxis.getX());
+      rot.setM01(yAxis.getX());
+      rot.setM02(zAxis.getX());
+      rot.setM10(xAxis.getY());
+      rot.setM11(yAxis.getY());
+      rot.setM12(zAxis.getY());
+      rot.setM20(xAxis.getZ());
+      rot.setM21(yAxis.getZ());
+      rot.setM22(zAxis.getZ());
 
    }
 
@@ -235,11 +235,11 @@ public class CollisionExampleController implements RobotController
 
       r1_twidle.set(new double[]
       {
-         0.0, -r1.z, r1.y, r1.z, 0.0, -r1.x, -r1.y, r1.x, 0.0
+         0.0, -r1.getZ(), r1.getY(), r1.getZ(), 0.0, -r1.getX(), -r1.getY(), r1.getX(), 0.0
       });
       r2_twidle.set(new double[]
       {
-         0.0, -r2.z, r2.y, r2.z, 0.0, -r2.x, -r2.y, r2.x, 0.0
+         0.0, -r2.getZ(), r2.getY(), r2.getZ(), 0.0, -r2.getX(), -r2.getY(), r2.getX(), 0.0
       });
 
 
@@ -369,20 +369,20 @@ public class CollisionExampleController implements RobotController
       double energy_world_after = 0.5 * u1_world.dot(u1_world) + 0.5 * u2_world.dot(u2_world);
 
       // Set the new values to the masses:
-      qd_ball1_x.set(u1_world.x);
-      qd_ball1_y.set(u1_world.y);
-      qd_ball1_z.set(u1_world.z);
-      qd_ball2_x.set(u2_world.x);
-      qd_ball2_y.set(u2_world.y);
-      qd_ball2_z.set(u2_world.z);
+      qd_ball1_x.set(u1_world.getX());
+      qd_ball1_y.set(u1_world.getY());
+      qd_ball1_z.set(u1_world.getZ());
+      qd_ball2_x.set(u2_world.getX());
+      qd_ball2_y.set(u2_world.getY());
+      qd_ball2_z.set(u2_world.getZ());
 
-      qd_ball1_wx.set(-delta_w1_world.x);
-      qd_ball1_wy.set(-delta_w1_world.y);
-      qd_ball1_wz.set(-delta_w1_world.z);
+      qd_ball1_wx.set(-delta_w1_world.getX());
+      qd_ball1_wy.set(-delta_w1_world.getY());
+      qd_ball1_wz.set(-delta_w1_world.getZ());
 
-      qd_ball2_wx.set(-delta_w2_world.x);
-      qd_ball2_wy.set(-delta_w2_world.y);
-      qd_ball2_wz.set(-delta_w2_world.z);
+      qd_ball2_wx.set(-delta_w2_world.getX());
+      qd_ball2_wy.set(-delta_w2_world.getY());
+      qd_ball2_wz.set(-delta_w2_world.getZ());
 
 
 

@@ -69,7 +69,7 @@ public class NoisyYoRotationMatrix
 
    public void update(Matrix3d m)
    {
-      update(m.m00, m.m01, m.m02, m.m10, m.m11, m.m12, m.m20, m.m21, m.m22);
+      update(m.getM00(), m.getM01(), m.getM02(), m.getM10(), m.getM11(), m.getM12(), m.getM20(), m.getM21(), m.getM22());
    }
    
    public void update(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21, double m22)

@@ -31,9 +31,9 @@ public class LinkTest
       double mass = 1.7;
       link.setMass(mass);
       Matrix3d momentOfInertia = new Matrix3d();
-      momentOfInertia.m00 = 0.1;
-      momentOfInertia.m11 = 0.1;
-      momentOfInertia.m22 = 0.001;
+      momentOfInertia.setM00(0.1);
+      momentOfInertia.setM11(0.1);
+      momentOfInertia.setM22(0.001);
       
       Vector3d rotationAxis = new Vector3d(0.0, 0.0, 1.0);
       

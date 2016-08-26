@@ -165,17 +165,17 @@ public class OpenCVChessboardPoseEstimator
       transform.getTranslation(translation);
       AxisAngle4d axisAngle = new AxisAngle4d();
       transform.getRotation(axisAngle);
-      Vector3d rotVector = new Vector3d(axisAngle.x, axisAngle.y, axisAngle.z);
+      Vector3d rotVector = new Vector3d(axisAngle.getX(), axisAngle.getY(), axisAngle.getZ());
       rotVector.normalize();
-      rotVector.scale(axisAngle.angle);
+      rotVector.scale(axisAngle.getAngle());
 
-      tvec.put(0, 0, translation.x);
-      tvec.put(1, 0, translation.y);
-      tvec.put(2, 0, translation.z);
+      tvec.put(0, 0, translation.getX());
+      tvec.put(1, 0, translation.getY());
+      tvec.put(2, 0, translation.getZ());
 
-      rvec.put(0, 0, rotVector.x);
-      rvec.put(1, 0, rotVector.y);
-      rvec.put(2, 0, rotVector.z);
+      rvec.put(0, 0, rotVector.getX());
+      rvec.put(1, 0, rotVector.getY());
+      rvec.put(2, 0, rotVector.getZ());
    }
 
    public void drawAxis(BufferedImage image, RigidBodyTransform transform, double scale)
@@ -266,13 +266,13 @@ public class OpenCVChessboardPoseEstimator
          if (i > 0)
          {
             int radius = 2;
-            g2.drawOval((int) imagePoints[i].x - radius, (int) imagePoints[i].y - radius, 2 * radius, 2 * radius);
-            g2.drawLine((int) imagePoints[i - 1].x, (int) imagePoints[i - 1].y, (int) imagePoints[i].x, (int) imagePoints[i].y);
+            g2.drawOval((int) imagePoints[i].getX() - radius, (int) imagePoints[i].getY() - radius, 2 * radius, 2 * radius);
+            g2.drawLine((int) imagePoints[i - 1].getX(), (int) imagePoints[i - 1].getY(), (int) imagePoints[i].getX(), (int) imagePoints[i].getY());
          }
          else
          {
             int radius = 12;
-            g2.drawOval((int) imagePoints[i].x - radius, (int) imagePoints[i].y - radius, 2 * radius, 2 * radius);
+            g2.drawOval((int) imagePoints[i].getX() - radius, (int) imagePoints[i].getY() - radius, 2 * radius, 2 * radius);
          }
 
       }

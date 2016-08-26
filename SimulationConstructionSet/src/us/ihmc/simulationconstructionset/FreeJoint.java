@@ -84,9 +84,9 @@ public class FreeJoint extends Joint
       // Transform3D tTranslate = new Transform3D();
       tTranslate.setIdentity();
 
-      vTranslate.x = x;
-      vTranslate.y = y;
-      vTranslate.z = z;
+      vTranslate.setX(x);
+      vTranslate.setY(y);
+      vTranslate.setZ(z);
       tTranslate.setTranslation(vTranslate);
 
       tYaw.setRotationYawAndZeroTranslation(yaw);

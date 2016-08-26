@@ -69,16 +69,16 @@ public class ContactableToroidRobotTest
 
       Point3d pt = new Point3d();
       
-      for (double x = randomVector.x + majorRadius - minorRadius; x < randomVector.x + majorRadius + minorRadius; x += delta)
+      for (double x = randomVector.getX() + majorRadius - minorRadius; x < randomVector.getX() + majorRadius + minorRadius; x += delta)
       {
-         for (double y = randomVector.y + majorRadius - minorRadius; y < randomVector.y + majorRadius + minorRadius; y += delta)
+         for (double y = randomVector.getY() + majorRadius - minorRadius; y < randomVector.getY() + majorRadius + minorRadius; y += delta)
          {
-            for (double z = randomVector.z - minorRadius; z < randomVector.z + minorRadius; z += delta)
+            for (double z = randomVector.getZ() - minorRadius; z < randomVector.getZ() + minorRadius; z += delta)
             {
                double x_sq = x * x;
                double y_sq = y * y;
                double z_sq = z * z;
-               double rma_sq = (randomVector.x + majorRadius + minorRadius) * (randomVector.x + majorRadius + minorRadius);
+               double rma_sq = (randomVector.getX() + majorRadius + minorRadius) * (randomVector.getX() + majorRadius + minorRadius);
                double rmi_sq = (minorRadius * minorRadius);               
 
                if ((x_sq + y_sq < rma_sq) &&  ((x_sq + y_sq) + z_sq < rmi_sq))
@@ -109,16 +109,16 @@ public class ContactableToroidRobotTest
 
       Point3d pt = new Point3d();
       
-      for (double x = vector3d.x + majorRadius - minorRadius; x < vector3d.x + majorRadius + minorRadius; x += delta)
+      for (double x = vector3d.getX() + majorRadius - minorRadius; x < vector3d.getX() + majorRadius + minorRadius; x += delta)
       {
-         for (double y = vector3d.y + majorRadius - minorRadius; y < vector3d.y + majorRadius + minorRadius; y += delta)
+         for (double y = vector3d.getY() + majorRadius - minorRadius; y < vector3d.getY() + majorRadius + minorRadius; y += delta)
          {
-            for (double z = vector3d.z - minorRadius; z < vector3d.z + minorRadius; z += delta)
+            for (double z = vector3d.getZ() - minorRadius; z < vector3d.getZ() + minorRadius; z += delta)
             {
                double x_sq = x * x;
                double y_sq = y * y;
                double z_sq = z * z;
-               double rma_sq = (vector3d.x + majorRadius + minorRadius) * (vector3d.x + majorRadius + minorRadius);
+               double rma_sq = (vector3d.getX() + majorRadius + minorRadius) * (vector3d.getX() + majorRadius + minorRadius);
                double rmi_sq = (minorRadius * minorRadius);               
 
                if ((x_sq + y_sq < rma_sq) &&  ((x_sq + y_sq) + z_sq < rmi_sq))

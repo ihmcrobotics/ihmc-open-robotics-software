@@ -746,32 +746,34 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public void getBounds(Point2d minToPack, Point2d maxToPack)
    {
-      minToPack.x = minToPack.y = Double.POSITIVE_INFINITY;
-      maxToPack.x = maxToPack.y = Double.NEGATIVE_INFINITY;
+      minToPack.setX(Double.POSITIVE_INFINITY);
+      minToPack.setY(Double.POSITIVE_INFINITY);
+      maxToPack.setX(Double.NEGATIVE_INFINITY);
+      maxToPack.setY(Double.NEGATIVE_INFINITY);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          FramePoint footstep = getFootstep(robotQuadrant);
          if (containsFootstep(footstep))
          {
-            if (footstep.getX() < minToPack.x)
+            if (footstep.getX() < minToPack.getX())
             {
-               minToPack.x = footstep.getX();
+               minToPack.setX(footstep.getX());
             }
 
-            if (footstep.getY() < minToPack.y)
+            if (footstep.getY() < minToPack.getY())
             {
-               minToPack.y = footstep.getY();
+               minToPack.setY(footstep.getY());
             }
 
-            if (footstep.getX() > maxToPack.x)
+            if (footstep.getX() > maxToPack.getX())
             {
-               maxToPack.x = footstep.getX();
+               maxToPack.setX(footstep.getX());
             }
 
-            if (footstep.getY() > maxToPack.y)
+            if (footstep.getY() > maxToPack.getY())
             {
-               maxToPack.y = footstep.getY();
+               maxToPack.setY(footstep.getY());
             }
          }
       }

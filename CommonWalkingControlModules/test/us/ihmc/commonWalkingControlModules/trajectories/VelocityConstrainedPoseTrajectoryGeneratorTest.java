@@ -231,7 +231,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
          angle = Math.acos(quatDelta.getW()) * 2.0;
          omega = angle / (2.0 * FDdt);
 
-         vectorDelta.set(quatDelta.x, quatDelta.y, quatDelta.z);
+         vectorDelta.set(quatDelta.getX(), quatDelta.getY(), quatDelta.getZ());
 
          if (vectorDelta.length() > 0.0)
          {
@@ -342,7 +342,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
          angle = Math.acos(quatDelta.getW()) * 2.0;
          omega = angle / (2.0 * FDdt);
 
-         vectorDelta.set(quatDelta.x, quatDelta.y, quatDelta.z);
+         vectorDelta.set(quatDelta.getX(), quatDelta.getY(), quatDelta.getZ());
 
          if (vectorDelta.length() > 0.0)
          {

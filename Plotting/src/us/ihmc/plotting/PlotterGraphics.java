@@ -99,7 +99,7 @@ public class PlotterGraphics
 
    public void drawLineSegment(Graphics2DAdapter graphics, Point2d point1, Point2d point2)
    {
-      drawLineSegment(graphics, point1.x, point1.y, point2.x, point2.y);
+      drawLineSegment(graphics, point1.getX(), point1.getY(), point2.getX(), point2.getY());
    }
 
    public void drawLineSegment(Graphics2DAdapter graphics, double x1, double y1, double x2, double y2)
@@ -147,8 +147,8 @@ public class PlotterGraphics
       {
          Point2d point2d = polygon.getVertex(i);
 
-         xPoints[i] = xDoubleToInt(point2d.x);
-         yPoints[i] = yDoubleToInt(point2d.y);
+         xPoints[i] = xDoubleToInt(point2d.getX());
+         yPoints[i] = yDoubleToInt(point2d.getY());
       }
 
       graphics.drawPolygon(xPoints, yPoints, nPoints);
@@ -165,8 +165,8 @@ public class PlotterGraphics
       {
          Point2d point2d = polygonPoints[i];
 
-         xPoints[i] = xDoubleToInt(point2d.x);
-         yPoints[i] = yDoubleToInt(point2d.y);
+         xPoints[i] = xDoubleToInt(point2d.getX());
+         yPoints[i] = yDoubleToInt(point2d.getY());
       }
 
       graphics.drawPolygon(xPoints, yPoints, nPoints);
@@ -207,8 +207,8 @@ public class PlotterGraphics
       {
          Point2d point2d = polygon.getVertex(i);
 
-         xPoints[i] = xDoubleToInt(point2d.x);
-         yPoints[i] = yDoubleToInt(point2d.y);
+         xPoints[i] = xDoubleToInt(point2d.getX());
+         yPoints[i] = yDoubleToInt(point2d.getY());
       }
 
       graphics.drawPolygonFilled(xPoints, yPoints, nPoints);
@@ -225,8 +225,8 @@ public class PlotterGraphics
       {
          Point2d point2d = polygonPoints.get(i);
 
-         xPoints[i] = xDoubleToInt(point2d.x);
-         yPoints[i] = yDoubleToInt(point2d.y);
+         xPoints[i] = xDoubleToInt(point2d.getX());
+         yPoints[i] = yDoubleToInt(point2d.getY());
       }
 
       graphics.drawPolygonFilled(xPoints, yPoints, nPoints);
@@ -243,8 +243,8 @@ public class PlotterGraphics
       {
          Point2d point2d = polygonPoints[i];
 
-         xPoints[i] = xDoubleToInt(point2d.x);
-         yPoints[i] = yDoubleToInt(point2d.y);
+         xPoints[i] = xDoubleToInt(point2d.getX());
+         yPoints[i] = yDoubleToInt(point2d.getY());
       }
 
       graphics.drawPolygonFilled(xPoints, yPoints, nPoints);

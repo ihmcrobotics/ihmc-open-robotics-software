@@ -74,7 +74,7 @@ public class PointArtifact extends Artifact
       if (_sonarHistory.size() == 0)
          return null;
 
-      return new Coordinate(_sonarHistory.get(0).x, _sonarHistory.get(0).y, Coordinate.METER);
+      return new Coordinate(_sonarHistory.get(0).getX(), _sonarHistory.get(0).getY(), Coordinate.METER);
    }
 
    public Point2d getPoint2d()
@@ -172,8 +172,8 @@ public class PointArtifact extends Artifact
 
             if (coordinate != null)
             {
-               int x = Xcenter + ((int) Math.round(coordinate.x * scaleFactor) - (size / 2));
-               int y = Ycenter - ((int) Math.round(coordinate.y * scaleFactor)) - (size / 2);
+               int x = Xcenter + ((int) Math.round(coordinate.getX() * scaleFactor) - (size / 2));
+               int y = Ycenter - ((int) Math.round(coordinate.getY() * scaleFactor)) - (size / 2);
                if (i == (_sonarHistory.size() - 1))
                {
                   graphics2d.setColor(color);
@@ -188,14 +188,14 @@ public class PointArtifact extends Artifact
                // save for median and mean
                if (i >= (_sonarHistory.size() - _medianFilterSize))
                {
-                  xMedianFliter.addElement(new Double(coordinate.x));
-                  yMedianFliter.addElement(new Double(coordinate.y));
+                  xMedianFliter.addElement(new Double(coordinate.getX()));
+                  yMedianFliter.addElement(new Double(coordinate.getY()));
                }
 
                if (i >= (_sonarHistory.size() - _meanFilterSize))
                {
-                  xMeanFilter.addElement(new Double(coordinate.x));
-                  yMeanFilter.addElement(new Double(coordinate.y));
+                  xMeanFilter.addElement(new Double(coordinate.getX()));
+                  yMeanFilter.addElement(new Double(coordinate.getY()));
                }
             }
 
@@ -240,7 +240,7 @@ public class PointArtifact extends Artifact
       for (int i = 0; i < _sonarHistory.size(); i++)
       {
          Point2d coordinate = _sonarHistory.get(i);
-         printWriter.println(coordinate.x + " " + coordinate.y);
+         printWriter.println(coordinate.getX() + " " + coordinate.getY());
       }
    }
 

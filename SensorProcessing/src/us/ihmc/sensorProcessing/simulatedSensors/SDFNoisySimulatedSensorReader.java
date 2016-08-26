@@ -48,15 +48,15 @@ public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorRead
    protected void packRootTransform(SDFRobot robot, RigidBodyTransform transformToPack)
    {
       super.packRootTransform(robot, transformToPack);
-      rotationError.w = 1;
-      rotationError.x = rand.nextGaussian() * quaternionNoiseStd;
-      rotationError.y = rand.nextGaussian() * quaternionNoiseStd;
-      rotationError.z = rand.nextGaussian() * quaternionNoiseStd;
+      rotationError.setW(1);
+      rotationError.setX(rand.nextGaussian() * quaternionNoiseStd);
+      rotationError.setY(rand.nextGaussian() * quaternionNoiseStd);
+      rotationError.setZ(rand.nextGaussian() * quaternionNoiseStd);
       rotationError.normalize();
 
-      positionError.x = rand.nextGaussian() * positionNoiseStd;
-      positionError.y = rand.nextGaussian() * positionNoiseStd;
-      positionError.z = rand.nextGaussian() * positionNoiseStd;
+      positionError.setX(rand.nextGaussian() * positionNoiseStd);
+      positionError.setY(rand.nextGaussian() * positionNoiseStd);
+      positionError.setZ(rand.nextGaussian() * positionNoiseStd);
 
       RigidBodyTransform disturbanceTransform = new RigidBodyTransform();
       if (addNoiseFiltering)

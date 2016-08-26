@@ -39,7 +39,7 @@ public class BoundingBox2dTest
    {
       Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
       Point2d upperRightPoint = new Point2d(2.0, 2.0);
-      BoundingBox2d boundingBox2d = new BoundingBox2d(lowerLeftPoint.x, lowerLeftPoint.y, upperRightPoint.x, upperRightPoint.y);
+      BoundingBox2d boundingBox2d = new BoundingBox2d(lowerLeftPoint.getX(), lowerLeftPoint.getY(), upperRightPoint.getX(), upperRightPoint.getY());
 
       Point2d minPoint = boundingBox2d.getMinPoint();
       assertEquals(minPoint, lowerLeftPoint);
@@ -56,7 +56,7 @@ public class BoundingBox2dTest
       Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
       Point2d upperRightPoint = new Point2d(2.0, 2.0);
       BoundingBox2d boundingBox2d = new BoundingBox2d();
-      boundingBox2d.set(lowerLeftPoint.x, lowerLeftPoint.y, upperRightPoint.x, upperRightPoint.y);
+      boundingBox2d.set(lowerLeftPoint.getX(), lowerLeftPoint.getY(), upperRightPoint.getX(), upperRightPoint.getY());
 
       Point2d minPoint = boundingBox2d.getMinPoint();
       assertEquals(minPoint, lowerLeftPoint);
@@ -73,7 +73,7 @@ public class BoundingBox2dTest
       Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
       Point2d upperRightPoint = new Point2d(2.0, 2.0);
       BoundingBox2d boundingBox2d = new BoundingBox2d();
-      boundingBox2d.set(4.0, lowerLeftPoint.y, upperRightPoint.x, upperRightPoint.y);
+      boundingBox2d.set(4.0, lowerLeftPoint.getY(), upperRightPoint.getX(), upperRightPoint.getY());
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -83,7 +83,7 @@ public class BoundingBox2dTest
       Point2d lowerLeftPoint = new Point2d(0.0, 0.0);
       Point2d upperRightPoint = new Point2d(2.0, 2.0);
       BoundingBox2d boundingBox2d = new BoundingBox2d();
-      boundingBox2d.set(lowerLeftPoint.x, 4.0, upperRightPoint.x, upperRightPoint.y);
+      boundingBox2d.set(lowerLeftPoint.getX(), 4.0, upperRightPoint.getX(), upperRightPoint.getY());
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -358,7 +358,7 @@ public class BoundingBox2dTest
       Point2d lowerLeftPoint = new Point2d(0.0123, 0.0456);
       Point2d upperRightPoint = new Point2d(2.0, 2.0);
       BoundingBox2d boundingBox2d = new BoundingBox2d();
-      boundingBox2d.set(lowerLeftPoint.x, lowerLeftPoint.y, upperRightPoint.x, upperRightPoint.y);
+      boundingBox2d.set(lowerLeftPoint.getX(), lowerLeftPoint.getY(), upperRightPoint.getX(), upperRightPoint.getY());
 
       BoundingBox2d boundingBoxCopy = new BoundingBox2d();
       boundingBoxCopy.set(boundingBox2d);
@@ -379,7 +379,7 @@ public class BoundingBox2dTest
       Point2d lowerLeftPoint = new Point2d(1.0, 7.0);
       Point2d upperRightPoint = new Point2d(4.0, 11.0);
       BoundingBox2d boundingBox2d = new BoundingBox2d();
-      boundingBox2d.set(lowerLeftPoint.x, lowerLeftPoint.y, upperRightPoint.x, upperRightPoint.y);
+      boundingBox2d.set(lowerLeftPoint.getX(), lowerLeftPoint.getY(), upperRightPoint.getX(), upperRightPoint.getY());
 
       assertEquals(25.0, boundingBox2d.getDiagonalLengthSquared(), 1e-7);
    }

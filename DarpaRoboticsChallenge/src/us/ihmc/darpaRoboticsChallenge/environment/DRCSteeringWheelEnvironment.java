@@ -33,7 +33,7 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
 
    public DRCSteeringWheelEnvironment(Point3d wheelLocation, double valveYawInDegrees, double valvePitchInDegrees, double percentOfSteeringWheelRadius)
    {
-      this(wheelLocation.x, wheelLocation.y, wheelLocation.z, valveYawInDegrees, valvePitchInDegrees, percentOfSteeringWheelRadius);
+      this(wheelLocation.getX(), wheelLocation.getY(), wheelLocation.getZ(), valveYawInDegrees, valvePitchInDegrees, percentOfSteeringWheelRadius);
    }
 
    public DRCSteeringWheelEnvironment(double x, double y, double z, double yawInDegrees, double pitchInDegrees, double percentOfSteeringWheelRadius)

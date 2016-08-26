@@ -144,9 +144,9 @@ public class JMEDataTypeUtils
 
    public static ColorRGBA jMEColorRGBAFromVecMathColor3f(Color3f originalColor, double alpha)
    {
-      float r = originalColor.x;
-      float g = originalColor.y;
-      float b = originalColor.z;
+      float r = originalColor.getX();
+      float g = originalColor.getY();
+      float b = originalColor.getZ();
 
       return new ColorRGBA(r, g, b, (float) alpha);
    }
@@ -191,8 +191,8 @@ public class JMEDataTypeUtils
 
    public static void packTexCoord2fInJMEVector2f(TexCoord2f textureCoordinate, Vector2f vector)
    {
-      vector.setX(textureCoordinate.x);
-      vector.setY(textureCoordinate.y);
+      vector.setX(textureCoordinate.getX());
+      vector.setY(textureCoordinate.getY());
    }
 
    public static float[] toPointCloudFloatArray(List<Point3d> points)
@@ -201,9 +201,9 @@ public class JMEDataTypeUtils
       for (int i = 0; i < points.size(); i++)
       {
          Point3d point3d = points.get(i);
-         ret[i * 3 + 0] = (float) point3d.x;
-         ret[i * 3 + 1] = (float) point3d.y;
-         ret[i * 3 + 2] = (float) point3d.z;
+         ret[i * 3 + 0] = (float) point3d.getX();
+         ret[i * 3 + 1] = (float) point3d.getY();
+         ret[i * 3 + 2] = (float) point3d.getZ();
       }
 
       return ret;
@@ -215,9 +215,9 @@ public class JMEDataTypeUtils
       for (int i = 0; i < points.size(); i++)
       {
          Point3d point3d = points.get(i);
-         ret[i * 3 + 0] = (float) point3d.y;
-         ret[i * 3 + 1] = (float) point3d.z;
-         ret[i * 3 + 2] = (float) point3d.x;
+         ret[i * 3 + 0] = (float) point3d.getY();
+         ret[i * 3 + 1] = (float) point3d.getZ();
+         ret[i * 3 + 2] = (float) point3d.getX();
       }
 
       return ret;

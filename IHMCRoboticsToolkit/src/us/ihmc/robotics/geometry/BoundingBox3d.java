@@ -219,38 +219,38 @@ public class BoundingBox3d
 
    public boolean intersects(BoundingBox3d boundingBox)
    {
-      return ((maxPoint.x >= boundingBox.minPoint.x) && (boundingBox.maxPoint.x >= minPoint.x) && (maxPoint.y >= boundingBox.minPoint.y)
-            && (boundingBox.maxPoint.y >= minPoint.y) && (maxPoint.z >= boundingBox.minPoint.z) && (boundingBox.maxPoint.z >= minPoint.z));
+      return ((maxPoint.getX() >= boundingBox.minPoint.getX()) && (boundingBox.maxPoint.getX() >= minPoint.getX()) && (maxPoint.getY() >= boundingBox.minPoint.getY())
+            && (boundingBox.maxPoint.getY() >= minPoint.getY()) && (maxPoint.getZ() >= boundingBox.minPoint.getZ()) && (boundingBox.maxPoint.getZ() >= minPoint.getZ()));
    }
 
    public boolean intersects(Point3d start, Point3d end)
    {
-      double invXDir = 1 / (end.x - start.x);
-      double invYDir = 1 / (end.y - start.y);
-      double invZDir = 1 / (end.z - start.z);
+      double invXDir = 1 / (end.getX() - start.getX());
+      double invYDir = 1 / (end.getY() - start.getY());
+      double invZDir = 1 / (end.getZ() - start.getZ());
 
       double tmin, tmax, tymin, tymax, tzmin, tzmax;
 
       if (invXDir > 0)
       {
-         tmin = (minPoint.x - start.x) * invXDir;
-         tmax = (maxPoint.x - start.x) * invXDir;
+         tmin = (minPoint.getX() - start.getX()) * invXDir;
+         tmax = (maxPoint.getX() - start.getX()) * invXDir;
       }
       else
       {
-         tmin = (maxPoint.x - start.x) * invXDir;
-         tmax = (minPoint.x - start.x) * invXDir;
+         tmin = (maxPoint.getX() - start.getX()) * invXDir;
+         tmax = (minPoint.getX() - start.getX()) * invXDir;
       }
       
       if (invYDir > 0)
       {
-         tymin = (minPoint.y - start.y) * invYDir;
-         tymax = (maxPoint.y - start.y) * invYDir;
+         tymin = (minPoint.getY() - start.getY()) * invYDir;
+         tymax = (maxPoint.getY() - start.getY()) * invYDir;
       }
       else
       {
-         tymin = (maxPoint.y - start.y) * invYDir;
-         tymax = (minPoint.y - start.y) * invYDir;
+         tymin = (maxPoint.getY() - start.getY()) * invYDir;
+         tymax = (minPoint.getY() - start.getY()) * invYDir;
       }
       
       // if regions do not overlap, return false
@@ -267,13 +267,13 @@ public class BoundingBox3d
       
       if (invZDir > 0)
       {
-         tzmin = (minPoint.z - start.z) * invZDir;
-         tzmax = (maxPoint.z - start.z) * invZDir;
+         tzmin = (minPoint.getZ() - start.getZ()) * invZDir;
+         tzmax = (maxPoint.getZ() - start.getZ()) * invZDir;
       }
       else
       {
-         tzmin = (maxPoint.z - start.z) * invZDir;
-         tzmax = (minPoint.z - start.z) * invZDir;
+         tzmin = (maxPoint.getZ() - start.getZ()) * invZDir;
+         tzmax = (minPoint.getZ() - start.getZ()) * invZDir;
       }
       
       // if regions do not overlap, return false

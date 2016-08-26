@@ -58,9 +58,9 @@ public class InclinedGroundProfile extends GroundProfileFromHeightMap
       if (boundingBox.isXYInside(x, y))
          dzdx = -Math.tan(angleOfInclination);
 
-      normal.x = -dzdx;
-      normal.y = 0.0;
-      normal.z = 1.0;
+      normal.setX(-dzdx);
+      normal.setY(0.0);
+      normal.setZ(1.0);
 
       normal.normalize();
    }

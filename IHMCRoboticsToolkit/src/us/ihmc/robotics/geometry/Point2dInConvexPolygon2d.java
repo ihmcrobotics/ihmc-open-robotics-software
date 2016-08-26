@@ -46,12 +46,12 @@ public class Point2dInConvexPolygon2d extends Point2d
 
       public double getAngle()
    {
-      return Math.atan2(y,x); 
+      return Math.atan2(getY(),getX()); 
    }
    
    public double getEccentricity()
    {
-      Point2d edgePoint = findEdgePoint(x, y);
+      Point2d edgePoint = findEdgePoint(getX(), getY());
       return Math.max(1e-3, distance(origin) / edgePoint.distance(origin));      
    }
    

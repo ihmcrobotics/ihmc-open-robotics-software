@@ -151,13 +151,13 @@ public class BoundingBox2d
 
    public boolean intersects(BoundingBox2d r)
    {
-      return ((maxPoint.x >= r.minPoint.x) && (r.maxPoint.x >= minPoint.x) && (maxPoint.y >= r.minPoint.y) && (r.maxPoint.y >= minPoint.y));
+      return ((maxPoint.getX() >= r.minPoint.getX()) && (r.maxPoint.getX() >= minPoint.getX()) && (maxPoint.getY() >= r.minPoint.getY()) && (r.maxPoint.getY() >= minPoint.getY()));
    }
 
    public void getPointGivenParameters(Point2d point, double xParameter, double yParameter)
    {
-      point.setX(minPoint.x + xParameter * (maxPoint.x - minPoint.x));
-      point.setY(minPoint.y + yParameter * (maxPoint.y - minPoint.y));
+      point.setX(minPoint.getX() + xParameter * (maxPoint.getX() - minPoint.getX()));
+      point.setY(minPoint.getY() + yParameter * (maxPoint.getY() - minPoint.getY()));
    }
 
    @Override

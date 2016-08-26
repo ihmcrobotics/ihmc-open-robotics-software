@@ -47,7 +47,7 @@ public class PointToLineUnProjectorTest
          temp.set(point2);
          temp.scale(s);
          point3.add(temp);
-         runTest(point1.x, point1.y, point1.z, point2.x, point2.y, point2.z, point3.x, point3.y, point3.z);
+         runTest(point1.getX(), point1.getY(), point1.getZ(), point2.getX(), point2.getY(), point2.getZ(), point3.getX(), point3.getY(), point3.getZ());
       }
    }
 
@@ -67,7 +67,7 @@ public class PointToLineUnProjectorTest
          temp.set(point2);
          temp.scale(s);
          point3.add(temp);
-         runTest(point1.x, point1.y, point1.z, point2.x, point2.y, point2.z, point3.x, point3.y, point3.z);
+         runTest(point1.getX(), point1.getY(), point1.getZ(), point2.getX(), point2.getY(), point2.getZ(), point3.getX(), point3.getY(), point3.getZ());
       }
    }
 
@@ -88,7 +88,7 @@ public class PointToLineUnProjectorTest
          temp.set(point2);
          temp.scale(s);
          point3.add(temp);
-         runTest(point1.x, point1.y, point1.z, point2.x, point2.y, point2.z, point3.x, point3.y, point3.z);
+         runTest(point1.getX(), point1.getY(), point1.getZ(), point2.getX(), point2.getY(), point2.getZ(), point3.getX(), point3.getY(), point3.getZ());
       }
    }
 
@@ -109,7 +109,7 @@ public class PointToLineUnProjectorTest
          temp.set(point2);
          temp.scale(s);
          point3.add(temp);
-         runTest(point1.x, point1.y, point1.z, point2.x, point2.y, point2.z, point3.x, point3.y, point3.z);
+         runTest(point1.getX(), point1.getY(), point1.getZ(), point2.getX(), point2.getY(), point2.getZ(), point3.getX(), point3.getY(), point3.getZ());
       }
    }
 

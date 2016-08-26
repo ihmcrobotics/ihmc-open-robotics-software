@@ -272,52 +272,52 @@ public class JUnitTools
    
    public static void assertVector3dEquals(String message, Vector3d expected, Vector3d actual, double delta)
    {
-      assertEquals(message,expected.x, actual.x,delta);
-      assertEquals(message,expected.y, actual.y,delta);
-      assertEquals(message, expected.z, actual.z, delta);
+      assertEquals(message,expected.getX(), actual.getX(),delta);
+      assertEquals(message,expected.getY(), actual.getY(),delta);
+      assertEquals(message, expected.getZ(), actual.getZ(), delta);
    }
    
    public static void assertPoint3dEquals(String message, Point3d expected, Point3d actual, double delta)
    {
-      assertEquals(message,expected.x, actual.x,delta);
-      assertEquals(message,expected.y, actual.y,delta);
-      assertEquals(message,expected.z, actual.z,delta);
+      assertEquals(message,expected.getX(), actual.getX(),delta);
+      assertEquals(message,expected.getY(), actual.getY(),delta);
+      assertEquals(message,expected.getZ(), actual.getZ(),delta);
    }
    
    public static void assertPoint2dEquals(String message, Point2d expected, Point2d actual, double delta)
    {
-      assertEquals(message, expected.x, actual.x, delta);
-      assertEquals(message, expected.y, actual.y, delta);
+      assertEquals(message, expected.getX(), actual.getX(), delta);
+      assertEquals(message, expected.getY(), actual.getY(), delta);
    }
    
    public static void assertPoint3fEquals(String message, Point3f expected, Point3f actual, double delta)
    {
-      assertEquals(message,expected.x, actual.x,delta);
-      assertEquals(message,expected.y, actual.y,delta);
-      assertEquals(message, expected.z, actual.z, delta);
+      assertEquals(message,expected.getX(), actual.getX(),delta);
+      assertEquals(message,expected.getY(), actual.getY(),delta);
+      assertEquals(message, expected.getZ(), actual.getZ(), delta);
    }
    
    public static void assertVector3fEquals(String message, Vector3f expected, Vector3f actual, double delta)
    {
-      assertEquals(message,expected.x, actual.x,delta);
-      assertEquals(message,expected.y, actual.y,delta);
-      assertEquals(message, expected.z, actual.z, delta);
+      assertEquals(message,expected.getX(), actual.getX(),delta);
+      assertEquals(message,expected.getY(), actual.getY(),delta);
+      assertEquals(message, expected.getZ(), actual.getZ(), delta);
    }
    
    public static void assertVector4dEquals(String message, Vector4d expected, Vector4d actual, double delta)
    {
-      assertEquals(message,expected.x, actual.x,delta);
-      assertEquals(message,expected.y, actual.y,delta);
-      assertEquals(message,expected.z, actual.z,delta);
-      assertEquals(message,expected.w, actual.w,delta);
+      assertEquals(message,expected.getX(), actual.getX(),delta);
+      assertEquals(message,expected.getY(), actual.getY(),delta);
+      assertEquals(message,expected.getZ(), actual.getZ(),delta);
+      assertEquals(message,expected.getW(), actual.getW(),delta);
    }
    
    public static void assertVector4fEquals(String message, Vector4f expected, Vector4f actual, double delta)
    {
-      assertEquals(message,expected.x, actual.x,delta);
-      assertEquals(message,expected.y, actual.y,delta);
-      assertEquals(message,expected.z, actual.z,delta);
-      assertEquals(message, expected.w, actual.w, delta);
+      assertEquals(message,expected.getX(), actual.getX(),delta);
+      assertEquals(message,expected.getY(), actual.getY(),delta);
+      assertEquals(message,expected.getZ(), actual.getZ(),delta);
+      assertEquals(message, expected.getW(), actual.getW(), delta);
    }
 
    /**
@@ -329,14 +329,14 @@ public class JUnitTools
    public static void assertSkewSymmetric(Matrix3d mat, double epsilon)
    {
       // diagonal terms
-      assertEquals(0.0, mat.m00, epsilon);
-      assertEquals(0.0, mat.m11, epsilon);
-      assertEquals(0.0, mat.m22, epsilon);
+      assertEquals(0.0, mat.getM00(), epsilon);
+      assertEquals(0.0, mat.getM11(), epsilon);
+      assertEquals(0.0, mat.getM22(), epsilon);
 
       // off-diagonal terms
-      assertEquals(0.0, mat.m01 + mat.m10, epsilon);
-      assertEquals(0.0, mat.m02 + mat.m20, epsilon);
-      assertEquals(0.0, mat.m12 + mat.m21, epsilon);
+      assertEquals(0.0, mat.getM01() + mat.getM10(), epsilon);
+      assertEquals(0.0, mat.getM02() + mat.getM20(), epsilon);
+      assertEquals(0.0, mat.getM12() + mat.getM21(), epsilon);
    }
 
    public static void assertDoubleArrayEquals(double[] expectedDoubleArray, double[] actualDoubleArray, double epsilon)

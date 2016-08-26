@@ -32,7 +32,7 @@ public class CollisionCylinderTest
          double z = -5.0 +  10.0 * random.nextDouble();  
          
          
-         Point3d point = new Point3d(vector.x, vector.y, z);
+         Point3d point = new Point3d(vector.getX(), vector.getY(), z);
          assertTrue(cylinder.contains(point));
       }
    }
@@ -53,7 +53,7 @@ public class CollisionCylinderTest
          double z = (random.nextBoolean()?1.0:-1.0) * (5.0 + 10.0 * random.nextDouble());  
          
          
-         Point3d point = new Point3d(vector.x, vector.y, z);
+         Point3d point = new Point3d(vector.getX(), vector.getY(), z);
          assertFalse(cylinder.contains(point));
       }
    }

@@ -25,7 +25,7 @@ public class RobotDepthDataFilter extends DepthDataFilter
    public boolean isValidNearScan(Point3d point, Point3d lidarOrigin)
    {
       boolean valid = super.isValidNearScan(point, lidarOrigin);
-      valid &= point.z > getMidFootPoint().z + parameters.nearScanZMinAboveFeet;
+      valid &= point.getZ() > getMidFootPoint().getZ() + parameters.nearScanZMinAboveFeet;
 //      valid &= parameters.nearScanCollisions || robotBoundingBoxes.isValidPoint(lidarOrigin, point);
       valid &= Math.abs(getAngleToPelvis(point, lidarOrigin)) < parameters.nearScanRadians;
 
@@ -48,8 +48,8 @@ public class RobotDepthDataFilter extends DepthDataFilter
    {
       Point3d footAvg = getMidFootPoint();
 
-      double footZ = footAvg.z;
-      footAvg.setZ(point.z);
+      double footZ = footAvg.getZ();
+      footAvg.setZ(point.getZ());
 
       double maxHeight = parameters.quadTreeZAboveFeet + point.distance(footAvg) * parameters.quadTreeZSlope;
       if (maxHeight > parameters.quadTreeZMax)
@@ -57,7 +57,7 @@ public class RobotDepthDataFilter extends DepthDataFilter
          maxHeight = parameters.quadTreeZMax;
       }
 
-      return (point.z - footZ) < maxHeight;
+      return (point.getZ() - footZ) < maxHeight;
    }
 
    private Point3d getMidFootPoint()
@@ -84,7 +84,7 @@ public class RobotDepthDataFilter extends DepthDataFilter
       Point3d tfPoint = new Point3d(point);
       tf.transform(tfPoint);
 
-      return tfPoint.x > parameters.xCutoffPelvis;
+      return tfPoint.getX() > parameters.xCutoffPelvis;
    }
 
    private double getAngleToPelvis(Point3d point, Point3d lidarOrigin)
@@ -94,7 +94,7 @@ public class RobotDepthDataFilter extends DepthDataFilter
       Point3d tfPoint = new Point3d(point);
       tf.transform(tfPoint);
 
-      return Math.atan2(tfPoint.y, tfPoint.x);
+      return Math.atan2(tfPoint.getY(), tfPoint.getX());
    }
 
    @Override

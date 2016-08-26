@@ -151,7 +151,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
          }
       }
 
-      return closestPoint.z;
+      return closestPoint.getZ();
 
       // If not finite, then the line is perpendicular
       // Find abscissa on axis of closest point to line
@@ -176,9 +176,9 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       Vector3d localVector = new Vector3d(testDirection);
       transformLineToLocalCoordinates(localTestPoint, localVector);
 
-      double a = localVector.x * localVector.x + localVector.y * localVector.y;
-      double b = 2 * (localTestPoint.x * localVector.x + localTestPoint.y * localVector.y);
-      double c = localTestPoint.x * localTestPoint.x + localTestPoint.y * localTestPoint.y - radius * radius;
+      double a = localVector.getX() * localVector.getX() + localVector.getY() * localVector.getY();
+      double b = 2 * (localTestPoint.getX() * localVector.getX() + localTestPoint.getY() * localVector.getY());
+      double c = localTestPoint.getX() * localTestPoint.getX() + localTestPoint.getY() * localTestPoint.getY() - radius * radius;
       double[] t = solveQuadraticEquation(a, b, c);
 
       for (int i = 0; i < t.length; i++)
@@ -186,7 +186,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
          Point3d localSideIntersection = new Point3d();
          localSideIntersection.scaleAdd(t[i], localVector, localTestPoint);
 
-         if ((localSideIntersection.z >= -height / 2) && (localSideIntersection.z <= height / 2))
+         if ((localSideIntersection.getZ() >= -height / 2) && (localSideIntersection.getZ() <= height / 2))
          {
             location.transform(localSideIntersection);
             intersections.add(localSideIntersection);
@@ -252,7 +252,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
 
    private Vector3D vector3DFromVector3d(Vector3d vector3d)
    {
-      Vector3D vector3D = new Vector3D(vector3d.x, vector3d.y, vector3d.z);
+      Vector3D vector3D = new Vector3D(vector3d.getX(), vector3d.getY(), vector3d.getZ());
 
       return vector3D;
    }

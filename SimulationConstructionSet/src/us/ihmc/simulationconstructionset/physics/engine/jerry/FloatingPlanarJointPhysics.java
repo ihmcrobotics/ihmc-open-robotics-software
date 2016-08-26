@@ -229,23 +229,23 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
 
       if (owner.type == owner.YZ)
       {
-         owner.qdd_t1.set(a_hat_world_bot.y);
-         owner.qdd_t2.set(a_hat_world_bot.z);
-         owner.qdd_rot.set(a_hat_i.top.x);    // a_hat_world_top.x;  // Don't need to do this since planar!
+         owner.qdd_t1.set(a_hat_world_bot.getY());
+         owner.qdd_t2.set(a_hat_world_bot.getZ());
+         owner.qdd_rot.set(a_hat_i.top.getX());    // a_hat_world_top.x;  // Don't need to do this since planar!
       }
 
       else if (owner.type == owner.XZ)
       {
-         owner.qdd_t1.set(a_hat_world_bot.x);
-         owner.qdd_t2.set(a_hat_world_bot.z);
-         owner.qdd_rot.set(a_hat_i.top.y);    // a_hat_world_top.y;  // Don't need to do this since planar!
+         owner.qdd_t1.set(a_hat_world_bot.getX());
+         owner.qdd_t2.set(a_hat_world_bot.getZ());
+         owner.qdd_rot.set(a_hat_i.top.getY());    // a_hat_world_top.y;  // Don't need to do this since planar!
       }
 
       else    // if (type == XY)
       {
-         owner.qdd_t1.set(a_hat_world_bot.x);
-         owner.qdd_t2.set(a_hat_world_bot.y);
-         owner.qdd_rot.set(a_hat_i.top.z);    // a_hat_world_top.z;  // Don't need to do this since planar!
+         owner.qdd_t1.set(a_hat_world_bot.getX());
+         owner.qdd_t2.set(a_hat_world_bot.getY());
+         owner.qdd_rot.set(a_hat_i.top.getZ());    // a_hat_world_top.z;  // Don't need to do this since planar!
       }
 
 
@@ -429,9 +429,9 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
          delta_qd_xyz.set(delta_v_me.bottom);
          R0_i.transform(delta_qd_xyz);
 
-         owner.qd_rot.set(owner.qd_rot.getDoubleValue() + delta_v_me.top.z);
-         owner.qd_t1.set(owner.qd_t1.getDoubleValue() + delta_qd_xyz.x);
-         owner.qd_t2.set(owner.qd_t2.getDoubleValue() + delta_qd_xyz.y);
+         owner.qd_rot.set(owner.qd_rot.getDoubleValue() + delta_v_me.top.getZ());
+         owner.qd_t1.set(owner.qd_t1.getDoubleValue() + delta_qd_xyz.getX());
+         owner.qd_t2.set(owner.qd_t2.getDoubleValue() + delta_qd_xyz.getY());
       }
 
       else if (owner.type == owner.XZ)
@@ -448,9 +448,9 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
          delta_qd_xyz.set(delta_v_me.bottom);
          R0_i.transform(delta_qd_xyz);
 
-         owner.qd_rot.set(owner.qd_rot.getDoubleValue() + delta_v_me.top.y);
-         owner.qd_t1.set(owner.qd_t1.getDoubleValue() + delta_qd_xyz.x);
-         owner.qd_t2.set(owner.qd_t2.getDoubleValue() + delta_qd_xyz.z);
+         owner.qd_rot.set(owner.qd_rot.getDoubleValue() + delta_v_me.top.getY());
+         owner.qd_t1.set(owner.qd_t1.getDoubleValue() + delta_qd_xyz.getX());
+         owner.qd_t2.set(owner.qd_t2.getDoubleValue() + delta_qd_xyz.getZ());
       }
 
       else
@@ -467,9 +467,9 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
          delta_qd_xyz.set(delta_v_me.bottom);
          R0_i.transform(delta_qd_xyz);
 
-         owner.qd_rot.set(owner.qd_rot.getDoubleValue() + delta_v_me.top.x);
-         owner.qd_t1.set(owner.qd_t1.getDoubleValue() + delta_qd_xyz.y);
-         owner.qd_t2.set(owner.qd_t2.getDoubleValue() + delta_qd_xyz.z);
+         owner.qd_rot.set(owner.qd_rot.getDoubleValue() + delta_v_me.top.getX());
+         owner.qd_t1.set(owner.qd_t1.getDoubleValue() + delta_qd_xyz.getY());
+         owner.qd_t2.set(owner.qd_t2.getDoubleValue() + delta_qd_xyz.getZ());
       }
 
    }

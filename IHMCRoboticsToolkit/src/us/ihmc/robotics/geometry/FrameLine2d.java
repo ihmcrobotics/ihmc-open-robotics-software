@@ -325,7 +325,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
    {
       checkReferenceFrameMatch(point);
       Point2d projected = line.orthogonalProjectionCopy(point.getPoint());
-      point.set(projected.x, projected.y);
+      point.set(projected.getX(), projected.getY());
    }
 
    @Override

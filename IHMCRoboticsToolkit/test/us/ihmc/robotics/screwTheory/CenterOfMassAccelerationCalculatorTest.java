@@ -176,9 +176,9 @@ public class CenterOfMassAccelerationCalculatorTest
    private Matrix3d getRandomDiagonalMatrix(Random random)
    {
       Matrix3d ret = new Matrix3d();
-      ret.m00 = random.nextDouble();
-      ret.m11 = random.nextDouble();
-      ret.m22 = random.nextDouble();
+      ret.setM00(random.nextDouble());
+      ret.setM11(random.nextDouble());
+      ret.setM22(random.nextDouble());
 
       return ret;
    }

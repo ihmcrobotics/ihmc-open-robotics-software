@@ -186,9 +186,9 @@ public class LoadCloudWithPoses extends SimpleApplication
                {
                   Point3d p = scan.getPoint(j);
                   if (!half || j > scan.size() / 2)
-                     clouds[0].add(new Point3D_F64(p.x, p.y, p.z));
+                     clouds[0].add(new Point3D_F64(p.getX(), p.getY(), p.getZ()));
                   else
-                     clouds[1].add(new Point3D_F64(p.x, p.y, p.z));
+                     clouds[1].add(new Point3D_F64(p.getX(), p.getY(), p.getZ()));
                }
             }
          }

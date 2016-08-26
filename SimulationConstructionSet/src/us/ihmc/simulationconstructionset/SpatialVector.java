@@ -65,17 +65,17 @@ public final class SpatialVector implements java.io.Serializable
 
    public void setFromVector3d(Vector3d v1, Vector3d v2)
    {
-      top.x = v1.x;
-      top.y = v1.y;
-      top.z = v1.z;
-      bottom.x = v2.x;
-      bottom.y = v2.y;
-      bottom.z = v2.z;
+      top.setX(v1.getX());
+      top.setY(v1.getY());
+      top.setZ(v1.getZ());
+      bottom.setX(v2.getX());
+      bottom.setY(v2.getY());
+      bottom.setZ(v2.getZ());
    }
 
    public String toString()
    {
-      return ("x1: " + top.x + " y1: " + top.y + " z1: " + top.z + " x2: " + bottom.x + " y2: " + bottom.y + " z2: " + bottom.z);
+      return ("x1: " + top.getX() + " y1: " + top.getY() + " z1: " + top.getZ() + " x2: " + bottom.getX() + " y2: " + bottom.getY() + " z2: " + bottom.getZ());
 
    }
 
@@ -87,33 +87,33 @@ public final class SpatialVector implements java.io.Serializable
 
    public final void getMatrix(Matrix M)
    {
-      M.set(0, 0, top.x);
-      M.set(1, 0, top.y);
-      M.set(2, 0, top.z);
-      M.set(3, 0, bottom.x);
-      M.set(4, 0, bottom.y);
-      M.set(5, 0, bottom.z);
+      M.set(0, 0, top.getX());
+      M.set(1, 0, top.getY());
+      M.set(2, 0, top.getZ());
+      M.set(3, 0, bottom.getX());
+      M.set(4, 0, bottom.getY());
+      M.set(5, 0, bottom.getZ());
    }
 
    public void getPlanarXYMatrix(Matrix M)
    {
-      M.set(0, 0, top.x);
-      M.set(1, 0, top.y);
-      M.set(2, 0, bottom.z);
+      M.set(0, 0, top.getX());
+      M.set(1, 0, top.getY());
+      M.set(2, 0, bottom.getZ());
    }
 
    public void getPlanarXZMatrix(Matrix M)
    {
-      M.set(0, 0, top.x);
-      M.set(1, 0, top.z);
-      M.set(2, 0, bottom.y);
+      M.set(0, 0, top.getX());
+      M.set(1, 0, top.getZ());
+      M.set(2, 0, bottom.getY());
    }
 
    public void getPlanarYZMatrix(Matrix M)
    {
-      M.set(0, 0, top.y);
-      M.set(1, 0, top.z);
-      M.set(2, 0, bottom.x);
+      M.set(0, 0, top.getY());
+      M.set(1, 0, top.getZ());
+      M.set(2, 0, bottom.getX());
    }
 
    public void scale(double t)
@@ -158,9 +158,9 @@ public final class SpatialVector implements java.io.Serializable
 
    public void setInitArticulatedZeroAccel(double mass, Vector3d w_i, Matrix3d Inertia, Matrix3d Ri_0, double gX, double gY, double gZ)
    {
-      top.x = -gX * mass;
-      top.y = -gY * mass;
-      top.z = -gZ * mass;
+      top.setX(-gX * mass);
+      top.setY(-gY * mass);
+      top.setZ(-gZ * mass);
 
       Ri_0.transform(top);
 

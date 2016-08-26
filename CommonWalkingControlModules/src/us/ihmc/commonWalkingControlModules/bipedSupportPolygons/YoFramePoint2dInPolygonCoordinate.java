@@ -35,7 +35,7 @@ public class YoFramePoint2dInPolygonCoordinate
    {
       point2dInConvexPolygon2d.setAngle(angle.getDoubleValue());
       point2dInConvexPolygon2d.setEccentricity(eccentricity.getDoubleValue());
-      framePoint2d.set(point2dInConvexPolygon2d.x, point2dInConvexPolygon2d.y);
+      framePoint2d.set(point2dInConvexPolygon2d.getX(), point2dInConvexPolygon2d.getY());
       return framePoint2d;
    }
 

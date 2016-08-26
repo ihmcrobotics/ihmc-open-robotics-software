@@ -97,7 +97,7 @@ public class SteppingStones
          {
             Point2d point2d = convexPolygon2d.getVertex(j);
 
-            ret[i][j] = new double[] {point2d.x, point2d.y};
+            ret[i][j] = new double[] {point2d.getX(), point2d.getY()};
          }
       }
 
@@ -120,7 +120,7 @@ public class SteppingStones
          {
             Point2d point2d = shrunkenConvexPolygon2d.getVertex(j);
 
-            ret[i][j] = new double[] {point2d.x, point2d.y};
+            ret[i][j] = new double[] {point2d.getX(), point2d.getY()};
          }
       }
 
