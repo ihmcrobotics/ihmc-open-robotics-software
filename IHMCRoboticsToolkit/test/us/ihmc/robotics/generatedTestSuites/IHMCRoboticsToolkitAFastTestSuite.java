@@ -110,6 +110,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.linearDynamicSystems.BodeUnitsConverterTest.class,
    us.ihmc.robotics.linearDynamicSystems.ComplexConjugateModeTest.class,
    us.ihmc.robotics.linearDynamicSystems.ComplexMatrixTest.class,
+   us.ihmc.robotics.linearDynamicSystems.DoubleMassSpringOscillatorTest.class,
    us.ihmc.robotics.linearDynamicSystems.EigenvalueDecomposerTest.class,
    us.ihmc.robotics.linearDynamicSystems.LinearDynamicSystemTest.class,
    us.ihmc.robotics.linearDynamicSystems.MassSpringDamperTest.class,
