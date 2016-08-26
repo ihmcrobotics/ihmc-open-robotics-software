@@ -18,9 +18,9 @@ public class MomentumOptimizationSettings
    private Vector3d chestAngularWeight = new Vector3d(15.0, 10.0, 5.0);
    private Vector3d pelvisAngularWeight = new Vector3d(5.0, 5.0, 5.0);
    
-   private int nBasisVectorsPerContactPoint = 1;
-   private int nContactPointsPerContactableBody = 1;
-   private int nContactableBodies = 6;
+   private int nBasisVectorsPerContactPoint = 4;
+   private int nContactPointsPerContactableBody = 4;
+   private int nContactableBodies = 2;
 
    private double jointAccelerationWeight = 0.005;
    private double jointJerkWeight = 0.1;
