@@ -77,6 +77,7 @@ public class SupportState extends AbstractFootControlState
    // For testing:
    private final BooleanYoVariable assumeCopOnEdge;
    private final BooleanYoVariable assumeFootBarelyLoaded;
+   private final BooleanYoVariable neverHoldRotation;
 
    // For line contact walking and balancing:
    private final BooleanYoVariable holdFootOrientationFlat;
@@ -119,13 +120,23 @@ public class SupportState extends AbstractFootControlState
 
       assumeCopOnEdge = new BooleanYoVariable(prefix + "AssumeCopOnEdge", registry);
       assumeFootBarelyLoaded = new BooleanYoVariable(prefix + "AssumeFootBarelyLoaded", registry);
+      neverHoldRotation = new BooleanYoVariable(prefix + "NeverHoldRotation", registry);
       holdFootOrientationFlat = new BooleanYoVariable(prefix + "HoldFlatOrientation", registry);
 
       explorationHelper = new ExplorationHelper(contactableFoot, footControlHelper, prefix, registry);
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
       requestFootholdExploration = new BooleanYoVariable(prefix + "RequestFootholdExploration", registry);
-      recoverTime = footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry).getRecoverTime();
-      timeBeforeExploring = footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry).getTimeBeforeExploring();
+      ExplorationParameters explorationParameters = footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry);
+      if (explorationParameters != null)
+      {
+         recoverTime = explorationParameters.getRecoverTime();
+         timeBeforeExploring = explorationParameters.getTimeBeforeExploring();
+      }
+      else
+      {
+         recoverTime = new DoubleYoVariable(prefix + "RecoverTime", registry);
+         timeBeforeExploring = new DoubleYoVariable(prefix + "TimeBeforeExploring", registry);
+      }
 
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
@@ -194,6 +205,8 @@ public class SupportState extends AbstractFootControlState
          copOnEdge.set(true);
       if (assumeFootBarelyLoaded.getBooleanValue())
          footBarelyLoaded.set(true);
+      if (neverHoldRotation.getBooleanValue())
+         copOnEdge.set(false);
 
       updateHoldPositionSetpoints();
 
