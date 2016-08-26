@@ -10,12 +10,12 @@ import us.ihmc.robotics.math.frames.YoFrameLine2d;
 
 public class YoArtifactLine2d extends YoArtifact
 {
+   private static final BasicStroke STROKE = new BasicStroke(2);
+   
    private final YoFrameLine2d yoFrameLine2d;
-   private final PlotterGraphics plotterGraphics = new PlotterGraphics();
    private final Color color;
-
-   private static final int pixels = 2;
-   private static final BasicStroke stroke = new BasicStroke(pixels);
+   
+   private final PlotterGraphics plotterGraphics = new PlotterGraphics();
 
    public YoArtifactLine2d(String name, YoFrameLine2d yoFrameLine2d, Color color)
    {
@@ -30,8 +30,7 @@ public class YoArtifactLine2d extends YoArtifact
       if (isVisible)
       {
          graphics.setColor(color);
-         if (stroke != null)
-            graphics.setStroke(stroke);
+         graphics.setStroke(STROKE);
 
          double x0 = yoFrameLine2d.getX0();
          double y0 = yoFrameLine2d.getY0();
@@ -49,14 +48,8 @@ public class YoArtifactLine2d extends YoArtifact
    public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
       graphics.setColor(color);
+      graphics.setStroke(STROKE);
 
-      //    int pixels = 2;
-      if (stroke != null)
-         graphics.setStroke(stroke);
-
-      //      plotterGraphics.setCenter(Xcenter, Ycenter);
-      //      plotterGraphics.setScale(scaleFactor);
-      //      plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.0);
       graphics.drawLineSegment(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
    }
 
