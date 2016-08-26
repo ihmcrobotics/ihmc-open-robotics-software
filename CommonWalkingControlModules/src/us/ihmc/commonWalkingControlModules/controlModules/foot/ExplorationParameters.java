@@ -26,7 +26,7 @@ public class ExplorationParameters
    private final DoubleYoVariable copGridThresholdForOccupancy;
    private final DoubleYoVariable copGridDecayAlpha;
    private static final double defaultCopGridThresholdForOccupancy = 3.0;
-   private static final double defaultCopGridDecayAlpha = 0.997;
+   private static final double defaultCopGridDecayAlpha = 1.0;
 
    /** Parameters for the partial foothold control module */
    private final BooleanYoVariable useCopOccupancyGrid;
@@ -46,7 +46,7 @@ public class ExplorationParameters
    private final DoubleYoVariable perpendicluarCopErrorThreshold;
    private final DoubleYoVariable copAllowedAreaOpeningAngle;
    private static final double defaultPerpendicluarCopErrorThreshold = 0.005;
-   private static final double defaultCopAllowedAreaOpeningAngle = 45.0 * Math.PI/180.0;
+   private static final double defaultCopAllowedAreaOpeningAngle = 30.0 * Math.PI/180.0;
 
    /** Parameters for the velocity based foothold detection */
    private final DoubleYoVariable stableLoRAngularVelocityThreshold;
@@ -57,7 +57,7 @@ public class ExplorationParameters
    private static final double defaultStableLoRAngularVelocityThreshold = 10.0;
    private static final double defaultStableCoRLinearVelocityThreshold = 0.1;
    private static final double defaultAngularVelocityAroundLoRThreshold = 0.5;
-   private static final double defaultFootDropThreshold = -0.025;
+   private static final double defaultFootDropThreshold = -0.04;
    private static final double defaultAngularVelocityFilterBreakFrequency = 16.0;
 
    /** Parameters for foothold exploration state */
@@ -69,7 +69,7 @@ public class ExplorationParameters
    private static final double defaultRecoverTime = 0.05;
    private static final double defaultTimeToGoToCorner = 0.3;
    private static final double defaultTimeToStayInCorner = 0.2;
-   private static final double defaultCopCommandWeight = 2000.0;
+   private static final double defaultCopCommandWeight = 200.0;
    private static final double defaultTimeBeforeExploring = 1.5;
 
    public ExplorationParameters(YoVariableRegistry parentRegistry)

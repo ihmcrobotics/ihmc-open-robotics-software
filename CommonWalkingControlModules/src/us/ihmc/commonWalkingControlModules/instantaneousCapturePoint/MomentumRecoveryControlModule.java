@@ -102,6 +102,7 @@ public class MomentumRecoveryControlModule
 
       allowUpperBodyMomentumInSingleSupport.set(false);
       allowUpperBodyMomentumInDoubleSupport.set(false);
+      allowUsingHighMomentumWeight.set(false);
       maxDistanceCMPSupport.set(maxAllowedDistanceCMPSupport);
 
       parentRegistry.addChild(registry);

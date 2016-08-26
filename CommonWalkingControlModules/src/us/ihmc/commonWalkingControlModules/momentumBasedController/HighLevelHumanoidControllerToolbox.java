@@ -33,6 +33,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -46,6 +47,8 @@ import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.Momentum;
+import us.ihmc.robotics.screwTheory.MomentumCalculator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -140,11 +143,16 @@ public class HighLevelHumanoidControllerToolbox
    protected final YoFramePoint yoCapturePoint = new YoFramePoint("capturePoint", worldFrame, registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
 
+   private final MomentumCalculator momentumCalculator;
+   private final YoFrameVector yoAngularMomentum;
+   private final AlphaFilteredYoFrameVector filteredYoAngularMomentum;
+   private final DoubleYoVariable totalMass = new DoubleYoVariable("TotalMass", registry);
+
    private final FramePoint2d centerOfPressure = new FramePoint2d();
    private final YoFramePoint2d yoCenterOfPressure = new YoFramePoint2d("CenterOfPressure", worldFrame, registry);
 
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
-   
+
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
          CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
@@ -354,6 +362,14 @@ public class HighLevelHumanoidControllerToolbox
          yoGraphicsListRegistry.registerArtifact(graphicListName, copViz);
       }
       yoCenterOfPressure.setToNaN();
+
+      this.totalMass.set(totalMass);
+      momentumCalculator = new MomentumCalculator(twistCalculator, ScrewTools.computeSubtreeSuccessors(fullRobotModel.getElevator()));
+      yoAngularMomentum = new YoFrameVector("AngularMomentum", centerOfMassFrame, registry);
+      DoubleYoVariable alpha = new DoubleYoVariable("filteredAngularMomentumAlpha", registry);
+      alpha.set(0.95); // switch to break frequency and move to walking parameters
+      filteredYoAngularMomentum = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filteredAngularMomentum", "", registry, alpha, yoAngularMomentum);
+      momentumGain.set(0.0);
    }
 
    public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
@@ -406,6 +422,8 @@ public class HighLevelHumanoidControllerToolbox
       updateBipedSupportPolygons();
       readWristSensorData();
 
+      computeAngularMomentum();
+
       robotJacobianHolder.compute();
 
       for (int i = 0; i < updatables.size(); i++)
@@ -453,7 +471,7 @@ public class HighLevelHumanoidControllerToolbox
    private void computeCapturePoint()
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
-      
+
       if (centerOfMassDataHolder != null)
       {
          centerOfMassDataHolder.getCenterOfMassVelocity(centerOfMassVelocity);
@@ -473,6 +491,34 @@ public class HighLevelHumanoidControllerToolbox
 
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
       yoCapturePoint.setXY(capturePoint2d);
+   }
+
+   private final FrameVector angularMomentum = new FrameVector();
+   private final Momentum robotMomentum = new Momentum();
+   private void computeAngularMomentum()
+   {
+      robotMomentum.setToZero(centerOfMassFrame);
+      momentumCalculator.computeAndPack(robotMomentum);
+      robotMomentum.getAngularPartIncludingFrame(angularMomentum);
+      yoAngularMomentum.set(angularMomentum);
+      filteredYoAngularMomentum.update();
+   }
+
+   private final FramePoint2d localDesiredCapturePoint = new FramePoint2d();
+   private final DoubleYoVariable momentumGain = new DoubleYoVariable("MomentumGain", registry);
+   public void getAdjustedDesiredCapturePoint(FramePoint2d desiredCapturePoint, FramePoint2d adjustedDesiredCapturePoint)
+   {
+      filteredYoAngularMomentum.getFrameTuple(angularMomentum);
+      ReferenceFrame comFrame = angularMomentum.getReferenceFrame();
+      localDesiredCapturePoint.setIncludingFrame(desiredCapturePoint);
+      localDesiredCapturePoint.changeFrameAndProjectToXYPlane(comFrame);
+
+      double scaleFactor = momentumGain.getDoubleValue() * omega0.getDoubleValue() / (totalMass.getDoubleValue() * gravity);
+
+      adjustedDesiredCapturePoint.setIncludingFrame(comFrame, -angularMomentum.getY(), angularMomentum.getX());
+      adjustedDesiredCapturePoint.scale(scaleFactor);
+      adjustedDesiredCapturePoint.add(localDesiredCapturePoint);
+      adjustedDesiredCapturePoint.changeFrameAndProjectToXYPlane(desiredCapturePoint.getReferenceFrame());
    }
 
    public void getCapturePoint(FramePoint2d capturePointToPack)
@@ -965,4 +1011,15 @@ public class HighLevelHumanoidControllerToolbox
    {
       return omega0.getDoubleValue();
    }
+
+   public void getCop(FramePoint2d copToPack)
+   {
+      yoCenterOfPressure.getFrameTuple2dIncludingFrame(copToPack);
+   }
+
+   public void getUpperBodyAngularMomentum(FrameVector upperBodyAngularMomentumToPack)
+   {
+      upperBodyAngularMomentumToPack.setIncludingFrame(angularMomentum);
+   }
+
 }
