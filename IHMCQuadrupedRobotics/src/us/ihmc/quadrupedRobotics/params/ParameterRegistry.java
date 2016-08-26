@@ -60,24 +60,16 @@ public class ParameterRegistry
    private final List<String> unregistered = new ArrayList<>();
 
    /**
-    * @deprecated Use loadFromResources(Path).
-    */
-   public void loadFromResources(String name) throws IOException
-   {
-      loadFromResources(Paths.get(name));
-   }
-   
-   /**
     * Loads the resource with the given filename from the class path. If more than one class path resource exists with the given name then every matching
     * resource will be loaded in an undefined order.
     *
     * @param parametersPath the full parameters file name, i.e. "parameters_testing_123.conf"
     * @throws IOException if the resource is not found or an I/O error occurs
     */
-   public void loadFromResources(Path parametersPath) throws IOException
+   public void loadFromResources(String parametersPath) throws IOException
    {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      Enumeration<URL> resources = loader.getResources(parametersPath.toString());
+      Enumeration<URL> resources = loader.getResources(parametersPath);
       if (!resources.hasMoreElements())
       {
          throw new IOException("Cannot locate " + parametersPath + " as a classpath resource");
