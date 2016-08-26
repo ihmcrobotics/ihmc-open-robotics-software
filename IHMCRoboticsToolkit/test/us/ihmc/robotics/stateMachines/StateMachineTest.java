@@ -9,8 +9,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.robotics.stateMachines.StateMachine;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class StateMachineTest
@@ -156,5 +155,13 @@ public class StateMachineTest
    private enum States
    {
       ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX
+   }
+
+
+   public static void main(String[] args)
+   {
+      String targetTests = StateMachineTest.class.getName();
+      String targetClassesInSamePackage = MutationTestingTools.createClassSelectorStringFromTargetString(targetTests);
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
    }
 }

@@ -251,11 +251,11 @@ public class TaskspaceToJointspaceHandPositionControlState extends State<HandCon
       }
    }
 
-   @Override
-   public double getTimeInCurrentState()
-   {
-      return yoTime.getDoubleValue() - initialTime.getDoubleValue();
-   }
+//   @Override
+//   public double getTimeInCurrentState()
+//   {
+//      return yoTime.getDoubleValue() - initialTime.getDoubleValue();
+//   }
 
    private void decayAngularControl(double time)
    {
