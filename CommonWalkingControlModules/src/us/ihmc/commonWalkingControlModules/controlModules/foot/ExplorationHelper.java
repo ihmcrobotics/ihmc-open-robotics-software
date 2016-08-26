@@ -58,7 +58,10 @@ public class ExplorationHelper
 
       centerOfPressureCommand.setContactingRigidBody(contactableFoot.getRigidBody());
       explorationParameters = footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry);
-      copCommandWeight = explorationParameters.getCopCommandWeight();
+      if (explorationParameters != null)
+         copCommandWeight = explorationParameters.getCopCommandWeight();
+      else
+         copCommandWeight = null;
       soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
 
