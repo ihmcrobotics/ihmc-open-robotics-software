@@ -262,10 +262,10 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       for (double[] jointAngleSet : jointAngles)
       {
          hipPosition = hipPositions.get(index);
-         kneePosition.setX(hipPosition.x - length1 * Math.sin(jointAngleSet[0]));
-         kneePosition.setY(hipPosition.y - length1 * Math.cos(jointAngleSet[0]));
-         anklePosition.setX(kneePosition.x - length2 * Math.sin(jointAngleSet[0] + jointAngleSet[1]));
-         anklePosition.setY(kneePosition.y - length2 * Math.cos(jointAngleSet[0] + jointAngleSet[1]));
+         kneePosition.setX(hipPosition.getX() - length1 * Math.sin(jointAngleSet[0]));
+         kneePosition.setY(hipPosition.getY() - length1 * Math.cos(jointAngleSet[0]));
+         anklePosition.setX(kneePosition.getX() - length2 * Math.sin(jointAngleSet[0] + jointAngleSet[1]));
+         anklePosition.setY(kneePosition.getY() - length2 * Math.cos(jointAngleSet[0] + jointAngleSet[1]));
 
          p.createAndAddLineArtifact("Femur" + index, new Line2d(hipPosition, kneePosition), Color.black);
          p.createAndAddLineArtifact("Shin" + index, new Line2d(kneePosition, anklePosition), Color.gray);

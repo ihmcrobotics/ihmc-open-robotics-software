@@ -179,14 +179,14 @@ public class RigidBodyInertiaTest
       // There exists a unique lower triangular matrix L, with strictly positive diagonal elements, that allows the factorization of M into M = LL*.
 
       Matrix3d lowerTriangular = new Matrix3d();
-      lowerTriangular.m00 = getRandomPositiveNumber();
+      lowerTriangular.setM00(getRandomPositiveNumber());
 
-      lowerTriangular.m10 = random.nextDouble() - 0.5;
-      lowerTriangular.m11 = getRandomPositiveNumber();
+      lowerTriangular.setM10(random.nextDouble() - 0.5);
+      lowerTriangular.setM11(getRandomPositiveNumber());
 
-      lowerTriangular.m20 = random.nextDouble() - 0.5;
-      lowerTriangular.m21 = random.nextDouble() - 0.5;
-      lowerTriangular.m22 = getRandomPositiveNumber();
+      lowerTriangular.setM20(random.nextDouble() - 0.5);
+      lowerTriangular.setM21(random.nextDouble() - 0.5);
+      lowerTriangular.setM22(getRandomPositiveNumber());
 
       Matrix3d ret = new Matrix3d(lowerTriangular);
       ret.mulTransposeRight(ret, lowerTriangular);
@@ -203,9 +203,9 @@ public class RigidBodyInertiaTest
     */
    private static void checkIsSymmetric(Matrix3d matrix, double epsilon)
    {
-      assertEquals(0.0, matrix.m01 - matrix.m10, epsilon);
-      assertEquals(0.0, matrix.m02 - matrix.m20, epsilon);
-      assertEquals(0.0, matrix.m12 - matrix.m21, epsilon);
+      assertEquals(0.0, matrix.getM01() - matrix.getM10(), epsilon);
+      assertEquals(0.0, matrix.getM02() - matrix.getM20(), epsilon);
+      assertEquals(0.0, matrix.getM12() - matrix.getM21(), epsilon);
    }
 
    private static void checkEigenValuesRealAndPositive(Matrix3d matrix, double epsilon)

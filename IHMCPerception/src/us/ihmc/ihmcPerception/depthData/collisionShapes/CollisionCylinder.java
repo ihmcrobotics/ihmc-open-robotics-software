@@ -29,7 +29,7 @@ public class CollisionCylinder extends CollisionShape
    @Override
    public boolean contains(Point3d point)
    {
-      return ((point.x * point.x + point.y * point.y) <= radiusSquared) && (point.z >= -halfLength && point.z <= halfLength);
+      return ((point.getX() * point.getX() + point.getY() * point.getY()) <= radiusSquared) && (point.getZ() >= -halfLength && point.getZ() <= halfLength);
 
    }
 }

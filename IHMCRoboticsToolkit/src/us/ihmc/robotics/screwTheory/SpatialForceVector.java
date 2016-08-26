@@ -379,24 +379,24 @@ public class SpatialForceVector
    {
       MathTools.checkIfInRange(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
       MathTools.checkIfInRange(matrix.getNumCols(), 1, Integer.MAX_VALUE);
-      matrix.set(0, 0, angularPart.x);
-      matrix.set(1, 0, angularPart.y);
-      matrix.set(2, 0, angularPart.z);
-      matrix.set(3, 0, linearPart.x);
-      matrix.set(4, 0, linearPart.y);
-      matrix.set(5, 0, linearPart.z);
+      matrix.set(0, 0, angularPart.getX());
+      matrix.set(1, 0, angularPart.getY());
+      matrix.set(2, 0, angularPart.getZ());
+      matrix.set(3, 0, linearPart.getX());
+      matrix.set(4, 0, linearPart.getY());
+      matrix.set(5, 0, linearPart.getZ());
    }
    
    public void getMatrixColumn(DenseMatrix64F matrix, int column)
    {
       MathTools.checkIfInRange(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
       MathTools.checkIfInRange(matrix.getNumCols(), column+1, Integer.MAX_VALUE);
-      matrix.set(0, column, angularPart.x);
-      matrix.set(1, column, angularPart.y);
-      matrix.set(2, column, angularPart.z);
-      matrix.set(3, column, linearPart.x);
-      matrix.set(4, column, linearPart.y);
-      matrix.set(5, column, linearPart.z);
+      matrix.set(0, column, angularPart.getX());
+      matrix.set(1, column, angularPart.getY());
+      matrix.set(2, column, angularPart.getZ());
+      matrix.set(3, column, linearPart.getX());
+      matrix.set(4, column, linearPart.getY());
+      matrix.set(5, column, linearPart.getZ());
    }
 
 
@@ -547,12 +547,12 @@ public class SpatialForceVector
 
    public void getMatrix(double[] matrix)
    {
-      matrix[0] = angularPart.x;
-      matrix[1] = angularPart.y;
-      matrix[2] = angularPart.z;
-      matrix[3] = linearPart.x;
-      matrix[4] = linearPart.y;
-      matrix[5] = linearPart.z;
+      matrix[0] = angularPart.getX();
+      matrix[1] = angularPart.getY();
+      matrix[2] = angularPart.getZ();
+      matrix[3] = linearPart.getX();
+      matrix[4] = linearPart.getY();
+      matrix[5] = linearPart.getZ();
    }
 
    public double getLinearPartX()

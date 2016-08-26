@@ -176,7 +176,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
          targetToCamera.transform(p3);
 
          // convert to pixels
-         norm.set(p3.x / p3.z, p3.y / p3.z);
+         norm.set(p3.getX() / p3.getZ(), p3.getY() / p3.getZ());
          PerspectiveOps.convertNormToPixel(intrinsic, norm, expectedPixel);
 
          Point2D_F64 observedPixel = observations.get(i);

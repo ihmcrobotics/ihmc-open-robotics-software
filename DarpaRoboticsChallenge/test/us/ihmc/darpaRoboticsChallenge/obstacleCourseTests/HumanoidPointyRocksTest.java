@@ -207,7 +207,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FloatingJoint rootJoint = robot.getRootJoint();
       rootJoint.getVelocity(rootVelocity);
       double push = 0.04;
-      rootVelocity.y = rootVelocity.y + push;
+      rootVelocity.setY(rootVelocity.getY() + push);
       rootJoint.setVelocity(rootVelocity);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -264,7 +264,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       ArrayList<Point2d> contacts = generateContactPointsForRotatedLineOfContact(lineWidth, 0.0);
       double offset = -0.04;
       for (Point2d contact : contacts)
-         contact.y += offset;
+         contact.setY(contact.getY() + offset);
       success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, RobotSide.LEFT, contacts , stepLocation, jointNames, true);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 

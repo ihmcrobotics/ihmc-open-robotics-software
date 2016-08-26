@@ -997,10 +997,10 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       //This affectively uses global yaw pitch and roll each time.
       q.mul(qprev);
 
-      q_qs.set(q.w);
-      q_qx.set(q.x);
-      q_qy.set(q.y);
-      q_qz.set(q.z);
+      q_qs.set(q.getW());
+      q_qx.set(q.getX());
+      q_qy.set(q.getY());
+      q_qz.set(q.getZ());
    }
 
    public YoVariableRegistry getYoVariableRegistry()

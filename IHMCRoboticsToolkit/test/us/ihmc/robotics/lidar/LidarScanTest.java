@@ -295,9 +295,9 @@ public class LidarScanTest
           
           for(int j = 0; j < list.size(); j++)
           {
-              assertEquals(list.get(j).x, lidarScan1.getAllPoints3f().get(j).x, 1e-3);
-              assertEquals(list.get(j).y, lidarScan1.getAllPoints3f().get(j).y, 1e-3);
-              assertEquals(list.get(j).z, lidarScan1.getAllPoints3f().get(j).z, 1e-3);
+              assertEquals(list.get(j).getX(), lidarScan1.getAllPoints3f().get(j).getX(), 1e-3);
+              assertEquals(list.get(j).getY(), lidarScan1.getAllPoints3f().get(j).getY(), 1e-3);
+              assertEquals(list.get(j).getZ(), lidarScan1.getAllPoints3f().get(j).getZ(), 1e-3);
           }
       }
    }

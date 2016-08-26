@@ -49,8 +49,8 @@ public class YoArtifactVector extends YoArtifact
          graphics.setColor(new Color(color.getX(), color.getY(), color.getZ()));
 
          basePoint.get(endPoint);
-         endPoint.x += vector.getX();
-         endPoint.y += vector.getY();
+         endPoint.setX(endPoint.getX() + vector.getX());
+         endPoint.setY(endPoint.getY() + vector.getY());
 
          arrowHeadPoints = getArrowHeadPoints(vector.getFrameVector2dCopy().getVectorCopy(), endPoint);
 

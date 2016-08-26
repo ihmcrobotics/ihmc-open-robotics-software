@@ -63,9 +63,9 @@ public class RollingGroundProfile extends GroundProfileFromHeightMap
 
       dzdx = amplitude * 2.0 * Math.PI * frequency * Math.cos(2.0 * Math.PI * frequency * (x + offset));
 
-      normal.x = -dzdx;
-      normal.y = 0.0;
-      normal.z = 1.0;
+      normal.setX(-dzdx);
+      normal.setY(0.0);
+      normal.setZ(1.0);
 
       normal.normalize();
    }

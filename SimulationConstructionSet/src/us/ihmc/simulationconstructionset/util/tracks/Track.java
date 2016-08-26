@@ -162,9 +162,9 @@ public class Track implements FunctionToIntegrate
             for (int j = 0; j < numPointsPerTread; j++)
             {
                TrackGroundContactPoint tgc = trackPoints[i][j];
-               tgc.dx_track.set(bottom_velocity.x);
-               tgc.dy_track.set(bottom_velocity.y);
-               tgc.dz_track.set(bottom_velocity.z);
+               tgc.dx_track.set(bottom_velocity.getX());
+               tgc.dy_track.set(bottom_velocity.getY());
+               tgc.dz_track.set(bottom_velocity.getZ());
             }
          }
 
@@ -181,9 +181,9 @@ public class Track implements FunctionToIntegrate
             {
                TrackGroundContactPoint tgc = trackPoints[i][j];
 
-               tgc.dx_track.set(velocity.x);
-               tgc.dy_track.set(velocity.y);
-               tgc.dz_track.set(velocity.z);
+               tgc.dx_track.set(velocity.getX());
+               tgc.dy_track.set(velocity.getY());
+               tgc.dz_track.set(velocity.getZ());
             }
          }
 
@@ -198,9 +198,9 @@ public class Track implements FunctionToIntegrate
             for (int j = 0; j < numPointsPerTread; j++)
             {
                TrackGroundContactPoint tgc = trackPoints[i][j];
-               tgc.dx_track.set(-bottom_velocity.x);
-               tgc.dy_track.set(-bottom_velocity.y);
-               tgc.dz_track.set(-bottom_velocity.z);
+               tgc.dx_track.set(-bottom_velocity.getX());
+               tgc.dy_track.set(-bottom_velocity.getY());
+               tgc.dz_track.set(-bottom_velocity.getZ());
             }
          }
 
@@ -217,9 +217,9 @@ public class Track implements FunctionToIntegrate
             {
                TrackGroundContactPoint tgc = trackPoints[i][j];
 
-               tgc.dx_track.set(velocity.x);
-               tgc.dy_track.set(velocity.y);
-               tgc.dz_track.set(velocity.z);
+               tgc.dx_track.set(velocity.getX());
+               tgc.dy_track.set(velocity.getY());
+               tgc.dz_track.set(velocity.getZ());
             }
          }
 
@@ -234,7 +234,7 @@ public class Track implements FunctionToIntegrate
             if (track_rotation != null)
                track_rotation.transform(temp_vector);
 
-            tgc.setOffsetJoint(temp_vector.x + track_offset.x, temp_vector.y + track_offset.y, temp_vector.z + track_offset.z);
+            tgc.setOffsetJoint(temp_vector.getX() + track_offset.getX(), temp_vector.getY() + track_offset.getY(), temp_vector.getZ() + track_offset.getZ());
          }
       }
    }
@@ -269,7 +269,7 @@ public class Track implements FunctionToIntegrate
                   gc.getForce(force);
                   temp_rotation.transform(force);
 
-                  total_force = total_force + force.x;
+                  total_force = total_force + force.getX();
                }
             }
          }
@@ -287,7 +287,7 @@ public class Track implements FunctionToIntegrate
                   gc.getForce(force);
                   temp_rotation.transform(force);
 
-                  total_force = total_force + force.x * Math.cos(angle) + force.z * Math.sin(angle);
+                  total_force = total_force + force.getX() * Math.cos(angle) + force.getZ() * Math.sin(angle);
                }
             }
          }
@@ -303,7 +303,7 @@ public class Track implements FunctionToIntegrate
                   gc.getForce(force);
                   temp_rotation.transform(force);
 
-                  total_force = total_force - force.x;
+                  total_force = total_force - force.getX();
                }
             }
          }
@@ -321,7 +321,7 @@ public class Track implements FunctionToIntegrate
                   gc.getForce(force);
 
                   temp_rotation.transform(force);
-                  total_force = total_force - force.x * Math.cos(angle) - force.z * Math.sin(angle);
+                  total_force = total_force - force.getX() * Math.cos(angle) - force.getZ() * Math.sin(angle);
                }
             }
          }

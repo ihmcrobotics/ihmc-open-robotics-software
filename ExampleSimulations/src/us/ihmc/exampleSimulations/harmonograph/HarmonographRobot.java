@@ -337,9 +337,9 @@ public class HarmonographRobot extends Robot
             }
             
             // Visualizers:
-            penPositionViz.setPosition(penPosition.x, penPosition.y, penPosition.z);
-            deskCenterViz.setPosition(deskCenterPosition.x, deskCenterPosition.y, deskCenterPosition.z);
-            penProjectionOntoDeskViz.setPosition(penProjectionOntoDesk.x, penProjectionOntoDesk.y, penProjectionOntoDesk.z);
+            penPositionViz.setPosition(penPosition.getX(), penPosition.getY(), penPosition.getZ());
+            deskCenterViz.setPosition(deskCenterPosition.getX(), deskCenterPosition.getY(), deskCenterPosition.getZ());
+            penProjectionOntoDeskViz.setPosition(penProjectionOntoDesk.getX(), penProjectionOntoDesk.getY(), penProjectionOntoDesk.getZ());
             
             computeEnergies();
             

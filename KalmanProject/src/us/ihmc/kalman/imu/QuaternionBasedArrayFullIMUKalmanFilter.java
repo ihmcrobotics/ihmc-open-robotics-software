@@ -943,10 +943,10 @@ public class QuaternionBasedArrayFullIMUKalmanFilter implements QuaternionBasedF
       
       Quat4d quaternion = new Quat4d();
       RotationTools.convertYawPitchRollToQuaternion(tempYawPitchRollAngles, quaternion);
-      quaternions[0] = quaternion.w;
-      quaternions[1] = quaternion.x;
-      quaternions[2] = quaternion.y;
-      quaternions[3] = quaternion.z;
+      quaternions[0] = quaternion.getW();
+      quaternions[1] = quaternion.getX();
+      quaternions[2] = quaternion.getY();
+      quaternions[3] = quaternion.getZ();
 
       // return the closest one:
       double distanceSquared = 0.0;

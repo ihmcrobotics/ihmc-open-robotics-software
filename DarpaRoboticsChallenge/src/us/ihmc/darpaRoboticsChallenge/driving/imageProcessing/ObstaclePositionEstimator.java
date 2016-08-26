@@ -96,10 +96,10 @@ public class ObstaclePositionEstimator implements PostProcessor
       ArrayList<int[]> coveredRanges = new ArrayList<int[]>();
       for (BoundingBox2d values : boundingBoxes)
       {
-         int minX = new Double(values.getMinPoint().x).intValue();
-         int minY = new Double(values.getMinPoint().y).intValue();
-         int maxX = new Double(values.getMaxPoint().x).intValue();
-         int maxY = new Double(values.getMaxPoint().y).intValue();
+         int minX = new Double(values.getMinPoint().getX()).intValue();
+         int minY = new Double(values.getMinPoint().getY()).intValue();
+         int maxX = new Double(values.getMaxPoint().getX()).intValue();
+         int maxY = new Double(values.getMaxPoint().getY()).intValue();
 
          if (!isCovered(minX, coveredRanges))
          {
@@ -218,8 +218,8 @@ public class ObstaclePositionEstimator implements PostProcessor
 
       for (BoundingBox2d values : boundingBoxes)
       {
-         int minX = new Double(values.getMinPoint().x).intValue();
-         int minY = new Double(values.getMinPoint().y).intValue();
+         int minX = new Double(values.getMinPoint().getX()).intValue();
+         int minY = new Double(values.getMinPoint().getY()).intValue();
 
          if (minY > closestObstacle.getY())
          {

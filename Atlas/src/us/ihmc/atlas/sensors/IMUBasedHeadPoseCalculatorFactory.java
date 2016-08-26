@@ -65,23 +65,23 @@ class RunningStatistics
 	public void update(Vector3d newData)
 	{
 		sum.add(newData);
-		squared_sum.add(new Vector3d(newData.x*newData.x, newData.y*newData.y, newData.z*newData.z));
+		squared_sum.add(new Vector3d(newData.getX()*newData.getX(), newData.getY()*newData.getY(), newData.getZ()*newData.getZ()));
 		data.addLast(newData);
 
 		if(data.size()>windowSize)
 		{
                   Vector3d removeData=data.removeFirst();
                   sum.sub(removeData);
-                  squared_sum.sub(new Vector3d(removeData.x*removeData.x, removeData.y*removeData.y, removeData.z*removeData.z));
+                  squared_sum.sub(new Vector3d(removeData.getX()*removeData.getX(), removeData.getY()*removeData.getY(), removeData.getZ()*removeData.getZ()));
 		}
 	}
 	
 	public Vector3d getMean()
 	{
 		Vector3d mean=new Vector3d();
-		mean.x = sum.x/windowSize;
-		mean.y = sum.y/windowSize;
-		mean.z = sum.z/windowSize;
+		mean.setX(sum.getX()/windowSize);
+		mean.setY(sum.getY()/windowSize);
+		mean.setZ(sum.getZ()/windowSize);
 		return mean;
 	}
 	
@@ -89,9 +89,9 @@ class RunningStatistics
 	{
 		Vector3d stdev = new Vector3d();
 		Vector3d mean = getMean();
-		stdev.x = Math.sqrt(squared_sum.x/windowSize - mean.x*mean.x);
-		stdev.y = Math.sqrt(squared_sum.y/windowSize - mean.y*mean.y);
-		stdev.z = Math.sqrt(squared_sum.z/windowSize - mean.z*mean.z);
+		stdev.setX(Math.sqrt(squared_sum.getX()/windowSize - mean.getX()*mean.getX()));
+		stdev.setY(Math.sqrt(squared_sum.getY()/windowSize - mean.getY()*mean.getY()));
+		stdev.setZ(Math.sqrt(squared_sum.getZ()/windowSize - mean.getZ()*mean.getZ()));
 		return stdev;
 	}
 }

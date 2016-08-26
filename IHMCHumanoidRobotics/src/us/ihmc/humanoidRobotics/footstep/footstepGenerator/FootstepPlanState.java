@@ -49,15 +49,15 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
       this.terrainType = copy.terrainType;
    }
 
-   public void setHeight(double z) { this.footstepData.location.z = z;}
+   public void setHeight(double z) { this.footstepData.location.setZ(z);}
 
    public Point3d getPosition() { return footstepData.location;}
 
    public boolean equals(Object o)
    {
       FootstepPlanState other = (FootstepPlanState) o;
-      boolean goodMatch = ((discretize(footstepData.location.x, distanceResolution) == discretize(other.footstepData.location.x, distanceResolution))
-            && (discretize(footstepData.location.y, distanceResolution) == discretize(other.footstepData.location.y, distanceResolution))
+      boolean goodMatch = ((discretize(footstepData.location.getX(), distanceResolution) == discretize(other.footstepData.location.getX(), distanceResolution))
+            && (discretize(footstepData.location.getY(), distanceResolution) == discretize(other.footstepData.location.getY(), distanceResolution))
             && (discretize(theta, thetaResolution) == discretize(other.theta, thetaResolution))
             && (footstepData.robotSide == other.footstepData.robotSide));
       if (goodMatch)
@@ -85,7 +85,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
 
    public double horizonalDistance(FootstepPlanState other)
    {
-      return Math.sqrt(Math.pow(footstepData.location.x - other.footstepData.location.x, 2) + Math.pow(footstepData.location.y - other.footstepData.location.y, 2));
+      return Math.sqrt(Math.pow(footstepData.location.getX() - other.footstepData.location.getX(), 2) + Math.pow(footstepData.location.getY() - other.footstepData.location.getY(), 2));
    }
 
 
@@ -103,17 +103,17 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
    public int compareTo(FootstepPlanState s)
    {
       if (this.equals(s)) return 0;
-      if (this.footstepData.location.x < s.footstepData.location.x)
+      if (this.footstepData.location.getX() < s.footstepData.location.getX())
          return -1;
-      if (this.footstepData.location.x > s.footstepData.location.x)
+      if (this.footstepData.location.getX() > s.footstepData.location.getX())
          return 1;
-      if (this.footstepData.location.y < s.footstepData.location.y)
+      if (this.footstepData.location.getY() < s.footstepData.location.getY())
          return -1;
-      if (this.footstepData.location.y > s.footstepData.location.y)
+      if (this.footstepData.location.getY() > s.footstepData.location.getY())
          return 1;
-      if (this.footstepData.location.z < s.footstepData.location.z)
+      if (this.footstepData.location.getZ() < s.footstepData.location.getZ())
          return -1;
-      if (this.footstepData.location.z > s.footstepData.location.z)
+      if (this.footstepData.location.getZ() > s.footstepData.location.getZ())
          return 1;
       if (this.theta < s.theta)
          return -1;
@@ -129,7 +129,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
    @Override
    public int hashCode()
    {
-      return (int) (discretize(footstepData.location.x, distanceResolution) + 3424.0 * discretize(footstepData.location.y, distanceResolution) + 16353.0 * discretize(theta, thetaResolution) + 72432.0 * footstepData.robotSide.ordinal());
+      return (int) (discretize(footstepData.location.getX(), distanceResolution) + 3424.0 * discretize(footstepData.location.getY(), distanceResolution) + 16353.0 * discretize(theta, thetaResolution) + 72432.0 * footstepData.robotSide.ordinal());
    }
 
    private double discretize(double value, double interval)
@@ -140,7 +140,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
    public String getID()
    {
       String id = "";
-      id = footstepData.robotSide.getSideNameFirstLetter() + "_" + discretize(footstepData.location.x, distanceResolution) + "_" + discretize(footstepData.location.y, distanceResolution) + "_" + discretize(theta, thetaResolution);
+      id = footstepData.robotSide.getSideNameFirstLetter() + "_" + discretize(footstepData.location.getX(), distanceResolution) + "_" + discretize(footstepData.location.getY(), distanceResolution) + "_" + discretize(theta, thetaResolution);
       return id;
    }
 }

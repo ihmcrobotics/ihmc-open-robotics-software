@@ -119,9 +119,9 @@ public class AlphaFilteredYoFramePoint extends YoFramePoint
 
    public void update(Point3d pointUnfiltered)
    {
-      x.update(pointUnfiltered.x);
-      y.update(pointUnfiltered.y);
-      z.update(pointUnfiltered.z);
+      x.update(pointUnfiltered.getX());
+      y.update(pointUnfiltered.getY());
+      z.update(pointUnfiltered.getZ());
    }
 
    public void update(FramePoint pointUnfiltered)

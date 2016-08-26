@@ -36,14 +36,14 @@ public class SiXDoFJointHolder implements JointHolder
       inverseDynamicsJoint.getTranslation(translation);
       inverseDynamicsJoint.getJointTwist(twist);
       
-      buffer[offset + 0]  = rotation.w;
-      buffer[offset + 1]  = rotation.x;
-      buffer[offset + 2]  = rotation.y;
-      buffer[offset + 3]  = rotation.z;
+      buffer[offset + 0]  = rotation.getW();
+      buffer[offset + 1]  = rotation.getX();
+      buffer[offset + 2]  = rotation.getY();
+      buffer[offset + 3]  = rotation.getZ();
       
-      buffer[offset + 4]  = translation.x;
-      buffer[offset + 5]  = translation.y;
-      buffer[offset + 6]  = translation.z;
+      buffer[offset + 4]  = translation.getX();
+      buffer[offset + 5]  = translation.getY();
+      buffer[offset + 6]  = translation.getZ();
       
       twist.getArray(buffer, offset + 7);
    }

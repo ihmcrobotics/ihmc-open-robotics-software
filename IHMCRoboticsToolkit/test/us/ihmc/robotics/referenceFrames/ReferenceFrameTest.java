@@ -141,9 +141,9 @@ public class ReferenceFrameTest
    
    private void randomizeVector(Random random, Vector3d vector)
    {
-      vector.x = random.nextDouble();
-      vector.y = random.nextDouble();
-      vector.z = random.nextDouble();
+      vector.setX(random.nextDouble());
+      vector.setY(random.nextDouble());
+      vector.setZ(random.nextDouble());
    }
    
    private void createRandomRotationMatrixX(Random random, Matrix3d matrix)
@@ -151,15 +151,15 @@ public class ReferenceFrameTest
       double theta = random.nextDouble();
       double cTheta = Math.cos(theta);
       double sTheta = Math.sin(theta);
-      matrix.m00 = 1;
-      matrix.m01 = 0;
-      matrix.m02 = 0;
-      matrix.m10 = 0;
-      matrix.m11 = cTheta;
-      matrix.m12 = -sTheta;
-      matrix.m20 = 0;
-      matrix.m21 = sTheta;
-      matrix.m22 = cTheta;
+      matrix.setM00(1);
+      matrix.setM01(0);
+      matrix.setM02(0);
+      matrix.setM10(0);
+      matrix.setM11(cTheta);
+      matrix.setM12(-sTheta);
+      matrix.setM20(0);
+      matrix.setM21(sTheta);
+      matrix.setM22(cTheta);
    }
 
    private void createRandomRotationMatrixY(Random random, Matrix3d matrix)
@@ -167,15 +167,15 @@ public class ReferenceFrameTest
       double theta = random.nextDouble();
       double cTheta = Math.cos(theta);
       double sTheta = Math.sin(theta);
-      matrix.m00 = cTheta;
-      matrix.m01 = 0;
-      matrix.m02 = sTheta;
-      matrix.m10 = 0;
-      matrix.m11 = 1;
-      matrix.m12 = 0;
-      matrix.m20 = -sTheta;
-      matrix.m21 = 0;
-      matrix.m22 = cTheta;
+      matrix.setM00(cTheta);
+      matrix.setM01(0);
+      matrix.setM02(sTheta);
+      matrix.setM10(0);
+      matrix.setM11(1);
+      matrix.setM12(0);
+      matrix.setM20(-sTheta);
+      matrix.setM21(0);
+      matrix.setM22(cTheta);
    }
 
    private void createRandomRotationMatrixZ(Random random, Matrix3d matrix)
@@ -183,15 +183,15 @@ public class ReferenceFrameTest
       double theta = random.nextDouble();
       double cTheta = Math.cos(theta);
       double sTheta = Math.sin(theta);
-      matrix.m00 = cTheta;
-      matrix.m01 = -sTheta;
-      matrix.m02 = 0;
-      matrix.m10 = sTheta;
-      matrix.m11 = cTheta;
-      matrix.m12 = 0;
-      matrix.m20 = 0;
-      matrix.m21 = 0;
-      matrix.m22 = 1;
+      matrix.setM00(cTheta);
+      matrix.setM01(-sTheta);
+      matrix.setM02(0);
+      matrix.setM10(sTheta);
+      matrix.setM11(cTheta);
+      matrix.setM12(0);
+      matrix.setM20(0);
+      matrix.setM21(0);
+      matrix.setM22(1);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)

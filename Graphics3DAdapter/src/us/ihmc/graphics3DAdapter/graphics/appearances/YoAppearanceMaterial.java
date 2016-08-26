@@ -15,16 +15,16 @@ public class YoAppearanceMaterial extends YoAppearanceTransparency
 
    public void setDiffuseColor(float f, float g, float h)
    {
-      diffuseColor.x = f;
-      diffuseColor.y = g;
-      diffuseColor.z = h;
+      diffuseColor.setX(f);
+      diffuseColor.setY(g);
+      diffuseColor.setZ(h);
    }
 
    public void setSpecularColor(float f, float g, float h)
    {
-      specularColor.x = f;
-      specularColor.y = g;
-      specularColor.z = h;
+      specularColor.setX(f);
+      specularColor.setY(g);
+      specularColor.setZ(h);
    }
 
    public void setShininess(float f)
@@ -34,9 +34,9 @@ public class YoAppearanceMaterial extends YoAppearanceTransparency
 
    public void setAmbientColor(float f, float g, float h)
    {
-      ambientColor.x = f;
-      ambientColor.y = g;
-      ambientColor.z = h;
+      ambientColor.setX(f);
+      ambientColor.setY(g);
+      ambientColor.setZ(h);
    }
 
    public Color3f getDiffuseColor()

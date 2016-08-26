@@ -130,12 +130,12 @@ public class FloatingJoint extends Joint
 
    public void setPositionAndVelocity(Tuple3d position, Tuple3d velocity)
    {
-      q_x.set(position.x);
-      q_y.set(position.y);
-      q_z.set(position.z);
-      qd_x.set(velocity.x);
-      qd_y.set(velocity.y);
-      qd_z.set(velocity.z);
+      q_x.set(position.getX());
+      q_y.set(position.getY());
+      q_z.set(position.getZ());
+      qd_x.set(velocity.getX());
+      qd_y.set(velocity.getY());
+      qd_z.set(velocity.getZ());
    }
 
    public void setPosition(Tuple3d position)
@@ -178,10 +178,10 @@ public class FloatingJoint extends Joint
       Quat4d q = new Quat4d();
       RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, q);
       RotationTools.checkQuaternionNormalized(q);
-      q_qs.set(q.w);
-      q_qx.set(q.x);
-      q_qy.set(q.y);
-      q_qz.set(q.z);
+      q_qs.set(q.getW());
+      q_qx.set(q.getX());
+      q_qy.set(q.getY());
+      q_qz.set(q.getZ());
    }
 
    public void setYawPitchRoll(double yaw, double pitch, double roll, double wz, double wy, double wx)
@@ -196,15 +196,15 @@ public class FloatingJoint extends Joint
    {
       double r11, r12, r13, r21, r22, r23, r31, r32, r33;
 
-      r11 = rotation.m00;
-      r12 = rotation.m01;
-      r13 = rotation.m02;
-      r21 = rotation.m10;
-      r22 = rotation.m11;
-      r23 = rotation.m12;
-      r31 = rotation.m20;
-      r32 = rotation.m21;
-      r33 = rotation.m22;
+      r11 = rotation.getM00();
+      r12 = rotation.getM01();
+      r13 = rotation.getM02();
+      r21 = rotation.getM10();
+      r22 = rotation.getM11();
+      r23 = rotation.getM12();
+      r31 = rotation.getM20();
+      r32 = rotation.getM21();
+      r33 = rotation.getM22();
       q_qs.set(Math.sqrt((1.0 + r11 + r22 + r33) / 4.0));
       q_qx.set((r32 - r23) / (4.0 * q_qs.getDoubleValue()));
       q_qy.set((r13 - r31) / (4.0 * q_qs.getDoubleValue()));
@@ -213,10 +213,10 @@ public class FloatingJoint extends Joint
 
    public void setQuaternion(Quat4d q)
    {
-      q_qs.set(q.w);
-      q_qx.set(q.x);
-      q_qy.set(q.y);
-      q_qz.set(q.z);
+      q_qs.set(q.getW());
+      q_qx.set(q.getX());
+      q_qy.set(q.getY());
+      q_qz.set(q.getZ());
    }
 
    public void setRotationAndTranslation(RigidBodyTransform transform)

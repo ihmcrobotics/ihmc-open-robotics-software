@@ -60,8 +60,8 @@ public class BoundingBox3dTest
    {
       Point3d lowerLeftPoint = new Point3d(0.0, 0.1, 0.6);
       Point3d upperRightPoint = new Point3d(2.0, 2.1, 5.6);
-      BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.x, lowerLeftPoint.y, lowerLeftPoint.z, upperRightPoint.x, upperRightPoint.y,
-                                       upperRightPoint.z);
+      BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.getX(), lowerLeftPoint.getY(), lowerLeftPoint.getZ(), upperRightPoint.getX(), upperRightPoint.getY(),
+                                       upperRightPoint.getZ());
 
       Point3d minPoint = new Point3d();
       boundingBox3d.getMinPoint(minPoint);
@@ -83,7 +83,7 @@ public class BoundingBox3dTest
    {
       Point3d lowerLeftPoint = new Point3d(0.0, 0.1, 0.6);
       Point3d upperRightPoint = new Point3d(2.0, 2.1, 5.6);
-      BoundingBox3d boundingBox3d = new BoundingBox3d(4.0, lowerLeftPoint.y, lowerLeftPoint.z, upperRightPoint.x, upperRightPoint.y, upperRightPoint.z);
+      BoundingBox3d boundingBox3d = new BoundingBox3d(4.0, lowerLeftPoint.getY(), lowerLeftPoint.getZ(), upperRightPoint.getX(), upperRightPoint.getY(), upperRightPoint.getZ());
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -92,7 +92,7 @@ public class BoundingBox3dTest
    {
       Point3d lowerLeftPoint = new Point3d(0.0, 0.1, 0.6);
       Point3d upperRightPoint = new Point3d(2.0, 2.1, 5.6);
-      BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.x, 4.0, lowerLeftPoint.z, upperRightPoint.x, upperRightPoint.y, upperRightPoint.z);
+      BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.getX(), 4.0, lowerLeftPoint.getZ(), upperRightPoint.getX(), upperRightPoint.getY(), upperRightPoint.getZ());
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -101,7 +101,7 @@ public class BoundingBox3dTest
    {
       Point3d lowerLeftPoint = new Point3d(0.0, 0.1, 0.6);
       Point3d upperRightPoint = new Point3d(2.0, 2.1, 5.6);
-      BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.x, lowerLeftPoint.y, 10.0, upperRightPoint.x, upperRightPoint.y, upperRightPoint.z);
+      BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.getX(), lowerLeftPoint.getY(), 10.0, upperRightPoint.getX(), upperRightPoint.getY(), upperRightPoint.getZ());
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -112,12 +112,12 @@ public class BoundingBox3dTest
       for (int i = 0; i < 1000; i++)
       {
          Point3d lowerLeftPoint = new Point3d(rand.nextDouble() * 1000, rand.nextDouble() * 1000, rand.nextDouble() * 1000);
-         Point3d upperRightPoint = new Point3d(lowerLeftPoint.x + 1.0, lowerLeftPoint.y + 1.0, lowerLeftPoint.z + 1.0);
-         BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.x, lowerLeftPoint.y, lowerLeftPoint.z, upperRightPoint.x, upperRightPoint.y,
-                                          upperRightPoint.z);
-         assertEquals(boundingBox3d.getXMin(), lowerLeftPoint.x, 1e-7);
-         assertEquals(boundingBox3d.getYMin(), lowerLeftPoint.y, 1e-7);
-         assertEquals(boundingBox3d.getZMin(), lowerLeftPoint.z, 1e-7);
+         Point3d upperRightPoint = new Point3d(lowerLeftPoint.getX() + 1.0, lowerLeftPoint.getY() + 1.0, lowerLeftPoint.getZ() + 1.0);
+         BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.getX(), lowerLeftPoint.getY(), lowerLeftPoint.getZ(), upperRightPoint.getX(), upperRightPoint.getY(),
+                                          upperRightPoint.getZ());
+         assertEquals(boundingBox3d.getXMin(), lowerLeftPoint.getX(), 1e-7);
+         assertEquals(boundingBox3d.getYMin(), lowerLeftPoint.getY(), 1e-7);
+         assertEquals(boundingBox3d.getZMin(), lowerLeftPoint.getZ(), 1e-7);
       }
    }
 
@@ -129,12 +129,12 @@ public class BoundingBox3dTest
       for (int i = 0; i < 1000; i++)
       {
          Point3d lowerLeftPoint = new Point3d(rand.nextDouble() * 1000, rand.nextDouble() * 1000, rand.nextDouble() * 1000);
-         Point3d upperRightPoint = new Point3d(lowerLeftPoint.x + 1.0, lowerLeftPoint.y + 1.0, lowerLeftPoint.z + 1.0);
-         BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.x, lowerLeftPoint.y, lowerLeftPoint.z, upperRightPoint.x, upperRightPoint.y,
-                                          upperRightPoint.z);
-         assertEquals(boundingBox3d.getXMax(), upperRightPoint.x, 1e-7);
-         assertEquals(boundingBox3d.getYMax(), upperRightPoint.y, 1e-7);
-         assertEquals(boundingBox3d.getZMax(), upperRightPoint.z, 1e-7);
+         Point3d upperRightPoint = new Point3d(lowerLeftPoint.getX() + 1.0, lowerLeftPoint.getY() + 1.0, lowerLeftPoint.getZ() + 1.0);
+         BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.getX(), lowerLeftPoint.getY(), lowerLeftPoint.getZ(), upperRightPoint.getX(), upperRightPoint.getY(),
+                                          upperRightPoint.getZ());
+         assertEquals(boundingBox3d.getXMax(), upperRightPoint.getX(), 1e-7);
+         assertEquals(boundingBox3d.getYMax(), upperRightPoint.getY(), 1e-7);
+         assertEquals(boundingBox3d.getZMax(), upperRightPoint.getZ(), 1e-7);
       }
    }
 

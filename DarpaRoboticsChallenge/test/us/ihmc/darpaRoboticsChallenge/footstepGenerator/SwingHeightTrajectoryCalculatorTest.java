@@ -241,7 +241,7 @@ public class SwingHeightTrajectoryCalculatorTest
       Quat4d startOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
       startPose.setPose(startPosition, startOrientation);
 
-      Point3d endPosition = new Point3d(startPosition.x + horizontalBuffer, startPosition.y, startPosition.z);
+      Point3d endPosition = new Point3d(startPosition.getX() + horizontalBuffer, startPosition.getY(), startPosition.getZ());
       Quat4d endOrientation = startOrientation;
       endPose.setPose(endPosition, endOrientation);
 
@@ -281,7 +281,7 @@ public class SwingHeightTrajectoryCalculatorTest
       Quat4d startOrientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
       startPose.setPose(startPosition, startOrientation);
 
-      Point3d endPosition = new Point3d(startPosition.x + 3 * horizontalBuffer, startPosition.y, startPosition.z);
+      Point3d endPosition = new Point3d(startPosition.getX() + 3 * horizontalBuffer, startPosition.getY(), startPosition.getZ());
       Quat4d endOrientation = startOrientation;
       endPose.setPose(endPosition, endOrientation);
 
@@ -289,10 +289,10 @@ public class SwingHeightTrajectoryCalculatorTest
       assertTrue(trajectoryPoints.size() == 4);
       assertTrue(trajectoryPoints.get(0).epsilonEquals(startPosition, 1e-13));
 
-      Point3d pointA = new Point3d(startPosition.x + horizontalBuffer, startPosition.y, startPosition.z + verticalBuffer);
+      Point3d pointA = new Point3d(startPosition.getX() + horizontalBuffer, startPosition.getY(), startPosition.getZ() + verticalBuffer);
       assertTrue(trajectoryPoints.get(1).epsilonEquals(pointA, 1e-13));
 
-      Point3d pointB = new Point3d(endPosition.x - horizontalBuffer, endPosition.y, endPosition.z + verticalBuffer);
+      Point3d pointB = new Point3d(endPosition.getX() - horizontalBuffer, endPosition.getY(), endPosition.getZ() + verticalBuffer);
       assertTrue(trajectoryPoints.get(2).epsilonEquals(pointB, 1e-13));
 
       assertTrue(trajectoryPoints.get(3).epsilonEquals(endPosition, 1e-13));

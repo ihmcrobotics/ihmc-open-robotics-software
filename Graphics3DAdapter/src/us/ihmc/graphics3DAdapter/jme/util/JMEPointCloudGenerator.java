@@ -156,7 +156,7 @@ public class JMEPointCloudGenerator
       
       for (int i = 0; i < pointCoordinates3d.length; i++)
       {
-         vectorArray[i] = new Vector3f(pointCoordinates3d[i].x, pointCoordinates3d[i].y, pointCoordinates3d[i].z);
+         vectorArray[i] = new Vector3f(pointCoordinates3d[i].getX(), pointCoordinates3d[i].getY(), pointCoordinates3d[i].getZ());
       }
 
       return generatePointCloudGraph(vectorArray, colorsRGBA);
@@ -177,7 +177,7 @@ public class JMEPointCloudGenerator
       while (it.hasNext())
       {
          current = it.next();
-         coords.put(current.x).put(current.y).put(current.z);
+         coords.put(current.getX()).put(current.getY()).put(current.getZ());
       }
 
       coords.rewind();
@@ -247,9 +247,9 @@ public class JMEPointCloudGenerator
       FloatBuffer pointBuffer = BufferUtils.createFloatBuffer(3 * pointCloud.length);
       for(Point3f point : pointCloud)
       {
-         pointBuffer.put(point.x);
-         pointBuffer.put(point.y);
-         pointBuffer.put(point.z);
+         pointBuffer.put(point.getX());
+         pointBuffer.put(point.getY());
+         pointBuffer.put(point.getZ());
       }
       pointBuffer.rewind();
 

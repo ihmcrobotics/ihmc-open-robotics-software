@@ -25,7 +25,7 @@ public class LineSegmentSearchVolume extends HyperVolume
    }
    public LineSegmentSearchVolume(Point2d point1, Point2d point2)
    {
-      this(new double[]{point1.x,point1.y},new double[]{point2.x,point2.y});
+      this(new double[]{point1.getX(),point1.getY()},new double[]{point2.getX(),point2.getY()});
    }
    
    public LineSegmentSearchVolume(double[] point1, double[] point2)

@@ -554,7 +554,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
          deltaAngle = Math.acos(quatFDDelta.getW()) * 2.0;
 
          omegaFD = deltaAngle / (2.0 * FDdt);
-         omegaVectorDF.setIncludingFrame(worldFrame, quatFDDelta.x, quatFDDelta.y, quatFDDelta.z);
+         omegaVectorDF.setIncludingFrame(worldFrame, quatFDDelta.getX(), quatFDDelta.getY(), quatFDDelta.getZ());
 
          if (omegaVectorDF.length() > 0.0)
          {

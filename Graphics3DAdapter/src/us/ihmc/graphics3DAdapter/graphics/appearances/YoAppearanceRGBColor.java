@@ -12,7 +12,7 @@ public class YoAppearanceRGBColor extends YoAppearanceTransparency
    public YoAppearanceRGBColor(Color3f color, double transparency)
    {
       this.color = new Color3f(color);
-      awtColor = new Color(this.color.x, this.color.y, this.color.z, (float) (1.0 - transparency));
+      awtColor = new Color(this.color.getX(), this.color.getY(), this.color.getZ(), (float) (1.0 - transparency));
       setTransparency(transparency);
    }
    

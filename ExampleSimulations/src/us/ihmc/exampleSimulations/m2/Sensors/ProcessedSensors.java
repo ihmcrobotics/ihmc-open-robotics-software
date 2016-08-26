@@ -250,9 +250,9 @@ public class ProcessedSensors
       {
          for (int j = 0; j < ContactPointName.values().length; j++)
          {
-            this.groundContactPointsPositions[i][j * 3 + 0].set(groundContactFramePointsPositions[i][j].x);
-            this.groundContactPointsPositions[i][j * 3 + 1].set(groundContactFramePointsPositions[i][j].y);
-            this.groundContactPointsPositions[i][j * 3 + 2].set(groundContactFramePointsPositions[i][j].z);
+            this.groundContactPointsPositions[i][j * 3 + 0].set(groundContactFramePointsPositions[i][j].getX());
+            this.groundContactPointsPositions[i][j * 3 + 1].set(groundContactFramePointsPositions[i][j].getY());
+            this.groundContactPointsPositions[i][j * 3 + 2].set(groundContactFramePointsPositions[i][j].getZ());
          }
       }
    }
@@ -263,9 +263,9 @@ public class ProcessedSensors
       {
          for (int j = 0; j < ContactPointName.values().length; j++)
          {
-            this.groundContactPointsForces[i][j * 3 + 0].set(groundContactFramePointsForces[i][j].x);
-            this.groundContactPointsForces[i][j * 3 + 1].set(groundContactFramePointsForces[i][j].y);
-            this.groundContactPointsForces[i][j * 3 + 2].set(groundContactFramePointsForces[i][j].z);
+            this.groundContactPointsForces[i][j * 3 + 0].set(groundContactFramePointsForces[i][j].getX());
+            this.groundContactPointsForces[i][j * 3 + 1].set(groundContactFramePointsForces[i][j].getY());
+            this.groundContactPointsForces[i][j * 3 + 2].set(groundContactFramePointsForces[i][j].getZ());
          }
       }
    }

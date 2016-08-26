@@ -297,8 +297,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
       endpointSlopes[0] = 0.0;
       endpointSlopes[1] = 0.0;
 
-      waypointSlopes[0] = (points[2].y - points[0].y) / (points[2].x - points[0].x);
-      waypointSlopes[1] = (points[3].y - points[1].y) / (points[3].x - points[1].x);
+      waypointSlopes[0] = (points[2].getY() - points[0].getY()) / (points[2].getX() - points[0].getX());
+      waypointSlopes[1] = (points[3].getY() - points[1].getY()) / (points[3].getX() - points[1].getX());
 
       spline.setPoints(points, endpointSlopes, waypointSlopes);
 
@@ -464,8 +464,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
       double[] endpointSlopes = new double[] {0.0, 0.0};
 
       double[] waypointSlopes = new double[2];
-      waypointSlopes[0] = (points[2].y - points[0].y) / (points[2].x - points[0].x);
-      waypointSlopes[1] = (points[3].y - points[1].y) / (points[3].x - points[1].x);
+      waypointSlopes[0] = (points[2].getY() - points[0].getY()) / (points[2].getX() - points[0].getX());
+      waypointSlopes[1] = (points[3].getY() - points[1].getY()) / (points[3].getX() - points[1].getX());
 
       spline.setPoints(points, endpointSlopes, waypointSlopes);
 

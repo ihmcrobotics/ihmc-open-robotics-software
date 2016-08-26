@@ -803,7 +803,7 @@ public abstract class JointPhysics< J extends Joint>
       collisionIntegrator.setup(Ki, u_coll, epsilon, mu);
       collisionIntegrator.computeMicroImpulse(p_coll);    // impulse is in collision coordinates.  Need to rotate into joint com coordinates:
 
-      if (Math.abs(Math.sqrt(p_coll.x * p_coll.x + p_coll.y * p_coll.y) / p_coll.z) > mu)    // If slipping, just do it the normal way...
+      if (Math.abs(Math.sqrt(p_coll.getX() * p_coll.getX() + p_coll.getY() * p_coll.getY()) / p_coll.getZ()) > mu)    // If slipping, just do it the normal way...
       {
          // Slipping MicroCollision:
          // System.out.println("Slipping Micro Collision:  " + p_coll);
@@ -942,49 +942,49 @@ public abstract class JointPhysics< J extends Joint>
       // System.out.println("k_X_hat_coll:  " + k_X_hat_coll);
 
       // x axis:
-      p_hat_coll.top.x = 1.0;
-      p_hat_coll.top.y = 0.0;
-      p_hat_coll.top.z = 0.0;
-      p_hat_coll.bottom.x = 0.0;
-      p_hat_coll.bottom.y = 0.0;
-      p_hat_coll.bottom.z = 0.0;
+      p_hat_coll.top.setX(1.0);
+      p_hat_coll.top.setY(0.0);
+      p_hat_coll.top.setZ(0.0);
+      p_hat_coll.bottom.setX(0.0);
+      p_hat_coll.bottom.setY(0.0);
+      p_hat_coll.bottom.setZ(0.0);
       k_X_hat_coll.transform(p_hat_coll);
 
       this.impulseResponse(p_hat_coll, delta_v_hat_k);
       coll_X_hat_k.transform(delta_v_hat_k);
-      Ki.m00 = delta_v_hat_k.bottom.x;
-      Ki.m10 = delta_v_hat_k.bottom.y;
-      Ki.m20 = delta_v_hat_k.bottom.z;
+      Ki.setM00(delta_v_hat_k.bottom.getX());
+      Ki.setM10(delta_v_hat_k.bottom.getY());
+      Ki.setM20(delta_v_hat_k.bottom.getZ());
 
       // y axis:
-      p_hat_coll.top.x = 0.0;
-      p_hat_coll.top.y = 1.0;
-      p_hat_coll.top.z = 0.0;
-      p_hat_coll.bottom.x = 0.0;
-      p_hat_coll.bottom.y = 0.0;
-      p_hat_coll.bottom.z = 0.0;
+      p_hat_coll.top.setX(0.0);
+      p_hat_coll.top.setY(1.0);
+      p_hat_coll.top.setZ(0.0);
+      p_hat_coll.bottom.setX(0.0);
+      p_hat_coll.bottom.setY(0.0);
+      p_hat_coll.bottom.setZ(0.0);
       k_X_hat_coll.transform(p_hat_coll);
 
       this.impulseResponse(p_hat_coll, delta_v_hat_k);
       coll_X_hat_k.transform(delta_v_hat_k);
-      Ki.m01 = delta_v_hat_k.bottom.x;
-      Ki.m11 = delta_v_hat_k.bottom.y;
-      Ki.m21 = delta_v_hat_k.bottom.z;
+      Ki.setM01(delta_v_hat_k.bottom.getX());
+      Ki.setM11(delta_v_hat_k.bottom.getY());
+      Ki.setM21(delta_v_hat_k.bottom.getZ());
 
       // z axis:
-      p_hat_coll.top.x = 0.0;
-      p_hat_coll.top.y = 0.0;
-      p_hat_coll.top.z = 1.0;
-      p_hat_coll.bottom.x = 0.0;
-      p_hat_coll.bottom.y = 0.0;
-      p_hat_coll.bottom.z = 0.0;
+      p_hat_coll.top.setX(0.0);
+      p_hat_coll.top.setY(0.0);
+      p_hat_coll.top.setZ(1.0);
+      p_hat_coll.bottom.setX(0.0);
+      p_hat_coll.bottom.setY(0.0);
+      p_hat_coll.bottom.setZ(0.0);
       k_X_hat_coll.transform(p_hat_coll);
 
       this.impulseResponse(p_hat_coll, delta_v_hat_k);
       coll_X_hat_k.transform(delta_v_hat_k);
-      Ki.m02 = delta_v_hat_k.bottom.x;
-      Ki.m12 = delta_v_hat_k.bottom.y;
-      Ki.m22 = delta_v_hat_k.bottom.z;
+      Ki.setM02(delta_v_hat_k.bottom.getX());
+      Ki.setM12(delta_v_hat_k.bottom.getY());
+      Ki.setM22(delta_v_hat_k.bottom.getZ());
 
 
       // +++JEP Run a bunch of test cases here:
@@ -1397,8 +1397,8 @@ public abstract class JointPhysics< J extends Joint>
       owner.transformToNext.transform(tempPE_COMPoint);
 
       double gravitationalPotentialEnergy = owner.link.getMass()
-            * (-owner.rob.gravityX.getDoubleValue() * tempPE_COMPoint.x - owner.rob.gravityY.getDoubleValue() * tempPE_COMPoint.y
-            - owner.rob.gravityZ.getDoubleValue() * tempPE_COMPoint.z);
+            * (-owner.rob.gravityX.getDoubleValue() * tempPE_COMPoint.getX() - owner.rob.gravityY.getDoubleValue() * tempPE_COMPoint.getY()
+            - owner.rob.gravityZ.getDoubleValue() * tempPE_COMPoint.getZ());
 
       // Add the children
 

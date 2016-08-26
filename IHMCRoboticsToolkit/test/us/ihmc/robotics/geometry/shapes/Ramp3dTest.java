@@ -85,9 +85,9 @@ public class Ramp3dTest
    public void testSurfaceNormal()
    {
       Ramp3d ramp = new Ramp3d(1.0, 1.0, 1.0);
-      assertEquals(ramp.getSurfaceNormal().x, -1.0 / Math.sqrt(2.0), 1e-14);
-      assertEquals(ramp.getSurfaceNormal().y, 0.0, 1e-14);
-      assertEquals(ramp.getSurfaceNormal().z, 1.0 / Math.sqrt(2.0), 1e-14);
+      assertEquals(ramp.getSurfaceNormal().getX(), -1.0 / Math.sqrt(2.0), 1e-14);
+      assertEquals(ramp.getSurfaceNormal().getY(), 0.0, 1e-14);
+      assertEquals(ramp.getSurfaceNormal().getZ(), 1.0 / Math.sqrt(2.0), 1e-14);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -97,18 +97,18 @@ public class Ramp3dTest
       Ramp3d ramp3d = new Ramp3d(1.0, 1.0, 1.0);
       Point3d pointToProject = new Point3d(0.0, 0.0, 1.0);
       ramp3d.orthogonalProjection(pointToProject);
-      assertEquals(pointToProject.x, 0.5, 1e-14);
-      assertEquals(pointToProject.y, 0.0, 1e-14);
-      assertEquals(pointToProject.z, 0.5, 1e-14);
+      assertEquals(pointToProject.getX(), 0.5, 1e-14);
+      assertEquals(pointToProject.getY(), 0.0, 1e-14);
+      assertEquals(pointToProject.getZ(), 0.5, 1e-14);
 
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationYawAndZeroTranslation(0.5 * Math.PI);
       ramp3d.applyTransform(transform);
       pointToProject.set(0.0, 0.0, 1.0);
       ramp3d.orthogonalProjection(pointToProject);
-      assertEquals(pointToProject.x, 0.0, 1e-14);
-      assertEquals(pointToProject.y, 0.5, 1e-14);
-      assertEquals(pointToProject.z, 0.5, 1e-14);
+      assertEquals(pointToProject.getX(), 0.0, 1e-14);
+      assertEquals(pointToProject.getY(), 0.5, 1e-14);
+      assertEquals(pointToProject.getZ(), 0.5, 1e-14);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)

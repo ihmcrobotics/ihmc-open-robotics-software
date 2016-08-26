@@ -61,9 +61,9 @@ public class GeometryToolsTest
       double expectedReturn2 = 9.0;
       double expectedReturn3 = 5;
       Point3d actualReturn = GeometryTools.averagePoints(a, b);
-      double actualReturn1 = actualReturn.x;
-      double actualReturn2 = actualReturn.y;
-      double actualReturn3 = actualReturn.z;
+      double actualReturn1 = actualReturn.getX();
+      double actualReturn2 = actualReturn.getY();
+      double actualReturn3 = actualReturn.getZ();
       assertEquals("return value", expectedReturn1, actualReturn1, EPSILON);
       assertEquals("return value", expectedReturn2, actualReturn2, EPSILON);
       assertEquals("return value", expectedReturn3, actualReturn3, EPSILON);
@@ -74,9 +74,9 @@ public class GeometryToolsTest
       double expectedReturn12 = -5;
       double expectedReturn13 = -5;
       Point3d actualReturn01 = GeometryTools.averagePoints(a1, b1);
-      double actualReturn11 = actualReturn01.x;
-      double actualReturn12 = actualReturn01.y;
-      double actualReturn13 = actualReturn01.z;
+      double actualReturn11 = actualReturn01.getX();
+      double actualReturn12 = actualReturn01.getY();
+      double actualReturn13 = actualReturn01.getZ();
       assertEquals("return value", expectedReturn11, actualReturn11, EPSILON);
       assertEquals("return value", expectedReturn12, actualReturn12, EPSILON);
       assertEquals("return value", expectedReturn13, actualReturn13, EPSILON);
@@ -87,9 +87,9 @@ public class GeometryToolsTest
       double expectedReturn22 = 0;
       double expectedReturn23 = 0;
       Point3d actualReturn02 = GeometryTools.averagePoints(a2, b2);
-      double actualReturn21 = actualReturn02.x;
-      double actualReturn22 = actualReturn02.y;
-      double actualReturn23 = actualReturn02.z;
+      double actualReturn21 = actualReturn02.getX();
+      double actualReturn22 = actualReturn02.getY();
+      double actualReturn23 = actualReturn02.getZ();
       assertEquals("return value", expectedReturn21, actualReturn21, EPSILON);
       assertEquals("return value", expectedReturn22, actualReturn22, EPSILON);
       assertEquals("return value", expectedReturn23, actualReturn23, EPSILON);
@@ -109,8 +109,8 @@ public class GeometryToolsTest
       double expectedReturn1 = 3.3;
       double expectedReturn2 = 4.2;
       Point2d actualReturn = GeometryTools.averagePoint2ds(points);
-      double actualReturn1 = actualReturn.x;
-      double actualReturn2 = actualReturn.y;
+      double actualReturn1 = actualReturn.getX();
+      double actualReturn2 = actualReturn.getY();
       assertEquals("return value", expectedReturn1, actualReturn1, EPSILON);
       assertEquals("return value", expectedReturn2, actualReturn2, EPSILON);
 
@@ -124,8 +124,8 @@ public class GeometryToolsTest
       double expectedReturn11 = 0.0;
       double expectedReturn12 = 0.0;
       Point2d actualReturn01 = GeometryTools.averagePoint2ds(points1);
-      double actualReturn11 = actualReturn01.x;
-      double actualReturn12 = actualReturn01.y;
+      double actualReturn11 = actualReturn01.getX();
+      double actualReturn12 = actualReturn01.getY();
       assertEquals("return value", expectedReturn11, actualReturn11, EPSILON);
       assertEquals("return value", expectedReturn12, actualReturn12, EPSILON);
 
@@ -139,8 +139,8 @@ public class GeometryToolsTest
       double expectedReturn21 = -3.3;
       double expectedReturn22 = -4.2;
       Point2d actualReturn02 = GeometryTools.averagePoint2ds(points2);
-      double actualReturn21 = actualReturn02.x;
-      double actualReturn22 = actualReturn02.y;
+      double actualReturn21 = actualReturn02.getX();
+      double actualReturn22 = actualReturn02.getY();
       assertEquals("return value", expectedReturn21, actualReturn21, EPSILON);
       assertEquals("return value", expectedReturn22, actualReturn22, EPSILON);
    }
@@ -160,9 +160,9 @@ public class GeometryToolsTest
       double expectedReturn2 = 5.0;
       double expectedReturn3 = 2.7;
       Point3d actualReturn = GeometryTools.averagePoint3ds(points);
-      double actualReturn1 = actualReturn.x;
-      double actualReturn2 = actualReturn.y;
-      double actualReturn3 = actualReturn.z;
+      double actualReturn1 = actualReturn.getX();
+      double actualReturn2 = actualReturn.getY();
+      double actualReturn3 = actualReturn.getZ();
       assertEquals("return value", expectedReturn1, actualReturn1, EPSILON);
       assertEquals("return value", expectedReturn2, actualReturn2, EPSILON);
       assertEquals("return value", expectedReturn3, actualReturn3, EPSILON);
@@ -178,9 +178,9 @@ public class GeometryToolsTest
       double expectedReturn12 = 0.0;
       double expectedReturn13 = 0.0;
       Point3d actualReturn01 = GeometryTools.averagePoint3ds(points1);
-      double actualReturn11 = actualReturn01.x;
-      double actualReturn12 = actualReturn01.y;
-      double actualReturn13 = actualReturn01.z;
+      double actualReturn11 = actualReturn01.getX();
+      double actualReturn12 = actualReturn01.getY();
+      double actualReturn13 = actualReturn01.getZ();
       assertEquals("return value", expectedReturn11, actualReturn11, EPSILON);
       assertEquals("return value", expectedReturn12, actualReturn12, EPSILON);
       assertEquals("return value", expectedReturn13, actualReturn13, EPSILON);
@@ -1544,10 +1544,10 @@ public class GeometryToolsTest
       Point2d[] closestPoints = GeometryTools.computeMinimumDistancePoints(polygon1, polygon2);
       Point2d[] closestPointsReversed = GeometryTools.computeMinimumDistancePoints(polygon2, polygon1);
       assertEquals(closestPoints[0].distance(closestPoints[1]), closestPointsReversed[0].distance(closestPointsReversed[1]), epsilon);
-      assertEquals(expectedSolution[0], closestPoints[0].x, epsilon);
-      assertEquals(expectedSolution[1], closestPoints[0].y, epsilon);
-      assertEquals(expectedSolution[2], closestPoints[1].x, epsilon);
-      assertEquals(expectedSolution[3], closestPoints[1].y, epsilon);
+      assertEquals(expectedSolution[0], closestPoints[0].getX(), epsilon);
+      assertEquals(expectedSolution[1], closestPoints[0].getY(), epsilon);
+      assertEquals(expectedSolution[2], closestPoints[1].getX(), epsilon);
+      assertEquals(expectedSolution[3], closestPoints[1].getY(), epsilon);
    }
 
    private ConvexPolygon2d getPolygon(double[] polygon)

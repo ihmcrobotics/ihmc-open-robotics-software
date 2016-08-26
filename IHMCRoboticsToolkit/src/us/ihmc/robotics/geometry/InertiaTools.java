@@ -16,15 +16,15 @@ public class InertiaTools
     */
    public static Vector3d getInertiaEllipsoidRadii(Vector3d principalMomentsOfInertia, double mass)
    {
-      double Ixx = principalMomentsOfInertia.x;
-      double Iyy = principalMomentsOfInertia.y;
-      double Izz = principalMomentsOfInertia.z;
+      double Ixx = principalMomentsOfInertia.getX();
+      double Iyy = principalMomentsOfInertia.getY();
+      double Izz = principalMomentsOfInertia.getZ();
 
 //    http://en.wikipedia.org/wiki/Ellipsoid#Mass_properties
       Vector3d ret = new Vector3d();
-      ret.x = Math.sqrt(5.0 / 2.0 * (Iyy + Izz - Ixx) / mass);
-      ret.y = Math.sqrt(5.0 / 2.0 * (Izz + Ixx - Iyy) / mass);
-      ret.z = Math.sqrt(5.0 / 2.0 * (Ixx + Iyy - Izz) / mass);
+      ret.setX(Math.sqrt(5.0 / 2.0 * (Iyy + Izz - Ixx) / mass));
+      ret.setY(Math.sqrt(5.0 / 2.0 * (Izz + Ixx - Iyy) / mass));
+      ret.setZ(Math.sqrt(5.0 / 2.0 * (Ixx + Iyy - Izz) / mass));
 
       return ret;
    }
@@ -62,7 +62,7 @@ public class InertiaTools
 
       double[][] moiArray = new double[][]
       {
-         {Inertia.m00, Inertia.m01, Inertia.m02}, {Inertia.m10, Inertia.m11, Inertia.m12}, {Inertia.m20, Inertia.m21, Inertia.m22}
+         {Inertia.getM00(), Inertia.getM01(), Inertia.getM02()}, {Inertia.getM10(), Inertia.getM11(), Inertia.getM12()}, {Inertia.getM20(), Inertia.getM21(), Inertia.getM22()}
       };
 
       Matrix inertiaForSVD = new Matrix(moiArray);

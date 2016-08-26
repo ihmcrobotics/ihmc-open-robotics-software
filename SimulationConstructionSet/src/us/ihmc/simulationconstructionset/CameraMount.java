@@ -99,7 +99,7 @@ public class CameraMount implements CameraMountInterface
 
    public void lookAt(Point3d center)
    {
-      lookAt(center.x, center.y, center.z);
+      lookAt(center.getX(), center.getY(), center.getZ());
    }
 
    public RigidBodyTransform lookAtTransform3D;
@@ -121,8 +121,8 @@ public class CameraMount implements CameraMountInterface
       lookAtTransform3D.transform(tempPoint3d);    // Put center from world coordinates to mount coordinates.
 
       // Compute pan and tilt to get there.
-      pan.set(Math.atan2(tempPoint3d.y, tempPoint3d.x));
-      tilt.set(Math.atan2(-tempPoint3d.z, Math.sqrt(tempPoint3d.x * tempPoint3d.x + tempPoint3d.y * tempPoint3d.y)));
+      pan.set(Math.atan2(tempPoint3d.getY(), tempPoint3d.getX()));
+      tilt.set(Math.atan2(-tempPoint3d.getZ(), Math.sqrt(tempPoint3d.getX() * tempPoint3d.getX() + tempPoint3d.getY() * tempPoint3d.getY())));
    }
 
 

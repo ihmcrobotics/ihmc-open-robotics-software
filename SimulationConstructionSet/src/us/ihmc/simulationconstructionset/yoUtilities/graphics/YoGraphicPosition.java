@@ -163,12 +163,12 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
 
    public void getPosition(Point3d point3d)
    {
-      point3d.x = this.getX();
-      point3d.y = this.getY();
+      point3d.setX(this.getX());
+      point3d.setY(this.getY());
       if (this.z != null)
-         point3d.z = this.getZ();
+         point3d.setZ(this.getZ());
       else
-         point3d.z = 0.0;
+         point3d.setZ(0.0);
    }
 
    public void getPosition(FramePoint framePoint)

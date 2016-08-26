@@ -137,8 +137,8 @@ public class PolygonArtifact extends Artifact
 
       if (nPoints == 1)
       {
-         int x = Xcenter + (int) Math.round(pointsCopy.get(0).x * scaleFactor);
-         int y = Ycenter - (int) Math.round(pointsCopy.get(0).y * scaleFactor);
+         int x = Xcenter + (int) Math.round(pointsCopy.get(0).getX() * scaleFactor);
+         int y = Ycenter - (int) Math.round(pointsCopy.get(0).getY() * scaleFactor);
          graphics2d.drawOvalFilled(x, y, 4, 4);
       }
       else
@@ -147,8 +147,8 @@ public class PolygonArtifact extends Artifact
          {
             if (pointsCopy.get(i) != null)
             {
-               int x = Xcenter + (int) Math.round(pointsCopy.get(i).x * scaleFactor);
-               int y = Ycenter - (int) Math.round(pointsCopy.get(i).y * scaleFactor);
+               int x = Xcenter + (int) Math.round(pointsCopy.get(i).getX() * scaleFactor);
+               int y = Ycenter - (int) Math.round(pointsCopy.get(i).getY() * scaleFactor);
                xPoints[i] = x;
                yPoints[i] = y;
             }

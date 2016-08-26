@@ -486,7 +486,7 @@ public class KDTree
          double[][] points = new double[pointArray.size()][3];
          for (int i = 0; i < pointArray.size(); i++)
          {
-            points[i] = new double[] {pointArray.get(i).x, pointArray.get(i).y, pointArray.get(i).z};
+            points[i] = new double[] {pointArray.get(i).getX(), pointArray.get(i).getY(), pointArray.get(i).getZ()};
          }
 
          return points;

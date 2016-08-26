@@ -124,7 +124,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       for (int i = 0; i < corruptedFootstepDataList.getDataList().size(); i++)
       {
          FootstepDataMessage footstepData = corruptedFootstepDataList.getDataList().get(i);
-         footstepData.location.z += 1.0;
+         footstepData.location.setZ(footstepData.location.getZ() + 1.0);
          tempFrameOrientation.set(footstepData.getOrientation());
          double[] yawPitchRoll = tempFrameOrientation.getYawPitchRoll();
          yawPitchRoll[1] = RandomTools.generateRandomDouble(random, Math.PI / 4.0);
@@ -154,13 +154,13 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 
       for (FootstepDataMessage footstepData : corruptedFootstepDataList.getDataList())
       {
-         double footstepX = footstepData.getLocation().x;
-         double footstepY = footstepData.getLocation().y;
+         double footstepX = footstepData.getLocation().getX();
+         double footstepY = footstepData.getLocation().getY();
 
-         boundingBoxMin.x = Math.min(boundingBoxMin.x, footstepX);
-         boundingBoxMin.y = Math.min(boundingBoxMin.y, footstepY);
-         boundingBoxMax.x = Math.max(boundingBoxMax.x, footstepX);
-         boundingBoxMax.y = Math.max(boundingBoxMax.y, footstepY);
+         boundingBoxMin.setX(Math.min(boundingBoxMin.getX(), footstepX));
+         boundingBoxMin.setY(Math.min(boundingBoxMin.getY(), footstepY));
+         boundingBoxMax.setX(Math.max(boundingBoxMax.getX(), footstepX));
+         boundingBoxMax.setY(Math.max(boundingBoxMax.getY(), footstepY));
       }
 
       double enlarge = 0.2;

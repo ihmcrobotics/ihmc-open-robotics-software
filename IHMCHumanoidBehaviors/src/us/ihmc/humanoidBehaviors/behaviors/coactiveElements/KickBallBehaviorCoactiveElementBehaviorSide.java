@@ -56,8 +56,8 @@ public class KickBallBehaviorCoactiveElementBehaviorSide extends KickBallBehavio
       numBlobsDetected.set(kickBallBehavior.getNumBlobsDetected());
       if (numBlobsDetected.getIntegerValue() > 0)
       {
-         blobX.set(kickBallBehavior.getBlobLocation().x);
-         blobY.set(kickBallBehavior.getBlobLocation().y);
+         blobX.set(kickBallBehavior.getBlobLocation().getX());
+         blobY.set(kickBallBehavior.getBlobLocation().getY());
       }
    }
 }

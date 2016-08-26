@@ -255,7 +255,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
    private void setOrCreate(Point2d point2d, int i)
    {
-      setOrCreate(point2d.x, point2d.y, i);
+      setOrCreate(point2d.getX(), point2d.getY(), i);
    }
 
    private void setOrCreate(double x, double y, int i)
@@ -389,53 +389,53 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       if (hasAtLeastOneVertex())
       {
          Point2d firstVertex = getVertex(0);
-         double minX = firstVertex.x;
-         double minY = firstVertex.y;
-         double maxX = firstVertex.x;
-         double maxY = firstVertex.y;
+         double minX = firstVertex.getX();
+         double minY = firstVertex.getY();
+         double maxX = firstVertex.getX();
+         double maxY = firstVertex.getY();
 
          Point2d p;
          for (int i = 1; i < numberOfVertices; i++)
          {
             p = getVertex(i);
 
-            if (p.x < minX)
+            if (p.getX() < minX)
             {
-               minX = p.x;
+               minX = p.getX();
                minX_index = i;
                minXminY_index = i;
             }
-            else if (p.x > maxX)
+            else if (p.getX() > maxX)
             {
-               maxX = p.x;
+               maxX = p.getX();
                maxX_index = i;
                maxXmaxY_index = i;
                maxXminY_index = i;
             }
-            else if (p.x == getVertex(minXminY_index).x && p.y < getVertex(minXminY_index).y)
+            else if (p.getX() == getVertex(minXminY_index).getX() && p.getY() < getVertex(minXminY_index).getY())
             {
                minXminY_index = i;
             }
-            else if (p.x == getVertex(maxXminY_index).x) // any case: getVertex(maxXmaxY_index).x == getVertex(maxXminY_index).x
+            else if (p.getX() == getVertex(maxXminY_index).getX()) // any case: getVertex(maxXmaxY_index).x == getVertex(maxXminY_index).x
             {
-               if (p.y < getVertex(maxXminY_index).y)
+               if (p.getY() < getVertex(maxXminY_index).getY())
                {
                   maxXminY_index = i;
                }
-               else if (p.y > getVertex(maxXmaxY_index).y)
+               else if (p.getY() > getVertex(maxXmaxY_index).getY())
                {
                   maxXmaxY_index = i;
                }
             }
 
-            if (p.y <= minY)
+            if (p.getY() <= minY)
             {
-               minY = p.y;
+               minY = p.getY();
                minY_index = i;
             }
-            else if (p.y >= maxY)
+            else if (p.getY() >= maxY)
             {
-               maxY = p.y;
+               maxY = p.getY();
                maxY_index = i;
             }
          }
@@ -812,7 +812,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          double distanceSquared;
          Point2d rayOrigin = ray.getPoint();
          Vector2d rayDirection = ray.getNormalizedVector();
-         double dotProductOfRayDirectionAndRayOriginToVertex = rayDirection.x * (vertex.x - rayOrigin.x) + rayDirection.y * (vertex.y - rayOrigin.y);
+         double dotProductOfRayDirectionAndRayOriginToVertex = rayDirection.getX() * (vertex.getX() - rayOrigin.getX()) + rayDirection.getY() * (vertex.getY() - rayOrigin.getY());
          // The sign of this dot product indicates if the point is "outside" the ray, meaning the closest point of the ray to the vertex is the ray origin.
          if (dotProductOfRayDirectionAndRayOriginToVertex >= 0.0)
             distanceSquared = ray.distanceSquared(vertex);
@@ -848,7 +848,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          double distanceSquared;
          Point2d rayOrigin = ray.getPoint();
          Vector2d rayDirection = ray.getNormalizedVector();
-         double dotProductOfRayDirectionAndRayOriginToVertex = rayDirection.x * (vertex.x - rayOrigin.x) + rayDirection.y * (vertex.y - rayOrigin.y);
+         double dotProductOfRayDirectionAndRayOriginToVertex = rayDirection.getX() * (vertex.getX() - rayOrigin.getX()) + rayDirection.getY() * (vertex.getY() - rayOrigin.getY());
          // The sign of this dot product indicates if the point is "outside" the ray, meaning the closest point of the ray to the vertex is the ray origin.
          if (dotProductOfRayDirectionAndRayOriginToVertex >= 0.0)
             distanceSquared = ray.distanceSquared(vertex);
@@ -904,7 +904,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public boolean isPointInside(Point2d point, double epsilon)
    {
       checkIfUpToDate();
-      return isPointInside(point.x, point.y, epsilon);
+      return isPointInside(point.getX(), point.getY(), epsilon);
    }
 
    public ConvexPolygon2d translateCopy(Tuple2d translation)
@@ -943,24 +943,24 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       checkIfUpToDate();
       if (hasAtLeastThreeVertices())
       {
-         if (x < boundingBox.getMinPoint().x)
+         if (x < boundingBox.getMinPoint().getX())
             return false;
-         if (y < boundingBox.getMinPoint().y)
+         if (y < boundingBox.getMinPoint().getY())
             return false;
 
-         if (x > boundingBox.getMaxPoint().x)
+         if (x > boundingBox.getMaxPoint().getX())
             return false;
-         if (y > boundingBox.getMaxPoint().y)
+         if (y > boundingBox.getMaxPoint().getY())
             return false;
 
          // Determine whether the point is on the right side of each edge:
          for (int i = 0; i < numberOfVertices; i++)
          {
-            double x0 = getVertex(i).x;
-            double y0 = getVertex(i).y;
+            double x0 = getVertex(i).getX();
+            double y0 = getVertex(i).getY();
 
-            double x1 = getNextVertex(i).x;
-            double y1 = getNextVertex(i).y;
+            double x1 = getNextVertex(i).getX();
+            double y1 = getNextVertex(i).getY();
 
             if ((y - y0) * (x1 - x0) - (x - x0) * (y1 - y0) > epsilon)
             {
@@ -1448,11 +1448,11 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       Point2d nextVertex = getNextVertex(edgeIndex);
 
       // Vector perpendicular to the edge and pointing outside the polygon
-      double edgeNormalX = -(nextVertex.y - vertex.y);
-      double edgeNormalY = (nextVertex.x - vertex.x);
+      double edgeNormalX = -(nextVertex.getY() - vertex.getY());
+      double edgeNormalY = (nextVertex.getX() - vertex.getX());
 
-      double vertexToObserverX = observerPoint2d.x - vertex.x;
-      double vertexToObserverY = observerPoint2d.y - vertex.y;
+      double vertexToObserverX = observerPoint2d.getX() - vertex.getX();
+      double vertexToObserverY = observerPoint2d.getY() - vertex.getY();
 
       // Equivalent to looking at the sign of the angle formed by (egdeNormal -> vertexToPoint)
       double crossProduct = edgeNormalX * vertexToObserverY - edgeNormalY * vertexToObserverX;
@@ -1474,11 +1474,11 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       Point2d nextVertex = getNextVertex(edgeIndex);
 
       // Vector perpendicular to the edge and pointing outside the polygon
-      double edgeNormalX = -(nextVertex.y - vertex.y);
-      double edgeNormalY = (nextVertex.x - vertex.x);
+      double edgeNormalX = -(nextVertex.getY() - vertex.getY());
+      double edgeNormalY = (nextVertex.getX() - vertex.getX());
 
-      double nextVertexToObserverX = observerPoint2d.x - nextVertex.x;
-      double nextVertexToObserverY = observerPoint2d.y - nextVertex.y;
+      double nextVertexToObserverX = observerPoint2d.getX() - nextVertex.getX();
+      double nextVertexToObserverY = observerPoint2d.getY() - nextVertex.getY();
 
       // Equivalent to looking at the sign of the angle formed by (egdeNormal -> vertexToPoint)
       double crossProduct = edgeNormalX * nextVertexToObserverY - edgeNormalY * nextVertexToObserverX;
@@ -1578,10 +1578,10 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    {
       Point2d point = getVertex(index);
 
-      double vectorToVertexX = point.x - lineStart.x; // x_index - x_start
-      double vectorToVertexY = point.y - lineStart.y; // y_index - y_start
+      double vectorToVertexX = point.getX() - lineStart.getX(); // x_index - x_start
+      double vectorToVertexY = point.getY() - lineStart.getY(); // y_index - y_start
       // 0 * (y_index - y_start) - 1 * (x_index - x_start) = x_start - x_index
-      double crossProduct = lineDirection.x * vectorToVertexY - lineDirection.y * vectorToVertexX;
+      double crossProduct = lineDirection.getX() * vectorToVertexY - lineDirection.getY() * vectorToVertexX;
 
       // x_start >= x_index
       if (crossProduct >= 0.0)
@@ -1598,10 +1598,10 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    {
       Point2d point = getVertex(index);
 
-      double vectorToVertexX = point.x - lineStart.x;
-      double vectorToVertexY = point.y - lineStart.y;
+      double vectorToVertexX = point.getX() - lineStart.getX();
+      double vectorToVertexY = point.getY() - lineStart.getY();
 
-      double crossProduct = lineDirection.x * vectorToVertexY - lineDirection.y * vectorToVertexX;
+      double crossProduct = lineDirection.getX() * vectorToVertexY - lineDirection.getY() * vectorToVertexX;
 
       if (crossProduct <= 0.0)
       {
@@ -1636,11 +1636,11 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       Point2d point1 = getVertex(index1);
       Point2d point2 = getVertex(index2);
 
-      double vectorToVertex1X = point1.x - observerFramePoint2d.x;
-      double vectorToVertex1Y = point1.y - observerFramePoint2d.y;
+      double vectorToVertex1X = point1.getX() - observerFramePoint2d.getX();
+      double vectorToVertex1Y = point1.getY() - observerFramePoint2d.getY();
 
-      double vectorToVertex2X = point2.x - observerFramePoint2d.x;
-      double vectorToVertex2Y = point2.y - observerFramePoint2d.y;
+      double vectorToVertex2X = point2.getX() - observerFramePoint2d.getX();
+      double vectorToVertex2Y = point2.getY() - observerFramePoint2d.getY();
 
       double crossProduct = vectorToVertex1X * vectorToVertex2Y - vectorToVertex1Y * vectorToVertex2X;
 
@@ -1672,11 +1672,11 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       Point2d nextVertex = getNextVertex(edgeIndex);
 
       // Vector perpendicular to the edge and pointing outside the polygon
-      double edgeNormalX = -(nextVertex.y - vertex.y);
-      double edgeVectorY = nextVertex.x - vertex.x;
+      double edgeNormalX = -(nextVertex.getY() - vertex.getY());
+      double edgeVectorY = nextVertex.getX() - vertex.getX();
 
-      double observerToVertexX = vertex.x - observerPoint2d.x;
-      double observerToVertexY = vertex.y - observerPoint2d.y;
+      double observerToVertexX = vertex.getX() - observerPoint2d.getX();
+      double observerToVertexY = vertex.getY() - observerPoint2d.getY();
 
       // Equivalent to looking at the projection of the observerToVertex vector on the edge normal vector, since only need to look at the sign.
       double dotProduct = edgeNormalX * observerToVertexX + edgeVectorY * observerToVertexY;
@@ -1964,14 +1964,14 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       Point2d leftVertex = getVertex(leftIndex);
       Point2d rightVertex = getVertex(rightIndex);
 
-      double startToLeftVertexX = leftVertex.x - lineStart.x;
-      double startToLeftVertexY = leftVertex.y - lineStart.y;
+      double startToLeftVertexX = leftVertex.getX() - lineStart.getX();
+      double startToLeftVertexY = leftVertex.getY() - lineStart.getY();
 
-      double startToRightVertexX = rightVertex.x - lineStart.x;
-      double startToRightVertexY = rightVertex.y - lineStart.y;
+      double startToRightVertexX = rightVertex.getX() - lineStart.getX();
+      double startToRightVertexY = rightVertex.getY() - lineStart.getY();
 
-      double leftCrossProduct = lineDirection.x * startToLeftVertexY - lineDirection.y * startToLeftVertexX;
-      double rightCrossProduct = lineDirection.x * startToRightVertexY - lineDirection.y * startToRightVertexX;
+      double leftCrossProduct = lineDirection.getX() * startToLeftVertexY - lineDirection.getY() * startToLeftVertexX;
+      double rightCrossProduct = lineDirection.getX() * startToRightVertexY - lineDirection.getY() * startToRightVertexX;
 
       if ((leftCrossProduct > 0.0) && (rightCrossProduct < 0.0))
          return true;
@@ -2095,7 +2095,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       for (int i = 0; i < numberOfVertices; i++)
       {
          Point2d vertex = clockwiseOrderedListOfPoints.get(i);
-         ret = ret + "{" + vertex.x + ", " + vertex.y + "}," + "\n";
+         ret = ret + "{" + vertex.getX() + ", " + vertex.getY() + "}," + "\n";
       }
 
       return ret;
@@ -2116,10 +2116,10 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       for (int i = 0; i < numberOfVertices; i++)
       {
          Point2d vertex = getVertexUnsafe(i);
-         tempVertex3d.set(vertex.x, vertex.y, 0.0);
+         tempVertex3d.set(vertex.getX(), vertex.getY(), 0.0);
          transform.transform(tempVertex3d);
-         vertex.x = tempVertex3d.x;
-         vertex.y = tempVertex3d.y;
+         vertex.setX(tempVertex3d.getX());
+         vertex.setY(tempVertex3d.getY());
       }
       update();
    }
@@ -2253,8 +2253,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public void pullPointTowardsCentroid(Point2d point, double percent)
    {
       checkIfUpToDate();
-      double x = centroid.x + (point.x - centroid.x) * (1.0 - percent);
-      double y = centroid.y + (point.y - centroid.y) * (1.0 - percent);
+      double x = centroid.getX() + (point.getX() - centroid.getX()) * (1.0 - percent);
+      double y = centroid.getY() + (point.getY() - centroid.getY()) * (1.0 - percent);
 
       point.set(x, y);
    }

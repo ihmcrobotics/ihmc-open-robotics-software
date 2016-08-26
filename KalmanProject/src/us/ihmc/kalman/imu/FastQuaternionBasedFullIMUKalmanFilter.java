@@ -284,10 +284,10 @@ public class FastQuaternionBasedFullIMUKalmanFilter
       double[] quaternions = new double[4];
       Quat4d quaternion = new Quat4d();
       RotationTools.convertYawPitchRollToQuaternion(yawPitchRoll, quaternion);
-      quaternions[0] = quaternion.w;
-      quaternions[1] = quaternion.x;
-      quaternions[2] = quaternion.y;
-      quaternions[3] = quaternion.z;
+      quaternions[0] = quaternion.getW();
+      quaternions[1] = quaternion.getX();
+      quaternions[2] = quaternion.getY();
+      quaternions[3] = quaternion.getZ();
 
 //    System.out.println(quaternions[0] + " " + quaternions[1] + " " + quaternions[2] + " " + quaternions[3]);
 //    double[] quats = accelerometers2quaternions(a,heading);

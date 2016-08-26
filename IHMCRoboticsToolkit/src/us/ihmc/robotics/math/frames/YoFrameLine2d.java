@@ -98,10 +98,10 @@ public class YoFrameLine2d extends AbstractReferenceFrameHolder
 
       Line2d line = frameLine2d.getLine2d();
 
-      x0.set(line.getPoint().x);
-      y0.set(line.getPoint().y);
-      vx.set(line.getNormalizedVector().x);
-      vy.set(line.getNormalizedVector().y);
+      x0.set(line.getPoint().getX());
+      y0.set(line.getPoint().getY());
+      vx.set(line.getNormalizedVector().getX());
+      vy.set(line.getNormalizedVector().getY());
    }
 
    public FrameLine2d getFrameLine2d()

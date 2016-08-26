@@ -46,9 +46,9 @@ public class FlatGroundProfile extends GroundProfileFromHeightMap
 
    public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
    {
-      normal.x = 0.0;
-      normal.y = 0.0;
-      normal.z = 1.0;
+      normal.setX(0.0);
+      normal.setY(0.0);
+      normal.setZ(1.0);
    }
 
    public BoundingBox3d getBoundingBox()

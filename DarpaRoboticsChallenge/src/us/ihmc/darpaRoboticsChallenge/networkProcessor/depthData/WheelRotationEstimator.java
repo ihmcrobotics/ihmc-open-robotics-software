@@ -244,7 +244,7 @@ public class WheelRotationEstimator extends IcpCloud3D
          Point3D_F64 point3d_F64 = current.get(j);
          tempPoint.set(point3d_F64.x, point3d_F64.y, point3d_F64.z);
          tempTransformFromCurrentToRotary.transform(tempPoint);
-         tempPoints.get(j).set(tempPoint.x, tempPoint.y, tempPoint.z);
+         tempPoints.get(j).set(tempPoint.getX(), tempPoint.getY(), tempPoint.getZ());
       }
    }
 

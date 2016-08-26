@@ -78,15 +78,15 @@ public class RotationalInertiaCalculatorTest
          assertEquals(0.5 * mass * radius * radius, mainAxis, DELTA);
          
          Matrix3d rotationMatrix = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, height, axis);
-         assertEquals(IxxIyyIzz[0], rotationMatrix.m00, DELTA);
-         assertEquals(IxxIyyIzz[1], rotationMatrix.m11, DELTA);
-         assertEquals(IxxIyyIzz[2], rotationMatrix.m22, DELTA);
-         assertEquals(0.0, rotationMatrix.m01, DELTA);
-         assertEquals(0.0, rotationMatrix.m02, DELTA);
-         assertEquals(0.0, rotationMatrix.m10, DELTA);
-         assertEquals(0.0, rotationMatrix.m12, DELTA);
-         assertEquals(0.0, rotationMatrix.m20, DELTA);
-         assertEquals(0.0, rotationMatrix.m21, DELTA);
+         assertEquals(IxxIyyIzz[0], rotationMatrix.getM00(), DELTA);
+         assertEquals(IxxIyyIzz[1], rotationMatrix.getM11(), DELTA);
+         assertEquals(IxxIyyIzz[2], rotationMatrix.getM22(), DELTA);
+         assertEquals(0.0, rotationMatrix.getM01(), DELTA);
+         assertEquals(0.0, rotationMatrix.getM02(), DELTA);
+         assertEquals(0.0, rotationMatrix.getM10(), DELTA);
+         assertEquals(0.0, rotationMatrix.getM12(), DELTA);
+         assertEquals(0.0, rotationMatrix.getM20(), DELTA);
+         assertEquals(0.0, rotationMatrix.getM21(), DELTA);
       }
    }
 
@@ -140,9 +140,9 @@ public class RotationalInertiaCalculatorTest
 		   
 		   Matrix3d inertiaTensor = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
 
-		   assertEquals(Ixx, inertiaTensor.m00, DELTA);
-		   assertEquals(Iyy, inertiaTensor.m11, DELTA);
-		   assertEquals(Izz, inertiaTensor.m22, DELTA);
+		   assertEquals(Ixx, inertiaTensor.getM00(), DELTA);
+		   assertEquals(Iyy, inertiaTensor.getM11(), DELTA);
+		   assertEquals(Izz, inertiaTensor.getM22(), DELTA);
 	   }
    }
 
@@ -207,15 +207,15 @@ public class RotationalInertiaCalculatorTest
 		   
 		   Matrix3d rotationalInertia = RotationalInertiaCalculator.getRotationalInertiaFromRadiiOfGyration(mass, xRadius, yRadius, zRadius);
 
-		   assertEquals(mass * (MathTools.square(yRadius) + MathTools.square(zRadius)), rotationalInertia.m00, DELTA);
-		   assertEquals(mass * (MathTools.square(zRadius) + MathTools.square(xRadius)), rotationalInertia.m11, DELTA);
-		   assertEquals(mass * (MathTools.square(xRadius) + MathTools.square(yRadius)), rotationalInertia.m22, DELTA);
-		   assertEquals(0.0, rotationalInertia.m01, DELTA);
-		   assertEquals(0.0, rotationalInertia.m02, DELTA);
-		   assertEquals(0.0, rotationalInertia.m10, DELTA);
-		   assertEquals(0.0, rotationalInertia.m12, DELTA);
-		   assertEquals(0.0, rotationalInertia.m20, DELTA);
-		   assertEquals(0.0, rotationalInertia.m21, DELTA);
+		   assertEquals(mass * (MathTools.square(yRadius) + MathTools.square(zRadius)), rotationalInertia.getM00(), DELTA);
+		   assertEquals(mass * (MathTools.square(zRadius) + MathTools.square(xRadius)), rotationalInertia.getM11(), DELTA);
+		   assertEquals(mass * (MathTools.square(xRadius) + MathTools.square(yRadius)), rotationalInertia.getM22(), DELTA);
+		   assertEquals(0.0, rotationalInertia.getM01(), DELTA);
+		   assertEquals(0.0, rotationalInertia.getM02(), DELTA);
+		   assertEquals(0.0, rotationalInertia.getM10(), DELTA);
+		   assertEquals(0.0, rotationalInertia.getM12(), DELTA);
+		   assertEquals(0.0, rotationalInertia.getM20(), DELTA);
+		   assertEquals(0.0, rotationalInertia.getM21(), DELTA);
 	   }
    }
 

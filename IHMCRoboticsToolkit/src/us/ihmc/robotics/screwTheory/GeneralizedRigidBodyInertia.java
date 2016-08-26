@@ -127,9 +127,9 @@ public abstract class GeneralizedRigidBodyInertia
    public void setMomentOfInertia(double Ixx, double Iyy, double Izz)
    {
       massMomentOfInertiaPart.setIdentity();
-      massMomentOfInertiaPart.m00 = Ixx;
-      massMomentOfInertiaPart.m11 = Iyy;
-      massMomentOfInertiaPart.m22 = Izz;
+      massMomentOfInertiaPart.setM00(Ixx);
+      massMomentOfInertiaPart.setM11(Iyy);
+      massMomentOfInertiaPart.setM22(Izz);
    }
 
    public void setMass(double mass)
@@ -227,21 +227,21 @@ public abstract class GeneralizedRigidBodyInertia
     */
    private static void subTildeTimesTildePlusTildeTimesTildeTransposeFromSymmetricMatrix(Matrix3d M, Vector3d a, Vector3d b)
    {
-      double axbx = a.x * b.x;
-      double ayby = a.y * b.y;
-      double azbz = a.z * b.z;
+      double axbx = a.getX() * b.getX();
+      double ayby = a.getY() * b.getY();
+      double azbz = a.getZ() * b.getZ();
 
-      M.m00 = M.m00 + 2.0 * (azbz + ayby);
-      M.m01 = M.m01 - a.y * b.x - a.x * b.y;
-      M.m02 = M.m02 - a.z * b.x - a.x * b.z;
+      M.setM00(M.getM00() + 2.0 * (azbz + ayby));
+      M.setM01(M.getM01() - a.getY() * b.getX() - a.getX() * b.getY());
+      M.setM02(M.getM02() - a.getZ() * b.getX() - a.getX() * b.getZ());
 
-      M.m10 = M.m01;
-      M.m11 = M.m11 + 2.0 * (axbx + azbz);
-      M.m12 = M.m12 - a.z * b.y - a.y * b.z;
+      M.setM10(M.getM01());
+      M.setM11(M.getM11() + 2.0 * (axbx + azbz));
+      M.setM12(M.getM12() - a.getZ() * b.getY() - a.getY() * b.getZ());
 
-      M.m20 = M.m02;
-      M.m21 = M.m12;
-      M.m22 = M.m22 + 2.0 * (axbx + ayby);
+      M.setM20(M.getM02());
+      M.setM21(M.getM12());
+      M.setM22(M.getM22() + 2.0 * (axbx + ayby));
    }
 
    /**
@@ -253,25 +253,25 @@ public abstract class GeneralizedRigidBodyInertia
     */
    private static void subScalarTimesTildeTimesTildeFromSymmetricMatrix(Matrix3d M, Vector3d a, double scalar)
    {
-      double xSquared = scalar * a.x * a.x;
-      double ySquared = scalar * a.y * a.y;
-      double zSquared = scalar * a.z * a.z;
+      double xSquared = scalar * a.getX() * a.getX();
+      double ySquared = scalar * a.getY() * a.getY();
+      double zSquared = scalar * a.getZ() * a.getZ();
 
-      double xy = scalar * a.x * a.y;
-      double xz = scalar * a.x * a.z;
-      double yz = scalar * a.y * a.z;
+      double xy = scalar * a.getX() * a.getY();
+      double xz = scalar * a.getX() * a.getZ();
+      double yz = scalar * a.getY() * a.getZ();
 
-      M.m00 = M.m00 + ySquared + zSquared;
-      M.m01 = M.m01 - xy;
-      M.m02 = M.m02 - xz;
+      M.setM00(M.getM00() + ySquared + zSquared);
+      M.setM01(M.getM01() - xy);
+      M.setM02(M.getM02() - xz);
 
-      M.m10 = M.m01;
-      M.m11 = M.m11 + xSquared + zSquared;
-      M.m12 = M.m12 - yz;
+      M.setM10(M.getM01());
+      M.setM11(M.getM11() + xSquared + zSquared);
+      M.setM12(M.getM12() - yz);
 
-      M.m20 = M.m02;
-      M.m21 = M.m12;
-      M.m22 = M.m22 + xSquared + ySquared;
+      M.setM20(M.getM02());
+      M.setM21(M.getM12());
+      M.setM22(M.getM22() + xSquared + ySquared);
    }
 
    protected void determineIfCrossPartIsZero()

@@ -60,12 +60,12 @@ public class ShipCorridorGroundProfileTest
             
             if(((initialHeight == 3.0)&&(finalHeight != 3.0)) || ((initialHeight != 3.0)&&(finalHeight == 3.0)) || ((initialHeight != 0.0)&&(finalHeight == 0.0)) || ((initialHeight == 0.0)&&(finalHeight != 0.0)))
             {
-               surfaceNormalFromGroundProfile.x = 0.0;
-               surfaceNormalFromGroundProfile.y = 0.0;
-               surfaceNormalFromGroundProfile.z = 1.0;
-               numericalSurfaceNormal.x = 0.0;
-               numericalSurfaceNormal.y = 0.0;
-               numericalSurfaceNormal.z = 1.0;         
+               surfaceNormalFromGroundProfile.setX(0.0);
+               surfaceNormalFromGroundProfile.setY(0.0);
+               surfaceNormalFromGroundProfile.setZ(1.0);
+               numericalSurfaceNormal.setX(0.0);
+               numericalSurfaceNormal.setY(0.0);
+               numericalSurfaceNormal.setZ(1.0);         
             }
             
             if(debug)

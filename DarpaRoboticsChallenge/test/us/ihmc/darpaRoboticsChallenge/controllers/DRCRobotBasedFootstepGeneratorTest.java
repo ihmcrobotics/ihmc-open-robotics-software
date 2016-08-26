@@ -92,7 +92,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    private void testPathToDestination(Point3d destination)
    {
       setupRobotParameters();
-      generateFootsteps(new FramePose2d(WORLD_FRAME), new FramePoint2d(WORLD_FRAME, destination.x, destination.y), SIDESTEP ? Math.PI / 2 : 0.0);
+      generateFootsteps(new FramePose2d(WORLD_FRAME), new FramePoint2d(WORLD_FRAME, destination.getX(), destination.getY()), SIDESTEP ? Math.PI / 2 : 0.0);
       FootstepValidityMetric footstepValidityMetric = new SemiCircularStepValidityMetric(fullRobotModel.getFoot(RobotSide.LEFT), 0.00, 1.2, 1.5);
       assertAllStepsLevelAndAtStartSoleHeight();
       assertAllStepsValid(footstepValidityMetric);

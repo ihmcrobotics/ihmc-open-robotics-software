@@ -198,9 +198,9 @@ public class ExportSimulationTo3DMaxDialogGenerator implements ExportSimulationT
             zAngle = (float) Math.toDegrees(rawAngle[2]);
             Vector3d translation = new Vector3d();
             joint.getTranslationToWorld(translation);
-            x = (float) translation.x;
-            y = (float) translation.y;
-            z = (float) translation.z;
+            x = (float) translation.getX();
+            y = (float) translation.getY();
+            z = (float) translation.getZ();
 
 //          x = offset.x;
 //          y = offset.y;
@@ -215,9 +215,9 @@ public class ExportSimulationTo3DMaxDialogGenerator implements ExportSimulationT
             double zAngle1 = Math.toDegrees(rawAngle[2]);
             Vector3d translation = new Vector3d();
             joint.getTranslationToWorld(translation);
-            double x1 = translation.x;
-            double y1 = translation.y;
-            double z1 = translation.z;
+            double x1 = translation.getX();
+            double y1 = translation.getY();
+            double z1 = translation.getZ();
 
 //          joint.getOffset(offset);
 //          offset.add(parentWorldPosition);
@@ -231,9 +231,9 @@ public class ExportSimulationTo3DMaxDialogGenerator implements ExportSimulationT
             double yAngle2 = Math.toDegrees(rawAngle[1]);
             double zAngle2 = Math.toDegrees(rawAngle[2]);
             joint.getTranslationToWorld(translation);
-            double x2 = translation.x;
-            double y2 = translation.y;
-            double z2 = translation.z;
+            double x2 = translation.getX();
+            double y2 = translation.getY();
+            double z2 = translation.getZ();
 
 //          joint.getOffset(offset);
 //          offset.add(parentWorldPosition);
@@ -339,9 +339,9 @@ public class ExportSimulationTo3DMaxDialogGenerator implements ExportSimulationT
 
    private String setRightFoot()
    {
-      String ret = "\t\trightFoot.pos = [" + convertDoubletoMaxScriptDoubleString((float) rightAnklePitchTran.x) + ","
-                   + convertDoubletoMaxScriptDoubleString((float) rightAnklePitchTran.y) + ","
-                   + convertDoubletoMaxScriptDoubleString((float) rightAnklePitchTran.z) + "]\n" + "\t\tSetObjectRotation rightFoot "
+      String ret = "\t\trightFoot.pos = [" + convertDoubletoMaxScriptDoubleString((float) rightAnklePitchTran.getX()) + ","
+                   + convertDoubletoMaxScriptDoubleString((float) rightAnklePitchTran.getY()) + ","
+                   + convertDoubletoMaxScriptDoubleString((float) rightAnklePitchTran.getZ()) + "]\n" + "\t\tSetObjectRotation rightFoot "
                    + convertDoubletoMaxScriptDoubleString(rightAnklePitchAngle[1]) + " " + convertDoubletoMaxScriptDoubleString(rightAnkleRollAngle[0])
                    + " 0 0 0 180\n";
       rightAnklePitchSet = false;
@@ -352,9 +352,9 @@ public class ExportSimulationTo3DMaxDialogGenerator implements ExportSimulationT
 
    private String setLeftFoot()
    {
-      String ret = "\t\tleftFoot.pos = [" + convertDoubletoMaxScriptDoubleString((float) leftAnklePitchTran.x) + ","
-                   + convertDoubletoMaxScriptDoubleString((float) leftAnklePitchTran.y) + ","
-                   + convertDoubletoMaxScriptDoubleString((float) leftAnklePitchTran.z) + "]\n" + "\t\tSetObjectRotation leftFoot "
+      String ret = "\t\tleftFoot.pos = [" + convertDoubletoMaxScriptDoubleString((float) leftAnklePitchTran.getX()) + ","
+                   + convertDoubletoMaxScriptDoubleString((float) leftAnklePitchTran.getY()) + ","
+                   + convertDoubletoMaxScriptDoubleString((float) leftAnklePitchTran.getZ()) + "]\n" + "\t\tSetObjectRotation leftFoot "
                    + convertDoubletoMaxScriptDoubleString(leftAnklePitchAngle[1]) + " " + convertDoubletoMaxScriptDoubleString(leftAnkleRollAngle[0])
                    + " 0 0 0 180\n";
       leftAnklePitchSet = false;

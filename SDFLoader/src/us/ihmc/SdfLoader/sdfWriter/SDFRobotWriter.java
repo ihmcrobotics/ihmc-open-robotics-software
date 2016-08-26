@@ -154,7 +154,7 @@ public abstract class SDFRobotWriter
       Vector3d scsJointAxis = new Vector3d();
       scsJoint.getJointAxis(scsJointAxis);
 
-      String xyz = String.valueOf(scsJointAxis.x) + " " + String.valueOf(scsJointAxis.y) + " " + String.valueOf(scsJointAxis.z);
+      String xyz = String.valueOf(scsJointAxis.getX()) + " " + String.valueOf(scsJointAxis.getY()) + " " + String.valueOf(scsJointAxis.getZ());
       sdfJointAxis.setXyz(xyz);
 
       sdfJointAxis.setDynamics(createJointDynamics(scsJoint));
@@ -349,12 +349,12 @@ public abstract class SDFRobotWriter
       Matrix3d scsInertia = new Matrix3d();
       scsLink.getMomentOfInertia(scsInertia);
 
-      sdfInertia.setIxx(String.valueOf(scsInertia.m00));
-      sdfInertia.setIyy(String.valueOf(scsInertia.m11));
-      sdfInertia.setIzz(String.valueOf(scsInertia.m22));
-      sdfInertia.setIxy(String.valueOf(scsInertia.m01));
-      sdfInertia.setIxz(String.valueOf(scsInertia.m02));
-      sdfInertia.setIyz(String.valueOf(scsInertia.m12));
+      sdfInertia.setIxx(String.valueOf(scsInertia.getM00()));
+      sdfInertia.setIyy(String.valueOf(scsInertia.getM11()));
+      sdfInertia.setIzz(String.valueOf(scsInertia.getM22()));
+      sdfInertia.setIxy(String.valueOf(scsInertia.getM01()));
+      sdfInertia.setIxz(String.valueOf(scsInertia.getM02()));
+      sdfInertia.setIyz(String.valueOf(scsInertia.getM12()));
 
       return sdfInertia;
    }
@@ -379,8 +379,8 @@ public abstract class SDFRobotWriter
 //         eulerAngles.x = Math.atan2(rotation.m21, rotation.m11);
 //         eulerAngles.z = 0.0;
 //      }
-      String pose = String.valueOf(translation.x) + " " + String.valueOf(translation.y) + " " + String.valueOf(translation.z) + " "
-            + String.valueOf(eulerAngles.x) + " " + String.valueOf(eulerAngles.y) + " " + String.valueOf(eulerAngles.z);
+      String pose = String.valueOf(translation.getX()) + " " + String.valueOf(translation.getY()) + " " + String.valueOf(translation.getZ()) + " "
+            + String.valueOf(eulerAngles.getX()) + " " + String.valueOf(eulerAngles.getY()) + " " + String.valueOf(eulerAngles.getZ());
       return pose;
    }
 }

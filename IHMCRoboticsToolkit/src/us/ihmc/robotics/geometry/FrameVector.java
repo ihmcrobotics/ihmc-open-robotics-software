@@ -180,11 +180,11 @@ public class FrameVector extends FrameTuple<FrameVector, TransformableVector3d> 
    {
       double x, y;
 
-      x = t1.y * t2.z - t1.z * t2.y;
-      y = t2.x * t1.z - t2.z * t1.x;
-      resultToPack.z = t1.x * t2.y - t1.y * t2.x;
-      resultToPack.x = x;
-      resultToPack.y = y;
+      x = t1.getY() * t2.getZ() - t1.getZ() * t2.getY();
+      y = t2.getX() * t1.getZ() - t2.getZ() * t1.getX();
+      resultToPack.setZ(t1.getX() * t2.getY() - t1.getY() * t2.getX());
+      resultToPack.setX(x);
+      resultToPack.setY(y);
    }
 
    public void normalize()

@@ -69,7 +69,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
          for(int i = 0; i < circles.size(); i++)
          {
             Point2d vecCenter = circles.get(i).getCenter();
-            Point openCvCenter = new Point(vecCenter.x, vecCenter.y);
+            Point openCvCenter = new Point(vecCenter.getX(), vecCenter.getY());
             int circleRadius = (int) circles.get(i).getRadius();
             Imgproc.circle(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR(), openCvCenter, circleRadius, circleColor, 1);
             Imgproc.circle(openCVColoredCircularBlobDetector.getThresholdMat(), openCvCenter, circleRadius, circleColor, 1);

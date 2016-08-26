@@ -67,7 +67,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
          {
             Point3d p = new Point3d(x, y, z);
             points.add(p);
-            tree.addPoint(p.x, p.y,p.z); //create significant Z difference so points won't be filtered.
+            tree.addPoint(p.getX(), p.getY(),p.getZ()); //create significant Z difference so points won't be filtered.
             z+=0.1;
          }
       }
@@ -86,7 +86,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
          Tuple3d minPoint=null;
          for(Tuple3d pointB: pointsB)
          {
-            double err = Math.abs(pointA.x-pointB.x) + Math.abs(pointA.y-pointB.y)+Math.abs(pointA.z-pointB.z);
+            double err = Math.abs(pointA.getX()-pointB.getX()) + Math.abs(pointA.getY()-pointB.getY())+Math.abs(pointA.getZ()-pointB.getZ());
             if(err<minError)
             {
                minError=err;

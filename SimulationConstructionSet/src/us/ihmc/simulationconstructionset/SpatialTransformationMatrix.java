@@ -42,15 +42,15 @@ public final class SpatialTransformationMatrix implements java.io.Serializable
 
       // r.set(r_i);
 
-      r_Twidle.m00 = 0.0;
-      r_Twidle.m01 = -r_i.z;
-      r_Twidle.m02 = r_i.y;
-      r_Twidle.m10 = r_i.z;
-      r_Twidle.m11 = 0.0;
-      r_Twidle.m12 = -r_i.x;
-      r_Twidle.m20 = -r_i.y;
-      r_Twidle.m21 = r_i.x;
-      r_Twidle.m22 = 0.0;
+      r_Twidle.setM00(0.0);
+      r_Twidle.setM01(-r_i.getZ());
+      r_Twidle.setM02(r_i.getY());
+      r_Twidle.setM10(r_i.getZ());
+      r_Twidle.setM11(0.0);
+      r_Twidle.setM12(-r_i.getX());
+      r_Twidle.setM20(-r_i.getY());
+      r_Twidle.setM21(r_i.getX());
+      r_Twidle.setM22(0.0);
 
       /*
        * r_Twidle.setElement(0,0, 0.0)   ;  r_Twidle.setElement(0,1, -r_i.z); r_Twidle.setElement(0,2, r_i.y);

@@ -41,9 +41,9 @@ public class RosPointCloudPublisher extends RosTopicPublisher<PointCloud2>
       ChannelBuffer buffer = new LittleEndianHeapChannelBuffer(dataLength);
       for(int i=0;i<points.length;i++)
       {
-         buffer.writeFloat((float)points[i].x);
-         buffer.writeFloat((float)points[i].y);
-         buffer.writeFloat((float)points[i].z);
+         buffer.writeFloat((float)points[i].getX());
+         buffer.writeFloat((float)points[i].getY());
+         buffer.writeFloat((float)points[i].getZ());
          buffer.writeFloat(intensities[i]);
       }
       message.setData(buffer);
@@ -70,9 +70,9 @@ public class RosPointCloudPublisher extends RosTopicPublisher<PointCloud2>
       ChannelBuffer buffer = new LittleEndianHeapChannelBuffer(dataLength);
       for(int i=0;i<points.length;i++)
       {
-         buffer.writeFloat((float)points[i].x);
-         buffer.writeFloat((float)points[i].y);
-         buffer.writeFloat((float)points[i].z);
+         buffer.writeFloat((float)points[i].getX());
+         buffer.writeFloat((float)points[i].getY());
+         buffer.writeFloat((float)points[i].getZ());
          buffer.writeByte((int)colors[i].getZ());
          buffer.writeByte((int)colors[i].getY());
          buffer.writeByte((int)colors[i].getX());

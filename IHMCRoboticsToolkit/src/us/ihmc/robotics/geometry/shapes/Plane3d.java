@@ -25,19 +25,19 @@ public class Plane3d
    public Plane3d(Point3d pointA, Point3d pointB, Point3d pointC)
    {
       point.set(pointA);
-      double v1_x = pointB.x - pointA.x;
-      double v1_y = pointB.y - pointA.y;
-      double v1_z = pointB.z - pointA.z;
+      double v1_x = pointB.getX() - pointA.getX();
+      double v1_y = pointB.getY() - pointA.getY();
+      double v1_z = pointB.getZ() - pointA.getZ();
       
-      double v2_x = pointC.x - pointA.x;
-      double v2_y = pointC.y - pointA.y;
-      double v2_z = pointC.z - pointA.z;
+      double v2_x = pointC.getX() - pointA.getX();
+      double v2_y = pointC.getY() - pointA.getY();
+      double v2_z = pointC.getZ() - pointA.getZ();
 
       double x = v1_y*v2_z - v1_z*v2_y;
       double y = v2_x*v1_z - v2_z*v1_x;
-      this.normal.z = v1_x*v2_y - v1_y*v2_x;
-      this.normal.x = x;
-      this.normal.y = y;
+      this.normal.setZ(v1_x*v2_y - v1_y*v2_x);
+      this.normal.setX(x);
+      this.normal.setY(y);
       this.normal.normalize();
    }
 
@@ -72,19 +72,19 @@ public class Plane3d
    public void setPoints(Point3d pointA, Point3d pointB, Point3d pointC)
    {
       point.set(pointA);
-      double v1_x = pointB.x - pointA.x;
-      double v1_y = pointB.y - pointA.y;
-      double v1_z = pointB.z - pointA.z;
+      double v1_x = pointB.getX() - pointA.getX();
+      double v1_y = pointB.getY() - pointA.getY();
+      double v1_z = pointB.getZ() - pointA.getZ();
       
-      double v2_x = pointC.x - pointA.x;
-      double v2_y = pointC.y - pointA.y;
-      double v2_z = pointC.z - pointA.z;
+      double v2_x = pointC.getX() - pointA.getX();
+      double v2_y = pointC.getY() - pointA.getY();
+      double v2_z = pointC.getZ() - pointA.getZ();
 
       double x = v1_y*v2_z - v1_z*v2_y;
       double y = v2_x*v1_z - v2_z*v1_x;
-      this.normal.z = v1_x*v2_y - v1_y*v2_x;
-      this.normal.x = x;
-      this.normal.y = y;
+      this.normal.setZ(v1_x*v2_y - v1_y*v2_x);
+      this.normal.setX(x);
+      this.normal.setY(y);
       this.normal.normalize();
    }
    
@@ -142,7 +142,7 @@ public class Plane3d
 
    public boolean isOnOrBelow(Point3d pointToTest, double epsilon)
    {
-      return isOnOrBelow(pointToTest.x, pointToTest.y, pointToTest.z, epsilon);
+      return isOnOrBelow(pointToTest.getX(), pointToTest.getY(), pointToTest.getZ(), epsilon);
    }
    
    public boolean isOnOrBelow(double x, double y, double z, double epsilon)

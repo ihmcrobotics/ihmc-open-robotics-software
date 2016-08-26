@@ -1079,11 +1079,11 @@ public class Graphics3DObject
 
    public void createInertiaEllipsoid(Matrix3d momentOfInertia, Vector3d comOffset, double mass, AppearanceDefinition appearance)
    {
-      Vector3d principalMomentsOfInertia = new Vector3d(momentOfInertia.m00, momentOfInertia.m11, momentOfInertia.m22);
+      Vector3d principalMomentsOfInertia = new Vector3d(momentOfInertia.getM00(), momentOfInertia.getM11(), momentOfInertia.getM22());
       Vector3d ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
 
       this.translate(comOffset);
-      this.addEllipsoid(ellipsoidRadii.x, ellipsoidRadii.y, ellipsoidRadii.z, appearance);
+      this.addEllipsoid(ellipsoidRadii.getX(), ellipsoidRadii.getY(), ellipsoidRadii.getZ(), appearance);
       this.identity();
    }
 

@@ -34,10 +34,10 @@ public class GeometryTools
    // TODO consider making line3d and moving into it
    public static double distanceFromPointToLine(Point3d point, Point3d lineStart, Point3d lineEnd)
    {
-      if (lineStart.x - lineEnd.x == 0 & lineStart.y - lineEnd.y == 0 & lineStart.z - lineEnd.z == 0)
+      if (lineStart.getX() - lineEnd.getX() == 0 & lineStart.getY() - lineEnd.getY() == 0 & lineStart.getZ() - lineEnd.getZ() == 0)
       {
-         double distance = Math.sqrt((lineStart.x - point.x) * (lineStart.x - point.x) + (lineStart.y - point.y) * (lineStart.y - point.y)
-                                     + (lineStart.z - point.z) * (lineStart.z - point.z));
+         double distance = Math.sqrt((lineStart.getX() - point.getX()) * (lineStart.getX() - point.getX()) + (lineStart.getY() - point.getY()) * (lineStart.getY() - point.getY())
+                                     + (lineStart.getZ() - point.getZ()) * (lineStart.getZ() - point.getZ()));
 
          return distance;
       }
@@ -83,7 +83,7 @@ public class GeometryTools
     */
    public static double distanceFromPointToLine(Point2d point, Point2d lineStart, Point2d lineEnd)
    {
-      return distanceFromPointToLine(point.x, point.y, lineStart.x, lineStart.y, lineEnd.x, lineEnd.y);
+      return distanceFromPointToLine(point.getX(), point.getY(), lineStart.getX(), lineStart.getY(), lineEnd.getX(), lineEnd.getY());
    }
    
    /**
@@ -172,7 +172,7 @@ public class GeometryTools
     */
    public static boolean isPointOnLeftSideOfLine(Point2d point, Point2d lineStart, Point2d lineEnd)
    {
-      return (((point.y - lineStart.y) * (lineEnd.x - lineStart.x)) - ((point.x - lineStart.x) * (lineEnd.y - lineStart.y))) > 0.0;
+      return (((point.getY() - lineStart.getY()) * (lineEnd.getX() - lineStart.getX())) - ((point.getX() - lineStart.getX()) * (lineEnd.getY() - lineStart.getY()))) > 0.0;
    }
 
    /**
@@ -206,12 +206,12 @@ public class GeometryTools
       Point2d totalPoint = new Point2d(0.0, 0.0);
       for (Point2d point : points)
       {
-         totalPoint.x += point.x;
-         totalPoint.y += point.y;
+         totalPoint.setX(totalPoint.getX() + point.getX());
+         totalPoint.setY(totalPoint.getY() + point.getY());
       }
 
-      totalPoint.x /= points.size();
-      totalPoint.y /= points.size();
+      totalPoint.setX(totalPoint.getX() / points.size());
+      totalPoint.setY(totalPoint.getY() / points.size());
 
       return totalPoint;
    }
@@ -227,14 +227,14 @@ public class GeometryTools
       Point3d totalPoint = new Point3d(0.0, 0.0, 0.0);
       for (Point3d point : points)
       {
-         totalPoint.x += point.x;
-         totalPoint.y += point.y;
-         totalPoint.z += point.z;
+         totalPoint.setX(totalPoint.getX() + point.getX());
+         totalPoint.setY(totalPoint.getY() + point.getY());
+         totalPoint.setZ(totalPoint.getZ() + point.getZ());
       }
 
-      totalPoint.x /= points.size();
-      totalPoint.y /= points.size();
-      totalPoint.z /= points.size();
+      totalPoint.setX(totalPoint.getX() / points.size());
+      totalPoint.setY(totalPoint.getY() / points.size());
+      totalPoint.setZ(totalPoint.getZ() / points.size());
 
       return totalPoint;
    }
@@ -409,11 +409,11 @@ public class GeometryTools
    // TODO ensure consistant with lineSegment2D
    public static boolean doLineSegmentsIntersect(Point2d lineStart1, Point2d lineEnd1, Point2d lineStart2, Point2d lineEnd2)
    {
-      double r1numerator = (lineEnd2.x - lineStart2.x) * (lineStart1.y - lineStart2.y) - (lineEnd2.y - lineStart2.y) * (lineStart1.x - lineStart2.x);
+      double r1numerator = (lineEnd2.getX() - lineStart2.getX()) * (lineStart1.getY() - lineStart2.getY()) - (lineEnd2.getY() - lineStart2.getY()) * (lineStart1.getX() - lineStart2.getX());
 
-      double r1denominator = (lineEnd2.y - lineStart2.y) * (lineEnd1.x - lineStart1.x) - (lineEnd2.x - lineStart2.x) * (lineEnd1.y - lineStart1.y);
+      double r1denominator = (lineEnd2.getY() - lineStart2.getY()) * (lineEnd1.getX() - lineStart1.getX()) - (lineEnd2.getX() - lineStart2.getX()) * (lineEnd1.getY() - lineStart1.getY());
 
-      double r2numerator = (lineEnd1.x - lineStart1.x) * (lineStart1.y - lineStart2.y) - (lineEnd1.y - lineStart1.y) * (lineStart1.x - lineStart2.x);
+      double r2numerator = (lineEnd1.getX() - lineStart1.getX()) * (lineStart1.getY() - lineStart2.getY()) - (lineEnd1.getY() - lineStart1.getY()) * (lineStart1.getX() - lineStart2.getX());
 
       double r2denominator = r1denominator;
 
@@ -422,19 +422,19 @@ public class GeometryTools
       if ((r1numerator == 0.0) && (r2numerator == 0.0) && (r1denominator == 0.0))
       {
          double ls1, le1, ls2, le2;
-         if (lineStart1.x != lineEnd1.x)
+         if (lineStart1.getX() != lineEnd1.getX())
          {
-            ls1 = lineStart1.x;
-            le1 = lineEnd1.x;
-            ls2 = lineStart2.x;
-            le2 = lineEnd2.x;
+            ls1 = lineStart1.getX();
+            le1 = lineEnd1.getX();
+            ls2 = lineStart2.getX();
+            le2 = lineEnd2.getX();
          }
          else
          {
-            ls1 = lineStart1.y;
-            le1 = lineEnd1.y;
-            ls2 = lineStart2.y;
-            le2 = lineEnd2.y;
+            ls1 = lineStart1.getY();
+            le1 = lineEnd1.getY();
+            ls2 = lineStart2.getY();
+            le2 = lineEnd2.getY();
          }
 
          // If both first points are less than both second points, the line
@@ -625,7 +625,7 @@ public class GeometryTools
    public static double[] getLineSegmentPercentagesIfIntersecting(Point2d lineStart1, Point2d lineEnd1, Point2d lineStart2, Point2d lineEnd2)
    {
       double[] garbage = new double[2];
-      getLineSegmentPercentagesIfIntersecting(lineStart1.x, lineStart1.y, lineEnd1.x, lineEnd1.y, lineStart2.x, lineStart2.y, lineEnd2.x, lineEnd2.y, garbage);
+      getLineSegmentPercentagesIfIntersecting(lineStart1.getX(), lineStart1.getY(), lineEnd1.getX(), lineEnd1.getY(), lineStart2.getX(), lineStart2.getY(), lineEnd2.getX(), lineEnd2.getY(), garbage);
       return garbage;
    }
    
@@ -750,7 +750,7 @@ public class GeometryTools
    
    public static void getPerpendicularVector(Vector2d perpendicularVectorToPack, Vector2d vector)
    {
-      perpendicularVectorToPack.set(-vector.y, vector.x);
+      perpendicularVectorToPack.set(-vector.getY(), vector.getX());
    }
    
    public static void getPerpendicularVector2d(FrameVector perpendicularVectorToPack, FrameVector vector)
@@ -873,8 +873,8 @@ public class GeometryTools
       Vector2d bisectorDirection2d = new Vector2d();
 
       getPerpendicularBisector(lineStart2d, lineEnd2d, bisectorStart2d, bisectorDirection2d);
-      bisectorDirection.set(bisectorDirection2d.x, bisectorDirection2d.y, 0.0);
-      bisectorStart.set(bisectorStart2d.x, bisectorStart2d.y, 0.0);
+      bisectorDirection.set(bisectorDirection2d.getX(), bisectorDirection2d.getY(), 0.0);
+      bisectorStart.set(bisectorStart2d.getX(), bisectorStart2d.getY(), 0.0);
    }
 
    /**
@@ -894,7 +894,7 @@ public class GeometryTools
 
       bisectorStart.scaleAdd(0.5, lineDirection, lineStart);
 
-      bisectorDirection.set(-lineDirection.y, lineDirection.x);
+      bisectorDirection.set(-lineDirection.getY(), lineDirection.getX());
       bisectorDirection.normalize();
    }
 
@@ -1099,13 +1099,13 @@ public class GeometryTools
 
    public static double getAngleFromFirstToSecondVector(Vector2d firstVector, Vector2d secondVector)
    {
-      Vector3d firstVector3d = new Vector3d(firstVector.x, firstVector.y, 0.0);
+      Vector3d firstVector3d = new Vector3d(firstVector.getX(), firstVector.getY(), 0.0);
       if (firstVector3d.length() < 1e-7)
          return 0.0;
       else
          firstVector3d.normalize();
 
-      Vector3d secondVector3d = new Vector3d(secondVector.x, secondVector.y, 0.0);
+      Vector3d secondVector3d = new Vector3d(secondVector.getX(), secondVector.getY(), 0.0);
       if (secondVector3d.length() < 1e-7)
          return 0.0;
       else
@@ -1121,14 +1121,14 @@ public class GeometryTools
       double angleMagnitude = Math.acos(dotProduct);
 
       double ret;
-      if (crossProduct.z > 0.0)
+      if (crossProduct.getZ() > 0.0)
          ret = angleMagnitude;
       else
          ret = -angleMagnitude;
 
       if (Double.isNaN(ret))
       {
-         throw new RuntimeException("NaN. dotProduct = " + dotProduct + ", crossProduct.z = " + crossProduct.z + ", firstVector = " + firstVector
+         throw new RuntimeException("NaN. dotProduct = " + dotProduct + ", crossProduct.z = " + crossProduct.getZ() + ", firstVector = " + firstVector
                                     + ", secondVector = " + secondVector);
       }
       else
@@ -1190,8 +1190,8 @@ public class GeometryTools
     */
    public static double distanceBetweenPoints(Point2d a, Point2d b)
    {
-      double deltaX = b.x - a.x;
-      double deltaY = b.y - a.y;
+      double deltaX = b.getX() - a.getX();
+      double deltaY = b.getY() - a.getY();
       return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
    }
 
@@ -1857,7 +1857,7 @@ public class GeometryTools
       }
 
       tangentIndex1 = vIndex;
-      Vector2d tangent1 = new Vector2d(polygon.getVertex(tangentIndex1).x - point.x,polygon.getVertex(tangentIndex1).y - point.y);
+      Vector2d tangent1 = new Vector2d(polygon.getVertex(tangentIndex1).getX() - point.getX(),polygon.getVertex(tangentIndex1).getY() - point.getY());
 
       vIndex++;
       vIndex %= polygon.getNumberOfVertices();
@@ -1869,7 +1869,7 @@ public class GeometryTools
       }
 
       tangentIndex2 = vIndex;
-      Vector2d tangent2 = new Vector2d(polygon.getVertex(tangentIndex2).x - point.x, polygon.getVertex(tangentIndex2).y - point.y);
+      Vector2d tangent2 = new Vector2d(polygon.getVertex(tangentIndex2).getX() - point.getX(), polygon.getVertex(tangentIndex2).getY() - point.getY());
 
       if (getAngleFromFirstToSecondVector(tangent1, tangent2) > 0)
       {
@@ -1890,9 +1890,9 @@ public class GeometryTools
       int nextIndex = (vertexIndex + 1) % polygon.getNumberOfVertices();
       Point2d previous = polygon.getVertex(previousIndex);
       Point2d next = polygon.getVertex(nextIndex);
-      Vector2d base = new Vector2d(point.x - vertex.x, point.y - vertex.y);
-      Vector2d first = new Vector2d(previous.x - vertex.x, previous.y - vertex.y);
-      Vector2d second = new Vector2d(next.x - vertex.x, next.y - vertex.y);
+      Vector2d base = new Vector2d(point.getX() - vertex.getX(), point.getY() - vertex.getY());
+      Vector2d first = new Vector2d(previous.getX() - vertex.getX(), previous.getY() - vertex.getY());
+      Vector2d second = new Vector2d(next.getX() - vertex.getX(), next.getY() - vertex.getY());
       double firstAngle = getAngleFromFirstToSecondVector(base, first);
       double secondAngle = getAngleFromFirstToSecondVector(base, second);
 
@@ -1947,17 +1947,17 @@ public class GeometryTools
          v1Median = polygon1.getVertex(v1MedianIndex);
          v2Median = polygon2.getVertex(v2MedianIndex);
 
-         Vector2d m = new Vector2d(v2Median.x - v1Median.x, v2Median.y - v1Median.y);
-         Vector2d mReversed = new Vector2d(v1Median.x - v2Median.x, v1Median.y - v2Median.y);
+         Vector2d m = new Vector2d(v2Median.getX() - v1Median.getX(), v2Median.getY() - v1Median.getY());
+         Vector2d mReversed = new Vector2d(v1Median.getX() - v2Median.getX(), v1Median.getY() - v2Median.getY());
 
          int edge1AStart = ((v1MedianIndex + numberOfVertices1 - 1) % numberOfVertices1);
          int edge1BEnd = (v1MedianIndex + 1) % numberOfVertices1;
          int edge2BStart = ((v2MedianIndex + numberOfVertices2 - 1) % numberOfVertices2);
          int edge2AEnd = (v2MedianIndex + 1) % numberOfVertices2;
-         Vector2d edge1A = new Vector2d(polygon1.getVertex(edge1AStart).x - v1Median.x, polygon1.getVertex(edge1AStart).y - v1Median.y);
-         Vector2d edge1B = new Vector2d(polygon1.getVertex(edge1BEnd).x - v1Median.x, polygon1.getVertex(edge1BEnd).y - v1Median.y);
-         Vector2d edge2A = new Vector2d(polygon2.getVertex(edge2AEnd).x - v2Median.x, polygon2.getVertex(edge2AEnd).y - v2Median.y);
-         Vector2d edge2B = new Vector2d(polygon2.getVertex(edge2BStart).x - v2Median.x, polygon2.getVertex(edge2BStart).y - v2Median.y);
+         Vector2d edge1A = new Vector2d(polygon1.getVertex(edge1AStart).getX() - v1Median.getX(), polygon1.getVertex(edge1AStart).getY() - v1Median.getY());
+         Vector2d edge1B = new Vector2d(polygon1.getVertex(edge1BEnd).getX() - v1Median.getX(), polygon1.getVertex(edge1BEnd).getY() - v1Median.getY());
+         Vector2d edge2A = new Vector2d(polygon2.getVertex(edge2AEnd).getX() - v2Median.getX(), polygon2.getVertex(edge2AEnd).getY() - v2Median.getY());
+         Vector2d edge2B = new Vector2d(polygon2.getVertex(edge2BStart).getX() - v2Median.getX(), polygon2.getVertex(edge2BStart).getY() - v2Median.getY());
 
          // see diagram 3.2 in [Edelsbrunner]
          double angle1A = getAngleFromFirstToSecondVector(m, edge1A); // A' in diagram
@@ -2365,7 +2365,7 @@ public class GeometryTools
          }
 
          // outward normal of the edge
-         Vector2d ni = new Vector2d(V0toV1.y, -V0toV1.x);
+         Vector2d ni = new Vector2d(V0toV1.getY(), -V0toV1.getX());
          if (DEBUG)
          {
             System.out.println("ni = " + ni);

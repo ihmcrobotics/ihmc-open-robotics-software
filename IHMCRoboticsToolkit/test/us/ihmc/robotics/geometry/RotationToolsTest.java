@@ -396,7 +396,7 @@ public class RotationToolsTest
             Quat4d expectedQuaternion = quaternionsToTest[i][j];
             // The conversion from quaternion to matrix is trivial => safe.
             expectedRotationMatrix.set(expectedQuaternion);
-            RotationTools.convertQuaternionToYawPitchRoll(expectedQuaternion.x, expectedQuaternion.y, expectedQuaternion.z, expectedQuaternion.w, actualYawPitchRoll);
+            RotationTools.convertQuaternionToYawPitchRoll(expectedQuaternion.getX(), expectedQuaternion.getY(), expectedQuaternion.getZ(), expectedQuaternion.getW(), actualYawPitchRoll);
 
             yawRotation.rotZ(actualYawPitchRoll[0]);
             pitchRotation.rotY(actualYawPitchRoll[1]);
@@ -523,8 +523,8 @@ public class RotationToolsTest
          {
             Quat4d expectedQuaternion = quaternionsToTest[i][j];
             expectedAxisAngle.set(expectedQuaternion);
-            rotationVector.set(expectedAxisAngle.x, expectedAxisAngle.y, expectedAxisAngle.z);
-            rotationVector.scale(expectedAxisAngle.angle);
+            rotationVector.set(expectedAxisAngle.getX(), expectedAxisAngle.getY(), expectedAxisAngle.getZ());
+            rotationVector.scale(expectedAxisAngle.getAngle());
 
             RotationTools.convertRotationVectorToAxisAngle(rotationVector, actualAxisAngle);
 
@@ -554,8 +554,8 @@ public class RotationToolsTest
             Quat4d expectedQuaternion = quaternionsToTest[i][j];
             expectedRotationMatrix.set(expectedQuaternion);
             expectedAxisAngle.set(expectedQuaternion);
-            rotationVector.set(expectedAxisAngle.x, expectedAxisAngle.y, expectedAxisAngle.z);
-            rotationVector.scale(expectedAxisAngle.angle);
+            rotationVector.set(expectedAxisAngle.getX(), expectedAxisAngle.getY(), expectedAxisAngle.getZ());
+            rotationVector.scale(expectedAxisAngle.getAngle());
 
             RotationTools.convertRotationVectorToMatrix(rotationVector, actualRotationMatrix);
 
@@ -1067,7 +1067,7 @@ public class RotationToolsTest
       //      System.err.println(" net:" + qdiff);
       AxisAngle4d axDiff = new AxisAngle4d();
       axDiff.set(qdiff);
-      Vector3d vdiff = new Vector3d(axDiff.x * axDiff.angle, axDiff.y * axDiff.angle, axDiff.z * axDiff.angle);
+      Vector3d vdiff = new Vector3d(axDiff.getX() * axDiff.getAngle(), axDiff.getY() * axDiff.getAngle(), axDiff.getZ() * axDiff.getAngle());
       assertEquals(0, vdiff.length(), 1e-5);
    }
 

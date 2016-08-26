@@ -31,7 +31,7 @@ public class DecayingResolutionFilter
 
    public boolean add(Point3d p)
    {
-      return add(p.x, p.y, p.z);
+      return add(p.getX(), p.getY(), p.getZ());
    }
 
    public boolean add(double x, double y, double z)
@@ -104,7 +104,7 @@ public class DecayingResolutionFilter
 
    private long hash(TimestampedPoint point)
    {
-      return hash(point.x, point.y, point.z, resolution);
+      return hash(point.getX(), point.getY(), point.getZ(), resolution);
    }
 
    private static final int bits = 20;
@@ -197,15 +197,15 @@ public class DecayingResolutionFilter
 
       for (Point3f p : points)
       {
-         dx = origin.x - p.x;
-         dy = origin.y - p.y;
-         dz = origin.z - p.z;
+         dx = origin.getX() - p.getX();
+         dy = origin.getY() - p.getY();
+         dz = origin.getZ() - p.getZ();
 
-         dot = dx * direction.x + dy * direction.y + dz * direction.z;
+         dot = dx * direction.getX() + dy * direction.getY() + dz * direction.getZ();
 
-         dx = dx - dot * direction.x;
-         dy = dy - dot * direction.y;
-         dz = dz - dot * direction.z;
+         dx = dx - dot * direction.getX();
+         dy = dy - dot * direction.getY();
+         dz = dz - dot * direction.getZ();
 
          distanceToLine = Math.sqrt(dx * dx + dy * dy + dz * dz);
 

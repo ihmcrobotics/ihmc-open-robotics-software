@@ -49,13 +49,13 @@ public class QuaternionCalculus
          return;
       }
       
-      quaternionToPack.w = Math.cos(0.5 * length);
+      quaternionToPack.setW(Math.cos(0.5 * length));
       double s = Math.sin(0.5 * length);
       vectorForExp.set(rotationVector);
       vectorForExp.scale(1.0 / length);
-      quaternionToPack.x = s * vectorForExp.x;
-      quaternionToPack.y = s * vectorForExp.y;
-      quaternionToPack.z = s * vectorForExp.z;
+      quaternionToPack.setX(s * vectorForExp.getX());
+      quaternionToPack.setY(s * vectorForExp.getY());
+      quaternionToPack.setZ(s * vectorForExp.getZ());
    }
 
    /**

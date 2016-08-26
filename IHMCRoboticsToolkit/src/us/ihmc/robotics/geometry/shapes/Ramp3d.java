@@ -172,13 +172,13 @@ public class Ramp3d implements Shape3d
       inverseTransform.transform(temporaryPoint);
       transformFromRampToAngledFrame.transform(temporaryPoint);
 
-      boolean isInsideOrOnSurface = ((temporaryPoint.z <= epsilon) && (Math.abs(temporaryPoint.y) < 0.5 * width + epsilon) && (temporaryPoint.x >= -epsilon)
-                                     && (temporaryPoint.x <= rampLength + epsilon));
+      boolean isInsideOrOnSurface = ((temporaryPoint.getZ() <= epsilon) && (Math.abs(temporaryPoint.getY()) < 0.5 * width + epsilon) && (temporaryPoint.getX() >= -epsilon)
+                                     && (temporaryPoint.getX() <= rampLength + epsilon));
 
       transformFromAngledFrameToRamp.transform(temporaryPoint);
 
-      isInsideOrOnSurface = isInsideOrOnSurface && (temporaryPoint.x <= epsilon + length) && (temporaryPoint.x >= -epsilon)
-                            && (temporaryPoint.z <= epsilon + height) && (temporaryPoint.z >= -epsilon);
+      isInsideOrOnSurface = isInsideOrOnSurface && (temporaryPoint.getX() <= epsilon + length) && (temporaryPoint.getX() >= -epsilon)
+                            && (temporaryPoint.getZ() <= epsilon + height) && (temporaryPoint.getZ() >= -epsilon);
 
       return isInsideOrOnSurface;
    }
@@ -256,16 +256,16 @@ public class Ramp3d implements Shape3d
    {
       double delta = 0.002;
       
-      boolean insideWidth = (pointTransformedOntoRampCoordinates.y <= 0.5 * width - delta) && (pointTransformedOntoRampCoordinates.y >= -0.5 * width + delta);
-      boolean insideLength = (pointTransformedOntoRampCoordinates.x >= delta) && (pointTransformedOntoRampCoordinates.x <= rampLength - delta);
+      boolean insideWidth = (pointTransformedOntoRampCoordinates.getY() <= 0.5 * width - delta) && (pointTransformedOntoRampCoordinates.getY() >= -0.5 * width + delta);
+      boolean insideLength = (pointTransformedOntoRampCoordinates.getX() >= delta) && (pointTransformedOntoRampCoordinates.getX() <= rampLength - delta);
       boolean onOrAboveSurface = pointTransformedOntoRampCoordinates.getZ() > -1e-3;
       return (insideWidth && insideLength && onOrAboveSurface);
    }
    
    private boolean canBeProjectedDirectlyOntoBottomOfRamp(Point3d pointTransformedOntoRampCoordinates)
    {
-      boolean insideWidth = Math.abs(pointTransformedOntoRampCoordinates.y) <= 0.5 * width;
-      boolean insideLength = (pointTransformedOntoRampCoordinates.x >= 0.0) && (pointTransformedOntoRampCoordinates.x <= length);
+      boolean insideWidth = Math.abs(pointTransformedOntoRampCoordinates.getY()) <= 0.5 * width;
+      boolean insideLength = (pointTransformedOntoRampCoordinates.getX() >= 0.0) && (pointTransformedOntoRampCoordinates.getX() <= length);
       boolean onSurface = Math.abs(pointTransformedOntoRampCoordinates.getZ()) < 1e-3;
       return (insideWidth && insideLength && onSurface);
    }
@@ -302,7 +302,7 @@ public class Ramp3d implements Shape3d
             return;
          }
          
-         normalToPack.set(surfaceNormal.x, surfaceNormal.y, surfaceNormal.z);
+         normalToPack.set(surfaceNormal.getX(), surfaceNormal.getY(), surfaceNormal.getZ());
          return;
       }
       

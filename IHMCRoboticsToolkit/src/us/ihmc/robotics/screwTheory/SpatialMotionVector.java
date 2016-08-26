@@ -217,13 +217,13 @@ public abstract class SpatialMotionVector
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
 
-      angularPart.x = matrix.get(rowStart + 0, 0);
-      angularPart.y = matrix.get(rowStart + 1, 0);
-      angularPart.z = matrix.get(rowStart + 2, 0);
+      angularPart.setX(matrix.get(rowStart + 0, 0));
+      angularPart.setY(matrix.get(rowStart + 1, 0));
+      angularPart.setZ(matrix.get(rowStart + 2, 0));
 
-      linearPart.x = matrix.get(rowStart + 3, 0);
-      linearPart.y = matrix.get(rowStart + 4, 0);
-      linearPart.z = matrix.get(rowStart + 5, 0);
+      linearPart.setX(matrix.get(rowStart + 3, 0));
+      linearPart.setY(matrix.get(rowStart + 4, 0));
+      linearPart.setZ(matrix.get(rowStart + 5, 0));
    }
    
    
@@ -370,23 +370,23 @@ public abstract class SpatialMotionVector
    
    public void getMatrix(DenseMatrix64F matrix, int rowStart)
    {
-      matrix.set(rowStart + 0, 0, angularPart.x);
-      matrix.set(rowStart + 1, 0, angularPart.y);
-      matrix.set(rowStart + 2, 0, angularPart.z);
+      matrix.set(rowStart + 0, 0, angularPart.getX());
+      matrix.set(rowStart + 1, 0, angularPart.getY());
+      matrix.set(rowStart + 2, 0, angularPart.getZ());
 
-      matrix.set(rowStart + 3, 0, linearPart.x);
-      matrix.set(rowStart + 4, 0, linearPart.y);
-      matrix.set(rowStart + 5, 0, linearPart.z);
+      matrix.set(rowStart + 3, 0, linearPart.getX());
+      matrix.set(rowStart + 4, 0, linearPart.getY());
+      matrix.set(rowStart + 5, 0, linearPart.getZ());
    }
    
    public void getArray(double[] array, int offset)
    {
-      array[offset + 0] =  angularPart.x;
-      array[offset + 1] =  angularPart.y;
-      array[offset + 2] =  angularPart.z;
-      array[offset + 3] =  linearPart.x;
-      array[offset + 4] =  linearPart.y;
-      array[offset + 5] =  linearPart.z;
+      array[offset + 0] =  angularPart.getX();
+      array[offset + 1] =  angularPart.getY();
+      array[offset + 2] =  angularPart.getZ();
+      array[offset + 3] =  linearPart.getX();
+      array[offset + 4] =  linearPart.getY();
+      array[offset + 5] =  linearPart.getZ();
    }
 
    /**

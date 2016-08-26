@@ -66,10 +66,10 @@ public class LineArtifact extends Artifact
    {
       if (isVisible)
       {
-         int x1 = Xcenter + ((int) Math.round(point1.x * scaleFactor));
-         int y1 = Ycenter - ((int) Math.round(point1.y * scaleFactor));
-         int x2 = Xcenter + ((int) Math.round(point2.x * scaleFactor));
-         int y2 = Ycenter - ((int) Math.round(point2.y * scaleFactor));
+         int x1 = Xcenter + ((int) Math.round(point1.getX() * scaleFactor));
+         int y1 = Ycenter - ((int) Math.round(point1.getY() * scaleFactor));
+         int x2 = Xcenter + ((int) Math.round(point2.getX() * scaleFactor));
+         int y2 = Ycenter - ((int) Math.round(point2.getY() * scaleFactor));
          graphics2d.setColor(color);
          Stroke currentStroke = graphics2d.getStroke();
          graphics2d.setStroke(new BasicStroke(lineThickness));

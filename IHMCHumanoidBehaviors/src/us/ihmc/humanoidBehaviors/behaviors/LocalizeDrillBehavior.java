@@ -110,7 +110,7 @@ public class LocalizeDrillBehavior extends BehaviorInterface implements VideoStr
          {
             Point3f point = points[i];
 
-            output.println(point.x + " " + point.y + " " + point.z);
+            output.println(point.getX() + " " + point.getY() + " " + point.getZ());
          }
          output.close();
       }

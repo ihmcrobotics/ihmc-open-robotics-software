@@ -41,7 +41,7 @@ public class LogVisualizerListenerDemo implements YoVariableLogPlaybackListener
       
       Point3d position = new Point3d();
       origin.getPosition(position);
-      System.out.println("pos: " + position.x + " " + position.y + " " + position.z + " - {");
+      System.out.println("pos: " + position.getX() + " " + position.getY() + " " + position.getZ() + " - {");
       for(OneDegreeOfFreedomJoint joint : joints)
       {
          System.out.print(joint.getQ().getDoubleValue() + ",");

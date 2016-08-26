@@ -374,9 +374,9 @@ public class TransformInterpolationCalculatorTest
       // This seems to work much better than going to quaternions first, especially when yaw is large...
       Matrix3d rotationMatrix = new Matrix3d();
       transform3D.getRotation(rotationMatrix);
-      yawPitchRoll[0] = Math.atan2(rotationMatrix.m10, rotationMatrix.m00);
-      yawPitchRoll[1] = Math.asin(-rotationMatrix.m20);
-      yawPitchRoll[2] = Math.atan2(rotationMatrix.m21, rotationMatrix.m22);
+      yawPitchRoll[0] = Math.atan2(rotationMatrix.getM10(), rotationMatrix.getM00());
+      yawPitchRoll[1] = Math.asin(-rotationMatrix.getM20());
+      yawPitchRoll[2] = Math.atan2(rotationMatrix.getM21(), rotationMatrix.getM22());
 
       if (Double.isNaN(yawPitchRoll[0]) || Double.isNaN(yawPitchRoll[1]) || Double.isNaN(yawPitchRoll[2]))
       {

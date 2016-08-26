@@ -203,10 +203,10 @@ public class FloatingPlanarJoint extends Joint
 
    public void setCartesianPosition(Tuple2d position, Tuple2d velocity)
    {
-      q_t1.set(position.x);
-      q_t2.set(position.y);
-      qd_t1.set(velocity.x);
-      qd_t2.set(velocity.y);
+      q_t1.set(position.getX());
+      q_t2.set(position.getY());
+      qd_t1.set(velocity.getX());
+      qd_t2.set(velocity.getY());
    }
    
    public void setCartesianVelocity(Tuple2d velocity)

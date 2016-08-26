@@ -84,7 +84,7 @@ public class PointCloudWorldPacketGenerator implements Runnable
       ArrayList<Point3d> nearScanPoints = new ArrayList<>();
       for (TimestampedPoint point : nearScanTimestampedPoints)
       {
-         nearScanPoints.add(new Point3d(point.x, point.y, point.z));
+         nearScanPoints.add(new Point3d(point.getX(), point.getY(), point.getZ()));
       }
       packet.setDecayingWorldScan(nearScanPoints.toArray(new Point3d[nearScanPoints.size()]));
       packet.timestamp = System.nanoTime();

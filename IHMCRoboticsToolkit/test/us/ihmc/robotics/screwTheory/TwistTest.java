@@ -528,7 +528,7 @@ public class TwistTest extends SpatialMotionVectorTest
 
    private static void fromTildeForm(Vector3d omegaToPack, Matrix3d omegaTilde)
    {
-      omegaToPack.set(omegaTilde.m21, omegaTilde.m02, omegaTilde.m10);
+      omegaToPack.set(omegaTilde.getM21(), omegaTilde.getM02(), omegaTilde.getM10());
    }
 
    @Override

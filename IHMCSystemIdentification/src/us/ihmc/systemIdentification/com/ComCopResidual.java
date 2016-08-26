@@ -125,7 +125,7 @@ public class ComCopResidual implements FunctionNtoM
       {
          Vector3d lastCom = new Vector3d();
          targetLink.getComOffset(lastCom);
-         targetLink.setComOffset(inParameter[0], lastCom.y, inParameter[2]);
+         targetLink.setComOffset(inParameter[0], lastCom.getY(), inParameter[2]);
       }
       else
       {
@@ -138,8 +138,8 @@ public class ComCopResidual implements FunctionNtoM
 
       for (int i = 0; i < com.size(); i++)
       {
-         outError[2 * i] = cop.get(i).x - com.get(i).x;
-         outError[2 * i + 1] = cop.get(i).y - com.get(i).y;
+         outError[2 * i] = cop.get(i).getX() - com.get(i).getX();
+         outError[2 * i + 1] = cop.get(i).getY() - com.get(i).getY();
       }
    }
 
@@ -174,8 +174,8 @@ public class ComCopResidual implements FunctionNtoM
 
       for (int i = 0; i < nSamples; i += nSamples / numPlotSample)
       {
-         plotter.addArtifact(new CircleArtifact("sensedCoP" + i, cop.get(i).x, cop.get(i).y, 0.005, true, Color.RED));
-         plotter.addArtifact(new CircleArtifact("modelCoM" + i, com.get(i).x, com.get(i).y, 0.01, false, Color.RED));
+         plotter.addArtifact(new CircleArtifact("sensedCoP" + i, cop.get(i).getX(), cop.get(i).getY(), 0.005, true, Color.RED));
+         plotter.addArtifact(new CircleArtifact("modelCoM" + i, com.get(i).getX(), com.get(i).getY(), 0.01, false, Color.RED));
       }
    }
 

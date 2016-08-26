@@ -83,8 +83,8 @@ public class RateLimitedYoFrameVector2d extends YoFrameVector2d
 
    public void update(Vector2d vector2dUnfiltered)
    {
-      x.update(vector2dUnfiltered.x);
-      y.update(vector2dUnfiltered.y);
+      x.update(vector2dUnfiltered.getX());
+      y.update(vector2dUnfiltered.getY());
    }
 
    public void update(FrameTuple2d<?, ?> vector2dUnfiltered)
