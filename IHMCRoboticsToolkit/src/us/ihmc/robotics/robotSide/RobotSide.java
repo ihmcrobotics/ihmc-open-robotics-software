@@ -1,5 +1,6 @@
 package us.ihmc.robotics.robotSide;
 
+import java.util.EnumSet;
 import java.util.Random;
 
 /**
@@ -18,6 +19,7 @@ public enum RobotSide
 {
    LEFT, RIGHT;
 
+   public static final EnumSet<RobotSide> set = EnumSet.allOf(RobotSide.class);
    public static final RobotSide[] values = values();
 
    public static RobotSide generateRandomRobotSide(Random random)
