@@ -22,8 +22,8 @@ public class StateMachineTest
    private final int MAX_NUMBER_OF_CALLS = 2;
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
-	@Test//(timeout = 30000)
-   public void testStateTransition()
+	@Test(timeout = 30000)
+   public void testStateTransitions()
    {
       ArrayList<Double> listOfActions = new ArrayList<Double>();
 
@@ -55,6 +55,7 @@ public class StateMachineTest
       {
          stateMachine.doAction();
          stateMachine.checkTransitionConditions();
+         time.add(0.01);
       }
       while (!stateMachine.getCurrentStateEnum().equals(States.values()[States.values().length - 1]));
 
