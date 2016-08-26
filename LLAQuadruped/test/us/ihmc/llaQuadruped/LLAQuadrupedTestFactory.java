@@ -1,6 +1,7 @@
 package us.ihmc.llaQuadruped;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
@@ -58,7 +59,7 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
       QuadrupedSimulationInitialPositionParameters initialPositionParameters = new LLAQuadrupedSimulationInitialPositionParameters();
       GroundContactParameters groundContactParameters = new LLAQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new LLAQuadrupedSensorInformation();
-      ParameterRegistry.getInstance().loadFromResources("parameters/simulation.param");
+      ParameterRegistry.getInstance().loadFromResources(Paths.get("parameters/simulation.param"));
       StateEstimatorParameters stateEstimatorParameters = new LLAQuadrupedStateEstimatorParameters();
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new LLAQuadrupedPositionBasedCrawlControllerParameters();
       
