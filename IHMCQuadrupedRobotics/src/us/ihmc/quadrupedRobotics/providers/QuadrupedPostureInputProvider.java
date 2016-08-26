@@ -17,7 +17,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-public class QuadrupedControllerInputProvider implements QuadrupedControllerInputProviderInterface
+public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProviderInterface
 {
    private final ParameterFactory parameterFactory = ParameterFactory.createWithoutRegistry(getClass());
    private final DoubleParameter comHeightNominalParameter = parameterFactory.createDouble("comHeightNominal", 0.55);
@@ -29,14 +29,11 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
    private final DoubleArrayParameter bodyOrientationUpperLimitsParameter = parameterFactory.createDoubleArray("bodyOrientationUpperLimits", Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
    private final DoubleArrayParameter bodyAngularRateLowerLimitsParameter = parameterFactory.createDoubleArray("bodyAngularRateLowerLimits", -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
    private final DoubleArrayParameter bodyAngularRateUpperLimitsParameter = parameterFactory.createDoubleArray("bodyAngularRateUpperLimits", Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-   private final DoubleArrayParameter planarVelocityLowerLimitsParameter = parameterFactory.createDoubleArray("planarVelocityLowerLimits", -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-   private final DoubleArrayParameter planarVelocityUpperLimitsParameter = parameterFactory.createDoubleArray("planarVelocityUpperLimits", Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 
    private final AtomicReference<ComPositionPacket> comPositionPacket;
    private final AtomicReference<ComVelocityPacket> comVelocityPacket;
    private final AtomicReference<BodyOrientationPacket> bodyOrientationPacket;
    private final AtomicReference<BodyAngularRatePacket> bodyAngularRatePacket;
-   private final AtomicReference<PlanarVelocityPacket> planarVelocityPacket;
    private final DoubleYoVariable yoComPositionInputX;
    private final DoubleYoVariable yoComPositionInputY;
    private final DoubleYoVariable yoComPositionInputZ;
@@ -49,22 +46,17 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
    private final DoubleYoVariable yoBodyAngularRateInputX;
    private final DoubleYoVariable yoBodyAngularRateInputY;
    private final DoubleYoVariable yoBodyAngularRateInputZ;
-   private final DoubleYoVariable yoPlanarVelocityInputX;
-   private final DoubleYoVariable yoPlanarVelocityInputY;
-   private final DoubleYoVariable yoPlanarVelocityInputZ;
    private final Point3d comPositionInput;
    private final Vector3d comVelocityInput;
    private final Quat4d bodyOrientationInput;
    private final Vector3d bodyAngularRateInput;
-   private final Vector3d planarVelocityInput;
 
-   public QuadrupedControllerInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry registry)
+   public QuadrupedPostureInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry registry)
    {
       comPositionPacket = new AtomicReference<>(new ComPositionPacket());
       comVelocityPacket = new AtomicReference<>(new ComVelocityPacket());
       bodyOrientationPacket = new AtomicReference<>(new BodyOrientationPacket());
       bodyAngularRatePacket = new AtomicReference<>(new BodyAngularRatePacket());
-      planarVelocityPacket = new AtomicReference<>(new PlanarVelocityPacket());
       yoComPositionInputX = new DoubleYoVariable("comPositionInputX", registry);
       yoComPositionInputY = new DoubleYoVariable("comPositionInputY", registry);
       yoComPositionInputZ = new DoubleYoVariable("comPositionInputZ", registry);
@@ -77,14 +69,10 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
       yoBodyAngularRateInputX = new DoubleYoVariable("bodyAngularRateInputX", registry);
       yoBodyAngularRateInputY = new DoubleYoVariable("bodyAngularRateInputY", registry);
       yoBodyAngularRateInputZ = new DoubleYoVariable("bodyAngularRateInputZ", registry);
-      yoPlanarVelocityInputX = new DoubleYoVariable("planarVelocityInputX", registry);
-      yoPlanarVelocityInputY = new DoubleYoVariable("planarVelocityInputY", registry);
-      yoPlanarVelocityInputZ = new DoubleYoVariable("planarVelocityInputZ", registry);
       comPositionInput = new Point3d();
       comVelocityInput = new Vector3d();
       bodyOrientationInput = new Quat4d();
       bodyAngularRateInput = new Vector3d();
-      planarVelocityInput = new Vector3d();
 
       // initialize com height
       yoComPositionInputZ.set(comHeightNominalParameter.get());
@@ -150,21 +138,6 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
                      bodyAngularRateUpperLimitsParameter.get(2)));
             }
          });
-
-         globalDataProducer.attachListener(PlanarVelocityPacket.class, new PacketConsumer<PlanarVelocityPacket>()
-         {
-            @Override
-            public void receivedPacket(PlanarVelocityPacket packet)
-            {
-               planarVelocityPacket.set(packet);
-               yoPlanarVelocityInputX.set(MathTools.clipToMinMax(planarVelocityPacket.get().getX(), planarVelocityLowerLimitsParameter.get(0),
-                     planarVelocityUpperLimitsParameter.get(0)));
-               yoPlanarVelocityInputY.set(MathTools.clipToMinMax(planarVelocityPacket.get().getY(), planarVelocityLowerLimitsParameter.get(1),
-                     planarVelocityUpperLimitsParameter.get(1)));
-               yoPlanarVelocityInputZ.set(MathTools.clipToMinMax(planarVelocityPacket.get().getZ(), planarVelocityLowerLimitsParameter.get(2),
-                     planarVelocityUpperLimitsParameter.get(2)));
-            }
-         });
       }
    }
 
@@ -194,12 +167,5 @@ public class QuadrupedControllerInputProvider implements QuadrupedControllerInpu
    {
       bodyAngularRateInput.set(yoBodyAngularRateInputX.getDoubleValue(), yoBodyAngularRateInputY.getDoubleValue(), yoBodyAngularRateInputZ.getDoubleValue());
       return bodyAngularRateInput;
-   }
-
-   @Override
-   public Vector3d getPlanarVelocityInput()
-   {
-      planarVelocityInput.set(yoPlanarVelocityInputX.getDoubleValue(), yoPlanarVelocityInputY.getDoubleValue(), yoPlanarVelocityInputZ.getDoubleValue());
-      return planarVelocityInput;
    }
 }
