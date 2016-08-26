@@ -419,6 +419,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       ICPControlGains gains = new ICPControlGains("", registry);
 
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
       double kpParallel = 2.5;
       double kpOrthogonal = 1.5;
       double ki = 0.0;
@@ -429,6 +431,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
 
+      if (runningOnRealRobot) gains.setFeedbackPartMaxRate(1.0);
       return gains;
    }
 
@@ -569,8 +572,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 40.0; //80.0;
-      double kpZ = 40.0; //80.0;
+      double kpXY = 40.0;
+      double kpZ = 40.0;
       double zetaXY = realRobot ? 0.5 : 0.8;
       double zetaZ = realRobot ? 0.22 : 0.8;
       double maxAccel = realRobot ? 6.0 : 36.0;
