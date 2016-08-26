@@ -115,6 +115,19 @@ public class StateMachineExampleOneTest
       stateMachine.setCurrentState(ExampleStateName.Starting);
 
       // Some simple tests. Just tick through and make sure we transition through the states properly:
+      assertEquals("switchTime", stateMachine.getSwitchTimeName());
+      assertEquals("stateMachine", stateMachine.getStateYoVariableName());
+
+      assertTrue(stateMachine.isCurrentState(ExampleStateName.Starting));
+
+      assertEquals(startingState, stateMachine.getState(ExampleStateName.Starting));
+      assertEquals(stateOne, stateMachine.getState(ExampleStateName.StateOne));
+      assertEquals(stateTwo, stateMachine.getState(ExampleStateName.StateTwo));
+      assertEquals(stoppedState, stateMachine.getState(ExampleStateName.Stopped));
+
+      RememberStateChangedListener listener = new RememberStateChangedListener();
+      stateMachine.attachStateChangedListener(listener);
+
       ExampleStateName currentStateEnum = stateMachine.getCurrentStateEnum();
       SimpleState currentState = (SimpleState) stateMachine.getCurrentState();
 
@@ -136,10 +149,22 @@ public class StateMachineExampleOneTest
       assertTrue(currentState.didAction);
       assertFalse(currentState.didTransitionOutOfAction);
 
+      assertNull(listener.oldState);
+      assertNull(listener.newState);
+      assertEquals(0.0, listener.time, 1e-7);
+
+      assertTrue(stateMachine.isCurrentState(ExampleStateName.Starting));
       currentState.transitionToDefaultNextState();
 
       stateMachine.doAction();
       stateMachine.checkTransitionConditions();
+
+      assertTrue(stateMachine.isCurrentState(ExampleStateName.StateOne));
+
+      assertEquals(startingState, listener.oldState);
+      assertEquals(stateOne, listener.newState);
+      assertEquals(time.getValue(), listener.time, 1e-7);
+
       time.setValue(time.getValue() + 0.01);
 
       assertTrue(currentState.didTransitionIntoAction);
@@ -157,10 +182,22 @@ public class StateMachineExampleOneTest
       assertFalse(currentState.didAction);
       assertFalse(currentState.didTransitionOutOfAction);
 
+      assertEquals(startingState, listener.oldState);
+      assertEquals(stateOne, listener.newState);
+
+      assertTrue(stateMachine.isCurrentState(ExampleStateName.StateOne));
+
       currentState.transitionToDefaultNextState();
 
       stateMachine.doAction();
       stateMachine.checkTransitionConditions();
+
+      assertTrue(stateMachine.isCurrentState(ExampleStateName.StateTwo));
+
+      assertEquals(stateOne, listener.oldState);
+      assertEquals(stateTwo, listener.newState);
+      assertEquals(time.getValue(), listener.time, 1e-7);
+
       time.setValue(time.getValue() + 0.01);
 
       assertTrue(currentState.didTransitionIntoAction);
@@ -189,10 +226,22 @@ public class StateMachineExampleOneTest
       assertTrue(currentState.didAction);
       assertFalse(currentState.didTransitionOutOfAction);
 
+      assertEquals(stateOne, listener.oldState);
+      assertEquals(stateTwo, listener.newState);
+
+      assertTrue(stateMachine.isCurrentState(ExampleStateName.StateTwo));
+
       currentState.transitionToDefaultNextState();
 
       stateMachine.doAction();
       stateMachine.checkTransitionConditions();
+
+      assertTrue(stateMachine.isCurrentState(ExampleStateName.Stopped));
+
+      assertEquals(stateTwo, listener.oldState);
+      assertEquals(stoppedState, listener.newState);
+      assertEquals(time.getValue(), listener.time, 1e-7);
+
       time.setValue(time.getValue() + 0.01);
 
       assertTrue(currentState.didTransitionIntoAction);
@@ -217,6 +266,60 @@ public class StateMachineExampleOneTest
       assertTrue(currentState.didTransitionIntoAction);
       assertTrue(currentState.didAction);
       assertFalse(currentState.didTransitionOutOfAction);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSomeStateMachineExceptions()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      SettableDoubleProvider time = new SettableDoubleProvider();
+      StateMachine<ExampleStateName> stateMachine = new StateMachine<ExampleStateName>("stateMachine", "switchTime", ExampleStateName.class, time, registry);
+
+      SimpleState startingState = new SimpleState(ExampleStateName.Starting);
+      startingState.setDefaultNextState(ExampleStateName.StateOne);
+      stateMachine.addState(startingState);
+
+      try
+      {
+         stateMachine.addState(startingState);
+         fail("Repeat State");
+      }
+      catch(RuntimeException e)
+      {
+      }
+
+      SimpleState stateOne = new SimpleState(ExampleStateName.StateOne);
+      stateOne.setDefaultNextState(ExampleStateName.StateTwo);
+      stateMachine.addState(stateOne);
+
+      try
+      {
+         stateMachine.addState(stateOne);
+         fail("Repeat State");
+      }
+      catch(RuntimeException e)
+      {
+      }
+
+      try
+      {
+         stateMachine.setCurrentState(ExampleStateName.Stopped);
+         fail("Cannot set current state that is not added to the state machine.");
+      }
+      catch(RuntimeException e)
+      {
+      }
+
+      try
+      {
+         stateMachine.getAndCheckCurrentState();
+         fail("This throws exception if the current state hasn't been set yet.");
+      }
+      catch(RuntimeException e)
+      {
+      }
+
    }
 
    private class SimpleState extends State<ExampleStateName>
@@ -253,6 +356,21 @@ public class StateMachineExampleOneTest
    private enum ExampleStateName
    {
       Starting, StateOne, StateTwo, Stopped
+   }
+
+   private class RememberStateChangedListener implements StateChangedListener<ExampleStateName>
+   {
+      public State<ExampleStateName> oldState;
+      public State<ExampleStateName> newState;
+      public double time;
+
+      @Override
+      public void stateChanged(State<ExampleStateName> oldState, State<ExampleStateName> newState, double time)
+      {
+         this.oldState = oldState;
+         this.newState = newState;
+         this.time = time;
+      };
    }
 
    public static void main(String[] args)

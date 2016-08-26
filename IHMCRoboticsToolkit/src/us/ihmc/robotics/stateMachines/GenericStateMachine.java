@@ -8,11 +8,9 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
-
 public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implements TimeInCurrentStateProvider
 {
    private static final boolean DEBUG = false;
-   private final String name;
    private final EnumYoVariable<E> stateYoVariable;
    private final DoubleYoVariable switchTimeYoVariable;
    private final DoubleProvider time;
@@ -27,10 +25,9 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
       this(name, switchTimeName, enumType, new YoVariableDoubleProvider(timeVariable), registry);
    }
 
-   public GenericStateMachine(String name, String switchTimeName, Class<E> enumType, DoubleProvider timeProvider, YoVariableRegistry registry)
+   public GenericStateMachine(String stateYoVariableName, String switchTimeName, Class<E> enumType, DoubleProvider timeProvider, YoVariableRegistry registry)
    {
-      this.name = name;
-      stateYoVariable = new EnumYoVariable<E>(name, registry, enumType);
+      stateYoVariable = new EnumYoVariable<E>(stateYoVariableName, registry, enumType);
       switchTimeYoVariable = new DoubleYoVariable(switchTimeName, registry);
       this.time = timeProvider;
       switchTimeYoVariable.set(time.getValue());
@@ -69,7 +66,7 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
    public void setCurrentState(E nextStateEnum)
    {
       if (DEBUG)
-         System.out.println(name + ": t = " + time.getValue() + ": going to state: " + nextStateEnum.toString());
+         System.out.println(getStateYoVariableName() + ": t = " + time.getValue() + ": going to state: " + nextStateEnum.toString());
 
       T previousState = getCurrentState();
 
@@ -203,19 +200,6 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
       setCurrentState(stateTransition.nextStateEnum);
    }
 
-   public void checkTransitionConditionsThoroughly()
-   {
-      E oldState;
-      E newState;
-      do
-      {
-         oldState = getCurrentStateEnum();
-         checkTransitionConditions();
-         newState = getCurrentStateEnum();
-      }
-      while (newState != oldState);
-   }
-
    public String toString()
    {
       StringBuffer stringBuffer = new StringBuffer();
@@ -223,11 +207,11 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
       // First print the states:
       stringBuffer.append("State Machine:\n");
 
-//    for (State state : states)
-//    {
-//       stringBuffer.append(state.getStateEnum());
-//       stringBuffer.append("\n");
-//    }
+      //    for (State state : states)
+      //    {
+      //       stringBuffer.append(state.getStateEnum());
+      //       stringBuffer.append("\n");
+      //    }
 
       for (T state : states)
       {
