@@ -1,30 +1,33 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import Jama.Matrix;
-import junit.framework.Assert;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 
 public class DynamicSystemsTestHelpers
 {
    public static void assertEpsilonEquals(double[] expectedArray, double[] actualArray, double epsilon)
    {
-      Assert.assertEquals(expectedArray.length, actualArray.length);
+      assertEquals(expectedArray.length, actualArray.length);
 
       for (int i = 0; i < expectedArray.length; i++)
       {
-         Assert.assertEquals(expectedArray[i], actualArray[i], epsilon);
+         assertEquals(expectedArray[i], actualArray[i], epsilon);
       }
    }
 
    public static void assertEpsilonEquals(ComplexNumber expectedComplexNumber, ComplexNumber actualComplexNumber, double epsilon)
    {
-      Assert.assertEquals(expectedComplexNumber.real(), actualComplexNumber.real(), epsilon);
-      Assert.assertEquals(expectedComplexNumber.imag(), actualComplexNumber.imag(), epsilon);
+      assertEquals(expectedComplexNumber.real(), actualComplexNumber.real(), epsilon);
+      assertEquals(expectedComplexNumber.imag(), actualComplexNumber.imag(), epsilon);
    }
 
    public static void assertEpsilonEquals(ComplexNumber[] expectedComplexNumbers, ComplexNumber[] actualComplexNumbers, double epsilon)
    {
-      Assert.assertEquals(expectedComplexNumbers.length, actualComplexNumbers.length);
+      assertEquals(expectedComplexNumbers.length, actualComplexNumbers.length);
 
       for (int i = 0; i < expectedComplexNumbers.length; i++)
       {
@@ -32,7 +35,6 @@ public class DynamicSystemsTestHelpers
 
       }
    }
-
 
    public static void printMatrix(String string, Matrix M)
    {
@@ -62,7 +64,6 @@ public class DynamicSystemsTestHelpers
    {
       StringBuilder stringBuilder = new StringBuilder(string);
       stringBuilder.append("\n");
-
 
       for (int i = 0; i < array.length; i++)
       {
@@ -98,8 +99,12 @@ public class DynamicSystemsTestHelpers
 
    public static void printComplexArray(String string, ComplexNumber[] array)
    {
-      StringBuilder stringBuilder = new StringBuilder(string);
-      stringBuilder.append("\n");
+      StringBuilder stringBuilder = new StringBuilder();
+
+      if (string != null)
+      {
+         stringBuilder.append(string + "\n");
+      }
 
       for (int i = 0; i < array.length; i++)
       {
@@ -110,14 +115,89 @@ public class DynamicSystemsTestHelpers
 
       stringBuilder.append("\n");
 
-      System.out.println(stringBuilder.toString());
+      System.out.print(stringBuilder.toString());
    }
 
    public static void printComplexArray(String string, ComplexNumber[][] array)
    {
+      if (string != null)
+         System.out.println(string);
+
       for (int i = 0; i < array.length; i++)
       {
-         printComplexArray(string, array[i]);
+         printComplexArray(null, array[i]);
+         //         System.out.println();
       }
+   }
+
+   public static void printRealModeArray(String string, ArrayList<SingleRealMode> realModes)
+   {
+      if (string != null)
+         System.out.println(string);
+
+      for (SingleRealMode mode : realModes)
+      {
+         printSingleRealMode(null, mode);
+      }
+   }
+
+   public static void printSingleRealMode(String string, SingleRealMode mode)
+   {
+      if (string != null)
+         System.out.println(string);
+
+      System.out.println(mode);
+   }
+
+   public static void printComplexConjugateModeArray(String string, ArrayList<ComplexConjugateMode> complexConjugateModes)
+   {
+      if (string != null)
+         System.out.println(string);
+
+      for (ComplexConjugateMode mode : complexConjugateModes)
+      {
+         printComplexConjugateMode(null, mode);
+      }
+   }
+
+   public static void printComplexConjugateMode(String string, ComplexConjugateMode mode)
+   {
+      if (string != null)
+         System.out.println(string);
+
+      System.out.println(mode);
+   }
+
+   public static void checkLeftAndRightEigenvectors(ComplexNumber[][] leftEigenvectorV, ComplexNumber[][] rightEigenvectorW)
+   {
+      for (int i=0; i<leftEigenvectorV.length; i++)
+      {
+         checkDotProductIsOne(leftEigenvectorV[i], rightEigenvectorW[i]);
+         checkConjugateDotProductIsZero(leftEigenvectorV[i], rightEigenvectorW[i]);
+      }
+   }
+
+   public static void checkDotProductIsOne(ComplexNumber[] leftEigenvector, ComplexNumber[] rightEigenvector)
+   {
+      ComplexNumber dotProduct = new ComplexNumber(0.0, 0.0);
+      for (int i = 0; i < leftEigenvector.length; i++)
+      {
+         dotProduct = dotProduct.plus(leftEigenvector[i].times(rightEigenvector[i]));
+      }
+
+      assertEquals(1.0, dotProduct.real(), 1e-7);
+      assertEquals(0.0, dotProduct.imag(), 1e-7);
+   }
+
+   public static void checkConjugateDotProductIsZero(ComplexNumber[] leftEigenvector, ComplexNumber[] rightEigenvector)
+   {
+       ComplexNumber dotProduct = new ComplexNumber(0.0, 0.0);
+       for (int i = 0; i < leftEigenvector.length; i++)
+       {
+          dotProduct = dotProduct.plus(leftEigenvector[i].times(rightEigenvector[i].conj()));
+       }
+
+       assertEquals(0.0, dotProduct.real(), 1e-7);
+       assertEquals(0.0, dotProduct.imag(), 1e-7);
    }
 }
