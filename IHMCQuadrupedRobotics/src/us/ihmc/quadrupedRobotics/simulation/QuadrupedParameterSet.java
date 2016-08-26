@@ -1,20 +1,17 @@
 package us.ihmc.quadrupedRobotics.simulation;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 public enum QuadrupedParameterSet
 {
    SIMULATION_IDEAL, SIMULATION_REAL, HARDWARE;
    
-   private final Path parametersPath;
+   private final String parametersPath;
    
    private QuadrupedParameterSet()
    {
-      parametersPath = Paths.get("parameters/" + name().toLowerCase() + ".param");
+      parametersPath = "parameters/" + name().toLowerCase() + ".param";
    }
    
-   public Path getPath()
+   public String getPath()
    {
       return parametersPath;
    }
