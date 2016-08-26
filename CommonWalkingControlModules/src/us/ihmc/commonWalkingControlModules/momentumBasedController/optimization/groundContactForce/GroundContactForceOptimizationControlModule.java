@@ -57,7 +57,7 @@ public class GroundContactForceOptimizationControlModule
    {
       this.wrenchMatrixCalculator = wrenchMatrixCalculator;
       this.contactablePlaneBodies = contactablePlaneBodies;
-      int rhoSize = WholeBodyControlCoreToolbox.rhoSize;
+      int rhoSize = momentumOptimizationSettings.getRhoSize();
 
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, yoGraphicsListRegistry, registry);

@@ -27,10 +27,10 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class WholeBodyControlCoreToolbox
 {
-   public static final int nBasisVectorsPerContactPoint = 4;
-   public static final int nContactPointsPerContactableBody = 4;
-   public static final int nContactableBodies = 2;
-   public static final int rhoSize = nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
+   private final int nBasisVectorsPerContactPoint;
+   private final int nContactPointsPerContactableBody;
+   private final int nContactableBodies;
+   private final int rhoSize;
 
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final TwistCalculator twistCalculator;
@@ -73,6 +73,10 @@ public class WholeBodyControlCoreToolbox
       this.geometricJacobianHolder = geometricJacobianHolder;
       this.contactablePlaneBodies = contactablePlaneBodies;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+      this.nBasisVectorsPerContactPoint = momentumOptimizationSettings.getNumberOfBasisVectorsPerContactPoint();    
+      this.nContactPointsPerContactableBody = momentumOptimizationSettings.getNumberOfContactPointsPerContactableBody();
+      this.nContactableBodies = momentumOptimizationSettings.getNumberOfContactableBodies();              
+      this.rhoSize = momentumOptimizationSettings.getRhoSize();
 
       if (contactablePlaneBodies != null)
       {
@@ -241,5 +245,30 @@ public class WholeBodyControlCoreToolbox
    public JointIndexHandler getJointIndexHandler()
    {
       return jointIndexHandler;
+   }
+
+   public int getNumberOfBasisVectorsPerContactPoint()
+   {
+      return nBasisVectorsPerContactPoint;
+   }
+
+   public int getNumberOfContactPointsPerContactableBody()
+   {
+      return nContactPointsPerContactableBody;
+   }
+
+   public int getNumberOfContactableBodies()
+   {
+      return nContactableBodies;
+   }
+
+   public int getRhoSize()
+   {
+      return rhoSize;
+   }
+
+   public ReferenceFrames getReferenceFrames()
+   {
+      return referenceFrames;
    }
 }
