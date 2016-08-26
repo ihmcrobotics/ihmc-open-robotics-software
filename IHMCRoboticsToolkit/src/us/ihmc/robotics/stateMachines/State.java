@@ -2,9 +2,7 @@ package us.ihmc.robotics.stateMachines;
 
 import java.util.ArrayList;
 
-
-
-public abstract class State <E extends Enum<E>>
+public abstract class State<E extends Enum<E>>
 {
    private final E stateEnum;
    private State<E> previousState;
@@ -18,115 +16,94 @@ public abstract class State <E extends Enum<E>>
       this.stateEnum = stateEnum;
    }
 
+   // These are abstract methods that a state defines.
    public abstract void doAction();
 
    public abstract void doTransitionIntoAction();
 
    public abstract void doTransitionOutOfAction();
 
-   void setTimeInCurrentStateProvider(TimeInCurrentStateProvider timeInCurrentStateProvider)
+   /**
+    * Override this method if you want to do a simple state machine with default transitions. This then becomes the default transition condition.
+    * @return true if this state should transition to the default next state set by {@link #setDefaultNextState(Enum)}.
+    */
+   public boolean isDone()
    {
-      this.timeInCurrentStateProvider = timeInCurrentStateProvider;
+      return true;
    }
-   
-   public void addStateTransition(StateTransition<E> stateTransition)
+
+   public final void addStateTransition(E nextStateEnum, StateTransitionCondition stateTransitionCondition)
+   {
+      StateTransition<E> stateTransition = new StateTransition<E>(nextStateEnum, stateTransitionCondition, (StateTransitionAction) null);
+      this.addStateTransition(stateTransition);
+   }
+
+   public final void addStateTransition(StateTransition<E> stateTransition)
    {
       stateTransitions.add(stateTransition);
    }
-   
-   public void addDelayBasedStateTransition(final E nextStateEnum,final double delay)
+
+   public final void addDelayBasedStateTransition(final E nextStateEnum, final double delay)
    {
       StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
-      {        
+      {
          @Override
          public boolean checkCondition()
          {
-            return (getTimeInCurrentState() > delay );                 
+            return (getTimeInCurrentState() > delay);
          }
       };
-      
-      stateTransitions.add (new StateTransition<E>(nextStateEnum, stateTransitionCondition ) );
-   }
-   
-   public void addImmediateStateTransition(final E nextStateEnum)
-   {
-      StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
-      {        
-         @Override
-         public boolean checkCondition()
-         {
-            return  true;        
-         }
-      };
-      
-      stateTransitions.add (new StateTransition<E>(nextStateEnum, stateTransitionCondition ) );
+
+      stateTransitions.add(new StateTransition<E>(nextStateEnum, stateTransitionCondition));
    }
 
-   public void setDefaultNextState(E nextStateEnum)
+   public final void addImmediateStateTransition(final E nextStateEnum)
    {
-      if (defaultNextStateTransition != null) throw new RuntimeException("Have already set default next state for " + stateEnum);
+      StateTransitionCondition stateTransitionCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return true;
+         }
+      };
+
+      stateTransitions.add(new StateTransition<E>(nextStateEnum, stateTransitionCondition));
+   }
+
+   public final void setDefaultNextState(E nextStateEnum)
+   {
+      if (defaultNextStateTransition != null)
+         throw new RuntimeException("Have already set default next state for " + stateEnum);
       defaultNextStateTransition = new StateTransition<E>(nextStateEnum, (StateTransitionCondition) null);
    }
 
-
-   public StateTransition<E> getDefaultNextStateTransition()
+   public final StateTransition<E> getDefaultNextStateTransition()
    {
       return defaultNextStateTransition;
    }
 
-   public boolean getTransitionToDefaultNextState()
-   {
-      return gotoDefaultNextState;
-   }
-
-   public void clearTransitionToDefaultNextState()
-   {
-      gotoDefaultNextState = false;
-   }
-
-   public void transitionToDefaultNextState()
+   public final void transitionToDefaultNextState()
    {
       gotoDefaultNextState = true;
    }
 
-
-   public StateTransition<E> checkTransitionConditions(double timeInState)
-   {
-      for (int i = 0; i < stateTransitions.size(); i++)
-      {
-         StateTransition<E> stateTransition = stateTransitions.get(i);
-
-         E nextStateEnum = stateTransition.checkTransitionConditions(timeInState);
-         if (nextStateEnum != null)
-         {
-            return stateTransition;
-         }
-      }
-
-      return null;
-   }
-
-   public double getTimeInCurrentState()
+   public final double getTimeInCurrentState()
    {
       return timeInCurrentStateProvider.timeInCurrentState();
    }
 
-   public ArrayList<StateTransition<E>> getStateTransitions()
+   public final ArrayList<StateTransition<E>> getStateTransitions()
    {
       return stateTransitions;
    }
 
-   public E getStateEnum()
+   public final E getStateEnum()
    {
       return stateEnum;
    }
-   
-   public void setPreviousState(State<E> previousState)
-   {
-      this.previousState = previousState;
-   }
-   
-   public State<E> getPreviousState()
+
+   public final State<E> getPreviousState()
    {
       return previousState;
    }
@@ -150,9 +127,41 @@ public abstract class State <E extends Enum<E>>
 
       return stringBuffer.toString();
    }
-   
-   public boolean isDone()
+
+   // Default methods. User should not use these. Only executor of a state machine should use these.
+   final boolean getTransitionToDefaultNextState()
    {
-      return true;
+      return gotoDefaultNextState;
+   }
+
+   final void setTimeInCurrentStateProvider(TimeInCurrentStateProvider timeInCurrentStateProvider)
+   {
+      this.timeInCurrentStateProvider = timeInCurrentStateProvider;
+   }
+
+   final void clearTransitionToDefaultNextState()
+   {
+      gotoDefaultNextState = false;
+   }
+
+   final void setPreviousState(State<E> previousState)
+   {
+      this.previousState = previousState;
+   }
+
+   StateTransition<E> checkTransitionConditions(double timeInState)
+   {
+      for (int i = 0; i < stateTransitions.size(); i++)
+      {
+         StateTransition<E> stateTransition = stateTransitions.get(i);
+
+         E nextStateEnum = stateTransition.checkTransitionConditions(timeInState);
+         if (nextStateEnum != null)
+         {
+            return stateTransition;
+         }
+      }
+
+      return null;
    }
 }

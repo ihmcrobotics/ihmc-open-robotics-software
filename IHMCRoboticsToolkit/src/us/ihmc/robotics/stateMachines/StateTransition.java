@@ -25,16 +25,6 @@ public class StateTransition <E extends Enum<E>>
          addTimePassedCondition(timePassedYoVariable);
    }
 
-   public StateTransition(E nextStateEnum, DoubleYoVariable timePassedYoVariable, StateTransitionCondition condition)
-   {
-      this(nextStateEnum, timePassedYoVariable, condition, null);
-   }
-
-   public StateTransition(E nextStateEnum, DoubleYoVariable timePassedYoVariable, StateTransitionAction action)
-   {
-      this(nextStateEnum, timePassedYoVariable, null, action);
-   }
-
    public StateTransition(E nextStateEnum, StateTransitionCondition condition, StateTransitionAction action)
    {
       this(nextStateEnum, null, condition, action);
@@ -78,7 +68,6 @@ public class StateTransition <E extends Enum<E>>
       this(nextStateEnum, stateTransitionConditions, (StateTransitionAction) null);
    }
 
-
    public void addStateTransitionCondition(StateTransitionCondition transitionCondition)
    {
       if (transitionCondition != null)
@@ -93,7 +82,7 @@ public class StateTransition <E extends Enum<E>>
          timePassedYoVariables.add(timePassedYoVariable);
    }
 
-   public E checkTransitionConditions(double timeInState)
+   final E checkTransitionConditions(double timeInState)
    {
       for (int i = 0; i < stateTransitionConditions.size(); i++)
       {
@@ -116,10 +105,9 @@ public class StateTransition <E extends Enum<E>>
       }
 
       return nextStateEnum;
-
    }
 
-   public void doAction()
+   final void doAction()
    {
       for(int i = 0; i < actions.size(); i++)
       {
