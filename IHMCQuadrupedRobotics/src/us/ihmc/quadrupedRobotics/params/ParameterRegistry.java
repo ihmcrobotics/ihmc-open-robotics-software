@@ -3,6 +3,8 @@ package us.ihmc.quadrupedRobotics.params;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -58,19 +60,27 @@ public class ParameterRegistry
    private final List<String> unregistered = new ArrayList<>();
 
    /**
-    * Loads the resource with the given filename from the class path. If more than one class path resource exists with the given name then every matching
-    * resource will be loaded in an undefined order.
-    *
-    * @param name the full parameters file name, i.e. "parameters_testing_123.conf"
-    * @throws IOException if the resource is not found or an I/O error occurs
+    * @deprecated Use loadFromResources(Path).
     */
    public void loadFromResources(String name) throws IOException
    {
+      loadFromResources(Paths.get(name));
+   }
+   
+   /**
+    * Loads the resource with the given filename from the class path. If more than one class path resource exists with the given name then every matching
+    * resource will be loaded in an undefined order.
+    *
+    * @param parametersPath the full parameters file name, i.e. "parameters_testing_123.conf"
+    * @throws IOException if the resource is not found or an I/O error occurs
+    */
+   public void loadFromResources(Path parametersPath) throws IOException
+   {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      Enumeration<URL> resources = loader.getResources(name);
+      Enumeration<URL> resources = loader.getResources(parametersPath.toString());
       if (!resources.hasMoreElements())
       {
-         throw new IOException("Cannot locate " + name + " as a classpath resource");
+         throw new IOException("Cannot locate " + parametersPath + " as a classpath resource");
       }
 
       // Load from all parameters files in the class path that match the given name.
