@@ -231,7 +231,7 @@ public class RigidBodyTransform implements Serializable
     */
    public void setRotation(AxisAngle4f axisAngle)
    {
-      setRotationWithAxisAngle(axisAngle.getX(), axisAngle.getY(), axisAngle.getZ(), axisAngle.angle);
+      setRotationWithAxisAngle(axisAngle.getX(), axisAngle.getY(), axisAngle.getZ(), axisAngle.getAngle());
    }
 
    private void setRotationWithAxisAngle(double axisAngleX, double axisAngleY, double axisAngleZ, double axisAngleTheta)
@@ -803,18 +803,18 @@ public class RigidBodyTransform implements Serializable
     */
    public final void set(Matrix4d matrix)
    {
-      mat00 = matrix.m00;
-      mat01 = matrix.m01;
-      mat02 = matrix.m02;
-      mat03 = matrix.m03;
-      mat10 = matrix.m10;
-      mat11 = matrix.m11;
-      mat12 = matrix.m12;
-      mat13 = matrix.m13;
-      mat20 = matrix.m20;
-      mat21 = matrix.m21;
-      mat22 = matrix.m22;
-      mat23 = matrix.m23;
+      mat00 = matrix.getM00();
+      mat01 = matrix.getM01();
+      mat02 = matrix.getM02();
+      mat03 = matrix.getM03();
+      mat10 = matrix.getM10();
+      mat11 = matrix.getM11();
+      mat12 = matrix.getM12();
+      mat13 = matrix.getM13();
+      mat20 = matrix.getM20();
+      mat21 = matrix.getM21();
+      mat22 = matrix.getM22();
+      mat23 = matrix.getM23();
    }
 
    /**
@@ -825,19 +825,19 @@ public class RigidBodyTransform implements Serializable
     */
    public void setAsTranspose(Matrix4d matrix)
    {
-      double tmp10 = matrix.m10;
-      double tmp20 = matrix.m20;
-      double tmp21 = matrix.m21;
-      double tmp30 = matrix.m30;
-      double tmp31 = matrix.m31;
-      double tmp32 = matrix.m32;
+      double tmp10 = matrix.getM10();
+      double tmp20 = matrix.getM20();
+      double tmp21 = matrix.getM21();
+      double tmp30 = matrix.getM30();
+      double tmp31 = matrix.getM31();
+      double tmp32 = matrix.getM32();
 
-      mat00 = matrix.m00;
-      mat11 = matrix.m11;
-      mat22 = matrix.m22;
-      mat10 = matrix.m01;
-      mat20 = matrix.m02;
-      mat21 = matrix.m12;
+      mat00 = matrix.getM00();
+      mat11 = matrix.getM11();
+      mat22 = matrix.getM22();
+      mat10 = matrix.getM01();
+      mat20 = matrix.getM02();
+      mat21 = matrix.getM12();
       mat01 = tmp10;
       mat03 = tmp30;
       mat13 = tmp31;
@@ -854,19 +854,19 @@ public class RigidBodyTransform implements Serializable
     */
    public void setAsTranspose(Matrix4f matrix)
    {
-      double tmp10 = matrix.m10;
-      double tmp20 = matrix.m20;
-      double tmp21 = matrix.m21;
-      double tmp30 = matrix.m30;
-      double tmp31 = matrix.m31;
-      double tmp32 = matrix.m32;
+      double tmp10 = matrix.getM10();
+      double tmp20 = matrix.getM20();
+      double tmp21 = matrix.getM21();
+      double tmp30 = matrix.getM30();
+      double tmp31 = matrix.getM31();
+      double tmp32 = matrix.getM32();
 
-      mat00 = matrix.m00;
-      mat11 = matrix.m11;
-      mat22 = matrix.m22;
-      mat10 = matrix.m01;
-      mat20 = matrix.m02;
-      mat21 = matrix.m12;
+      mat00 = matrix.getM00();
+      mat11 = matrix.getM11();
+      mat22 = matrix.getM22();
+      mat10 = matrix.getM01();
+      mat20 = matrix.getM02();
+      mat21 = matrix.getM12();
       mat01 = tmp10;
       mat03 = tmp30;
       mat13 = tmp31;
@@ -882,18 +882,18 @@ public class RigidBodyTransform implements Serializable
     */
    public final void set(Matrix4f matrix)
    {
-      mat00 = matrix.m00;
-      mat01 = matrix.m01;
-      mat02 = matrix.m02;
-      mat03 = matrix.m03;
-      mat10 = matrix.m10;
-      mat11 = matrix.m11;
-      mat12 = matrix.m12;
-      mat13 = matrix.m13;
-      mat20 = matrix.m20;
-      mat21 = matrix.m21;
-      mat22 = matrix.m22;
-      mat23 = matrix.m23;
+      mat00 = matrix.getM00();
+      mat01 = matrix.getM01();
+      mat02 = matrix.getM02();
+      mat03 = matrix.getM03();
+      mat10 = matrix.getM10();
+      mat11 = matrix.getM11();
+      mat12 = matrix.getM12();
+      mat13 = matrix.getM13();
+      mat20 = matrix.getM20();
+      mat21 = matrix.getM21();
+      mat22 = matrix.getM22();
+      mat23 = matrix.getM23();
    }
 
    /**
@@ -1319,7 +1319,7 @@ public class RigidBodyTransform implements Serializable
          double sin = 0.5 * mag;
          double cos = 0.5 * (mat00 + mat11 + mat22 - 1.0);
 
-         axisAngle.angle = (float) Math.atan2(sin, cos);
+         axisAngle.setAngle((float) Math.atan2(sin, cos));
 
          double invMag = 1.0 / mag;
          axisAngle.setX((float) (axisAngle.getX() * invMag));
@@ -1331,7 +1331,7 @@ public class RigidBodyTransform implements Serializable
          axisAngle.setX((float) 0.0);
          axisAngle.setY((float) 1.0);
          axisAngle.setZ((float) 0.0);
-         axisAngle.angle = (float) 0.0;
+         axisAngle.setAngle((float) 0.0);
       }
    }
 
@@ -1428,22 +1428,22 @@ public class RigidBodyTransform implements Serializable
     */
    public final void get(Matrix4d ret)
    {
-      ret.m00 = mat00;
-      ret.m01 = mat01;
-      ret.m02 = mat02;
-      ret.m03 = mat03;
-      ret.m10 = mat10;
-      ret.m11 = mat11;
-      ret.m12 = mat12;
-      ret.m13 = mat13;
-      ret.m20 = mat20;
-      ret.m21 = mat21;
-      ret.m22 = mat22;
-      ret.m23 = mat23;
-      ret.m30 = 0.0;
-      ret.m31 = 0.0;
-      ret.m32 = 0.0;
-      ret.m33 = 1.0;
+      ret.setM00(mat00);
+      ret.setM01(mat01);
+      ret.setM02(mat02);
+      ret.setM03(mat03);
+      ret.setM10(mat10);
+      ret.setM11(mat11);
+      ret.setM12(mat12);
+      ret.setM13(mat13);
+      ret.setM20(mat20);
+      ret.setM21(mat21);
+      ret.setM22(mat22);
+      ret.setM23(mat23);
+      ret.setM30(0.0);
+      ret.setM31(0.0);
+      ret.setM32(0.0);
+      ret.setM33(1.0);
    }
 
    /**
@@ -1453,22 +1453,22 @@ public class RigidBodyTransform implements Serializable
     */
    public final void get(Matrix4f ret)
    {
-      ret.m00 = (float) mat00;
-      ret.m01 = (float) mat01;
-      ret.m02 = (float) mat02;
-      ret.m03 = (float) mat03;
-      ret.m10 = (float) mat10;
-      ret.m11 = (float) mat11;
-      ret.m12 = (float) mat12;
-      ret.m13 = (float) mat13;
-      ret.m20 = (float) mat20;
-      ret.m21 = (float) mat21;
-      ret.m22 = (float) mat22;
-      ret.m23 = (float) mat23;
-      ret.m30 = 0.0f;
-      ret.m31 = 0.0f;
-      ret.m32 = 0.0f;
-      ret.m33 = 1.0f;
+      ret.setM00((float) mat00);
+      ret.setM01((float) mat01);
+      ret.setM02((float) mat02);
+      ret.setM03((float) mat03);
+      ret.setM10((float) mat10);
+      ret.setM11((float) mat11);
+      ret.setM12((float) mat12);
+      ret.setM13((float) mat13);
+      ret.setM20((float) mat20);
+      ret.setM21((float) mat21);
+      ret.setM22((float) mat22);
+      ret.setM23((float) mat23);
+      ret.setM30(0.0f);
+      ret.setM31(0.0f);
+      ret.setM32(0.0f);
+      ret.setM33(1.0f);
    }
 
    /**
