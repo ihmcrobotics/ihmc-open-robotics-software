@@ -3,7 +3,6 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 import java.awt.BasicStroke;
 import java.awt.Color;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
 import us.ihmc.robotics.math.frames.YoFrameLine2d;

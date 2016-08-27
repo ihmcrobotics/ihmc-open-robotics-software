@@ -47,6 +47,7 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO LineSegments unified
  * TODO Lines unified
  * TODO Fix color field in Artifact
+ * TODO Implement remote artifact in line2d
  */
 @SuppressWarnings("serial")
 public class Plotter
