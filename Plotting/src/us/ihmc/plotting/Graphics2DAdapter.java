@@ -32,6 +32,7 @@ import javax.vecmath.Vector2d;
 import us.ihmc.plotting.frames.MetersReferenceFrame;
 import us.ihmc.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.LineSegment2d;
 
 /**
@@ -90,6 +91,26 @@ public class Graphics2DAdapter
       firstEndpoint.changeFrame(screenFrame);
       secondEndpoint.changeFrame(screenFrame);
       graphics2d.drawLine(pixelate(firstEndpoint.getX()), pixelate(firstEndpoint.getY()), pixelate(secondEndpoint.getX()), pixelate(secondEndpoint.getY()));
+   }
+   
+   public void drawLine(Line2d line)
+   {
+      PlotterPoint2d start = pointBin[0];
+      PlotterVector2d direction = vectorBin[0];
+      start.setIncludingFrame(metersFrame, line.getPoint());
+      direction.setIncludingFrame(metersFrame, line.getNormalizedVector());
+      PlotterPoint2d farPointPositive = pointBin[1];
+      PlotterPoint2d farPointNegative = pointBin[2];
+      PlotterVector2d far = vectorBin[1];
+      far.setIncludingFrame(direction);
+      far.scale(2000.0);
+      farPointPositive.setIncludingFrame(start);
+      farPointNegative.setIncludingFrame(start);
+      farPointPositive.add(far);
+      farPointNegative.sub(far);
+      farPointPositive.changeFrame(screenFrame);
+      farPointNegative.changeFrame(screenFrame);
+      graphics2d.drawLine(pixelate(farPointNegative.getX()), pixelate(farPointNegative.getY()), pixelate(farPointPositive.getX()), pixelate(farPointPositive.getY()));
    }
 
    @Deprecated
