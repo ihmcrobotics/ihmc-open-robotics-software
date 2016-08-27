@@ -556,9 +556,14 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       }
    }
 
-   public static boolean areEndpointsTheSame(Point2d endpoint0, Point2d endpoint1)
+   public static boolean areEndpointsTheSame(Point2d firstEndpoint, Point2d secondEndpoint)
    {
-      return (endpoint0.getX() == endpoint1.getX()) && (endpoint0.getY() == endpoint1.getY());
+      return areEndpointsTheSame(firstEndpoint.getX(), firstEndpoint.getY(), secondEndpoint.getX(), secondEndpoint.getY());
+   }
+   
+   public static boolean areEndpointsTheSame(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
+   {
+      return (firstEndpointX == secondEndpointX) && (firstEndpointY == secondEndpointY);
    }
 
    @Override

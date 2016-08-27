@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 import java.awt.BasicStroke;
 import java.awt.Color;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
@@ -20,6 +21,7 @@ public class YoArtifactLineSegment2d extends YoArtifact
    private final YoFrameLineSegment2d lineSegment;
    private final Color color;
    
+   private final Point2d tempFirstEndpoint = new Point2d();
    private final LineSegment2d tempLineSegment = new LineSegment2d();
    private final ConvexPolygon2d tempArrowPolygon = new ConvexPolygon2d(new double[][] {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}});
    
@@ -81,8 +83,16 @@ public class YoArtifactLineSegment2d extends YoArtifact
          graphics.setColor(color);
          graphics.setStroke(STROKE);
 
-         lineSegment.getFrameLineSegment2d().get(tempLineSegment);
-         graphics.drawLineSegment(tempLineSegment);
+         if (lineSegment.areEndpointsTheSame())
+         {
+            tempFirstEndpoint.set(lineSegment.getFirstEndpointX(), lineSegment.getFirstEndpointY());
+            graphics.drawPoint(tempFirstEndpoint);
+         }
+         else
+         {
+            lineSegment.getFrameLineSegment2d().get(tempLineSegment);
+            graphics.drawLineSegment(tempLineSegment);
+         }
 
          if (drawArrow)
          {
