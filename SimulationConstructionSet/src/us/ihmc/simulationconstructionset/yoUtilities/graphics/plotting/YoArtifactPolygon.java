@@ -5,8 +5,6 @@ import java.awt.Color;
 import java.awt.Stroke;
 import java.awt.geom.Rectangle2D;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -22,7 +20,7 @@ public class YoArtifactPolygon extends YoArtifact
 
    private final PlotterGraphics plotterGraphics = new PlotterGraphics();
 
-   // private final Color color;
+   private final Color color;
    private final boolean fill;
 
    private final int pixels;
@@ -35,7 +33,7 @@ public class YoArtifactPolygon extends YoArtifact
 
    public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill, int lineWidth)
    {
-      super(name);
+      super(name,  new double[] {fill ? 1.0 : 0.0}, color);
       this.yoConvexPolygon2d = yoConvexPolygon2d;
       this.color = color;
       this.fill = fill;
@@ -132,18 +130,6 @@ public class YoArtifactPolygon extends YoArtifact
       }
 
       return vars;
-   }
-
-   @Override
-   public double[] getConstants()
-   {
-      return new double[] { fill ? 1 : 0 };
-   }
-
-   @Override
-   public AppearanceDefinition getAppearance()
-   {
-      return new YoAppearanceRGBColor(color, 0.0);
    }
 
    @Override

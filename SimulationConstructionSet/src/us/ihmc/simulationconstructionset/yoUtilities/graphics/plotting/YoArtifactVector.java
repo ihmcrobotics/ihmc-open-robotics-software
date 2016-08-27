@@ -3,11 +3,9 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 import java.awt.Color;
 import java.util.ArrayList;
 
-import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.PlotterGraphics;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -18,7 +16,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class YoArtifactVector extends YoArtifact
 {
    private final PlotterGraphics plotterGraphics = new PlotterGraphics();
-   private final Color3f color;
    private final YoFramePoint2d basePoint;
    private final YoFrameVector2d vector;
    private final Point2d endPoint = new Point2d();
@@ -27,15 +24,16 @@ public class YoArtifactVector extends YoArtifact
    private final static double ARROW_HEAD_WIDTH = 0.08;
    private final static double ARROW_HEAD_HEIGHT = 0.12;
 
-   public YoArtifactVector(String name, DoubleYoVariable basePointX, DoubleYoVariable basePointY, DoubleYoVariable vectorX, DoubleYoVariable vectorY, Color3f color)
+   public YoArtifactVector(String name, DoubleYoVariable basePointX, DoubleYoVariable basePointY, DoubleYoVariable vectorX, DoubleYoVariable vectorY, Color color)
    {
       this(name, new YoFramePoint2d(basePointX, basePointY, ReferenceFrame.getWorldFrame()),
                  new YoFrameVector2d(vectorX, vectorY, ReferenceFrame.getWorldFrame()), color);
    }
 
-   public YoArtifactVector(String name, YoFramePoint2d basePoint, YoFrameVector2d vector, Color3f color)
+   public YoArtifactVector(String name, YoFramePoint2d basePoint, YoFrameVector2d vector, Color color)
    {
-      super(name, basePoint.getYoX(), basePoint.getYoY(), vector.getYoX(), vector.getYoY());
+      super(name, new double[0], color,
+            basePoint.getYoX(), basePoint.getYoY(), vector.getYoX(), vector.getYoY());
       this.basePoint = basePoint;
       this.vector = vector;
       this.color = color;
@@ -46,7 +44,7 @@ public class YoArtifactVector extends YoArtifact
    {
       if (isVisible)
       {
-         graphics.setColor(new Color(color.getX(), color.getY(), color.getZ()));
+         graphics.setColor(color);
 
          basePoint.get(endPoint);
          endPoint.setX(endPoint.getX() + vector.getX());
@@ -92,7 +90,7 @@ public class YoArtifactVector extends YoArtifact
    @Override
    public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
-      graphics.setColor(new Color(color.getX(), color.getY(), color.getZ()));
+      graphics.setColor(color);
 
       graphics.drawLineSegment(Xcenter, Ycenter, Xcenter + 20, Ycenter);
 
@@ -115,18 +113,6 @@ public class YoArtifactVector extends YoArtifact
 
    @Override
    public RemoteGraphicType getRemoteGraphicType()
-   {
-      return null;
-   }
-
-   @Override
-   public double[] getConstants()
-   {
-      return null;
-   }
-
-   @Override
-   public AppearanceDefinition getAppearance()
    {
       return null;
    }

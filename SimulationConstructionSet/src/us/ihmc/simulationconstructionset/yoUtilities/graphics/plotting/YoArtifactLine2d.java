@@ -19,7 +19,8 @@ public class YoArtifactLine2d extends YoArtifact
 
    public YoArtifactLine2d(String name, YoFrameLine2d yoFrameLine2d, Color color)
    {
-      super(name,  yoFrameLine2d.getYoX0(), yoFrameLine2d.getYoY0(), yoFrameLine2d.getYoVx(), yoFrameLine2d.getYoVy());
+      super(name, new double[0], color,
+            yoFrameLine2d.getYoX0(), yoFrameLine2d.getYoY0(), yoFrameLine2d.getYoVx(), yoFrameLine2d.getYoVy());
       this.yoFrameLine2d = yoFrameLine2d;
       this.color = color;
    }
@@ -67,18 +68,6 @@ public class YoArtifactLine2d extends YoArtifact
 
    @Override
    public RemoteGraphicType getRemoteGraphicType()
-   {
-      return null;
-   }
-
-   @Override
-   public double[] getConstants()
-   {
-      return null;
-   }
-
-   @Override
-   public AppearanceDefinition getAppearance()
    {
       return null;
    }

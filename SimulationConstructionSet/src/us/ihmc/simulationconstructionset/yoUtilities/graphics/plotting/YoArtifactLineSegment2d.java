@@ -5,8 +5,6 @@ import java.awt.Color;
 
 import javax.vecmath.Vector2d;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
@@ -18,7 +16,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class YoArtifactLineSegment2d extends YoArtifact
 {
    private static final BasicStroke STROKE = new BasicStroke(2);
-   private static final double[] CONSTANTS = new double[] {};
 
    private final YoFrameLineSegment2d lineSegment;
    private final Color color;
@@ -51,7 +48,8 @@ public class YoArtifactLineSegment2d extends YoArtifact
    
    public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d lineSegment, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
-      super(name, lineSegment.getYoFirstEndpointX(), lineSegment.getYoFirstEndpointY(), lineSegment.getYoSecondEndpointX(), lineSegment.getYoSecondEndpointY());
+      super(name, new double[0], color,
+            lineSegment.getYoFirstEndpointX(), lineSegment.getYoFirstEndpointY(), lineSegment.getYoSecondEndpointX(), lineSegment.getYoSecondEndpointY());
       this.lineSegment = lineSegment;
       this.color = color;
       this.drawArrow = true;
@@ -60,7 +58,8 @@ public class YoArtifactLineSegment2d extends YoArtifact
 
    public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d lineSegment, Color color)
    {
-      super(name, lineSegment.getYoFirstEndpointX(), lineSegment.getYoFirstEndpointY(), lineSegment.getYoSecondEndpointX(), lineSegment.getYoSecondEndpointY());
+      super(name, new double[0], color,
+            lineSegment.getYoFirstEndpointX(), lineSegment.getYoFirstEndpointY(), lineSegment.getYoSecondEndpointX(), lineSegment.getYoSecondEndpointY());
       this.lineSegment = lineSegment;
       this.color = color;
       this.drawArrow = false;
@@ -134,17 +133,5 @@ public class YoArtifactLineSegment2d extends YoArtifact
    public RemoteGraphicType getRemoteGraphicType()
    {
       return RemoteGraphicType.LINE_SEGMENT_2D_ARTIFACT;
-   }
-
-   @Override
-   public double[] getConstants()
-   {
-      return CONSTANTS;
-   }
-
-   @Override
-   public AppearanceDefinition getAppearance()
-   {
-      return new YoAppearanceRGBColor(color, 0.0);
    }
 }

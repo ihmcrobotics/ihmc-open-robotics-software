@@ -20,7 +20,8 @@ public class YoArtifactLine extends YoArtifact
 
    public YoArtifactLine(String name, YoFramePoint p1, YoFramePoint p2, Color color)
    {
-      super(name, p1.getYoX(), p1.getYoY(), p2.getYoX(), p2.getYoY());
+      super(name, new double[0], color,
+            p1.getYoX(), p1.getYoY(), p2.getYoX(), p2.getYoY());
       this.p1 = p1;
       this.p2 = p2;
       this.color = color;
@@ -81,18 +82,6 @@ public class YoArtifactLine extends YoArtifact
 
    @Override
    public RemoteGraphicType getRemoteGraphicType()
-   {
-      return null;
-   }
-
-   @Override
-   public double[] getConstants()
-   {
-      return null;
-   }
-
-   @Override
-   public AppearanceDefinition getAppearance()
    {
       return null;
    }

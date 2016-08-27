@@ -46,6 +46,7 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO ALT rotation
  * TODO LineSegments unified
  * TODO Lines unified
+ * TODO Fix color field in Artifact
  */
 @SuppressWarnings("serial")
 public class Plotter
