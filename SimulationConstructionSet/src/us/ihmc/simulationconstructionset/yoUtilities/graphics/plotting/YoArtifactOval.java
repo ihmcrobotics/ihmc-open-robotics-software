@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -45,7 +43,8 @@ public class YoArtifactOval extends YoArtifact
    
    public YoArtifactOval(String name, YoFramePoint2d center, YoFrameVector2d radii, Color color)
    {
-      super(name, center.getYoX(), center.getYoY(), radii.getYoX(), radii.getYoY());
+      super(name, new double[0], color,
+            center.getYoX(), center.getYoY(), radii.getYoX(), radii.getYoY());
       this.center = center;
       this.radii = radii;
       this.color = color;
@@ -102,17 +101,5 @@ public class YoArtifactOval extends YoArtifact
    public RemoteGraphicType getRemoteGraphicType()
    {
       return RemoteGraphicType.CIRCLE_ARTIFACT;
-   }
-
-   @Override
-   public double[] getConstants()
-   {
-      return new double[] {};
-   }
-
-   @Override
-   public AppearanceDefinition getAppearance()
-   {
-      return new YoAppearanceRGBColor(color, 0.0);
    }
 }

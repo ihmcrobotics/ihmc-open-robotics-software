@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Drawing2DTools;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.robotics.MathTools;
@@ -32,7 +30,7 @@ public class YoArtifactPosition extends YoArtifact
    
    public YoArtifactPosition(String name, DoubleYoVariable x, DoubleYoVariable y, YoGraphicPosition.GraphicType type, Color color, double scale)
    {
-      super(name, x, y);
+      super(name, new double[] {scale, type.ordinal()}, color, x, y);
       this.x = x;
       this.y = y;
       
@@ -186,17 +184,5 @@ public class YoArtifactPosition extends YoArtifact
    public RemoteGraphicType getRemoteGraphicType() 
    {
       return RemoteGraphicType.POSITION_ARTIFACT;
-   }
- 
-   @Override
-   public double[] getConstants() 
-   {
-      return new double[]{scale, graphicType.ordinal()};
-   }
-   
-   @Override
-   public AppearanceDefinition getAppearance()
-   {
-      return new YoAppearanceRGBColor(color, 0.0);
    }
 }
