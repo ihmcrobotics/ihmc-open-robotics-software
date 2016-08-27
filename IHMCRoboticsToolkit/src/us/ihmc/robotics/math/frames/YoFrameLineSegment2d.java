@@ -262,6 +262,11 @@ public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
 
       return frameLineSegment.pointBetweenEndPointsGivenParameter(parameter);
    }
+   
+   public boolean areEndpointsTheSame()
+   {
+      return LineSegment2d.areEndpointsTheSame(getFirstEndpointX(), getFirstEndpointY(), getSecondEndpointX(), getSecondEndpointY());
+   }
 
    public void setToNaN()
    {

@@ -93,6 +93,14 @@ public class Graphics2DAdapter
       graphics2d.drawLine(pixelate(firstEndpoint.getX()), pixelate(firstEndpoint.getY()), pixelate(secondEndpoint.getX()), pixelate(secondEndpoint.getY()));
    }
    
+   public void drawPoint(Point2d point)
+   {
+      PlotterPoint2d plotterPoint = pointBin[0];
+      plotterPoint.setIncludingFrame(metersFrame, point);
+      plotterPoint.changeFrame(screenFrame);
+      graphics2d.drawLine(pixelate(plotterPoint.getX()), pixelate(plotterPoint.getY()), pixelate(plotterPoint.getX()), pixelate(plotterPoint.getY()));
+   }
+   
    public void drawLine(Line2d line)
    {
       PlotterPoint2d start = pointBin[0];
