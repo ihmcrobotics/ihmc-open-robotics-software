@@ -162,6 +162,8 @@ public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
 
    public void getFirstEndPoint(Point2d firstEndpointToPack)
    {
+      putYoValuesIntoFrameLineSegment();
+      
       frameLineSegment.getFirstEndpoint(firstEndpointToPack);
    }
 
