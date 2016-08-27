@@ -167,7 +167,7 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      variables.getYoPlanarVelocityInputX().set(directionX * 1.0);
+      variables.getYoPlanarVelocityInputX().set(directionX * 0.6);
       variables.getYoPlanarVelocityInputZ().set(directionZ * 0.5);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 10.0);
