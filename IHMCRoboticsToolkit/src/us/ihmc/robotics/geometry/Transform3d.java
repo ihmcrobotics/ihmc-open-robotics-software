@@ -543,8 +543,8 @@ public class Transform3d extends RigidBodyTransform
          double ay = axisAngle.getY() * mag;
          double az = axisAngle.getZ() * mag;
 
-         double sinTheta = Math.sin(axisAngle.angle);
-         double cosTheta = Math.cos(axisAngle.angle);
+         double sinTheta = Math.sin(axisAngle.getAngle());
+         double cosTheta = Math.cos(axisAngle.getAngle());
          double t = 1.0 - cosTheta;
 
          double xz = ax * az;
@@ -1062,8 +1062,8 @@ public class Transform3d extends RigidBodyTransform
          double ay = axisAngle.getY() / mag;
          double az = axisAngle.getZ() / mag;
 
-         double sTheta = Math.sin(axisAngle.angle);
-         double cTheta = Math.cos(axisAngle.angle);
+         double sTheta = Math.sin(axisAngle.getAngle());
+         double cTheta = Math.cos(axisAngle.getAngle());
          double t = 1.0 - cTheta;
 
          double xz = ax * az;
@@ -1112,8 +1112,8 @@ public class Transform3d extends RigidBodyTransform
          double ay = axisAngle.getY() / mag;
          double az = axisAngle.getZ() / mag;
 
-         double sTheta = Math.sin(axisAngle.angle);
-         double cTheta = Math.cos(axisAngle.angle);
+         double sTheta = Math.sin(axisAngle.getAngle());
+         double cTheta = Math.cos(axisAngle.getAngle());
          double t = 1.0 - cTheta;
 
          double xz = ax * az;
@@ -1162,8 +1162,8 @@ public class Transform3d extends RigidBodyTransform
          double ay = axisAngle.getY() / mag;
          double az = axisAngle.getZ() / mag;
 
-         double sTheta = Math.sin(axisAngle.angle);
-         double cTheta = Math.cos(axisAngle.angle);
+         double sTheta = Math.sin(axisAngle.getAngle());
+         double cTheta = Math.cos(axisAngle.getAngle());
          double t = 1.0 - cTheta;
 
          double xz = ax * az;
@@ -1780,7 +1780,7 @@ public class Transform3d extends RigidBodyTransform
          double sin = 0.5 * mag;
          double cos = 0.5 * (rot00 + rot11 + rot22 - 1.0);
 
-         axisAngle.angle = (float) Math.atan2(sin, cos);
+         axisAngle.setAngle((float) Math.atan2(sin, cos));
 
          double invMag = 1.0 / mag;
          axisAngle.setX((float) (axisAngle.getX() * invMag));
@@ -1792,7 +1792,7 @@ public class Transform3d extends RigidBodyTransform
          axisAngle.setX((float) 0.0);
          axisAngle.setY((float) 1.0);
          axisAngle.setZ((float) 0.0);
-         axisAngle.angle = (float) 0.0;
+         axisAngle.setAngle((float) 0.0);
       }
    }
 
