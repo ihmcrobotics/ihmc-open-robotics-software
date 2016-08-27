@@ -782,7 +782,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       isInFrontOfLeftTrotLine.set(leftTrotLine.isPointInFrontOfLine(frontDirection, desiredCenterOfPressure.getFrameTuple2d()));
       isInFrontOfRightTrotLine.set(rightTrotLine.isPointInFrontOfLine(frontDirection, desiredCenterOfPressure.getFrameTuple2d()));
    
-      lineForFindingClosestLineSegment.setOrigin(desiredCenterOfPressure.getFrameTuple2d());
+      lineForFindingClosestLineSegment.setPoint(desiredCenterOfPressure.getFrameTuple2d());
    
       if (isInFrontOfLeftTrotLine.getBooleanValue() == isInFrontOfRightTrotLine.getBooleanValue())
       {
