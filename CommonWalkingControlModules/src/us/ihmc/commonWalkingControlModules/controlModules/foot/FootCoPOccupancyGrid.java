@@ -621,8 +621,8 @@ public class FootCoPOccupancyGrid
          return false;
 
       lineToPack.setToZero(soleFrame);
-      lineToPack.setOrigin(lineOrigin);
-      lineToPack.setDirection(lineDirection);
+      lineToPack.setPoint(lineOrigin);
+      lineToPack.setVector(lineDirection);
       return true;
    }
 }

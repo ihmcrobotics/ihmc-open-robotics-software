@@ -11,21 +11,11 @@ import us.ihmc.robotics.geometry.transformables.TransformableVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
  * @author Twan Koolen
- * @version 1.0
  */
 public class Line2d implements Geometry2d<Line2d>
 {
    // TODO: think about usage of epsilons in the methods.
-
 
    protected final TransformablePoint2d point = new TransformablePoint2d();
    protected final TransformableVector2d normalizedVector = new TransformableVector2d();
@@ -237,15 +227,15 @@ public class Line2d implements Geometry2d<Line2d>
       normalizedVector.normalize();
    }
 
-   public void set(double x0, double y0, double vx, double vy)
+   public void set(double pointX, double pointY, double vectorX, double vectorY)
    {
-      if ((Math.abs(vx) < minAllowableVectorPart) && (Math.abs(vy) < minAllowableVectorPart))
+      if ((Math.abs(vectorX) < minAllowableVectorPart) && (Math.abs(vectorY) < minAllowableVectorPart))
       {
          throw new RuntimeException("Line length must be greater than zero");
       }
 
-      point.set(x0, y0);
-      normalizedVector.set(vx, vy);
+      point.set(pointX, pointY);
+      normalizedVector.set(vectorX, vectorY);
       normalizedVector.normalize();
    }
 
@@ -578,18 +568,6 @@ public class Line2d implements Geometry2d<Line2d>
          return false;
       }
    }
-   
-   private boolean isPointInFrontOfLine(double x, double y, double vFrontX, double vFrontY)
-   {
-      if (isPointOnSideOfLine(x, y, RobotSide.RIGHT) == isPointOnSideOfLine(vFrontX, vFrontY, RobotSide.RIGHT))
-      {
-         return true;
-      }
-      else
-      {
-         return false;
-      }
-   }
 
    /**
     * isPointInFrontOfLine returns whether the point is in front of the line or
@@ -747,5 +725,4 @@ public class Line2d implements Geometry2d<Line2d>
       
       return true;
    }
-
 }

@@ -42,10 +42,10 @@ public class YoArtifactDemo
       lineSegment.getYoSecondEndpointY().set(2.0);
       
       YoFrameLine2d line = new YoFrameLine2d("line", "", ReferenceFrame.getWorldFrame(), registry);
-      line.getYoX0().set(-1.0);
-      line.getYoY0().set(1.0);
-      line.getYoVx().set(-0.5);
-      line.getYoVy().set(1.0);
+      line.getYoPointX().set(-1.0);
+      line.getYoPointY().set(1.0);
+      line.getYoVectorX().set(-0.5);
+      line.getYoVectorY().set(1.0);
       
       plotter.addArtifact(new LineArtifact("01", new Point2d(0, 0), new Point2d(1, 1)));
       plotter.addArtifact(new LineArtifact("02", new Point2d(1, 1), new Point2d(2, 0)));

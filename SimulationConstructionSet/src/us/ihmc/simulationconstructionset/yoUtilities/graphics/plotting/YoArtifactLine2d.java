@@ -19,7 +19,7 @@ public class YoArtifactLine2d extends YoArtifact
    public YoArtifactLine2d(String name, YoFrameLine2d yoFrameLine2d, Color color)
    {
       super(name, new double[0], color,
-            yoFrameLine2d.getYoX0(), yoFrameLine2d.getYoY0(), yoFrameLine2d.getYoVx(), yoFrameLine2d.getYoVy());
+            yoFrameLine2d.getYoPointX(), yoFrameLine2d.getYoPointY(), yoFrameLine2d.getYoVectorX(), yoFrameLine2d.getYoVectorY());
       this.yoFrameLine2d = yoFrameLine2d;
       this.color = color;
    }
