@@ -106,12 +106,6 @@ public class YoArtifactVector extends YoArtifact
    }
 
    @Override
-   public void takeHistorySnapshot()
-   {
-      throw new RuntimeException("Not implemented!");
-   }
-
-   @Override
    public RemoteGraphicType getRemoteGraphicType()
    {
       return null;

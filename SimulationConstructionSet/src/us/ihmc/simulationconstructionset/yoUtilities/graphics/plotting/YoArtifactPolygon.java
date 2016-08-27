@@ -105,12 +105,6 @@ public class YoArtifactPolygon extends YoArtifact
    }
 
    @Override
-   public void takeHistorySnapshot()
-   {
-      throw new RuntimeException("Not implemented!");
-   }
-
-   @Override
    public RemoteGraphicType getRemoteGraphicType()
    {
       return RemoteGraphicType.POLYGON_ARTIFACT;

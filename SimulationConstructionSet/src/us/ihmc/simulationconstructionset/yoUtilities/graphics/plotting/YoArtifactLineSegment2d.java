@@ -124,12 +124,6 @@ public class YoArtifactLineSegment2d extends YoArtifact
    }
 
    @Override
-   public void takeHistorySnapshot()
-   {
-      throw new RuntimeException("Not implemented!");
-   }
-
-   @Override
    public RemoteGraphicType getRemoteGraphicType()
    {
       return RemoteGraphicType.LINE_SEGMENT_2D_ARTIFACT;

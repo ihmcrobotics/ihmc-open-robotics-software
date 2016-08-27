@@ -38,18 +38,6 @@ public class YoArtifactPosition extends YoArtifact
       this.color = color;
       this.scale = scale;
    }
-
-   @Override
-   public void takeHistorySnapshot()
-   {
-      if (getRecordHistory())
-      {
-         synchronized(historicalPositions)
-         {
-            historicalPositions.add(new double[]{x.getDoubleValue(), y.getDoubleValue()});
-         }
-      }
-   }
    
    private final Point3d position = new Point3d();
    private static final int MIN_RADIUS = 5;

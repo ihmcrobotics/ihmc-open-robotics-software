@@ -51,18 +51,6 @@ public class YoArtifactOval extends YoArtifact
    }
 
    @Override
-   public void takeHistorySnapshot()
-   {
-      if (getRecordHistory())
-      {
-         synchronized (historicalData)
-         {
-            historicalData.add(new double[] {center.getX(), center.getY(), radii.getX(), radii.getY()});
-         }
-      }
-   }
-
-   @Override
    public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY, double scaleFactor)
    {
       graphics.setColor(color);
