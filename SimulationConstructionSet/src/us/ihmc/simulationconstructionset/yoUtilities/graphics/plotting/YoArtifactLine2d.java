@@ -32,29 +32,23 @@ public class YoArtifactLine2d extends YoArtifact
          graphics.setColor(color);
          graphics.setStroke(STROKE);
 
-         double x0 = yoFrameLine2d.getX0();
-         double y0 = yoFrameLine2d.getY0();
-         double vx = yoFrameLine2d.getVx();
-         double vy = yoFrameLine2d.getVy();
-
          plotterGraphics.setCenter(Xcenter, Ycenter);
          plotterGraphics.setScale(scaleFactor);
-
-         plotterGraphics.drawLineGivenStartAndVector(graphics, x0, y0, vx, vy);
+         plotterGraphics.drawLineGivenStartAndVector(graphics, yoFrameLine2d.getX0(), yoFrameLine2d.getY0(), yoFrameLine2d.getVx(), yoFrameLine2d.getVy());
       }
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY, double scaleFactor)
    {
       graphics.setColor(color);
       graphics.setStroke(STROKE);
 
-      graphics.drawLineSegment(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
+      graphics.drawLineSegment(-20 + centerX, -5 + centerY, 20 + centerX, 5 + centerY);
    }
 
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
