@@ -4,7 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 
 import us.ihmc.plotting.Graphics2DAdapter;
-import us.ihmc.plotting.PlotterGraphics;
+import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.math.frames.YoFrameLine2d;
 
 public class YoArtifactLine2d extends YoArtifact
@@ -14,8 +14,8 @@ public class YoArtifactLine2d extends YoArtifact
    private final YoFrameLine2d yoFrameLine2d;
    private final Color color;
    
-   private final PlotterGraphics plotterGraphics = new PlotterGraphics();
-
+   private final Line2d tempLine = new Line2d();
+   
    public YoArtifactLine2d(String name, YoFrameLine2d yoFrameLine2d, Color color)
    {
       super(name, new double[0], color,
@@ -32,9 +32,8 @@ public class YoArtifactLine2d extends YoArtifact
          graphics.setColor(color);
          graphics.setStroke(STROKE);
 
-         plotterGraphics.setCenter(Xcenter, Ycenter);
-         plotterGraphics.setScale(scaleFactor);
-         plotterGraphics.drawLineGivenStartAndVector(graphics, yoFrameLine2d.getX0(), yoFrameLine2d.getY0(), yoFrameLine2d.getVx(), yoFrameLine2d.getVy());
+         yoFrameLine2d.getFrameLine2d().get(tempLine);
+         graphics.drawLine(tempLine);
       }
    }
 

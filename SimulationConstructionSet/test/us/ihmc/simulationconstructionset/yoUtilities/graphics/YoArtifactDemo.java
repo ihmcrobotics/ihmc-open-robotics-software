@@ -7,10 +7,12 @@ import javax.vecmath.Point2d;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.artifact.LineArtifact;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.math.frames.YoFrameLine2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLine2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactOval;
 
@@ -39,11 +41,18 @@ public class YoArtifactDemo
       lineSegment.getYoSecondEndpointX().set(2.0);
       lineSegment.getYoSecondEndpointY().set(2.0);
       
+      YoFrameLine2d line = new YoFrameLine2d("line", "", ReferenceFrame.getWorldFrame(), registry);
+      line.getYoX0().set(-1.0);
+      line.getYoY0().set(1.0);
+      line.getYoVx().set(-0.5);
+      line.getYoVy().set(1.0);
+      
       plotter.addArtifact(new LineArtifact("01", new Point2d(0, 0), new Point2d(1, 1)));
       plotter.addArtifact(new LineArtifact("02", new Point2d(1, 1), new Point2d(2, 0)));
       plotter.addArtifact(new LineArtifact("03", new Point2d(2, 0), new Point2d(3, 1)));
       plotter.addArtifact(new YoArtifactOval("circle", center, radii, Color.RED));
-      plotter.addArtifact(new YoArtifactLineSegment2d("line1", lineSegment, Color.DARK_GRAY, 0.1, 0.1));
+      plotter.addArtifact(new YoArtifactLineSegment2d("lineSegment1", lineSegment, Color.DARK_GRAY, 0.1, 0.1));
+      plotter.addArtifact(new YoArtifactLine2d("line1", line, Color.GREEN));
       
       plotter.showInNewWindow("plotterDemo", true);
       
