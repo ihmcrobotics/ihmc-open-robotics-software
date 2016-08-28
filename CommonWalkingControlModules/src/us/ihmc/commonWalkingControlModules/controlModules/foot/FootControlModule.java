@@ -128,25 +128,31 @@ public class FootControlModule
       onToesState = new OnToesState(footControlHelper, toeOffFootControlGains, registry);
       states.add(onToesState);
 
-      supportState = new FullyConstrainedState(footControlHelper, registry);
       supportStateNew = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
       useNewSupportState = walkingControllerParameters.useSupportState();
-      holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
-      if (!useNewSupportState && walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
-         exploreFootPolygonState = new ExploreFootPolygonState(footControlHelper, holdPositionFootControlGains, registry);
-      else
-         exploreFootPolygonState = null;
 
       if (useNewSupportState)
       {
          states.add(supportStateNew);
+
+         supportState = null;
+         holdPositionState = null;
+         exploreFootPolygonState = null;
       }
       else
       {
+         supportState = new FullyConstrainedState(footControlHelper, registry);
+         holdPositionState = new HoldPositionState(footControlHelper, holdPositionFootControlGains, registry);
          states.add(supportState);
          states.add(holdPositionState);
-         if (exploreFootPolygonState != null)
+
+         if (walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
+         {
+            exploreFootPolygonState = new ExploreFootPolygonState(footControlHelper, holdPositionFootControlGains, registry);
             states.add(exploreFootPolygonState);
+         }
+         else
+            exploreFootPolygonState = null;
       }
 
       swingState = new SwingState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
@@ -187,53 +193,56 @@ public class FootControlModule
          }
       }
 
-      supportState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.HOLD_POSITION, new StateTransitionCondition()
+      if (!useNewSupportState)
       {
-         @Override
-         public boolean checkCondition()
-         {
-            if (alwaysHoldPosition.getBooleanValue())
-               return true;
-            if (neverHoldPosition.getBooleanValue())
-               return false;
-
-            if (isFootBarelyLoaded())
-               return true;
-            if (holdPositionIfCopOnEdge.getBooleanValue())
-               return footControlHelper.isCoPOnEdge();
-            return false;
-         }
-      }));
-
-      holdPositionState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.FULL, new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            if (useNewSupportState)
-               return true;
-
-            if (alwaysHoldPosition.getBooleanValue())
-               return false;
-            if (neverHoldPosition.getBooleanValue())
-               return true;
-
-            if (isFootBarelyLoaded())
-               return false;
-            return !footControlHelper.isCoPOnEdge();
-         }
-      }));
-
-      if (exploreFootPolygonState != null)
-      {
-         exploreFootPolygonState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.FULL, new StateTransitionCondition()
+         supportState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.HOLD_POSITION, new StateTransitionCondition()
          {
             @Override
             public boolean checkCondition()
             {
-               return exploreFootPolygonState.isDoneExploring();
+               if (alwaysHoldPosition.getBooleanValue())
+                  return true;
+               if (neverHoldPosition.getBooleanValue())
+                  return false;
+
+               if (isFootBarelyLoaded())
+                  return true;
+               if (holdPositionIfCopOnEdge.getBooleanValue())
+                  return footControlHelper.isCoPOnEdge();
+               return false;
             }
          }));
+
+         holdPositionState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.FULL, new StateTransitionCondition()
+         {
+            @Override
+            public boolean checkCondition()
+            {
+               if (useNewSupportState)
+                  return true;
+
+               if (alwaysHoldPosition.getBooleanValue())
+                  return false;
+               if (neverHoldPosition.getBooleanValue())
+                  return true;
+
+               if (isFootBarelyLoaded())
+                  return false;
+               return !footControlHelper.isCoPOnEdge();
+            }
+         }));
+
+         if (exploreFootPolygonState != null)
+         {
+            exploreFootPolygonState.addStateTransition(new StateTransition<FootControlModule.ConstraintType>(ConstraintType.FULL, new StateTransitionCondition()
+            {
+               @Override
+               public boolean checkCondition()
+               {
+                  return exploreFootPolygonState.isDoneExploring();
+               }
+            }));
+         }
       }
 
       for (AbstractFootControlState state : states)
@@ -248,13 +257,14 @@ public class FootControlModule
       swingState.setWeight(defaultFootWeight);
       moveViaWaypointsState.setWeight(defaultFootWeight);
       onToesState.setWeight(highFootWeight);
-      supportState.setWeight(highFootWeight);
-      supportStateNew.setWeight(highFootWeight);
-      holdPositionState.setWeight(defaultFootWeight);
+      if (supportState != null)
+         supportState.setWeight(highFootWeight);
+      if (supportStateNew != null)
+         supportStateNew.setWeight(highFootWeight);
+      if (holdPositionState != null)
+         holdPositionState.setWeight(defaultFootWeight);
       if (exploreFootPolygonState != null)
-      {
          exploreFootPolygonState.setWeight(defaultFootWeight);
-      }
    }
 
    public void setWeights(Vector3d highAngularFootWeight, Vector3d highLinearFootWeight, Vector3d defaultAngularFootWeight, Vector3d defaultLinearFootWeight)
@@ -262,13 +272,14 @@ public class FootControlModule
       swingState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       moveViaWaypointsState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       onToesState.setWeights(highAngularFootWeight, highLinearFootWeight);
-      supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
-      supportStateNew.setWeights(highAngularFootWeight, highLinearFootWeight);
-      holdPositionState.setWeights(highAngularFootWeight, highLinearFootWeight);
+      if (supportState != null)
+         supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
+      if (supportStateNew != null)
+         supportStateNew.setWeights(highAngularFootWeight, highLinearFootWeight);
+      if (holdPositionState != null)
+         holdPositionState.setWeights(highAngularFootWeight, highLinearFootWeight);
       if (exploreFootPolygonState != null)
-      {
          exploreFootPolygonState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
-      }
    }
 
    public void replanTrajectory(Footstep footstep, double swingTime)
@@ -493,7 +504,8 @@ public class FootControlModule
 
    public void setAllowFootholdAdjustments(boolean allow)
    {
-      holdPositionState.doFootholdAdjustments(allow);
+      if (holdPositionState != null)
+         holdPositionState.doFootholdAdjustments(allow);
    }
 
    private void requestExploration()
