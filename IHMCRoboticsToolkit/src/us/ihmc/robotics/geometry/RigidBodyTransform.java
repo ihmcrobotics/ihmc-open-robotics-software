@@ -2154,4 +2154,124 @@ public class RigidBodyTransform implements Serializable
       out.format( F + F + F + "|" + F + "\n", 0f,0f,0f,1f );      
       return stream.toString();
    }
+
+   public void setM00(double m00)
+   {
+      this.mat00 = m00;
+   }
+
+   public void setM01(double m01)
+   {
+      this.mat01 = m01;
+   }
+
+   public void setM02(double m02)
+   {
+      this.mat02 = m02;
+   }
+
+   public void setM03(double m03)
+   {
+      this.mat03 = m03;
+   }
+
+   public void setM10(double m10)
+   {
+      this.mat10 = m10;
+   }
+
+   public void setM11(double m11)
+   {
+      this.mat11 = m11;
+   }
+
+   public void setM13(double m13)
+   {
+      this.mat13 = m13;
+   }
+
+   public void setM12(double m12)
+   {
+      this.mat12 = m12;
+   }
+
+   public void setM20(double m20)
+   {
+      this.mat20 = m20;
+   }
+
+   public void setM21(double m21)
+   {
+      this.mat21 = m21;
+   }
+
+   public void setM22(double m22)
+   {
+      this.mat22 = m22;
+   }
+
+   public void setM23(double m23)
+   {
+      this.mat23 = m23;
+   }
+
+   public double getM00()
+   {
+      return mat00;
+   }
+
+   public double getM01()
+   {
+      return mat01;
+   }
+
+   public double getM02()
+   {
+      return mat02;
+   }
+
+   public double getM03()
+   {
+      return mat03;
+   }
+
+   public double getM10()
+   {
+      return mat10;
+   }
+
+   public double getM11()
+   {
+      return mat11;
+   }
+
+   public double getM13()
+   {
+      return mat13;
+   }
+
+   public double getM12()
+   {
+      return mat12;
+   }
+
+   public double getM20()
+   {
+      return mat20;
+   }
+
+   public double getM21()
+   {
+      return mat21;
+   }
+
+   public double getM22()
+   {
+      return mat22;
+   }
+
+   public double getM23()
+   {
+      return mat23;
+   }
 }
