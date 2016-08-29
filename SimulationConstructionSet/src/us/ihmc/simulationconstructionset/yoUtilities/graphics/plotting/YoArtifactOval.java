@@ -55,15 +55,12 @@ public class YoArtifactOval extends YoArtifact
    }
 
    @Override
-   public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
-      if (isVisible)
-      {
-         center.get(tempCenter);
-         radii.get(tempRadii);
-         graphics.setColor(color);
-         graphics.drawOval(tempCenter, tempRadii);
-      }
+      center.get(tempCenter);
+      radii.get(tempRadii);
+      graphics.setColor(color);
+      graphics.drawOval(tempCenter, tempRadii);
    }
 
    @Override
