@@ -332,4 +332,10 @@ public class WandererJointMap implements DRCRobotJointMap
    {
       return jointNamesBeforeFeet;
    }
+   
+   @Override
+   public Enum<?>[] getRobotSegments()
+   {
+      return RobotSide.values;
+   }
 }
