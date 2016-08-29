@@ -22,19 +22,19 @@ public class StateMachineExampleOneTest
       SettableDoubleProvider time = new SettableDoubleProvider();
       StateMachine<ExampleStateName> stateMachine = new StateMachine<ExampleStateName>("stateMachine", "switchTime", ExampleStateName.class, time, registry);
 
-      SimpleState startingState = new SimpleState(ExampleStateName.Starting);
+      SimpleExampleState startingState = new SimpleExampleState(ExampleStateName.Starting);
       startingState.addDelayBasedStateTransition(ExampleStateName.StateOne, 1.0);
       stateMachine.addState(startingState);
 
-      SimpleState stateOne = new SimpleState(ExampleStateName.StateOne);
+      SimpleExampleState stateOne = new SimpleExampleState(ExampleStateName.StateOne);
       stateOne.addDelayBasedStateTransition(ExampleStateName.StateTwo, 1.0);
       stateMachine.addState(stateOne);
 
-      SimpleState stateTwo = new SimpleState(ExampleStateName.StateTwo);
+      SimpleExampleState stateTwo = new SimpleExampleState(ExampleStateName.StateTwo);
       stateTwo.addDelayBasedStateTransition(ExampleStateName.Stopped, 1.0);
       stateMachine.addState(stateTwo);
 
-      SimpleState stoppedState = new SimpleState(ExampleStateName.Stopped);
+      SimpleExampleState stoppedState = new SimpleExampleState(ExampleStateName.Stopped);
       stateMachine.addState(stoppedState);
 
       stateMachine.setCurrentState(ExampleStateName.Starting);
@@ -52,7 +52,7 @@ public class StateMachineExampleOneTest
          else
             assertEquals(ExampleStateName.Stopped, currentStateEnum);
 
-         SimpleState currentState = (SimpleState) stateMachine.getCurrentState();
+         SimpleExampleState currentState = (SimpleExampleState) stateMachine.getCurrentState();
 
          if (stateMachine.timeInCurrentState() < 0.001)
          {
@@ -97,19 +97,19 @@ public class StateMachineExampleOneTest
       SettableDoubleProvider time = new SettableDoubleProvider();
       StateMachine<ExampleStateName> stateMachine = new StateMachine<ExampleStateName>("stateMachine", "switchTime", ExampleStateName.class, time, registry);
 
-      SimpleState startingState = new SimpleState(ExampleStateName.Starting);
+      SimpleExampleState startingState = new SimpleExampleState(ExampleStateName.Starting);
       startingState.setDefaultNextState(ExampleStateName.StateOne);
       stateMachine.addState(startingState);
 
-      SimpleState stateOne = new SimpleState(ExampleStateName.StateOne);
+      SimpleExampleState stateOne = new SimpleExampleState(ExampleStateName.StateOne);
       stateOne.setDefaultNextState(ExampleStateName.StateTwo);
       stateMachine.addState(stateOne);
 
-      SimpleState stateTwo = new SimpleState(ExampleStateName.StateTwo);
+      SimpleExampleState stateTwo = new SimpleExampleState(ExampleStateName.StateTwo);
       stateTwo.setDefaultNextState(ExampleStateName.Stopped);
       stateMachine.addState(stateTwo);
 
-      SimpleState stoppedState = new SimpleState(ExampleStateName.Stopped);
+      SimpleExampleState stoppedState = new SimpleExampleState(ExampleStateName.Stopped);
       stateMachine.addState(stoppedState);
 
       stateMachine.setCurrentState(ExampleStateName.Starting);
@@ -129,7 +129,7 @@ public class StateMachineExampleOneTest
       stateMachine.attachStateChangedListener(listener);
 
       ExampleStateName currentStateEnum = stateMachine.getCurrentStateEnum();
-      SimpleState currentState = (SimpleState) stateMachine.getCurrentState();
+      SimpleExampleState currentState = (SimpleExampleState) stateMachine.getCurrentState();
 
       assertEquals(currentState, startingState);
       assertEquals(currentStateEnum, ExampleStateName.Starting);
@@ -172,7 +172,7 @@ public class StateMachineExampleOneTest
       assertTrue(currentState.didTransitionOutOfAction);
 
       currentStateEnum = stateMachine.getCurrentStateEnum();
-      currentState = (SimpleState) stateMachine.getCurrentState();
+      currentState = (SimpleExampleState) stateMachine.getCurrentState();
 
       assertEquals(currentState, stateOne);
       assertEquals(currentStateEnum, ExampleStateName.StateOne);
@@ -205,7 +205,7 @@ public class StateMachineExampleOneTest
       assertTrue(currentState.didTransitionOutOfAction);
 
       currentStateEnum = stateMachine.getCurrentStateEnum();
-      currentState = (SimpleState) stateMachine.getCurrentState();
+      currentState = (SimpleExampleState) stateMachine.getCurrentState();
 
       assertEquals(currentState, stateTwo);
       assertEquals(currentStateEnum, ExampleStateName.StateTwo);
@@ -249,7 +249,7 @@ public class StateMachineExampleOneTest
       assertTrue(currentState.didTransitionOutOfAction);
 
       currentStateEnum = stateMachine.getCurrentStateEnum();
-      currentState = (SimpleState) stateMachine.getCurrentState();
+      currentState = (SimpleExampleState) stateMachine.getCurrentState();
 
       assertEquals(currentState, stoppedState);
       assertEquals(currentStateEnum, ExampleStateName.Stopped);
@@ -276,7 +276,7 @@ public class StateMachineExampleOneTest
       SettableDoubleProvider time = new SettableDoubleProvider();
       StateMachine<ExampleStateName> stateMachine = new StateMachine<ExampleStateName>("stateMachine", "switchTime", ExampleStateName.class, time, registry);
 
-      SimpleState startingState = new SimpleState(ExampleStateName.Starting);
+      SimpleExampleState startingState = new SimpleExampleState(ExampleStateName.Starting);
       startingState.setDefaultNextState(ExampleStateName.StateOne);
       stateMachine.addState(startingState);
 
@@ -289,7 +289,7 @@ public class StateMachineExampleOneTest
       {
       }
 
-      SimpleState stateOne = new SimpleState(ExampleStateName.StateOne);
+      SimpleExampleState stateOne = new SimpleExampleState(ExampleStateName.StateOne);
       stateOne.setDefaultNextState(ExampleStateName.StateTwo);
       stateMachine.addState(stateOne);
 
@@ -320,15 +320,29 @@ public class StateMachineExampleOneTest
       {
       }
 
+      SimpleExampleState stateTwo = new SimpleExampleState(ExampleStateName.StateTwo);
+      stateMachine.addState(stateTwo);
+      stateMachine.setCurrentState(ExampleStateName.StateTwo);
+
+      try
+      {
+         stateTwo.transitionToDefaultNextState();
+         stateMachine.checkTransitionConditions();
+         fail("DefaultNextState not set");
+      }
+      catch(RuntimeException e)
+      {
+      }
+
    }
 
-   private class SimpleState extends State<ExampleStateName>
+   private class SimpleExampleState extends State<ExampleStateName>
    {
       public boolean didTransitionIntoAction = false;
       public boolean didAction = false;
       public boolean didTransitionOutOfAction = false;
 
-      public SimpleState(ExampleStateName stateEnum)
+      public SimpleExampleState(ExampleStateName stateEnum)
       {
          super(stateEnum);
       }
