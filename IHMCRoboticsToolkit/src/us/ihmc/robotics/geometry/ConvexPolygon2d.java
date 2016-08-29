@@ -2501,22 +2501,13 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          alpha = 0.0;
       if (alpha > 1.0)
          alpha = 1.0;
-
       edgeVector.scale(alpha);
 
-      Point2d ret = new Point2d(firstEdgeVertex);
-      ret.add(edgeVector);
-
+      point2d.set(firstEdgeVertex);
+      point2d.add(edgeVector);
       // Make sure the returned point is inside the polygon by nudging it a little toward the centroid.
       // This will all but guarantee that projections are then inside.
-
-      Vector2d retToCentroid = new Vector2d(centroid);
-      retToCentroid.sub(ret);
-      retToCentroid.scale(1.0e-12);
-
-      ret.add(retToCentroid);
-
-      point2d.set(ret);
+      pullPointTowardsCentroid(point2d, 10E-10);
    }
 
    public boolean isEmpty()
