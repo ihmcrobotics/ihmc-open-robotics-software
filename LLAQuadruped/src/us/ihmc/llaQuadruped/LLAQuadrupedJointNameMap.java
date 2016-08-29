@@ -15,6 +15,7 @@ import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
 {
@@ -213,5 +214,11 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
    public String getSDFNameForJointName(QuadrupedJointName name)
    {
       return sdfJointNameMap.get(name);
+   }
+   
+   @Override
+   public Enum<?>[] getRobotSegments()
+   {
+      return RobotQuadrant.values;
    }
 }

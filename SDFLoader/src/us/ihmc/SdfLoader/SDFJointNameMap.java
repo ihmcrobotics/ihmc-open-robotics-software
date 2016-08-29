@@ -11,6 +11,7 @@ import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.robotSide.RobotSegment;
 
 public interface SDFJointNameMap extends RobotSpecificJointNames
 {
@@ -38,5 +39,7 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
    Set<String> getLastSimulatedJoints();
 
    String[] getJointNamesBeforeFeet();
+
+   Enum<?>[] getRobotSegments();
 
 }
