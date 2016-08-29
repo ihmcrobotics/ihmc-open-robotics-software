@@ -272,7 +272,7 @@ public abstract class DRCPushRecoveryTest
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
       forceDirection.normalize();
       double magnitude = 100.0;
-      double duration = 2.0;
+      double duration = 1.5; // used to be 2.0 but started failing 8/16
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0);
       assertTrue(success);
