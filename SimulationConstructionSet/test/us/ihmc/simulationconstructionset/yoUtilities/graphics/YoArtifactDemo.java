@@ -7,6 +7,8 @@ import javax.vecmath.Point2d;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.artifact.LineArtifact;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLine2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -15,6 +17,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLine2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactOval;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
 public class YoArtifactDemo
 {
@@ -47,12 +50,29 @@ public class YoArtifactDemo
       line.getYoVectorX().set(-0.5);
       line.getYoVectorY().set(1.0);
       
+      YoFrameConvexPolygon2d polygon = new YoFrameConvexPolygon2d("polygon", ReferenceFrame.getWorldFrame(), 5, registry);
+      
+      YoFrameConvexPolygon2d polygon2 = new YoFrameConvexPolygon2d("polygon1", ReferenceFrame.getWorldFrame(), 5, registry);
+      YoFramePoint2d polyPoint1 = new YoFramePoint2d("point1", ReferenceFrame.getWorldFrame(), registry);
+      polyPoint1.set(1.5, 2.0);
+      polygon2.setConvexPolygon2d(new FramePoint2d[] {polyPoint1.getFrameTuple2d()});
+      
+      YoFrameConvexPolygon2d polygon3 = new YoFrameConvexPolygon2d("polygon2", ReferenceFrame.getWorldFrame(), 5, registry);
+      YoFramePoint2d polyPoint2 = new YoFramePoint2d("point2", ReferenceFrame.getWorldFrame(), registry);
+      polyPoint2.set(2.0, 2.5);
+      YoFramePoint2d polyPoint3 = new YoFramePoint2d("point3", ReferenceFrame.getWorldFrame(), registry);
+      polyPoint3.set(1.0, 3.0);
+      polygon3.setConvexPolygon2d(new FramePoint2d[] {polyPoint1.getFrameTuple2d(), polyPoint2.getFrameTuple2d(), polyPoint3.getFrameTuple2d()});
+      
       plotter.addArtifact(new LineArtifact("01", new Point2d(0, 0), new Point2d(1, 1)));
       plotter.addArtifact(new LineArtifact("02", new Point2d(1, 1), new Point2d(2, 0)));
       plotter.addArtifact(new LineArtifact("03", new Point2d(2, 0), new Point2d(3, 1)));
       plotter.addArtifact(new YoArtifactOval("circle", center, radii, Color.RED));
       plotter.addArtifact(new YoArtifactLineSegment2d("lineSegment1", lineSegment, Color.DARK_GRAY, 0.1, 0.1));
       plotter.addArtifact(new YoArtifactLine2d("line1", line, Color.GREEN));
+      plotter.addArtifact(new YoArtifactPolygon("emptyPolygon1", polygon, Color.MAGENTA, false)); 
+      plotter.addArtifact(new YoArtifactPolygon("onePointPolygon", polygon2, Color.MAGENTA, false)); 
+      plotter.addArtifact(new YoArtifactPolygon("twoPointPolygon", polygon3, Color.BLUE, true)); 
       
       plotter.showInNewWindow("plotterDemo", true);
       

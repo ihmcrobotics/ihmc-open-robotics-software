@@ -2,30 +2,24 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Stroke;
 import java.awt.geom.Rectangle2D;
 
 import us.ihmc.plotting.Graphics2DAdapter;
-import us.ihmc.plotting.PlotterGraphics;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
 public class YoArtifactPolygon extends YoArtifact
 {
-   private final YoFrameConvexPolygon2d yoConvexPolygon2d;
-   private final ConvexPolygon2d convexPolygon2d = new ConvexPolygon2d();
-
-   private final PlotterGraphics plotterGraphics = new PlotterGraphics();
+   private final YoFrameConvexPolygon2d convexPolygon;
+   
+   private final ConvexPolygon2d tempConvexPolygon = new ConvexPolygon2d();
 
    private final Color color;
    private final boolean fill;
-
-   private final int pixels;
    private final BasicStroke stroke;
-
+   
    public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill)
    {
       this(name, yoConvexPolygon2d, color, fill, 2);
@@ -34,16 +28,10 @@ public class YoArtifactPolygon extends YoArtifact
    public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill, int lineWidth)
    {
       super(name,  new double[] {fill ? 1.0 : 0.0}, color);
-      this.yoConvexPolygon2d = yoConvexPolygon2d;
+      this.convexPolygon = yoConvexPolygon2d;
       this.color = color;
       this.fill = fill;
-      this.pixels = lineWidth;
-      stroke = createStroke();
-   }
-
-   public BasicStroke createStroke()
-   {
-      return new BasicStroke(pixels);
+      stroke = new BasicStroke(lineWidth);
    }
 
    @Override
@@ -63,38 +51,18 @@ public class YoArtifactPolygon extends YoArtifact
       if (isVisible)
       {
          graphics.setColor(color);
-
-         Stroke previousStroke = graphics.getStroke();
          graphics.setStroke(stroke);
 
-         plotterGraphics.setCenter(Xcenter, Ycenter);
-         plotterGraphics.setScale(scaleFactor);
+         convexPolygon.getFrameConvexPolygon2d().get(tempConvexPolygon);
 
-         try
+         if (fill)
          {
-            FrameConvexPolygon2d frameConvexPolygon2d = yoConvexPolygon2d.getFrameConvexPolygon2d();
-            ConvexPolygon2d convexPolygon2dFromYoConvexPolygon = frameConvexPolygon2d.getConvexPolygon2d();
-            convexPolygon2d.setAndUpdate(convexPolygon2dFromYoConvexPolygon);
-         }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-            return;
-         }
-
-         if (convexPolygon2d.isEmpty())
-               return;
-
-         if (fill && convexPolygon2d.getNumberOfVertices() > 2)
-         {
-            plotterGraphics.fillPolygon(graphics, convexPolygon2d);
+            graphics.drawPolygonFilled(tempConvexPolygon);
          }
          else
          {
-            plotterGraphics.drawPolygon(graphics, convexPolygon2d);
+            graphics.drawPolygon(tempConvexPolygon);
          }
-
-         graphics.setStroke(previousStroke);
       }
    }
 
@@ -113,22 +81,16 @@ public class YoArtifactPolygon extends YoArtifact
    @Override
    public YoVariable<?>[] getVariables()
    {
-      YoVariable<?>[] vars = new YoVariable[1 + 2 * yoConvexPolygon2d.getMaxNumberOfVertices()];
+      YoVariable<?>[] vars = new YoVariable[1 + 2 * convexPolygon.getMaxNumberOfVertices()];
       int i = 0;
-      vars[i++] = yoConvexPolygon2d.getYoNumberVertices();
+      vars[i++] = convexPolygon.getYoNumberVertices();
 
-      for (YoFramePoint2d p : yoConvexPolygon2d.getYoFramePoints())
+      for (YoFramePoint2d p : convexPolygon.getYoFramePoints())
       {
          vars[i++] = p.getYoX();
          vars[i++] = p.getYoY();
       }
 
       return vars;
-   }
-
-   @Override
-   public String getName()
-   {
-      return getID();
    }
 }

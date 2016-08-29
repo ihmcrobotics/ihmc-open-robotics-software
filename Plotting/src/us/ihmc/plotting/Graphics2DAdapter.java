@@ -207,6 +207,20 @@ public class Graphics2DAdapter
    
    public void drawPolygonFilled(ConvexPolygon2d convexPolygon2d)
    {
+      setupForDrawPolygon(convexPolygon2d);
+      
+      graphics2d.fillPolygon(tempPoints[0], tempPoints[1], convexPolygon2d.getNumberOfVertices());
+   }
+   
+   public void drawPolygon(ConvexPolygon2d convexPolygon2d)
+   {
+      setupForDrawPolygon(convexPolygon2d);
+      
+      graphics2d.drawPolygon(tempPoints[0], tempPoints[1], convexPolygon2d.getNumberOfVertices());
+   }
+
+   private void setupForDrawPolygon(ConvexPolygon2d convexPolygon2d)
+   {
       for (int i = 0; i < convexPolygon2d.getNumberOfVertices(); i++)
       {
          pointBin[i].setIncludingFrame(metersFrame, convexPolygon2d.getVertex(i));
@@ -214,8 +228,6 @@ public class Graphics2DAdapter
          tempPoints[0][i] = pixelate(pointBin[i].getX());
          tempPoints[1][i] = pixelate(pointBin[i].getY());
       }
-      
-      graphics2d.fillPolygon(tempPoints[0], tempPoints[1], convexPolygon2d.getNumberOfVertices());
    }
 
    @Deprecated

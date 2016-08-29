@@ -8,26 +8,13 @@ import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2006</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder implements VariableChangedListener
 {
    private final ArrayList<YoFramePoint2d> yoFramePoints = new ArrayList<YoFramePoint2d>();
@@ -121,6 +108,27 @@ public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder impleme
    }
 
    public void setConvexPolygon2d(List<FramePoint> framePoints)
+   {
+      if (framePoints == null)
+      {
+         hide();
+         setToNaN();
+         return;
+      }
+
+      try
+      {
+         convexPolygon2dForWriting.clear(referenceFrame);
+         convexPolygon2dForWriting.setAndUpdate(framePoints);
+         getYoValuesFromFrameConvexPolygon2d();
+      }
+      catch (Exception e)
+      {
+         System.err.println("In YoFrameConvexPolygon2d.java: " + e.getClass().getSimpleName() + " while calling setConvexPolygon2d(List<FramePoint>).");
+      }
+   }
+
+   public void setConvexPolygon2d(FramePoint2d[] framePoints)
    {
       if (framePoints == null)
       {
@@ -278,6 +286,7 @@ public class YoFrameConvexPolygon2d extends AbstractReferenceFrameHolder impleme
       return hasChanged.getAndSet(false);
    }
 
+   @Override
    public void variableChanged(YoVariable<?> v)
    {
       hasChanged.set(true);
