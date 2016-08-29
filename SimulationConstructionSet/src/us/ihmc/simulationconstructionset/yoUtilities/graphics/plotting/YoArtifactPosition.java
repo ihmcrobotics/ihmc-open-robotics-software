@@ -94,16 +94,20 @@ public class YoArtifactPosition extends YoArtifact
    }
 
    @Override
-   public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
-      if (isVisible)
-      {
-         point.get(tempPoint);
-         draw(graphics);
-      }
+      point.get(tempPoint);
+      drawLocal(graphics);
    }
 
-   private void draw(Graphics2DAdapter graphics)
+   @Override
+   public void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry)
+   {
+      tempPoint.set(entry[0], entry[1]);
+      drawLocal(graphics);
+   }
+
+   private void drawLocal(Graphics2DAdapter graphics)
    {
       graphics.setColor(color);
       graphics.setStroke(STROKE);
@@ -150,13 +154,6 @@ public class YoArtifactPosition extends YoArtifact
       }
    }
    
-   @Override
-   public void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry)
-   {
-      tempPoint.set(entry[0], entry[1]);
-      draw(graphics);
-   }
-
    @Override
    public RemoteGraphicType getRemoteGraphicType() 
    {

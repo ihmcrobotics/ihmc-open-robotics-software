@@ -25,16 +25,13 @@ public class YoArtifactLine2d extends YoArtifact
    }
 
    @Override
-   public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
-      if (isVisible)
-      {
-         graphics.setColor(color);
-         graphics.setStroke(STROKE);
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
 
-         yoFrameLine2d.getFrameLine2d().get(tempLine);
-         graphics.drawLine(tempLine);
-      }
+      yoFrameLine2d.getFrameLine2d().get(tempLine);
+      graphics.drawLine(tempLine);
    }
 
    @Override

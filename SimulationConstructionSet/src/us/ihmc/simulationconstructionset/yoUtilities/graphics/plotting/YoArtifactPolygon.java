@@ -46,23 +46,20 @@ public class YoArtifactPolygon extends YoArtifact
    }
 
    @Override
-   public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
-      if (isVisible)
+      graphics.setColor(color);
+      graphics.setStroke(stroke);
+
+      convexPolygon.getFrameConvexPolygon2d().get(tempConvexPolygon);
+
+      if (fill)
       {
-         graphics.setColor(color);
-         graphics.setStroke(stroke);
-
-         convexPolygon.getFrameConvexPolygon2d().get(tempConvexPolygon);
-
-         if (fill)
-         {
-            graphics.drawPolygonFilled(tempConvexPolygon);
-         }
-         else
-         {
-            graphics.drawPolygon(tempConvexPolygon);
-         }
+         graphics.drawPolygonFilled(tempConvexPolygon);
+      }
+      else
+      {
+         graphics.drawPolygon(tempConvexPolygon);
       }
    }
 

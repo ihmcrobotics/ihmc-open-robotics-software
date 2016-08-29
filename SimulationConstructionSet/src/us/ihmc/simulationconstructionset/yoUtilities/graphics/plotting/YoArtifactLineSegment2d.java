@@ -76,45 +76,42 @@ public class YoArtifactLineSegment2d extends YoArtifact
    }
    
    @Override
-   public void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
-      if (isVisible)
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+
+      if (lineSegment.areEndpointsTheSame())
       {
-         graphics.setColor(color);
-         graphics.setStroke(STROKE);
+         tempFirstEndpoint.set(lineSegment.getFirstEndpointX(), lineSegment.getFirstEndpointY());
+         graphics.drawPoint(tempFirstEndpoint);
+      }
+      else
+      {
+         lineSegment.getFrameLineSegment2d().get(tempLineSegment);
+         graphics.drawLineSegment(tempLineSegment);
+      }
 
-         if (lineSegment.areEndpointsTheSame())
-         {
-            tempFirstEndpoint.set(lineSegment.getFirstEndpointX(), lineSegment.getFirstEndpointY());
-            graphics.drawPoint(tempFirstEndpoint);
-         }
-         else
-         {
-            lineSegment.getFrameLineSegment2d().get(tempLineSegment);
-            graphics.drawLineSegment(tempLineSegment);
-         }
-
-         if (drawArrow)
-         {
-            arrowHeadVector.set(lineSegment.getSecondEndpointX() - lineSegment.getFirstEndpointX(), lineSegment.getSecondEndpointY() - lineSegment.getFirstEndpointY());
-            arrowHeadVector.normalize();
-            arrowHeadLateralVector.set(arrowHeadVector.getY(), -arrowHeadVector.getX());
-            
-            arrowHeadVector.scale(arrowHeadHeight);
-            arrowHeadLateralVector.scale(arrowHeadWidth / 2.0);
-            
-            tempArrowPolygon.getVertex(0).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
-            
-            tempArrowPolygon.getVertex(1).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
-            tempArrowPolygon.getVertex(1).sub(arrowHeadVector);
-            tempArrowPolygon.getVertex(1).sub(arrowHeadLateralVector);
-            
-            tempArrowPolygon.getVertex(2).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
-            tempArrowPolygon.getVertex(2).sub(arrowHeadVector);
-            tempArrowPolygon.getVertex(2).add(arrowHeadLateralVector);
-            
-            graphics.drawPolygonFilled(tempArrowPolygon);
-         }
+      if (drawArrow)
+      {
+         arrowHeadVector.set(lineSegment.getSecondEndpointX() - lineSegment.getFirstEndpointX(), lineSegment.getSecondEndpointY() - lineSegment.getFirstEndpointY());
+         arrowHeadVector.normalize();
+         arrowHeadLateralVector.set(arrowHeadVector.getY(), -arrowHeadVector.getX());
+         
+         arrowHeadVector.scale(arrowHeadHeight);
+         arrowHeadLateralVector.scale(arrowHeadWidth / 2.0);
+         
+         tempArrowPolygon.getVertex(0).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
+         
+         tempArrowPolygon.getVertex(1).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
+         tempArrowPolygon.getVertex(1).sub(arrowHeadVector);
+         tempArrowPolygon.getVertex(1).sub(arrowHeadLateralVector);
+         
+         tempArrowPolygon.getVertex(2).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
+         tempArrowPolygon.getVertex(2).sub(arrowHeadVector);
+         tempArrowPolygon.getVertex(2).add(arrowHeadLateralVector);
+         
+         graphics.drawPolygonFilled(tempArrowPolygon);
       }
    }
 
