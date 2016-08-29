@@ -289,4 +289,10 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       numberOfQueuedCommands.set(0);
       this.lastCommandId.set(lastCommandId);
    }
+
+   @Override
+   public boolean isDone()
+   {
+      return true;
+   }
 }

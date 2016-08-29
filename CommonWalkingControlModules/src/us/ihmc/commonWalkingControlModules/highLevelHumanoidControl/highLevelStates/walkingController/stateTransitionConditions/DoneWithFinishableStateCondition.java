@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions;
 
-import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.FinishableState;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 
-public class DoneWithStateCondition implements StateTransitionCondition
+public class DoneWithFinishableStateCondition implements StateTransitionCondition
 {
-   private final State<?> state;
+   private final FinishableState<?> state;
 
-   public DoneWithStateCondition(State<?> state)
+   public DoneWithFinishableStateCondition(FinishableState<?> state)
    {
       this.state = state;
    }
