@@ -8,10 +8,10 @@ import javax.vecmath.Vector2d;
 public class Drawing2DTools
 {
    @Deprecated
-   public static void drawEmptyCircle(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)
+   public static void drawEmptyCircle(Graphics2DAdapter graphics, int x, int y, int radius, Color color)
    {
-      graphics2d.setColor(color);
-      graphics2d.drawOval((x - (radius / 2)), (y - (radius / 2)), radius, radius);
+      graphics.setColor(color);
+      graphics.drawOval((x - (radius / 2)), (y - (radius / 2)), radius, radius);
    }
    
    public static void drawEmptyCircle(Graphics2DAdapter graphics, Point2d center, Vector2d radii)
@@ -20,10 +20,10 @@ public class Drawing2DTools
    }
 
    @Deprecated
-   public static void drawFilledCircle(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)
+   public static void drawFilledCircle(Graphics2DAdapter graphics, int x, int y, int radius, Color color)
    {
-      graphics2d.setColor(color);
-      graphics2d.drawOvalFilled((x - (radius / 2)), (y - (radius / 2)), radius, radius);
+      graphics.setColor(color);
+      graphics.drawOvalFilled((x - (radius / 2)), (y - (radius / 2)), radius, radius);
    }
    
    public static void drawFilledCircle(Graphics2DAdapter graphics, Point2d center, Vector2d radii)
@@ -32,11 +32,11 @@ public class Drawing2DTools
    }
    
    @Deprecated
-   public static void drawCross(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)
+   public static void drawCross(Graphics2DAdapter graphics, int x, int y, int radius, Color color)
    {
-      graphics2d.setColor(color);
-      graphics2d.drawLineSegment((x - (radius / 2)), y, (x + (radius / 2)), y);
-      graphics2d.drawLineSegment(x, (y - (radius / 2)), x, (y + (radius / 2)));
+      graphics.setColor(color);
+      graphics.drawLineSegment((x - (radius / 2)), y, (x + (radius / 2)), y);
+      graphics.drawLineSegment(x, (y - (radius / 2)), x, (y + (radius / 2)));
    }
    
    public static void drawCross(Graphics2DAdapter graphics, Point2d center, Vector2d radii)
@@ -46,12 +46,12 @@ public class Drawing2DTools
    }
 
    @Deprecated
-   public static void drawCircleWithCross(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)
+   public static void drawCircleWithCross(Graphics2DAdapter graphics, int x, int y, int radius, Color color)
    {
-      graphics2d.setColor(color);
-      graphics2d.drawOval((x - (radius / 2)), (y - (radius / 2)), radius, radius);
-      graphics2d.drawLineSegment((x - (radius / 2)), y, (x + (radius / 2)), y);
-      graphics2d.drawLineSegment(x, (y - (radius / 2)), x, (y + (radius / 2)));
+      graphics.setColor(color);
+      graphics.drawOval((x - (radius / 2)), (y - (radius / 2)), radius, radius);
+      graphics.drawLineSegment((x - (radius / 2)), y, (x + (radius / 2)), y);
+      graphics.drawLineSegment(x, (y - (radius / 2)), x, (y + (radius / 2)));
    }
    
    public static void drawCircleWithCross(Graphics2DAdapter graphics, Point2d center, Vector2d radii)
@@ -62,12 +62,12 @@ public class Drawing2DTools
    }
 
    @Deprecated
-   public static void drawRotatedCross(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)
+   public static void drawRotatedCross(Graphics2DAdapter graphics, int x, int y, int radius, Color color)
    {
-      graphics2d.setColor(color);
+      graphics.setColor(color);
       int distance = (int)Math.round(0.707 * radius / 2);
-      graphics2d.drawLineSegment((x - distance), (y - distance), (x + distance), (y + distance));
-      graphics2d.drawLineSegment((x - distance), (y + distance), (x + distance), (y - distance));
+      graphics.drawLineSegment((x - distance), (y - distance), (x + distance), (y + distance));
+      graphics.drawLineSegment((x - distance), (y + distance), (x + distance), (y - distance));
    }
 
    public static void drawRotatedCross(Graphics2DAdapter graphics, Point2d center, Vector2d radii)
@@ -79,13 +79,13 @@ public class Drawing2DTools
    }
 
    @Deprecated
-   public static void drawCircleWithRotatedCross(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)
+   public static void drawCircleWithRotatedCross(Graphics2DAdapter graphics, int x, int y, int radius, Color color)
    {
-      graphics2d.setColor(color);
+      graphics.setColor(color);
       int distance = (int)Math.round(0.707 * radius / 2);
-      graphics2d.drawOval((x - radius / 2), (y - radius / 2), radius, radius);
-      graphics2d.drawLineSegment((x - distance), (y - distance), (x + distance), (y + distance));
-      graphics2d.drawLineSegment((x - distance), (y + distance), (x + distance), (y - distance));
+      graphics.drawOval((x - radius / 2), (y - radius / 2), radius, radius);
+      graphics.drawLineSegment((x - distance), (y - distance), (x + distance), (y + distance));
+      graphics.drawLineSegment((x - distance), (y + distance), (x + distance), (y - distance));
    }
    
    public static void drawCircleWithRotatedCross(Graphics2DAdapter graphics, Point2d center, Vector2d radii)
@@ -98,13 +98,13 @@ public class Drawing2DTools
    }
 
    @Deprecated
-   public static void drawDiamond(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)
+   public static void drawDiamond(Graphics2DAdapter graphics, int x, int y, int radius, Color color)
    {
-      graphics2d.setColor(color);
-      graphics2d.drawLineSegment((x - (radius / 2)), y, x, (y + radius / 2));
-      graphics2d.drawLineSegment((x - (radius / 2)), y, x, (y - radius / 2));
-      graphics2d.drawLineSegment(x, (y + radius / 2), x + radius / 2, y);
-      graphics2d.drawLineSegment(x, (y - radius / 2), x + radius / 2, y);
+      graphics.setColor(color);
+      graphics.drawLineSegment((x - (radius / 2)), y, x, (y + radius / 2));
+      graphics.drawLineSegment((x - (radius / 2)), y, x, (y - radius / 2));
+      graphics.drawLineSegment(x, (y + radius / 2), x + radius / 2, y);
+      graphics.drawLineSegment(x, (y - radius / 2), x + radius / 2, y);
    }
    
    public static void drawDiamond(Graphics2DAdapter graphics, Point2d center, Vector2d radii)
@@ -116,15 +116,15 @@ public class Drawing2DTools
    }
 
    @Deprecated
-   public static void drawDiamondWithCross(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)
+   public static void drawDiamondWithCross(Graphics2DAdapter graphics, int x, int y, int radius, Color color)
    {
-      graphics2d.setColor(color);
-      graphics2d.drawLineSegment((x - (radius / 2)), y, x, (y + radius / 2));
-      graphics2d.drawLineSegment((x - (radius / 2)), y, x, (y - radius / 2));
-      graphics2d.drawLineSegment(x, (y + radius / 2), x + radius / 2, y);
-      graphics2d.drawLineSegment(x, (y - radius / 2), x + radius / 2, y);
-      graphics2d.drawLineSegment((x - (radius / 2)), y, (x + (radius / 2)), y);
-      graphics2d.drawLineSegment(x, (y - (radius / 2)), x, (y + (radius / 2)));
+      graphics.setColor(color);
+      graphics.drawLineSegment((x - (radius / 2)), y, x, (y + radius / 2));
+      graphics.drawLineSegment((x - (radius / 2)), y, x, (y - radius / 2));
+      graphics.drawLineSegment(x, (y + radius / 2), x + radius / 2, y);
+      graphics.drawLineSegment(x, (y - radius / 2), x + radius / 2, y);
+      graphics.drawLineSegment((x - (radius / 2)), y, (x + (radius / 2)), y);
+      graphics.drawLineSegment(x, (y - (radius / 2)), x, (y + (radius / 2)));
    }
    
    public static void drawDiamondWithCross(Graphics2DAdapter graphics, Point2d center, Vector2d radii)
@@ -138,13 +138,13 @@ public class Drawing2DTools
    }
 
    @Deprecated
-   public static void drawSquare(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)
+   public static void drawSquare(Graphics2DAdapter graphics, int x, int y, int radius, Color color)
    {
-      graphics2d.setColor(color);
-      graphics2d.drawLineSegment((x - (radius / 2)), (y - (radius / 2)), (x + (radius / 2)), (y - (radius / 2)));
-      graphics2d.drawLineSegment((x + (radius / 2)), (y - (radius / 2)), (x + (radius / 2)), (y + (radius / 2)));
-      graphics2d.drawLineSegment((x - (radius / 2)), (y - (radius / 2)), (x - (radius / 2)), (y + (radius / 2)));
-      graphics2d.drawLineSegment((x - (radius / 2)), (y + (radius / 2)), (x + (radius / 2)), (y + (radius / 2)));
+      graphics.setColor(color);
+      graphics.drawLineSegment((x - (radius / 2)), (y - (radius / 2)), (x + (radius / 2)), (y - (radius / 2)));
+      graphics.drawLineSegment((x + (radius / 2)), (y - (radius / 2)), (x + (radius / 2)), (y + (radius / 2)));
+      graphics.drawLineSegment((x - (radius / 2)), (y - (radius / 2)), (x - (radius / 2)), (y + (radius / 2)));
+      graphics.drawLineSegment((x - (radius / 2)), (y + (radius / 2)), (x + (radius / 2)), (y + (radius / 2)));
    }
    
    public static void drawSquare(Graphics2DAdapter graphics, Point2d center, Vector2d radii)
@@ -156,15 +156,15 @@ public class Drawing2DTools
    }
 
    @Deprecated
-   public static void drawSquareWithCross(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)
+   public static void drawSquareWithCross(Graphics2DAdapter graphics, int x, int y, int radius, Color color)
    {
-      graphics2d.setColor(color);
-      graphics2d.drawLineSegment((x - (radius / 2)), (y - (radius / 2)), (x + (radius / 2)), (y - (radius / 2)));
-      graphics2d.drawLineSegment((x + (radius / 2)), (y - (radius / 2)), (x + (radius / 2)), (y + (radius / 2)));
-      graphics2d.drawLineSegment((x - (radius / 2)), (y - (radius / 2)), (x - (radius / 2)), (y + (radius / 2)));
-      graphics2d.drawLineSegment((x - (radius / 2)), (y + (radius / 2)), (x + (radius / 2)), (y + (radius / 2)));
-      graphics2d.drawLineSegment((x - (radius / 2)), y, (x + (radius / 2)), y);
-      graphics2d.drawLineSegment(x, (y - (radius / 2)), x, (y + (radius / 2)));
+      graphics.setColor(color);
+      graphics.drawLineSegment((x - (radius / 2)), (y - (radius / 2)), (x + (radius / 2)), (y - (radius / 2)));
+      graphics.drawLineSegment((x + (radius / 2)), (y - (radius / 2)), (x + (radius / 2)), (y + (radius / 2)));
+      graphics.drawLineSegment((x - (radius / 2)), (y - (radius / 2)), (x - (radius / 2)), (y + (radius / 2)));
+      graphics.drawLineSegment((x - (radius / 2)), (y + (radius / 2)), (x + (radius / 2)), (y + (radius / 2)));
+      graphics.drawLineSegment((x - (radius / 2)), y, (x + (radius / 2)), y);
+      graphics.drawLineSegment(x, (y - (radius / 2)), x, (y + (radius / 2)));
    }
    
    public static void drawSquareWithCross(Graphics2DAdapter graphics, Point2d center, Vector2d radii)
