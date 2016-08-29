@@ -8,7 +8,7 @@ public abstract class State<E extends Enum<E>>
    private State<E> previousState;
    private ArrayList<StateTransition<E>> stateTransitions = new ArrayList<StateTransition<E>>();
    private StateTransition<E> defaultNextStateTransition;
-   private boolean gotoDefaultNextState = false;
+   private boolean gotoDefaultNextState;
    private TimeInCurrentStateProvider timeInCurrentStateProvider;
 
    public State(E stateEnum)
@@ -110,7 +110,7 @@ public abstract class State<E extends Enum<E>>
       {
          if (!firstTime)
             stringBuffer.append(", ");
-         stringBuffer.append(stateTransition.nextStateEnum);
+         stringBuffer.append(stateTransition.getNextStateEnum());
          firstTime = false;
       }
 

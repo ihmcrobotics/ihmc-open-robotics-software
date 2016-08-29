@@ -232,6 +232,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.screwTheory.WrenchTest.class,
    us.ihmc.robotics.stateMachines.StateChangeRecorderTest.class,
    us.ihmc.robotics.stateMachines.StateMachineExampleOneTest.class,
+   us.ihmc.robotics.stateMachines.StateMachineExampleTwoTest.class,
    us.ihmc.robotics.stateMachines.StateMachineTest.class,
    us.ihmc.robotics.stateMachines.SimpleStateTest.class,
    us.ihmc.robotics.statistics.CovarianceDerivationTest.class,
