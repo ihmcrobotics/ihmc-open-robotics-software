@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.Color;
-import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
@@ -20,8 +19,6 @@ public class YoArtifactOval extends YoArtifact
    private final YoFramePoint2d center;
    private final YoFrameVector2d radii;
    
-   private final ArrayList<double[]> historicalData = new ArrayList<double[]>();
-
    private final Point2d tempCenter = new Point2d();
    private final Vector2d tempRadii = new Vector2d();
 
@@ -70,19 +67,13 @@ public class YoArtifactOval extends YoArtifact
    }
 
    @Override
-   public void drawHistory(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry)
    {
-      synchronized (historicalData)
-      {
-         for (double[] data : historicalData)
-         {
-            tempCenter.set(data[0], data[1]);
-            tempRadii.set(data[2], data[3]);
+      tempCenter.set(entry[0], entry[1]);
+      tempRadii.set(entry[2], entry[3]);
 
-            graphics.setColor(color);
-            graphics.drawOval(tempCenter, tempRadii);
-         }
-      }
+      graphics.setColor(color);
+      graphics.drawOval(tempCenter, tempRadii);
    }
 
    @Override

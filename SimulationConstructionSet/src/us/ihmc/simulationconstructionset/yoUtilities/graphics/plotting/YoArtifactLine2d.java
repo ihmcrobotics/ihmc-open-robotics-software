@@ -47,9 +47,13 @@ public class YoArtifactLine2d extends YoArtifact
    }
 
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
+   public void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry)
    {
-      throw new RuntimeException("Not implemented!");
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+
+      tempLine.set(entry[0], entry[1], entry[2], entry[3]);
+      graphics.drawLine(tempLine);
    }
 
    @Override

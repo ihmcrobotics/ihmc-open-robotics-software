@@ -14,10 +14,12 @@ import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLine2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactOval;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 public class YoArtifactDemo
 {
@@ -53,7 +55,8 @@ public class YoArtifactDemo
       YoFrameConvexPolygon2d polygon = new YoFrameConvexPolygon2d("polygon", ReferenceFrame.getWorldFrame(), 5, registry);
       
       YoFrameConvexPolygon2d polygon2 = new YoFrameConvexPolygon2d("polygon1", ReferenceFrame.getWorldFrame(), 5, registry);
-      YoFramePoint2d polyPoint1 = new YoFramePoint2d("point1", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2d point1 = new YoFramePoint2d("point1", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2d polyPoint1 = point1;
       polyPoint1.set(1.5, 2.0);
       polygon2.setConvexPolygon2d(new FramePoint2d[] {polyPoint1.getFrameTuple2d()});
       
@@ -64,6 +67,30 @@ public class YoArtifactDemo
       polyPoint3.set(1.0, 3.0);
       polygon3.setConvexPolygon2d(new FramePoint2d[] {polyPoint1.getFrameTuple2d(), polyPoint2.getFrameTuple2d(), polyPoint3.getFrameTuple2d()});
       
+      YoFramePoint2d pointZ = new YoFramePoint2d("pointZ", ReferenceFrame.getWorldFrame(), registry);
+      pointZ.set(-2.2, 3.0);
+      YoFramePoint2d point4 = new YoFramePoint2d("point4", ReferenceFrame.getWorldFrame(), registry);
+      point4.set(-2.0, 3.0);
+      YoFramePoint2d point5 = new YoFramePoint2d("point5", ReferenceFrame.getWorldFrame(), registry);
+      point5.set(-1.8, 3.0);
+      YoFramePoint2d point6 = new YoFramePoint2d("point6", ReferenceFrame.getWorldFrame(), registry);
+      point6.set(-1.6, 3.0);
+      YoFramePoint2d point7 = new YoFramePoint2d("point7", ReferenceFrame.getWorldFrame(), registry);
+      point7.set(-1.4, 3.0);
+      YoFramePoint2d point8 = new YoFramePoint2d("point8", ReferenceFrame.getWorldFrame(), registry);
+      point8.set(-1.2, 3.0);
+      YoFramePoint2d point9 = new YoFramePoint2d("point9", ReferenceFrame.getWorldFrame(), registry);
+      point9.set(-1.0, 3.0);
+      YoFramePoint2d point10 = new YoFramePoint2d("point10", ReferenceFrame.getWorldFrame(), registry);
+      point10.set(-0.8, 3.0);
+      YoFramePoint2d point11 = new YoFramePoint2d("point11", ReferenceFrame.getWorldFrame(), registry);
+      point11.set(-0.6, 3.0);
+      YoFramePoint2d point12 = new YoFramePoint2d("point12", ReferenceFrame.getWorldFrame(), registry);
+      point12.set(-0.4, 3.0);
+      YoFramePoint2d point13 = new YoFramePoint2d("point13", ReferenceFrame.getWorldFrame(), registry);
+      point13.set(-0.2, 3.0);
+      
+      
       plotter.addArtifact(new LineArtifact("01", new Point2d(0, 0), new Point2d(1, 1)));
       plotter.addArtifact(new LineArtifact("02", new Point2d(1, 1), new Point2d(2, 0)));
       plotter.addArtifact(new LineArtifact("03", new Point2d(2, 0), new Point2d(3, 1)));
@@ -73,6 +100,17 @@ public class YoArtifactDemo
       plotter.addArtifact(new YoArtifactPolygon("emptyPolygon1", polygon, Color.MAGENTA, false)); 
       plotter.addArtifact(new YoArtifactPolygon("onePointPolygon", polygon2, Color.MAGENTA, false)); 
       plotter.addArtifact(new YoArtifactPolygon("twoPointPolygon", polygon3, Color.BLUE, true)); 
+      plotter.addArtifact(new YoArtifactPosition("pointZ", pointZ, GraphicType.BALL, Color.DARK_GRAY, 0.1)); 
+      plotter.addArtifact(new YoArtifactPosition("point4", point4, GraphicType.BALL_WITH_CROSS, Color.DARK_GRAY, 0.1)); 
+      plotter.addArtifact(new YoArtifactPosition("point5", point5, GraphicType.BALL_WITH_ROTATED_CROSS, Color.DARK_GRAY, 0.1)); 
+      plotter.addArtifact(new YoArtifactPosition("point6", point6, GraphicType.CROSS, Color.DARK_GRAY, 0.1)); 
+      plotter.addArtifact(new YoArtifactPosition("point7", point7, GraphicType.DIAMOND, Color.DARK_GRAY, 0.1)); 
+      plotter.addArtifact(new YoArtifactPosition("point8", point8, GraphicType.DIAMOND_WITH_CROSS, Color.DARK_GRAY, 0.1)); 
+      plotter.addArtifact(new YoArtifactPosition("point9", point9, GraphicType.ELLIPSOID, Color.DARK_GRAY, 0.1)); 
+      plotter.addArtifact(new YoArtifactPosition("point10", point10, GraphicType.ROTATED_CROSS, Color.DARK_GRAY, 0.1)); 
+      plotter.addArtifact(new YoArtifactPosition("point11", point11, GraphicType.SOLID_BALL, Color.DARK_GRAY, 0.1)); 
+      plotter.addArtifact(new YoArtifactPosition("point12", point12, GraphicType.SQUARE, Color.DARK_GRAY, 0.1)); 
+      plotter.addArtifact(new YoArtifactPosition("point13", point13, GraphicType.SQUARE_WITH_CROSS, Color.DARK_GRAY, 0.1)); 
       
       plotter.showInNewWindow("plotterDemo", true);
       

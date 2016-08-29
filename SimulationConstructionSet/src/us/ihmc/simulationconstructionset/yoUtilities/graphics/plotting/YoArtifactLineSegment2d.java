@@ -128,9 +128,9 @@ public class YoArtifactLineSegment2d extends YoArtifact
    }
 
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry)
    {
-      throw new RuntimeException("Not implemented!");
+      tempLineSegment.set(entry[0], entry[1], entry[2], entry[3]);
    }
 
    @Override
