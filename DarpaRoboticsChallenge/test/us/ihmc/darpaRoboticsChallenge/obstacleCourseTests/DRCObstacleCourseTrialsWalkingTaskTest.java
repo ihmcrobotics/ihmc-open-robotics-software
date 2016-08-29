@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 
 import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
@@ -13,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -38,7 +36,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    private static final boolean MOVE_ROBOT_FOR_VIZ = false;
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -61,7 +59,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -86,9 +84,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
 
-      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-
-      setupCameraForWalkingOverCinderBlocks(simulationConstructionSet);
+      setupCameraForWalkingOverCinderBlocks();
 
       ThreadTools.sleep(0);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -107,8 +103,8 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-	
-   
+
+
 	@DeployableTestMethod(estimatedDuration = 47.3)
    @Test(timeout = 240000)
    public void testStepOnCinderBlocksSlowlyWithDisturbance() throws SimulationExceededMaximumTimeException
@@ -120,11 +116,13 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      setupCameraForWalkingOverCinderBlocks();
+
       SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       FramePoint pelvisHeight = new FramePoint(fullRobotModel.getRootJoint().getFrameAfterJoint());
       pelvisHeight.changeFrame(ReferenceFrame.getWorldFrame());
-      PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.05);
+      PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage(0.5, pelvisHeight.getZ() + 0.1);
       drcSimulationTestHelper.send(message);
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
@@ -132,14 +130,12 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       DoubleYoVariable swingTime = (DoubleYoVariable) simulationConstructionSet.getVariable("swingTime");
       DoubleYoVariable transferTime = (DoubleYoVariable) simulationConstructionSet.getVariable("transferTime");
-      
-      setupCameraForWalkingOverCinderBlocks(simulationConstructionSet);
 
       ThreadTools.sleep(0);
 
       swingTime.set(2.0);
       transferTime.set(2.0);
-      
+
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.5);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.5);
 
@@ -154,7 +150,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       if (MOVE_ROBOT_FOR_VIZ) moveRobotOutOfWayForViz();
-      
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -164,10 +160,10 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
       {
          private final DoubleYoVariable q_y = (DoubleYoVariable) scs.getVariable("q_y");
-         
+
          @Override
          public void initializeProcessing()
-         {   
+         {
          }
 
          @Override
@@ -175,7 +171,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
          {
             q_y.sub(4.0);
          }};
-      
+
       scs.applyDataProcessingFunction(dataProcessingFunction);
    }
 
@@ -197,7 +193,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 
-      setupCameraForWalkingOverCinderBlocks(simulationConstructionSet);
+      setupCameraForWalkingOverCinderBlocks();
 
       ThreadTools.sleep(0);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
@@ -220,10 +216,10 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private void setupCameraForWalkingOverCinderBlocks(SimulationConstructionSet scs)
+   private void setupCameraForWalkingOverCinderBlocks()
    {
-      Point3d cameraFix = new Point3d(13.2664, 13.03, 0.75);
-      Point3d cameraPosition = new Point3d(9.50, 15.59, 1.87);
+      Point3d cameraFix = new Point3d(13.5, 13.0, 0.75);
+      Point3d cameraPosition = new Point3d(7.0, 17.0, 2.0);
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
