@@ -631,7 +631,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double kpXY = 100.0;
       double kpZ = 0.0;
       double zetaXYZ = realRobot ? 0.2 : 1.0;
-      double kpXYOrientation = realRobot ? 100.0 : 100.0;
+      double kpXYOrientation = realRobot ? 100.0 : 175.0;
       double kpZOrientation = realRobot ? 100.0 : 200.0;
       double zetaOrientation = realRobot ? 0.2 : 1.0;
       // Reduce maxPositionAcceleration from 10 to 6 to prevent too high acceleration when hitting joint limits.
