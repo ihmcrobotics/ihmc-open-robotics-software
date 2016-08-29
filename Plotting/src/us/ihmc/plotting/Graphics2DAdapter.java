@@ -93,6 +93,17 @@ public class Graphics2DAdapter
       graphics2d.drawLine(pixelate(firstEndpoint.getX()), pixelate(firstEndpoint.getY()), pixelate(secondEndpoint.getX()), pixelate(secondEndpoint.getY()));
    }
    
+   public void drawLineSegment(double firstPointX, double firstPointY, double secondPointX, double secondPointY)
+   {
+      PlotterPoint2d firstEndpoint = pointBin[0];
+      PlotterPoint2d secondEndpoint = pointBin[1];
+      firstEndpoint.setIncludingFrame(metersFrame, firstPointX, firstPointY);
+      secondEndpoint.setIncludingFrame(metersFrame, secondPointX, secondPointY);
+      firstEndpoint.changeFrame(screenFrame);
+      secondEndpoint.changeFrame(screenFrame);
+      graphics2d.drawLine(pixelate(firstEndpoint.getX()), pixelate(firstEndpoint.getY()), pixelate(secondEndpoint.getX()), pixelate(secondEndpoint.getY()));
+   }
+   
    public void drawPoint(Point2d point)
    {
       PlotterPoint2d plotterPoint = pointBin[0];
@@ -143,6 +154,18 @@ public class Graphics2DAdapter
       centerFramePoint.changeFrame(screenFrame);
       radiiFrameVector.changeFrame(screenFrame);
       graphics2d.drawOval(pixelate(centerFramePoint.getX()), pixelate(centerFramePoint.getY()), pixelate(2.0 * radiiFrameVector.getX()), -pixelate(2.0 * radiiFrameVector.getY()));
+   }
+   
+   public void drawOvalFilled(Point2d center, Vector2d radii)
+   {
+      PlotterPoint2d centerFramePoint = pointBin[0];
+      PlotterVector2d radiiFrameVector = vectorBin[0];
+      centerFramePoint.setIncludingFrame(metersFrame, center);
+      radiiFrameVector.setIncludingFrame(metersFrame, radii);
+      centerFramePoint.add(-radiiFrameVector.getX(), radiiFrameVector.getY());
+      centerFramePoint.changeFrame(screenFrame);
+      radiiFrameVector.changeFrame(screenFrame);
+      graphics2d.fillOval(pixelate(centerFramePoint.getX()), pixelate(centerFramePoint.getY()), pixelate(2.0 * radiiFrameVector.getX()), -pixelate(2.0 * radiiFrameVector.getY()));
    }
    
    @Deprecated

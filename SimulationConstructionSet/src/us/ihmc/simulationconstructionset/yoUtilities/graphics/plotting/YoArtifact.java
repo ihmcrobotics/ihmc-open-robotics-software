@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
+import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
@@ -26,6 +27,8 @@ public abstract class YoArtifact extends Artifact implements RemoteYoGraphic
       this.appearance = new YoAppearanceRGBColor(color, 0.0);
    }
    
+   public abstract void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry);
+
    @Override
    public YoVariable<?>[] getVariables()
    {
@@ -57,6 +60,18 @@ public abstract class YoArtifact extends Artifact implements RemoteYoGraphic
                values[i] = variableArray[i].getValueAsDouble();
             }
             historicalData.add(values);
+         }
+      }
+   }
+   
+   @Override
+   public final void drawHistory(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
+   {
+      synchronized (historicalData)
+      {
+         for (double[] data : historicalData)
+         {
+            drawHistoryEntry(graphics, data);
          }
       }
    }

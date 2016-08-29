@@ -1,54 +1,96 @@
 package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
-import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
+import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.Drawing2DTools;
 import us.ihmc.plotting.Graphics2DAdapter;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 
 public class YoArtifactPosition extends YoArtifact
 {
-   private final ArrayList<double[]> historicalPositions = new ArrayList<double[]>();
-
-   private final DoubleYoVariable x;
-   private final DoubleYoVariable y;
+   private static final int LEGEND_RADIUS = 10;
+   private static final BasicStroke STROKE = new BasicStroke(1.2f);
+   
+   private final YoFramePoint2d point;
+   private final Vector2d radii = new Vector2d();
    private final GraphicType graphicType;
-   private final double scale;
+   
+   private final Point2d tempPoint = new Point2d();
 
-   public YoArtifactPosition(String namePrefix, String nameSuffix, YoGraphicPosition.GraphicType type, Color color, double scale, YoVariableRegistry registry)
+   public YoArtifactPosition(String namePrefix, String nameSuffix, GraphicType type, Color color, double radius, YoVariableRegistry registry)
    {
-      this(namePrefix+nameSuffix, new DoubleYoVariable(namePrefix + "X" + nameSuffix, registry), new DoubleYoVariable(namePrefix + "Y" + nameSuffix, registry), type, color, scale);
+      this(namePrefix+nameSuffix, new DoubleYoVariable(namePrefix + "X" + nameSuffix, registry), new DoubleYoVariable(namePrefix + "Y" + nameSuffix, registry), type, color, radius);
    }
    
-   public YoArtifactPosition(String name, DoubleYoVariable x, DoubleYoVariable y, YoGraphicPosition.GraphicType type, Color color, double scale)
+   public YoArtifactPosition(String name, DoubleYoVariable x, DoubleYoVariable y, GraphicType type, Color color, double radius)
    {
-      super(name, new double[] {scale, type.ordinal()}, color, x, y);
-      this.x = x;
-      this.y = y;
+      this(name, new YoFramePoint2d(x, y, ReferenceFrame.getWorldFrame()), type, color, radius);
+   }
+   
+   public YoArtifactPosition(String name, YoFramePoint2d point, GraphicType type, Color color, double radius)
+   {
+      super(name, new double[] {radius, type.ordinal()}, color, point.getYoX(), point.getYoY());
       
+      this.point = point;
       this.graphicType = type;
       this.color = color;
-      this.scale = scale;
+      this.radii.set(radius, radius);
    }
-   
-   private final Point3d position = new Point3d();
-   private static final int MIN_RADIUS = 5;
-   private static final int MAX_RADIUS = 25;
 
    @Override
    public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
    {
-      double radius = Math.round(4.0 * scale * scaleFactor);
-      radius = MathTools.clipToMinMax(radius, MIN_RADIUS, MAX_RADIUS);
-      draw(graphics, Xcenter, Ycenter, (int) radius);
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+      
+      switch (graphicType)
+      {
+         case BALL :
+            Drawing2DTools.drawEmptyCircle(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            break;
+         case SOLID_BALL :
+            Drawing2DTools.drawFilledCircle(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            break;
+         case CROSS :
+            Drawing2DTools.drawCircleWithCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            break;
+         case BALL_WITH_CROSS :
+            Drawing2DTools.drawCircleWithCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            break;
+         case ROTATED_CROSS :
+            Drawing2DTools.drawRotatedCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            break;
+         case BALL_WITH_ROTATED_CROSS :
+            Drawing2DTools.drawCircleWithRotatedCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            break;
+         case DIAMOND :
+            Drawing2DTools.drawDiamond(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            break;
+         case DIAMOND_WITH_CROSS :
+            Drawing2DTools.drawDiamondWithCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            break;
+         case SQUARE :
+            Drawing2DTools.drawSquare(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            break;
+         case SQUARE_WITH_CROSS :
+            Drawing2DTools.drawSquareWithCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            break;
+         case ELLIPSOID :
+            double radius = radii.getX();
+            radii.setX(radii.getX() * 1.2);
+            radii.setY(radii.getY() * 0.8);
+            Drawing2DTools.drawEmptyCircle(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            radii.set(radius, radius);
+            break;
+      }
    }
 
    @Override
@@ -56,121 +98,83 @@ public class YoArtifactPosition extends YoArtifact
    {
       if (isVisible)
       {
-         getPosition(position);
-         draw(graphics, position.getX(), position.getY(), Xcenter, Ycenter, scaleFactor);
+         point.get(tempPoint);
+         draw(graphics);
       }
    }
-   
-   public void getPosition(Point3d point3d)
-   {
-      point3d.set(x.getDoubleValue(), y.getDoubleValue(), 0.0);
-   }
-   
-   public void setPosition(Point2d point2d)
-   {
-      x.set(point2d.getX());
-      y.set(point2d.getY());
-   }
-   
-   private void draw(Graphics2DAdapter graphics, double xWorld, double yWorld, int Xcenter, int Ycenter, double scaleFactor)
-   {
-      if (Double.isNaN(xWorld) || Double.isNaN(yWorld))
-         return;
 
-      int x = (int) (xWorld * scaleFactor) + Xcenter;
-      int y = (int) (-yWorld * scaleFactor) + Ycenter;
-      int radius = (int) (4.0 * scale * scaleFactor);
-
-      draw(graphics, x, y, radius);
-   }
-
-   private void draw(Graphics2DAdapter graphics, int x, int y, int radius)
+   private void draw(Graphics2DAdapter graphics)
    {
-      YoGraphicPosition.GraphicType type = graphicType;
-      switch (type)
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+      
+      switch (graphicType)
       {
          case BALL :
-            Drawing2DTools.drawEmptyCircle(graphics, x, y, radius, color);
-
+            Drawing2DTools.drawEmptyCircle(graphics, tempPoint, radii);
             break;
-
          case SOLID_BALL :
-            Drawing2DTools.drawFilledCircle(graphics, x, y, radius, color);
-
+            Drawing2DTools.drawFilledCircle(graphics, tempPoint, radii);
             break;
-
          case CROSS :
-            Drawing2DTools.drawCircleWithCross(graphics, x, y, radius, color);
-
+            Drawing2DTools.drawCircleWithCross(graphics, tempPoint, radii);
             break;
-
          case BALL_WITH_CROSS :
-            Drawing2DTools.drawCircleWithCross(graphics, x, y, radius, color);
-
+            Drawing2DTools.drawCircleWithCross(graphics, tempPoint, radii);
             break;
-
          case ROTATED_CROSS :
-            Drawing2DTools.drawCircleWithRotatedCross(graphics, x, y, radius, color);
-
+            Drawing2DTools.drawRotatedCross(graphics, tempPoint, radii);
             break;
-
          case BALL_WITH_ROTATED_CROSS :
-            Drawing2DTools.drawCircleWithRotatedCross(graphics, x, y, radius, color);
-
+            Drawing2DTools.drawCircleWithRotatedCross(graphics, tempPoint, radii);
             break;
-
          case DIAMOND :
-            Drawing2DTools.drawDiamond(graphics, x, y, radius, color);
-
+            Drawing2DTools.drawDiamond(graphics, tempPoint, radii);
             break;
-
          case DIAMOND_WITH_CROSS :
-            Drawing2DTools.drawDiamondWithCross(graphics, x, y, radius, color);
-
+            Drawing2DTools.drawDiamondWithCross(graphics, tempPoint, radii);
             break;
-
          case SQUARE :
-            Drawing2DTools.drawDiamondWithCross(graphics, x, y, radius, color);
-
+            Drawing2DTools.drawSquare(graphics, tempPoint, radii);
             break;
-
          case SQUARE_WITH_CROSS :
-            Drawing2DTools.drawDiamondWithCross(graphics, x, y, radius, color);
-
+            Drawing2DTools.drawSquareWithCross(graphics, tempPoint, radii);
             break;
-      default:
-         throw new RuntimeException("type "+ type +" not implemented");
+         case ELLIPSOID :
+            double radius = radii.getX();
+            radii.setX(radii.getX() * 1.2);
+            radii.setY(radii.getY() * 0.8);
+            Drawing2DTools.drawEmptyCircle(graphics, tempPoint, radii);
+            radii.set(radius, radius);
+            break;
       }
-   }
-   
-   public DoubleYoVariable getYoX()
-   {
-      return x;
-   }
-   
-   public DoubleYoVariable getYoY()
-   {
-      return y;
    }
    
    @Override
-   public void drawHistory(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry)
    {
-      synchronized(historicalPositions)
-      {
-         for (double[] position : historicalPositions)
-         {
-            double xWorld = position[0];
-            double yWorld = position[1];
-
-            draw(graphics, xWorld, yWorld, Xcenter, Ycenter, scaleFactor);
-         }
-      }
+      tempPoint.set(entry[0], entry[1]);
+      draw(graphics);
    }
 
    @Override
    public RemoteGraphicType getRemoteGraphicType() 
    {
       return RemoteGraphicType.POSITION_ARTIFACT;
+   }
+   
+   public DoubleYoVariable getYoX()
+   {
+      return point.getYoX();
+   }
+   
+   public DoubleYoVariable getYoY()
+   {
+      return point.getYoY();
+   }
+   
+   public void setPosition(Point2d point2d)
+   {
+      point.set(point2d);
    }
 }
