@@ -3,11 +3,11 @@ package us.ihmc.humanoidBehaviors.stateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveBehaviorTools;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.FinishableState;
 import us.ihmc.tools.io.printing.PrintTools;
 
-public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
-{   
+public class BehaviorStateWrapper <E extends Enum<E>> extends FinishableState<E>
+{
    private final BehaviorInterface behavior;
    private final Boolean initializeOnTransitionIntoAction;
 
@@ -15,7 +15,7 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
    {
       this(stateEnum, behavior, true);
    }
-   
+
    public BehaviorStateWrapper(E stateEnum, BehaviorInterface behavior, boolean initializeOnTransitionIntoAction)
    {
       super(stateEnum);
@@ -28,7 +28,7 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
       {
          CoactiveBehaviorTools.synchronizeCoactiveElementMachineSideUsingTCPYoWhiteBoard(coactiveElement);
       }
-      
+
    }
 
    @Override
@@ -46,7 +46,7 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
          }
       }
    }
-   
+
    @Override
    public void doAction()
    {
@@ -70,7 +70,7 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
    {
       return behavior.isDone();
    }
-   
+
    public void pause()
    {
       PrintTools.debug(this, "Pausing " + getStateEnum().name());
@@ -94,7 +94,7 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
       PrintTools.debug(this, "Enabling " + getStateEnum().name());
       behavior.enableActions();
    }
-   
+
    public void doPostBehaviorCleanup()
    {
       PrintTools.debug(this, "Cleaning up " + getStateEnum().name());

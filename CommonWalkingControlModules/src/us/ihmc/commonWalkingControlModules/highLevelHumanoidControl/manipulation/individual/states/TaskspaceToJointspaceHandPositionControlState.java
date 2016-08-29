@@ -30,10 +30,10 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.FinishableState;
 import us.ihmc.tools.FormattingTools;
 
-public class TaskspaceToJointspaceHandPositionControlState extends State<HandControlMode>
+public class TaskspaceToJointspaceHandPositionControlState extends FinishableState<HandControlMode>
 {
    private final String name;
    private final YoVariableRegistry registry;

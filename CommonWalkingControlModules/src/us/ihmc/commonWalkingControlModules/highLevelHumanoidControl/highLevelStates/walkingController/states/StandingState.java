@@ -97,4 +97,10 @@ public class StandingState extends WalkingState
    {
       return true;
    }
+
+   @Override
+   public boolean isDone()
+   {
+      return true;
+   }
 }

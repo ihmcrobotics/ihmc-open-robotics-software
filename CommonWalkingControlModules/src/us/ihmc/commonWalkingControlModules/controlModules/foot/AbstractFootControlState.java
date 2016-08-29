@@ -12,9 +12,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.FinishableState;
 
-public abstract class AbstractFootControlState extends State<ConstraintType>
+public abstract class AbstractFootControlState extends FinishableState<ConstraintType>
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -68,5 +68,11 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    @Override
    public void doTransitionOutOfAction()
    {
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      return true;
    }
 }

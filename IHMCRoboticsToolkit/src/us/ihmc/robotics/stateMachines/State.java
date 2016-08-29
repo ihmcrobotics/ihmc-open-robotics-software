@@ -23,15 +23,6 @@ public abstract class State<E extends Enum<E>>
 
    public abstract void doTransitionOutOfAction();
 
-   /**
-    * Override this method if you want to do a simple state machine with default transitions. This then becomes the default transition condition.
-    * @return true if this state should transition to the default next state set by {@link #setDefaultNextState(Enum)}.
-    */
-   public boolean isDone()
-   {
-      return true;
-   }
-
    public final void addStateTransition(E nextStateEnum, StateTransitionCondition stateTransitionCondition)
    {
       StateTransition<E> stateTransition = new StateTransition<E>(nextStateEnum, stateTransitionCondition, (StateTransitionAction) null);
