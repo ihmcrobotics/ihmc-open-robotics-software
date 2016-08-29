@@ -396,6 +396,23 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    /**
     * This method does:
     * 1- {@code clear()};
+    * 2- {@code addVertex(vertices.get(i)};
+    * 3- {@code update()}.
+    * @param vertices {@code FramePoint2d[]} the array of points that is used to creates the vertices.
+    */
+   public void setAndUpdate(FramePoint2d[] vertices)
+   {
+      clear();
+      for (int i = 0; i < vertices.length; i++)
+      {
+         addVertex(vertices[i]);
+      }
+      update();
+   }
+
+   /**
+    * This method does:
+    * 1- {@code clear()};
     * 2- {@code addVertices(otherPolygon)};
     * 3- {@code update()}.
     * <p/> TODO There is no need to call update() there, instead update everything from the other polygon to make it faster.<p/>
