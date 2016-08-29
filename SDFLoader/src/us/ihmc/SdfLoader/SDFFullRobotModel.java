@@ -20,7 +20,6 @@ import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -61,12 +60,20 @@ public class SDFFullRobotModel implements FullRobotModel
    private final HashMap<String, ReferenceFrame> sensorFrames = new HashMap<String, ReferenceFrame>();
    private double totalMass = 0.0;
 
+   private final Map<Enum<?>, RigidBody> endEffectors;
+   
    public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       super();
       this.rootLink = rootLink;
       this.sdfJointNameMap = sdfJointNameMap;
       this.sensorLinksToTrack = sensorLinksToTrack;
+      endEffectors = new HashMap<>();
+      
+      for (Enum<?> segment : sdfJointNameMap.getRobotSegments())
+      {
+         endEffectors.put(segment, chest);
+      }
 
       /*
        * Create root object
@@ -98,6 +105,11 @@ public class SDFFullRobotModel implements FullRobotModel
       }
    }
 
+   public RigidBody getEndEffector(Enum<?> segmentEnum)
+   {
+      return endEffectors.get(segmentEnum);
+   }
+   
    public String getModelName()
    {
       return sdfJointNameMap.getModelName();
