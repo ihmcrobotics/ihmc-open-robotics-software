@@ -117,7 +117,8 @@ public class WholeBodyControlCoreToolbox
    public static WholeBodyControlCoreToolbox createForInverseKinematicsOnly(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints,
          CommonHumanoidReferenceFrames referenceFrames, double controlDT, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator)
    {
-      WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, null, controlledJoints, null, referenceFrames, controlDT, Double.NaN,
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
+      WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, null, controlledJoints, momentumOptimizationSettings, referenceFrames, controlDT, Double.NaN,
             geometricJacobianHolder, twistCalculator, null, null, null);
       return ret;
    }
