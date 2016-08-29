@@ -215,7 +215,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 45.0, targets = {TestPlanTarget.Fast})
+   @DeployableTestMethod(estimatedDuration = 45.0, targets = {TestPlanTarget.InDevelopment})
    @Test(timeout = 300000)
    public void testBalanceOnLine() throws SimulationExceededMaximumTimeException
    {
@@ -278,8 +278,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       pushController.applyForce(new Vector3d(0.0, 1.0, 0.0), 200.0, 0.025);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
 
-      Point3d center = new Point3d(0.0, 0.15, 0.8);
-      Vector3d plusMinusVector = new Vector3d(0.1, 0.1, 0.1);
+      Point3d center = new Point3d(-0.0198, 0.1317, 0.7865);
+      Vector3d plusMinusVector = new Vector3d(0.025, 0.025, 0.025);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
