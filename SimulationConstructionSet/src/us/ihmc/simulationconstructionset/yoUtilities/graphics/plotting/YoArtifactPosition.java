@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.
 
 public class YoArtifactPosition extends YoArtifact
 {
-   private static final int LEGEND_RADIUS = 10;
+   private static final int LEGEND_RADIUS = 20;
    private static final BasicStroke STROKE = new BasicStroke(1.2f);
    
    private final YoFramePoint2d point;
@@ -60,7 +60,7 @@ public class YoArtifactPosition extends YoArtifact
             Drawing2DTools.drawFilledCircle(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
             break;
          case CROSS :
-            Drawing2DTools.drawCircleWithCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            Drawing2DTools.drawCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
             break;
          case BALL_WITH_CROSS :
             Drawing2DTools.drawCircleWithCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
@@ -121,7 +121,7 @@ public class YoArtifactPosition extends YoArtifact
             Drawing2DTools.drawFilledCircle(graphics, tempPoint, radii);
             break;
          case CROSS :
-            Drawing2DTools.drawCircleWithCross(graphics, tempPoint, radii);
+            Drawing2DTools.drawCross(graphics, tempPoint, radii);
             break;
          case BALL_WITH_CROSS :
             Drawing2DTools.drawCircleWithCross(graphics, tempPoint, radii);

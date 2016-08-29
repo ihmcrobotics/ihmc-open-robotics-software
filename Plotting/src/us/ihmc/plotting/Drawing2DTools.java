@@ -30,6 +30,20 @@ public class Drawing2DTools
    {
       graphics.drawOvalFilled(center, radii);
    }
+   
+   @Deprecated
+   public static void drawCross(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)
+   {
+      graphics2d.setColor(color);
+      graphics2d.drawLineSegment((x - (radius / 2)), y, (x + (radius / 2)), y);
+      graphics2d.drawLineSegment(x, (y - (radius / 2)), x, (y + (radius / 2)));
+   }
+   
+   public static void drawCross(Graphics2DAdapter graphics, Point2d center, Vector2d radii)
+   {
+      graphics.drawLineSegment(center.getX() - radii.getX(), center.getY(), center.getX() + radii.getX(), center.getY());
+      graphics.drawLineSegment(center.getX(), center.getY() - radii.getY(), center.getX(), center.getY() + radii.getY());
+   }
 
    @Deprecated
    public static void drawCircleWithCross(Graphics2DAdapter graphics2d, int x, int y, int radius, Color color)

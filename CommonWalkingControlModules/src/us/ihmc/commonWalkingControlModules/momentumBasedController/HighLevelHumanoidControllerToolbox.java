@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Blue;
 import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArrayList;
-import static us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType.ROTATED_CROSS;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -354,7 +353,7 @@ public class HighLevelHumanoidControllerToolbox
       String graphicListName = getClass().getSimpleName();
       if (yoGraphicsListRegistry != null)
       {
-         YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), ROTATED_CROSS);
+         YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
          yoGraphicsListRegistry.registerArtifact(graphicListName, capturePointViz.createArtifact());
 
          YoArtifactPosition copViz = new YoArtifactPosition("Controller CoP", yoCenterOfPressure.getYoX(), yoCenterOfPressure.getYoY(),
