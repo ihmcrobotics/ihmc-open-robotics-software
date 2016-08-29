@@ -277,7 +277,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
          if (defaultNextStateTransition != null)
          {
             // and that default state if the one we are checking, then the one we are checking is not empty.
-            if ((defaultNextStateTransition.nextStateEnum == checkstate.getStateEnum()))
+            if ((defaultNextStateTransition.getNextStateEnum() == checkstate.getStateEnum()))
             {
                isEmpty = false;
             }
@@ -288,7 +288,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
          {
             // and one of those state transitions are the state we are checking,
             // then the state we are checking is not empty
-            if (state.getStateTransitions().get(j).nextStateEnum == checkstate.getStateEnum())
+            if (state.getStateTransitions().get(j).getNextStateEnum() == checkstate.getStateEnum())
             {
                isEmpty = false;
             }
@@ -324,7 +324,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
       {
          for (int i = 0; i < parent.getStateTransitions().size(); i++)
          {
-            String state = parent.getStateTransitions().get(i).nextStateEnum.toString();
+            String state = parent.getStateTransitions().get(i).getNextStateEnum().toString();
 
             if (!doesCellAlreadyExist(state))
             {
@@ -341,7 +341,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
                   try
                   {
                      for (int j = indexOfStateinStateMachine(state) + 1;
-                             j < indexOfStateinStateMachine(parent.getStateTransitions().get(i + 1).nextStateEnum.toString()); j++)
+                             j < indexOfStateinStateMachine(parent.getStateTransitions().get(i + 1).getNextStateEnum().toString()); j++)
                      {
                         State<E> checkState = stateMachine.states.get(j);
 
@@ -383,7 +383,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
          {
             int source = indexOfStateInStateCells(state);
             int target =
-               indexOfStateInStateCells(stateMachine.states.get(indexOfStateinStateMachine(state.getStateTransitions().get(z).nextStateEnum.toString())));
+               indexOfStateInStateCells(stateMachine.states.get(indexOfStateinStateMachine(state.getStateTransitions().get(z).getNextStateEnum().toString())));
             createArrow(source, target);
          }
       }
@@ -400,7 +400,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
             int source = indexOfStateInStateCells(state);
             int target = indexOfStateInStateCells(
                              stateMachine.states.get(
-                                indexOfStateinStateMachine(defaultNextStateTransition.nextStateEnum.toString())));
+                                indexOfStateinStateMachine(defaultNextStateTransition.getNextStateEnum().toString())));
             createArrow(source, target);
          }
       }
@@ -521,11 +521,11 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
 
          for (StateTransition<E> stateTransition : stateTransitions)
          {
-            State<E> nextState = stateMachine.getState(stateTransition.nextStateEnum);
+            State<E> nextState = stateMachine.getState(stateTransition.getNextStateEnum());
 
             if (nextState == null)
             {
-               System.err.println("Error. StateMachine doesn't include state with enum " + stateTransition.nextStateEnum);
+               System.err.println("Error. StateMachine doesn't include state with enum " + stateTransition.getNextStateEnum());
 
                return;
             }

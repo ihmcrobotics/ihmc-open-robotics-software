@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
-    <diagram creationDate="2016-Aug-29 14:55" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20160414-2044">
+    <diagram creationDate="2016-Aug-29 15:06" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20160414-2044">
         <filterScript>
 
 // no filter script yet defined for this class diagram
@@ -14,7 +14,8 @@ hide all fields
         <class className="us.ihmc.robotics.stateMachines.StateChangeRecorder" modelMemberId="us.ihmc.robotics.stateMachines.StateChangeRecorder" project="IHMCRoboticsToolkit" xLocation="1550" yLocation="175"/>
         <class className="us.ihmc.robotics.stateMachines.StateChangedListener" modelMemberId="us.ihmc.robotics.stateMachines.StateChangedListener" project="IHMCRoboticsToolkit" xLocation="820" yLocation="437"/>
         <class className="us.ihmc.robotics.stateMachines.StateMachinesJPanel" modelMemberId="us.ihmc.robotics.stateMachines.StateMachinesJPanel" project="IHMCRoboticsToolkit" xLocation="1315" yLocation="21"/>
-        <class className="us.ihmc.robotics.stateMachines.FinishableState" modelMemberId="us.ihmc.robotics.stateMachines.FinishableState" project="IHMCRoboticsToolkit" xLocation="1476" yLocation="538"/>
+        <class className="us.ihmc.robotics.stateMachines.DoneWithFinishableStateTransitionCondition" modelMemberId="us.ihmc.robotics.stateMachines.DoneWithFinishableStateTransitionCondition" project="IHMCRoboticsToolkit" xLocation="1594" yLocation="507"/>
+        <class className="us.ihmc.robotics.stateMachines.FinishableState" modelMemberId="us.ihmc.robotics.stateMachines.FinishableState" project="IHMCRoboticsToolkit" xLocation="1415" yLocation="605"/>
         <class className="us.ihmc.robotics.stateMachines.StateTransition" modelMemberId="us.ihmc.robotics.stateMachines.StateTransition" project="IHMCRoboticsToolkit" xLocation="531" yLocation="701"/>
         <class className="us.ihmc.robotics.stateMachines.StateMachine" modelMemberId="us.ihmc.robotics.stateMachines.StateMachine" project="IHMCRoboticsToolkit" xLocation="947" yLocation="111"/>
         <class className="us.ihmc.robotics.stateMachines.State" modelMemberId="us.ihmc.robotics.stateMachines.State" project="IHMCRoboticsToolkit" xLocation="846" yLocation="569"/>

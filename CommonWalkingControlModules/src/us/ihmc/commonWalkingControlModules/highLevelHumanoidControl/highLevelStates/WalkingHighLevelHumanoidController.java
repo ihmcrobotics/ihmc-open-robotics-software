@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.DoneWithFinishableStateCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.DoubSuppToSingSuppCond4DistRecov;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.SingleSupportToTransferToCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StartFlamingoCondition;
@@ -59,6 +58,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.stateMachines.DoneWithFinishableStateTransitionCondition;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
@@ -116,7 +116,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
    private final BooleanYoVariable limitCommandSent = new BooleanYoVariable("limitCommandSent", registry);
-   
+
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
@@ -230,7 +230,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       // Encapsulate toStandingTransition to make sure it is not used afterwards
       {
-         DoneWithFinishableStateCondition toStandingDoneCondition = new DoneWithFinishableStateCondition(toStandingState);
+         DoneWithFinishableStateTransitionCondition toStandingDoneCondition = new DoneWithFinishableStateTransitionCondition(toStandingState);
          StateTransition<WalkingStateEnum> toStandingTransition = new StateTransition<>(WalkingStateEnum.STANDING, toStandingDoneCondition);
          toStandingState.addStateTransition(toStandingTransition);
       }
@@ -267,7 +267,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          SingleSupportState singleSupportState = walkingSingleSupportStates.get(robotSide);
          WalkingStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
-         DoneWithFinishableStateCondition doneWithTransferCondition = new DoneWithFinishableStateCondition(transferState);
+         DoneWithFinishableStateTransitionCondition doneWithTransferCondition = new DoneWithFinishableStateTransitionCondition(transferState);
          StateTransition<WalkingStateEnum> toSingleSupport = new StateTransition<WalkingStateEnum>(singleSupportStateEnum, doneWithTransferCondition);
          transferState.addStateTransition(toSingleSupport);
       }
@@ -326,7 +326,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
          WalkingStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
-         DoneWithFinishableStateCondition doneWithTransferCondition = new DoneWithFinishableStateCondition(transferState);
+         DoneWithFinishableStateTransitionCondition doneWithTransferCondition = new DoneWithFinishableStateTransitionCondition(transferState);
          StateTransition<WalkingStateEnum> toSingleSupport = new StateTransition<WalkingStateEnum>(singleSupportStateEnum, doneWithTransferCondition);
          transferState.addStateTransition(toSingleSupport);
       }

@@ -27,7 +27,9 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
 
    public GenericStateMachine(String stateYoVariableName, String switchTimeName, Class<E> enumType, DoubleProvider timeProvider, YoVariableRegistry registry)
    {
-      stateYoVariable = new EnumYoVariable<E>(stateYoVariableName, registry, enumType);
+      stateYoVariable = new EnumYoVariable<E>(stateYoVariableName, "State machine variable to keep track of the state.", registry, enumType, true);
+      stateYoVariable.set(null);
+
       switchTimeYoVariable = new DoubleYoVariable(switchTimeName, registry);
       this.time = timeProvider;
       switchTimeYoVariable.set(time.getValue());
@@ -115,7 +117,15 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
 
    public void doAction()
    {
-      T currentState = getAndCheckCurrentState();
+      T currentState = getCurrentState();
+
+      if (currentState == null)
+      {
+         System.err.println("Warning! GenericStateMachine.doAction(). You should first use stateMachine.setCurrentState() rather than assume that it'll start in the first enum in the list!");
+         setCurrentState(states.get(0).getStateEnum());
+      }
+
+      currentState = getAndCheckCurrentState();
       currentState.doAction();
    }
 
@@ -155,7 +165,11 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
 
    public E getCurrentStateEnum()
    {
-      return getCurrentState().getStateEnum();
+      T currentState = getCurrentState();
+      if (currentState == null)
+         return null;
+
+      return currentState.getStateEnum();
    }
 
    public T getState(E stateEnum)
@@ -197,7 +211,7 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
 
       currentState.doTransitionOutOfAction();
       stateTransition.doAction();
-      setCurrentState(stateTransition.nextStateEnum);
+      setCurrentState(stateTransition.getNextStateEnum());
    }
 
    public String toString()

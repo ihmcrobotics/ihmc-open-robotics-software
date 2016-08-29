@@ -9,10 +9,10 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class StateTransition <E extends Enum<E>>
 {
-   protected final E nextStateEnum;
-   protected final ArrayList<StateTransitionCondition> stateTransitionConditions = new ArrayList<StateTransitionCondition>();
-   protected ArrayList<DoubleYoVariable> timePassedYoVariables;
-   protected final ArrayList<StateTransitionAction> actions = new ArrayList<StateTransitionAction>();
+   private final E nextStateEnum;
+   private final ArrayList<StateTransitionCondition> stateTransitionConditions = new ArrayList<StateTransitionCondition>();
+   private ArrayList<DoubleYoVariable> timePassedYoVariables;
+   private final ArrayList<StateTransitionAction> actions = new ArrayList<StateTransitionAction>();
 
    public StateTransition(E nextStateEnum, DoubleYoVariable timePassedYoVariable, StateTransitionCondition condition, StateTransitionAction action)
    {
@@ -113,5 +113,10 @@ public class StateTransition <E extends Enum<E>>
       {
          actions.get(i).doTransitionAction();
       }
+   }
+
+   public E getNextStateEnum()
+   {
+      return nextStateEnum;
    }
 }

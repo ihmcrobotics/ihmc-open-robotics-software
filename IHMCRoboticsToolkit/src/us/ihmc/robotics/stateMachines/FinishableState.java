@@ -1,12 +1,11 @@
 package us.ihmc.robotics.stateMachines;
 
-import us.ihmc.robotics.math.trajectories.Finishable;
-
-public abstract class FinishableState<E extends Enum<E>> extends State<E> implements Finishable
+public abstract class FinishableState<E extends Enum<E>> extends State<E>
 {
-
    public FinishableState(E stateEnum)
    {
       super(stateEnum);
    }
+
+   public abstract boolean isDone();
 }

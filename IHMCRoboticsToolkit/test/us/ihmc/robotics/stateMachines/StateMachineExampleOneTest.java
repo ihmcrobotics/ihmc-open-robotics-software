@@ -135,7 +135,7 @@ public class StateMachineExampleOneTest
       assertEquals(currentStateEnum, ExampleStateName.Starting);
 
       // Not sure if this should be Starting or null here. Hmm...
-      assertEquals(currentState.getPreviousState(), startingState);
+      assertEquals(currentState.getPreviousState(), null);
 
       assertTrue(currentState.didTransitionIntoAction);
       assertFalse(currentState.didAction);

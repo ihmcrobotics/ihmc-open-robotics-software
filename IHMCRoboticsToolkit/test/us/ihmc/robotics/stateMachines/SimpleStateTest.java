@@ -64,7 +64,9 @@ public class SimpleStateTest
 
       stateMachine.addState(stateEnd);
 
+      assertEquals(stateMachine.getCurrentState(), null);
 
+      stateMachine.setCurrentState(StateList.START);
       assertEquals(stateMachine.getCurrentState(), stateStart);
 
       while (timeProvider.getValue() < 10.0)
