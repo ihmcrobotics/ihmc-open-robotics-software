@@ -4,10 +4,12 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedTimedStepInputProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
+import us.ihmc.quadrupedRobotics.util.PreallocatedQueueSorter;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
 {
@@ -28,6 +30,15 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
       this.bodyOrientation = new FrameOrientation();
    }
 
+   private Comparator<QuadrupedTimedStep> compareByEndTime = new Comparator<QuadrupedTimedStep>()
+   {
+      @Override
+      public int compare(QuadrupedTimedStep a, QuadrupedTimedStep b)
+      {
+         return Double.compare(a.getTimeInterval().getEndTime(), b.getTimeInterval().getEndTime());
+      }
+   };
+
    @Override
    public void onEntry()
    {
@@ -46,12 +57,21 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
             stepQueue.getTail().setAbsolute(true);
          }
       }
+      PreallocatedQueueSorter.sort(stepQueue, compareByEndTime);
+
       bodyOrientation.setToZero(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
    }
 
    @Override
    public void process()
    {
+      // dequeue completed steps
+      double currentTime = timestamp.getDoubleValue();
+      while ((stepQueue.size() > 0) && (currentTime > stepQueue.getHead().getTimeInterval().getEndTime()))
+      {
+         stepQueue.dequeue();
+      }
+
       bodyOrientation.setToZero(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
    }
 
