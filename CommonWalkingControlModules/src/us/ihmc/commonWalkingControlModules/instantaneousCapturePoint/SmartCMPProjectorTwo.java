@@ -26,6 +26,7 @@ public class SmartCMPProjectorTwo extends CMPProjector
    private final FramePoint2d intersection2 = new FramePoint2d();
    private final BooleanYoVariable cmpWasProjected = new BooleanYoVariable("CmpWasProjected", registry);
    private final FramePoint2d perfectCMPlocal = new FramePoint2d();
+   private final FramePoint2d desiredCMPlocal = new FramePoint2d();
    private final FrameLine2d perfectCMPToDesiredCMP = new FrameLine2d();
 
    public SmartCMPProjectorTwo(YoVariableRegistry parentRegistry)
@@ -45,8 +46,12 @@ public class SmartCMPProjectorTwo extends CMPProjector
    public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint,
          FramePoint2d desiredCMP, FramePoint2d perfectCMP)
    {
+      ReferenceFrame returnFrame = desiredCMP.getReferenceFrame();
+
       // if CMP is inside the support do nothing
-      if (supportPolygon.isPointInside(desiredCMP))
+      desiredCMPlocal.setIncludingFrame(desiredCMP);
+      desiredCMPlocal.changeFrameAndProjectToXYPlane(supportPolygon.getReferenceFrame());
+      if (supportPolygon.isPointInside(desiredCMPlocal))
       {
          cmpWasProjected.set(false);
          return;
@@ -71,6 +76,7 @@ public class SmartCMPProjectorTwo extends CMPProjector
       if (intersections != 1)
          throw new RuntimeException("Expected exactly one intersection since polygon is convex");
       desiredCMP.set(intersection1);
+      desiredCMP.changeFrame(returnFrame);
 
       cmpWasProjected.set(true);
    }
