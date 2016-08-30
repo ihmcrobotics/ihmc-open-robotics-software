@@ -115,6 +115,12 @@ public class StateMachineExampleOneTest
       stateMachine.setCurrentState(ExampleStateName.Starting);
 
       // Some simple tests. Just tick through and make sure we transition through the states properly:
+
+      assertEquals(startingState, stateMachine.getState(ExampleStateName.Starting));
+      assertEquals(stateOne, stateMachine.getState(ExampleStateName.StateOne));
+      assertEquals(stateTwo, stateMachine.getState(ExampleStateName.StateTwo));
+      assertEquals(stoppedState, stateMachine.getState(ExampleStateName.Stopped));
+
       assertEquals("switchTime", stateMachine.getSwitchTimeName());
       assertEquals("stateMachine", stateMachine.getStateYoVariableName());
 
@@ -127,6 +133,9 @@ public class StateMachineExampleOneTest
 
       RememberStateChangedListener listener = new RememberStateChangedListener();
       stateMachine.attachStateChangedListener(listener);
+
+      RememberStateChangedListener listenerTwo = new RememberStateChangedListener();
+      stateMachine.attachStateChangedListener(listenerTwo);
 
       ExampleStateName currentStateEnum = stateMachine.getCurrentStateEnum();
       SimpleExampleState currentState = (SimpleExampleState) stateMachine.getCurrentState();
@@ -196,6 +205,8 @@ public class StateMachineExampleOneTest
 
       assertEquals(stateOne, listener.oldState);
       assertEquals(stateTwo, listener.newState);
+      assertEquals(stateOne, listenerTwo.oldState);
+      assertEquals(stateTwo, listenerTwo.newState);
       assertEquals(time.getValue(), listener.time, 1e-7);
 
       time.setValue(time.getValue() + 0.01);
@@ -276,6 +287,8 @@ public class StateMachineExampleOneTest
       SettableDoubleProvider time = new SettableDoubleProvider();
       StateMachine<ExampleStateName> stateMachine = new StateMachine<ExampleStateName>("stateMachine", "switchTime", ExampleStateName.class, time, registry);
 
+      assertNull(stateMachine.getState(ExampleStateName.Starting));
+
       SimpleExampleState startingState = new SimpleExampleState(ExampleStateName.Starting);
       startingState.setDefaultNextState(ExampleStateName.StateOne);
       stateMachine.addState(startingState);
@@ -293,6 +306,15 @@ public class StateMachineExampleOneTest
       stateOne.setDefaultNextState(ExampleStateName.StateTwo);
       stateMachine.addState(stateOne);
 
+      try
+      {
+         stateOne.setDefaultNextState(ExampleStateName.StateTwo);
+         fail("Already set default next state.");
+      }
+      catch(RuntimeException e)
+      {
+         assertEquals("Have already set default next state for StateOne", e.getMessage());
+      }
       try
       {
          stateMachine.addState(stateOne);

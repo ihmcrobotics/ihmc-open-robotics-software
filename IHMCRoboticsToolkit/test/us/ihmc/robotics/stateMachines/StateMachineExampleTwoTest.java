@@ -251,6 +251,8 @@ public class StateMachineExampleTwoTest
       assertEquals("TWO: (THREE)", stateTwo.toString());
       assertEquals("THREE: (FOUR, ONE, THREE)", stateThree.toString());
       assertEquals("FOUR: (THREE)", stateFour.toString());
+
+      assertEquals("State Machine:\nONE: (FOUR)\nTWO: (THREE)\nTHREE: (FOUR, ONE, THREE)\nFOUR: (THREE)\n", stateMachine.toString());
    }
 
    private class ExampleStateTransitionCondition implements StateTransitionCondition
