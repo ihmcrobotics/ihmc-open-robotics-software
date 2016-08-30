@@ -74,10 +74,10 @@ public class TextArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int centerX, int centerY, double headingOffset, double scaleFactor)
    {
-      int x1 = Xcenter + xPixelOffset +((int)Math.round(this.x1 * scaleFactor));
-      int y1 = Ycenter - yPixelOffset - ((int)Math.round(this.y1 * scaleFactor));
+      int x1 = centerX + xPixelOffset +((int)Math.round(this.x1 * scaleFactor));
+      int y1 = centerY - yPixelOffset - ((int)Math.round(this.y1 * scaleFactor));
 
 
       graphics2d.setColor(color);
@@ -87,10 +87,10 @@ public class TextArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
    {
-      int x1 = Xcenter + ((int)Math.round(this.x1 * scaleFactor));
-      int y1 = Ycenter - ((int)Math.round(this.y1 * scaleFactor));
+      int x1 = centerX + ((int)Math.round(this.x1 * scaleFactor));
+      int y1 = centerY - ((int)Math.round(this.y1 * scaleFactor));
 
       graphics2d.setColor(color);
       graphics2d.setFont(font);
@@ -112,7 +112,7 @@ public class TextArtifact extends Artifact
    }
    
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

@@ -155,7 +155,7 @@ public class PointArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int centerX, int centerY, double headingOffset, double scaleFactor)
    {
       Vector<Double> xMedianFliter = new Vector<Double>();
       Vector<Double> yMedianFliter = new Vector<Double>();
@@ -172,8 +172,8 @@ public class PointArtifact extends Artifact
 
             if (coordinate != null)
             {
-               int x = Xcenter + ((int) Math.round(coordinate.getX() * scaleFactor) - (size / 2));
-               int y = Ycenter - ((int) Math.round(coordinate.getY() * scaleFactor)) - (size / 2);
+               int x = centerX + ((int) Math.round(coordinate.getX() * scaleFactor) - (size / 2));
+               int y = centerY - ((int) Math.round(coordinate.getY() * scaleFactor)) - (size / 2);
                if (i == (_sonarHistory.size() - 1))
                {
                   graphics2d.setColor(color);
@@ -206,8 +206,8 @@ public class PointArtifact extends Artifact
 
       /*
        * double xMedian = getMedian(xMeanFilter); double yMedian =
-       * getMedian(yMeanFilter); int x = Xcenter + (new Double(xMedian*
-       * scaleFactor).intValue()); int y = Ycenter - (new Double(yMedian*
+       * getMedian(yMeanFilter); int x = centerX + (new Double(xMedian*
+       * scaleFactor).intValue()); int y = centerY - (new Double(yMedian*
        * scaleFactor).intValue()); g.setColor(Color.black); g.drawOval(x -10,
        * y-10, 20, 20);
        */
@@ -217,8 +217,8 @@ public class PointArtifact extends Artifact
       /*
        * double xMean = getMean(xMeanFilter); double yMean =
        * getMean(yMeanFilter); double xStdDev = getStdDev(xMeanFilter, xMean);
-       * double yStdDev = getStdDev(yMeanFilter, yMean); x = Xcenter + (new
-       * Double(xMean* scaleFactor).intValue()); y = Ycenter - (new
+       * double yStdDev = getStdDev(yMeanFilter, yMean); x = centerX + (new
+       * Double(xMean* scaleFactor).intValue()); y = centerY - (new
        * Double(yMean* scaleFactor).intValue()); g.setColor(Color.blue); int xSD
        * = new Double(xStdDev*scaleFactor).intValue(); int ySD = new
        * Double(yStdDev*scaleFactor).intValue(); g.drawOval((x - (xSD/2)), (y -
@@ -231,7 +231,7 @@ public class PointArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
    {
    }
 
@@ -245,7 +245,7 @@ public class PointArtifact extends Artifact
    }
 
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

@@ -113,12 +113,12 @@ public class YoArtifactLineSegment2d extends YoArtifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY, double scaleFactor)
    {
       graphics.setColor(color);
       graphics.setStroke(STROKE);
 
-      graphics.drawLineSegment(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
+      graphics.drawLineSegment(-20 + centerX, -5 + centerY, 20 + centerX, 5 + centerY);
    }
 
    @Override

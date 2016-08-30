@@ -44,7 +44,7 @@ public class YoArtifactPosition extends YoArtifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY, double scaleFactor)
    {
       graphics.setColor(color);
       graphics.setStroke(STROKE);
@@ -52,40 +52,40 @@ public class YoArtifactPosition extends YoArtifact
       switch (graphicType)
       {
          case BALL :
-            graphics.drawEmptyCircle(Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawEmptyCircle(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case SOLID_BALL :
-            graphics.drawFilledCircle(Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawFilledCircle(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case CROSS :
-            graphics.drawCross(Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawCross(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case BALL_WITH_CROSS :
-            graphics.drawCircleWithCross(Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawCircleWithCross(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case ROTATED_CROSS :
-            graphics.drawRotatedCross(Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawRotatedCross(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case BALL_WITH_ROTATED_CROSS :
-            graphics.drawCircleWithRotatedCross(Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawCircleWithRotatedCross(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case DIAMOND :
-            graphics.drawDiamond(Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawDiamond(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case DIAMOND_WITH_CROSS :
-            graphics.drawDiamondWithCross(Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawDiamondWithCross(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case SQUARE :
-            graphics.drawSquare(Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawSquare(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case SQUARE_WITH_CROSS :
-            graphics.drawSquareWithCross(Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawSquareWithCross(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case ELLIPSOID :
             double radius = radii.getX();
             radii.setX(radii.getX() * 1.2);
             radii.setY(radii.getY() * 0.8);
-            graphics.drawEmptyCircle(Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawEmptyCircle(centerX, centerY, LEGEND_RADIUS, color);
             radii.set(radius, radius);
             break;
       }

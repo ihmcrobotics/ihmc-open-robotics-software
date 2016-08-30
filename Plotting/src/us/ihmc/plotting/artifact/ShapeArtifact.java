@@ -43,7 +43,7 @@ public class ShapeArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int centerX, int centerY, double headingOffset, double scaleFactor)
    {
       if (pose == null)
       {
@@ -52,8 +52,8 @@ public class ShapeArtifact extends Artifact
          return;
       }
 
-      int x = Xcenter + ((int) Math.round(pose.getX() * scaleFactor));
-      int y = Ycenter - ((int) Math.round(pose.getY() * scaleFactor));
+      int x = centerX + ((int) Math.round(pose.getX() * scaleFactor));
+      int y = centerY - ((int) Math.round(pose.getY() * scaleFactor));
 
       graphics2d.setColor(color);
       int w = (int) (width * scaleFactor);
@@ -77,10 +77,10 @@ public class ShapeArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
    {
-      int x = Xcenter;
-      int y = Ycenter;
+      int x = centerX;
+      int y = centerY;
 
       graphics2d.setColor(color);
       int w = (int) (width * scaleFactor);
@@ -143,7 +143,7 @@ public class ShapeArtifact extends Artifact
    }
 
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
