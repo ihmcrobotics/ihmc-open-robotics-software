@@ -21,7 +21,7 @@ import us.ihmc.robotics.trajectories.providers.DoubleProvider;
  * @param <E> Type of Enum that lists the potential states.
  * @param <T> Type of State that is contained in the state machine.
  */
-public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implements TimeInCurrentStateProvider
+public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implements TimeInCurrentStateProvider, PreviousStateProvider<E, State<E>>
 {
    private static final boolean DEBUG = false;
 
@@ -93,6 +93,7 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
             throw new RuntimeException("Duplicate state enums, name: " + state.getStateEnum() + ", already in use.");
       }
       state.setTimeInCurrentStateProvider(this);
+      state.setPreviousStateProvider(this);
       states.add(state);
       enumsToStates.put(state.getStateEnum(), state);
    }
@@ -118,7 +119,6 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
                listener.stateChanged(previousState, state, switchTimeYoVariable.getDoubleValue());
             }
          }
-         state.setPreviousState(previousState);
          state.doTransitionIntoAction();
       }
 

@@ -5,11 +5,11 @@ import java.util.ArrayList;
 public abstract class State<E extends Enum<E>>
 {
    private final E stateEnum;
-   private State<E> previousState;
    private ArrayList<StateTransition<E>> stateTransitions = new ArrayList<StateTransition<E>>();
    private StateTransition<E> defaultNextStateTransition;
    private boolean gotoDefaultNextState;
    private TimeInCurrentStateProvider timeInCurrentStateProvider;
+   private PreviousStateProvider<E, State<E>> previousStateProvider;
 
    public State(E stateEnum)
    {
@@ -96,7 +96,7 @@ public abstract class State<E extends Enum<E>>
 
    public final State<E> getPreviousState()
    {
-      return previousState;
+      return previousStateProvider.getPreviousState();
    }
 
    public String toString()
@@ -130,14 +130,14 @@ public abstract class State<E extends Enum<E>>
       this.timeInCurrentStateProvider = timeInCurrentStateProvider;
    }
 
+   final void setPreviousStateProvider(PreviousStateProvider<E, State<E>> provider)
+   {
+      this.previousStateProvider = provider;
+   }
+
    final void clearTransitionToDefaultNextState()
    {
       gotoDefaultNextState = false;
-   }
-
-   final void setPreviousState(State<E> previousState)
-   {
-      this.previousState = previousState;
    }
 
    StateTransition<E> checkTransitionConditions(double timeInState)
