@@ -64,7 +64,7 @@ public class SimpleStateTest
 
       stateMachine.addState(stateEnd);
 
-      assertEquals(stateMachine.getCurrentState(), null);
+      assertEquals(stateStart, stateMachine.getCurrentState());
 
       stateMachine.setCurrentState(StateList.START);
       assertEquals(stateMachine.getCurrentState(), stateStart);
