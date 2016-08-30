@@ -109,7 +109,7 @@ public class TextArtifact extends Artifact
    }
    
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics)
    {
       throw new RuntimeException("Not implemented!");
    }
