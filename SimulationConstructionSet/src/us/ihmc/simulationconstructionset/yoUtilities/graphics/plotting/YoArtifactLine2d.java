@@ -12,7 +12,6 @@ public class YoArtifactLine2d extends YoArtifact
    private static final BasicStroke STROKE = new BasicStroke(2);
    
    private final YoFrameLine2d yoFrameLine2d;
-   private final Color color;
    
    private final Line2d tempLine = new Line2d();
    
@@ -21,7 +20,6 @@ public class YoArtifactLine2d extends YoArtifact
       super(name, new double[0], color,
             yoFrameLine2d.getYoPointX(), yoFrameLine2d.getYoPointY(), yoFrameLine2d.getYoVectorX(), yoFrameLine2d.getYoVectorY());
       this.yoFrameLine2d = yoFrameLine2d;
-      this.color = color;
    }
 
    @Override

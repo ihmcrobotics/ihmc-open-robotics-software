@@ -40,7 +40,6 @@ public class YoArtifactPosition extends YoArtifact
       
       this.point = point;
       this.graphicType = type;
-      this.color = color;
       this.radii.set(radius, radius);
    }
 

@@ -44,7 +44,6 @@ public class YoArtifactOval extends YoArtifact
             center.getYoX(), center.getYoY(), radii.getYoX(), radii.getYoY());
       this.center = center;
       this.radii = radii;
-      this.color = color;
    }
 
    @Override
