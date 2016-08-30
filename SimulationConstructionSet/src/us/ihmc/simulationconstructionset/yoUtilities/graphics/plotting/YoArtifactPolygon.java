@@ -70,12 +70,6 @@ public class YoArtifactPolygon extends YoArtifact
    }
 
    @Override
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.POLYGON_ARTIFACT;
-   }
-
-   @Override
    public YoVariable<?>[] getVariables()
    {
       YoVariable<?>[] vars = new YoVariable[1 + 2 * convexPolygon.getMaxNumberOfVertices()];
@@ -89,5 +83,11 @@ public class YoArtifactPolygon extends YoArtifact
       }
 
       return vars;
+   }
+
+   @Override
+   public RemoteGraphicType getRemoteGraphicType()
+   {
+      return RemoteGraphicType.POLYGON_ARTIFACT;
    }
 }

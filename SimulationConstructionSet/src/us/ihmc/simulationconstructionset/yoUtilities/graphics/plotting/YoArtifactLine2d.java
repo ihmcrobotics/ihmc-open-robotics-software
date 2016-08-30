@@ -56,6 +56,6 @@ public class YoArtifactLine2d extends YoArtifact
    @Override
    public RemoteGraphicType getRemoteGraphicType()
    {
-      return null;
+      return RemoteGraphicType.LINE_ARTIFACT;
    }
 }
