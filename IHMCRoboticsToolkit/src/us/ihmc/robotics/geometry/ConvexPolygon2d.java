@@ -47,7 +47,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    private int minXminY_index = 0, maxXminY_index = 0, maxXmaxY_index = 0;
    private final int minXmaxY_index = 0;
 
-   private final Point2d tempPoint2dForDistance = new Point2d();
+   private final Point2d tempPoint2d = new Point2d();
+   private final Vector2d tempVector2d = new Vector2d();
 
    /**
     * Creates an empty convex polygon.
@@ -1815,6 +1816,32 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
    }
 
+   /**
+    * Computes the intersections of a ray with this polygon. Since the polygon is convex the maximum
+    * number of intersections is two. Returns the number of intersections found. If there are less
+    * then two intersections the Points are set to NaN.
+    *
+    * @param ray                  ray to intersect this polygon with
+    * @param intersectionToPack1  modified - is set to the first intersection
+    *                             If the are no intersections this will be set to NaN.
+    * @param intersectionToPack2  modified - is set to the second intersection
+    *                             If there is only one intersection this will be set to NaN.
+    * @return                     The number of intersections 0, 1, or 2
+    */
+   public int intersectionWithRay(Line2d ray, Point2d intersectionToPack1, Point2d intersectionToPack2)
+   {
+      checkIfUpToDate();
+      if (ray == null || ray.containsNaN())
+      {
+         intersectionToPack1.set(Double.NaN, Double.NaN);
+         intersectionToPack2.set(Double.NaN, Double.NaN);
+         return 0;
+      }
+
+      throw new RuntimeException("Implement me!");
+   }
+
+   @Deprecated // creates garbage - use intersectionWithRay method instead.
    public Point2d[] intersectionWithRay(Line2d ray)
    {
       checkIfUpToDate();
@@ -2419,10 +2446,10 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public double distance(Point2d point)
    {
       checkIfUpToDate();
-      tempPoint2dForDistance.set(point);
-      orthogonalProjection(tempPoint2dForDistance);
+      tempPoint2d.set(point);
+      orthogonalProjection(tempPoint2d);
 
-      return point.distance(tempPoint2dForDistance);
+      return point.distance(tempPoint2d);
    }
 
    @Override
@@ -2434,9 +2461,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       return copy;
    }
-
-
-   private final Point2d tempPoint2d = new Point2d();
 
    /**
     * Compute the orthogonal projection of the given point and modify it to store the result.
@@ -2507,7 +2531,10 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       point2d.add(edgeVector);
       // Make sure the returned point is inside the polygon by nudging it a little toward the centroid.
       // This will all but guarantee that projections are then inside.
-      pullPointTowardsCentroid(point2d, 10E-10);
+      tempVector2d.set(centroid);
+      tempVector2d.sub(point2d);
+      tempVector2d.scale(1.0e-12);
+      point2d.add(tempVector2d);
    }
 
    public boolean isEmpty()
