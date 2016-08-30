@@ -128,7 +128,7 @@ public class PolygonArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int centerX, int centerY, double headingOffset, double scaleFactor)
    {
       ArrayList<Point2d> pointsCopy = new ArrayList<>(points);
       int nPoints = pointsCopy.size();
@@ -137,8 +137,8 @@ public class PolygonArtifact extends Artifact
 
       if (nPoints == 1)
       {
-         int x = Xcenter + (int) Math.round(pointsCopy.get(0).getX() * scaleFactor);
-         int y = Ycenter - (int) Math.round(pointsCopy.get(0).getY() * scaleFactor);
+         int x = centerX + (int) Math.round(pointsCopy.get(0).getX() * scaleFactor);
+         int y = centerY - (int) Math.round(pointsCopy.get(0).getY() * scaleFactor);
          graphics2d.drawOvalFilled(x, y, 4, 4);
       }
       else
@@ -147,8 +147,8 @@ public class PolygonArtifact extends Artifact
          {
             if (pointsCopy.get(i) != null)
             {
-               int x = Xcenter + (int) Math.round(pointsCopy.get(i).getX() * scaleFactor);
-               int y = Ycenter - (int) Math.round(pointsCopy.get(i).getY() * scaleFactor);
+               int x = centerX + (int) Math.round(pointsCopy.get(i).getX() * scaleFactor);
+               int y = centerY - (int) Math.round(pointsCopy.get(i).getY() * scaleFactor);
                xPoints[i] = x;
                yPoints[i] = y;
             }
@@ -174,7 +174,7 @@ public class PolygonArtifact extends Artifact
    }
 
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

@@ -59,10 +59,10 @@ public class ArcArtifact extends Artifact
    }
 
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int centerX, int centerY, double headingOffset, double scaleFactor)
    {
-      int x = Xcenter + ((int) Math.round(this.x * scaleFactor));
-      int y = Ycenter - ((int) Math.round(this.y * scaleFactor));
+      int x = centerX + ((int) Math.round(this.x * scaleFactor));
+      int y = centerY - ((int) Math.round(this.y * scaleFactor));
 
       graphics2d.setColor(color);
       int d = (int) ((this.diameter * scaleFactor));
@@ -74,13 +74,13 @@ public class ArcArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }
 
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
    {
       throw new RuntimeException("Not implemented!");
    }

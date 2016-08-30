@@ -33,13 +33,13 @@ public class YoArtifactPolygon extends YoArtifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY, double scaleFactor)
    {
       graphics.setColor(color);
       String name = "Polygon";
       Rectangle2D textDimensions = graphics.getFontMetrics().getStringBounds(name, graphics.getGraphicsContext());
-      int x = Xcenter - (int) (textDimensions.getWidth()/2);
-      int y = Ycenter + (int) (textDimensions.getHeight()/2);
+      int x = centerX - (int) (textDimensions.getWidth()/2);
+      int y = centerY + (int) (textDimensions.getHeight()/2);
       graphics.drawString(name, x, y);
    }
 
