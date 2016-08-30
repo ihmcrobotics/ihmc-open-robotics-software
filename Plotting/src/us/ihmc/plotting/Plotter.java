@@ -40,12 +40,8 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO Deprecate archaic methods
  * TODO Factor out artifacts.
  * TODO Fix Artifact interface to use meters.
- * TODO Show labels at sides
  * TODO Kill Pose and Coordinate
- * TODO Rewrite PlotterGraphics
  * TODO ALT rotation
- * TODO LineSegments unified
- * TODO Lines unified
  * TODO Fix color field in Artifact
  * TODO Implement remote artifact in line2d
  */

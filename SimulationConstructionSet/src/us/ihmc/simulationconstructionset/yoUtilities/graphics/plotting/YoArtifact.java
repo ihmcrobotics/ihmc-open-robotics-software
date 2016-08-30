@@ -60,6 +60,12 @@ public abstract class YoArtifact extends Artifact implements RemoteYoGraphic
    }
    
    @Override
+   public final String getName()
+   {
+      return getID();
+   }
+   
+   @Override
    public final void takeHistorySnapshot()
    {
       if (getRecordHistory())
