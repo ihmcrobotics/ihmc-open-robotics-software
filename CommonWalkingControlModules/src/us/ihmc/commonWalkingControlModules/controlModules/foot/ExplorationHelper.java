@@ -152,7 +152,10 @@ public class ExplorationHelper
          desiredCenterOfPressure.set(currentCorner);
 
       if (time - lastShrunkTime > 2.0 * timeToExploreCorner * corners)
+      {
          footholdExplorationActive.set(false);
+         partialFootholdControlModule.informExplorationDone();
+      }
    }
 
    public boolean isExploring()
