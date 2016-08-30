@@ -25,6 +25,7 @@ public abstract class YoArtifact extends Artifact implements RemoteYoGraphic
       this.variableArray = variableArray;
       this.constants = constants;
       this.appearance = new YoAppearanceRGBColor(color, 0.0);
+      this.color = color;
    }
    
    public abstract void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry);

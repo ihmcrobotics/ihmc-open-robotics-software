@@ -16,7 +16,6 @@ public class YoArtifactPolygon extends YoArtifact
    
    private final ConvexPolygon2d tempConvexPolygon = new ConvexPolygon2d();
 
-   private final Color color;
    private final boolean fill;
    private final BasicStroke stroke;
    
@@ -29,9 +28,8 @@ public class YoArtifactPolygon extends YoArtifact
    {
       super(name,  new double[] {fill ? 1.0 : 0.0}, color);
       this.convexPolygon = yoConvexPolygon2d;
-      this.color = color;
       this.fill = fill;
-      stroke = new BasicStroke(lineWidth);
+      this.stroke = new BasicStroke(lineWidth);
    }
 
    @Override
