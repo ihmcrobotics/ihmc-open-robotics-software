@@ -6,11 +6,13 @@ import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class FinishableStateTest
 {
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testExampleStateMachineWithFinishableStates()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
