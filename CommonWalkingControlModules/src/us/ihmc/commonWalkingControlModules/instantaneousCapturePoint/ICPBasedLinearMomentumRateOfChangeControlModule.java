@@ -182,7 +182,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
             areaToProjectInto.setIncludingFrameAndUpdate(supportPolygon);
          }
 
-         cmpProjector.projectCMPIntoSupportPolygonUsingFinalDesired(capturePoint, areaToProjectInto, finalDesiredCapturePoint, desiredCMP);
+         cmpProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, areaToProjectInto, finalDesiredCapturePoint, desiredCMP);
          if (cmpProjector.getWasCMPProjected())
             icpProportionalController.bleedOffIntegralTerm();
       }
