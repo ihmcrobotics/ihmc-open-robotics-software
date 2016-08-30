@@ -33,7 +33,7 @@ public class YoArtifactPolygon extends YoArtifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
    {
       graphics.setColor(color);
       String name = "Polygon";
