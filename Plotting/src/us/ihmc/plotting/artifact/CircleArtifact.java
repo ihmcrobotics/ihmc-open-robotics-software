@@ -73,20 +73,17 @@ public class CircleArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
    {
-      int x = centerX;
-      int y = centerY;
-
-      graphics2d.setColor(color);
-      int d = (int) ((this.diameter * scaleFactor));
+      graphics.setColor(color);
+      int diameter = 40;
       if (fill)
       {
-         graphics2d.drawOvalFilled((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics.drawOvalFilled((centerX - (diameter / 2)), (centerY - (diameter / 2)), diameter, diameter);
       }
       else
       {
-         graphics2d.drawOval((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics.drawOval((centerX - (diameter / 2)), (centerY - (diameter / 2)), diameter, diameter);
       }
    }
 

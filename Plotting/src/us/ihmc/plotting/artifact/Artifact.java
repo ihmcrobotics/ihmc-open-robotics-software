@@ -25,7 +25,7 @@ public abstract class Artifact
    
    public abstract void drawHistory(Graphics2DAdapter graphics, int centerX, int centerY, double scaleFactor);
    
-   public abstract void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY, double scaleFactor);
+   public abstract void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY);
    
    public abstract void takeHistorySnapshot();
 

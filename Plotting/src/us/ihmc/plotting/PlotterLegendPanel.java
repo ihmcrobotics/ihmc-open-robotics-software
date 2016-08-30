@@ -56,15 +56,7 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
          y = y + deltaY;
          g.setFont(f);
 
-         double scale = 500;
-         
-         // TODO: Get the desired scale factor from the artifact itself.
-         if (artifact.getID().equals("FinalDesiredSwing"))
-         {
-            scale = 200;
-         }
-
-         artifact.drawLegend(graphics2dAdapter, artifactX, y, scale);
+         artifact.drawLegend(graphics2dAdapter, artifactX, y);
 
          g.setColor(Color.black);
 //         String newName = "";

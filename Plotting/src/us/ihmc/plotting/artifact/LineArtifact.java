@@ -79,7 +79,7 @@ public class LineArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
    {
    }
 

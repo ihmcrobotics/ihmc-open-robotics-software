@@ -87,15 +87,12 @@ public class TextArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
    {
-      int x1 = centerX + ((int)Math.round(this.x1 * scaleFactor));
-      int y1 = centerY - ((int)Math.round(this.y1 * scaleFactor));
+      graphics.setColor(color);
+      graphics.setFont(font);
 
-      graphics2d.setColor(color);
-      graphics2d.setFont(font);
-
-      graphics2d.drawString(text, x1, y1);
+      graphics.drawString(text, centerX - 30, centerY + 6);
    }
 
    public void save(PrintWriter printWriter)

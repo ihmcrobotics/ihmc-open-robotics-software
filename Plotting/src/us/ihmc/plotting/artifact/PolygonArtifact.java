@@ -168,9 +168,9 @@ public class PolygonArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int xCenter, int yCenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
    {
-      graphics2d.drawString("Polygon", xCenter, yCenter);
+      graphics.drawString("Polygon", centerX, centerY);
    }
 
    @Override

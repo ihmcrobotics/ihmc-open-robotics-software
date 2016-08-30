@@ -77,29 +77,26 @@ public class ShapeArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int centerX, int centerY, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
    {
-      int x = centerX;
-      int y = centerY;
-
-      graphics2d.setColor(color);
-      int w = (int) (width * scaleFactor);
-      int h = (int) (height * scaleFactor);
+      graphics.setColor(color);
+      int w = 40;
+      int h = 40;
       if (getType().equals("fillcircle"))
       {
-         graphics2d.drawOvalFilled((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawOvalFilled((centerX - (w / 2)), (centerY - (h / 2)), w, h);
       }
       else if (getType().equals("circle"))
       {
-         graphics2d.drawOval((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawOval((centerX - (w / 2)), (centerY - (h / 2)), w, h);
       }
       else if (getType().equals("fillrectangle"))
       {
-         graphics2d.drawRectangleFilled((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawRectangleFilled((centerX - (w / 2)), (centerY - (h / 2)), w, h);
       }
       else if (getType().equals("rectangle"))
       {
-         graphics2d.drawRectangle((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawRectangle((centerX - (w / 2)), (centerY - (h / 2)), w, h);
       }
    }
 
