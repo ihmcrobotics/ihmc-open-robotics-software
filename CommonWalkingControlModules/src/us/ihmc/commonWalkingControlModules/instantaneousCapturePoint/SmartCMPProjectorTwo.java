@@ -22,6 +22,8 @@ public class SmartCMPProjectorTwo extends CMPProjector
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final BoundingBox2d tempBoundingBox = new BoundingBox2d();
+   private final FramePoint2d intersection1 = new FramePoint2d();
+   private final FramePoint2d intersection2 = new FramePoint2d();
    private final BooleanYoVariable cmpWasProjected = new BooleanYoVariable("CmpWasProjected", registry);
    private final FramePoint2d perfectCMPlocal = new FramePoint2d();
    private final FrameLine2d perfectCMPToDesiredCMP = new FrameLine2d();
@@ -64,11 +66,11 @@ public class SmartCMPProjectorTwo extends CMPProjector
       perfectCMPlocal.setIncludingFrame(perfectCMP);
       supportPolygon.orthogonalProjection(perfectCMPlocal);
       perfectCMPToDesiredCMP.set(perfectCMPlocal, desiredCMP);
-      FramePoint2d[] intersection = supportPolygon.intersectionWithRay(perfectCMPToDesiredCMP); // TODO: remove garbage
+      int intersections = supportPolygon.intersectionWithRay(perfectCMPToDesiredCMP, intersection1, intersection2);
 
-      if (intersection.length != 1)
+      if (intersections != 1)
          throw new RuntimeException("Expected exactly one intersection since polygon is convex");
-      desiredCMP.set(intersection[0]);
+      desiredCMP.set(intersection1);
 
       cmpWasProjected.set(true);
    }
@@ -96,10 +98,6 @@ public class SmartCMPProjectorTwo extends CMPProjector
       desiredCMP.changeFrame(returnFrame);
       capturePoint.changeFrame(returnFrame);
    }
-
-   private final BoundingBox2d tempBoundingBox = new BoundingBox2d();
-   private final FramePoint2d intersection1 = new FramePoint2d();
-   private final FramePoint2d intersection2 = new FramePoint2d();
 
    private void projectCMPIntoSupportPolygonIfOutsideLocal(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon,
          FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
