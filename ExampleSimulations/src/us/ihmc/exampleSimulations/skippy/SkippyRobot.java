@@ -483,4 +483,9 @@ public class SkippyRobot extends Robot
       return this.getGravityZ();
    }
 
+   public boolean getFootFS()
+   {
+      return footGroundContactPoint.isInContact();
+   }
+
 }
