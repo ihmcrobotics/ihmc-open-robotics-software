@@ -263,7 +263,6 @@ public class CommandInputManager
    public <C extends CompilableCommand<C, ?>> C pollAndCompileCommands(Class<C> commandClassToPoll)
    {
       List<C> commands = pollNewCommands(commandClassToPoll);
-
       if (commands.isEmpty())
          return null;
 
