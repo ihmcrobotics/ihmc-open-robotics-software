@@ -1,6 +1,7 @@
 package us.ihmc.robotics.stateMachines;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -23,14 +24,15 @@ import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implements TimeInCurrentStateProvider
 {
    private static final boolean DEBUG = false;
-   private final EnumYoVariable<E> stateYoVariable;
+
+   private final EnumMap<E, T> enumsToStates;
+
+   private final EnumYoVariable<E> stateYoVariable, previousStateYoVariable;
    private final DoubleYoVariable switchTimeYoVariable;
    private final DoubleProvider time;
    private ArrayList<StateChangedListener<E>> stateChangedListeners;
 
    protected ArrayList<T> states = new ArrayList<T>();
-
-   private T cachedCurrentState;
 
    public GenericStateMachine(String name, String switchTimeName, Class<E> enumType, E initialState, DoubleYoVariable timeVariable, YoVariableRegistry registry)
    {
@@ -50,11 +52,16 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
    public GenericStateMachine(String stateYoVariableName, String switchTimeName, Class<E> enumType, E initialState, DoubleProvider timeProvider, YoVariableRegistry registry)
    {
       stateYoVariable = new EnumYoVariable<E>(stateYoVariableName, "State machine variable to keep track of the state.", registry, enumType, false);
+      previousStateYoVariable = new EnumYoVariable<E>(stateYoVariableName + "PreviousState", "State machine variable to keep track of the previous state.", registry, enumType, true);
+
+      enumsToStates = new EnumMap<>(enumType);
 
       if (initialState != null)
       {
          stateYoVariable.set(initialState);
       }
+
+      previousStateYoVariable.set(null);
 
       switchTimeYoVariable = new DoubleYoVariable(switchTimeName, registry);
       this.time = timeProvider;
@@ -87,8 +94,7 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
       }
       state.setTimeInCurrentStateProvider(this);
       states.add(state);
-      if (cachedCurrentState == null)
-         cachedCurrentState = state;
+      enumsToStates.put(state.getStateEnum(), state);
    }
 
    public void setCurrentState(E nextStateEnum)
@@ -97,33 +103,29 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
          System.out.println(getStateYoVariableName() + ": t = " + time.getValue() + ": going to state: " + nextStateEnum.toString());
 
       T previousState = getCurrentState();
+      T state = enumsToStates.get(nextStateEnum);
 
-      switchTimeYoVariable.set(time.getValue());
-      stateYoVariable.set(nextStateEnum);
-
-      for (int i = 0; i < states.size(); i++)
+      if (state != null)
       {
-         T state = states.get(i);
-         if (state.getStateEnum() == nextStateEnum)
+         switchTimeYoVariable.set(time.getValue());
+         previousStateYoVariable.set(stateYoVariable.getEnumValue());
+         stateYoVariable.set(nextStateEnum);
+
+         if (stateChangedListeners != null)
          {
-            if (stateChangedListeners != null)
+            for (StateChangedListener<E> listener : stateChangedListeners)
             {
-               for (StateChangedListener<E> listener : stateChangedListeners)
-               {
-                  listener.stateChanged(cachedCurrentState, state, switchTimeYoVariable.getDoubleValue());
-               }
+               listener.stateChanged(previousState, state, switchTimeYoVariable.getDoubleValue());
             }
-
-            cachedCurrentState = state;
-
-            state.setPreviousState(previousState);
-            state.doTransitionIntoAction();
-
-            return;
          }
+         state.setPreviousState(previousState);
+         state.doTransitionIntoAction();
       }
 
-      throw new RuntimeException("Need to add state " + nextStateEnum + " to the state machine. Can't transition into the state unless it is added!");
+      else
+      {
+         throw new RuntimeException("Need to add state " + nextStateEnum + " to the state machine. Can't transition into the state unless it is added!");
+      }
    }
 
    public boolean isCurrentState(E stateEnum)
@@ -144,69 +146,30 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
    public void doAction()
    {
       T currentState = getCurrentState();
-
-      if (currentState == null)
-      {
-         System.err.println("Warning! GenericStateMachine.doAction(). You should first use stateMachine.setCurrentState() rather than assume that it'll start in the first enum in the list!");
-         setCurrentState(states.get(0).getStateEnum());
-      }
-
-      currentState = getAndCheckCurrentState();
       currentState.doAction();
    }
 
    public T getCurrentState()
    {
       E stateEnum = stateYoVariable.getEnumValue();
-
-//      // Hack for now to be backward compatible. Lots of people set up the state machine but don't set the initial state. Rather they assume that they start in the first state.
-//      // Instead they should call setCurrentState(); to initialize.
-//
-//      if (stateEnum == null)
-//      {
-//         setCurrentState(states.get(0).getStateEnum());
-//         stateEnum = stateYoVariable.getEnumValue();
-//      }
-
-      if (stateEnum == cachedCurrentState.getStateEnum())
-         return cachedCurrentState;
-
-      for (T state : states)
-      {
-         if (isCurrentState(state.getStateEnum()))
-         {
-            cachedCurrentState = state;
-
-            return state;
-         }
-      }
-
-      return null;
+      return enumsToStates.get(stateEnum);
    }
 
-   /**
-    * Same as getCurrentState() except that it throws an RuntimeException if the current state enum
-    * @return
-    */
-   public T getAndCheckCurrentState()
+   public T getPreviousState()
    {
-      T currentState = getCurrentState();
-
-      if (currentState == null)
-      {
-         throw new RuntimeException("Current state is null. Make sure to call StateMachine.setCurrentState() first.");
-      }
-
-      return currentState;
+      E stateEnum = previousStateYoVariable.getEnumValue();
+      return enumsToStates.get(stateEnum);
    }
 
    public E getCurrentStateEnum()
    {
-      T currentState = getCurrentState();
-      if (currentState == null)
-         return null;
+      return stateYoVariable.getEnumValue();
+   }
 
-      return currentState.getStateEnum();
+   public E getPreviousStateEnum()
+   {
+      E stateEnum = previousStateYoVariable.getEnumValue();
+      return stateEnum;
    }
 
    public T getState(E stateEnum)

@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.tools.testing.MutationTestingTools;
@@ -48,7 +49,9 @@ public class StateMachineExampleTwoTest
 
       final BooleanYoVariable threeToOneTransitionAction = new BooleanYoVariable("threeToOneTransitionAction", registry);
 
-      SettableDoubleProvider timeProvider = new SettableDoubleProvider();
+      DoubleYoVariable timeProvider = new DoubleYoVariable("time", registry);
+      timeProvider.set(13.3);
+
       StateMachine<StateEnum> stateMachine = new StateMachine<StateEnum>("complexStateMachine", "switchTime", StateEnum.class, StateEnum.FOUR, timeProvider, registry);
 
       ExampleState stateOne = new ExampleState(StateEnum.ONE, inStateOne, didTransitionIntoStateOne, didTransitionOutOfStateOne, ticksInStateOne);
@@ -89,7 +92,8 @@ public class StateMachineExampleTwoTest
       assertEquals(stateFour, stateMachine.getCurrentState());
       assertEquals(StateEnum.FOUR, stateMachine.getCurrentStateEnum());
 
-
+      assertEquals(null, stateMachine.getPreviousStateEnum());
+      assertEquals(null, stateMachine.getPreviousState());
       assertNull(stateOne.getPreviousState());
       assertFalse(inStateOne.getBooleanValue());
       assertFalse(didTransitionIntoStateOne.getBooleanValue());
@@ -127,6 +131,8 @@ public class StateMachineExampleTwoTest
       assertTrue(didTransitionOutOfStateOne.getBooleanValue());
       assertEquals(2, ticksInStateOne.getIntegerValue());
 
+      assertEquals(StateEnum.ONE, stateMachine.getPreviousStateEnum());
+      assertEquals(stateOne, stateMachine.getPreviousState());
       assertEquals(stateOne, stateTwo.getPreviousState());
       assertTrue(inStateTwo.getBooleanValue());
       assertTrue(didTransitionIntoStateTwo.getBooleanValue());
@@ -149,6 +155,8 @@ public class StateMachineExampleTwoTest
       assertTrue(didTransitionOutOfStateTwo.getBooleanValue());
       assertEquals(2, ticksInStateTwo.getIntegerValue());
 
+      assertEquals(StateEnum.TWO, stateMachine.getPreviousStateEnum());
+      assertEquals(stateTwo, stateMachine.getPreviousState());
       assertEquals(stateTwo, stateThree.getPreviousState());
       assertTrue(inStateThree.getBooleanValue());
       assertTrue(didTransitionIntoStateThree.getBooleanValue());
@@ -182,6 +190,8 @@ public class StateMachineExampleTwoTest
       assertTrue(didTransitionOutOfStateThree.getBooleanValue());
       assertEquals(3, ticksInStateThree.getIntegerValue());
 
+      assertEquals(StateEnum.THREE, stateMachine.getPreviousStateEnum());
+      assertEquals(stateThree, stateMachine.getPreviousState());
       assertEquals(stateThree, stateFour.getPreviousState());
       assertTrue(inStateFour.getBooleanValue());
       assertTrue(didTransitionIntoStateFour.getBooleanValue());
@@ -198,6 +208,8 @@ public class StateMachineExampleTwoTest
       assertTrue(didTransitionOutOfStateFour.getBooleanValue());
       assertEquals(1, ticksInStateFour.getIntegerValue());
 
+      assertEquals(StateEnum.FOUR, stateMachine.getPreviousStateEnum());
+      assertEquals(stateFour, stateMachine.getPreviousState());
       assertEquals(stateFour, stateThree.getPreviousState());
       assertTrue(inStateThree.getBooleanValue());
       assertTrue(didTransitionIntoStateThree.getBooleanValue());
@@ -223,6 +235,8 @@ public class StateMachineExampleTwoTest
       stateMachine.doAction();
       stateMachine.checkTransitionConditions();
 
+      assertEquals(StateEnum.THREE, stateMachine.getPreviousStateEnum());
+      assertEquals(stateThree, stateMachine.getPreviousState());
       assertEquals(stateThree, stateOne.getPreviousState());
       assertTrue(inStateOne.getBooleanValue());
       assertTrue(didTransitionIntoStateOne.getBooleanValue());

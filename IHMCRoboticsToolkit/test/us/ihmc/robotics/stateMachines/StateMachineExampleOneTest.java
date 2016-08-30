@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
@@ -44,9 +45,14 @@ public class StateMachineExampleOneTest
       {
          ExampleStateName currentStateEnum = stateMachine.getCurrentStateEnum();
          if (time.getValue() < 1.01)
+         {
             assertEquals(ExampleStateName.Starting, currentStateEnum);
+            assertFalse(stateMachine.inCurrentStateForDuration(1.01));
+         }
          else if (time.getValue() < 2.01)
+         {
             assertEquals(ExampleStateName.StateOne, currentStateEnum);
+         }
          else if (time.getValue() < 3.01)
             assertEquals(ExampleStateName.StateTwo, currentStateEnum);
          else
@@ -66,6 +72,10 @@ public class StateMachineExampleOneTest
          stateMachine.doAction();
          stateMachine.checkTransitionConditions();
          time.setValue(time.getValue() + 0.01);
+
+         double timeInCurrentState = stateMachine.timeInCurrentState();
+         assertTrue(stateMachine.inCurrentStateForDuration(timeInCurrentState));
+         assertFalse(stateMachine.inCurrentStateForDuration(timeInCurrentState + 1e-5));
 
          assertTrue(currentState.didTransitionIntoAction);
          assertTrue(currentState.didAction);
@@ -201,6 +211,7 @@ public class StateMachineExampleOneTest
       stateMachine.doAction();
       stateMachine.checkTransitionConditions();
 
+      assertFalse(stateMachine.isCurrentState(ExampleStateName.StateOne));
       assertTrue(stateMachine.isCurrentState(ExampleStateName.StateTwo));
 
       assertEquals(stateOne, listener.oldState);
@@ -218,6 +229,7 @@ public class StateMachineExampleOneTest
       currentStateEnum = stateMachine.getCurrentStateEnum();
       currentState = (SimpleExampleState) stateMachine.getCurrentState();
 
+      assertTrue(stateMachine.isCurrentState(ExampleStateName.StateTwo));
       assertEquals(currentState, stateTwo);
       assertEquals(currentStateEnum, ExampleStateName.StateTwo);
       assertEquals(currentState.getPreviousState(), stateOne);
@@ -300,6 +312,17 @@ public class StateMachineExampleOneTest
       }
       catch(RuntimeException e)
       {
+         assertEquals("Duplicate state enums, name: Starting, already in use.", e.getMessage());
+      }
+
+      try
+      {
+         stateMachine.setCurrentState(ExampleStateName.StateOne);
+         fail("State not added yet");
+      }
+      catch(RuntimeException e)
+      {
+         assertEquals("Need to add state StateOne to the state machine. Can't transition into the state unless it is added!", e.getMessage());
       }
 
       SimpleExampleState stateOne = new SimpleExampleState(ExampleStateName.StateOne);
@@ -322,6 +345,7 @@ public class StateMachineExampleOneTest
       }
       catch(RuntimeException e)
       {
+         assertEquals("Duplicate state enums, name: StateOne, already in use.", e.getMessage());
       }
 
       try
@@ -331,15 +355,7 @@ public class StateMachineExampleOneTest
       }
       catch(RuntimeException e)
       {
-      }
-
-      try
-      {
-         stateMachine.getAndCheckCurrentState();
-         fail("This throws exception if the current state hasn't been set yet.");
-      }
-      catch(RuntimeException e)
-      {
+         assertEquals("Need to add state Stopped to the state machine. Can't transition into the state unless it is added!", e.getMessage());
       }
 
       SimpleExampleState stateTwo = new SimpleExampleState(ExampleStateName.StateTwo);
@@ -354,8 +370,20 @@ public class StateMachineExampleOneTest
       }
       catch(RuntimeException e)
       {
+         assertEquals("DefaultNextState was not set for currentState=StateTwo: ()", e.getMessage());
       }
 
+      EnumYoVariable<ExampleStateName> stateYoVariable = stateMachine.getStateYoVariable();
+
+      try
+      {
+         stateYoVariable.set(null);
+         fail("Can't set null!");
+      }
+      catch(Exception e)
+      {
+         assertEquals("Setting EnumYoVariable stateMachine to null. Must set allowNullValue to true in the constructor if you ever want to set it to null.", e.getMessage());
+      }
    }
 
    private class SimpleExampleState extends State<ExampleStateName>
