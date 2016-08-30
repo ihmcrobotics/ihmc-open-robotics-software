@@ -8,6 +8,18 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
+/**
+ * GenericStateMachine. Class for construction a finite state machine. Requires an Enum, which lists all the possible state names.
+ * An EnumYoVariable keeps track of the current state and a DoubleYoVariable keeps track of the time since the state was switched.
+ * A GenericStateMachine is not dynamic. New states cannot be constructed on the fly.
+ * The user is given the option to set the initial state in the constructor.
+ * If they do not set an initialState, then it defaults to the first state in the Enum list.
+ * Setting the initialState does not call the doTransitionIntoAction of that state.
+ * In order to call the doTransitionIntoAction the user must call setCurrentState() instead of construct with an initial state.
+ *
+ * @param <E> Type of Enum that lists the potential states.
+ * @param <T> Type of State that is contained in the state machine.
+ */
 public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implements TimeInCurrentStateProvider
 {
    private static final boolean DEBUG = false;
@@ -20,18 +32,29 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
 
    private T cachedCurrentState;
 
+   public GenericStateMachine(String name, String switchTimeName, Class<E> enumType, E initialState, DoubleYoVariable timeVariable, YoVariableRegistry registry)
+   {
+      this(name, switchTimeName, enumType, initialState, new YoVariableDoubleProvider(timeVariable), registry);
+   }
+
    public GenericStateMachine(String name, String switchTimeName, Class<E> enumType, DoubleYoVariable timeVariable, YoVariableRegistry registry)
    {
-      this(name, switchTimeName, enumType, new YoVariableDoubleProvider(timeVariable), registry);
+      this(name, switchTimeName, enumType, null, new YoVariableDoubleProvider(timeVariable), registry);
    }
 
    public GenericStateMachine(String stateYoVariableName, String switchTimeName, Class<E> enumType, DoubleProvider timeProvider, YoVariableRegistry registry)
    {
-      stateYoVariable = new EnumYoVariable<E>(stateYoVariableName, "State machine variable to keep track of the state.", registry, enumType, true);
+      this(stateYoVariableName, switchTimeName, enumType, null, timeProvider, registry);
+   }
 
-      // We should initialize the state to null and force the user to call setCurrentState?
-      // Or not, since we don't want to have to call the doTransitionIntoAction() sometimes at the beginning?
-//    stateYoVariable.set(null);
+   public GenericStateMachine(String stateYoVariableName, String switchTimeName, Class<E> enumType, E initialState, DoubleProvider timeProvider, YoVariableRegistry registry)
+   {
+      stateYoVariable = new EnumYoVariable<E>(stateYoVariableName, "State machine variable to keep track of the state.", registry, enumType, false);
+
+      if (initialState != null)
+      {
+         stateYoVariable.set(initialState);
+      }
 
       switchTimeYoVariable = new DoubleYoVariable(switchTimeName, registry);
       this.time = timeProvider;
