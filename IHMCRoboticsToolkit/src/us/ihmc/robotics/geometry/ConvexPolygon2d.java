@@ -52,6 +52,9 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    private final Vector2d tempVector1 = new Vector2d();
    private final Vector2d tempVector2 = new Vector2d();
    private final int[] tempTwoIndices = new int[2];
+   private final LineSegment2d tempSegment1 = new LineSegment2d();
+   private final LineSegment2d tempSegment2 = new LineSegment2d();
+   private final LineSegment2d tempSegment3 = new LineSegment2d();
 
    /**
     * Creates an empty convex polygon.
@@ -776,11 +779,18 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
    public Point2d getClosestVertexCopy(Line2d line)
    {
+      Point2d point = new Point2d();
+      getClosestVertex(line, point);
+      return point;
+   }
+
+   public boolean getClosestVertex(Line2d line, Point2d pointToPack)
+   {
       checkIfUpToDate();
       // O(n) for now, maybe there's a faster way?
 
-      Point2d ret = null;
       double minDistanceSquared = Double.POSITIVE_INFINITY;
+      pointToPack.set(Double.NaN, Double.NaN);
 
       for (int i = 0; i < numberOfVertices; i++)
       {
@@ -788,18 +798,12 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          double distanceSquared = line.distanceSquared(vertex);
          if (distanceSquared < minDistanceSquared)
          {
-            ret = vertex;
+            pointToPack.set(vertex);
             minDistanceSquared = distanceSquared;
          }
       }
 
-      if (ret == null)
-      {
-         System.err.println(this.getClass().getSimpleName() + ": Distance squared to vertex 0: " + line.distanceSquared(getVertex(0)));
-         return null;
-      }
-      else
-         return new Point2d(ret);
+      return !Double.isInfinite(minDistanceSquared);
    }
 
    public Point2d getClosestVertexWithRayCopy(Line2d ray, boolean throwAwayVerticesOutsideRay)
@@ -1510,11 +1514,16 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return crossProduct < 0.0;
    }
 
-   private int[] getFirstCrossedEdgeFromInsideLineIndices(Point2d lineStart, Vector2d lineDirection)
+   private boolean getFirstCrossedEdgeFromInsideLineIndices(Point2d lineStart, Vector2d lineDirection, int[] indicesToPack)
    {
+      if (indicesToPack.length != 2)
+         throw new RuntimeException("Expected array of length two");
+
       if (!hasAtLeastOneVertex())
       {
-         return null;
+         indicesToPack[0] = -1;
+         indicesToPack[1] = -1;
+         return false;
       }
 
       // At any time we'll hold onto 4 vertex indices. -1 signifies not found yet:
@@ -1593,7 +1602,9 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          }
       }
 
-      return new int[] { forwardLeftVertex, forwardRightVertex };
+      indicesToPack[0] = forwardLeftVertex;
+      indicesToPack[1] = forwardRightVertex;
+      return true;
    }
 
    private boolean isVertexToTheLeftOrStraightOn(int index, Point2d lineStart, Vector2d lineDirection)
@@ -1852,6 +1863,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public int intersectionWithRay(Line2d ray, Point2d intersectionToPack1, Point2d intersectionToPack2)
    {
       checkIfUpToDate();
+
       if (ray == null || ray.containsNaN())
       {
          intersectionToPack1.set(Double.NaN, Double.NaN);
@@ -1859,91 +1871,146 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          return 0;
       }
 
-      throw new RuntimeException("Implement me!");
+      int intersectingEdges = getIntersectingEdges(ray, tempSegment1, tempSegment2);
+
+      if (intersectingEdges == 0)
+      {
+         intersectionToPack1.set(Double.NaN, Double.NaN);
+         intersectionToPack2.set(Double.NaN, Double.NaN);
+         return 0;
+      }
+      else if (intersectingEdges == 1)
+      {
+         // TODO: this duplicates the computation in intersectionWith(ray) - same below
+         if (tempSegment1.intersectionWith(ray) == null)
+            getClosestVertex(ray, intersectionToPack1);
+         else
+            intersectionToPack1.set(tempSegment1.intersectionWith(ray));
+
+         intersectionToPack2.set(Double.NaN, Double.NaN);
+
+         return 1;
+      }
+      else if (intersectingEdges == 2)
+      {
+         if (tempSegment1.intersectionWith(ray) == null)
+            getClosestVertex(ray, intersectionToPack1);
+         else
+            intersectionToPack1.set(tempSegment1.intersectionWith(ray));
+
+         if (tempSegment2.intersectionWith(ray) == null)
+            getClosestVertex(ray, intersectionToPack2);
+         else
+            intersectionToPack2.set(tempSegment2.intersectionWith(ray));
+
+         if (hasExactlyTwoVertices() && intersectionToPack1.equals(intersectionToPack2))
+         {
+            intersectionToPack2.set(Double.NaN, Double.NaN);
+            return 1;
+         }
+
+         return 2;
+      }
+      else
+         throw new RuntimeException("This should never happen for a convex polygon.");
    }
 
-   @Deprecated // creates garbage - use intersectionWithRay method instead.
    public Point2d[] intersectionWithRay(Line2d ray)
    {
       checkIfUpToDate();
-      if (ray == null || ray.containsNaN())
+
+      Point2d intersection1 = new Point2d();
+      Point2d intersection2 = new Point2d();
+      int intersections = intersectionWithRay(ray, intersection1, intersection2);
+
+      if (intersections == 0)
          return null;
+      if (intersections == 1)
+         return new Point2d[] {intersection1};
+      if (intersections == 2)
+         return new Point2d[] {intersection1, intersection2};
 
-      LineSegment2d[] intersectingEdges = getIntersectingEdges(ray);
-      if (intersectingEdges == null)
-         return null;
-
-      Point2d[] ret = new Point2d[intersectingEdges.length];
-
-      for (int i = 0; i < intersectingEdges.length; i++)
-      {
-         ret[i] = intersectingEdges[i].intersectionWith(ray);
-         if (ret[i] == null)
-            return new Point2d[] { this.getClosestVertexCopy(ray) };
-
-         //       if (ret[i] == null) throw new RuntimeException("Shouldn't be null! line2d = " + line2d + ", intersectingEdges[" + i + "] = " + intersectingEdges[i]);
-      }
-
-      if (hasExactlyTwoVertices() && ret.length == 2 && ret[0].equals(ret[1]))
-         ret = new Point2d[] { ret[0] };
-
-      return ret;
+      throw new RuntimeException("This should never happen for a convex polygon.");
    }
 
-   public LineSegment2d[] getIntersectingEdges(Line2d line2d)
+   public LineSegment2d[] getIntersectingEdges(Line2d line)
    {
       checkIfUpToDate();
+
+      LineSegment2d edge1 = new LineSegment2d();
+      LineSegment2d edge2 = new LineSegment2d();
+      int edges = getIntersectingEdges(line, edge1, edge2);
+
+      if (edges == 0)
+         return null;
+      if (edges == 1)
+         return new LineSegment2d[] {edge1};
+      if (edges == 2)
+         return new LineSegment2d[] {edge1, edge2};
+
+      throw new RuntimeException("This should never happen for a convex polygon.");
+   }
+
+   public int getIntersectingEdges(Line2d line2d, LineSegment2d edgeToPack1, LineSegment2d edgeToPack2)
+   {
+      checkIfUpToDate();
+
       if (!hasAtLeastTwoVertices())
       {
-         return null;
+         edgeToPack1.setToNaN();
+         edgeToPack2.setToNaN();
+         return 0;
       }
 
       else if (!hasAtLeastThreeVertices())
       {
-         LineSegment2d polygonAsSegment = new LineSegment2d(getVertex(0), getVertex(1));
-         LineSegment2d polygonAsSegmentReversed = new LineSegment2d(getVertex(1), getVertex(0));
-         if (polygonAsSegment.intersectionWith(line2d) != null)
+         tempSegment3.set(getVertex(0), getVertex(1));
+         if (tempSegment3.intersectionWith(line2d) != null)
          {
-            return new LineSegment2d[] { polygonAsSegment, polygonAsSegmentReversed };
+            edgeToPack1.set(getVertex(0), getVertex(1));
+            edgeToPack2.set(getVertex(1), getVertex(0));
+            return 2;
          }
          else
          {
-            return null;
+            edgeToPack1.setToNaN();
+            edgeToPack2.setToNaN();
+            return 0;
          }
       }
 
       // First find the indices of the two line of sight vertices:
-      Point2d lineStart = new Point2d();
-      line2d.getPoint(lineStart);
-      Vector2d lineDirection = new Vector2d();
-      line2d.getNormalizedVector(lineDirection);
+      line2d.getPoint(tempPoint); // line start
+      line2d.getNormalizedVector(tempVector1); // line direction
 
-      int[] lineOfSightVertices = getLineOfSightVerticesIndicesCopy(lineStart);
-      int leftLineOfSightVertex, rightLineOfSightVertex;
+      boolean foundLineOfSightVertices = getLineOfSightVerticesIndices(tempPoint, tempTwoIndices);
+      int leftLineOfSightVertex = tempTwoIndices[0];
+      int rightLineOfSightVertex = tempTwoIndices[1];
 
-      if (lineOfSightVertices == null) // Means the line starts inside the Polygon! Only worry about the leaving vertices and not the entering vertices!
+      if (!foundLineOfSightVertices) // Means the line starts inside the Polygon! Only worry about the leaving vertices and not the entering vertices!
       {
-         int[] leavingEdgeVertices = getFirstCrossedEdgeFromInsideLineIndices(lineStart, lineDirection);
-         int firstLeavingVertex = leavingEdgeVertices[0];
-         int secondLeavingVertex = leavingEdgeVertices[1];
+         getFirstCrossedEdgeFromInsideLineIndices(tempPoint, tempVector1, tempTwoIndices);
+         int firstLeavingVertex = tempTwoIndices[0];
+         int secondLeavingVertex = tempTwoIndices[1];
 
          if (getNextVertexIndex(firstLeavingVertex) != secondLeavingVertex)
          {
             throw new RuntimeException("!areAdjacentInClockwiseOrder");
          }
 
-         LineSegment2d leavingEdge = new LineSegment2d(getVertex(firstLeavingVertex), getVertex(secondLeavingVertex));
-
-         return new LineSegment2d[] { leavingEdge };
+         edgeToPack1.set(getVertex(firstLeavingVertex), getVertex(secondLeavingVertex));
+         edgeToPack2.setToNaN();
+         return 1;
 
       }
 
-      leftLineOfSightVertex = lineOfSightVertices[0];
-      rightLineOfSightVertex = lineOfSightVertices[1];
-
       // Check if line is between the vertices or not:
-      if (!isLineStrictlyBetweenVertices(lineStart, lineDirection, leftLineOfSightVertex, rightLineOfSightVertex))
-         return null;
+      if (!isLineStrictlyBetweenVertices(tempPoint, tempVector1, leftLineOfSightVertex, rightLineOfSightVertex))
+      {
+         edgeToPack1.setToNaN();
+         edgeToPack2.setToNaN();
+         return 0;
+      }
 
       // Now binary search between them to find the entering edge.
       int leftEnteringVertex = leftLineOfSightVertex;
@@ -1953,11 +2020,11 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       {
          int testVertex = getMidEdgeOppositeClockwiseOrdering(leftEnteringVertex, rightEnteringVertex);
 
-         if (isLineStrictlyBetweenVertices(lineStart, lineDirection, testVertex, rightEnteringVertex))
+         if (isLineStrictlyBetweenVertices(tempPoint, tempVector1, testVertex, rightEnteringVertex))
          {
             leftEnteringVertex = testVertex;
          }
-         else if (isLineStrictlyBetweenVertices(lineStart, lineDirection, leftEnteringVertex, testVertex))
+         else if (isLineStrictlyBetweenVertices(tempPoint, tempVector1, leftEnteringVertex, testVertex))
          {
             rightEnteringVertex = testVertex;
          }
@@ -1966,9 +2033,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
             // Hit vertex right on!
             rightEnteringVertex = testVertex;
             leftEnteringVertex = (testVertex + 1) % numberOfVertices;
-
-            // throw new RuntimeException("Should never get here!!");
-
          }
       }
 
@@ -1980,11 +2044,11 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       {
          int testVertex = getMidEdgeOppositeClockwiseOrdering(rightLeavingVertex, leftLeavingVertex);
 
-         if (isLineStrictlyBetweenVertices(lineStart, lineDirection, testVertex, rightLeavingVertex))
+         if (isLineStrictlyBetweenVertices(tempPoint, tempVector1, testVertex, rightLeavingVertex))
          {
             leftLeavingVertex = testVertex;
          }
-         else if (isLineStrictlyBetweenVertices(lineStart, lineDirection, leftLeavingVertex, testVertex))
+         else if (isLineStrictlyBetweenVertices(tempPoint, tempVector1, leftLeavingVertex, testVertex))
          {
             rightLeavingVertex = testVertex;
          }
@@ -1993,18 +2057,13 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
             // Hit vertex right on!
             leftLeavingVertex = testVertex;
             rightLeavingVertex = (testVertex + 1) % numberOfVertices;
-
-            //          throw new RuntimeException("Should never get here!!");
          }
       }
 
       // Now we have adjacent vertices. Return the first ones to signify the edges:
-
-      LineSegment2d enteringEdge = new LineSegment2d(getVertex(rightEnteringVertex), getVertex(leftEnteringVertex));
-      LineSegment2d leavingEdge = new LineSegment2d(getVertex(leftLeavingVertex), getVertex(rightLeavingVertex));
-
-      return new LineSegment2d[] { enteringEdge, leavingEdge };
-
+      edgeToPack1.set(getVertex(rightEnteringVertex), getVertex(leftEnteringVertex));
+      edgeToPack2.set(getVertex(leftLeavingVertex), getVertex(rightLeavingVertex));
+      return 2;
    }
 
    private boolean isLineStrictlyBetweenVertices(Point2d lineStart, Vector2d lineDirection, int leftIndex, int rightIndex)
