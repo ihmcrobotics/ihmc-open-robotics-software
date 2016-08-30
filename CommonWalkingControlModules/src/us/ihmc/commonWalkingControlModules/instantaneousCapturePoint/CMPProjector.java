@@ -10,6 +10,8 @@ public abstract class CMPProjector
 
    public abstract boolean getWasCMPProjected();
 
-   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint,
-         FramePoint2d desiredCMP, FramePoint2d perfectCMP) {}
+   public void projectCMPIntoSupportPolygonUsingFinalDesired(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon,
+         FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
+   {
+   }
 }
