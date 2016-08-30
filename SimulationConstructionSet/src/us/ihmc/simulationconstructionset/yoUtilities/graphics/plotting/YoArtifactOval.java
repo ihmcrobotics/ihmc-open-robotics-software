@@ -44,11 +44,10 @@ public class YoArtifactOval extends YoArtifact
             center.getYoX(), center.getYoY(), radii.getYoX(), radii.getYoY());
       this.center = center;
       this.radii = radii;
-      this.color = color;
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
    {
       graphics.setColor(color);
       graphics.drawOval(centerX, centerY, LEGEND_DIAMETER, LEGEND_DIAMETER);

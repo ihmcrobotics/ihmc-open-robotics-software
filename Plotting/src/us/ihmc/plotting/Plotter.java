@@ -40,12 +40,8 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO Deprecate archaic methods
  * TODO Factor out artifacts.
  * TODO Fix Artifact interface to use meters.
- * TODO Show labels at sides
  * TODO Kill Pose and Coordinate
- * TODO Rewrite PlotterGraphics
  * TODO ALT rotation
- * TODO LineSegments unified
- * TODO Lines unified
  * TODO Fix color field in Artifact
  * TODO Implement remote artifact in line2d
  */
@@ -284,8 +280,23 @@ public class Plotter
                graphics2d.setColor(PlotterColors.LABEL_COLOR);
                drawGuy.changeFrame(metersFrame);
                String labelString = FormattingTools.getFormattedToSignificantFigures(drawGuy.getX(), 2);
+               drawGuy.changeFrame(pixelsFrame);
+               origin.changeFrame(pixelsFrame);
+               if (origin.getY() > upperLeftCorner.getY() - 14)
+               {
+                  drawGuy.setY(upperLeftCorner.getY() - 14);
+               }
+               else if (origin.getY() < lowerRightCorner.getY())
+               {
+                  drawGuy.setY(lowerRightCorner.getY() + 6);
+               }
+               else
+               {
+                  drawGuy.setY(origin.getY() + 1);
+               }
+               origin.changeFrame(metersFrame);
                drawGuy.changeFrame(screenFrame);
-               graphics2d.drawString(labelString, (int) Math.round(drawGuy.getX()) + 1, (int) Math.round(origin.getY()) - 1);
+               graphics2d.drawString(labelString, (int) Math.round(drawGuy.getX()) + 1, (int) Math.round(drawGuy.getY()));
                graphics2d.setColor(tempColor);
             }
          }
@@ -310,8 +321,23 @@ public class Plotter
                graphics2d.setColor(PlotterColors.LABEL_COLOR);
                drawGuy.changeFrame(metersFrame);
                String labelString = FormattingTools.getFormattedToSignificantFigures(drawGuy.getY(), 2);
+               drawGuy.changeFrame(pixelsFrame);
+               origin.changeFrame(pixelsFrame);
+               if (origin.getX() > lowerRightCorner.getX() - 30)
+               {
+                  drawGuy.setX(lowerRightCorner.getX() - 30);
+               }
+               else if (origin.getX() < upperLeftCorner.getX())
+               {
+                  drawGuy.setX(upperLeftCorner.getX() + 6);
+               }
+               else
+               {
+                  drawGuy.setX(origin.getX() + 1);
+               }
+               origin.changeFrame(metersFrame);
                drawGuy.changeFrame(screenFrame);
-               graphics2d.drawString(labelString, (int) Math.round(origin.getX()) + 1, (int) Math.round(drawGuy.getY()) - 1);
+               graphics2d.drawString(labelString, (int) Math.round(drawGuy.getX()), (int) Math.round(drawGuy.getY()) - 1);
                graphics2d.setColor(tempColor);
             }
          }
@@ -331,7 +357,7 @@ public class Plotter
             {
                if (showHistory && artifact.getDrawHistory())
                {
-                  artifact.drawHistory(graphics2d, (int) Math.round(origin.getX()), (int) Math.round(origin.getY()), metersToPixels.getX());
+                  artifact.drawHistory(graphics2d);
                }
             }
          });

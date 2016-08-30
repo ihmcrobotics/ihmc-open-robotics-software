@@ -19,7 +19,6 @@ public class YoArtifactLineSegment2d extends YoArtifact
    private static final BasicStroke STROKE = new BasicStroke(2);
 
    private final YoFrameLineSegment2d lineSegment;
-   private final Color color;
    
    private final Point2d tempFirstEndpoint = new Point2d();
    private final LineSegment2d tempLineSegment = new LineSegment2d();
@@ -53,7 +52,6 @@ public class YoArtifactLineSegment2d extends YoArtifact
       super(name, new double[0], color,
             lineSegment.getYoFirstEndpointX(), lineSegment.getYoFirstEndpointY(), lineSegment.getYoSecondEndpointX(), lineSegment.getYoSecondEndpointY());
       this.lineSegment = lineSegment;
-      this.color = color;
       this.drawArrow = true;
       instatiateArrowObjects(arrowHeadWidth, arrowHeadHeight);
    }
@@ -63,7 +61,6 @@ public class YoArtifactLineSegment2d extends YoArtifact
       super(name, new double[0], color,
             lineSegment.getYoFirstEndpointX(), lineSegment.getYoFirstEndpointY(), lineSegment.getYoSecondEndpointX(), lineSegment.getYoSecondEndpointY());
       this.lineSegment = lineSegment;
-      this.color = color;
       this.drawArrow = false;
    }
 
@@ -116,12 +113,12 @@ public class YoArtifactLineSegment2d extends YoArtifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
    {
       graphics.setColor(color);
       graphics.setStroke(STROKE);
 
-      graphics.drawLineSegment(-20 + Xcenter, -5 + Ycenter, 20 + Xcenter, 5 + Ycenter);
+      graphics.drawLineSegment(-20 + centerX, -5 + centerY, 20 + centerX, 5 + centerY);
    }
 
    @Override

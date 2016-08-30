@@ -25,6 +25,7 @@ public abstract class YoArtifact extends Artifact implements RemoteYoGraphic
       this.variableArray = variableArray;
       this.constants = constants;
       this.appearance = new YoAppearanceRGBColor(color, 0.0);
+      this.color = color;
    }
    
    public abstract void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry);
@@ -50,12 +51,18 @@ public abstract class YoArtifact extends Artifact implements RemoteYoGraphic
    }
    
    @Override
-   public final void draw(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public final void draw(Graphics2DAdapter graphics, int centerX, int centerY, double headingOffset, double scaleFactor)
    {
       if (isVisible)
       {
          draw(graphics);
       }
+   }
+   
+   @Override
+   public final String getName()
+   {
+      return getID();
    }
    
    @Override
@@ -76,7 +83,7 @@ public abstract class YoArtifact extends Artifact implements RemoteYoGraphic
    }
    
    @Override
-   public final void drawHistory(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public final void drawHistory(Graphics2DAdapter graphics)
    {
       synchronized (historicalData)
       {

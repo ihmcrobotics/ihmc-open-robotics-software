@@ -75,6 +75,173 @@ public class Graphics2DAdapter
    {
       return (int) Math.round(continuous);
    }
+   
+   @Deprecated
+   public void drawEmptyCircle(int x, int y, int radius, Color color)
+   {
+      setColor(color);
+      drawOval((x - (radius / 2)), (y - (radius / 2)), radius, radius);
+   }
+   
+   public void drawEmptyCircle(Point2d center, Vector2d radii)
+   {
+      drawOval(center, radii);
+   }
+
+   @Deprecated
+   public void drawFilledCircle(int x, int y, int radius, Color color)
+   {
+      setColor(color);
+      drawOvalFilled((x - (radius / 2)), (y - (radius / 2)), radius, radius);
+   }
+   
+   public void drawFilledCircle(Point2d center, Vector2d radii)
+   {
+      drawOvalFilled(center, radii);
+   }
+   
+   @Deprecated
+   public void drawCross(int x, int y, int radius, Color color)
+   {
+      setColor(color);
+      drawLineSegment((x - (radius / 2)), y, (x + (radius / 2)), y);
+      drawLineSegment(x, (y - (radius / 2)), x, (y + (radius / 2)));
+   }
+   
+   public void drawCross(Point2d center, Vector2d radii)
+   {
+      drawLineSegment(center.getX() - radii.getX(), center.getY(), center.getX() + radii.getX(), center.getY());
+      drawLineSegment(center.getX(), center.getY() - radii.getY(), center.getX(), center.getY() + radii.getY());
+   }
+
+   @Deprecated
+   public void drawCircleWithCross(int x, int y, int radius, Color color)
+   {
+      setColor(color);
+      drawOval((x - (radius / 2)), (y - (radius / 2)), radius, radius);
+      drawLineSegment((x - (radius / 2)), y, (x + (radius / 2)), y);
+      drawLineSegment(x, (y - (radius / 2)), x, (y + (radius / 2)));
+   }
+   
+   public void drawCircleWithCross(Point2d center, Vector2d radii)
+   {
+      drawOval(center, radii);
+      drawLineSegment(center.getX() - radii.getX(), center.getY(), center.getX() + radii.getX(), center.getY());
+      drawLineSegment(center.getX(), center.getY() - radii.getY(), center.getX(), center.getY() + radii.getY());
+   }
+
+   @Deprecated
+   public void drawRotatedCross(int x, int y, int radius, Color color)
+   {
+      setColor(color);
+      int distance = (int)Math.round(0.707 * radius / 2);
+      drawLineSegment((x - distance), (y - distance), (x + distance), (y + distance));
+      drawLineSegment((x - distance), (y + distance), (x + distance), (y - distance));
+   }
+
+   public void drawRotatedCross(Point2d center, Vector2d radii)
+   {
+      double distanceX = 0.707 * radii.getX();
+      double distanceY = 0.707 * radii.getY();
+      drawLineSegment(center.getX() - distanceX, center.getY() - distanceY, center.getX() + distanceX, center.getY() + distanceY);
+      drawLineSegment(center.getX() - distanceX, center.getY() + distanceY, center.getX() + distanceX, center.getY() - distanceY);
+   }
+
+   @Deprecated
+   public void drawCircleWithRotatedCross(int x, int y, int radius, Color color)
+   {
+      setColor(color);
+      int distance = (int)Math.round(0.707 * radius / 2);
+      drawOval((x - radius / 2), (y - radius / 2), radius, radius);
+      drawLineSegment((x - distance), (y - distance), (x + distance), (y + distance));
+      drawLineSegment((x - distance), (y + distance), (x + distance), (y - distance));
+   }
+   
+   public void drawCircleWithRotatedCross(Point2d center, Vector2d radii)
+   {
+      double distanceX = 0.707 * radii.getX();
+      double distanceY = 0.707 * radii.getY();
+      drawOval(center, radii);
+      drawLineSegment(center.getX() - distanceX, center.getY() - distanceY, center.getX() + distanceX, center.getY() + distanceY);
+      drawLineSegment(center.getX() - distanceX, center.getY() + distanceY, center.getX() + distanceX, center.getY() - distanceY);
+   }
+
+   @Deprecated
+   public void drawDiamond(int x, int y, int radius, Color color)
+   {
+      setColor(color);
+      drawLineSegment((x - (radius / 2)), y, x, (y + radius / 2));
+      drawLineSegment((x - (radius / 2)), y, x, (y - radius / 2));
+      drawLineSegment(x, (y + radius / 2), x + radius / 2, y);
+      drawLineSegment(x, (y - radius / 2), x + radius / 2, y);
+   }
+   
+   public void drawDiamond(Point2d center, Vector2d radii)
+   {
+      drawLineSegment(center.getX() - radii.getX(), center.getY(), center.getX(), center.getY() + radii.getY());
+      drawLineSegment(center.getX() - radii.getX(), center.getY(), center.getX(), center.getY() - radii.getY());
+      drawLineSegment(center.getX(), center.getY() + radii.getY(), center.getX() + radii.getX(), center.getY());
+      drawLineSegment(center.getX(), center.getY() - radii.getY(), center.getX() + radii.getX(), center.getY());
+   }
+
+   @Deprecated
+   public void drawDiamondWithCross(int x, int y, int radius, Color color)
+   {
+      setColor(color);
+      drawLineSegment((x - (radius / 2)), y, x, (y + radius / 2));
+      drawLineSegment((x - (radius / 2)), y, x, (y - radius / 2));
+      drawLineSegment(x, (y + radius / 2), x + radius / 2, y);
+      drawLineSegment(x, (y - radius / 2), x + radius / 2, y);
+      drawLineSegment((x - (radius / 2)), y, (x + (radius / 2)), y);
+      drawLineSegment(x, (y - (radius / 2)), x, (y + (radius / 2)));
+   }
+   
+   public void drawDiamondWithCross(Point2d center, Vector2d radii)
+   {
+      drawLineSegment(center.getX() - radii.getX(), center.getY(), center.getX(), center.getY() + radii.getY());
+      drawLineSegment(center.getX() - radii.getX(), center.getY(), center.getX(), center.getY() - radii.getY());
+      drawLineSegment(center.getX(), center.getY() + radii.getY(), center.getX() + radii.getX(), center.getY());
+      drawLineSegment(center.getX(), center.getY() - radii.getY(), center.getX() + radii.getX(), center.getY());
+      drawLineSegment(center.getX() - radii.getX(), center.getY(), center.getX() + radii.getX(), center.getY());
+      drawLineSegment(center.getX(), center.getY() - radii.getY(), center.getX(), center.getY() + radii.getY());
+   }
+
+   @Deprecated
+   public void drawSquare(int x, int y, int radius, Color color)
+   {
+      setColor(color);
+      drawLineSegment((x - (radius / 2)), (y - (radius / 2)), (x + (radius / 2)), (y - (radius / 2)));
+      drawLineSegment((x + (radius / 2)), (y - (radius / 2)), (x + (radius / 2)), (y + (radius / 2)));
+      drawLineSegment((x - (radius / 2)), (y - (radius / 2)), (x - (radius / 2)), (y + (radius / 2)));
+      drawLineSegment((x - (radius / 2)), (y + (radius / 2)), (x + (radius / 2)), (y + (radius / 2)));
+   }
+   
+   public void drawSquare(Point2d center, Vector2d radii)
+   {
+      drawLineSegment(center.getX() - radii.getX(), center.getY() - radii.getY(), center.getX() + radii.getX(), center.getY() - radii.getY());
+      drawLineSegment(center.getX() + radii.getX(), center.getY() - radii.getY(), center.getX() + radii.getX(), center.getY() + radii.getY());
+      drawLineSegment(center.getX() - radii.getX(), center.getY() - radii.getY(), center.getX() - radii.getX(), center.getY() + radii.getY());
+      drawLineSegment(center.getX() - radii.getX(), center.getY() + radii.getY(), center.getX() + radii.getX(), center.getY() + radii.getY());
+   }
+
+   @Deprecated
+   public void drawSquareWithCross(int x, int y, int radius, Color color)
+   {
+      setColor(color);
+      drawLineSegment((x - (radius / 2)), (y - (radius / 2)), (x + (radius / 2)), (y - (radius / 2)));
+      drawLineSegment((x + (radius / 2)), (y - (radius / 2)), (x + (radius / 2)), (y + (radius / 2)));
+      drawLineSegment((x - (radius / 2)), (y - (radius / 2)), (x - (radius / 2)), (y + (radius / 2)));
+      drawLineSegment((x - (radius / 2)), (y + (radius / 2)), (x + (radius / 2)), (y + (radius / 2)));
+      drawLineSegment((x - (radius / 2)), y, (x + (radius / 2)), y);
+      drawLineSegment(x, (y - (radius / 2)), x, (y + (radius / 2)));
+   }
+   
+   public void drawSquareWithCross(Point2d center, Vector2d radii)
+   {
+      drawSquare(center, radii);
+      drawLineSegment(center.getX() - radii.getX(), center.getY(), center.getX() + radii.getX(), center.getY());
+      drawLineSegment(center.getX(), center.getY() - radii.getY(), center.getX(), center.getY() + radii.getY());
+   }
 
    @Deprecated
    public void drawLineSegment(int x1, int y1, int x2, int y2)

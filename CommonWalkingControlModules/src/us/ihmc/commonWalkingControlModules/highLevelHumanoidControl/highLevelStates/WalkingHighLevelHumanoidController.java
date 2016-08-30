@@ -230,9 +230,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       // Encapsulate toStandingTransition to make sure it is not used afterwards
       {
-         DoneWithFinishableStateTransitionCondition toStandingDoneCondition = new DoneWithFinishableStateTransitionCondition(toStandingState);
-         StateTransition<WalkingStateEnum> toStandingTransition = new StateTransition<>(WalkingStateEnum.STANDING, toStandingDoneCondition);
-         toStandingState.addStateTransition(toStandingTransition);
+         toStandingState.addDoneWithStateTransition(WalkingStateEnum.STANDING);
       }
 
       // Setup start/stop walking conditions
@@ -267,9 +265,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          SingleSupportState singleSupportState = walkingSingleSupportStates.get(robotSide);
          WalkingStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
-         DoneWithFinishableStateTransitionCondition doneWithTransferCondition = new DoneWithFinishableStateTransitionCondition(transferState);
-         StateTransition<WalkingStateEnum> toSingleSupport = new StateTransition<WalkingStateEnum>(singleSupportStateEnum, doneWithTransferCondition);
-         transferState.addStateTransition(toSingleSupport);
+         transferState.addDoneWithStateTransition(singleSupportStateEnum);
       }
 
       // Setup walking single support to transfer conditions
@@ -326,9 +322,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
          WalkingStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
-         DoneWithFinishableStateTransitionCondition doneWithTransferCondition = new DoneWithFinishableStateTransitionCondition(transferState);
-         StateTransition<WalkingStateEnum> toSingleSupport = new StateTransition<WalkingStateEnum>(singleSupportStateEnum, doneWithTransferCondition);
-         transferState.addStateTransition(toSingleSupport);
+         transferState.addDoneWithStateTransition(singleSupportStateEnum);
       }
 
       // Setup the abort condition from all states to the toStandingState

@@ -6,7 +6,6 @@ import java.awt.Color;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.plotting.Drawing2DTools;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -41,12 +40,11 @@ public class YoArtifactPosition extends YoArtifact
       
       this.point = point;
       this.graphicType = type;
-      this.color = color;
       this.radii.set(radius, radius);
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
    {
       graphics.setColor(color);
       graphics.setStroke(STROKE);
@@ -54,40 +52,40 @@ public class YoArtifactPosition extends YoArtifact
       switch (graphicType)
       {
          case BALL :
-            Drawing2DTools.drawEmptyCircle(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawEmptyCircle(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case SOLID_BALL :
-            Drawing2DTools.drawFilledCircle(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawFilledCircle(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case CROSS :
-            Drawing2DTools.drawCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawCross(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case BALL_WITH_CROSS :
-            Drawing2DTools.drawCircleWithCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawCircleWithCross(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case ROTATED_CROSS :
-            Drawing2DTools.drawRotatedCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawRotatedCross(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case BALL_WITH_ROTATED_CROSS :
-            Drawing2DTools.drawCircleWithRotatedCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawCircleWithRotatedCross(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case DIAMOND :
-            Drawing2DTools.drawDiamond(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawDiamond(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case DIAMOND_WITH_CROSS :
-            Drawing2DTools.drawDiamondWithCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawDiamondWithCross(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case SQUARE :
-            Drawing2DTools.drawSquare(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawSquare(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case SQUARE_WITH_CROSS :
-            Drawing2DTools.drawSquareWithCross(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawSquareWithCross(centerX, centerY, LEGEND_RADIUS, color);
             break;
          case ELLIPSOID :
             double radius = radii.getX();
             radii.setX(radii.getX() * 1.2);
             radii.setY(radii.getY() * 0.8);
-            Drawing2DTools.drawEmptyCircle(graphics, Xcenter, Ycenter, LEGEND_RADIUS, color);
+            graphics.drawEmptyCircle(centerX, centerY, LEGEND_RADIUS, color);
             radii.set(radius, radius);
             break;
       }
@@ -115,40 +113,40 @@ public class YoArtifactPosition extends YoArtifact
       switch (graphicType)
       {
          case BALL :
-            Drawing2DTools.drawEmptyCircle(graphics, tempPoint, radii);
+            graphics.drawEmptyCircle(tempPoint, radii);
             break;
          case SOLID_BALL :
-            Drawing2DTools.drawFilledCircle(graphics, tempPoint, radii);
+            graphics.drawFilledCircle(tempPoint, radii);
             break;
          case CROSS :
-            Drawing2DTools.drawCross(graphics, tempPoint, radii);
+            graphics.drawCross(tempPoint, radii);
             break;
          case BALL_WITH_CROSS :
-            Drawing2DTools.drawCircleWithCross(graphics, tempPoint, radii);
+            graphics.drawCircleWithCross(tempPoint, radii);
             break;
          case ROTATED_CROSS :
-            Drawing2DTools.drawRotatedCross(graphics, tempPoint, radii);
+            graphics.drawRotatedCross(tempPoint, radii);
             break;
          case BALL_WITH_ROTATED_CROSS :
-            Drawing2DTools.drawCircleWithRotatedCross(graphics, tempPoint, radii);
+            graphics.drawCircleWithRotatedCross(tempPoint, radii);
             break;
          case DIAMOND :
-            Drawing2DTools.drawDiamond(graphics, tempPoint, radii);
+            graphics.drawDiamond(tempPoint, radii);
             break;
          case DIAMOND_WITH_CROSS :
-            Drawing2DTools.drawDiamondWithCross(graphics, tempPoint, radii);
+            graphics.drawDiamondWithCross(tempPoint, radii);
             break;
          case SQUARE :
-            Drawing2DTools.drawSquare(graphics, tempPoint, radii);
+            graphics.drawSquare(tempPoint, radii);
             break;
          case SQUARE_WITH_CROSS :
-            Drawing2DTools.drawSquareWithCross(graphics, tempPoint, radii);
+            graphics.drawSquareWithCross(tempPoint, radii);
             break;
          case ELLIPSOID :
             double radius = radii.getX();
             radii.setX(radii.getX() * 1.2);
             radii.setY(radii.getY() * 0.8);
-            Drawing2DTools.drawEmptyCircle(graphics, tempPoint, radii);
+            graphics.drawEmptyCircle(tempPoint, radii);
             radii.set(radius, radius);
             break;
       }

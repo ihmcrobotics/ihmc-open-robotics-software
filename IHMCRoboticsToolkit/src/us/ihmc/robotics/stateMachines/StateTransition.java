@@ -5,9 +5,7 @@ import java.util.List;
 
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-
-
-public class StateTransition <E extends Enum<E>>
+public class StateTransition<E extends Enum<E>>
 {
    private final E nextStateEnum;
    private final ArrayList<StateTransitionCondition> stateTransitionConditions = new ArrayList<StateTransitionCondition>();
@@ -16,6 +14,9 @@ public class StateTransition <E extends Enum<E>>
 
    public StateTransition(E nextStateEnum, DoubleYoVariable timePassedYoVariable, StateTransitionCondition condition, StateTransitionAction action)
    {
+      if (nextStateEnum == null)
+         throw new RuntimeException("Cannot create StateTransition with null nextStateEnum!");
+
       this.nextStateEnum = nextStateEnum;
       if (condition != null)
          this.stateTransitionConditions.add(condition);
@@ -109,7 +110,7 @@ public class StateTransition <E extends Enum<E>>
 
    final void doAction()
    {
-      for(int i = 0; i < actions.size(); i++)
+      for (int i = 0; i < actions.size(); i++)
       {
          actions.get(i).doTransitionAction();
       }
