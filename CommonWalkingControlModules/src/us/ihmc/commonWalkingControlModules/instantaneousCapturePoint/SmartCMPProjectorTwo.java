@@ -56,6 +56,8 @@ public class SmartCMPProjectorTwo extends CMPProjector
    }
 
    private final BoundingBox2d tempBoundingBox = new BoundingBox2d();
+   private final FramePoint2d intersection1 = new FramePoint2d();
+   private final FramePoint2d intersection2 = new FramePoint2d();
 
    private void projectCMPIntoSupportPolygonIfOutsideLocal(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon,
          FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
@@ -77,14 +79,18 @@ public class SmartCMPProjectorTwo extends CMPProjector
          return;
 
       icpToCMPLine.setIncludingFrame(capturePoint, desiredCMP);
-      FramePoint2d[] icpToCMPIntersections = supportPolygon.intersectionWithRay(icpToCMPLine);
+      int intersections = supportPolygon.intersectionWithRay(icpToCMPLine, intersection1, intersection2);
 
-      if ((icpToCMPIntersections != null) && (icpToCMPIntersections.length > 0))
+      if (intersections == 1)
       {
          cmpProjectedAlongRay.set(true);
-
-         FramePoint2d closestIntersection = findClosestIntersection(icpToCMPIntersections, desiredCMP);
-         desiredCMP.set(closestIntersection);
+         desiredCMP.set(intersection1);
+         return;
+      }
+      else if (intersections == 2)
+      {
+         cmpProjectedAlongRay.set(true);
+         desiredCMP.set(findClosestIntersection(desiredCMP, intersection1, intersection2));
          return;
       }
 
@@ -102,7 +108,7 @@ public class SmartCMPProjectorTwo extends CMPProjector
          if (finalDesiredICPToICPIntersections != null && finalDesiredICPToICPIntersections.length > 1)
          {
             cmpProjectedToPushTowardFinalDesiredICP.set(true);
-            FramePoint2d closestIntersection = findClosestIntersection(finalDesiredICPToICPIntersections, capturePoint);
+            FramePoint2d closestIntersection = findClosestIntersection(capturePoint, finalDesiredICPToICPIntersections);
             desiredCMP.set(closestIntersection);
             return;
          }
@@ -117,7 +123,7 @@ public class SmartCMPProjectorTwo extends CMPProjector
       supportPolygon.orthogonalProjection(desiredCMP);
    }
 
-   private FramePoint2d findClosestIntersection(FramePoint2d[] potentialIntersections, FramePoint2d closestToPoint)
+   private FramePoint2d findClosestIntersection(FramePoint2d closestToPoint, FramePoint2d... potentialIntersections)
    {
       FramePoint2d closestIntersection = null;
       double closestDistanceSquared = Double.POSITIVE_INFINITY;
