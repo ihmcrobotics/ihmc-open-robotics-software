@@ -357,7 +357,7 @@ public class Plotter
             {
                if (showHistory && artifact.getDrawHistory())
                {
-                  artifact.drawHistory(graphics2d, (int) Math.round(origin.getX()), (int) Math.round(origin.getY()), metersToPixels.getX());
+                  artifact.drawHistory(graphics2d);
                }
             }
          });

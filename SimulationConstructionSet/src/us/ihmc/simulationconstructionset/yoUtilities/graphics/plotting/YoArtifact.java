@@ -83,7 +83,7 @@ public abstract class YoArtifact extends Artifact implements RemoteYoGraphic
    }
    
    @Override
-   public final void drawHistory(Graphics2DAdapter graphics, int centerX, int centerY, double scaleFactor)
+   public final void drawHistory(Graphics2DAdapter graphics)
    {
       synchronized (historicalData)
       {
