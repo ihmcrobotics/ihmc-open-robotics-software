@@ -28,7 +28,10 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
    public GenericStateMachine(String stateYoVariableName, String switchTimeName, Class<E> enumType, DoubleProvider timeProvider, YoVariableRegistry registry)
    {
       stateYoVariable = new EnumYoVariable<E>(stateYoVariableName, "State machine variable to keep track of the state.", registry, enumType, true);
-      stateYoVariable.set(null);
+
+      // We should initialize the state to null and force the user to call setCurrentState?
+      // Or not, since we don't want to have to call the doTransitionIntoAction() sometimes at the beginning?
+//    stateYoVariable.set(null);
 
       switchTimeYoVariable = new DoubleYoVariable(switchTimeName, registry);
       this.time = timeProvider;
@@ -131,7 +134,18 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
 
    public T getCurrentState()
    {
-      if (stateYoVariable.getEnumValue() == cachedCurrentState.getStateEnum())
+      E stateEnum = stateYoVariable.getEnumValue();
+
+//      // Hack for now to be backward compatible. Lots of people set up the state machine but don't set the initial state. Rather they assume that they start in the first state.
+//      // Instead they should call setCurrentState(); to initialize.
+//
+//      if (stateEnum == null)
+//      {
+//         setCurrentState(states.get(0).getStateEnum());
+//         stateEnum = stateYoVariable.getEnumValue();
+//      }
+
+      if (stateEnum == cachedCurrentState.getStateEnum())
          return cachedCurrentState;
 
       for (T state : states)
