@@ -49,7 +49,7 @@ public class StateMachineExampleTwoTest
       final BooleanYoVariable threeToOneTransitionAction = new BooleanYoVariable("threeToOneTransitionAction", registry);
 
       SettableDoubleProvider timeProvider = new SettableDoubleProvider();
-      StateMachine<StateEnum> stateMachine = new StateMachine<StateEnum>("complexStateMachine", "switchTime", StateEnum.class, timeProvider, registry);
+      StateMachine<StateEnum> stateMachine = new StateMachine<StateEnum>("complexStateMachine", "switchTime", StateEnum.class, StateEnum.FOUR, timeProvider, registry);
 
       ExampleState stateOne = new ExampleState(StateEnum.ONE, inStateOne, didTransitionIntoStateOne, didTransitionOutOfStateOne, ticksInStateOne);
       ExampleState stateTwo = new ExampleState(StateEnum.TWO, inStateTwo, didTransitionIntoStateTwo, didTransitionOutOfStateTwo, ticksInStateTwo);
@@ -86,26 +86,26 @@ public class StateMachineExampleTwoTest
       stateMachine.addState(stateThree);
       stateMachine.addState(stateFour);
 
-      assertNull(stateMachine.getCurrentState());
-      assertNull(stateMachine.getCurrentStateEnum());
+      assertEquals(stateFour, stateMachine.getCurrentState());
+      assertEquals(StateEnum.FOUR, stateMachine.getCurrentStateEnum());
 
-      // Use the below later when we want to force users to call stateMachine.setCurrentState() at the beginning...
-//      try
-//      {
-//         stateMachine.doAction();
-//         fail("Should not call doAction() before the state is set!");
-//      }
-//      catch (RuntimeException e)
-//      {
-//      }
 
       assertNull(stateOne.getPreviousState());
       assertFalse(inStateOne.getBooleanValue());
       assertFalse(didTransitionIntoStateOne.getBooleanValue());
       assertFalse(didTransitionOutOfStateOne.getBooleanValue());
       assertEquals(0, ticksInStateOne.getIntegerValue());
+
+      assertNull(stateFour.getPreviousState());
+      assertFalse(inStateFour.getBooleanValue());
+      assertFalse(didTransitionIntoStateFour.getBooleanValue());
+      assertFalse(didTransitionOutOfStateFour.getBooleanValue());
+      assertEquals(0, ticksInStateFour.getIntegerValue());
+
       stateMachine.setCurrentState(StateEnum.ONE);
       assertTrue(inStateOne.getBooleanValue());
+      assertEquals(stateOne, stateMachine.getCurrentState());
+      assertEquals(StateEnum.ONE, stateMachine.getCurrentStateEnum());
       assertTrue(didTransitionIntoStateOne.getBooleanValue());
       assertFalse(didTransitionOutOfStateOne.getBooleanValue());
       assertEquals(0, ticksInStateOne.getIntegerValue()); //setCurrentState should do the transitionInto, but not the doAction().
@@ -251,6 +251,8 @@ public class StateMachineExampleTwoTest
       assertEquals("TWO: (THREE)", stateTwo.toString());
       assertEquals("THREE: (FOUR, ONE, THREE)", stateThree.toString());
       assertEquals("FOUR: (THREE)", stateFour.toString());
+
+      assertEquals("State Machine:\nONE: (FOUR)\nTWO: (THREE)\nTHREE: (FOUR, ONE, THREE)\nFOUR: (THREE)\n", stateMachine.toString());
    }
 
    private class ExampleStateTransitionCondition implements StateTransitionCondition

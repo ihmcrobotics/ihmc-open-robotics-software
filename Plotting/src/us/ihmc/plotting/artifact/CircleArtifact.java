@@ -55,10 +55,10 @@ public class CircleArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int centerX, int centerY, double headingOffset, double scaleFactor)
    {
-      int x = Xcenter + ((int)Math.round(this.x * scaleFactor));
-      int y = Ycenter - ((int)Math.round(this.y * scaleFactor));
+      int x = centerX + ((int)Math.round(this.x * scaleFactor));
+      int y = centerY - ((int)Math.round(this.y * scaleFactor));
 
       graphics2d.setColor(color);
       int d = (int) ((this.diameter * scaleFactor));
@@ -73,20 +73,17 @@ public class CircleArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
    {
-      int x = Xcenter;
-      int y = Ycenter;
-
-      graphics2d.setColor(color);
-      int d = (int) ((this.diameter * scaleFactor));
+      graphics.setColor(color);
+      int diameter = 40;
       if (fill)
       {
-         graphics2d.drawOvalFilled((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics.drawOvalFilled((centerX - (diameter / 2)), (centerY - (diameter / 2)), diameter, diameter);
       }
       else
       {
-         graphics2d.drawOval((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics.drawOval((centerX - (diameter / 2)), (centerY - (diameter / 2)), diameter, diameter);
       }
    }
 
@@ -129,7 +126,7 @@ public class CircleArtifact extends Artifact
    }
    
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics)
    {
       throw new RuntimeException("Not implemented!");
    }

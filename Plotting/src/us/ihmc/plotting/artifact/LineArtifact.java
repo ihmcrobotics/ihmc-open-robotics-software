@@ -62,14 +62,14 @@ public class LineArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics2d, int centerX, int centerY, double headingOffset, double scaleFactor)
    {
       if (isVisible)
       {
-         int x1 = Xcenter + ((int) Math.round(point1.getX() * scaleFactor));
-         int y1 = Ycenter - ((int) Math.round(point1.getY() * scaleFactor));
-         int x2 = Xcenter + ((int) Math.round(point2.getX() * scaleFactor));
-         int y2 = Ycenter - ((int) Math.round(point2.getY() * scaleFactor));
+         int x1 = centerX + ((int) Math.round(point1.getX() * scaleFactor));
+         int y1 = centerY - ((int) Math.round(point1.getY() * scaleFactor));
+         int x2 = centerX + ((int) Math.round(point2.getX() * scaleFactor));
+         int y2 = centerY - ((int) Math.round(point2.getY() * scaleFactor));
          graphics2d.setColor(color);
          Stroke currentStroke = graphics2d.getStroke();
          graphics2d.setStroke(new BasicStroke(lineThickness));
@@ -79,12 +79,12 @@ public class LineArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
    {
    }
 
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics)
    {
       throw new RuntimeException("Not implemented!");
    }

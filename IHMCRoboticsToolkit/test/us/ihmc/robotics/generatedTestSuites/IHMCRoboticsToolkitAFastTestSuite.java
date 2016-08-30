@@ -235,6 +235,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.stateMachines.StateMachineExampleTwoTest.class,
    us.ihmc.robotics.stateMachines.StateMachineTest.class,
    us.ihmc.robotics.stateMachines.SimpleStateTest.class,
+   us.ihmc.robotics.stateMachines.FinishableStateTest.class,
    us.ihmc.robotics.statistics.CovarianceDerivationTest.class,
    us.ihmc.robotics.statistics.OnePassMeanAndStandardDeviationTest.class,
    us.ihmc.robotics.statistics.PermutationTest.class,

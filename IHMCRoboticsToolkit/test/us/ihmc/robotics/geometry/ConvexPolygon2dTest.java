@@ -18,6 +18,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ConvexPolygon2dTest
@@ -216,15 +217,15 @@ public class ConvexPolygon2dTest
             {-10.0, -10.0}
       };
       ConvexPolygon2d doubles = new ConvexPolygon2d(verticesArray);
-      
+
       for(int i = 0; i < 10; i++)
       {
          int x = random.nextInt(10);
          int y = random.nextInt(10);
          assertTrue(doubles.isPointInside(x, y));
-      } 
+      }
    }
-   
+
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIntersectionWith()
@@ -253,7 +254,7 @@ public class ConvexPolygon2dTest
             {15.0, -10.0},
             {15.0, 10.0}
       };
-      
+
       ConvexPolygon2d polygon1 = new ConvexPolygon2d(verticesArray1);
       ConvexPolygon2d polygon2 = new ConvexPolygon2d(verticesArray2);
       ConvexPolygon2d polygon3 = new ConvexPolygon2d(verticesArray3);
@@ -471,7 +472,7 @@ public class ConvexPolygon2dTest
        test.distance(new Point2d());
     }
 
-   
+
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPerimeterSquare()
@@ -1074,7 +1075,7 @@ public class ConvexPolygon2dTest
          waitForButtonOrPause(testFrame);
       }
    }
-   
+
    @DeployableTestMethod(estimatedDuration = 0.9)
    @Test(timeout = 30000)
    public void testPolygonShrinkInto()
@@ -1782,7 +1783,7 @@ public class ConvexPolygon2dTest
       }
    }
 
-   
+
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -1991,67 +1992,67 @@ public class ConvexPolygon2dTest
    public void testGetDistanceInside()
    {
       double[][] vertices = new double[][]{{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}};
-      
+
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertices);
-      
+
       Point2d point = new Point2d(0.0, 0.0);
       assertEquals(0.0, convexPolygon.getDistanceInside(point), 1e-7);
-      
+
       point = new Point2d(0.5, 0.8);
       assertEquals(0.2, convexPolygon.getDistanceInside(point), 1e-7);
-      
+
       point = new Point2d(0.5, 1.2);
       assertEquals(-0.2, convexPolygon.getDistanceInside(point), 1e-7);
-      
+
       point = new Point2d(0.5, 0.5);
       assertEquals(0.5, convexPolygon.getDistanceInside(point), 1e-7);
-      
-      // Note: This 1.0 isn't the true distance outside. It's the distance to 
+
+      // Note: This 1.0 isn't the true distance outside. It's the distance to
       // a projected edge. The distance is only exact when the point is inside.
       point = new Point2d(2.0, 2.0);
       assertEquals(-1.0, convexPolygon.getDistanceInside(point), 1e-7);
 
       vertices = new double[][]{{0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}};
-      
+
       convexPolygon = new ConvexPolygon2d(vertices);
-      
+
       point = new Point2d(0.0, 0.0);
       assertEquals(-0.70710678118, convexPolygon.getDistanceInside(point), 1e-7);
-      
+
       point = new Point2d(0.5, 0.5);
       assertEquals(0.0, convexPolygon.getDistanceInside(point), 1e-7);
-      
+
       point = new Point2d(0.6, 0.6);
       assertEquals(0.141421356, convexPolygon.getDistanceInside(point), 1e-7);
-      
+
       vertices = new double[][]{{0.0, 1.0}, {1.0, 0.0}};
-      
+
       convexPolygon = new ConvexPolygon2d(vertices);
-      
+
       point = new Point2d(0.0, 0.0);
       assertEquals(-0.70710678118, convexPolygon.getDistanceInside(point), 1e-7);
-      
+
       point = new Point2d(0.5, 0.5);
       assertEquals(0.0, convexPolygon.getDistanceInside(point), 1e-7);
-      
+
       point = new Point2d(0.6, 0.6);
       assertEquals(-0.141421356, convexPolygon.getDistanceInside(point), 1e-7);
-      
+
       vertices = new double[][]{{0.0, 1.0}};
-      
+
       convexPolygon = new ConvexPolygon2d(vertices);
-      
+
       point = new Point2d(0.0, 0.0);
       assertEquals(-1.0, convexPolygon.getDistanceInside(point), 1e-7);
-      
+
       point = new Point2d(0.5, 0.5);
       assertEquals(-0.70710678118, convexPolygon.getDistanceInside(point), 1e-7);
-      
+
       point = new Point2d(0.6, 0.6);
       assertEquals(-0.721110255, convexPolygon.getDistanceInside(point), 1e-7);
    }
 
-   
+
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOrthogonalProjectionPointConvexPolygon2d()
@@ -2196,14 +2197,14 @@ public class ConvexPolygon2dTest
          assertTrue(ConvexPolygonTools.intersection(arbitraryLineSegment, polygonWithOnePoint) == null);
          assertTrue(ConvexPolygonTools.intersection(new LineSegment2d(pointThatDefinesThePolygon, arbitraryPoint0),
                polygonWithOnePoint)[0].equals(pointThatDefinesThePolygon));
-         
+
          ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
          ConvexPolygon2d shrunkenOnePointPolygon = new ConvexPolygon2d();
-         
+
          shrinker.shrinkConstantDistanceInto(polygonWithOnePoint, random.nextDouble(), shrunkenOnePointPolygon);
-         
+
          assertTrue(shrunkenOnePointPolygon.epsilonEquals(polygonWithOnePoint, 1e-7));
-         
+
          assertEquals(1, ConvexPolygonTools.shrinkInto(sparePolygon, arbitraryPoint0, polygonWithOnePoint).getNumberOfVertices());
          assertTrue(ConvexPolygonTools.shrinkInto(sparePolygon, arbitraryPoint0,
                polygonWithOnePoint).getVertex(0).equals(pointThatDefinesThePolygon));
@@ -2375,7 +2376,7 @@ public class ConvexPolygon2dTest
          assertTrue((leftPoint.getX() == polygonWithTwoPoints.getVertex(0).getX()) && (leftPoint.getY() == polygonWithTwoPoints.getVertex(0).getY()));
          assertTrue((rightPoint.getX() == polygonWithTwoPoints.getVertex(1).getX()) && (rightPoint.getY() == polygonWithTwoPoints.getVertex(1).getY()));
 
-         // maxXMaxYPointCopy, maxXMinYPointCopy, minXMaxYPointCopy, minXMinYPointCopy 
+         // maxXMaxYPointCopy, maxXMinYPointCopy, minXMaxYPointCopy, minXMinYPointCopy
          Point2d maxXPoint, minXPoint;
          if (pointThatDefinesThePolygon0.getX() > pointThatDefinesThePolygon1.getX())
          {
@@ -2498,19 +2499,19 @@ public class ConvexPolygon2dTest
 
          // shrinkConstantDistanceInto
          double shrinkDistance = random.nextDouble() * lineSegmentThatDefinesThePolygon.length() / 2.0;
-         
+
          ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker();
 
          ConvexPolygon2d shrunkenPolygon = new ConvexPolygon2d();
-         
+
          shrinker.shrinkConstantDistanceInto(polygonWithTwoPoints, shrinkDistance, shrunkenPolygon);
-         
+
          assertEquals(shrunkenPolygon.perimeter(), polygonWithTwoPoints.perimeter() - 4.0
                * shrinkDistance, epsilon);
          shrinkDistance = lineSegmentThatDefinesThePolygon.length() / 2.0 + random.nextDouble();
-         
+
          shrinker.shrinkConstantDistanceInto(polygonWithTwoPoints, shrinkDistance, shrunkenPolygon);
-         
+
          assertTrue(shrunkenPolygon.getNumberOfVertices() == 1);
          ConvexPolygon2d shrinkInto = ConvexPolygonTools.shrinkInto(sparePolygon, arbitraryPoint0, polygonWithTwoPoints);
          assertEquals(2, shrinkInto.getNumberOfVertices());
@@ -2590,5 +2591,12 @@ public class ConvexPolygon2dTest
    {
       if (point1.distance(point2) > 1e-7)
          throw new RuntimeException("point1 = " + point1 + ", point2 = " + point2);
+   }
+
+   public static void main(String[] args)
+   {
+      String targetTests = "us.ihmc.robotics.geometry.ConvexPolygon2dTest";
+      String targetClasses = "us.ihmc.robotics.geometry.ConvexPolygon2d";
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
    }
 }

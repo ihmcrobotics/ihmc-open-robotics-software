@@ -16,7 +16,6 @@ public class YoArtifactPolygon extends YoArtifact
    
    private final ConvexPolygon2d tempConvexPolygon = new ConvexPolygon2d();
 
-   private final Color color;
    private final boolean fill;
    private final BasicStroke stroke;
    
@@ -29,19 +28,18 @@ public class YoArtifactPolygon extends YoArtifact
    {
       super(name,  new double[] {fill ? 1.0 : 0.0}, color);
       this.convexPolygon = yoConvexPolygon2d;
-      this.color = color;
       this.fill = fill;
-      stroke = new BasicStroke(lineWidth);
+      this.stroke = new BasicStroke(lineWidth);
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
    {
       graphics.setColor(color);
       String name = "Polygon";
       Rectangle2D textDimensions = graphics.getFontMetrics().getStringBounds(name, graphics.getGraphicsContext());
-      int x = Xcenter - (int) (textDimensions.getWidth()/2);
-      int y = Ycenter + (int) (textDimensions.getHeight()/2);
+      int x = centerX - (int) (textDimensions.getWidth()/2);
+      int y = centerY + (int) (textDimensions.getHeight()/2);
       graphics.drawString(name, x, y);
    }
 
@@ -70,12 +68,6 @@ public class YoArtifactPolygon extends YoArtifact
    }
 
    @Override
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.POLYGON_ARTIFACT;
-   }
-
-   @Override
    public YoVariable<?>[] getVariables()
    {
       YoVariable<?>[] vars = new YoVariable[1 + 2 * convexPolygon.getMaxNumberOfVertices()];
@@ -89,5 +81,11 @@ public class YoArtifactPolygon extends YoArtifact
       }
 
       return vars;
+   }
+
+   @Override
+   public RemoteGraphicType getRemoteGraphicType()
+   {
+      return RemoteGraphicType.POLYGON_ARTIFACT;
    }
 }
