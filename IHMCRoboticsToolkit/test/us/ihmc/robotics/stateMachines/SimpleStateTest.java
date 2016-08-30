@@ -6,10 +6,12 @@ import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
+import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class SimpleStateTest
 {
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSimpleStateMachine()
    {
       SettableDoubleProvider timeProvider = new SettableDoubleProvider();
