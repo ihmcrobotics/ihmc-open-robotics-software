@@ -6,14 +6,10 @@ import us.ihmc.plotting.Graphics2DAdapter;
 
 public abstract class Artifact
 {
-   public static int X_Y = 0;
-   public static int X_Z = 1;
-   public static int Y_Z = 2;
-   
    protected final String id;
    protected String type;
    protected int level;
-   protected Color color = Color.blue;
+   protected Color color = Color.BLUE;
    protected boolean isVisible = true;
    private boolean showID = false;
    private boolean drawHistory = false;
@@ -107,11 +103,7 @@ public abstract class Artifact
    {
       this.isVisible = isVisible;
    }
-
-   public String getName() {
-      return getID();
-   }
-
+   
    @Override
    public String toString()
    {
