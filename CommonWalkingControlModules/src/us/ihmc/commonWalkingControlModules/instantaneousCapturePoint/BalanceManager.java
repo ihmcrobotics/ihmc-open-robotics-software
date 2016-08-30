@@ -406,7 +406,6 @@ public class BalanceManager
    public void initializeICPPlanForSingleSupport()
    {
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
-      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
    public void initializeICPPlanForStanding()
@@ -417,7 +416,6 @@ public class BalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
-      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
    public void initializeICPPlanForTransfer()
@@ -428,7 +426,6 @@ public class BalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
-      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
    public boolean isTransitionToSingleSupportSafe(RobotSide transferToSide)
@@ -548,6 +545,7 @@ public class BalanceManager
       yoCenterOfMass.setAndMatchFrame(centerOfMassPosition);
       double omega0 = momentumBasedController.getOmega0();
       CapturePointTools.computeDesiredCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, yoPerfectCMP);
+      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
    public void computeAchievedCMP(FrameVector achievedLinearMomentumRate)
@@ -582,14 +580,12 @@ public class BalanceManager
    public void updateCurrentICPPlan()
    {
       icpPlanner.updateCurrentPlan();
-      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
    public void updateICPPlanForSingleSupportDisturbances()
    {
       momentumBasedController.getCapturePoint(capturePoint2d);
       icpPlanner.updatePlanForSingleSupportDisturbances(yoTime.getDoubleValue(), capturePoint2d);
-      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
    public void getCapturePoint(FramePoint2d capturePointToPack)
