@@ -32,7 +32,8 @@ public interface RemoteYoGraphic
       POSITION_ARTIFACT,
       CIRCLE_ARTIFACT,
       LINE_SEGMENT_2D_ARTIFACT,
-      POLYGON_ARTIFACT
+      POLYGON_ARTIFACT,
+      LINE_ARTIFACT
    }
 
    public String getName();
