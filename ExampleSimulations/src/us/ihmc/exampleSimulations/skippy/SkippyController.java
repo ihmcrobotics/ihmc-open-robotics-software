@@ -423,7 +423,7 @@ public class SkippyController implements RobotController
        * CoM angular momentum rate of change equal to zero when reaction force
        * is on CMP(view notes)
        */
-      if (Math.abs(groundReactionForce.getZ()) > 1.0e-5)
+      if (robot.getFootFS())
       {
          getCMPFromDefinition.setX(
                (+rateOfChangeOfAngularMomentum.getY() - centerOfMass.getX() * groundReactionForce.getZ() + centerOfMass.getZ() * groundReactionForce.getX())
@@ -433,6 +433,7 @@ public class SkippyController implements RobotController
                      / groundReactionForce.getZ());
          getCMPFromDefinition.setZ(0.0);
       }
+      
    }
 
    /**
