@@ -255,7 +255,7 @@ public class RobotDescriptionTest
                linkGraphics.addCylinder(0.37, 0.025);
             }
 
-            ret.setLinkGraphicsDescription(linkGraphics);
+            ret.setLinkGraphics(linkGraphics);
 
             if (SHOW_MASS_PROPERTIES_GRAPHICS)
             {
@@ -301,7 +301,7 @@ public class RobotDescriptionTest
                linkGraphics.addCylinder(0.025, 0.015, pulleyAppearance);    /* Pulley */
             }
 
-            ret.setLinkGraphicsDescription(linkGraphics);
+            ret.setLinkGraphics(linkGraphics);
 
             if (SHOW_MASS_PROPERTIES_GRAPHICS)
             {
@@ -331,7 +331,7 @@ public class RobotDescriptionTest
 
              linkGraphics.translate(0.0, 0.0, 0.308);
              linkGraphics.addCube(0.025, 0.04, 0.062, YoAppearance.AluminumMaterial());
-             ret.setLinkGraphicsDescription(linkGraphics);
+             ret.setLinkGraphics(linkGraphics);
             }
 
             if (SHOW_MASS_PROPERTIES_GRAPHICS)
@@ -359,7 +359,7 @@ public class RobotDescriptionTest
              linkGraphics.identity();
              linkGraphics.translate(0.0, 0.0, FOOT_ZMAX);
              linkGraphics.addCube(0.028, 0.028, -FOOT_ZMAX);
-             ret.setLinkGraphicsDescription(linkGraphics);
+             ret.setLinkGraphics(linkGraphics);
             }
 
             if (SHOW_MASS_PROPERTIES_GRAPHICS)

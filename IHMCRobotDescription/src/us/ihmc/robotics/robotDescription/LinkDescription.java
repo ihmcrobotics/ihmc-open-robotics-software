@@ -40,7 +40,7 @@ public class LinkDescription
       return linkGraphics;
    }
 
-   public void setLinkGraphicsDescription(LinkGraphicsDescription linkGraphics)
+   public void setLinkGraphics(LinkGraphicsDescription linkGraphics)
    {
       this.linkGraphics = linkGraphics;
    }
