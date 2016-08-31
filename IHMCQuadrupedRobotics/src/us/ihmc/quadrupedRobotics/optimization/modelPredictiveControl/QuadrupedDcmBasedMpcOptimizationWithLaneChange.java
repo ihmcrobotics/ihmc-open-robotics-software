@@ -7,9 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.Qua
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMotionEstimator;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStepPressurePlanner;
+import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
@@ -31,7 +29,10 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
    private final FramePoint currentDcmEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
-   private final QuadrupedTimedStepPressurePlanner timedStepPressurePlanner;
+   private final QuadrupedContactStatePlan contactStatePlan;
+   private final QuadrupedContactStatePlanner contactStatePlanner;
+   private final QuadrupedPiecewiseConstantPressurePlan piecewiseConstantPressurePlan;
+   private final QuadrupedPiecewiseConstantPressurePlanner piecewiseConstantPressurePlanner;
 
    private final ConstrainedQPSolver qpSolver = new QuadProgSolver(null);
    private final DenseMatrix64F qpSolutionVector = new DenseMatrix64F(6, 1);
@@ -64,7 +65,10 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       this.linearInvertedPendulumModel = dcmPositionEstimator.getLinearInvertedPendulumModel();
       this.dcmPositionEstimator = dcmPositionEstimator;
       this.currentDcmEstimate = new FramePoint();
-      this.timedStepPressurePlanner = new QuadrupedTimedStepPressurePlanner(maxPreviewSteps + 4);
+      this.contactStatePlan = new QuadrupedContactStatePlan(maxPreviewSteps + 4);
+      this.contactStatePlanner = new QuadrupedContactStatePlanner(maxPreviewSteps + 4);
+      this.piecewiseConstantPressurePlan = new QuadrupedPiecewiseConstantPressurePlan(maxPreviewSteps + 4);
+      this.piecewiseConstantPressurePlanner = new QuadrupedPiecewiseConstantPressurePlanner();
 
       if (graphicsListRegistry != null)
       {
@@ -122,7 +126,9 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       }
 
       // Compute nominal piecewise center of pressure plan.
-      numberOfIntervals = timedStepPressurePlanner.compute(numberOfPreviewSteps, queuedSteps, currentSolePosition, currentContactState, currentTime);
+      contactStatePlanner.compute(contactStatePlan, numberOfPreviewSteps, queuedSteps, currentSolePosition, currentContactState, currentTime);
+      piecewiseConstantPressurePlanner.compute(piecewiseConstantPressurePlan, contactStatePlan);
+      numberOfIntervals = piecewiseConstantPressurePlan.getNumberOfIntervals();
 
       // Solve constrained quadratic program.
       DenseMatrix64F A = qpCostMatrix;
@@ -193,7 +199,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       {
          if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
          {
-            b.set(rowOffset++, 0, timedStepPressurePlanner.getNormalizedPressureContributedByQuadrant(robotQuadrant, 0));
+            b.set(rowOffset++, 0, piecewiseConstantPressurePlan.getNormalizedPressureAtStartOfInterval(0, robotQuadrant));
          }
       }
       CommonOps.multTransA(A, b, b);
@@ -229,17 +235,17 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
 
          for (int i = 0; i < numberOfIntervals; i++)
          {
-            timedStepPressurePlanner.getCenterOfPressureAtStartOfInterval(i).changeFrame(ReferenceFrame.getWorldFrame());
-            x0.set(i * 2 + rowOffset, 0, timedStepPressurePlanner.getCenterOfPressureAtStartOfInterval(i).get(direction));
-            B.set(i * 2 + rowOffset, numberOfContacts + rowOffset, timedStepPressurePlanner.getNormalizedPressureContributedByQueuedSteps(i));
+            piecewiseConstantPressurePlan.getCenterOfPressureAtStartOfInterval(i).changeFrame(ReferenceFrame.getWorldFrame());
+            x0.set(i * 2 + rowOffset, 0, piecewiseConstantPressurePlan.getCenterOfPressureAtStartOfInterval(i).get(direction));
+            B.set(i * 2 + rowOffset, numberOfContacts + rowOffset, piecewiseConstantPressurePlan.getNormalizedPressureContributedByQueuedSteps(i));
          }
          x0.set(rowOffset, 0, 0);
 
          double naturalFrequency = linearInvertedPendulumModel.getNaturalFrequency();
          for (int i = numberOfIntervals - 2; i >= 0; i--)
          {
-            double tn = timedStepPressurePlanner.getTimeAtStartOfInterval(numberOfIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1);
-            double ti = timedStepPressurePlanner.getTimeAtStartOfInterval(i + 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(i);
+            double tn = piecewiseConstantPressurePlan.getTimeAtStartOfInterval(numberOfIntervals - 1) - piecewiseConstantPressurePlan.getTimeAtStartOfInterval(i + 1);
+            double ti = piecewiseConstantPressurePlan.getTimeAtStartOfInterval(i + 1) - piecewiseConstantPressurePlan.getTimeAtStartOfInterval(i);
             double expn = Math.exp(naturalFrequency * tn);
             double expi = Math.exp(naturalFrequency * ti);
             C.set(rowOffset, i * 2 + rowOffset, expn * (1 - expi));
@@ -247,7 +253,8 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
          C.set(rowOffset, 2 * numberOfIntervals - 2 + rowOffset, 0);
          S.set(rowOffset, 2 * numberOfIntervals - 2 + rowOffset, 1);
 
-         double previewTime = timedStepPressurePlanner.getTimeAtStartOfInterval(numberOfIntervals - 1) - timedStepPressurePlanner.getTimeAtStartOfInterval(0);
+         double previewTime =
+               piecewiseConstantPressurePlan.getTimeAtStartOfInterval(numberOfIntervals - 1) - piecewiseConstantPressurePlan.getTimeAtStartOfInterval(0);
          y0.set(rowOffset, 0, Math.exp(naturalFrequency * previewTime) * currentDcmEstimate.get(direction));
          rowOffset++;
       }
