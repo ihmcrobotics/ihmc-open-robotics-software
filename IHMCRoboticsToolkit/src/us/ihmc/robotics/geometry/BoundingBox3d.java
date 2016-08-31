@@ -5,8 +5,8 @@ import javax.vecmath.Tuple3d;
 
 public class BoundingBox3d
 {
-   private final Point3d minPoint;
-   private final Point3d maxPoint;
+   private final Point3d minPoint = new Point3d();
+   private final Point3d maxPoint = new Point3d();
 
    public static BoundingBox3d createUsingCenterAndPlusMinusVector(Point3d center, Tuple3d plusMinusVector)
    {
@@ -18,46 +18,7 @@ public class BoundingBox3d
 
       return new BoundingBox3d(minimumPoint, maximumPoint);
    }
-   
-   public BoundingBox3d(Point3d min, Point3d max)
-   {
-      this.minPoint = new Point3d(min);
-      this.maxPoint = new Point3d(max);
 
-      verifyBounds();
-   }
-
-   public BoundingBox3d(double xMin, double yMin, double zMin, double xMax, double yMax, double zMax)
-   {
-      this.minPoint = new Point3d(xMin, yMin, zMin);
-      this.maxPoint = new Point3d(xMax, yMax, zMax);
-
-      verifyBounds();
-   }
-
-   public BoundingBox3d(double[] min, double[] max)
-   {
-      this.minPoint = new Point3d(min);
-      this.maxPoint = new Point3d(max);
-
-      verifyBounds();
-   }
-
-   public BoundingBox3d(BoundingBox3d boundingBox)
-   {
-      this(boundingBox.minPoint, boundingBox.maxPoint);
-   }
-
-   private void verifyBounds()
-   {
-      if (minPoint.getX() > maxPoint.getX())
-         throw new RuntimeException("minPoint.getX() > maxPoint.getX()");
-      if (minPoint.getY() > maxPoint.getY())
-         throw new RuntimeException("minPoint.getY() > maxPoint.getY()");
-      if (minPoint.getZ() > maxPoint.getZ())
-         throw new RuntimeException("minPoint.getZ() > maxPoint.getZ()");
-   }
-   
    public static BoundingBox3d union(BoundingBox3d boundingBoxOne, BoundingBox3d boundingBoxTwo)
    {
       double minX = Math.min(boundingBoxOne.minPoint.getX(), boundingBoxTwo.minPoint.getX());
@@ -72,6 +33,72 @@ public class BoundingBox3d
       Point3d unionMax = new Point3d(maxX, maxY, maxZ);
 
       return new BoundingBox3d(unionMin, unionMax);
+   }
+
+   public BoundingBox3d(Point3d min, Point3d max)
+   {
+      set(min, max);
+   }
+
+   public BoundingBox3d(double xMin, double yMin, double zMin, double xMax, double yMax, double zMax)
+   {
+      set(xMin, yMin, zMin, xMax, yMax, zMax);
+   }
+
+   public BoundingBox3d(double[] min, double[] max)
+   {
+      set(min, max);
+   }
+
+   public BoundingBox3d(BoundingBox3d boundingBox)
+   {
+      this(boundingBox.minPoint, boundingBox.maxPoint);
+   }
+
+   public void set(Point3d min, Point3d max)
+   {
+      minPoint.set(min);
+      maxPoint.set(max);
+
+      verifyBounds();
+   }
+
+   public void set(double xMin, double yMin, double zMin, double xMax, double yMax, double zMax)
+   {
+      minPoint.set(xMin, yMin, zMin);
+      maxPoint.set(xMax, yMax, zMax);
+
+      verifyBounds();
+   }
+
+   public void set(double[] min, double[] max)
+   {
+      minPoint.set(min);
+      maxPoint.set(max);
+
+      verifyBounds();
+   }
+
+   public void setMin(Point3d min)
+   {
+      minPoint.set(min);
+      verifyBounds();
+   }
+
+   public void setMax(Point3d max)
+   {
+      maxPoint.set(max);
+      verifyBounds();
+   }
+
+   private void verifyBounds()
+   {
+      if (minPoint.getX() > maxPoint.getX())
+         throw new RuntimeException("minPoint.getX() > maxPoint.getX()");
+      if (minPoint.getY() > maxPoint.getY())
+         throw new RuntimeException("minPoint.getY() > maxPoint.getY()");
+      if (minPoint.getZ() > maxPoint.getZ())
+         throw new RuntimeException("minPoint.getZ() > maxPoint.getZ()");
    }
 
    public double getXMin()
@@ -104,19 +131,29 @@ public class BoundingBox3d
       return maxPoint.getZ();
    }
 
-   public void getMinPoint(Point3d min)
+   public void getMinPoint(Point3d minToPack)
    {
-      min.set(this.minPoint);
+      minToPack.set(minPoint);
    }
 
-   public void getMaxPoint(Point3d max)
+   public void getMaxPoint(Point3d maxToPack)
    {
-      max.set(this.maxPoint);
+      maxToPack.set(maxPoint);
    }
 
-   public void getCenterPointCopy(Point3d center)
+   public void getMinPoint(double[] minToPack)
    {
-      center.set((minPoint.getX() + maxPoint.getX()) / 2.0, (minPoint.getY() + maxPoint.getY()) / 2.0, (minPoint.getZ() + maxPoint.getZ()) / 2.0);
+      minPoint.get(minToPack);
+   }
+
+   public void getMaxPoint(double[] maxToPack)
+   {
+      maxPoint.get(maxToPack);
+   }
+
+   public void getCenterPoint(Point3d centerToPack)
+   {
+      centerToPack.interpolate(minPoint, maxPoint, 0.5);
    }
 
    /**
@@ -124,7 +161,7 @@ public class BoundingBox3d
     */
    public boolean isBoxAtOrAbove(double referenceZ)
    {
-      return (minPoint.getZ() >= referenceZ);
+      return minPoint.getZ() >= referenceZ;
    }
 
    /**
@@ -132,7 +169,7 @@ public class BoundingBox3d
     */
    public boolean isBoxAtOrBelow(double referenceZ)
    {
-      return (maxPoint.getZ() <= referenceZ);
+      return maxPoint.getZ() <= referenceZ;
    }
 
    /**
@@ -140,7 +177,7 @@ public class BoundingBox3d
     */
    public boolean isBoxAtOrLeftOf(double referenceY)
    {
-      return (minPoint.getY() >= referenceY);
+      return minPoint.getY() >= referenceY;
    }
 
    /**
@@ -148,7 +185,7 @@ public class BoundingBox3d
     */
    public boolean isBoxAtOrRightOf(double referenceY)
    {
-      return (maxPoint.getY() <= referenceY);
+      return maxPoint.getY() <= referenceY;
    }
 
    /**
@@ -156,7 +193,7 @@ public class BoundingBox3d
     */
    public boolean isBoxAtOrBehind(double referenceX)
    {
-      return (maxPoint.getX() <= referenceX);
+      return maxPoint.getX() <= referenceX;
    }
 
    /**
@@ -164,7 +201,7 @@ public class BoundingBox3d
     */
    public boolean isBoxAtOrInFrontOf(double referenceX)
    {
-      return (minPoint.getX() >= referenceX);
+      return minPoint.getX() >= referenceX;
    }
 
    public boolean isInside(Point3d point3d)
@@ -219,8 +256,9 @@ public class BoundingBox3d
 
    public boolean intersects(BoundingBox3d boundingBox)
    {
-      return ((maxPoint.getX() >= boundingBox.minPoint.getX()) && (boundingBox.maxPoint.getX() >= minPoint.getX()) && (maxPoint.getY() >= boundingBox.minPoint.getY())
-            && (boundingBox.maxPoint.getY() >= minPoint.getY()) && (maxPoint.getZ() >= boundingBox.minPoint.getZ()) && (boundingBox.maxPoint.getZ() >= minPoint.getZ()));
+      return maxPoint.getX() >= boundingBox.minPoint.getX() && boundingBox.maxPoint.getX() >= minPoint.getX() && maxPoint.getY() >= boundingBox.minPoint.getY()
+            && boundingBox.maxPoint.getY() >= minPoint.getY() && maxPoint.getZ() >= boundingBox.minPoint.getZ()
+            && boundingBox.maxPoint.getZ() >= minPoint.getZ();
    }
 
    public boolean intersects(Point3d start, Point3d end)
@@ -241,7 +279,7 @@ public class BoundingBox3d
          tmin = (maxPoint.getX() - start.getX()) * invXDir;
          tmax = (minPoint.getX() - start.getX()) * invXDir;
       }
-      
+
       if (invYDir > 0)
       {
          tymin = (minPoint.getY() - start.getY()) * invYDir;
@@ -252,19 +290,20 @@ public class BoundingBox3d
          tymin = (maxPoint.getY() - start.getY()) * invYDir;
          tymax = (minPoint.getY() - start.getY()) * invYDir;
       }
-      
+
       // if regions do not overlap, return false
-      if (tmin > tymax || tmax < tymin) {
+      if (tmin > tymax || tmax < tymin)
+      {
          return false;
       }
-      
+
       // update tmin
       if (tymin > tmin)
          tmin = tymin;
-      
+
       if (tymax < tmax)
          tmax = tymax;
-      
+
       if (invZDir > 0)
       {
          tzmin = (minPoint.getZ() - start.getZ()) * invZDir;
@@ -275,19 +314,20 @@ public class BoundingBox3d
          tzmin = (maxPoint.getZ() - start.getZ()) * invZDir;
          tzmax = (minPoint.getZ() - start.getZ()) * invZDir;
       }
-      
+
       // if regions do not overlap, return false
-      if (tmin > tzmax || tmax < tzmin) {
+      if (tmin > tzmax || tmax < tzmin)
+      {
          return false;
       }
-      
+
       // update tmin
       if (tzmin > tmin)
          tmin = tzmin;
-      
+
       if (tzmax < tmax)
          tmax = tzmax;
-      
+
       // return tmin/tmax within 0-1
       return tmin < 1 && tmax > 0;
 
@@ -298,5 +338,4 @@ public class BoundingBox3d
    {
       return "BoundingBox3d{" + "minPoint=" + minPoint + " , maxPoint=" + maxPoint + '}';
    }
-
 }
