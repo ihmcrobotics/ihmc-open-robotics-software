@@ -1,4 +1,4 @@
-package us.ihmc.robotics.robotDefinition;
+package us.ihmc.robotics.robotDescription;
 
 public class LinkGraphicsDescription
 {
