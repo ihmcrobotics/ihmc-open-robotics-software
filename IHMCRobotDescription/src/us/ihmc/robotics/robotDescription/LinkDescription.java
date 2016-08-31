@@ -52,13 +52,19 @@ public class LinkDescription
 
    public void setMass(double mass)
    {
-      if (mass < 0.0) throw new RuntimeException("mass < 0.0");
+      if (mass < 0.0)
+         throw new RuntimeException("mass < 0.0");
       this.mass = mass;
    }
 
    public void getCenterOfMassOffset(Vector3d centerOfMassOffsetToPack)
    {
       centerOfMassOffsetToPack.set(centerOfMassOffset);
+   }
+
+   public Vector3d getCenterOfMassOffset()
+   {
+      return centerOfMassOffset;
    }
 
    public void setCenterOfMassOffset(Vector3d centerOfMassOffset)
@@ -79,6 +85,11 @@ public class LinkDescription
    public void getMomentOfInertia(DenseMatrix64F momentOfInertiaToPack)
    {
       momentOfInertiaToPack.set(momentOfInertia);
+   }
+
+   public DenseMatrix64F getMomentOfInertia()
+   {
+      return momentOfInertia;
    }
 
    public void setMomentOfInertia(double Ixx, double Iyy, double Izz)
@@ -120,7 +131,6 @@ public class LinkDescription
       linkGraphics.identity();
    }
 
-
    public void addEllipsoidFromMassProperties2(AppearanceDefinition appearance)
    {
       computePrincipalMomentsOfInertia();
@@ -129,12 +139,30 @@ public class LinkDescription
 
       ArrayList<Vector3d> inertiaEllipsoidAxes = new ArrayList<Vector3d>();
 
-      Vector3d e1 = new Vector3d(); principalAxesRotation.getColumn(0, e1); e1.normalize(); e1.scale(inertiaEllipsoidRadii.getX()); inertiaEllipsoidAxes.add(e1);
-      Vector3d e2 = new Vector3d(); principalAxesRotation.getColumn(1, e2); e2.normalize(); e2.scale(inertiaEllipsoidRadii.getY()); inertiaEllipsoidAxes.add(e2);
-      Vector3d e3 = new Vector3d(); principalAxesRotation.getColumn(2, e3); e3.normalize(); e3.scale(inertiaEllipsoidRadii.getZ()); inertiaEllipsoidAxes.add(e3);
-      Vector3d e4 = new Vector3d(e1); e4.negate(); inertiaEllipsoidAxes.add(e4);
-      Vector3d e5 = new Vector3d(e2); e5.negate(); inertiaEllipsoidAxes.add(e5);
-      Vector3d e6 = new Vector3d(e3); e6.negate(); inertiaEllipsoidAxes.add(e6);
+      Vector3d e1 = new Vector3d();
+      principalAxesRotation.getColumn(0, e1);
+      e1.normalize();
+      e1.scale(inertiaEllipsoidRadii.getX());
+      inertiaEllipsoidAxes.add(e1);
+      Vector3d e2 = new Vector3d();
+      principalAxesRotation.getColumn(1, e2);
+      e2.normalize();
+      e2.scale(inertiaEllipsoidRadii.getY());
+      inertiaEllipsoidAxes.add(e2);
+      Vector3d e3 = new Vector3d();
+      principalAxesRotation.getColumn(2, e3);
+      e3.normalize();
+      e3.scale(inertiaEllipsoidRadii.getZ());
+      inertiaEllipsoidAxes.add(e3);
+      Vector3d e4 = new Vector3d(e1);
+      e4.negate();
+      inertiaEllipsoidAxes.add(e4);
+      Vector3d e5 = new Vector3d(e2);
+      e5.negate();
+      inertiaEllipsoidAxes.add(e5);
+      Vector3d e6 = new Vector3d(e3);
+      e6.negate();
+      inertiaEllipsoidAxes.add(e6);
 
       double vertexSize = 0.01 * inertiaEllipsoidRadii.length();
 
@@ -151,23 +179,52 @@ public class LinkDescription
 
       ArrayList<Point3d> inertiaOctahedronVertices = new ArrayList<Point3d>();
 
-      Point3d p1 = new Point3d(e1); inertiaOctahedronVertices.add(p1);
-      Point3d p2 = new Point3d(e2); inertiaOctahedronVertices.add(p2);
-      Point3d p3 = new Point3d(e4); inertiaOctahedronVertices.add(p3);
-      Point3d p4 = new Point3d(e5); inertiaOctahedronVertices.add(p4);
-      Point3d p5 = new Point3d(e3); inertiaOctahedronVertices.add(p5);
-      Point3d p6 = new Point3d(e6); inertiaOctahedronVertices.add(p6);
+      Point3d p1 = new Point3d(e1);
+      inertiaOctahedronVertices.add(p1);
+      Point3d p2 = new Point3d(e2);
+      inertiaOctahedronVertices.add(p2);
+      Point3d p3 = new Point3d(e4);
+      inertiaOctahedronVertices.add(p3);
+      Point3d p4 = new Point3d(e5);
+      inertiaOctahedronVertices.add(p4);
+      Point3d p5 = new Point3d(e3);
+      inertiaOctahedronVertices.add(p5);
+      Point3d p6 = new Point3d(e6);
+      inertiaOctahedronVertices.add(p6);
 
-      ArrayList<Point3d> face1 = new ArrayList<Point3d>(); face1.add(p1); face1.add(p5); face1.add(p4);
-      ArrayList<Point3d> face2 = new ArrayList<Point3d>(); face2.add(p4); face2.add(p5); face2.add(p3);
-      ArrayList<Point3d> face3 = new ArrayList<Point3d>(); face3.add(p3); face3.add(p5); face3.add(p2);
-      ArrayList<Point3d> face4 = new ArrayList<Point3d>(); face4.add(p2); face4.add(p5); face4.add(p1);
+      ArrayList<Point3d> face1 = new ArrayList<Point3d>();
+      face1.add(p1);
+      face1.add(p5);
+      face1.add(p4);
+      ArrayList<Point3d> face2 = new ArrayList<Point3d>();
+      face2.add(p4);
+      face2.add(p5);
+      face2.add(p3);
+      ArrayList<Point3d> face3 = new ArrayList<Point3d>();
+      face3.add(p3);
+      face3.add(p5);
+      face3.add(p2);
+      ArrayList<Point3d> face4 = new ArrayList<Point3d>();
+      face4.add(p2);
+      face4.add(p5);
+      face4.add(p1);
 
-      ArrayList<Point3d> face5 = new ArrayList<Point3d>(); face5.add(p4); face5.add(p6); face5.add(p1);
-      ArrayList<Point3d> face6 = new ArrayList<Point3d>(); face6.add(p3); face6.add(p6); face6.add(p4);
-      ArrayList<Point3d> face7 = new ArrayList<Point3d>(); face7.add(p2); face7.add(p6); face7.add(p3);
-      ArrayList<Point3d> face8 = new ArrayList<Point3d>(); face8.add(p1); face8.add(p6); face8.add(p2);
-
+      ArrayList<Point3d> face5 = new ArrayList<Point3d>();
+      face5.add(p4);
+      face5.add(p6);
+      face5.add(p1);
+      ArrayList<Point3d> face6 = new ArrayList<Point3d>();
+      face6.add(p3);
+      face6.add(p6);
+      face6.add(p4);
+      ArrayList<Point3d> face7 = new ArrayList<Point3d>();
+      face7.add(p2);
+      face7.add(p6);
+      face7.add(p3);
+      ArrayList<Point3d> face8 = new ArrayList<Point3d>();
+      face8.add(p1);
+      face8.add(p6);
+      face8.add(p2);
 
       linkGraphics.identity();
       linkGraphics.translate(comOffset.getX(), comOffset.getY(), comOffset.getZ());
@@ -180,14 +237,13 @@ public class LinkDescription
       linkGraphics.addPolygon(face7, appearance);
       linkGraphics.addPolygon(face8, appearance);
 
-//    linkGraphics.identity();
-//    linkGraphics.translate(comOffset.x, comOffset.y, comOffset.z);
-//    linkGraphics.rotate(principalAxesRotation);
-//    linkGraphics.addEllipsoid(inertiaEllipsoidRadii.x, inertiaEllipsoidRadii.y, inertiaEllipsoidRadii.z, appearance);
-//    linkGraphics.identity();
+      //    linkGraphics.identity();
+      //    linkGraphics.translate(comOffset.x, comOffset.y, comOffset.z);
+      //    linkGraphics.rotate(principalAxesRotation);
+      //    linkGraphics.addEllipsoid(inertiaEllipsoidRadii.x, inertiaEllipsoidRadii.y, inertiaEllipsoidRadii.z, appearance);
+      //    linkGraphics.identity();
 
    }
-
 
    /**
     * Adds an ellipsoid representing the mass and inertia of the link at its center of mass
@@ -214,7 +270,6 @@ public class LinkDescription
       linkGraphics.identity();
    }
 
-
    /**
     * Adds an box representing the mass and inertia of the link at its center of mass
     * with the specified appearance.
@@ -230,8 +285,7 @@ public class LinkDescription
       Vector3d comOffset = new Vector3d();
       getCenterOfMassOffset(comOffset);
 
-      if (mass <= 0 || momentOfInertia.get(0,0) <= 0 || momentOfInertia.get(1, 1) <= 0 || momentOfInertia.get(2, 2) <= 0 ||
-            momentOfInertia.get(0, 0) + momentOfInertia.get(1, 1) <= momentOfInertia.get(2, 2)
+      if (mass <= 0 || momentOfInertia.get(0, 0) <= 0 || momentOfInertia.get(1, 1) <= 0 || momentOfInertia.get(2, 2) <= 0 || momentOfInertia.get(0, 0) + momentOfInertia.get(1, 1) <= momentOfInertia.get(2, 2)
             || momentOfInertia.get(1, 1) + momentOfInertia.get(2, 2) <= momentOfInertia.get(0, 0) || momentOfInertia.get(0, 0) + momentOfInertia.get(2, 2) <= momentOfInertia.get(1, 1))
       {
          System.err.println(getName() + " has unrealistic inertia");
@@ -243,7 +297,7 @@ public class LinkDescription
          double lx = Math.sqrt(6.0 * (momentOfInertia.get(2, 2) + momentOfInertia.get(1, 1) - momentOfInertia.get(0, 0)) / mass);
          double ly = Math.sqrt(6.0 * (momentOfInertia.get(2, 2) + momentOfInertia.get(0, 0) - momentOfInertia.get(1, 1)) / mass);
          double lz = Math.sqrt(6.0 * (momentOfInertia.get(0, 0) + momentOfInertia.get(1, 1) - momentOfInertia.get(2, 2)) / mass);
-         linkGraphics.translate(0.0, 0.0, -lz/2.0);
+         linkGraphics.translate(0.0, 0.0, -lz / 2.0);
          linkGraphics.addCube(lx, ly, lz, appearance);
          linkGraphics.identity();
       }

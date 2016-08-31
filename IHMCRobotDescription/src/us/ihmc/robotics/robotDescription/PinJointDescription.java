@@ -44,4 +44,19 @@ public class PinJointDescription extends JointDescription
       this.bLimit = bLimit;
    }
 
+   public Vector3d getJointAxis()
+   {
+      return jointAxis;
+   }
+
+   public boolean containsLimitStops()
+   {
+      return containsLimitStops;
+   }
+
+   public double[] getLimitStopParameters()
+   {
+      return new double[]{qMin, qMax, kLimit, bLimit};
+   }
+
 }

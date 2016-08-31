@@ -74,12 +74,12 @@ public class RobotDescriptionUsingSpringFlamingoTest
       camRotation.setRotationYawAndZeroTranslation(Math.PI);
 
       CameraSensorDescription robotCam = new CameraSensorDescription("robot cam mount", camRotation);
-      plane.addCameraMount(robotCam);
+      plane.addCameraSensor(robotCam);
 
       RigidBodyTransform imuTransform = new RigidBodyTransform();
       imuTransform.setTranslation(new Vector3d(0.0, 0.0, 0.2));
       IMUSensorDescription imuMount = new IMUSensorDescription("FlamingoIMU", imuTransform);
-      plane.addIMUMount(imuMount);
+      plane.addIMUSensor(imuMount);
 
       /** ************************ Right limb ********************************** */
 
