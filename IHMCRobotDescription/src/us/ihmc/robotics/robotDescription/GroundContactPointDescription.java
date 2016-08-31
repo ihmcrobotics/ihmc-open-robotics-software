@@ -2,12 +2,10 @@ package us.ihmc.robotics.robotDescription;
 
 import javax.vecmath.Vector3d;
 
-public class GroundContactPointDescription
+public class GroundContactPointDescription extends ExternalForcePointDescription
 {
-
-   public GroundContactPointDescription(String string, Vector3d vector3d, RobotDescription robotDescription)
+   public GroundContactPointDescription(String name, Vector3d offsetFromJoint)
    {
-      // TODO Auto-generated constructor stub
+      super(name, offsetFromJoint);
    }
-
 }

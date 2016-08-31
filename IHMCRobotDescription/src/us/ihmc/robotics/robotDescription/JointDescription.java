@@ -6,12 +6,32 @@ import javax.vecmath.Vector3d;
 
 public class JointDescription
 {
+   private String name;
    private final ArrayList<JointDescription> childrenJointDescriptions = new ArrayList<>();
 
    private JointDescription parentJoint;
    private Vector3d offsetFromParentJoint = new Vector3d();
 
    private LinkDescription link;
+
+   private final ArrayList<KinematicPointDescription> kinematicPoints = new ArrayList<>();
+   private final ArrayList<ExternalForcePointDescription> externalForcePoints = new ArrayList<>();
+   private final ArrayList<GroundContactPointDescription> groundContactPoints = new ArrayList<>();
+
+   private final ArrayList<JointWrenchSensorDescription> wrenchSensors = new ArrayList<>();
+   private final ArrayList<CameraSensorDescription> cameraSensors = new ArrayList<>();
+   private final ArrayList<IMUSensorDescription> imuSensors = new ArrayList<>();
+
+   public JointDescription(String name, Vector3d offsetFromParentJoint)
+   {
+      this.name = name;
+      this.offsetFromParentJoint.set(offsetFromParentJoint);
+   }
+
+   public String getName()
+   {
+      return name;
+   }
 
    public void setParentJoint(JointDescription parentJoint)
    {
@@ -48,27 +68,53 @@ public class JointDescription
       childrenJointDescriptions.add(childJointDescription);
    }
 
-   public void addJointWrenchSensor(JointWrenchSensorDescription jointWrenchSensorDescription)
+   public ArrayList<JointDescription> getChildrenJoints()
    {
-      // TODO Auto-generated method stub
-
+      return childrenJointDescriptions;
    }
 
    public void addGroundContactPoint(GroundContactPointDescription groundContactPointDescription)
    {
-      // TODO Auto-generated method stub
-
+      this.groundContactPoints.add(groundContactPointDescription);
    }
 
-   public void addCameraMount(CameraMountDescription robotCam)
+   public ArrayList<GroundContactPointDescription> getGroundContactPoints()
    {
-      // TODO Auto-generated method stub
-
+      return groundContactPoints;
    }
 
-   public void addIMUMount(IMUMountDescription imuMount)
+   public void addExternalForcePoint(ExternalForcePointDescription externalForcePointDescription)
    {
-      // TODO Auto-generated method stub
+      this.externalForcePoints.add(externalForcePointDescription);
+   }
 
+   public ArrayList<ExternalForcePointDescription> getExternalForcePoints()
+   {
+      return externalForcePoints;
+   }
+
+   public void addKinematicPoint(KinematicPointDescription kinematicPointDescription)
+   {
+      this.kinematicPoints.add(kinematicPointDescription);
+   }
+
+   public ArrayList<KinematicPointDescription> getKinematicPoints()
+   {
+      return kinematicPoints;
+   }
+
+   public void addJointWrenchSensor(JointWrenchSensorDescription jointWrenchSensorDescription)
+   {
+      wrenchSensors.add(jointWrenchSensorDescription);
+   }
+
+   public void addCameraMount(CameraSensorDescription cameraSensorDescription)
+   {
+      cameraSensors.add(cameraSensorDescription);
+   }
+
+   public void addIMUMount(IMUSensorDescription imuSensorDescription)
+   {
+      imuSensors.add(imuSensorDescription);
    }
 }
