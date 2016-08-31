@@ -196,8 +196,8 @@ public class SpringFlamingoRobot
    {
       SpringFlamingoRobotDescription description = new SpringFlamingoRobotDescription(name);
 
-      RobotConstructorFromRobotDescription constructor = new RobotConstructorFromRobotDescription();
-      return constructor.constructRobotFromDescription(description);
+      RobotConstructorFromRobotDescription constructor = new RobotConstructorFromRobotDescription(description);
+      return constructor.getRobot();
    }
 
    public double getHipAngle(RobotSide robotSide)
