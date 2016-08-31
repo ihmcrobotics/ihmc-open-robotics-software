@@ -1,4 +1,4 @@
-package us.ihmc.graphics3DAdapter.generatedTestSuites;
+package us.ihmc.atlas.generatedTestSuites;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
@@ -9,15 +9,14 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtilsTest.class,
-   us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtilsTest.class,
-   us.ihmc.graphics3DAdapter.stlLoader.STLReaderTest.class
+   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
+   us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class
 })
 
-public class Graphics3DAdapterAFastTestSuite
+public class AtlasGInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {
