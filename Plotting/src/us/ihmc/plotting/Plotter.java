@@ -25,7 +25,7 @@ import javax.vecmath.Vector2d;
 import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.plotting.artifact.ArtifactsChangedListener;
 import us.ihmc.plotting.artifact.LineArtifact;
-import us.ihmc.plotting.artifact.PointArtifact;
+import us.ihmc.plotting.artifact.PointListArtifact;
 import us.ihmc.plotting.frames.MetersReferenceFrame;
 import us.ihmc.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.plotting.frames.PlotterFrameSpace;
@@ -827,9 +827,9 @@ public class Plotter
       return lineArtifact;
    }
 
-   public PointArtifact createAndAddPointArtifact(String name, Point2d point, Color color)
+   public PointListArtifact createAndAddPointArtifact(String name, Point2d point, Color color)
    {
-      PointArtifact pointArtifact = new PointArtifact(name, point);
+      PointListArtifact pointArtifact = new PointListArtifact(name, point);
       pointArtifact.setColor(color);
       addArtifact(pointArtifact);
 
