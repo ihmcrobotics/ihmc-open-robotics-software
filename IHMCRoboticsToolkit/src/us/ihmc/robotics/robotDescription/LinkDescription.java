@@ -6,11 +6,18 @@ import org.ejml.data.DenseMatrix64F;
 
 public class LinkDescription
 {
+   private String name;
+
    private double mass;
    private final Vector3d centerOfMassLocation = new Vector3d();
    private final DenseMatrix64F momentOfInertia = new DenseMatrix64F();
 
    private LinkGraphicsDescription linkGraphics;
+
+   public LinkDescription(String name)
+   {
+      this.name = name;
+   }
 
    public LinkGraphicsDescription getLinkGraphics()
    {
@@ -46,6 +53,15 @@ public class LinkDescription
    public void getMomentOfInertia(DenseMatrix64F momentOfInertiaToPack)
    {
       momentOfInertiaToPack.set(momentOfInertia);
+   }
+
+   public void setMomentOfInertia(double Ixx, double Iyy, double Izz)
+   {
+      this.momentOfInertia.zero();
+      this.momentOfInertia.set(0, 0, Ixx);
+      this.momentOfInertia.set(1, 1, Iyy);
+      this.momentOfInertia.set(2, 2, Izz);
+
    }
 
 }
