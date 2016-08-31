@@ -139,7 +139,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       }
       else
       {
-         pelvisRotationalStateUpdater = null;
+         pelvisRotationalStateUpdater = new ConstantPelvisRotationalStateUpdater(inverseDynamicsStructure, registry);
       }
 
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, footSwitches,
