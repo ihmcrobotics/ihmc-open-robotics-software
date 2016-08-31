@@ -50,7 +50,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private RigidBody base;
 
    private final RigidBody endEffector;
-   private final ReferenceFrame endEffectorFrame;
 
    public PointFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
          YoVariableRegistry parentRegistry)
@@ -63,8 +62,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
       TwistCalculator twistCalculator = toolbox.getTwistCalculator();
       double dt = toolbox.getControlDT();
       accelerationControlModule = new BodyFixedPointLinearAccelerationControlModule(endEffectorName, twistCalculator, endEffector, dt, registry);
-
-      endEffectorFrame = endEffector.getBodyFixedFrame();
 
       isEnabled = new BooleanYoVariable(endEffectorName + "isPointFBControllerEnabled", registry);
       isEnabled.set(false);
@@ -137,7 +134,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    {
       yoDesiredLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
 
-      tempPosition.setToZero(endEffectorFrame);
+      accelerationControlModule.getBodyFixedPoint(tempPosition);
       yoCurrentPosition.setAndMatchFrame(tempPosition);
 
       accelerationControlModule.getBodyFixedPointCurrentLinearVelocity(tempLinearVelocity);

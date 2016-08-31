@@ -60,8 +60,8 @@
 <Graph Array Window Size>1</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
-<WindowLocation>-1928.0, 85.0</WindowLocation>
-<WindowSize>1936.0, 1176.0</WindowSize>
+<WindowLocation>-1926.0, 94.0</WindowLocation>
+<WindowSize>1932.0, 1165.0</WindowSize>
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
@@ -77,7 +77,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.getCMPFromIcpX,root.Skippy.SkippyController.getCMPFromIcpY,root.Skippy.SkippyController.getCMPFromIcpZ</Variables>
+		<Variables>root.Skippy.SkippyController.trueCMPX,root.Skippy.SkippyController.trueCMPY,root.Skippy.SkippyController.trueCMPZ</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -89,9 +89,21 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.getCMPFromDefinitionX,root.Skippy.SkippyController.getCMPFromDefinitionY,root.Skippy.SkippyController.getCMPFromDefinitionZ</Variables>
+		<Variables>root.Skippy.SkippyController.trueICPX,root.Skippy.SkippyController.trueICPY</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.Skippy.SkippyController.theCMPFromIcpX,root.Skippy.SkippyController.theCMPFromIcpY,root.Skippy.SkippyController.theCMPFromIcpZ</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
