@@ -10,4 +10,9 @@ public class IMUMountDescription
       // TODO Auto-generated constructor stub
    }
 
+   public IMUMountDescription(String string, RigidBodyTransform imuTransform, RobotDescription robotDescription)
+   {
+      // TODO Auto-generated constructor stub
+   }
+
 }
