@@ -8,6 +8,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -36,7 +37,7 @@ import us.ihmc.simulationconstructionset.Robot;
  * @version 1.0
  */
 public class SpringFlamingoRobot extends Robot
-{   
+{
    private static final boolean SHOW_MASS_PROPERTIES_GRAPHICS = false;
    private static final boolean SHOW_CARTOON_GRAPHICS = true;
 
@@ -94,13 +95,13 @@ public class SpringFlamingoRobot extends Robot
    public final BooleanYoVariable gc_rtoe_slip;
 
    public final DoubleYoVariable gc_lheel_x, gc_lheel_y, gc_lheel_z, gc_lheel_dx, gc_lheel_dy, gc_lheel_dz, gc_lheel_fx, gc_lheel_fy, gc_lheel_fz;
-   public final DoubleYoVariable gc_lheel_px, gc_lheel_py, gc_lheel_pz, gc_lheel_tdx, gc_lheel_tdy, gc_lheel_tdz, gc_lheel_fs; 
+   public final DoubleYoVariable gc_lheel_px, gc_lheel_py, gc_lheel_pz, gc_lheel_tdx, gc_lheel_tdy, gc_lheel_tdz, gc_lheel_fs;
    public final BooleanYoVariable gc_lheel_slip;
 
    public final DoubleYoVariable gc_ltoe_x, gc_ltoe_y, gc_ltoe_z, gc_ltoe_dx, gc_ltoe_dy, gc_ltoe_dz, gc_ltoe_fx, gc_ltoe_fy, gc_ltoe_fz;
    public final DoubleYoVariable gc_ltoe_px, gc_ltoe_py, gc_ltoe_pz, gc_ltoe_tdx, gc_ltoe_tdy, gc_ltoe_tdz, gc_ltoe_fs;
    public final BooleanYoVariable gc_ltoe_slip;
-   
+
    private final Joint plane, rightHip, rightKnee, rightAnkle, leftHip, leftKnee, leftAnkle;
 
    private final ArrayList<GroundContactPoint> gcPoints = new ArrayList<GroundContactPoint>(4);
@@ -110,7 +111,7 @@ public class SpringFlamingoRobot extends Robot
       super(name);
       this.setGravity(0.0, 0.0, -9.81);
 
-      plane = new FloatingPlanarJoint("plane", this, FloatingPlanarJoint.XZ);
+      plane = new FloatingPlanarJoint("plane", this, Plane.XZ);
       Link body = body();
       plane.setLink(body);
       this.addRootJoint(plane);
@@ -120,12 +121,12 @@ public class SpringFlamingoRobot extends Robot
 
       CameraMount robotCam = new CameraMount("robot cam mount", camRotation, this);
       plane.addCameraMount(robotCam);
-      
+
       RigidBodyTransform imuTransform = new RigidBodyTransform();
       imuTransform.setTranslation(new Vector3d(0.0, 0.0, 0.2));
       IMUMount imuMount = new IMUMount("FlamingoIMU", imuTransform, this);
       plane.addIMUMount(imuMount);
-      
+
       /** ************************ Right limb ********************************** */
 
       rightHip = new PinJoint("rh", new Vector3d(0.0, -HIP_OFFSET_Y, 0.0), this, Axis.Y);    // right hip joint
@@ -135,7 +136,7 @@ public class SpringFlamingoRobot extends Robot
 
       JointWrenchSensor rightHipWrenchSensor = new JointWrenchSensor("rightHipWrenchSensor",  new Vector3d(), this);
       rightHip.addJointWrenchSensor(rightHipWrenchSensor);
-      
+
       rightKnee = new PinJoint("rk", new Vector3d(0.0, 0.0, -UPPER_LINK_LENGTH), this, Axis.Y);    // right knee joint
       Link r_lower_leg = lower_leg("r_lower_leg");
       rightKnee.setLink(r_lower_leg);
@@ -144,12 +145,12 @@ public class SpringFlamingoRobot extends Robot
 
       JointWrenchSensor rightKneeWrenchSensor = new JointWrenchSensor("rightKneeWrenchSensor",  new Vector3d(), this);
       rightKnee.addJointWrenchSensor(rightKneeWrenchSensor);
-      
+
       rightAnkle = new PinJoint("ra", new Vector3d(0.0, 0.0, -LOWER_LINK_LENGTH), this, Axis.Y);    // right ankle joint
       Link r_foot = foot("r_foot");
       rightAnkle.setLink(r_foot);
       rightKnee.addJoint(rightAnkle);
-      
+
       GroundContactPoint gc_rheel = new GroundContactPoint("gc_rheel", new Vector3d(FOOT_OFFSET_PERCENT * FOOT_X, 0.0, FOOT_ZMIN), this);
       GroundContactPoint gc_rtoe = new GroundContactPoint("gc_rtoe", new Vector3d(-(1.0 - FOOT_OFFSET_PERCENT) * FOOT_X, 0.0, FOOT_ZMIN), this);
 
@@ -158,7 +159,7 @@ public class SpringFlamingoRobot extends Robot
 
       rightAnkle.addGroundContactPoint(gc_rheel);
       rightAnkle.addGroundContactPoint(gc_rtoe);
-      
+
       JointWrenchSensor rightAnkleWrenchSensor = new JointWrenchSensor("rightAnkleWrenchSensor",  new Vector3d(), this);
       rightAnkle.addJointWrenchSensor(rightAnkleWrenchSensor);
 
@@ -171,7 +172,7 @@ public class SpringFlamingoRobot extends Robot
 
       JointWrenchSensor leftHipWrenchSensor = new JointWrenchSensor("leftHipWrenchSensor",  new Vector3d(), this);
       leftHip.addJointWrenchSensor(leftHipWrenchSensor);
-      
+
       leftKnee = new PinJoint("lk", new Vector3d(0.0, 0.0, -UPPER_LINK_LENGTH), this, Axis.Y);    // left knee joint
       Link l_lower_leg = lower_leg("l_lower_leg");
       leftKnee.setLink(l_lower_leg);
@@ -180,7 +181,7 @@ public class SpringFlamingoRobot extends Robot
 
       JointWrenchSensor leftKneeWrenchSensor = new JointWrenchSensor("leftKneeWrenchSensor", new Vector3d(), this);
       leftKnee.addJointWrenchSensor(leftKneeWrenchSensor);
-      
+
       leftAnkle = new PinJoint("la", new Vector3d(0.0, 0.0, -LOWER_LINK_LENGTH), this, Axis.Y);    // left ankle joint
       Link l_foot = foot("l_foot");
       leftAnkle.setLink(l_foot);
@@ -191,13 +192,13 @@ public class SpringFlamingoRobot extends Robot
 
       gcPoints.add(gc_lheel);
       gcPoints.add(gc_ltoe);
-      
+
       leftAnkle.addGroundContactPoint(gc_lheel);
       leftAnkle.addGroundContactPoint(gc_ltoe);
 
       JointWrenchSensor leftAnkleWrenchSensor = new JointWrenchSensor("leftAnkleWrenchSensor",  new Vector3d(), this);
       leftAnkle.addJointWrenchSensor(leftAnkleWrenchSensor);
-      
+
       // Extract YoVariables:
 
       t = (DoubleYoVariable)getVariable("t");
@@ -413,7 +414,7 @@ public class SpringFlamingoRobot extends Robot
     	  ret.addEllipsoidFromMassProperties(YoAppearance.DarkRed());
     	  ret.addCoordinateSystemToCOM(0.2);
       }
-      
+
       return ret;
    }
 
@@ -459,7 +460,7 @@ public class SpringFlamingoRobot extends Robot
          ret.addEllipsoidFromMassProperties(YoAppearance.Fuchsia());
          ret.addCoordinateSystemToCOM(0.2);
       }
-      
+
       return ret;
    }
 
@@ -512,7 +513,7 @@ public class SpringFlamingoRobot extends Robot
      	 linkGraphics.addCube(0.028, 0.028, -FOOT_ZMAX);
     	 ret.setLinkGraphics(linkGraphics);
       }
-      
+
       if (SHOW_MASS_PROPERTIES_GRAPHICS)
       {
          ret.addEllipsoidFromMassProperties(YoAppearance.Aqua());
@@ -704,12 +705,12 @@ public class SpringFlamingoRobot extends Robot
       gc_ltoe_slip.set(false);
 
    }
-   
+
    public int getInputVectorLength()
    {
 	   return 6;
    }
-   
+
    public void setInputVector(double[] u)
    {
 	   if (u.length!=6) throw new java.lang.RuntimeException("u is the wrong size");
@@ -720,15 +721,15 @@ public class SpringFlamingoRobot extends Robot
 	   tau_lk.set(u[4]);
 	   tau_la.set(u[5]);
    }
-   
+
    //////////////////////////////////////
-   
+
    public double getBodyVelocityX()
    {
       double vel = this.qd_x.getDoubleValue();
       return vel;
    }
-   
+
    public double getBodyPositionX()
    {
       double vel = this.q_x.getDoubleValue();

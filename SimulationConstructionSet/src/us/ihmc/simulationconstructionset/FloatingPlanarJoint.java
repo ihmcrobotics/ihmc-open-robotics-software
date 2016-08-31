@@ -5,11 +5,12 @@ package us.ihmc.simulationconstructionset;
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.simulationconstructionset.physics.engine.jerry.FloatingPlanarJointPhysics;
+import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.physics.engine.jerry.FloatingPlanarJointPhysics;
 
 /**
  * Title:        Yobotics! Simulation Construction Set<p>
@@ -21,13 +22,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
  */
 public class FloatingPlanarJoint extends Joint
 {
-   /**
-    *
-    */
    private static final long serialVersionUID = -1627814016079577790L;
-
-   public static final int
-      XY = 1, YZ = 2, XZ = 3;
 
    public DoubleYoVariable q_t1;
    public DoubleYoVariable q_t2;
@@ -36,7 +31,7 @@ public class FloatingPlanarJoint extends Joint
    public DoubleYoVariable q_rot;
    public DoubleYoVariable qd_rot;
    public DoubleYoVariable qdd_t1, qdd_t2, qdd_rot;
-   public int type = XZ;
+   public Plane type = Plane.XZ;
 
    public DoubleYoVariable getQ_t1()
    {
@@ -79,11 +74,11 @@ public class FloatingPlanarJoint extends Joint
 
    public FloatingPlanarJoint(String jname, Robot rob)
    {
-      this(jname, rob, XZ);
+      this(jname, rob, Plane.XZ);
       physics = new FloatingPlanarJointPhysics(this);
    }
 
-   public FloatingPlanarJoint(String jname, Robot rob, int type)
+   public FloatingPlanarJoint(String jname, Robot rob, Plane type)
    {
       super(jname, new Vector3d(), rob, 3);
       physics = new FloatingPlanarJointPhysics(this);
@@ -94,13 +89,13 @@ public class FloatingPlanarJoint extends Joint
 
       String t1_name, t2_name, rot_name;
 
-      if (type == XY)
+      if (type == Plane.XY)
       {
          t1_name = "x";
          t2_name = "y";
          rot_name = "yaw";
       }
-      else if (type == XZ)
+      else if (type == Plane.XZ)
       {
          t1_name = "x";
          t2_name = "z";
@@ -135,7 +130,7 @@ public class FloatingPlanarJoint extends Joint
    }
 
 
-   public FloatingPlanarJoint(String jname, String varName, Robot rob, int type)
+   public FloatingPlanarJoint(String jname, String varName, Robot rob, Plane type)
    {
       super(jname, new Vector3d(), rob, 6);
       physics = new FloatingPlanarJointPhysics(this);
@@ -146,13 +141,13 @@ public class FloatingPlanarJoint extends Joint
 
       String t1_name, t2_name, rot_name;
 
-      if (type == XY)
+      if (type == Plane.XY)
       {
          t1_name = varName + "_x";
          t2_name = varName + "_y";
          rot_name = varName + "_yaw";
       }
-      else if (type == XZ)
+      else if (type == Plane.XZ)
       {
          t1_name = varName + "x";
          t2_name = varName + "z";
@@ -208,7 +203,7 @@ public class FloatingPlanarJoint extends Joint
       qd_t1.set(velocity.getX());
       qd_t2.set(velocity.getY());
    }
-   
+
    public void setCartesianVelocity(Tuple2d velocity)
    {
       qd_t1.set(velocity.getX());
@@ -228,7 +223,7 @@ public class FloatingPlanarJoint extends Joint
 
    public void setRotationalVelocity(double thetaDot)
    {
-      this.qd_rot.set(thetaDot);      
+      this.qd_rot.set(thetaDot);
    }
 
 
@@ -247,12 +242,12 @@ public class FloatingPlanarJoint extends Joint
 
    protected void setFloatingTransform3D(RigidBodyTransform t1)
    {
-      if (type == YZ)
+      if (type == Plane.YZ)
       {
          position.set(0.0, q_t1.getDoubleValue(), q_t2.getDoubleValue());
          t1.setRotationRollAndZeroTranslation(q_rot.getDoubleValue());
       }
-      else if (type == XZ)
+      else if (type == Plane.XZ)
       {
          position.set(q_t1.getDoubleValue(), 0.0, q_t2.getDoubleValue());
          t1.setRotationPitchAndZeroTranslation(q_rot.getDoubleValue());
@@ -267,7 +262,7 @@ public class FloatingPlanarJoint extends Joint
    }
 
 
-   public int getType()
+   public Plane getType()
    {
       return type;
    }

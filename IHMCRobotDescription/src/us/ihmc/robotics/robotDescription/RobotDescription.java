@@ -26,4 +26,9 @@ public class RobotDescription
    {
       this.name = name;
    }
+
+   public ArrayList<JointDescription> getRootJoints()
+   {
+      return rootJoints;
+   }
 }

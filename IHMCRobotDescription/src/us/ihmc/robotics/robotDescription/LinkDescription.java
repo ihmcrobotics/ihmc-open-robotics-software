@@ -18,7 +18,7 @@ public class LinkDescription
 
    private double mass;
    private final Vector3d centerOfMassOffset = new Vector3d();
-   private final DenseMatrix64F momentOfInertia = new DenseMatrix64F();
+   private final DenseMatrix64F momentOfInertia = new DenseMatrix64F(3, 3);
 
    public Vector3d principalMomentsOfInertia = new Vector3d();
    public Matrix3d principalAxesRotation = new Matrix3d();

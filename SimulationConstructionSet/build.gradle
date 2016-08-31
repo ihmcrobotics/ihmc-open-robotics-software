@@ -70,6 +70,7 @@ dependencies {
 
     compile ihmc.getProjectDependency(":Plotting")
 	compile ihmc.getProjectDependency(":Graphics3DAdapter")
+	compile ihmc.getProjectDependency(":IHMCRobotDescription")
 	compile ihmc.getProjectDependency(":ParameterOptimization")
 	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
