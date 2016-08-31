@@ -2,12 +2,9 @@ package us.ihmc.plotting.jfree;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
 import org.jfree.chart.ChartFactory;
