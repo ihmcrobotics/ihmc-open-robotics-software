@@ -9,9 +9,21 @@ public class RobotDescription
 
    public RobotDescription(String name)
    {
-      this.name = name;
+      this.setName(name);
    }
 
+   public void addRootJoint(JointDescription rootJoint)
+   {
+      this.rootJoints.add(rootJoint);
+   }
 
+   public String getName()
+   {
+      return name;
+   }
 
+   public void setName(String name)
+   {
+      this.name = name;
+   }
 }
