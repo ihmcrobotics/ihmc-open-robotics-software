@@ -7,10 +7,12 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class CommonReferenceFrames implements ReferenceFrames
 {
    private final CenterOfMassReferenceFrame centerOfMassFrame;
+   private final SDFFullRobotModel fullRobotModel;
 
    public CommonReferenceFrames(SDFFullRobotModel fullRobotModel)
    {
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
+      this.fullRobotModel = fullRobotModel;
    }
    
    @Override
@@ -21,6 +23,7 @@ public class CommonReferenceFrames implements ReferenceFrames
    
    public void updateFrames()
    {
+      fullRobotModel.updateFrames();
       centerOfMassFrame.update();
    }
 }

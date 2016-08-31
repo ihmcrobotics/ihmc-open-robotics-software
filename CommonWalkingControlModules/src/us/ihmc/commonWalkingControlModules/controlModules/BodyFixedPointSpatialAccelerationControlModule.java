@@ -88,7 +88,7 @@ public class BodyFixedPointSpatialAccelerationControlModule
 
    public void getEndEffectorCurrentAngularVelocity(FrameVector endEffectorAngularVelocityToPack)
    {
-      accelerationControlModule.getEndEffectorCurrentLinearVelocity(endEffectorAngularVelocityToPack);
+      accelerationControlModule.getEndEffectorCurrentAngularVelocity(endEffectorAngularVelocityToPack);
    }
 
    public void getAcceleration(SpatialAccelerationVector accelerationToPack)

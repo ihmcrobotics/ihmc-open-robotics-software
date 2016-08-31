@@ -133,7 +133,7 @@ public class BodyFixedPointLinearAccelerationControlModule
       twistCalculator.getRelativeTwist(endEffectorTwist, base, endEffector);
       endEffectorTwist.changeFrame(baseFrame);
       bodyFixedPoint.setToZero(frameAtBodyFixedPoint);
-      bodyFixedPoint.changeFrame(base.getBodyFixedFrame());
+      bodyFixedPoint.changeFrame(baseFrame);
       endEffectorTwist.getLinearVelocityOfPointFixedInBodyFrame(currentVelocity, bodyFixedPoint);
 
       desiredVelocity.changeFrame(baseFrame);
