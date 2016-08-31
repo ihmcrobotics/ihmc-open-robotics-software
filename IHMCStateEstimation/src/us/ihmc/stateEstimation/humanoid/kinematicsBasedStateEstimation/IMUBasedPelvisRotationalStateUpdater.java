@@ -32,7 +32,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
  * @author Sylvain
  *
  */
-public class PelvisRotationalStateUpdater
+public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalStateUpdaterInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -57,7 +57,7 @@ public class PelvisRotationalStateUpdater
    private final ReferenceFrame measurementFrame;
    private final RigidBody measurementLink;
 
-   public PelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, IMUBiasProvider imuBiasProvider, double dt,
+   public IMUBasedPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, IMUBiasProvider imuBiasProvider, double dt,
          YoVariableRegistry parentRegistry)
    {
       this.imuBiasProvider = imuBiasProvider;
@@ -102,12 +102,14 @@ public class PelvisRotationalStateUpdater
          throw new RuntimeException("No sensor set up for the IMU.");
    }
 
+   @Override
    public void initialize()
    {
       rotationFrozenOffset.setIdentity();
       updateRootJointOrientationAndAngularVelocity();
    }
 
+   @Override
    public void initializeForFrozenState()
    {
       rotationFrozenOffset.setIdentity();
@@ -143,6 +145,7 @@ public class PelvisRotationalStateUpdater
    private final Matrix3d rotationFrozenOffset = new Matrix3d();
    private final double[] lastComputedYawPitchRoll = new double[3];
 
+   @Override
    public void updateForFrozenState()
    {
       // R_{measurementFrame}^{world}
@@ -175,6 +178,7 @@ public class PelvisRotationalStateUpdater
       updateViz();
    }
 
+   @Override
    public void updateRootJointOrientationAndAngularVelocity()
    {
       updateRootJointRotation();
@@ -282,11 +286,13 @@ public class PelvisRotationalStateUpdater
       yoRootJointFrameOrientation.set(rotationFromRootJointFrameToWorld);
    }
 
+   @Override
    public void getEstimatedOrientation(FrameOrientation estimatedOrientation)
    {
       estimatedOrientation.set(rotationFromRootJointFrameToWorld);
    }
 
+   @Override
    public void getEstimatedAngularVelocity(FrameVector estimatedAngularVelocityToPack)
    {
       estimatedAngularVelocityToPack.setIncludingFrame(angularVelocityRootJointFrameRelativeToWorld);
