@@ -41,4 +41,18 @@ public class SensorDescription
       transformToJointToPack.set(transformToJoint);
    }
 
+   public RigidBodyTransform getTransformToJoint()
+   {
+      return transformToJoint;
+   }
+
+   public Vector3d getOffsetFromJoint()
+   {
+      Vector3d ret = new Vector3d();
+
+      transformToJoint.getTranslation(ret);
+
+      return ret;
+   }
+
 }

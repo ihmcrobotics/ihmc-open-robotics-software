@@ -54,7 +54,7 @@
 <Title>
 control vars1
 </Title>
-<Entry Boxes>root.SpringFlamingoRobot.SpringFlamingoController.t_gain,root.SpringFlamingoRobot.SpringFlamingoController.t_damp,root.SpringFlamingoRobot.SpringFlamingoController.hip_d,root.SpringFlamingoRobot.SpringFlamingoController.hip_hold,root.SpringFlamingoRobot.SpringFlamingoController.swing_gain_knee,root.SpringFlamingoRobot.SpringFlamingoController.swing_damp_knee,root.SpringFlamingoRobot.q_x,root.SpringFlamingoRobot.q_z</Entry Boxes>
+<Entry Boxes>root.SpringFlamingoRobot.q_x,root.SpringFlamingoRobot.q_z</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -154,7 +154,7 @@ control vars1
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-7.837510200461724</Fix X>
+<Fix X>-9.342539902385122</Fix X>
 <Fix Y>0.0</Fix Y>
 <Fix Z>0.6</Fix Z>
 </Fix Position>

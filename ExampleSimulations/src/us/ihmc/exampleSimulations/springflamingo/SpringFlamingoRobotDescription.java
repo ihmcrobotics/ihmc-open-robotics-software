@@ -71,7 +71,6 @@ public class SpringFlamingoRobotDescription extends RobotDescription
    public SpringFlamingoRobotDescription(String name)
    {
       super(name);
-      //      this.setGravity(0.0, 0.0, -9.81);
 
       plane = new FloatingPlanarJointDescription("plane", Plane.XZ);
       LinkDescription body = body();
@@ -82,12 +81,12 @@ public class SpringFlamingoRobotDescription extends RobotDescription
       camRotation.setRotationYawAndZeroTranslation(Math.PI);
 
       CameraSensorDescription robotCam = new CameraSensorDescription("robot cam mount", camRotation);
-      plane.addCameraMount(robotCam);
+      plane.addCameraSensor(robotCam);
 
       RigidBodyTransform imuTransform = new RigidBodyTransform();
       imuTransform.setTranslation(new Vector3d(0.0, 0.0, 0.2));
       IMUSensorDescription imuMount = new IMUSensorDescription("FlamingoIMU", imuTransform);
-      plane.addIMUMount(imuMount);
+      plane.addIMUSensor(imuMount);
 
       /** ************************ Right limb ********************************** */
 

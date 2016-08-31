@@ -28,6 +28,11 @@ public class KinematicPointDescription
       offsetFromJointToPack.set(offsetFromJoint);
    }
 
+   public Vector3d getOffsetFromJoint()
+   {
+      return offsetFromJoint;
+   }
+
    public void setOffsetFromJoint(Vector3d offsetFromJoint)
    {
       this.offsetFromJoint.set(offsetFromJoint);

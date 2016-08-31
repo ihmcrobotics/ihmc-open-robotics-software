@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
@@ -31,7 +32,7 @@ public class SpringFlamingoSimulationTest
    {
       SpringFlamingoSimulation springFlamingoSimulation = new SpringFlamingoSimulation();
       scs = springFlamingoSimulation.getSimulationConstructionSet();
-      
+
 //      ThreadTools.sleep(1000L);
       testFixture = new SimulationGUITestFixture(scs);
    }
@@ -51,42 +52,42 @@ public class SpringFlamingoSimulationTest
    {
       testFixture.showWindow();
 //      testFixture.clickFileMenu();
-//      
+//
 //      testFixture.selectNameSpaceTab();
 //      ThreadTools.sleep(1000);
-      
+
 //      testFixture.selectNewGraphWindowMenu();
-      
+
       testFixture.selectSearchTab();
-      
+
       testFixture.deleteSearchText();
       testFixture.enterSearchText("q_");
-      
+
       testFixture.selectVariableAndSetValueInSearchTab("q_pitch", 1.0);
 //      ThreadTools.sleep(500);
       testFixture.selectVariableInSearchTab("q_x");
 //      ThreadTools.sleep(500);
-      
+
       testFixture.clickRemoveEmptyGraphButton();
       testFixture.clickNewGraphButton();
       testFixture.middleClickInEmptyGraph();
-      
+
       testFixture.selectVariableInSearchTab("q_z");
       testFixture.middleClickInNthGraph(1);
       testFixture.removeVariableFromNthGraph("q_z", 1);
-      
+
 //      testFixture.selectNewGraphWindowMenu();
-      
+
 //      testFixture.sel
 //      testFixture.selectVariableInSearchTab("q_z");
 //      ThreadTools.sleep(3000);
 
-      
+
 //      testFixture.clickRemoveEmptyGraphButton();
 //      testFixture.clickNewGraphButton();
 
-      
-//  
+
+//
 
 //      testFixture.clickNewGraphButton();
 //      testFixture.clickSimulateButton();
@@ -108,20 +109,20 @@ public class SpringFlamingoSimulationTest
 //
 //      testFixture.clickPlaybackPropertiesMenu();
 
-//      
+//
 //    ThreadTools.sleep(1000);
 //    ThreadTools.sleepForever();
 //    window.menuItem("foo").
-      
+
    }
-	
+
 
 	@DeployableTestMethod(estimatedDuration = 3.6)
 	@Test(timeout = 30000)
 	public void testRewindability() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
 	{
       int numTicksToTest = 1000;
-	   int numTicksToSimulateAhead = 100; 
+	   int numTicksToSimulateAhead = 100;
 
 	   SimulationConstructionSet scs1 = setupScs();
 	   SimulationConstructionSet scs2 = setupScs();
@@ -145,7 +146,7 @@ public class SpringFlamingoSimulationTest
 	   exceptions.add("lastControllerClockTime");
 	   exceptions.add("totalDelay");
       exceptions.add("TimerStandardDeviation");
-      
+
 	   SimulationRewindabilityVerifier checker = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
 
 	   double maxDifferenceAllowed = 1e-7;
@@ -163,21 +164,23 @@ public class SpringFlamingoSimulationTest
 
    private SimulationConstructionSet setupScs() throws SimulationExceededMaximumTimeException
    {
-      SpringFlamingoRobot springFlamingo = new SpringFlamingoRobot("SpringFlamingo");
+      SpringFlamingoRobot springFlamingoConstructor = new SpringFlamingoRobot("SpringFlamingo");
+      Robot springFlamingo = springFlamingoConstructor.getRobot();
+
       double gravity = 9.81;
-      SpringFlamingoFastWalkingController controller = new SpringFlamingoFastWalkingController(springFlamingo, gravity , "springFlamingoFastWalkingController");
+      SpringFlamingoFastWalkingController controller = new SpringFlamingoFastWalkingController(springFlamingoConstructor, gravity , "springFlamingoFastWalkingController");
       springFlamingo.setController(controller);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(false);
       parameters.setShowWindows(false);
       parameters.setShowSplashScreen(false);
-      
+
       SimulationConstructionSet scs = new SimulationConstructionSet(springFlamingo, parameters);
       scs.setDT(0.0001, 10);
-      
+
       return scs;
    }
-	
+
 
 }

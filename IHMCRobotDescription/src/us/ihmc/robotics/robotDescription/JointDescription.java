@@ -108,13 +108,28 @@ public class JointDescription
       wrenchSensors.add(jointWrenchSensorDescription);
    }
 
-   public void addCameraMount(CameraSensorDescription cameraSensorDescription)
+   public ArrayList<JointWrenchSensorDescription> getWrenchSensors()
+   {
+      return wrenchSensors;
+   }
+
+   public void addCameraSensor(CameraSensorDescription cameraSensorDescription)
    {
       cameraSensors.add(cameraSensorDescription);
    }
 
-   public void addIMUMount(IMUSensorDescription imuSensorDescription)
+   public ArrayList<CameraSensorDescription> getCameraSensors()
+   {
+      return cameraSensors;
+   }
+
+   public void addIMUSensor(IMUSensorDescription imuSensorDescription)
    {
       imuSensors.add(imuSensorDescription);
+   }
+
+   public ArrayList<IMUSensorDescription> getIMUSensors()
+   {
+      return imuSensors;
    }
 }

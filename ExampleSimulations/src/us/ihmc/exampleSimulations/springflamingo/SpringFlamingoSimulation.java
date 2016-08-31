@@ -9,6 +9,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.DynamicIntegrationMethod;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
@@ -24,9 +25,7 @@ import us.ihmc.simulationconstructionset.util.visualizers.RobotFreezeFramer;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SpringFlamingoSimulation
-{	
-   YoVariableRegistry registry; //TODO
-   
+{
    private static final SupportedGraphics3DAdapter graphics3DAdapterToUse = SupportedGraphics3DAdapter.JAVA_MONKEY_ENGINE;
 //   private static final SupportedGraphics3DAdapter graphics3DAdapterToUse = SupportedGraphics3DAdapter.JAVA3D;
 
@@ -68,8 +67,6 @@ public class SpringFlamingoSimulation
 
    public SpringFlamingoSimulation() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      
-      
       double baseGravity = EARTH_GRAVITY;    // MOON_GRAVITY; //1.5 * EARTH_GRAVITY; //4.0; //9.81;
       double minGravity = MOON_GRAVITY;    // 1.64; //4.0;
 
@@ -79,14 +76,17 @@ public class SpringFlamingoSimulation
          numberOfFlamingos = 6;
       }
 
-      SpringFlamingoRobot[] springFlamingos = new SpringFlamingoRobot[numberOfFlamingos];
+      Robot[] springFlamingos = new Robot[numberOfFlamingos];
 
       for (int i = 0; i < numberOfFlamingos; i++)
       {
          String name = "SpringFlamingoRobot";
          if (i > 0)
             name = name + i;
-         SpringFlamingoRobot springFlamingo = new SpringFlamingoRobot(name);
+         SpringFlamingoRobot springFlamingoConstructor = new SpringFlamingoRobot(name);
+
+         Robot springFlamingo = springFlamingoConstructor.getRobot();
+
          springFlamingo.setDynamicIntegrationMethod(DynamicIntegrationMethod.EULER_DOUBLE_STEPS);
          springFlamingos[i] = springFlamingo;
 
@@ -95,25 +95,25 @@ public class SpringFlamingoSimulation
          if (numberOfFlamingos > 1)
             gravity = -(baseGravity - (((double) i) / ((double) (numberOfFlamingos - 1))) * (baseGravity - minGravity));
 
-        
+
          YoVariableRegistry registry = springFlamingo.getRobotsYoVariableRegistry(); //TODO
-        
+
          // System.out.println(springFlamingo);
          RobotController controller = null;
          if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
          {
-            controller = new SpringFlamingoController(springFlamingo, "springFlamingoController");
+            controller = new SpringFlamingoController(springFlamingoConstructor, "springFlamingoController");
 //            controller = new SpringFlamingoController(springFlamingo, "springFlamingoController", icpVisualizer); //TODO
 //            System.out.println("I am using your controller");
          }
          else if (controllerToUse == FAST_WALKING_CONTROLLER)
          {
-            controller = new SpringFlamingoFastWalkingController(springFlamingo, gravity, "springFlamingoFastWalkingController");
+            controller = new SpringFlamingoFastWalkingController(springFlamingoConstructor, gravity, "springFlamingoFastWalkingController");
          }
 
          springFlamingo.setController(controller, TICKS_PER_CONTROL);
 
-         
+
          if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
          {
             springFlamingo.setGroundContactModel(new LinearGroundContactModel(springFlamingo, 14220, 150.6, 125.0, 300.0, springFlamingo.getRobotsYoVariableRegistry()));
@@ -128,17 +128,17 @@ public class SpringFlamingoSimulation
          double xStart = 0.0 + 1.5 * ((double) i);
 
          System.out.println("xStart = " + xStart + ", gravity = " + gravity);
-         springFlamingo.q_x.set(xStart);
-         springFlamingo.setGravity(gravity);  
+         springFlamingoConstructor.q_x.set(xStart);
+         springFlamingo.setGravity(gravity);
       }
 
-      
+
       if (!SHOW_GUI)
       {
          SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
          parameters.setCreateGUI(false);
          parameters.setDataBufferSize(512);
-         
+
          sim = new SimulationConstructionSet(springFlamingos, parameters);
       }
       else
@@ -146,7 +146,7 @@ public class SpringFlamingoSimulation
          int initialBufferSize = 4*8192;
          sim = new SimulationConstructionSet(springFlamingos, graphics3DAdapterToUse, new SimulationConstructionSetParameters(initialBufferSize));
       }
-      
+
       Graphics3DObject coneGraphics = new Graphics3DObject();
       coneGraphics.translate(-20.0, -2.0, 0.0);
       coneGraphics.addGenTruncatedCone(0.5, 0.25, 0.25, 0.1, 0.1, YoAppearance.Red());
@@ -222,13 +222,13 @@ public class SpringFlamingoSimulation
       sim.setPlaybackRealTimeRate(1.0);
       sim.setPlaybackDesiredFrameRate(0.033);
       sim.setGraphsUpdatedDuringPlayback(true);
-      
+
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();//TODO
 //      ICPVisualizer icpVisualizer = new ICPVisualizer(registry, yoGraphicsListRegistry);
       sim.addYoGraphicsListRegistry(yoGraphicsListRegistry); //TODO
 
       // Set up VarGroups, GraphGroups, EntryBoxGroups, and Configs.
-      sim.setupVarGroup("kinematics", new String[] {"t"}, new String[] {"q_.*", "qd_.*"});  
+      sim.setupVarGroup("kinematics", new String[] {"t"}, new String[] {"q_.*", "qd_.*"});
 
       sim.setupVarGroup("torques", null, new String[] {"t", "tau_.*"});
 
@@ -285,7 +285,7 @@ public class SpringFlamingoSimulation
 
       Thread myThread = new Thread(sim);
       myThread.start();
-      
+
       if (BENCHMARK)
       {
          long startTime = System.currentTimeMillis();
@@ -323,13 +323,13 @@ public class SpringFlamingoSimulation
          else
          {
             String message = "Variables changed: \n" + VariableDifference.allVariableDifferencesToString(variableDifferences);
-            
+
             System.err.println(message);
             JOptionPane.showMessageDialog(null, message);
          }
       }
    }
-   
+
    public SimulationConstructionSet getSimulationConstructionSet()
    {
       return sim;
