@@ -1,7 +1,6 @@
 package us.ihmc.robotics.robotDefinition;
 
-public class RobotDefinition
+public class LinkGraphicsDescription
 {
 
-   //Test gitflow
 }
