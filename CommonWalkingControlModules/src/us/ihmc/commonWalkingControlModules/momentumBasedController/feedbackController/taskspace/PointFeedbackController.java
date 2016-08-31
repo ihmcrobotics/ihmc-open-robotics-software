@@ -51,8 +51,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private final RigidBody endEffector;
 
-   private final YoFramePoint bodyFixedPoint;
-
    public PointFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
          YoVariableRegistry parentRegistry)
    {
