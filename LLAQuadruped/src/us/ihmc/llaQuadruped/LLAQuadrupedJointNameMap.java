@@ -221,4 +221,17 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
    {
       return RobotQuadrant.values;
    }
+   
+   @Override
+   public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
+   {
+      for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if(getJointBeforeFootName(robotQuadrant).equals(joineNameBeforeEndEffector))
+         {
+            return robotQuadrant;
+         }
+      }
+      throw new IllegalArgumentException(joineNameBeforeEndEffector + " was not listed as an end effector in " + this.getClass().getSimpleName());
+   }
 }
