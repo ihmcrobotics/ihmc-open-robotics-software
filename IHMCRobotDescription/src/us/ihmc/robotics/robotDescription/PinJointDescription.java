@@ -6,16 +6,42 @@ import us.ihmc.robotics.Axis;
 
 public class PinJointDescription extends JointDescription
 {
+   private boolean containsLimitStops;
+   private double qMin, qMax, kLimit, bLimit;
 
-   public PinJointDescription(String string, Vector3d vector3d, RobotDescription robotDescription, Axis axis)
+   private final Vector3d jointAxis = new Vector3d();
+
+   public PinJointDescription(String name, Vector3d offsetFromParentJoint, Axis jointAxis)
    {
-      // TODO Auto-generated constructor stub
+      super(name, offsetFromParentJoint);
+
+      switch (jointAxis)
+      {
+      case X:
+      {
+         this.jointAxis.set(1.0, 0.0, 0.0);
+         break;
+      }
+      case Y:
+      {
+         this.jointAxis.set(0.0, 1.0, 0.0);
+         break;
+      }
+      case Z:
+      {
+         this.jointAxis.set(0.0, 0.0, 1.0);
+         break;
+      }
+      }
    }
 
-   public void setLimitStops(double d, double e, double f, double g)
+   public void setLimitStops(double qMin, double qMax, double kLimit, double bLimit)
    {
-      // TODO Auto-generated method stub
-
+      this.containsLimitStops = true;
+      this.qMin = qMin;
+      this.qMax = qMax;
+      this.kLimit = kLimit;
+      this.bLimit = bLimit;
    }
 
 }
