@@ -2,7 +2,9 @@ package us.ihmc.plotting.artifact;
 
 import java.awt.Color;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 import javax.vecmath.Point2d;
@@ -11,49 +13,49 @@ import javax.vecmath.Vector2d;
 import us.ihmc.plotting.Coordinate;
 import us.ihmc.plotting.Graphics2DAdapter;
 
-public class PointArtifact extends Artifact
+public class PointListArtifact extends Artifact
 {
-   private final Vector<Point2d> _sonarHistory = new Vector<Point2d>();
-   private int _historyLength = 1;
-   private Color historyColor = Color.blue;
-   int _medianFilterSize = 20;
-   int _meanFilterSize = 999;
+   private final List<Point2d> points = new ArrayList<Point2d>();
+   private int historyLength = 1;
+   private Color historyColor = Color.BLUE;
+   int medianFilterSize = 20;
+   int meanFilterSize = 999;
    private int size = 10;
    
    private final Point2d tempPoint = new Point2d();
    private final Vector2d tempRadii = new Vector2d();
 
-   public PointArtifact(String id)
+   public PointListArtifact(String id)
    {
       this(id, 1);
    }
 
-   public PointArtifact(String id, Point2d point)
+   public PointListArtifact(String id, Point2d point)
    {
       this(id, 1);
 
       setPoint(point);
    }
 
-   public PointArtifact(String id, int history)
+   public PointListArtifact(String id, int history)
    {
       super(id);
       setType("point");
       setLevel(2);
       System.currentTimeMillis();
-      _historyLength = history;
+      historyLength = history;
       color = Color.red;
    }
 
    public void setPoint(Point2d point)
    {
-      synchronized (_sonarHistory)
+      synchronized (points)
       {
-         _sonarHistory.addElement(point);
+         points.add(point);
 
-         if (_sonarHistory.size() > _historyLength)
+         if (points.size() > historyLength)
          {
-            _sonarHistory.removeElementAt(0);
+            points.remove(0);
          }
       }
    }
@@ -65,33 +67,33 @@ public class PointArtifact extends Artifact
 
    public void setCoordinate(Coordinate coordinate)
    {
-      _sonarHistory.addElement(new Point2d(coordinate.getX(), coordinate.getY()));
+      points.add(new Point2d(coordinate.getX(), coordinate.getY()));
 
-      if (_sonarHistory.size() > _historyLength)
+      if (points.size() > historyLength)
       {
-         _sonarHistory.removeElementAt(0);
+         points.remove(0);
       }
    }
 
    public Coordinate getCoordinate()
    {
-      if (_sonarHistory.size() == 0)
+      if (points.size() == 0)
          return null;
 
-      return new Coordinate(_sonarHistory.get(0).getX(), _sonarHistory.get(0).getY(), Coordinate.METER);
+      return new Coordinate(points.get(0).getX(), points.get(0).getY(), Coordinate.METER);
    }
 
    public Point2d getPoint2d()
    {
-      if (_sonarHistory.size() == 0)
+      if (points.size() == 0)
          return null;
 
-      return _sonarHistory.get(0);
+      return points.get(0);
    }
 
    public void setHistoryLength(int length)
    {
-      _historyLength = length;
+      historyLength = length;
    }
 
    public void setHistoryColor(Color color)
@@ -158,16 +160,16 @@ public class PointArtifact extends Artifact
       Vector<Double> yMeanFilter = new Vector<Double>();
 
       Point2d coordinate = null;
-      synchronized (_sonarHistory)
+      synchronized (points)
       {
-         for (int i = 0; i < _sonarHistory.size(); i++)
+         for (int i = 0; i < points.size(); i++)
          {
             // paint points
-            coordinate = _sonarHistory.elementAt(i);
+            coordinate = points.get(i);
 
             if (coordinate != null)
             {
-               if (i == (_sonarHistory.size() - 1))
+               if (i == (points.size() - 1))
                {
                   graphics.setColor(color);
                   tempPoint.set(coordinate.getX(), coordinate.getY());
@@ -183,13 +185,13 @@ public class PointArtifact extends Artifact
                }
 
                // save for median and mean
-               if (i >= (_sonarHistory.size() - _medianFilterSize))
+               if (i >= (points.size() - medianFilterSize))
                {
                   xMedianFliter.addElement(new Double(coordinate.getX()));
                   yMedianFliter.addElement(new Double(coordinate.getY()));
                }
 
-               if (i >= (_sonarHistory.size() - _meanFilterSize))
+               if (i >= (points.size() - meanFilterSize))
                {
                   xMeanFilter.addElement(new Double(coordinate.getX()));
                   yMeanFilter.addElement(new Double(coordinate.getY()));
@@ -207,9 +209,9 @@ public class PointArtifact extends Artifact
 
    public void save(PrintWriter printWriter)
    {
-      for (int i = 0; i < _sonarHistory.size(); i++)
+      for (int i = 0; i < points.size(); i++)
       {
-         Point2d coordinate = _sonarHistory.get(i);
+         Point2d coordinate = points.get(i);
          printWriter.println(coordinate.getX() + " " + coordinate.getY());
       }
    }
