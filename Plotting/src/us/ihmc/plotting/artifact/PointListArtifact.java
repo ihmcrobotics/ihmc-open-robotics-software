@@ -10,7 +10,6 @@ import java.util.Vector;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.plotting.Coordinate;
 import us.ihmc.plotting.Graphics2DAdapter;
 
 public class PointListArtifact extends Artifact
@@ -63,24 +62,6 @@ public class PointListArtifact extends Artifact
    public void setSize(int size)
    {
       this.size = size;
-   }
-
-   public void setCoordinate(Coordinate coordinate)
-   {
-      points.add(new Point2d(coordinate.getX(), coordinate.getY()));
-
-      if (points.size() > historyLength)
-      {
-         points.remove(0);
-      }
-   }
-
-   public Coordinate getCoordinate()
-   {
-      if (points.size() == 0)
-         return null;
-
-      return new Coordinate(points.get(0).getX(), points.get(0).getY(), Coordinate.METER);
    }
 
    public Point2d getPoint2d()
