@@ -6,6 +6,7 @@ import java.util.Collection;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.Plane;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
@@ -107,13 +108,13 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
 
       // Are Holding on to the velocities as part of the state:
 
-      if (owner.type == owner.YZ)
+      if (owner.type == Plane.YZ)
       {
          w_i.set(owner.qd_rot.getDoubleValue(), 0.0, 0.0);
          v_i.set(0.0, owner.qd_t1.getDoubleValue(), owner.qd_t2.getDoubleValue());
       }
 
-      else if (owner.type == owner.XZ)
+      else if (owner.type == Plane.XZ)
       {
          w_i.set(0.0, owner.qd_rot.getDoubleValue(), 0.0);
          v_i.set(owner.qd_t1.getDoubleValue(), 0.0, owner.qd_t2.getDoubleValue());
@@ -162,7 +163,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
    private Vector3d wdXr = new Vector3d(), wXr = new Vector3d(), wXwXr = new Vector3d();
    public void featherstonePassFour(SpatialVector a_hat_h, int passNumber) throws UnreasonableAccelerationException
    {
-      if (owner.type == owner.XY)
+      if (owner.type == Plane.XY)
       {
          I_hat_i.getPlanarXYMatrix(I_hat_matrix);
 
@@ -177,7 +178,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
          a_hat_i.bottom.set(-a_hat_matrix.get(1, 0), -a_hat_matrix.get(2, 0), 0.0);
       }
 
-      else if (owner.type == owner.XZ)
+      else if (owner.type == Plane.XZ)
       {
          I_hat_i.getPlanarXZMatrix(I_hat_matrix);
 
@@ -227,14 +228,14 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
       // R0_i.transform(a_hat_world_top);  // Don't need to do this since planar!
       R0_i.transform(a_hat_world_bot);
 
-      if (owner.type == owner.YZ)
+      if (owner.type == Plane.YZ)
       {
          owner.qdd_t1.set(a_hat_world_bot.getY());
          owner.qdd_t2.set(a_hat_world_bot.getZ());
          owner.qdd_rot.set(a_hat_i.top.getX());    // a_hat_world_top.x;  // Don't need to do this since planar!
       }
 
-      else if (owner.type == owner.XZ)
+      else if (owner.type == Plane.XZ)
       {
          owner.qdd_t1.set(a_hat_world_bot.getX());
          owner.qdd_t2.set(a_hat_world_bot.getZ());
@@ -371,7 +372,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
       // Override with FloatingPlanarJoint as in Mirtich p. 144
       // Already have computed I_hat_inverse from the dynamics.  Use that...
 
-      if (owner.type == owner.XY)
+      if (owner.type == Plane.XY)
       {
          Y_hat_i.getPlanarXYMatrix(Y_hat_matrix);
 
@@ -382,7 +383,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
          delta_v_me.bottom.set(-a_hat_matrix.get(1, 0), -a_hat_matrix.get(2, 0), 0.0);
       }
 
-      else if (owner.type == owner.XZ)
+      else if (owner.type == Plane.XZ)
       {
          Y_hat_i.getPlanarXZMatrix(Y_hat_matrix);
 
@@ -415,7 +416,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
       // Override with FloatingJoint as in Mirtich p. 144
       // Already have computed I_hat_inverse from the dynamics.  Use that...
 
-      if (owner.type == owner.XY)
+      if (owner.type == Plane.XY)
       {
          Y_hat_i.getPlanarXYMatrix(Y_hat_matrix);
 
@@ -434,7 +435,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
          owner.qd_t2.set(owner.qd_t2.getDoubleValue() + delta_qd_xyz.getY());
       }
 
-      else if (owner.type == owner.XZ)
+      else if (owner.type == Plane.XZ)
       {
          Y_hat_i.getPlanarXZMatrix(Y_hat_matrix);
 
@@ -501,14 +502,14 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
       Rh_i.setIdentity();    // We probably can rely on Rh_i not changing its 1 and 0 elements but let's just be safe.
       double cosQ = Math.cos(owner.q_rot.getDoubleValue()), sinQ = Math.sin(owner.q_rot.getDoubleValue());
 
-      if (owner.type == owner.YZ)
+      if (owner.type == Plane.YZ)
       {
          Rh_i.setElement(1, 1, cosQ);
          Rh_i.setElement(2, 2, cosQ);
          Rh_i.setElement(1, 2, -sinQ);
          Rh_i.setElement(2, 1, sinQ);
       }    // Rotation about X
-      else if (owner.type == owner.XZ)
+      else if (owner.type == Plane.XZ)
       {
          Rh_i.setElement(0, 0, cosQ);
          Rh_i.setElement(2, 2, cosQ);

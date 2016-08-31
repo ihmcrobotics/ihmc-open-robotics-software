@@ -2,26 +2,26 @@ package us.ihmc.robotics.robotDescription;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.Plane;
+
 public class FloatingPlanarJointDescription extends JointDescription
 {
-   private FloatingPlanarJointPlane plane;
+   private Plane plane;
 
-   public FloatingPlanarJointDescription(String name, RobotDescription robotDescription, FloatingPlanarJointPlane plane)
+   public FloatingPlanarJointDescription(String name, Plane plane)
    {
       super(name, new Vector3d());
       this.setType(plane);
    }
 
-   public FloatingPlanarJointPlane getPlane()
+   public Plane getPlane()
    {
       return plane;
    }
 
-   public void setType(FloatingPlanarJointPlane plane)
+   public void setType(Plane plane)
    {
       this.plane = plane;
    }
-
-   public static enum FloatingPlanarJointPlane{XY, YZ, XZ}
 
 }

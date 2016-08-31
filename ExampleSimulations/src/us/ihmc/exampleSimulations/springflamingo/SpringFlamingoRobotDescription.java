@@ -1,21 +1,29 @@
-package us.ihmc.robotics.robotDescription;
+package us.ihmc.exampleSimulations.springflamingo;
 
 import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
-
-import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.CameraSensorDescription;
+import us.ihmc.robotics.robotDescription.FloatingPlanarJointDescription;
+import us.ihmc.robotics.robotDescription.GroundContactPointDescription;
+import us.ihmc.robotics.robotDescription.IMUSensorDescription;
+import us.ihmc.robotics.robotDescription.JointDescription;
+import us.ihmc.robotics.robotDescription.JointWrenchSensorDescription;
+import us.ihmc.robotics.robotDescription.LinkDescription;
+import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
+import us.ihmc.robotics.robotDescription.PinJointDescription;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 
-public class RobotDescriptionUsingSpringFlamingoTest
+public class SpringFlamingoRobotDescription extends RobotDescription
 {
-   private static final boolean SHOW_CARTOON_GRAPHICS = true;
    private static final boolean SHOW_MASS_PROPERTIES_GRAPHICS = false;
+   private static final boolean SHOW_CARTOON_GRAPHICS = true;
 
    private static final double UPPER_LEG_MASS = 0.4598;
    private static final double UPPER_LEG_Ixx = 0.01256, UPPER_LEG_Iyy = 0.01256, UPPER_LEG_Izz = 0.00013;
@@ -28,47 +36,47 @@ public class RobotDescriptionUsingSpringFlamingoTest
    // private static final double FOOT_Ixx = 0.0015, FOOT_Iyy = 0.0015, FOOT_Izz = 7.15e-5;
    private static final double FOOT_Ixx = 7.15e-5, FOOT_Iyy = 0.0015, FOOT_Izz = 0.0015;
 
-   private static final double BODY_Z = .385;
-   private static final double BODY_Y = .12;
-   private static final double BODY_X = .05;
-   private static final double BODY_CG_Z = 0.20;
-   private static final double BODY_Z_LEGPLOT = 0.21;
-   private static final double BODY_Y_LEGPLOT = 0.363;
-   private static final double BODY_X_LEGPLOT = 0.45;
-   private static final double UPPER_LINK_LENGTH = 0.42;
-   private static final double UPPER_LEG_ZMAX = 0.0;
-   private static final double UPPER_LEG_ZMIN = -0.42;
-   private static final double UPPER_LEG_Y = 0.02175;
-   private static final double UPPER_LEG_X = 0.02175;
-   private static final double LOWER_LINK_LENGTH = 0.42;
-   private static final double LOWER_LEG_ZMAX = 0.0;
-   private static final double LOWER_LEG_ZMIN = -0.42;
-   private static final double LOWER_LEG_Y = 0.02175;
-   private static final double LOWER_LEG_X = 0.02175;
-   private static final double FOOT_ZMIN = -0.04;
-   private static final double FOOT_ZMAX = -0.01;
-   private static final double FOOT_Y = 0.04;
-   private static final double FOOT_X = 0.23;
-   private static final double FOOT_H = (0.04);
-   private static final double FOOT_OFFSET_PERCENT = 0.25;
-   private static final double FOOT_FORWARD = (FOOT_X * FOOT_OFFSET_PERCENT);
-   private static final double FOOT_BEHIND = FOOT_X - FOOT_FORWARD;
-   private static final double HIP_OFFSET_Y = 0.12;
+   public static final double BODY_Z = .385;
+   public static final double BODY_Y = .12;
+   public static final double BODY_X = .05;
+   public static final double BODY_CG_Z = 0.20;
+   public static final double BODY_Z_LEGPLOT = 0.21;
+   public static final double BODY_Y_LEGPLOT = 0.363;
+   public static final double BODY_X_LEGPLOT = 0.45;
+   public static final double UPPER_LINK_LENGTH = 0.42;
+   public static final double UPPER_LEG_ZMAX = 0.0;
+   public static final double UPPER_LEG_ZMIN = -0.42;
+   public static final double UPPER_LEG_Y = 0.02175;
+   public static final double UPPER_LEG_X = 0.02175;
+   public static final double LOWER_LINK_LENGTH = 0.42;
+   public static final double LOWER_LEG_ZMAX = 0.0;
+   public static final double LOWER_LEG_ZMIN = -0.42;
+   public static final double LOWER_LEG_Y = 0.02175;
+   public static final double LOWER_LEG_X = 0.02175;
+   public static final double FOOT_ZMIN = -0.04;
+   public static final double FOOT_ZMAX = -0.01;
+   public static final double FOOT_Y = 0.04;
+   public static final double FOOT_X = 0.23;
+   public static final double FOOT_H = (0.04);
+   public static final double FOOT_OFFSET_PERCENT = 0.25;
+   public static final double FOOT_FORWARD = (FOOT_X * FOOT_OFFSET_PERCENT);
+   public static final double FOOT_BEHIND = FOOT_X - FOOT_FORWARD;
+   public static final double HIP_OFFSET_Y = 0.12;
 
-   @Test
-   public void testUsingSpringFlamingoRobotDescription()
+   private final JointDescription plane;
+   private final PinJointDescription rightHip, rightKnee, rightAnkle, leftHip, leftKnee, leftAnkle;
+
+   private final ArrayList<GroundContactPointDescription> gcPoints = new ArrayList<GroundContactPointDescription>(4);
+
+   public SpringFlamingoRobotDescription(String name)
    {
-      FloatingPlanarJointDescription plane;
-      PinJointDescription rightHip, rightKnee, rightAnkle, leftHip, leftKnee, leftAnkle;
-
-      ArrayList<GroundContactPointDescription> gcPoints = new ArrayList<GroundContactPointDescription>(4);
-
-      RobotDescription robotDescription = new RobotDescription("SpringFlamingo");
+      super(name);
+      //      this.setGravity(0.0, 0.0, -9.81);
 
       plane = new FloatingPlanarJointDescription("plane", Plane.XZ);
       LinkDescription body = body();
       plane.setLink(body);
-      robotDescription.addRootJoint(plane);
+      this.addRootJoint(plane);
 
       RigidBodyTransform camRotation = new RigidBodyTransform();
       camRotation.setRotationYawAndZeroTranslation(Math.PI);
@@ -131,7 +139,7 @@ public class RobotDescriptionUsingSpringFlamingoTest
       LinkDescription l_lower_leg = lower_leg("l_lower_leg");
       leftKnee.setLink(l_lower_leg);
       leftHip.addJoint(leftKnee);
-      ((PinJointDescription) leftKnee).setLimitStops(-Math.PI, 0.0, 1000.0, 40.0);
+      leftKnee.setLimitStops(-Math.PI, 0.0, 1000.0, 40.0);
 
       JointWrenchSensorDescription leftKneeWrenchSensor = new JointWrenchSensorDescription("leftKneeWrenchSensor", new Vector3d());
       leftKnee.addJointWrenchSensor(leftKneeWrenchSensor);

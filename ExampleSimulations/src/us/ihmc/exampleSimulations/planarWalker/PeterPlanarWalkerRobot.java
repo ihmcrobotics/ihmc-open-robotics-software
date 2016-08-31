@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
@@ -41,7 +42,7 @@ public class PeterPlanarWalkerRobot extends Robot
       super("Walker");
       this.setGravity(GRAVITY);
 
-      bodyJoint = new FloatingPlanarJoint("body", this, FloatingPlanarJoint.XZ);
+      bodyJoint = new FloatingPlanarJoint("body", this, Plane.XZ);
 
       Link bodyLink = getBodyLink();
 
@@ -200,7 +201,7 @@ public class PeterPlanarWalkerRobot extends Robot
    {
       hipJoints.get(robotSide).getTau().set(torque);
    }
-   
+
    public double getHipTorque(RobotSide robotSide)
    {
       return hipJoints.get(robotSide).getTau().getDoubleValue();
