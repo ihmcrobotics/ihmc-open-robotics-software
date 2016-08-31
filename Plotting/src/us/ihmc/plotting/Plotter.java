@@ -44,6 +44,9 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO ALT rotation
  * TODO Fix color field in Artifact
  * TODO Implement remote artifact in line2d
+ * TODO Rid drawYo and move is
+ * TODO Rename draw square to drawRectangle
+ * TODO Remove all deprecated Graphics2DAdapter methods (or pass in frame)
  */
 @SuppressWarnings("serial")
 public class Plotter
@@ -240,7 +243,10 @@ public class Plotter
          @Override
          public void drawArtifact(Artifact artifact)
          {
-            artifact.draw(graphics2d, (int) Math.round(origin.getX()), (int) Math.round(origin.getY()), 0.0, metersToPixels.getX());
+            if (artifact.isVisible())
+            {
+               artifact.draw(graphics2d);
+            }
          }
       });
       
@@ -355,7 +361,7 @@ public class Plotter
             @Override
             public void drawArtifact(Artifact artifact)
             {
-               if (showHistory && artifact.getDrawHistory())
+               if (showHistory && artifact.getDrawHistory() && artifact.isVisible())
                {
                   artifact.drawHistory(graphics2d);
                }
@@ -370,7 +376,10 @@ public class Plotter
             @Override
             public void drawArtifact(Artifact artifact)
             {
-               artifact.draw(graphics2d, (int) Math.round(origin.getX()), (int) Math.round(origin.getY()), 0.0, metersToPixels.getX());
+               if (artifact.isVisible())
+               {
+                  artifact.draw(graphics2d);
+               }
             }
          });
       }

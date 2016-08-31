@@ -30,8 +30,6 @@ public abstract class YoArtifact extends Artifact implements RemoteYoGraphic
    
    public abstract void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry);
    
-   public abstract void draw(Graphics2DAdapter graphics);
-
    @Override
    public YoVariable<?>[] getVariables()
    {
@@ -48,15 +46,6 @@ public abstract class YoArtifact extends Artifact implements RemoteYoGraphic
    public final AppearanceDefinition getAppearance()
    {
       return appearance;
-   }
-   
-   @Override
-   public final void draw(Graphics2DAdapter graphics, int centerX, int centerY, double headingOffset, double scaleFactor)
-   {
-      if (isVisible)
-      {
-         draw(graphics);
-      }
    }
    
    @Override

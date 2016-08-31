@@ -34,6 +34,7 @@ import us.ihmc.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.LineSegment2d;
+import us.ihmc.robotics.linearDynamicSystems.BodeUnitsConverter;
 
 /**
  * Everything not deprecated is in meters.
@@ -222,6 +223,18 @@ public class Graphics2DAdapter
       drawLineSegment(center.getX() + radii.getX(), center.getY() - radii.getY(), center.getX() + radii.getX(), center.getY() + radii.getY());
       drawLineSegment(center.getX() - radii.getX(), center.getY() - radii.getY(), center.getX() - radii.getX(), center.getY() + radii.getY());
       drawLineSegment(center.getX() - radii.getX(), center.getY() + radii.getY(), center.getX() + radii.getX(), center.getY() + radii.getY());
+   }
+   
+   public void drawSquareFilled(Point2d center, Vector2d radii)
+   {
+      PlotterPoint2d centerFramePoint = pointBin[0];
+      PlotterVector2d radiiFrameVector = vectorBin[0];
+      centerFramePoint.setIncludingFrame(metersFrame, center);
+      radiiFrameVector.setIncludingFrame(metersFrame, radii);
+      centerFramePoint.add(-radiiFrameVector.getX(), radiiFrameVector.getY());
+      centerFramePoint.changeFrame(screenFrame);
+      radiiFrameVector.changeFrame(screenFrame);
+      drawRectangleFilled(pixelate(centerFramePoint.getX()), pixelate(centerFramePoint.getY()), pixelate(2.0 * radiiFrameVector.getX()), pixelate(2.0 * radiiFrameVector.getY()));
    }
 
    @Deprecated
@@ -431,6 +444,22 @@ public class Graphics2DAdapter
    {
       graphics2d.drawArc(x, y, width, height, startAngle, arcAngle);
    }
+   
+   public void drawArc(Point2d center, Vector2d radii, double startAngle, double arcAngle)
+   {
+      PlotterPoint2d plotCenter = pointBin[0];
+      PlotterVector2d plotRadii = vectorBin[0];
+      plotCenter.setIncludingFrame(metersFrame, center);
+      plotRadii.setIncludingFrame(metersFrame, radii);
+      plotCenter.changeFrame(screenFrame);
+      plotRadii.changeFrame(screenFrame);
+      graphics2d.drawArc(pixelate(plotCenter.getX()),
+                         pixelate(plotCenter.getY()),
+                         pixelate(2.0 * plotRadii.getX()),
+                         pixelate(2.0 * plotRadii.getY()),
+                         pixelate(BodeUnitsConverter.convertRadianToDegrees(startAngle)),
+                         pixelate(BodeUnitsConverter.convertRadianToDegrees(arcAngle)));
+   }
 
    @Deprecated
    public void drawArcFilled(int x, int y, int width, int height, int startAngle, int arcAngle)
@@ -444,6 +473,14 @@ public class Graphics2DAdapter
       graphics2d.drawString(str, x, y);
    }
 
+   public void drawString(Point2d startPoint, String string)
+   {
+      PlotterPoint2d plotStart = pointBin[0];
+      plotStart.setIncludingFrame(metersFrame, startPoint);
+      plotStart.changeFrame(screenFrame);
+      graphics2d.drawString(string, pixelate(plotStart.getX()), pixelate(plotStart.getY()));
+   }
+   
    @Deprecated
    public void drawString(String str, float x, float y)
    {

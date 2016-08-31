@@ -1,7 +1,6 @@
 package us.ihmc.plotting.artifact;
 
 import java.awt.BasicStroke;
-import java.awt.Stroke;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
@@ -11,9 +10,10 @@ import us.ihmc.robotics.geometry.Line2d;
 
 public class LineArtifact extends Artifact
 {
+   private static final BasicStroke STROKE = new BasicStroke(1.0f);
+   
    private final Point2d point1 = new Point2d();
    private final Point2d point2 = new Point2d(0.01, 0.01);
-   private int lineThickness = 1;
 
    public LineArtifact(String id)
    {
@@ -53,29 +53,16 @@ public class LineArtifact extends Artifact
       point2.add(point1, vector);
    }
 
-   public void setLineThicknessInPixels(int pixels)
-   {
-      lineThickness = pixels;
-   }
-
    /**
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int centerX, int centerY, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
-      if (isVisible)
-      {
-         int x1 = centerX + ((int) Math.round(point1.getX() * scaleFactor));
-         int y1 = centerY - ((int) Math.round(point1.getY() * scaleFactor));
-         int x2 = centerX + ((int) Math.round(point2.getX() * scaleFactor));
-         int y2 = centerY - ((int) Math.round(point2.getY() * scaleFactor));
-         graphics2d.setColor(color);
-         Stroke currentStroke = graphics2d.getStroke();
-         graphics2d.setStroke(new BasicStroke(lineThickness));
-         graphics2d.drawLineSegment(x1, y1, x2, y2);
-         graphics2d.setStroke(currentStroke);
-      }
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+      
+      graphics.drawLineSegment(point1.getX(), point1.getY(), point2.getX(), point2.getY());
    }
 
    @Override
