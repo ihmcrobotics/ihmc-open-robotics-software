@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.vecmath.Vector3d;
 
@@ -21,11 +22,69 @@ public class RobotConstructorFromRobotDescription
 {
    private Robot robot;
 
-   public RobotConstructorFromRobotDescription()
+   private HashMap<String, Joint> jointNameMap = new HashMap<>();
+   private HashMap<JointDescription, Joint> jointDescriptionMap = new HashMap<>();
+
+   private HashMap<String, CameraMount> cameraNameMap = new HashMap<>();
+   private HashMap<CameraSensorDescription, CameraMount> cameraDescriptionMap = new HashMap<>();
+
+   private HashMap<String, IMUMount> imuNameMap = new HashMap<>();
+   private HashMap<IMUSensorDescription, IMUMount> imuDescriptionMap = new HashMap<>();
+
+   private HashMap<String, JointWrenchSensor> wrenchSensorNameMap = new HashMap<>();
+   private HashMap<JointWrenchSensorDescription, JointWrenchSensor> wrenchSensorDescriptionMap = new HashMap<>();
+
+   public RobotConstructorFromRobotDescription(RobotDescription description)
    {
+      constructRobotFromDescription(description);
    }
 
-   public Robot constructRobotFromDescription(RobotDescription description)
+   public Robot getRobot()
+   {
+      return robot;
+   }
+
+   public Joint getJoint(String jointName)
+   {
+      return jointNameMap.get(jointName);
+   }
+
+   public Joint getJoint(JointDescription jointDescription)
+   {
+      return jointDescriptionMap.get(jointDescription);
+   }
+
+   public CameraMount getCameraMount(String cameraName)
+   {
+      return cameraNameMap.get(cameraName);
+   }
+
+   public CameraMount getCameraMount(CameraSensorDescription cameraSensorDescription)
+   {
+      return cameraDescriptionMap.get(cameraSensorDescription);
+   }
+
+   public IMUMount getIMUMount(String name)
+   {
+      return imuNameMap.get(name);
+   }
+
+   public IMUMount getIMUMount(IMUSensorDescription imuSensorDescription)
+   {
+      return imuDescriptionMap.get(imuSensorDescription);
+   }
+
+   public JointWrenchSensor getJointWrenchSensor(String name)
+   {
+      return wrenchSensorNameMap.get(name);
+   }
+
+   public JointWrenchSensor getJointWrenchSensor(JointWrenchSensorDescription jointWrenchSensorDescription)
+   {
+      return wrenchSensorDescriptionMap.get(jointWrenchSensorDescription);
+   }
+
+   private void constructRobotFromDescription(RobotDescription description)
    {
       robot = new Robot(description.getName());
 
@@ -36,8 +95,6 @@ public class RobotConstructorFromRobotDescription
          Joint rootJoint = constructJointRecursively(rootJointDescription);
          robot.addRootJoint(rootJoint);
       }
-
-      return robot;
    }
 
    private Joint constructJointRecursively(JointDescription jointDescription)
@@ -60,6 +117,8 @@ public class RobotConstructorFromRobotDescription
          joint.addJoint(childJoint);
       }
 
+      jointNameMap.put(joint.getName(), joint);
+      jointDescriptionMap.put(jointDescription, joint);
       return joint;
    }
 
@@ -70,16 +129,22 @@ public class RobotConstructorFromRobotDescription
       {
          CameraMount cameraMount = new CameraMount(cameraSensorDescription.getName(), cameraSensorDescription.getTransformToJoint(), robot);
          joint.addCameraMount(cameraMount);
+
+         cameraNameMap.put(cameraMount.getName(), cameraMount);
+         cameraDescriptionMap.put(cameraSensorDescription, cameraMount);
       }
    }
 
    private void addIMUMounts(JointDescription jointDescription, Joint joint)
    {
-      ArrayList<IMUSensorDescription> IMUSensorDescriptions = jointDescription.getIMUSensors();
-      for (IMUSensorDescription IMUSensorDescription : IMUSensorDescriptions)
+      ArrayList<IMUSensorDescription> imuSensorDescriptions = jointDescription.getIMUSensors();
+      for (IMUSensorDescription imuSensorDescription : imuSensorDescriptions)
       {
-         IMUMount IMUMount = new IMUMount(IMUSensorDescription.getName(), IMUSensorDescription.getTransformToJoint(), robot);
-         joint.addIMUMount(IMUMount);
+         IMUMount imuMount = new IMUMount(imuSensorDescription.getName(), imuSensorDescription.getTransformToJoint(), robot);
+         joint.addIMUMount(imuMount);
+
+         imuNameMap.put(imuMount.getName(), imuMount);
+         imuDescriptionMap.put(imuSensorDescription, imuMount);
       }
    }
 
@@ -90,6 +155,9 @@ public class RobotConstructorFromRobotDescription
       {
          JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(jointWrenchSensorDescription.getName(), jointWrenchSensorDescription.getOffsetFromJoint(), robot);
          joint.addJointWrenchSensor(jointWrenchSensor);
+
+         wrenchSensorNameMap.put(jointWrenchSensor.getName(), jointWrenchSensor);
+         wrenchSensorDescriptionMap.put(jointWrenchSensorDescription, jointWrenchSensor);
       }
    }
 
