@@ -81,7 +81,7 @@ public class RobotDescriptionTest
 
             RigidBodyTransform imuTransform = new RigidBodyTransform();
             imuTransform.setTranslation(new Vector3d(0.0, 0.0, 0.2));
-            IMUMountDescription imuMount = new IMUMountDescription("FlamingoIMU", imuTransform, this);
+            IMUMountDescription imuMount = new IMUMountDescription("FlamingoIMU", imuTransform, robotDescription);
             plane.addIMUMount(imuMount);
 
             /** ************************ Right limb ********************************** */
