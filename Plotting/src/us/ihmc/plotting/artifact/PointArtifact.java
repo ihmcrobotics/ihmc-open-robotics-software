@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Vector;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.Coordinate;
 import us.ihmc.plotting.Graphics2DAdapter;
@@ -18,6 +19,9 @@ public class PointArtifact extends Artifact
    int _medianFilterSize = 20;
    int _meanFilterSize = 999;
    private int size = 10;
+   
+   private final Point2d tempPoint = new Point2d();
+   private final Vector2d tempRadii = new Vector2d();
 
    public PointArtifact(String id)
    {
@@ -101,17 +105,14 @@ public class PointArtifact extends Artifact
       double[] unsorted = new double[n];
       double[] sorted = new double[n];
 
-      // System.out.println("median for:");
       for (int i = 0; i < n; i++)
       {
-         // System.out.println("\t" + ((Double)buffer.elementAt(i)).doubleValue());
          unsorted[i] = ((Double) buffer.elementAt(i)).doubleValue();
       }
 
       System.arraycopy(unsorted, 0, sorted, 0, n);
       Arrays.sort(sorted);
 
-      // System.out.println("\t=" + sorted[n/2]);
       return sorted[n / 2];
    }
 
@@ -120,16 +121,13 @@ public class PointArtifact extends Artifact
       int n = buffer.size();
       double mean = 0;
 
-      // System.out.println("mean for:");
       for (int i = 0; i < n; i++)
       {
-         // System.out.println("\t" + ((Double)buffer.elementAt(i)).doubleValue());
          mean += ((Double) buffer.elementAt(i)).doubleValue();
       }
 
       mean = mean / n;
 
-      // System.out.println("\t=" + mean);
       return mean;
    }
 
@@ -138,16 +136,13 @@ public class PointArtifact extends Artifact
       int n = buffer.size();
       double sd = 0;
 
-      // System.out.println("stddev for:");
       for (int i = 0; i < n; i++)
       {
-         // System.out.println("\t" + ((Double)buffer.elementAt(i)).doubleValue());
          sd += Math.pow((((Double) buffer.elementAt(i)).doubleValue() - mean), 2);
       }
 
       sd = Math.sqrt(sd);
 
-      // System.out.println("\t=" + sd);
       return sd;
    }
 
@@ -155,7 +150,7 @@ public class PointArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int centerX, int centerY, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
       Vector<Double> xMedianFliter = new Vector<Double>();
       Vector<Double> yMedianFliter = new Vector<Double>();
@@ -172,17 +167,19 @@ public class PointArtifact extends Artifact
 
             if (coordinate != null)
             {
-               int x = centerX + ((int) Math.round(coordinate.getX() * scaleFactor) - (size / 2));
-               int y = centerY - ((int) Math.round(coordinate.getY() * scaleFactor)) - (size / 2);
                if (i == (_sonarHistory.size() - 1))
                {
-                  graphics2d.setColor(color);
-                  graphics2d.drawOvalFilled(x, y, size, size);
+                  graphics.setColor(color);
+                  tempPoint.set(coordinate.getX(), coordinate.getY());
+                  tempRadii.set(size, size);
+                  graphics.drawOvalFilled(tempPoint, tempRadii);
                }
                else
                {
-                  graphics2d.setColor(historyColor);
-                  graphics2d.drawOvalFilled(x, y, (int) (size * 0.7), (int) (size * 0.7));
+                  graphics.setColor(historyColor);
+                  tempPoint.set(coordinate.getX(), coordinate.getY());
+                  tempRadii.set(size * 0.7, size * 0.7);
+                  graphics.drawOvalFilled(tempPoint, tempRadii);
                }
 
                // save for median and mean
@@ -201,33 +198,6 @@ public class PointArtifact extends Artifact
 
          }
       }
-
-      // paint median
-
-      /*
-       * double xMedian = getMedian(xMeanFilter); double yMedian =
-       * getMedian(yMeanFilter); int x = centerX + (new Double(xMedian*
-       * scaleFactor).intValue()); int y = centerY - (new Double(yMedian*
-       * scaleFactor).intValue()); g.setColor(Color.black); g.drawOval(x -10,
-       * y-10, 20, 20);
-       */
-
-      // paint mean
-
-      /*
-       * double xMean = getMean(xMeanFilter); double yMean =
-       * getMean(yMeanFilter); double xStdDev = getStdDev(xMeanFilter, xMean);
-       * double yStdDev = getStdDev(yMeanFilter, yMean); x = centerX + (new
-       * Double(xMean* scaleFactor).intValue()); y = centerY - (new
-       * Double(yMean* scaleFactor).intValue()); g.setColor(Color.blue); int xSD
-       * = new Double(xStdDev*scaleFactor).intValue(); int ySD = new
-       * Double(yStdDev*scaleFactor).intValue(); g.drawOval((x - (xSD/2)), (y -
-       * (ySD/2)), xSD, ySD);
-       */
-
-      // System.out.println("gps " + coordinate.getX() + " " + coordinate.getY() +
-      // " " + xMeanFilter.size() + " " + (System.currentTimeMillis() - _startTime)/1000 +
-      // " " + xMean + " " + yMean + " " + xStdDev + " " + yStdDev);
    }
 
    @Override

@@ -1,18 +1,27 @@
 package us.ihmc.plotting.artifact;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+
 import us.ihmc.plotting.Graphics2DAdapter;
 
 public class CircleArtifact extends Artifact
 {
+   private static final BasicStroke STROKE = new BasicStroke(1.0f);
+   
    private double x;
    private double y;
    private double diameter;
    private boolean fill = true;
+   
+   private final Point2d tempPoint = new Point2d();
+   private final Vector2d tempRadii = new Vector2d();
 
    public CircleArtifact(String id, double x, double y, double diameter, boolean fill)
    {
@@ -55,20 +64,20 @@ public class CircleArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int centerX, int centerY, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
-      int x = centerX + ((int)Math.round(this.x * scaleFactor));
-      int y = centerY - ((int)Math.round(this.y * scaleFactor));
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+      tempPoint.set(x, y);
+      tempRadii.set(diameter / 2.0, diameter / 2.0);
 
-      graphics2d.setColor(color);
-      int d = (int) ((this.diameter * scaleFactor));
       if (fill)
       {
-         graphics2d.drawOvalFilled((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics.drawOvalFilled(tempPoint, tempRadii);
       }
       else
       {
-         graphics2d.drawOval((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics.drawOval(tempPoint, tempRadii);
       }
    }
 
@@ -76,6 +85,7 @@ public class CircleArtifact extends Artifact
    public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
    {
       graphics.setColor(color);
+      graphics.setStroke(STROKE);
       int diameter = 40;
       if (fill)
       {

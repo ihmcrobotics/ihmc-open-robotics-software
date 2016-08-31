@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+
 import us.ihmc.plotting.Coordinate;
 import us.ihmc.plotting.Graphics2DAdapter;
 import us.ihmc.plotting.Pose;
@@ -13,6 +16,9 @@ public class ShapeArtifact extends Artifact
    private Pose pose;
    private double height;
    private double width;
+   
+   private final Point2d tempCenter = new Point2d();
+   private final Vector2d tempRadii = new Vector2d();
 
    public ShapeArtifact(String id, String type, double height, double width, Pose pose)
    {
@@ -43,7 +49,7 @@ public class ShapeArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int centerX, int centerY, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
       if (pose == null)
       {
@@ -52,27 +58,25 @@ public class ShapeArtifact extends Artifact
          return;
       }
 
-      int x = centerX + ((int) Math.round(pose.getX() * scaleFactor));
-      int y = centerY - ((int) Math.round(pose.getY() * scaleFactor));
-
-      graphics2d.setColor(color);
-      int w = (int) (width * scaleFactor);
-      int h = (int) (height * scaleFactor);
+      graphics.setColor(color);
+      tempCenter.set(pose.getX(), pose.getY());
+      tempRadii.set(width / 2.0, height / 2.0);
+      
       if (getType().equals("fillcircle"))
       {
-         graphics2d.drawOvalFilled((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawOvalFilled(tempCenter, tempRadii);
       }
       else if (getType().equals("circle"))
       {
-         graphics2d.drawOval((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawOval(tempCenter, tempRadii);
       }
       else if (getType().equals("fillrectangle"))
       {
-         graphics2d.drawRectangleFilled((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawSquareFilled(tempCenter, tempRadii);
       }
       else if (getType().equals("rectangle"))
       {
-         graphics2d.drawRectangle((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawSquare(tempCenter, tempRadii);
       }
    }
 

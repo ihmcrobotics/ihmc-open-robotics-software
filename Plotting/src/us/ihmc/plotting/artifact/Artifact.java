@@ -21,7 +21,7 @@ public abstract class Artifact
       this.id = id;
    }
 
-   public abstract void draw(Graphics2DAdapter graphics, int centerX, int centerY, double headingOffset, double scaleFactor);
+   public abstract void draw(Graphics2DAdapter graphics);
    
    public abstract void drawHistory(Graphics2DAdapter graphics);
    
