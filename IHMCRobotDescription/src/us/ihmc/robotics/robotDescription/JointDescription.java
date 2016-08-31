@@ -42,4 +42,33 @@ public class JointDescription
    {
       this.link = link;
    }
+
+   public void addJoint(JointDescription childJointDescription)
+   {
+      childrenJointDescriptions.add(childJointDescription);
+   }
+
+   public void addJointWrenchSensor(JointWrenchSensorDescription jointWrenchSensorDescription)
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   public void addGroundContactPoint(GroundContactPointDescription groundContactPointDescription)
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   public void addCameraMount(CameraMountDescription robotCam)
+   {
+      // TODO Auto-generated method stub
+
+   }
+
+   public void addIMUMount(IMUMountDescription imuMount)
+   {
+      // TODO Auto-generated method stub
+
+   }
 }
