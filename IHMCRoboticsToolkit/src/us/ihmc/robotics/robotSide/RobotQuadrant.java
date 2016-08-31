@@ -538,8 +538,6 @@ public enum RobotQuadrant implements RobotSegment<RobotQuadrant>
             return RobotQuadrant.FRONT_RIGHT;
       }
 
-//      throw new RuntimeException("Could not find an associated quadrant for " + name);
-      System.err.println("Could not find an associated quadrant for " + name);
       return null;
    }
 
