@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -25,10 +26,14 @@ class DataExporterOptionsDialog
    private final JCheckBox createVideoCheckBox = new JCheckBox("Create Video");
    private final JCheckBox tagCodeCheckBox = new JCheckBox("Auto Tag Code");
    private final JTextField tagTextField = new JTextField();
+   private final JTextField filenameTextField = new JTextField();
+
    private boolean isCancelled = false;
    private final JDialog dialog;
 
-   public DataExporterOptionsDialog(String tag)
+   private final String simulationDataAndVideoDirectory;
+
+   public DataExporterOptionsDialog(String tag, String simulationDataAndVideoDirectory)
    {
       this.tag = tag;
       JFrame frame = new JFrame();
@@ -42,6 +47,9 @@ class DataExporterOptionsDialog
          }
       });
       dialog.add(buildOptionsPanel());
+
+      this.simulationDataAndVideoDirectory = simulationDataAndVideoDirectory;
+      dialog.setTitle("Saving to " + simulationDataAndVideoDirectory);
       dialog.pack();
       dialog.setVisible(true);
    }
@@ -96,6 +104,13 @@ class DataExporterOptionsDialog
       gridBagConstraints.gridwidth = 1;
       panel.add(tagTextField, gridBagConstraints);
       tagTextField.setText(tag);
+
+//    gridBagConstraints.gridy++;
+//    gridBagConstraints.gridwidth = 1;
+////    gridBagConstraints.gridx++;
+////    gridBagConstraints.gridwidth = 1;
+//    filenameTextField.setText(simulationDataAndVideoDirectory);
+//    panel.add(filenameTextField, gridBagConstraints);
 
       JButton okButton = new JButton("OK");
       okButton.addActionListener(new ActionListener()
