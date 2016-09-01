@@ -7,13 +7,27 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedPiecewiseConstantPressurePlanner
+import java.util.ArrayList;
+
+public class QuadrupedPiecewiseConstantPressureSequence
 {
+   // internal
    private final QuadrantDependentList<ContactState> initialContactState;
    private final QuadrantDependentList<MutableBoolean> isInitialContactState;
 
-   public QuadrupedPiecewiseConstantPressurePlanner()
+   // external
+   private int numberOfIntervals;
+   private final ArrayList<MutableDouble> timeAtStartOfInterval;
+   private final ArrayList<FramePoint> centerOfPressureAtStartOfInterval;
+   private final ArrayList<QuadrantDependentList<MutableDouble>> normalizedPressureAtStartOfInterval;
+   private final ArrayList<MutableDouble> normalizedPressureContributedByInitialContacts;
+   private final ArrayList<MutableDouble> normalizedPressureContributedByQueuedSteps;
+
+   public QuadrupedPiecewiseConstantPressureSequence(int maxSteps)
    {
+      int maxIntervals = 2 * maxSteps + 2;
+
+      // internal
       initialContactState = new QuadrantDependentList<>();
       isInitialContactState = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -21,36 +35,106 @@ public class QuadrupedPiecewiseConstantPressurePlanner
          initialContactState.set(robotQuadrant, ContactState.IN_CONTACT);
          isInitialContactState.set(robotQuadrant, new MutableBoolean(true));
       }
+
+      // external
+      numberOfIntervals = 0;
+      timeAtStartOfInterval = new ArrayList<>(maxIntervals);
+      centerOfPressureAtStartOfInterval = new ArrayList<>(maxIntervals);
+      normalizedPressureContributedByInitialContacts = new ArrayList<>(maxIntervals);
+      normalizedPressureContributedByQueuedSteps = new ArrayList<>(maxIntervals);
+      normalizedPressureAtStartOfInterval = new ArrayList<>(maxIntervals);
+      for (int i = 0; i < maxIntervals; i++)
+      {
+         timeAtStartOfInterval.add(i, new MutableDouble(0.0));
+         centerOfPressureAtStartOfInterval.add(i, new FramePoint());
+         normalizedPressureContributedByInitialContacts.add(i, new MutableDouble(0.0));
+         normalizedPressureContributedByQueuedSteps.add(i, new MutableDouble(0.0));
+         normalizedPressureAtStartOfInterval.add(i, new QuadrantDependentList<MutableDouble>());
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            normalizedPressureAtStartOfInterval.get(i).set(robotQuadrant, new MutableDouble(0.0));
+         }
+      }
+   }
+
+   public int getNumberOfIntervals()
+   {
+      return numberOfIntervals;
+   }
+
+   public double getTimeAtStartOfInterval(int interval)
+   {
+      return timeAtStartOfInterval.get(interval).getValue();
+   }
+
+   public FramePoint getCenterOfPressureAtStartOfInterval(int interval)
+   {
+      return centerOfPressureAtStartOfInterval.get(interval);
+   }
+
+   public QuadrantDependentList<MutableDouble> getNormalizedPressureAtStartOfInterval(int interval)
+   {
+      return normalizedPressureAtStartOfInterval.get(interval);
+   }
+
+   public double getNormalizedPressureContributedByInitialContacts(int interval)
+   {
+      return normalizedPressureContributedByInitialContacts.get(interval).getValue();
+   }
+
+   public double getNormalizedPressureContributedByQueuedSteps(int interval)
+   {
+      return normalizedPressureContributedByQueuedSteps.get(interval).getValue();
+   }
+
+
+   public ArrayList<MutableDouble> getTimeAtStartOfInterval()
+   {
+      return timeAtStartOfInterval;
+   }
+
+   public ArrayList<FramePoint> getCenterOfPressureAtStartOfInterval()
+   {
+      return centerOfPressureAtStartOfInterval;
+   }
+
+   public ArrayList<QuadrantDependentList<MutableDouble>> getNormalizedPressureAtStartOfInterval()
+   {
+      return normalizedPressureAtStartOfInterval;
+   }
+
+   public ArrayList<MutableDouble> getNormalizedPressureContributedByInitialContacts()
+   {
+      return normalizedPressureContributedByInitialContacts;
+   }
+
+   public ArrayList<MutableDouble> getNormalizedPressureContributedByQueuedSteps()
+   {
+      return normalizedPressureContributedByQueuedSteps;
    }
 
    /**
     * compute piecewise constant center of pressure plan given the upcoming contact states
-    * @param piecewiseConstantPressurePlan piecewise constant pressure plan (output)
-    * @param contactStatePlan contact state plan (input)
+    * @param contactStatePlan contact state plan
     */
-   public void compute(QuadrupedPiecewiseConstantPressurePlan piecewiseConstantPressurePlan, QuadrupedContactStatePlan contactStatePlan)
+   public void compute(QuadrupedContactStateSequence contactStatePlan)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         initialContactState.set(robotQuadrant, contactStatePlan.getContactStateAtStartOfInterval(0, robotQuadrant));
+         initialContactState.set(robotQuadrant, contactStatePlan.getContactStateAtStartOfInterval(0).get(robotQuadrant));
          isInitialContactState.get(robotQuadrant).setTrue();
       }
 
       for (int interval = 0; interval < contactStatePlan.getNumberOfIntervals(); interval++)
       {
-         MutableDouble timeAtStartOfInterval = contactStatePlan.getTimeAtStartOfInterval().get(interval);
+         numberOfIntervals = contactStatePlan.getNumberOfIntervals();
          QuadrantDependentList<FramePoint> solePosition = contactStatePlan.getSolePositionAtStartOfInterval().get(interval);
          QuadrantDependentList<ContactState> contactState = contactStatePlan.getContactStateAtStartOfInterval().get(interval);
-         FramePoint centerOfPressure = piecewiseConstantPressurePlan.getCenterOfPressureAtStartOfInterval().get(interval);
-         QuadrantDependentList<MutableDouble> normalizedPressure = piecewiseConstantPressurePlan.getNormalizedPressureAtStartOfInterval().get(interval);
-         MutableDouble normalizedPressureContributedByQueuedSteps = piecewiseConstantPressurePlan.getNormalizedPressureContributedByQueuedSteps().get(interval);
-         MutableDouble normalizedPressureContributedByInitialContacts = piecewiseConstantPressurePlan
-               .getNormalizedPressureContributedByInitialContacts().get(interval);
 
-         computeNormalizedContactPressure(normalizedPressure, contactState);
-         computeCenterOfPressure(centerOfPressure, solePosition, normalizedPressure);
-         normalizedPressureContributedByQueuedSteps.setValue(0.0);
-         normalizedPressureContributedByInitialContacts.setValue(0.0);
+         computeNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState);
+         computeCenterOfPressure(centerOfPressureAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
+         normalizedPressureContributedByQueuedSteps.get(interval).setValue(0.0);
+         normalizedPressureContributedByInitialContacts.get(interval).setValue(0.0);
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             if (contactState.get(robotQuadrant) != initialContactState.get(robotQuadrant))
@@ -59,18 +143,15 @@ public class QuadrupedPiecewiseConstantPressurePlanner
             }
             if (isInitialContactState.get(robotQuadrant).booleanValue())
             {
-               normalizedPressureContributedByInitialContacts.add(normalizedPressure.get(robotQuadrant));
+               normalizedPressureContributedByInitialContacts.get(interval).add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant));
             }
             else
             {
-               normalizedPressureContributedByQueuedSteps.add(normalizedPressure.get(robotQuadrant));
+               normalizedPressureContributedByQueuedSteps.add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant));
             }
          }
-
-         piecewiseConstantPressurePlan.getTimeAtStartOfInterval().get(interval).setValue(timeAtStartOfInterval);
+         timeAtStartOfInterval.get(interval).setValue(contactStatePlan.getTimeAtStartOfInterval().get(interval));
       }
-
-      piecewiseConstantPressurePlan.setNumberOfIntervals(contactStatePlan.getNumberOfIntervals());
    }
 
    private void computeNormalizedContactPressure(QuadrantDependentList<MutableDouble> contactPressure, QuadrantDependentList<ContactState> contactState)
@@ -137,4 +218,5 @@ public class QuadrupedPiecewiseConstantPressurePlanner
       point.checkReferenceFrameMatch(pointToAdd);
       point.add(scaleFactor * pointToAdd.getX(), scaleFactor * pointToAdd.getY(), scaleFactor * pointToAdd.getZ());
    }
+
 }
