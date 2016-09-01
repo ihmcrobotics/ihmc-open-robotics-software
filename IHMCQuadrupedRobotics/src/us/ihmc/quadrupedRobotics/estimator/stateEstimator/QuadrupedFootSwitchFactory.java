@@ -28,7 +28,12 @@ public class QuadrupedFootSwitchFactory
    private final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedFootSwitchManagerRegistry");
 
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter jointTorqueTouchdownThreshold = parameterFactory.createDouble("jointTorqueTouchdownThreshold", 3.0);
+   private final QuadrantDependentList<DoubleParameter> jointTorqueTouchdownThresholds = new QuadrantDependentList<>(
+         parameterFactory.createDouble("frontLeftJointTorqueTouchdownThreshold", 5.0),
+         parameterFactory.createDouble("frontRightJointTorqueTouchdownThreshold", 5.0),
+         parameterFactory.createDouble("hindLeftJointTorqueTouchdownThreshold", -5.0),
+         parameterFactory.createDouble("hindRightJointTorqueTouchdownThreshold", -5.0)
+   );
 
    private void setupTouchdownBasedFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
@@ -40,7 +45,7 @@ public class QuadrupedFootSwitchFactory
 
          JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector;
          jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.get().getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), registry);
-         jointTorqueBasedTouchdownDetector.setTorqueThreshold(jointTorqueTouchdownThreshold.get());
+         jointTorqueBasedTouchdownDetector.setTorqueThreshold(jointTorqueTouchdownThresholds.get(robotQuadrant).get());
          touchdownDetectorBasedFootSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
 
          footSwitches.set(robotQuadrant, touchdownDetectorBasedFootSwitch);

@@ -52,8 +52,12 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       boolean touchdown = true;
       for (int i = 0; i < touchdownDetectors.size(); i++)
       {
-         touchdown &= touchdownDetectors.get(i).hasTouchedDown();
+         TouchdownDetector touchdownDetector = touchdownDetectors.get(i);
+         if(!touchdownDetectorsUpdated)
+            touchdownDetector.update();
+         touchdown &= touchdownDetector.hasTouchedDown();
       }
+      touchdownDetectorsUpdated = true;
 
       touchdownDetected.set(touchdown);
 
@@ -99,5 +103,6 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    public void trustFootSwitch(boolean trustFootSwitch)
    {
       this.trustTouchdownDetectors.set(trustFootSwitch);
+      touchdownDetectorsUpdated = false;
    }
 }
