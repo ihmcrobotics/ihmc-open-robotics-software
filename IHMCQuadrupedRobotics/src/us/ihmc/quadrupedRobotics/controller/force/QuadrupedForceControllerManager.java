@@ -26,6 +26,7 @@ import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -40,6 +41,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final BooleanParameter bypassDoNothingStateParameter = parameterFactory.createBoolean("bypassDoNothingState", true);
+   private final EnumYoVariable<QuadrupedForceControllerRequestedEvent> lastEvent = new EnumYoVariable<>("lastEvent", registry, QuadrupedForceControllerRequestedEvent.class);
 
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
    private final QuadrupedPostureInputProviderInterface postureProvider;
@@ -131,6 +133,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       QuadrupedForceControllerRequestedEvent reqEvent = requestedEvent.getAndSet(null);
       if (reqEvent != null)
       {
+         lastEvent.set(reqEvent);
          stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, reqEvent);
       }
       stateMachine.process();
