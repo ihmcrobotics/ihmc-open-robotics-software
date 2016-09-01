@@ -4,59 +4,18 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.Axis;
 
-public class PinJointDescription extends JointDescription
+public class PinJointDescription extends OneDoFJointDescription
 {
-   private boolean containsLimitStops;
-   private double qMin, qMax, kLimit, bLimit;
-
-   private final Vector3d jointAxis = new Vector3d();
 
    public PinJointDescription(String name, Vector3d offsetFromParentJoint, Axis jointAxis)
    {
-      super(name, offsetFromParentJoint);
-
-      switch (jointAxis)
-      {
-      case X:
-      {
-         this.jointAxis.set(1.0, 0.0, 0.0);
-         break;
-      }
-      case Y:
-      {
-         this.jointAxis.set(0.0, 1.0, 0.0);
-         break;
-      }
-      case Z:
-      {
-         this.jointAxis.set(0.0, 0.0, 1.0);
-         break;
-      }
-      }
+      super(name, offsetFromParentJoint, jointAxis);
    }
 
-   public void setLimitStops(double qMin, double qMax, double kLimit, double bLimit)
+   public PinJointDescription(String name, Vector3d offset, Vector3d jointAxis)
    {
-      this.containsLimitStops = true;
-      this.qMin = qMin;
-      this.qMax = qMax;
-      this.kLimit = kLimit;
-      this.bLimit = bLimit;
+      super(name, offset, jointAxis);
    }
 
-   public Vector3d getJointAxis()
-   {
-      return jointAxis;
-   }
-
-   public boolean containsLimitStops()
-   {
-      return containsLimitStops;
-   }
-
-   public double[] getLimitStopParameters()
-   {
-      return new double[]{qMin, qMax, kLimit, bLimit};
-   }
 
 }
