@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2016-Sep-01 10:11" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20160414-2044">
+        <filterScript>
+
+// no filter script yet defined for this class diagram
+// use CTRL+SPACE for completion suggestions
+hide all methods
+hide all fields
+
+</filterScript>
+        <class className="us.ihmc.SdfLoader.GeneralizedSDFRobotModel" modelMemberId="us.ihmc.SdfLoader.GeneralizedSDFRobotModel" project="SDFLoader" xLocation="929" yLocation="107"/>
+        <class className="us.ihmc.SdfLoader.SDFConversionsHelper" modelMemberId="us.ihmc.SdfLoader.SDFConversionsHelper" project="SDFLoader" xLocation="271" yLocation="445"/>
+        <class className="us.ihmc.SdfLoader.SDFGraphics3DObject" modelMemberId="us.ihmc.SdfLoader.SDFGraphics3DObject" project="SDFLoader" xLocation="173" yLocation="166"/>
+        <class className="us.ihmc.SdfLoader.SDFFullRobotModel" modelMemberId="us.ihmc.SdfLoader.SDFFullRobotModel" project="SDFLoader" xLocation="535" yLocation="150"/>
+        <class className="us.ihmc.SdfLoader.SDFForceSensor" modelMemberId="us.ihmc.SdfLoader.SDFForceSensor" project="SDFLoader" xLocation="883" yLocation="511"/>
+        <class className="us.ihmc.SdfLoader.JaxbSDFLoader" modelMemberId="us.ihmc.SdfLoader.JaxbSDFLoader" project="SDFLoader" xLocation="836" yLocation="-84"/>
+        <class className="us.ihmc.SdfLoader.SDFJointHolder" modelMemberId="us.ihmc.SdfLoader.SDFJointHolder" project="SDFLoader" xLocation="569" yLocation="326"/>
+        <class className="us.ihmc.SdfLoader.SDFRobot" modelMemberId="us.ihmc.SdfLoader.SDFRobot" project="SDFLoader" xLocation="576" yLocation="-3"/>
+    </diagram>
+</ajsv>
