@@ -9,14 +9,17 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import us.ihmc.tools.io.printing.PrintTools;
+
 public class DataExporterReadmeWriter
 {
    public void writeReadMe(File directory, String name, long revisionNumber)
    {
       try
       {
-         String revisionNumberLine = "Revision number: " + revisionNumber + "\n\n";
-         String readmeText = revisionNumberLine + getUserInputReadMeText();
+//         String revisionNumberLine = "Revision number: " + revisionNumber + "\n\n";
+//         String readmeText = revisionNumberLine + getUserInputReadMeText();
+         String readmeText = getUserInputReadMeText();
 
          File file = new File(directory, name + ".txt");
          FileWriter out = new FileWriter(file);
@@ -26,7 +29,7 @@ public class DataExporterReadmeWriter
       }
       catch (IOException ex)
       {
-         ex.printStackTrace();
+         PrintTools.error(this, "IOException in DataExporterReadmeWriter. " + ex.getMessage());
       }
    }
 
