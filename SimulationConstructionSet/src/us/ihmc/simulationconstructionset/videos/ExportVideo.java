@@ -21,6 +21,7 @@ import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.XMLReaderUtility;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class ExportVideo implements ExportVideoCommandExecutor
 {
@@ -57,20 +58,20 @@ public class ExportVideo implements ExportVideoCommandExecutor
       Boolean isSequanceSelected = false;
       double playBackRate = 1.0;
       double frameRate = 30.0;
-      
+
       CameraController cameraController = standardSimulationGUI.getActiveView().getCameraController();
 
       this.createVideo(cameraController, selectedFile, dimension, isSequanceSelected, playBackRate, frameRate);
    }
-   
+
    public void createVideo(CameraController cameraController, File selectedFile, Dimension dimension, Boolean isSequanceSelected, double playBackRate, double frameRate)
-   { 
+   {
       Graphics3DAdapter graphics3dAdapter = standardSimulationGUI.getGraphics3dAdapter();
-      
+
       ViewportAdapter adapter = graphics3dAdapter.createNewViewport(null, false, true);
-      
+
       adapter.setupOffscreenView((int) dimension.getWidth(), (int) dimension.getHeight());
-      
+
       adapter.setCameraController(cameraController);
 
       CaptureDevice captureDevice = adapter.getCaptureDevice();
@@ -194,24 +195,24 @@ public class ExportVideo implements ExportVideoCommandExecutor
       dataBufferCommandsExecutor.gotoInPoint();
       BufferedImage bufferedImage = captureDevice.exportSnapshotAsBufferedImage();
       int bitrate = bufferedImage.getWidth() * bufferedImage.getHeight() / 100; // Heuristic bitrate in kbit/s
-      
+
       MP4H264MovieBuilder movieBuilder = null;
       try
       {
          movieBuilder = new MP4H264MovieBuilder(new File(file), bufferedImage.getWidth(), bufferedImage.getHeight(), (int) frameRate, bitrate,
                EUsageType.CAMERA_VIDEO_REAL_TIME);
-   
+
          movieBuilder.encodeFrame(bufferedImage);
-   
+
          boolean reachedEndPoint = false; // This keeps track of what the previous index was to stop the playback when it starts to loop back.
-   
+
          while (!reachedEndPoint)
          {
             printIfDebug("ExportVideo: Capturing Frame");
-   
-      
+
+
             movieBuilder.encodeFrame(captureDevice.exportSnapshotAsBufferedImage());
-   
+
             printIfDebug("Waiting For simulationSynchronizer 1");
             synchronized (simulationSynchronizer) // Synched so we don't update during a graphics redraw...
             {
@@ -226,14 +227,14 @@ public class ExportVideo implements ExportVideoCommandExecutor
                standardSimulationGUI.updateGraphs();
                standardSimulationGUI.allowTickUpdatesNow();
             }
-   
+
             //         if (sim.isGraphsUpdatedDuringPlayback())
             standardSimulationGUI.updateGraphs();
          }
       }
       catch(IOException e)
       {
-         e.printStackTrace();
+         PrintTools.error(this, "Could not crate movie.  " + e.getMessage());
       }
       finally
       {
@@ -245,7 +246,7 @@ public class ExportVideo implements ExportVideoCommandExecutor
             }
             catch (IOException e)
             {
-            }            
+            }
          }
       }
    }
