@@ -488,4 +488,9 @@ public class SkippyRobot extends Robot
       return footGroundContactPoint.isInContact();
    }
 
+   public double getMass()
+   {
+      return SHOULDER_MASS+LEG_MASS+TORSO_MASS;
+   }
+
 }
