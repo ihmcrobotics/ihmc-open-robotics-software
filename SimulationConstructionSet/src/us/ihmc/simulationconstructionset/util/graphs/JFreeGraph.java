@@ -46,6 +46,7 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class JFreeGraph extends JPanel
 {
@@ -61,7 +62,7 @@ public class JFreeGraph extends JPanel
 
    private AxisScaling xAxisScaling;
    private AxisScaling yAxisScaling;
-   
+
    public enum AxisScaling
    {
       CONSTANT,
@@ -184,7 +185,7 @@ public class JFreeGraph extends JPanel
       }
       graph.getXYPlot().setDomainAxis(0, axis);
    }
-   
+
    private void setYAxis()
    {
       ValueAxis axis;
@@ -198,10 +199,10 @@ public class JFreeGraph extends JPanel
          axis = new NumberAxis(xLabel);
          break;
       }
-      
+
       graph.getXYPlot().setRangeAxis(0, axis);
    }
-   
+
    public void setXAxisLabel(String label)
    {
       this.xLabel = label;
@@ -215,13 +216,13 @@ public class JFreeGraph extends JPanel
       setYAxis();
 
    }
-   
+
    public void setXaxisScaling(AxisScaling scaling)
    {
       this.xAxisScaling = scaling;
       setXAxis();
    }
-   
+
    public void setYaxisScaling(AxisScaling scaling)
    {
       this.yAxisScaling = scaling;
@@ -287,24 +288,24 @@ public class JFreeGraph extends JPanel
 
       return null;
    }
-   
+
    public void enableGrid(boolean enable)
    {
       if(enable)
       {
          BasicStroke dotted = new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1.0f, new float[] {1.0f, 6.0f}, 0.0f);
-         graph.getXYPlot().setDomainGridlinesVisible(true);  
-         graph.getXYPlot().setRangeGridlinesVisible(true);  
-         graph.getXYPlot().setRangeGridlinePaint(Color.black);  
-         graph.getXYPlot().setDomainGridlinePaint(Color.black);  
+         graph.getXYPlot().setDomainGridlinesVisible(true);
+         graph.getXYPlot().setRangeGridlinesVisible(true);
+         graph.getXYPlot().setRangeGridlinePaint(Color.black);
+         graph.getXYPlot().setDomainGridlinePaint(Color.black);
          graph.getXYPlot().setRangeGridlineStroke(dotted);
          graph.getXYPlot().setDomainGridlineStroke(dotted);
-         
+
       }
       else
       {
-         graph.getXYPlot().setDomainGridlinesVisible(false);  
-         graph.getXYPlot().setRangeGridlinesVisible(false);  
+         graph.getXYPlot().setDomainGridlinesVisible(false);
+         graph.getXYPlot().setRangeGridlinesVisible(false);
       }
    }
 
@@ -384,9 +385,9 @@ public class JFreeGraph extends JPanel
    {
       int x = 1024, y = 768;
       saveToPDF(pdfFileName, x, y);
-      
+
    }
-   
+
    public void saveToPDF(File pdfFileName, int x, int y)
    {
       try
@@ -414,7 +415,7 @@ public class JFreeGraph extends JPanel
       }
       catch (IOException | COSVisitorException e)
       {
-         e.printStackTrace();
+         PrintTools.error(this, "Could not save pdf to file " + pdfFileName);
       }
    }
 
@@ -473,7 +474,6 @@ public class JFreeGraph extends JPanel
    {
       legend.setItemFont(new Font("SansSerif", Font.PLAIN, 22));
       graph.addLegend(legend);
-      
    }
 
 

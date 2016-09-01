@@ -13,18 +13,34 @@ public class DataExporter implements ActionListener
 {
    private final SimulationConstructionSet scs;
    private final Robot robot;
+   private final String subdirectoryName;
 
    private DataExporterOptionsDialog optionsPanel;
    private final DataExporterReadmeWriter readmeWriter = new DataExporterReadmeWriter();
    private final DataExporterGraphCreator graphCreator;
    private final DataExporterExcelWorkbookCreator excelWorkbookCreator;
+   private final File simulationRootDirectory;
 
    public DataExporter(SimulationConstructionSet scs, Robot robot)
    {
+      this(scs, robot, robot.getClass(), robot.getName());
+   }
+
+   public DataExporter(SimulationConstructionSet scs, Robot robot, Class<?> rootClassForDirectory)
+   {
+      this(scs, robot, rootClassForDirectory, robot.getName());
+   }
+
+   public DataExporter(SimulationConstructionSet scs, Robot robot, Class<?> rootClassForDirectory, String subdirectoryName)
+   {
       this.scs = scs;
       this.robot = robot;
+      this.subdirectoryName = subdirectoryName;
+
       this.graphCreator = new DataExporterGraphCreator(robot, scs.getDataBuffer());
       this.excelWorkbookCreator = new DataExporterExcelWorkbookCreator(robot, scs.getDataBuffer());
+
+      simulationRootDirectory = DataExporterDirectoryFinder.findSimulationRootLocation(rootClassForDirectory);
    }
 
    public void actionPerformed(ActionEvent e)
@@ -44,21 +60,20 @@ public class DataExporter implements ActionListener
       scs.gotoInPointNow();
 
       // confirm directory structure is correct
-      File simulationRootDirectory = DataExporterDirectoryFinder.findSimulationRootLocation(robot);
       if (simulationRootDirectory == null)
          return;
-      File simulationDataAndVideoDirectory = DataExporterDirectoryFinder.findSimulationDataAndVideoRootLocation(simulationRootDirectory, robot);
+      File simulationDataAndVideoDirectory = DataExporterDirectoryFinder.findSimulationDataAndVideoRootLocation(simulationRootDirectory, subdirectoryName);
       if (simulationDataAndVideoDirectory == null)
          return;
 
       // create label
       String timeStamp = DateTools.getDateString() + "_" + DateTools.getTimeString();
-      String tagName = timeStamp + "_" + robot.getClass().getSimpleName();
+      String tagName = timeStamp + "_" + robot.getName();
 
       // figure out svn revsision number for project
       long revisionNumber = -1;
 
-      optionsPanel = new DataExporterOptionsDialog(tagName);
+      optionsPanel = new DataExporterOptionsDialog(tagName, simulationDataAndVideoDirectory.getAbsolutePath());
 
       if (!optionsPanel.isCancelled())
       {
