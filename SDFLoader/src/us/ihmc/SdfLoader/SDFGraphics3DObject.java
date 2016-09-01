@@ -19,7 +19,6 @@ import us.ihmc.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Blend;
 import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Texture;
 import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.Mesh;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.ModelFileType;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.HeightBasedTerrainBlend;
@@ -28,9 +27,10 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceMaterial;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 
 
-public class SDFGraphics3DObject extends Graphics3DObject
+public class SDFGraphics3DObject extends LinkGraphicsDescription
 {
    private static final boolean SHOW_COORDINATE_SYSTEMS = false;
    private static final AppearanceDefinition DEFAULT_APPEARANCE = YoAppearance.Orange();
@@ -38,18 +38,18 @@ public class SDFGraphics3DObject extends Graphics3DObject
    {
       YoAppearance.makeTransparent(DEFAULT_APPEARANCE, 0.4);
    }
-   
+
    public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, List<String> resourceDirectories)
    {
       this(sdfVisuals, resourceDirectories, new RigidBodyTransform());
    }
-   
+
    public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, List<String> resourceDirectories, RigidBodyTransform graphicsTransform)
    {
       Matrix3d rotation = new Matrix3d();
       Vector3d offset = new Vector3d();
       graphicsTransform.get(rotation, offset);
-      
+
       if(sdfVisuals != null)
       {
          for(AbstractSDFMesh sdfVisual : sdfVisuals)
@@ -57,25 +57,25 @@ public class SDFGraphics3DObject extends Graphics3DObject
             identity();
             translate(offset);
             rotate(rotation);
-            
+
             RigidBodyTransform visualPose = SDFConversionsHelper.poseToTransform(sdfVisual.getPose());
             Vector3d modelOffset = new Vector3d();
             Matrix3d modelRotation = new Matrix3d();
             visualPose.get(modelRotation, modelOffset);
-            
+
             if (SHOW_COORDINATE_SYSTEMS)
             {
-               addCoordinateSystem(0.1);         
+               addCoordinateSystem(0.1);
             }
             translate(modelOffset);
-            rotate(modelRotation);     
+            rotate(modelRotation);
             AppearanceDefinition appearance = null;
             if(sdfVisual.getMaterial() != null)
             {
                if(sdfVisual.getMaterial().getScript() != null)
                {
                   ArrayList<String> resourceUrls = new ArrayList<>();
-                  
+
                   if(sdfVisual.getMaterial().getScript().getUri() != null)
                   {
                      for(String uri : sdfVisual.getMaterial().getScript().getUri())
@@ -91,23 +91,23 @@ public class SDFGraphics3DObject extends Graphics3DObject
                         }
                      }
                   }
-                  
+
                   String name = sdfVisual.getMaterial().getScript().getName();
-                  
+
                   appearance = new SDFAppearance(resourceUrls, name, resourceDirectories);
                }
                else
-               {  
+               {
                   YoAppearanceMaterial mat = new YoAppearanceMaterial();
-                  
+
                   mat.setAmbientColor(SDFConversionsHelper.stringToColor(sdfVisual.getMaterial().getAmbient()));
                   mat.setDiffuseColor(SDFConversionsHelper.stringToColor(sdfVisual.getMaterial().getDiffuse()));
                   mat.setSpecularColor(SDFConversionsHelper.stringToColor(sdfVisual.getMaterial().getSpecular()));
-                  
+
                   appearance = mat;
                }
             }
-            
+
             SDFGeometry geometry = sdfVisual.getGeometry();
             Mesh mesh = geometry.getMesh();
             if(mesh != null)
@@ -130,13 +130,13 @@ public class SDFGraphics3DObject extends Graphics3DObject
             else if(geometry.getCylinder() != null)
             {
                double length = Double.parseDouble(geometry.getCylinder().getLength());
-               double radius = Double.parseDouble(geometry.getCylinder().getRadius()); 
+               double radius = Double.parseDouble(geometry.getCylinder().getRadius());
                translate(0.0, 0.0, -length/2.0);
                addCylinder(length, radius, getDefaultAppearanceIfNull(appearance));
             }
             else if(geometry.getBox() != null)
             {
-               String[] boxDimensions = geometry.getBox().getSize().split(" ");            
+               String[] boxDimensions = geometry.getBox().getSize().split(" ");
                double bx = Double.parseDouble(boxDimensions[0]);
                double by = Double.parseDouble(boxDimensions[1]);
                double bz = Double.parseDouble(boxDimensions[2]);
@@ -152,7 +152,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
             {
                Vector3d normal = SDFConversionsHelper.stringToNormalizedVector3d(geometry.getPlane().getNormal());
                Vector2d size = SDFConversionsHelper.stringToVector2d(geometry.getPlane().getSize());
-               
+
                AxisAngle4d planeRotation = GeometryTools.getRotationBasedOnNormal(normal);
                rotate(planeRotation);
                addCube(size.getX(), size.getY(), 0.005, getDefaultAppearanceIfNull(appearance));
@@ -161,8 +161,8 @@ public class SDFGraphics3DObject extends Graphics3DObject
             {
                String id = convertToResourceIdentifier(resourceDirectories, geometry.getHeightMap().getUri());
                SDFHeightMap heightMap = new SDFHeightMap(id, geometry.getHeightMap());
-               
-               
+
+
                AppearanceDefinition app = DEFAULT_APPEARANCE;
                if(geometry.getHeightMap().getTextures() != null)
                {
@@ -175,12 +175,12 @@ public class SDFGraphics3DObject extends Graphics3DObject
                      sdfTerrainBlend.addTexture(scale, convertToResourceIdentifier(resourceDirectories, text.getDiffuse()),
                            convertToResourceIdentifier(resourceDirectories, text.getNormal()));
                   }
-                  
+
                   for(Blend blend : geometry.getHeightMap().getBlends())
                   {
                      sdfTerrainBlend.addBlend(Double.parseDouble(blend.getMinHeight()), Double.parseDouble(blend.getFadeDist()));
                   }
-                  
+
                   app = sdfTerrainBlend;
                }
                translate(heightMap.getOffset());
@@ -190,14 +190,14 @@ public class SDFGraphics3DObject extends Graphics3DObject
             {
                System.err.println("Visual for " + sdfVisual.getName() + " not implemented yet");
                System.err.println("Defined visual" + ToStringBuilder.reflectionToString(geometry));
-               
+
             }
-   
-            
+
+
          }
       }
    }
-   
+
    private static AppearanceDefinition getDefaultAppearanceIfNull(AppearanceDefinition appearance)
    {
       if(appearance == null)
@@ -209,7 +209,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
          return appearance;
       }
    }
-   
+
    private void addMesh(String mesh, String submesh, boolean centerSubmesh, RigidBodyTransform visualPose, AppearanceDefinition appearance, List<String> resourceDirectories)
    {
 
@@ -230,13 +230,13 @@ public class SDFGraphics3DObject extends Graphics3DObject
 
       if (meshPath.contains("models/silverspine_roll.obj"))
          System.out.println();
-      
+
       if (resourceDirectories.size() == 0)
       {
          String id = tryConversion(meshPath, "");
          if (id != null) return id;
       }
-      
+
       for (String resourceDirectory : resourceDirectories)
       {
          String id = tryConversion(meshPath, resourceDirectory);
@@ -269,13 +269,13 @@ public class SDFGraphics3DObject extends Graphics3DObject
          if (f.exists())
          {
         	 return id;
-         }         
+         }
       }
       catch (URISyntaxException e)
       {
          System.err.println("Malformed resource path in .SDF file for path: " + meshPath);
       }
-      
+
       return null;
    }
 }

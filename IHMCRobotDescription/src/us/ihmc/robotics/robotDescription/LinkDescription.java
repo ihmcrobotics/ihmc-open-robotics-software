@@ -77,9 +77,20 @@ public class LinkDescription
       this.centerOfMassOffset.set(xOffset, yOffset, zOffset);
    }
 
-   public void setMomentOfInertia(DenseMatrix64F momentOfInertiaToPack)
+   public void setMomentOfInertia(DenseMatrix64F momentOfInertia)
    {
-      momentOfInertiaToPack.set(momentOfInertia);
+      this.momentOfInertia.set(momentOfInertia);
+   }
+
+   public void setMomentOfInertia(Matrix3d momentOfInertia)
+   {
+      for (int i=0; i<3; i++)
+      {
+         for (int j=0; j<3; j++)
+         {
+            this.momentOfInertia.set(i, j, momentOfInertia.getElement(0, 0));
+         }
+      }
    }
 
    public void getMomentOfInertia(DenseMatrix64F momentOfInertiaToPack)

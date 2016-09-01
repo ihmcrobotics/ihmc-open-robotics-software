@@ -21,6 +21,7 @@ public class JointDescription
    private final ArrayList<JointWrenchSensorDescription> wrenchSensors = new ArrayList<>();
    private final ArrayList<CameraSensorDescription> cameraSensors = new ArrayList<>();
    private final ArrayList<IMUSensorDescription> imuSensors = new ArrayList<>();
+   private final ArrayList<LidarSensorDescription> lidarSensors = new ArrayList<>();
 
    public JointDescription(String name, Vector3d offsetFromParentJoint)
    {
@@ -132,4 +133,15 @@ public class JointDescription
    {
       return imuSensors;
    }
+
+   public void addLidarSensor(LidarSensorDescription lidarSensor)
+   {
+      lidarSensors.add(lidarSensor);
+   }
+
+   public ArrayList<LidarSensorDescription> getLidarSensors()
+   {
+      return lidarSensors;
+   }
+
 }
