@@ -9,10 +9,11 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import javax.vecmath.Point3d;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class QuadrupedContactStatePlanner
+public class QuadrupedContactStateSequence
 {
    private enum QuadrupedStepTransitionType
    {
@@ -43,20 +44,25 @@ public class QuadrupedContactStatePlanner
       }
    };
 
-   // step plan
+   // internal states
    private final QuadrupedTimedStep[] stepArray;
    private final QuadrupedStepTransition[] stepTransition;
    private final QuadrupedTimedStep[] transitionStep;
-
-   // internal states
    private final QuadrantDependentList<FramePoint> solePosition;
    private final QuadrantDependentList<ContactState> contactState;
    private final QuadrantDependentList<MutableDouble> contactPressure;
 
-   public QuadrupedContactStatePlanner(int maximumNumberOfSteps)
+   // contact state plan
+   private int numberOfIntervals;
+   private final ArrayList<MutableDouble> timeAtStartOfInterval;
+   private final ArrayList<QuadrantDependentList<ContactState>> contactStateAtStartOfInterval;
+   private final ArrayList<QuadrantDependentList<FramePoint>> solePositionAtStartOfInterval;
+
+   public QuadrupedContactStateSequence(int maximumNumberOfSteps)
    {
-      // step plan
       int maximumNumberOfIntervals = 2 * maximumNumberOfSteps + 2;
+
+      // internal
       stepArray = new QuadrupedTimedStep[maximumNumberOfIntervals];
       stepTransition = new QuadrupedStepTransition[maximumNumberOfIntervals];
       transitionStep = new QuadrupedTimedStep[maximumNumberOfIntervals];
@@ -64,8 +70,6 @@ public class QuadrupedContactStatePlanner
       {
          stepTransition[i] = new QuadrupedStepTransition();
       }
-
-      // internal states
       solePosition = new QuadrantDependentList<>();
       contactState = new QuadrantDependentList<>();
       contactPressure = new QuadrantDependentList<>();
@@ -75,56 +79,100 @@ public class QuadrupedContactStatePlanner
          contactState.set(robotQuadrant, ContactState.IN_CONTACT);
          contactPressure.set(robotQuadrant, new MutableDouble(0.0));
       }
+
+      // external
+      numberOfIntervals = 0;
+      timeAtStartOfInterval = new ArrayList<>(maximumNumberOfIntervals);
+      solePositionAtStartOfInterval = new ArrayList<>(maximumNumberOfIntervals);
+      contactStateAtStartOfInterval = new ArrayList<>(maximumNumberOfIntervals);
+      for (int i = 0; i < maximumNumberOfIntervals; i++)
+      {
+         timeAtStartOfInterval.add(i, new MutableDouble(0.0));
+         contactStateAtStartOfInterval.add(i, new QuadrantDependentList<ContactState>());
+         solePositionAtStartOfInterval.add(i, new QuadrantDependentList<>(new FramePoint(), new FramePoint(), new FramePoint(), new FramePoint()));
+      }
+   }
+
+   public int getNumberOfIntervals()
+   {
+      return numberOfIntervals;
+   }
+
+   public double getTimeAtStartOfInterval(int interval)
+   {
+      return timeAtStartOfInterval.get(interval).getValue();
+   }
+
+   public QuadrantDependentList<ContactState> getContactStateAtStartOfInterval(int interval)
+   {
+      return contactStateAtStartOfInterval.get(interval);
+   }
+
+   public QuadrantDependentList<FramePoint> getSolePositionAtStartOfInterval(int interval)
+   {
+      return solePositionAtStartOfInterval.get(interval);
+   }
+
+   public ArrayList<MutableDouble> getTimeAtStartOfInterval()
+   {
+      return timeAtStartOfInterval;
+   }
+
+   public ArrayList<QuadrantDependentList<ContactState>> getContactStateAtStartOfInterval()
+   {
+      return contactStateAtStartOfInterval;
+   }
+
+   public ArrayList<QuadrantDependentList<FramePoint>> getSolePositionAtStartOfInterval()
+   {
+      return solePositionAtStartOfInterval;
    }
 
    /**
     * compute piecewise center of pressure plan given a preallocated queue of upcoming steps
-    * @param contactStatePlan contact state plan (output)
     * @param numberOfSteps number of upcoming steps (input)
     * @param stepQueue queue of preview steps (input)
     * @param initialSolePosition initial sole positions (input)
     * @param initialContactState initial sole contact state (input)
     * @param initialTime initial time (input)
     */
-   public void compute(QuadrupedContactStatePlan contactStatePlan, int numberOfSteps, PreallocatedQueue<QuadrupedTimedStep> stepQueue, QuadrantDependentList<FramePoint> initialSolePosition,
+   public void compute(int numberOfSteps, PreallocatedQueue<QuadrupedTimedStep> stepQueue, QuadrantDependentList<FramePoint> initialSolePosition,
          QuadrantDependentList<ContactState> initialContactState, double initialTime)
    {
       for (int i = 0; i < numberOfSteps; i++)
       {
          stepArray[i] = stepQueue.get(i);
       }
-      compute(contactStatePlan, numberOfSteps, stepArray, initialSolePosition, initialContactState, initialTime);
+      compute(numberOfSteps, stepArray, initialSolePosition, initialContactState, initialTime);
    }
 
    /**
     * compute piecewise center of pressure plan given a list of upcoming steps
-    * @param contactStatePlan contact state plan (output)
     * @param numberOfSteps number of upcoming steps (input)
     * @param stepList list of upcoming steps (input)
     * @param initialSolePosition initial sole positions (input)
     * @param initialContactState initial sole contact state (input)
     * @param initialTime initial time (input)
     */
-   public void compute(QuadrupedContactStatePlan contactStatePlan, int numberOfSteps, List<QuadrupedTimedStep> stepList, QuadrantDependentList<FramePoint> initialSolePosition,
+   public void compute(int numberOfSteps, List<QuadrupedTimedStep> stepList, QuadrantDependentList<FramePoint> initialSolePosition,
          QuadrantDependentList<ContactState> initialContactState, double initialTime)
    {
       for (int i = 0; i < numberOfSteps; i++)
       {
          stepArray[i] = stepList.get(i);
       }
-      compute(contactStatePlan, numberOfSteps, stepArray, initialSolePosition, initialContactState, initialTime);
+      compute(numberOfSteps, stepArray, initialSolePosition, initialContactState, initialTime);
    }
 
    /**
     * compute piecewise center of pressure plan given an array of upcoming steps
-    * @param contactStatePlan contact state plan (output)
     * @param numberOfSteps number of upcoming steps (input)
     * @param stepArray array of upcoming steps (input)
     * @param initialSolePosition initial sole positions (input)
     * @param initialContactState initial sole contact state (input)
     * @param initialTime initial time (input)
     */
-   public void compute(QuadrupedContactStatePlan contactStatePlan, int numberOfSteps, QuadrupedTimedStep[] stepArray, QuadrantDependentList<FramePoint> initialSolePosition,
+   public void compute(int numberOfSteps, QuadrupedTimedStep[] stepArray, QuadrantDependentList<FramePoint> initialSolePosition,
          QuadrantDependentList<ContactState> initialContactState, double initialTime)
    {
       // initialize contact state and sole positions
@@ -171,8 +219,13 @@ public class QuadrupedContactStatePlanner
       ArraySorter.sort(stepTransition, compareByTime);
 
       // compute transition time and center of pressure for each time interval
-      int numberOfIntervals = 1;
-      updatePiecewisePressurePlan(contactStatePlan, 0, initialTime);
+      numberOfIntervals = 1;
+      timeAtStartOfInterval.get(0).setValue(initialTime);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         contactStateAtStartOfInterval.get(0).set(robotQuadrant, contactState.get(robotQuadrant));
+         solePositionAtStartOfInterval.get(0).get(robotQuadrant).setIncludingFrame(solePosition.get(robotQuadrant));
+      }
       for (int i = 0; i < numberOfStepTransitions; i++)
       {
          switch (stepTransition[i].type)
@@ -188,20 +241,14 @@ public class QuadrupedContactStatePlanner
          }
          if ((i + 1 == numberOfStepTransitions) || (stepTransition[i].time != stepTransition[i + 1].time))
          {
-            updatePiecewisePressurePlan(contactStatePlan, numberOfIntervals, stepTransition[i].time);
+            timeAtStartOfInterval.get(numberOfIntervals).setValue(stepTransition[i].time);
+            for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            {
+               contactStateAtStartOfInterval.get(numberOfIntervals).set(robotQuadrant, contactState.get(robotQuadrant));
+               solePositionAtStartOfInterval.get(numberOfIntervals).get(robotQuadrant).setIncludingFrame(solePosition.get(robotQuadrant));
+            }
             numberOfIntervals++;
          }
-      }
-      contactStatePlan.setNumberOfIntervals(numberOfIntervals);
-   }
-
-   private void updatePiecewisePressurePlan(QuadrupedContactStatePlan contactStatePlan, int interval, double intervalStartTime)
-   {
-      contactStatePlan.getTimeAtStartOfInterval().get(interval).setValue(intervalStartTime);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         contactStatePlan.getContactStateAtStartOfInterval().get(interval).set(robotQuadrant, contactState.get(robotQuadrant));
-         contactStatePlan.getSolePositionAtStartOfInterval().get(interval).get(robotQuadrant).setIncludingFrame(solePosition.get(robotQuadrant));
       }
    }
 }
