@@ -184,7 +184,7 @@ public class BoundingBox3dTest
 
          // determine center point
          Point3d actualCenterPoint = new Point3d();
-         BoundingBox3d.getCenterPointCopy(actualCenterPoint);
+         BoundingBox3d.getCenterPoint(actualCenterPoint);
          assertEquals(expectedCenterPoint.getX(), actualCenterPoint.getX(), epsilon);
          assertEquals(expectedCenterPoint.getY(), actualCenterPoint.getY(), epsilon);
          assertEquals(expectedCenterPoint.getZ(), actualCenterPoint.getZ(), epsilon);
@@ -298,7 +298,7 @@ public class BoundingBox3dTest
          BoundingBox3d BoundingBox3d = new BoundingBox3d(lowerLeftPoint, upperRightPoint);
 
          Point3d actualCenterPoint = new Point3d();
-         BoundingBox3d.getCenterPointCopy(actualCenterPoint);
+         BoundingBox3d.getCenterPoint(actualCenterPoint);
 
          Point3d inPoint = new Point3d(centerX + (randomX * 0.9), centerY + (randomY * 0.9), centerZ + (randomZ * 0.9));
          assertTrue(BoundingBox3d.isInside(inPoint));
@@ -444,9 +444,9 @@ public class BoundingBox3dTest
       assertTrue(BoundingBox3dA.intersects(BoundingBox3dB));
 
       Point3d expectedCenterPoint = new Point3d();
-      BoundingBox3dA.getCenterPointCopy(expectedCenterPoint);
+      BoundingBox3dA.getCenterPoint(expectedCenterPoint);
       Point3d actualCenterPoint = new Point3d();
-      BoundingBox3dB.getCenterPointCopy(actualCenterPoint);
+      BoundingBox3dB.getCenterPoint(actualCenterPoint);
       assertEquals(expectedCenterPoint.getX(), actualCenterPoint.getX(), epsilon);
       assertEquals(expectedCenterPoint.getY(), actualCenterPoint.getY(), epsilon);
       assertEquals(expectedCenterPoint.getZ(), actualCenterPoint.getZ(), epsilon);
@@ -456,9 +456,9 @@ public class BoundingBox3dTest
       assertTrue(BoundingBox3dA.intersects(BoundingBox3dC));
 
       expectedCenterPoint = new Point3d();
-      BoundingBox3dA.getCenterPointCopy(expectedCenterPoint);
+      BoundingBox3dA.getCenterPoint(expectedCenterPoint);
       actualCenterPoint = new Point3d();
-      BoundingBox3dC.getCenterPointCopy(actualCenterPoint);
+      BoundingBox3dC.getCenterPoint(actualCenterPoint);
       assertEquals(expectedCenterPoint.getX(), actualCenterPoint.getX(), epsilon);
       assertEquals(expectedCenterPoint.getY(), actualCenterPoint.getY(), epsilon);
       assertEquals(expectedCenterPoint.getZ(), actualCenterPoint.getZ(), epsilon);

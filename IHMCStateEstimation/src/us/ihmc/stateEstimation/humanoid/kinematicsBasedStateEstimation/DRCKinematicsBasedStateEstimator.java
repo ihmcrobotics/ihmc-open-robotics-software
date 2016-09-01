@@ -41,6 +41,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
 {
@@ -56,7 +57,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    private final FusedIMUSensor fusedIMUSensor;
    private final JointStateUpdater jointStateUpdater;
-   private final PelvisRotationalStateUpdater pelvisRotationalStateUpdater;
+   private final PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
    private final ForceSensorStateUpdater forceSensorStateUpdater;
    private final IMUBiasStateEstimator imuBiasStateEstimator;
@@ -135,11 +136,12 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
       if (imusToUse.size() > 0)
       {
-         pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, estimatorDT, registry);
+         pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, estimatorDT, registry);
       }
       else
       {
-         pelvisRotationalStateUpdater = null;
+         PrintTools.warn(this, "No IMUs, setting up with: " + ConstantPelvisRotationalStateUpdater.class.getSimpleName(), true);
+         pelvisRotationalStateUpdater = new ConstantPelvisRotationalStateUpdater(inverseDynamicsStructure, registry);
       }
 
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, footSwitches,
