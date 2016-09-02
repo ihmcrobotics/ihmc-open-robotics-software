@@ -237,18 +237,19 @@ public class Plotter2DAdapter
       PlotterVector2d direction = vectorBin[0];
       start.setIncludingFrame(frame, line.getPoint());
       direction.setIncludingFrame(frame, line.getNormalizedVector());
+      start.changeFrame(screenFrame);
+      direction.changeFrame(screenFrame);
+      direction.normalize();
       PlotterPoint2d farPointPositive = pointBin[1];
       PlotterPoint2d farPointNegative = pointBin[2];
       PlotterVector2d far = vectorBin[1];
       far.setIncludingFrame(direction);
-      far.scale(2000.0);
+      far.scale(1e4);
       farPointPositive.setIncludingFrame(start);
       farPointNegative.setIncludingFrame(start);
       farPointPositive.add(far);
       farPointNegative.sub(far);
-      farPointPositive.changeFrame(screenFrame);
-      farPointNegative.changeFrame(screenFrame);
-      graphics2d.drawLine(pixelate(farPointNegative.getX()), pixelate(farPointNegative.getY()), pixelate(farPointPositive.getX()), pixelate(farPointPositive.getY()));
+      drawLineSegment(pixelate(farPointNegative.getX()), pixelate(farPointNegative.getY()), pixelate(farPointPositive.getX()), pixelate(farPointPositive.getY()));
    }
 
    public void drawPolygonFilled(PlotterReferenceFrame frame, ConvexPolygon2d convexPolygon2d)

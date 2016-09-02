@@ -31,6 +31,7 @@ import us.ihmc.plotting.frames.MetersReferenceFrame;
 import us.ihmc.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.plotting.frames.PlotterFrameSpace;
 import us.ihmc.plotting.frames.PlotterSpaceConverter;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -42,6 +43,7 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO Factor out artifacts.
  * TODO ALT rotation
  * TODO Fix color field in Artifact
+ * TODO Clean up after rotation code
  */
 @SuppressWarnings("serial")
 public class Plotter
@@ -77,6 +79,7 @@ public class Plotter
    
    private double screenRotation = 0.0;
    private final Vector3d tempTranslation = new Vector3d();
+   private final Line2d tempGridLine = new Line2d();
    private final PlotterPoint2d screenPosition;
    private final PlotterPoint2d upperLeftCorner;
    private final PlotterPoint2d lowerRightCorner;
@@ -154,7 +157,7 @@ public class Plotter
             transformToParent.setIdentity();
             tempTranslation.set(screenPosition.getX() + getPlotterWidthPixels() / 2.0, screenPosition.getY() - getPlotterHeightPixels() / 2.0, 0.0);
             transformToParent.applyTranslation(tempTranslation);
-            transformToParent.applyRotationZ(screenRotation);
+            transformToParent.applyRotationZ(-screenRotation);
             tempTranslation.set(-getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0, 0.0);
             transformToParent.applyTranslation(tempTranslation);
             transformToParent.applyRotationY(Math.PI);
@@ -277,33 +280,33 @@ public class Plotter
          upperLeftCorner.changeFrame(pixelsFrame);
          lowerRightCorner.changeFrame(pixelsFrame);
          
-         double overShoot = upperLeftCorner.getX() % gridSizePixels.getX();
-         for (double gridX = upperLeftCorner.getX() - overShoot; gridX < lowerRightCorner.getX(); gridX += gridSizePixels.getX())
+         focusPoint.changeFrame(pixelsFrame);
+         double gridStart = (Math.round(focusPoint.getX() / gridSizePixels.getX()) - 20.0) * gridSizePixels.getX();
+         double gridEnd = (Math.round(focusPoint.getX() / gridSizePixels.getX()) + 20.0) * gridSizePixels.getX();
+         
+         for (double gridX = gridStart; gridX < gridEnd; gridX += gridSizePixels.getX())
          {
-            drawGuy.changeFrame(pixelsFrame);
-            upperLeftCorner.changeFrame(pixelsFrame);
-            drawGuy.set(upperLeftCorner);
-            drawGuy.setX(gridX);
+            drawGuy.setIncludingFrame(pixelsFrame, gridX, 0.0);
             
-            int nthGridLineFromOrigin = (int) (Math.abs(drawGuy.getX()) / gridSizePixels.getX());
+            int nthGridLineFromOrigin = (int) (Math.abs(gridX) / gridSizePixels.getX());
             applyColorForGridline(graphics2d, nthGridLineFromOrigin);
    
-            drawGuy.changeFrame(screenFrame);
-            graphics2d.drawLineSegment(screenFrame, drawGuy.getX(), 0.0, drawGuy.getX(), getPlotterHeightPixels());
+            tempGridLine.set(drawGuy.getX(), drawGuy.getY(), 0.0, 1.0);
+            graphics2d.drawLine(pixelsFrame, tempGridLine);
             
             if (showLabels)
             {
-               Color tempColor = graphics2d.getColor();
                graphics2d.setColor(PlotterColors.LABEL_COLOR);
                drawGuy.changeFrame(metersFrame);
                String labelString = FormattingTools.getFormattedToSignificantFigures(drawGuy.getX(), 2);
                drawGuy.changeFrame(pixelsFrame);
                origin.changeFrame(pixelsFrame);
-               if (origin.getY() > upperLeftCorner.getY() - 14)
+               upperLeftCorner.changeFrame(pixelsFrame);
+               if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getY() > upperLeftCorner.getY() - 14)
                {
                   drawGuy.setY(upperLeftCorner.getY() - 14);
                }
-               else if (origin.getY() < lowerRightCorner.getY())
+               else if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getY() < lowerRightCorner.getY())
                {
                   drawGuy.setY(lowerRightCorner.getY() + 6);
                }
@@ -311,42 +314,38 @@ public class Plotter
                {
                   drawGuy.setY(origin.getY() + 1);
                }
-               origin.changeFrame(metersFrame);
-               drawGuy.changeFrame(screenFrame);
                labelPosition.setIncludingFrame(drawGuy);
                labelPosition.add(1.0, 0.0);
                graphics2d.drawString(labelString, labelPosition);
-               graphics2d.setColor(tempColor);
             }
          }
          
-         overShoot = lowerRightCorner.getY() % gridSizePixels.getY();
-         for (double gridY = lowerRightCorner.getY() - overShoot; gridY < upperLeftCorner.getY(); gridY += gridSizePixels.getY())
+         gridStart = (Math.round(focusPoint.getY() / gridSizePixels.getY()) - 20.0) * gridSizePixels.getY();
+         gridEnd = (Math.round(focusPoint.getY() / gridSizePixels.getY()) + 20.0) * gridSizePixels.getY();
+         
+         for (double gridY = gridStart; gridY < gridEnd; gridY += gridSizePixels.getY())
          {
-            drawGuy.changeFrame(pixelsFrame);
-            upperLeftCorner.changeFrame(pixelsFrame);
-            drawGuy.set(upperLeftCorner);
-            drawGuy.setY(gridY);
+            drawGuy.setIncludingFrame(pixelsFrame, 0.0, gridY);
             
-            int nthGridLineFromOrigin = (int) (Math.abs(drawGuy.getY()) / gridSizePixels.getY());
+            int nthGridLineFromOrigin = (int) (Math.abs(gridY) / gridSizePixels.getY());
             applyColorForGridline(graphics2d, nthGridLineFromOrigin);
    
-            drawGuy.changeFrame(screenFrame);
-            graphics2d.drawLineSegment(screenFrame, 0, drawGuy.getY(), getPlotterWidthPixels(), drawGuy.getY());
+            tempGridLine.set(drawGuy.getX(), drawGuy.getY(), 1.0, 0.0);
+            graphics2d.drawLine(pixelsFrame, tempGridLine);
             
             if (showLabels)
             {
-               Color tempColor = graphics2d.getColor();
                graphics2d.setColor(PlotterColors.LABEL_COLOR);
                drawGuy.changeFrame(metersFrame);
                String labelString = FormattingTools.getFormattedToSignificantFigures(drawGuy.getY(), 2);
                drawGuy.changeFrame(pixelsFrame);
+               upperLeftCorner.changeFrame(pixelsFrame);
                origin.changeFrame(pixelsFrame);
-               if (origin.getX() > lowerRightCorner.getX() - 30)
+               if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getX() > lowerRightCorner.getX() - 30)
                {
                   drawGuy.setX(lowerRightCorner.getX() - 30);
                }
-               else if (origin.getX() < upperLeftCorner.getX())
+               else if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getX() < upperLeftCorner.getX())
                {
                   drawGuy.setX(upperLeftCorner.getX() + 6);
                }
@@ -354,21 +353,20 @@ public class Plotter
                {
                   drawGuy.setX(origin.getX() + 1);
                }
-               origin.changeFrame(metersFrame);
-               drawGuy.changeFrame(screenFrame);
                labelPosition.setIncludingFrame(drawGuy);
-               labelPosition.add(0.0, -1.0);
+               labelPosition.add(0.0, 1.0);
                graphics2d.drawString(labelString, labelPosition);
-               graphics2d.setColor(tempColor);
             }
          }
       }
       
       // paint grid centerline
-      origin.changeFrame(screenFrame);
+      origin.changeFrame(pixelsFrame);
       graphics2d.setColor(PlotterColors.GRID_AXIS);
-      graphics2d.drawLineSegment(screenFrame, origin.getX(), 0.0, origin.getX(), getPlotterHeightPixels());
-      graphics2d.drawLineSegment(screenFrame, 0.0, origin.getY(), getPlotterWidthPixels(), origin.getY());
+      tempGridLine.set(origin.getX(), origin.getY(), 1.0, 0.0);
+      graphics2d.drawLine(pixelsFrame, tempGridLine);
+      tempGridLine.set(origin.getX(), origin.getY(), 0.0, 1.0);
+      graphics2d.drawLine(pixelsFrame, tempGridLine);
       
       for (int artifactLevel = 0; artifactLevel < 5; artifactLevel++)
       {
