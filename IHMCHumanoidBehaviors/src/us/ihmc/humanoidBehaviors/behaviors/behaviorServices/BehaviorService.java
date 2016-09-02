@@ -1,12 +1,12 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 
 public abstract class BehaviorService
 {
-   private final BehaviorInterface behaviorInterface;
+   private final AbstractBehavior behaviorInterface;
    
-   public BehaviorService(BehaviorInterface behaviorInterface)
+   public BehaviorService(AbstractBehavior behaviorInterface)
    {
       this.behaviorInterface = behaviorInterface;
    }
@@ -19,7 +19,7 @@ public abstract class BehaviorService
    
    public abstract void resume();
    
-   protected BehaviorInterface getBehaviorInterface()
+   protected AbstractBehavior getBehaviorInterface()
    {
       return behaviorInterface;
    }

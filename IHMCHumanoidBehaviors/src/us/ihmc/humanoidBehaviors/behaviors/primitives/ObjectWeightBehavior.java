@@ -1,11 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
-public class ObjectWeightBehavior extends BehaviorInterface
+public class ObjectWeightBehavior extends AbstractBehavior
 {
    private final BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet" + behaviorName, registry);
    private final BooleanYoVariable packetAvailable = new BooleanYoVariable("packetAvailable" + behaviorName, registry);

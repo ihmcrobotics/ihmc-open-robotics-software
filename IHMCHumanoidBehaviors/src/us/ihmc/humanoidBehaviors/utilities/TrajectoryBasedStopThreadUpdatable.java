@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.utilities;
 
 import static org.junit.Assert.assertTrue;
 
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.robotics.geometry.FramePose;
@@ -33,7 +33,7 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
    private final double pauseDuration;
    private final double stopPercent;
 
-   public TrajectoryBasedStopThreadUpdatable(HumanoidRobotDataReceiver robotDataReceiver, BehaviorInterface behavior, double pausePercent, double pauseDuration,
+   public TrajectoryBasedStopThreadUpdatable(HumanoidRobotDataReceiver robotDataReceiver, AbstractBehavior behavior, double pausePercent, double pauseDuration,
          double stopPercent, FramePose2d pose2dAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf)
    {
       this(robotDataReceiver, behavior, pausePercent, pauseDuration, stopPercent, new FramePose(), frameToKeepTrackOf);
@@ -43,7 +43,7 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
       poseAtTrajectoryEnd.setPoseIncludingFrame(worldFrame, transformToWorldAtTrajectoryEnd);
    }
 
-   public TrajectoryBasedStopThreadUpdatable(HumanoidRobotDataReceiver robotDataReceiver, BehaviorInterface behavior, double pausePercent, double pauseDuration,
+   public TrajectoryBasedStopThreadUpdatable(HumanoidRobotDataReceiver robotDataReceiver, AbstractBehavior behavior, double pausePercent, double pauseDuration,
          double stopPercent, FramePose poseAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf)
    {
       super(robotDataReceiver, behavior, frameToKeepTrackOf);

@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleForwardingBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
@@ -94,7 +94,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       requestedBehavior.set(behaviorEnum);
    }
 
-   public void addBehaviors(List<E> Es, List<BehaviorInterface> newBehaviors)
+   public void addBehaviors(List<E> Es, List<AbstractBehavior> newBehaviors)
    {
       if (Es.size() != newBehaviors.size())
          throw new RuntimeException("Arguments don't have the same size.");
@@ -105,7 +105,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       }
    }
 
-   public void addBehavior(E E, BehaviorInterface behaviorToAdd)
+   public void addBehavior(E E, AbstractBehavior behaviorToAdd)
    {
       BehaviorStateWrapper<E> behaviorStateToAdd = new BehaviorStateWrapper<E>(E, behaviorToAdd);
 
@@ -271,7 +271,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       }
    }
 
-   private void attachListeners(BehaviorInterface behavior)
+   private void attachListeners(AbstractBehavior behavior)
    {
       if (DEBUG)
          System.out.println(this.getClass().getSimpleName() + ": attach listeners to: " + behavior.getName());
@@ -279,7 +279,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       communicationBridge.attachGlobalListener(behavior.getNetworkProcessorGlobalObjectConsumer());
    }
 
-   private void detachListeners(BehaviorInterface behavior)
+   private void detachListeners(AbstractBehavior behavior)
    {
       if (DEBUG)
          System.out.println(this.getClass().getSimpleName() + ": detach listeners to: " + behavior.getName());

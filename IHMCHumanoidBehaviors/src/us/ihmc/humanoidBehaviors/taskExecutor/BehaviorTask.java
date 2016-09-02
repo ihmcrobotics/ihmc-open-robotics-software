@@ -1,23 +1,23 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.taskExecutor.Task;
 
 public abstract class BehaviorTask implements Task
 {
-   private final BehaviorInterface behavior;
+   private final AbstractBehavior behavior;
 
    protected final DoubleYoVariable yoTime;
    protected double behaviorDoneTime = Double.NaN;
    protected final double sleepTime;
 
-   public BehaviorTask(BehaviorInterface behavior, DoubleYoVariable yoTime)
+   public BehaviorTask(AbstractBehavior behavior, DoubleYoVariable yoTime)
    {
       this(behavior, yoTime, 0.0);
    }
 
-   public BehaviorTask(BehaviorInterface behavior, DoubleYoVariable yoTime, double sleepTime)
+   public BehaviorTask(AbstractBehavior behavior, DoubleYoVariable yoTime, double sleepTime)
    {
       this.behavior = behavior;
       this.yoTime = yoTime;
@@ -71,7 +71,7 @@ public abstract class BehaviorTask implements Task
       behavior.stop();
    }
 
-   public BehaviorInterface getBehavior()
+   public AbstractBehavior getBehavior()
    {
       return behavior;
    }
