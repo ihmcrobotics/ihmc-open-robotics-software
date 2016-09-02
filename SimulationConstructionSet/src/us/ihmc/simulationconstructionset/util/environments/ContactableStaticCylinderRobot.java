@@ -110,7 +110,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    {
       if (yoGraphicsListRegistry == null) return;
       
-      GroundContactPointGroup groundContactPointGroup = nullJoint.physics.getGroundContactPointGroup(groupIdentifier);
+      GroundContactPointGroup groundContactPointGroup = nullJoint.getGroundContactPointGroup(groupIdentifier);
       System.out.println("GroundContactPointGroup" + groundContactPointGroup.getGroundContactPoints());
       ArrayList<GroundContactPoint> groundContactPoints = groundContactPointGroup.getGroundContactPoints();
       

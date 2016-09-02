@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
+import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.FloatingPlanarJointDescription;
 import us.ihmc.robotics.robotDescription.GroundContactPointDescription;
 import us.ihmc.robotics.robotDescription.IMUSensorDescription;
@@ -17,6 +18,7 @@ import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotics.robotDescription.SliderJointDescription;
 
 public class RobotConstructorFromRobotDescription
 {
@@ -198,7 +200,17 @@ public class RobotConstructorFromRobotDescription
    {
       Joint joint;
 
-      if (jointDescription instanceof FloatingPlanarJointDescription)
+      if (jointDescription instanceof FloatingJointDescription)
+      {
+         FloatingJointDescription floatingJointDescription = (FloatingJointDescription) jointDescription;
+
+         Vector3d offset = new Vector3d();
+         floatingJointDescription.getOffsetFromParentJoint(offset);
+         
+         joint = new FloatingJoint(jointDescription.getName(), offset, robot);
+      }
+      
+      else if (jointDescription instanceof FloatingPlanarJointDescription)
       {
          FloatingPlanarJointDescription floatingPlanarJointDescription = (FloatingPlanarJointDescription) jointDescription;
 
@@ -227,9 +239,31 @@ public class RobotConstructorFromRobotDescription
             pinJoint.setLimitStops(qMin, qMax, kLimit, bLimit);
          }
       }
+      else if (jointDescription instanceof SliderJointDescription)
+      {
+         SliderJointDescription sliderJointDescription = (SliderJointDescription) jointDescription;
+         Vector3d offset = new Vector3d();
+         sliderJointDescription.getOffsetFromParentJoint(offset);
+
+         joint = new SliderJoint(jointDescription.getName(), offset, robot, sliderJointDescription.getJointAxis());
+
+         SliderJoint sliderJoint = (SliderJoint) joint;
+
+         if (sliderJointDescription.containsLimitStops())
+         {
+            double[] limitStopParameters = sliderJointDescription.getLimitStopParameters();
+
+            double qMin = limitStopParameters[0];
+            double qMax = limitStopParameters[1];
+            double kLimit = limitStopParameters[2];
+            double bLimit = limitStopParameters[3];
+
+            sliderJoint.setLimitStops(qMin, qMax, kLimit, bLimit);
+         }
+      }
       else
       {
-         throw new RuntimeException("Don't support that joint type yet. Please implement it!");
+         throw new RuntimeException("Don't support that joint type yet. Please implement it! Type = " + jointDescription.getClass());
       }
 
       Link link = createLink(jointDescription.getLink());

@@ -140,7 +140,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
       if (yoGraphicsListRegistry == null)
          return;
 
-      GroundContactPointGroup groundContactPointGroup = floatingJoint.physics.getGroundContactPointGroup(groupIdentifier);
+      GroundContactPointGroup groundContactPointGroup = floatingJoint.getGroundContactPointGroup(groupIdentifier);
       ArrayList<GroundContactPoint> groundContactPoints = groundContactPointGroup.getGroundContactPoints();
 
       for (GroundContactPoint groundContactPoint : groundContactPoints)

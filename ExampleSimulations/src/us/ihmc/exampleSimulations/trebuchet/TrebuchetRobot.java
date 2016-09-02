@@ -125,7 +125,7 @@ public class TrebuchetRobot extends Robot
       this.addRootJoint(ballJoint);
 
       ballCenterExternalForcePoint = new ExternalForcePoint("ef_ball", new Vector3d(), this);
-      ballJoint.physics.addExternalForcePoint(ballCenterExternalForcePoint);
+      ballJoint.addExternalForcePoint(ballCenterExternalForcePoint);
 
       /** ************************ Tower ********************************** */
 
@@ -144,7 +144,7 @@ public class TrebuchetRobot extends Robot
       xSliderJoint.addJoint(pivotJoint);
 
       poleTipExternalForcePoint = new ExternalForcePoint("ef_pole", new Vector3d(0.0, 0.0, POLE_BALLSIDE_LENGTH), this);
-      pivotJoint.physics.addExternalForcePoint(poleTipExternalForcePoint);
+      pivotJoint.addExternalForcePoint(poleTipExternalForcePoint);
       
       setInitialConditions();
    }

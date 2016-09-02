@@ -111,7 +111,7 @@ public class StewartPlatformRobot extends Robot
       this.addRootJoint(platformJoint);
 
       ExternalForcePoint ef_platform = new ExternalForcePoint("ef_platform", new Vector3d(), this);
-      platformJoint.physics.addExternalForcePoint(ef_platform);
+      platformJoint.addExternalForcePoint(ef_platform);
 
       // Platform External Force Points
 
@@ -126,7 +126,7 @@ public class StewartPlatformRobot extends Robot
       for (int i = 0; i < 6; i++)
       {
          ExternalForcePoint ef_p = new ExternalForcePoint("ef_p" + i, platform_offsets[i], this);
-         platformJoint.physics.addExternalForcePoint(ef_p);
+         platformJoint.addExternalForcePoint(ef_p);
       }
 
       // 6 Legs:
@@ -144,7 +144,7 @@ public class StewartPlatformRobot extends Robot
          uni.addJoint(slider);
 
          ExternalForcePoint ef = new ExternalForcePoint("ef_a" + i, new Vector3d(), this);
-         slider.physics.addExternalForcePoint(ef);
+         slider.addExternalForcePoint(ef);
       }
 
 

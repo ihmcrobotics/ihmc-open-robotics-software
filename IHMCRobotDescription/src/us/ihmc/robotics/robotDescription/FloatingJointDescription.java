@@ -8,5 +8,6 @@ public class FloatingJointDescription extends JointDescription
    {
       super(name, new Vector3d());
    }
+
 }
 
